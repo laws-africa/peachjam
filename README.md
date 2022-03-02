@@ -21,9 +21,15 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-- Create a database. Postgresql is used in this project. Both default database user and password are `postgres`. The default database name is `peach_jam`. 
+- Ensure you have PostgreSQL installed and running. Create a postgresql user with username and password peach_jam, and create a corresponding database called peach_jam.
 
-- You also have the option of export a custom database connection string as an environment variable named `DATABASE_URL` which will take precedence over the default.
+```
+sudo su - postgres -c 'createuser -d -P peach_jam'
+sudo su - postgres -c 'createdb peach_jam'
+```
+
+
+- You also have the option of exporting a custom database connection string as an environment variable named `DATABASE_URL` which will take precedence over the default.
 
 ```
 export DATABASE_URL=postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE_NAME>

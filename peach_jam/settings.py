@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'bootstrap5',
     'peach_jam.apps.PeachJamConfig'
 ]
 
@@ -81,7 +80,7 @@ WSGI_APPLICATION = 'peach_jam.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 import dj_database_url
 
-default_db_url = 'postgres://postgres:postgres@localhost:5432/peach_jam'
+default_db_url = 'postgres://peach_jam:peach_jam@localhost:5432/peach_jam'
 db_config = dj_database_url.config(default=os.environ.get('DATABASE_URL', default_db_url))
 db_config['ATOMIC_REQUESTS'] = True
 
@@ -127,6 +126,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(os.getcwd(), 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
