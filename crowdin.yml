@@ -1,3 +1,5 @@
 files:
   - source: /peach_jam/locale/fr/LC_MESSAGES/django.po
     translation: /peach_jam/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
+  - source: /peach_jam/locale/sw/LC_MESSAGES/django.po
+    translation: /peach_jam/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
