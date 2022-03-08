@@ -50,3 +50,22 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+## Adding translation strings
+
+Translations for the project are stored in the `locale` directory. Translations for strings are added on [CrowdIn](https://crowdin.com/project/lawsafrica-indigo).
+
+If you have added or changed strings that need translating, you must [tell Django to update the .po files](https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#localization-how-to-create-language-files) so that translations can be supplied through CrowdIn.
+
+```bash
+cd peach_jam && django-admin makemessages -a
+```
+
+And then commit the changes. CrowdIn will pick up any changed strings and make them available for translation. Once they are translated, it will open a pull request to merge the changes into master.
+
+Once merged into master, you must [tell Django to compile the .po files to .mo files](https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#compiling-message-files):
+
+```bash
+django-admin compilemessages
+```
+
+And then commit the changes.
