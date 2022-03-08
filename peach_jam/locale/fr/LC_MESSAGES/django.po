@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: peachjam\n"
 "X-Crowdin-Project-ID: 503248\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /l10n/peach_jam/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 20\n"
+"X-Crowdin-File: /l10n/peach_jam/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 22\n"
 
 #: templates/peach_jam/home.html:11
 msgid "Welcome to Peach Jam"
