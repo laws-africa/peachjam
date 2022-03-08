@@ -1,0 +1,23 @@
+{% extends 'peach_jam/layouts/decision.html' %}
+
+{% block page_title %}Decision List{% endblock %}
+
+{% block decision_content %}
+
+  <header>
+    <h1>Decision List</h1>
+  </header>
+
+  {% if decisions %}
+    <ul>
+      {% for decision in decisions %}
+        <li>
+          <a href="{% url 'decision_overview' pk=decision.pk %}">{{ decision.title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No decisions found.</p>
+  {% endif %}
+ 
+{% endblock %}
