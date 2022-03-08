@@ -1,11 +1,13 @@
 {% extends "peach_jam/layouts/base.html" %}
+{% load i18n %}
 
 {% block page_title %} Home {% endblock %} k
 
 {% block content %}
 <section class="row">
   <div class="col m-5">
-    <h1>Peach Jam</h1>
+    <h1>{% trans 'Welcome to Peach Jam' %}</h1>
+    <p>{% trans 'More text that needs translation' %}</p>
   </div>
 </section>
 {% endblock %}
