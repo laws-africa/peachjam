@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: peachjam\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-03-08 09:44+0300\n"
-"PO-Revision-Date: 2022-03-08 07:06\n"
+"PO-Revision-Date: 2022-03-08 06:56\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -14,14 +14,14 @@ msgstr ""
 "X-Crowdin-Project: peachjam\n"
 "X-Crowdin-Project-ID: 503248\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /l10n/peach_jam/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 20\n"
+"X-Crowdin-File: /l10n/peach_jam/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 22\n"
 
 #: templates/peach_jam/home.html:11
 msgid "Welcome to Peach Jam"
-msgstr "Bienvenue dans Peach Jam"
+msgstr ""
 
 #: templates/peach_jam/home.html:16
 msgid "More text that needs translation"
-msgstr "Plus de texte qui nécessite une traduction"
+msgstr ""
 
