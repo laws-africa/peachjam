@@ -5,6 +5,6 @@ class HomeViewTest(TestCase):
   def setUpTestData(cls):
     pass
 
-  def test_home_page(self):
-    response = self.client.get('/')
-    self.assertTemplateUsed(response, 'peach_jam/home.html')
+  def test_login_page(self):
+    response = self.client.get('/accounts/login/')
+    self.assertTemplateUsed(response, 'account/login.html')
