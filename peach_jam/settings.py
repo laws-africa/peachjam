@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 import os
 from pathlib import Path
+import logging
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -69,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'peach_jam.context_processors.general'
             ],
         },
     },
@@ -76,6 +81,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'peach_jam.wsgi.application'
 
+if DEBUG:
+    INSTALLED_APPS.append('debug_toolbar')
+    INSTALLED_APPS.append('django_extensions')
+    MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+    INTERNAL_IPS = ['127.0.0.1']
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -136,3 +146,40 @@ if not DEBUG:
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+PEACHJAM = {
+    'APP_NAME': os.environ.get('APP_NAME', 'Peachjam'),
+
+    'SENTRY_DSN_KEY': os.environ.get('SENTRY_DSN_KEY'),
+    'SENTRY_ENVIRONMENT': os.environ.get('SENTRY_ENVIRONMENT', 'staging'),
+}
+
+
+# Elastic APM
+APM_SERVER_URL = os.environ.get('APM_SERVER_URL', '')
+ELK_PROJECT = 'peachjam-staging'
+ELASTIC_APM = {
+    'SERVICE_NAME': ELK_PROJECT,
+    'SERVER_URL': APM_SERVER_URL,
+}
+if not DEBUG and APM_SERVER_URL:
+    INSTALLED_APPS = INSTALLED_APPS + ['elasticapm.contrib.django']
+    MIDDLEWARE = [
+        'elasticapm.contrib.django.middleware.TracingMiddleware',
+        'elasticapm.contrib.django.middleware.Catch404Middleware',
+    ] + MIDDLEWARE
+
+
+# Sentry
+if not DEBUG:
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,  # Capture info and above as breadcrumbs
+        event_level=None,  # Don't send errors based on log messages
+    )
+    sentry_sdk.init(
+        dsn=PEACHJAM['SENTRY_DSN_KEY'],
+        environment=PEACHJAM['SENTRY_ENVIRONMENT'],
+        integrations=[DjangoIntegration(), sentry_logging],
+        send_default_pii=True,
+    )
