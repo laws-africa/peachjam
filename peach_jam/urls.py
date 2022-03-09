@@ -20,6 +20,7 @@ from peach_jam import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
     path('', views.HomePageView.as_view(), name='home_page')
 ]
 
