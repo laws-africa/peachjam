@@ -1,5 +1,3 @@
-import json
-
 from django.conf import settings
 
 
@@ -10,6 +8,7 @@ def general(request):
     return {
         'DEBUG': settings.DEBUG,
         'APP_NAME': settings.PEACHJAM['APP_NAME'],
+        'SUPPORT_EMAIL': settings.PEACHJAM['SUPPORT_EMAIL'],
 
         'SENTRY_DSN_KEY': settings.PEACHJAM['SENTRY_DSN_KEY'],
         'SENTRY_ENVIRONMENT': settings.PEACHJAM['SENTRY_ENVIRONMENT'],

@@ -38,14 +38,20 @@ ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
+    'peach_jam.apps.PeachJamConfig',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sites',
     'django.contrib.staticfiles',
-
-    'peach_jam.apps.PeachJamConfig'
 ]
 
 MIDDLEWARE = [
@@ -79,7 +85,47 @@ TEMPLATES = [
     },
 ]
 
+PEACHJAM = {
+    'APP_NAME': os.environ.get('APP_NAME', 'Peachjam'),
+    'SUPPORT_EMAIL': os.environ.get('SUPPORT_EMAIL'),
+
+    'SENTRY_DSN_KEY': os.environ.get('SENTRY_DSN_KEY'),
+    'SENTRY_ENVIRONMENT': os.environ.get('SENTRY_ENVIRONMENT', 'staging'),
+}
+
 WSGI_APPLICATION = 'peach_jam.wsgi.application'
+EMAIL_SUBJECT_PREFIX = f"[{PEACHJAM['APP_NAME']}] "
+
+# Django all-auth
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+# admins must create accounts
+ACCOUNT_SIGNUP_ENABLED = False
+# sign in with email addresses
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# email addresses are required for new accounts
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_PRESERVE_USERNAME_CASING = False
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX
+LOGIN_URL = 'account_login'
+
+# social logins
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'offline',
+        }
+    },
+}
+
+SOCIALACCOUNT_ADAPTER = 'peach_jam.auth.SocialAccountAdapter'
 
 if DEBUG:
     INSTALLED_APPS.append('debug_toolbar')
@@ -97,7 +143,7 @@ db_config['ATOMIC_REQUESTS'] = True
 
 DATABASES = {
     'default': db_config
-    }
+}
 
 
 # Password validation
@@ -132,6 +178,7 @@ USE_L10N = True
 
 USE_TZ = True
 
+SITE_ID = 1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
@@ -146,14 +193,6 @@ if not DEBUG:
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-PEACHJAM = {
-    'APP_NAME': os.environ.get('APP_NAME', 'Peachjam'),
-
-    'SENTRY_DSN_KEY': os.environ.get('SENTRY_DSN_KEY'),
-    'SENTRY_ENVIRONMENT': os.environ.get('SENTRY_ENVIRONMENT', 'staging'),
-}
 
 
 # Elastic APM
