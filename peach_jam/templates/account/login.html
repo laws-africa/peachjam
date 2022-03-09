@@ -1,0 +1,81 @@
+{% extends "account/base.html" %}
+{% load account socialaccount static %}
+
+{% block title %}Log In{% endblock %}
+
+{% block head-css %}
+  {{ block.super }}
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+  <h1 class="mb-3">Log in</h1>
+
+  <form method="POST" action="{% url 'account_login' %}" id="email-login">
+    {% csrf_token %}
+    {% if redirect_field_value %}
+      <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+    {% endif %}
+
+    {% if form.non_field_errors %}
+      <div class="text-danger">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label for="{{ form.login.id_for_label }}">Email address</label>
+      <input type="email" class="form-control" name="{{ form.login.name }}" id="{{ form.login.id_for_label }}" required autofocus placeholder="you@example.com">
+      {% if form.login.errors %}
+        <div class="text-danger">
+          {% for error in form.login.errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.password.id_for_label }}">Password</label>
+      <input type="password" class="form-control" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" required>
+      <div class="my-2">
+        <a href="{% url 'account_reset_password' %}">Forgot your password?</a>
+      </div>
+
+      {% if form.password.errors %}
+        <div class="text-danger">
+          {% for error in form.password.errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="my-2">
+      <button class="btn btn-success btn-block mb-3" type="submit">Log in</button>
+    </div>
+  </form>
+
+  {% get_providers as socialaccount_providers %}
+  {% if socialaccount_providers %}
+    <hr class="my-2">
+  {% endif %}
+
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      {% for provider in socialaccount_providers %}
+        <a class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{provider.id}}" href="{% provider_login_url provider.id process='login' %}">
+          {% if provider.name == "Google" %}
+            <img src="{% static 'images/google-logo.png' %}" style="height: 20px; margin-right: 5px">
+          {% else %}
+            <i class="fab fa-fw fa-{{ provider.id }}"></i>
+          {% endif %}
+
+          Log in with {{ provider.name }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
