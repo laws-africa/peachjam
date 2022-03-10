@@ -14,7 +14,7 @@ class Decision(models.Model):
     date = models.DateField(null=False, blank=False)
     citation = models.CharField(max_length=1024, null=True, blank=True)
     case_number_numeric = models.CharField(max_length=1024, null=True, blank=True)
-    case_number_year = models.CharField(max_length=1024, null=True, blank=True)
+    case_number_year = models.IntegerField(null=True, blank=True)
     case_number_string = models.CharField(max_length=1024, null=True, blank=True)
     matter_type = models.ForeignKey(MatterType, on_delete=models.PROTECT, null=True, blank=True)
     document_content = models.TextField(null=True, blank=True)
@@ -31,4 +31,4 @@ class Decision(models.Model):
         return super().save(*args, **kwargs)
 
     def get_case_number_string(self):
-        return f'{self.matter_type}-{self.case_number_numeric} of {self.case_number_year}'
+        return f'{self.matter_type} {self.case_number_numeric} of {self.case_number_year}'

@@ -1,10 +1,7 @@
-{% extends 'peach_jam/layouts/base.html' %}
+{% extends 'peach_jam/layouts/main.html' %}
 
-{% block title %}
-  {%block page_title %}{%endblock%}
-{% endblock %}
-  
-{% block content %}
+{% block page-content %}
+  {% include 'peach_jam/header.html' %}
   <main class="m-5">
     {% block decision_content %}{% endblock%}
   </main>

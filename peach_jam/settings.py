@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 
+    'countries_plus',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
