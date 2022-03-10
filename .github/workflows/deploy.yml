@@ -1,0 +1,21 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+
+jobs:
+  deploy:
+    name: Deploy to peachjam.staging.laws.africa
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: git push to peachjam.staging.laws.africa
+      uses: dokku/github-action@master
+      with:
+        ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+        git_remote_url: 'ssh://dokku@web2.laws.africa:22/peachjam'
+        git_push_flags: '--force'
