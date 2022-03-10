@@ -8,8 +8,8 @@ class DecisonListView(generic.ListView):
     def get_queryset(self):
         return Decision.objects.all()
 
-class DecisionOverviewView(generic.DetailView):
+class DecisionDetailView(generic.DetailView):
     model = Decision
-    template_name = 'peach_jam/decision_overview.html'
+    template_name = 'peach_jam/decision_detail.html'
     context_object_name = 'decision'
 

@@ -23,7 +23,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('', views.HomePageView.as_view(), name='home_page'),
     path('decisions', views.DecisonListView.as_view(), name='decision_list' ),
-    path('decisions/<int:pk>', views.DecisionOverviewView.as_view(), name='decision_overview'),
+    path('decisions/<int:pk>', views.DecisionDetailView.as_view(), name='decision_detail'),
 ]
 
 
