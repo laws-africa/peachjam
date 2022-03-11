@@ -18,7 +18,7 @@ class PeachJam {
       if (name && components[name]) {
         // create the component and attached it to the HTML element
         (el as any).component = new components[name](el);
-        this.components.push(el.component);
+        this.components.push((el as any).component);
       }
     });
 
@@ -26,8 +26,10 @@ class PeachJam {
     document.querySelectorAll('[data-vue-component]').forEach((el) => {
       const name = el.getAttribute('data-vue-component');
       if (name && components[name]) {
-        const component = defineComponent(components[name]);
-        createApp(component).mount(el);
+        const vueComp = defineComponent(components[name]);
+        createApp(vueComp).mount(el);
+        (el as any).component = vueComp;
+        this.components.push(vueComp);
       }
     });
   }
