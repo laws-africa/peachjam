@@ -1,0 +1,26 @@
+name: Lint
+
+on: [pull_request]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install dependencies
+        run: |
+          npm ci --no-audit --prefer-offline
+          rm .npmrc
+        env:
+          GITHUB_TOKEN: ${{ secrets.LA_ACTIONS_TOKEN }}
+      - name: Run reviewdog
+        uses: reviewdog/action-eslint@v1
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          reporter: github-pr-review
+          eslint_flags: 'peach_jam/js/'
