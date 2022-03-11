@@ -1,1 +1,5 @@
-console.log('awesome js happens here');
+import peachJam from "./peach-jam";
+
+(() => {
+  peachJam.setup();
+})()
