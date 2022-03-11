@@ -1,3 +1,10 @@
 from django.contrib import admin
+from peach_jam.models import (
+  Decision, 
+  MatterType, 
+  Court,
+)
 
-# Register your models here.
+admin.site.register(Decision)
+admin.site.register(MatterType)
+admin.site.register(Court)
