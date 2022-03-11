@@ -18,7 +18,7 @@ class PeachJam {
       if (name && components[name]) {
         // create the component and attached it to the HTML element
         (el as any).component = new components[name](el);
-        this.components.push(el);
+        this.components.push(el.component);
       }
     });
 
