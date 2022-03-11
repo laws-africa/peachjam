@@ -1,6 +1,6 @@
 class SampleDataComponent {
-  constructor(root: HTMLElement) {
-    root.innerText = 'Sample Data component'
+  constructor (root: HTMLElement) {
+    root.innerText = 'Sample Data component';
   }
 }
 

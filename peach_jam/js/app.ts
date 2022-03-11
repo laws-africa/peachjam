@@ -1,5 +1,5 @@
-import peachJam from "./peach-jam";
+import peachJam from './peach-jam';
 
 (() => {
   peachJam.setup();
-})()
+})();

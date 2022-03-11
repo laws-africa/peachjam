@@ -7,7 +7,7 @@
 <script>
 export default {
   name: 'SampleVue'
-}
+};
 </script>
 
 <style scoped>

@@ -1,4 +1,3 @@
-// @ts-ignore
 import components from './components';
 import { defineComponent, createApp } from 'vue';
 

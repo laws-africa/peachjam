@@ -1,18 +1,18 @@
-const { VueLoaderPlugin } = require('vue-loader')
+const { VueLoaderPlugin } = require('vue-loader');
 
 const peachJamConfig = {
   mode: 'development',
   resolve: {
     alias: {
-      'vue': '@vue/runtime-dom',
+      vue: '@vue/runtime-dom'
     },
     modules: [
-      './node_modules',
+      './node_modules'
     ],
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.js']
   },
   entry: {
-    app: './peach_jam/js/app.ts',
+    app: './peach_jam/js/app.ts'
   },
   module: {
     rules: [
@@ -27,7 +27,7 @@ const peachJamConfig = {
       {
         test: /\.tsx?$/,
         use: 'ts-loader',
-        exclude: /node_modules/,
+        exclude: /node_modules/
       },
       {
         test: /\.css$/,
@@ -44,7 +44,7 @@ const peachJamConfig = {
     path: __dirname + '/peach_jam/static/js'
   },
   plugins: [
-      new VueLoaderPlugin(),
+    new VueLoaderPlugin()
   ]
 };
 
