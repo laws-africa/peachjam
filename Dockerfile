@@ -16,4 +16,4 @@ WORKDIR /app
 
 # install npm requirements
 RUN npm ci --no-audit --prefer-offline
-RUN npx webpack -p
+RUN npx webpack --mode production
