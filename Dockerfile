@@ -9,3 +9,7 @@ RUN pip install -q --upgrade pip \
 # Copy the code
 COPY . /app
 WORKDIR /app
+
+# install npm requirements
+RUN npm ci --no-audit --prefer-offline
+RUN npx webpack -p
