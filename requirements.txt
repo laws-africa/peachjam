@@ -14,6 +14,7 @@ django-countries-plus==2.0.1
 django-debug-toolbar==3.2.4
 django-extensions==3.1.5
 django-sass-processor==1.1
+django-widget-tweaks==1.4.12
 elastic-apm==6.8.0
 gevent==21.12.0
 greenlet==1.1.2

@@ -1,22 +1,63 @@
 {% extends 'peach_jam/layouts/decision.html' %}
-{% load i18n %}
+{% load i18n widget_tweaks %}
 
 {% block title %}Decision List{% endblock %}
 
 {% block decision_content %}
 
   <header>
-    <h1>{% trans 'Decision List' %}</h1>
+    <h3>{% trans 'Decisions' %}</h3>
   </header>
 
+  <!-- Decisions Filter Form -->
+
+  <form class="form-inline my-4 border p-4">
+    <p class="lead font-bold">Filters</p>
+    <div class="form-group d-flex">
+        {% render_field form.matter_type class="form-control mx-3" placeholder="Matter Type" %}
+        {% render_field form.date class="form-control mx-3" placeholder="Date" %}
+        {% render_field form.citation class="form-control mx-3" placeholder="Citation" %}
+        {% render_field form.case_number_numeric class="form-control mx-3" placeholder="Case Number" %}
+        {% render_field form.case_number_year class="form-control mx-3" placeholder="Case Year" %}
+      <input type="Submit" class="flex-shrink-1 btn btn-primary px-4" value="Filter">
+    </div>
+  </form>
+
+
+
   {% if decisions %}
-    <ul>
-      {% for decision in decisions %}
-        <li>
-          <a href="{% url 'decision_detail' pk=decision.pk %}">{{ decision.title }}</a>
-        </li>
-      {% endfor %}
-    </ul>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>
+            <label class="d-flex align-items-center">
+              <input type="checkbox" name="toggle-all-decisions" class="mr-1">
+            </label>
+          </th>
+          <th>Title</th>
+          <th>Citation</th>
+          <th>Matter Type</th>
+          <th>Author</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for decision in decisions %}
+          <tr>
+            <td>
+              <input type="checkbox" value="{{ decision.id }}">
+            </td>
+            <td>
+              <a href="{% url 'decision_detail' pk=decision.pk %}">{{ decision.title }}</a>
+            </td>
+            <td>{{ decision.citation }}</td>
+            <td>{{ decision.matter_type.name }}</td>
+            <td>{{ decision.author }}</td>
+            <td>{{ decision.date }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   {% else %}
     <p>{% trans 'No decisions found.' %}</p>
   {% endif %}
