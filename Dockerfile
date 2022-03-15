@@ -6,6 +6,10 @@ RUN pip install -q --upgrade pip \
   && pip install -q --upgrade setuptools \
   && pip install -q -r /tmp/requirements.txt
 
+# node
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
+
 # Copy the code
 COPY . /app
 WORKDIR /app
