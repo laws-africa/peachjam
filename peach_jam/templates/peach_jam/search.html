@@ -1,0 +1,14 @@
+{% extends "peach_jam/layouts/main.html" %}
+{% load i18n %}
+
+{% block title %} Search {% endblock %} k
+
+{% block page-content %}
+  {% include 'peach_jam/header.html' %}
+
+  <div>
+    <div class="container mt-2">
+      <div data-vue-component="SearchView"></div>
+    </div>
+  </div>
+{% endblock %}
