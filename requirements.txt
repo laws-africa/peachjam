@@ -12,8 +12,11 @@ django-appconf==1.0.5
 django-compressor==3.1
 django-countries-plus==2.0.1
 django-debug-toolbar==3.2.4
+django-elasticsearch-debug-toolbar==3.0.2
 django-elasticsearch-dsl==7.2.2
+django-elasticsearch-dsl-drf==0.22.4
 django-extensions==3.1.5
+django-nine==0.2.5
 django-sass-processor==1.1
 djangorestframework==3.13.1
 elastic-apm==6.8.0
