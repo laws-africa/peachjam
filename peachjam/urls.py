@@ -19,6 +19,7 @@ from django.urls import include, path
 from peachjam import views
 
 urlpatterns = [
+    path('api/', include('peachjam_api.urls')),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', views.HomePageView.as_view(), name='home_page'),

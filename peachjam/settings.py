@@ -39,6 +39,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'peachjam.apps.PeachJamConfig',
+    'peachjam_api.apps.PeachjamApiConfig',
 
     'allauth',
     'allauth.account',
@@ -46,6 +47,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 
     'countries_plus',
+    'rest_framework',
+    'django_elasticsearch_dsl',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -196,6 +199,12 @@ if not DEBUG:
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'localhost:9200',
+    },
+}
 
 
 # Elastic APM
