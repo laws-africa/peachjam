@@ -1,7 +1,7 @@
 <template>
   <ul class="list-unstyled mb-0">
     <li
-      v-for="bucket in sorted"
+      v-for="bucket in buckets"
       :key="bucket.key"
     >
       <label
@@ -35,18 +35,11 @@
 export default {
   name: 'TermFacet',
   props: ['buckets', 'reverse', 'selection', 'loading'],
+  emits: ['changed'],
   data: () => {
     return {
       items: []
     };
-  },
-  computed: {
-    sorted () {
-      const buckets = [...this.buckets];
-      buckets.sort((a, b) => a.key.localeCompare(b.key));
-      if (this.reverse) buckets.reverse();
-      return buckets;
-    }
   },
   watch: {
     selection: {
