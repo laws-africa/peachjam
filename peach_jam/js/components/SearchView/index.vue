@@ -28,16 +28,6 @@
               />
               <span v-else>Search</span>
             </button>
-
-            <button
-              v-if="searchInfo.count"
-              type="button"
-              style="border-radius: 0.2rem"
-              class="btn  btn-sm btn-secondary ml-1 d-lg-none"
-              @click="() => drawerOpen = true"
-            >
-              Filters <span v-if="selectedFiltersCount">({{ selectedFiltersCount }})</span>
-            </button>
           </div>
         </div>
       </form>
@@ -55,10 +45,10 @@
         No gazettes match your search.
       </div>
       <div class="mt-3">
-        <DidYouMean
-          :q="q"
-          @suggest="suggest"
-        />
+        <!--        <DidYouMean-->
+        <!--          :q="q"-->
+        <!--          @suggest="suggest"-->
+        <!--        />-->
       </div>
     </div>
     <div class="container-fluid">
@@ -90,70 +80,80 @@
               </li>
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Jurisdiction</strong>
+                  <strong>Filter author</strong>
                   <a
-                    v-if="filters.jurisdiction_name.length"
+                    v-if="filters.author.length"
                     href="#"
-                    @click.prevent="() => filters.jurisdiction_name = []"
+                    @click.prevent="() => filters.author = []"
                   >
                     Clear
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_jurisdiction_name"
-                  :buckets="searchInfo.facets._filter_jurisdiction_name.jurisdiction_name.buckets"
-                  :selection="filters.jurisdiction_name"
+                  v-if="searchInfo.facets && searchInfo.facets._filter_author"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_author.author.buckets)"
+                  :selection="filters.author"
                   :loading="loading"
-                  @changed="(x) => filters.jurisdiction_name = x"
+                  @changed="(x) => filters.author = x"
                 />
               </li>
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Year</strong>
+                  <strong>Filter country</strong>
                   <a
-                    v-if="filters.year.length"
+                    v-if="filters.country.length"
                     href="#"
-                    @click.prevent="() => filters.year = []"
+                    @click.prevent="() => filters.country = []"
                   >
                     Clear
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_year"
-                  :buckets="searchInfo.facets._filter_year.year.buckets"
-                  :selection="filters.year"
-                  :reverse="true"
+                  v-if="searchInfo.facets && searchInfo.facets._filter_country"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_country.country.buckets)"
+                  :selection="filters.country"
                   :loading="loading"
-                  @changed="(x) => filters.year = x"
+                  @changed="(x) => filters.country = x"
                 />
               </li>
+
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Publication</strong>
+                  <strong>Filter date</strong>
                   <a
-                    v-if="filters.publication.length || filters.sub_publication.length"
+                    v-if="filters.date.length"
                     href="#"
-                    @click.prevent="() => { filters.publication = []; filters.sub_publication = []; }"
+                    @click.prevent="() => filters.date = []"
                   >
                     Clear
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_publication"
-                  :buckets="searchInfo.facets._filter_publication.publication.buckets"
-                  :selection="filters.publication"
+                  v-if="searchInfo.facets && searchInfo.facets._filter_date"
+                  :buckets="sortDateBuckets(searchInfo.facets._filter_date.date.buckets)"
+                  :selection="filters.date"
                   :loading="loading"
-                  @changed="(x) => filters.publication = x"
+                  @changed="(x) => filters.date = x"
                 />
+              </li>
 
-                <hr v-if="searchInfo.facets && searchInfo.facets._filter_sub_publication && searchInfo.facets._filter_sub_publication.sub_publication.buckets.length">
-
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between mb-2">
+                  <strong>Filter matter type</strong>
+                  <a
+                    v-if="filters.matter_type.length"
+                    href="#"
+                    @click.prevent="() => filters.matter_type = []"
+                  >
+                    Clear
+                  </a>
+                </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_sub_publication"
-                  :buckets="searchInfo.facets._filter_sub_publication.sub_publication.buckets"
-                  :selection="filters.sub_publication"
+                  v-if="searchInfo.facets && searchInfo.facets._filter_matter_type"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_matter_type.matter_type.buckets)"
+                  :selection="filters.matter_type"
                   :loading="loading"
-                  @changed="(x) => filters.sub_publication = x"
+                  @changed="(x) => filters.matter_type = x"
                 />
               </li>
             </ul>
@@ -209,16 +209,15 @@
   </div>
 </template>
 
-<script>import SearchResult from './SearchResult.vue';
+<script>
+import SearchResult from './SearchResult.vue';
 import SearchPagination from './SearchPagination.vue';
 import TermFacet from './TermFacet.vue';
-import DidYouMean from './DidYouMean.vue';
-// import MobileFacetsDrawer from './MobileSideDrawer';
-import debounce from 'lodash.debounce';
+import moment from 'moment';
 
 export default {
   name: 'SearchView',
-  components: { SearchResult, SearchPagination, TermFacet, DidYouMean },
+  components: { SearchResult, SearchPagination, TermFacet },
   data: () => {
     return {
       loadingCount: 0,
@@ -229,10 +228,10 @@ export default {
       q: '',
       drawerOpen: false,
       filters: {
-        jurisdiction_name: [],
-        year: [],
-        publication: [],
-        sub_publication: []
+        author: [],
+        country: [],
+        date: [],
+        matter_type: []
       }
     };
   },
@@ -266,14 +265,33 @@ export default {
 
   mounted () {
     // this.loadState();
-    // window.addEventListener('resize', this.handleScreenResize);
   },
 
   methods: {
-    // handleScreenResize: debounce(function () {
-    //   this.drawerOpen = false;
-    // }, 200),
-
+    sortDateBuckets (items, ascending = false) {
+      const buckets = [...items];
+      if (ascending) {
+        buckets.sort((a, b) =>
+          moment(a).isBefore(moment(b)) ? -1 : 1
+        );
+      } else {
+        buckets.sort((a, b) =>
+          moment(a).isBefore(moment(b)) ? 1 : -1
+        );
+      }
+      return buckets.map(bucket => ({
+        ...bucket,
+        key: moment(bucket).format('YYYY-MM-DD')
+      }));
+    },
+    sortGenericBuckets (items, reverse = false) {
+      const buckets = [...items];
+      buckets.sort((a, b) => a.key.localeCompare(b.key));
+      if (reverse) {
+        buckets.reverse();
+      }
+      return buckets;
+    },
     handlePageChange (newPage) {
       this.page = newPage;
       this.search();
@@ -351,7 +369,7 @@ export default {
           }
 
           // facets that we want the API to return
-          for (const facet of ['jurisdiction_name', 'year', 'publication', 'sub_publication']) {
+          for (const facet of Object.keys(this.filters)) {
             params.append('facet', facet);
           }
 
@@ -380,19 +398,6 @@ export default {
         this.loadingCount = this.loadingCount - 1;
         // this.drawerOpen = false;
       }
-    },
-    sendGAEvent () {
-      if (this.skipFirstGAEvent) {
-        this.skipFirstGAEvent = false;
-        return;
-      }
-
-      // update page location
-      window.history.replaceState(null, '', document.location.pathname + '?' + this.serialiseState());
-
-      window.gtag('config', window.ga_id, {
-        page_location: document.location.pathname + document.location.search
-      });
     }
   }
 };
