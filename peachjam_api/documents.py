@@ -1,7 +1,7 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 # from django_elasticsearch_dsl_drf.serializers import DocumentSerialzier
-from peach_jam.models import Decision as DecisionModel
+from peachjam.models import Decision as DecisionModel
 
 @registry.register_document
 class DecisionDocument(Document):

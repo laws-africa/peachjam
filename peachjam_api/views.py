@@ -10,7 +10,7 @@ from django_elasticsearch_dsl_drf.filter_backends import (
     FacetedFilterSearchFilterBackend
 )
 
-from peach_jam.models import Decision
+from peachjam.models import Decision
 from peachjam_api.serializers import DecisionSerializer
 from peachjam_api.documents import DecisionDocument
 

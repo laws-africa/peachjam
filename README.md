@@ -21,11 +21,11 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-- Ensure you have PostgreSQL installed and running. Create a postgresql user with username and password peach_jam, and create a corresponding database called peach_jam.
+- Ensure you have PostgreSQL installed and running. Create a postgresql user with username and password peachjam, and create a corresponding database called peachjam.
 
 ```
-sudo su - postgres -c 'createuser -d -P peach_jam'
-sudo su - postgres -c 'createdb peach_jam'
+sudo su - postgres -c 'createuser -d -P peachjam'
+sudo su - postgres -c 'createdb peachjam'
 ```
 
 
@@ -57,7 +57,7 @@ Translations for the project are stored in the `locale` directory. Translations 
 If you have added or changed strings that need translating, you must [tell Django to update the .po files](https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#localization-how-to-create-language-files) so that translations can be supplied through CrowdIn.
 
 ```bash
-cd peach_jam && django-admin makemessages -a
+cd peachjam && django-admin makemessages -a
 ```
 
 And then commit the changes. CrowdIn will pick up any changed strings and make them available for translation. Once they are translated, it will open a pull request to merge the changes into master.

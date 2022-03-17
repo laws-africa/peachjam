@@ -1,0 +1,18 @@
+{% extends 'peachjam/layouts/decision.html' %}
+
+  
+{% block title %}Decision Overview{% endblock %}
+
+{% block decision_content %}
+<header>
+  <h1>{{ decision.title }}</h1>
+</header>
+
+<section>
+  <p>{{ decision.date }}</p>
+  <p>{{ decision.author }}</p>
+  <p>{{ decision.citation }}</p>
+  <p>{{ decision.case_number_string }}</p>
+  <p>{{ decision.document_content }}</p>
+</section>
+{% endblock %}
