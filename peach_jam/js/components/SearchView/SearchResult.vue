@@ -1,43 +1,27 @@
 <template>
   <li class="mb-4 hit">
-    <h6 class="mb-0"><a :href="`/gazettes/${item.key}`">{{ item.name }}</a></h6>
-    <ul class="list-unstyled">
-      <li v-for="page in item.pages" :key="page.page_num">
-        <span class="text-muted">
-          <a :href="`https://gazettes.africa${path}#page=${page.page_num}`">Page {{ page.page_num }}</a>:
-        </span>
-        <span class="snippet" v-html="highlights(page)"></span>
-      </li>
-    </ul>
+    <h5 class="mb-0">
+      {{ item.title }}
+    </h5>
+    <div>{{ item.matter_type }}</div>
+    <div>
+      {{ item.citation }}
+    </div>
+    <div><strong>{{ item.author }}</strong> - <span class="text-muted">{{ item.date }}</span></div>
+    <div>{{ item.country }}</div>
   </li>
 </template>
 
 <script>
 export default {
   name: 'SearchResult',
-  props: ['item'],
-  methods: {
-    highlights (page) {
-      return page.highlight['pages.body'].join(' ... ');
-    }
-  },
-  computed: {
-    path () {
-      const year = this.item.date.split('-')[0];
-      return `/archive/${this.item.jurisdiction}/${year}/${this.item.key}.pdf`;
+  props: {
+    item: {
+      type: Object,
+      default () {
+        return {};
+      }
     }
   }
 };
 </script>
-
-<style>
-.hit mark {
-  font-weight: bold;
-  padding: 0px;
-}
-
-.snippet {
-  line-height: 1.3;
-  word-break: break-word;
-}
-</style>
