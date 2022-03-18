@@ -12,7 +12,7 @@ const peachJamConfig = {
     extensions: ['.tsx', '.ts', '.js']
   },
   entry: {
-    app: './peach_jam/js/app.ts'
+    app: './peachjam/js/app.ts'
   },
   module: {
     rules: [
@@ -41,7 +41,7 @@ const peachJamConfig = {
   },
   output: {
     filename: 'app-prod.js',
-    path: __dirname + '/peach_jam/static/js'
+    path: __dirname + '/peachjam/static/js'
   },
   plugins: [
     new VueLoaderPlugin()

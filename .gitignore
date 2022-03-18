@@ -1,7 +1,7 @@
 node_modules
 
-peach_jam/static/js/app-prod.js
-peach_jam/static/js/*.app-prod.js
+peachjam/static/js/app-prod.js
+peachjam/static/js/*.app-prod.js
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
