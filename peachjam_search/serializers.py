@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
-from peachjam_api.documents import DecisionDocument
+from peachjam_search.documents import DecisionDocument
 
 class DecisionSerializer(DocumentSerializer):
 

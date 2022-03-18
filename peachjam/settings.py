@@ -39,7 +39,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'peachjam.apps.PeachJamConfig',
-    'peachjam_api.apps.PeachjamApiConfig',
+    'peachjam_search.apps.PeachjamSearchConfig',
 
     'allauth',
     'allauth.account',
