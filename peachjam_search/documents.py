@@ -15,7 +15,7 @@ class DecisionDocument(Document):
     created_at = fields.DateField()
     updated_at = fields.DateField()
     class Index:
-      name = 'decisions'
+      name = 'agp_decisions'
 
     class Django:
       model = DecisionModel
