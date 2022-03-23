@@ -1,4 +1,17 @@
 import debounce from 'lodash/debounce';
+import items from '../items.json';
+// @ts-ignore
+import { markRange, rangeToTarget, targetToRange } from '../dom';
+
+type GlobalWorkerOptionsType = {
+  [key: string]: any,
+  workerSrc: string
+}
+
+interface iPdfLib {
+  [key: string]: any,
+  GlobalWorkerOptions: GlobalWorkerOptionsType,
+}
 
 class PdfRenderer {
   protected pdf: any;
@@ -6,15 +19,18 @@ class PdfRenderer {
   protected previewPanelsContainer: HTMLElement | null;
   private root: HTMLElement;
   protected scrollListenerActive: boolean;
+  protected pdfContentMarks: any[];
   constructor (root: HTMLElement) {
     this.root = root;
     this.pdf = root.dataset.pdf;
     this.pdfContentWrapper = root.querySelector('.pdf-renderer__content');
     this.previewPanelsContainer = root.querySelector('.pdf-renderer__previews__inner');
     this.scrollListenerActive = true;
+    this.pdfContentMarks = [];
 
     this.setupPdfAndPreviewPanels().then(() => {
-      const pages = Array.from(this.root.querySelectorAll('.pdf-renderer__content__page'));
+      this.decoratePdf();
+      const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-renderer__content__page'));
       const previewPanels = Array.from(root.querySelectorAll('.preview-panel'));
       for (const previewPanel of previewPanels) {
         previewPanel.addEventListener('click', (e) => this.handlePreviewPanelClick(e));
@@ -22,15 +38,15 @@ class PdfRenderer {
 
       window.addEventListener('scroll', debounce(() => {
         if (this.scrollListenerActive) {
-          let current: HTMLElement;
+          let current: HTMLElement | null;
           for (const page of pages) {
-            // @ts-ignore
             if (window.scrollY >= page.offsetTop) {
-              // @ts-ignore
               current = root.querySelector(`.preview-panel[data-page="${page.dataset.page}"]`);
-              this.activatePreviewPanel(current);
-              if (this.previewPanelsContainer) {
-                this.previewPanelsContainer.scrollTop = current.offsetTop - (current.offsetHeight * 2);
+              if (current) {
+                this.activatePreviewPanel(current);
+                if (this.previewPanelsContainer) {
+                  this.previewPanelsContainer.scrollTop = current.offsetTop - (current.offsetHeight * 2);
+                }
               }
             }
           }
@@ -51,15 +67,15 @@ class PdfRenderer {
   }
 
   handlePreviewPanelClick (e: Event) {
-    // @ts-ignore
-    const targetPage = this.root.querySelector(`.pdf-renderer__content__page[data-page="${e.currentTarget.dataset.page}"]`);
+    const targetPage = e.currentTarget && e.currentTarget instanceof HTMLElement
+      ? this.root.querySelector(`.pdf-renderer__content__page[data-page="${e.currentTarget.dataset.page}"]`)
+      : null;
     if (e.currentTarget) {
       this.activatePreviewPanel(e.currentTarget);
     }
     if (targetPage) {
       this.scrollListenerActive = false;
-      // eslint-disable-next-line no-undef
-      let scrollTimeout: NodeJS.Timeout;
+      let scrollTimeout:ReturnType<typeof setTimeout>;
       const windowScrollerListn = () => {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
@@ -73,8 +89,7 @@ class PdfRenderer {
   }
 
   async setupPdfAndPreviewPanels () {
-    // @ts-ignore
-    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    const pdfjsLib = (window as { [key: string]: any })['pdfjs-dist/build/pdf'] as iPdfLib;
     const asyncForEach = async (array: any[], callback: (arg0: any, arg1: number, arg2: any[]) => any) => {
       for (let index = 0; index < array.length; index++) {
         await callback(array[index], index, array);
@@ -91,8 +106,8 @@ class PdfRenderer {
         const viewport = page.getViewport({ scale: 1 });
 
         const elementRendered = document.createElement('div');
-        // @ts-ignore
-        elementRendered.dataset.page = index + 1;
+        elementRendered.setAttribute('id', String(index + 1));
+        elementRendered.dataset.page = String(index + 1);
         elementRendered.classList.add('pdf-renderer__content__page');
         elementRendered.style.position = 'relative';
         const canvas = document.createElement('canvas');
@@ -148,6 +163,23 @@ class PdfRenderer {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  decoratePdf () {
+    const marks: { style: { backgroundColor: string; }; setAttribute: (arg0: string, arg1: string) => void; }[] = [];
+    items.forEach(item => {
+      const range = targetToRange(item.target, this.pdfContentWrapper);
+      markRange(range, 'a', (element: { style: { backgroundColor: string; }; setAttribute: (arg0: string, arg1: string) => void; }) => {
+        element.style.backgroundColor = 'red';
+        element.setAttribute('href', '#');
+        marks.push(element);
+        return element;
+      });
+      this.pdfContentMarks.push({
+        ...item,
+        marks
+      });
+    });
   }
 }
 
