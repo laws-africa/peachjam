@@ -19,6 +19,7 @@ from django.urls import include, path
 from peachjam import views
 
 urlpatterns = [
+    path('find-documents/', views.FindDocumentsView.as_view(), name='find_documents' ),
     path('search/', include('peachjam_search.urls')),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
