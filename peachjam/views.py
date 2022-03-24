@@ -14,3 +14,7 @@ class AuthedViewMixin(LoginRequiredMixin, PermissionRequiredMixin):
 
 class HomePageView(AuthedViewMixin, TemplateView):
     template_name = 'peachjam/home.html'
+
+
+class FindDocumentsView(AuthedViewMixin, TemplateView):
+    template_name = 'peachjam/find_documents.html'

@@ -10,16 +10,17 @@ from django_elasticsearch_dsl_drf.filter_backends import (
     FacetedFilterSearchFilterBackend
 )
 
-from peachjam.models import Decision
-from peachjam_search.serializers import DecisionSerializer
-from peachjam_search.documents import DecisionDocument
+from africanlii.models import Judgment
+from peachjam_search.serializers import JudgmentSerializer
+from peachjam_search.documents import JudgmentDocument
 
-class DecisionSearchViewSet(BaseDocumentViewSet):
+
+class JudgmentSearchViewSet(BaseDocumentViewSet):
     """
-    API endpoint that allows decisions to be searched.
+    API endpoint that allows judgments to be searched.
     """
-    document = DecisionDocument
-    serializer_class = DecisionSerializer
+    document = JudgmentDocument
+    serializer_class = JudgmentSerializer
     filter_backends = [
         OrderingFilterBackend,
         DefaultOrderingFilterBackend,
@@ -42,12 +43,12 @@ class DecisionSearchViewSet(BaseDocumentViewSet):
     }
 
     search_fields = (
-          'title', 
+          'title',
           'author',
           'country',
-          'citation', 
+          'citation',
           'matter_type',
-          'document_content', 
+          'document_content',
     )
 
     faceted_search_fields = {

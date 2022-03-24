@@ -1,19 +1,19 @@
-from rest_framework import serializers
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
-from peachjam_search.documents import DecisionDocument
+from peachjam_search.documents import JudgmentDocument
 
-class DecisionSerializer(DocumentSerializer):
+
+class JudgmentSerializer(DocumentSerializer):
 
     class Meta:
-        document = DecisionDocument
+        document = JudgmentDocument
         fields = [
-          'id', 
-          'title', 
-          'date',
-          'author',
-          'country',
-          'citation',
-          'matter_type',
-          'document_content', 
-          'source_url',
-      ] 
+            'id',
+            'title',
+            'date',
+            'author',
+            'country',
+            'citation',
+            'matter_type',
+            'document_content',
+            'source_url',
+        ]
