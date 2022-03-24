@@ -15,11 +15,16 @@
 
     <div class="row">
       <div class="col col-lg-6 col-sm-12">
-        <form>
+        <form method="get" action="/search">
           <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search indices" aria-label="Recipient's username" aria-describedby="button-addon2">
-            <button class="btn btn-dark" type="button" id="button-addon2">
-              <i class="bi bi-search text-white "></i>
+            <input type="text" class="form-control"
+                   placeholder="Search indices"
+                   aria-label="Search documents"
+                   aria-describedby="button-addon2"
+                   name="search"
+            >
+            <button class="btn btn-dark" type="submit" id="button-addon2">
+              <i class="bi bi-search text-white"></i>
             </button>
           </div>
         </form>
