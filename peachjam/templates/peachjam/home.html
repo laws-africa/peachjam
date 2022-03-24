@@ -4,15 +4,26 @@
 {% block title %} Home {% endblock %}
 
 {% block page-content %}
-  {% include 'peachjam/header.html' %}
-
   <section class="row">
-    <div class="col m-5">
-      <h1>{% trans 'Welcome to Peach Jam' %}</h1>
-      <p>{% trans 'More text that needs translation' %}</p>
+    <p>
+      We power LIIs in X countries hosting Y documents and serving Z million users a year. We help individuals, organizations,
+      and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond.
+    </p>
+    <p>
+      The site is based on a series of indexes and collections.
+    </p>
 
-      <div data-component="SampleDataComponent"></div>
-      <div data-vue-component="SampleVue"></div>
+    <div class="row">
+      <div class="col col-lg-6 col-sm-12">
+        <form>
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search indices" aria-label="Recipient's username" aria-describedby="button-addon2">
+            <button class="btn btn-dark" type="button" id="button-addon2">
+              <i class="bi bi-search text-white "></i>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </section>
 {% endblock %}
