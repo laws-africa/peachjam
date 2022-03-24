@@ -10,8 +10,8 @@
             ref="search-input"
             type="text"
             class="form-control"
-            placeholder="Search gazettes"
-            aria-label="Search gazettes"
+            placeholder="Search documents"
+            aria-label="Search documents"
             aria-describedby="basic-addon2"
             required
           >
@@ -42,7 +42,7 @@
         v-if="searchInfo.count === 0"
         class="mt-3"
       >
-        No gazettes match your search.
+        No documents match your search.
       </div>
       <div class="mt-3">
         <!--        <DidYouMean-->
@@ -165,7 +165,7 @@
             <div v-if="searchInfo.count">
               <div class="mb-3 d-flex justify-content-between">
                 <div>
-                  {{ searchInfo.count }}  gazettes found.
+                  {{ searchInfo.count }}  documents found.
                 </div>
 
                 <!--                <div>-->
@@ -372,7 +372,7 @@ export default {
             params.append('facet', facet);
           }
 
-          return `${window.location.origin}/search/decisions?${params.toString()}`;
+          return `${window.location.origin}/search/api/judgments?${params.toString()}`;
         };
 
         this.loadingCount = this.loadingCount + 1;

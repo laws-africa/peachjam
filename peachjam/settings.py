@@ -39,6 +39,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'peachjam.apps.PeachJamConfig',
+    'africanlii.apps.AfricanliiConfig',
     'peachjam_search.apps.PeachjamSearchConfig',
 
     'allauth',

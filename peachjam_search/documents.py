@@ -1,10 +1,10 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from peachjam.models import Decision as DecisionModel
+from africanlii.models import Judgment
+
 
 @registry.register_document
-class DecisionDocument(Document):
-
+class JudgmentDocument(Document):
     title = fields.TextField()
     date = fields.DateField()
     citation = fields.TextField()
@@ -14,9 +14,9 @@ class DecisionDocument(Document):
     matter_type = fields.KeywordField(attr='matter_type.name')
     created_at = fields.DateField()
     updated_at = fields.DateField()
+
     class Index:
-      name = 'agp_decisions'
+        name = 'africanlii_judgments'
 
     class Django:
-      model = DecisionModel
-   
+        model = Judgment

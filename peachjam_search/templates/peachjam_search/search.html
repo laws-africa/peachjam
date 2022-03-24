@@ -1,0 +1,14 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+
+{% block title %} {% trans 'Search' %} {% endblock %}
+
+{% block page-content %}
+  {% include 'peachjam/header.html' %}
+
+  <div>
+    <div class="container mt-2">
+      <div data-vue-component="FindDocuments"></div>
+    </div>
+  </div>
+{% endblock %}

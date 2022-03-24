@@ -1,25 +1,26 @@
-from rest_framework.pagination import LimitOffsetPagination
+from django.views.generic import TemplateView
 from elasticsearch_dsl import DateHistogramFacet
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
-from django_elasticsearch_dsl_drf.filter_backends import (
-    OrderingFilterBackend,
-    DefaultOrderingFilterBackend,
-    SourceBackend,
-    SearchFilterBackend,
-    FacetedFilterSearchFilterBackend
-)
+from django_elasticsearch_dsl_drf.filter_backends import OrderingFilterBackend, \
+    DefaultOrderingFilterBackend, SourceBackend, SearchFilterBackend, FacetedFilterSearchFilterBackend
+from rest_framework.pagination import LimitOffsetPagination
 
-from peachjam.models import Decision
-from peachjam_search.serializers import DecisionSerializer
-from peachjam_search.documents import DecisionDocument
+from peachjam_search.serializers import JudgmentSerializer
+from peachjam_search.documents import JudgmentDocument
+from peachjam.views import AuthedViewMixin
 
-class DecisionSearchViewSet(BaseDocumentViewSet):
+
+class SearchView(AuthedViewMixin, TemplateView):
+    template_name = 'peachjam_search/search.html'
+
+
+class JudgmentSearchViewSet(BaseDocumentViewSet):
     """
-    API endpoint that allows decisions to be searched.
+    API endpoint that allows judgments to be searched.
     """
-    document = DecisionDocument
-    serializer_class = DecisionSerializer
+    document = JudgmentDocument
+    serializer_class = JudgmentSerializer
     filter_backends = [
         OrderingFilterBackend,
         DefaultOrderingFilterBackend,
@@ -42,12 +43,12 @@ class DecisionSearchViewSet(BaseDocumentViewSet):
     }
 
     search_fields = (
-          'title', 
+          'title',
           'author',
           'country',
-          'citation', 
+          'citation',
           'matter_type',
-          'document_content', 
+          'document_content',
     )
 
     faceted_search_fields = {
