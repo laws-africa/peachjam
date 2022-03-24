@@ -30,5 +30,11 @@
 {% endblock %}
 
 {% block body-content %}
-  {% block page-content %}{% endblock %}
+  {% include 'peachjam/header.html' %}
+    <main>
+      <div class="container pb-5 pt-5">
+        {% block page-content %}{% endblock %}
+      </div>
+    </main>
+  {% include 'peachjam/footer.html' %}
 {% endblock %}
