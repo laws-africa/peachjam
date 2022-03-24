@@ -1,6 +1,6 @@
 {% extends 'peachjam/layouts/decision.html' %}
 
-  
+
 {% block title %}Decision Overview{% endblock %}
 
 {% block decision_content %}
@@ -14,5 +14,20 @@
   <p>{{ decision.citation }}</p>
   <p>{{ decision.case_number_string }}</p>
   <p>{{ decision.document_content }}</p>
+
+  <h4>Sample pdf</h4>
+  <div>
+    <h4>PDF Prototype</h4>
+    <div class="pdf-renderer" data-component="PdfRenderer" data-pdf="/static/docs/sample.pdf">
+      <div class="pdf-renderer__previews">
+        <div class="pdf-renderer__previews__inner"></div>
+      </div>
+      <div class="pdf-renderer__content">
+      </div>
+      <div class="pdf-renderer__right">
+        content
+      </div>
+    </div>
+  </div>
 </section>
 {% endblock %}

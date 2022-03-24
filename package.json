@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/laws-africa/peach-jam#readme",
   "devDependencies": {
+    "@types/lodash": "^4.14.180",
     "@typescript-eslint/eslint-plugin": "^5.14.0",
     "@typescript-eslint/parser": "^5.14.0",
     "@vue/compiler-sfc": "^3.2.31",
@@ -38,6 +39,9 @@
   },
   "dependencies": {
     "moment": "^2.29.1",
+    "dom-anchor-text-position": "^5.0.0",
+    "dom-anchor-text-quote": "^4.0.2",
+    "lodash": "^4.17.21",
     "vue": "^3.2.31"
   }
 }
