@@ -1,18 +1,18 @@
-from rest_framework.pagination import LimitOffsetPagination
+from django.views.generic import TemplateView
 from elasticsearch_dsl import DateHistogramFacet
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
-from django_elasticsearch_dsl_drf.filter_backends import (
-    OrderingFilterBackend,
-    DefaultOrderingFilterBackend,
-    SourceBackend,
-    SearchFilterBackend,
-    FacetedFilterSearchFilterBackend
-)
+from django_elasticsearch_dsl_drf.filter_backends import OrderingFilterBackend, \
+    DefaultOrderingFilterBackend, SourceBackend, SearchFilterBackend, FacetedFilterSearchFilterBackend
+from rest_framework.pagination import LimitOffsetPagination
 
-from africanlii.models import Judgment
 from peachjam_search.serializers import JudgmentSerializer
 from peachjam_search.documents import JudgmentDocument
+from peachjam.views import AuthedViewMixin
+
+
+class SearchView(AuthedViewMixin, TemplateView):
+    template_name = 'peachjam_search/search.html'
 
 
 class JudgmentSearchViewSet(BaseDocumentViewSet):

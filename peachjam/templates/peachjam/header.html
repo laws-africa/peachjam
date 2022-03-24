@@ -11,7 +11,7 @@
           <a class="nav-item nav-link {% ifequal request.path '/judgments'%} active {% endifequal%}" href="{% url 'africanlii:judgment_list' %}">Judgments</a>
         </li>
       <li>
-        <a class="nav-item nav-link {% ifequal request.path '/find-documents/'%} active {% endifequal%}" href="{% url 'find_documents' %}">Search</a>
+        <a class="nav-item nav-link {% ifequal request.path '/search'%} active {% endifequal%}" href="{% url 'search:search' %}">Search</a>
         </li>
       </ul>
 

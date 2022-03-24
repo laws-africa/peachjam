@@ -372,7 +372,7 @@ export default {
             params.append('facet', facet);
           }
 
-          return `${window.location.origin}/search/judgments?${params.toString()}`;
+          return `${window.location.origin}/search/api/judgments?${params.toString()}`;
         };
 
         this.loadingCount = this.loadingCount + 1;

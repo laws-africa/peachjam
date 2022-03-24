@@ -9,6 +9,7 @@ router.register(r'judgments', views.JudgmentSearchViewSet, basename='judgment_se
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    path('', include(router.urls)),
+    path('api/', include(router.urls)),
+    path('', views.SearchView.as_view(), name='search'),
 
 ]
