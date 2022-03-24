@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class MatterType(models.Model):
     name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
     description = models.TextField(blank=True)
@@ -7,10 +8,12 @@ class MatterType(models.Model):
     def __str__(self):
         return self.name
 
-class Decision(models.Model):
-    """This model represents the decison for a case."""
+
+class Judgment(models.Model):
+    """ This model represents judgments.
+    """
     title = models.CharField(max_length=1024, null=False, blank=False)
-    author = models.ForeignKey('peachjam.Court', on_delete=models.PROTECT, null=False, blank=False)
+    author = models.ForeignKey('africanlii.Court', on_delete=models.PROTECT, null=False, blank=False)
     date = models.DateField(null=False, blank=False)
     citation = models.CharField(max_length=1024, null=True, blank=True)
     case_number_numeric = models.CharField(max_length=1024, null=True, blank=True)

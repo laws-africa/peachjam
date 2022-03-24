@@ -7,8 +7,7 @@
 
 {% block head-js %}
   <script defer src="{% static 'lib/bootstrap/dist/js/bootstrap.bundle.js' %}"></script>
-
-<script defer src="{% static 'js/app-prod.js' %}"></script>
+  <script defer src="{% static 'js/app-prod.js' %}"></script>
 
   {% if not DEBUG %}
     <!-- sentry -->

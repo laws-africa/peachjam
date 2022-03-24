@@ -1,6 +1,7 @@
 from django.db import models
 from countries_plus.models import Country
-      
+
+
 class Court(models.Model):
     name = models.CharField(max_length=255, null=False)
     country = models.ForeignKey(Country, on_delete=models.PROTECT)

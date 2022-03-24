@@ -1,0 +1,17 @@
+{% extends 'africanlii/layouts/judgment.html' %}
+
+{% block title %}Judgment Overview{% endblock %}
+
+{% block judgment_content %}
+  <header>
+    <h1>{{ judgment.title }}</h1>
+  </header>
+
+  <section>
+    <p>{{ judgment.date }}</p>
+    <p>{{ judgment.author }}</p>
+    <p>{{ judgment.citation }}</p>
+    <p>{{ judgment.case_number_string }}</p>
+    <p>{{ judgment.document_content }}</p>
+  </section>
+{% endblock %}
