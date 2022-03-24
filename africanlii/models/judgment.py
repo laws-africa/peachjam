@@ -1,30 +1,29 @@
 from django.db import models
+from .matter_type import MatterType
+from .core_document_model import CoreDocumentModel
+from .court import Court
+from .judge import Judge
 
-
-class MatterType(models.Model):
-    name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
-    description = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Judgment(models.Model):
-    """ This model represents judgments.
+class Judgment(CoreDocumentModel):
+    """ This model represents judgments it inherits from the CoreDocumentModel.
     """
-    title = models.CharField(max_length=1024, null=False, blank=False)
-    author = models.ForeignKey('africanlii.Court', on_delete=models.PROTECT, null=False, blank=False)
-    date = models.DateField(null=False, blank=False)
-    citation = models.CharField(max_length=1024, null=True, blank=True)
+   
     case_number_numeric = models.CharField(max_length=1024, null=True, blank=True)
     case_number_year = models.IntegerField(null=True, blank=True)
     case_number_string = models.CharField(max_length=1024, null=True, blank=True)
+
     matter_type = models.ForeignKey(MatterType, on_delete=models.PROTECT, null=True, blank=True)
-    document_content = models.TextField(null=True, blank=True)
-    source_url = models.URLField(max_length=2048, null=True, blank=True)
-    source_file = models.FileField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
+    court = models.ForeignKey(Court, on_delete=models.PROTECT, null=True, blank=True)
+    judges = models.ManyToManyField(Judge, blank=True)
+
+    headnote_holding = models.TextField(blank=True)
+    additional_citations = models.TextField(blank=True)
+
+    media_summary_file = models.FileField(upload_to='judgments/media_summary/', null=True, blank=True)
+
+    flynote = models.TextField(blank=True)
+
 
     def __str__(self):
         return self.title
