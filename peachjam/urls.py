@@ -21,8 +21,6 @@ from peachjam import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
-    path('', views.HomePageView.as_view(), name='home_page'),
-
     path('', include(('africanlii.urls', 'africanlii'), namespace='africanlii')),
     path('search/', include(('peachjam_search.urls', 'search'), namespace='search')),
 ]
