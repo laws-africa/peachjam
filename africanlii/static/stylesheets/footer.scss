@@ -4,7 +4,7 @@ footer {
     color: #6c757d;
     transition: color 200ms ease-in-out;
     &:hover, &:focus {
-      color: #EE7845
+      color: $primary
     }
   }
 }

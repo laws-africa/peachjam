@@ -6,7 +6,7 @@
     transition: 200ms color ease-in-out;
     &:hover,
     &.active {
-      color: #EE7845;
+      color: $primary;
     }
   }
 }
