@@ -3,10 +3,10 @@
 {% block title %}Judgment Overview{% endblock %}
 
 {% block judgment_content %}
+<div class="container pb-5 pt-5">
   <header>
     <h1>{{ judgment.title }}</h1>
   </header>
-
   <section>
     <p>{{ judgment.date }}</p>
     <p>{{ judgment.author }}</p>
@@ -29,4 +29,5 @@
       </div>
     </div>
   </section>
+</div>
 {% endblock %}
