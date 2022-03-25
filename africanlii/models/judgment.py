@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from .matter_type import MatterType
 from .core_document_model import CoreDocumentModel
 from .court import Court
@@ -34,3 +35,6 @@ class Judgment(CoreDocumentModel):
 
     def get_case_number_string(self):
         return f'{self.matter_type} {self.case_number_numeric} of {self.case_number_year}'
+
+    def get_absolute_url(self):
+        return reverse('africanlii:judgment_detail', args=str(self.id))

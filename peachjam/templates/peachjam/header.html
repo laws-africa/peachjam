@@ -1,3 +1,35 @@
 <header>
   header content
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand mx-5 {% ifequal request.path '/'%} active {% endifequal%}" href="/">Peach Jam</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbar">
+      <ul class="navbar-nav mr-auto list-unstyled">
+        <li class="nav-item">
+          <a class="nav-link {% ifequal request.path '/judgments/'%} active {% endifequal%}" href="{% url 'africanlii:judgment_list' %}">Judgments</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="{% url 'africanlii:legislation_list' %}">Legislation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% ifequal request.path '/legal_instruments/'%} active {% endifequal%}" href="{% url 'africanlii:legal_instrument_list' %}">Legal Instruments</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% ifequal request.path '/generic_documents/'%} active {% endifequal%}" href="{% url 'africanlii:generic_document_list' %}">Generic Document</a>
+        </li>
+      <li>
+        <a class="nav-item nav-link {% ifequal request.path '/search'%} active {% endifequal%}" href="{% url 'search:search' %}">Search</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
 </header>

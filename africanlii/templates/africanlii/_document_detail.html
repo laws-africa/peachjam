@@ -1,0 +1,9 @@
+
+<h1>{{ document.title }}</h1>
+
+{% for field, value in document.get_all_values.items %}
+
+<p class="fw-bold">{{ field | title }}</p>
+<p>{{ value }}</p>
+
+{% endfor %}

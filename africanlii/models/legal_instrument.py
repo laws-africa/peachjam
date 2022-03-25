@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from .core_document_model import CoreDocumentModel
 from .authoring_body import AuthoringBody
 from .document_nature import DocumentNature
@@ -12,3 +13,6 @@ class LegalInstrument(CoreDocumentModel):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('africanlii:legal_instrument_detail', args=str(self.id))

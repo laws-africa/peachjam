@@ -1,4 +1,5 @@
 from django.db import models
+from django.core import serializers
 from languages_plus.models import Language
 from countries_plus.models import Country
 from .images import ImageSet
@@ -17,13 +18,20 @@ class CoreDocumentModel(models.Model):
   citation = models.CharField(max_length=1024, null=True, blank=True)
   content_html = models.TextField(null=True, blank=True)
   images = models.OneToOneField(ImageSet, on_delete=models.PROTECT, blank=True, null=True)
-  language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True, blank=True)
-  jurisdicition = models.ForeignKey(Country, on_delete=models.PROTECT, null=True, blank=True)
+  language = models.ForeignKey(Language, on_delete=models.PROTECT, null=False, blank=False)
+  jurisdiction = models.ForeignKey(Country, on_delete=models.PROTECT, null=False, blank=False)
   locality = models.ForeignKey(Locality, on_delete=models.PROTECT, null=True, blank=True)
-  expression_frbr_uri = models.CharField(max_length=1024, null=True, blank=True)
+  expression_frbr_uri = models.CharField(max_length=1024, null=False, blank=False, unique=True)
   work_frbr_uri = models.CharField(max_length=1024, null=True, blank=True)
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
 
   class Meta:
     abstract = True
+    ordering = ['title']
+
+  def get_all_fields(self):
+    return self._meta.get_fields()
+
+  def get_all_values(self):
+    return serializers.serialize('python', [self])[0]['fields']

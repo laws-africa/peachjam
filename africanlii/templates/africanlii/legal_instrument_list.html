@@ -1,0 +1,22 @@
+{% extends 'africanlii/layouts/base_document_layout.html' %}
+{% load i18n %}
+
+{% block title %}Legal Instrument List{% endblock %}
+
+{% block content %}
+
+  <header>
+    <h1 class="h4">{% trans 'Legal Instrument List' %}</h1>
+  </header>
+  
+  {% if legal_instruments %}
+
+    {% with rows=legal_instruments %}
+    {% include 'africanlii/_document_table.html'%}
+    {% endwith %}
+
+  {% else %}
+    <p>{% trans 'No legal_instruments found.' %}</p>
+  {% endif %}
+ 
+{% endblock %}
