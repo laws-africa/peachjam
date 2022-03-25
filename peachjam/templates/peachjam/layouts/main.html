@@ -3,8 +3,7 @@
 {% load sass_tags %}
 
 {% block head-css %}
-  <link rel="stylesheet" href="{% static 'lib/bootstrap/dist/css/bootstrap.min.css' %}" type="text/css">
-  <link rel="stylesheet" href="{% sass_src 'stylesheets/app.scss' %}" type="text/css" />
+  <link rel="stylesheet" href="{% sass_src 'lib/bootstrap/scss/bootstrap.scss' %}" type="text/css">
 {% endblock %}
 
 {% block head-js %}
@@ -29,12 +28,14 @@
 
 {% endblock %}
 
-{% block body-content %}
+{% block header %}
   {% include 'peachjam/header.html' %}
+{% endblock %}
+{% block body-content %}
     <main>
-      <div class="container pb-5 pt-5">
-        {% block page-content %}{% endblock %}
-      </div>
+      {% block page-content %}{% endblock %}
     </main>
+{% endblock %}
+{% block footer %}
   {% include 'peachjam/footer.html' %}
 {% endblock %}
