@@ -4,21 +4,20 @@
 {% block title %}Judgment List{% endblock %}
 
 {% block judgment_content %}
-
+<div class="container pb-5 pt-5">
   <header>
     <h1>{% trans 'Judgment List' %}</h1>
   </header>
-
   {% if judgments %}
-    <ul>
-      {% for judgment in judgments %}
-        <li>
-          <a href="{% url 'africanlii:judgment_detail' pk=judgment.pk %}">{{ judgment.title }}</a>
-        </li>
-      {% endfor %}
-    </ul>
+  <ul>
+    {% for judgment in judgments %}
+    <li>
+      <a href="{% url 'africanlii:judgment_detail' pk=judgment.pk %}">{{ judgment.title }}</a>
+    </li>
+    {% endfor %}
+  </ul>
   {% else %}
-    <p>{% trans 'No judgments found.' %}</p>
+  <p>{% trans 'No judgments found.' %}</p>
   {% endif %}
- 
+</div>
 {% endblock %}
