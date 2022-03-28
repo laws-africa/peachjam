@@ -12,7 +12,7 @@
   <ul>
     {% for judgment in judgments %}
     <li>
-      <a href="{% url 'africanlii:judgment_detail' pk=judgment.pk %}">{{ judgment.title }}</a>
+      <a href="{% url 'judgment_detail' pk=judgment.pk %}">{{ judgment.title }}</a>
     </li>
     {% endfor %}
   </ul>
