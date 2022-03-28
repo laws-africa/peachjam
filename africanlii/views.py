@@ -20,7 +20,3 @@ class JudgmentDetailView(AuthedViewMixin, DetailView):
 
 class HomePageView(AuthedViewMixin, TemplateView):
     template_name = 'africanlii/home.html'
-
-
-class SearchPageView(AuthedViewMixin, TemplateView):
-    template_name = 'africanlii/search.html'
