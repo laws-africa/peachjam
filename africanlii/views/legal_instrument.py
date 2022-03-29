@@ -7,6 +7,7 @@ from peachjam.views import AuthedViewMixin
 class LegalInstrumentListView(AuthedViewMixin, ListView):
     template_name = 'africanlii/legal_instrument_list.html'
     context_object_name = 'legal_instruments'
+    paginate_by = 20
 
     def get_queryset(self):
         return LegalInstrument.objects.all()

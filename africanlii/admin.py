@@ -5,24 +5,23 @@ from africanlii.models import (
   DocumentNature,
   GenericDocument,
   Image,
-  ImageSet,
   Judge,
   Judgment,
+  JudgmentMediaSummaryFile,
   LegalInstrument,
   Legislation,
   Locality,
   MatterType,
 ) 
 
-
 admin.site.register([
   Court,
   DocumentNature,
   GenericDocument,
   Image,
-  ImageSet,
   Judge,
   Judgment,
+  JudgmentMediaSummaryFile,
   LegalInstrument,
   Legislation,
   Locality,
