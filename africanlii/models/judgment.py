@@ -58,7 +58,7 @@ class Judgment(CoreDocumentModel):
         return f'{self.matter_type} {self.case_number_numeric} of {self.case_number_year}'
 
     def get_absolute_url(self):
-        return reverse('africanlii:judgment_detail', args=str(self.id))
+        return reverse('judgment_detail', args=str(self.id))
 
 def media_summary_file_location(instance, filename):
     return f'media/judgments/{instance.judgment.id}/{os.path.basename(filename)}'

@@ -30,11 +30,11 @@ class BaseGenericDocument(CoreDocumentModel):
 
 class GenericDocument(BaseGenericDocument):
     def get_absolute_url(self):
-        return reverse('africanlii:generic_document_detail', args=str(self.id))
+        return reverse('generic_document_detail', args=str(self.id))
 
 class LegalInstrument(BaseGenericDocument):
     def get_absolute_url(self):
-        return reverse('africanlii:legal_instrument_detail', args=str(self.id))
+        return reverse('legal_instrument_detail', args=str(self.id))
 
 class Legislation(CoreDocumentModel):
     toc_json = models.JSONField(null=True, blank=True) 
@@ -44,4 +44,4 @@ class Legislation(CoreDocumentModel):
         return self.title
     
     def get_absolute_url(self):
-        return reverse('africanlii:legislation_detail', args=str(self.id))
+        return reverse('legislation_detail', args=str(self.id))
