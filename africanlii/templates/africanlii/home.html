@@ -1,0 +1,36 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+
+{% block title %} Home {% endblock %}
+
+{% block page-content %}
+<div class="container pb-5 pt-5">
+  <section class="row">
+    <p>
+      We power LIIs in X countries hosting Y documents and serving Z million users a year. We help individuals, organizations,
+      and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond.
+    </p>
+    <p>
+      The site is based on a series of indexes and collections.
+    </p>
+
+    <div class="row">
+      <div class="col col-lg-6 col-sm-12">
+        <form method="get" action="/search">
+          <div class="input-group">
+            <input type="text" class="form-control"
+                   placeholder="Search indices"
+                   aria-label="Search documents"
+                   aria-describedby="button-addon2"
+                   name="q"
+            >
+            <button class="btn btn-dark" type="submit" id="button-addon2">
+              <i class="bi bi-search text-white"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -2,10 +2,7 @@
 {% load static %}
 {% load sass_tags %}
 
-{% block head-css %}
-  <link rel="stylesheet" href="{% static 'lib/bootstrap/dist/css/bootstrap.min.css' %}" type="text/css">
-  <link rel="stylesheet" href="{% sass_src 'stylesheets/app.scss' %}" type="text/css" />
-{% endblock %}
+{% block head-css %}{% endblock %}
 
 {% block head-js %}
   <script defer src="/static/lib/pdfjs/pdf.js"></script>
@@ -29,6 +26,14 @@
 
 {% endblock %}
 
+{% block header %}
+  {% include 'peachjam/header.html' %}
+{% endblock %}
 {% block body-content %}
-  {% block page-content %}{% endblock %}
+    <main>
+      {% block page-content %}{% endblock %}
+    </main>
+{% endblock %}
+{% block footer %}
+  {% include 'peachjam/footer.html' %}
 {% endblock %}

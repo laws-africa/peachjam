@@ -13,23 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
-from peachjam import views
 
 urlpatterns = [
+    path('search/', include(('peachjam_search.urls', 'search'), namespace='search')),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
-    path('', views.HomePageView.as_view(), name='home_page'),
-
-    path('', include(('africanlii.urls', 'africanlii'), namespace='africanlii')),
-    path('search/', include(('peachjam_search.urls', 'search'), namespace='search')),
 ]
 
-
-if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns

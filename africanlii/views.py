@@ -1,4 +1,4 @@
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 
 from africanlii.models import Judgment
 from peachjam.views import AuthedViewMixin
@@ -16,3 +16,7 @@ class JudgmentDetailView(AuthedViewMixin, DetailView):
     model = Judgment
     template_name = 'africanlii/judgment_detail.html'
     context_object_name = 'judgment'
+
+
+class HomePageView(AuthedViewMixin, TemplateView):
+    template_name = 'africanlii/home.html'

@@ -1,0 +1,10 @@
+footer {
+  a {
+    text-decoration: none;
+    color: #6c757d;
+    transition: color 200ms ease-in-out;
+    &:hover, &:focus {
+      color: $primary
+    }
+  }
+}
