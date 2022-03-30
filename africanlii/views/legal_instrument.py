@@ -1,16 +1,13 @@
 from django.views.generic import ListView, DetailView
-
 from africanlii.models import LegalInstrument
 from peachjam.views import AuthedViewMixin
 
 
 class LegalInstrumentListView(AuthedViewMixin, ListView):
+    model = LegalInstrument
     template_name = 'africanlii/legal_instrument_list.html'
     context_object_name = 'legal_instruments'
     paginate_by = 20
-
-    def get_queryset(self):
-        return LegalInstrument.objects.all()
 
 
 class LegalInstrumentDetailView(AuthedViewMixin, DetailView):

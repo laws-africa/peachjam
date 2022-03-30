@@ -12,6 +12,7 @@ from africanlii.models import (
   Legislation,
   Locality,
   MatterType,
+  SourceFile
 ) 
 
 admin.site.register([
@@ -27,3 +28,15 @@ admin.site.register([
   Locality,
   MatterType,
 ])
+
+@admin.register(SourceFile)
+class SourceFileAdmin(admin.ModelAdmin):
+  def save_model(self, request, obj, form, change):
+    if change is False:
+      file = obj.file
+      obj.file = None
+      super().save_model(request, obj, form, change)
+      obj.file = file
+      super().save_model(request, obj, form, change)
+    else:
+      super().save_model(request, obj, form, change)

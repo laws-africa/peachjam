@@ -17,7 +17,6 @@ class Court(models.Model):
     def __str__(self):
         return f'{self.name}'
 
-from django.db import models
 
 class Judge(models.Model):
     name = models.CharField(max_length=1024, null=False, blank=False)
@@ -29,12 +28,14 @@ class Judge(models.Model):
     class Meta:
         ordering = ['name']
 
+
 class MatterType(models.Model):
     name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
     description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
+
 
 class Judgment(CoreDocumentModel):
     case_number_numeric = models.CharField(max_length=1024, null=True, blank=True)
@@ -60,11 +61,13 @@ class Judgment(CoreDocumentModel):
     def get_absolute_url(self):
         return reverse('judgment_detail', args=str(self.id))
 
+
 def media_summary_file_location(instance, filename):
     return f'media/judgments/{instance.judgment.id}/{os.path.basename(filename)}'
 
+
 class JudgmentMediaSummaryFile(models.Model):
-    judgment = models.ForeignKey(Judgment, related_name='attachments', on_delete=models.PROTECT)
+    judgment = models.ForeignKey(Judgment, related_name='media_summaries', on_delete=models.PROTECT)
     file = models.FileField(upload_to=media_summary_file_location)
     size = models.IntegerField()
     filename = models.CharField(max_length=255, help_text="Unique attachment filename")

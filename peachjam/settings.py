@@ -148,7 +148,8 @@ if DEBUG:
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 import dj_database_url
 
-default_db_url = 'postgres://peachjam:peachjam@localhost:5432/peachjam'
+# default_db_url = 'postgres://peachjam:peachjam@localhost:5432/peachjam'
+default_db_url = 'postgres://postgres@localhost:5432/pj1'
 db_config = dj_database_url.config(default=os.environ.get('DATABASE_URL', default_db_url))
 db_config['ATOMIC_REQUESTS'] = True
 
