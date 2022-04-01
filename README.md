@@ -50,6 +50,12 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+### Setup Precommit
+- Setup the precommit hooks that run on every commit:
+```
+pre-commit install
+```
+
 ## Adding translation strings
 
 Translations for the project are stored in the `locale` directory. Translations for strings are added on [CrowdIn](https://crowdin.com/project/lawsafrica-indigo).

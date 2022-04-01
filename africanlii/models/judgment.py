@@ -10,10 +10,10 @@ class MatterType(models.Model):
 
 
 class Judgment(models.Model):
-    """ This model represents judgments.
-    """
+    """This model represents judgments."""
+
     title = models.CharField(max_length=1024, null=False, blank=False)
-    author = models.ForeignKey('africanlii.Court', on_delete=models.PROTECT, null=False, blank=False)
+    author = models.ForeignKey("africanlii.Court", on_delete=models.PROTECT, null=False, blank=False)
     date = models.DateField(null=False, blank=False)
     citation = models.CharField(max_length=1024, null=True, blank=True)
     case_number_numeric = models.CharField(max_length=1024, null=True, blank=True)
@@ -34,4 +34,4 @@ class Judgment(models.Model):
         return super().save(*args, **kwargs)
 
     def get_case_number_string(self):
-        return f'{self.matter_type} {self.case_number_numeric} of {self.case_number_year}'
+        return f"{self.matter_type} {self.case_number_numeric} of {self.case_number_year}"

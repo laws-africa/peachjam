@@ -16,7 +16,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 3
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python Environment
@@ -30,6 +30,6 @@ jobs:
     - name: Run tests
       env:
         DATABASE_URL: "postgres://postgres:postgres@localhost:5432/peach-jam"
-      run: python manage.py test
-
-
+      run: |
+        pre-commit run --all-files
+        python manage.py test

@@ -1,2 +1,2 @@
-from .judgment import *
-from .court import *
+from .court import *  # noqa
+from .judgment import *  # noqa

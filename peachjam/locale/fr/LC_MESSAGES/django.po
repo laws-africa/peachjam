@@ -24,4 +24,3 @@ msgstr "Bienvenue dans Peach Jam"
 #: templates/peachjam/home.html:10
 msgid "More text that needs translation"
 msgstr "Plus de texte qui nécessite une traduction"
-

@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import logging
 import os
 from pathlib import Path
-import logging
+
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
@@ -25,135 +25,128 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'true') == 'true'
+DEBUG = os.environ.get("DJANGO_DEBUG", "true") == "true"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 if DEBUG:
-    SECRET_KEY = 'django-insecure-1q!zjpjmde2=yf0$doia!@74h-(f85(&&8)l05a+tt(b8g^rrt'
+    SECRET_KEY = "django-insecure-1q!zjpjmde2=yf0$doia!@74h-(f85(&&8)l05a+tt(b8g^rrt"
 else:
-    SECRET_KEY=os.environ.get('DJANGO_SECRET_KEY')
+    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 INSTALLED_APPS = [
-    'peachjam.apps.PeachJamConfig',
-    'peachjam_search.apps.PeachjamSearchConfig',
-
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-
-    'countries_plus',
-    'rest_framework',
-    'django_elasticsearch_dsl',
-    'django_elasticsearch_dsl_drf',
-
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.sites',
-    'django.contrib.staticfiles',
-
-    'sass_processor'
+    "peachjam.apps.PeachJamConfig",
+    "peachjam_search.apps.PeachjamSearchConfig",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "countries_plus",
+    "rest_framework",
+    "django_elasticsearch_dsl",
+    "django_elasticsearch_dsl_drf",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.sites",
+    "django.contrib.staticfiles",
+    "sass_processor",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'peachjam.urls'
+ROOT_URLCONF = "peachjam.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'peachjam.context_processors.general'
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "peachjam.context_processors.general",
             ],
         },
     },
 ]
 
 PEACHJAM = {
-    'APP_NAME': os.environ.get('APP_NAME', 'Peachjam'),
-    'SUPPORT_EMAIL': os.environ.get('SUPPORT_EMAIL'),
-
-    'SENTRY_DSN_KEY': os.environ.get('SENTRY_DSN_KEY'),
-    'SENTRY_ENVIRONMENT': os.environ.get('SENTRY_ENVIRONMENT', 'staging'),
+    "APP_NAME": os.environ.get("APP_NAME", "Peachjam"),
+    "SUPPORT_EMAIL": os.environ.get("SUPPORT_EMAIL"),
+    "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
+    "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),
 }
 
-WSGI_APPLICATION = 'peachjam.wsgi.application'
+WSGI_APPLICATION = "peachjam.wsgi.application"
 EMAIL_SUBJECT_PREFIX = f"[{PEACHJAM['APP_NAME']}] "
 
 # Django all-auth
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 # admins must create accounts
 ACCOUNT_SIGNUP_ENABLED = False
 # sign in with email addresses
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_AUTHENTICATION_METHOD = "email"
 # email addresses are required for new accounts
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_PRESERVE_USERNAME_CASING = False
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-LOGIN_URL = 'account_login'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+LOGIN_URL = "account_login"
 
 # social logins
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
         ],
-        'AUTH_PARAMS': {
-            'access_type': 'offline',
-        }
+        "AUTH_PARAMS": {
+            "access_type": "offline",
+        },
     },
 }
 
-SOCIALACCOUNT_ADAPTER = 'peachjam.auth.SocialAccountAdapter'
+SOCIALACCOUNT_ADAPTER = "peachjam.auth.SocialAccountAdapter"
 
 if DEBUG:
-    INSTALLED_APPS.append('debug_toolbar')
-    INSTALLED_APPS.append('django_extensions')
-    INSTALLED_APPS.append('elastic_panel')
-    MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
-    INTERNAL_IPS = ['127.0.0.1']
+    INSTALLED_APPS.append("debug_toolbar")
+    INSTALLED_APPS.append("django_extensions")
+    INSTALLED_APPS.append("elastic_panel")
+    MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+    INTERNAL_IPS = ["127.0.0.1"]
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-import dj_database_url
+import dj_database_url  # noqa
 
-default_db_url = 'postgres://peachjam:peachjam@localhost:5432/peachjam'
-db_config = dj_database_url.config(default=os.environ.get('DATABASE_URL', default_db_url))
-db_config['ATOMIC_REQUESTS'] = True
+default_db_url = "postgres://peachjam:peachjam@localhost:5432/peachjam"
+db_config = dj_database_url.config(default=os.environ.get("DATABASE_URL", default_db_url))
+db_config["ATOMIC_REQUESTS"] = True
 
-DATABASES = {
-    'default': db_config
-}
+DATABASES = {"default": db_config}
 
 
 # Password validation
@@ -161,16 +154,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -178,9 +171,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -193,47 +186,47 @@ SITE_ID = 1
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(os.getcwd(), 'staticfiles')
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(os.getcwd(), "staticfiles")
 
 STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'sass_processor.finders.CssFinder',
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "sass_processor.finders.CssFinder",
 ]
 
 if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-ELASTICSEARCH_DSL={
-    'default': {
-        'hosts': os.environ.get("ELASTICSEARCH_HOST", "localhost:9200"),
-        'timeout': 5,
+ELASTICSEARCH_DSL = {
+    "default": {
+        "hosts": os.environ.get("ELASTICSEARCH_HOST", "localhost:9200"),
+        "timeout": 5,
     },
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 10
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 10,
 }
 
 # Elastic APM
-APM_SERVER_URL = os.environ.get('APM_SERVER_URL', '')
-ELK_PROJECT = 'peachjam-staging'
+APM_SERVER_URL = os.environ.get("APM_SERVER_URL", "")
+ELK_PROJECT = "peachjam-staging"
 ELASTIC_APM = {
-    'SERVICE_NAME': ELK_PROJECT,
-    'SERVER_URL': APM_SERVER_URL,
+    "SERVICE_NAME": ELK_PROJECT,
+    "SERVER_URL": APM_SERVER_URL,
 }
 if not DEBUG and APM_SERVER_URL:
-    INSTALLED_APPS = INSTALLED_APPS + ['elasticapm.contrib.django']
+    INSTALLED_APPS = INSTALLED_APPS + ["elasticapm.contrib.django"]
     MIDDLEWARE = [
-        'elasticapm.contrib.django.middleware.TracingMiddleware',
-        'elasticapm.contrib.django.middleware.Catch404Middleware',
+        "elasticapm.contrib.django.middleware.TracingMiddleware",
+        "elasticapm.contrib.django.middleware.Catch404Middleware",
     ] + MIDDLEWARE
 
 
@@ -244,34 +237,32 @@ if not DEBUG:
         event_level=None,  # Don't send errors based on log messages
     )
     sentry_sdk.init(
-        dsn=PEACHJAM['SENTRY_DSN_KEY'],
-        environment=PEACHJAM['SENTRY_ENVIRONMENT'],
+        dsn=PEACHJAM["SENTRY_DSN_KEY"],
+        environment=PEACHJAM["SENTRY_ENVIRONMENT"],
         integrations=[DjangoIntegration(), sentry_logging],
         send_default_pii=True,
     )
 
-DEBUG_TOOLBAR_CONFIG = {
-    'INTERCEPT_REDIRECTS': False
-}
+DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}
 
 DEBUG_TOOLBAR_PANELS = (
     # Defaults
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
-    'debug_toolbar.panels.cache.CachePanel',
-    'debug_toolbar.panels.signals.SignalsPanel',
-    'debug_toolbar.panels.logging.LoggingPanel',
-    'debug_toolbar.panels.redirects.RedirectsPanel',
+    "debug_toolbar.panels.versions.VersionsPanel",
+    "debug_toolbar.panels.timer.TimerPanel",
+    "debug_toolbar.panels.settings.SettingsPanel",
+    "debug_toolbar.panels.headers.HeadersPanel",
+    "debug_toolbar.panels.request.RequestPanel",
+    "debug_toolbar.panels.sql.SQLPanel",
+    "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+    "debug_toolbar.panels.templates.TemplatesPanel",
+    "debug_toolbar.panels.cache.CachePanel",
+    "debug_toolbar.panels.signals.SignalsPanel",
+    "debug_toolbar.panels.logging.LoggingPanel",
+    "debug_toolbar.panels.redirects.RedirectsPanel",
     # Additional
-    'elastic_panel.panel.ElasticDebugPanel',
+    "elastic_panel.panel.ElasticDebugPanel",
 )
 
 SASS_PROCESSOR_INCLUDE_DIRS = [
-    os.path.join(BASE_DIR, 'node_modules'),
+    os.path.join(BASE_DIR, "node_modules"),
 ]

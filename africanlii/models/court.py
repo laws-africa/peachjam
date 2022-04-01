@@ -1,5 +1,5 @@
-from django.db import models
 from countries_plus.models import Country
+from django.db import models
 
 
 class Court(models.Model):
@@ -7,9 +7,9 @@ class Court(models.Model):
     country = models.ForeignKey(Country, on_delete=models.PROTECT)
 
     class Meta:
-        verbose_name_plural = 'courts'
-        ordering = ['name']
-        unique_together = ['name', 'country']
+        verbose_name_plural = "courts"
+        ordering = ["name"]
+        unique_together = ["name", "country"]
 
     def __str__(self):
-        return f'{self.name}'
+        return f"{self.name}"

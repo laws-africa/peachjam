@@ -1,24 +1,26 @@
 from django.views.generic import TemplateView
-from elasticsearch_dsl import DateHistogramFacet
+from django_elasticsearch_dsl_drf.filter_backends import DefaultOrderingFilterBackend
+from django_elasticsearch_dsl_drf.filter_backends import FacetedFilterSearchFilterBackend
+from django_elasticsearch_dsl_drf.filter_backends import OrderingFilterBackend
+from django_elasticsearch_dsl_drf.filter_backends import SearchFilterBackend
+from django_elasticsearch_dsl_drf.filter_backends import SourceBackend
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
-from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
-from django_elasticsearch_dsl_drf.filter_backends import OrderingFilterBackend, \
-    DefaultOrderingFilterBackend, SourceBackend, SearchFilterBackend, FacetedFilterSearchFilterBackend
-from rest_framework.pagination import LimitOffsetPagination
+from elasticsearch_dsl import DateHistogramFacet
 
-from peachjam_search.serializers import JudgmentSerializer
-from peachjam_search.documents import JudgmentDocument
 from peachjam.views import AuthedViewMixin
+from peachjam_search.documents import JudgmentDocument
+from peachjam_search.serializers import JudgmentSerializer
 
 
 class SearchView(AuthedViewMixin, TemplateView):
-    template_name = 'peachjam_search/search.html'
+    template_name = "peachjam_search/search.html"
 
 
 class JudgmentSearchViewSet(BaseDocumentViewSet):
     """
     API endpoint that allows judgments to be searched.
     """
+
     document = JudgmentDocument
     serializer_class = JudgmentSerializer
     filter_backends = [
@@ -29,43 +31,34 @@ class JudgmentSearchViewSet(BaseDocumentViewSet):
         SourceBackend,
     ]
 
-    ordering_fields = {
-        'date': '_date',
-        'title': 'title'
-    }
+    ordering_fields = {"date": "_date", "title": "title"}
 
     filter_fields = {
-        'title': 'title',
-        'citation': 'citation',
-        'author': 'author',
-        'country': 'country',
-        'matter_type': 'matter_type',
+        "title": "title",
+        "citation": "citation",
+        "author": "author",
+        "country": "country",
+        "matter_type": "matter_type",
     }
 
     search_fields = (
-          'title',
-          'author',
-          'country',
-          'citation',
-          'matter_type',
-          'document_content',
+        "title",
+        "author",
+        "country",
+        "citation",
+        "matter_type",
+        "document_content",
     )
 
     faceted_search_fields = {
-        'author': {
-            'field': 'author',
+        "author": {
+            "field": "author",
         },
-        'country': {
-            'field': 'country',
+        "country": {
+            "field": "country",
         },
-        'matter_type': {
-            'field': 'matter_type',
+        "matter_type": {
+            "field": "matter_type",
         },
-        'date': {
-            'field': 'date',
-            'facet': DateHistogramFacet,
-            'options': {
-                'interval': 'year'
-            }
-        },
+        "date": {"field": "date", "facet": DateHistogramFacet, "options": {"interval": "year"}},
     }
