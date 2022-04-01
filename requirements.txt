@@ -27,6 +27,7 @@ gunicorn==20.1.0
 idna==3.3
 libsass==0.21.0
 oauthlib==3.2.0
+pre-commit==2.17.0
 psycopg2-binary==2.9.3
 pycparser==2.21
 PyJWT==2.3.0
