@@ -3,6 +3,8 @@ node_modules
 peachjam/static/js/app-prod.js
 peachjam/static/js/*.app-prod.js
 
+media/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
