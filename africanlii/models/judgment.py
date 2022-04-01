@@ -2,7 +2,7 @@ import os
 from django.db import models
 from django.urls import reverse
 from countries_plus.models import Country
-from .core_document_model import CoreDocumentModel
+from .core_document_model import CoreDocument
 
 
 class Court(models.Model):
@@ -10,7 +10,6 @@ class Court(models.Model):
     country = models.ForeignKey(Country, on_delete=models.PROTECT)
 
     class Meta:
-        verbose_name_plural = 'courts'
         ordering = ['name']
         unique_together = ['name', 'country']
 
@@ -36,8 +35,12 @@ class MatterType(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name']
 
-class Judgment(CoreDocumentModel):
+
+class Judgment(models.Model):
+    document = models.ForeignKey(CoreDocument, on_delete=models.PROTECT)
     case_number_numeric = models.CharField(max_length=1024, null=True, blank=True)
     case_number_year = models.IntegerField(null=True, blank=True)
     case_number_string = models.CharField(max_length=1024, null=True, blank=True)
@@ -48,8 +51,11 @@ class Judgment(CoreDocumentModel):
     additional_citations = models.TextField(blank=True)
     flynote = models.TextField(blank=True)
 
+    class Meta :
+        ordering = ['document__title']
+
     def __str__(self):
-        return self.title
+        return self.document.title
 
     def save(self, *args, **kwargs):
         self.case_number_string = self.get_case_number_string()
@@ -63,7 +69,7 @@ class Judgment(CoreDocumentModel):
 
 
 def media_summary_file_location(instance, filename):
-    return f'media/judgments/{instance.judgment.id}/{os.path.basename(filename)}'
+    return f'media/media_summaries/{instance.judgment.id}/{os.path.basename(filename)}'
 
 
 class JudgmentMediaSummaryFile(models.Model):
@@ -76,4 +82,4 @@ class JudgmentMediaSummaryFile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['filename']
+        ordering = ['judgment__document__title']
