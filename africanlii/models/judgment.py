@@ -2,7 +2,7 @@ import os
 from django.db import models
 from django.urls import reverse
 from countries_plus.models import Country
-from .core_document_model import CoreDocument
+from peachjam.models import CoreDocument, file_location
 
 
 class Court(models.Model):
@@ -39,8 +39,7 @@ class MatterType(models.Model):
         ordering = ['name']
 
 
-class Judgment(models.Model):
-    document = models.ForeignKey(CoreDocument, on_delete=models.PROTECT)
+class Judgment(CoreDocument):
     case_number_numeric = models.CharField(max_length=1024, null=True, blank=True)
     case_number_year = models.IntegerField(null=True, blank=True)
     case_number_string = models.CharField(max_length=1024, null=True, blank=True)
@@ -51,14 +50,15 @@ class Judgment(models.Model):
     additional_citations = models.TextField(blank=True)
     flynote = models.TextField(blank=True)
 
-    class Meta :
-        ordering = ['document__title']
+    class Meta:
+        ordering = ['title']
 
     def __str__(self):
-        return self.document.title
+        return self.title
 
     def save(self, *args, **kwargs):
         self.case_number_string = self.get_case_number_string()
+        self.doc_type = 'judgment'
         return super().save(*args, **kwargs)
 
     def get_case_number_string(self):
@@ -68,18 +68,19 @@ class Judgment(models.Model):
         return reverse('judgment_detail', args=str(self.id))
 
 
-def media_summary_file_location(instance, filename):
-    return f'media/media_summaries/{instance.judgment.id}/{os.path.basename(filename)}'
-
-
 class JudgmentMediaSummaryFile(models.Model):
-    judgment = models.ForeignKey(Judgment, related_name='media_summaries', on_delete=models.PROTECT)
-    file = models.FileField(upload_to=media_summary_file_location)
+    SAVE_FOLDER = 'media_summary_files'
+
+    document = models.ForeignKey(Judgment, related_name='media_summaries', on_delete=models.PROTECT)
+    file = models.FileField(upload_to=file_location)
     size = models.IntegerField()
-    filename = models.CharField(max_length=255, help_text="Unique attachment filename")
+    filename = models.CharField(max_length=255)
     mime_type = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['judgment__document__title']
+        ordering = ['document', 'filename']
+
+    def __str__(self):
+        return f'{self.filename}'

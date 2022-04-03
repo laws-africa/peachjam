@@ -1,6 +1,6 @@
 from django.db import models
 from django.urls import reverse
-from .core_document_model import CoreDocument
+from peachjam.models import CoreDocument
 
 
 class AuthoringBody(models.Model):
@@ -23,47 +23,49 @@ class DocumentNature(models.Model):
         return self.name
 
 
-class GenericDocument(models.Model):
-    document = models.OneToOneField(CoreDocument, on_delete=models.PROTECT, null=False, blank=False)
+class GenericDocument(CoreDocument):
     authoring_body = models.ForeignKey(AuthoringBody, on_delete=models.PROTECT, null=False, blank=False)
     nature = models.ForeignKey(DocumentNature, on_delete=models.PROTECT, null=False, blank=False)
 
-    class Meta:
-        ordering = ['document__title']
-
     def __str__(self):
-        return self.document.title
+        return self.title
+
+    def save(self, *args, **kwargs):
+        self.doc_type = 'generic_document'
+        return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('generic_document_detail', args=str(self.id))
 
 
-class LegalInstrument(models.Model):
-    document = models.OneToOneField(CoreDocument, on_delete=models.PROTECT, null=False, blank=False)
+class LegalInstrument(CoreDocument):
     authoring_body = models.ForeignKey(AuthoringBody, on_delete=models.PROTECT, null=False, blank=False)
     nature = models.ForeignKey(DocumentNature, on_delete=models.PROTECT, null=False, blank=False)
 
-    class Meta:
-        ordering = ['document__title']
-
     def __str__(self):
-        return self.document.title
+        return self.title
+
+    def save(self, *args, **kwargs):
+        self.doc_type = 'legal_instrument'
+        return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('legal_instrument_detail', args=str(self.id))
 
 
-class Legislation(models.Model):
-    document = models.OneToOneField(CoreDocument, on_delete=models.PROTECT, null=False, blank=False)
+class Legislation(CoreDocument):
     toc_json = models.JSONField(null=True, blank=True)
     metadata_json = models.JSONField(null=False, blank=False)
 
     class Meta:
-        ordering = ['document__title']
         verbose_name_plural = 'Legislation'
 
     def __str__(self):
-        return self.document.title
+        return self.title
+
+    def save(self, *args, **kwargs):
+        self.doc_type = 'legislation'
+        return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('legislation_detail', args=str(self.id))

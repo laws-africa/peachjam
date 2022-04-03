@@ -11,9 +11,9 @@
   <tbody>
     {% for row in rows %}
     <tr>
-      <td><a href="{{ row.get_absolute_url }}">{{ row.document.title }}</a></td>
-      <td>{{ row.document.date }}</td>
-      <td>{{ row.document.jurisdiction }}</td>
+      <td><a href="{{ row.get_absolute_url }}">{{ row.title }}</a></td>
+      <td>{{ row.date }}</td>
+      <td>{{ row.jurisdiction }}</td>
     </tr>
     {% endfor %}
 
