@@ -1,15 +1,13 @@
 {% extends 'africanlii/layouts/base_document_layout.html' %}
 
-{% block title %}Judgment Overview{% endblock %}
+{% block title %}Legislation Overview{% endblock %}
 
 {% block content %}
-
   <section>
 
-    {% with document=judgment %}
+    {% with document=legislation %}
       {% include 'africanlii/_document_detail.html' %}
     {% endwith %}
 
-  </section>
-</div>
+  </section> 
 {% endblock %}

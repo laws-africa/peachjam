@@ -1,21 +1,24 @@
 {% extends 'africanlii/layouts/base_document_layout.html' %}
 {% load i18n %}
 
-{% block title %}Judgment List{% endblock %}
+{% block title %}Legislation List{% endblock %}
 
 {% block content %}
 
   <header>
-    <h1 class="h4">{% trans 'Judgment List' %}</h1>
+    <h1 class="h4">{% trans 'Legislation List' %}</h1>
   </header>
-  {% if judgments %}
 
-    {% with rows=judgments %}
+  {% if legislation %}
+
+    {% with rows=legislation %}
     {% include 'africanlii/_document_table.html'%}
     {% endwith %}
-
+  
   {% else %}
-  <p>{% trans 'No judgments found.' %}</p>
+
+    <p>{% trans 'No legislation found.' %}</p>
+    
   {% endif %}
-</div>
+ 
 {% endblock %}

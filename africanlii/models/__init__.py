@@ -1,2 +1,2 @@
 from .judgment import *
-from .court import *
+from .generic_document import *

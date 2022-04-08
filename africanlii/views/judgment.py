@@ -1,15 +1,13 @@
 from django.views.generic import ListView, DetailView, TemplateView
-
 from africanlii.models import Judgment
 from peachjam.views import AuthedViewMixin
 
 
 class JudgmentListView(AuthedViewMixin, ListView):
+    model = Judgment
     template_name = 'africanlii/judgment_list.html'
     context_object_name = 'judgments'
-
-    def get_queryset(self):
-        return Judgment.objects.all()
+    paginate_by = 20
 
 
 class JudgmentDetailView(AuthedViewMixin, DetailView):

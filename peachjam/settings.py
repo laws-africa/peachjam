@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 
     'countries_plus',
+    'languages_plus',
     'rest_framework',
     'django_elasticsearch_dsl',
     'django_elasticsearch_dsl_drf',

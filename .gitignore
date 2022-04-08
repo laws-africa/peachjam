@@ -1,5 +1,7 @@
 node_modules
 
+media/
+
 peachjam/static/js/app-prod.js
 peachjam/static/js/*.app-prod.js
 
