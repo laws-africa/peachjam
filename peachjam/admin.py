@@ -21,4 +21,3 @@ class CoreDocumentAdmin(admin.ModelAdmin):
         SourceFileInline,
     ]
 
-# admin.site.register(CoreDocument, CoreDocumentAdmin)
