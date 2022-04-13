@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
 from africanlii.models import (
     AuthoringBody,
@@ -29,7 +30,15 @@ admin.site.register(
 class SourceFileInline(admin.TabularInline):
     model = SourceFile
     extra = 0
-    exclude = ("filename", "mimetype")
+    readonly_fields = ("filename", "mimetype", "attachment_link")
+
+    def attachment_link(self, obj):
+        if obj.pk:
+            return format_html(
+                '<a href="{url}">{title}</a>', url=obj.file.path, title=obj.filename
+            )
+
+    attachment_link.short_description = "Attachment"
 
 
 class DocumentAdmin(admin.ModelAdmin):
