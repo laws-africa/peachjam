@@ -39,6 +39,11 @@ export DATABASE_URL=postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE_NAME>
 python manage.py migrate
 ```
 
+- Run the following command to create fixtures for languages and countries.
+```
+python manage.py setup_countries_languages
+```
+
 - Create a superuser for the admin.
 
 ```
@@ -48,6 +53,12 @@ python manage.py createsuperuser
 - You can now run the server
 ```
 python manage.py runserver
+```
+
+## Setup pre-commit
+The project has linting enabled using pre-commit. It runs on the CI pipeline, so you need to enable locally as well. Run the following to allow Precommit to format and fix any linting errors on your code.
+```
+pre-commit install
 ```
 
 ## Adding translation strings

@@ -3,8 +3,8 @@ from django.views.generic import TemplateView
 
 
 class AuthedViewMixin(LoginRequiredMixin, PermissionRequiredMixin):
-    """ View mixin for views that require authentication and permissions (ie. most views).
-    """
+    """View mixin for views that require authentication and permissions (ie. most views)."""
+
     permission_required = []
 
     def get_permission_required(self):
@@ -13,4 +13,4 @@ class AuthedViewMixin(LoginRequiredMixin, PermissionRequiredMixin):
 
 
 class HomePageView(AuthedViewMixin, TemplateView):
-    template_name = 'peachjam/home.html'
+    template_name = "peachjam/home.html"

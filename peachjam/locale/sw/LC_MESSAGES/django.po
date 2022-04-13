@@ -24,4 +24,3 @@ msgstr "Karibu kwa Peach Jam"
 #: templates/peachjam/home.html:10
 msgid "More text that needs translation"
 msgstr "Sentensi nyengine zinazohitaji tafsiri"
-

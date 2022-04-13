@@ -14,11 +14,11 @@
     {% with rows=legislation %}
     {% include 'africanlii/_document_table.html'%}
     {% endwith %}
-  
+
   {% else %}
 
     <p>{% trans 'No legislation found.' %}</p>
-    
+
   {% endif %}
- 
+
 {% endblock %}

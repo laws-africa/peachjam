@@ -7,5 +7,5 @@ class HomeViewTest(TestCase):
         pass
 
     def test_login_page(self):
-        response = self.client.get('/accounts/login/')
-        self.assertTemplateUsed(response, 'account/login.html')
+        response = self.client.get("/accounts/login/")
+        self.assertTemplateUsed(response, "account/login.html")
