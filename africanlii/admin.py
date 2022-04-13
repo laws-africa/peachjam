@@ -29,12 +29,14 @@ admin.site.register(
 class SourceFileInline(admin.TabularInline):
     model = SourceFile
     extra = 0
+    exclude = ("filename", "mimetype")
 
 
 class DocumentAdmin(admin.ModelAdmin):
     inlines = [SourceFileInline]
     list_display = ("title", "date")
     search_fields = ("title", "date")
+    exclude = ("doc_type",)
 
 
 admin.site.register(GenericDocument, DocumentAdmin)

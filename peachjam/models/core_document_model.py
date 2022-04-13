@@ -1,5 +1,6 @@
 import os
 
+import magic
 from countries_plus.models import Country
 from django.core import serializers
 from django.db import models
@@ -96,7 +97,7 @@ class Image(AttachmentAbstractModel):
     document = models.ForeignKey(
         CoreDocument, related_name="images", on_delete=models.PROTECT
     )
-    file = models.ImageField(upload_to=file_location)
+    file = models.ImageField(upload_to=file_location, max_length=1024)
 
 
 class SourceFile(AttachmentAbstractModel):
@@ -105,4 +106,9 @@ class SourceFile(AttachmentAbstractModel):
     document = models.OneToOneField(
         CoreDocument, related_name="source_file", on_delete=models.PROTECT
     )
-    file = models.FileField(upload_to=file_location)
+    file = models.FileField(upload_to=file_location, max_length=1024)
+
+    def save(self, *args, **kwargs):
+        self.filename = self.file.name
+        self.mimetype = magic.from_buffer(self.file.read(), mime=True)
+        return super().save(*args, **kwargs)
