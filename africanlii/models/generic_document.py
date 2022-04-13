@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+
 from peachjam.models import CoreDocument
 
 
@@ -11,8 +12,8 @@ class AuthoringBody(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['name']
-        verbose_name_plural = 'Authoring bodies'
+        ordering = ["name"]
+        verbose_name_plural = "Authoring bodies"
 
 
 class DocumentNature(models.Model):
@@ -24,33 +25,41 @@ class DocumentNature(models.Model):
 
 
 class GenericDocument(CoreDocument):
-    authoring_body = models.ForeignKey(AuthoringBody, on_delete=models.PROTECT, null=False, blank=False)
-    nature = models.ForeignKey(DocumentNature, on_delete=models.PROTECT, null=False, blank=False)
+    authoring_body = models.ForeignKey(
+        AuthoringBody, on_delete=models.PROTECT, null=False, blank=False
+    )
+    nature = models.ForeignKey(
+        DocumentNature, on_delete=models.PROTECT, null=False, blank=False
+    )
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        self.doc_type = 'generic_document'
+        self.doc_type = "generic_document"
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('generic_document_detail', args=str(self.id))
+        return reverse("generic_document_detail", args=str(self.id))
 
 
 class LegalInstrument(CoreDocument):
-    authoring_body = models.ForeignKey(AuthoringBody, on_delete=models.PROTECT, null=False, blank=False)
-    nature = models.ForeignKey(DocumentNature, on_delete=models.PROTECT, null=False, blank=False)
+    authoring_body = models.ForeignKey(
+        AuthoringBody, on_delete=models.PROTECT, null=False, blank=False
+    )
+    nature = models.ForeignKey(
+        DocumentNature, on_delete=models.PROTECT, null=False, blank=False
+    )
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        self.doc_type = 'legal_instrument'
+        self.doc_type = "legal_instrument"
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('legal_instrument_detail', args=str(self.id))
+        return reverse("legal_instrument_detail", args=str(self.id))
 
 
 class Legislation(CoreDocument):
@@ -58,14 +67,14 @@ class Legislation(CoreDocument):
     metadata_json = models.JSONField(null=False, blank=False)
 
     class Meta:
-        verbose_name_plural = 'Legislation'
+        verbose_name_plural = "Legislation"
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        self.doc_type = 'legislation'
+        self.doc_type = "legislation"
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('legislation_detail', args=str(self.id))
+        return reverse("legislation_detail", args=str(self.id))

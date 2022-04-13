@@ -1,5 +1,4 @@
 from django.contrib import admin
-from peachjam.models import SourceFile
 
 from africanlii.models import (
     AuthoringBody,
@@ -13,15 +12,18 @@ from africanlii.models import (
     Legislation,
     MatterType,
 )
+from peachjam.models import SourceFile
 
-admin.site.register([
-    AuthoringBody,
-    Court,
-    DocumentNature,
-    Judge,
-    JudgmentMediaSummaryFile,
-    MatterType,
-])
+admin.site.register(
+    [
+        AuthoringBody,
+        Court,
+        DocumentNature,
+        Judge,
+        JudgmentMediaSummaryFile,
+        MatterType,
+    ]
+)
 
 
 class SourceFileInline(admin.TabularInline):
@@ -31,8 +33,8 @@ class SourceFileInline(admin.TabularInline):
 
 class DocumentAdmin(admin.ModelAdmin):
     inlines = [SourceFileInline]
-    list_display = ('title', 'date')
-    search_fields = ('title', 'date')
+    list_display = ("title", "date")
+    search_fields = ("title", "date")
 
 
 admin.site.register(GenericDocument, DocumentAdmin)

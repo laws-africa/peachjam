@@ -8,7 +8,7 @@
   <header>
     <h1 class="h4">{% trans 'Legal Instrument List' %}</h1>
   </header>
-  
+
   {% if legal_instruments %}
 
     {% with rows=legal_instruments %}
@@ -18,5 +18,5 @@
   {% else %}
     <p>{% trans 'No legal_instruments found.' %}</p>
   {% endif %}
- 
+
 {% endblock %}

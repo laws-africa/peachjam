@@ -1,7 +1,7 @@
-import os
+from countries_plus.models import Country
 from django.db import models
 from django.urls import reverse
-from countries_plus.models import Country
+
 from peachjam.models import CoreDocument, file_location
 
 
@@ -10,11 +10,11 @@ class Court(models.Model):
     country = models.ForeignKey(Country, on_delete=models.PROTECT)
 
     class Meta:
-        ordering = ['name']
-        unique_together = ['name', 'country']
+        ordering = ["name"]
+        unique_together = ["name", "country"]
 
     def __str__(self):
-        return f'{self.name}'
+        return f"{self.name}"
 
 
 class Judge(models.Model):
@@ -25,7 +25,7 @@ class Judge(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
 
 class MatterType(models.Model):
@@ -36,14 +36,16 @@ class MatterType(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
 
 class Judgment(CoreDocument):
     case_number_numeric = models.CharField(max_length=1024, null=True, blank=True)
     case_number_year = models.IntegerField(null=True, blank=True)
     case_number_string = models.CharField(max_length=1024, null=True, blank=True)
-    matter_type = models.ForeignKey(MatterType, on_delete=models.PROTECT, null=True, blank=True)
+    matter_type = models.ForeignKey(
+        MatterType, on_delete=models.PROTECT, null=True, blank=True
+    )
     court = models.ForeignKey(Court, on_delete=models.PROTECT, null=True, blank=True)
     judges = models.ManyToManyField(Judge, blank=True)
     headnote_holding = models.TextField(blank=True)
@@ -51,27 +53,31 @@ class Judgment(CoreDocument):
     flynote = models.TextField(blank=True)
 
     class Meta:
-        ordering = ['title']
+        ordering = ["title"]
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
         self.case_number_string = self.get_case_number_string()
-        self.doc_type = 'judgment'
+        self.doc_type = "judgment"
         return super().save(*args, **kwargs)
 
     def get_case_number_string(self):
-        return f'{self.matter_type} {self.case_number_numeric} of {self.case_number_year}'
+        return (
+            f"{self.matter_type} {self.case_number_numeric} of {self.case_number_year}"
+        )
 
     def get_absolute_url(self):
-        return reverse('judgment_detail', args=str(self.id))
+        return reverse("judgment_detail", args=str(self.id))
 
 
 class JudgmentMediaSummaryFile(models.Model):
-    SAVE_FOLDER = 'media_summary_files'
+    SAVE_FOLDER = "media_summary_files"
 
-    document = models.ForeignKey(Judgment, related_name='media_summaries', on_delete=models.PROTECT)
+    document = models.ForeignKey(
+        Judgment, related_name="media_summaries", on_delete=models.PROTECT
+    )
     file = models.FileField(upload_to=file_location)
     size = models.IntegerField()
     filename = models.CharField(max_length=255)
@@ -80,7 +86,7 @@ class JudgmentMediaSummaryFile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['document', 'filename']
+        ordering = ["document", "filename"]
 
     def __str__(self):
-        return f'{self.filename}'
+        return f"{self.filename}"
