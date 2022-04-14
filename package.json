@@ -38,7 +38,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "dom-anchor-text-position": "^5.0.0",
     "dom-anchor-text-quote": "^4.0.2",
     "lodash": "^4.17.21",
