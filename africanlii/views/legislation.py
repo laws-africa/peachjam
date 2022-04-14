@@ -14,4 +14,4 @@ class LegislationListView(AuthedViewMixin, ListView):
 class LegislationDetailView(AuthedViewMixin, DetailView):
     model = Legislation
     template_name = "africanlii/legislation_detail.html"
-    context_object_name = "legislation"
+    context_object_name = "document"

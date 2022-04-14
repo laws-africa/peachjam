@@ -1,7 +1,11 @@
 {% extends 'peachjam/layouts/main.html' %}
 
+{% block title %}{{ document.title }}{% endblock %}
+
 {% block page-content %}
-  <main class="m-5">
-    {% block content %}{% endblock%}
+  <main>
+    <div class="container-fluid py-3">
+      {% block content %}{% endblock%}
+    </div>
   </main>
 {% endblock %}

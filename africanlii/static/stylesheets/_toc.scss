@@ -1,0 +1,12 @@
+.toc {
+  position: sticky;
+  top: 0px;
+  padding-bottom: 1em;
+  padding-top: 1em;
+  padding-right: 1em;
+
+  border-right: 1px solid $gray-200;
+
+  max-height: 100vh;
+  overflow-y: auto;
+}
