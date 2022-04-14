@@ -1,14 +1,13 @@
 {% extends 'africanlii/layouts/base_document_layout.html' %}
 
-{% block title %}Generic Document Overview{% endblock %}
-
 {% block content %}
+  <div data-component="PdfRenderer" data-pdf="{{ document.source_file.file.url }}" class="pdf-renderer">
+    <div class="pdf-renderer__previews">
+      <div class="pdf-renderer__previews__inner"></div>
+    </div>
 
-  <section>
-
-    {% with document=generic_document %}
-      {% include 'africanlii/_document_detail.html' %}
-    {% endwith %}
-
-  </section>
+    <div class="pdf-renderer__right">
+      <div class="pdf-renderer__content"></div>
+    </div>
+  </div>
 {% endblock %}

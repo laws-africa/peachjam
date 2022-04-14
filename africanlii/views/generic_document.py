@@ -14,4 +14,4 @@ class GenericDocumentListView(AuthedViewMixin, ListView):
 class GenericDocumentDetailView(AuthedViewMixin, DetailView):
     model = GenericDocument
     template_name = "africanlii/generic_document_detail.html"
-    context_object_name = "generic_document"
+    context_object_name = "document"

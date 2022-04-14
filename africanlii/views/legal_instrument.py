@@ -14,4 +14,4 @@ class LegalInstrumentListView(AuthedViewMixin, ListView):
 class LegalInstrumentDetailView(AuthedViewMixin, DetailView):
     model = LegalInstrument
     template_name = "africanlii/legal_instrument_detail.html"
-    context_object_name = "legal_instrument"
+    context_object_name = "document"

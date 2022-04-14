@@ -1,24 +1,20 @@
 {% extends 'africanlii/layouts/base_document_layout.html' %}
 {% load peachjam %}
 
-{% block content %}
-  <h1 class="m-0">{{ document.title }}</h1>
-
-  <div class="card my-3">
-    <div class="card-body">
-      <div class="row">
-        <div class="col-sm-6">
-          <dl class="row mb-0">
-            <dt class="col-4">Language</dt>
-            <dd class="col-8">{{ document.language.name }}</dd>
-            <dt class="col-4">Date</dt>
-            <dd class="col-8">{{ document.date }}</dd>
-          </dl>
-        </div>
-      </div>
+{% block document-metadata-content %}
+  <div class="row">
+    <div class="col-sm-6">
+      <dl class="row mb-0">
+        <dt class="col-4">Language</dt>
+        <dd class="col-8">{{ document.language.name }}</dd>
+        <dt class="col-4">Date</dt>
+        <dd class="col-8">{{ document.date }}</dd>
+      </dl>
     </div>
   </div>
+{% endblock %}
 
+{% block content %}
   <div class="row">
     <div class="col-lg-3 d-none d-lg-block">
       <aside class="toc">
@@ -47,6 +43,7 @@
         <la-gutter akoma-ntoso="#akn">
 
         </la-gutter>
+      </div>
     </div>
   </div>
 {% endblock %}
