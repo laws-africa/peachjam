@@ -1,4 +1,3 @@
-
 <table class="table">
     <thead>
     <tr>
@@ -9,11 +8,11 @@
   </thead>
 
   <tbody>
-    {% for row in rows %}
+    {% for document in documents %}
     <tr>
-      <td><a href="{{ row.get_absolute_url }}">{{ row.title }}</a></td>
-      <td>{{ row.date }}</td>
-      <td>{{ row.jurisdiction }}</td>
+      <td><a href="{{ document.get_absolute_url }}">{{ document.title }}</a></td>
+      <td>{{ document.date }}</td>
+      <td>{{ document.jurisdiction }}</td>
     </tr>
     {% endfor %}
 

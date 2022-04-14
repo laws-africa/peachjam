@@ -7,7 +7,7 @@ from peachjam.views import AuthedViewMixin
 class LegalInstrumentListView(AuthedViewMixin, ListView):
     model = LegalInstrument
     template_name = "africanlii/legal_instrument_list.html"
-    context_object_name = "legal_instruments"
+    context_object_name = "documents"
     paginate_by = 20
 
 

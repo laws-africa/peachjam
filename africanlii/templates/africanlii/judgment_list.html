@@ -1,21 +1,8 @@
-{% extends 'africanlii/layouts/base_document_layout.html' %}
+{% extends 'africanlii/layouts/document_list.html' %}
 {% load i18n %}
 
 {% block title %}Judgment List{% endblock %}
 
-{% block content %}
-
-  <header>
-    <h1 class="h4">{% trans 'Judgment List' %}</h1>
-  </header>
-  {% if judgments %}
-
-    {% with rows=judgments %}
-    {% include 'africanlii/_document_table.html'%}
-    {% endwith %}
-
-  {% else %}
-  <p>{% trans 'No judgments found.' %}</p>
-  {% endif %}
-</div>
+{% block page-title %}
+  <h1 class="m-0">{% trans 'Judgment List' %}</h1>
 {% endblock %}

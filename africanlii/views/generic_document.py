@@ -6,7 +6,7 @@ from peachjam.views import AuthedViewMixin
 
 class GenericDocumentListView(AuthedViewMixin, ListView):
     template_name = "africanlii/generic_document_list.html"
-    context_object_name = "generic_documents"
+    context_object_name = "documents"
     paginate_by = 20
     model = GenericDocument
 
