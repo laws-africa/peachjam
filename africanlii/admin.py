@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.http.response import FileResponse
+from django.shortcuts import get_object_or_404
+from django.urls import path, reverse
 from django.utils.html import format_html
 
 from africanlii.models import (
@@ -35,10 +38,15 @@ class SourceFileInline(admin.TabularInline):
     def attachment_link(self, obj):
         if obj.pk:
             return format_html(
-                '<a href="{url}">{title}</a>', url=obj.file.path, title=obj.filename
+                '<a href="{url}">{title}</a>',
+                url=reverse(
+                    "admin:peachjam_source_file",
+                    kwargs={
+                        "pk": obj.pk,
+                    },
+                ),
+                title=obj.filename,
             )
-
-    attachment_link.short_description = "Attachment"
 
 
 class DocumentAdmin(admin.ModelAdmin):
@@ -46,6 +54,19 @@ class DocumentAdmin(admin.ModelAdmin):
     list_display = ("title", "date")
     search_fields = ("title", "date")
     exclude = ("doc_type",)
+
+    def get_urls(self):
+        return [
+            path(
+                "source_files/<int:pk>",
+                self.admin_site.admin_view(self.download_sourcefile),
+                name="peachjam_source_file",
+            )
+        ] + super().get_urls()
+
+    def download_sourcefile(self, request, pk):
+        source_file = get_object_or_404(SourceFile.objects, pk=pk)
+        return FileResponse(source_file.file)
 
 
 admin.site.register(GenericDocument, DocumentAdmin)
