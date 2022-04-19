@@ -1,13 +1,1 @@
-{% extends 'africanlii/layouts/base_document_layout.html' %}
-
-{% block title %}Legal Instrument Overview{% endblock %}
-
-{% block content %}
-  <section>
-
-    {% with document=legal_instrument %}
-      {% include 'africanlii/_document_detail.html' %}
-    {% endwith %}
-
-  </section>
-{% endblock %}
+{% extends 'africanlii/layouts/document_detail.html' %}

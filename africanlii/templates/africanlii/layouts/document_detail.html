@@ -1,0 +1,28 @@
+{% extends 'peachjam/layouts/main.html' %}
+
+{% block title %}{{ document.title }}{% endblock %}
+
+{% block page-content %}
+  <main class="container-fluid py-3">
+    {% block document-title %}
+      <h1 class="m-0">{{ document.title }}</h1>
+    {% endblock %}
+
+    {% block document-metadata %}
+      <div class="card my-3">
+        <div class="card-body">
+          {% block document-metadata-content %}
+            <dl class="row mb-0">
+              {% for field, value in document.get_all_values.items %}
+              <dt class="col-4">{{ field | title }}</dt>
+              <dd class="col-8">{{ value }}</dd>
+              {% endfor %}
+            </dl>
+          {% endblock %}
+        </div>
+      </div>
+    {% endblock %}
+
+    {% block content %}{% endblock%}
+  </main>
+{% endblock %}

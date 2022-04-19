@@ -29,7 +29,7 @@ class PdfRenderer {
     this.pdfContentMarks = [];
 
     this.setupPdfAndPreviewPanels().then(() => {
-      this.decoratePdf();
+      // this.decoratePdf();
       const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-renderer__content__page'));
       const previewPanels = Array.from(root.querySelectorAll('.preview-panel'));
       for (const previewPanel of previewPanels) {

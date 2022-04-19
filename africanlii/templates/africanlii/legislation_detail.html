@@ -1,13 +1,49 @@
-{% extends 'africanlii/layouts/base_document_layout.html' %}
+{% extends 'africanlii/layouts/document_detail.html' %}
+{% load peachjam %}
 
-{% block title %}Legislation Overview{% endblock %}
+{% block document-metadata-content %}
+  <div class="row">
+    <div class="col-sm-6">
+      <dl class="row mb-0">
+        <dt class="col-4">Language</dt>
+        <dd class="col-8">{{ document.language.name }}</dd>
+        <dt class="col-4">Date</dt>
+        <dd class="col-8">{{ document.date }}</dd>
+      </dl>
+    </div>
+  </div>
+{% endblock %}
 
 {% block content %}
-  <section>
+  <div class="row">
+    <div class="col-lg-3 d-none d-lg-block">
+      <aside class="toc">
+        <la-table-of-contents-controller
+          items="{{ document.toc_json|jsonify }}"
+          expand-all-btn-classes="btn btn-secondary btn-sm"
+          collapse-all-btn-classes="btn btn-secondary btn-sm"
+          title-filter-clear-btn-classes="btn btn-secondary btn-sm"
+          search-filter-input-classes="form-control"
+        ></la-table-of-contents-controller>
+      </aside>
+    </div>
 
-    {% with document=legislation %}
-      {% include 'africanlii/_document_detail.html' %}
-    {% endwith %}
+    <div class="col-lg-9">
+      <div class="la-akoma-ntoso-with-gutter">
+        <la-akoma-ntoso
+          id="akn"
+          expression-frbr-uri="{{ document.expression_frbr_uri }}"
+          class="flash-target"
+        >
+          <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
+          <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
 
-  </section>
+          {{ document.content_html|safe }}
+        </la-akoma-ntoso>
+        <la-gutter akoma-ntoso="#akn">
+
+        </la-gutter>
+      </div>
+    </div>
+  </div>
 {% endblock %}

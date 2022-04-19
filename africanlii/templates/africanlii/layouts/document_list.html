@@ -1,0 +1,20 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n %}
+
+{% block title %}{{ document.title }}{% endblock %}
+
+{% block page-content %}
+  <main class="container-fluid py-3">
+    {% block page-title %}
+      <h1 class="m-0">{% trans 'Documents' %}</h1>
+    {% endblock %}
+
+    {% block content %}
+      {% if documents %}
+        {% include 'africanlii/_document_table.html'%}
+      {% else %}
+        <p>{% trans 'No documents found.' %}</p>
+      {% endif %}
+    {% endblock%}
+  </main>
+{% endblock %}
