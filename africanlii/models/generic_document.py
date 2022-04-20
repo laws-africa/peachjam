@@ -40,7 +40,7 @@ class GenericDocument(CoreDocument):
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("generic_document_detail", args=str(self.id))
+        return reverse("generic_document_detail", args=[str(self.id)])
 
 
 class LegalInstrument(CoreDocument):
@@ -59,7 +59,7 @@ class LegalInstrument(CoreDocument):
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("legal_instrument_detail", args=str(self.id))
+        return reverse("legal_instrument_detail", args=[str(self.id)])
 
 
 class Legislation(CoreDocument):
@@ -77,4 +77,4 @@ class Legislation(CoreDocument):
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("legislation_detail", args=str(self.id))
+        return reverse("legislation_detail", args=[str(self.id)])

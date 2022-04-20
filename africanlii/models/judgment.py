@@ -69,7 +69,7 @@ class Judgment(CoreDocument):
         )
 
     def get_absolute_url(self):
-        return reverse("judgment_detail", args=str(self.id))
+        return reverse("judgment_detail", args=[str(self.id)])
 
 
 class JudgmentMediaSummaryFile(models.Model):

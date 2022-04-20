@@ -5,6 +5,7 @@ from countries_plus.models import Country
 from django.core import serializers
 from django.db import models
 from languages_plus.models import Language
+# from cobalt import FrbrUri
 
 
 class Locality(models.Model):
@@ -51,9 +52,9 @@ class CoreDocument(models.Model):
         Locality, on_delete=models.PROTECT, null=True, blank=True
     )
     expression_frbr_uri = models.CharField(
-        max_length=1024, null=False, blank=False, unique=True
+        max_length=1024, null=True, blank=True, unique=True
     )
-    work_frbr_uri = models.CharField(max_length=1024, null=True, blank=True)
+    work_frbr_uri = models.CharField(max_length=1024, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -78,6 +79,14 @@ def file_location(instance, filename):
     folder = instance.SAVE_FOLDER
     filename = os.path.basename(filename)
     return f"media/{doc_type}/{pk}/{folder}/{filename}"
+
+def generate_frbr_uri(self):
+    jurisdiction = self.jurisdiction.name
+    doc_type = self.doc_type
+    date = self.date
+    return f"/{jurisdiction}/{doc_type}/{date}/self.pk"
+
+
 
 
 class AttachmentAbstractModel(models.Model):
