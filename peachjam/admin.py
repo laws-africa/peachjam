@@ -37,6 +37,7 @@ class DocumentAdmin(admin.ModelAdmin):
     inlines = [SourceFileInline]
     list_display = ("title", "date")
     search_fields = ("title", "date")
+    readonly_fields = ("expression_frbr_uri",)
     exclude = ("doc_type",)
 
     def get_urls(self):

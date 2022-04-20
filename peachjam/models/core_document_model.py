@@ -1,11 +1,14 @@
 import os
 
 import magic
+from cobalt import FrbrUri
+from cobalt.akn import datestring
 from countries_plus.models import Country
 from django.core import serializers
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
 from languages_plus.models import Language
-# from cobalt import FrbrUri
 
 
 class Locality(models.Model):
@@ -52,7 +55,7 @@ class CoreDocument(models.Model):
         Locality, on_delete=models.PROTECT, null=True, blank=True
     )
     expression_frbr_uri = models.CharField(
-        max_length=1024, null=True, blank=True, unique=True
+        max_length=1024, null=False, blank=False, unique=True
     )
     work_frbr_uri = models.CharField(max_length=1024, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -70,6 +73,25 @@ class CoreDocument(models.Model):
     def get_all_values(self):
         return serializers.serialize("python", [self])[0]["fields"]
 
+    def get_absolute_url(self):
+        return reverse(f"{self.doc_type}_detail", kwargs={"pk": self.pk})
+
+    def clean(self):
+        try:
+            FrbrUri.parse(self.work_frbr_uri)
+        except ValueError:
+            raise ValidationError({"work_frbr_uri": "Invalid FRBR URI."})
+
+    def generate_expression_frbr_uri(self):
+        frbr_uri = FrbrUri.parse(self.work_frbr_uri)
+        frbr_uri.expression_date = f"@{datestring(self.date)}"
+        frbr_uri.language = self.language.iso_639_3
+        return frbr_uri.expression_uri()
+
+    def save(self, *args, **kwargs):
+        self.expression_frbr_uri = self.generate_expression_frbr_uri()
+        return super().save(*args, **kwargs)
+
 
 def file_location(instance, filename):
     if not instance.document.pk:
@@ -79,14 +101,6 @@ def file_location(instance, filename):
     folder = instance.SAVE_FOLDER
     filename = os.path.basename(filename)
     return f"media/{doc_type}/{pk}/{folder}/{filename}"
-
-def generate_frbr_uri(self):
-    jurisdiction = self.jurisdiction.name
-    doc_type = self.doc_type
-    date = self.date
-    return f"/{jurisdiction}/{doc_type}/{date}/self.pk"
-
-
 
 
 class AttachmentAbstractModel(models.Model):

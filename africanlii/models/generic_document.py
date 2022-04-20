@@ -1,5 +1,4 @@
 from django.db import models
-from django.urls import reverse
 
 from peachjam.models import CoreDocument
 
@@ -39,9 +38,6 @@ class GenericDocument(CoreDocument):
         self.doc_type = "generic_document"
         return super().save(*args, **kwargs)
 
-    def get_absolute_url(self):
-        return reverse("generic_document_detail", args=[str(self.id)])
-
 
 class LegalInstrument(CoreDocument):
     authoring_body = models.ForeignKey(
@@ -58,9 +54,6 @@ class LegalInstrument(CoreDocument):
         self.doc_type = "legal_instrument"
         return super().save(*args, **kwargs)
 
-    def get_absolute_url(self):
-        return reverse("legal_instrument_detail", args=[str(self.id)])
-
 
 class Legislation(CoreDocument):
     toc_json = models.JSONField(null=True, blank=True)
@@ -75,6 +68,3 @@ class Legislation(CoreDocument):
     def save(self, *args, **kwargs):
         self.doc_type = "legislation"
         return super().save(*args, **kwargs)
-
-    def get_absolute_url(self):
-        return reverse("legislation_detail", args=[str(self.id)])
