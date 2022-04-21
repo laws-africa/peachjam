@@ -1,6 +1,5 @@
 from countries_plus.models import Country
 from django.db import models
-from django.urls import reverse
 
 from peachjam.models import CoreDocument, file_location
 
@@ -67,9 +66,6 @@ class Judgment(CoreDocument):
         return (
             f"{self.matter_type} {self.case_number_numeric} of {self.case_number_year}"
         )
-
-    def get_absolute_url(self):
-        return reverse("judgment_detail", args=str(self.id))
 
 
 class JudgmentMediaSummaryFile(models.Model):
