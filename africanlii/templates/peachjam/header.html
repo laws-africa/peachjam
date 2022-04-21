@@ -61,13 +61,13 @@
             <a class="nav-link {% ifequal request.path '/judgments'%} active {% endifequal%}" href="{% url 'judgment_list' %}">Judgments</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/generic_documents'%} active {% endifequal%}" href="{% url 'generic_document_list' %}">Generic Documents</a>
+            <a class="nav-link {% ifequal request.path '/generic_documents'%} active {% endifequal%}" href="{% url 'generic_document_list' %}">AU Documents</a>
           </li>
           <li class="nav-item">
             <a class="nav-link {% ifequal request.path '/legal_instruments'%} active {% endifequal%}" href="{% url 'legal_instrument_list' %}">Legal Instruments</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/legislation'%} active {% endifequal%}" href="{% url 'legislation_list' %}">Legislation</a>
+            <a class="nav-link {% ifequal request.path '/legislation'%} active {% endifequal%}" href="{% url 'legislation_list' %}">Treaties and Protocols</a>
           </li>
           <li class="nav-item">
             <a class="nav-link {% ifequal request.path '/search'%} active {% endifequal%}" href="{% url 'search:search' %}">Search</a>
