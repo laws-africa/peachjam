@@ -41,6 +41,18 @@
           {{ document.content_html|safe }}
         </la-akoma-ntoso>
         <la-gutter akoma-ntoso="#akn">
+          <!-- hack for demo -->
+          {% if document.pk == 4 %}
+            <la-gutter-item anchor="#preamble__p_5">
+              <div class="card">
+                <h6 class="card-header p-2">Related Decision</h6>
+                <div class="card-body p-2">
+                  <a href="https://peachjam.staging.laws.africa/generic_documents/7" target="_blank">Decision A/DEC. 8/5/82</a>
+                  amends the ECOWAS Treaty.
+                </div>
+              </div>
+            </la-gutter-item>
+          {% endif %}
 
         </la-gutter>
       </div>
