@@ -41,6 +41,11 @@ urlpatterns = [
         views.GenericDocumentDetailView.as_view(),
         name="generic_document_detail",
     ),
+    path(
+        "documents/<int:pk>/source.pdf",
+        views.DocumentSourceView.as_view(),
+        name="document_source",
+    ),
 ]
 
 if settings.DEBUG:
