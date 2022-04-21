@@ -1,4 +1,5 @@
 from django.contrib import admin
+from import_export import resources
 
 from africanlii.models import (
     AuthoringBody,
@@ -24,6 +25,11 @@ admin.site.register(
         MatterType,
     ]
 )
+
+
+class DocumentResource(resources.ModelResource):
+    class Meta:
+        model = GenericDocument
 
 
 admin.site.register(GenericDocument, DocumentAdmin)

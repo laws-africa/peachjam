@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.staticfiles",
     "sass_processor",
+    "import_export",
 ]
 
 MIDDLEWARE = [
@@ -278,3 +279,5 @@ if not DEBUG:
     AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "")
     AWS_SIGNATURE_VERSION = "s3v4"
     AWS_QUERYSTRING_AUTH = True
+
+IMPORT_EXPORT_USE_TRANSACTIONS = True
