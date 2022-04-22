@@ -8,6 +8,7 @@ from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
+from django.utils.functional import cached_property
 from languages_plus.models import Language
 
 
@@ -97,6 +98,20 @@ class CoreDocument(models.Model):
         if not self.expression_frbr_uri:
             self.expression_frbr_uri = self.generate_expression_frbr_uri()
         return super().save(*args, **kwargs)
+
+    @cached_property
+    def relationships_as_subject(self):
+        """Returns a list of relationships where this work is the subject."""
+        from peachjam.models import Relationship
+
+        return Relationship.for_subject_document(self).load_object_documents()
+
+    @cached_property
+    def relationships_as_object(self):
+        """Returns a list of relationships where this work is the subject."""
+        from peachjam.models import Relationship
+
+        return Relationship.for_object_document(self).load_subject_documents()
 
 
 def file_location(instance, filename):

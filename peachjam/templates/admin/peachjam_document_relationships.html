@@ -1,0 +1,50 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ module_name }}</a>
+  &rsaquo; <a href="{% url opts|admin_urlname:'change' object.pk|admin_urlquote %}">{{ object|truncatewords:"18" }}</a>
+  &rsaquo; {% translate 'History' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <div class="module">
+    <form method="post">
+      {% csrf_token %}
+      <table>
+        {% for rel in relationships %}
+          <tr>
+            <td>This document...</td>
+            <td>{{ rel.predicate }}</td>
+            <td>{{ rel.object_work_frbr_uri }}</td>
+            <td>
+              <button type="submit" formaction="{% url opts|admin_urlname:'delete_relationship' object_id=object.pk|admin_urlquote rel_id=rel.pk %}">Delete</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    </form>
+
+    {{ form.non_field_errors }}
+
+    <form method="post">
+      {% csrf_token %}
+      <table>
+        <tr>
+          <td>This document...</td>
+          <td>{{ form.predicate }}</td>
+          <td>{{ form.object_work_frbr_uri }}</td>
+          <td>
+            <button type="submit" formaction="{% url opts|admin_urlname:'relationships' object.pk|admin_urlquote %}">Add</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>
+{% endblock %}
