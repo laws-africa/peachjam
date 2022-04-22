@@ -14,6 +14,7 @@ from languages_plus.models import Language
 class Locality(models.Model):
     name = models.CharField(max_length=255, null=False)
     jurisdiction = models.ForeignKey(Country, on_delete=models.PROTECT)
+    code = models.CharField(max_length=20, null=False)
 
     class Meta:
         verbose_name_plural = "localities"
