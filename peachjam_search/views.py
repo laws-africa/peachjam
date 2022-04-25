@@ -19,8 +19,8 @@ class SearchView(AuthedViewMixin, TemplateView):
 
 
 class DocumentSearchViewSet(BaseDocumentViewSet):
-    """ API endpoint that allows document to be searched.
-    """
+    """API endpoint that allows document to be searched."""
+
     document = SearchableDocument
     serializer_class = SearchableDocumentSerializer
     filter_backends = [
@@ -41,7 +41,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "matter_type": "matter_type",
         "nature": "nature",
         "language": "language",
-        "year": "year"
+        "year": "year",
     }
 
     search_fields = (
@@ -52,7 +52,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "citation",
         "matter_type",
         "content_html",
-        "judges"
+        "judges",
     )
 
     faceted_search_fields = {
@@ -76,9 +76,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             "facet": DateHistogramFacet,
             "options": {"interval": "year"},
         },
-        "year": {
-            "field": "year"
-        },
+        "year": {"field": "year"},
         "nature": {
             "field": "nature",
         },

@@ -25,5 +25,5 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "court",
             "headnote_holding",
             "flynote",
-            "judges"
+            "judges",
         ]
