@@ -80,60 +80,98 @@
               </li>
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter author</strong>
+                  <strong>Filter document type</strong>
                   <a
-                    v-if="filters.author.length"
+                    v-if="filters.doc_type.length"
                     href="#"
-                    @click.prevent="() => filters.author = []"
+                    @click.prevent="() => filters.doc_type = []"
                   >
                     Clear
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_author"
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_author.author.buckets)"
-                  :selection="filters.author"
+                  v-if="searchInfo.facets && searchInfo.facets._filter_doc_type"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_doc_type.doc_type.buckets)"
+                  :selection="filters.doc_type"
                   :loading="loading"
-                  @changed="(x) => filters.author = x"
+                  @changed="(x) => filters.doc_type = x"
                 />
               </li>
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter country</strong>
+                  <strong>Filter author</strong>
                   <a
-                    v-if="filters.country.length"
+                    v-if="filters.authoring_body.length"
                     href="#"
-                    @click.prevent="() => filters.country = []"
+                    @click.prevent="() => filters.authoring_body = []"
                   >
                     Clear
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_country"
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_country.country.buckets)"
-                  :selection="filters.country"
+                  v-if="searchInfo.facets && searchInfo.facets._filter_authoring_body"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_authoring_body.authoring_body.buckets)"
+                  :selection="filters.authoring_body"
                   :loading="loading"
-                  @changed="(x) => filters.country = x"
+                  @changed="(x) => filters.authoring_body = x"
+                />
+              </li>
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between mb-2">
+                  <strong>Filter jurisdiction</strong>
+                  <a
+                    v-if="filters.jurisdiction.length"
+                    href="#"
+                    @click.prevent="() => filters.jurisdiction = []"
+                  >
+                    Clear
+                  </a>
+                </div>
+                <TermFacet
+                  v-if="searchInfo.facets && searchInfo.facets._filter_jurisdiction"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_jurisdiction.jurisdiction.buckets)"
+                  :selection="filters.jurisdiction"
+                  :loading="loading"
+                  @changed="(x) => filters.jurisdiction = x"
+                />
+              </li>
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between mb-2">
+                  <strong>Filter locality</strong>
+                  <a
+                    v-if="filters.locality.length"
+                    href="#"
+                    @click.prevent="() => filters.locality = []"
+                  >
+                    Clear
+                  </a>
+                </div>
+                <TermFacet
+                  v-if="searchInfo.facets && searchInfo.facets._filter_locality"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_locality.locality.buckets)"
+                  :selection="filters.locality"
+                  :loading="loading"
+                  @changed="(x) => filters.locality = x"
                 />
               </li>
 
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter date</strong>
+                  <strong>Filter year</strong>
                   <a
-                    v-if="filters.date.length"
+                    v-if="filters.year.length"
                     href="#"
-                    @click.prevent="() => filters.date = []"
+                    @click.prevent="() => filters.year = []"
                   >
                     Clear
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_date"
-                  :buckets="sortDateBuckets(searchInfo.facets._filter_date.date.buckets)"
-                  :selection="filters.date"
+                  v-if="searchInfo.facets && searchInfo.facets._filter_year"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_year.year.buckets)"
+                  :selection="filters.year"
                   :loading="loading"
-                  @changed="(x) => filters.date = x"
+                  @changed="(x) => filters.year = x"
                 />
               </li>
 
@@ -156,6 +194,44 @@
                   @changed="(x) => filters.matter_type = x"
                 />
               </li>
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between mb-2">
+                  <strong>Filter document nature</strong>
+                  <a
+                    v-if="filters.nature.length"
+                    href="#"
+                    @click.prevent="() => filters.nature = []"
+                  >
+                    Clear
+                  </a>
+                </div>
+                <TermFacet
+                  v-if="searchInfo.facets && searchInfo.facets._filter_nature"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_nature.nature.buckets)"
+                  :selection="filters.nature"
+                  :loading="loading"
+                  @changed="(x) => filters.nature = x"
+                />
+              </li>
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between mb-2">
+                  <strong>Filter language</strong>
+                  <a
+                    v-if="filters.language.length"
+                    href="#"
+                    @click.prevent="() => filters.language = []"
+                  >
+                    Clear
+                  </a>
+                </div>
+                <TermFacet
+                  v-if="searchInfo.facets && searchInfo.facets._filter_language"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_language.language.buckets)"
+                  :selection="filters.language"
+                  :loading="loading"
+                  @changed="(x) => filters.language = x"
+                />
+              </li>
             </ul>
           </div>
         </div>
@@ -167,21 +243,6 @@
                 <div>
                   {{ searchInfo.count }}  documents found.
                 </div>
-
-                <!--                <div>-->
-                <!--                  Sort by-->
-                <!--                  <select v-model="ordering">-->
-                <!--                    <option value="-score">-->
-                <!--                      Revelance-->
-                <!--                    </option>-->
-                <!--                    <option value="date">-->
-                <!--                      Date (oldest first)-->
-                <!--                    </option>-->
-                <!--                    <option value="-date">-->
-                <!--                      Date (newest first)-->
-                <!--                    </option>-->
-                <!--                  </select>-->
-                <!--                </div>-->
               </div>
 
               <ul class="list-unstyled">
@@ -228,10 +289,15 @@ export default {
       q: '',
       drawerOpen: false,
       filters: {
-        author: [],
-        country: [],
+        doc_type: [],
+        authoring_body: [],
+        jurisdiction: [],
+        locality: [],
+        year: [],
         date: [],
-        matter_type: []
+        matter_type: [],
+        nature: [],
+        language: []
       }
     };
   },
@@ -281,7 +347,7 @@ export default {
       }
       return buckets.map(bucket => ({
         ...bucket,
-        key: moment(bucket).format('YYYY-MM-DD')
+        key: moment(bucket.key).format('YYYY')
       }));
     },
     sortGenericBuckets (items, reverse = false) {
@@ -372,7 +438,7 @@ export default {
             params.append('facet', facet);
           }
 
-          return `${window.location.origin}/search/api/judgments?${params.toString()}`;
+          return `${window.location.origin}/search/api/documents/?${params.toString()}`;
         };
 
         this.loadingCount = this.loadingCount + 1;

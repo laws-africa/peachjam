@@ -3,12 +3,19 @@
     <h5 class="mb-0">
       {{ item.title }}
     </h5>
-    <div>{{ item.matter_type }}</div>
+    <div>
+      {{ item.matter_type }}
+    </div>
     <div>
       {{ item.citation }}
     </div>
-    <div><strong>{{ item.author }}</strong> - <span class="text-muted">{{ item.date }}</span></div>
-    <div>{{ item.country }}</div>
+    <div>
+      <span v-if="item.authoring_body"><strong>{{ item.authoring_body }}</strong> - </span>
+      <span class="text-muted">{{ item.date }}</span>
+    </div>
+    <div>
+      {{ item.jurisdiction }}
+    </div>
   </li>
 </template>
 
