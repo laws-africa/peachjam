@@ -1,9 +1,9 @@
 from django.views.generic import TemplateView
 from django_elasticsearch_dsl_drf.filter_backends import (
+    CompoundSearchFilterBackend,
     DefaultOrderingFilterBackend,
     FacetedFilterSearchFilterBackend,
     OrderingFilterBackend,
-    SearchFilterBackend,
     SourceBackend,
 )
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
@@ -26,7 +26,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     filter_backends = [
         OrderingFilterBackend,
         DefaultOrderingFilterBackend,
-        SearchFilterBackend,
+        CompoundSearchFilterBackend,
         FacetedFilterSearchFilterBackend,
         SourceBackend,
     ]
