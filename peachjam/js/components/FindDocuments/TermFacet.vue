@@ -8,24 +8,24 @@
         v-if="bucket.key"
         class="mb-0 d-flex"
       >
-        <span class="flex-grow-1">
+        <div class="flex-grow-1">
           <input
             v-model="items"
             type="checkbox"
             :value="bucket.key"
           >
           {{ bucket.key }}
-        </span>
-        <span>
+        </div>
+        <div>
           <span
             v-if="loading"
             class="circle-loader count-loader"
           />
           <span
             v-else
-            class="badge badge-light"
+            class="badge bg-light text-dark"
           >{{ bucket.doc_count }}</span>
-        </span>
+        </div>
       </label>
     </li>
   </ul>
