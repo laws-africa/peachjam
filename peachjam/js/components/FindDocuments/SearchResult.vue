@@ -16,6 +16,9 @@
     <div>
       {{ item.jurisdiction }}
     </div>
+    <div>
+      <span class="snippet" v-html="highlights(item)"/>
+    </div>
   </li>
 </template>
 
@@ -29,6 +32,24 @@ export default {
         return {};
       }
     }
+  },
+  methods: {
+    highlights (item) {
+      if (item.highlight.content) {
+        return item.highlight.content.join(' ... ');
+      }
+    }
   }
 };
 </script>
+
+<style>
+.hit mark {
+  font-weight: bold;
+  padding: 0px;
+}
+.snippet {
+  line-height: 1.3;
+  word-break: break-word;
+}
+</style>

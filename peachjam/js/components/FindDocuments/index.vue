@@ -426,6 +426,7 @@ export default {
           params.append('search', this.q);
           params.append('page', this.page);
           params.append('ordering', this.ordering);
+          params.append('highlight', 'content');
 
           for (const key of Object.keys(this.filters)) {
             for (const x of this.filters[key]) {
