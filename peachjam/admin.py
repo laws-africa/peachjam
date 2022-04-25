@@ -11,6 +11,7 @@ admin.site.register(
     [
         Image,
         Locality,
+        SourceFile,
     ]
 )
 
