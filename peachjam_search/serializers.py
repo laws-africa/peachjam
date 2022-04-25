@@ -1,9 +1,12 @@
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
+from rest_framework.serializers import SerializerMethodField
 
 from peachjam_search.documents import SearchableDocument
 
 
 class SearchableDocumentSerializer(DocumentSerializer):
+    highlight = SerializerMethodField()
+
     class Meta:
         document = SearchableDocument
         fields = [
@@ -15,7 +18,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "jurisdiction",
             "locality",
             "citation",
-            "content_html",
+            "content",
             "expression_frbr_uri",
             "work_frbr_uri",
             "authoring_body",
@@ -26,4 +29,10 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "headnote_holding",
             "flynote",
             "judges",
+            "highlight",
         ]
+
+    def get_highlight(self, obj):
+        if hasattr(obj.meta, "highlight"):
+            return obj.meta.highlight.__dict__["_d_"]
+        return {}

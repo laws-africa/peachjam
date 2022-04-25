@@ -3,6 +3,7 @@ from django_elasticsearch_dsl_drf.filter_backends import (
     CompoundSearchFilterBackend,
     DefaultOrderingFilterBackend,
     FacetedFilterSearchFilterBackend,
+    HighlightBackend,
     OrderingFilterBackend,
     SourceBackend,
 )
@@ -29,6 +30,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         CompoundSearchFilterBackend,
         FacetedFilterSearchFilterBackend,
         SourceBackend,
+        HighlightBackend,
     ]
 
     ordering_fields = {"date": "_date", "title": "title"}
@@ -53,6 +55,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "matter_type",
         "content_html",
         "judges",
+        "content",
     )
 
     faceted_search_fields = {
@@ -82,5 +85,16 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         },
         "language": {
             "field": "language",
+        },
+    }
+
+    highlight_fields = {
+        "content": {
+            "options": {
+                "pre_tags": ["<mark>"],
+                "post_tags": ["</mark>"],
+                "fragment_size": 80,
+                "number_of_fragments": 2,
+            }
         },
     }
