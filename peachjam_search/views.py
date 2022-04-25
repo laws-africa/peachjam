@@ -10,21 +10,19 @@ from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from elasticsearch_dsl import DateHistogramFacet
 
 from peachjam.views import AuthedViewMixin
-from peachjam_search.documents import JudgmentDocument
-from peachjam_search.serializers import JudgmentSerializer
+from peachjam_search.documents import SearchableDocument
+from peachjam_search.serializers import SearchableDocumentSerializer
 
 
 class SearchView(AuthedViewMixin, TemplateView):
     template_name = "peachjam_search/search.html"
 
 
-class JudgmentSearchViewSet(BaseDocumentViewSet):
+class DocumentSearchViewSet(BaseDocumentViewSet):
+    """ API endpoint that allows document to be searched.
     """
-    API endpoint that allows judgments to be searched.
-    """
-
-    document = JudgmentDocument
-    serializer_class = JudgmentSerializer
+    document = SearchableDocument
+    serializer_class = SearchableDocumentSerializer
     filter_backends = [
         OrderingFilterBackend,
         DefaultOrderingFilterBackend,
@@ -36,28 +34,39 @@ class JudgmentSearchViewSet(BaseDocumentViewSet):
     ordering_fields = {"date": "_date", "title": "title"}
 
     filter_fields = {
-        "title": "title",
-        "citation": "citation",
-        "author": "author",
-        "country": "country",
+        "doc_type": "doc_type",
+        "authoring_body": "authoring_body",
+        "jurisdiction": "jurisdiction",
+        "locality": "locality",
         "matter_type": "matter_type",
+        "nature": "nature",
+        "language": "language",
+        "year": "year"
     }
 
     search_fields = (
         "title",
         "author",
-        "country",
+        "jurisdiction",
+        "locality",
         "citation",
         "matter_type",
-        "document_content",
+        "content_html",
+        "judges"
     )
 
     faceted_search_fields = {
-        "author": {
-            "field": "author",
+        "doc_type": {
+            "field": "doc_type",
         },
-        "country": {
-            "field": "country",
+        "authoring_body": {
+            "field": "authoring_body",
+        },
+        "jurisdiction": {
+            "field": "jurisdiction",
+        },
+        "locality": {
+            "field": "locality",
         },
         "matter_type": {
             "field": "matter_type",
@@ -66,5 +75,14 @@ class JudgmentSearchViewSet(BaseDocumentViewSet):
             "field": "date",
             "facet": DateHistogramFacet,
             "options": {"interval": "year"},
+        },
+        "year": {
+            "field": "year"
+        },
+        "nature": {
+            "field": "nature",
+        },
+        "language": {
+            "field": "language",
         },
     }
