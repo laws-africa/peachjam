@@ -1,5 +1,6 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
+from lxml import etree
 
 from africanlii.models import GenericDocument, Judgment, LegalInstrument, Legislation
 from peachjam.models import CoreDocument
@@ -12,7 +13,7 @@ class SearchableDocument(Document):
     date = fields.DateField()
     year = fields.KeywordField(attr="date.year")
     citation = fields.TextField()
-    content_html = fields.TextField()
+    content = fields.TextField()
     language = fields.KeywordField(attr="language.name_native")
     jurisdiction = fields.KeywordField(attr="jurisdiction.name")
     locality = fields.KeywordField(attr="locality.name")
@@ -34,6 +35,7 @@ class SearchableDocument(Document):
     nature = fields.KeywordField()
 
     class Index:
+        # TODO: make this configurable per website
         name = "africanlii_documents"
 
     class Django:
@@ -77,3 +79,8 @@ class SearchableDocument(Document):
     def prepare_judges(self, instance):
         if instance.doc_type == "judgment":
             return [j.name for j in instance.judgment.judges.all()]
+
+    def prepare_content(self, instance):
+        if instance.content_html:
+            root = etree.HTML(instance.content_html)
+            return " ".join(root.itertext())
