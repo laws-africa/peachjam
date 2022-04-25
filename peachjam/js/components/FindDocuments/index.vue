@@ -80,7 +80,7 @@
               </li>
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter document type</strong>
+                  <strong>Document type</strong>
                   <a
                     v-if="filters.doc_type.length"
                     href="#"
@@ -99,7 +99,7 @@
               </li>
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter author</strong>
+                  <strong>Author</strong>
                   <a
                     v-if="filters.authoring_body.length"
                     href="#"
@@ -118,7 +118,7 @@
               </li>
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter jurisdiction</strong>
+                  <strong>Jurisdiction</strong>
                   <a
                     v-if="filters.jurisdiction.length"
                     href="#"
@@ -137,7 +137,7 @@
               </li>
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter locality</strong>
+                  <strong>Locality</strong>
                   <a
                     v-if="filters.locality.length"
                     href="#"
@@ -157,7 +157,7 @@
 
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter year</strong>
+                  <strong>Year</strong>
                   <a
                     v-if="filters.year.length"
                     href="#"
@@ -177,7 +177,7 @@
 
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter matter type</strong>
+                  <strong>Matter type</strong>
                   <a
                     v-if="filters.matter_type.length"
                     href="#"
@@ -196,7 +196,7 @@
               </li>
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter document nature</strong>
+                  <strong>Document nature</strong>
                   <a
                     v-if="filters.nature.length"
                     href="#"
@@ -215,7 +215,7 @@
               </li>
               <li class="list-group-item">
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Filter language</strong>
+                  <strong>Language</strong>
                   <a
                     v-if="filters.language.length"
                     href="#"
