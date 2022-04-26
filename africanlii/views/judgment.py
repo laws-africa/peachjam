@@ -14,7 +14,7 @@ class JudgmentListView(AuthedViewMixin, ListView):
 class JudgmentDetailView(AuthedViewMixin, DetailView):
     model = Judgment
     template_name = "africanlii/judgment_detail.html"
-    context_object_name = "judgment"
+    context_object_name = "document"
 
 
 class HomePageView(AuthedViewMixin, TemplateView):

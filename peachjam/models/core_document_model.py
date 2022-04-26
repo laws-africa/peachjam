@@ -45,6 +45,8 @@ class CoreDocument(models.Model):
     source_url = models.URLField(max_length=2048, null=True, blank=True)
     citation = models.CharField(max_length=1024, null=True, blank=True)
     content_html = models.TextField(null=True, blank=True)
+    content_html_is_akn = models.BooleanField(default=False)
+    toc_json = models.JSONField(null=True, blank=True)
     language = models.ForeignKey(
         Language, on_delete=models.PROTECT, null=False, blank=False
     )

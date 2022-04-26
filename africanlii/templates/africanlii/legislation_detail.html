@@ -1,5 +1,4 @@
 {% extends 'africanlii/layouts/document_detail.html' %}
-{% load peachjam %}
 
 {% block document-metadata-content %}
   <div class="row">
@@ -10,52 +9,6 @@
         <dt class="col-4">Date</dt>
         <dd class="col-8">{{ document.date }}</dd>
       </dl>
-    </div>
-  </div>
-{% endblock %}
-
-{% block content %}
-  <div class="row">
-    <div class="col-lg-3 d-none d-lg-block">
-      <aside class="toc">
-        <la-table-of-contents-controller
-          items="{{ document.toc_json|jsonify }}"
-          expand-all-btn-classes="btn btn-secondary btn-sm"
-          collapse-all-btn-classes="btn btn-secondary btn-sm"
-          title-filter-clear-btn-classes="btn btn-secondary btn-sm"
-          search-filter-input-classes="form-control"
-        ></la-table-of-contents-controller>
-      </aside>
-    </div>
-
-    <div class="col-lg-9">
-      <div class="la-akoma-ntoso-with-gutter">
-        <la-akoma-ntoso
-          id="akn"
-          expression-frbr-uri="{{ document.expression_frbr_uri }}"
-          class="flash-target"
-        >
-          <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
-          <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
-
-          {{ document.content_html|safe }}
-        </la-akoma-ntoso>
-        <la-gutter akoma-ntoso="#akn">
-          <!-- hack for demo -->
-          {% if document.pk == 4 %}
-            <la-gutter-item anchor="#preamble__p_5">
-              <div class="card">
-                <h6 class="card-header p-2">Related Decision</h6>
-                <div class="card-body p-2">
-                  <a href="https://peachjam.staging.laws.africa/generic_documents/7" target="_blank">Decision A/DEC. 8/5/82</a>
-                  amends the ECOWAS Treaty.
-                </div>
-              </div>
-            </la-gutter-item>
-          {% endif %}
-
-        </la-gutter>
-      </div>
     </div>
   </div>
 {% endblock %}
