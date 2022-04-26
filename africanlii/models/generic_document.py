@@ -56,7 +56,6 @@ class LegalInstrument(CoreDocument):
 
 
 class Legislation(CoreDocument):
-    toc_json = models.JSONField(null=True, blank=True)
     metadata_json = models.JSONField(null=False, blank=False)
 
     class Meta:
