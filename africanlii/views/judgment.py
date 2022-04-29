@@ -1,6 +1,7 @@
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import DetailView, ListView
 
 from africanlii.models import Judgment
+from africanlii.registry import registry
 from peachjam.views import AuthedViewMixin
 
 
@@ -11,11 +12,8 @@ class JudgmentListView(AuthedViewMixin, ListView):
     paginate_by = 20
 
 
+@registry.register_doc_type("judgment")
 class JudgmentDetailView(AuthedViewMixin, DetailView):
     model = Judgment
     template_name = "africanlii/judgment_detail.html"
     context_object_name = "document"
-
-
-class HomePageView(AuthedViewMixin, TemplateView):
-    template_name = "africanlii/home.html"
