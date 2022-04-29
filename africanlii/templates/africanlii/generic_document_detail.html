@@ -1,7 +1,7 @@
 {% extends 'africanlii/layouts/document_detail.html' %}
 
 {% block content %}
-  <div data-component="PdfRenderer" data-pdf="{% url 'document_source' pk=document.pk %}" class="pdf-renderer">
+  <div data-component="PdfRenderer" data-pdf="{% url 'document_source' expression_frbr_uri=document.expression_frbr_uri %}" class="pdf-renderer">
     <div class="pdf-renderer__previews">
       <div class="pdf-renderer__previews__inner"></div>
     </div>
