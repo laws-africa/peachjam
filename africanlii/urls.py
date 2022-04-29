@@ -7,6 +7,18 @@ from africanlii import views
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),
     path("", include("peachjam.urls")),
+    path("judgments/", views.JudgmentListView.as_view(), name="judgment_list"),
+    path("legislation/", views.LegislationListView.as_view(), name="legislation_list"),
+    path(
+        "legal_instruments/",
+        views.LegalInstrumentListView.as_view(),
+        name="legal_instrument_list",
+    ),
+    path(
+        "generic_documents/",
+        views.GenericDocumentListView.as_view(),
+        name="generic_document_list",
+    ),
     path(
         "documents<path:expression_frbr_uri>/",
         views.DocumentDetailViewResolver.as_view(),
