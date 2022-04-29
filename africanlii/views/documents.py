@@ -1,10 +1,14 @@
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
-from django.views.generic import DetailView, View
+from django.views.generic import DetailView, TemplateView, View
 
 from africanlii.registry import registry
 from peachjam.models import CoreDocument
 from peachjam.views import AuthedViewMixin
+
+
+class HomePageView(AuthedViewMixin, TemplateView):
+    template_name = "africanlii/home.html"
 
 
 class DocumentDetailViewResolver(View):

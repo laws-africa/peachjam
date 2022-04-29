@@ -1,5 +1,4 @@
 # flake8: noqa
-from .common import *
 from .documents import *
 from .generic_document import *
 from .judgment import *
