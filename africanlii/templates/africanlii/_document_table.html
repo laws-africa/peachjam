@@ -1,13 +1,14 @@
-<table class="table">
+<div class="custom-table">
+  <table class="table">
     <thead>
     <tr>
       <th scope="col">Title</th>
       <th scope="col">Date</th>
       <th scope="col">Jurisdiction</th>
     </tr>
-  </thead>
+    </thead>
 
-  <tbody>
+    <tbody>
     {% for document in documents %}
     <tr>
       <td><a href="{{ document.get_absolute_url }}">{{ document.title }}</a></td>
@@ -16,6 +17,7 @@
     </tr>
     {% endfor %}
 
-</table>
+  </table>
+</div>
 
 {% include 'africanlii/_pagination.html' %}
