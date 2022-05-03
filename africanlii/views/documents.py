@@ -22,8 +22,6 @@ class DocumentDetailViewResolver(View):
         view_class = registry.views.get(obj.doc_type)
         if view_class:
             view = view_class()
-            view.slug_field = "expression_frbr_uri"
-            view.slug_url_kwarg = "expression_frbr_uri"
             view.setup(request, *args, **kwargs)
 
             return view.dispatch(request, *args, **kwargs)

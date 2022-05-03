@@ -15,5 +15,7 @@ class LegalInstrumentListView(AuthedViewMixin, ListView):
 @registry.register_doc_type("legal_instrument")
 class LegalInstrumentDetailView(AuthedViewMixin, DetailView):
     model = LegalInstrument
+    slug_field = "expression_frbr_uri"
+    slug_url_kwarg = "expression_frbr_uri"
     template_name = "africanlii/legal_instrument_detail.html"
     context_object_name = "document"
