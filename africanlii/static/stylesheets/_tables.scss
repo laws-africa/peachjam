@@ -1,0 +1,13 @@
+.custom-table {
+  border-top: 1rem solid $gray-900;
+  padding: 1rem;
+  border-left: 1px solid $gray-500;
+  border-right: 1px solid $gray-500;
+  border-bottom: 1px solid $gray-500;
+  border-radius: 5px;
+  overflow: hidden;
+
+  thead {
+    border-bottom: 4px solid $primary;
+  }
+}
