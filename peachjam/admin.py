@@ -3,7 +3,6 @@ from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
 from django.utils.html import format_html
-from import_export.admin import ImportMixin
 
 from peachjam.models import Image, Locality, SourceFile
 
@@ -35,7 +34,7 @@ class SourceFileInline(admin.TabularInline):
             )
 
 
-class DocumentAdmin(ImportMixin, admin.ModelAdmin):
+class DocumentAdmin(admin.ModelAdmin):
     inlines = [SourceFileInline]
     list_display = ("title", "date")
     search_fields = ("title", "date")

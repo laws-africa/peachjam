@@ -1,4 +1,6 @@
 import io
+import re
+from tempfile import NamedTemporaryFile
 
 from django.conf import settings
 from google.oauth2 import service_account
@@ -7,7 +9,19 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
 
-def download_file_from_google(file_id, destination):
+def download_source_file(url):
+    google_pattern = re.compile(r"google")
+    if google_pattern.search(url):
+        pattern = r"(?<=document\/d\/)(?P<google_id>.*)(?=\/)"
+        regex = re.compile(pattern)
+        match = regex.search(url)
+        if match:
+            return download_file_from_google(match.group("google_id"))
+    else:
+        return None
+
+
+def download_file_from_google(file_id):
     try:
         scopes = ["https://www.googleapis.com/auth/drive"]
         creds = service_account.Credentials.from_service_account_file(
@@ -25,9 +39,11 @@ def download_file_from_google(file_id, destination):
 
         fh.seek(0)
 
-        with open(destination, "wb") as f:
-            f.write(fh.read())
-            f.close()
-
     except HttpError as e:
         print(e)
+        return None
+
+    else:
+        f = NamedTemporaryFile()
+        f.write(fh.read())
+        return f
