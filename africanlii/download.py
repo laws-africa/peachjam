@@ -1,5 +1,7 @@
 import io
+import logging
 import re
+import urllib
 from tempfile import NamedTemporaryFile
 
 from django.conf import settings
@@ -8,24 +10,27 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
+logger = logging.getLogger(__name__)
+
 
 def download_source_file(url):
-    google_pattern = re.compile(r"google")
-    if google_pattern.search(url):
+    # check if the url is a Google doc url
+    google_regex = re.compile(r"google")
+    if google_regex.search(url):
         pattern = r"(?<=document\/d\/)(?P<google_id>.*)(?=\/)"
         regex = re.compile(pattern)
         match = regex.search(url)
         if match:
             return download_file_from_google(match.group("google_id"))
     else:
-        return None
+        return download_with_urllib(url)
 
 
 def download_file_from_google(file_id):
     try:
         scopes = ["https://www.googleapis.com/auth/drive"]
-        creds = service_account.Credentials.from_service_account_file(
-            settings.GOOGLE_CREDENTIALS_JSON_FILE, scopes=scopes
+        creds = service_account.Credentials.from_service_account_info(
+            settings.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS, scopes=scopes
         )
         service = build("drive", "v3", credentials=creds)
         request = service.files().get_media(fileId=file_id)
@@ -35,15 +40,26 @@ def download_file_from_google(file_id):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-            print("Download %d%%." % int(status.progress() * 100))
+            logger.info("Download %d%%." % int(status.progress() * 100))
 
         fh.seek(0)
 
     except HttpError as e:
-        print(e)
+        logger.error(e)
         return None
 
     else:
         f = NamedTemporaryFile()
         f.write(fh.read())
+        return f
+
+
+def download_with_urllib(url):
+    try:
+        f = NamedTemporaryFile()
+        urllib.request.urlretrieve(url, f.name)
+    except urllib.error.HTTPError as e:
+        logger.error(e)
+        return None
+    else:
         return f
