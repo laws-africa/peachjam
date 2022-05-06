@@ -1,11 +1,13 @@
 import FindDocuments from './FindDocuments/index.vue';
 import PdfRenderer from './pdf-renderer';
-import ListingFacets from './ListingFacets.vue';
+import DocumentList from './document-list';
 
 const components: Record<string, any> = {
-  FindDocuments,
+  // Data components
   PdfRenderer,
-  ListingFacets
+  DocumentList,
+  // Vue components
+  FindDocuments
 };
 
 export default components;
