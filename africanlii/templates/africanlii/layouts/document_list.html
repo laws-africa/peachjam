@@ -4,7 +4,7 @@
 {% block title %}{{ document.title }}{% endblock %}
 
 {% block page-content %}
-  <main class="container py-3">
+  <main class="container py-3" data-component="DocumentList">
     <div class="row">
       <div class="col-md-3"></div>
       <div class="col-md-9">
@@ -17,16 +17,19 @@
     </div>
     <div class="row">
       <div class="col-md-3">
-        <div data-vue-component="ListingFacets"></div>
+        <div id="list-facets"></div>
       </div>
       <div class="col-md-9">
-        {% block content %}
-          {% if documents %}
-            {% include 'africanlii/_document_table.html'%}
-          {% else %}
-            <p>{% trans 'No documents found.' %}</p>
-          {% endif %}
-        {% endblock%}
+        <div class="position-relative">
+          {% block content %}
+            {% if documents %}
+              {% include 'africanlii/_document_table.html'%}
+            {% else %}
+              <p>{% trans 'No documents found.' %}</p>
+            {% endif %}
+          {% endblock%}
+          <div id="overlay" class="overlay d-none"></div>
+        </div>
       </div>
     </div>
   </main>
