@@ -1,0 +1,22 @@
+.pill-link {
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 4px 4px 8px $gray-300;
+  border-radius: 5px;
+  background-color: white;
+}
+
+.pill-link__body {
+  flex: 1;
+  padding: 0.5rem;
+}
+
+.pill-link__icon {
+  background-color: $dark;
+  width: 37px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
