@@ -29,35 +29,47 @@
         <div
           v-for="(year, index) in years"
           :key="index"
-          class="form-check"
+          class="d-flex justify-content-between align-items-center"
         >
-          <input
-            :id="year"
-            ref="yearInput"
-            class="form-check-input"
-            type="checkbox"
-            name="year"
-            :value="year"
-            :checked="yearInputChecked(year)"
-          >
-          <label
-            class="form-check-label"
-            :for="year"
-          >
-            {{ year }}
-          </label>
+          <div class="form-check">
+            <input
+              :id="year"
+              ref="yearInput"
+              class="form-check-input"
+              type="checkbox"
+              name="year"
+              :value="year"
+              :checked="yearInputChecked(year)"
+            >
+            <label
+              class="form-check-label"
+              :for="year"
+            >
+              {{ year }}
+            </label>
+          </div>
+          <div
+            v-if="loading"
+            class="circle-loader"
+          />
         </div>
       </li>
       <li class="list-group-item">
         <div class="d-flex justify-content-between mb-2">
           <strong>Alphabetical</strong>
-          <a
-            v-if="alphabetParam.length"
-            href="#"
-            @click.prevent="clearFacet('alphabet')"
-          >
-            Clear
-          </a>
+          <div class="d-flex">
+            <a
+              v-if="alphabetParam.length"
+              href="#"
+              @click.prevent="clearFacet('alphabet')"
+            >
+              Clear
+            </a>
+            <span
+              v-if="loading"
+              class="circle-loader mx-2"
+            />
+          </div>
         </div>
         <div class="letter-radiobox-container">
           <label
@@ -129,6 +141,7 @@ export default {
       return urlParams.getAll(key);
     },
     submit () {
+      this.loading = true;
       this.$el.dispatchEvent(new CustomEvent('submitted', {
         bubbles: true
       }));
