@@ -4,7 +4,6 @@ import magic
 from cobalt import FrbrUri
 from cobalt.akn import datestring
 from countries_plus.models import Country
-from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
@@ -72,9 +71,6 @@ class CoreDocument(models.Model):
 
     def get_all_fields(self):
         return self._meta.get_fields()
-
-    def get_all_values(self):
-        return serializers.serialize("python", [self])[0]["fields"]
 
     def get_absolute_url(self):
         return reverse(
