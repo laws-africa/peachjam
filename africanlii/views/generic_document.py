@@ -11,6 +11,16 @@ class GenericDocumentListView(GenericListView):
     paginate_by = 20
     model = GenericDocument
 
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        object_list = self.object_list
+        context = self.get_context_data()
+
+        authors = list(set(object_list.values_list("authoring_body__name", flat=True)))
+
+        context["authors"] = authors
+        return self.render_to_response(context)
+
 
 @registry.register_doc_type("generic_document")
 class GenericDocumentDetailView(AuthedViewMixin, DetailView):
