@@ -2,6 +2,7 @@ from django.views.generic import DetailView, ListView
 
 from africanlii.models import Judgment
 from africanlii.registry import registry
+from africanlii.models.generic_document import GenericDocument
 from peachjam.views import AuthedViewMixin
 
 

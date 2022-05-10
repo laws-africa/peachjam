@@ -36,72 +36,32 @@
 <div class="pb-5 pt-5 bg-light">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent Judgements</h2>
-    <a class="mb-2 pill-link">
-      <div class="pill-link__body">Lorem title</div>
-      <div class="pill-link__icon" href="#">
-        <i class="text-white bi bi-book"></i>
-      </div>
-    </a>
-    <a class="mb-2 pill-link">
-      <div class="pill-link__body">Lorem title</div>
-      <div class="pill-link__icon" href="#">
-        <i class="text-white bi bi-book"></i>
-      </div>
-    </a>
-    <a class="mb-2 pill-link">
-      <div class="pill-link__body">Lorem title</div>
-      <div class="pill-link__icon" href="#">
-        <i class="text-white bi bi-book"></i>
-      </div>
-    </a>
-    <a class="mb-2 pill-link">
-      <div class="pill-link__body">Lorem title</div>
-      <div class="pill-link__icon" href="#">
-        <i class="text-white bi bi-book"></i>
-      </div>
-    </a>
-    <a class="mb-2 pill-link">
-      <div class="pill-link__body">Lorem title</div>
-      <div class="pill-link__icon" href="#">
-        <i class="text-white bi bi-book"></i>
-      </div>
-    </a>
+      {% for object in recent_judgements %}
+      <a class="mb-2 pill-link" href="{% url 'judgment_detail' object.id %}">
+        <div class="pill-link__body">
+          {{ object.title }}
+        </div>
+        <div class="pill-link__icon" href="#">
+          <i class="text-white bi bi-book"></i>
+        </div>
+      </a>
+      {% endfor %}
   </div>
 </div>
 
 <div class="pb-5 pt-5">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent AU Documents</h2>
-    <a class="mb-2 pill-link">
-      <div class="pill-link__body">Lorem title</div>
-      <div class="pill-link__icon" href="#">
-        <i class="text-white bi bi-book"></i>
-      </div>
-    </a>
-    <a class="mb-2 pill-link">
-      <div class="pill-link__body">Lorem title</div>
-      <div class="pill-link__icon" href="#">
-        <i class="text-white bi bi-book"></i>
-      </div>
-    </a>
-    <a class="mb-2 pill-link">
-      <div class="pill-link__body">Lorem title</div>
-      <div class="pill-link__icon" href="#">
-        <i class="text-white bi bi-book"></i>
-      </div>
-    </a>
-    <a class="mb-2 pill-link">
-      <div class="pill-link__body">Lorem title</div>
-      <div class="pill-link__icon" href="#">
-        <i class="text-white bi bi-book"></i>
-      </div>
-    </a>
-    <a class="mb-2 pill-link">
-      <div class="pill-link__body">Lorem title</div>
-      <div class="pill-link__icon" href="#">
-        <i class="text-white bi bi-book"></i>
-      </div>
-    </a>
+      {% for object in recent_documents %}
+      <a class="mb-2 pill-link" href="{% url 'generic_document_detail' object.id %}">
+        <div class="pill-link__body">
+          {{ object.title }}
+        </div>
+        <div class="pill-link__icon" href="#">
+          <i class="text-white bi bi-book"></i>
+        </div>
+      </a>
+      {% endfor %}
   </div>
 </div>
 
