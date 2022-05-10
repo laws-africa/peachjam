@@ -14,6 +14,7 @@ from languages_plus.models import Language
 class Locality(models.Model):
     name = models.CharField(max_length=255, null=False)
     jurisdiction = models.ForeignKey(Country, on_delete=models.PROTECT)
+    code = models.CharField(max_length=20, null=False)
 
     class Meta:
         verbose_name_plural = "localities"
@@ -91,7 +92,8 @@ class CoreDocument(models.Model):
         return frbr_uri.expression_uri()
 
     def save(self, *args, **kwargs):
-        self.expression_frbr_uri = self.generate_expression_frbr_uri()
+        if not self.expression_frbr_uri:
+            self.expression_frbr_uri = self.generate_expression_frbr_uri()
         return super().save(*args, **kwargs)
 
 
@@ -135,5 +137,6 @@ class SourceFile(AttachmentAbstractModel):
 
     def save(self, *args, **kwargs):
         self.filename = self.file.name
-        self.mimetype = magic.from_buffer(self.file.read(), mime=True)
+        if not self.mimetype:
+            self.mimetype = magic.from_buffer(self.file.read(), mime=True)
         return super().save(*args, **kwargs)

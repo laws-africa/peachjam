@@ -18,6 +18,7 @@ django-elasticsearch-debug-toolbar==3.0.2
 django-elasticsearch-dsl==7.2.2
 django-elasticsearch-dsl-drf==0.22.4
 django-extensions==3.1.5
+django-import-export==2.8.0
 django-languages-plus==1.1.1
 django-sass-processor==1.1
 django-storages==1.12.3
@@ -26,6 +27,9 @@ elastic-apm==6.8.0
 elasticsearch==7.17.1
 elasticsearch-dsl==7.4.0
 gevent==21.12.0
+google-api-python-client==2.46.0
+google-auth-httplib2==0.1.0
+google-auth-oauthlib==0.5.1
 greenlet==1.1.2
 gunicorn==20.1.0
 idna==3.3

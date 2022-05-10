@@ -1,4 +1,5 @@
 from django.contrib import admin
+from import_export.admin import ImportMixin
 
 from africanlii.models import (
     AuthoringBody,
@@ -14,6 +15,8 @@ from africanlii.models import (
 )
 from peachjam.admin import DocumentAdmin
 
+from .resources import GenericDocumentResource, JudgmentResource
+
 admin.site.register(
     [
         AuthoringBody,
@@ -26,7 +29,15 @@ admin.site.register(
 )
 
 
-admin.site.register(GenericDocument, DocumentAdmin)
+class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
+    resource_class = GenericDocumentResource
+
+
+class JudgmentAdmin(ImportMixin, DocumentAdmin):
+    resource_class = JudgmentResource
+
+
+admin.site.register(GenericDocument, GenericDocumentAdmin)
 admin.site.register(Legislation, DocumentAdmin)
 admin.site.register(LegalInstrument, DocumentAdmin)
-admin.site.register(Judgment, DocumentAdmin)
+admin.site.register(Judgment, JudgmentAdmin)

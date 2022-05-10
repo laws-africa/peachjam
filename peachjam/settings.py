@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import base64
 import logging
 import os
 from pathlib import Path
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.staticfiles",
     "sass_processor",
+    "import_export",
 ]
 
 MIDDLEWARE = [
@@ -278,3 +280,43 @@ if not DEBUG:
     AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "")
     AWS_SIGNATURE_VERSION = "s3v4"
     AWS_QUERYSTRING_AUTH = True
+
+IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+GOOGLE_SERVICE_ACCOUNT_CREDENTIALS = {
+    "type": "service_account",
+    "project_id": os.environ.get("GOOGLE_PROJECT_ID", ""),
+    "private_key_id": os.environ.get("GOOGLE_PRIVATE_KEY_ID", ""),
+    #  private key is expected to be base64 encoded string
+    "private_key": base64.b64decode(
+        os.environ.get("GOOGLE_PRIVATE_KEY", "").encode("utf-8")
+    ).decode("utf-8"),
+    "client_email": os.environ.get("GOOGLE_CLIENT_EMAIL", ""),
+    "client_id": os.environ.get("GOOGLE_CLIENT_ID", ""),
+    "auth_uri": os.environ.get("GOOGLE_AUTH_URI", ""),
+    "token_uri": os.environ.get("GOOGLE_TOKEN_URI", ""),
+    "auth_provider_x509_cert_url": os.environ.get(
+        "GOOGLE_AUTH_PROVIDER_X509_CERT_URL", ""
+    ),
+    "client_x509_cert_url": os.environ.get("GOOGLE_CLIENT_X509_CERT_URL", ""),
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "loggers": {
+        "africanlii": {"handlers": ["console"], "level": "DEBUG"},
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "formatters": {
+        "simple": {
+            "format": "%(asctime)s %(levelname)s %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        }
+    },
+}
