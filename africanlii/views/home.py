@@ -19,6 +19,9 @@ class HomePageView(AuthedViewMixin, TemplateView):
 
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents
+        recent_instruments = LegalInstrument.objects.filter().order_by("-created_at")[
+            :5
+        ]
         context["recent_instruments"] = recent_instruments
         context["recent_legislation"] = recent_legislation
 
