@@ -1,5 +1,4 @@
 from django.views.generic import TemplateView
-
 from africanlii.models import Judgment
 from africanlii.models.generic_document import GenericDocument
 from africanlii.models import LegalInstrument
