@@ -17,8 +17,7 @@ class JudgmentListView(AuthedViewMixin, ListView):
         context = self.get_context_data()
 
         courts = list(set(object_list.values_list("court__name", flat=True)))
-
-        judges = list(set(object_list.values_list("judge__name", flat=True)))
+        judges = list(set(object_list.values_list("judges", flat=True)))
 
         context["courts"] = courts
         context["judges"] = judges
