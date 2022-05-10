@@ -47,12 +47,13 @@
             </div>
           </a>
         {% endfor %}
+      <a class="btn btn-primary stretched-link" href="{% url 'judgment_list' %}">View more Judgements</a>
       {% else %}
         <p>{% trans 'No documents found.' %}</p>
       {% endif %}
   </div>
 </div>
-
+>
 <div class="pb-5 pt-5">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent AU Documents</h2>
@@ -67,6 +68,7 @@
           </div>
         </a>
       {% endfor %}
+      <a class="btn btn-primary stretched-link" href="{% url 'generic_document_list' %}">View more AU Documents</a>
     {% else %}
       <p>{% trans 'No documents found.' %}</p>
     {% endif %}
@@ -87,6 +89,7 @@
           </div>
         </a>
       {% endfor %}
+      <a class="btn btn-primary stretched-link" href="{% url 'legal_instrument_list' %}">View more Legal Instruments</a>
     {% else %}
       <p>{% trans 'No documents found.' %}</p>
     {% endif %}
@@ -107,6 +110,7 @@
           </div>
         </a>
       {% endfor %}
+      <a class="btn btn-primary stretched-link" href="{% url 'legislation_list' %}">View more Treaties and Protocols</a>
     {% else %}
       <p>{% trans 'No documents found.' %}</p>
     {% endif %}
