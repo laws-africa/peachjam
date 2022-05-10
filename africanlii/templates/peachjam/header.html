@@ -43,6 +43,7 @@
   </div>
   <nav class="navbar navbar-expand-lg shadow-sm">
     <div class="container">
+      <div></div>
       <a class="navbar-brand" href="/">
         <img src="{% static 'images/img.png' %}" alt="africanlii" width="120" />
       </a>
@@ -58,19 +59,19 @@
       <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/judgments'%} active {% endifequal%}" href="{% url 'judgment_list' %}">Judgments</a>
+            <a class="nav-link {% ifequal request.path '/judgments/'%} active {% endifequal%}" href="{% url 'judgment_list' %}">Judgments</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/generic_documents'%} active {% endifequal%}" href="{% url 'generic_document_list' %}">AU Documents</a>
+            <a class="nav-link {% ifequal request.path '/generic_documents/'%} active {% endifequal%}" href="{% url 'generic_document_list' %}">AU Documents</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/legal_instruments'%} active {% endifequal%}" href="{% url 'legal_instrument_list' %}">Legal Instruments</a>
+            <a class="nav-link {% ifequal request.path '/legal_instruments/'%} active {% endifequal%}" href="{% url 'legal_instrument_list' %}">Legal Instruments</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/legislation'%} active {% endifequal%}" href="{% url 'legislation_list' %}">Treaties and Protocols</a>
+            <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="{% url 'legislation_list' %}">Treaties and Protocols</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/search'%} active {% endifequal%}" href="{% url 'search:search' %}">Search</a>
+            <a class="nav-link {% ifequal request.path '/search/'%} active {% endifequal%}" href="{% url 'search:search' %}">Search</a>
           </li>
         </ul>
         <ul class="navbar-nav">
