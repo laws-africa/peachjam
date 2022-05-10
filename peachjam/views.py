@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import TemplateView
+from django.views.generic import ListView, TemplateView
 
 
 class AuthedViewMixin(LoginRequiredMixin, PermissionRequiredMixin):
@@ -14,3 +14,31 @@ class AuthedViewMixin(LoginRequiredMixin, PermissionRequiredMixin):
 
 class HomePageView(AuthedViewMixin, TemplateView):
     template_name = "peachjam/home.html"
+
+
+class GenericListView(AuthedViewMixin, ListView):
+    """
+    A generic list view, with year and alphabetical title filters
+    that can be incorporated into site wide list views."""
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        object_list = self.object_list
+        context = self.get_context_data()
+        context_object_name = self.get_context_object_name(self.object_list)
+        alphabet = request.GET.get("alphabet")
+        year = request.GET.get("year")
+
+        if alphabet is not None:
+            object_list = object_list.filter(title__istartswith=alphabet)
+
+        if year is not None:
+            object_list = object_list.filter(date__year=year)
+
+        if alphabet is not None and year is not None:
+            object_list = object_list.filter(
+                title__istartswith=alphabet, date__year=year
+            )
+
+        context[context_object_name] = object_list
+        return self.render_to_response(context)
