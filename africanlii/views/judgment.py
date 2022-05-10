@@ -11,6 +11,19 @@ class JudgmentListView(AuthedViewMixin, ListView):
     context_object_name = "documents"
     paginate_by = 20
 
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        object_list = self.object_list
+        context = self.get_context_data()
+
+        courts = list(set(object_list.values_list("court__name", flat=True)))
+
+        judges = list(set(object_list.values_list("judge__name", flat=True)))
+
+        context["courts"] = courts
+        context["judges"] = judges
+        return self.render_to_response(context)
+
 
 @registry.register_doc_type("judgment")
 class JudgmentDetailView(AuthedViewMixin, DetailView):
