@@ -4,8 +4,8 @@
 {% block title %} Home {% endblock %}
 
 {% block page-content %}
-<section class="container pb-5 pt-5">
-  <section class="row">
+<section class="pb-5 pt-5">
+  <div class="container">
     <p>
       We power LIIs in X countries hosting Y documents and serving Z million users a year. We help individuals, organizations,
       and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond.
@@ -31,7 +31,7 @@
         </form>
       </div>
     </div>
-  </section>
+  </div>
 </section>
 <div class="pb-5 pt-5 bg-light">
   <div class="container">
@@ -53,7 +53,7 @@
       {% endif %}
   </div>
 </div>
->
+
 <div class="pb-5 pt-5">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent AU Documents</h2>
@@ -68,7 +68,9 @@
           </div>
         </a>
       {% endfor %}
-      <a class="btn btn-primary stretched-link" href="{% url 'generic_document_list' %}">View more AU Documents</a>
+      <a class="btn btn-primary text-white" href="{% url 'generic_document_list' %}">
+        View more AU Documents
+      </a>
     {% else %}
       <p>{% trans 'No documents found.' %}</p>
     {% endif %}
