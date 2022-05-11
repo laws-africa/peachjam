@@ -15,6 +15,27 @@
           Clear all
         </a>
       </li>
+      <li class="list-group-item" v-if="authors && authors.length">
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Author</strong>
+          <a
+              v-if="author"
+              href="#"
+              @click.prevent="clearFacet('author')"
+          >
+            Clear
+          </a>
+        </div>
+        <input name="author" :value="author"  type="hidden"/>
+        <Multiselect
+            name="author"
+            :options="authors"
+            :searchable="true"
+            v-model="author"
+            placeholder="Filter by author"
+            :canClear="false"
+        />
+      </li>
       <li class="list-group-item">
         <div class="d-flex justify-content-between mb-2">
           <strong>Year</strong>
@@ -96,15 +117,26 @@
 </template>
 
 <script>
+import { nextTick} from "vue";
+import Multiselect from '@vueform/multiselect'
+import '@vueform/multiselect/themes/default.css'
+
 export default {
+  components: {
+    Multiselect
+  },
   name: 'ListFacets',
-  emits: ['form-changed'],
-  data: () => ({
-    page: 1,
-    loading: false,
-    alphabet: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
-    years: ['2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011']
-  }),
+  props: ['alphabet', 'years', 'authors'],
+  data: () => {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const author = urlParams.get('author');
+    return {
+      page: 1,
+      loading: false,
+      author,
+    }
+  },
 
   computed: {
     alphabetParam () {
@@ -142,10 +174,15 @@ export default {
     },
     submit () {
       this.loading = true;
-      this.$el.dispatchEvent(new CustomEvent('submitted', {
-        bubbles: true
-      }));
+      //On submit page refreshes
       this.$refs.form.submit();
+    },
+  },
+  watch: {
+    author() {
+      nextTick().then(() => {
+        this.submit();
+      })
     }
   }
 };
