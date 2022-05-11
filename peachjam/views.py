@@ -40,9 +40,5 @@ class GenericListView(AuthedViewMixin, ListView):
                 title__istartswith=alphabet, date__year=year
             )
 
-        authors = list(set(object_list.values_list("authoring_body__name", flat=True)))
-
-        context["authors"] = authors
-
         context[context_object_name] = object_list
         return self.render_to_response(context)
