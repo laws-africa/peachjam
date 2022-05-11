@@ -11,6 +11,14 @@ class LegalInstrumentListView(GenericListView):
     context_object_name = "documents"
     paginate_by = 20
 
+    def get_context_data(self, **kwargs):
+        context = super(LegalInstrumentListView, self).get_context_data(**kwargs)
+        authors = list(
+            set(LegalInstrument.objects.values_list("authoring_body__name", flat=True))
+        )
+        context["authors"] = authors
+        return context
+
 
 @registry.register_doc_type("legal_instrument")
 class LegalInstrumentDetailView(AuthedViewMixin, DetailView):
