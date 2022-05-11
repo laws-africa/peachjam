@@ -36,8 +36,8 @@
 <div class="pb-5 pt-5 bg-light">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent Judgements</h2>
-      {% if recent_judgements %}
-        {% for object in recent_judgements %}
+      {% if recent_judgments %}
+        {% for object in recent_judgments %}
           <a class="mb-2 pill-link" href="{% url 'judgment_detail' object.id %}">
             <div class="pill-link__body">
               {{ object.title }}
