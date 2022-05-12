@@ -15,25 +15,34 @@
           Clear all
         </a>
       </li>
-      <li class="list-group-item" v-if="authors && authors.length">
+      <li
+        v-if="authors.length"
+        class="list-group-item"
+      >
         <div class="d-flex justify-content-between mb-2">
           <strong>Author</strong>
           <a
-              v-if="author"
-              href="#"
-              @click.prevent="clearFacet('author')"
+            v-if="author"
+            href="#"
+            @click.prevent="clearFacet('author')"
           >
             Clear
           </a>
         </div>
-        <input name="author" :value="author"  type="hidden"/>
+        <input
+          v-if="author"
+          name="author"
+          :value="author"
+          type="hidden"
+        >
         <Multiselect
-            name="author"
-            :options="authors"
-            :searchable="true"
-            v-model="author"
-            placeholder="Filter by author"
-            :canClear="false"
+          v-model="author"
+          name="author"
+          :options="authors"
+          :searchable="true"
+          placeholder="Filter by author"
+          :can-clear="false"
+          class="author-select"
         />
       </li>
       <li class="list-group-item">
@@ -117,16 +126,29 @@
 </template>
 
 <script>
-import { nextTick} from "vue";
-import Multiselect from '@vueform/multiselect'
-import '@vueform/multiselect/themes/default.css'
+import { nextTick } from 'vue';
+import Multiselect from '@vueform/multiselect';
+import '@vueform/multiselect/themes/default.css';
 
 export default {
+  name: 'ListFacets',
   components: {
     Multiselect
   },
-  name: 'ListFacets',
-  props: ['alphabet', 'years', 'authors'],
+  props: {
+    alphabet: {
+      type: Array,
+      default: () => []
+    },
+    authors: {
+      type: Array,
+      default: () => []
+    },
+    years: {
+      type: Array,
+      default: () => []
+    }
+  },
   data: () => {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -134,8 +156,8 @@ export default {
     return {
       page: 1,
       loading: false,
-      author,
-    }
+      author
+    };
   },
 
   computed: {
@@ -147,6 +169,13 @@ export default {
     },
     showClearAllFilter () {
       return this.alphabetParam.length || this.yearParam.length;
+    }
+  },
+  watch: {
+    author () {
+      nextTick().then(() => {
+        this.submit();
+      });
     }
   },
   methods: {
@@ -174,55 +203,17 @@ export default {
     },
     submit () {
       this.loading = true;
-      //On submit page refreshes
+      // On submit page refreshes
       this.$refs.form.submit();
-    },
-  },
-  watch: {
-    author() {
-      nextTick().then(() => {
-        this.submit();
-      })
     }
   }
 };
 </script>
 
 <style scoped>
-.letter-radiobox-container {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
-}
-
-.letter-radiobox {
-  height: 40px;
-  width: 40px;
-  border-radius: 5px;
-  cursor: pointer;
-  overflow: hidden;
-}
-.letter-radiobox input {
-  display: none;
-}
-
-.letter-radiobox__text {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 200ms ease-in-out, background-color 200ms ease-in-out;
-  text-transform: uppercase;
-}
-
-.letter-radiobox:hover .letter-radiobox__text {
-  background-color: rgba(238, 120, 69, 0.3);
-}
-
-.letter-radiobox input:checked + .letter-radiobox__text {
-  background-color: #EE7845;
-  color: white;
+.author-select {
+  --ms-font-size: 14px;
+  --ms-option-font-size: 14px;
 }
 
 </style>
