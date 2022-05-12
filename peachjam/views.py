@@ -39,9 +39,11 @@ class GenericListView(AuthedViewMixin, ListView):
         if year is not None:
             object_list = object_list.filter(date__year=year)
 
-        if alphabet is not None and year is not None:
+        if alphabet is not None and year is not None and author is not None:
             object_list = object_list.filter(
-                title__istartswith=alphabet, date__year=year
+                title__istartswith=alphabet,
+                date__year=year,
+                authoring_body__name=author,
             )
 
         context[context_object_name] = object_list
