@@ -47,7 +47,7 @@
             </div>
           </a>
         {% endfor %}
-      <a class="btn btn-primary" href="{% url 'judgment_list' %}">View more Judgements</a>
+      <a class="btn btn-primary text-white" href="{% url 'judgment_list' %}">View more Judgements</a>
       {% else %}
         <p>{% trans 'No documents found.' %}</p>
       {% endif %}
@@ -91,7 +91,7 @@
           </div>
         </a>
       {% endfor %}
-      <a class="btn btn-primary" href="{% url 'legal_instrument_list' %}">View more Legal Instruments</a>
+      <a class="btn btn-primary text-white" href="{% url 'legal_instrument_list' %}">View more Legal Instruments</a>
     {% else %}
       <p>{% trans 'No documents found.' %}</p>
     {% endif %}
@@ -112,7 +112,7 @@
           </div>
         </a>
       {% endfor %}
-      <a class="btn btn-primary" href="{% url 'legislation_list' %}">View more Treaties and Protocols</a>
+      <a class="btn btn-primary text-white" href="{% url 'legislation_list' %}">View more Treaties and Protocols</a>
     {% else %}
       <p>{% trans 'No documents found.' %}</p>
     {% endif %}
