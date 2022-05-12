@@ -28,6 +28,10 @@ class GenericListView(AuthedViewMixin, ListView):
         context_object_name = self.get_context_object_name(self.object_list)
         alphabet = request.GET.get("alphabet")
         year = request.GET.get("year")
+        author = request.GET.get("author")
+
+        if author is not None:
+            object_list = object_list.filter(authoring_body__name=author)
 
         if alphabet is not None:
             object_list = object_list.filter(title__istartswith=alphabet)
