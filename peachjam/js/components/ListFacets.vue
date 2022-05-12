@@ -168,7 +168,7 @@ export default {
       return this.getUrlParamValue('year');
     },
     showClearAllFilter () {
-      return this.alphabetParam.length || this.yearParam.length;
+      return this.alphabetParam.length || this.yearParam.length || this.author;
     }
   },
   watch: {
