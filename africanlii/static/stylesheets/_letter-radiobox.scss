@@ -26,10 +26,10 @@
 }
 
 .letter-radiobox:hover .letter-radiobox__text {
-  background-color: rgba(238, 120, 69, 0.3);
+  background-color: transparentize($primary, 0.3);
 }
 
 .letter-radiobox input:checked + .letter-radiobox__text {
-  background-color: #EE7845;
+  background-color: $primary;
   color: white;
 }
