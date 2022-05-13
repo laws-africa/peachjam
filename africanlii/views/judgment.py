@@ -1,22 +1,27 @@
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 
 from africanlii.models import Judgment
 from africanlii.registry import registry
 from peachjam.views import AuthedViewMixin
 
 
-class JudgmentListView(GenericListView):
+class JudgmentListView(AuthedViewMixin, ListView):
     model = Judgment
     template_name = "africanlii/judgment_list.html"
     context_object_name = "documents"
     paginate_by = 20
 
+    def get_queryset(self):
+        queryset = self.model.objects.all()
+        self.form = DocumentFilterForm(self.request.GET)
+        self.form.is_valid()
+        queryset = Judgment.objects.all()
+        return self.form.filter_queryset(queryset)
+
     def get_context_data(self, **kwargs):
         context = super(JudgmentListView, self).get_context_data(**kwargs)
-        courts = list(set(Judgment.objects.values_list("court__name", flat=True)))
-        judges = list(set(Judgment.objects.values_list("judges", flat=True)))
-        context["courts"] = courts
-        context["judges"] = judges
+        authors = list(set(Judgment.objects.values_list("judges__name", flat=True)))
+        context["authors"] = authors
         return context
 
 

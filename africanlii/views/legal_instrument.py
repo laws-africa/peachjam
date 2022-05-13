@@ -1,15 +1,22 @@
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 
 from africanlii.models import LegalInstrument
 from africanlii.registry import registry
 from peachjam.views import AuthedViewMixin
 
 
-class LegalInstrumentListView(GenericListView):
+class LegalInstrumentListView(AuthedViewMixin, ListView):
     model = LegalInstrument
     template_name = "africanlii/legal_instrument_list.html"
     context_object_name = "documents"
     paginate_by = 20
+
+    def get_queryset(self):
+        queryset = self.model.objects.all()
+        self.form = DocumentFilterForm(self.request.GET)
+        self.form.is_valid()
+        queryset = LegalInstrument.objects.all()
+        return self.form.filter_queryset(queryset)
 
     def get_context_data(self, **kwargs):
         context = super(LegalInstrumentListView, self).get_context_data(**kwargs)
