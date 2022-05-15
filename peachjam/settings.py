@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "sass_processor",
     "import_export",
+    "treebeard",
 ]
 
 MIDDLEWARE = [

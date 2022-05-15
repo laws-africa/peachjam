@@ -3,8 +3,10 @@ from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
 from django.utils.html import format_html
+from treebeard.admin import TreeAdmin
+from treebeard.forms import movenodeform_factory
 
-from peachjam.models import Image, Locality, SourceFile
+from peachjam.models import DocumentCategory, Image, Locality, SourceFile, Taxonomy
 
 admin.site.register(
     [
@@ -34,8 +36,13 @@ class SourceFileInline(admin.TabularInline):
             )
 
 
+class DocumentCategoryInline(admin.TabularInline):
+    model = DocumentCategory
+    extra = 1
+
+
 class DocumentAdmin(admin.ModelAdmin):
-    inlines = [SourceFileInline]
+    inlines = [DocumentCategoryInline, SourceFileInline]
     list_display = ("title", "date")
     search_fields = ("title", "date")
     readonly_fields = ("expression_frbr_uri",)
@@ -55,7 +62,8 @@ class DocumentAdmin(admin.ModelAdmin):
         return FileResponse(source_file.file)
 
 
-class CoreDocumentAdmin(admin.ModelAdmin):
-    inlines = [
-        SourceFileInline,
-    ]
+class TaxonomyAdmin(TreeAdmin):
+    form = movenodeform_factory(Taxonomy)
+
+
+admin.site.register(Taxonomy, TaxonomyAdmin)
