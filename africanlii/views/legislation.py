@@ -11,6 +11,11 @@ class LegislationListView(AuthedViewMixin, ListView):
     context_object_name = "documents"
     paginate_by = 20
 
+    def get_queryset(self):
+        self.form = DocumentFilterForm(self.request.GET)
+        self.form.is_valid()
+        queryset = Legislation.objects.all()
+        return self.form.filter_queryset(queryset)
 
 @registry.register_doc_type("legislation")
 class LegislationDetailView(AuthedViewMixin, DetailView):
