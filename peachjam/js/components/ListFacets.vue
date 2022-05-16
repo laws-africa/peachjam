@@ -154,7 +154,6 @@ export default {
     const urlParams = new URLSearchParams(queryString);
     const author = urlParams.get('author');
     return {
-      page: 1,
       loading: false,
       author
     };
