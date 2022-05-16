@@ -19,7 +19,6 @@ class DocumentFilterForm(forms.Form):
 
     def filter_queryset(self, queryset):
         queryset = queryset.filter()
-        print(self.cleaned_data)
 
         author = self.cleaned_data.get("author")
         year = self.cleaned_data.get("year")

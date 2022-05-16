@@ -12,7 +12,6 @@ class JudgmentListView(AuthedViewMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = self.model.objects.all()
         self.form = DocumentFilterForm(self.request.GET)
         self.form.is_valid()
         queryset = Judgment.objects.all()
