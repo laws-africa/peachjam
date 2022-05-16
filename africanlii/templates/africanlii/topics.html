@@ -1,0 +1,53 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load peachjam %}
+
+{% block title %}
+  Topic - {{ topic.name }}
+{% endblock %}
+
+{% block page-content %}
+  <main class="container-fluid py-5 px-5">
+    <h1>Topic - {{ topic.name }}</h1>
+    <div class="d-flex">
+      <section class="my-5 my-5">
+
+        {% for topic in topic_list %}
+          <div class="py-1">
+            {% for span in topic.depth|times %}
+              <span class="">_</span>
+            {% endfor %}
+            <a href="{% url 'topic_list' slug=topic.slug %}">{{ topic.name }}</a>
+          </div>
+        {% endfor %}
+      </section>
+      <section class="mx-5">
+        {% if page_obj %}
+          <table class="table">
+            <thead>
+            <tr>
+              <th>Title</th>
+              <th>Date</th>
+              <th>Jurisdiction</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for document in page_obj %}
+              <tr>
+                <td><a href="{{ document.document.get_absolute_url }}">{{ document.document.title }}</a>
+                </td>
+                <td>{{ document.document.date }}</td>
+                <td>{{ document.document.jurisdiction }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+          {% include "africanlii/_pagination.html" %}
+        {% else %}
+          <div>
+            No documents found.
+          </div>
+        {% endif %}
+      </section>
+    </div>
+  </main>
+{% endblock %}

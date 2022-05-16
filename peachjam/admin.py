@@ -6,7 +6,7 @@ from django.utils.html import format_html
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from peachjam.models import DocumentCategory, Image, Locality, SourceFile, Taxonomy
+from peachjam.models import DocumentTopic, Image, Locality, SourceFile, Taxonomy
 
 admin.site.register(
     [
@@ -36,13 +36,13 @@ class SourceFileInline(admin.TabularInline):
             )
 
 
-class DocumentCategoryInline(admin.TabularInline):
-    model = DocumentCategory
+class DocumentTopicInline(admin.TabularInline):
+    model = DocumentTopic
     extra = 1
 
 
 class DocumentAdmin(admin.ModelAdmin):
-    inlines = [DocumentCategoryInline, SourceFileInline]
+    inlines = [DocumentTopicInline, SourceFileInline]
     list_display = ("title", "date")
     search_fields = ("title", "date")
     readonly_fields = ("expression_frbr_uri",)
@@ -64,6 +64,7 @@ class DocumentAdmin(admin.ModelAdmin):
 
 class TaxonomyAdmin(TreeAdmin):
     form = movenodeform_factory(Taxonomy)
+    readonly_fields = ("slug",)
 
 
 admin.site.register(Taxonomy, TaxonomyAdmin)
