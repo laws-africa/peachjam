@@ -19,7 +19,7 @@ class JudgmentListView(AuthedViewMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(JudgmentListView, self).get_context_data(**kwargs)
-        authors = list(set(Judgment.objects.values_list("judges__name", flat=True)))
+        authors = list(set(Judgment.objects.values_list("court__name", flat=True)))
         context["authors"] = authors
         return context
 
