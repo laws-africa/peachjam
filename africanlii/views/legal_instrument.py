@@ -12,7 +12,7 @@ class LegalInstrumentListView(AuthedViewMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        self.form = DocumentFilterForm(self.request.GET)
+        self.form = GenericDocumentFilterForm(self.request.GET)
         self.form.is_valid()
         queryset = LegalInstrument.objects.all()
         return self.form.filter_queryset(queryset)

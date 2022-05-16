@@ -12,7 +12,7 @@ class GenericDocumentListView(AuthedViewMixin, ListView):
     model = GenericDocument
 
     def get_queryset(self):
-        self.form = DocumentFilterForm(self.request.GET)
+        self.form = GenericDocumentFilterForm(self.request.GET)
         self.form.is_valid()
         queryset = GenericDocument.objects.all()
         return self.form.filter_queryset(queryset)
