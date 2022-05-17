@@ -9,23 +9,15 @@ class BaseDocumentFilterForm(forms.Form):
     alphabet = forms.CharField(required=False)
     year = forms.CharField(required=False)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def is_valid_queryparam(self, param):
-        return param != "" and param is not None
-
     def filter_queryset(self, queryset):
 
         year = self.cleaned_data.get("year")
         alphabet = self.cleaned_data.get("alphabet")
 
-        # filter by year
-        if self.is_valid_queryparam(year):
+        if year:
             queryset = queryset.filter(date__year=year)
 
-        # filter by alphabetical title
-        if self.is_valid_queryparam(alphabet):
+        if alphabet:
             queryset = queryset.filter(title__istartswith=alphabet)
 
         return queryset

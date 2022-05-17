@@ -9,13 +9,10 @@ class HomePageView(AuthedViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
-
-        recent_judgments = Judgment.objects.filter().order_by("-created_at")[:5]
-        recent_documents = GenericDocument.objects.filter().order_by("-created_at")[:5]
-        recent_instruments = LegalInstrument.objects.filter().order_by("-created_at")[
-            :5
-        ]
-        recent_legislation = Legislation.objects.filter().order_by("-created_at")[:5]
+        recent_judgments = Judgment.objects.order_by("-date")[:5]
+        recent_documents = GenericDocument.objects.order_by("-date")[:5]
+        recent_instruments = LegalInstrument.objects.order_by("-date")[:5]
+        recent_legislation = Legislation.objects.order_by("-date")[:5]
 
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents

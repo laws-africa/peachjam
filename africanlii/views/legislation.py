@@ -1,22 +1,17 @@
 from django.views.generic import DetailView, ListView
 
-from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import Legislation
 from africanlii.registry import registry
+from africanlii.views.generic_views import FilteredDocumentListView
 from peachjam.views import AuthedViewMixin
 
 
-class LegislationListView(AuthedViewMixin, ListView):
+class LegislationListView(AuthedViewMixin, ListView, FilteredDocumentListView):
     model = Legislation
     template_name = "africanlii/legislation_list.html"
     context_object_name = "documents"
     paginate_by = 20
 
-    def get_queryset(self):
-        self.form = BaseDocumentFilterForm(self.request.GET)
-        self.form.is_valid()
-        queryset = Legislation.objects.all()
-        return self.form.filter_queryset(queryset)
 
 @registry.register_doc_type("legislation")
 class LegislationDetailView(AuthedViewMixin, DetailView):
