@@ -320,3 +320,7 @@ LOGGING = {
         }
     },
 }
+
+
+if DEBUG:
+    ELASTICSEARCH_DSL_AUTOSYNC = False
