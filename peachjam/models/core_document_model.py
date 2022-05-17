@@ -77,7 +77,9 @@ class CoreDocument(models.Model):
         return serializers.serialize("python", [self])[0]["fields"]
 
     def get_absolute_url(self):
-        return reverse(f"{self.doc_type}_detail", kwargs={"pk": self.pk})
+        return reverse(
+            "document_detail", kwargs={"expression_frbr_uri": self.expression_frbr_uri}
+        )
 
     def clean(self):
         try:
