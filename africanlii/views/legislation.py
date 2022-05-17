@@ -1,5 +1,6 @@
 from django.views.generic import DetailView, ListView
 
+from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import Legislation
 from africanlii.registry import registry
 from peachjam.views import AuthedViewMixin
