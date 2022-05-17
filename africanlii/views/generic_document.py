@@ -1,5 +1,6 @@
 from django.views.generic import DetailView, ListView
 
+from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import GenericDocument
 from africanlii.registry import registry
 from peachjam.views import AuthedViewMixin
@@ -12,18 +13,11 @@ class GenericDocumentListView(AuthedViewMixin, ListView):
     model = GenericDocument
 
     def get_queryset(self):
-        self.form = GenericDocumentFilterForm(self.request.GET)
+        self.form = BaseDocumentFilterForm(self.request.GET)
         self.form.is_valid()
         queryset = GenericDocument.objects.all()
         return self.form.filter_queryset(queryset)
 
-    def get_context_data(self, **kwargs):
-        context = super(GenericDocumentListView, self).get_context_data(**kwargs)
-        authors = list(
-            set(GenericDocument.objects.values_list("authoring_body__name", flat=True))
-        )
-        context["authors"] = authors
-        return context
 
 
 @registry.register_doc_type("generic_document")
