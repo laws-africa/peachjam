@@ -46,7 +46,6 @@ urlpatterns = [
         views.DocumentSourceView.as_view(),
         name="document_source",
     ),
-    path("topic/<slug:slug>/", views.TopicsView.as_view(), name="topic_list"),
 ]
 
 if settings.DEBUG:
