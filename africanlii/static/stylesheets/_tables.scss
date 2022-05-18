@@ -1,41 +1,7 @@
-.document-table {
-  border-top: 1rem solid $gray-900;
-  padding: 1rem;
-  border-left: 1px solid $gray-300;
-  border-right: 1px solid $gray-300;
-  border-bottom: 1px solid $gray-300;
-  border-radius: 5px;
-  overflow: hidden;
-
+table {
+  border: 1px solid $gray-500;
+  border-radius: 4px;
   thead {
     border-bottom: 4px solid $primary;
   }
-
-  a[data-bs-toggle="collapse"] {
-    text-decoration: none;
-    color: $black;
-
-    .bi {
-      margin-left: 5px;
-    }
-
-    &[aria-expanded="true"] {
-      .bi-plus-square {
-        display: none;
-      }
-      .bi-dash-square {
-        display: inline;
-      }
-    }
-
-    &[aria-expanded="false"] {
-      .bi-plus-square {
-        display: inline;
-      }
-      .bi-dash-square {
-        display: none;
-      }
-    }
-  }
-
 }
