@@ -5,7 +5,7 @@ from africanlii.registry import registry
 from peachjam.views import AuthedViewMixin
 
 
-class JudgmentListView(AuthedViewMixin, ListView, FilteredDocumentListView):
+class JudgmentListView(AuthedViewMixin, FilteredDocumentListView):
     model = Judgment
     template_name = "africanlii/judgment_list.html"
     context_object_name = "documents"

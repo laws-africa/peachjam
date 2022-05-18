@@ -1,11 +1,11 @@
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 
 from africanlii.models import GenericDocument
 from africanlii.registry import registry
 from peachjam.views import AuthedViewMixin
 
 
-class GenericDocumentListView(AuthedViewMixin, ListView, FilteredDocumentListView):
+class GenericDocumentListView(AuthedViewMixin, FilteredDocumentListView):
     template_name = "africanlii/generic_document_list.html"
     context_object_name = "documents"
     paginate_by = 20
