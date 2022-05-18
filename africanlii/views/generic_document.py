@@ -2,6 +2,7 @@ from django.views.generic import DetailView
 
 from africanlii.models import GenericDocument
 from africanlii.registry import registry
+from africanlii.views.generic_views import FilteredDocumentListView
 from peachjam.views import AuthedViewMixin
 
 
@@ -10,8 +11,6 @@ class GenericDocumentListView(AuthedViewMixin, FilteredDocumentListView):
     context_object_name = "documents"
     paginate_by = 20
     model = GenericDocument
-
-
 
 
 @registry.register_doc_type("generic_document")
