@@ -1,4 +1,4 @@
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 
 from africanlii.models import Legislation
 from africanlii.registry import registry
