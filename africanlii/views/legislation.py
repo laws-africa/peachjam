@@ -6,7 +6,7 @@ from africanlii.views.generic_views import FilteredDocumentListView
 from peachjam.views import AuthedViewMixin
 
 
-class LegislationListView(AuthedViewMixin, ListView, FilteredDocumentListView):
+class LegislationListView(AuthedViewMixin, FilteredDocumentListView):
     model = Legislation
     template_name = "africanlii/legislation_list.html"
     context_object_name = "documents"
