@@ -7,11 +7,8 @@
 <section class="pb-5 pt-5">
   <div class="container">
     <p>
-      We power LIIs in X countries hosting Y documents and serving Z million users a year. We help individuals, organizations,
-      and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond.
-    </p>
-    <p>
-      The site is based on a series of indexes and collections.
+      We power open access to African law in 15 countries hosting over 500,000 documents and serving millions of users
+      every year. We capacitate African governments to publish their law and reach the people of Africa and beyond.
     </p>
 
     <div class="row">
@@ -35,96 +32,29 @@
 </section>
 <div class="pb-5 pt-5 bg-light">
   <div class="container">
-    <h2 class="mb-4 heading-underlined">Recent Judgements</h2>
-      {% if recent_judgments %}
-        {% for object in recent_judgments %}
-          <a class="mb-2 pill-link" href="{% url 'judgment_detail' object.id %}">
-            <div class="pill-link__body">
-              {{ object.title }}
-            </div>
-            <div class="pill-link__icon">
-              <i class="text-white bi bi-book"></i>
-            </div>
-          </a>
-        {% endfor %}
-      <a class="btn btn-primary text-white" href="{% url 'judgment_list' %}">View more Judgements</a>
-      {% else %}
-        <p>{% trans 'No documents found.' %}</p>
-      {% endif %}
+    <h2 class="mb-4 heading-underlined">Recent Judgments</h2>
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text='View more Judgements' view_more_url_name='judgment_list' %}
   </div>
 </div>
 
 <div class="pb-5 pt-5">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent AU Documents</h2>
-    {% if recent_documents %}
-      {% for object in recent_documents %}
-        <a class="mb-2 pill-link" href="{% url 'generic_document_detail' object.id %}">
-          <div class="pill-link__body">
-            {{ object.title }}
-          </div>
-          <div class="pill-link__icon">
-            <i class="text-white bi bi-book"></i>
-          </div>
-        </a>
-      {% endfor %}
-      <a class="btn btn-primary text-white" href="{% url 'generic_document_list' %}">
-        View more AU Documents
-      </a>
-    {% else %}
-      <p>{% trans 'No documents found.' %}</p>
-    {% endif %}
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_documents  view_more_text='View more AU Documents' view_more_url_name='generic_document_list' %}
   </div>
 </div>
 
 <div class="pb-5 pt-5 bg-light">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent Legal Instruments</h2>
-    {% if recent_instruments %}
-      {% for object in recent_instruments %}
-        <a class="mb-2 pill-link" href="{% url 'legal_instrument_detail' object.id %}">
-          <div class="pill-link__body">
-            {{ object.title }}
-          </div>
-          <div class="pill-link__icon">
-            <i class="text-white bi bi-book"></i>
-          </div>
-        </a>
-      {% endfor %}
-      <a class="btn btn-primary text-white" href="{% url 'legal_instrument_list' %}">View more Legal Instruments</a>
-    {% else %}
-      <p>{% trans 'No documents found.' %}</p>
-    {% endif %}
-  </div>
-</div>
-
-<div class="pb-5 pt-5 bg-light">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">Recent treaties and protocols</h2>
-    {% if recent_legislation %}
-      {% for object in recent_legislation %}
-        <a class="mb-2 pill-link" href="{% url 'legislation_detail' object.id %}">
-          <div class="pill-link__body">
-            {{ object.title }}
-          </div>
-          <div class="pill-link__icon">
-            <i class="text-white bi bi-book"></i>
-          </div>
-        </a>
-      {% endfor %}
-      <a class="btn btn-primary text-white" href="{% url 'legislation_list' %}">View more Treaties and Protocols</a>
-    {% else %}
-      <p>{% trans 'No documents found.' %}</p>
-    {% endif %}
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_instruments view_more_text='View more Legal Instruments' view_more_url_name='legal_instrument_list' %}
   </div>
 </div>
 
 <div class="pb-5 pt-5">
   <div class="container">
-    <h2 class="mb-4 heading-underlined">Browse our collections</h2>
-    <div>
-      No collections available
-    </div>
+    <h2 class="mb-4 heading-underlined">Recent treaties and protocols</h2>
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text='View more Treaties and Protocols' view_more_url_name='legislation_list' %}
   </div>
 </div>
 {% endblock %}
