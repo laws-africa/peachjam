@@ -15,36 +15,6 @@
           Clear all
         </a>
       </li>
-      <li
-        v-if="authors.length"
-        class="list-group-item"
-      >
-        <div class="d-flex justify-content-between mb-2">
-          <strong>Author</strong>
-          <a
-            v-if="author"
-            href="#"
-            @click.prevent="clearFacet('author')"
-          >
-            Clear
-          </a>
-        </div>
-        <input
-          v-if="author"
-          name="author"
-          :value="author"
-          type="hidden"
-        >
-        <Multiselect
-          v-model="author"
-          name="author"
-          :options="authors"
-          :searchable="true"
-          placeholder="Filter by author"
-          :can-clear="false"
-          class="author-select"
-        />
-      </li>
       <li class="list-group-item">
         <div class="d-flex justify-content-between mb-2">
           <strong>Year</strong>
@@ -127,20 +97,11 @@
 
 <script>
 import { nextTick } from 'vue';
-import Multiselect from '@vueform/multiselect';
-import '@vueform/multiselect/themes/default.css';
 
 export default {
   name: 'ListFacets',
-  components: {
-    Multiselect
-  },
   props: {
     alphabet: {
-      type: Array,
-      default: () => []
-    },
-    authors: {
       type: Array,
       default: () => []
     },
@@ -150,12 +111,8 @@ export default {
     }
   },
   data: () => {
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const author = urlParams.get('author');
     return {
-      loading: false,
-      author
+      loading: false
     };
   },
 
@@ -167,7 +124,7 @@ export default {
       return this.getUrlParamValue('year');
     },
     showClearAllFilter () {
-      return this.alphabetParam.length || this.yearParam.length || this.author;
+      return this.alphabetParam.length || this.yearParam.length;
     }
   },
   watch: {
@@ -208,11 +165,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.author-select {
-  --ms-font-size: 14px;
-  --ms-option-font-size: 14px;
-}
-
-</style>
