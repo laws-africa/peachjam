@@ -1,5 +1,6 @@
-from africanlii.forms import BaseDocumentFilterForm
 from django.views.generic import ListView
+
+from africanlii.forms import BaseDocumentFilterForm
 
 
 class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
