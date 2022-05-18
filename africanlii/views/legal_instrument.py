@@ -20,7 +20,6 @@ class LegalInstrumentListView(AuthedViewMixin, FilteredDocumentListView):
         return self.form.filter_queryset(queryset)
 
 
-
 @registry.register_doc_type("legal_instrument")
 class LegalInstrumentDetailView(AuthedViewMixin, DetailView):
     model = LegalInstrument
