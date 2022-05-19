@@ -6,7 +6,7 @@
       <span>{{ object.date }}</span>
     </a>
   {% endfor %}
-  <a class="mt-3 btn btn-primary text-white" href="{{ view_more_url }}">
+  <a class="mt-3 btn btn-primary text-white" href="{% url view_more_url_name %}">
     {{ view_more_text }}
   </a>
 {% else %}
