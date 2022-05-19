@@ -15,7 +15,10 @@
           Clear all
         </a>
       </li>
-      <li class="list-group-item">
+      <li
+        v-if="years.length"
+        class="list-group-item"
+      >
         <div class="d-flex justify-content-between mb-2">
           <strong>Year</strong>
           <a
@@ -54,7 +57,10 @@
           />
         </div>
       </li>
-      <li class="list-group-item">
+      <li
+        v-if="alphabet.length"
+        class="list-group-item"
+      >
         <div class="d-flex justify-content-between mb-2">
           <strong>Alphabetical</strong>
           <div class="d-flex">
