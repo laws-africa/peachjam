@@ -3,6 +3,12 @@ from django.conf.urls.static import static
 from django.urls import include, path
 
 from africanlii import views
+from africanlii.feeds import (
+    GenericDocumentAtomSiteNewsFeed,
+    JudgmentAtomSiteNewsFeed,
+    LegalInstrumentAtomSiteNewsFeed,
+    LegislationAtomSiteNewsFeed,
+)
 
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),
@@ -29,6 +35,10 @@ urlpatterns = [
         views.DocumentSourceView.as_view(),
         name="document_source",
     ),
+    path("feeds/judgments.xml", JudgmentAtomSiteNewsFeed()),
+    path("feeds/generic_documents.xml", GenericDocumentAtomSiteNewsFeed()),
+    path("feeds/legal_instruments.xml", LegalInstrumentAtomSiteNewsFeed()),
+    path("feeds/legislation.xml", LegislationAtomSiteNewsFeed()),
 ]
 
 if settings.DEBUG:
