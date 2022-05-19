@@ -12,14 +12,6 @@ class JudgmentListView(AuthedViewMixin, FilteredDocumentListView):
     context_object_name = "documents"
     paginate_by = 20
 
-    def get_context_data(self, **kwargs):
-        context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
-        years = (
-            Judgment.objects.values_list("date__year", flat=True).order_by().distinct()
-        )
-        context["years"] = years
-        return context
-
 
 @registry.register_doc_type("judgment")
 class JudgmentDetailView(AuthedViewMixin, DetailView):
