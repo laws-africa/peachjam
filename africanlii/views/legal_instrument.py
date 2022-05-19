@@ -1,6 +1,5 @@
 from django.views.generic import DetailView
 
-from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import LegalInstrument
 from africanlii.registry import registry
 from africanlii.views.generic_views import FilteredDocumentListView
@@ -13,11 +12,15 @@ class LegalInstrumentListView(AuthedViewMixin, FilteredDocumentListView):
     context_object_name = "documents"
     paginate_by = 20
 
-    def get_queryset(self):
-        self.form = BaseDocumentFilterForm(self.request.GET)
-        self.form.is_valid()
-        queryset = LegalInstrument.objects.all()
-        return self.form.filter_queryset(queryset)
+    def get_context_data(self, **kwargs):
+        context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
+        years = (
+            LegalInstrument.objects.values_list("date__year", flat=True)
+            .order_by()
+            .distinct()
+        )
+        context["years"] = years
+        return context
 
 
 @registry.register_doc_type("legal_instrument")
