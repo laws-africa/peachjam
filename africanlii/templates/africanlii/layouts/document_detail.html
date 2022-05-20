@@ -9,6 +9,10 @@
       <h1 class="m-0">{{ document.title }}</h1>
     {% endblock %}
 
+    {% if user.is_staff %}
+      <a href="{{ document|admin_url:'change' }}">Edit</a>
+    {% endif %}
+
     {% block document-metadata %}
       <div class="card my-3">
         <div class="card-body">
@@ -33,9 +37,7 @@
                     {% for rel in relationships %}
                       <div>
                         ... {% translate rel.predicate.verb %}
-                        <a href="{% url 'document_detail' expression_frbr_uri=rel.object_document.expression_frbr_uri %}">
-                          {{ rel.object_document.title }}
-                        </a>
+                        <a href="{% url 'document_detail' expression_frbr_uri=rel.object_document.expression_frbr_uri %}">{{ rel.object_document.title }}</a>
                       </div>
                     {% endfor %}
                   {% endif %}
@@ -47,9 +49,7 @@
 
                     {% for rel in relationships %}
                       <div>
-                        <a href="{% url 'document_detail' expression_frbr_uri=rel.subject_document.expression_frbr_uri %}">
-                          {{ rel.subject_document.title }}
-                        </a>
+                        <a href="{% url 'document_detail' expression_frbr_uri=rel.subject_document.expression_frbr_uri %}">{{ rel.subject_document.title }}</a>
                         {% translate rel.predicate.reverse_verb %} this document.
                       </div>
                     {% endfor %}
