@@ -4,34 +4,28 @@
 {% block title %}{{ document.title }}{% endblock %}
 
 {% block page-content %}
-  <main class="container py-5">
+  <main class="container-fluid py-5">
     {% block document-title %}
       <h1 class="heading-underlined mb-4">{{ document.title }}</h1>
     {% endblock %}
 
-    <div class="lead mb-5">
+    <div class="mb-5">
       <div class="card">
         <div class="card-body">
           {% block document-metadata %}
             {% block document-metadata-content %}
-              {% if document.authoring_body %}
-                <dl class="row mb-0">
+              <dl class="row mb-0">
                   <dt class="col-4">Author</dt>
                   <dd class="col-8 text-muted">{{ document.authoring_body }}</dd>
                 </dl>
-              {% endif %}
-              {% if document.date %}
-                <dl class="row mb-0">
+              <dl class="row mb-0">
                   <dt class="col-4">Date</dt>
                   <dd class="col-8 text-muted">{{ document.date }}</dd>
                 </dl>
-              {% endif %}
-              {% if document.language %}
-                <dl class="row mb-0">
+              <dl class="row mb-0">
                     <dt class="col-4">Language</dt>
                     <dd class="col-8 text-muted">{{ document.language }}</dd>
                 </dl>
-              {% endif %}
             {% endblock %}
           {% endblock %}
         </div>
