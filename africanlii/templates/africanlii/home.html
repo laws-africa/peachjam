@@ -4,14 +4,11 @@
 {% block title %} Home {% endblock %}
 
 {% block page-content %}
-<div class="container pb-5 pt-5">
-  <section class="row">
+<section class="pb-5 pt-5">
+  <div class="container">
     <p>
-      We power LIIs in X countries hosting Y documents and serving Z million users a year. We help individuals, organizations,
-      and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond.
-    </p>
-    <p>
-      The site is based on a series of indexes and collections.
+      We power open access to African law in 15 countries hosting over 500,000 documents and serving millions of users
+      every year. We capacitate African governments to publish their law and reach the people of Africa and beyond.
     </p>
 
     <div class="row">
@@ -31,6 +28,33 @@
         </form>
       </div>
     </div>
-  </section>
+  </div>
+</section>
+<div class="pb-5 pt-5 bg-light">
+  <div class="container">
+    <h2 class="mb-4 heading-underlined">Recent Judgments</h2>
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text='View more Judgements' view_more_url_name='judgment_list' %}
+  </div>
+</div>
+
+<div class="pb-5 pt-5">
+  <div class="container">
+    <h2 class="mb-4 heading-underlined">Recent AU Documents</h2>
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_documents  view_more_text='View more AU Documents' view_more_url_name='generic_document_list' %}
+  </div>
+</div>
+
+<div class="pb-5 pt-5 bg-light">
+  <div class="container">
+    <h2 class="mb-4 heading-underlined">Recent Legal Instruments</h2>
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_instruments view_more_text='View more Legal Instruments' view_more_url_name='legal_instrument_list' %}
+  </div>
+</div>
+
+<div class="pb-5 pt-5">
+  <div class="container">
+    <h2 class="mb-4 heading-underlined">Recent treaties and protocols</h2>
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text='View more Treaties and Protocols' view_more_url_name='legislation_list' %}
+  </div>
 </div>
 {% endblock %}

@@ -4,17 +4,34 @@
 {% block title %}{{ document.title }}{% endblock %}
 
 {% block page-content %}
-  <main class="container-fluid py-3">
-    {% block page-title %}
-      <h1 class="m-0">{% trans 'Documents' %}</h1>
-    {% endblock %}
+  <main class="container py-3" data-component="DocumentList">
+    <div class="row">
+      <div class="col-md-3"></div>
+      <div class="col-md-9">
+        <div class="mb-2">
+          {% block page-title %}
+            <h1 class="m-0">{% trans 'Documents' %}</h1>
+          {% endblock %}
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3">
+        <div id="list-facets"></div>
+      </div>
+      <div class="col-md-9">
+        <div class="position-relative">
+          {% block content %}
+            {% if documents %}
+              {% include 'africanlii/_document_table.html'%}
+            {% else %}
+              <p>{% trans 'No documents found.' %}</p>
+            {% endif %}
+          {% endblock%}
+        </div>
+      </div>
+    </div>
 
-    {% block content %}
-      {% if documents %}
-        {% include 'africanlii/_document_table.html'%}
-      {% else %}
-        <p>{% trans 'No documents found.' %}</p>
-      {% endif %}
-    {% endblock%}
+    {{ facet_data|json_script:"facet-data" }}
   </main>
 {% endblock %}
