@@ -1,8 +1,13 @@
 <template>
   <li class="mb-4 hit">
-    <h5 class="mb-0">
+    <a
+      class="h5"
+      target="_blank"
+      rel="noreferrer"
+      :href="href"
+    >
       {{ item.title }}
-    </h5>
+    </a>
     <div>
       {{ item.matter_type }}
     </div>
@@ -17,7 +22,10 @@
       {{ item.jurisdiction }}
     </div>
     <div>
-      <span class="snippet" v-html="highlights(item)"/>
+      <span
+        class="snippet"
+        v-html="highlights(item)"
+      />
     </div>
   </li>
 </template>
@@ -31,6 +39,11 @@ export default {
       default () {
         return {};
       }
+    }
+  },
+  computed: {
+    href () {
+      return `/documents${this.item.expression_frbr_uri}/`;
     }
   },
   methods: {
