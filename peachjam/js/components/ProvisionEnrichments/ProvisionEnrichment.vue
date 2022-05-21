@@ -2,7 +2,12 @@
   <la-gutter-item :anchor.prop="anchorElement">
     <div class="card">
       <div class="card-body">
-        {{ enrichment.title }}
+        <p>
+          {{ enrichment.title }}
+        </p>
+        <div v-if="!readonly">
+          <button type="button" class="btn btn-sm btn-primary" @click="edit">Edit</button>
+        </div>
       </div>
     </div>
   </la-gutter-item>
@@ -13,7 +18,7 @@ import { markRange, targetToRange } from '@laws-africa/indigo-akn/dist/ranges';
 
 export default {
   name: 'ProvisionEnrichment',
-  props: ['enrichment', 'viewRoot', 'gutter'],
+  props: ['enrichment', 'viewRoot', 'gutter', 'readonly'],
   data: () => ({
     marks: [],
     anchorElement: null
@@ -48,6 +53,10 @@ export default {
         parent.removeChild(mark);
       });
       this.marks = [];
+    },
+
+    edit () {
+      this.$emit('edit', this.enrichment);
     }
   }
 };
