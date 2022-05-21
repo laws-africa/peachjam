@@ -1,7 +1,7 @@
 <template>
   <div>
     <relationship-enrichment
-      v-for="(enrichment) in enrichments"
+      v-for="enrichment in items"
       :key="enrichment.id"
       ref="gutter-item"
       :enrichment="enrichment"
@@ -9,14 +9,12 @@
       :gutter="gutter"
       :readonly="readonly"
       :this-work-frbr-uri="thisWorkFrbrUri"
-      @edit="edit"
+      @delete="deleteEnrichment(enrichment)"
     />
     <relationship-enrichment-modal
-      v-if="editing"
-      :enrichment="editing"
-      @delete="deleteEnrichment"
-      @save="saveEdits"
-      @close="closeModal"
+      v-if="creating"
+      :enrichment="creating"
+      @save="save"
     />
   </div>
 </template>
@@ -34,7 +32,7 @@ export default {
   props: {
     enrichments: {
       type: Array,
-      default: []
+      default: () => []
     },
     viewRoot: HTMLElement,
     gutter: HTMLElement,
@@ -44,9 +42,10 @@ export default {
       default: ''
     }
   },
-  data: () => {
+  data: (x) => {
     return {
-      editing: null
+      items: x.enrichments,
+      creating: null
     };
   },
   methods: {
@@ -58,35 +57,23 @@ export default {
       }
     },
 
-    edit (enrichment) {
-      this.editing = enrichment;
-    },
-
-    deleteEnrichment () {
+    deleteEnrichment (enrichment) {
       // TODO: delete from the server
-
-      const ix = this.enrichments.findIndex((e) => e.id === this.editing.id);
+      const ix = this.items.findIndex((e) => e.id === enrichment.id);
       if (ix > -1) {
         // eslint-disable-next-line vue/no-mutating-props
-        this.enrichments.splice(ix, 1);
+        this.items.splice(ix, 1);
       }
-      this.editing = null;
     },
 
-    saveEdits (enrichment) {
-      if (enrichment.id) {
-        // TODO: save to server
-        console.log('saving');
-      } else {
-        // it's new
-        // TODO: save to server
-        this.enrichments.push(enrichment);
-      }
-      this.editing = null;
+    save (enrichment) {
+      // TODO: save to server
+      this.items.push(enrichment);
+      this.creating = null;
     },
 
     closeModal () {
-      this.editing = null;
+      this.creating = null;
     }
   }
 };

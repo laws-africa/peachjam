@@ -2,19 +2,39 @@
   <la-gutter-item :anchor.prop="anchorElement">
     <div class="card">
       <div class="card-body">
-        <p v-if="isForwards">
+        <div
+          v-if="!readonly"
+          class="float-end"
+        >
+          <div class="dropdown">
+            <a
+              class="dropdown-toggle"
+              href="#"
+              data-bs-toggle="dropdown"
+            />
+            <ul class="dropdown-menu">
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  @click.prevent="remove"
+                >
+                  Delete
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div v-if="isForwards">
           This provision
           {{ enrichment.predicate.verb }}
           <a :href="`/documents${object_document.expression_frbr_uri}`">{{ object_document.title }}</a>.
-        </p>
-        <p v-else>
+        </div>
+        <div v-else>
           <a :href="`/documents${subject_document.expression_frbr_uri}`">{{ subject_document.title }}</a>.
           {{ enrichment.predicate.reverse_verb }}
           this provision.
-        </p>
-
-        <div v-if="!readonly">
-          <button type="button" class="btn btn-sm btn-primary" @click="edit">Edit</button>
         </div>
       </div>
     </div>
@@ -40,6 +60,7 @@ export default {
       default: ''
     }
   },
+  emits: ['delete'],
   data: () => ({
     marks: [],
     anchorElement: null
@@ -92,8 +113,10 @@ export default {
       this.marks = [];
     },
 
-    edit () {
-      this.$emit('edit', this.enrichment);
+    remove () {
+      if (confirm('Are you sure?')) {
+        this.$emit('delete', this.enrichment);
+      }
     }
   }
 };

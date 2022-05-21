@@ -12,7 +12,7 @@
         <form @submit.stop="save" ref="form">
           <div class="modal-header">
             <h5 class="modal-title">
-              {{ modalTitle }}
+              Add relationship
             </h5>
             <button
               type="button"
@@ -28,24 +28,14 @@
 
           <div class="modal-footer">
             <button
-              v-if="!isNew"
-              type="button"
-              class="btn btn-danger mr-3"
-              @click="deleteEnrichment"
-            >
-              Delete
-            </button>
-
-            <button
               type="button"
               class="btn btn-secondary"
               @click="close"
             >
-              Close
+              Cancel
             </button>
 
             <button
-              v-if="isNew"
               type="submit"
               class="btn btn-success"
             >
@@ -61,16 +51,13 @@
 <script>
 export default {
   name: 'RelationshipEnrichmentModal',
-  props: ['enrichment'],
-  emits: ['close', 'save', 'delete'],
-  computed: {
-    isNew () {
-      return this.enrichment.id === null;
-    },
-    modalTitle () {
-      return `${this.isNew ? 'Add' : 'Edit'} relationship enrichment`;
+  props: {
+    enrichment: {
+      type: Object,
+      default: null
     }
   },
+  emits: ['close', 'save'],
 
   mounted () {
     document.body.appendChild(this.$el);
@@ -84,23 +71,12 @@ export default {
   },
 
   methods: {
-    close () {
-      if (this.isNew) {
-        // new, don't save it
-        this.$emit('close');
-      } else {
-        this.save();
-      }
-    },
-
     save () {
       this.$emit('save', this.enrichment);
     },
 
-    deleteEnrichment () {
-      if (confirm('Are you sure?')) {
-        this.$emit('delete', this.enrichment);
-      }
+    close () {
+      this.$emit('close');
     }
   }
 };
