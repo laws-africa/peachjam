@@ -2,12 +2,13 @@
   <div>
     <relationship-enrichment
       v-for="(enrichment) in enrichments"
-      :key="key(enrichment)"
+      :key="enrichment.id"
       ref="gutter-item"
       :enrichment="enrichment"
       :view-root="viewRoot"
       :gutter="gutter"
       :readonly="readonly"
+      :this-work-frbr-uri="thisWorkFrbrUri"
       @edit="edit"
     />
     <relationship-enrichment-modal
@@ -23,7 +24,6 @@
 <script>
 import RelationshipEnrichment from './RelationshipEnrichment.vue';
 import RelationshipEnrichmentModal from './RelationshipEnrichmentModal.vue';
-let counter = -1;
 
 export default {
   name: 'RelationshipEnrichmentList',
@@ -31,23 +31,25 @@ export default {
     RelationshipEnrichmentModal,
     RelationshipEnrichment
   },
-  props: ['gutter', 'viewRoot', 'enrichments', 'readonly'],
+  props: {
+    enrichments: {
+      type: Array,
+      default: []
+    },
+    viewRoot: HTMLElement,
+    gutter: HTMLElement,
+    readonly: Boolean,
+    thisWorkFrbrUri: {
+      type: String,
+      default: ''
+    }
+  },
   data: () => {
     return {
       editing: null
     };
   },
   methods: {
-    key (enrichment) {
-      if (enrichment.id) {
-        return enrichment.id;
-      }
-      if (!enrichment._id) {
-        enrichment._id = --counter;
-      }
-      return enrichment._id;
-    },
-
     markAndAnchorAll () {
       if (this.$refs['gutter-item']) {
         this.$refs['gutter-item'].forEach(item => {

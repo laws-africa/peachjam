@@ -2,9 +2,17 @@
   <la-gutter-item :anchor.prop="anchorElement">
     <div class="card">
       <div class="card-body">
-        <p>
-          {{ enrichment.title }}
+        <p v-if="isForwards">
+          This provision
+          {{ enrichment.predicate.verb }}
+          <a :href="`/documents${object_document.expression_frbr_uri}`">{{ object_document.title }}</a>.
         </p>
+        <p v-else>
+          <a :href="`/documents${subject_document.expression_frbr_uri}`">{{ subject_document.title }}</a>.
+          {{ enrichment.predicate.reverse_verb }}
+          this provision.
+        </p>
+
         <div v-if="!readonly">
           <button type="button" class="btn btn-sm btn-primary" @click="edit">Edit</button>
         </div>
@@ -15,10 +23,23 @@
 
 <script>
 import { markRange, targetToRange } from '@laws-africa/indigo-akn/dist/ranges';
+import { bestDocument } from './enrichment';
 
 export default {
   name: 'RelationshipEnrichment',
-  props: ['enrichment', 'viewRoot', 'gutter', 'readonly'],
+  props: {
+    enrichment: {
+      type: Object,
+      default: null
+    },
+    viewRoot: HTMLElement,
+    gutter: HTMLElement,
+    readonly: Boolean,
+    thisWorkFrbrUri: {
+      type: String,
+      default: ''
+    }
+  },
   data: () => ({
     marks: [],
     anchorElement: null
@@ -33,11 +54,27 @@ export default {
     this.unmark();
   },
 
+  computed: {
+    isForwards () {
+      return this.enrichment.subject_work_frbr_uri === this.thisWorkFrbrUri;
+    },
+
+    object_document () {
+      return bestDocument(this.enrichment.object_documents, 'eng');
+    },
+
+    subject_document () {
+      return bestDocument(this.enrichment.subject_documents, 'eng');
+    }
+  },
+
   methods: {
     markAndAnchor () {
       this.unmark();
-      if (!this.enrichment.target) return;
-      const range = targetToRange(this.enrichment.target, this.viewRoot);
+      const target = {
+        anchor_id: this.isForwards ? this.enrichment.subject_target_id : this.enrichment.object_target_id
+      };
+      const range = targetToRange(target, this.viewRoot);
       if (!range) return;
       markRange(range, 'mark', mark => {
         this.marks.push(mark);
