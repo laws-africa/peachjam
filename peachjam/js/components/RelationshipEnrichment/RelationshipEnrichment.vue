@@ -17,7 +17,7 @@
 import { markRange, targetToRange } from '@laws-africa/indigo-akn/dist/ranges';
 
 export default {
-  name: 'ProvisionEnrichment',
+  name: 'RelationshipEnrichment',
   props: ['enrichment', 'viewRoot', 'gutter', 'readonly'],
   data: () => ({
     marks: [],

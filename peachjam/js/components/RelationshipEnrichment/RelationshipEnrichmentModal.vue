@@ -60,7 +60,7 @@
 
 <script>
 export default {
-  name: 'ProvisionEnrichmentModal',
+  name: 'RelationshipEnrichmentModal',
   props: ['enrichment'],
   emits: ['close', 'save', 'delete'],
   computed: {
@@ -68,7 +68,7 @@ export default {
       return this.enrichment.id === null;
     },
     modalTitle () {
-      return `${this.isNew ? 'Add' : 'Edit'} provision enrichment`;
+      return `${this.isNew ? 'Add' : 'Edit'} relationship enrichment`;
     }
   },
 

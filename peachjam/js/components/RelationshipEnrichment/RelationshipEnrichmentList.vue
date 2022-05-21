@@ -1,6 +1,6 @@
 <template>
   <div>
-    <provision-enrichment
+    <relationship-enrichment
       v-for="(enrichment) in enrichments"
       :key="key(enrichment)"
       ref="gutter-item"
@@ -10,7 +10,7 @@
       :readonly="readonly"
       @edit="edit"
     />
-    <provision-enrichment-modal
+    <relationship-enrichment-modal
       v-if="editing"
       :enrichment="editing"
       @delete="deleteEnrichment"
@@ -21,15 +21,15 @@
 </template>
 
 <script>
-import ProvisionEnrichment from './ProvisionEnrichment.vue';
-import ProvisionEnrichmentModal from './ProvisionEnrichmentModal.vue';
+import RelationshipEnrichment from './RelationshipEnrichment.vue';
+import RelationshipEnrichmentModal from './RelationshipEnrichmentModal.vue';
 let counter = -1;
 
 export default {
-  name: 'ProvisionEnrichmentList',
+  name: 'RelationshipEnrichmentList',
   components: {
-    ProvisionEnrichmentModal,
-    ProvisionEnrichment
+    RelationshipEnrichmentModal,
+    RelationshipEnrichment
   },
   props: ['gutter', 'viewRoot', 'enrichments', 'readonly'],
   data: () => {

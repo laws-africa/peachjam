@@ -1,12 +1,12 @@
 import { createApp, defineComponent, ComponentPublicInstance } from 'vue';
-import ProvisionEnrichmentList from './ProvisionEnrichmentList.vue';
-import { IProvisionEnrichment } from './enrichment';
+import RelationshipEnrichmentList from './RelationshipEnrichmentList.vue';
+import { IRelationshipEnrichment } from './enrichment';
 
-export class ProvisionEnrichments {
+export class RelationshipEnrichments {
   root: HTMLElement;
   gutter: Element | null;
   akn: Element | null;
-  enrichments: IProvisionEnrichment[];
+  enrichments: IRelationshipEnrichment[];
   listComponent: ComponentPublicInstance;
 
   constructor (root: HTMLElement) {
@@ -23,7 +23,7 @@ export class ProvisionEnrichments {
     }];
 
     // @ts-ignore
-    this.listComponent = createApp(defineComponent(ProvisionEnrichmentList), {
+    this.listComponent = createApp(defineComponent(RelationshipEnrichmentList), {
       gutter: this.gutter,
       viewRoot: this.root,
       enrichments: this.enrichments,
