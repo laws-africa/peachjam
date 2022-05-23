@@ -15,6 +15,11 @@ urlpatterns = [
         name="legal_instrument_list",
     ),
     path(
+        "about/",
+        views.AboutPageView.as_view(),
+        name="about",
+    ),
+    path(
         "generic_documents/",
         views.GenericDocumentListView.as_view(),
         name="generic_document_list",
