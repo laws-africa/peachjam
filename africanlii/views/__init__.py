@@ -1,4 +1,5 @@
 # flake8: noqa
+from .about import *
 from .documents import *
 from .generic_document import *
 from .home import *
