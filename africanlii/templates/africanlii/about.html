@@ -1,0 +1,45 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+
+{% block title %} About {% endblock %}
+
+{% block page-content %}
+<section class="py-5">
+  <div class="container">
+    <h1 class="mb-4">About</h1>
+    <p>
+      AfricanLII is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University of Cape Town.
+      We help individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond.
+      We convene a network of 16 African LIIs - a collaborative group of organizations and individuals in Africa, dedicated to free access to law on our continent.
+    </p>
+    <p class="mb-4">
+      Free Access to Law, or LII, websites are indispensable sources of legal information for the justice sector and citizens of the countries LIIs serve.
+      Often, there is no commercial alternative. We also provide a Pan-African legal search engine and host regional legal materials for free access.
+    </p>
+    <div>
+      To find out more about this project, feel free to send us an email:
+    </div>
+    <div class="mb-4">
+      <a href="mailto:info@laws.africa">info@laws.africa</a>
+    </div>
+
+    <h2 class="mb-4">Our partners</h2>
+    <div class="row mt-5">
+        <div class="offset-md-3 col-md-3 mt-3 text-center align-self-center">
+          <a href="https://laws.africa"
+             target="_blank"
+          >
+            <img src="/static/images/laws-africa-logo.png" height="140px" alt="Laws.Africa logo">
+          </a>
+        </div>
+        <div class="col-md-3 mt-3 text-center">
+          <a href="https://africanlii.org"
+             target="_blank"
+          >
+            <img src="/static/images/africanlii-logo.svg" height="140px" alt="AfricanLII logo"></a>
+        </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
