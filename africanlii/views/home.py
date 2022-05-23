@@ -2,7 +2,14 @@ from itertools import chain
 
 from django.views.generic import TemplateView
 
-from africanlii.models import GenericDocument, Judgment, LegalInstrument, Legislation
+from africanlii.models import (
+    AuthoringBody,
+    Court,
+    GenericDocument,
+    Judgment,
+    LegalInstrument,
+    Legislation,
+)
 from peachjam.views import AuthedViewMixin
 
 
@@ -15,24 +22,20 @@ class HomePageView(AuthedViewMixin, TemplateView):
         recent_documents = GenericDocument.objects.order_by("-date")[:5]
         recent_instruments = LegalInstrument.objects.order_by("-date")[:5]
         recent_legislation = Legislation.objects.order_by("-date")[:5]
-        documents_count = GenericDocument.objects.all().count()
+        documents_count = GenericDocument.objects.count()
 
-        judgments_authors = Judgment.objects.values("id", "court__name").distinct()
-        documents_authors = GenericDocument.objects.values(
-            "id", "authoring_body__name"
-        ).distinct()
-        legal_instruments_authors = LegalInstrument.objects.values(
-            "id", "authoring_body__name"
-        ).distinct()
-        authors = list(
-            chain(judgments_authors, documents_authors, legal_instruments_authors)
-        )
+        # Judgments have courts as their authors. Querying the Courts should suffice.
+        judgments_authors = Court.objects.values("id", "name")
 
-        context["authors"] = authors
-        context["documents_count"] = documents_count
+        # CoreDocuments have the AuthoringBody as the author. Querying the AuthoringBody model should suffice
+        core_documents_authors = AuthoringBody.objects.values("id", "name")
+        authors = list(chain(judgments_authors, core_documents_authors))
 
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents
         context["recent_instruments"] = recent_instruments
         context["recent_legislation"] = recent_legislation
+        context["documents_count"] = documents_count
+        context["authors"] = authors
+
         return self.render_to_response(context)
