@@ -14,18 +14,16 @@
         <div class="card-body">
           {% block document-metadata %}
             {% block document-metadata-content %}
-              <dl class="row mb-0">
+              <dl class="row">
+                {% if document.authoring_body %}
                   <dt class="col-4">Author</dt>
                   <dd class="col-8 text-muted">{{ document.authoring_body }}</dd>
-                </dl>
-              <dl class="row mb-0">
-                  <dt class="col-4">Date</dt>
-                  <dd class="col-8 text-muted">{{ document.date }}</dd>
-                </dl>
-              <dl class="row mb-0">
-                    <dt class="col-4">Language</dt>
-                    <dd class="col-8 text-muted">{{ document.language }}</dd>
-                </dl>
+                {% endif %}
+                <dt class="col-4">Date</dt>
+                <dd class="col-8 text-muted">{{ document.date }}</dd>
+                <dt class="col-4">Language</dt>
+                <dd class="col-8 text-muted">{{ document.language }}</dd>
+              </dl>
             {% endblock %}
           {% endblock %}
         </div>
