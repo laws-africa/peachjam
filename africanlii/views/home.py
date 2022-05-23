@@ -13,7 +13,9 @@ class HomePageView(AuthedViewMixin, TemplateView):
         recent_documents = GenericDocument.objects.order_by("-date")[:5]
         recent_instruments = LegalInstrument.objects.order_by("-date")[:5]
         recent_legislation = Legislation.objects.order_by("-date")[:5]
+        documents_count = GenericDocument.objects.all().count()
 
+        context["documents_count"] = documents_count
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents
         context["recent_instruments"] = recent_instruments
