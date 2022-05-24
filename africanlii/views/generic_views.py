@@ -23,6 +23,15 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
         )
         context["facet_data"] = {
             "years": years,
+            "authors": [
+                {"name": "Hope", "id": 1},
+                {
+                    "name": "Kain",
+                    "id": 2,
+                },
+                {"name": "Jen", "id": 3},
+                {"name": "Musango", "id": 4},
+            ],
             "alphabet": [
                 "a",
                 "b",
