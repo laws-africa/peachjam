@@ -39,6 +39,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
+    "@vueform/multiselect": "^2.3.4",
     "dom-anchor-text-position": "^5.0.0",
     "dom-anchor-text-quote": "^4.0.2",
     "lodash": "^4.17.21",
