@@ -16,7 +16,10 @@ class RelationshipDocumentSerializer(serializers.ModelSerializer):
 
 
 class RelationshipSerializer(serializers.ModelSerializer):
-    predicate = PredicateSerializer()
+    predicate = PredicateSerializer(read_only=True)
+    predicate_id = serializers.PrimaryKeyRelatedField(
+        write_only=True, source="predicate", queryset=Predicate.objects.all()
+    )
     object_documents = RelationshipDocumentSerializer(many=True, read_only=True)
     subject_documents = RelationshipDocumentSerializer(many=True, read_only=True)
 
@@ -29,6 +32,7 @@ class RelationshipSerializer(serializers.ModelSerializer):
             "object_work_frbr_uri",
             "object_target_id",
             "predicate",
+            "predicate_id",
             "subject_documents",
             "object_documents",
         ]

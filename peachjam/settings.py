@@ -303,6 +303,14 @@ GOOGLE_SERVICE_ACCOUNT_CREDENTIALS = {
     "client_x509_cert_url": os.environ.get("GOOGLE_CLIENT_X509_CERT_URL", ""),
 }
 
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication"
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissions"],
+}
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

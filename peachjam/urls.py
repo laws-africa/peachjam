@@ -20,4 +20,5 @@ urlpatterns = [
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
+    path("api/v1/", include("peachjam_api.urls")),
 ]
