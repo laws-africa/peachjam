@@ -30,15 +30,15 @@
           This provision
           {{ enrichment.predicate.verb }}
           <a
-            v-if="object_document"
-            :href="`/documents${object_document.expression_frbr_uri}`"
-          >{{ object_document.title }}</a><span v-else>{{ enrichment.object_work_frbr_uri}}</span>.
+            v-if="objectDocument"
+            :href="`/documents${objectDocument.expression_frbr_uri}`"
+          >{{ objectDocument.title }}</a><span v-else>{{ enrichment.object_work.frbr_uri }} xx</span>.
         </div>
         <div v-else>
           <a
-            v-if="subject_document"
-            :href="`/documents${subject_document.expression_frbr_uri}`"
-          >{{ subject_document.title }}</a><span v-else>{{ enrichment.subject_work_frbr_uri }}</span>.
+            v-if="subjectDocument"
+            :href="`/documents${subjectDocument.expression_frbr_uri}`"
+          >{{ subjectDocument.title }}</a><span v-else>{{ enrichment.subject_work.frbr_uri }}</span>.
           {{ enrichment.predicate.reverse_verb }}
           this provision.
         </div>
@@ -83,14 +83,14 @@ export default {
 
   computed: {
     isForwards () {
-      return this.enrichment.subject_work_frbr_uri === this.thisWorkFrbrUri;
+      return this.enrichment.subject_work.frbr_uri === this.thisWorkFrbrUri;
     },
 
-    object_document () {
+    objectDocument () {
       return bestDocument(this.enrichment.object_documents, 'eng');
     },
 
-    subject_document () {
+    subjectDocument () {
       return bestDocument(this.enrichment.subject_documents, 'eng');
     }
   },

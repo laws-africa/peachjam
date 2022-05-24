@@ -3,21 +3,34 @@ export interface IRelationshipEnrichmentDocument {
   // eslint-disable-next-line camelcase
   expression_frbr_uri: string;
   language: string;
+  language3: string;
   date: string;
+}
+
+export interface IRelationshipEnrichmentWork {
+  // eslint-disable-next-line camelcase
+  frbr_uri: string;
+}
+
+export interface IRelationshipPredicate {
+  id: number;
+  verb: string;
+  // eslint-disable-next-line camelcase
+  reverse_verb: string;
 }
 
 export interface IRelationshipEnrichment {
   id: number;
-  predicate: object;
+  predicate: IRelationshipPredicate;
   // eslint-disable-next-line camelcase
-  subject_work_frbr_uri: string;
+  subject_work: IRelationshipEnrichmentWork;
   // eslint-disable-next-line camelcase
   subject_target_id: string | null;
   // eslint-disable-next-line camelcase
   subject_documents: IRelationshipEnrichmentDocument[];
 
   // eslint-disable-next-line camelcase
-  object_work_frbr_uri: string;
+  object_work: IRelationshipEnrichmentWork;
   // eslint-disable-next-line camelcase
   object_target_id: string | null;
   // eslint-disable-next-line camelcase
@@ -33,5 +46,5 @@ export function bestDocument (docs: IRelationshipEnrichmentDocument[], language:
   const sorted = [...docs].sort((a, b) => -a.date.localeCompare(b.date));
 
   // find the first doc in our language, or fall back to the first doc
-  return sorted.find(d => d.language === language) || sorted[0];
+  return sorted.find(d => d.language3 === language) || sorted[0];
 }

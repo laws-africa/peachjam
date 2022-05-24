@@ -25,6 +25,10 @@ class Locality(models.Model):
         return f"{self.name}"
 
 
+class Work(models.Model):
+    frbr_uri = models.CharField(max_length=1024, null=False, blank=False, unique=True)
+
+
 class CoreDocument(models.Model):
     DOC_TYPE_CHOICES = (
         ("core_document", "Core Document"),
@@ -34,6 +38,9 @@ class CoreDocument(models.Model):
         ("judgment", "Judgment"),
     )
 
+    work = models.ForeignKey(
+        Work, null=False, on_delete=models.PROTECT, related_name="documents"
+    )
     doc_type = models.CharField(
         max_length=255,
         choices=DOC_TYPE_CHOICES,
@@ -93,6 +100,13 @@ class CoreDocument(models.Model):
     def save(self, *args, **kwargs):
         if not self.expression_frbr_uri:
             self.expression_frbr_uri = self.generate_expression_frbr_uri()
+
+        # ensure a matching work exists
+        if self.work_frbr_uri and (
+            not self.work or self.work.frbr_uri != self.work_frbr_uri
+        ):
+            self.work, _ = Work.objects.get_or_create(frbr_uri=self.work_frbr_uri)
+
         return super().save(*args, **kwargs)
 
     @cached_property
@@ -100,14 +114,18 @@ class CoreDocument(models.Model):
         """Returns a list of relationships where this work is the subject."""
         from peachjam.models import Relationship
 
-        return Relationship.for_subject_document(self).load_object_documents()
+        return Relationship.for_subject_document(self).prefetch_related(
+            "subject_work", "subject_work__documents"
+        )
 
     @cached_property
     def relationships_as_object(self):
         """Returns a list of relationships where this work is the subject."""
         from peachjam.models import Relationship
 
-        return Relationship.for_object_document(self).load_subject_documents()
+        return Relationship.for_object_document(self).prefetch_related(
+            "object_work", "object_work__documents"
+        )
 
 
 def file_location(instance, filename):

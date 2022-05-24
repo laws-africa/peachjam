@@ -29,15 +29,27 @@ class LegislationDetailView(AuthedViewMixin, DetailView):
         # provision relationships
         rels = [
             r
-            for r in Relationship.for_subject_document(context["document"])
+            for r in Relationship.for_subject_document(
+                context["document"]
+            ).prefetch_related(
+                "subject_work",
+                "subject_work__documents",
+                "object_work",
+                "object_work__documents",
+            )
             if r.subject_target_id
         ] + [
             r
-            for r in Relationship.for_object_document(context["document"])
+            for r in Relationship.for_object_document(
+                context["document"]
+            ).prefetch_related(
+                "subject_work",
+                "subject_work__documents",
+                "object_work",
+                "object_work__documents",
+            )
             if r.object_target_id
         ]
-        Relationship.load_object_documents(rels)
-        Relationship.load_subject_documents(rels)
         context["provision_relationships"] = RelationshipSerializer(
             rels, many=True
         ).data
