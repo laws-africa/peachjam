@@ -29,6 +29,11 @@ urlpatterns = [
         views.DocumentSourceView.as_view(),
         name="document_source",
     ),
+    path(
+        "authors/<author_name>/<int:pk>/",
+        views.AuthorListView.as_view(),
+        name="author_list",
+    ),
 ]
 
 if settings.DEBUG:

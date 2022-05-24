@@ -1,0 +1,6 @@
+<h1>Author Detail</h1>
+{% for document in documents %}
+    <div>
+        {{ document.pk }} - {{ document.title }}
+    </div>
+{% endfor %}
