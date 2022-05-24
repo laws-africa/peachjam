@@ -3,7 +3,9 @@ from django.views.generic import DetailView
 from africanlii.models import Legislation
 from africanlii.registry import registry
 from africanlii.views.generic_views import FilteredDocumentListView
+from peachjam.models import Relationship
 from peachjam.views import AuthedViewMixin
+from peachjam_api.serializers import RelationshipSerializer
 
 
 class LegislationListView(AuthedViewMixin, FilteredDocumentListView):
@@ -20,3 +22,24 @@ class LegislationDetailView(AuthedViewMixin, DetailView):
     slug_url_kwarg = "expression_frbr_uri"
     template_name = "africanlii/legislation_detail.html"
     context_object_name = "document"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # provision relationships
+        rels = [
+            r
+            for r in Relationship.for_subject_document(context["document"])
+            if r.subject_target_id
+        ] + [
+            r
+            for r in Relationship.for_object_document(context["document"])
+            if r.object_target_id
+        ]
+        Relationship.load_object_documents(rels)
+        Relationship.load_subject_documents(rels)
+        context["provision_relationships"] = RelationshipSerializer(
+            rels, many=True
+        ).data
+
+        return context

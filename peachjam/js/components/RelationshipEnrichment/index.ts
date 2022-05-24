@@ -13,32 +13,13 @@ export class RelationshipEnrichments {
     this.root = root;
     this.gutter = root.querySelector('la-gutter');
     this.akn = root.querySelector('la-akoma-ntoso');
-    // TODO
-    this.enrichments = [{
-      id: 1,
-      subject_work_frbr_uri: '/akn/foo',
-      subject_target_id: null,
-      subject_documents: [{
-        title: 'Foo document (ger)',
-        expression_frbr_uri: '/akn/foo/ger@1910-01-01',
-        language: 'ger',
-        date: '1909-01-01'
-      }, {
-        title: 'Foo document (fre)',
-        expression_frbr_uri: '/akn/foo/fre@1910-01-01',
-        language: 'fre',
-        date: '1910-01-01'
-      }],
-      predicate: {
-        id: 1,
-        name: 'gives effect to',
-        verb: 'gives effect to',
-        reverse_verb: 'is effected by'
-      },
-      object_work_frbr_uri: '/akn/aa-au/act/charter/1990/rights-and-welfare-of-the-child',
-      object_target_id: 'part_I-Rightsandduties__chp_One__art_I__para_1',
-      object_documents: []
-    }];
+
+    const node = document.getElementById('provision-relationships');
+    if (node) {
+      this.enrichments = JSON.parse(node.innerText || '[]');
+    } else {
+      this.enrichments = [];
+    }
 
     // @ts-ignore
     this.listComponent = createApp(defineComponent(RelationshipEnrichmentList), {

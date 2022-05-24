@@ -29,10 +29,16 @@
         <div v-if="isForwards">
           This provision
           {{ enrichment.predicate.verb }}
-          <a :href="`/documents${object_document.expression_frbr_uri}`">{{ object_document.title }}</a>.
+          <a
+            v-if="object_document"
+            :href="`/documents${object_document.expression_frbr_uri}`"
+          >{{ object_document.title }}</a><span v-else>{{ enrichment.object_work_frbr_uri}}</span>.
         </div>
         <div v-else>
-          <a :href="`/documents${subject_document.expression_frbr_uri}`">{{ subject_document.title }}</a>.
+          <a
+            v-if="subject_document"
+            :href="`/documents${subject_document.expression_frbr_uri}`"
+          >{{ subject_document.title }}</a><span v-else>{{ enrichment.subject_work_frbr_uri }}</span>.
           {{ enrichment.predicate.reverse_verb }}
           this provision.
         </div>
