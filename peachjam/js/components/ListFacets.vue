@@ -64,7 +64,7 @@
       >
         <div class="d-flex justify-content-between mb-2">
           <strong>Authors</strong>
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
             <a
               v-if="authorParam.length"
               href="#"
@@ -74,7 +74,7 @@
             </a>
             <span
               v-if="loading"
-              class="circle-loader mx-2"
+              class="circle-loader ms-2"
             />
           </div>
         </div>
