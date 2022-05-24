@@ -307,6 +307,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "loggers": {
         "africanlii": {"handlers": ["console"], "level": "DEBUG"},
+        "peachjam": {"handlers": ["console"], "level": "DEBUG"},
     },
     "handlers": {
         "console": {
