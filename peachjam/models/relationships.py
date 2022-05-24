@@ -52,11 +52,21 @@ class RelationshipQuerySet(models.QuerySet):
 
 class Relationship(models.Model):
     subject_work_frbr_uri = models.CharField(max_length=1024)
+    subject_target_id = models.CharField(max_length=1024)
+
     object_work_frbr_uri = models.CharField(max_length=1024)
+    object_target_id = models.CharField(max_length=1024)
+
     predicate = models.ForeignKey(Predicate, on_delete=models.PROTECT)
 
     class Meta:
-        unique_together = ("subject_work_frbr_uri", "object_work_frbr_uri", "predicate")
+        unique_together = (
+            "subject_work_frbr_uri",
+            "subject_target_id",
+            "object_work_frbr_uri",
+            "object_target_id",
+            "predicate",
+        )
 
     objects = RelationshipQuerySet.as_manager()
 
