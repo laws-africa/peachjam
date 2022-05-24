@@ -33,7 +33,7 @@ class DocumentSourceView(AuthedViewMixin, DetailView):
     slug_url_kwarg = "expression_frbr_uri"
 
     def render_to_response(self, context, **response_kwargs):
-        if self.object.source_file and self.object.source_file.file:
+        if hasattr(self.object, "source_file") and self.object.source_file.file:
             # TODO: ensure it's PDF
             return FileResponse(
                 self.object.source_file.file.open(),

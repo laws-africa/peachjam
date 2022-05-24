@@ -4,26 +4,30 @@
 {% block title %}{{ document.title }}{% endblock %}
 
 {% block page-content %}
-  <main class="container-fluid py-3">
+  <main class="container-fluid py-5">
     {% block document-title %}
-      <h1 class="m-0">{{ document.title }}</h1>
+      <h1 class="heading-underlined mb-4">{{ document.title }}</h1>
     {% endblock %}
 
     {% if user.is_staff %}
       <a href="{{ document|admin_url:'change' }}">Edit</a>
     {% endif %}
 
-    {% block document-metadata %}
-      <div class="card my-3">
+    <div class="mb-5">
+      <div class="card">
         <div class="card-body">
-          <div class="row">
+          {% block document-metadata %}
             <div class="col-md-6">
               {% block document-metadata-content %}
-                <dl class="row mb-0">
-                  {% for field, value in document.get_all_values.items %}
-                  <dt class="col-4">{{ field | title }}</dt>
-                  <dd class="col-8">{{ value }}</dd>
-                  {% endfor %}
+                <dl class="row">
+                  {% if document.authoring_body %}
+                    <dt class="col-4">Author</dt>
+                    <dd class="col-8 text-muted">{{ document.authoring_body }}</dd>
+                  {% endif %}
+                  <dt class="col-4">Date</dt>
+                  <dd class="col-8 text-muted">{{ document.date }}</dd>
+                  <dt class="col-4">Language</dt>
+                  <dd class="col-8 text-muted">{{ document.language }}</dd>
                 </dl>
               {% endblock %}
             </div>
@@ -57,10 +61,10 @@
                 {% endwith %}
               {% endblock %}
             </div>
-          </div>
+          {% endblock %}
         </div>
       </div>
-    {% endblock %}
+    </div>
 
     {% if document.content_html_is_akn %}
       <div class="row">

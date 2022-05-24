@@ -1,11 +1,15 @@
 import FindDocuments from './FindDocuments/index.vue';
 import PdfRenderer from './pdf-renderer';
 import { RelationshipEnrichments } from './RelationshipEnrichment';
+import DocumentList from './document-list';
 
 const components: Record<string, any> = {
-  FindDocuments,
+  // Data components
   PdfRenderer,
-  RelationshipEnrichments
+  DocumentList,
+  RelationshipEnrichments,
+  // Vue components
+  FindDocuments
 };
 
 export default components;

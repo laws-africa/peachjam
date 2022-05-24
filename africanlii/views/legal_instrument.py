@@ -1,11 +1,12 @@
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 
 from africanlii.models import LegalInstrument
 from africanlii.registry import registry
+from africanlii.views.generic_views import FilteredDocumentListView
 from peachjam.views import AuthedViewMixin
 
 
-class LegalInstrumentListView(AuthedViewMixin, ListView):
+class LegalInstrumentListView(AuthedViewMixin, FilteredDocumentListView):
     model = LegalInstrument
     template_name = "africanlii/legal_instrument_list.html"
     context_object_name = "documents"
