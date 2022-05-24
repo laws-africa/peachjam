@@ -43,7 +43,6 @@
           <div class="form-check">
             <input
               :id="year"
-              ref="yearInput"
               class="form-check-input"
               type="checkbox"
               name="year"
@@ -58,6 +57,41 @@
             </label>
           </div>
         </div>
+      </li>
+      <li
+        v-if="authors.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Authors</strong>
+          <div class="d-flex">
+            <a
+              v-if="authorParam.length"
+              href="#"
+              @click.prevent="clearFacet('author')"
+            >
+              Clear
+            </a>
+            <span
+              v-if="loading"
+              class="circle-loader mx-2"
+            />
+          </div>
+        </div>
+        <input
+          ref="hidden-author-input"
+          type="hidden"
+          name="author"
+        >
+        <Multiselect
+          v-model="author"
+          :options="authorsOptions"
+          :searchable="true"
+          :can-clear="false"
+          placeholder="Filter by author"
+          class="author-select"
+          @change="handleAuthorChange"
+        />
       </li>
       <li
         v-if="alphabet.length"
@@ -106,9 +140,19 @@
 <script>
 import { nextTick } from 'vue';
 
+import Multiselect from '@vueform/multiselect';
+import '@vueform/multiselect/themes/default.css';
+
 export default {
   name: 'ListFacets',
+  components: {
+    Multiselect
+  },
   props: {
+    authors: {
+      type: Array,
+      default: () => []
+    },
     alphabet: {
       type: Array,
       default: () => []
@@ -120,7 +164,8 @@ export default {
   },
   data: () => {
     return {
-      loading: false
+      loading: false,
+      author: null
     };
   },
 
@@ -131,15 +176,24 @@ export default {
     yearParam () {
       return this.getUrlParamValue('year');
     },
+    authorParam () {
+      return this.getUrlParamValue('author');
+    },
     showClearAllFilter () {
-      return this.alphabetParam.length || this.yearParam.length;
+      return this.alphabetParam.length || this.yearParam.length || this.authorParam.length;
+    },
+    authorsOptions () {
+      return this.authors.map(author => ({
+        label: author.name,
+        value: author.id
+      }));
     }
   },
-  watch: {
-    author () {
-      nextTick().then(() => {
-        this.submit();
-      });
+
+  mounted () {
+    if (this.authorParam.length) {
+      this.$refs['hidden-author-input'].value = this.authorParam[0];
+      this.author = this.authorParam[0];
     }
   },
   methods: {
@@ -165,11 +219,29 @@ export default {
       const urlParams = new URLSearchParams(queryString);
       return urlParams.getAll(key);
     },
+    handleAuthorChange (id) {
+      this.$refs['hidden-author-input'].value = id;
+      nextTick().then(() => this.submit());
+    },
     submit () {
       this.loading = true;
       // On submit page refreshes
+      // Prevention of empty query params
+      for (const input of this.$refs.form.querySelectorAll('input')) {
+        if (!input.value) input.setAttribute('disabled', '');
+      }
       this.$refs.form.submit();
     }
   }
 };
 </script>
+
+<style scoped>
+.author-select {
+  --ms-font-size: 14px;
+  --ms-option-font-size: 14px;
+  --ms-ring-color: none;
+  --ms-option-bg-selected: var(--bs-primary);
+  --ms-option-bg-selected-pointed: var(--bs-primary);
+}
+</style>
