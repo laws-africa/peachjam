@@ -21,13 +21,19 @@
       >
         <div class="d-flex justify-content-between mb-2">
           <strong>Year</strong>
-          <a
-            v-if="yearParam.length"
-            href="#"
-            @click.prevent="clearFacet('year')"
-          >
-            Clear
-          </a>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="yearParam.length"
+              href="#"
+              @click.prevent="clearFacet('year')"
+            >
+              Clear
+            </a>
+            <div
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
         </div>
         <div
           v-for="(year, index) in years"
@@ -51,10 +57,6 @@
               {{ year }}
             </label>
           </div>
-          <div
-            v-if="loading"
-            class="circle-loader"
-          />
         </div>
       </li>
       <li
@@ -63,7 +65,7 @@
       >
         <div class="d-flex justify-content-between mb-2">
           <strong>Alphabetical</strong>
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
             <a
               v-if="alphabetParam.length"
               href="#"
@@ -73,7 +75,7 @@
             </a>
             <span
               v-if="loading"
-              class="circle-loader mx-2"
+              class="circle-loader ms-2"
             />
           </div>
         </div>
@@ -142,7 +144,7 @@ export default {
   },
   methods: {
     yearInputChecked (value) {
-      return this.yearParam.includes(value);
+      return this.yearParam.includes(value.toString());
     },
     alphabetInputChecked (value) {
       return this.alphabetParam.includes(value);
