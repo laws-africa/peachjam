@@ -6,7 +6,9 @@
 {% block page-content %}
   <main class="container py-3" data-component="DocumentList">
     <div class="row">
-      <div class="col-md-3"></div>
+      {% if not "/authors/" in request.path %}
+        <div class="col-md-3"></div>
+      {% endif %}
       <div class="col-md-9">
         <div class="mb-2">
           {% block page-title %}
@@ -16,9 +18,12 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-3">
-        <div id="list-facets"></div>
-      </div>
+      {% if not "/authors/" in request.path %}
+        <div class="col-md-3">
+          <div id="list-facets"></div>
+        </div>
+      {% endif %}
+
       <div class="col-md-9">
         <div class="position-relative">
           {% block content %}
