@@ -93,11 +93,11 @@ class DocumentAdmin(admin.ModelAdmin):
                 request, model._meta, object_id
             )
 
-        form = RelationshipForm(obj, request.POST)
+        form = RelationshipForm(obj.work, request.POST)
         if request.method == "POST":
             if form.is_valid():
                 form.save()
-                form = RelationshipForm(obj)
+                form = RelationshipForm(obj.work)
 
         opts = model._meta
         context = {

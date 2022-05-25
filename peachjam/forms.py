@@ -1,26 +1,24 @@
 from django import forms
 
-from peachjam.models import CoreDocument, Relationship
+from peachjam.models import CoreDocument, Relationship, Work
 
 
 def work_choices():
     return [("", "---")] + [
-        (work_frbr_uri, title)
-        for title, work_frbr_uri in CoreDocument.objects.values_list(
-            "title", "work_frbr_uri"
-        )
-        .order_by("title")
-        .distinct()
+        (doc.work.pk, doc.title) for doc in CoreDocument.objects.order_by("title")
     ]
 
 
 class RelationshipForm(forms.ModelForm):
-    object_work_frbr_uri = forms.ChoiceField(choices=work_choices)
+    object_work = forms.ChoiceField(choices=work_choices)
 
     class Meta:
         model = Relationship
-        fields = ["predicate", "object_work_frbr_uri"]
+        fields = ["predicate", "object_work"]
 
-    def __init__(self, subject_doc, *args, **kwargs):
-        self.subject_doc = subject_doc
+    def __init__(self, subject_work, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.instance.subject_work = subject_work
+
+    def clean_object_work(self):
+        return Work.objects.get(pk=self.cleaned_data["object_work"])

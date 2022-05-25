@@ -17,53 +17,55 @@
       <div class="card">
         <div class="card-body">
           {% block document-metadata %}
-            <div class="col-md-6">
-              {% block document-metadata-content %}
-                <dl class="row">
-                  {% if document.authoring_body %}
-                    <dt class="col-4">Author</dt>
-                    <dd class="col-8 text-muted">{{ document.authoring_body }}</dd>
-                  {% endif %}
-                  <dt class="col-4">Date</dt>
-                  <dd class="col-8 text-muted">{{ document.date }}</dd>
-                  <dt class="col-4">Language</dt>
-                  <dd class="col-8 text-muted">{{ document.language }}</dd>
-                </dl>
-              {% endblock %}
-            </div>
+            <div class="row">
+              <div class="col-md-6">
+                {% block document-metadata-content %}
+                  <dl class="row">
+                    {% if document.authoring_body %}
+                      <dt class="col-4">Author</dt>
+                      <dd class="col-8 text-muted">{{ document.authoring_body }}</dd>
+                    {% endif %}
+                    <dt class="col-4">Date</dt>
+                    <dd class="col-8 text-muted">{{ document.date }}</dd>
+                    <dt class="col-4">Language</dt>
+                    <dd class="col-8 text-muted">{{ document.language }}</dd>
+                  </dl>
+                {% endblock %}
+              </div>
 
-            <div class="col-md-6">
-              {% block document-relationships-content %}
-                {% with document.relationships_as_subject as relationships %}
-                  {% if relationships %}
-                    <h5>{% translate 'This document' %}...</h5>
+              <div class="col-md-6">
+                {% block document-relationships-content %}
+                  {% with document.relationships_as_subject as relationships %}
+                    {% if relationships %}
+                      <h5>{% translate 'This document' %}...</h5>
 
-                    {% for rel in relationships %}
-                      {% if rel.object_document %}
-                        <div>
-                          ... {% translate rel.predicate.verb %}
-                          <a href="{% url 'document_detail' expression_frbr_uri=rel.object_document.expression_frbr_uri %}">{{ rel.object_document.title }}</a>
-                        </div>
-                      {% endif %}
-                    {% endfor %}
-                  {% endif %}
-                {% endwith %}
+                      {% for rel in relationships %}
+                        {% if rel.object_document %}
+                          <div>
+                            ... {% translate rel.predicate.verb %}
+                            <a href="{% url 'document_detail' expression_frbr_uri=rel.object_document.expression_frbr_uri %}">{{ rel.object_document.title }}</a>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+                  {% endwith %}
 
-                {% with document.relationships_as_object as relationships %}
-                  {% if relationships %}
-                    <h5>{% translate 'Related documents' %}</h5>
+                  {% with document.relationships_as_object as relationships %}
+                    {% if relationships %}
+                      <h5>{% translate 'Related documents' %}</h5>
 
-                    {% for rel in relationships %}
-                      {% if rel.subject_document %}
-                        <div>
-                          <a href="{% url 'document_detail' expression_frbr_uri=rel.subject_document.expression_frbr_uri %}">{{ rel.subject_document.title }}</a>
-                          {% translate rel.predicate.reverse_verb %} this document.
-                        </div>
-                      {% endif %}
-                    {% endfor %}
-                  {% endif %}
-                {% endwith %}
-              {% endblock %}
+                      {% for rel in relationships %}
+                        {% if rel.subject_document %}
+                          <div>
+                            <a href="{% url 'document_detail' expression_frbr_uri=rel.subject_document.expression_frbr_uri %}">{{ rel.subject_document.title }}</a>
+                            {% translate rel.predicate.reverse_verb %} this document.
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+                  {% endwith %}
+                {% endblock %}
+              </div>
             </div>
           {% endblock %}
         </div>

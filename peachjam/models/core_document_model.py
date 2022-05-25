@@ -22,11 +22,14 @@ class Locality(models.Model):
         unique_together = ["name", "jurisdiction"]
 
     def __str__(self):
-        return f"{self.name}"
+        return self.name
 
 
 class Work(models.Model):
     frbr_uri = models.CharField(max_length=1024, null=False, blank=False, unique=True)
+
+    def __str__(self):
+        return self.frbr_uri
 
 
 class CoreDocument(models.Model):

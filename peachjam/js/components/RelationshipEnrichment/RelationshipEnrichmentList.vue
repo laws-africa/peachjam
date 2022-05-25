@@ -22,6 +22,7 @@
 <script>
 import RelationshipEnrichment from './RelationshipEnrichment.vue';
 import RelationshipEnrichmentModal from './RelationshipEnrichmentModal.vue';
+import { authHeaders } from '../../api';
 
 export default {
   name: 'RelationshipEnrichmentList',
@@ -57,12 +58,17 @@ export default {
       }
     },
 
-    deleteEnrichment (enrichment) {
-      // TODO: delete from the server
-      const ix = this.items.findIndex((e) => e.id === enrichment.id);
-      if (ix > -1) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.items.splice(ix, 1);
+    async deleteEnrichment (enrichment) {
+      const resp = await fetch(`/api/v1/relationships/${enrichment.id}/`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      if (resp.ok) {
+        const ix = this.items.findIndex((e) => e.id === enrichment.id);
+        if (ix > -1) {
+          // eslint-disable-next-line vue/no-mutating-props
+          this.items.splice(ix, 1);
+        }
       }
     },
 

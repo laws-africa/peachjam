@@ -39,10 +39,18 @@ class Relationship(models.Model):
         )
 
     def subject_documents(self):
-        return self.subject_work.documents
+        return self.subject_work.documents.order_by("-date")
 
     def object_documents(self):
-        return self.object_work.documents
+        return self.object_work.documents.order_by("-date")
+
+    def subject_document(self):
+        # TODO: better way of doing this for the view? choose the right language?
+        return self.subject_documents()[0]
+
+    def object_document(self):
+        # TODO: better way of doing this for the view? choose the right language?
+        return self.object_documents()[0]
 
     @classmethod
     def for_subject_document(cls, doc):

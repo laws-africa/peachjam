@@ -21,7 +21,7 @@
           <tr>
             <td>This document...</td>
             <td>{{ rel.predicate }}</td>
-            <td>{{ rel.object_work_frbr_uri }}</td>
+            <td>{{ rel.object_work }}</td>
             <td>
               <button type="submit" formaction="{% url opts|admin_urlname:'delete_relationship' object_id=object.pk|admin_urlquote rel_id=rel.pk %}">Delete</button>
             </td>
@@ -38,7 +38,7 @@
         <tr>
           <td>This document...</td>
           <td>{{ form.predicate }}</td>
-          <td>{{ form.object_work_frbr_uri }}</td>
+          <td>{{ form.object_work }}</td>
           <td>
             <button type="submit" formaction="{% url opts|admin_urlname:'relationships' object.pk|admin_urlquote %}">Add</button>
           </td>
