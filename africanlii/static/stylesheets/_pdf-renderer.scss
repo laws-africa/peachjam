@@ -1,5 +1,7 @@
 .pdf-renderer {
+  background-color: gray;
   display: flex;
+  justify-content: center;
   .textLayer {
     position: absolute;
     text-align: initial;
@@ -133,13 +135,10 @@
   }
 }
 
-.pdf-renderer__content {
-  flex: 2;
+.pdf-renderer__right {
+  width: 200px;
 }
 
-.pdf-renderer__right {
-  flex: 1;
-}
 
 .pdf-renderer__content__page {
   border: 1px solid black;
