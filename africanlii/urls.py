@@ -30,7 +30,7 @@ urlpatterns = [
         name="document_source",
     ),
     path(
-        "authors/<author_name>/<int:pk>/",
+        "authors/<slug:slug>/<int:pk>/",
         views.AuthorListView.as_view(),
         name="author_list",
     ),

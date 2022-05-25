@@ -25,10 +25,10 @@ class HomePageView(AuthedViewMixin, TemplateView):
         documents_count = GenericDocument.objects.count()
 
         # Judgments have courts as their authors. Querying the Courts should suffice.
-        judgments_authors = Court.objects.values("id", "name")
+        judgments_authors = Court.objects.values("id", "name", "slug")
 
         # CoreDocuments have the AuthoringBody as the author. Querying the AuthoringBody model should suffice
-        core_documents_authors = AuthoringBody.objects.values("id", "name")
+        core_documents_authors = AuthoringBody.objects.values("id", "name", "slug")
         authors = list(chain(judgments_authors, core_documents_authors))
 
         context["recent_judgments"] = recent_judgments

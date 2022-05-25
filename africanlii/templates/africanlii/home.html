@@ -37,7 +37,7 @@
     <div class="row">
       {% for author in authors %}
         <div class="col-md-6 col-sm-12">
-            <a href="{% url 'author_list' author.name author.id %}">{{ author.name }}</a>
+            <a href="{% url 'author_list' author.slug author.id %}">{{ author.name }}</a>
         </div>
       {% endfor %}
     </div>
