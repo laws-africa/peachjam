@@ -1,6 +1,7 @@
-<h1>Author Detail</h1>
-{% for document in documents %}
-    <div>
-        {{ document.pk }} - {{ document.title }}
-    </div>
-{% endfor %}
+{% extends 'africanlii/layouts/document_list.html' %}
+
+{% block title %}{{ author }}{% endblock %}
+
+{% block page-title %}
+  <h1 class="m-0">Documents by {{ author }}</h1>
+{% endblock %}
