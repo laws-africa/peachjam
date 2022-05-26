@@ -17,4 +17,36 @@
   0% {
     transform: rotate(0deg); }
   100% {
-    transform: rotate(360deg); } }
+    transform: rotate(360deg); }
+}
+
+.block-loader {
+  background-color: rgba(148, 148, 148, 0.3);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 15px;
+  border-radius: 10px;
+}
+
+.block-loader:after {
+  content: "";
+  display: block;
+  background-color: rgba(96, 93, 91, 0.3);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  transform: translateX(0);
+  animation: 1.5s blockLoaderAnimation ease-in-out infinite;
+}
+
+@keyframes blockLoaderAnimation {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

@@ -1,1 +1,5 @@
 {% extends 'africanlii/layouts/document_detail.html' %}
+
+{% block content %}
+  {% include 'peachjam/_document_content.html' with document=document %}
+{% endblock %}

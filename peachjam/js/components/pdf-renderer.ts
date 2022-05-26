@@ -28,8 +28,9 @@ class PdfRenderer {
     this.scrollListenerActive = true;
     this.pdfContentMarks = [];
 
+    this.setIsLoadingState(true);
     this.setupPdfAndPreviewPanels().then(() => {
-      // this.decoratePdf();
+      this.setIsLoadingState(false);
       const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-renderer__content__page'));
       const previewPanels = Array.from(root.querySelectorAll('.preview-panel'));
       for (const previewPanel of previewPanels) {
@@ -53,6 +54,20 @@ class PdfRenderer {
         }
       }, 20));
     });
+  }
+
+  setIsLoadingState (nextState: Boolean) {
+    const rendererElement: HTMLElement | null = this.root.querySelector('.pdf-renderer');
+    const loadingElement: HTMLElement | null = this.root.querySelector('.block-loader');
+    if (rendererElement && loadingElement) {
+      if (nextState) {
+        rendererElement.style.display = 'none';
+        loadingElement.style.display = 'flex';
+      } else {
+        rendererElement.style.display = 'flex';
+        loadingElement.style.display = 'none';
+      }
+    }
   }
 
   activatePreviewPanel (nextActivePreviewPanel: HTMLElement | EventTarget) {
