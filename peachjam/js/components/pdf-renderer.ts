@@ -1,7 +1,7 @@
 import debounce from 'lodash/debounce';
 import items from '../items.json';
 // @ts-ignore
-import { markRange, rangeToTarget, targetToRange } from '../dom';
+import {markRange, rangeToTarget, targetToRange} from '../dom';
 
 type GlobalWorkerOptionsType = {
   [key: string]: any,
@@ -28,9 +28,21 @@ class PdfRenderer {
     this.scrollListenerActive = true;
     this.pdfContentMarks = [];
 
-    this.setIsLoadingState(true);
+    const observer = new MutationObserver(() => {
+      const progressBarElement: HTMLElement | null = root.querySelector('.progress-bar');
+      if(progressBarElement) {
+        const width = `${parseInt(root.getAttribute('loading-progress')) * 100}%`
+        progressBarElement.style.width = width;
+        progressBarElement.innerText = width;
+      }
+    })
+    observer.observe(this.root, { attributes: true });
     this.setupPdfAndPreviewPanels().then(() => {
-      this.setIsLoadingState(false);
+      window.setTimeout(() => {
+        this.root.removeAttribute('loading-progress');
+        this.root.removeAttribute('is-loading');
+      }, 300);
+
       const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-renderer__content__page'));
       const previewPanels = Array.from(root.querySelectorAll('.preview-panel'));
       for (const previewPanel of previewPanels) {
@@ -54,20 +66,6 @@ class PdfRenderer {
         }
       }, 20));
     });
-  }
-
-  setIsLoadingState (nextState: Boolean) {
-    const rendererElement: HTMLElement | null = this.root.querySelector('.pdf-renderer');
-    const loadingElement: HTMLElement | null = this.root.querySelector('.block-loader');
-    if (rendererElement && loadingElement) {
-      if (nextState) {
-        rendererElement.style.display = 'none';
-        loadingElement.style.display = 'flex';
-      } else {
-        rendererElement.style.display = 'flex';
-        loadingElement.style.display = 'none';
-      }
-    }
   }
 
   activatePreviewPanel (nextActivePreviewPanel: HTMLElement | EventTarget) {
@@ -118,8 +116,9 @@ class PdfRenderer {
       const listOfGetPages = Array.from(Array(numPages), (_, index) => pdf.getPage(index + 1));
       const pages = await Promise.all(listOfGetPages);
       await asyncForEach(pages, async (page, index) => {
-        const viewport = page.getViewport({ scale: 1 });
+        this.root.setAttribute('loading-progress', ((index + 1)/ pages.length).toString())
 
+        const viewport = page.getViewport({ scale: 1 });
         const elementRendered = document.createElement('div');
         elementRendered.setAttribute('id', String(index + 1));
         elementRendered.dataset.page = String(index + 1);
