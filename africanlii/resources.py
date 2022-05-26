@@ -11,6 +11,7 @@ from languages_plus.models import Language
 
 from africanlii.models import (
     AuthoringBody,
+    CaseNumber,
     Court,
     DocumentNature,
     GenericDocument,
@@ -105,12 +106,7 @@ class JudgmentResource(BaseDocumentResource):
     court = fields.Field(
         column_name="court",
         attribute="court",
-        widget=ForeignKeyWidget(Court, field="name"),
-    )
-    matter_type = fields.Field(
-        column_name="matter_type",
-        attribute="matter_type",
-        widget=ForeignKeyWidget(MatterType, field="name"),
+        widget=ForeignKeyWidget(Court, field="code"),
     )
     judges = fields.Field(
         column_name="judges",
@@ -123,11 +119,26 @@ class JudgmentResource(BaseDocumentResource):
 
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
-        MatterType.objects.get_or_create(name=row["matter_type"])
+        row["court"] = row["court_obj"]["code"]
         Court.objects.get_or_create(
-            name=row["court"],
-            country=Country.objects.get(iso__iexact=row["jurisdiction"]),
+            code=row["court_obj"]["code"],
+            defaults={
+                "name": row["court_obj"]["name"],
+                "country": Country.objects.get(iso__iexact=row["jurisdiction"]),
+            },
         )
         if row["judges"]:
-            for judge in list(map(str.strip, row["judges"].split(","))):
+            for judge in list(map(str.strip, row["judges"].split("|"))):
                 Judge.objects.get_or_create(name=judge)
+
+    def after_import_row(self, row, row_result, row_number=None, **kwargs):
+        super().after_import_row(row, row_result, row_number, **kwargs)
+        for case_number in row["case_numbers"]:
+            if case_number["number"]:
+                MatterType.objects.get_or_create(name=case_number["matter_type"])
+                CaseNumber.objects.create(
+                    document=Judgment.objects.get(pk=row_result.object_id),
+                    number=case_number["number"],
+                    year=case_number["year"],
+                    matter_type=MatterType.objects.get(name=case_number["matter_type"]),
+                )
