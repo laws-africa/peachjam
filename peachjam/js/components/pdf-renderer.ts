@@ -30,8 +30,9 @@ class PdfRenderer {
 
     const observer = new MutationObserver(() => {
       const progressBarElement: HTMLElement | null = root.querySelector('.progress-bar');
-      if(progressBarElement) {
-        const width = `${parseInt(root.getAttribute('loading-progress')) * 100}%`
+      const loadingProgress = root.getAttribute('loading-progress');
+      if(progressBarElement && loadingProgress) {
+        const width = `${parseInt(loadingProgress) * 100}%`
         progressBarElement.style.width = width;
         progressBarElement.innerText = width;
       }
