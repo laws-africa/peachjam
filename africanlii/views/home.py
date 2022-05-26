@@ -1,5 +1,3 @@
-from itertools import chain
-
 from django.views.generic import TemplateView
 
 from africanlii.models import (
@@ -23,19 +21,15 @@ class HomePageView(AuthedViewMixin, TemplateView):
         recent_instruments = LegalInstrument.objects.order_by("-date")[:5]
         recent_legislation = Legislation.objects.order_by("-date")[:5]
         documents_count = GenericDocument.objects.count()
-
-        # Judgments have courts as their authors. Querying the Courts should suffice.
-        judgments_authors = Court.objects.values("id", "name", "slug")
-
-        # CoreDocuments have the AuthoringBody as the author. Querying the AuthoringBody model should suffice
-        core_documents_authors = AuthoringBody.objects.values("id", "name", "slug")
-        authors = list(chain(judgments_authors, core_documents_authors))
+        courts = Court.objects.values("id", "name")
+        authoring_bodies = AuthoringBody.objects.values("id", "name")
 
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents
         context["recent_instruments"] = recent_instruments
         context["recent_legislation"] = recent_legislation
         context["documents_count"] = documents_count
-        context["authors"] = authors
+        context["courts"] = courts
+        context["authoring_bodies"] = authoring_bodies
 
         return self.render_to_response(context)

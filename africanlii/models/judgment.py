@@ -1,7 +1,5 @@
 from countries_plus.models import Country
 from django.db import models
-from django.template.defaultfilters import slugify
-from django.urls import reverse
 
 from peachjam.models import CoreDocument, file_location
 
@@ -9,7 +7,6 @@ from peachjam.models import CoreDocument, file_location
 class Court(models.Model):
     name = models.CharField(max_length=255, null=False)
     country = models.ForeignKey(Country, on_delete=models.PROTECT)
-    slug = models.SlugField(default="", editable=False, unique=True)
 
     class Meta:
         ordering = ["name"]
@@ -17,14 +14,6 @@ class Court(models.Model):
 
     def __str__(self):
         return f"{self.name}"
-
-    def get_absolute_url(self):
-        return reverse("author_list", kwargs={"slug": self.slug, "pk": str(self.id)})
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        return super().save(*args, **kwargs)
 
 
 class Judge(models.Model):

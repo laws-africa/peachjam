@@ -33,11 +33,24 @@
 
 <section class="pb-5 pt-5 bg-light">
   <div class="container">
-    <h2 class="mb-4 heading-underlined">By Authors</h2>
+    <h2 class="mb-4 heading-underlined">By Courts</h2>
     <div class="row">
-      {% for author in authors %}
+      {% for court in courts %}
         <div class="col-md-6 col-sm-12">
-            <a href="{% url 'author_list' author.slug author.id %}">{{ author.name }}</a>
+            <a href="{% url 'court_list' court.id %}">{{ court.name }}</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="pb-5 pt-5 bg-light">
+  <div class="container">
+    <h2 class="mb-4 heading-underlined">By Authoring Bodies</h2>
+    <div class="row">
+      {% for authoring_body in authoring_bodies %}
+        <div class="col-md-6 col-sm-12">
+            <a href="{% url 'author_list' authoring_body.id %}">{{ authoring_body.name }}</a>
         </div>
       {% endfor %}
     </div>
