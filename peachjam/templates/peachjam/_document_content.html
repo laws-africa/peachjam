@@ -33,8 +33,16 @@
     {{ document.content_html|safe }}
   {% endif %}
 {% else %}
-  <div data-component="PdfRenderer" data-pdf="{% url 'document_source' expression_frbr_uri=document.expression_frbr_uri %}">
-    <div class="block-loader" style="height: 30px; display: none"></div>
+  <div data-component="PdfRenderer"
+       data-pdf="{% url 'document_source' expression_frbr_uri=document.expression_frbr_uri %}"
+       is-loading
+  >
+    <div class="pdf-loading-text text-center mb-2"><strong>Loading PDF...</strong></div>
+    <div class="progress">
+      <div class="progress-bar bg-primary"
+           role="progressbar">
+      </div>
+    </div>
     <div class="pdf-renderer">
       <div class="pdf-renderer__previews">
       <div class="pdf-renderer__previews__inner"></div>
