@@ -85,7 +85,7 @@
         >
         <Multiselect
           v-model="author"
-          :options="authorsOptions"
+          :options="authors"
           :searchable="true"
           :can-clear="false"
           placeholder="Filter by author"
@@ -182,12 +182,6 @@ export default {
     showClearAllFilter () {
       return this.alphabetParam.length || this.yearParam.length || this.authorParam.length;
     },
-    authorsOptions () {
-      return this.authors.map(author => ({
-        label: author.name,
-        value: author.id
-      }));
-    },
     orderedYears () {
       const years = [...this.years];
       // largest to smallest
@@ -224,8 +218,8 @@ export default {
       const urlParams = new URLSearchParams(queryString);
       return urlParams.getAll(key);
     },
-    handleAuthorChange (id) {
-      this.$refs['hidden-author-input'].value = id;
+    handleAuthorChange (author) {
+      this.$refs['hidden-author-input'].value = author;
       nextTick().then(() => this.submit());
     },
     submit () {
