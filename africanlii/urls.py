@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
+from django.views.decorators.cache import cache_page
 
 from africanlii import views
 from africanlii.feeds import (
@@ -38,7 +39,7 @@ urlpatterns = [
     ),
     path(
         "documents<path:expression_frbr_uri>/source.pdf",
-        views.DocumentSourceView.as_view(),
+        cache_page(60 * 60 * 6)(views.DocumentSourceView.as_view()),
         name="document_source",
     ),
     path("feeds/judgments.xml", JudgmentAtomSiteNewsFeed(), name="judgment_feed"),

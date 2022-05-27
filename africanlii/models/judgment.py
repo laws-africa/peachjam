@@ -7,6 +7,7 @@ from peachjam.models import CoreDocument, file_location
 class Court(models.Model):
     name = models.CharField(max_length=255, null=False)
     country = models.ForeignKey(Country, on_delete=models.PROTECT)
+    code = models.CharField(max_length=255, null=False)
 
     class Meta:
         ordering = ["name"]
@@ -39,12 +40,6 @@ class MatterType(models.Model):
 
 
 class Judgment(CoreDocument):
-    case_number_numeric = models.CharField(max_length=1024, null=True, blank=True)
-    case_number_year = models.IntegerField(null=True, blank=True)
-    case_number_string = models.CharField(max_length=1024, null=True, blank=True)
-    matter_type = models.ForeignKey(
-        MatterType, on_delete=models.PROTECT, null=True, blank=True
-    )
     court = models.ForeignKey(Court, on_delete=models.PROTECT, null=True, blank=True)
     judges = models.ManyToManyField(Judge, blank=True)
     headnote_holding = models.TextField(blank=True)
@@ -58,14 +53,31 @@ class Judgment(CoreDocument):
         return self.title
 
     def save(self, *args, **kwargs):
-        self.case_number_string = self.get_case_number_string()
         self.doc_type = "judgment"
         return super().save(*args, **kwargs)
 
+
+class CaseNumber(models.Model):
+    string = models.CharField(max_length=1024, null=True, blank=True)
+    number = models.PositiveIntegerField(null=True, blank=True)
+    year = models.PositiveIntegerField(null=True, blank=True)
+    matter_type = models.ForeignKey(
+        MatterType, on_delete=models.PROTECT, null=True, blank=True
+    )
+
+    document = models.ForeignKey(
+        Judgment, related_name="case_numbers", on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return f"{self.string}"
+
     def get_case_number_string(self):
-        return (
-            f"{self.matter_type} {self.case_number_numeric} of {self.case_number_year}"
-        )
+        return f"{self.matter_type} {self.number} of {self.year}"
+
+    def save(self, *args, **kwargs):
+        self.string = self.get_case_number_string()
+        return super().save(*args, **kwargs)
 
 
 class JudgmentMediaSummaryFile(models.Model):
