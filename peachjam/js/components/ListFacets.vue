@@ -187,7 +187,6 @@ export default {
         label: author.name,
         value: author.id
       }));
-      return this.alphabetParam.length || this.yearParam.length;
     },
     orderedYears () {
       const years = [...this.years];
