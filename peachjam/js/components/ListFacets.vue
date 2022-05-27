@@ -36,7 +36,7 @@
           </div>
         </div>
         <div
-          v-for="(year, index) in years"
+          v-for="(year, index) in orderedYears"
           :key="index"
           class="d-flex justify-content-between align-items-center"
         >
@@ -133,6 +133,11 @@ export default {
     },
     showClearAllFilter () {
       return this.alphabetParam.length || this.yearParam.length;
+    },
+    orderedYears () {
+      const years = [...this.years];
+      // largest to smallest
+      return years.sort((a, b) => b - a);
     }
   },
   watch: {
