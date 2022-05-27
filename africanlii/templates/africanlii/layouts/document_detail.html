@@ -6,7 +6,7 @@
 {% block page-content %}
   <main class="container-fluid py-5">
     {% block document-title %}
-      <h1 class="heading-underlined mb-4">{{ document.title }}</h1>
+      <h1 class="heading-underlined mb-4">{{ document.title|safe }}</h1>
     {% endblock %}
 
     <div class="mb-5">
@@ -17,12 +17,12 @@
               <dl class="row">
                 {% if document.authoring_body %}
                   <dt class="col-4">Author</dt>
-                  <dd class="col-8 text-muted">{{ document.authoring_body }}</dd>
+                  <dd class="col-8 text-muted">{{ document.authoring_body|safe }}</dd>
                 {% endif %}
                 <dt class="col-4">Date</dt>
-                <dd class="col-8 text-muted">{{ document.date }}</dd>
+                <dd class="col-8 text-muted">{{ document.date|safe }}</dd>
                 <dt class="col-4">Language</dt>
-                <dd class="col-8 text-muted">{{ document.language }}</dd>
+                <dd class="col-8 text-muted">{{ document.language|safe }}</dd>
               </dl>
             {% endblock %}
           {% endblock %}
