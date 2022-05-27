@@ -187,14 +187,11 @@ export default {
         label: author.name,
         value: author.id
       }));
-<<<<<<< HEAD
-=======
     },
     orderedYears () {
       const years = [...this.years];
       // largest to smallest
       return years.sort((a, b) => b - a);
->>>>>>> 39c998a2ff3c2289a2533e5659be235daf6d98a0
     }
   },
 
