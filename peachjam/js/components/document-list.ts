@@ -18,7 +18,8 @@ class DocumentList {
     createApp(ListFacets, {
       alphabet,
       years,
-      authors: [...courts, ...authoringBodies]
+      authoringBodies,
+      courts
     }).mount(facetsElement);
   }
 }
