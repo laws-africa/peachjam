@@ -23,7 +23,7 @@
           <strong>Year</strong>
           <div class="d-flex align-items-center">
             <a
-              v-if="yearParam.length"
+              v-if="getUrlParamValue('year').length"
               href="#"
               @click.prevent="clearFacet('year')"
             >
@@ -47,7 +47,7 @@
               type="checkbox"
               name="year"
               :value="year"
-              :checked="yearInputChecked(year)"
+              :checked="inputChecked('year', year)"
             >
             <label
               class="form-check-label"
@@ -59,16 +59,16 @@
         </div>
       </li>
       <li
-        v-if="authors.length"
+        v-if="authoringBodies.length"
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>Authors</strong>
+          <strong>Authoring Body</strong>
           <div class="d-flex align-items-center">
             <a
-              v-if="authorParam.length"
+              v-if="getUrlParamValue('authoring-body').length"
               href="#"
-              @click.prevent="clearFacet('author')"
+              @click.prevent="clearFacet('authoring-body')"
             >
               Clear
             </a>
@@ -78,20 +78,71 @@
             />
           </div>
         </div>
-        <input
-          ref="hidden-author-input"
-          type="hidden"
-          name="author"
+        <div
+          v-for="(authoringBody, index) in authoringBodies"
+          :key="index"
+          class="d-flex justify-content-between align-items-center"
         >
-        <Multiselect
-          v-model="author"
-          :options="authors"
-          :searchable="true"
-          :can-clear="false"
-          placeholder="Filter by author"
-          class="author-select"
-          @change="handleAuthorChange"
-        />
+          <div class="form-check">
+            <input
+              :id="authoringBody"
+              class="form-check-input"
+              type="radio"
+              name="authoring-body"
+              :value="authoringBody"
+              :checked="inputChecked('authoring-body', authoringBody)"
+            >
+            <label
+              class="form-check-label"
+              :for="authoringBody"
+            >
+              {{ authoringBody }}
+            </label>
+          </div>
+        </div>
+      </li>
+      <li
+        v-if="courts.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Court</strong>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="getUrlParamValue('court').length"
+              href="#"
+              @click.prevent="clearFacet('court')"
+            >
+              Clear
+            </a>
+            <span
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
+        </div>
+        <div
+          v-for="(court, index) in courts"
+          :key="index"
+          class="d-flex justify-content-between align-items-center"
+        >
+          <div class="form-check">
+            <input
+              :id="court"
+              class="form-check-input"
+              type="radio"
+              name="court"
+              :value="court"
+              :checked="inputChecked('court', court)"
+            >
+            <label
+              class="form-check-label"
+              :for="court"
+            >
+              {{ court }}
+            </label>
+          </div>
+        </div>
       </li>
       <li
         v-if="alphabet.length"
@@ -101,7 +152,7 @@
           <strong>Alphabetical</strong>
           <div class="d-flex align-items-center">
             <a
-              v-if="alphabetParam.length"
+              v-if="getUrlParamValue('alphabet').length"
               href="#"
               @click.prevent="clearFacet('alphabet')"
             >
@@ -121,9 +172,8 @@
           >
             <input
               :key="key"
-              ref="alphabetInput"
               :value="letter"
-              :checked="alphabetInputChecked(letter)"
+              :checked="inputChecked('alphabet', letter)"
               type="radio"
               name="alphabet"
             >
@@ -138,18 +188,14 @@
 </template>
 
 <script>
-import { nextTick } from 'vue';
-
-import Multiselect from '@vueform/multiselect';
-import '@vueform/multiselect/themes/default.css';
-
 export default {
   name: 'ListFacets',
-  components: {
-    Multiselect
-  },
   props: {
-    authors: {
+    authoringBodies: {
+      type: Array,
+      default: () => []
+    },
+    courts: {
       type: Array,
       default: () => []
     },
@@ -168,19 +214,9 @@ export default {
       author: null
     };
   },
-
   computed: {
-    alphabetParam () {
-      return this.getUrlParamValue('alphabet');
-    },
-    yearParam () {
-      return this.getUrlParamValue('year');
-    },
-    authorParam () {
-      return this.getUrlParamValue('author');
-    },
     showClearAllFilter () {
-      return this.alphabetParam.length || this.yearParam.length || this.authorParam.length;
+      return ['alphabet', 'year', 'authoring-body', 'court'].some(key => this.getUrlParamValue(key).length);
     },
     orderedYears () {
       const years = [...this.years];
@@ -188,19 +224,14 @@ export default {
       return years.sort((a, b) => b - a);
     }
   },
-
-  mounted () {
-    if (this.authorParam.length) {
-      this.$refs['hidden-author-input'].value = this.authorParam[0];
-      this.author = this.authorParam[0];
-    }
-  },
   methods: {
-    yearInputChecked (value) {
-      return this.yearParam.includes(value.toString());
+    getUrlParamValue (key) {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      return urlParams.getAll(key);
     },
-    alphabetInputChecked (value) {
-      return this.alphabetParam.includes(value);
+    inputChecked (key, value) {
+      return this.getUrlParamValue(key).includes(value.toString());
     },
 
     clearAll () {
@@ -212,15 +243,6 @@ export default {
       const urlParams = new URLSearchParams(queryString);
       urlParams.delete(key);
       window.location.href = `${window.location.origin}${window.location.pathname}?${urlParams.toString()}`;
-    },
-    getUrlParamValue (key) {
-      const queryString = window.location.search;
-      const urlParams = new URLSearchParams(queryString);
-      return urlParams.getAll(key);
-    },
-    handleAuthorChange (author) {
-      this.$refs['hidden-author-input'].value = author;
-      nextTick().then(() => this.submit());
     },
     submit () {
       this.loading = true;
@@ -234,13 +256,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.author-select {
-  --ms-font-size: 14px;
-  --ms-option-font-size: 14px;
-  --ms-ring-color: none;
-  --ms-option-bg-selected: var(--bs-primary);
-  --ms-option-bg-selected-pointed: var(--bs-primary);
-}
-</style>
