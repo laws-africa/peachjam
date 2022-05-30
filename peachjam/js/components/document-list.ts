@@ -9,10 +9,14 @@ class DocumentList {
     if (facetDataJsonElement && facetDataJsonElement.textContent) {
       alphabet = JSON.parse(facetDataJsonElement.textContent).alphabet;
       years = JSON.parse(facetDataJsonElement.textContent).years;
+
+      // Court facet only appears on the judgments page
       if (window.location.href.includes('/judgments/')) {
         courts = JSON.parse(facetDataJsonElement.textContent).courts;
-      } else {
-        authoringBodies = JSON.parse(facetDataJsonElement.textContent).authoring_bodies;
+      }
+      // Authoring body facet appears every list page except /judgments/ and /legislation/
+      if(!['/judgments/', '/legislation/'].some(value => window.location.href.includes(value))) {
+        authoringBodies = JSON.parse(facetDataJsonElement.textContent).courts;
       }
     }
     createApp(ListFacets, {
