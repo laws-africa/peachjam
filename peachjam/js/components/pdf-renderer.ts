@@ -36,7 +36,6 @@ class PdfRenderer {
       if (progressBarElement && loadingProgress) {
         progressBarElement.style.width = `${parseFloat(loadingProgress) * 100}%`;
         progressBarElement.innerText = `${Math.ceil(parseFloat(loadingProgress) * 100)}%`;
-        debugger;
       }
     });
     observer.observe(this.root, { attributes: true });
