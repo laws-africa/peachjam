@@ -66,9 +66,9 @@
           <strong>Authoring Body</strong>
           <div class="d-flex align-items-center">
             <a
-              v-if="getUrlParamValue('authoring_body').length"
+              v-if="getUrlParamValue('authoring-body').length"
               href="#"
-              @click.prevent="clearFacet('authoring_body')"
+              @click.prevent="clearFacet('authoring-body')"
             >
               Clear
             </a>
@@ -88,9 +88,9 @@
               :id="authoringBody"
               class="form-check-input"
               type="radio"
-              name="authoring_body"
+              name="authoring-body"
               :value="authoringBody"
-              :checked="inputChecked('authoring_body', authoringBody)"
+              :checked="inputChecked('authoring-body', authoringBody)"
             >
             <label
               class="form-check-label"
@@ -216,7 +216,7 @@ export default {
   },
   computed: {
     showClearAllFilter () {
-      return ['alphabet', 'year', 'authoring_body', 'court'].some(key => this.getUrlParamValue(key).length);
+      return ['alphabet', 'year', 'authoring-body', 'court'].some(key => this.getUrlParamValue(key).length);
     },
     orderedYears () {
       const years = [...this.years];
