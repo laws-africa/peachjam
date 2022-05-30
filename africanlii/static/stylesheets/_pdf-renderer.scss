@@ -9,7 +9,7 @@
     }
   }
 
-  &[is-loading] {
+  &[data-is-loading] {
     .pdf-renderer {
       display: none;
     }
