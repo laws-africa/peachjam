@@ -1,8 +1,16 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
+from django.views.decorators.cache import cache_page
 
 from africanlii import views
+from africanlii.feeds import (
+    CoreDocumentAtomSiteNewsFeed,
+    GenericDocumentAtomSiteNewsFeed,
+    JudgmentAtomSiteNewsFeed,
+    LegalInstrumentAtomSiteNewsFeed,
+    LegislationAtomSiteNewsFeed,
+)
 
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),
@@ -13,6 +21,11 @@ urlpatterns = [
         "legal_instruments/",
         views.LegalInstrumentListView.as_view(),
         name="legal_instrument_list",
+    ),
+    path(
+        "about/",
+        views.AboutPageView.as_view(),
+        name="about",
     ),
     path(
         "generic_documents/",
@@ -26,7 +39,7 @@ urlpatterns = [
     ),
     path(
         "documents<path:expression_frbr_uri>/source.pdf",
-        views.DocumentSourceView.as_view(),
+        cache_page(60 * 60 * 6)(views.DocumentSourceView.as_view()),
         name="document_source",
     ),
     path(
@@ -39,6 +52,21 @@ urlpatterns = [
         views.AuthoringBodyListView.as_view(),
         name="author_list",
     ),
+    path("feeds/judgments.xml", JudgmentAtomSiteNewsFeed(), name="judgment_feed"),
+    path(
+        "feeds/generic_documents.xml",
+        GenericDocumentAtomSiteNewsFeed(),
+        name="generic_document_feed",
+    ),
+    path(
+        "feeds/legal_instruments.xml",
+        LegalInstrumentAtomSiteNewsFeed(),
+        name="legal_instrument_feed",
+    ),
+    path(
+        "feeds/legislation.xml", LegislationAtomSiteNewsFeed(), name="legislation_feed"
+    ),
+    path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
 ]
 
 if settings.DEBUG:

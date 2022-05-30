@@ -1,0 +1,56 @@
+{% load peachjam %}
+
+{% if document.content_html %}
+  {% if document.content_html_is_akn %}
+    <div class="row">
+      <div class="col-lg-3 d-none d-lg-block">
+        <aside class="toc">
+            <la-table-of-contents-controller
+              items="{{ document.toc_json|jsonify }}"
+              expand-all-btn-classes="btn btn-secondary btn-sm"
+              collapse-all-btn-classes="btn btn-secondary btn-sm"
+              title-filter-clear-btn-classes="btn btn-secondary btn-sm"
+              search-filter-input-classes="form-control"
+            ></la-table-of-contents-controller>
+          </aside>
+      </div>
+      <div class="col-lg-9">
+        <div class="la-akoma-ntoso-with-gutter">
+          <la-akoma-ntoso
+            id="akn"
+            expression-frbr-uri="{{ document.expression_frbr_uri }}"
+            class="flash-target"
+          >
+            <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
+            <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
+
+            {{ document.content_html|safe }}
+          </la-akoma-ntoso>
+          <la-gutter></la-gutter>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    {{ document.content_html|safe }}
+  {% endif %}
+{% else %}
+  <div data-component="PdfRenderer"
+       data-pdf="{% url 'document_source' expression_frbr_uri=document.expression_frbr_uri %}"
+       data-pdf-size="{{ document.source_file.file.size }}"
+       data-is-loading
+  >
+    <div class="pdf-loading-text text-center mb-2"><strong>Loading PDF...</strong></div>
+    <div class="progress">
+      <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
+           role="progressbar">
+      </div>
+    </div>
+    <div class="pdf-renderer">
+      <div class="pdf-renderer__previews">
+      <div class="pdf-renderer__previews__inner"></div>
+    </div>
+    <div class="pdf-renderer__content"></div>
+    <div class="pdf-renderer__right"></div>
+    </div>
+  </div>
+{% endif %}

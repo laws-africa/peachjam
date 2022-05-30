@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, TemplateView, View
 
 from africanlii.registry import registry
+from peachjam.docx import convert_docx_to_pdf
 from peachjam.models import CoreDocument
 from peachjam.views import AuthedViewMixin
 
@@ -34,9 +35,13 @@ class DocumentSourceView(AuthedViewMixin, DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         if hasattr(self.object, "source_file") and self.object.source_file.file:
-            # TODO: ensure it's PDF
+            if self.object.source_file.file.name.endswith(".docx"):
+                temp_dir, filename = convert_docx_to_pdf(self.object.source_file.file)
+                file = open(f"{temp_dir.name}/{filename}", "rb")
+            else:
+                file = self.object.source_file.file.open()
             return FileResponse(
-                self.object.source_file.file.open(),
+                file,
                 filename=self.object.source_file.filename,
             )
         raise Http404

@@ -70,6 +70,9 @@
           <li class="nav-item">
             <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="{% url 'legislation_list' %}">Treaties and Protocols</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link {% ifequal request.path '/about/'%} active {% endifequal%}" href="{% url 'about' %}">About</a>
+          </li>
         </ul>
         <form method="get" action="/search/">
           <div class="input-group">
