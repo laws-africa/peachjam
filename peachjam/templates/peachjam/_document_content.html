@@ -1,4 +1,5 @@
 {% load peachjam %}
+
 {% if document.content_html %}
   {% if document.content_html_is_akn %}
     <div class="row">
@@ -35,11 +36,12 @@
 {% else %}
   <div data-component="PdfRenderer"
        data-pdf="{% url 'document_source' expression_frbr_uri=document.expression_frbr_uri %}"
-       is-loading
+       data-pdf-size="{{ document.source_file.file.size }}"
+       data-is-loading
   >
     <div class="pdf-loading-text text-center mb-2"><strong>Loading PDF...</strong></div>
     <div class="progress">
-      <div class="progress-bar bg-primary"
+      <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
            role="progressbar">
       </div>
     </div>
