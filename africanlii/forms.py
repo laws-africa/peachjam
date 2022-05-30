@@ -25,9 +25,9 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(title__istartswith=alphabet)
 
         if court:
-            queryset = queryset.filter(name=court)
+            queryset = queryset.filter(court__name=court)
 
         if authoring_body:
-            queryset = queryset.filter(name=authoring_body)
+            queryset = queryset.filter(authoring_body__name__iexact=authoring_body)
 
         return queryset

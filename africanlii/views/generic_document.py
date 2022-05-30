@@ -13,7 +13,8 @@ class GenericDocumentListView(AuthedViewMixin, FilteredDocumentListView):
     model = GenericDocument
 
     def get_queryset(self):
-        return self.model.objects.order_by("-date")
+        queryset = super(GenericDocumentListView, self).get_queryset()
+        return queryset.order_by("-date")
 
 
 @registry.register_doc_type("generic_document")
