@@ -23,7 +23,7 @@
           <strong>Year</strong>
           <div class="d-flex align-items-center">
             <a
-              v-if="yearParam.length"
+              v-if="getUrlParamValue('year').length"
               href="#"
               @click.prevent="clearFacet('year')"
             >
@@ -43,18 +43,103 @@
           <div class="form-check">
             <input
               :id="year"
-              ref="yearInput"
               class="form-check-input"
               type="checkbox"
               name="year"
               :value="year"
-              :checked="yearInputChecked(year)"
+              :checked="inputChecked('year', year)"
             >
             <label
               class="form-check-label"
               :for="year"
             >
               {{ year }}
+            </label>
+          </div>
+        </div>
+      </li>
+      <li
+        v-if="authoringBodies.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Authoring Body</strong>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="getUrlParamValue('authoring_body').length"
+              href="#"
+              @click.prevent="clearFacet('authoring_body')"
+            >
+              Clear
+            </a>
+            <span
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
+        </div>
+        <div
+          v-for="(authoringBody, index) in authoringBodies"
+          :key="index"
+          class="d-flex justify-content-between align-items-center"
+        >
+          <div class="form-check">
+            <input
+              :id="authoringBody"
+              class="form-check-input"
+              type="radio"
+              name="authoring_body"
+              :value="authoringBody"
+              :checked="inputChecked('authoring_body', authoringBody)"
+            >
+            <label
+              class="form-check-label"
+              :for="authoringBody"
+            >
+              {{ authoringBody }}
+            </label>
+          </div>
+        </div>
+      </li>
+      <li
+        v-if="courts.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Court</strong>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="getUrlParamValue('court').length"
+              href="#"
+              @click.prevent="clearFacet('court')"
+            >
+              Clear
+            </a>
+            <span
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
+        </div>
+        <div
+          v-for="(court, index) in courts"
+          :key="index"
+          class="d-flex justify-content-between align-items-center"
+        >
+          <div class="form-check">
+            <input
+              :id="court"
+              class="form-check-input"
+              type="radio"
+              name="court"
+              :value="court"
+              :checked="inputChecked('court', court)"
+            >
+            <label
+              class="form-check-label"
+              :for="court"
+            >
+              {{ court }}
             </label>
           </div>
         </div>
@@ -67,7 +152,7 @@
           <strong>Alphabetical</strong>
           <div class="d-flex align-items-center">
             <a
-              v-if="alphabetParam.length"
+              v-if="getUrlParamValue('alphabet').length"
               href="#"
               @click.prevent="clearFacet('alphabet')"
             >
@@ -87,9 +172,8 @@
           >
             <input
               :key="key"
-              ref="alphabetInput"
               :value="letter"
-              :checked="alphabetInputChecked(letter)"
+              :checked="inputChecked('alphabet', letter)"
               type="radio"
               name="alphabet"
             >
@@ -104,11 +188,17 @@
 </template>
 
 <script>
-import { nextTick } from 'vue';
-
 export default {
   name: 'ListFacets',
   props: {
+    authoringBodies: {
+      type: Array,
+      default: () => []
+    },
+    courts: {
+      type: Array,
+      default: () => []
+    },
     alphabet: {
       type: Array,
       default: () => []
@@ -120,19 +210,13 @@ export default {
   },
   data: () => {
     return {
-      loading: false
+      loading: false,
+      author: null
     };
   },
-
   computed: {
-    alphabetParam () {
-      return this.getUrlParamValue('alphabet');
-    },
-    yearParam () {
-      return this.getUrlParamValue('year');
-    },
     showClearAllFilter () {
-      return this.alphabetParam.length || this.yearParam.length;
+      return ['alphabet', 'year', 'authoring_body', 'court'].some(key => this.getUrlParamValue(key).length);
     },
     orderedYears () {
       const years = [...this.years];
@@ -140,19 +224,14 @@ export default {
       return years.sort((a, b) => b - a);
     }
   },
-  watch: {
-    author () {
-      nextTick().then(() => {
-        this.submit();
-      });
-    }
-  },
   methods: {
-    yearInputChecked (value) {
-      return this.yearParam.includes(value.toString());
+    getUrlParamValue (key) {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      return urlParams.getAll(key);
     },
-    alphabetInputChecked (value) {
-      return this.alphabetParam.includes(value);
+    inputChecked (key, value) {
+      return this.getUrlParamValue(key).includes(value.toString());
     },
 
     clearAll () {
@@ -165,14 +244,13 @@ export default {
       urlParams.delete(key);
       window.location.href = `${window.location.origin}${window.location.pathname}?${urlParams.toString()}`;
     },
-    getUrlParamValue (key) {
-      const queryString = window.location.search;
-      const urlParams = new URLSearchParams(queryString);
-      return urlParams.getAll(key);
-    },
     submit () {
       this.loading = true;
       // On submit page refreshes
+      // Prevention of empty query params
+      for (const input of this.$refs.form.querySelectorAll('input')) {
+        if (!input.value) input.setAttribute('disabled', '');
+      }
       this.$refs.form.submit();
     }
   }
