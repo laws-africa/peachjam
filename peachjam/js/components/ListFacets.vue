@@ -36,7 +36,7 @@
           </div>
         </div>
         <div
-          v-for="(year, index) in orderedYears"
+          v-for="(year, index) in sortDescending(years)"
           :key="index"
           class="d-flex justify-content-between align-items-center"
         >
@@ -79,7 +79,7 @@
           </div>
         </div>
         <div
-          v-for="(authoringBody, index) in authoringBodies"
+          v-for="(authoringBody, index) in sortAlphabetically(authoringBodies)"
           :key="index"
           class="d-flex justify-content-between align-items-center"
         >
@@ -122,7 +122,7 @@
           </div>
         </div>
         <div
-          v-for="(court, index) in courts"
+          v-for="(court, index) in sortAlphabetically(courts)"
           :key="index"
           class="d-flex justify-content-between align-items-center"
         >
@@ -217,14 +217,17 @@ export default {
   computed: {
     showClearAllFilter () {
       return ['alphabet', 'year', 'authoring_body', 'court'].some(key => this.getUrlParamValue(key).length);
-    },
-    orderedYears () {
-      const years = [...this.years];
-      // largest to smallest
-      return years.sort((a, b) => b - a);
     }
   },
   methods: {
+    sortAlphabetically (items) {
+      const sorted = [...items];
+      return sorted.sort((a, b) => a.localeCompare(b));
+    },
+    sortDescending (items) {
+      const sorted = [...items];
+      return sorted.sort((a, b) => b - a);
+    },
     getUrlParamValue (key) {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
