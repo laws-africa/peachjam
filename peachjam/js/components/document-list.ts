@@ -15,8 +15,8 @@ class DocumentList {
         courts = JSON.parse(facetDataJsonElement.textContent).courts;
       }
       // Authoring body facet appears every list page except /judgments/ and /legislation/
-      if(!['/judgments/', '/legislation/'].some(value => window.location.href.includes(value))) {
-        authoringBodies = JSON.parse(facetDataJsonElement.textContent).courts;
+      if (!['/judgments/', '/legislation/'].some(value => window.location.href.includes(value))) {
+        authoringBodies = JSON.parse(facetDataJsonElement.textContent).authoring_bodies;
       }
     }
     createApp(ListFacets, {
