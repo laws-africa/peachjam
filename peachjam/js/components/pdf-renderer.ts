@@ -114,7 +114,12 @@ class PdfRenderer {
 
     loadingTask.onProgress = (data: { loaded: number }) => {
       if(this.pdfSize) {
-        this.root.setAttribute('data-loading-progress', `${data.loaded / parseInt(this.pdfSize)}`);
+        /*
+        * The progress bar represents the progress of two process
+        *  1) loading the pdf data (first 50%)
+        *  2) creating the pdf associating html and inserting it into the DOM (last 50%)
+        * */
+        this.root.setAttribute('data-loading-progress', `${data.loaded / parseInt(this.pdfSize)/2}`);
       }
     };
 
@@ -179,6 +184,11 @@ class PdfRenderer {
         panelPreview.append(target, pageNumber);
         if (this.previewPanelsContainer) {
           this.previewPanelsContainer.appendChild(panelPreview);
+        }
+        const currentLoadingProgress = this.root.getAttribute('data-loading-progress');
+        if(currentLoadingProgress) {
+          const progressIncrement = 0.5 / pages.length;
+          this.root.setAttribute('data-loading-progress', `${parseFloat(currentLoadingProgress) + progressIncrement}`);
         }
       });
     } catch (e) {
