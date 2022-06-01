@@ -115,7 +115,7 @@ class PdfRenderer {
     loadingTask.onProgress = (data: { loaded: number }) => {
       if(this.pdfSize) {
         /*
-        * The progress bar represents the progress of two process
+        * The progress bar represents the progress of two processes
         *  1) loading the pdf data (first 50%)
         *  2) creating the pdf associating html and inserting it into the DOM (last 50%)
         * */
