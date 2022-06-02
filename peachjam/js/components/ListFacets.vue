@@ -35,26 +35,28 @@
             />
           </div>
         </div>
-        <div
-          v-for="(year, index) in sortDescending(years)"
-          :key="index"
-          class="d-flex justify-content-between align-items-center"
-        >
-          <div class="form-check">
-            <input
-              :id="year"
-              class="form-check-input"
-              type="checkbox"
-              name="year"
-              :value="year"
-              :checked="inputChecked('year', year)"
-            >
-            <label
-              class="form-check-label"
-              :for="year"
-            >
-              {{ year }}
-            </label>
+        <div class="facets-scrollable">
+          <div
+              v-for="(year, index) in sortDescending(years)"
+              :key="index"
+              class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                  :id="year"
+                  class="form-check-input"
+                  type="checkbox"
+                  name="year"
+                  :value="year"
+                  :checked="inputChecked('year', year)"
+              >
+              <label
+                  class="form-check-label"
+                  :for="year"
+              >
+                {{ year }}
+              </label>
+            </div>
           </div>
         </div>
       </li>
@@ -78,26 +80,28 @@
             />
           </div>
         </div>
-        <div
-          v-for="(authoringBody, index) in sortAlphabetically(authoringBodies)"
-          :key="index"
-          class="d-flex justify-content-between align-items-center"
-        >
-          <div class="form-check">
-            <input
-              :id="authoringBody"
-              class="form-check-input"
-              type="radio"
-              name="authoring_body"
-              :value="authoringBody"
-              :checked="inputChecked('authoring_body', authoringBody)"
-            >
-            <label
-              class="form-check-label"
-              :for="authoringBody"
-            >
-              {{ authoringBody }}
-            </label>
+        <div class="facets-scrollable">
+          <div
+              v-for="(authoringBody, index) in sortAlphabetically(authoringBodies)"
+              :key="index"
+              class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                  :id="authoringBody"
+                  class="form-check-input"
+                  type="radio"
+                  name="authoring_body"
+                  :value="authoringBody"
+                  :checked="inputChecked('authoring_body', authoringBody)"
+              >
+              <label
+                  class="form-check-label"
+                  :for="authoringBody"
+              >
+                {{ authoringBody }}
+              </label>
+            </div>
           </div>
         </div>
       </li>
@@ -121,26 +125,28 @@
             />
           </div>
         </div>
-        <div
-          v-for="(court, index) in sortAlphabetically(courts)"
-          :key="index"
-          class="d-flex justify-content-between align-items-center"
-        >
-          <div class="form-check">
-            <input
-              :id="court"
-              class="form-check-input"
-              type="radio"
-              name="court"
-              :value="court"
-              :checked="inputChecked('court', court)"
-            >
-            <label
-              class="form-check-label"
-              :for="court"
-            >
-              {{ court }}
-            </label>
+        <div class="facets-scrollable">
+          <div
+              v-for="(court, index) in sortAlphabetically(courts)"
+              :key="index"
+              class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                  :id="court"
+                  class="form-check-input"
+                  type="radio"
+                  name="court"
+                  :value="court"
+                  :checked="inputChecked('court', court)"
+              >
+              <label
+                  class="form-check-label"
+                  :for="court"
+              >
+                {{ court }}
+              </label>
+            </div>
           </div>
         </div>
       </li>
@@ -259,3 +265,10 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.facets-scrollable {
+  max-height: 25vh;
+  overflow-y: auto;
+}
+</style>
