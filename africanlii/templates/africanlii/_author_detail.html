@@ -3,5 +3,7 @@
 {% block title %}{{ author }}{% endblock %}
 
 {% block page-title %}
-  <h1 class="m-0">Documents by {{ author }}</h1>
+    {% if documents %}
+        <h1 class="m-0">Documents by {{ author }}</h1>
+    {% endif %}
 {% endblock %}
