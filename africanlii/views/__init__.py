@@ -1,6 +1,6 @@
 # flake8: noqa
-from .authors import *
 from .about import *
+from .authors import *
 from .documents import *
 from .generic_document import *
 from .home import *
