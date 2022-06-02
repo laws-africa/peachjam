@@ -25,6 +25,12 @@
                 <dd class="col-8 text-muted">{{ document.language }}</dd>
               </dl>
             {% endblock %}
+
+            {% if document.source_file %}
+              <div>
+                <a class="card-link" href="{% url 'document_source' expression_frbr_uri=document.expression_frbr_uri %}">Download document</a> ({{ document.source_file.file.size|filesizeformat }})
+              </div>
+            {% endif %}
           {% endblock %}
         </div>
       </div>
