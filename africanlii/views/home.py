@@ -21,8 +21,10 @@ class HomePageView(AuthedViewMixin, TemplateView):
         recent_instruments = LegalInstrument.objects.order_by("-date")[:5]
         recent_legislation = Legislation.objects.order_by("-date")[:5]
         documents_count = GenericDocument.objects.count()
-        courts = Court.objects.values("id", "name")
-        authoring_bodies = AuthoringBody.objects.values("id", "name")
+        courts = Court.objects.exclude(judgment__isnull=True).values("id", "name")
+        authoring_bodies = AuthoringBody.objects.exclude(
+            genericdocument__isnull=True, legalinstrument__isnull=True
+        ).values("id", "name")
 
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents
