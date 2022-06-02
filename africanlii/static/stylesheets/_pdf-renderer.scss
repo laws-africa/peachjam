@@ -121,6 +121,9 @@
   .pdf-renderer__previews {
     width: 200px;
     background-color: gray;
+    @include media-breakpoint-down(md) {
+      display: none;
+    }
   }
 
   .pdf-renderer__previews__inner {
@@ -156,6 +159,13 @@
 
   .pdf-renderer__right {
     width: 200px;
+    @include media-breakpoint-down(md) {
+      display: none;
+    }
+  }
+
+  .pdf-renderer__content {
+    overflow: auto;
   }
 
   .pdf-renderer__content__page {
