@@ -38,9 +38,14 @@ urlpatterns = [
         name="document_detail",
     ),
     path(
-        "documents<path:expression_frbr_uri>/source.pdf",
+        "documents<path:expression_frbr_uri>/source",
         cache_page(60 * 60 * 6)(views.DocumentSourceView.as_view()),
         name="document_source",
+    ),
+    path(
+        "documents<path:expression_frbr_uri>/source.pdf",
+        cache_page(60 * 60 * 6)(views.DocumentSourcePDFView.as_view()),
+        name="document_source_pdf",
     ),
     path("feeds/judgments.xml", JudgmentAtomSiteNewsFeed(), name="judgment_feed"),
     path(
