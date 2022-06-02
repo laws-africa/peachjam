@@ -31,7 +31,7 @@
   </div>
 </section>
 
-<section class="pb-5 pt-5">
+<section class="pb-5 pt-5 bg-light">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Courts</h2>
     <div class="row">
@@ -45,7 +45,7 @@
   </div>
 </section>
 
-<section class="pb-5 pt-5 bg-light">
+<section class="pb-5 pt-5">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Authors</h2>
     <div class="row">
@@ -58,28 +58,28 @@
   </div>
 </section>
 
-<div class="pb-5 pt-5">
+<section class="pb-5 pt-5 bg-light">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent Judgments</h2>
     {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text='View more Judgements' view_more_url_name='judgment_list' %}
   </div>
-</div>
+</section>
 
-<section class="pb-5 pt-5 bg-light">
+<section class="pb-5 pt-5">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent AU Documents</h2>
     {% include 'peachjam/_recent_document_list.html' with documents=recent_documents  view_more_text='View more AU Documents' view_more_url_name='generic_document_list' %}
   </div>
 </section>
 
-<section class="pb-5 pt-5">
+<section class="pb-5 pt-5 bg-light">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent Legal Instruments</h2>
     {% include 'peachjam/_recent_document_list.html' with documents=recent_instruments view_more_text='View more Legal Instruments' view_more_url_name='legal_instrument_list' %}
   </div>
 </section>
 
-<section class="pb-5 pt-5 bg-light">
+<section class="pb-5 pt-5">
   <div class="container">
     <h2 class="mb-4 heading-underlined">Recent treaties and protocols</h2>
     {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text='View more Treaties and Protocols' view_more_url_name='legislation_list' %}
