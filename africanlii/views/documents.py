@@ -35,6 +35,17 @@ class DocumentSourceView(AuthedViewMixin, DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         if hasattr(self.object, "source_file") and self.object.source_file.file:
+            file = self.object.source_file.file.open()
+            return FileResponse(
+                file,
+                filename=self.object.source_file.filename,
+            )
+        raise Http404
+
+
+class DocumentSourcePDFView(DocumentSourceView):
+    def render_to_response(self, context, **response_kwargs):
+        if hasattr(self.object, "source_file") and self.object.source_file.file:
             if self.object.source_file.file.name.endswith(".docx"):
                 temp_dir, filename = convert_docx_to_pdf(self.object.source_file.file)
                 file = open(f"{temp_dir.name}/{filename}", "rb")
