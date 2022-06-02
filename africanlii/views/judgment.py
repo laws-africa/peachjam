@@ -13,7 +13,8 @@ class JudgmentListView(AuthedViewMixin, FilteredDocumentListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return self.model.objects.order_by("-date")
+        queryset = super(JudgmentListView, self).get_queryset()
+        return queryset.order_by("-date")
 
 
 @registry.register_doc_type("judgment")

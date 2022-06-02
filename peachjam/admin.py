@@ -12,9 +12,42 @@ admin.site.register(
     [
         Image,
         Locality,
-        SourceFile,
     ]
 )
+
+
+class SourceFileFilter(admin.SimpleListFilter):
+    title = "by document type"
+    parameter_name = "doc_type"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("generic", "Generic"),
+            ("judgment", "Judgment"),
+            ("legislation", "Legislation"),
+            ("legal_instrument", "Legal Instrument"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "generic":
+            return queryset.filter(document__doc_type="generic_document")
+        elif self.value() == "judgment":
+            return queryset.filter(document__doc_type="judgment")
+        elif self.value() == "legislation":
+            return queryset.filter(document__doc_type="legislation")
+        elif self.value() == "legal_instrument":
+            return queryset.filter(document__doc_type="legal_instrument")
+        else:
+            return queryset
+
+
+class SourceFileAdmin(admin.ModelAdmin):
+    list_display = ("filename",)
+    list_filter = (SourceFileFilter,)
+    search_fields = ("filename",)
+
+
+admin.site.register(SourceFile, SourceFileAdmin)
 
 
 class SourceFileInline(admin.TabularInline):
