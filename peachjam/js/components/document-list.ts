@@ -9,6 +9,7 @@ class DocumentList {
     if (facetDataJsonElement && facetDataJsonElement.textContent) {
       alphabet = JSON.parse(facetDataJsonElement.textContent).alphabet;
       years = JSON.parse(facetDataJsonElement.textContent).years;
+      docTypes = JSON.parse(facetDataJsonElement.textContent).doc_types;
 
       // Court facet only appears on the judgments page
       if (window.location.href.includes('/judgments/')) {
@@ -17,10 +18,6 @@ class DocumentList {
       // Authoring body facet appears every list page except /judgments/ and /legislation/
       if (!['/judgments/', '/legislation/'].some(value => window.location.href.includes(value))) {
         authoringBodies = JSON.parse(facetDataJsonElement.textContent).authoring_bodies;
-      }
-
-      if (!['/courts/', '/authors/'].some(value => window.location.href.includes(value))) {
-        docTypes = JSON.parse(facetDataJsonElement.textContent).doc_type;
       }
     }
     createApp(ListFacets, {
