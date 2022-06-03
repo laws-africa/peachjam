@@ -43,6 +43,16 @@ urlpatterns = [
         name="document_source",
     ),
     path(
+        "courts/<int:pk>/",
+        views.CourtListView.as_view(),
+        name="court_list",
+    ),
+    path(
+        "authors/<int:pk>/",
+        views.AuthoringBodyListView.as_view(),
+        name="author_list",
+    ),
+    path(
         "documents<path:expression_frbr_uri>/source.pdf",
         cache_page(60 * 60 * 6)(views.DocumentSourcePDFView.as_view()),
         name="document_source_pdf",
