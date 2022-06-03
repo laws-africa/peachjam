@@ -63,9 +63,12 @@ class CourtListView(BaseAuthorListView):
         context = super(CourtListView, self).get_context_data(**kwargs)
         court = get_object_or_404(self.model, pk=self.kwargs["pk"])
         years = list(set(court.judgment_set.values_list("date__year", flat=True)))
+        doc_types = list(set(court.judgment_set.values_list("doc_type", flat=True)))
 
         context["author"] = court
         context["facet_data"] = add_facet_data_to_context(years)
+        context["facet_data"]["doc_types"] = doc_types
+
         return context
 
 
@@ -94,9 +97,20 @@ class AuthoringBodyListView(BaseAuthorListView):
         legal_instrument_years = authoring_body.legalinstrument_set.values_list(
             "date__year", flat=True
         )
-
         years = list(set((chain(generic_doc_years, legal_instrument_years))))
+
+        generic_document_doc_type = authoring_body.genericdocument_set.values_list(
+            "doc_type", flat=True
+        )
+        legal_instrument_doc_type = authoring_body.legalinstrument_set.values_list(
+            "doc_type", flat=True
+        )
+        doc_types = list(
+            set(chain(generic_document_doc_type, legal_instrument_doc_type))
+        )
 
         context["author"] = authoring_body
         context["facet_data"] = add_facet_data_to_context(years)
+        context["facet_data"]["doc_types"] = doc_types
+
         return context
