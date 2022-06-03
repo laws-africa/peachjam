@@ -144,7 +144,7 @@
                 class="form-check-label"
                 :for="docType"
               >
-                {{ docType }}
+                {{ getDocTypeLabel(docType) }}
               </label>
             </div>
           </div>
@@ -275,6 +275,9 @@ export default {
     }
   },
   methods: {
+    getDocTypeLabel (value) {
+      return value.split('_').map(word => `${word[0].toUpperCase()}${word.slice(1, word.length)}`).join(' ');
+    },
     sortAlphabetically (items) {
       const sorted = [...items];
       return sorted.sort((a, b) => a.localeCompare(b));
