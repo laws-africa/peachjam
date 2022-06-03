@@ -37,22 +37,22 @@
         </div>
         <div class="facets-scrollable">
           <div
-              v-for="(year, index) in sortDescending(years)"
-              :key="index"
-              class="d-flex justify-content-between align-items-center"
+            v-for="(year, index) in sortDescending(years)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
           >
             <div class="form-check">
               <input
-                  :id="year"
-                  class="form-check-input"
-                  type="checkbox"
-                  name="year"
-                  :value="year"
-                  :checked="inputChecked('year', year)"
+                :id="year"
+                class="form-check-input"
+                type="checkbox"
+                name="year"
+                :value="year"
+                :checked="inputChecked('year', year)"
               >
               <label
-                  class="form-check-label"
-                  :for="year"
+                class="form-check-label"
+                :for="year"
               >
                 {{ year }}
               </label>
@@ -82,24 +82,69 @@
         </div>
         <div class="facets-scrollable">
           <div
-              v-for="(authoringBody, index) in sortAlphabetically(authoringBodies)"
-              :key="index"
-              class="d-flex justify-content-between align-items-center"
+            v-for="(authoringBody, index) in sortAlphabetically(authoringBodies)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
           >
             <div class="form-check">
               <input
-                  :id="authoringBody"
-                  class="form-check-input"
-                  type="radio"
-                  name="authoring_body"
-                  :value="authoringBody"
-                  :checked="inputChecked('authoring_body', authoringBody)"
+                :id="authoringBody"
+                class="form-check-input"
+                type="radio"
+                name="authoring_body"
+                :value="authoringBody"
+                :checked="inputChecked('authoring_body', authoringBody)"
               >
               <label
-                  class="form-check-label"
-                  :for="authoringBody"
+                class="form-check-label"
+                :for="authoringBody"
               >
                 {{ authoringBody }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li
+        v-if="docTypes.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Document type</strong>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="getUrlParamValue('doc_type').length"
+              href="#"
+              @click.prevent="clearFacet('doc_type')"
+            >
+              Clear
+            </a>
+            <span
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
+        </div>
+        <div class="facets-scrollable">
+          <div
+            v-for="(docType, index) in sortAlphabetically(docTypes)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                :id="docType"
+                class="form-check-input"
+                type="checkbox"
+                name="doc_type"
+                :value="docType"
+                :checked="inputChecked('doc_type', docType)"
+              >
+              <label
+                class="form-check-label"
+                :for="docType"
+              >
+                {{ docType }}
               </label>
             </div>
           </div>
@@ -127,22 +172,22 @@
         </div>
         <div class="facets-scrollable">
           <div
-              v-for="(court, index) in sortAlphabetically(courts)"
-              :key="index"
-              class="d-flex justify-content-between align-items-center"
+            v-for="(court, index) in sortAlphabetically(courts)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
           >
             <div class="form-check">
               <input
-                  :id="court"
-                  class="form-check-input"
-                  type="radio"
-                  name="court"
-                  :value="court"
-                  :checked="inputChecked('court', court)"
+                :id="court"
+                class="form-check-input"
+                type="radio"
+                name="court"
+                :value="court"
+                :checked="inputChecked('court', court)"
               >
               <label
-                  class="form-check-label"
-                  :for="court"
+                class="form-check-label"
+                :for="court"
               >
                 {{ court }}
               </label>
@@ -210,6 +255,10 @@ export default {
       default: () => []
     },
     years: {
+      type: Array,
+      default: () => []
+    },
+    docTypes: {
       type: Array,
       default: () => []
     }
