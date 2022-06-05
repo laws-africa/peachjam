@@ -9,9 +9,10 @@ from peachjam.models import CoreDocument
 from peachjam.views import AuthedViewMixin
 
 
-def add_facet_data_to_context(years):
+def add_facet_data_to_context(years, doc_types):
     return {
         "years": years,
+        "doc_types": doc_types,
         "alphabet": [
             "a",
             "b",
@@ -66,8 +67,7 @@ class CourtListView(BaseAuthorListView):
         doc_types = list(set(court.judgment_set.values_list("doc_type", flat=True)))
 
         context["author"] = court
-        context["facet_data"] = add_facet_data_to_context(years)
-        context["facet_data"]["doc_types"] = doc_types
+        context["facet_data"] = add_facet_data_to_context(years, doc_types)
 
         return context
 
@@ -110,7 +110,6 @@ class AuthoringBodyListView(BaseAuthorListView):
         )
 
         context["author"] = authoring_body
-        context["facet_data"] = add_facet_data_to_context(years)
-        context["facet_data"]["doc_types"] = doc_types
+        context["facet_data"] = add_facet_data_to_context(years, doc_types)
 
         return context
