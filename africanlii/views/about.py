@@ -1,7 +1,5 @@
 from django.views.generic import TemplateView
 
-from peachjam.views import AuthedViewMixin
 
-
-class AboutPageView(AuthedViewMixin, TemplateView):
+class AboutPageView(TemplateView):
     template_name = "africanlii/about.html"

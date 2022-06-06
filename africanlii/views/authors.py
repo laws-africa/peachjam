@@ -6,7 +6,6 @@ from django.views.generic import ListView
 from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import AuthoringBody, Court
 from peachjam.models import CoreDocument
-from peachjam.views import AuthedViewMixin
 
 
 def add_facet_data_to_context(years):
@@ -43,7 +42,7 @@ def add_facet_data_to_context(years):
     }
 
 
-class BaseAuthorListView(AuthedViewMixin, ListView):
+class BaseAuthorListView(ListView):
     context_object_name = "documents"
     paginate_by = 20
 

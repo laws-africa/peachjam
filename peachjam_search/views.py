@@ -10,12 +10,11 @@ from django_elasticsearch_dsl_drf.filter_backends import (
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from elasticsearch_dsl import DateHistogramFacet
 
-from peachjam.views import AuthedViewMixin
 from peachjam_search.documents import SearchableDocument
 from peachjam_search.serializers import SearchableDocumentSerializer
 
 
-class SearchView(AuthedViewMixin, TemplateView):
+class SearchView(TemplateView):
     template_name = "peachjam_search/search.html"
 
 
