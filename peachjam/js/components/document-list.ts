@@ -5,10 +5,11 @@ class DocumentList {
   constructor (root: HTMLElement) {
     const facetsElement:any = root.querySelector('#list-facets');
     const facetDataJsonElement = root.querySelector('#facet-data');
-    let alphabet = []; let years = []; let courts = []; let authoringBodies = [];
+    let alphabet, years, courts, authoringBodies, docTypes;
     if (facetDataJsonElement && facetDataJsonElement.textContent) {
       alphabet = JSON.parse(facetDataJsonElement.textContent).alphabet;
       years = JSON.parse(facetDataJsonElement.textContent).years;
+      docTypes = JSON.parse(facetDataJsonElement.textContent).doc_types;
 
       // Court facet only appears on the judgments page
       if (window.location.href.includes('/judgments/')) {
@@ -23,7 +24,8 @@ class DocumentList {
       alphabet,
       years,
       authoringBodies,
-      courts
+      courts,
+      docTypes
     }).mount(facetsElement);
   }
 }
