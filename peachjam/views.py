@@ -12,5 +12,5 @@ class AuthedViewMixin(LoginRequiredMixin, PermissionRequiredMixin):
         return list(perms)
 
 
-class HomePageView(AuthedViewMixin, TemplateView):
+class HomePageView(TemplateView):
     template_name = "peachjam/home.html"

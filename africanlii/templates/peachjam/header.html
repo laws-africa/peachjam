@@ -87,11 +87,13 @@
             </button>
           </div>
         </form>
-        <ul class="navbar-nav">
-          <li class="nav-link">
-            <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
-          </li>
-        </ul>
+        {% if user.is_authenticated %}
+          <ul class="navbar-nav">
+            <li class="nav-link">
+              <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+            </li>
+          </ul>
+        {% endif %}
       </div>
     </div>
   </nav>

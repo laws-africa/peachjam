@@ -5,10 +5,9 @@ from django.views.generic import DetailView, TemplateView, View
 from africanlii.registry import registry
 from peachjam.docx import convert_docx_to_pdf
 from peachjam.models import CoreDocument
-from peachjam.views import AuthedViewMixin
 
 
-class HomePageView(AuthedViewMixin, TemplateView):
+class HomePageView(TemplateView):
     template_name = "africanlii/home.html"
 
 
@@ -28,7 +27,7 @@ class DocumentDetailViewResolver(View):
             return view.dispatch(request, *args, **kwargs)
 
 
-class DocumentSourceView(AuthedViewMixin, DetailView):
+class DocumentSourceView(DetailView):
     model = CoreDocument
     slug_field = "expression_frbr_uri"
     slug_url_kwarg = "expression_frbr_uri"

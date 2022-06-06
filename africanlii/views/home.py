@@ -8,10 +8,9 @@ from africanlii.models import (
     LegalInstrument,
     Legislation,
 )
-from peachjam.views import AuthedViewMixin
 
 
-class HomePageView(AuthedViewMixin, TemplateView):
+class HomePageView(TemplateView):
     template_name = "africanlii/home.html"
 
     def get(self, request, *args, **kwargs):
