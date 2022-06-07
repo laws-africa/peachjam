@@ -20,8 +20,8 @@ msgstr ""
 
 #: templates/africanlii/judgment_list.html:9
 msgid "Judgment List"
-msgstr ""
+msgstr "Orodha ya Hukumu"
 
 #: templates/africanlii/judgment_list.html:21
 msgid "No judgments found."
-msgstr ""
+msgstr "Hakuna hukumu zilizopatikana."
