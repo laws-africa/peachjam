@@ -1,42 +1,43 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: peachjam\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-07 20:47+0300\n"
-"PO-Revision-Date: 2022-03-08 07:37\n"
-"Last-Translator: \n"
-"Language-Team: Swahili\n"
-"Language: sw_KE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Crowdin-Project: peachjam\n"
-"X-Crowdin-Project-ID: 503248\n"
-"X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /l10n/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 22\n"
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
 msgid "Log Out"
-msgstr "Ondoka"
+msgstr ""
 
 #: templates/account/logout.html:9
 msgid "Are you sure you want to log out?"
-msgstr "Je, una uhakika unataka kuondoka?"
+msgstr ""
 
 #: templates/account/password_reset.html:7
 msgid "Reset Your Password"
-msgstr "Badilisha nenosiri lako"
+msgstr ""
 
 #: templates/account/password_reset_from_key.html:7
 msgid "Bad Token"
-msgstr "Ishara mbaya"
+msgstr ""
 
 #: templates/account/password_reset_from_key.html:7
 msgid "Reset Password"
-msgstr "Badilisha nenosiri"
+msgstr ""
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
@@ -45,20 +46,11 @@ msgid ""
 "used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
 "a>."
 msgstr ""
-"Kiungo cha kuweka upya nenosiri kilikuwa batili, labda kwa sababu tayari "
-"imetumika.Tafadhali omba <a href=\"%(passwd_reset_url)s\">kuweka upya "
-"nenosiri jipya</a>."
 
 #: templates/account/password_reset_from_key.html:56
 msgid "Your password is now reset."
-msgstr "Nenosiri lako sasa limewekwa upya."
+msgstr ""
 
 #: templates/peachjam/_recent_document_list.html:13
 msgid "No documents found."
-msgstr "Hakuna hati zilizopatikana."
-
-#~ msgid "Welcome to Peach Jam"
-#~ msgstr "Karibu kwa Peach Jam"
-
-#~ msgid "More text that needs translation"
-#~ msgstr "Sentensi nyengine zinazohitaji tafsiri"
+msgstr ""
