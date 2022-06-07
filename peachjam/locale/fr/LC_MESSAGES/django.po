@@ -14,14 +14,14 @@ msgstr ""
 "X-Crowdin-Project: peachjam\n"
 "X-Crowdin-Project-ID: 520560\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 124\n"
+"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 126\n"
 
 #: templates/peachjam/home.html:9
 msgid "Welcome to Peach Jam"
-msgstr ""
+msgstr "Bienvenue dans Peach Jam"
 
 #: templates/peachjam/home.html:10
 msgid "More text that needs translation"
-msgstr ""
+msgstr "Plus de texte qui nécessite une traduction"
 
