@@ -40,7 +40,8 @@ export default {
   },
   emits: ['mark-clicked'],
   data: () => ({
-    markInstance: null
+    markInstance: null,
+    marks: []
   }),
 
   watch: {
@@ -53,6 +54,11 @@ export default {
 
   mounted () {
     this.mark(this.q);
+  },
+  beforeUnmount () {
+    this.marks.forEach(item => {
+      item.node.removeEventListener('click', item.clickCb);
+    });
   },
 
   methods: {
@@ -81,12 +87,17 @@ export default {
           clonedNode.setAttribute('role', 'button');
           const brElement = document.createElement('br');
           clonedNode.appendChild(brElement);
-          clonedNode.addEventListener('click', (e) => {
+          const clickCb = (e) => {
             this.$emit('mark-clicked', {
               sectionId: this.result.id,
               nthMark: e.currentTarget.getAttribute('count')
             });
+          };
+          this.marks.push({
+            clickCb,
+            node: clonedNode
           });
+          clonedNode.addEventListener('click', clickCb);
           this.$refs['result-snippet'].appendChild(clonedNode);
         }
       });
