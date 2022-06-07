@@ -1,5 +1,5 @@
 <template>
-  <div class="doc-search toc">
+  <div class="doc-search">
     <div class="inner">
       <div class="section">
         <div class="mb-4">
@@ -49,7 +49,8 @@ export default {
   },
   data: () => ({
     q: '',
-    results: []
+    results: [],
+    markInstance: null
   }),
   watch: {
     q (newValue) {
@@ -58,7 +59,9 @@ export default {
   },
   methods: {
     searchAknDoc: debounce(function (q) {
-      const markInstance = new Mark(this.document.querySelectorAll('.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp'));
+      if (!this.markInstance) {
+        this.markInstance = new Mark(this.document.querySelectorAll('.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp'));
+      }
       if (q) {
         const searchData = [];
         const selector = '.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp';
@@ -79,31 +82,17 @@ export default {
           });
         });
 
-        // WIP lunr logic
-        // const lunrSearchData = lunr(function () {
-        //   this.field('id');
-        //   this.field('title');
-        //   this.field('content');
-        //   searchData.forEach((item) => {
-        //     this.add(item);
-        //   });
-        // });
-        // const result = lunrSearchData.search(q);
-        // this.results = result.map(x => {
-        //   return searchData.find((y) => x.ref === y.id);
-        // });
-        // Hack to get it working for now
         if (this.q.length > 3) {
           this.results = searchData.filter(item => item.content.toLowerCase().includes(q.toLowerCase()));
 
           // Mark content
-          markInstance.unmark();
-          markInstance.mark(q, {
+          this.markInstance.unmark();
+          this.markInstance.mark(q, {
             separateWordSearch: false
           });
         }
       } else {
-        markInstance.unmark();
+        this.markInstance.unmark();
         this.results = [];
       }
     }, 300),
@@ -128,6 +117,7 @@ export default {
 .doc-search {
   position: relative;
   height: 100%;
+  background-color: #f8f9fa;
 }
 
 .doc-search .inner {
