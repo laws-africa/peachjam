@@ -57,9 +57,11 @@ export default {
 
   methods: {
     mark (q) {
-      const instance = new Mark(this.$refs.content);
-      instance.unmark();
-      instance.mark(q, {
+      if (!this.markInstance) {
+        this.markInstance = new Mark(this.$refs.content);
+      }
+      this.markInstance.unmark();
+      this.markInstance.mark(q, {
         separateWordSearch: false
       });
       this.$refs['result-snippet'].innerHTML = '';
