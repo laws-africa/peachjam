@@ -13,20 +13,24 @@
             aria-describedby="search-content-button"
           >
         </div>
-        <div v-if="!results.length && q">
+        <div v-if="!aknResults.length && q">
           No results
         </div>
         <div
-          v-if="results.length"
+          v-if="aknResults.length"
           class="scrollable-content"
         >
-          <ResultCard
-            v-for="result in results"
+          <div
+            v-for="result in aknResults"
             :key="result.id"
-            :q="q"
-            :result="result"
-            @mark-clicked="handleMarkClick"
-          />
+            class="mb-4"
+          >
+            <AknResult
+              :q="q"
+              :result="result"
+              @mark-clicked="handleMarkClick"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -34,13 +38,13 @@
 </template>
 
 <script>
-import ResultCard from './ResultCard.vue';
 import Mark from 'mark.js';
 import debounce from 'lodash/debounce';
+import AknResult from './AknResult.vue';
 
 export default {
   name: 'DocumentSearch',
-  components: { ResultCard },
+  components: { AknResult },
   props: {
     document: {
       type: HTMLElement,
@@ -49,7 +53,7 @@ export default {
   },
   data: () => ({
     q: '',
-    results: [],
+    aknResults: [],
     markInstance: null
   }),
   watch: {
@@ -60,30 +64,31 @@ export default {
   methods: {
     searchAknDoc: debounce(function (q) {
       if (!this.markInstance) {
-        this.markInstance = new Mark(this.document.querySelectorAll('.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp'));
+        this.markInstance = new Mark(this.document.querySelectorAll('.akn-section'));
       }
       if (q) {
+        const clonedDoc = this.document.cloneNode(true);
         const searchData = [];
-        const selector = '.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp';
-        this.document.querySelectorAll('.akn-section').forEach((section) => {
-          // TODO: This query has cases of duplicate textNodes. Need to investigate why. (For now use Set to remove duplicates)
-          // const text = [];
-          const text = new Set();
-          section.querySelectorAll(selector).forEach((elem) => {
-            // text.push(elem.textContent);
-            text.add(elem.textContent);
-          });
+        clonedDoc.querySelectorAll('.akn-section').forEach((section) => {
           const titleSelector = section.querySelector('h3');
           const title = (titleSelector ? titleSelector.textContent : '') || '';
+          const selector = '.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp';
+          const text = [];
+          const contentNodes = section.querySelectorAll(selector);
+          contentNodes.forEach((elem) => {
+            text.push(elem.textContent);
+          });
+
           searchData.push({
             id: section.id,
             title,
-            content: [...text].join(' ')
+            contentNodes,
+            text: text.join(' ').toLocaleLowerCase()
           });
         });
 
         if (this.q.length > 3) {
-          this.results = searchData.filter(item => item.content.toLowerCase().includes(q.toLowerCase()));
+          this.aknResults = searchData.filter(item => item.text.includes(q.toLocaleLowerCase()));
 
           // Mark content
           this.markInstance.unmark();
@@ -93,20 +98,24 @@ export default {
         }
       } else {
         this.markInstance.unmark();
-        this.results = [];
+        this.aknResults = [];
       }
     }, 300),
 
-    handleMarkClick (data) {
-      const marks = [...this.document.querySelectorAll(`#${data.sectionId} mark`)];
-      const targetElement = marks[data.nthMark - 1];
+    handleMarkClick (targetSelector) {
+      const targetElement = this.document.querySelector(targetSelector);
+      targetElement.style.transition = 'background-color 400ms ease-in-out';
       const top =
         window.pageYOffset +
-        targetElement.getBoundingClientRect().top;
+        targetElement.getBoundingClientRect().top - 70;
       window.scrollTo({
         top,
         behavior: 'smooth'
       });
+      targetElement.style.backgroundColor = 'yellow';
+      window.setTimeout(() => {
+        targetElement.style.backgroundColor = 'initial';
+      }, 400);
     }
   }
 
