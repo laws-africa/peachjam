@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-08 10:16+0300\n"
-"PO-Revision-Date: 2022-06-08 12:35\n"
+"PO-Revision-Date: 2022-06-08 13:08\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 44\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 50\n"
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
@@ -52,8 +52,8 @@ msgid "No documents found."
 msgstr "Hakuna hati zilizopatikana."
 
 #~ msgid "Welcome to Peach Jam"
-#~ msgstr "Karibu kwa Peach Jam"
+#~ msgstr "Bienvenue dans Peach Jam"
 
 #~ msgid "More text that needs translation"
-#~ msgstr "Sentensi nyengine zinazohitaji tafsiri"
+#~ msgstr "Plus de texte qui nécessite une traduction"
 
