@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: peachjam\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-08 10:16+0300\n"
-"PO-Revision-Date: 2022-06-07 13:10\n"
+"PO-Revision-Date: 2022-06-08 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: peachjam\n"
 "X-Crowdin-Project-ID: 520560\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 126\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 124\n"
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
@@ -40,10 +40,7 @@ msgstr ""
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
-msgid ""
-"The password reset link was invalid, possibly because it has already been "
-"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
-"a>."
+msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
 msgstr ""
 
 #: templates/account/password_reset_from_key.html:56
@@ -55,7 +52,8 @@ msgid "No documents found."
 msgstr ""
 
 #~ msgid "Welcome to Peach Jam"
-#~ msgstr "Karibu kwa Peach Jam"
+#~ msgstr "Bienvenue dans Peach Jam"
 
 #~ msgid "More text that needs translation"
-#~ msgstr "Sentensi nyengine zinazohitaji tafsiri"
+#~ msgstr "Plus de texte qui nécessite une traduction"
+
