@@ -106,14 +106,13 @@ export default {
     searchHtmlDoc () {
       if (!this.markInstance) {
         this.markInstance = new Mark(this.document);
-        // Mark content
-        this.markInstance.unmark();
-        this.markInstance.mark(this.q, {
-          separateWordSearch: false
-        });
-
-        this.results = Array.prototype.slice.call(this.document.querySelectorAll('mark'));
       }
+      // Mark content
+      this.markInstance.unmark();
+      this.markInstance.mark(this.q, {
+        separateWordSearch: false
+      });
+      this.results = [...this.document.querySelectorAll('mark')];
     },
     searchAknDoc () {
       if (!this.markInstance) {
