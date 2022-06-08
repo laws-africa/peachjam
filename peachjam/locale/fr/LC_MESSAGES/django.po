@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: peachjam\n"
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-08 10:16+0300\n"
-"PO-Revision-Date: 2022-06-07 13:10\n"
+"PO-Revision-Date: 2022-06-08 13:08\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -11,51 +11,49 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Crowdin-Project: peachjam\n"
-"X-Crowdin-Project-ID: 520560\n"
+"X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 126\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 50\n"
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
 msgid "Log Out"
-msgstr ""
+msgstr "Déconnexion"
 
 #: templates/account/logout.html:9
 msgid "Are you sure you want to log out?"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir vous déconnecter ?"
 
 #: templates/account/password_reset.html:7
 msgid "Reset Your Password"
-msgstr ""
+msgstr "Réinitialiser votre mot de passe"
 
 #: templates/account/password_reset_from_key.html:7
 msgid "Bad Token"
-msgstr ""
+msgstr "Mauvais jeton"
 
 #: templates/account/password_reset_from_key.html:7
 msgid "Reset Password"
-msgstr ""
+msgstr "Réinitialiser le mot de passe"
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
-msgid ""
-"The password reset link was invalid, possibly because it has already been "
-"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
-"a>."
-msgstr ""
+msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
+msgstr "Le lien de réinitialisation du mot de passe n'est pas valide, peut-être parce qu'il a déjà été utilisé. Veuillez demander une <a href=\"%(passwd_reset_url)s\">nouvelle réinitialisation du mot de passe</a>."
 
 #: templates/account/password_reset_from_key.html:56
 msgid "Your password is now reset."
-msgstr ""
+msgstr "Votre mot de passe est maintenant réinitialisé."
 
 #: templates/peachjam/_recent_document_list.html:13
 msgid "No documents found."
-msgstr ""
+msgstr "Aucun document trouvé."
 
 #~ msgid "Welcome to Peach Jam"
 #~ msgstr "Bienvenue dans Peach Jam"
 
 #~ msgid "More text that needs translation"
 #~ msgstr "Plus de texte qui nécessite une traduction"
+
