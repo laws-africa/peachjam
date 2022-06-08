@@ -24,24 +24,32 @@
             </div>
           </form>
         </div>
-        <div v-if="!aknResults.length && q">
+        <div v-if="!results.length && q">
           No results
         </div>
         <div
-          v-if="aknResults.length"
+          v-if="results.length"
           class="scrollable-content"
         >
-          <div
-            v-for="result in aknResults"
-            :key="result.id"
-            class="mb-4"
-          >
-            <AknResult
-              :q="q"
-              :result="result"
-              @mark-clicked="handleMarkClick"
-            />
+          <div v-if="docType === 'akn'">
+            <div
+              v-for="result in results"
+              :key="result.id"
+              class="mb-4"
+            >
+              <AknResult
+                :result="result"
+                :q="q"
+                @go-to-result="goToResult"
+              />
+            </div>
           </div>
+          <HTMLResults
+            v-if="docType === 'html'"
+            :q="q"
+            :results="results"
+            @go-to-result="goToResult"
+          />
         </div>
       </div>
     </div>
@@ -51,10 +59,11 @@
 <script>
 import Mark from 'mark.js';
 import AknResult from './AknResult.vue';
+import HTMLResults from './HTMLResults.vue';
 
 export default {
   name: 'DocumentSearch',
-  components: { AknResult },
+  components: { HTMLResults, AknResult },
   props: {
     docType: {
       type: String,
@@ -71,16 +80,17 @@ export default {
   },
   data: () => ({
     q: '',
-    aknResults: [],
-    htmlResults: [],
+    results: [],
     markInstance: null
   }),
   watch: {
     q (newValue) {
       switch (this.docType) {
         case 'akn':
-        case 'document':
           this.searchAknDoc(newValue);
+          break;
+        case 'html':
+          this.searchHtmlDoc(newValue);
           break;
         case 'pdf':
         default:
@@ -93,14 +103,31 @@ export default {
       e.preventDefault();
       this.q = this.$refs.q.value;
     },
+    searchHtmlDoc () {
+      if (!this.markInstance) {
+        this.markInstance = new Mark(this.document);
+        // Mark content
+        this.markInstance.unmark();
+        this.markInstance.mark(this.q, {
+          separateWordSearch: false
+        });
+
+        this.results = Array.prototype.slice.call(this.document.querySelectorAll('mark'));
+      }
+    },
     searchAknDoc () {
       if (!this.markInstance) {
         this.markInstance = new Mark(this.document.querySelectorAll('.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp'));
       }
       if (this.q) {
-        const clonedDoc = this.document.cloneNode(true);
+        // Mark content
+        this.markInstance.unmark();
+        this.markInstance.mark(this.q, {
+          separateWordSearch: false
+        });
+
         const searchData = [];
-        clonedDoc.querySelectorAll('.akn-section').forEach((section) => {
+        this.document.querySelectorAll('.akn-section').forEach((section) => {
           const titleSelector = section.querySelector('h3');
           const title = (titleSelector ? titleSelector.textContent : '') || '';
           const selector = '.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp';
@@ -118,31 +145,26 @@ export default {
           });
         });
 
-        this.aknResults = searchData.filter(item => item.text.includes(this.q.toLocaleLowerCase()));
-        // Mark content
-        this.markInstance.unmark();
-        this.markInstance.mark(this.q, {
-          separateWordSearch: false
-        });
+        this.results = searchData.filter(item => item.text.includes(this.q.toLocaleLowerCase()));
       } else {
+        // If empty unmark content
         this.markInstance.unmark();
-        this.aknResults = [];
+        this.results = [];
       }
     },
 
-    handleMarkClick (targetSelector) {
-      const targetElement = this.document.querySelector(targetSelector);
-      targetElement.style.transition = 'background-color 400ms ease-in-out';
+    goToResult (node) {
+      node.style.transition = 'background-color 400ms ease-in-out';
       const top =
         window.pageYOffset +
-        targetElement.getBoundingClientRect().top - 70;
+        node.getBoundingClientRect().top - 70;
       window.scrollTo({
         top,
         behavior: 'smooth'
       });
-      targetElement.style.backgroundColor = 'yellow';
+      node.style.backgroundColor = 'yellow';
       window.setTimeout(() => {
-        targetElement.style.backgroundColor = 'initial';
+        node.style.backgroundColor = 'initial';
       }, 400);
     }
   }
