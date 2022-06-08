@@ -2,6 +2,7 @@ from django.views.generic import ListView
 
 from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import AuthoringBody, Court
+from peachjam.models import CoreDocument
 
 
 class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
@@ -52,4 +53,25 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
                 "z",
             ],
         }
+        return context
+
+
+class DocumentVersionsMixin:
+    """Helper mixin for document detail views to fetch other versions of a document based
+    on the document's work_frbr_uri and separate them based on language and date.
+    """
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # get all versions that match current document work_frbr_uri
+        all_versions = CoreDocument.objects.filter(
+            work_frbr_uri=self.object.work_frbr_uri
+        ).exclude(pk=self.object.pk)
+
+        # language versions that match current document date
+        context["language_versions"] = all_versions.filter(date=self.object.date)
+
+        # date versions that match current document language
+        context["date_versions"] = all_versions.filter(language=self.object.language)
+
         return context

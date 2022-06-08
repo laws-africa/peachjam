@@ -2,7 +2,10 @@ from django.views.generic import DetailView
 
 from africanlii.models import LegalInstrument
 from africanlii.registry import registry
-from africanlii.views.generic_views import FilteredDocumentListView
+from africanlii.views.generic_views import (
+    DocumentVersionsMixin,
+    FilteredDocumentListView,
+)
 
 
 class LegalInstrumentListView(FilteredDocumentListView):
@@ -17,7 +20,7 @@ class LegalInstrumentListView(FilteredDocumentListView):
 
 
 @registry.register_doc_type("legal_instrument")
-class LegalInstrumentDetailView(DetailView):
+class LegalInstrumentDetailView(DocumentVersionsMixin, DetailView):
     model = LegalInstrument
     slug_field = "expression_frbr_uri"
     slug_url_kwarg = "expression_frbr_uri"
