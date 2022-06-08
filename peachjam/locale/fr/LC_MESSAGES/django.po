@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: peachjam\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-07 20:47+0300\n"
+"POT-Creation-Date: 2022-06-08 15:13+0300\n"
 "PO-Revision-Date: 2022-03-08 07:39\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -16,6 +16,18 @@ msgstr ""
 "X-Crowdin-Language: fr\n"
 "X-Crowdin-File: /l10n/peachjam/locale/sw/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 22\n"
+
+#: settings.py:185
+msgid "English"
+msgstr ""
+
+#: settings.py:186
+msgid "French"
+msgstr ""
+
+#: settings.py:187
+msgid "Swahili"
+msgstr ""
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
