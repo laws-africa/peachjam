@@ -73,8 +73,8 @@ export default {
 
   methods: {
     renderSnippets () {
-      this.snippets = Array.prototype.slice.call(this.result.contentNodes).map(node => {
-        return Array.prototype.slice.call(node.querySelectorAll('mark')).map(mark => {
+      this.snippets = [...this.result.contentNodes].map(node => {
+        return [...node.querySelectorAll('mark')].map(mark => {
           // find nearest akn block element (ensures snippet text)
           const selector = [
             'blockContainer',
