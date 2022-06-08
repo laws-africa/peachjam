@@ -2,14 +2,14 @@
 
 <div data-component="DocumentContent">
   {% if document.content_html %}
-    {% if document.content_html_is_akn %}
-      <div class="row">
-        <div class="col-lg-3 d-none d-lg-flex vh-100 position-sticky"
-             style="top:0; left: 0"
-        >
-          <div class="d-flex flex-column w-100">
-            <nav>
-              <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <div class="row">
+      <div class="col-lg-3 d-none d-lg-flex vh-100 position-sticky"
+           style="top:0; left: 0"
+      >
+        {% if document.content_html_is_akn %}
+        <div class="d-flex flex-column w-100">
+          <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
               <button class="nav-link active"
                       id="toc-tab"
                       data-bs-toggle="tab"
@@ -31,34 +31,42 @@
                 Search
               </button>
             </div>
-            </nav>
-            <div class="tab-content flex-grow-1" id="nav-tabContent">
-              <div class="tab-pane fade show active h-100" id="nav-toc" role="tabpanel" aria-labelledby="toc-tab">
-                <aside class="toc">
-                  <la-table-of-contents-controller
+          </nav>
+          <div class="tab-content flex-grow-1" id="nav-tabContent">
+            <div class="tab-pane fade show active h-100" id="nav-toc"
+                 role="tabpanel"
+                 aria-labelledby="toc-tab">
+              <aside class="toc">
+                <la-table-of-contents-controller
                     items="{{ document.toc_json|jsonify }}"
                     expand-all-btn-classes="btn btn-secondary btn-sm"
                     collapse-all-btn-classes="btn btn-secondary btn-sm"
                     title-filter-clear-btn-classes="btn btn-secondary btn-sm"
                     search-filter-input-classes="form-control"
-                  ></la-table-of-contents-controller>
-                </aside>
-              </div>
-              <div class="tab-pane fade h-100"
-                   id="nav-search" role="tabpanel"
-                   aria-labelledby="nav-search-tab"
-              >
-                <div id="akn-document-search" class="h-100"></div>
-              </div>
-          </div>
+                ></la-table-of-contents-controller>
+              </aside>
+            </div>
+            <div class="tab-pane fade h-100"
+                 id="nav-search" role="tabpanel"
+                 aria-labelledby="nav-search-tab"
+            >
+              <div id="akn-doc-search" class="h-100"></div>
+            </div>
           </div>
         </div>
-        <div class="col-lg-9">
+        {% else %}
+        <div class="w-100">
+          <div class="h-100" id="html-doc-search"></div>
+        </div>
+        {% endif%}
+      </div>
+      <div class="col-lg-9">
+        {% if document.content_html_is_akn %}
           <div class="la-akoma-ntoso-with-gutter">
             <la-akoma-ntoso
-              id="akn"
-              expression-frbr-uri="{{ document.expression_frbr_uri }}"
-              class="flash-target"
+                id="akn"
+                expression-frbr-uri="{{ document.expression_frbr_uri }}"
+                class="flash-target"
             >
               <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
               <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
@@ -67,11 +75,13 @@
             </la-akoma-ntoso>
             <la-gutter></la-gutter>
           </div>
-        </div>
+        {% else %}
+          <div data-html-doc>
+            {{ document.content_html|safe }}
+          </div>
+        {% endif%}
       </div>
-    {% else %}
-      {{ document.content_html|safe }}
-    {% endif %}
+    </div>
   {% else %}
     <div data-component="PdfRenderer"
          data-pdf="{% url 'document_source_pdf' expression_frbr_uri=document.expression_frbr_uri %}"
@@ -86,10 +96,10 @@
       </div>
       <div class="pdf-renderer">
         <div class="pdf-renderer__previews">
-        <div class="pdf-renderer__previews__inner"></div>
-      </div>
-      <div class="pdf-renderer__content"></div>
-      <div class="pdf-renderer__right"></div>
+          <div class="pdf-renderer__previews__inner"></div>
+        </div>
+        <div class="pdf-renderer__content"></div>
+        <div class="pdf-renderer__right"></div>
       </div>
     </div>
   {% endif %}
