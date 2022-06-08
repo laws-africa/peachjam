@@ -1,4 +1,4 @@
-from django.views.generic import ListView
+from django.views.generic import DetailView, ListView
 
 from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import AuthoringBody, Court
@@ -56,10 +56,10 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
         return context
 
 
-class DocumentVersionsMixin:
-    """Helper mixin for document detail views to fetch other versions of a document based
-    on the document's work_frbr_uri and separate them based on language and date.
-    """
+class BaseDocumentDetailView(DetailView):
+    slug_field = "expression_frbr_uri"
+    slug_url_kwarg = "expression_frbr_uri"
+    context_object_name = "document"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -72,6 +72,8 @@ class DocumentVersionsMixin:
         context["language_versions"] = all_versions.filter(date=self.object.date)
 
         # date versions that match current document language
-        context["date_versions"] = all_versions.filter(language=self.object.language)
+        context["date_versions"] = all_versions.filter(
+            language=self.object.language
+        ).order_by("-date")
 
         return context
