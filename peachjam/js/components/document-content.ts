@@ -11,7 +11,8 @@ class DocumentContent {
       targetMountElement = root.querySelector('#akn-document-search');
       if (targetMountElement) {
         createApp(DocumentSearch, {
-          document: aknDoc
+          document: aknDoc,
+          docType: 'akn'
         }).mount(targetMountElement);
       }
     }
