@@ -3,15 +3,26 @@
     <div class="inner">
       <div class="section">
         <div class="mb-4">
-          <input
-            v-model="q"
-            type="text"
-            required
-            class="form-control"
-            placeholder="Search document content"
-            aria-label="Search document content"
-            aria-describedby="search-content-button"
-          >
+          <form @submit="handleSubmit">
+            <div class="input-group">
+              <input
+                ref="q"
+                type="text"
+                required
+                class="form-control"
+                placeholder="Search document content"
+                aria-label="Search document content"
+                aria-describedby="search-content-button"
+                minlength="3"
+              >
+              <button
+                class="btn btn-secondary"
+                type="submit"
+              >
+                Search
+              </button>
+            </div>
+          </form>
         </div>
         <div v-if="!aknResults.length && q">
           No results
@@ -39,13 +50,20 @@
 
 <script>
 import Mark from 'mark.js';
-import debounce from 'lodash/debounce';
 import AknResult from './AknResult.vue';
 
 export default {
   name: 'DocumentSearch',
   components: { AknResult },
   props: {
+    docType: {
+      type: String,
+      required: true,
+      validator (value) {
+        // The value must match one of these strings
+        return ['akn', 'pdf', 'html'].includes(value);
+      }
+    },
     document: {
       type: HTMLElement,
       required: true
@@ -54,19 +72,32 @@ export default {
   data: () => ({
     q: '',
     aknResults: [],
+    htmlResults: [],
     markInstance: null
   }),
   watch: {
     q (newValue) {
-      this.searchAknDoc(newValue);
+      switch (this.docType) {
+        case 'akn':
+        case 'document':
+          this.searchAknDoc(newValue);
+          break;
+        case 'pdf':
+        default:
+          break;
+      }
     }
   },
   methods: {
-    searchAknDoc: debounce(function (q) {
+    handleSubmit (e) {
+      e.preventDefault();
+      this.q = this.$refs.q.value;
+    },
+    searchAknDoc () {
       if (!this.markInstance) {
-        this.markInstance = new Mark(this.document.querySelectorAll('.akn-section'));
+        this.markInstance = new Mark(this.document.querySelectorAll('.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp'));
       }
-      if (q) {
+      if (this.q) {
         const clonedDoc = this.document.cloneNode(true);
         const searchData = [];
         clonedDoc.querySelectorAll('.akn-section').forEach((section) => {
@@ -87,20 +118,17 @@ export default {
           });
         });
 
-        if (this.q.length > 3) {
-          this.aknResults = searchData.filter(item => item.text.includes(q.toLocaleLowerCase()));
-
-          // Mark content
-          this.markInstance.unmark();
-          this.markInstance.mark(q, {
-            separateWordSearch: false
-          });
-        }
+        this.aknResults = searchData.filter(item => item.text.includes(this.q.toLocaleLowerCase()));
+        // Mark content
+        this.markInstance.unmark();
+        this.markInstance.mark(this.q, {
+          separateWordSearch: false
+        });
       } else {
         this.markInstance.unmark();
         this.aknResults = [];
       }
-    }, 300),
+    },
 
     handleMarkClick (targetSelector) {
       const targetElement = this.document.querySelector(targetSelector);
