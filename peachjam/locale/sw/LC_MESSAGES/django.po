@@ -14,46 +14,46 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 50\n"
+"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 44\n"
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
 msgid "Log Out"
-msgstr ""
+msgstr "Ondoka"
 
 #: templates/account/logout.html:9
 msgid "Are you sure you want to log out?"
-msgstr ""
+msgstr "Je, una uhakika unataka kuondoka?"
 
 #: templates/account/password_reset.html:7
 msgid "Reset Your Password"
-msgstr ""
+msgstr "Weka upya nenosiri lako"
 
 #: templates/account/password_reset_from_key.html:7
 msgid "Bad Token"
-msgstr ""
+msgstr "Ishara mbaya"
 
 #: templates/account/password_reset_from_key.html:7
 msgid "Reset Password"
-msgstr ""
+msgstr "Weka upya nenosiri"
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
 msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
-msgstr ""
+msgstr "Kiungo cha kuweka upya nenosiri kilikuwa batili, pengine kwa sababu tayari kimetumika. Tafadhali omba <a href=\"%(passwd_reset_url)s\">uwekaji upya wa nenosiri</a>."
 
 #: templates/account/password_reset_from_key.html:56
 msgid "Your password is now reset."
-msgstr ""
+msgstr "Nenosiri lako sasa limewekwa upya."
 
 #: templates/peachjam/_recent_document_list.html:13
 msgid "No documents found."
-msgstr ""
+msgstr "Hakuna hati zilizopatikana."
 
 #~ msgid "Welcome to Peach Jam"
-#~ msgstr "Bienvenue dans Peach Jam"
+#~ msgstr "Karibu kwa Peach Jam"
 
 #~ msgid "More text that needs translation"
-#~ msgstr "Plus de texte qui nécessite une traduction"
+#~ msgstr "Sentensi nyengine zinazohitaji tafsiri"
 
