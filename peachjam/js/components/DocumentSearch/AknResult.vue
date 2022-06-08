@@ -17,14 +17,14 @@
       >
         <ResultSnippet
           class="mb-2"
-          :node="snippet"
+          :node="snippet.clonedNode"
         />
         <div>
           <a
             href="#"
-            @click.prevent="handleResultClick(snippet)"
+            @click.prevent="$emit('go-to-result', snippet.originalNode);"
           >
-            Go to section
+            Go to result
           </a>
         </div>
         <hr
@@ -37,23 +37,23 @@
 </template>
 
 <script>
-import Mark from 'mark.js';
 import ResultSnippet from './ResultSnippet.vue';
 
 export default {
   name: 'AknResult',
   components: { ResultSnippet },
   props: {
-    q: {
-      type: String,
-      default: ''
-    },
     result: {
       type: Object,
       required: true
+    },
+    q: {
+      type: String,
+      required: false,
+      default: ''
     }
   },
-  emits: ['mark-clicked'],
+  emits: ['go-to-result'],
   data: () => ({
     markInstance: null,
     snippets: []
@@ -61,25 +61,20 @@ export default {
 
   watch: {
     q: {
-      handler (value) {
-        this.mark(value);
+      handler () {
+        this.renderSnippets();
       }
     }
   },
 
   mounted () {
-    this.mark(this.q);
+    this.renderSnippets();
   },
 
   methods: {
-    mark (q) {
-      const markInstance = new Mark(this.result.contentNodes);
-      markInstance.unmark();
-      markInstance.mark(q, {
-        separateWordSearch: false
-      });
-      this.snippets = [...this.result.contentNodes].map(node => {
-        return [...node.querySelectorAll('mark')].map(mark => {
+    renderSnippets () {
+      this.snippets = Array.prototype.slice.call(this.result.contentNodes).map(node => {
+        return Array.prototype.slice.call(node.querySelectorAll('mark')).map(mark => {
           // find nearest akn block element (ensures snippet text)
           const selector = [
             'blockContainer',
@@ -95,19 +90,19 @@ export default {
             'toc',
             'ul'
           ].map(item => `.akn-${item}`).join(', ');
-          const snippetNode = mark.closest(selector);
-          const clonedNode = snippetNode.cloneNode(true);
+          const originalNode = mark.closest(selector);
+          const clonedNode = originalNode.cloneNode(true);
           clonedNode.querySelectorAll('a').forEach(node => {
             const parent = node.parentNode;
             while (node.firstChild) parent.insertBefore(node.firstChild, node);
             parent.removeChild(node);
           });
-          return clonedNode;
+          return {
+            originalNode,
+            clonedNode
+          };
         });
       }).flat(Infinity);
-    },
-    handleResultClick (node) {
-      this.$emit('mark-clicked', `[data-eid="${node.getAttribute('data-eid')}"]`);
     }
   }
 };
