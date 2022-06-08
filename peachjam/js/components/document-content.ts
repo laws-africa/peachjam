@@ -5,16 +5,25 @@ class DocumentContent {
   protected root: HTMLElement;
   constructor (root: HTMLElement) {
     this.root = root;
-    let targetMountElement;
-    const aknDoc = root.querySelector('la-akoma-ntoso');
+    const aknDoc: HTMLElement | null = root.querySelector('la-akoma-ntoso');
+    const htmlDoc: HTMLElement | null = root.querySelector('[data-html-doc]');
+    const pdfDoc = root.querySelector('[data-component="PdfRenderer"]');
     if (aknDoc) {
-      targetMountElement = root.querySelector('#akn-document-search');
-      if (targetMountElement) {
-        createApp(DocumentSearch, {
-          document: aknDoc,
-          docType: 'akn'
-        }).mount(targetMountElement);
-      }
+      this.renderDocSearch(aknDoc, 'akn', '#akn-doc-search');
+    } else if (htmlDoc) {
+      this.renderDocSearch(htmlDoc, 'html', '#html-doc-search');
+    } else if (pdfDoc) {
+      // this.renderDocSearch()
+    }
+  }
+
+  renderDocSearch (document: HTMLElement, docType: string, targetSelector: string) {
+    const targetMountElement = this.root.querySelector(targetSelector);
+    if (targetMountElement) {
+      createApp(DocumentSearch, {
+        document,
+        docType: docType
+      }).mount(targetMountElement);
     }
   }
 }
