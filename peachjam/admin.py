@@ -17,11 +17,12 @@ from peachjam.models import (
     Locality,
     Predicate,
     Relationship,
+    Ingestor,
     SourceFile,
     Taxonomy,
 )
 
-admin.site.register([Image, Locality, CitationLink])
+admin.site.register([Image, Locality, CitationLink, Ingestor])
 
 
 class SourceFileFilter(admin.SimpleListFilter):

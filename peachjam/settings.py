@@ -41,6 +41,7 @@ ALLOWED_HOSTS = ["*"]
 
 
 INSTALLED_APPS = [
+    "background_task",
     "peachjam.apps.PeachJamConfig",
     "peachjam_search.apps.PeachjamSearchConfig",
     "peachjam_api.apps.PeachjamApiConfig",
