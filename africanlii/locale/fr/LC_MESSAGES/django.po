@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-24 09:06+0300\n"
+"POT-Creation-Date: 2022-06-09 15:27+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,10 +18,26 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: templates/africanlii/judgment_list.html:9
+#: templates/africanlii/generic_document_list.html:7
+msgid "AU Documents"
+msgstr ""
+
+#: templates/africanlii/judgment_list.html:7
 msgid "Judgment List"
 msgstr ""
 
-#: templates/africanlii/judgment_list.html:21
-msgid "No judgments found."
+#: templates/africanlii/layouts/document_list.html:13
+msgid "Documents"
+msgstr ""
+
+#: templates/africanlii/layouts/document_list.html:28
+msgid "No documents found."
+msgstr ""
+
+#: templates/africanlii/legal_instrument_list.html:7
+msgid "Legal Instrument List"
+msgstr ""
+
+#: templates/africanlii/legislation_list.html:7
+msgid "Treaties and Protocols"
 msgstr ""
