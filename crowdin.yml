@@ -3,3 +3,7 @@ files:
     translation: /peachjam/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
   - source: /peachjam/locale/sw/LC_MESSAGES/django.po
     translation: /peachjam/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
+  - source: /africanlii/locale/fr/LC_MESSAGES/django.po
+    translation: /africanlii/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
+  - source: /africanlii/locale/sw/LC_MESSAGES/django.po
+    translation: /africanlii/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
