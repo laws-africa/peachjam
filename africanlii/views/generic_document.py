@@ -1,8 +1,9 @@
-from django.views.generic import DetailView
-
 from africanlii.models import GenericDocument
 from africanlii.registry import registry
-from africanlii.views.generic_views import FilteredDocumentListView
+from africanlii.views.generic_views import (
+    BaseDocumentDetailView,
+    FilteredDocumentListView,
+)
 
 
 class GenericDocumentListView(FilteredDocumentListView):
@@ -17,9 +18,6 @@ class GenericDocumentListView(FilteredDocumentListView):
 
 
 @registry.register_doc_type("generic_document")
-class GenericDocumentDetailView(DetailView):
+class GenericDocumentDetailView(BaseDocumentDetailView):
     model = GenericDocument
-    slug_field = "expression_frbr_uri"
-    slug_url_kwarg = "expression_frbr_uri"
     template_name = "africanlii/generic_document_detail.html"
-    context_object_name = "document"

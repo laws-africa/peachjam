@@ -29,6 +29,7 @@ msgstr "Français"
 msgid "Swahili"
 msgstr "Swahili"
 
+
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
 msgid "Log Out"
@@ -52,8 +53,14 @@ msgstr "Réinitialiser le mot de passe"
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
-msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
-msgstr "Le lien de réinitialisation du mot de passe n'est pas valide, peut-être parce qu'il a déjà été utilisé. Veuillez demander une <a href=\"%(passwd_reset_url)s\">nouvelle réinitialisation du mot de passe</a>."
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
+"a>."
+msgstr ""
+"Le lien de réinitialisation du mot de passe n'est pas valide, peut-être "
+"parce qu'il a déjà été utilisé. Veuillez demander une <a "
+"href=\"%(passwd_reset_url)s\">nouvelle réinitialisation du mot de passe</a>."
 
 #: templates/account/password_reset_from_key.html:56
 msgid "Your password is now reset."
@@ -68,4 +75,3 @@ msgstr "Aucun document trouvé."
 
 #~ msgid "More text that needs translation"
 #~ msgstr "Plus de texte qui nécessite une traduction"
-

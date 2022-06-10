@@ -52,8 +52,14 @@ msgstr "Weka upya nenosiri"
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
-msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
-msgstr "Kiungo cha kuweka upya nenosiri kilikuwa batili, pengine kwa sababu tayari kimetumika. Tafadhali omba <a href=\"%(passwd_reset_url)s\">uwekaji upya wa nenosiri</a>."
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
+"a>."
+msgstr ""
+"Kiungo cha kuweka upya nenosiri kilikuwa batili, pengine kwa sababu tayari "
+"kimetumika. Tafadhali omba <a href=\"%(passwd_reset_url)s\">uwekaji upya wa "
+"nenosiri</a>."
 
 #: templates/account/password_reset_from_key.html:56
 msgid "Your password is now reset."
@@ -68,4 +74,3 @@ msgstr "Hakuna hati zilizopatikana."
 
 #~ msgid "More text that needs translation"
 #~ msgstr "Plus de texte qui nécessite une traduction"
-

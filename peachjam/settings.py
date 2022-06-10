@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 
 import sentry_sdk
+from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -179,6 +180,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
+
+LANGUAGES = [
+    ("en", _("English")),
+    ("fr", _("French")),
+    ("sw", _("Swahili")),
+]
 
 TIME_ZONE = "UTC"
 

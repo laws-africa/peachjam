@@ -19,10 +19,42 @@
                   <dt class="col-4">Author</dt>
                   <dd class="col-8 text-muted">{{ document.authoring_body }}</dd>
                 {% endif %}
+
                 <dt class="col-4">Date</dt>
-                <dd class="col-8 text-muted">{{ document.date }}</dd>
+                {% if date_versions %}
+                  <dd class="col-8">
+                    <div class="dropdown">
+                      <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ document.date }}
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        {% for version in date_versions %}
+                          <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </dd>
+                {% else %}
+                  <dd class="col-8 text-muted">{{ document.date }}</dd>
+                {% endif %}
+
                 <dt class="col-4">Language</dt>
-                <dd class="col-8 text-muted">{{ document.language }}</dd>
+                {% if language_versions %}
+                  <dd class="col-8">
+                    <div class="dropdown">
+                      <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ document.language }}
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        {% for version in language_versions %}
+                          <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </dd>
+                {% else %}
+                  <dd class="col-8 text-muted">{{ document.language }} </dd>
+                {% endif %}
               </dl>
             {% endblock %}
 
