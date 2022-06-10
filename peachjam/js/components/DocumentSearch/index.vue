@@ -50,6 +50,13 @@
             :results="results"
             @go-to-result="goToResult"
           />
+
+          <PdfResults
+            v-if="docType === 'pdf'"
+            :results="results"
+            :q="q"
+            @go-to-result="goToResult"
+          />
         </div>
       </div>
     </div>
@@ -60,10 +67,11 @@
 import Mark from 'mark.js';
 import AknResult from './AknResult.vue';
 import HTMLResults from './HTMLResults.vue';
+import PdfResults from './PdfResults.vue';
 
 export default {
   name: 'DocumentSearch',
-  components: { HTMLResults, AknResult },
+  components: { PdfResults, HTMLResults, AknResult },
   props: {
     docType: {
       type: String,
@@ -85,14 +93,21 @@ export default {
   }),
   watch: {
     q (newValue) {
+      // Unmark when search if mark instance exists already
+      if (this.markInstance) {
+        this.markInstance.unmark();
+        this.results = [];
+      }
       switch (this.docType) {
         case 'akn':
           this.searchAknDoc(newValue);
           break;
-        case 'html':
-          this.searchHtmlDoc(newValue);
-          break;
         case 'pdf':
+          this.searchDoc(newValue, this.document.querySelector('.pdf-renderer__content'));
+          break;
+        case 'html':
+          this.searchDoc(newValue, this.document);
+          break;
         default:
           break;
       }
@@ -103,25 +118,28 @@ export default {
       e.preventDefault();
       this.q = this.$refs.q.value;
     },
-    searchHtmlDoc () {
+    searchDoc (q, markContext) {
       if (!this.markInstance) {
-        this.markInstance = new Mark(this.document);
+        this.markInstance = new Mark(markContext);
       }
       // Mark content
       this.markInstance.unmark();
-      this.markInstance.mark(this.q, {
+      this.markInstance.mark(q, {
+        element: 'span',
+        className: 'doc-mark',
         separateWordSearch: false
       });
-      this.results = [...this.document.querySelectorAll('mark')];
+      this.results = [...this.document.querySelectorAll('[data-markjs]')];
     },
-    searchAknDoc () {
+
+    searchAknDoc (q) {
       if (!this.markInstance) {
         this.markInstance = new Mark(this.document.querySelectorAll('.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp'));
       }
-      if (this.q) {
+      if (q) {
         // Mark content
         this.markInstance.unmark();
-        this.markInstance.mark(this.q, {
+        this.markInstance.mark(q, {
           separateWordSearch: false
         });
 
@@ -145,10 +163,6 @@ export default {
         });
 
         this.results = searchData.filter(item => item.text.includes(this.q.toLocaleLowerCase()));
-      } else {
-        // If empty unmark content
-        this.markInstance.unmark();
-        this.results = [];
       }
     },
 
