@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 44\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 50\n"
 
 #: settings.py:185
 msgid "English"
