@@ -95,8 +95,43 @@
         </div>
       </div>
       <div class="pdf-renderer">
-        <div class="pdf-renderer__previews">
-          <div class="pdf-renderer__previews__inner"></div>
+        <div class="pdf-renderer__left">
+          <nav>
+            <div class="nav nav-tabs" id="pdf-tabs" role="tablist">
+              <button class="nav-link active"
+                      id="pdf-previews-tab"
+                      data-bs-toggle="tab"
+                      data-bs-target="#nav-pdf-previews"
+                      type="button"
+                      role="tab"
+                      aria-controls="nav-pdf-previews"
+                      aria-selected="true">
+                Pages
+              </button>
+              <button class="nav-link"
+                      id="pdf-search-tab"
+                      data-bs-toggle="tab"
+                      data-bs-target="#nav-pdf-search"
+                      type="button"
+                      role="tab"
+                      aria-controls="nav-pdf-search"
+                      aria-selected="false">
+                Search
+              </button>
+            </div>
+          </nav>
+          <div class="tab-content" id="pdf-tabContent">
+            <div class="tab-pane fade show active" id="nav-pdf-previews"
+                 role="tabpanel"
+                 aria-labelledby="pdf-previews-tab">
+              <div class="previews">
+                <div class="previews__inner"></div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="nav-pdf-search" role="tabpanel" aria-labelledby="pdf-search-tab">
+              <div id="pdf-doc-search" class="h-100"></div>
+            </div>
+          </div>
         </div>
         <div class="pdf-renderer__content"></div>
         <div class="pdf-renderer__right"></div>
