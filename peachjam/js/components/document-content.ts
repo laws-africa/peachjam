@@ -7,13 +7,13 @@ class DocumentContent {
     this.root = root;
     const aknDoc: HTMLElement | null = root.querySelector('la-akoma-ntoso');
     const htmlDoc: HTMLElement | null = root.querySelector('[data-html-doc]');
-    const pdfDoc = root.querySelector('[data-component="PdfRenderer"]');
+    const pdfDoc: HTMLElement| null = root.querySelector('[data-component="PdfRenderer"]');
     if (aknDoc) {
       this.renderDocSearch(aknDoc, 'akn', '#akn-doc-search');
     } else if (htmlDoc) {
       this.renderDocSearch(htmlDoc, 'html', '#html-doc-search');
     } else if (pdfDoc) {
-      // this.renderDocSearch()
+      this.renderDocSearch(pdfDoc, 'pdf', '#pdf-doc-search');
     }
   }
 
