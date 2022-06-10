@@ -17,12 +17,12 @@
       >
         <ResultSnippet
           class="mb-2"
-          :node="snippet.clonedNode"
+          :node="snippet.node"
         />
         <div>
           <a
             href="#"
-            @click.prevent="$emit('go-to-result', snippet.originalNode);"
+            @click.prevent="$emit('go-to-result', snippet.nodeForClickFn);"
           >
             Go to result
           </a>
@@ -90,16 +90,16 @@ export default {
             'toc',
             'ul'
           ].map(item => `.akn-${item}`).join(', ');
-          const originalNode = mark.closest(selector);
-          const clonedNode = originalNode.cloneNode(true);
-          clonedNode.querySelectorAll('a').forEach(node => {
+          const nodeForClickFn = mark.closest(selector);
+          const node = nodeForClickFn.cloneNode(true);
+          node.querySelectorAll('a').forEach(node => {
             const parent = node.parentNode;
             while (node.firstChild) parent.insertBefore(node.firstChild, node);
             parent.removeChild(node);
           });
           return {
-            originalNode,
-            clonedNode
+            nodeForClickFn,
+            node
           };
         });
       }).flat(Infinity);
