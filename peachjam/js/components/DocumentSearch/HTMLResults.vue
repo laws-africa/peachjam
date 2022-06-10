@@ -1,26 +1,21 @@
 <template>
-  <div class="card">
+  <div
+    v-for="(snippet, index) in snippets"
+    :key="index"
+    class="card mb-2"
+  >
     <div class="card-body">
-      <div
-        v-for="(snippet, index) in snippets"
-        :key="index"
-      >
-        <ResultSnippet
-          class="mb-2"
-          :node="snippet.clonedNode"
-        />
-        <div>
-          <a
-            href="#"
-            @click.prevent="$emit('go-to-result', snippet.originalNode);"
-          >
-            Go to result
-          </a>
-        </div>
-        <hr
-          v-if="index < snippets.length -1"
-          class="mb-2"
+      <ResultSnippet
+        class="mb-2"
+        :node="snippet.node"
+      />
+      <div>
+        <a
+          href="#"
+          @click.prevent="$emit('go-to-result', snippet.nodeForClickFn);"
         >
+          Go to result
+        </a>
       </div>
     </div>
   </div>
@@ -54,8 +49,8 @@ export default {
       this.snippets = this.results.map(node => {
         const snippet = node.closest('p, h1, h2, h3, h4, h5, h6, address, blockquote, div, table');
         return ({
-          originalNode: snippet,
-          clonedNode: snippet.cloneNode(true)
+          nodeForClickFn: snippet,
+          node: snippet.cloneNode(true)
         });
       });
     }
