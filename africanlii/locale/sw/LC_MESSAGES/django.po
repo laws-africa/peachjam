@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-10 17:25+0300\n"
-"PO-Revision-Date: 2022-06-10 14:34\n"
+"PO-Revision-Date: 2022-06-10 19:46\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -14,20 +14,20 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/africanlii/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 65\n"
+"X-Crowdin-File: /main/africanlii/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 63\n"
 
 #: templates/africanlii/generic_document_list.html:7
 msgid "AU Documents"
-msgstr "Nyaraka za AU"
+msgstr ""
 
 #: templates/africanlii/judgment_list.html:7
 msgid "Judgment List"
-msgstr "Orodha ya Hukumu"
+msgstr ""
 
 #: templates/africanlii/layouts/document_list.html:13
 msgid "Documents"
-msgstr "Nyaraka"
+msgstr ""
 
 #: templates/africanlii/layouts/document_list.html:28
 msgid "No documents found."
@@ -35,9 +35,9 @@ msgstr "Hakuna hati zilizopatikana."
 
 #: templates/africanlii/legal_instrument_list.html:7
 msgid "Legal Instrument List"
-msgstr "Orodha ya Vyombo vya Kisheria"
+msgstr ""
 
 #: templates/africanlii/legislation_list.html:7
 msgid "Treaties and Protocols"
-msgstr "Mikataba na Itifaki"
+msgstr ""
 
