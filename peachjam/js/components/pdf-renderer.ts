@@ -26,7 +26,7 @@ class PdfRenderer {
     this.pdf = root.dataset.pdf;
     this.pdfSize = root.dataset.pdfSize;
     this.pdfContentWrapper = root.querySelector('.pdf-renderer__content');
-    this.previewPanelsContainer = root.querySelector('.pdf-renderer__previews__inner');
+    this.previewPanelsContainer = root.querySelector('.previews__inner');
     this.scrollListenerActive = true;
     this.pdfContentMarks = [];
 
