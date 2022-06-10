@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-10 12:46+0300\n"
-"PO-Revision-Date: 2022-06-08 13:08\n"
+"POT-Creation-Date: 2022-06-09 15:27+0300\n"
+"PO-Revision-Date: 2022-06-10 10:08\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -14,20 +14,20 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 50\n"
+"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 44\n"
 
 #: settings.py:185
 msgid "English"
-msgstr ""
+msgstr "Kiingereza"
 
 #: settings.py:186
 msgid "French"
-msgstr ""
+msgstr "Kifaransa"
 
 #: settings.py:187
 msgid "Swahili"
-msgstr ""
+msgstr "Kiswahili"
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
