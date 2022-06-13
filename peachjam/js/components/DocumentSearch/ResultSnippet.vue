@@ -13,12 +13,23 @@ export default {
   },
   watch: {
     node (newNode) {
-      this.$refs.snippet.innerHTML = '';
-      this.$refs.snippet.appendChild(newNode);
+      this.setHTML(newNode);
     }
   },
   mounted () {
-    this.$refs.snippet.appendChild(this.node);
+    this.setHTML(this.node);
+  },
+  methods: {
+    setHTML (node) {
+      this.$refs.snippet.innerHTML = '';
+      // Small clean up
+      node.querySelectorAll('a').forEach(node => {
+        const parent = node.parentNode;
+        while (node.firstChild) parent.insertBefore(node.firstChild, node);
+        parent.removeChild(node);
+      });
+      this.$refs.snippet.appendChild(node);
+    }
   }
 };
 </script>
