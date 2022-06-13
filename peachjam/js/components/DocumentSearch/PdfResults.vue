@@ -5,18 +5,20 @@
     class="card mb-2"
   >
     <div class="card-body">
-      <div class="card-title">
-        <strong>
-          Page {{ getPageTitle(snippet.nodeForClickFn) }}
-        </strong>
-      </div>
+      <a
+        class="card-title"
+        href="#"
+        @click.prevent=""
+      >
+        Page {{ getPageElement(snippet).dataset.page }}
+      </a>
       <div>
-        {{ snippet.text }}
+        {{ snippet.textContent }}
       </div>
       <div>
         <a
           href="#"
-          @click.prevent="$emit('go-to-result', snippet.nodeForClickFn);"
+          @click.prevent="$emit('go-to-result', snippet);"
         >
           Go to result
         </a>
@@ -28,7 +30,17 @@
 <script>
 export default {
   name: 'PdfResults',
-  props: ['results', 'q'],
+  props: {
+    results: {
+      type: Array,
+      required: true
+    },
+    q: {
+      type: String,
+      required: false,
+      default: ''
+    }
+  },
   emits: ['go-to-result'],
   data: () => ({
     snippets: []
@@ -45,16 +57,14 @@ export default {
     this.renderSnippets();
   },
   methods: {
-    getPageTitle (node) {
-      return node.closest('[data-page]').dataset.page;
+    getPageElement (node) {
+      return node.closest('[data-page]');
     },
     renderSnippets () {
       this.snippets = this.results.map(node => {
         const snippet = node.closest('span[role="presentation"]');
-        return ({
-          nodeForClickFn: snippet,
-          text: snippet.textContent
-        });
+        const hello = snippet;
+        return snippet;
       });
     }
   }
