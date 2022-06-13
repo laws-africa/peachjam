@@ -7,12 +7,12 @@
     <div class="card-body">
       <ResultSnippet
         class="mb-2"
-        :node="snippet.node"
+        :node="snippet.cloneNode(true)"
       />
       <div>
         <a
           href="#"
-          @click.prevent="$emit('go-to-result', snippet.nodeForClickFn);"
+          @click.prevent="$emit('go-to-result', snippet);"
         >
           Go to result
         </a>
@@ -28,7 +28,17 @@ export default {
   components: {
     ResultSnippet
   },
-  props: ['results', 'q'],
+  props: {
+    results: {
+      type: Array,
+      required: true
+    },
+    q: {
+      type: String,
+      required: false,
+      default: ''
+    }
+  },
   emits: ['go-to-result'],
   data: () => ({
     snippets: []
@@ -47,11 +57,8 @@ export default {
   methods: {
     renderSnippets () {
       this.snippets = this.results.map(node => {
-        const snippet = node.closest('p, h1, h2, h3, h4, h5, h6, address, blockquote, div, table');
-        return ({
-          nodeForClickFn: snippet,
-          node: snippet.cloneNode(true)
-        });
+        // Find nearest block level element
+        return node.closest('p, h1, h2, h3, h4, h5, h6, address, blockquote, div, table');
       });
     }
   }
