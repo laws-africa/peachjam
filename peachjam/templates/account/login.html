@@ -1,7 +1,8 @@
 {% extends "account/base.html" %}
 {% load account socialaccount static %}
+{% load i18n %}
 
-{% block title %}Log In{% endblock %}
+{% block title %}{% trans 'Log In' %}{% endblock %}
 
 {% block head-css %}
   {{ block.super }}
@@ -9,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-  <h1 class="mb-3">Log in</h1>
+  <h1 class="mb-3">{% trans 'Log in' %}</h1>
 
   <form method="POST" action="{% url 'account_login' %}" id="email-login">
     {% csrf_token %}
@@ -26,7 +27,7 @@
     {% endif %}
 
     <div class="form-group">
-      <label for="{{ form.login.id_for_label }}">Email address</label>
+      <label for="{{ form.login.id_for_label }}">{% trans 'Email address' %}}</label>
       <input type="email" class="form-control" name="{{ form.login.name }}" id="{{ form.login.id_for_label }}" required autofocus placeholder="you@example.com">
       {% if form.login.errors %}
         <div class="text-danger">
@@ -38,10 +39,10 @@
     </div>
 
     <div class="form-group">
-      <label for="{{ form.password.id_for_label }}">Password</label>
+      <label for="{{ form.password.id_for_label }}">{% trans 'Password' %}</label>
       <input type="password" class="form-control" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" required>
       <div class="my-2">
-        <a href="{% url 'account_reset_password' %}">Forgot your password?</a>
+        <a href="{% url 'account_reset_password' %}">{% trans 'Forgot your password?' %}</a>
       </div>
 
       {% if form.password.errors %}
@@ -54,7 +55,7 @@
     </div>
 
     <div class="my-2">
-      <button class="btn btn-success btn-block mb-3" type="submit">Log in</button>
+      <button class="btn btn-success btn-block mb-3" type="submit">{% trans 'Log in' %}</button>
     </div>
   </form>
 
@@ -72,8 +73,9 @@
           {% else %}
             <i class="fab fa-fw fa-{{ provider.id }}"></i>
           {% endif %}
-
-          Log in with {{ provider.name }}
+          {% blocktrans %}
+            Log in with {{ provider.name }}
+          {% endblocktrans %}
         </a>
       {% endfor %}
     </div>
