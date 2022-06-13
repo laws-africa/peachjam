@@ -17,12 +17,12 @@
       >
         <ResultSnippet
           class="mb-2"
-          :node="snippet.node"
+          :node="snippet.cloneNode(true)"
         />
         <div>
           <a
             href="#"
-            @click.prevent="$emit('go-to-result', snippet.nodeForClickFn);"
+            @click.prevent="$emit('go-to-result', snippet);"
           >
             Go to result
           </a>
@@ -51,6 +51,10 @@ export default {
       type: String,
       required: false,
       default: ''
+    },
+    blockElementNames: {
+      type: Array,
+      required: true
     }
   },
   emits: ['go-to-result'],
@@ -76,31 +80,8 @@ export default {
       this.snippets = [...this.result.contentNodes].map(node => {
         return [...node.querySelectorAll('mark')].map(mark => {
           // find nearest akn block element (ensures snippet text)
-          const selector = [
-            'blockContainer',
-            'block',
-            'blockList',
-            'conclusions',
-            'foreign',
-            'item',
-            'ol',
-            'p',
-            'preface',
-            'tblock',
-            'toc',
-            'ul'
-          ].map(item => `.akn-${item}`).join(', ');
-          const nodeForClickFn = mark.closest(selector);
-          const node = nodeForClickFn.cloneNode(true);
-          node.querySelectorAll('a').forEach(node => {
-            const parent = node.parentNode;
-            while (node.firstChild) parent.insertBefore(node.firstChild, node);
-            parent.removeChild(node);
-          });
-          return {
-            nodeForClickFn,
-            node
-          };
+          const selector = this.blockElementNames.map(item => `.akn-${item}`).join(', ');
+          return mark.closest(selector);
         });
       }).flat(Infinity);
     }
