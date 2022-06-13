@@ -5,7 +5,11 @@
     class="card mb-2"
   >
     <div class="card-body">
-      <div class="card-title" />
+      <div class="card-title">
+        <strong>
+          Page {{ getPageTitle(snippet.nodeForClickFn) }}
+        </strong>
+      </div>
       <div>
         {{ snippet.text }}
       </div>
@@ -41,6 +45,9 @@ export default {
     this.renderSnippets();
   },
   methods: {
+    getPageTitle (node) {
+      return node.closest('[data-page]').dataset.page;
+    },
     renderSnippets () {
       this.snippets = this.results.map(node => {
         const snippet = node.closest('span[role="presentation"]');
