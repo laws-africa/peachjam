@@ -1,5 +1,6 @@
 {% extends "peachjam/layouts/standalone.html" %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}{{ title }}{% endblock %}
 
@@ -12,7 +13,7 @@
     <div class="card-footer">
       {% if SUPPORT_EMAIL %}
         <div class="float-left">
-          Need help? Please email <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>.
+          {% trans 'Need help? Please email <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>.' %}
         </div>
       {% endif %}
     </div>
