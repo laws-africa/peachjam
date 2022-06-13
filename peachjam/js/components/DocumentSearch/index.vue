@@ -40,6 +40,7 @@
               <AknResult
                 :result="result"
                 :q="q"
+                :block-element-names="aknBlockElNames"
                 @go-to-result="goToResult"
               />
             </div>
@@ -89,7 +90,20 @@ export default {
   data: () => ({
     q: '',
     results: [],
-    markInstance: null
+    markInstance: null,
+    aknBlockElNames: [
+      'blockContainer',
+      'block',
+      'blockList',
+      'conclusions',
+      'foreign',
+      'item',
+      'ol',
+      'p',
+      'preface',
+      'tblock',
+      'toc',
+      'ul']
   }),
   watch: {
     q (newValue) {
@@ -103,10 +117,10 @@ export default {
           this.searchAknDoc(newValue);
           break;
         case 'pdf':
-          this.searchDoc(newValue, this.document.querySelector('.pdf-renderer__content'));
+          this.searchHTMLDoc(newValue, this.document.querySelectorAll('.pdf-renderer__content__page .textLayer'));
           break;
         case 'html':
-          this.searchDoc(newValue, this.document);
+          this.searchHTMLDoc(newValue, this.document);
           break;
         default:
           break;
@@ -118,7 +132,22 @@ export default {
       e.preventDefault();
       this.q = this.$refs.q.value;
     },
-    searchDoc (q, markContext) {
+    searchPdf (q) {
+      // Still tweaking this
+      const textLayers = this.document.querySelectorAll('.pdf-renderer__content__page .textLayer');
+      const sentences = [];
+      textLayers.forEach(element => {
+        const sentence = [];
+        for (const child of element.childNodes) {
+          sentence.push(child);
+          if (child.nodeName === 'BR') {
+            break;
+          }
+        }
+        sentences.push(sentence);
+      });
+    },
+    searchHTMLDoc (q, markContext) {
       if (!this.markInstance) {
         this.markInstance = new Mark(markContext);
       }
@@ -133,8 +162,10 @@ export default {
     },
 
     searchAknDoc (q) {
+      const selector = this.aknBlockElNames.map(item => `.akn-section .akn-${item}, .akn-preamble .akn-${item}`).join(', ');
       if (!this.markInstance) {
-        this.markInstance = new Mark(this.document.querySelectorAll('.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp'));
+        // Monitor block level element for each section in akn document
+        this.markInstance = new Mark(this.document.querySelectorAll(selector));
       }
       if (q) {
         // Mark content
@@ -144,16 +175,14 @@ export default {
         });
 
         const searchData = [];
-        this.document.querySelectorAll('.akn-section').forEach((section) => {
+        this.document.querySelectorAll('.akn-section, .akn-preamble').forEach((section) => {
           const titleSelector = section.querySelector('h3');
           const title = (titleSelector ? titleSelector.textContent : '') || '';
-          const selector = '.akn-p, .akn-listIntroduction, .akn-intro, .akn-wrapUp';
           const text = [];
           const contentNodes = section.querySelectorAll(selector);
           contentNodes.forEach((elem) => {
             text.push(elem.textContent);
           });
-
           searchData.push({
             id: section.id,
             title,
