@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-10 23:33+0300\n"
-"PO-Revision-Date: 2022-06-13 08:54\n"
+"PO-Revision-Date: 2022-06-13 09:55\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/africanlii/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 63\n"
+"X-Crowdin-File: /main/africanlii/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 65\n"
 
 #: templates/africanlii/_author_detail.html:7
 #: templates/africanlii/_court_detail.html:7
@@ -157,6 +157,7 @@ msgid "Our partners"
 msgstr ""
 
 #: templates/africanlii/generic_document_list.html:4
+#| msgid "Legal Instrument List"
 msgid "Generic Document List"
 msgstr ""
 
@@ -175,31 +176,36 @@ msgid "\n"
 "        We digitise the law and policy of the African Governance Architecture and help Africans and the world connect\n"
 "        with and understand the African Union agenda. Search through %(documents_count)s AU documents on the AfricanLII platform\n"
 "      "
-msgstr ""
+msgstr "\n"
+"Tunaweka kidigitali sheria na sera ya Usanifu wa Utawala wa Kiafrika na kusaidia Waafrika na ulimwengu kuungana na kuelewa ajenda ya Umoja wa Afrika. Tafuta kupitia hati %(documents_count)s za AU kwenye jukwaa la AfricanLII      "
 
 #: templates/africanlii/home.html:38
 msgid "Courts"
-msgstr ""
+msgstr "Mahakama"
 
 #: templates/africanlii/home.html:52
 msgid "Authors"
-msgstr ""
+msgstr "Waandishi"
 
 #: templates/africanlii/home.html:65
+#| msgid "Judgment List"
 msgid "Recent Judgments"
-msgstr ""
+msgstr "Hukumu za Hivi Karibuni"
 
 #: templates/africanlii/home.html:72
+#| msgid "AU Documents"
 msgid "Recent AU Documents"
-msgstr ""
+msgstr "Nyaraka za AU za Hivi Punde"
 
 #: templates/africanlii/home.html:79
+#| msgid "Legal Instrument List"
 msgid "Recent Legal Instruments"
-msgstr ""
+msgstr "Vyombo vya Kisheria vya Hivi Punde"
 
 #: templates/africanlii/home.html:86
+#| msgid "Treaties and Protocols"
 msgid "Recent Treaties and Protocols "
-msgstr ""
+msgstr "Mikataba na Itifaki za Hivi Punde "
 
 #: templates/africanlii/judgment_list.html:4
 #: templates/africanlii/judgment_list.html:7
@@ -221,11 +227,11 @@ msgstr "Orodha ya Vyombo vya Kisheria"
 
 #: templates/africanlii/legislation_detail.html:7
 msgid "Language"
-msgstr ""
+msgstr "Lugha"
 
 #: templates/africanlii/legislation_list.html:4
 msgid "Legislation List"
-msgstr ""
+msgstr "Orodha ya Mikataba na Itifaki"
 
 #: templates/africanlii/legislation_list.html:7
 #: templates/peachjam/header.html:73
@@ -234,25 +240,27 @@ msgstr "Mikataba na Itifaki"
 
 #: templates/peachjam/footer.html:8
 msgid "About AfricanLII"
-msgstr ""
+msgstr "Kuhusu AfricanLII"
 
 #: templates/peachjam/footer.html:13
 msgid "With support from"
-msgstr ""
+msgstr "Kwa msaada kutoka"
 
 #: templates/peachjam/footer.html:23
 msgid "Other African Legal Information Institutions"
-msgstr ""
+msgstr "Taasisi Nyingine za Kisheria za Kiafrika"
 
 #: templates/peachjam/header.html:64
+#| msgid "Judgment List"
 msgid "Judgments"
-msgstr ""
+msgstr "Hukumu"
 
 #: templates/peachjam/header.html:70
+#| msgid "Legal Instrument List"
 msgid "Legal Instruments"
-msgstr ""
+msgstr "Vyombo vya Kisheria"
 
 #: templates/peachjam/header.html:95
 msgid "Logout"
-msgstr ""
+msgstr "Ondoka"
 
