@@ -3,10 +3,10 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-10 23:33+0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2022-06-13 08:54\n"
+"Last-Translator: \n"
+"Language-Team: Swahili\n"
+"Language: sw_KE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/africanlii/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 65\n"
+"X-Crowdin-File: /main/africanlii/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 63\n"
 
 #: templates/africanlii/_author_detail.html:7
 #: templates/africanlii/_court_detail.html:7
@@ -65,119 +65,78 @@ msgid "About the platform"
 msgstr ""
 
 #: templates/africanlii/about.html:11
-msgid ""
-"\n"
-"          This Pan-African platform serves as an information clearinghouse "
-"on all aspects of the African Governance\n"
-"          Architecture (AGA) agenda, including charters, protocols, "
-"communications, relevant legal decisions, policy,\n"
-"          implementation, monitoring, and related material. The overall "
-"objective is to build effective collaboration\n"
-"          between African citizens and civil society organisations on the "
-"one hand, and AGA members on the other, to\n"
-"          strengthen implementation of the AGA platform’s agenda with "
-"respect to democracy, governance, and human rights.\n"
+msgid "\n"
+"          This Pan-African platform serves as an information clearinghouse on all aspects of the African Governance\n"
+"          Architecture (AGA) agenda, including charters, protocols, communications, relevant legal decisions, policy,\n"
+"          implementation, monitoring, and related material. The overall objective is to build effective collaboration\n"
+"          between African citizens and civil society organisations on the one hand, and AGA members on the other, to\n"
+"          strengthen implementation of the AGA platform’s agenda with respect to democracy, governance, and human rights.\n"
 "          Our specific goals are to:\n"
 "        "
 msgstr ""
 
 #: templates/africanlii/about.html:22
-msgid ""
-"\n"
-"            Increase overall awareness of the AGA agenda and popular "
-"perceptions about democracy, governance and human\n"
+msgid "\n"
+"            Increase overall awareness of the AGA agenda and popular perceptions about democracy, governance and human\n"
 "            rights among civil society organisations (CSOs) and AGA members\n"
 "          "
 msgstr ""
 
 #: templates/africanlii/about.html:28
-msgid ""
-"\n"
-"            Supply complete, accurate and re-usable AGA information to allow "
-"AGA and CSOs to work towards shared goals\n"
+msgid "\n"
+"            Supply complete, accurate and re-usable AGA information to allow AGA and CSOs to work towards shared goals\n"
 "          "
 msgstr ""
 
 #: templates/africanlii/about.html:33
-msgid ""
-"\n"
-"            Capacitate civil society on all levels to access, interpret and "
-"effectively use AGA information\n"
+msgid "\n"
+"            Capacitate civil society on all levels to access, interpret and effectively use AGA information\n"
 "          "
 msgstr ""
 
 #: templates/africanlii/about.html:38
-msgid ""
-"\n"
-"            Strengthen monitoring, develop insights, and improve national-"
-"level implementation by developing linkages\n"
+msgid "\n"
+"            Strengthen monitoring, develop insights, and improve national-level implementation by developing linkages\n"
 "            between regional and member-states’ law and policy.\n"
 "          "
 msgstr ""
 
 #: templates/africanlii/about.html:45
-msgid ""
-"\n"
-"          This platform is developed and maintained jointly by <a "
-"href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
-"with funds from the European Union,\n"
-"          the Indigo Trust and the Sigrid Rausing Trust. The initial phase "
-"of the project runs from 2021 to 2024.\n"
+msgid "\n"
+"          This platform is developed and maintained jointly by <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> with funds from the European Union,\n"
+"          the Indigo Trust and the Sigrid Rausing Trust. The initial phase of the project runs from 2021 to 2024.\n"
 "        "
 msgstr ""
 
 #: templates/africanlii/about.html:58
-msgid ""
-"\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
-"a> is a programme of the Democratic Governance and Rights Unit at the "
-"Department of Public Law, University\n"
-"          of Cape Town. <a href=\"https://africanlii.org/\" "
-"target=\"_blank\">AfricanLII</a> helps governments, academia and non-profit "
-"organisations publish the law of African\n"
-"          countries for sustainable open access. <a href=\"https://"
-"africanlii.org/\" target=\"_blank\">AfricanLII</a> hosts curated collections "
-"on various subjects of African law,\n"
-"          such as human rights, the environment, commercial law and "
-"finance.\n"
+msgid "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University\n"
+"          of Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> helps governments, academia and non-profit organisations publish the law of African\n"
+"          countries for sustainable open access. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> hosts curated collections on various subjects of African law,\n"
+"          such as human rights, the environment, commercial law and finance.\n"
 "        "
 msgstr ""
 
 #: templates/africanlii/about.html:66
-msgid ""
-"\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
-"a> convenes a network of 16 African LIIs - a collaborative group of "
-"governments, organizations, and\n"
-"          individuals in Africa, dedicated to free access to law on our "
-"continent.\n"
+msgid "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> convenes a network of 16 African LIIs - a collaborative group of governments, organizations, and\n"
+"          individuals in Africa, dedicated to free access to law on our continent.\n"
 "        "
 msgstr ""
 
 #: templates/africanlii/about.html:72
-msgid ""
-"\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
-"helps African governments to sustainably digitise their legal information "
-"for public use, through open\n"
-"          law software, capacity-building, training, partnerships and "
-"support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</"
-"a> Open Law Technology solutions\n"
-"          lower the cost of digitisation, archival and publication of "
-"primary legal information, and create opportunities for\n"
-"          rich interactivity, advanced research and justice sector "
-"innovation.\n"
+msgid "\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> helps African governments to sustainably digitise their legal information for public use, through open\n"
+"          law software, capacity-building, training, partnerships and support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions\n"
+"          lower the cost of digitisation, archival and publication of primary legal information, and create opportunities for\n"
+"          rich interactivity, advanced research and justice sector innovation.\n"
 "        "
 msgstr ""
 
 #: templates/africanlii/about.html:80
-msgid ""
-"\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
-"a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
-"collaborate in unlocking the value of African digital legal information in "
-"support\n"
+msgid "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborate in unlocking the value of African digital legal information in support\n"
 "          of the rule of law, access to justice, and innovation.\n"
 "        "
 msgstr ""
@@ -187,12 +146,9 @@ msgid "Find out more"
 msgstr ""
 
 #: templates/africanlii/about.html:88
-msgid ""
-"\n"
-"          Visit <a href=\"https://openlawafrica.org/\" "
-"target=\"_blank\">openlawafrica.org</a>\n"
-"          or contact us on <a href=\"mailto:info@laws.africa\">info@laws."
-"africa</a> for more information.\n"
+msgid "\n"
+"          Visit <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a>\n"
+"          or contact us on <a href=\"mailto:info@laws.africa\">info@laws.africa</a> for more information.\n"
 "        "
 msgstr ""
 
@@ -201,10 +157,8 @@ msgid "Our partners"
 msgstr ""
 
 #: templates/africanlii/generic_document_list.html:4
-#, fuzzy
-#| msgid "Legal Instrument List"
 msgid "Generic Document List"
-msgstr "Orodha ya Vyombo vya Kisheria"
+msgstr ""
 
 #: templates/africanlii/generic_document_list.html:7
 #: templates/peachjam/header.html:67
@@ -217,12 +171,9 @@ msgstr ""
 
 #: templates/africanlii/home.html:10
 #, python-format
-msgid ""
-"\n"
-"        We digitise the law and policy of the African Governance "
-"Architecture and help Africans and the world connect\n"
-"        with and understand the African Union agenda. Search through "
-"%(documents_count)s AU documents on the AfricanLII platform\n"
+msgid "\n"
+"        We digitise the law and policy of the African Governance Architecture and help Africans and the world connect\n"
+"        with and understand the African Union agenda. Search through %(documents_count)s AU documents on the AfricanLII platform\n"
 "      "
 msgstr ""
 
@@ -235,28 +186,20 @@ msgid "Authors"
 msgstr ""
 
 #: templates/africanlii/home.html:65
-#, fuzzy
-#| msgid "Judgment List"
 msgid "Recent Judgments"
-msgstr "Orodha ya Hukumu"
+msgstr ""
 
 #: templates/africanlii/home.html:72
-#, fuzzy
-#| msgid "AU Documents"
 msgid "Recent AU Documents"
-msgstr "Nyaraka za AU"
+msgstr ""
 
 #: templates/africanlii/home.html:79
-#, fuzzy
-#| msgid "Legal Instrument List"
 msgid "Recent Legal Instruments"
-msgstr "Orodha ya Vyombo vya Kisheria"
+msgstr ""
 
 #: templates/africanlii/home.html:86
-#, fuzzy
-#| msgid "Treaties and Protocols"
 msgid "Recent Treaties and Protocols "
-msgstr "Mikataba na Itifaki"
+msgstr ""
 
 #: templates/africanlii/judgment_list.html:4
 #: templates/africanlii/judgment_list.html:7
@@ -302,17 +245,14 @@ msgid "Other African Legal Information Institutions"
 msgstr ""
 
 #: templates/peachjam/header.html:64
-#, fuzzy
-#| msgid "Judgment List"
 msgid "Judgments"
-msgstr "Orodha ya Hukumu"
+msgstr ""
 
 #: templates/peachjam/header.html:70
-#, fuzzy
-#| msgid "Legal Instrument List"
 msgid "Legal Instruments"
-msgstr "Orodha ya Vyombo vya Kisheria"
+msgstr ""
 
 #: templates/peachjam/header.html:95
 msgid "Logout"
 msgstr ""
+
