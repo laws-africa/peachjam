@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/africanlii/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 63\n"
+"X-Crowdin-File: /main/africanlii/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 65\n"
 
 #: templates/africanlii/_author_detail.html:7
 #: templates/africanlii/_court_detail.html:7
@@ -157,6 +157,7 @@ msgid "Our partners"
 msgstr ""
 
 #: templates/africanlii/generic_document_list.html:4
+#| msgid "Legal Instrument List"
 msgid "Generic Document List"
 msgstr ""
 
@@ -186,18 +187,22 @@ msgid "Authors"
 msgstr ""
 
 #: templates/africanlii/home.html:65
+#| msgid "Judgment List"
 msgid "Recent Judgments"
 msgstr ""
 
 #: templates/africanlii/home.html:72
+#| msgid "AU Documents"
 msgid "Recent AU Documents"
 msgstr ""
 
 #: templates/africanlii/home.html:79
+#| msgid "Legal Instrument List"
 msgid "Recent Legal Instruments"
 msgstr ""
 
 #: templates/africanlii/home.html:86
+#| msgid "Treaties and Protocols"
 msgid "Recent Treaties and Protocols "
 msgstr ""
 
@@ -245,10 +250,12 @@ msgid "Other African Legal Information Institutions"
 msgstr ""
 
 #: templates/peachjam/header.html:64
+#| msgid "Judgment List"
 msgid "Judgments"
 msgstr ""
 
 #: templates/peachjam/header.html:70
+#| msgid "Legal Instrument List"
 msgid "Legal Instruments"
 msgstr ""
 
