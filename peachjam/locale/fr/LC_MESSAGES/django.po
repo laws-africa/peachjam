@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-10 18:38+0300\n"
-"PO-Revision-Date: 2022-06-08 13:08\n"
+"POT-Creation-Date: 2022-06-09 15:27+0300\n"
+"PO-Revision-Date: 2022-06-13 08:54\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -19,15 +19,15 @@ msgstr ""
 
 #: settings.py:185
 msgid "English"
-msgstr ""
+msgstr "Anglais"
 
 #: settings.py:186
 msgid "French"
-msgstr ""
+msgstr "Français"
 
 #: settings.py:187
 msgid "Swahili"
-msgstr ""
+msgstr "Swahili"
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
@@ -52,14 +52,8 @@ msgstr "Réinitialiser le mot de passe"
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
-msgid ""
-"The password reset link was invalid, possibly because it has already been "
-"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
-"a>."
-msgstr ""
-"Le lien de réinitialisation du mot de passe n'est pas valide, peut-être "
-"parce qu'il a déjà été utilisé. Veuillez demander une <a "
-"href=\"%(passwd_reset_url)s\">nouvelle réinitialisation du mot de passe</a>."
+msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
+msgstr "Le lien de réinitialisation du mot de passe n'est pas valide, peut-être parce qu'il a déjà été utilisé. Veuillez demander une <a href=\"%(passwd_reset_url)s\">nouvelle réinitialisation du mot de passe</a>."
 
 #: templates/account/password_reset_from_key.html:56
 msgid "Your password is now reset."
@@ -74,3 +68,4 @@ msgstr "Aucun document trouvé."
 
 #~ msgid "More text that needs translation"
 #~ msgstr "Plus de texte qui nécessite une traduction"
+
