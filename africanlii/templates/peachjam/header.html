@@ -1,4 +1,6 @@
 {% load static %}
+{% load i18n %}
+
 <header>
   <div class="bg-dark p-2">
     <div class="container">
@@ -59,19 +61,19 @@
       <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/judgments/'%} active {% endifequal%}" href="{% url 'judgment_list' %}">Judgments</a>
+            <a class="nav-link {% ifequal request.path '/judgments/'%} active {% endifequal%}" href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/generic_documents/'%} active {% endifequal%}" href="{% url 'generic_document_list' %}">AU Documents</a>
+            <a class="nav-link {% ifequal request.path '/generic_documents/'%} active {% endifequal%}" href="{% url 'generic_document_list' %}">{% trans 'AU Documents' %}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/legal_instruments/'%} active {% endifequal%}" href="{% url 'legal_instrument_list' %}">Legal Instruments</a>
+            <a class="nav-link {% ifequal request.path '/legal_instruments/'%} active {% endifequal%}" href="{% url 'legal_instrument_list' %}">{% trans 'Legal Instruments' %}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="{% url 'legislation_list' %}">Treaties and Protocols</a>
+            <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="{% url 'legislation_list' %}">{% trans 'Treaties and Protocols' %}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/about/'%} active {% endifequal%}" href="{% url 'about' %}">About</a>
+            <a class="nav-link {% ifequal request.path '/about/'%} active {% endifequal%}" href="{% url 'about' %}">{% trans 'About' %}</a>
           </li>
         </ul>
         <form method="get" action="/search/">
@@ -90,7 +92,7 @@
         {% if user.is_authenticated %}
           <ul class="navbar-nav">
             <li class="nav-link">
-              <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+              <a class="nav-link" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
             </li>
           </ul>
         {% endif %}
