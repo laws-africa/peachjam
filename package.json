@@ -19,7 +19,6 @@
   "devDependencies": {
     "@laws-africa/web-components": "^0.7.1-beta",
     "@types/lodash": "^4.14.180",
-    "@types/lunr": "^2.3.4",
     "@types/mark.js": "^8.11.7",
     "@typescript-eslint/eslint-plugin": "^5.14.0",
     "@typescript-eslint/parser": "^5.14.0",
