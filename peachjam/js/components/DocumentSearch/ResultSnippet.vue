@@ -1,5 +1,8 @@
 <template>
-  <div ref="snippet" />
+  <div
+    ref="snippet"
+    class="snippet"
+  />
 </template>
 
 <script>
@@ -22,12 +25,15 @@ export default {
   methods: {
     setHTML (node) {
       this.$refs.snippet.innerHTML = '';
-      // Small clean up
+      // Anchor clean up
       node.querySelectorAll('a').forEach(node => {
         const parent = node.parentNode;
         while (node.firstChild) parent.insertBefore(node.firstChild, node);
         parent.removeChild(node);
       });
+      // Inline style clean up
+      node.removeAttribute('style');
+      node.querySelectorAll('*').forEach(node => node.removeAttribute('style'));
       this.$refs.snippet.appendChild(node);
     }
   }
@@ -35,5 +41,8 @@ export default {
 </script>
 
 <style scoped>
-
+.snippet > * {
+  font-family: 'Lato', sans-serif !important;
+  font-size: 16px !important;
+}
 </style>
