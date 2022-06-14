@@ -42,6 +42,13 @@
       transform-origin: 0% 0%;
     }
 
+    .textLayer mark {
+      transform-origin: 0% 0%;
+      color: transparent;
+      white-space: pre;
+      cursor: text;
+    }
+
     .textLayer .highlight {
       margin: -1px;
       padding: 1px;
