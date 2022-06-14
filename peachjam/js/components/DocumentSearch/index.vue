@@ -103,19 +103,33 @@ export default {
     },
 
     goToSnippet (node) {
-      node.style.outline = '2px solid transparent';
-      node.style.transition = 'outline-color 300ms ease-in-out';
-      const top =
-        window.pageYOffset +
-        node.getBoundingClientRect().top - 70;
+      const decorateNode = () => {
+        node.style.outline = '2px solid transparent';
+        node.style.transition = 'outline-color 300ms ease-in-out';
+        node.style.outlineColor = 'var(--bs-primary)';
+        window.setTimeout(() => {
+          node.style.outlineColor = 'transparent';
+        }, 400);
+      };
+      let isScrolling;
+      const onScroll = () => {
+        window.clearTimeout(isScrolling);
+        isScrolling = window.setTimeout(() => {
+          // On scroll stop decorate node
+          decorateNode();
+          window.removeEventListener('scroll', onScroll);
+        }, 66);
+      };
+
+      const top = window.pageYOffset + node.getBoundingClientRect().top - 70;
+
+      window.addEventListener('scroll', onScroll, false);
       window.scrollTo({
         top,
         behavior: 'smooth'
       });
-      node.style.outlineColor = 'var(--bs-primary)';
-      window.setTimeout(() => {
-        node.style.outlineColor = 'transparent';
-      }, 400);
+      // If did not scroll decorate node
+      if (!isScrolling) decorateNode();
     }
   }
 
