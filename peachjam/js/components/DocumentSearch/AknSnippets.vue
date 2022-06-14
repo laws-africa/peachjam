@@ -64,12 +64,8 @@ export default {
 
   methods: {
     renderSnippets () {
-      const nodeSet = new Set();
-      this.nodes.forEach(node => {
-        nodeSet.add(node);
-      });
-      this.snippets = [...nodeSet].map(node => {
-        const titleNode = node.closest('.akn-section') ? node.closest('.akn-section').querySelector('h3') : '';
+      const set = new Set();
+      const nodes = this.nodes.map(node => {
         const selector = [
           'blockContainer',
           'block',
@@ -84,10 +80,15 @@ export default {
           'toc',
           'ul'
         ].map(item => `.akn-${item}`).join(', ');
-        const snippet = node.closest(selector);
+        const snippetNode = node.closest(selector);
+        return snippetNode ? node.closest(selector) : node;
+      });
+      nodes.forEach(node => { set.add(node); });
+      this.snippets = [...nodes].map(node => {
+        const titleNode = node.closest('.akn-section') ? node.closest('.akn-section').querySelector('h3') : '';
         return {
-          titleNode,
-          snippetNode: snippet ? node.closest(selector) : node
+          snippetNode: node,
+          titleNode
         };
       });
     }
