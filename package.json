@@ -45,7 +45,6 @@
     "dom-anchor-text-position": "^5.0.0",
     "dom-anchor-text-quote": "^4.0.2",
     "lodash": "^4.17.21",
-    "lunr": "^2.3.9",
     "moment": "^2.29.2",
     "vue": "^3.2.31"
   }
