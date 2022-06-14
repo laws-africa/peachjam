@@ -6,8 +6,8 @@
       class="card"
     >
       <div class="card-body">
-        <div v-if="snippet.titleNode">
-          <a :href="`#${snippet.titleNode.id}`">
+        <div v-if="snippet.titleNode && snippet.sectionId">
+          <a :href="`#${snippet.sectionId}`">
             <h5 class="card-title">
               {{ snippet.titleNode.textContent }}
             </h5>
@@ -85,10 +85,11 @@ export default {
       });
       nodes.forEach(node => { set.add(node); });
       this.snippets = [...set].map(node => {
-        const titleNode = node.closest('.akn-section') ? node.closest('.akn-section').querySelector('h3') : '';
+        const section = node.closest('.akn-section');
         return {
           snippetNode: node,
-          titleNode
+          sectionId: section ? section.id : '',
+          titleNode: section ? section.querySelector('h3') : ''
         };
       });
     }
