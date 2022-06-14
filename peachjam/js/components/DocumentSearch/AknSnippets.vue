@@ -84,7 +84,7 @@ export default {
         return snippetNode ? node.closest(selector) : node;
       });
       nodes.forEach(node => { set.add(node); });
-      this.snippets = [...nodes].map(node => {
+      this.snippets = [...set].map(node => {
         const titleNode = node.closest('.akn-section') ? node.closest('.akn-section').querySelector('h3') : '';
         return {
           snippetNode: node,
