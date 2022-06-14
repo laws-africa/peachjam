@@ -7,7 +7,7 @@ class DocumentContent {
     this.root = root;
     const aknDoc: HTMLElement | null = root.querySelector('la-akoma-ntoso');
     const htmlDoc: HTMLElement | null = root.querySelector('[data-html-doc]');
-    const pdfDoc: HTMLElement| null = root.querySelector('[data-component="PdfRenderer"]');
+    const pdfDoc: HTMLElement| null = root.querySelector('[data-component="PdfRenderer"] .pdf-renderer__content');
     if (aknDoc) {
       this.renderDocSearch(aknDoc, 'akn', '#akn-doc-search');
     } else if (htmlDoc) {
