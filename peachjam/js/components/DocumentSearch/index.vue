@@ -99,33 +99,44 @@ export default {
     },
 
     goToSnippet (node) {
-      const decorateNode = () => {
+      scrollToElement(node, 60).then(() => {
         node.style.outline = '2px solid transparent';
-        node.style.transition = 'outline-color 300ms ease-in-out';
+        node.style.transition = 'outline-color 500ms ease-in-out';
         node.style.outlineColor = 'var(--bs-primary)';
         window.setTimeout(() => {
           node.style.outlineColor = 'transparent';
-        }, 400);
-      };
-      let isScrolling;
-      const onScroll = () => {
-        window.clearTimeout(isScrolling);
-        isScrolling = window.setTimeout(() => {
-          // On scroll stop decorate node
-          decorateNode();
-          window.removeEventListener('scroll', onScroll);
-        }, 66);
-      };
-
-      const top = window.pageYOffset + node.getBoundingClientRect().top - 70;
-
-      window.addEventListener('scroll', onScroll, false);
-      window.scrollTo({
-        top,
-        behavior: 'smooth'
+        }, 500);
       });
-      // If did not scroll decorate node
-      if (!isScrolling) decorateNode();
+
+      function scrollToElement (elem, offset = 0) {
+        const rect = elem.getBoundingClientRect();
+        const targetPosition = Math.floor(rect.top + self.pageYOffset - offset);
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+
+        return new Promise((resolve, reject) => {
+          const failed = setTimeout(() => {
+            // eslint-disable-next-line prefer-promise-reject-errors
+            reject();
+          }, 2000);
+          const scrollHandler = () => {
+            if (self.pageYOffset === targetPosition) {
+              window.removeEventListener('scroll', scrollHandler);
+              clearTimeout(failed);
+              resolve();
+            }
+          };
+          if (self.pageYOffset === targetPosition) {
+            clearTimeout(failed);
+            resolve();
+          } else {
+            window.addEventListener('scroll', scrollHandler);
+            elem.getBoundingClientRect();
+          }
+        });
+      }
     }
   }
 
