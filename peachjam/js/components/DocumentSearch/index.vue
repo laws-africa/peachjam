@@ -1,53 +1,49 @@
 <template>
   <div class="doc-search">
-    <div class="inner">
-      <div class="section">
-        <div class="mb-4">
-          <form @submit.prevent="() => q = $refs.q.value">
-            <div class="input-group">
-              <input
-                ref="q"
-                type="text"
-                required
-                class="form-control"
-                placeholder="Search document content"
-                aria-label="Search document content"
-                aria-describedby="search-content-button"
-                minlength="3"
-              >
-              <button
-                class="btn btn-secondary"
-                type="submit"
-              >
-                Search
-              </button>
-            </div>
-          </form>
-        </div>
-        <div v-if="!marks.length && q">
-          No results
-        </div>
-        <div
-          v-if="marks.length"
-          class="scrollable-content"
+    <form
+      class="doc-search__form"
+      @submit.prevent="() => q = $refs.q.value"
+    >
+      <div class="input-group">
+        <input
+          ref="q"
+          type="text"
+          required
+          class="form-control"
+          placeholder="Search document content"
+          aria-label="Search document content"
+          aria-describedby="search-content-button"
+          minlength="3"
         >
-          <AknSnippets
-            v-if="docType === 'akn'"
-            :nodes="marks"
-            @go-to-snippet="goToSnippet"
-          />
-          <HTMLSnippets
-            v-if="docType === 'html'"
-            :nodes="marks"
-            @go-to-snippet="goToSnippet"
-          />
+        <button
+          class="btn btn-secondary"
+          type="submit"
+        >
+          Search
+        </button>
+      </div>
+    </form>
+    <div class="doc-search__results">
+      <div v-if="!marks.length && q">
+        No results
+      </div>
+      <div v-if="marks.length">
+        <AknSnippets
+          v-if="docType === 'akn'"
+          :nodes="marks"
+          @go-to-snippet="goToSnippet"
+        />
+        <HTMLSnippets
+          v-if="docType === 'html'"
+          :nodes="marks"
+          @go-to-snippet="goToSnippet"
+        />
 
-          <PdfSnippets
-            v-if="docType === 'pdf'"
-            :nodes="marks"
-            @go-to-snippet="goToSnippet"
-          />
-        </div>
+        <PdfSnippets
+          v-if="docType === 'pdf'"
+          :nodes="marks"
+          @go-to-snippet="goToSnippet"
+        />
       </div>
     </div>
   </div>
@@ -138,37 +134,16 @@ export default {
 
 <style scoped>
 .doc-search {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  padding: 1rem;
   background-color: #f8f9fa;
 }
 
-.doc-search .inner {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.doc-search .section {
-  margin: 10px;
+.doc-search__results {
   flex-grow: 1;
-
-  display: flex;
-  flex-direction: column;
-
-  /* for Firefox */
   min-height: 0;
+  overflow-y: auto;
 }
-
-.doc-search .section .scrollable-content {
-  flex-grow: 1;
-  overflow: auto;
-  /* for Firefox */
-  min-height: 0;
-}
-
 </style>
