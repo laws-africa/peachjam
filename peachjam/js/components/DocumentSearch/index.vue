@@ -3,7 +3,7 @@
     <div class="inner">
       <div class="section">
         <div class="mb-4">
-          <form @submit="handleSubmit">
+          <form @submit.prevent="() => q = $refs.q.value">
             <div class="input-group">
               <input
                 ref="q"
@@ -24,39 +24,28 @@
             </div>
           </form>
         </div>
-        <div v-if="!results.length && q">
+        <div v-if="!marks.length && q">
           No results
         </div>
         <div
-          v-if="results.length"
+          v-if="marks.length"
           class="scrollable-content"
         >
-          <div v-if="docType === 'akn'">
-            <div
-              v-for="result in results"
-              :key="result.id"
-              class="mb-4"
-            >
-              <AknResult
-                :result="result"
-                :q="q"
-                :block-element-names="aknBlockElNames"
-                @go-to-result="goToResult"
-              />
-            </div>
-          </div>
-          <HTMLResults
+          <AknSnippets
+            v-if="docType === 'akn'"
+            :nodes="marks"
+            @go-to-snippet="goToSnippet"
+          />
+          <HTMLSnippets
             v-if="docType === 'html'"
-            :q="q"
-            :results="results"
-            @go-to-result="goToResult"
+            :nodes="marks"
+            @go-to-snippet="goToSnippet"
           />
 
-          <PdfResults
+          <PdfSnippets
             v-if="docType === 'pdf'"
-            :results="results"
-            :q="q"
-            @go-to-result="goToResult"
+            :nodes="marks"
+            @go-to-snippet="goToSnippet"
           />
         </div>
       </div>
@@ -66,13 +55,13 @@
 
 <script>
 import Mark from 'mark.js';
-import AknResult from './AknResult.vue';
-import HTMLResults from './HTMLResults.vue';
-import PdfResults from './PdfResults.vue';
+import HTMLSnippets from './HTMLSnippets.vue';
+import PdfSnippets from './PdfSnippets.vue';
+import AknSnippets from './AknSnippets.vue';
 
 export default {
   name: 'DocumentSearch',
-  components: { PdfResults, HTMLResults, AknResult },
+  components: { AknSnippets, PdfSnippets, HTMLSnippets },
   props: {
     docType: {
       type: String,
@@ -89,113 +78,31 @@ export default {
   },
   data: () => ({
     q: '',
-    results: [],
-    markInstance: null,
-    aknBlockElNames: [
-      'blockContainer',
-      'block',
-      'blockList',
-      'conclusions',
-      'foreign',
-      'item',
-      'ol',
-      'p',
-      'preface',
-      'tblock',
-      'toc',
-      'ul']
+    marks: [],
+    markInstance: null
   }),
   watch: {
     q (newValue) {
       // Unmark when search if mark instance exists already
       if (this.markInstance) {
         this.markInstance.unmark();
-        this.results = [];
+        this.marks = [];
       }
-      switch (this.docType) {
-        case 'akn':
-          this.searchAknDoc(newValue);
-          break;
-        case 'pdf':
-          this.searchHTMLDoc(newValue, this.document.querySelectorAll('.pdf-renderer__content__page .textLayer'));
-          break;
-        case 'html':
-          this.searchHTMLDoc(newValue, this.document);
-          break;
-        default:
-          break;
-      }
+      this.searchDoc(newValue);
     }
   },
   methods: {
-    handleSubmit (e) {
-      e.preventDefault();
-      this.q = this.$refs.q.value;
-    },
-    searchPdf (q) {
-      // Still tweaking this
-      const textLayers = this.document.querySelectorAll('.pdf-renderer__content__page .textLayer');
-      const sentences = [];
-      textLayers.forEach(element => {
-        const sentence = [];
-        for (const child of element.childNodes) {
-          sentence.push(child);
-          if (child.nodeName === 'BR') {
-            break;
-          }
-        }
-        sentences.push(sentence);
-      });
-    },
-    searchHTMLDoc (q, markContext) {
+    searchDoc (q) {
       if (!this.markInstance) {
-        this.markInstance = new Mark(markContext);
+        this.markInstance = new Mark(this.document);
       }
-      // Mark content
-      this.markInstance.unmark();
       this.markInstance.mark(q, {
-        element: 'span',
-        className: 'doc-mark',
         separateWordSearch: false
       });
-      this.results = [...this.document.querySelectorAll('[data-markjs]')];
+      this.marks = [...this.document.querySelectorAll('[data-markjs]')];
     },
 
-    searchAknDoc (q) {
-      const selector = this.aknBlockElNames.map(item => `.akn-section .akn-${item}, .akn-preamble .akn-${item}`).join(', ');
-      if (!this.markInstance) {
-        // Monitor block level element for each section in akn document
-        this.markInstance = new Mark(this.document.querySelectorAll(selector));
-      }
-      if (q) {
-        // Mark content
-        this.markInstance.unmark();
-        this.markInstance.mark(q, {
-          separateWordSearch: false
-        });
-
-        const searchData = [];
-        this.document.querySelectorAll('.akn-section, .akn-preamble').forEach((section) => {
-          const titleSelector = section.querySelector('h3');
-          const title = (titleSelector ? titleSelector.textContent : '') || '';
-          const text = [];
-          const contentNodes = section.querySelectorAll(selector);
-          contentNodes.forEach((elem) => {
-            text.push(elem.textContent);
-          });
-          searchData.push({
-            id: section.id,
-            title,
-            contentNodes,
-            text: text.join(' ').toLocaleLowerCase()
-          });
-        });
-
-        this.results = searchData.filter(item => item.text.includes(this.q.toLocaleLowerCase()));
-      }
-    },
-
-    goToResult (node) {
+    goToSnippet (node) {
       node.style.transition = 'background-color 400ms ease-in-out';
       const top =
         window.pageYOffset +
