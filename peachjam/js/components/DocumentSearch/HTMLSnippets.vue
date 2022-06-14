@@ -12,7 +12,7 @@
       <div>
         <a
           href="#"
-          @click.prevent="$emit('go-to-result', snippet);"
+          @click.prevent="$emit('go-to-snippet', snippet);"
         >
           Go to result
         </a>
@@ -24,27 +24,23 @@
 <script>
 import ResultSnippet from './ResultSnippet.vue';
 export default {
-  name: 'HTMLResults',
+  name: 'HTMLSnippets',
   components: {
     ResultSnippet
   },
   props: {
-    results: {
+    nodes: {
       type: Array,
       required: true
-    },
-    q: {
-      type: String,
-      required: false,
-      default: ''
     }
   },
-  emits: ['go-to-result'],
+  emits: ['go-to-snippet'],
   data: () => ({
     snippets: []
   }),
   watch: {
-    q: {
+    nodes: {
+      deep: true,
       handler () {
         this.renderSnippets();
       }
@@ -56,15 +52,11 @@ export default {
   },
   methods: {
     renderSnippets () {
-      this.snippets = this.results.map(node => {
-        // Find nearest block level element
-        return node.closest('p, h1, h2, h3, h4, h5, h6, address, blockquote, div, table');
-      });
+      const set = new Set();
+      const nodes = this.nodes.map(node => node.closest('p, h1, h2, h3, h4, h5, h6, address, blockquote, div, table'));
+      nodes.forEach(node => set.add(node));
+      this.snippets = [...set];
     }
   }
 };
 </script>
-
-<style scoped>
-
-</style>
