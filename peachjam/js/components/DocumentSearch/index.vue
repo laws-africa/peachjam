@@ -103,7 +103,8 @@ export default {
     },
 
     goToSnippet (node) {
-      node.style.transition = 'background-color 400ms ease-in-out';
+      node.style.outline = '2px solid transparent';
+      node.style.transition = 'outline-color 300ms ease-in-out';
       const top =
         window.pageYOffset +
         node.getBoundingClientRect().top - 70;
@@ -111,9 +112,9 @@ export default {
         top,
         behavior: 'smooth'
       });
-      node.style.backgroundColor = 'yellow';
+      node.style.outlineColor = 'var(--bs-primary)';
       window.setTimeout(() => {
-        node.style.backgroundColor = 'initial';
+        node.style.outlineColor = 'transparent';
       }, 400);
     }
   }
