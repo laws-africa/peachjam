@@ -1,7 +1,7 @@
 <template>
   <div class="doc-search">
     <form
-      class="doc-search__form"
+      class="doc-search__form mb-4"
       @submit.prevent="() => q = $refs.q.value"
     >
       <div class="input-group">
@@ -142,8 +142,8 @@ export default {
 }
 
 .doc-search__results {
-  flex-grow: 1;
-  min-height: 0;
+  flex: 1 1 auto;
   overflow-y: auto;
+  height: 0;
 }
 </style>
