@@ -174,11 +174,15 @@
 
       &.active {
         background-color: #bbbbbb;
+
+        .preview-panel__page-number {
+          color: white;
+        }
       }
     }
     .preview-panel__page-number {
       text-align: center;
-      color: white;
+      color: $gray-900;
       display: block;
     }
   }
