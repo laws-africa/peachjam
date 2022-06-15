@@ -39,9 +39,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.result-snippet * {
-  font-size: 16px !important;
-}
-</style>
