@@ -1,7 +1,7 @@
 <template>
   <div class="doc-search">
     <form
-      class="doc-search__form mb-4"
+      class="doc-search__form mb-2"
       @submit.prevent="() => q = $refs.q.value"
     >
       <div class="input-group">
@@ -22,11 +22,23 @@
           Search
         </button>
       </div>
-    </form>
-    <div class="doc-search__results">
-      <div v-if="!marks.length && q">
+      <div
+        v-if="marks.length"
+        class="text-end mt-2"
+      >
+        <a
+          href="#"
+          @click.prevent="clear"
+        >Clear</a>
+      </div>
+      <div
+        v-if="!marks.length && q"
+        class="mt-2"
+      >
         No results
       </div>
+    </form>
+    <div class="doc-search__results">
       <div v-if="marks.length">
         <AknSnippets
           v-if="docType === 'akn'"
@@ -88,6 +100,10 @@ export default {
     }
   },
   methods: {
+    clear () {
+      this.$refs.q.value = '';
+      this.q = '';
+    },
     searchDoc (q) {
       if (!this.markInstance) {
         this.markInstance = new Mark(this.document);
