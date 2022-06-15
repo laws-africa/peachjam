@@ -117,11 +117,11 @@ export default {
     goToSnippet (node) {
       scrollToElement(node, 60).then(() => {
         node.style.outline = '2px solid transparent';
-        node.style.transition = 'outline-color 500ms ease-in-out';
+        node.style.transition = 'outline-color 400ms ease-in-out';
         node.style.outlineColor = 'var(--bs-primary)';
         window.setTimeout(() => {
           node.style.outlineColor = 'transparent';
-        }, 500);
+        }, 400);
       });
 
       function scrollToElement (elem, offset = 0) {
@@ -159,7 +159,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .doc-search {
   display: flex;
   flex-direction: column;
@@ -172,5 +172,9 @@ export default {
   flex: 1 1 auto;
   overflow-y: auto;
   height: 0;
+}
+
+.doc-search__results .snippet-card:focus {
+  border-color: var(--bs-primary);
 }
 </style>
