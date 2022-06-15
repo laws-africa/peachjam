@@ -2,21 +2,16 @@
   <div
     v-for="(snippet, index) in snippets"
     :key="index"
-    class="card mb-2"
+    class="card snippet-card mb-2"
+    :tabindex="index"
+    role="button"
+    aria-pressed="false"
+    @click="$emit('go-to-snippet', snippet);"
   >
     <div class="card-body">
       <ResultSnippet
-        class="mb-2"
         :node="snippet.cloneNode(true)"
       />
-      <div>
-        <a
-          href="#"
-          @click.prevent="$emit('go-to-snippet', snippet);"
-        >
-          Go to result
-        </a>
-      </div>
     </div>
   </div>
 </template>

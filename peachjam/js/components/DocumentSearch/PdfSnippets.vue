@@ -2,28 +2,16 @@
   <div
     v-for="(snippet, index) in snippets"
     :key="index"
-    class="card mb-2"
+    class="card snippet-card mb-2"
+    :tabindex="index"
+    role="button"
+    aria-pressed="false"
+    @click="$emit('go-to-snippet', snippet.snippetNode);"
   >
     <div class="card-body">
-      <div>
-        <a
-          class="card-title"
-          href="#"
-          @click.prevent="$emit('go-to-snippet', snippet.pageNode)"
-        >
-          Page {{ snippet.pageNode.dataset.page }}
-        </a>
-      </div>
+      <h5><strong>Page {{ snippet.pageNode.dataset.page }}</strong></h5>
       <div>
         <ResultSnippet :node="snippet.snippetNode.cloneNode(true)" />
-      </div>
-      <div>
-        <a
-          href="#"
-          @click.prevent="$emit('go-to-snippet', snippet.snippetNode);"
-        >
-          Go to result
-        </a>
       </div>
     </div>
   </div>
