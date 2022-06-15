@@ -33,7 +33,7 @@ export default {
       });
       // Inline style clean up
       node.removeAttribute('style');
-      node.querySelectorAll('*').forEach(node => node.removeAttribute('style'));
+      node.querySelectorAll('[style]').forEach(node => node.removeAttribute('style'));
       this.$refs.snippet.appendChild(node);
     }
   }
