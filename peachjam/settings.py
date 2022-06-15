@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "sass_processor",
     "import_export",
     "treebeard",
+    "api",
 ]
 
 MIDDLEWARE = [
