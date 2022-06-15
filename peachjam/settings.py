@@ -339,6 +339,8 @@ LOGGING = {
     },
 }
 
+MAX_ATTEMPTS = 1
+
 
 if DEBUG:
     ELASTICSEARCH_DSL_AUTOSYNC = False

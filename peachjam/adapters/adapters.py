@@ -21,13 +21,11 @@ class IndigoAdapter:
 
     def get_updated_documents(self, last_refreshed):
         updated_docs_list = []
+
+        if last_refreshed is None:
+            return self.get_doc_list()
+
         for document in self.get_doc_list():
             if document["updated_at"] > last_refreshed:
                 updated_docs_list.append(document)
         return updated_docs_list
-
-    def get_toc(self, url):
-        print("getting toc")
-
-    def get_html(self, url):
-        pass

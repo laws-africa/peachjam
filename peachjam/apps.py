@@ -6,7 +6,7 @@ class PeachJamConfig(AppConfig):
     name = "peachjam"
 
     def ready(self):
-        if settings.DEBUG:
+        if not settings.DEBUG:
             from peachjam.tasks import setup_ingestors
 
-            setup_ingestors()
+            setup_ingestors(repeat=60 * 60 * 24)
