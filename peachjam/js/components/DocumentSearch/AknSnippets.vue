@@ -1,31 +1,21 @@
 <template>
-  <div>
+  <div class="">
     <div
       v-for="(snippet, index) in snippets"
       :key="index"
-      class="card"
+      class="card snippet-card mb-2"
+      :tabindex="index"
+      role="button"
+      aria-pressed="false"
+      @click="$emit('go-to-snippet', snippet.snippetNode);"
     >
       <div class="card-body">
-        <div v-if="snippet.titleNode && snippet.sectionId">
-          <a :href="`#${snippet.sectionId}`">
-            <h5 class="card-title">
-              {{ snippet.titleNode.textContent }}
-            </h5>
-          </a>
-        </div>
-
+        <h5 class="card-title">
+          <strong>{{ snippet.titleNode.textContent }}</strong>
+        </h5>
         <ResultSnippet
-          class="mb-2"
           :node="snippet.snippetNode.cloneNode(true)"
         />
-        <div>
-          <a
-            href="#"
-            @click.prevent="$emit('go-to-snippet', snippet.snippetNode);"
-          >
-            Go to result
-          </a>
-        </div>
       </div>
     </div>
   </div>
@@ -63,12 +53,19 @@ export default {
     renderSnippets () {
       const set = new Set();
       const nodes = this.nodes.map(node => {
-        const selector = [
+        const aknSelectors = [
           'blockContainer',
           'block',
           'blockList',
           'conclusions',
           'foreign',
+          'heading',
+          'subheading',
+          'listIntroduction',
+          'listWrapUp',
+          'intro',
+          'wrapUp',
+          'crossHeading',
           'item',
           'ol',
           'p',
@@ -76,17 +73,27 @@ export default {
           'tblock',
           'toc',
           'ul'
-        ].map(item => `.akn-${item}`).join(', ');
+        ].map(item => `.akn-${item}`);
+        const selector = ['h1', 'h2', 'h3', 'h4', 'h5', ...aknSelectors].join(', ');
         const snippetNode = node.closest(selector);
         return snippetNode ? node.closest(selector) : node;
       });
       nodes.forEach(node => { set.add(node); });
       this.snippets = [...set].map(node => {
-        const section = node.closest('.akn-section');
+        let titleNode; let ancestor = node;
+        const findTitle = () => {
+          ancestor = ancestor.parentElement;
+          const target = ancestor.querySelector('h1, h2, h3, h4, h5, .akn-heading, .akn-subheading');
+          if (target) {
+            titleNode = target;
+          } else {
+            findTitle();
+          }
+        };
+        findTitle();
         return {
           snippetNode: node,
-          sectionId: section ? section.id : '',
-          titleNode: section ? section.querySelector('h3') : ''
+          titleNode
         };
       });
     }
