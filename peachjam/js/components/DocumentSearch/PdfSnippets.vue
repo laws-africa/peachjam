@@ -56,9 +56,6 @@ export default {
     this.renderSnippets();
   },
   methods: {
-    getPageElement (node) {
-      return node.closest('[data-page]');
-    },
     renderSnippets () {
       const set = new Set();
       const nodes = this.nodes.map(node => node.closest('span[role="presentation"]'));
