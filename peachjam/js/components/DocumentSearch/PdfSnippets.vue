@@ -45,10 +45,8 @@ export default {
     snippets: []
   }),
   watch: {
-    nodes: {
-      handler () {
-        this.renderSnippets();
-      }
+    nodes () {
+      this.renderSnippets();
     }
   },
 

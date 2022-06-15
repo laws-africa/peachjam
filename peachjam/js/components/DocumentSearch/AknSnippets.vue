@@ -50,11 +50,8 @@ export default {
   }),
 
   watch: {
-    nodes: {
-      deep: true,
-      handler () {
-        this.renderSnippets();
-      }
+    nodes () {
+      this.renderSnippets();
     }
   },
 
