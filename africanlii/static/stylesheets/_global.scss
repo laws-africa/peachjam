@@ -22,4 +22,9 @@ main {
 
 mark {
   background-color: yellow;
+  padding: 0;
+}
+
+.result-snippet * {
+  font-size: $font-size-base;
 }
