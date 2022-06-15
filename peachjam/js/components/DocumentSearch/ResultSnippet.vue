@@ -1,7 +1,7 @@
 <template>
   <div
     ref="snippet"
-    class="snippet"
+    class="result-snippet"
   />
 </template>
 
@@ -40,9 +40,8 @@ export default {
 };
 </script>
 
-<style scoped>
-.snippet > * {
-  font-family: 'Lato', sans-serif !important;
+<style>
+.result-snippet * {
   font-size: 16px !important;
 }
 </style>
