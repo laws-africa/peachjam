@@ -73,7 +73,7 @@ urlpatterns = [
     ),
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
     path("i18n/", include("django.conf.urls.i18n")),
-    path("api/", include("api.urls")),
+    path("api/documents", include("api.urls")),
 ]
 
 if settings.DEBUG:
