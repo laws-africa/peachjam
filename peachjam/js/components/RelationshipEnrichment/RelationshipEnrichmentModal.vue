@@ -7,7 +7,7 @@
     role="dialog"
     aria-hidden="true"
   >
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <form @submit.prevent="save" ref="form">
           <div class="modal-header">
@@ -42,10 +42,9 @@
             <v-select
               v-model="relationship.object_work_id"
               label="title"
-              filterable
               placeholder="Choose the related document..."
-              :options="objectDocuments"
-              :reduce="d => d.expression_frbr_uri"
+              :options="works"
+              :reduce="w => w.id"
               @search="onSearch"
             >
               <template slot="no-options">
@@ -105,7 +104,7 @@ export default {
   data: (x) => ({
     predicates: [],
     relationship: x.enrichment,
-    objectDocuments: []
+    works: []
   }),
 
   mounted () {
@@ -130,13 +129,13 @@ export default {
     },
 
     search: debounce(async function (loading, search) {
-      const q = encodeURIComponent(search);
-      const resp = await fetch('/search/api/documents/?search=' + q + '&page=1&ordering=-score', {
+      const resp = await fetch('/api/v1/works/?title__icontains=' + encodeURIComponent(search), {
         headers: authHeaders()
       });
       loading(false);
       if (resp.ok) {
-        this.objectDocuments = await resp.json();
+        const data = await resp.json();
+        this.works = data.results;
       }
     }, 200),
 

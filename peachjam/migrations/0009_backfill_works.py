@@ -12,7 +12,9 @@ def forwards(apps, schema_editor):
 
     for doc in CoreDocument.objects.using(db_alias).all():
         if doc.work_frbr_uri not in works:
-            works[doc.work_frbr_uri] = Work.objects.create(frbr_uri=doc.work_frbr_uri)
+            works[doc.work_frbr_uri] = Work.objects.create(
+                frbr_uri=doc.work_frbr_uri, title=doc.title
+            )
         doc.work = works[doc.work_frbr_uri]
         doc.save(update_fields=["work"])
 

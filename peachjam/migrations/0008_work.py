@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.CreateModel(
             name="Work",
+            options={"ordering": ["title"]},
             fields=[
                 (
                     "id",
@@ -24,6 +25,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("frbr_uri", models.CharField(max_length=1024, unique=True)),
+                ("title", models.CharField(max_length=1024)),
             ],
         ),
         migrations.AddField(

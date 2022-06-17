@@ -12,4 +12,7 @@ class RelationshipViewSet(viewsets.ModelViewSet):
 class WorksViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Work.objects.all()
     serializer_class = WorkSerializer
-    filterset_fields = {"frbr_uri": ["exact", "icontains"]}
+    filterset_fields = {
+        "frbr_uri": ["exact"],
+        "title": ["exact", "icontains"],
+    }

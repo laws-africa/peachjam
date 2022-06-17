@@ -54,7 +54,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
     const btn = document.createElement('button');
     btn.className = 'btn btn-outline-secondary';
     btn.type = 'button';
-    btn.innerText = 'hi';
+    btn.innerText = 'Add relationship...';
     return btn;
   }
 

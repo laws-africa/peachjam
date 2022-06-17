@@ -27,9 +27,13 @@ class Locality(models.Model):
 
 class Work(models.Model):
     frbr_uri = models.CharField(max_length=1024, null=False, blank=False, unique=True)
+    title = models.CharField(max_length=1024, null=False, blank=False)
+
+    class Meta:
+        ordering = ["title"]
 
     def __str__(self):
-        return self.frbr_uri
+        return f"{self.frbr_uri} - {self.title}"
 
 
 class CoreDocument(models.Model):
@@ -108,7 +112,14 @@ class CoreDocument(models.Model):
         if self.work_frbr_uri and (
             not self.work or self.work.frbr_uri != self.work_frbr_uri
         ):
-            self.work, _ = Work.objects.get_or_create(frbr_uri=self.work_frbr_uri)
+            self.work, _ = Work.objects.get_or_create(
+                frbr_uri=self.work_frbr_uri, title=self.title
+            )
+
+        # keep work title in sync with English documents
+        if self.language.iso_639_3 == "eng" and self.work.title != self.title:
+            self.work.title = self.title
+            self.work.save()
 
         return super().save(*args, **kwargs)
 
