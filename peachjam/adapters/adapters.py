@@ -5,6 +5,8 @@ import magic
 import requests
 from django.core.files import File
 
+from peachjam.plugins import plugins
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +21,12 @@ class Adapter:
         """Update the document identified by some opaque id, returned by check_for_updates."""
         raise NotImplementedError()
 
+    @classmethod
+    def name(cls):
+        return cls.__name__
 
+
+@plugins.register("ingestor-adapter")
 class IndigoAdapter(Adapter):
     def __init__(self, url, token):
         self.client = requests.session()

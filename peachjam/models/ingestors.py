@@ -1,19 +1,20 @@
 from django.db import models
 from django.utils import timezone
 
-from peachjam.adapters import IndigoAdapter
+from peachjam.plugins import plugins
 from peachjam.tasks import update_document
 
-ADAPTERS = {"indigo_adapter": IndigoAdapter}
+
+def adapter_choices():
+    # TOOD: use these choices in the ingestor admin form
+    return [(key, p.name) for key, p in plugins.registry["ingestor-adapter"].items()]
 
 
 class Ingestor(models.Model):
-
-    ADAPTER_CHOICES = (("indigo_adapter", "Indigo Adapter"),)
-
+    # TODO: add a name field
     url = models.CharField(max_length=2048)
     token = models.CharField(max_length=2048)
-    adapter = models.CharField(choices=ADAPTER_CHOICES, max_length=2048)
+    adapter = models.CharField(max_length=2048)
     last_refreshed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
@@ -34,5 +35,6 @@ class Ingestor(models.Model):
         adapter.update_document(document_id)
 
     def get_adapter(self):
+        klass = plugins.registry["ingestor-adapter"][self.adapter]
         # TODO: settings
-        return ADAPTERS[self.adapter](self.url, self.token)
+        return klass(self.url, self.token)
