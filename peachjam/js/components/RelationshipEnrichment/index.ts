@@ -11,14 +11,15 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   enrichments: IRelationshipEnrichment[];
   listComponent: ComponentPublicInstance;
   manager: GutterEnrichmentManager;
-  thisWorkFrbrUri: string;
+  workFrbrUri: string;
+  workId: string;
 
   constructor (root: HTMLElement) {
     this.root = root;
     this.gutter = root.querySelector('la-gutter');
     this.akn = root.querySelector('la-akoma-ntoso');
-    // TODO: this work
-    this.thisWorkFrbrUri = '/akn/aa-au/act/charter/1990/rights-and-welfare-of-the-child';
+    this.workFrbrUri = root.dataset.workFrbrUri || '';
+    this.workId = root.dataset.workId || '';
 
     const node = document.getElementById('provision-relationships');
     if (node) {
@@ -33,7 +34,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
       viewRoot: this.root,
       enrichments: this.enrichments,
       readonly: false,
-      thisWorkFrbrUri: this.thisWorkFrbrUri
+      thisWorkFrbrUri: this.workFrbrUri
     }).mount(document.createElement('div'));
 
     const observer = new MutationObserver(() => {
@@ -60,21 +61,17 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   addEnrichment (target: IRangeTarget): void {
     // @ts-ignore
     this.listComponent.creating = {
-      id: 999,
-      // TODO
-      predicate: {
-        id: 999,
-        verb: 'verb',
-        reverse_verb: 'reverse'
-      },
-      // @ts-ignore
+      id: null,
+      predicate_id: null,
+      predicate: {},
+
+      subject_work_id: this.workId,
       subject_work: {
-        frbr_uri: this.thisWorkFrbrUri,
+        frbr_uri: this.workFrbrUri
       },
       subject_target_id: target.anchor_id,
       subject_documents: [],
 
-      // @ts-ignore
       object_work: {},
       object_target_id: null,
       object_documents: []

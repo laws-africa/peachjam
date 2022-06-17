@@ -15,6 +15,7 @@
       v-if="creating"
       :enrichment="creating"
       @save="save"
+      @close="closeModal"
     />
   </div>
 </template>

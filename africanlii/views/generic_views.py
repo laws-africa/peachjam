@@ -2,8 +2,8 @@ from django.views.generic import DetailView, ListView
 
 from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import AuthoringBody, Court
-from peachjam.models import CoreDocument, Relationship
-from peachjam_api.serializers import RelationshipSerializer
+from peachjam.models import CoreDocument, Predicate, Relationship
+from peachjam_api.serializers import PredicateSerializer, RelationshipSerializer
 
 
 class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
@@ -104,5 +104,10 @@ class BaseDocumentDetailView(DetailView):
         context["provision_relationships"] = RelationshipSerializer(
             rels, many=True
         ).data
+
+        if self.request.user.has_perm("peachjam.add_relationship"):
+            context["predicates_json"] = PredicateSerializer(
+                Predicate.objects.all(), many=True
+            ).data
 
         return context

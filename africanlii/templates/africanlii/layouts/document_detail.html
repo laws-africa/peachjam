@@ -9,8 +9,12 @@
       <h1 class="heading-underlined mb-4">{{ document.title }}</h1>
     {% endblock %}
 
-    {% if user.is_staff and perms.peachjam.change_coredocument %}
+    {% if perms.peachjam.change_coredocument %}
       <a href="{{ document|admin_url:'change' }}">Edit</a>
+    {% endif %}
+
+    {% if perms.peachjam.add_relationship %}
+      {{ predicates_json|json_script:"predicates" }}
     {% endif %}
 
     <div class="mb-5">
