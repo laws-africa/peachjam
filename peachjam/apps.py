@@ -7,6 +7,6 @@ class PeachJamConfig(AppConfig):
 
     def ready(self):
         if not settings.DEBUG:
-            from peachjam.tasks import setup_ingestors
+            from peachjam.tasks import run_ingestors
 
-            setup_ingestors(repeat=60 * 60 * 24)
+            run_ingestors(repeat=60 * 60 * 24)
