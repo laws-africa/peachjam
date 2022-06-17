@@ -37,6 +37,17 @@ export interface IRelationshipEnrichment {
   object_documents: IRelationshipEnrichmentDocument[];
 }
 
+export function reverseRelationship (relationship: IRelationshipEnrichment) {
+  for (const attr of ['work', 'target_id', 'documents']) {
+    // @ts-ignore
+    const val = relationship[`subject_${attr}`];
+    // @ts-ignore
+    relationship[`subject_${attr}`] = relationship[`object_${attr}`]
+    // @ts-ignore
+    relationship[`object_${attr}`] = val;
+  }
+}
+
 export function bestDocument (docs: IRelationshipEnrichmentDocument[], language: string): IRelationshipEnrichmentDocument | null {
   if (!docs.length) {
     return null;

@@ -14,6 +14,7 @@
     <relationship-enrichment-modal
       v-if="creating"
       :enrichment="creating"
+      :this-work-frbr-uri="thisWorkFrbrUri"
       @save="save"
       @close="closeModal"
     />

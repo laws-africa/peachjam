@@ -23,7 +23,31 @@
           </div>
 
           <div class="modal-body">
-            <p>This document...</p>
+            <p v-if="isForwards">The selection...</p>
+
+            <v-select
+              v-if="!isForwards"
+              v-model="relationship.subject_work_id"
+              class="mb-3"
+              label="title"
+              placeholder="Choose the subject document..."
+              :options="works"
+              :reduce="w => w.id"
+              @search="onSearch"
+            >
+              <template slot="no-options">
+                Search for a document...
+              </template>
+
+              <template #search="{attributes, events}">
+                <input
+                  class="vs__search"
+                  :required="!relationship.subject_work_id"
+                  v-bind="attributes"
+                  v-on="events"
+                />
+              </template>
+            </v-select>
 
             <select
               v-model="relationship.predicate_id"
@@ -40,9 +64,10 @@
             </select>
 
             <v-select
+              v-if="isForwards"
               v-model="relationship.object_work_id"
               label="title"
-              placeholder="Choose the related document..."
+              placeholder="Choose the object document..."
               :options="works"
               :reduce="w => w.id"
               @search="onSearch"
@@ -60,9 +85,19 @@
                 />
               </template>
             </v-select>
+
+            <p v-else>... the selection.</p>
           </div>
 
           <div class="modal-footer">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              @click="reverse"
+            >
+              Reverse
+            </button>
+
             <button
               type="button"
               class="btn btn-secondary"
@@ -85,6 +120,7 @@
 </template>
 
 <script>
+import { reverseRelationship } from './enrichment';
 // @ts-ignore
 import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
@@ -98,7 +134,8 @@ export default {
     enrichment: {
       type: Object,
       default: null
-    }
+    },
+    thisWorkFrbrUri: String
   },
   emits: ['close', 'save'],
   data: (x) => ({
@@ -106,6 +143,12 @@ export default {
     relationship: x.enrichment,
     works: []
   }),
+
+  computed: {
+    isForwards () {
+      return this.relationship.subject_work.frbr_uri === this.thisWorkFrbrUri;
+    }
+  },
 
   mounted () {
     document.body.appendChild(this.$el);
@@ -126,6 +169,11 @@ export default {
         loading(true);
         this.search(loading, search);
       }
+    },
+
+    reverse () {
+      // reverse the direction of the relationship
+      reverseRelationship(this.relationship);
     },
 
     search: debounce(async function (loading, search) {

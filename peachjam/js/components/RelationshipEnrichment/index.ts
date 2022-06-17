@@ -10,9 +10,10 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   akn: Element | null;
   enrichments: IRelationshipEnrichment[];
   listComponent: ComponentPublicInstance;
-  manager: GutterEnrichmentManager;
+  manager: GutterEnrichmentManager | null = null;
   workFrbrUri: string;
   workId: string;
+  readonly: boolean;
 
   constructor (root: HTMLElement) {
     this.root = root;
@@ -20,6 +21,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
     this.akn = root.querySelector('la-akoma-ntoso');
     this.workFrbrUri = root.dataset.workFrbrUri || '';
     this.workId = root.dataset.workId || '';
+    this.readonly = !!root.dataset.readonly;
 
     const node = document.getElementById('provision-relationships');
     if (node) {
@@ -33,7 +35,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
       gutter: this.gutter,
       viewRoot: this.root,
       enrichments: this.enrichments,
-      readonly: false,
+      readonly: this.readonly,
       thisWorkFrbrUri: this.workFrbrUri
     }).mount(document.createElement('div'));
 
@@ -45,9 +47,10 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
       observer.observe(this.akn, { childList: true });
     }
 
-    // TODO: permissions
-    this.manager = new GutterEnrichmentManager(this.root);
-    this.manager.addProvider(this);
+    if (!this.readonly) {
+      this.manager = new GutterEnrichmentManager(this.root);
+      this.manager.addProvider(this);
+    }
   }
 
   getButton (target: IRangeTarget): HTMLButtonElement | null {

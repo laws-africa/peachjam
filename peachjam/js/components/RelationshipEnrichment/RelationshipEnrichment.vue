@@ -72,15 +72,6 @@ export default {
     anchorElement: null
   }),
 
-  mounted () {
-    this.markAndAnchor();
-    this.gutter.appendChild(this.$el);
-  },
-
-  unmounted () {
-    this.unmark();
-  },
-
   computed: {
     isForwards () {
       return this.enrichment.subject_work.frbr_uri === this.thisWorkFrbrUri;
@@ -93,6 +84,15 @@ export default {
     subjectDocument () {
       return bestDocument(this.enrichment.subject_documents, 'eng');
     }
+  },
+
+  mounted () {
+    this.markAndAnchor();
+    this.gutter.appendChild(this.$el);
+  },
+
+  unmounted () {
+    this.unmark();
   },
 
   methods: {
