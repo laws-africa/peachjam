@@ -68,6 +68,8 @@
       </div>
     </div>
 
+    {{ citation_links|json_script:"citation-links" }}
+
     {% block content %}{% endblock %}
   </main>
 {% endblock %}

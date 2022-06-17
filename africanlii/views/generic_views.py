@@ -1,7 +1,10 @@
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
 from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import AuthoringBody, Court
+from api.models import CitationLink
+from api.serializers import CitationLinkSerializer
 from peachjam.models import CoreDocument
 
 
@@ -67,6 +70,13 @@ class BaseDocumentDetailView(DetailView):
         all_versions = CoreDocument.objects.filter(
             work_frbr_uri=self.object.work_frbr_uri
         ).exclude(pk=self.object.pk)
+
+        # citation links for a document
+        doc = get_object_or_404(CoreDocument, pk=self.object.pk)
+        citation_links = CitationLink.objects.filter(document=doc)
+        context["citation_links"] = CitationLinkSerializer(
+            citation_links, many=True
+        ).data
 
         # language versions that match current document date
         context["language_versions"] = all_versions.filter(date=self.object.date)
