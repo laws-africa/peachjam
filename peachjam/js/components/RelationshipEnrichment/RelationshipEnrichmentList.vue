@@ -72,10 +72,19 @@ export default {
       }
     },
 
-    save (enrichment) {
-      // TODO: save to server
-      this.items.push(enrichment);
-      this.creating = null;
+    async save (enrichment) {
+      const headers = authHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      const resp = await fetch('/api/v1/relationships/', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(enrichment)
+      });
+      if (resp.ok) {
+        this.items.push(await resp.json());
+        this.creating = null;
+      }
     },
 
     closeModal () {

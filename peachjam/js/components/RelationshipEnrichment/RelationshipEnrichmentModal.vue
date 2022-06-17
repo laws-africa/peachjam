@@ -9,7 +9,7 @@
   >
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <form @submit.stop="save" ref="form">
+        <form @submit.prevent="save" ref="form">
           <div class="modal-header">
             <h5 class="modal-title">
               Add relationship

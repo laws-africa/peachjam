@@ -2,7 +2,8 @@ from django.views.generic import DetailView, ListView
 
 from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import AuthoringBody, Court
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, Relationship
+from peachjam_api.serializers import RelationshipSerializer
 
 
 class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
@@ -75,5 +76,33 @@ class BaseDocumentDetailView(DetailView):
         context["date_versions"] = all_versions.filter(
             language=self.object.language
         ).order_by("-date")
+
+        # provision relationships
+        rels = [
+            r
+            for r in Relationship.for_subject_document(
+                context["document"]
+            ).prefetch_related(
+                "subject_work",
+                "subject_work__documents",
+                "object_work",
+                "object_work__documents",
+            )
+            if r.subject_target_id
+        ] + [
+            r
+            for r in Relationship.for_object_document(
+                context["document"]
+            ).prefetch_related(
+                "subject_work",
+                "subject_work__documents",
+                "object_work",
+                "object_work__documents",
+            )
+            if r.object_target_id
+        ]
+        context["provision_relationships"] = RelationshipSerializer(
+            rels, many=True
+        ).data
 
         return context
