@@ -5,6 +5,7 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register(r"relationships", views.RelationshipViewSet, basename="relationships")
+router.register(r"works", views.WorksViewSet, basename="works")
 
 urlpatterns = [
     path("", include(router.urls)),
