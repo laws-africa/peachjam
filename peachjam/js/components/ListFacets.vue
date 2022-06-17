@@ -23,7 +23,7 @@
           <strong>Year</strong>
           <div class="d-flex align-items-center">
             <a
-              v-if="yearParam.length"
+              v-if="getUrlParamValue('year').length"
               href="#"
               @click.prevent="clearFacet('year')"
             >
@@ -35,27 +35,163 @@
             />
           </div>
         </div>
-        <div
-          v-for="(year, index) in years"
-          :key="index"
-          class="d-flex justify-content-between align-items-center"
-        >
-          <div class="form-check">
-            <input
-              :id="year"
-              ref="yearInput"
-              class="form-check-input"
-              type="checkbox"
-              name="year"
-              :value="year"
-              :checked="yearInputChecked(year)"
+        <div class="facets-scrollable">
+          <div
+            v-for="(year, index) in sortDescending(years)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                :id="year"
+                class="form-check-input"
+                type="checkbox"
+                name="year"
+                :value="year"
+                :checked="inputChecked('year', year)"
+              >
+              <label
+                class="form-check-label"
+                :for="year"
+              >
+                {{ year }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li
+        v-if="authoringBodies.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Authoring Body</strong>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="getUrlParamValue('authoring_body').length"
+              href="#"
+              @click.prevent="clearFacet('authoring_body')"
             >
-            <label
-              class="form-check-label"
-              :for="year"
+              Clear
+            </a>
+            <span
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
+        </div>
+        <div class="facets-scrollable">
+          <div
+            v-for="(authoringBody, index) in sortAlphabetically(authoringBodies)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                :id="authoringBody"
+                class="form-check-input"
+                type="radio"
+                name="authoring_body"
+                :value="authoringBody"
+                :checked="inputChecked('authoring_body', authoringBody)"
+              >
+              <label
+                class="form-check-label"
+                :for="authoringBody"
+              >
+                {{ authoringBody }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li
+        v-if="docTypes.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Document type</strong>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="getUrlParamValue('doc_type').length"
+              href="#"
+              @click.prevent="clearFacet('doc_type')"
             >
-              {{ year }}
-            </label>
+              Clear
+            </a>
+            <span
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
+        </div>
+        <div class="facets-scrollable">
+          <div
+            v-for="(docType, index) in sortAlphabetically(docTypes)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                :id="docType"
+                class="form-check-input"
+                type="checkbox"
+                name="doc_type"
+                :value="docType"
+                :checked="inputChecked('doc_type', docType)"
+              >
+              <label
+                class="form-check-label"
+                :for="docType"
+              >
+                {{ getDocTypeLabel(docType) }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li
+        v-if="courts.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Court</strong>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="getUrlParamValue('court').length"
+              href="#"
+              @click.prevent="clearFacet('court')"
+            >
+              Clear
+            </a>
+            <span
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
+        </div>
+        <div class="facets-scrollable">
+          <div
+            v-for="(court, index) in sortAlphabetically(courts)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                :id="court"
+                class="form-check-input"
+                type="radio"
+                name="court"
+                :value="court"
+                :checked="inputChecked('court', court)"
+              >
+              <label
+                class="form-check-label"
+                :for="court"
+              >
+                {{ court }}
+              </label>
+            </div>
           </div>
         </div>
       </li>
@@ -67,7 +203,7 @@
           <strong>Alphabetical</strong>
           <div class="d-flex align-items-center">
             <a
-              v-if="alphabetParam.length"
+              v-if="getUrlParamValue('alphabet').length"
               href="#"
               @click.prevent="clearFacet('alphabet')"
             >
@@ -87,9 +223,8 @@
           >
             <input
               :key="key"
-              ref="alphabetInput"
               :value="letter"
-              :checked="alphabetInputChecked(letter)"
+              :checked="inputChecked('alphabet', letter)"
               type="radio"
               name="alphabet"
             >
@@ -104,11 +239,17 @@
 </template>
 
 <script>
-import { nextTick } from 'vue';
-
 export default {
   name: 'ListFacets',
   props: {
+    authoringBodies: {
+      type: Array,
+      default: () => []
+    },
+    courts: {
+      type: Array,
+      default: () => []
+    },
     alphabet: {
       type: Array,
       default: () => []
@@ -116,38 +257,42 @@ export default {
     years: {
       type: Array,
       default: () => []
+    },
+    docTypes: {
+      type: Array,
+      default: () => []
     }
   },
   data: () => {
     return {
-      loading: false
+      loading: false,
+      author: null
     };
   },
-
   computed: {
-    alphabetParam () {
-      return this.getUrlParamValue('alphabet');
-    },
-    yearParam () {
-      return this.getUrlParamValue('year');
-    },
     showClearAllFilter () {
-      return this.alphabetParam.length || this.yearParam.length;
-    }
-  },
-  watch: {
-    author () {
-      nextTick().then(() => {
-        this.submit();
-      });
+      return ['alphabet', 'year', 'authoring_body', 'court'].some(key => this.getUrlParamValue(key).length);
     }
   },
   methods: {
-    yearInputChecked (value) {
-      return this.yearParam.includes(value.toString());
+    getDocTypeLabel (value) {
+      return value.split('_').map(word => `${word[0].toUpperCase()}${word.slice(1, word.length)}`).join(' ');
     },
-    alphabetInputChecked (value) {
-      return this.alphabetParam.includes(value);
+    sortAlphabetically (items) {
+      const sorted = [...items];
+      return sorted.sort((a, b) => a.localeCompare(b));
+    },
+    sortDescending (items) {
+      const sorted = [...items];
+      return sorted.sort((a, b) => b - a);
+    },
+    getUrlParamValue (key) {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      return urlParams.getAll(key);
+    },
+    inputChecked (key, value) {
+      return this.getUrlParamValue(key).includes(value.toString());
     },
 
     clearAll () {
@@ -160,16 +305,22 @@ export default {
       urlParams.delete(key);
       window.location.href = `${window.location.origin}${window.location.pathname}?${urlParams.toString()}`;
     },
-    getUrlParamValue (key) {
-      const queryString = window.location.search;
-      const urlParams = new URLSearchParams(queryString);
-      return urlParams.getAll(key);
-    },
     submit () {
       this.loading = true;
       // On submit page refreshes
+      // Prevention of empty query params
+      for (const input of this.$refs.form.querySelectorAll('input')) {
+        if (!input.value) input.setAttribute('disabled', '');
+      }
       this.$refs.form.submit();
     }
   }
 };
 </script>
+
+<style scoped>
+.facets-scrollable {
+  max-height: 25vh;
+  overflow-y: auto;
+}
+</style>

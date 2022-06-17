@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 
 import sentry_sdk
+from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -181,6 +182,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
+LANGUAGES = [
+    ("en", _("English")),
+    ("fr", _("French")),
+    ("sw", _("Swahili")),
+]
+
 TIME_ZONE = "UTC"
 
 USE_I18N = True
@@ -316,6 +323,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "loggers": {
         "africanlii": {"handlers": ["console"], "level": "DEBUG"},
+        "peachjam": {"handlers": ["console"], "level": "DEBUG"},
     },
     "handlers": {
         "console": {

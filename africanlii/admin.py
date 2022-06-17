@@ -3,6 +3,7 @@ from import_export.admin import ImportMixin
 
 from africanlii.models import (
     AuthoringBody,
+    CaseNumber,
     Court,
     DocumentNature,
     GenericDocument,
@@ -29,12 +30,21 @@ admin.site.register(
 )
 
 
+class CaseNumberAdmin(admin.TabularInline):
+    model = CaseNumber
+    extra = 1
+    verbose_name = "Case number"
+    verbose_name_plural = "Case numbers"
+    readonly_fields = ["string"]
+
+
 class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
     resource_class = GenericDocumentResource
 
 
 class JudgmentAdmin(ImportMixin, DocumentAdmin):
     resource_class = JudgmentResource
+    inlines = [CaseNumberAdmin] + DocumentAdmin.inlines
 
 
 admin.site.register(GenericDocument, GenericDocumentAdmin)

@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: peachjam\n"
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-08 10:35+0300\n"
-"PO-Revision-Date: 2022-03-08 07:37\n"
+"POT-Creation-Date: 2022-06-13 15:55+0300\n"
+"PO-Revision-Date: 2022-06-13 13:13\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -11,16 +11,61 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Crowdin-Project: peachjam\n"
-"X-Crowdin-Project-ID: 503248\n"
+"X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /l10n/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 22\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 50\n"
 
-#: templates/peachjam/home.html:9
-msgid "Welcome to Peach Jam"
-msgstr "Karibu kwa Peach Jam"
+#: settings.py:185
+msgid "English"
+msgstr "Kiingereza"
 
-#: templates/peachjam/home.html:10
-msgid "More text that needs translation"
-msgstr "Sentensi nyengine zinazohitaji tafsiri"
+#: settings.py:186
+msgid "French"
+msgstr "Kifaransa"
+
+#: settings.py:187
+msgid "Swahili"
+msgstr "Kiswahili"
+
+#: templates/account/logout.html:4 templates/account/logout.html:7
+#: templates/account/logout.html:17
+msgid "Log Out"
+msgstr "Ondoka"
+
+#: templates/account/logout.html:9
+msgid "Are you sure you want to log out?"
+msgstr "Je, una uhakika unataka kuondoka?"
+
+#: templates/account/password_reset.html:7
+msgid "Reset Your Password"
+msgstr "Weka upya nenosiri lako"
+
+#: templates/account/password_reset_from_key.html:7
+msgid "Bad Token"
+msgstr "Ishara mbaya"
+
+#: templates/account/password_reset_from_key.html:7
+msgid "Reset Password"
+msgstr "Weka upya nenosiri"
+
+#: templates/account/password_reset_from_key.html:11
+#, python-format
+msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
+msgstr "Kiungo cha kuweka upya nenosiri kilikuwa batili, pengine kwa sababu tayari kimetumika. Tafadhali omba <a href=\"%(passwd_reset_url)s\">uwekaji upya wa nenosiri</a>."
+
+#: templates/account/password_reset_from_key.html:56
+msgid "Your password is now reset."
+msgstr "Nenosiri lako sasa limewekwa upya."
+
+#: templates/peachjam/_recent_document_list.html:13
+msgid "No documents found."
+msgstr "Hakuna hati zilizopatikana."
+
+#~ msgid "Welcome to Peach Jam"
+#~ msgstr "Bienvenue dans Peach Jam"
+
+#~ msgid "More text that needs translation"
+#~ msgstr "Plus de texte qui nécessite une traduction"
+

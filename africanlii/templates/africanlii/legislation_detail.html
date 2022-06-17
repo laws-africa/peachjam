@@ -1,14 +1,19 @@
 {% extends 'africanlii/layouts/document_detail.html' %}
+{% load i18n %}
 
 {% block document-metadata-content %}
   <div class="row">
     <div class="col-sm-6">
       <dl class="row mb-0">
-        <dt class="col-4">Language</dt>
+        <dt class="col-4">{% trans 'Language' %}</dt>
         <dd class="col-8">{{ document.language.name }}</dd>
-        <dt class="col-4">Date</dt>
+        <dt class="col-4">{% trans 'Date' %}</dt>
         <dd class="col-8">{{ document.date }}</dd>
       </dl>
     </div>
   </div>
+{% endblock %}
+
+{% block content %}
+  {% include 'peachjam/_document_content.html' with document=document %}
 {% endblock %}

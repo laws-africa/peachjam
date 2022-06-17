@@ -25,12 +25,50 @@
                       <dt class="col-4">Author</dt>
                       <dd class="col-8 text-muted">{{ document.authoring_body }}</dd>
                     {% endif %}
+
                     <dt class="col-4">Date</dt>
-                    <dd class="col-8 text-muted">{{ document.date }}</dd>
+                    {% if date_versions %}
+                      <dd class="col-8">
+                        <div class="dropdown">
+                          <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ document.date }}
+                          </a>
+                          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            {% for version in date_versions %}
+                              <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
+                            {% endfor %}
+                          </ul>
+                        </div>
+                      </dd>
+                    {% else %}
+                      <dd class="col-8 text-muted">{{ document.date }}</dd>
+                    {% endif %}
+
                     <dt class="col-4">Language</dt>
-                    <dd class="col-8 text-muted">{{ document.language }}</dd>
+                    {% if language_versions %}
+                      <dd class="col-8">
+                        <div class="dropdown">
+                          <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ document.language }}
+                          </a>
+                          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            {% for version in language_versions %}
+                              <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
+                            {% endfor %}
+                          </ul>
+                        </div>
+                      </dd>
+                    {% else %}
+                      <dd class="col-8 text-muted">{{ document.language }} </dd>
+                    {% endif %}
                   </dl>
                 {% endblock %}
+
+                {% if document.source_file %}
+                  <div>
+                    <a class="card-link" href="{% url 'document_source' expression_frbr_uri=document.expression_frbr_uri %}">Download document</a> ({{ document.source_file.file.size|filesizeformat }})
+                  </div>
+                {% endif %}
               </div>
 
               <div class="col-md-6">
@@ -72,39 +110,7 @@
       </div>
     </div>
 
-    {% if document.content_html_is_akn %}
-      <div class="row">
-        <div class="col-lg-3 d-none d-lg-block">
-          <aside class="toc">
-            <la-table-of-contents-controller
-              items="{{ document.toc_json|jsonify }}"
-              expand-all-btn-classes="btn btn-secondary btn-sm"
-              collapse-all-btn-classes="btn btn-secondary btn-sm"
-              title-filter-clear-btn-classes="btn btn-secondary btn-sm"
-              search-filter-input-classes="form-control"
-            ></la-table-of-contents-controller>
-          </aside>
-        </div>
-
-        <div class="col-lg-9">
-          <div class="la-akoma-ntoso-with-gutter" {% if user.is_staff %}data-component="RelationshipEnrichments"{% endif %}>
-            <la-akoma-ntoso
-              id="akn"
-              expression-frbr-uri="{{ document.expression_frbr_uri }}"
-              class="flash-target"
-            >
-              <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
-              <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
-
-              {{ document.content_html|safe }}
-            </la-akoma-ntoso>
-            <la-gutter akoma-ntoso="#akn"></la-gutter>
-          </div>
-        </div>
-      </div>
-
-      {{ provision_relationships|json_script:"provision-relationships" }}
-    {% endif %}
+    {{ provision_relationships|json_script:"provision-relationships" }}
 
     {% block content %}{% endblock %}
   </main>

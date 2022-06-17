@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
+from django.views.decorators.cache import cache_page
 
 from africanlii import views
 from africanlii.feeds import (
@@ -37,9 +38,24 @@ urlpatterns = [
         name="document_detail",
     ),
     path(
-        "documents<path:expression_frbr_uri>/source.pdf",
-        views.DocumentSourceView.as_view(),
+        "documents<path:expression_frbr_uri>/source",
+        cache_page(60 * 60 * 6)(views.DocumentSourceView.as_view()),
         name="document_source",
+    ),
+    path(
+        "courts/<int:pk>/",
+        views.CourtListView.as_view(),
+        name="court_list",
+    ),
+    path(
+        "authors/<int:pk>/",
+        views.AuthoringBodyListView.as_view(),
+        name="author_list",
+    ),
+    path(
+        "documents<path:expression_frbr_uri>/source.pdf",
+        cache_page(60 * 60 * 6)(views.DocumentSourcePDFView.as_view()),
+        name="document_source_pdf",
     ),
     path("feeds/judgments.xml", JudgmentAtomSiteNewsFeed(), name="judgment_feed"),
     path(
@@ -56,6 +72,7 @@ urlpatterns = [
         "feeds/legislation.xml", LegislationAtomSiteNewsFeed(), name="legislation_feed"
     ),
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
+    path("i18n/", include("django.conf.urls.i18n")),
 ]
 
 if settings.DEBUG:

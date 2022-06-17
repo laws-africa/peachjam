@@ -7,12 +7,12 @@ class AuthoringBody(models.Model):
     name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
     description = models.TextField(blank=True)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ["name"]
         verbose_name_plural = "Authoring bodies"
+
+    def __str__(self):
+        return self.name
 
 
 class DocumentNature(models.Model):

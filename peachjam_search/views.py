@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 from django_elasticsearch_dsl_drf.filter_backends import (
     CompoundSearchFilterBackend,
@@ -10,12 +12,13 @@ from django_elasticsearch_dsl_drf.filter_backends import (
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from elasticsearch_dsl import DateHistogramFacet
 
-from peachjam.views import AuthedViewMixin
 from peachjam_search.documents import SearchableDocument
 from peachjam_search.serializers import SearchableDocumentSerializer
 
+CACHE_SECS = 15 * 60
 
-class SearchView(AuthedViewMixin, TemplateView):
+
+class SearchView(TemplateView):
     template_name = "peachjam_search/search.html"
 
 
@@ -98,3 +101,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             }
         },
     }
+
+    @method_decorator(cache_page(CACHE_SECS))
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)

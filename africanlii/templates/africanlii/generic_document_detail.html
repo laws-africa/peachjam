@@ -1,13 +1,5 @@
 {% extends 'africanlii/layouts/document_detail.html' %}
 
 {% block content %}
-  <div data-component="PdfRenderer" data-pdf="{% url 'document_source' expression_frbr_uri=document.expression_frbr_uri %}" class="pdf-renderer">
-    <div class="pdf-renderer__previews">
-      <div class="pdf-renderer__previews__inner"></div>
-    </div>
-
-    <div class="pdf-renderer__right">
-      <div class="pdf-renderer__content"></div>
-    </div>
-  </div>
+  {% include 'peachjam/_document_content.html' with document=document %}
 {% endblock %}

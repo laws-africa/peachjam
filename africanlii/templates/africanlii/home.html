@@ -1,14 +1,16 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
 
-{% block title %} Home {% endblock %}
+{% block title %} {% trans 'Home' %} {% endblock %}
 
 {% block page-content %}
 <section class="pb-5 pt-5">
   <div class="container">
     <p class="lead">
-      We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
-      with and understand the African Union agenda. Search through {{ documents_count }} AU documents on the AfricanLII platform
+      {% blocktrans %}
+        We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
+        with and understand the African Union agenda. Search through {{ documents_count }} AU documents on the AfricanLII platform
+      {% endblocktrans %}
     </p>
 
     <div class="row">
@@ -30,31 +32,59 @@
     </div>
   </div>
 </section>
-<div class="pb-5 pt-5 bg-light">
+
+<section class="pb-5 pt-5 bg-light">
   <div class="container">
-    <h2 class="mb-4 heading-underlined">Recent Judgments</h2>
+    <h2 class="mb-4 heading-underlined">{% trans 'Courts' %}</h2>
+    <div class="row">
+      {% for court in courts %}
+        <div class="col-md-6 col-sm-12">
+            <input type="hidden" value="court">
+            <a href="{% url 'court_list' court.id %}">{{ court.name }}</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="pb-5 pt-5">
+  <div class="container">
+    <h2 class="mb-4 heading-underlined">{% trans 'Authors' %}</h2>
+    <div class="row">
+      {% for authoring_body in authoring_bodies %}
+        <div class="col-md-6 col-sm-12">
+            <a href="{% url 'author_list' authoring_body.id %}">{{ authoring_body.name }}</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="pb-5 pt-5 bg-light">
+  <div class="container">
+    <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
     {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text='View more Judgements' view_more_url_name='judgment_list' %}
   </div>
-</div>
+</section>
 
-<div class="pb-5 pt-5">
+<section class="pb-5 pt-5">
   <div class="container">
-    <h2 class="mb-4 heading-underlined">Recent AU Documents</h2>
+    <h2 class="mb-4 heading-underlined">{% trans 'Recent AU Documents' %}</h2>
     {% include 'peachjam/_recent_document_list.html' with documents=recent_documents  view_more_text='View more AU Documents' view_more_url_name='generic_document_list' %}
   </div>
-</div>
+</section>
 
-<div class="pb-5 pt-5 bg-light">
+<section class="pb-5 pt-5 bg-light">
   <div class="container">
-    <h2 class="mb-4 heading-underlined">Recent Legal Instruments</h2>
+    <h2 class="mb-4 heading-underlined">{% trans 'Recent Legal Instruments' %}</h2>
     {% include 'peachjam/_recent_document_list.html' with documents=recent_instruments view_more_text='View more Legal Instruments' view_more_url_name='legal_instrument_list' %}
   </div>
-</div>
+</section>
 
-<div class="pb-5 pt-5">
+<section class="pb-5 pt-5">
   <div class="container">
-    <h2 class="mb-4 heading-underlined">Recent treaties and protocols</h2>
+    <h2 class="mb-4 heading-underlined">{% trans 'Recent Treaties and Protocols ' %}</h2>
     {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text='View more Treaties and Protocols' view_more_url_name='legislation_list' %}
   </div>
-</div>
+</section>
 {% endblock %}
