@@ -177,7 +177,7 @@ export default {
     },
 
     search: debounce(async function (loading, search) {
-      const resp = await fetch('/api/v1/works/?title__icontains=' + encodeURIComponent(search), {
+      const resp = await fetch('/api/works/?title__icontains=' + encodeURIComponent(search), {
         headers: authHeaders()
       });
       loading(false);

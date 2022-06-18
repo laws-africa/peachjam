@@ -61,7 +61,7 @@ export default {
     },
 
     async deleteEnrichment (enrichment) {
-      const resp = await fetch(`/api/v1/relationships/${enrichment.id}/`, {
+      const resp = await fetch(`/api/relationships/${enrichment.id}/`, {
         method: 'DELETE',
         headers: authHeaders()
       });
@@ -78,7 +78,7 @@ export default {
       const headers = authHeaders();
       headers['Content-Type'] = 'application/json';
 
-      const resp = await fetch('/api/v1/relationships/', {
+      const resp = await fetch('/api/relationships/', {
         method: 'POST',
         headers,
         body: JSON.stringify(enrichment)
