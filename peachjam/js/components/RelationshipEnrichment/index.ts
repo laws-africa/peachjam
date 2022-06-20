@@ -1,8 +1,8 @@
 import { createApp, defineComponent, ComponentPublicInstance } from 'vue';
 import RelationshipEnrichmentList from './RelationshipEnrichmentList.vue';
 import { IRelationshipEnrichment } from './enrichment';
-import { GutterEnrichmentManager, IGutterEnrichmentProvider } from '@laws-africa/indigo-akn/dist/enrichments';
-import { IRangeTarget } from '@laws-africa/indigo-akn/dist/ranges';
+import { GutterEnrichmentManager, IGutterEnrichmentProvider } from '@lawsafrica/indigo-akn/dist/enrichments';
+import { IRangeTarget } from '@lawsafrica/indigo-akn/dist/ranges';
 
 export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   root: HTMLElement;

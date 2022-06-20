@@ -1,11 +1,11 @@
 import components from './components';
 import { defineComponent, createApp } from 'vue';
-import '@laws-africa/web-components/dist/components/la-akoma-ntoso';
-import '@laws-africa/web-components/dist/components/la-gutter';
-import '@laws-africa/web-components/dist/components/la-gutter-item';
-import '@laws-africa/web-components/dist/components/la-table-of-contents-controller';
-import '@laws-africa/web-components/dist/components/la-decorate-internal-refs';
-import '@laws-africa/web-components/dist/components/la-decorate-terms';
+import '@lawsafrica/web-components/dist/components/la-akoma-ntoso';
+import '@lawsafrica/web-components/dist/components/la-gutter';
+import '@lawsafrica/web-components/dist/components/la-gutter-item';
+import '@lawsafrica/web-components/dist/components/la-table-of-contents-controller';
+import '@lawsafrica/web-components/dist/components/la-decorate-internal-refs';
+import '@lawsafrica/web-components/dist/components/la-decorate-terms';
 
 class PeachJam {
   private components: any[];
