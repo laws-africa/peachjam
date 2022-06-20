@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import { markRange, targetToRange } from '@laws-africa/indigo-akn/dist/ranges';
+import { markRange, targetToRange } from '@lawsafrica/indigo-akn/dist/ranges';
 import { bestDocument } from './enrichment';
 
 export default {
