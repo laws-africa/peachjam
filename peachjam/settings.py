@@ -43,6 +43,7 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     "peachjam.apps.PeachJamConfig",
     "peachjam_search.apps.PeachjamSearchConfig",
+    "peachjam_api.apps.PeachjamApiConfig",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     "countries_plus",
     "languages_plus",
     "rest_framework",
+    "django_filters",
     "django_elasticsearch_dsl",
     "django_elasticsearch_dsl_drf",
     "django.contrib.admin",
@@ -225,6 +227,11 @@ ELASTICSEARCH_DSL = {
 }
 
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication"
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissions"],
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 10,
 }
@@ -308,6 +315,7 @@ GOOGLE_SERVICE_ACCOUNT_CREDENTIALS = {
     ),
     "client_x509_cert_url": os.environ.get("GOOGLE_CLIENT_X509_CERT_URL", ""),
 }
+
 
 LOGGING = {
     "version": 1,

@@ -63,7 +63,13 @@
       </div>
       <div class="col-lg-9">
         {% if document.content_html_is_akn %}
-          <div class="la-akoma-ntoso-with-gutter">
+          <div class="la-akoma-ntoso-with-gutter" data-component="RelationshipEnrichments"
+               {% if not perms.peachjam.add_relationship %}
+               data-readonly="true"
+               {% endif %}
+               data-work-id="{{ document.work_id }}"
+               data-work-frbr-uri="{{ document.work_frbr_uri }}"
+          >
             <la-akoma-ntoso
                 id="akn"
                 expression-frbr-uri="{{ document.expression_frbr_uri }}"
