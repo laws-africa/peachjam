@@ -12,6 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 class Adapter:
+    def __init__(self, settings):
+        self.client = requests.session()
+        self.client.headers.update(
+            {
+                "Authorization": f"Token {settings['token']}",
+            }
+        )
+        self.url = settings["url"]
+
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
         of document identifiers (expression FRBR URIs) which must be updated.
@@ -29,15 +38,6 @@ class Adapter:
 
 @plugins.register("ingestor-adapter")
 class IndigoAdapter(Adapter):
-    def __init__(self, url, token):
-        self.client = requests.session()
-        self.client.headers.update(
-            {
-                "Authorization": f"Token {token}",
-            }
-        )
-        self.url = url
-
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
         of document identifiers (expression FRBR URIs) which must be updated.
@@ -46,16 +46,16 @@ class IndigoAdapter(Adapter):
         return [d["url"] for d in updated_docs_list]
 
     def get_doc_list(self):
-        return self.client_get(self.url).json()["results"]
+        return self.client_get(self.url).json()["results"][:2]
 
     def get_updated_documents(self, last_refreshed):
         if last_refreshed is None:
             return self.get_doc_list()
 
         return [
-            d
-            for d in self.get_doc_list()
-            if parser.parse(d["updated_at"]) > last_refreshed
+            document
+            for document in self.get_doc_list()
+            if parser.parse(document["updated_at"]) > last_refreshed
         ]
 
     def update_document(self, url):
@@ -69,7 +69,7 @@ class IndigoAdapter(Adapter):
 
         document = self.client_get(f"{url}.json").json()
         expression_frbr_uri = document["expression_frbr_uri"]
-        toc_json = self.client_get(url + "/toc.json").json()["toc"]
+        toc_json = self.get_toc_json(url)
         content_html = self.client_get(url + ".html").text
         jurisdiction = Country.objects.get(iso__iexact=document["country"])
         language = Language.objects.get(iso_639_3__iexact=document["language"])
@@ -103,6 +103,25 @@ class IndigoAdapter(Adapter):
         r = self.client.get(url)
         r.raise_for_status()
         return r
+
+    def get_toc_json(self, url):
+        def remove_sub_paragraph(d):
+            for k, v in d.items():
+                if (k == "type" and v == "paragraph") or (
+                    k == "basic_unit" and v is True
+                ):
+                    d["children"] = []
+                elif isinstance(v, dict):
+                    remove_sub_paragraph(v)
+                elif isinstance(v, list):
+                    for i in v:
+                        if isinstance(i, dict):
+                            remove_sub_paragraph(i)
+
+        toc_json = self.client_get(url + "/toc.json").json()["toc"]
+        for i in toc_json:
+            remove_sub_paragraph(i)
+        return toc_json
 
     def download_source_file(self, publication_document, doc):
         from peachjam.models import SourceFile
