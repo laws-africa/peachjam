@@ -1,6 +1,6 @@
 from django.db import models
 
-from peachjam.models import CoreDocument
+from peachjam.models.core_document_model import CoreDocument
 
 
 class CitationLink(models.Model):
