@@ -5,7 +5,11 @@
     <tr>
       <th scope="col" style="width: 80%">{% trans 'Title' %}</th>
       <th scope="col">{% trans 'Date' %}</th>
-      <th scope="col">{% trans 'Jurisdiction' %}</th>
+      {% if "courts" in request.path or "authors" in request.path  %}
+        <th scope="col">{% trans 'Document Type' %}</th>
+      {% else %}
+        <th scope="col">{% trans 'Jurisdiction' %}</th>
+      {% endif %}
     </tr>
     </thead>
 
@@ -17,8 +21,12 @@
           <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
         </div>
       </td>
-      <td>{{ document.date }}</td>
-      <td>{{ document.jurisdiction }}</td>
+      <td style="white-space: nowrap;">{{ document.date }}</td>
+      {% if "courts" in request.path or "authors" in request.path  %}
+        <td>{{ document.doc_type }}</td>
+      {% else %}
+        <td>{{ document.jurisdiction }}</td>
+      {% endif %}
     </tr>
     {% endfor %}
 
