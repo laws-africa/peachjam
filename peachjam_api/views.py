@@ -1,4 +1,4 @@
-from rest_framework import generics, viewsets
+from rest_framework import viewsets
 
 from peachjam.models import CitationLink, Relationship, Work
 from peachjam_api.serializers import (
@@ -22,11 +22,6 @@ class WorksViewSet(viewsets.ReadOnlyModelViewSet):
     }
 
 
-class CitationLinkList(generics.ListCreateAPIView):
-    queryset = CitationLink.objects.all()
-    serializer_class = CitationLinkSerializer
-
-
-class CitationLinkDetail(generics.RetrieveUpdateDestroyAPIView):
+class CitationLinkViewSet(viewsets.ModelViewSet):
     queryset = CitationLink.objects.all()
     serializer_class = CitationLinkSerializer
