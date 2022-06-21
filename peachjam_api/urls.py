@@ -9,4 +9,9 @@ router.register(r"works", views.WorksViewSet, basename="works")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path(
+        "documents/<int:pk>/enrichments/citation-links",
+        views.CitationLinkDetail.as_view(),
+    ),
+    path("documents/enrichments/citation-links", views.CitationLinkList.as_view()),
 ]

@@ -1,9 +1,14 @@
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
 from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import AuthoringBody, Court
-from peachjam.models import CoreDocument, Predicate, Relationship
-from peachjam_api.serializers import PredicateSerializer, RelationshipSerializer
+from peachjam.models import CitationLink, CoreDocument, Predicate, Relationship
+from peachjam_api.serializers import (
+    CitationLinkSerializer,
+    PredicateSerializer,
+    RelationshipSerializer,
+)
 
 
 class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
@@ -68,6 +73,13 @@ class BaseDocumentDetailView(DetailView):
         all_versions = CoreDocument.objects.filter(
             work_frbr_uri=self.object.work_frbr_uri
         ).exclude(pk=self.object.pk)
+
+        # citation links for a document
+        doc = get_object_or_404(CoreDocument, pk=self.object.pk)
+        citation_links = CitationLink.objects.filter(document=doc)
+        context["citation_links"] = CitationLinkSerializer(
+            citation_links, many=True
+        ).data
 
         # language versions that match current document date
         context["language_versions"] = all_versions.filter(date=self.object.date)

@@ -11,6 +11,7 @@ from treebeard.forms import movenodeform_factory
 
 from peachjam.forms import RelationshipForm
 from peachjam.models import (
+    CitationLink,
     DocumentTopic,
     Image,
     Locality,
@@ -20,12 +21,7 @@ from peachjam.models import (
     Taxonomy,
 )
 
-admin.site.register(
-    [
-        Image,
-        Locality,
-    ]
-)
+admin.site.register([Image, Locality, CitationLink])
 
 
 class SourceFileFilter(admin.SimpleListFilter):

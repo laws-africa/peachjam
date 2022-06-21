@@ -1,7 +1,11 @@
-from rest_framework import viewsets
+from rest_framework import generics, viewsets
 
-from peachjam.models import Relationship, Work
-from peachjam_api.serializers import RelationshipSerializer, WorkSerializer
+from peachjam.models import CitationLink, Relationship, Work
+from peachjam_api.serializers import (
+    CitationLinkSerializer,
+    RelationshipSerializer,
+    WorkSerializer,
+)
 
 
 class RelationshipViewSet(viewsets.ModelViewSet):
@@ -16,3 +20,13 @@ class WorksViewSet(viewsets.ReadOnlyModelViewSet):
         "frbr_uri": ["exact"],
         "title": ["exact", "icontains"],
     }
+
+
+class CitationLinkList(generics.ListCreateAPIView):
+    queryset = CitationLink.objects.all()
+    serializer_class = CitationLinkSerializer
+
+
+class CitationLinkDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CitationLink.objects.all()
+    serializer_class = CitationLinkSerializer
