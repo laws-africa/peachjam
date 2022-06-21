@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+from peachjam.adapters import IndigoAdapter  # noqa
 from peachjam.plugins import plugins
 from peachjam.tasks import update_document
 
@@ -10,10 +11,16 @@ def adapter_choices():
     return [(key, p.name) for key, p in plugins.registry["ingestor-adapter"].items()]
 
 
+class AdapterSettings(models.Model):
+    token = models.CharField(max_length=255)
+    url = models.URLField()
+    ingestor = models.ForeignKey("peachjam.Ingestor", on_delete=models.CASCADE)
+
+
 class Ingestor(models.Model):
     # TODO: add a name field
-    url = models.CharField(max_length=2048)
-    token = models.CharField(max_length=2048)
+    # url = models.CharField(max_length=2048)
+    # token = models.CharField(max_length=2048)
     adapter = models.CharField(max_length=2048)
     last_refreshed_at = models.DateTimeField(null=True, blank=True)
 
@@ -36,5 +43,5 @@ class Ingestor(models.Model):
 
     def get_adapter(self):
         klass = plugins.registry["ingestor-adapter"][self.adapter]
-        # TODO: settings
-        return klass(self.url, self.token)
+        settings = AdapterSettings.objects.filter(ingestor=self).first()
+        return klass(settings.url, settings.token)

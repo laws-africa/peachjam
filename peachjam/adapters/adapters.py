@@ -3,6 +3,7 @@ from tempfile import NamedTemporaryFile
 
 import magic
 import requests
+from dateutil import parser
 from django.core.files import File
 
 from peachjam.plugins import plugins
@@ -42,7 +43,7 @@ class IndigoAdapter(Adapter):
         of document identifiers (expression FRBR URIs) which must be updated.
         """
         updated_docs_list = self.get_updated_documents(last_refreshed)
-        return [d["expression_frbr_uri"] for d in updated_docs_list]
+        return [d["url"] for d in updated_docs_list]
 
     def get_doc_list(self):
         return self.client_get(self.url).json()["results"]
@@ -51,21 +52,25 @@ class IndigoAdapter(Adapter):
         if last_refreshed is None:
             return self.get_doc_list()
 
-        return [d for d in self.get_doc_list() if d["updated_at"] > last_refreshed]
+        return [
+            d
+            for d in self.get_doc_list()
+            if parser.parse(d["updated_at"]) > last_refreshed
+        ]
 
-    def update_document(self, expression_frbr_uri):
+    def update_document(self, url):
         from countries_plus.models import Country
         from languages_plus.models import Language
 
         from africanlii.models import Legislation
         from peachjam.models import Locality
 
-        url = self.url + expression_frbr_uri + ".json"
         logger.info(f"Updating document ... {url}")
 
-        document = self.client_get(url)
-        toc_json = self.client_get(document["url"] + "/toc.json").json()["toc"]
-        content_html = self.client_get(document["url"] + "/eng.html").text
+        document = self.client_get(f"{url}.json").json()
+        expression_frbr_uri = document["expression_frbr_uri"]
+        toc_json = self.client_get(url + "/toc.json").json()["toc"]
+        content_html = self.client_get(url + ".html").text
         jurisdiction = Country.objects.get(iso__iexact=document["country"])
         language = Language.objects.get(iso_639_3__iexact=document["language"])
         locality = Locality.objects.get(code=document["locality"])
@@ -84,11 +89,11 @@ class IndigoAdapter(Adapter):
             "jurisdiction": jurisdiction,
             "locality": locality,
             "language": language,
-            "toc_json": toc_json["toc"],
+            "toc_json": toc_json,
             "content_html": content_html,
         }
 
-        doc = Legislation.objects.update_or_create(
+        doc, created = Legislation.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri, defaults={**field_data}
         )
         if document["publication_document"]:

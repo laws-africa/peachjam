@@ -12,6 +12,7 @@ from treebeard.forms import movenodeform_factory
 from peachjam.forms import RelationshipForm
 from peachjam.models import (
     CitationLink,
+    AdapterSettings,
     DocumentTopic,
     Image,
     Locality,
@@ -22,7 +23,7 @@ from peachjam.models import (
     Taxonomy,
 )
 
-admin.site.register([Image, Locality, CitationLink, Ingestor])
+admin.site.register([Image, Locality, CitationLink, Ingestor, AdapterSettings])
 
 
 class SourceFileFilter(admin.SimpleListFilter):
@@ -174,3 +175,14 @@ class PredicateAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name", "verb")
     prepopulated_fields = {"slug": ("name",)}
+    
+class AdapterSettingsInline(admin.TabularInline):
+    model = AdapterSettings
+    extra = 1
+
+
+class IngestorAdmin(admin.ModelAdmin):
+    inlines = [AdapterSettingsInline]
+
+
+admin.site.register(Ingestor, IngestorAdmin)

@@ -11,9 +11,9 @@ def update_document(ingestor_id, document_id):
 
     log.info(f"Updating document {document_id} with ingestor {ingestor_id}")
 
-    ingestor = Ingestor.objects.fillter(pk=ingestor_id).first()
+    ingestor = Ingestor.objects.filter(pk=ingestor_id).first()
     if not ingestor:
-        log.info(f"No ingestor with id {ingestor_id} exists, igoring.")
+        log.info(f"No ingestor with id {ingestor_id} exists, ignoring.")
         return
     ingestor.update_document(document_id)
     log.info("Done")
