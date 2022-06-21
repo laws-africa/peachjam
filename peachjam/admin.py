@@ -9,10 +9,9 @@ from django.utils.text import capfirst
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from peachjam.forms import RelationshipForm, IngestorForm
+from peachjam.forms import IngestorForm, RelationshipForm
 from peachjam.models import (
     CitationLink,
-    AdapterSettings,
     DocumentTopic,
     Image,
     Ingestor,
@@ -25,7 +24,6 @@ from peachjam.models import (
 )
 
 admin.site.register([Image, Locality, CitationLink])
-admin.site.register([Image, Locality])
 
 
 class SourceFileFilter(admin.SimpleListFilter):
@@ -178,6 +176,7 @@ class PredicateAdmin(admin.ModelAdmin):
     search_fields = ("name", "verb")
     prepopulated_fields = {"slug": ("name",)}
 
+
 class IngestorSettingInline(admin.TabularInline):
     model = IngestorSetting
     extra = 1
@@ -188,4 +187,3 @@ class IngestorAdmin(admin.ModelAdmin):
     inlines = [IngestorSettingInline]
     readonly_fields = ("last_refreshed_at",)
     form = IngestorForm
-

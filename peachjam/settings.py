@@ -41,7 +41,6 @@ ALLOWED_HOSTS = ["*"]
 
 
 INSTALLED_APPS = [
-    "background_task",
     "peachjam.apps.PeachJamConfig",
     "peachjam_search.apps.PeachjamSearchConfig",
     "peachjam_api.apps.PeachjamApiConfig",
@@ -65,6 +64,7 @@ INSTALLED_APPS = [
     "sass_processor",
     "import_export",
     "treebeard",
+    "background_task",
 ]
 
 MIDDLEWARE = [
@@ -338,8 +338,6 @@ LOGGING = {
         }
     },
 }
-
-MAX_ATTEMPTS = 1
 
 
 if DEBUG:
