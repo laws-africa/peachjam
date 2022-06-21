@@ -1,10 +1,14 @@
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.generic import DetailView, TemplateView, View
 
 from africanlii.registry import registry
 from peachjam.docx import convert_docx_to_pdf
 from peachjam.models import CoreDocument
+
+CACHE_SECONDS = 86400
 
 
 class HomePageView(TemplateView):
@@ -55,3 +59,7 @@ class DocumentSourcePDFView(DocumentSourceView):
                 filename=self.object.source_file.filename,
             )
         raise Http404
+
+    @method_decorator(cache_page(CACHE_SECONDS))
+    def dispatch(self, request, *args, **kwargs):
+        return super(DocumentSourcePDFView, self).dispatch(request, *args, **kwargs)
