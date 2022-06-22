@@ -46,7 +46,7 @@ class IndigoAdapter(Adapter):
         return [d["url"] for d in updated_docs_list]
 
     def get_doc_list(self):
-        return self.client_get(self.url).json()["results"][:2]
+        return self.client_get(self.url).json()["results"]
 
     def get_updated_documents(self, last_refreshed):
         if last_refreshed is None:
@@ -63,23 +63,28 @@ class IndigoAdapter(Adapter):
         from languages_plus.models import Language
 
         from africanlii.models import Legislation
-        from peachjam.models import Locality
+        from peachjam.models import Locality, Work
 
         logger.info(f"Updating document ... {url}")
 
         document = self.client_get(f"{url}.json").json()
+        frbr_uri = document["frbr_uri"]
+        title = document["title"]
         expression_frbr_uri = document["expression_frbr_uri"]
         toc_json = self.get_toc_json(url)
         content_html = self.client_get(url + ".html").text
         jurisdiction = Country.objects.get(iso__iexact=document["country"])
         language = Language.objects.get(iso_639_3__iexact=document["language"])
         locality = Locality.objects.get(code=document["locality"])
+        work, _ = Work.objects.update_or_create(
+            frbr_uri=frbr_uri, defaults={"title": title}
+        )
 
         field_data = {
-            "title": document["title"],
+            "title": title,
             "created_at": document["created_at"],
             "updated_at": document["updated_at"],
-            "work_frbr_uri": document["frbr_uri"],
+            "work_frbr_uri": frbr_uri,
             "date": document["expression_date"],
             "content_html_is_akn": True,
             "source_url": document["publication_document"]["url"]
@@ -91,9 +96,10 @@ class IndigoAdapter(Adapter):
             "language": language,
             "toc_json": toc_json,
             "content_html": content_html,
+            "work": work,
         }
 
-        doc, created = Legislation.objects.update_or_create(
+        doc, _ = Legislation.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri, defaults={**field_data}
         )
         if document["publication_document"]:

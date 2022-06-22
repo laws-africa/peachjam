@@ -16,7 +16,7 @@ def update_document(ingestor_id, document_id):
         log.info(f"No ingestor with id {ingestor_id} exists, ignoring.")
         return
     ingestor.update_document(document_id)
-    log.info("Done")
+    log.info("Update document done")
 
 
 @background(remove_existing_tasks=True)
@@ -28,4 +28,4 @@ def run_ingestors():
     for ingestor in Ingestor.objects.all():
         ingestor.check_for_updates()
 
-    log.info("Done")
+    log.info("Running ingestors done")

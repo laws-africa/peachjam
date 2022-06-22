@@ -1,8 +1,7 @@
 from django import forms
 
-from peachjam.models import CoreDocument, Relationship, Work, Ingestor
+from peachjam.models import CoreDocument, Ingestor, Relationship, Work
 from peachjam.plugins import plugins
-
 
 
 def work_choices():
@@ -24,6 +23,7 @@ class RelationshipForm(forms.ModelForm):
 
     def clean_object_work(self):
         return Work.objects.get(pk=self.cleaned_data["object_work"])
+
 
 def adapter_choices():
     return [(key, p.name) for key, p in plugins.registry["ingestor-adapter"].items()]
