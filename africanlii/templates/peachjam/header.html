@@ -62,7 +62,7 @@
       <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/judgments/'%} active {% endifequal%}" href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
+            <a class="nav-link {% ifequal request.path '/judgments/'%} active {% endifequal%}" href="{% url 'judgment_list' %}">{% trans 'Decisions' %}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link {% ifequal request.path '/generic_documents/'%} active {% endifequal%}" href="{% url 'generic_document_list' %}">{% trans 'AU Documents' %}</a>
@@ -78,19 +78,22 @@
           </li>
         </ul>
 
-        <form method="get" action="/search/">
-          <div class="input-group">
-            <input type="text" class="form-control"
-                   placeholder="Search documents"
-                   aria-label="Search documents"
-                   aria-describedby="button-addon2"
-                   name="q"
-            >
-            <button class="btn btn-dark" type="submit" id="button-addon2">
-              <i class="bi bi-search text-white"></i>
-            </button>
-          </div>
-        </form>
+        {% if request.path == '/' %}
+        {% else %}
+          <form method="get" action="/search/">
+            <div class="input-group">
+              <input type="text" class="form-control"
+              placeholder="Search documents"
+              aria-label="Search documents"
+              aria-describedby="button-addon2"
+              name="q"
+              >
+              <button class="btn btn-dark" type="submit" id="button-addon2">
+                <i class="bi bi-search text-white"></i>
+              </button>
+            </div>
+          </form>
+        {% endif %}
 
         {% if user.is_authenticated %}
           <ul class="navbar-nav">

@@ -6,28 +6,30 @@
 {% block page-content %}
 <section class="pb-5 pt-5">
   <div class="container">
-    <p class="lead">
-      {% blocktrans %}
+    <p class="display-6 text-center">
+      {% blocktrans trimmed %}
         We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
-        with and understand the African Union agenda. Search through {{ documents_count }} AU documents on the AfricanLII platform
+        with and understand the African Union agenda.
+      {% endblocktrans %}
+    </p>
+    <p class="display-6 text-center">
+      {% blocktrans trimmed %}
+        Search through {{ documents_count }} AU documents on the AfricanLII platform.
       {% endblocktrans %}
     </p>
 
-    <div class="row">
-      <div class="col col-lg-6 col-sm-12">
-        <form method="get" action="/search/">
-          <div class="input-group">
-            <input type="text" class="form-control"
-                   placeholder="Search documents"
-                   aria-label="Search documents"
-                   aria-describedby="button-addon2"
-                   name="q"
-            >
-            <button class="btn btn-dark" type="submit" id="button-addon2">
-              <i class="bi bi-search text-white"></i>
-            </button>
-          </div>
-        </form>
+    <div class="row mt-5">
+        <div class="col-md-9 mx-auto">
+          <form method="get" action="/search/" class="d-flex">
+              <input type="text" class="form-control form-control-lg flex-grow-1"
+                    placeholder="Search documents"
+                    aria-label="Search documents"
+                    aria-describedby="button-addon2"
+                    autofocus
+                    name="q"
+              >
+              <input type="submit" class="btn btn-primary ms-2" value="Search">
+          </form>
       </div>
     </div>
   </div>
