@@ -1,10 +1,12 @@
 import logging
+import re
 from tempfile import NamedTemporaryFile
 
 import magic
 import requests
 from dateutil import parser
 from django.core.files import File
+from django.utils.text import slugify
 
 from peachjam.plugins import plugins
 
@@ -13,13 +15,7 @@ logger = logging.getLogger(__name__)
 
 class Adapter:
     def __init__(self, settings):
-        self.client = requests.session()
-        self.client.headers.update(
-            {
-                "Authorization": f"Token {settings['token']}",
-            }
-        )
-        self.url = settings["url"]
+        self.settings = settings
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -38,6 +34,16 @@ class Adapter:
 
 @plugins.register("ingestor-adapter")
 class IndigoAdapter(Adapter):
+    def __init__(self, settings):
+        super().__init__(settings)
+        self.client = requests.session()
+        self.client.headers.update(
+            {
+                "Authorization": f"Token {self.settings['token']}",
+            }
+        )
+        self.url = self.settings["url"]
+
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
         of document identifiers (expression FRBR URIs) which must be updated.
@@ -102,8 +108,7 @@ class IndigoAdapter(Adapter):
         doc, _ = Legislation.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri, defaults={**field_data}
         )
-        if document["publication_document"]:
-            self.download_source_file(document["publication_document"], doc)
+        self.download_source_file(f"{url}.pdf", doc, title)
 
     def client_get(self, url):
         r = self.client.get(url)
@@ -111,34 +116,32 @@ class IndigoAdapter(Adapter):
         return r
 
     def get_toc_json(self, url):
-        def remove_sub_paragraph(d):
-            for k, v in d.items():
-                if (k == "type" and v == "paragraph") or (
-                    k == "basic_unit" and v is True
-                ):
-                    d["children"] = []
-                elif isinstance(v, dict):
-                    remove_sub_paragraph(v)
-                elif isinstance(v, list):
-                    for i in v:
-                        if isinstance(i, dict):
-                            remove_sub_paragraph(i)
+        def remove_subparagraph(d):
+            if d["type"] == "paragraph" or d["basic_unit"]:
+                d["children"] = []
+            else:
+                for kid in d["children"]:
+                    remove_subparagraph(kid)
 
         toc_json = self.client_get(url + "/toc.json").json()["toc"]
         for i in toc_json:
-            remove_sub_paragraph(i)
+            remove_subparagraph(i)
         return toc_json
 
-    def download_source_file(self, publication_document, doc):
+    def download_source_file(self, url, doc, title):
         from peachjam.models import SourceFile
 
-        filename = publication_document["filename"]
-        source_url = publication_document["url"]
-
-        logger.info(f"Downloading source file {filename}")
+        logger.info(f"Downloading source file from {url}")
 
         with NamedTemporaryFile() as f:
-            r = self.client_get(source_url)
+            r = self.client_get(url)
+            try:
+                # sometimes this header is not present
+                d = r.headers["Content-Disposition"]
+                filename = re.findall("filename=(.+)", d)[0]
+            except KeyError:
+                filename = f"{slugify(title)}.pdf"
+
             f.write(r.content)
 
             SourceFile.objects.update_or_create(

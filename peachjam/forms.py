@@ -30,7 +30,7 @@ def adapter_choices():
 
 
 class IngestorForm(forms.ModelForm):
-    adapter = forms.ChoiceField(choices=adapter_choices())
+    adapter = forms.ChoiceField(choices=adapter_choices)
     last_refreshed_at = forms.DateTimeField(required=False)
     name = forms.CharField(max_length=255)
 
