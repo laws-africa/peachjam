@@ -1,5 +1,7 @@
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.generic import DetailView, TemplateView, View
 
 from africanlii.registry import registry
@@ -55,3 +57,8 @@ class DocumentSourcePDFView(DocumentSourceView):
                 filename=self.object.source_file.filename,
             )
         raise Http404
+
+    
+    @method_decorator(cache_page(60 * 60 * 24))
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
