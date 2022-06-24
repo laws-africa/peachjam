@@ -60,4 +60,4 @@ class DocumentSourcePDFView(DocumentSourceView):
 
     @method_decorator(cache_page(60 * 60 * 24))
     def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
+        return super(DocumentSourcePDFView, self).dispatch(request, *args, **kwargs)
