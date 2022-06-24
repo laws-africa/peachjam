@@ -55,4 +55,3 @@ class DocumentSourcePDFView(DocumentSourceView):
                 filename=self.object.source_file.filename,
             )
         raise Http404
-
