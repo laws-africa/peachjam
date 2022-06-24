@@ -1,3 +1,4 @@
 # flake8: noqa
-from .generic_document import *
+from peachjam.models.generic_document import *
+
 from .judgment import *
