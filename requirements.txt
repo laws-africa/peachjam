@@ -24,7 +24,7 @@ django-import-export==2.8.0
 django-languages-plus==1.1.1
 djangorestframework==3.13.1
 django-sass-processor==1.1
-git+https://github.com/laws-africa/django-sass-processor-dart-sass.git@e1abd7176020da8027285cdbafef2b5c01d6bbff#egg=django-sass-processor-dart-sass
+git+https://github.com/laws-africa/django-sass-processor-dart-sass.git@fae05068635e58a20660ec4aedbc40e99787fe6a#egg=django-sass-processor-dart-sass
 django-storages==1.12.3
 django-treebeard==4.5.1
 djangorestframework==3.13.1
