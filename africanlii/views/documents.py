@@ -58,7 +58,6 @@ class DocumentSourcePDFView(DocumentSourceView):
             )
         raise Http404
 
-    
     @method_decorator(cache_page(60 * 60 * 24))
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
