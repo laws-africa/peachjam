@@ -1,18 +1,7 @@
 from django.db import models
 
 from peachjam.models import CoreDocument
-
-
-class AuthoringBody(models.Model):
-    name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name_plural = "Authoring bodies"
-
-    def __str__(self):
-        return self.name
+from peachjam.models.author import Author
 
 
 class DocumentNature(models.Model):
@@ -25,7 +14,7 @@ class DocumentNature(models.Model):
 
 class GenericDocument(CoreDocument):
     authoring_body = models.ForeignKey(
-        AuthoringBody, on_delete=models.PROTECT, null=False, blank=False
+        Author, on_delete=models.PROTECT, null=False, blank=False
     )
     nature = models.ForeignKey(
         DocumentNature, on_delete=models.PROTECT, null=False, blank=False
@@ -41,7 +30,7 @@ class GenericDocument(CoreDocument):
 
 class LegalInstrument(CoreDocument):
     authoring_body = models.ForeignKey(
-        AuthoringBody, on_delete=models.PROTECT, null=False, blank=False
+        Author, on_delete=models.PROTECT, null=False, blank=False
     )
     nature = models.ForeignKey(
         DocumentNature, on_delete=models.PROTECT, null=False, blank=False
