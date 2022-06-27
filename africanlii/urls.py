@@ -43,14 +43,9 @@ urlpatterns = [
         name="document_source",
     ),
     path(
-        "courts/<int:pk>/",
-        views.CourtListView.as_view(),
-        name="court_list",
-    ),
-    path(
         "authors/<int:pk>/",
-        views.AuthoringBodyListView.as_view(),
-        name="author_list",
+        views.AuthorListView.as_view(),
+        name="authors",
     ),
     path(
         "documents<path:expression_frbr_uri>/source.pdf",

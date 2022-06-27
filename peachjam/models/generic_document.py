@@ -13,7 +13,7 @@ class DocumentNature(models.Model):
 
 
 class GenericDocument(CoreDocument):
-    authoring_body = models.ForeignKey(
+    author = models.ForeignKey(
         Author, on_delete=models.PROTECT, null=False, blank=False
     )
     nature = models.ForeignKey(
@@ -29,7 +29,7 @@ class GenericDocument(CoreDocument):
 
 
 class LegalInstrument(CoreDocument):
-    authoring_body = models.ForeignKey(
+    author = models.ForeignKey(
         Author, on_delete=models.PROTECT, null=False, blank=False
     )
     nature = models.ForeignKey(

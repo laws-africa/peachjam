@@ -2,9 +2,8 @@ from django.contrib import admin
 from import_export.admin import ImportMixin
 
 from africanlii.models import (
-    AuthoringBody,
+    Author,
     CaseNumber,
-    Court,
     DocumentNature,
     GenericDocument,
     Judge,
@@ -20,8 +19,7 @@ from .resources import GenericDocumentResource, JudgmentResource
 
 admin.site.register(
     [
-        AuthoringBody,
-        Court,
+        Author,
         DocumentNature,
         Judge,
         JudgmentMediaSummaryFile,

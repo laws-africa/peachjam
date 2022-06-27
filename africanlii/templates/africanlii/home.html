@@ -35,27 +35,13 @@
   </div>
 </section>
 
-<section class="pb-5 pt-5 bg-light">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Courts' %}</h2>
-    <div class="row">
-      {% for court in courts %}
-        <div class="col-md-6 col-sm-12">
-            <input type="hidden" value="court">
-            <a href="{% url 'court_list' court.id %}">{{ court.name }}</a>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
 <section class="pb-5 pt-5">
   <div class="container">
     <h2 class="mb-4 heading-underlined">{% trans 'Authors' %}</h2>
     <div class="row">
-      {% for authoring_body in authoring_bodies %}
+      {% for author in authors %}
         <div class="col-md-6 col-sm-12">
-            <a href="{% url 'author_list' authoring_body.id %}">{{ authoring_body.name }}</a>
+            <a href="{% url 'authors' author.id %}">{{ author.name }}</a>
         </div>
       {% endfor %}
     </div>

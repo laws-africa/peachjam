@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
 from africanlii.forms import BaseDocumentFilterForm
-from africanlii.models import AuthoringBody, Court
+from africanlii.models import Author
 from peachjam.models import CitationLink, CoreDocument, Predicate, Relationship
 from peachjam_api.serializers import (
     CitationLinkSerializer,
@@ -23,8 +23,8 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
     def get_context_data(self, **kwargs):
         context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
         years = list(set(self.model.objects.values_list("date__year", flat=True)))
-        courts = list(Court.objects.values_list("name", flat=True))
-        authoring_bodies = list(AuthoringBody.objects.values_list("name", flat=True))
+        courts = list(Author.objects.values_list("name", flat=True))
+        authoring_bodies = list(Author.objects.values_list("name", flat=True))
 
         context["facet_data"] = {
             "years": years,
