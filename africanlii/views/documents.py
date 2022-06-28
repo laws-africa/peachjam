@@ -56,8 +56,5 @@ class DocumentSourcePDFView(DocumentSourceView):
                 file = open(f"{temp_dir.name}/{filename}", "rb")
             else:
                 file = self.object.source_file.file.open()
-            return FileResponse(
-                file,
-                filename=self.object.source_file.filename,
-            )
+            return view_attachment(file)
         raise Http404
