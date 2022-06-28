@@ -16,10 +16,6 @@ class DocumentList {
       if (window.location.href.includes('/legislation/')) {
         authors = [];
       }
-      // // Authoring body facet appears every list page except /judgments/ and /legislation/
-      // if (!['/judgments/', '/legislation/'].some(value => window.location.href.includes(value))) {
-      //   authors = JSON.parse(facetDataJsonElement.textContent).authors;
-      // }
     }
     createApp(ListFacets, {
       alphabet,
