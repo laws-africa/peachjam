@@ -39,7 +39,7 @@ urlpatterns = [
     ),
     path(
         "documents<path:expression_frbr_uri>/source",
-        cache_page(60 * 60 * 6)(views.DocumentSourceView.as_view()),
+        cache_page(60 * 60 * 24)(views.DocumentSourceView.as_view()),
         name="document_source",
     ),
     path(
@@ -54,7 +54,7 @@ urlpatterns = [
     ),
     path(
         "documents<path:expression_frbr_uri>/source.pdf",
-        cache_page(60 * 60 * 6)(views.DocumentSourcePDFView.as_view()),
+        cache_page(60 * 60 * 24)(views.DocumentSourcePDFView.as_view()),
         name="document_source_pdf",
     ),
     path("feeds/judgments.xml", JudgmentAtomSiteNewsFeed(), name="judgment_feed"),
