@@ -9,15 +9,14 @@ class BaseDocumentFilterForm(forms.Form):
     alphabet = forms.CharField(required=False)
     year = forms.CharField(required=False)
     court = forms.CharField(required=False)
-    authoring_body = forms.CharField(required=False)
+    author = forms.CharField(required=False)
     doc_type = forms.CharField(required=False)
 
     def filter_queryset(self, queryset):
 
         year = self.cleaned_data.get("year")
         alphabet = self.cleaned_data.get("alphabet")
-        court = self.cleaned_data.get("court")
-        authoring_body = self.cleaned_data.get("authoring_body")
+        author = self.cleaned_data.get("author")
         doc_type = self.cleaned_data.get("doc_type")
 
         if year:
@@ -26,11 +25,9 @@ class BaseDocumentFilterForm(forms.Form):
         if alphabet:
             queryset = queryset.filter(title__istartswith=alphabet)
 
-        if court:
-            queryset = queryset.filter(court__name=court)
-
-        if authoring_body:
-            queryset = queryset.filter(authoring_body__name__iexact=authoring_body)
+        if author:
+            print(queryset)
+            queryset = queryset.filter(author__name__iexact=author)
 
         if doc_type:
             queryset = queryset.filter(doc_type=doc_type)

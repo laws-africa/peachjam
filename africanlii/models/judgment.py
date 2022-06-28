@@ -27,7 +27,7 @@ class MatterType(models.Model):
 
 
 class Judgment(CoreDocument):
-    court = models.ForeignKey(Author, on_delete=models.PROTECT, null=True, blank=True)
+    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=True, blank=True)
     judges = models.ManyToManyField(Judge, blank=True)
     headnote_holding = models.TextField(blank=True)
     additional_citations = models.TextField(blank=True)

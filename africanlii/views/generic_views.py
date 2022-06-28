@@ -2,7 +2,6 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
 from africanlii.forms import BaseDocumentFilterForm
-from africanlii.models import Author
 from africanlii.utils import lowercase_alphabet
 from peachjam.models import CitationLink, CoreDocument, Predicate, Relationship
 from peachjam_api.serializers import (
@@ -23,8 +22,17 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
 
     def get_context_data(self, **kwargs):
         context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
+
         years = list(set(self.model.objects.values_list("date__year", flat=True)))
-        authors = list(Author.objects.values_list("name", flat=True))
+
+        object_doc_type = self.model.objects.values_list("doc_type", flat=True)
+        if "legislation" in object_doc_type:
+            # legislation docs have no associated authors
+            authors = []
+        else:
+            authors = list(
+                set(self.model.objects.values_list("author__name", flat=True))
+            )
 
         context["facet_data"] = {
             "years": years,

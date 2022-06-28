@@ -12,10 +12,10 @@ class DocumentList {
       docTypes = JSON.parse(facetDataJsonElement.textContent).doc_types;
       authors = JSON.parse(facetDataJsonElement.textContent).authors;
 
-      // // Court facet only appears on the judgments page
-      // if (window.location.href.includes('/judgments/')) {
-      //   authors = JSON.parse(facetDataJsonElement.textContent).authors;
-      // }
+      // Treaties and protocols don't have associated authors
+      if (window.location.href.includes('/legislation/')) {
+        authors = [];
+      }
       // // Authoring body facet appears every list page except /judgments/ and /legislation/
       // if (!['/judgments/', '/legislation/'].some(value => window.location.href.includes(value))) {
       //   authors = JSON.parse(facetDataJsonElement.textContent).authors;
