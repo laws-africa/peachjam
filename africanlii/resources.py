@@ -10,8 +10,9 @@ from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from languages_plus.models import Language
 
 from africanlii.models import (
-    Author,
+    AuthoringBody,
     CaseNumber,
+    Court,
     DocumentNature,
     GenericDocument,
     Judge,
@@ -84,7 +85,7 @@ class GenericDocumentResource(BaseDocumentResource):
     authoring_body = fields.Field(
         column_name="authoring_body",
         attribute="authoring_body",
-        widget=ForeignKeyWidget(Author, field="name"),
+        widget=ForeignKeyWidget(AuthoringBody, field="name"),
     )
     nature = fields.Field(
         column_name="nature",
@@ -98,14 +99,14 @@ class GenericDocumentResource(BaseDocumentResource):
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
         DocumentNature.objects.get_or_create(name=row["nature"])
-        Author.objects.get_or_create(name=row["authoring_body"])
+        AuthoringBody.objects.get_or_create(name=row["authoring_body"])
 
 
 class JudgmentResource(BaseDocumentResource):
     court = fields.Field(
         column_name="court",
         attribute="court",
-        widget=ForeignKeyWidget(Author, field="code"),
+        widget=ForeignKeyWidget(Court, field="code"),
     )
     judges = fields.Field(
         column_name="judges",
@@ -119,7 +120,7 @@ class JudgmentResource(BaseDocumentResource):
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
         row["court"] = row["court_obj"]["code"]
-        Author.objects.get_or_create(
+        Court.objects.get_or_create(
             code=row["court_obj"]["code"],
             defaults={
                 "name": row["court_obj"]["name"],

@@ -61,16 +61,16 @@
         </div>
       </li>
       <li
-        v-if="authoringBodies.length"
+        v-if="authors.length"
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>Authoring Body</strong>
+          <strong>Authors</strong>
           <div class="d-flex align-items-center">
             <a
-              v-if="getUrlParamValue('authoring_body').length"
+              v-if="getUrlParamValue('author').length"
               href="#"
-              @click.prevent="clearFacet('authoring_body')"
+              @click.prevent="clearFacet('author')"
             >
               Clear
             </a>
@@ -82,24 +82,24 @@
         </div>
         <div class="facets-scrollable">
           <div
-            v-for="(authoringBody, index) in sortAlphabetically(authoringBodies)"
+            v-for="(author, index) in sortAlphabetically(authors)"
             :key="index"
             class="d-flex justify-content-between align-items-center"
           >
             <div class="form-check">
               <input
-                :id="authoringBody"
+                :id="author"
                 class="form-check-input"
                 type="radio"
-                name="authoring_body"
-                :value="authoringBody"
-                :checked="inputChecked('authoring_body', authoringBody)"
+                name="author"
+                :value="author"
+                :checked="inputChecked('author', author)"
               >
               <label
                 class="form-check-label"
-                :for="authoringBody"
+                :for="author"
               >
-                {{ authoringBody }}
+                {{ author }}
               </label>
             </div>
           </div>
@@ -242,7 +242,7 @@
 export default {
   name: 'ListFacets',
   props: {
-    authoringBodies: {
+    authors: {
       type: Array,
       default: () => []
     },
@@ -271,7 +271,7 @@ export default {
   },
   computed: {
     showClearAllFilter () {
-      return ['alphabet', 'year', 'authoring_body', 'court'].some(key => this.getUrlParamValue(key).length);
+      return ['alphabet', 'year', 'author', 'court'].some(key => this.getUrlParamValue(key).length);
     }
   },
   methods: {

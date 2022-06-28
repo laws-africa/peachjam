@@ -3,6 +3,7 @@ from django.views.generic import DetailView, ListView
 
 from africanlii.forms import BaseDocumentFilterForm
 from africanlii.models import Author
+from africanlii.utils import lowercase_alphabet
 from peachjam.models import CitationLink, CoreDocument, Predicate, Relationship
 from peachjam_api.serializers import (
     CitationLinkSerializer,
@@ -23,41 +24,12 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
     def get_context_data(self, **kwargs):
         context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
         years = list(set(self.model.objects.values_list("date__year", flat=True)))
-        courts = list(Author.objects.values_list("name", flat=True))
-        authoring_bodies = list(Author.objects.values_list("name", flat=True))
+        authors = list(Author.objects.values_list("name", flat=True))
 
         context["facet_data"] = {
             "years": years,
-            "courts": courts,
-            "authoring_bodies": authoring_bodies,
-            "alphabet": [
-                "a",
-                "b",
-                "c",
-                "d",
-                "e",
-                "f",
-                "g",
-                "h",
-                "i",
-                "j",
-                "k",
-                "l",
-                "m",
-                "n",
-                "o",
-                "p",
-                "q",
-                "r",
-                "s",
-                "t",
-                "u",
-                "v",
-                "w",
-                "x",
-                "y",
-                "z",
-            ],
+            "authors": authors,
+            "alphabet": lowercase_alphabet(),
         }
         return context
 

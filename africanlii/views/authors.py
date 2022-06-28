@@ -4,63 +4,38 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 
 from africanlii.forms import BaseDocumentFilterForm
-from africanlii.models import AuthoringBody, Court
+from africanlii.models import Author
+from africanlii.utils import lowercase_alphabet
 from peachjam.models import CoreDocument
 
 
 def add_facet_data_to_context(years, doc_types):
-    return {
-        "years": years,
-        "doc_types": doc_types,
-        "alphabet": [
-            "a",
-            "b",
-            "c",
-            "d",
-            "e",
-            "f",
-            "g",
-            "h",
-            "i",
-            "j",
-            "k",
-            "l",
-            "m",
-            "n",
-            "o",
-            "p",
-            "q",
-            "r",
-            "s",
-            "t",
-            "u",
-            "v",
-            "w",
-            "x",
-            "y",
-            "z",
-        ],
-    }
+    return {"years": years, "doc_types": doc_types, "alphabet": lowercase_alphabet()}
 
 
 class BaseAuthorListView(ListView):
     context_object_name = "documents"
     paginate_by = 20
+    model = Author
+    template_name = "africanlii/_author_detail.html"
 
 
-class CourtListView(BaseAuthorListView):
-    template_name = "africanlii/_court_detail.html"
-    model = Court
-
+class AuthorListView(BaseAuthorListView):
     def get_queryset(self):
         self.form = BaseDocumentFilterForm(self.request.GET)
         self.form.is_valid()
-        court = get_object_or_404(self.model, pk=self.kwargs["pk"])
-        queryset = court.judgment_set.all()
+        author = get_object_or_404(self.model, pk=self.kwargs["pk"])
+
+        queryset = (
+            CoreDocument.objects.filter(genericdocument__author=author)
+            | CoreDocument.objects.filter(legalinstrument__author=author)
+            | CoreDocument.objects.filter(judgment__author=author)
+        )
+
         return self.form.filter_queryset(queryset)
 
     def get_context_data(self, **kwargs):
-        context = super(CourtListView, self).get_context_data(**kwargs)
+        context = super(AuthorListView, self).get_context_data(**kwargs)
         court = get_object_or_404(self.model, pk=self.kwargs["pk"])
         years = list(set(court.judgment_set.values_list("date__year", flat=True)))
         doc_types = list(set(court.judgment_set.values_list("doc_type", flat=True)))
@@ -73,7 +48,6 @@ class CourtListView(BaseAuthorListView):
 
 class AuthoringBodyListView(BaseAuthorListView):
     template_name = "africanlii/_author_detail.html"
-    model = AuthoringBody
 
     def get_queryset(self):
         self.form = BaseDocumentFilterForm(self.request.GET)

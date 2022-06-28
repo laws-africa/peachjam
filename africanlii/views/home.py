@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.views.generic import TemplateView
 
 from africanlii.models import (
@@ -19,11 +20,12 @@ class HomePageView(TemplateView):
         recent_instruments = LegalInstrument.objects.order_by("-date")[:5]
         recent_legislation = Legislation.objects.order_by("-date")[:5]
         documents_count = GenericDocument.objects.count()
-        authors = Author.objects.exclude(
-            genericdocument__isnull=True,
-            legalinstrument__isnull=True,
-            judgment__isnull=True,
-        ).values("id", "name")
+
+        authors = Author.objects.filter(
+            Q(genericdocument__isnull=True)
+            | Q(judgment__isnull=True)
+            | Q(legalinstrument__isnull=True)
+        )
 
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents
