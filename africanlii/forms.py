@@ -6,9 +6,8 @@ class BaseDocumentFilterForm(forms.Form):
     using facets such as year and alphabetical title.
     """
 
-    alphabet = forms.CharField(required=False)
     year = forms.CharField(required=False)
-    court = forms.CharField(required=False)
+    alphabet = forms.CharField(required=False)
     author = forms.CharField(required=False)
     doc_type = forms.CharField(required=False)
 
@@ -26,7 +25,6 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(title__istartswith=alphabet)
 
         if author:
-            print(queryset)
             queryset = queryset.filter(author__name__iexact=author)
 
         if doc_type:
