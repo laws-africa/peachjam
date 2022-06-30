@@ -19,6 +19,7 @@ from peachjam.models import (
     Locality,
     MatterType,
     SourceFile,
+    Work,
 )
 
 from .download import download_source_file
@@ -34,6 +35,11 @@ class JurisdictionWidget(ForeignKeyWidget):
 
 
 class BaseDocumentResource(resources.ModelResource):
+    author = fields.Field(
+        column_name="author",
+        attribute="author",
+        widget=ForeignKeyWidget(Author, field="code"),
+    )
     language = fields.Field(
         attribute="language",
         widget=ForeignKeyWidget(Language, field="iso_639_3"),
@@ -61,6 +67,18 @@ class BaseDocumentResource(resources.ModelResource):
         row["language"] = frbr_uri.default_language
         row["jurisdiction"] = frbr_uri.country
         row["locality"] = frbr_uri.locality
+
+        work, _ = Work.objects.update_or_create(
+            frbr_uri=frbr_uri, defaults={"title": row["title"]}
+        )
+        row["work"] = work.id
+        row["author"] = row["author_obj"]["code"]
+
+        Author.objects.get_or_create(
+            code=row["author_obj"]["code"],
+            name=row["author_obj"]["name"],
+        )
+
         logger.info(f"Importing row: {row}")
 
     def after_save_instance(self, instance, using_transactions, dry_run):
@@ -82,11 +100,6 @@ class BaseDocumentResource(resources.ModelResource):
 
 
 class GenericDocumentResource(BaseDocumentResource):
-    authoring_body = fields.Field(
-        column_name="authoring_body",
-        attribute="authoring_body",
-        widget=ForeignKeyWidget(Author, field="name"),
-    )
     nature = fields.Field(
         column_name="nature",
         attribute="nature",
@@ -99,15 +112,9 @@ class GenericDocumentResource(BaseDocumentResource):
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
         DocumentNature.objects.get_or_create(name=row["nature"])
-        Author.objects.get_or_create(name=row["authoring_body"])
 
 
 class JudgmentResource(BaseDocumentResource):
-    court = fields.Field(
-        column_name="court",
-        attribute="court",
-        widget=ForeignKeyWidget(Author, field="code"),
-    )
     judges = fields.Field(
         column_name="judges",
         attribute="judges",
@@ -119,14 +126,6 @@ class JudgmentResource(BaseDocumentResource):
 
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
-        row["court"] = row["court_obj"]["code"]
-        Author.objects.get_or_create(
-            code=row["court_obj"]["code"],
-            defaults={
-                "name": row["court_obj"]["name"],
-                "country": Country.objects.get(iso__iexact=row["jurisdiction"]),
-            },
-        )
         if row["judges"]:
             for judge in list(map(str.strip, row["judges"].split("|"))):
                 Judge.objects.get_or_create(name=judge)

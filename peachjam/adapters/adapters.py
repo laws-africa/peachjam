@@ -68,8 +68,7 @@ class IndigoAdapter(Adapter):
         from countries_plus.models import Country
         from languages_plus.models import Language
 
-        from africanlii.models import Legislation
-        from peachjam.models import Locality, Work
+        from peachjam.models import Legislation, Locality, Work
 
         logger.info(f"Updating document ... {url}")
 

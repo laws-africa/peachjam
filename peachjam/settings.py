@@ -99,7 +99,7 @@ TEMPLATES = [
 ]
 
 PEACHJAM = {
-    "APP_NAME": os.environ.get("APP_NAME", "Peachjam"),
+    "APP_NAME": os.environ.get("APP_NAME", "peachjam"),
     "SUPPORT_EMAIL": os.environ.get("SUPPORT_EMAIL"),
     "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
     "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),

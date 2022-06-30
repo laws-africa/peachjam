@@ -1,3 +1,4 @@
+from django.conf import settings
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from lxml import etree
@@ -36,12 +37,12 @@ class SearchableDocument(Document):
     judges = fields.TextField()
 
     # GenericDocument, LegalInstrument
-    authoring_body = fields.KeywordField()
+    author = fields.KeywordField()
     nature = fields.KeywordField()
 
     class Index:
         # TODO: make this configurable per website
-        name = "africanlii_documents"
+        name = settings.PEACHJAM["APP_NAME"]
 
     class Django:
         model = CoreDocument
@@ -71,9 +72,9 @@ class SearchableDocument(Document):
 
     def prepare_authoring_body(self, instance):
         if instance.doc_type == "generic_document":
-            return instance.genericdocument.authoring_body.name
+            return instance.genericdocument.author.name
         elif instance.doc_type == "legal_instrument":
-            return instance.legalinstrument.authoring_body.name
+            return instance.legalinstrument.author.name
 
     def prepare_nature(self, instance):
         if instance.doc_type == "generic_document":
