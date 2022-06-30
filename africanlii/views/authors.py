@@ -36,44 +36,15 @@ class AuthorListView(BaseAuthorListView):
         context = super(AuthorListView, self).get_context_data(**kwargs)
         author = get_object_or_404(self.model, pk=self.kwargs["pk"])
 
-        generic_doc_years = []
-        generic_document_doc_type = []
-        generic_docs = author.genericdocument_set.all()
-        if generic_docs.exists():
-            generic_doc_years = generic_docs.values_list("date__year", flat=True)
-            generic_document_doc_type = generic_docs.values_list("doc_type", flat=True)
-
-        legal_instrument_years = []
-        legal_instrument_doc_type = []
-        legal_instruments = author.legalinstrument_set.all()
-        if legal_instruments.exists():
-            legal_instrument_years = legal_instruments.values_list(
-                "date__year", flat=True
-            )
-            legal_instrument_doc_type = legal_instruments.values_list(
-                "doc_type", flat=True
-            )
-
-        judgment_years = []
-        judgment_doc_type = []
-        judgments = author.judgment_set.all()
-        if judgments.exists():
-            judgment_years = judgments.values_list("date__year", flat=True)
-            judgment_doc_type = judgments.values_list("doc_type", flat=True)
-
-        years = list(
-            set(
-                list(generic_doc_years)
-                + list(legal_instrument_years)
-                + list(judgment_years)
-            )
+        # Fetch the author's documents
+        docs = CoreDocument.objects.filter(
+            Q(genericdocument__author=author)
+            | Q(legalinstrument__author=author)
+            | Q(judgment__author=author)
         )
 
-        doc_types = (
-            list(generic_document_doc_type)
-            + list(legal_instrument_doc_type)
-            + list(judgment_doc_type)
-        )
+        years = list(set(docs.values_list("date__year", flat=True)))
+        doc_types = list(docs.values_list("doc_type", flat=True))
 
         context["author"] = author
         context["facet_data"] = add_facet_data_to_context(years, doc_types)

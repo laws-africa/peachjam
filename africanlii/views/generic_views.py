@@ -24,7 +24,7 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
         context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
 
         object_doc_type = self.model.objects.values_list("doc_type", flat=True)
-        # Legislation objects don't have an associated author
+        # Legislation objects don't have an associated author, hence empty authors list
         if not object_doc_type or "legislation" in object_doc_type:
             authors = []
         else:
