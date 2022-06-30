@@ -23,16 +23,16 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
     def get_context_data(self, **kwargs):
         context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
 
-        years = list(set(self.model.objects.values_list("date__year", flat=True)))
-
         object_doc_type = self.model.objects.values_list("doc_type", flat=True)
-        if "legislation" in object_doc_type:
-            # legislation docs have no associated authors
+        # Legislation objects don't have an associated author
+        if not object_doc_type or "legislation" in object_doc_type:
             authors = []
         else:
             authors = list(
                 set(self.model.objects.values_list("author__name", flat=True))
             )
+
+        years = list(set(self.model.objects.values_list("date__year", flat=True)))
 
         context["facet_data"] = {
             "years": years,

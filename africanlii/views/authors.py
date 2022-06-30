@@ -1,9 +1,10 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 
 from africanlii.forms import BaseDocumentFilterForm
 from africanlii.utils import lowercase_alphabet
-from peachjam.models import Author
+from peachjam.models import Author, CoreDocument
 
 
 def add_facet_data_to_context(years, doc_types):
@@ -23,16 +24,12 @@ class AuthorListView(BaseAuthorListView):
         self.form.is_valid()
         author = get_object_or_404(self.model, pk=self.kwargs["pk"])
 
-        if author.genericdocument_set.exists():
-            queryset = author.genericdocument_set.all()
+        queryset = CoreDocument.objects.filter(
+            Q(genericdocument__author=author)
+            | Q(legalinstrument__author=author)
+            | Q(judgment__author=author)
+        )
 
-        if author.legalinstrument_set.exists():
-            queryset = author.legalinstrument_set.all()
-
-        if author.judgment_set.exists():
-            queryset = author.judgment_set.all()
-
-        print(queryset)
         return self.form.filter_queryset(queryset)
 
     def get_context_data(self, **kwargs):
@@ -64,12 +61,13 @@ class AuthorListView(BaseAuthorListView):
             judgment_years = judgments.values_list("date__year", flat=True)
             judgment_doc_type = judgments.values_list("doc_type", flat=True)
 
-        years = (
-            list(generic_doc_years)
-            + list(legal_instrument_years)
-            + list(judgment_years)
+        years = list(
+            set(
+                list(generic_doc_years)
+                + list(legal_instrument_years)
+                + list(judgment_years)
+            )
         )
-        print(years)
 
         doc_types = (
             list(generic_document_doc_type)
