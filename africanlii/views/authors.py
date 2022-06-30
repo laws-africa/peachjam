@@ -2,8 +2,8 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 
 from africanlii.forms import BaseDocumentFilterForm
-from africanlii.models import Author
 from africanlii.utils import lowercase_alphabet
+from peachjam.models import Author
 
 
 def add_facet_data_to_context(years, doc_types):

@@ -2,8 +2,13 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from lxml import etree
 
-from africanlii.models import GenericDocument, Judgment, LegalInstrument, Legislation
-from peachjam.models import CoreDocument
+from peachjam.models import (
+    CoreDocument,
+    GenericDocument,
+    Judgment,
+    LegalInstrument,
+    Legislation,
+)
 
 
 @registry.register_document

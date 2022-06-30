@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.views.generic import TemplateView
 
-from africanlii.models import (
+from peachjam.models import (
     Author,
     GenericDocument,
     Judgment,

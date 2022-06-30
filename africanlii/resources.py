@@ -9,16 +9,17 @@ from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from languages_plus.models import Language
 
-from africanlii.models import (
+from peachjam.models import (
     Author,
     CaseNumber,
     DocumentNature,
     GenericDocument,
     Judge,
     Judgment,
+    Locality,
     MatterType,
+    SourceFile,
 )
-from peachjam.models import Locality, SourceFile
 
 from .download import download_source_file
 

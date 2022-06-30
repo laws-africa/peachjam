@@ -1,7 +1,8 @@
 from django.contrib import admin
 from import_export.admin import ImportMixin
 
-from africanlii.models import (
+from peachjam.admin import DocumentAdmin
+from peachjam.models import (
     Author,
     CaseNumber,
     DocumentNature,
@@ -13,7 +14,6 @@ from africanlii.models import (
     Legislation,
     MatterType,
 )
-from peachjam.admin import DocumentAdmin
 
 from .resources import GenericDocumentResource, JudgmentResource
 
