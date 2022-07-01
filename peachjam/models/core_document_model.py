@@ -110,7 +110,7 @@ class CoreDocument(models.Model):
 
         # ensure a matching work exists
         if self.work_frbr_uri and (
-            not self.work or self.work.frbr_uri != self.work_frbr_uri
+            not hasattr(self, "work") or self.work.frbr_uri != self.work_frbr_uri
         ):
             self.work, _ = Work.objects.get_or_create(
                 frbr_uri=self.work_frbr_uri, title=self.title
