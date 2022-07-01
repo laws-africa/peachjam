@@ -88,8 +88,35 @@ class DocumentAdmin(admin.ModelAdmin):
     inlines = [DocumentTopicInline, SourceFileInline]
     list_display = ("title", "date")
     search_fields = ("title", "date")
-    readonly_fields = ("expression_frbr_uri",)
+    readonly_fields = ("expression_frbr_uri", "work", "created_at", "updated_at")
     exclude = ("doc_type",)
+    date_hierarchy = "date"
+
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": [
+                    ("jurisdiction", "locality"),
+                    "title",
+                    "date",
+                    "language",
+                    "work_frbr_uri",
+                ]
+            },
+        ),
+        (None, {"fields": ["citation", "source_url"]}),
+        (
+            "Content",
+            {
+                "fields": [
+                    "content_html_is_akn",
+                    "content_html",
+                ]
+            },
+        ),
+        ("Advanced", {"classes": ("collapse",), "fields": ["toc_json"]}),
+    ]
 
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.model_name
