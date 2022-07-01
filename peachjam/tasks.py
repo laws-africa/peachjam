@@ -15,7 +15,13 @@ def update_document(ingestor_id, document_id):
     if not ingestor:
         log.info(f"No ingestor with id {ingestor_id} exists, ignoring.")
         return
-    ingestor.update_document(document_id)
+
+    try:
+        ingestor.update_document(document_id)
+    except Exception as e:
+        log.error("Error updating document", exc_info=e)
+        raise
+
     log.info("Update document done")
 
 

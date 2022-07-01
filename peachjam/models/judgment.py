@@ -1,20 +1,7 @@
-from countries_plus.models import Country
 from django.db import models
 
 from peachjam.models import CoreDocument, file_location
-
-
-class Court(models.Model):
-    name = models.CharField(max_length=255, null=False)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT)
-    code = models.CharField(max_length=255, null=False)
-
-    class Meta:
-        ordering = ["name"]
-        unique_together = ["name", "country"]
-
-    def __str__(self):
-        return f"{self.name}"
+from peachjam.models.author import Author
 
 
 class Judge(models.Model):
@@ -40,7 +27,7 @@ class MatterType(models.Model):
 
 
 class Judgment(CoreDocument):
-    court = models.ForeignKey(Court, on_delete=models.PROTECT, null=True, blank=True)
+    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=True, blank=True)
     judges = models.ManyToManyField(Judge, blank=True)
     headnote_holding = models.TextField(blank=True)
     additional_citations = models.TextField(blank=True)
