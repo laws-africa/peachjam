@@ -42,7 +42,7 @@ class SearchableDocument(Document):
 
     class Index:
         # TODO: make this configurable per website
-        name = settings.PEACHJAM["APP_NAME"]
+        name = settings.PEACHJAM["ES_INDEX"]
 
     class Django:
         model = CoreDocument
