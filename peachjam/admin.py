@@ -1,3 +1,5 @@
+import copy
+
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.http.response import FileResponse
@@ -6,24 +8,34 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.text import capfirst
+from import_export.admin import ImportMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
 from peachjam.forms import IngestorForm, RelationshipForm
 from peachjam.models import (
+    Author,
+    CaseNumber,
     CitationLink,
+    DocumentNature,
     DocumentTopic,
+    GenericDocument,
     Image,
     Ingestor,
     IngestorSetting,
+    Judge,
+    Judgment,
+    JudgmentMediaSummaryFile,
+    LegalInstrument,
+    Legislation,
     Locality,
+    MatterType,
     Predicate,
     Relationship,
     SourceFile,
     Taxonomy,
 )
-
-admin.site.register([Image, Locality, CitationLink])
+from peachjam.resources import GenericDocumentResource, JudgmentResource
 
 
 class SourceFileFilter(admin.SimpleListFilter):
@@ -188,13 +200,40 @@ class TaxonomyAdmin(TreeAdmin):
     readonly_fields = ("slug",)
 
 
-admin.site.register(Taxonomy, TaxonomyAdmin)
+class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
+    resource_class = GenericDocumentResource
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["author", "nature"])
 
 
-class CoreDocumentAdmin(admin.ModelAdmin):
-    inlines = [
-        SourceFileInline,
-    ]
+class LegalInstrumentAdmin(ImportMixin, DocumentAdmin):
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["author", "nature"])
+
+
+class LegislationAdmin(ImportMixin, DocumentAdmin):
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[3][1]["fields"].extend(["metadata_json"])
+    fieldsets[2][1]["classes"] = ("collapse",)
+
+
+class CaseNumberAdmin(admin.TabularInline):
+    model = CaseNumber
+    extra = 1
+    verbose_name = "Case number"
+    verbose_name_plural = "Case numbers"
+    readonly_fields = ["string"]
+    fields = ["matter_type", "number", "year"]
+
+
+class JudgmentAdmin(ImportMixin, DocumentAdmin):
+    resource_class = JudgmentResource
+    inlines = [CaseNumberAdmin] + DocumentAdmin.inlines
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["author", "judges"])
+    fieldsets[2][1]["fields"].extend(
+        ["headnote_holding", "additional_citations", "flynote"]
+    )
 
 
 @admin.register(Predicate)
@@ -214,3 +253,22 @@ class IngestorAdmin(admin.ModelAdmin):
     inlines = [IngestorSettingInline]
     readonly_fields = ("last_refreshed_at",)
     form = IngestorForm
+
+
+admin.site.register(
+    [
+        Image,
+        Locality,
+        CitationLink,
+        Author,
+        DocumentNature,
+        Judge,
+        JudgmentMediaSummaryFile,
+        MatterType,
+    ]
+)
+admin.site.register(Taxonomy, TaxonomyAdmin)
+admin.site.register(GenericDocument, GenericDocumentAdmin)
+admin.site.register(Legislation, LegislationAdmin)
+admin.site.register(LegalInstrument, LegalInstrumentAdmin)
+admin.site.register(Judgment, JudgmentAdmin)
