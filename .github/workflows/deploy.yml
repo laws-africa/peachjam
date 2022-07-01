@@ -6,17 +6,17 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to peachjam.staging.laws.africa
+    name: Deploy to agp.africanlii.org
     runs-on: ubuntu-latest
-    concurrency: peachjam.staging.laws.africa
+    concurrency: agp.africanlii.org
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
 
-    - name: git push to peachjam.staging.laws.africa
+    - name: git push to agp.africanlii.org
       uses: dokku/github-action@master
       with:
         ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-        git_remote_url: 'ssh://dokku@web2.laws.africa:22/peachjam'
+        git_remote_url: 'ssh://dokku@web2.laws.africa:22/agp'
         git_push_flags: '--force'
