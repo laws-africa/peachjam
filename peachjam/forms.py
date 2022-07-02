@@ -1,8 +1,10 @@
 import copy
 
 from django import forms
+from docpipe.pipeline import PipelineContext
 
 from peachjam.models import CoreDocument, Ingestor, Relationship, Work
+from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.plugins import plugins
 
 
@@ -56,13 +58,13 @@ class NewDocumentFormMixin:
         return super().save(commit)
 
     def process_upload_file(self, upload_file):
-        # TODO: .doc content type
-        if (
-            upload_file.content_type
-            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        ):
-            # TODO: read the uploaded file and extract its contents
-            self.instance.content_html = "contents of file"
+        if upload_file.content_type in DOC_MIMETYPES:
+            # pass the document through the word pipeline
+            context = PipelineContext(word_pipeline)
+            context.source_file = upload_file
+            word_pipeline(context)
+            # TODO: attachments
+            self.instance.content_html = context.html_text
 
     @classmethod
     def adjust_fieldsets(cls, fieldsets):
