@@ -65,7 +65,7 @@ class DocumentContent {
     if (navColumn && navOffCanvasElement && navContent) {
       this.navOffCanvas = new OffCanvas(navOffCanvasElement);
       if (this.navOffCanvas.body) {
-        this.navResponsiveContentTransporter = new ResponsiveContentTransporter(navColumn, navOffCanvasElement, navContent);
+        this.navResponsiveContentTransporter = new ResponsiveContentTransporter(navColumn, this.navOffCanvas.body, navContent);
       }
     }
 
