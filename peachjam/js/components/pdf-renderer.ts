@@ -21,12 +21,14 @@ class PdfRenderer {
   protected scrollListenerActive: boolean;
   protected pdfContentMarks: any[];
   private readonly pdfSize: string | undefined;
+  private tabContent: HTMLElement | null;
   constructor (root: HTMLElement) {
     this.root = root;
     this.pdf = root.dataset.pdf;
     this.pdfSize = root.dataset.pdfSize;
-    this.pdfContentWrapper = root.querySelector('.pdf-renderer__content');
-    this.previewPanelsContainer = root.querySelector('.previews__inner');
+    this.pdfContentWrapper = root.querySelector('.pdf-content');
+    this.tabContent = root.querySelector('.pdf-tab-content');
+    this.previewPanelsContainer = root.querySelector('.pdf-previews');
     this.scrollListenerActive = true;
     this.pdfContentMarks = [];
 
@@ -43,7 +45,7 @@ class PdfRenderer {
       this.root.removeAttribute('data-loading-progress');
       this.root.removeAttribute('data-is-loading');
 
-      const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-renderer__content__page'));
+      const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-content__page'));
       const previewPanels = Array.from(root.querySelectorAll('.preview-panel'));
       for (const previewPanel of previewPanels) {
         previewPanel.addEventListener('click', (e) => this.handlePreviewPanelClick(e));
@@ -57,8 +59,8 @@ class PdfRenderer {
               current = root.querySelector(`.preview-panel[data-page="${page.dataset.page}"]`);
               if (current) {
                 this.activatePreviewPanel(current);
-                if (this.previewPanelsContainer) {
-                  this.previewPanelsContainer.scrollTop = current.offsetTop - (current.offsetHeight * 2);
+                if (this.tabContent) {
+                  this.tabContent.scrollTop = current.offsetTop - (current.offsetHeight * 2);
                 }
               }
             }
@@ -81,7 +83,7 @@ class PdfRenderer {
 
   handlePreviewPanelClick (e: Event) {
     const targetPage = e.currentTarget && e.currentTarget instanceof HTMLElement
-      ? this.root.querySelector(`.pdf-renderer__content__page[data-page="${e.currentTarget.dataset.page}"]`)
+      ? this.root.querySelector(`.pdf-content__page[data-page="${e.currentTarget.dataset.page}"]`)
       : null;
     if (e.currentTarget) {
       this.activatePreviewPanel(e.currentTarget);
@@ -113,13 +115,13 @@ class PdfRenderer {
     const loadingTask = pdfjsLib.getDocument(this.pdf);
 
     loadingTask.onProgress = (data: { loaded: number }) => {
-      if(this.pdfSize) {
+      if (this.pdfSize) {
         /*
         * The progress bar represents the progress of two processes
         *  1) loading the pdf data (first 50%)
         *  2) creating the pdf associating html and inserting it into the DOM (last 50%)
         * */
-        this.root.setAttribute('data-loading-progress', `${data.loaded / parseInt(this.pdfSize)/2}`);
+        this.root.setAttribute('data-loading-progress', `${data.loaded / parseInt(this.pdfSize) / 2}`);
       }
     };
 
@@ -134,7 +136,7 @@ class PdfRenderer {
         const elementRendered = document.createElement('div');
         elementRendered.setAttribute('id', String(index + 1));
         elementRendered.dataset.page = String(index + 1);
-        elementRendered.classList.add('pdf-renderer__content__page');
+        elementRendered.classList.add('pdf-content__page');
         elementRendered.style.position = 'relative';
         const canvas = document.createElement('canvas');
         canvas.style.display = 'block';
@@ -186,7 +188,7 @@ class PdfRenderer {
           this.previewPanelsContainer.appendChild(panelPreview);
         }
         const currentLoadingProgress = this.root.getAttribute('data-loading-progress');
-        if(currentLoadingProgress) {
+        if (currentLoadingProgress) {
           const progressIncrement = 0.5 / pages.length;
           this.root.setAttribute('data-loading-progress', `${parseFloat(currentLoadingProgress) + progressIncrement}`);
         }
