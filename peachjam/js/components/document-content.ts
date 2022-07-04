@@ -24,64 +24,49 @@ class OffCanvas {
   }
 }
 
-/*
-* TODO:
-*  1 - Refactor class to something generic.perhaps ResponsiveContentTransporter
-*  2 - Seperate offcanvas logic from class
-* */
-class ColumnOffsetCanvasLinker {
-  private readonly offsetCanvasElement: HTMLElement;
-  private readonly content: HTMLElement;
-  private readonly column: HTMLElement;
-  public offsetCanvas: OffCanvas;
-  constructor (column: HTMLElement, content: HTMLElement, offsetCanvasElement: HTMLElement) {
-    this.column = column;
-    this.content = content;
-    this.offsetCanvasElement = offsetCanvasElement;
-    this.offsetCanvas = new OffCanvas(this.offsetCanvasElement);
-
-    const placeContent = (vw: number, content: HTMLElement, possibleTargets: {
-      column: HTMLElement,
-      offCanvasBody: HTMLElement
-    }) => {
+class ResponsiveContentTransporter {
+  constructor (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
+    const placeContent = (vw: number) => {
       // reference _variables.scss for grid-breakpoints
-      // Transport navigation content offcanvas on table/mobile view and nav column on desktop view
       if (vw < 992) {
-        possibleTargets.offCanvasBody.appendChild(content);
+        // transport content to mobile element on tablet/mobile view
+        mobileElement.appendChild(content);
       } else {
-        possibleTargets.column.appendChild(content);
+        // transport content to desktop element on desktop view
+        desktopElement.appendChild(content);
       }
     };
 
-    // place content initially
-    if (this.offsetCanvas.body) {
-      const possibleTargets = {
-        column: this.column,
-        offCanvasBody: this.offsetCanvas.body
-      };
+    const initialVw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    placeContent(initialVw);
 
-      const initialVw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-      placeContent(initialVw, this.content, possibleTargets);
-
-      window.visualViewport.addEventListener('resize', debounce(() => {
-        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-        placeContent(vw, this.content, possibleTargets);
-      }, 500));
-    }
+    window.visualViewport.addEventListener('resize', debounce(() => {
+      const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      placeContent(vw);
+    }, 300));
   }
 }
 
 class DocumentContent {
   protected root: HTMLElement;
   private pdf: PdfRenderer | undefined;
+  private navOffCanvas: OffCanvas | undefined;
+  private navResponsiveContentTransporter: ResponsiveContentTransporter | undefined;
+  private offCanvases: {};
+  private documentSearch: any;
   constructor (root: HTMLElement) {
     this.root = root;
+    this.navResponsiveContentTransporter = undefined;
+    this.offCanvases = {};
+
     const navColumn: HTMLElement | null = this.root.querySelector('#navigation-column');
     const navContent: HTMLElement | null = this.root.querySelector('#navigation-content .navigation__inner');
     const navOffCanvasElement: HTMLElement | null = this.root.querySelector('#navigation-offcanvas');
-
     if (navColumn && navOffCanvasElement && navContent) {
-      const instance = new ColumnOffsetCanvasLinker(navColumn, navContent, navOffCanvasElement);
+      this.navOffCanvas = new OffCanvas(navOffCanvasElement);
+      if (this.navOffCanvas.body) {
+        this.navResponsiveContentTransporter = new ResponsiveContentTransporter(navColumn, navOffCanvasElement, navContent);
+      }
     }
 
     // if pdf setup pdf renderer instance
@@ -96,10 +81,15 @@ class DocumentContent {
 
     const targetMountElement = this.root.querySelector('[data-doc-search]');
     if (targetMountElement) {
-      createApp(DocumentSearch, {
+      const component = createApp(DocumentSearch, {
         document,
         docType: root.getAttribute('data-display-type')
-      }).mount(targetMountElement);
+      });
+      this.documentSearch = component;
+      // this.documentSearch.$on('going-to-snippet', () => {
+      //
+      // });
+      component.mount(targetMountElement);
     }
   }
 }
