@@ -165,7 +165,6 @@ export default {
   flex-direction: column;
   height: 100%;
   padding: 1rem;
-  background-color: #f8f9fa;
 }
 
 .doc-search__results {
