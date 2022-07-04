@@ -1,9 +1,11 @@
 import copy
+from os.path import splitext
 
 from django import forms
+from django.core.files import File
 from docpipe.pipeline import PipelineContext
 
-from peachjam.models import CoreDocument, Ingestor, Relationship, Work
+from peachjam.models import CoreDocument, Ingestor, Relationship, SourceFile, Work
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.plugins import plugins
 
@@ -53,9 +55,10 @@ class NewDocumentFormMixin:
         self.fields["upload_file"] = forms.FileField(required=False)
 
     def save(self, commit=True):
-        if "upload_file" in self.cleaned_data:
+        obj = super().save(commit)
+        if self.cleaned_data.get("upload_file"):
             self.process_upload_file(self.cleaned_data["upload_file"])
-        return super().save(commit)
+        return obj
 
     def process_upload_file(self, upload_file):
         if upload_file.content_type in DOC_MIMETYPES:
@@ -65,6 +68,16 @@ class NewDocumentFormMixin:
             word_pipeline(context)
             # TODO: attachments
             self.instance.content_html = context.html_text
+
+        # store the uploaded file
+        self.instance.save()
+        upload_file.seek(0)
+        file_ext = splitext(upload_file.name)[1]
+        SourceFile(
+            document=self.instance,
+            file=File(upload_file, name=f"{self.instance.title[-250:]}{file_ext}"),
+            mimetype=upload_file.content_type,
+        ).save()
 
     @classmethod
     def adjust_fieldsets(cls, fieldsets):
