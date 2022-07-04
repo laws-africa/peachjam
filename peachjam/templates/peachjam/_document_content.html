@@ -1,148 +1,183 @@
 {% load peachjam %}
 {% load i18n %}
 
-<div data-component="DocumentContent">
-  {% if document.content_html %}
-    <div class="row">
-      <div class="col-lg-3 d-none d-lg-flex vh-100 position-sticky"
-           style="top:0; left: 0"
-      >
-        {% if document.content_html_is_akn %}
-        <div class="d-flex flex-column w-100">
-          <nav>
-            <div class="nav nav-tabs" id="nav-tab" role="tablist">
-              <button class="nav-link active"
-                      id="toc-tab"
-                      data-bs-toggle="tab"
-                      data-bs-target="#nav-toc"
-                      type="button"
-                      role="tab"
-                      aria-controls="nav-toc"
-                      aria-selected="true">
-                Table of contents
-              </button>
-              <button class="nav-link"
-                      id="nav-search-tab"
-                      data-bs-toggle="tab"
-                      data-bs-target="#nav-search"
-                      type="button"
-                      role="tab"
-                      aria-controls="nav-search"
-                      aria-selected="false">
-                Search
-              </button>
-            </div>
-          </nav>
-          <div class="tab-content flex-grow-1" id="nav-tabContent">
-            <div class="tab-pane fade show active h-100" id="nav-toc"
-                 role="tabpanel"
-                 aria-labelledby="toc-tab">
-              <aside class="toc">
-                <la-table-of-contents-controller
-                    items="{{ document.toc_json|jsonify }}"
-                    expand-all-btn-classes="btn btn-secondary btn-sm"
-                    collapse-all-btn-classes="btn btn-secondary btn-sm"
-                    title-filter-clear-btn-classes="btn btn-secondary btn-sm"
-                    search-filter-input-classes="form-control"
-                ></la-table-of-contents-controller>
-              </aside>
-            </div>
-            <div class="tab-pane fade h-100"
-                 id="nav-search" role="tabpanel"
-                 aria-labelledby="nav-search-tab"
-            >
-              <div id="akn-doc-search" class="h-100"></div>
-            </div>
-          </div>
-        </div>
-        {% else %}
-        <div class="w-100">
-          <div class="h-100" id="html-doc-search"></div>
-        </div>
-        {% endif%}
-      </div>
-      <div class="col-lg-9">
-        {% if document.content_html_is_akn %}
-          <div class="la-akoma-ntoso-with-gutter" data-component="RelationshipEnrichments"
-               {% if not perms.peachjam.add_relationship %}
-               data-readonly="true"
-               {% endif %}
-               data-work-id="{{ document.work_id }}"
-               data-work-frbr-uri="{{ document.work_frbr_uri }}"
-          >
-            <la-akoma-ntoso
-                id="akn"
-                expression-frbr-uri="{{ document.expression_frbr_uri }}"
-                class="flash-target"
-            >
-              <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
-              <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
+<div class="document-content"
+     data-component="DocumentContent"
+     data-display-type="{{ display_type }}"
+>
 
-              {{ document.content_html|safe }}
-            </la-akoma-ntoso>
-            <la-gutter></la-gutter>
-          </div>
-        {% else %}
-          <div data-html-doc>
-            {{ document.content_html|safe }}
-          </div>
-        {% endif%}
-      </div>
-    </div>
-  {% else %}
-    <div data-component="PdfRenderer"
-         data-pdf="{% url 'document_source_pdf' expression_frbr_uri=document.expression_frbr_uri %}"
+  {% if display_type == 'pdf' %}
+    <div data-pdf="{% url 'document_source_pdf' expression_frbr_uri=document.expression_frbr_uri %}"
          data-pdf-size="{{ document.source_file.file.size }}"
-         data-is-loading
-    >
-      <div class="pdf-loading-text text-center mb-2"><strong>Loading PDF...</strong></div>
-      <div class="progress">
-        <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
-             role="progressbar">
-        </div>
-      </div>
-      <div class="pdf-renderer">
-        <div class="pdf-renderer__left">
-          <nav>
-            <div class="nav nav-tabs" id="pdf-tabs" role="tablist">
-              <button class="nav-link active"
-                      id="pdf-previews-tab"
-                      data-bs-toggle="tab"
-                      data-bs-target="#nav-pdf-previews"
-                      type="button"
-                      role="tab"
-                      aria-controls="nav-pdf-previews"
-                      aria-selected="true">
-                Pages
-              </button>
-              <button class="nav-link"
-                      id="pdf-search-tab"
-                      data-bs-toggle="tab"
-                      data-bs-target="#nav-pdf-search"
-                      type="button"
-                      role="tab"
-                      aria-controls="nav-pdf-search"
-                      aria-selected="false">
-                Search
-              </button>
-            </div>
-          </nav>
-          <div class="tab-content" id="pdf-tabContent">
-            <div class="tab-pane fade show active" id="nav-pdf-previews"
-                 role="tabpanel"
-                 aria-labelledby="pdf-previews-tab">
-              <div class="previews">
-                <div class="previews__inner"></div>
-              </div>
-            </div>
-            <div class="tab-pane fade" id="nav-pdf-search" role="tabpanel" aria-labelledby="pdf-search-tab">
-              <div id="pdf-doc-search" class="h-100"></div>
-            </div>
-          </div>
-        </div>
-        <div class="pdf-renderer__content"></div>
-        <div class="pdf-renderer__right"></div>
-      </div>
+         data-is-loading>
     </div>
   {% endif %}
+  <div class="document-content__toggle">
+    <button class="btn btn-primary"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#navigation-offcanvas"
+            aria-controls="navigation-offcanvas">
+      Navigate document
+    </button>
+  </div>
+
+  <div id="navigation-content" class="d-none">
+    <div class="navigation__inner">
+      {% if display_type == 'akn' %}
+        <nav>
+          <div class="nav nav-tabs" id="akn-tab" role="tablist">
+            <button class="nav-link active"
+                    id="akn-toc-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#akn-toc"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-toc"
+                    aria-selected="true">
+              Table of contents
+            </button>
+            <button class="nav-link"
+                    id="akn-search-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#akn-search"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-search"
+                    aria-selected="false">
+              Search
+            </button>
+          </div>
+        </nav>
+        <div class="tab-content" id="akn-tabContent">
+          <div class="tab-pane fade show active h-100"
+               id="akn-toc"
+               role="tabpanel"
+               aria-labelledby="toc-tab">
+            <aside class="toc">
+              <la-table-of-contents-controller
+                items="{{ document.toc_json|jsonify }}"
+                expand-all-btn-classes="btn btn-secondary btn-sm"
+                collapse-all-btn-classes="btn btn-secondary btn-sm"
+                title-filter-clear-btn-classes="btn btn-secondary btn-sm"
+                title-filter-input-classes="form-control"
+              ></la-table-of-contents-controller>
+            </aside>
+          </div>
+          <div class="tab-pane fade h-100"
+               id="akn-search"
+               role="tabpanel"
+               aria-labelledby="nav-search-tab"
+          >
+            <div data-doc-search class="h-100"></div>
+          </div>
+        </div>
+      {% endif %}
+      {% if display_type == 'html' %}
+        <div data-doc-search class="h-100"></div>
+      {% endif %}
+      {% if display_type == 'pdf' %}
+        <nav>
+          <div class="nav nav-tabs" id="pdf-tab" role="tablist">
+            <button class="nav-link active"
+                    id="pdf-previews-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#pdf-previews"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-toc"
+                    aria-selected="true">
+              PDF previews
+            </button>
+            <button class="nav-link"
+                    id="pdf-search-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#pdf-search"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-search"
+                    aria-selected="false">
+              Search
+            </button>
+          </div>
+        </nav>
+        <div class="tab-content pdf-tab-content" id="pdf-tabContent">
+          <div class="tab-pane fade show active pdf-previews-pane"
+               id="pdf-previews"
+               role="tabpanel"
+               aria-labelledby="pdf-previews">
+            <div class="pdf-previews"></div>
+          </div>
+          <div class="tab-pane fade h-100"
+               id="pdf-search"
+               role="tabpanel"
+               aria-labelledby="nav-search-tab"
+          >
+            <div data-doc-search class="h-100"></div>
+          </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="offcanvas offcanvas-start"
+       tabindex="-1"
+       id="navigation-offcanvas"
+       aria-labelledby="navigation-offcanvasLabel"
+  >
+    <div class="offcanvas-header justify-content-end">
+      <button type="button"
+              class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="navigation" data-offcanvas-body>
+    </div>
+  </div>
+
+
+  <div class="document-content__inner">
+    <div class="navigation" id="navigation-column">
+    </div>
+    <div class="content-and-enrichments" data-component="RelationshipEnrichments">
+      <div class="content-and-enrichments__inner la-akoma-ntoso-with-gutter"
+       {% if not perms.peachjam.add_relationship %}
+         data-readonly="true"
+       {% endif %}
+       data-work-id="{{ document.work_id }}"
+       data-work-frbr-uri="{{ document.work_frbr_uri }}"
+      >
+        {% if display_type == 'akn' %}
+          <la-akoma-ntoso
+            id="akn"
+            expression-frbr-uri="{{ document.expression_frbr_uri }}"
+            class="flash-target"
+          >
+            <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
+            <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
+
+            {{ document.content_html|safe }}
+          </la-akoma-ntoso>
+        {% endif %}
+        {% if display_type == 'html' %}
+          <div class="content">
+            {{ document.content_html|safe }}
+          </div>
+        {% endif %}
+
+        {% if display_type == 'pdf' %}
+          <div class="content">
+            <div class="pdf-loading">
+              <div class="text-center mb-2"><strong>Loading PDF...</strong></div>
+              <div class="progress">
+                <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
+                     role="progressbar">
+                </div>
+              </div>
+            </div>
+            <div class="pdf-content"></div>
+          </div>
+        {% endif %}
+        <la-gutter></la-gutter>
+      </div>
+    </div>
+  </div>
 </div>
