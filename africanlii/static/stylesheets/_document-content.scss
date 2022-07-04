@@ -1,0 +1,248 @@
+@import "pdfjs";
+
+.document-content {
+
+  .document-content__toggle {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    @include media-breakpoint-up(lg) {
+      display: none;
+    }
+  }
+
+  .navigation {
+    position: sticky;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background-color: $gray-100;
+    border-right: 1px solid $gray-200;
+  }
+
+  .document-content__inner {
+    @extend .row;
+
+    .navigation {
+      @extend .col-3;
+      display: none;
+      @include media-breakpoint-up(lg) {
+        display: block;
+      }
+    }
+  }
+
+  .navigation__inner {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+
+    .search__clear-btn {
+      width: 35px;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    .tab-content {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      min-height: 0px;
+
+      .tab-pane, .toc {
+        height: 100%;
+      }
+    }
+  }
+
+  .content-and-enrichments {
+    @extend .col-12;
+    @extend .col-lg-9;
+  }
+
+  .content-and-enrichments__inner {
+    .content {
+      flex: 80%;
+      max-width: 80%;
+      padding-right: 0.5rem;
+
+      @include media-breakpoint-down(lg) {
+        flex: 100%;
+        max-width: 100%;
+      }
+    }
+
+    la-akoma-ntoso {
+      @include media-breakpoint-down(lg) {
+        flex: 100%;
+        max-width: 100%;
+      }
+    }
+
+    la-gutter {
+      display: none;
+      @include media-breakpoint-up(lg) {
+        display: block;
+      }
+    }
+  }
+
+  .preview-panel {
+    border: none;
+    max-width: 200px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background-color: transparent;
+
+    img {
+      @extend .mb-2;
+      width: 100%;
+      height: auto;
+    }
+
+    &.active {
+      background-color: $gray-200;
+    }
+  }
+
+  .preview-panel__page-number {
+    display: block;
+    text-align: center;
+  }
+
+  .pdf-content {
+    .textLayer {
+    position: absolute;
+    text-align: initial;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    opacity: 0.4;
+    line-height: 1;
+  }
+
+  .textLayer span,
+  .textLayer br {
+    color: transparent;
+    position: absolute;
+    white-space: pre;
+    cursor: text;
+    transform-origin: 0% 0%;
+  }
+
+  .textLayer mark {
+    transform-origin: 0% 0%;
+    color: transparent;
+    white-space: pre;
+    cursor: text;
+  }
+
+  .textLayer .highlight {
+    margin: -1px;
+    padding: 1px;
+    background-color: rgba(180, 0, 170, 1);
+    border-radius: 4px;
+  }
+
+  .textLayer .highlight.appended {
+    position: initial;
+  }
+
+  .textLayer .highlight.begin {
+    border-radius: 4px 0 0 4px;
+  }
+
+  .textLayer .highlight.end {
+    border-radius: 0 4px 4px 0;
+  }
+
+  .textLayer .highlight.middle {
+    border-radius: 0;
+  }
+
+  .textLayer .highlight.selected {
+    background-color: rgba(0, 100, 0, 1);
+  }
+
+  .textLayer ::-moz-selection {
+    background: rgba(0, 0, 255, 1);
+  }
+
+  .textLayer ::selection {
+    background: rgba(0, 0, 255, 1);
+  }
+
+  /* Avoids https://github.com/mozilla/pdf.js/issues/13840 in Chrome */
+  .textLayer br::-moz-selection {
+    background: transparent;
+  }
+  .textLayer br::selection {
+    background: transparent;
+  }
+
+  .textLayer .endOfContent {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+
+  .textLayer .endOfContent.active {
+    top: 0;
+  }
+
+
+  .pdfPresentationMode:-webkit-full-screen .textLayer span {
+    cursor: none;
+  }
+
+  .pdfPresentationMode:fullscreen .textLayer span {
+    cursor: none;
+  }
+
+  .pdfPresentationMode.pdfPresentationModeControls > *,
+  .pdfPresentationMode.pdfPresentationModeControls .textLayer span {
+    cursor: default;
+  }
+  }
+
+  .pdf-content__page {
+    @extend .shadow-sm;
+    @extend .mb-4;
+    canvas, .textLayer {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  .pdf-loading {
+    display: none;
+  }
+
+  &[data-is-loading] {
+    .pdf-loading {
+      display: block;
+    }
+
+    .navigation {
+      opacity: 0;
+    }
+    .pdf-content {
+      display: none;
+    }
+  }
+
+}
