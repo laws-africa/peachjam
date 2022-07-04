@@ -68,10 +68,7 @@
             <a class="nav-link {% ifequal request.path '/generic_documents/'%} active {% endifequal%}" href="{% url 'generic_document_list' %}">{% trans 'AU Documents' %}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/legal_instruments/'%} active {% endifequal%}" href="{% url 'legal_instrument_list' %}">{% trans 'Legal Instruments' %}</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="{% url 'legislation_list' %}">{% trans 'Treaties and Protocols' %}</a>
+            <a class="nav-link {% ifequal request.path '/legal_instruments/'%} active {% endifequal%}" href="{% url 'legal_instrument_list' %}">{% trans 'Treaties and Protocols' %}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link {% ifequal request.path '/about/'%} active {% endifequal%}" href="{% url 'about' %}">{% trans 'About' %}</a>
