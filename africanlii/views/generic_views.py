@@ -101,7 +101,6 @@ class BaseDocumentDetailView(DetailView):
             context["predicates_json"] = PredicateSerializer(
                 Predicate.objects.all(), many=True
             ).data
-        print("asdsadasdasd")
 
         if context["document"].content_html:
             if context["document"].content_html_is_akn:
