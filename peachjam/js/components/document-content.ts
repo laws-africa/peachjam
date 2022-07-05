@@ -4,23 +4,19 @@ import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
 
 class OffCanvas {
-  protected triggerButton: HTMLElement | null;
   protected offCanvas: any;
-  protected element: HTMLElement;
   body: HTMLElement | null;
   constructor (element: HTMLElement) {
     this.offCanvas = new (window as { [key: string]: any }).bootstrap.Offcanvas(element);
-    this.element = element;
-    this.triggerButton = document.querySelector(`[data-bs-target="#${element.getAttribute('id')}"]`);
     this.body = element.querySelector('[data-offcanvas-body]');
   }
 
-  open () {
+  show () {
     this.offCanvas.show();
   }
 
-  close () {
-    this.offCanvas.show();
+  hide () {
+    this.offCanvas.hide();
   }
 }
 
@@ -52,12 +48,10 @@ class DocumentContent {
   private pdf: PdfRenderer | undefined;
   private navOffCanvas: OffCanvas | undefined;
   private navResponsiveContentTransporter: ResponsiveContentTransporter | undefined;
-  private offCanvases: {};
-  private documentSearch: any;
+  private searchApp: any;
   constructor (root: HTMLElement) {
     this.root = root;
     this.navResponsiveContentTransporter = undefined;
-    this.offCanvases = {};
 
     const navColumn: HTMLElement | null = this.root.querySelector('#navigation-column');
     const navContent: HTMLElement | null = this.root.querySelector('#navigation-content .navigation__inner');
@@ -81,15 +75,16 @@ class DocumentContent {
 
     const targetMountElement = this.root.querySelector('[data-doc-search]');
     if (targetMountElement) {
-      const component = createApp(DocumentSearch, {
+      const app = createApp(DocumentSearch, {
         document,
-        docType: root.getAttribute('data-display-type')
+        docType: root.getAttribute('data-display-type'),
+        mountElement: targetMountElement
       });
-      this.documentSearch = component;
-      // this.documentSearch.$on('going-to-snippet', () => {
-      //
-      // });
-      component.mount(targetMountElement);
+      this.searchApp = app;
+      app.mount(targetMountElement);
+      targetMountElement.addEventListener('going-to-snippet', () => {
+        this.navOffCanvas?.hide();
+      });
     }
   }
 }
