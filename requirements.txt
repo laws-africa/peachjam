@@ -7,6 +7,7 @@ charset-normalizer==2.0.12
 cobalt==5.0.0
 cryptography==36.0.1
 defusedxml==0.7.1
+git+https://github.com/laws-africa/docpipe.git@fac46c6f7ffe51f23e96b63488cb1cc45d2de6a7#egg=docpipe
 dj-database-url==0.5.0
 Django==3.2.13
 django-allauth==0.49.0
