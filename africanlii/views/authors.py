@@ -44,9 +44,10 @@ class AuthorListView(BaseAuthorListView):
         )
 
         years = list(set(docs.values_list("date__year", flat=True)))
-        doc_types = list(docs.values_list("doc_type", flat=True))
+        doc_types = list(set(docs.values_list("doc_type", flat=True)))
 
         context["author"] = author
+        context["author_listing_view"] = True
         context["facet_data"] = add_facet_data_to_context(years, doc_types)
 
         return context
