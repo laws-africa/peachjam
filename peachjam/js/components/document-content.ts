@@ -22,22 +22,29 @@ class OffCanvas {
 
 class DocumentContent {
   protected root: HTMLElement;
-  private pdf: PdfRenderer | undefined;
+  private pdfRenderer: PdfRenderer | undefined;
   private searchApp: any;
+  private navOffCanvas: OffCanvas | undefined;
   constructor (root: HTMLElement) {
     this.root = root;
+    this.navOffCanvas = undefined;
 
+    // Activate first tab
+    const firstTabEl = this.root.querySelector('#navigation-tab .nav-link:first-child');
+    if (firstTabEl) {
+      const firstTab = new (window as { [key: string]: any }).bootstrap.Tab(firstTabEl);
+      firstTab.show();
+    }
     const documentElement: HTMLElement | null = this.root.querySelector('[data-document-element]');
 
     const navColumn: HTMLElement | null = this.root.querySelector('#navigation-column');
     const navContent: HTMLElement | null = this.root.querySelector('#navigation-content .navigation__inner');
     const navOffCanvasElement: HTMLElement | null = this.root.querySelector('#navigation-offcanvas');
-    let navOffCanvas: OffCanvas | undefined;
 
     if (navColumn && navOffCanvasElement && navContent) {
-      navOffCanvas = new OffCanvas(navOffCanvasElement);
-      if (navOffCanvas.body) {
-        this.setupResponsiveContentTransporter(navColumn, navOffCanvas.body, navContent);
+      this.navOffCanvas = new OffCanvas(navOffCanvasElement);
+      if (this.navOffCanvas.body) {
+        this.setupResponsiveContentTransporter(navColumn, this.navOffCanvas.body, navContent);
       }
     }
 
@@ -48,7 +55,8 @@ class DocumentContent {
       if (pdfAttrsElement) {
         Object.keys(pdfAttrsElement.dataset).forEach(key => { root.dataset[key] = pdfAttrsElement.dataset[key]; });
       }
-      this.pdf = new PdfRenderer(root);
+      this.pdfRenderer = new PdfRenderer(root);
+      this.pdfRenderer.onPreviewPanelClick = () => { this.navOffCanvas?.hide(); };
     }
 
     const targetMountElement = this.root.querySelector('[data-doc-search]');
@@ -61,7 +69,7 @@ class DocumentContent {
       this.searchApp = app;
       app.mount(targetMountElement);
       targetMountElement.addEventListener('going-to-snippet', () => {
-        navOffCanvas?.hide();
+        this.navOffCanvas?.hide();
       });
     }
   }
@@ -73,6 +81,7 @@ class DocumentContent {
         // transport content to mobile element on tablet/mobile view
         mobileElement.appendChild(content);
       } else {
+        this.navOffCanvas?.hide();
         // transport content to desktop element on desktop view
         desktopElement.appendChild(content);
       }
@@ -84,7 +93,7 @@ class DocumentContent {
     window.addEventListener('resize', debounce(() => {
       const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
       placeContent(vw);
-    }, 300));
+    }, 200));
   }
 }
 
