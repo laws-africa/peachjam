@@ -93,10 +93,11 @@ class CoreDocument(models.Model):
         )
 
     def clean(self):
-        try:
-            FrbrUri.parse(self.work_frbr_uri)
-        except ValueError:
-            raise ValidationError({"work_frbr_uri": "Invalid FRBR URI."})
+        if self.work_frbr_uri:
+            try:
+                FrbrUri.parse(self.work_frbr_uri)
+            except ValueError:
+                raise ValidationError({"work_frbr_uri": "Invalid FRBR URI."})
 
     def generate_expression_frbr_uri(self):
         frbr_uri = FrbrUri.parse(self.work_frbr_uri)

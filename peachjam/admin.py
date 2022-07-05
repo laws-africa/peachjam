@@ -230,10 +230,18 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     resource_class = JudgmentResource
     inlines = [CaseNumberAdmin] + DocumentAdmin.inlines
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].insert(1, "case_name")
     fieldsets[0][1]["fields"].extend(["author", "judges"])
+    # remove work_frbr_uri, we'll generate it automatically
+    fieldsets[0][1]["fields"] = [
+        f for f in fieldsets[0][1]["fields"] if f != "work_frbr_uri"
+    ]
+    fieldsets[1][1]["fields"].insert(0, "mnc")
     fieldsets[2][1]["fields"].extend(
         ["headnote_holding", "additional_citations", "flynote"]
     )
+    fieldsets[3][1]["fields"].extend(["serial_number"])
+    readonly_fields = ("mnc", "serial_number", "title")
 
 
 @admin.register(Predicate)
