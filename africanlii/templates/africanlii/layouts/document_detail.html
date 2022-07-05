@@ -27,9 +27,13 @@
               <div class="col-md-6">
                 {% block document-metadata-content %}
                   <dl class="row">
-                    {% if document.authoring_body %}
+                    {% if document.author %}
                       <dt class="col-4">Author</dt>
-                      <dd class="col-8 text-muted">{{ document.authoring_body }}</dd>
+                      <dd class="col-8 text-muted">{{ document.author }}</dd>
+                    {% endif %}
+
+                    {% if document.citation_links %}
+                      {{ citation_links|json_script:"citation-links" }}
                     {% endif %}
 
                     <dt class="col-4">Date</dt>
@@ -119,8 +123,6 @@
         </div>
       </div>
     </div>
-
-    {{ citation_links|json_script:"citation-links" }}
 
     {% block content %}{% endblock %}
   </main>
