@@ -60,7 +60,7 @@ class PdfRenderer {
               if (current) {
                 this.activatePreviewPanel(current);
                 if (this.tabContent) {
-                  this.tabContent.scrollTop = current.offsetTop - (current.offsetHeight * 2);
+                  this.tabContent.scrollTop = (current.offsetTop + current.clientHeight) - (current.offsetHeight * 2);
                 }
               }
             }
