@@ -6,10 +6,86 @@
      data-display-type="{{ display_type }}"
 >
 
+  <div id="navigation-content" class="d-none">
+    <div class="navigation__inner">
+      <nav>
+        <div class="nav nav-tabs" id="navigation-tab" role="tablist">
+          {% if display_type == 'akn' and document.toc_json %}
+            <button class="nav-link"
+                    id="akn-toc-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#akn-toc"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-toc"
+                    aria-selected="true">
+              Table of contents
+            </button>
+          {% endif %}
+          {% if display_type == 'pdf' %}
+          <button class="nav-link"
+                  id="pdf-previews-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#pdf-previews"
+                  type="button"
+                  role="tab"
+                  aria-controls="nav-toc"
+                  aria-selected="true">
+            PDF previews
+          </button>
+          {% endif %}
+          <button class="nav-link"
+                  id="navigation-search-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#navigation-search"
+                  type="button"
+                  role="tab"
+                  aria-controls="nav-search"
+                  aria-selected="false">
+            Search
+          </button>
+        </div>
+      </nav>
+      <div class="tab-content" id="navigation-tab-content" data-preview-scroll-container>
+        <div class="tab-pane fade h-100"
+             id="navigation-search"
+             role="tabpanel"
+             aria-labelledby="nav-search-tab"
+        >
+          <div data-doc-search class="h-100"></div>
+        </div>
+        {% if display_type == 'akn' and document.toc_json %}
+        <div class="tab-pane fade h-100"
+             id="akn-toc"
+             role="tabpanel"
+             aria-labelledby="toc-tab">
+          <aside class="toc">
+            <la-table-of-contents-controller
+              items="{{ document.toc_json|jsonify }}"
+              expand-all-btn-classes="btn btn-secondary btn-sm"
+              collapse-all-btn-classes="btn btn-secondary btn-sm"
+              title-filter-clear-btn-classes="btn btn-secondary btn-sm"
+              title-filter-input-classes="form-control"
+            ></la-table-of-contents-controller>
+          </aside>
+        </div>
+        {% endif %}
+        {% if display_type == 'pdf' %}
+        <div class="tab-pane fade pdf-previews-pane"
+             id="pdf-previews"
+             role="tabpanel"
+             aria-labelledby="pdf-previews">
+          <div class="pdf-previews"></div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
   {% if display_type == 'pdf' %}
     <div data-pdf="{% url 'document_source_pdf' expression_frbr_uri=document.expression_frbr_uri %}"
          data-pdf-size="{{ document.source_file.file.size }}"
-         data-is-loading>
+         data-pdf-loading>
     </div>
   {% endif %}
   <div class="document-content__toggle">
@@ -22,105 +98,7 @@
     </button>
   </div>
 
-  <div id="navigation-content" class="d-none">
-    <div class="navigation__inner">
-      {% if display_type == 'akn' %}
-        <nav>
-          <div class="nav nav-tabs" id="akn-tab" role="tablist">
-            <button class="nav-link active"
-                    id="akn-toc-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#akn-toc"
-                    type="button"
-                    role="tab"
-                    aria-controls="nav-toc"
-                    aria-selected="true">
-              Table of contents
-            </button>
-            <button class="nav-link"
-                    id="akn-search-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#akn-search"
-                    type="button"
-                    role="tab"
-                    aria-controls="nav-search"
-                    aria-selected="false">
-              Search
-            </button>
-          </div>
-        </nav>
-        <div class="tab-content" id="akn-tabContent">
-          <div class="tab-pane fade show active h-100"
-               id="akn-toc"
-               role="tabpanel"
-               aria-labelledby="toc-tab">
-            <aside class="toc">
-              <la-table-of-contents-controller
-                items="{{ document.toc_json|jsonify }}"
-                expand-all-btn-classes="btn btn-secondary btn-sm"
-                collapse-all-btn-classes="btn btn-secondary btn-sm"
-                title-filter-clear-btn-classes="btn btn-secondary btn-sm"
-                title-filter-input-classes="form-control"
-              ></la-table-of-contents-controller>
-            </aside>
-          </div>
-          <div class="tab-pane fade h-100"
-               id="akn-search"
-               role="tabpanel"
-               aria-labelledby="nav-search-tab"
-          >
-            <div data-doc-search class="h-100"></div>
-          </div>
-        </div>
-      {% endif %}
-      {% if display_type == 'html' %}
-        <div data-doc-search class="h-100"></div>
-      {% endif %}
-      {% if display_type == 'pdf' %}
-        <nav>
-          <div class="nav nav-tabs" id="pdf-tab" role="tablist">
-            <button class="nav-link active"
-                    id="pdf-previews-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#pdf-previews"
-                    type="button"
-                    role="tab"
-                    aria-controls="nav-toc"
-                    aria-selected="true">
-              PDF previews
-            </button>
-            <button class="nav-link"
-                    id="pdf-search-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#pdf-search"
-                    type="button"
-                    role="tab"
-                    aria-controls="nav-search"
-                    aria-selected="false">
-              Search
-            </button>
-          </div>
-        </nav>
-        <div class="tab-content pdf-tab-content" id="pdf-tabContent">
-          <div class="tab-pane fade show active pdf-previews-pane"
-               id="pdf-previews"
-               role="tabpanel"
-               aria-labelledby="pdf-previews">
-            <div class="pdf-previews"></div>
-          </div>
-          <div class="tab-pane fade h-100"
-               id="pdf-search"
-               role="tabpanel"
-               aria-labelledby="nav-search-tab"
-          >
-            <div data-doc-search class="h-100"></div>
-          </div>
-      </div>
-      {% endif %}
-    </div>
-  </div>
-
-  <div class="offcanvas offcanvas-start"
+  <div class="offcanvas offcanvas-start document-content__offcanvas"
        tabindex="-1"
        id="navigation-offcanvas"
        aria-labelledby="navigation-offcanvasLabel"
