@@ -20,46 +20,24 @@ class OffCanvas {
   }
 }
 
-class ResponsiveContentTransporter {
-  constructor (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
-    const placeContent = (vw: number) => {
-      // reference _variables.scss for grid-breakpoints
-      if (vw < 992) {
-        // transport content to mobile element on tablet/mobile view
-        mobileElement.appendChild(content);
-      } else {
-        // transport content to desktop element on desktop view
-        desktopElement.appendChild(content);
-      }
-    };
-
-    const initialVw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-    placeContent(initialVw);
-
-    window.visualViewport.addEventListener('resize', debounce(() => {
-      const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-      placeContent(vw);
-    }, 300));
-  }
-}
-
 class DocumentContent {
   protected root: HTMLElement;
   private pdf: PdfRenderer | undefined;
-  private navOffCanvas: OffCanvas | undefined;
-  private navResponsiveContentTransporter: ResponsiveContentTransporter | undefined;
   private searchApp: any;
   constructor (root: HTMLElement) {
     this.root = root;
-    this.navResponsiveContentTransporter = undefined;
+
+    const documentElement: HTMLElement | null = this.root.querySelector('[data-document-element]');
 
     const navColumn: HTMLElement | null = this.root.querySelector('#navigation-column');
     const navContent: HTMLElement | null = this.root.querySelector('#navigation-content .navigation__inner');
     const navOffCanvasElement: HTMLElement | null = this.root.querySelector('#navigation-offcanvas');
+    let navOffCanvas: OffCanvas | undefined;
+
     if (navColumn && navOffCanvasElement && navContent) {
-      this.navOffCanvas = new OffCanvas(navOffCanvasElement);
-      if (this.navOffCanvas.body) {
-        this.navResponsiveContentTransporter = new ResponsiveContentTransporter(navColumn, this.navOffCanvas.body, navContent);
+      navOffCanvas = new OffCanvas(navOffCanvasElement);
+      if (navOffCanvas.body) {
+        this.setupResponsiveContentTransporter(navColumn, navOffCanvas.body, navContent);
       }
     }
 
@@ -76,16 +54,37 @@ class DocumentContent {
     const targetMountElement = this.root.querySelector('[data-doc-search]');
     if (targetMountElement) {
       const app = createApp(DocumentSearch, {
-        document,
+        document: documentElement,
         docType: root.getAttribute('data-display-type'),
         mountElement: targetMountElement
       });
       this.searchApp = app;
       app.mount(targetMountElement);
       targetMountElement.addEventListener('going-to-snippet', () => {
-        this.navOffCanvas?.hide();
+        navOffCanvas?.hide();
       });
     }
+  }
+
+  setupResponsiveContentTransporter (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
+    const placeContent = (vw: number) => {
+      // reference _variables.scss for grid-breakpoints
+      if (vw < 992) {
+        // transport content to mobile element on tablet/mobile view
+        mobileElement.appendChild(content);
+      } else {
+        // transport content to desktop element on desktop view
+        desktopElement.appendChild(content);
+      }
+    };
+
+    const initialVw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    placeContent(initialVw);
+
+    window.addEventListener('resize', debounce(() => {
+      const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      placeContent(vw);
+    }, 300));
   }
 }
 
