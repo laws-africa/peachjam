@@ -32,8 +32,22 @@
                       <dd class="col-8 text-muted">{{ document.author }}</dd>
                     {% endif %}
 
+                    {% if document.jurisdiction %}
+                      <dt class="col-4">Jurisdiction</dt>
+                      <dd class="col-8 text-muted">{{ document.jurisdiction }}</dd>
+                    {% endif %}
+
+                    {% if document.locality %}
+                      <dt class="col-4">Locality</dt>
+                      <dd class="col-8 text-muted">{{ document.locality }}</dd>
+                    {% endif %}
+
                     {% if document.citation_links %}
                       {{ citation_links|json_script:"citation-links" }}
+                    {% endif %}
+
+                    {% if document.toc_json %}
+                      {{ document.toc_json|json_script:"toc-json" }}
                     {% endif %}
 
                     <dt class="col-4">Date</dt>
