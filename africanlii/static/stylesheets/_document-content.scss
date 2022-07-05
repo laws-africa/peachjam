@@ -1,6 +1,7 @@
 .document-content {
 
   .document-content__toggle {
+    @extend .mb-4;
     position: sticky;
     top: 0;
     left: 0;
@@ -10,13 +11,17 @@
     }
   }
 
+  .document-content__offcanvas {
+    width: 300px;
+  }
+
   .navigation {
     position: sticky;
     top: 0;
     left: 0;
     height: 100vh;
-    background-color: $gray-100;
     border-right: 1px solid $gray-200;
+    padding: 0;
   }
 
   .document-content__inner {
@@ -36,6 +41,28 @@
     height: 100%;
     flex-direction: column;
 
+    nav {
+      padding-top: 1rem;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      border-bottom: 2px solid $gray-200 ;
+
+      .nav-tabs {
+        border: none;
+        .nav-link {
+          border: none;
+          border-bottom: 2px solid transparent;
+          color:  $body-color;
+
+          &.active {
+            border: none;
+            font-weight: bold;
+            border-bottom: 2px solid $primary;
+          }
+        }
+      }
+    }
+
     .search__clear-btn {
       width: 35px;
       border-top-left-radius: 0;
@@ -46,6 +73,7 @@
       flex: 1 1 auto;
       overflow-y: auto;
       min-height: 0px;
+      background-color: $gray-100;
 
       .tab-pane, .toc {
         height: 100%;
@@ -220,17 +248,19 @@
   .pdf-content__page {
     @extend .shadow-sm;
     @extend .mb-4;
-    canvas, .textLayer {
+    canvas,
+    .textLayer {
       margin-left: auto;
       margin-right: auto;
     }
+    overflow-y: auto;
   }
 
   .pdf-loading {
     display: none;
   }
 
-  &[data-is-loading] {
+  &[data-pdf-loading] {
     .pdf-loading {
       display: block;
     }
@@ -239,6 +269,10 @@
       opacity: 0;
     }
     .pdf-content {
+      display: none;
+    }
+
+    .document-content__toggle {
       display: none;
     }
   }
