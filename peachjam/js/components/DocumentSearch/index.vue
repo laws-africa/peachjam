@@ -82,9 +82,12 @@ export default {
     document: {
       type: HTMLElement,
       required: true
+    },
+    mountElement: {
+      type: HTMLElement,
+      required: true
     }
   },
-  emits: ['going-to-snippet'],
   data: () => ({
     q: '',
     marks: [],
@@ -116,7 +119,7 @@ export default {
     },
 
     goToSnippet (node) {
-      this.$emit('going-to-snippet');
+      this.mountElement.dispatchEvent(new CustomEvent('going-to-snippet'));
       scrollToElement(node, 60).then(() => {
         node.style.outline = '2px solid transparent';
         node.style.transition = 'outline-color 400ms ease-in-out';
