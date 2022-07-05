@@ -5,7 +5,7 @@
     <tr>
       <th scope="col" style="width: 80%">{% trans 'Title' %}</th>
       <th scope="col">{% trans 'Date' %}</th>
-      {% if "courts" in request.path or "authors" in request.path  %}
+      {% if author_listing_view %}
         <th scope="col">{% trans 'Document Type' %}</th>
       {% else %}
         <th scope="col">{% trans 'Jurisdiction' %}</th>
@@ -22,7 +22,7 @@
         </div>
       </td>
       <td style="white-space: nowrap;">{{ document.date }}</td>
-      {% if "courts" in request.path or "authors" in request.path  %}
+      {% if author_listing_view %}
         <td>{{ document.doc_type }}</td>
       {% else %}
         <td>{{ document.jurisdiction }}</td>
