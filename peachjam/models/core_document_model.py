@@ -114,7 +114,10 @@ class CoreDocument(models.Model):
             not hasattr(self, "work") or self.work.frbr_uri != self.work_frbr_uri
         ):
             self.work, _ = Work.objects.get_or_create(
-                frbr_uri=self.work_frbr_uri, title=self.title
+                frbr_uri=self.work_frbr_uri,
+                defaults={
+                    "title": self.title,
+                },
             )
 
         # keep work title in sync with English documents

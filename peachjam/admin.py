@@ -12,7 +12,7 @@ from import_export.admin import ImportMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from peachjam.forms import IngestorForm, RelationshipForm
+from peachjam.forms import IngestorForm, NewDocumentFormMixin, RelationshipForm
 from peachjam.models import (
     Author,
     CaseNumber,
@@ -129,6 +129,28 @@ class DocumentAdmin(admin.ModelAdmin):
         ),
         ("Advanced", {"classes": ("collapse",), "fields": ["toc_json"]}),
     ]
+
+    new_document_form_mixin = NewDocumentFormMixin
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        if obj is None:
+            fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
+        return fieldsets
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj is None:
+            kwargs["fields"] = self.new_document_form_mixin.adjust_fields(
+                kwargs["fields"]
+            )
+            form = super().get_form(request, obj, **kwargs)
+
+            class NewForm(self.new_document_form_mixin, form):
+                pass
+
+            return NewForm
+
+        return super().get_form(request, obj, **kwargs)
 
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.model_name
