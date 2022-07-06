@@ -13,9 +13,7 @@ class DocumentNature(models.Model):
 
 
 class GenericDocument(CoreDocument):
-    author = models.ForeignKey(
-        Author, on_delete=models.PROTECT, null=False, blank=False
-    )
+    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=True, blank=True)
     nature = models.ForeignKey(
         DocumentNature, on_delete=models.PROTECT, null=False, blank=False
     )
@@ -29,9 +27,7 @@ class GenericDocument(CoreDocument):
 
 
 class LegalInstrument(CoreDocument):
-    author = models.ForeignKey(
-        Author, on_delete=models.PROTECT, null=False, blank=False
-    )
+    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=True, blank=True)
     nature = models.ForeignKey(
         DocumentNature, on_delete=models.PROTECT, null=False, blank=False
     )
