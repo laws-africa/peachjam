@@ -19,7 +19,12 @@ class HomePageView(TemplateView):
         recent_documents = GenericDocument.objects.order_by("-date")[:5]
         recent_instruments = LegalInstrument.objects.order_by("-date")[:5]
         recent_legislation = Legislation.objects.order_by("-date")[:5]
-        documents_count = GenericDocument.objects.count()
+        documents_count = (
+            Judgment.objects.count()
+            + GenericDocument.objects.count()
+            + LegalInstrument.objects.count()
+            + Legislation.objects.count()
+        )
 
         authors = Author.objects.exclude(
             Q(genericdocument__isnull=True),
