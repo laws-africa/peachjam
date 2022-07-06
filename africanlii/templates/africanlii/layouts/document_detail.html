@@ -27,14 +27,15 @@
               <div class="col-md-6">
                 {% block document-metadata-content %}
                   <dl class="row">
+
+                    {% if document.jurisdiction %}
+                      <dt class="col-4">Jurisdiction </dt>
+                      <dd class="col-8 text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
+                    {% endif %}
+
                     {% if document.author %}
                       <dt class="col-4">Author</dt>
                       <dd class="col-8 text-muted">{{ document.author }}</dd>
-                    {% endif %}
-
-                    {% if document.jurisdiction %}
-                      <dt class="col-4">Jurisdiction · Locality</dt>
-                      <dd class="col-8 text-muted">{{ document.jurisdiction }} · {% if document.locality %} {{ document.locality }}</dd>{% endif %}
                     {% endif %}
 
                     {% if document.citation_links %}
