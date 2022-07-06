@@ -59,6 +59,16 @@ class DocumentContent {
       this.pdfRenderer.onPreviewPanelClick = () => { this.navOffCanvas?.hide(); };
     }
 
+    // Close navOffCanvas on lac-toc title click
+    if (root.getAttribute('data-display-type') === 'akn') {
+      const element = root.querySelector('la-table-of-contents-controller');
+      if (element) {
+        element.addEventListener('itemTitleClicked', () => {
+          this.navOffCanvas?.hide();
+        });
+      }
+    }
+
     const targetMountElement = this.root.querySelector('[data-doc-search]');
     if (targetMountElement) {
       const app = createApp(DocumentSearch, {
