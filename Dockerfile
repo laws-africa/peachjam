@@ -1,4 +1,4 @@
-FROM python:3.7-bullseye
+FROM python:3.8-bullseye
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 COPY requirements.txt /tmp/requirements.txt
