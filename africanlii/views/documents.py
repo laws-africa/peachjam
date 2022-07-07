@@ -1,4 +1,4 @@
-import os.path
+import os
 
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
@@ -52,21 +52,17 @@ class DocumentSourceView(DetailView):
 
 class DocumentSourcePDFView(DocumentSourceView):
     def render_to_response(self, context, **response_kwargs):
-        infile = self.object.source_file.file
-        if (
-            hasattr(self.object, "source_file")
-            and infile
-            and not infile.name.endswith(".pdf")
-        ):
-            insuffix = os.path.splitext(infile.name)[1].replace(".", "")
-            primary_file, files = soffice_convert(infile, insuffix, "pdf")
+        if hasattr(self.object, "source_file"):
+            # If the file is not a pdf, convert it
+            if not self.object.source_file.file.name.endswith(".pdf"):
+                filename = self.object.source_file.file.name
+                insuffix = os.path.splitext(filename)[1].replace(".", "")
+                primary_file, files = soffice_convert(
+                    self.object.source_file.file, insuffix, "pdf"
+                )
+                file = primary_file
+            else:
+                file = self.object.source_file.file
+            return HttpResponse(file.read(), content_type="application/pdf")
 
-            response = HttpResponse(primary_file.read(), content_type="application/pdf")
-            response[
-                "Content-Disposition"
-            ] = f"attachment; filename='{primary_file.name}'"
-            return response
-
-        return HttpResponse(
-            self.object.source_file.file.open(), content_type="application/pdf"
-        )
+        return Http404
