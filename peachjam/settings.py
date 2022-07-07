@@ -348,4 +348,5 @@ if DEBUG:
     ELASTICSEARCH_DSL_AUTOSYNC = False
 
 GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
+
 CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}
