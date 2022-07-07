@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "import_export",
     "treebeard",
     "background_task",
+    "ckeditor",
 ]
 
 MIDDLEWARE = [
