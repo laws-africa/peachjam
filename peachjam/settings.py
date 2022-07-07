@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "import_export",
     "treebeard",
     "background_task",
+    "ckeditor",
 ]
 
 MIDDLEWARE = [
@@ -345,3 +346,5 @@ LOGGING = {
 
 if DEBUG:
     ELASTICSEARCH_DSL_AUTOSYNC = False
+
+CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}
