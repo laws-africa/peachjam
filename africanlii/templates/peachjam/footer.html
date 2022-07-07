@@ -1,3 +1,4 @@
+{% load static %}
 {% load i18n %}
 
 <footer class="bg-dark text-white pt-4 pb-4">
@@ -7,17 +8,24 @@
         <div class="mb-3">
           <strong>{% trans 'About AfricanLII' %}</strong>
         </div>
-        <iframe style="max-width: 360px;" width="100%" height="203" src="https://www.youtube.com/embed/og2YO8e_Dmc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <iframe style="max-width: 360px;" width="100%" height="203" src="https://www.youtube.com/embed/og2YO8e_Dmc"
+                title="YouTube video player" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
       </div>
       <div class="col-lg-4 mb-3">
         <div class="mb-2"><strong>{% trans 'With support from' %}</strong></div>
-        <div><a href="https://www.sigrid-rausing-trust.org/" target="_blank" rel="noreferrer">Sigrid Rausing Trust</a></div>
+        <div><a href="https://www.sigrid-rausing-trust.org/" target="_blank" rel="noreferrer">Sigrid Rausing Trust</a>
+        </div>
         <div><a href="https://indigotrust.org.uk/" target="_blank" rel="noreferrer">Indigo Trust</a></div>
         <div><a href="http://clfafrica.org" target="_blank" rel="noreferrer">African Commercial Law Foundation</a></div>
-        <div><a href="https://www.opensocietyfoundations.org/" target="_blank" rel="noreferrer">Open Society Foundations</a></div>
+        <div><a href="https://www.opensocietyfoundations.org/" target="_blank" rel="noreferrer">Open Society
+          Foundations</a></div>
         <div><a href="http://cedartower.co.za/" target="_blank" rel="noreferrer">CedarTower Services</a></div>
-        <div><a href="http://saipar.org/" target="_blank" rel="noreferrer">Southern African Institute for Policy and Research</a></div>
-        <div><a href="http://www.lrfzim.com/" target="_blank" rel="noreferrer">Legal Resources Foundation - Zimbabwe</a></div>
+        <div><a href="http://saipar.org/" target="_blank" rel="noreferrer">Southern African Institute for Policy and
+          Research</a></div>
+        <div><a href="http://www.lrfzim.com/" target="_blank" rel="noreferrer">Legal Resources Foundation - Zimbabwe</a>
+        </div>
       </div>
       <div class="col-lg-4 mb-3">
         <div class="mb-2"><strong>{% trans 'Other African Legal Information Institutions' %}</strong></div>
@@ -36,6 +44,22 @@
         <div><a href="https://ulii.org/" target="_blank" rel="noreferrer">UgandaLII</a></div>
         <div><a href="https://zambialii.org/" target="_blank" rel="noreferrer">ZambiaLII</a></div>
         <div><a href="https://zimlii.org/" target="_blank" rel="noreferrer">ZimLII</a></div>
+      </div>
+    </div>
+    <hr/>
+    <div class="d-block d-lg-flex align-items-center">
+      <div class="text-center text-lg-start me-0 me-lg-4 mb-4 mb-lg-0">
+        <a href="https://uct.ac.za/"
+           target="_blank"
+           rel="noreferrer"
+        >
+          <img src="{% static 'images/uct-logo.svg' %}" alt="uct-logo" height="30"/>
+        </a>
+      </div>
+      <div class="text-center text-lg-start">
+        <a href="https://laws.africa/" target="_blank" rel="noreferrer">
+          <img src="{% static 'images/laws-africa-logo-horizontal.png' %}" alt="africanlii" height="30"/>
+        </a>
       </div>
     </div>
   </div>
