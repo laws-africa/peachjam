@@ -3,6 +3,7 @@ from django.views.generic import TemplateView
 
 from peachjam.models import (
     Author,
+    CoreDocument,
     GenericDocument,
     Judgment,
     LegalInstrument,
@@ -15,11 +16,11 @@ class HomePageView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
-        recent_judgments = Judgment.objects.order_by("-date")[:5]
-        recent_documents = GenericDocument.objects.order_by("-date")[:5]
-        recent_instruments = LegalInstrument.objects.order_by("-date")[:5]
-        recent_legislation = Legislation.objects.order_by("-date")[:5]
-        documents_count = GenericDocument.objects.count()
+        recent_judgments = Judgment.objects.order_by("-updated_at")[:5]
+        recent_documents = GenericDocument.objects.order_by("-updated_at")[:5]
+        recent_instruments = LegalInstrument.objects.order_by("-updated_at")[:5]
+        recent_legislation = Legislation.objects.order_by("-updated_at")[:5]
+        documents_count = CoreDocument.objects.count()
 
         authors = Author.objects.exclude(
             Q(genericdocument__isnull=True),
