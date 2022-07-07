@@ -1,9 +1,11 @@
+import os
+
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, TemplateView, View
+from docpipe.soffice import soffice_convert
 
 from africanlii.registry import registry
-from peachjam.docx import convert_docx_to_pdf
 from peachjam.models import CoreDocument
 
 
@@ -50,11 +52,17 @@ class DocumentSourceView(DetailView):
 
 class DocumentSourcePDFView(DocumentSourceView):
     def render_to_response(self, context, **response_kwargs):
-        if hasattr(self.object, "source_file") and self.object.source_file.file:
-            if self.object.source_file.file.name.endswith(".docx"):
-                temp_dir, filename = convert_docx_to_pdf(self.object.source_file.file)
-                file = open(f"{temp_dir.name}/{filename}", "rb")
+        if hasattr(self.object, "source_file"):
+            # If the file is not a pdf, convert it
+            if not self.object.source_file.file.name.endswith(".pdf"):
+                filename = self.object.source_file.file.name
+                insuffix = os.path.splitext(filename)[1].replace(".", "")
+                primary_file, files = soffice_convert(
+                    self.object.source_file.file, insuffix, "pdf"
+                )
+                file = primary_file
             else:
-                file = self.object.source_file.file.open()
-            return view_attachment(file)
-        raise Http404
+                file = self.object.source_file.file
+            return HttpResponse(file.read(), content_type="application/pdf")
+
+        return Http404
