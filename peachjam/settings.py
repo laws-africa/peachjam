@@ -346,3 +346,5 @@ LOGGING = {
 
 if DEBUG:
     ELASTICSEARCH_DSL_AUTOSYNC = False
+
+CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}

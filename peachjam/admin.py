@@ -101,6 +101,11 @@ class DocumentTopicInline(admin.TabularInline):
 class DocumentForm(forms.ModelForm):
     content_html = forms.CharField(widget=CKEditorWidget())
 
+    def __init__(self, *args, **kwargs):
+        super(DocumentForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.content_html_is_akn:
+            self.fields["content_html"].widget.attrs["readonly"] = True
+
 
 class DocumentAdmin(admin.ModelAdmin):
     form = DocumentForm
