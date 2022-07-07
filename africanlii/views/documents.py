@@ -54,17 +54,19 @@ class DocumentSourcePDFView(DocumentSourceView):
     def render_to_response(self, context, **response_kwargs):
         infile = self.object.source_file.file
         if (
-            not hasattr(self.object, "source_file")
-            or not infile
-            or infile.name.endswith(".pdf")
+            hasattr(self.object, "source_file")
+            and infile
+            and not infile.name.endswith(".pdf")
         ):
-            return HttpResponse(
-                self.object.source_file.file.open(), content_type="application/pdf"
-            )
+            insuffix = os.path.splitext(infile.name)[1].replace(".", "")
+            primary_file, files = soffice_convert(infile, insuffix, "pdf")
 
-        insuffix = os.path.splitext(infile.name)[1].replace(".", "")
-        primary_file, files = soffice_convert(infile, insuffix, "pdf")
+            response = HttpResponse(primary_file.read(), content_type="application/pdf")
+            response[
+                "Content-Disposition"
+            ] = f"attachment; filename='{primary_file.name}'"
+            return response
 
-        response = HttpResponse(primary_file.read(), content_type="application/pdf")
-        response["Content-Disposition"] = f"attachment; filename='{primary_file.name}'"
-        return response
+        return HttpResponse(
+            self.object.source_file.file.open(), content_type="application/pdf"
+        )
