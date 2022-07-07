@@ -1,5 +1,7 @@
 import copy
 
+from ckeditor.widgets import CKEditorWidget
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.http.response import FileResponse
@@ -96,7 +98,17 @@ class DocumentTopicInline(admin.TabularInline):
     extra = 1
 
 
+class DocumentForm(forms.ModelForm):
+    content_html = forms.CharField(widget=CKEditorWidget())
+
+    def __init__(self, *args, **kwargs):
+        super(DocumentForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.content_html_is_akn:
+            self.fields["content_html"].widget.attrs["readonly"] = True
+
+
 class DocumentAdmin(admin.ModelAdmin):
+    form = DocumentForm
     inlines = [DocumentTopicInline, SourceFileInline]
     list_display = ("title", "date")
     search_fields = ("title", "date")
