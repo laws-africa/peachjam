@@ -29,7 +29,9 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
             authors = []
         else:
             authors = list(
-                set(self.model.objects.values_list("author__name", flat=True))
+                filter(
+                    None, set(self.model.objects.values_list("author__name", flat=True))
+                )
             )
 
         years = list(set(self.model.objects.values_list("date__year", flat=True)))
