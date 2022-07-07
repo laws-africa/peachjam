@@ -6,7 +6,6 @@ from cobalt.akn import datestring
 from countries_plus.models import Country
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.urls import reverse
 from django.utils.functional import cached_property
 from languages_plus.models import Language
 
@@ -88,9 +87,7 @@ class CoreDocument(models.Model):
         return self._meta.get_fields()
 
     def get_absolute_url(self):
-        return reverse(
-            "document_detail", kwargs={"expression_frbr_uri": self.expression_frbr_uri}
-        )
+        return f"{self.expression_frbr_uri}/"
 
     def clean(self):
         if self.work_frbr_uri:

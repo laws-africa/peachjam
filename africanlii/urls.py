@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_page
 
 from africanlii import views
@@ -68,6 +68,10 @@ urlpatterns = [
     ),
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
     path("i18n/", include("django.conf.urls.i18n")),
+    re_path(
+        r"^(?P<expression_frbr_uri>akn/.*)/$",
+        views.DocumentDetailViewResolver.as_view(),
+    ),
 ]
 
 if settings.DEBUG:

@@ -26,6 +26,11 @@ class DocumentDetailViewResolver(View):
     """Resolver view that returns detail views for documents based on their doc_type."""
 
     def dispatch(self, request, *args, **kwargs):
+        expression_frbr_uri = kwargs.get("expression_frbr_uri")
+        # add the leading slash if not present
+        if expression_frbr_uri[0] != "/":
+            kwargs["expression_frbr_uri"] = f"/{expression_frbr_uri}"
+
         obj = get_object_or_404(
             CoreDocument, expression_frbr_uri=kwargs.get("expression_frbr_uri")
         )
