@@ -33,11 +33,6 @@ urlpatterns = [
         name="generic_document_list",
     ),
     path(
-        "documents<path:expression_frbr_uri>/",
-        views.DocumentDetailViewResolver.as_view(),
-        name="document_detail",
-    ),
-    path(
         "documents<path:expression_frbr_uri>/source",
         cache_page(60 * 60 * 24)(views.DocumentSourceView.as_view()),
         name="document_source",
@@ -69,7 +64,7 @@ urlpatterns = [
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
     path("i18n/", include("django.conf.urls.i18n")),
     re_path(
-        r"^(?P<expression_frbr_uri>akn/.*)/$",
+        r"^(?P<frbr_uri>akn/.*)/$",
         views.DocumentDetailViewResolver.as_view(),
     ),
 ]

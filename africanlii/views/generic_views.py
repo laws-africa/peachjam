@@ -44,7 +44,7 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
 
 class BaseDocumentDetailView(DetailView):
     slug_field = "expression_frbr_uri"
-    slug_url_kwarg = "expression_frbr_uri"
+    slug_url_kwarg = "frbr_uri"
     context_object_name = "document"
 
     def get_context_data(self, **kwargs):
