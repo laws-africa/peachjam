@@ -105,6 +105,10 @@ class CoreDocument(models.Model):
         frbr_uri.language = self.language.iso_639_3
         return frbr_uri.expression_uri()
 
+    def expression_uri(self):
+        """Parsed form of expression_frbr_uri."""
+        return FrbrUri.parse(self.expression_frbr_uri)
+
     def save(self, *args, **kwargs):
         if not self.expression_frbr_uri:
             self.expression_frbr_uri = self.generate_expression_frbr_uri()
