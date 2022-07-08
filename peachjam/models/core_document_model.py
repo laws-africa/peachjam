@@ -93,10 +93,11 @@ class CoreDocument(models.Model):
         )
 
     def clean(self):
-        try:
-            FrbrUri.parse(self.work_frbr_uri)
-        except ValueError:
-            raise ValidationError({"work_frbr_uri": "Invalid FRBR URI."})
+        if self.work_frbr_uri:
+            try:
+                FrbrUri.parse(self.work_frbr_uri)
+            except ValueError:
+                raise ValidationError({"work_frbr_uri": "Invalid FRBR URI."})
 
     def generate_expression_frbr_uri(self):
         frbr_uri = FrbrUri.parse(self.work_frbr_uri)
@@ -110,10 +111,13 @@ class CoreDocument(models.Model):
 
         # ensure a matching work exists
         if self.work_frbr_uri and (
-            not self.work or self.work.frbr_uri != self.work_frbr_uri
+            not hasattr(self, "work") or self.work.frbr_uri != self.work_frbr_uri
         ):
             self.work, _ = Work.objects.get_or_create(
-                frbr_uri=self.work_frbr_uri, title=self.title
+                frbr_uri=self.work_frbr_uri,
+                defaults={
+                    "title": self.title,
+                },
             )
 
         # keep work title in sync with English documents

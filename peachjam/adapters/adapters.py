@@ -68,8 +68,14 @@ class IndigoAdapter(Adapter):
         from countries_plus.models import Country
         from languages_plus.models import Language
 
-        from africanlii.models import Legislation
-        from peachjam.models import Locality, Work
+        from peachjam.models import (
+            DocumentNature,
+            GenericDocument,
+            LegalInstrument,
+            Legislation,
+            Locality,
+            Work,
+        )
 
         logger.info(f"Updating document ... {url}")
 
@@ -96,7 +102,6 @@ class IndigoAdapter(Adapter):
             "source_url": document["publication_document"]["url"]
             if document["publication_document"]
             else None,
-            "metadata_json": document,
             "jurisdiction": jurisdiction,
             "locality": locality,
             "language": language,
@@ -105,7 +110,28 @@ class IndigoAdapter(Adapter):
             "work": work,
         }
 
-        doc, _ = Legislation.objects.update_or_create(
+        if document["nature"] == "act":
+            if (
+                document["subtype"] == "charter"
+                or "protocol"
+                or "convention"
+                or "treaty"
+            ):
+                model = LegalInstrument
+                field_data["nature"] = DocumentNature.objects.update_or_create(
+                    name=document["subtype"]
+                )[0]
+            else:
+                model = Legislation
+                field_data["metadata_json"] = document
+        else:
+            model = GenericDocument
+            field_data["nature"] = DocumentNature.objects.update_or_create(
+                name=document["subtype"]
+            )[0]
+
+        logger.info(model)
+        doc, _ = model.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri, defaults={**field_data}
         )
         self.download_source_file(f"{url}.pdf", doc, title)

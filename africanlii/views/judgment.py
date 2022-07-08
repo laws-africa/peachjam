@@ -1,9 +1,9 @@
-from africanlii.models import Judgment
 from africanlii.registry import registry
 from africanlii.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
+from peachjam.models import Judgment
 
 
 class JudgmentListView(FilteredDocumentListView):

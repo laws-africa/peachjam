@@ -7,11 +7,13 @@ charset-normalizer==2.0.12
 cobalt==5.0.0
 cryptography==36.0.1
 defusedxml==0.7.1
+git+https://github.com/laws-africa/docpipe.git@fac46c6f7ffe51f23e96b63488cb1cc45d2de6a7#egg=docpipe
 dj-database-url==0.5.0
 Django==3.2.13
 django-allauth==0.49.0
 django-appconf==1.0.5
 django-background-tasks==1.2.5
+django-ckeditor==6.4.2
 django-compressor==3.1
 django-countries-plus==1.3.2
 django-debug-toolbar==3.2.4
@@ -24,6 +26,7 @@ django-import-export==2.8.0
 django-languages-plus==1.1.1
 djangorestframework==3.13.1
 django-sass-processor==1.1
+django-sass-processor-dart-sass==0.0.1
 django-storages==1.12.3
 django-treebeard==4.5.1
 djangorestframework==3.13.1
@@ -37,7 +40,6 @@ google-auth-oauthlib==0.5.1
 greenlet==1.1.2
 gunicorn==20.1.0
 idna==3.3
-libsass==0.21.0
 lxml==4.8.0
 oauthlib==3.2.0
 Pillow==9.0.1

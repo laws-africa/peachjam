@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 
 import sentry_sdk
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
@@ -65,6 +66,7 @@ INSTALLED_APPS = [
     "import_export",
     "treebeard",
     "background_task",
+    "ckeditor",
 ]
 
 MIDDLEWARE = [
@@ -104,6 +106,8 @@ PEACHJAM = {
     "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
     "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),
 }
+
+PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
 
 WSGI_APPLICATION = "peachjam.wsgi.application"
 EMAIL_SUBJECT_PREFIX = f"[{PEACHJAM['APP_NAME']}] "
@@ -342,3 +346,7 @@ LOGGING = {
 
 if DEBUG:
     ELASTICSEARCH_DSL_AUTOSYNC = False
+
+GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
+
+CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}

@@ -1,9 +1,9 @@
-from africanlii.models import LegalInstrument
 from africanlii.registry import registry
 from africanlii.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
+from peachjam.models import LegalInstrument
 
 
 class LegalInstrumentListView(FilteredDocumentListView):

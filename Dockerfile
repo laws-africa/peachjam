@@ -1,4 +1,4 @@
-FROM python:3.7-bullseye
+FROM python:3.8-bullseye
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 COPY requirements.txt /tmp/requirements.txt
@@ -20,4 +20,5 @@ WORKDIR /app
 
 # install npm requirements
 RUN npm ci --no-audit --prefer-offline
+RUN npm i -g sass
 RUN npx webpack --mode production

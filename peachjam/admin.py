@@ -1,3 +1,7 @@
+import copy
+
+from ckeditor.widgets import CKEditorWidget
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.http.response import FileResponse
@@ -6,24 +10,34 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.text import capfirst
+from import_export.admin import ImportMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from peachjam.forms import IngestorForm, RelationshipForm
+from peachjam.forms import IngestorForm, NewDocumentFormMixin, RelationshipForm
 from peachjam.models import (
+    Author,
+    CaseNumber,
     CitationLink,
+    DocumentNature,
     DocumentTopic,
+    GenericDocument,
     Image,
     Ingestor,
     IngestorSetting,
+    Judge,
+    Judgment,
+    JudgmentMediaSummaryFile,
+    LegalInstrument,
+    Legislation,
     Locality,
+    MatterType,
     Predicate,
     Relationship,
     SourceFile,
     Taxonomy,
 )
-
-admin.site.register([Image, Locality, CitationLink])
+from peachjam.resources import GenericDocumentResource, JudgmentResource
 
 
 class SourceFileFilter(admin.SimpleListFilter):
@@ -84,12 +98,71 @@ class DocumentTopicInline(admin.TabularInline):
     extra = 1
 
 
+class DocumentForm(forms.ModelForm):
+    content_html = forms.CharField(widget=CKEditorWidget())
+
+    def __init__(self, *args, **kwargs):
+        super(DocumentForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.content_html_is_akn:
+            self.fields["content_html"].widget.attrs["readonly"] = True
+
+
 class DocumentAdmin(admin.ModelAdmin):
+    form = DocumentForm
     inlines = [DocumentTopicInline, SourceFileInline]
     list_display = ("title", "date")
     search_fields = ("title", "date")
-    readonly_fields = ("expression_frbr_uri",)
+    readonly_fields = ("expression_frbr_uri", "work", "created_at", "updated_at")
     exclude = ("doc_type",)
+    date_hierarchy = "date"
+
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": [
+                    ("jurisdiction", "locality"),
+                    "title",
+                    "date",
+                    "language",
+                    "work_frbr_uri",
+                ]
+            },
+        ),
+        (None, {"fields": ["citation", "source_url"]}),
+        (
+            "Content",
+            {
+                "fields": [
+                    "content_html_is_akn",
+                    "content_html",
+                ]
+            },
+        ),
+        ("Advanced", {"classes": ("collapse",), "fields": ["toc_json"]}),
+    ]
+
+    new_document_form_mixin = NewDocumentFormMixin
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        if obj is None:
+            fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
+        return fieldsets
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj is None:
+            kwargs["fields"] = self.new_document_form_mixin.adjust_fields(
+                kwargs["fields"]
+            )
+            form = super().get_form(request, obj, **kwargs)
+
+            class NewForm(self.new_document_form_mixin, form):
+                pass
+
+            return NewForm
+
+        return super().get_form(request, obj, **kwargs)
 
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -161,13 +234,48 @@ class TaxonomyAdmin(TreeAdmin):
     readonly_fields = ("slug",)
 
 
-admin.site.register(Taxonomy, TaxonomyAdmin)
+class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
+    resource_class = GenericDocumentResource
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["author", "nature"])
 
 
-class CoreDocumentAdmin(admin.ModelAdmin):
-    inlines = [
-        SourceFileInline,
+class LegalInstrumentAdmin(ImportMixin, DocumentAdmin):
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["author", "nature"])
+
+
+class LegislationAdmin(ImportMixin, DocumentAdmin):
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[3][1]["fields"].extend(["metadata_json"])
+    fieldsets[2][1]["classes"] = ("collapse",)
+
+
+class CaseNumberAdmin(admin.TabularInline):
+    model = CaseNumber
+    extra = 1
+    verbose_name = "Case number"
+    verbose_name_plural = "Case numbers"
+    readonly_fields = ["string"]
+    fields = ["matter_type", "number", "year"]
+
+
+class JudgmentAdmin(ImportMixin, DocumentAdmin):
+    resource_class = JudgmentResource
+    inlines = [CaseNumberAdmin] + DocumentAdmin.inlines
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].insert(1, "case_name")
+    fieldsets[0][1]["fields"].extend(["author", "judges"])
+    # remove work_frbr_uri, we'll generate it automatically
+    fieldsets[0][1]["fields"] = [
+        f for f in fieldsets[0][1]["fields"] if f != "work_frbr_uri"
     ]
+    fieldsets[1][1]["fields"].insert(0, "mnc")
+    fieldsets[2][1]["fields"].extend(
+        ["headnote_holding", "additional_citations", "flynote"]
+    )
+    fieldsets[3][1]["fields"].extend(["serial_number"])
+    readonly_fields = ("mnc", "serial_number", "title")
 
 
 @admin.register(Predicate)
@@ -187,3 +295,22 @@ class IngestorAdmin(admin.ModelAdmin):
     inlines = [IngestorSettingInline]
     readonly_fields = ("last_refreshed_at",)
     form = IngestorForm
+
+
+admin.site.register(
+    [
+        Image,
+        Locality,
+        CitationLink,
+        Author,
+        DocumentNature,
+        Judge,
+        JudgmentMediaSummaryFile,
+        MatterType,
+    ]
+)
+admin.site.register(Taxonomy, TaxonomyAdmin)
+admin.site.register(GenericDocument, GenericDocumentAdmin)
+admin.site.register(Legislation, LegislationAdmin)
+admin.site.register(LegalInstrument, LegalInstrumentAdmin)
+admin.site.register(Judgment, JudgmentAdmin)

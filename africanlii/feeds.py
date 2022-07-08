@@ -3,7 +3,7 @@ import datetime
 from django.contrib.syndication.views import Feed
 from django.utils.feedgenerator import Atom1Feed
 
-from africanlii.models import (
+from peachjam.models import (
     CoreDocument,
     GenericDocument,
     Judgment,
