@@ -3,7 +3,7 @@ import re
 from docpipe.pipeline import Pipeline, Stage
 
 from peachjam.analysis.citations import citation_analyser
-from peachjam.analysis.markers import RefsMarker
+from peachjam.analysis.matchers import RefsMarker
 
 
 class RefsMarkerAchprResolutions(RefsMarker):
@@ -30,11 +30,11 @@ class CitationStage(Stage):
 
     def __call__(self, context):
         if context.use_html:
-            self.matcher.find_html_matches(
+            self.matcher.markup_html_matches(
                 context.document.expression_uri(), context.html
             )
         else:
-            self.matcher.find_text_matches(
+            self.matcher.extract_text_matches(
                 context.document.expression_uri(), context.text
             )
 
