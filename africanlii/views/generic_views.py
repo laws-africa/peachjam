@@ -106,4 +106,14 @@ class BaseDocumentDetailView(DetailView):
                 Predicate.objects.all(), many=True
             ).data
 
+        if context["document"].content_html:
+            if context["document"].content_html_is_akn:
+                context["display_type"] = "akn"
+            else:
+                context["display_type"] = "html"
+        elif context["document"].source_file:
+            context["display_type"] = "pdf"
+        else:
+            context["display_type"] = None
+
         return context
