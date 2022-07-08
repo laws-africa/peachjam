@@ -8,16 +8,27 @@
         <div class="mb-3">
           <strong>{% trans 'About AfricanLII' %}</strong>
         </div>
-        <iframe style="max-width: 360px;" width="100%" height="203" src="https://www.youtube.com/embed/og2YO8e_Dmc"
-                title="YouTube video player" frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen></iframe>
+        <p>
+          {% blocktrans %}
+            AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of
+            the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and
+            federates search across all open access African national law available through the
+            <a class="text-primary" href="https://www.openlawafrica.org/" target="_blank" rel="noreferrer">Open Law Africa</a> community of LIIs.
+          {% endblocktrans %}
+        </p>
+        <p>
+          {% blocktrans %}
+            The publication of the African Union material is co-sponsored by the European Union and is part of the <a class="text-primary" href="https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/" target="_blank" rel="noreferrer">Data
+          for Governance Alliance project</a>.
+          {% endblocktrans %}
+        </p>
       </div>
       <div class="col-lg-4 mb-3">
         <div class="mb-2"><strong>{% trans 'With support from' %}</strong></div>
         <div><a href="https://www.sigrid-rausing-trust.org/" target="_blank" rel="noreferrer">Sigrid Rausing Trust</a>
         </div>
         <div><a href="https://indigotrust.org.uk/" target="_blank" rel="noreferrer">Indigo Trust</a></div>
+        <div><a href="https://www.eeas.europa.eu/" target="_blank" rel="noreferrer">European Union</a></div>
         <div><a href="http://clfafrica.org" target="_blank" rel="noreferrer">African Commercial Law Foundation</a></div>
         <div><a href="https://www.opensocietyfoundations.org/" target="_blank" rel="noreferrer">Open Society
           Foundations</a></div>
@@ -53,12 +64,22 @@
            target="_blank"
            rel="noreferrer"
         >
-          <img src="{% static 'images/uct-logo.svg' %}" alt="uct-logo" height="30"/>
+          <img src="{% static 'images/uct-logo.svg' %}" alt="uct-logo" height="50"/>
         </a>
       </div>
-      <div class="text-center text-lg-start">
+      <div class="text-center text-lg-start me-0 me-lg-5 mb-4 mb-lg-0">
         <a href="https://laws.africa/" target="_blank" rel="noreferrer">
-          <img src="{% static 'images/laws-africa-logo-horizontal.png' %}" alt="africanlii" height="30"/>
+          <img src="{% static 'images/laws-africa-logo-horizontal.png' %}" alt="africanlii" height="50"/>
+        </a>
+      </div>
+      <div class="text-center text-lg-start me-0 me-lg-5 mb-4 mb-lg-0">
+        <a href="https://www.indigotrust.org.uk/" target="_blank" rel="noreferrer">
+          <img src="{% static 'images/indigo-trust-logo.jpg' %}" alt="africanlii" height="50"/>
+        </a>
+      </div>
+      <div class="text-center text-lg-start me-0 me-lg-5 mb-4 mb-lg-0">
+        <a href="https://www.eeas.europa.eu" target="_blank" rel="noreferrer">
+          <img src="{% static 'images/eu-funded-logo.png' %}" alt="africanlii" height="50"/>
         </a>
       </div>
     </div>
