@@ -1,7 +1,6 @@
 import re
 
-from peachjam.analysis.citations import citation_analyser
-from peachjam.analysis.matchers import CitationMatcher
+from peachjam.analysis.citations import CitationMatcher, citation_analyser
 
 
 class AchprResolutionMatcher(CitationMatcher):

@@ -22,7 +22,7 @@ class CitationLink(models.Model):
         return cls(
             text=citation.text,
             url=citation.href,
-            target_id=f"page-{citation.pagenum + 1}",
+            target_id=f"page-{citation.target_id + 1}",
             target_selectors=[
                 {
                     "type": "TextPositionSelector",
