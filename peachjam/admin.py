@@ -99,7 +99,7 @@ class DocumentTopicInline(admin.TabularInline):
 
 
 class DocumentForm(forms.ModelForm):
-    content_html = forms.CharField(widget=CKEditorWidget())
+    content_html = forms.CharField(widget=CKEditorWidget(), required=False)
 
     def __init__(self, *args, **kwargs):
         super(DocumentForm, self).__init__(*args, **kwargs)
