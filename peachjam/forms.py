@@ -59,7 +59,7 @@ class NewDocumentFormMixin:
         obj = super().save(commit)
         if self.cleaned_data.get("upload_file"):
             self.process_upload_file(self.cleaned_data["upload_file"])
-            self.apply_enrichments()
+            self.run_analysis()
         return obj
 
     def process_upload_file(self, upload_file):
@@ -83,9 +83,7 @@ class NewDocumentFormMixin:
 
     def run_analysis(self):
         """Apply analysis pipelines for this newly created document."""
-        # TODO: how to choose what analysers to run
-        # TODO: plugins
-        citation_analyser.analyse_document(self.instance)
+        citation_analyser.extract_citations(self.instance)
 
     @classmethod
     def adjust_fieldsets(cls, fieldsets):

@@ -1,56 +1,45 @@
 import re
 
-from docpipe.pipeline import Pipeline, Stage
-
 from peachjam.analysis.citations import citation_analyser
-from peachjam.analysis.matchers import RefsMarker
+from peachjam.analysis.matchers import CitationMatcher
 
 
-class RefsMarkerAchprResolutions(RefsMarker):
+class RefsMarkerAchprResolutions(CitationMatcher):
     """Finds references to ACHPR resolutions in documents, of the form:
 
     ACHPR/Res.227 (LII) 2012
+    ACHPR/Res. 437 (EXT.OS/ XXVI1) 2020
+    ACHPR/Res.79 (XXXVIII) 05
     """
 
     pattern_re = re.compile(
-        r"""\bACHPR/Res\.\s*
-            (\d+)\s*
-            \([XVILC]\)\s*
-            \((\d{2,4})\)
+        r"""\bACHPR/Res\.?\s*
+            (?P<num>\d+)\s*
+            \((EXT\.\s*OS\s*/\s*)?[XVILC1]+\)\s*
+            (?P<year>\d{2,4})
         """,
         re.X | re.I,
     )
-    candidate_xpath = ".//text()[contains(., 'ACHPR') and not(ancestor::a:ref)]"
+    candidate_xpath = ".//text()[contains(., 'ACHPR') and not(ancestor::a)]"
+
+    frbr_uri_pattern = "/akn/aa-au/statement/resolution/achpr/{year}/{num}"
+
+    def frbr_uri_pattern_args(self, match):
+        args = super().frbr_uri_pattern_args(match)
+
+        # adjust for short years
+        year = int(args["year"])
+        if year < 100:
+            if year > 80:
+                year = 1900 + year
+            else:
+                year = 2000 + year
+            args["year"] = str(year)
+
+        return args
 
 
-class CitationStage(Stage):
-    def __init__(self, matcher, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.matcher = matcher
-
-    def __call__(self, context):
-        if context.use_html:
-            self.matcher.markup_html_matches(
-                context.document.expression_uri(), context.html
-            )
-        else:
-            self.matcher.extract_text_matches(
-                context.document.expression_uri(), context.text
-            )
-
-
-citation_pipeline = Pipeline(
-    [
-        # TODO: achpr matcher, use whatever marker is appropriate
-        # TODO: Act 5 of 2019 matcher, use whatever marker is appropriate
-        # TODO: for plain text, we care about the regex and how to extract the right run and FRBR URI from it
-        # TODO: for html, we care about the regex and how to markup the right run and FRBR URI from it
-        CitationStage(RefsMarkerAchprResolutions())
-    ]
-)
-
-
-# TODO: plugins
-# TODO: how does the pipeline fit in with the markers?
-# TODO: marker handles just xml (or html?), pipeline passes in xml root
-citation_analyser.pipelines["enrichment"].append(citation_pipeline)
+# TODO: Act 5 of 2019 matcher, use whatever marker is appropriate
+# TODO: for plain text, we care about the regex and how to extract the right run and FRBR URI from it
+# TODO: for html, we care about the regex and how to markup the right run and FRBR URI from it
+citation_analyser.matchers.append(RefsMarkerAchprResolutions)

@@ -16,28 +16,27 @@ class TextPatternMatcher:
     """ Compiled re pattern to be applied to the text. Must be defined by subclasses.
     """
 
-    candidate_xpath = None
-    """ Xpath for candidate text nodes that should be tested for matches. Must be defined by subclasses.
+    candidate_xpath = ".//text()"
+    """ Xpath for candidate text nodes that should be tested for matches. Defaults to all text nodes.
     """
 
     marker_tag = "b"
     """ Tag that will be used to markup matches.
     """
 
-    def __init__(self, matcher):
-        self.matcher = matcher
-        self.pagenum = None
-
     def setup(self, frbr_uri, text=None, root=None):
         self.frbr_uri = frbr_uri
         self.text = text
         self.root = root
         self.matches = []
+        self.pagenum = None
 
         if root:
-            self.ns = self.root.nsmap[None]
-            self.nsmap = {"a": self.ns}
-            self.marker_tag = "{%s}%s" % (self.ns, self.marker_tag)
+            self.ns = self.root.nsmap[None] if self.root.nsmap else None
+            self.nsmap = {"a": self.ns} if self.ns else {}
+            self.marker_tag = (
+                "{%s}%s" % (self.ns, self.marker_tag) if self.ns else self.marker_tag
+            )
             self.candidate_xpath = etree.XPath(
                 self.candidate_xpath, namespaces=self.nsmap
             )
@@ -76,7 +75,7 @@ class TextPatternMatcher:
 
     def run_html_matching(self):
         for ancestor in self.ancestor_nodes():
-            for candidate in self.candidate_nodes(ancestor):
+            for candidate in self.candidate_text_nodes(ancestor):
                 node = candidate.getparent()
 
                 # TODO: this could probably be made simpler if we processed matches from right to left.
@@ -110,8 +109,8 @@ class TextPatternMatcher:
         Otherwise, return None.
         """
         if self.is_node_match_valid(node, match):
-            ref, start_pos, end_pos = self.markup_node_match(node, match)
-            return wrap_text(node, in_tail, lambda t: ref, start_pos, end_pos)
+            marker, start_pos, end_pos = self.markup_node_match(node, match)
+            return wrap_text(node, in_tail, lambda t: marker, start_pos, end_pos)
 
     def is_node_match_valid(self, node, match):
         return True
@@ -133,29 +132,32 @@ class TextPatternMatcher:
     def ancestor_nodes(self):
         return [self.root]
 
-    def candidate_nodes(self, root):
+    def candidate_text_nodes(self, root):
         return self.candidate_xpath(root)
 
 
-class RefsMarker(TextPatternMatcher):
+class CitationMatcher(TextPatternMatcher):
     """Marks references to cited documents that follow a common citation pattern."""
 
-    marker_tag = "ref"
+    marker_tag = "a"
+
+    frbr_uri_pattern = "/akn/"
 
     def is_node_match_valid(self, node, match):
         if self.make_href(match) != self.frbr_uri.work_uri():
             return True
 
-    def markup_match(self, node, match):
+    def markup_node_match(self, node, match):
         """Markup the match with a ref tag. The first group in the match is substituted with the ref."""
-        ref = etree.Element(self.marker_tag)
-        ref.text = match.group("ref")
-        ref.set("href", self.make_href(match))
-        return ref, match.start("ref"), match.end("ref")
+        node, start, end = super().markup_node_match(node, match)
+        node.set("href", self.make_href(match))
+        return node, start, end
 
     def make_href(self, match):
-        """Turn this match into a full FRBR URI href.
-
-        Subclasses must implement this method.
+        """Turn this match into a full FRBR URI href using the frbr_uri_pattern. Subclasses can also
+        override this method to do more complex things.
         """
-        raise NotImplementedError()
+        return self.frbr_uri_pattern.format(**self.frbr_uri_pattern_args(match))
+
+    def frbr_uri_pattern_args(self, match):
+        return match.groupdict()
