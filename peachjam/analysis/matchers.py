@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from lxml import etree
 
 from peachjam.analysis.xmlutils import wrap_text
@@ -7,9 +9,9 @@ class TextPatternMatcher:
     """Logic for matching and marking up portions of text in paged text,  xml or html documents using regular
     expressions. It supports two modes of operation:
 
-    1. running the regular expression across plain text, and storing the matches in matches.
+    1. running the regular expression across plain text, and storing the matches in citations.
     2. running the regular expression across certain nodes in an HTML/XML tree, marking up the matches, and storing
-       matches in matches.
+       matches in citations.
     """
 
     pattern_re = None
@@ -20,7 +22,7 @@ class TextPatternMatcher:
     """ Xpath for candidate text nodes that should be tested for matches. Defaults to all text nodes.
     """
 
-    marker_tag = "b"
+    marker_tag = "mark"
     """ Tag that will be used to markup matches.
     """
 
@@ -28,10 +30,9 @@ class TextPatternMatcher:
         self.frbr_uri = frbr_uri
         self.text = text
         self.root = root
-        self.matches = []
         self.pagenum = None
 
-        if root:
+        if root is not None:
             self.ns = self.root.nsmap[None] if self.root.nsmap else None
             self.nsmap = {"a": self.ns} if self.ns else {}
             self.marker_tag = (
@@ -65,8 +66,7 @@ class TextPatternMatcher:
         return True
 
     def handle_text_match(self, text, match):
-        # TODO: create and stash an object
-        self.matches.append(match)
+        pass
 
     def markup_html_matches(self, frbr_uri, root):
         """Extract matches in a parsed HTML tree."""
@@ -123,8 +123,6 @@ class TextPatternMatcher:
         The element is the new element to insert into the tree, and the start_pos and end_pos specify
         the offsets of the chunk of text that will be replaced by the new element.
         """
-        # TODO: create and stash an object
-        self.matches.append(match)
         marker = etree.Element(self.marker_tag)
         marker.text = match.group(0)
         return marker, match.start(0), match.end(0)
@@ -136,12 +134,31 @@ class TextPatternMatcher:
         return self.candidate_xpath(root)
 
 
+@dataclass
+class ExtractedCitation:
+    text: str
+    start: int
+    end: int
+    href: str
+
+
 class CitationMatcher(TextPatternMatcher):
     """Marks references to cited documents that follow a common citation pattern."""
 
     marker_tag = "a"
 
-    frbr_uri_pattern = "/akn/"
+    href_pattern = "/akn/"
+
+    def setup(self, *args, **kwargs):
+        super().setup(*args, **kwargs)
+        self.citations = []
+
+    def handle_text_match(self, text, match):
+        self.citations.append(
+            ExtractedCitation(
+                match.group(), match.start(), match.end(), self.make_href(match)
+            )
+        )
 
     def is_node_match_valid(self, node, match):
         if self.make_href(match) != self.frbr_uri.work_uri():
@@ -150,14 +167,18 @@ class CitationMatcher(TextPatternMatcher):
     def markup_node_match(self, node, match):
         """Markup the match with a ref tag. The first group in the match is substituted with the ref."""
         node, start, end = super().markup_node_match(node, match)
-        node.set("href", self.make_href(match))
+        href = self.make_href(match)
+        node.set("href", href)
+        self.citations.append(
+            ExtractedCitation(match.group(), match.start(), match.end(), href)
+        )
         return node, start, end
 
     def make_href(self, match):
-        """Turn this match into a full FRBR URI href using the frbr_uri_pattern. Subclasses can also
+        """Turn this match into a full FRBR URI href using the href_pattern. Subclasses can also
         override this method to do more complex things.
         """
-        return self.frbr_uri_pattern.format(**self.frbr_uri_pattern_args(match))
+        return self.href_pattern.format(**self.href_pattern_args(match))
 
-    def frbr_uri_pattern_args(self, match):
+    def href_pattern_args(self, match):
         return match.groupdict()

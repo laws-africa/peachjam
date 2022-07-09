@@ -4,7 +4,7 @@ from peachjam.analysis.citations import citation_analyser
 from peachjam.analysis.matchers import CitationMatcher
 
 
-class RefsMarkerAchprResolutions(CitationMatcher):
+class AchprResolutionMatcher(CitationMatcher):
     """Finds references to ACHPR resolutions in documents, of the form:
 
     ACHPR/Res.227 (LII) 2012
@@ -22,10 +22,10 @@ class RefsMarkerAchprResolutions(CitationMatcher):
     )
     candidate_xpath = ".//text()[contains(., 'ACHPR') and not(ancestor::a)]"
 
-    frbr_uri_pattern = "/akn/aa-au/statement/resolution/achpr/{year}/{num}"
+    href_pattern = "/akn/aa-au/statement/resolution/achpr/{year}/{num}"
 
-    def frbr_uri_pattern_args(self, match):
-        args = super().frbr_uri_pattern_args(match)
+    def href_pattern_args(self, match):
+        args = super().href_pattern_args(match)
 
         # adjust for short years
         year = int(args["year"])
@@ -42,4 +42,4 @@ class RefsMarkerAchprResolutions(CitationMatcher):
 # TODO: Act 5 of 2019 matcher, use whatever marker is appropriate
 # TODO: for plain text, we care about the regex and how to extract the right run and FRBR URI from it
 # TODO: for html, we care about the regex and how to markup the right run and FRBR URI from it
-citation_analyser.matchers.append(RefsMarkerAchprResolutions)
+citation_analyser.matchers.append(AchprResolutionMatcher)
