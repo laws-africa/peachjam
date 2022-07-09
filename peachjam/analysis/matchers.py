@@ -140,6 +140,7 @@ class ExtractedCitation:
     start: int
     end: int
     href: str
+    target_id: str
 
 
 class CitationMatcher(TextPatternMatcher):
@@ -156,7 +157,11 @@ class CitationMatcher(TextPatternMatcher):
     def handle_text_match(self, text, match):
         self.citations.append(
             ExtractedCitation(
-                match.group(), match.start(), match.end(), self.make_href(match)
+                match.group(),
+                match.start(),
+                match.end(),
+                self.make_href(match),
+                self.pagenum,
             )
         )
 

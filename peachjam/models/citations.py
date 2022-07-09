@@ -14,3 +14,20 @@ class CitationLink(models.Model):
 
     def __str__(self):
         return f"Citation link for {self.document.doc_type} - {self.document.title}"
+
+    @classmethod
+    def from_extracted_citation(cls, citation):
+        """Create a new CitationLink object from an ExtractedCitation object."""
+        # TODO: this currently assumes a plain-text citation
+        return cls(
+            text=citation.text,
+            url=citation.href,
+            target_id=f"page-{citation.pagenum + 1}",
+            target_selectors=[
+                {
+                    "type": "TextPositionSelector",
+                    "start": citation.start,
+                    "end": citation.end,
+                }
+            ],
+        )

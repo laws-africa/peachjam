@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
+from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
 
 
@@ -193,3 +194,11 @@ class SourceFile(AttachmentAbstractModel):
         if not self.mimetype:
             self.mimetype = magic.from_buffer(self.file.read(), mime=True)
         return super().save(*args, **kwargs)
+
+    def as_pdf(self):
+        if self.filename.endswith(".pdf"):
+            return self.file
+
+        # convert with soffice
+        suffix = os.path.splitext(self.filename)[1].replace(".", "")
+        return soffice_convert(self.file, suffix, "pdf")[0]
