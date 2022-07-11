@@ -1,4 +1,3 @@
-from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
@@ -24,9 +23,6 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
     def get_context_data(self, **kwargs):
         context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
 
-        # Initialize facet_data values i.e years and authors
-        years = list(set(self.model.objects.values_list("date__year", flat=True)))
-
         object_doc_type = self.model.objects.values_list("doc_type", flat=True)
         if object_doc_type and "legislation" not in object_doc_type:
             authors = list(
@@ -40,39 +36,7 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
         else:
             authors = []
 
-        # Read parameter values
-        params = QueryDict(mutable=True)
-        params.update(self.request.GET)
-
-        year = params.get("year")
-        author = params.get("author")
-        alphabet = params.get("alphabet")
-
-        # Use parameter values to filter
-        if year:
-            # TODO: apply all filters except year
-            years = list(
-                set(
-                    self.model.objects.filter(date__year=year).values_list(
-                        "date__year", flat=True
-                    )
-                )
-            )
-
-        if author:
-            authors = list(
-                set(
-                    self.model.objects.filter(author__name=author).values_list(
-                        "author__name", flat=True
-                    )
-                )
-            )
-
-        if alphabet:
-            documents = self.get_queryset().filter(title__istartswith=alphabet)
-            years = list(set(documents.values_list("date__year", flat=True)))
-            authors = list(set(documents.values_list("author__name", flat=True)))
-            context["documents"] = documents
+        years = list(set(self.model.objects.values_list("date__year", flat=True)))
 
         context["facet_data"] = {
             "years": years,
@@ -141,5 +105,15 @@ class BaseDocumentDetailView(DetailView):
             context["predicates_json"] = PredicateSerializer(
                 Predicate.objects.all(), many=True
             ).data
+
+        if context["document"].content_html:
+            if context["document"].content_html_is_akn:
+                context["display_type"] = "akn"
+            else:
+                context["display_type"] = "html"
+        elif context["document"].source_file:
+            context["display_type"] = "pdf"
+        else:
+            context["display_type"] = None
 
         return context
