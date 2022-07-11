@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 
@@ -43,8 +44,43 @@ class AuthorListView(BaseAuthorListView):
             | Q(judgment__author=author)
         )
 
+        # Initialize facet data values
         years = list(set(docs.values_list("date__year", flat=True)))
         doc_types = list(set(docs.values_list("doc_type", flat=True)))
+
+        # Read params in request
+        params = QueryDict(mutable=True)
+        params.update(self.request.GET)
+
+        # Use params to refine search results
+        year = params.get("year")
+        if year:
+            doc_types = list(
+                set(docs.filter(date__year=year).values_list("doc_type", flat=True))
+            )
+
+        doc_type = params.get("doc_type")
+        if doc_type:
+            years = list(
+                set(docs.filter(doc_type=doc_type).values_list("date__year", flat=True))
+            )
+
+        alphabet = params.get("alphabet")
+        if alphabet:
+            years = list(
+                set(
+                    docs.filter(title__istartswith=alphabet).values_list(
+                        "date__year", flat=True
+                    )
+                )
+            )
+            doc_types = list(
+                set(
+                    docs.filter(title__istartswith=alphabet).values_list(
+                        "doc_type", flat=True
+                    )
+                )
+            )
 
         context["author"] = author
         context["author_listing_view"] = True

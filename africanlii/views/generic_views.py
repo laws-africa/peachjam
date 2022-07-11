@@ -1,3 +1,4 @@
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
@@ -23,6 +24,7 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
     def get_context_data(self, **kwargs):
         context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
 
+        # Initialize facet data values
         object_doc_type = self.model.objects.values_list("doc_type", flat=True)
         if object_doc_type and "legislation" not in object_doc_type:
             authors = list(
@@ -37,6 +39,48 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
             authors = []
 
         years = list(set(self.model.objects.values_list("date__year", flat=True)))
+
+        # Read params in request
+        params = QueryDict(mutable=True)
+        params.update(self.request.GET)
+
+        # Use params to refine search results
+        year = params.get("year")
+        if year:
+            authors = list(
+                set(
+                    self.model.objects.filter(date__year=year).values_list(
+                        "author__name", flat=True
+                    )
+                )
+            )
+
+        author = params.get("author")
+        if author:
+            years = list(
+                set(
+                    self.model.objects.filter(author__name=author).values_list(
+                        "date__year", flat=True
+                    )
+                )
+            )
+
+        alphabet = params.get("alphabet")
+        if alphabet:
+            years = list(
+                set(
+                    self.model.objects.filter(title__istartswith=alphabet).values_list(
+                        "date__year", flat=True
+                    )
+                )
+            )
+            authors = list(
+                set(
+                    self.model.objects.filter(title__istartswith=alphabet).values_list(
+                        "author__name", flat=True
+                    )
+                )
+            )
 
         context["facet_data"] = {
             "years": years,
