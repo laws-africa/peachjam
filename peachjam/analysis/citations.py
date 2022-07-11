@@ -1,67 +1,10 @@
 import shutil
 import tempfile
-from dataclasses import dataclass
 
 import lxml.html
 from docpipe.pdf import pdf_to_text
 
-from peachjam.analysis.matchers import TextPatternMatcher
 from peachjam.models import CitationLink
-
-
-@dataclass
-class ExtractedCitation:
-    text: str
-    start: int
-    end: int
-    href: str
-    target_id: str
-
-
-class CitationMatcher(TextPatternMatcher):
-    """Marks references to cited documents that follow a common citation pattern."""
-
-    marker_tag = "a"
-
-    href_pattern = "/akn/"
-
-    def setup(self, *args, **kwargs):
-        super().setup(*args, **kwargs)
-        self.citations = []
-
-    def handle_text_match(self, text, match):
-        self.citations.append(
-            ExtractedCitation(
-                match.group(),
-                match.start(),
-                match.end(),
-                self.make_href(match),
-                self.pagenum,
-            )
-        )
-
-    def is_node_match_valid(self, node, match):
-        if self.make_href(match) != self.frbr_uri.work_uri():
-            return True
-
-    def markup_node_match(self, node, match):
-        """Markup the match with a ref tag. The first group in the match is substituted with the ref."""
-        node, start, end = super().markup_node_match(node, match)
-        href = self.make_href(match)
-        node.set("href", href)
-        self.citations.append(
-            ExtractedCitation(match.group(), match.start(), match.end(), href)
-        )
-        return node, start, end
-
-    def make_href(self, match):
-        """Turn this match into a full FRBR URI href using the href_pattern. Subclasses can also
-        override this method to do more complex things.
-        """
-        return self.href_pattern.format(**self.href_pattern_args(match))
-
-    def href_pattern_args(self, match):
-        return match.groupdict()
 
 
 class CitationAnalyser:
