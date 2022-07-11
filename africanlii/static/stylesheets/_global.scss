@@ -20,6 +20,22 @@ main {
   padding-bottom: 5px;
 }
 
+.nav-tabs {
+  border: none;
+
+  .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: $body-color;
+
+    &.active {
+      border: none;
+      font-weight: bold;
+      border-bottom: 2px solid $primary;
+    }
+  }
+}
+
 mark {
   background-color: yellow;
   padding: 0;
@@ -27,4 +43,8 @@ mark {
 
 .result-snippet * {
   font-size: $font-size-base;
+}
+
+.la-akoma-ntoso-with-gutter la-gutter {
+  background-color: transparent !important;
 }

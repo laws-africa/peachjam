@@ -82,6 +82,10 @@ export default {
     document: {
       type: HTMLElement,
       required: true
+    },
+    mountElement: {
+      type: HTMLElement,
+      required: true
     }
   },
   data: () => ({
@@ -115,6 +119,7 @@ export default {
     },
 
     goToSnippet (node) {
+      this.mountElement.dispatchEvent(new CustomEvent('going-to-snippet'));
       scrollToElement(node, 60).then(() => {
         node.style.outline = '2px solid transparent';
         node.style.transition = 'outline-color 400ms ease-in-out';
@@ -165,7 +170,6 @@ export default {
   flex-direction: column;
   height: 100%;
   padding: 1rem;
-  background-color: #f8f9fa;
 }
 
 .doc-search__results {
