@@ -29,7 +29,11 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
             authors = []
         else:
             authors = list(
-                set(self.model.objects.values_list("author__name", flat=True))
+                set(
+                    a
+                    for a in self.model.objects.values_list("author__name", flat=True)
+                    if a
+                )
             )
 
         years = list(set(self.model.objects.values_list("date__year", flat=True)))
@@ -101,5 +105,15 @@ class BaseDocumentDetailView(DetailView):
             context["predicates_json"] = PredicateSerializer(
                 Predicate.objects.all(), many=True
             ).data
+
+        if context["document"].content_html:
+            if context["document"].content_html_is_akn:
+                context["display_type"] = "akn"
+            else:
+                context["display_type"] = "html"
+        elif context["document"].source_file:
+            context["display_type"] = "pdf"
+        else:
+            context["display_type"] = None
 
         return context
