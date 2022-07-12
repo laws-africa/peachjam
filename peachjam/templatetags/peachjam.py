@@ -17,3 +17,8 @@ def admin_url(obj, verb):
         "admin:%s_%s_%s" % (obj._meta.app_label, obj._meta.model_name, verb),
         args=[obj.pk],
     )
+
+
+@register.filter
+def strip_first_character(value):
+    return value[1:]
