@@ -465,7 +465,6 @@ export default {
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
-              console.log({ ...this.searchInfo });
               if (this.searchInfo.count === 0) {
                 this.clearAllFilters();
               }
