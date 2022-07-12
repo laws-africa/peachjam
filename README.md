@@ -80,3 +80,11 @@ django-admin compilemessages
 ```
 
 And then commit the changes.
+
+
+## i18n-vue translations
+Translations for `vue` components are stored in `peachjam/js/locales`. To generate translation using i18next run.
+TODO: Establish protocol with crowdin
+```
+i18next './peachjam/js/**/*.{js,vue}'
+```
