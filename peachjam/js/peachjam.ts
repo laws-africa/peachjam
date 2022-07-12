@@ -6,6 +6,8 @@ import '@lawsafrica/web-components/dist/components/la-gutter-item';
 import '@lawsafrica/web-components/dist/components/la-table-of-contents-controller';
 import '@lawsafrica/web-components/dist/components/la-decorate-internal-refs';
 import '@lawsafrica/web-components/dist/components/la-decorate-terms';
+// @ts-ignore
+import { i18n } from './i18n';
 
 class PeachJam {
   private components: any[];
@@ -32,7 +34,9 @@ class PeachJam {
       const name = el.getAttribute('data-vue-component');
       if (name && components[name]) {
         const vueComp = defineComponent(components[name]);
-        createApp(vueComp).mount(el);
+        const app = createApp(vueComp);
+        app.use(i18n);
+        app.mount(el);
         (el as any).component = vueComp;
         this.components.push(vueComp);
       }

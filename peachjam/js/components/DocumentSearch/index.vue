@@ -10,8 +10,8 @@
           type="text"
           required
           class="form-control"
-          placeholder="Search document content"
-          aria-label="Search document content"
+          :placeholder="$t('Search document content')"
+          :aria-label="$t('Search document content')"
           aria-describedby="search-content-button"
           minlength="3"
         >
@@ -19,7 +19,7 @@
           class="btn btn-secondary"
           type="submit"
         >
-          Search
+          {{ $t("Search") }}
         </button>
       </div>
       <div
@@ -29,13 +29,13 @@
         <a
           href="#"
           @click.prevent="clear"
-        >Clear</a>
+        >{{ $t("Clear") }}</a>
       </div>
       <div
         v-if="!marks.length && q"
         class="mt-2"
       >
-        No results
+        {{ $t("No results") }}
       </div>
     </form>
     <div class="doc-search__results">

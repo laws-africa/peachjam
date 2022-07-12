@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 import DocumentSearch from './DocumentSearch/index.vue';
 import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
+import { i18n } from '../i18n';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -77,6 +78,7 @@ class DocumentContent {
         mountElement: targetMountElement
       });
       this.searchApp = app;
+      app.use(i18n);
       app.mount(targetMountElement);
       targetMountElement.addEventListener('going-to-snippet', () => {
         this.navOffCanvas?.hide();

@@ -9,7 +9,7 @@
     @click="$emit('go-to-snippet', snippet.snippetNode);"
   >
     <div class="card-body">
-      <h5><strong>Page {{ snippet.pageNode.dataset.page }}</strong></h5>
+      <h5><strong>{{ $t("Page") }} {{ snippet.pageNode.dataset.page }}</strong></h5>
       <div>
         <ResultSnippet :node="snippet.snippetNode.cloneNode(true)" />
       </div>
