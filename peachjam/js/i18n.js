@@ -7,7 +7,7 @@ const selectedLang = languageSelect ? languageSelect.options[languageSelect.sele
 
 const loadJSONFile = (url = '') => {
   try {
-    return require(`./peachjam/js/locale/${url}`);
+    return require(`./locale/${url}`);
   } catch (e) {
     return null;
   }
