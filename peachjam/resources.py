@@ -125,7 +125,7 @@ class JudgmentResource(BaseDocumentResource):
         model = Judgment
 
     def before_import_row(self, row, **kwargs):
-        super().before_import_row(row, **kwargs)
+        # super().before_import_row(row, **kwargs)
         if row["judges"]:
             for judge in list(map(str.strip, row["judges"].split("|"))):
                 Judge.objects.get_or_create(name=judge)
