@@ -1,4 +1,3 @@
-from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
@@ -30,7 +29,9 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
             authors = list(
                 {
                     a
-                    for a in self.model.objects.values_list("author__name", flat=True)
+                    for a in self.form.filter_queryset(
+                        self.model.objects, exclude="author"
+                    ).values_list("author__name", flat=True)
                     if a
                 }
             )
@@ -38,49 +39,13 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
         else:
             authors = []
 
-        years = list(set(self.model.objects.values_list("date__year", flat=True)))
-
-        # Read params in request
-        params = QueryDict(mutable=True)
-        params.update(self.request.GET)
-
-        # Use params to refine search results
-        year = params.get("year")
-        if year:
-            authors = list(
-                set(
-                    self.model.objects.filter(date__year=year).values_list(
-                        "author__name", flat=True
-                    )
-                )
+        years = list(
+            set(
+                self.form.filter_queryset(
+                    self.model.objects, exclude="year"
+                ).values_list("date__year", flat=True)
             )
-
-        author = params.get("author")
-        if author:
-            years = list(
-                set(
-                    self.model.objects.filter(author__name=author).values_list(
-                        "date__year", flat=True
-                    )
-                )
-            )
-
-        alphabet = params.get("alphabet")
-        if alphabet:
-            years = list(
-                set(
-                    self.model.objects.filter(title__istartswith=alphabet).values_list(
-                        "date__year", flat=True
-                    )
-                )
-            )
-            authors = list(
-                set(
-                    self.model.objects.filter(title__istartswith=alphabet).values_list(
-                        "author__name", flat=True
-                    )
-                )
-            )
+        )
 
         context["facet_data"] = {
             "years": years,
