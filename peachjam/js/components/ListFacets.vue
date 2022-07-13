@@ -20,7 +20,7 @@
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>{{ $('Authoring Body') }}</strong>
+          <strong>{{ $t('Authoring Body') }}</strong>
           <div class="d-flex align-items-center">
             <a
               v-if="getUrlParamValue('author').length"
@@ -161,7 +161,8 @@
               v-if="getUrlParamValue('year').length"
               href="#"
               @click.prevent="clearFacet('year')"
-            >{{ $t('Clear') }}
+            >
+              {{ $t('Clear') }}
             </a>
             <div
               v-if="loading"
