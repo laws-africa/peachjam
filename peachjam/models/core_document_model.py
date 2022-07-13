@@ -92,7 +92,9 @@ class CoreDocument(models.Model):
     def clean(self):
         if self.work_frbr_uri:
             try:
-                FrbrUri.parse(self.work_frbr_uri)
+                parsed = FrbrUri.parse(self.work_frbr_uri)
+                if parsed.prefix != "akn":
+                    raise ValueError()
             except ValueError:
                 raise ValidationError({"work_frbr_uri": "Invalid FRBR URI."})
 
@@ -103,8 +105,7 @@ class CoreDocument(models.Model):
         return frbr_uri.expression_uri()
 
     def save(self, *args, **kwargs):
-        if not self.expression_frbr_uri:
-            self.expression_frbr_uri = self.generate_expression_frbr_uri()
+        self.expression_frbr_uri = self.generate_expression_frbr_uri()
 
         # ensure a matching work exists
         if self.work_frbr_uri and (
