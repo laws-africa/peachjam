@@ -124,6 +124,9 @@ class JudgmentResource(BaseDocumentResource):
     class Meta(BaseDocumentResource.Meta):
         model = Judgment
 
+    def before_import_row(self, row, **kwargs):
+        pass
+
     def after_import_row(self, row, instance, row_number=None, **kwargs):
         super().after_import_row(row, instance, row_number, **kwargs)
 
