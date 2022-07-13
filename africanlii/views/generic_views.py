@@ -21,7 +21,7 @@ class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
         return self.form.filter_queryset(queryset)
 
     def get_context_data(self, **kwargs):
-        context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         # Initialize facet data values
         object_doc_type = self.model.objects.values_list("doc_type", flat=True)
