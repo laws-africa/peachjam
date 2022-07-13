@@ -7,3 +7,5 @@ files:
     translation: /africanlii/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
   - source: /africanlii/locale/sw/LC_MESSAGES/django.po
     translation: /africanlii/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
+  - source: /peachjam/js/locale/en/translation.json
+    translation: /peachjam/js/locale/%two_letters_code%/%original_file_name%
