@@ -1,10 +1,12 @@
 {
   "Alphabetical": "Alphabetical",
   "Author": "Author",
+  "Authoring Body": "Authoring Body",
   "Clear": "Clear",
   "Clear all": "Clear all",
   "Clear All": "Clear All",
   "Court": "Court",
+  "Delete": "Delete",
   "Document nature": "Document nature",
   "Document type": "Document type",
   "Filters": "Filters",
@@ -18,5 +20,7 @@
   "Page": "Page",
   "Search": "Search",
   "Search document content": "Search document content",
+  "this provision": "this provision",
+  "This provision": "This provision",
   "Year": "Year"
 }
