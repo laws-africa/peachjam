@@ -6,13 +6,13 @@
   >
     <ul class="list-group">
       <li class="list-group-item bg-light d-flex justify-content-between align-items-center">
-        <strong>{{ $t("Filters") }}</strong>
+        <strong>{{ $t('Filters') }}</strong>
         <a
           v-if="showClearAllFilter"
           href="#"
           @click.prevent="clearAll"
         >
-          {{ $t("Clear all") }}
+          {{ $t('Clear all') }}
         </a>
       </li>
       <li
@@ -20,14 +20,14 @@
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>Authoring Body</strong>
+          <strong>{{ $('Authoring Body') }}</strong>
           <div class="d-flex align-items-center">
             <a
               v-if="getUrlParamValue('author').length"
               href="#"
               @click.prevent="clearFacet('author')"
             >
-              {{ $t("Clear") }}
+              {{ $t('Clear') }}
             </a>
             <span
               v-if="loading"
@@ -65,14 +65,14 @@
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>Document type</strong>
+          <strong>{{ $t('Document type') }}</strong>
           <div class="d-flex align-items-center">
             <a
               v-if="getUrlParamValue('doc_type').length"
               href="#"
               @click.prevent="clearFacet('doc_type')"
             >
-              {{ $t("Clear") }}
+              {{ $t('Clear') }}
             </a>
             <span
               v-if="loading"
@@ -110,14 +110,14 @@
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>{{ $t("Court") }}</strong>
+          <strong>{{ $t('Court') }}</strong>
           <div class="d-flex align-items-center">
             <a
               v-if="getUrlParamValue('court').length"
               href="#"
               @click.prevent="clearFacet('court')"
             >
-              {{ $t("Clear") }}
+              {{ $t('Clear') }}
             </a>
             <span
               v-if="loading"
@@ -161,8 +161,7 @@
               v-if="getUrlParamValue('year').length"
               href="#"
               @click.prevent="clearFacet('year')"
-            >
-              Clear
+            >{{ $t('Clear') }}
             </a>
             <div
               v-if="loading"
@@ -207,7 +206,7 @@
               href="#"
               @click.prevent="clearFacet('alphabet')"
             >
-              {{ $t("Clear") }}
+              {{ $t('Clear') }}
             </a>
             <span
               v-if="loading"
