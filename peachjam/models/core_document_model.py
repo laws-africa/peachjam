@@ -169,7 +169,7 @@ class Image(AttachmentAbstractModel):
     SAVE_FOLDER = "images"
 
     document = models.ForeignKey(
-        CoreDocument, related_name="images", on_delete=models.PROTECT
+        CoreDocument, related_name="images", on_delete=models.CASCADE
     )
     file = models.ImageField(upload_to=file_location, max_length=1024)
 
@@ -178,7 +178,7 @@ class SourceFile(AttachmentAbstractModel):
     SAVE_FOLDER = "source_file"
 
     document = models.OneToOneField(
-        CoreDocument, related_name="source_file", on_delete=models.PROTECT
+        CoreDocument, related_name="source_file", on_delete=models.CASCADE
     )
     file = models.FileField(upload_to=file_location, max_length=1024)
 
