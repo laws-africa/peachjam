@@ -45,7 +45,10 @@ from peachjam.resources import GenericDocumentResource, JudgmentResource
 
 
 class PeachJamSettingsAdmin(admin.ModelAdmin):
-    filter_horizontal = ("document_languages", "document_jurisdictions",)
+    filter_horizontal = (
+        "document_languages",
+        "document_jurisdictions",
+    )
 
 
 class SourceFileFilter(admin.SimpleListFilter):
