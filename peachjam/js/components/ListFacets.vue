@@ -16,56 +16,11 @@
         </a>
       </li>
       <li
-        v-if="years.length"
-        class="list-group-item"
-      >
-        <div class="d-flex justify-content-between mb-2">
-          <strong>Year</strong>
-          <div class="d-flex align-items-center">
-            <a
-              v-if="getUrlParamValue('year').length"
-              href="#"
-              @click.prevent="clearFacet('year')"
-            >
-              Clear
-            </a>
-            <div
-              v-if="loading"
-              class="circle-loader ms-2"
-            />
-          </div>
-        </div>
-        <div class="facets-scrollable">
-          <div
-            v-for="(year, index) in sortDescending(years)"
-            :key="index"
-            class="d-flex justify-content-between align-items-center"
-          >
-            <div class="form-check">
-              <input
-                :id="year"
-                class="form-check-input"
-                type="checkbox"
-                name="year"
-                :value="year"
-                :checked="inputChecked('year', year)"
-              >
-              <label
-                class="form-check-label"
-                :for="year"
-              >
-                {{ year }}
-              </label>
-            </div>
-          </div>
-        </div>
-      </li>
-      <li
         v-if="authors.length"
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>Authors</strong>
+          <strong>Authoring Body</strong>
           <div class="d-flex align-items-center">
             <a
               v-if="getUrlParamValue('author').length"
@@ -196,6 +151,51 @@
         </div>
       </li>
       <li
+        v-if="years.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Year</strong>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="getUrlParamValue('year').length"
+              href="#"
+              @click.prevent="clearFacet('year')"
+            >
+              Clear
+            </a>
+            <div
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
+        </div>
+        <div class="facets-scrollable">
+          <div
+            v-for="(year, index) in sortDescending(years)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                :id="year"
+                class="form-check-input"
+                type="checkbox"
+                name="year"
+                :value="year"
+                :checked="inputChecked('year', year)"
+              >
+              <label
+                class="form-check-label"
+                :for="year"
+              >
+                {{ year }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li
         v-if="alphabet.length"
         class="list-group-item"
       >
@@ -265,8 +265,7 @@ export default {
   },
   data: () => {
     return {
-      loading: false,
-      author: null
+      loading: false
     };
   },
   computed: {

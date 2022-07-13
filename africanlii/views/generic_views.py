@@ -3,7 +3,15 @@ from django.views.generic import DetailView, ListView
 
 from africanlii.forms import BaseDocumentFilterForm
 from africanlii.utils import lowercase_alphabet
-from peachjam.models import CitationLink, CoreDocument, Predicate, Relationship
+from peachjam.models import (
+    CitationLink,
+    CoreDocument,
+    GenericDocument,
+    Judgment,
+    LegalInstrument,
+    Predicate,
+    Relationship,
+)
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,
@@ -11,32 +19,42 @@ from peachjam_api.serializers import (
 )
 
 
-class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
+class FilteredDocumentListView(ListView):
     """Generic List View class for filtering documents."""
+
+    def get_base_queryset(self):
+        return self.model.objects.all()
 
     def get_queryset(self):
         self.form = BaseDocumentFilterForm(self.request.GET)
         self.form.is_valid()
-        queryset = self.model.objects.all()
-        return self.form.filter_queryset(queryset)
+        return self.form.filter_queryset(self.get_base_queryset())
 
     def get_context_data(self, **kwargs):
-        context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
-        object_doc_type = self.model.objects.values_list("doc_type", flat=True)
-        # Legislation objects don't have an associated author, hence empty authors list
-        if not object_doc_type or "legislation" in object_doc_type:
-            authors = []
-        else:
+        # Initialize facet data values
+        if self.model in [GenericDocument, LegalInstrument, Judgment]:
             authors = list(
-                set(
+                {
                     a
-                    for a in self.model.objects.values_list("author__name", flat=True)
+                    for a in self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="author"
+                    ).values_list("author__name", flat=True)
                     if a
-                )
+                }
             )
+        # Legislation objects don't have an associated author, hence empty authors list
+        else:
+            authors = []
 
-        years = list(set(self.model.objects.values_list("date__year", flat=True)))
+        years = list(
+            set(
+                self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="year"
+                ).values_list("date__year", flat=True)
+            )
+        )
 
         context["facet_data"] = {
             "years": years,
