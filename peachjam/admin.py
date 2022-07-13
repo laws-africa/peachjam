@@ -34,12 +34,18 @@ from peachjam.models import (
     Legislation,
     Locality,
     MatterType,
+    PeachJamSettings,
     Predicate,
     Relationship,
     SourceFile,
     Taxonomy,
+    pj_settings,
 )
 from peachjam.resources import GenericDocumentResource, JudgmentResource
+
+
+class PeachJamSettingsAdmin(admin.ModelAdmin):
+    filter_horizontal = ("document_languages",)
 
 
 class SourceFileFilter(admin.SimpleListFilter):
@@ -106,7 +112,16 @@ class DocumentForm(forms.ModelForm):
     headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
 
     def __init__(self, *args, **kwargs):
-        super(DocumentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+        # adjust form based on peach jam site settings
+        settings = pj_settings()
+        self.fields["language"].initial = settings.default_document_language
+        if settings.document_languages.exists():
+            self.fields["language"].queryset = settings.document_languages
+        if settings.document_languages.exists():
+            self.fields["jurisdiction"].queryset = settings.document_jurisdictions
+
         if self.instance and self.instance.content_html_is_akn:
             self.fields["content_html"].widget.attrs["readonly"] = True
 
@@ -335,6 +350,7 @@ admin.site.register(
         MatterType,
     ]
 )
+admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)
 admin.site.register(Taxonomy, TaxonomyAdmin)
 admin.site.register(GenericDocument, GenericDocumentAdmin)
 admin.site.register(Legislation, LegislationAdmin)

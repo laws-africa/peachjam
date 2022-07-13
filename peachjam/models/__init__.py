@@ -6,4 +6,5 @@ from .generic_document import *
 from .ingestors import *
 from .judgment import *
 from .relationships import *
+from .settings import *
 from .taxonomies import *
