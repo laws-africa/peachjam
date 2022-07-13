@@ -1,7 +1,7 @@
-{% load i18n %}
+{% load peachjam i18n %}
 {% if documents %}
   {% for object in documents %}
-    <a class="mb-2 d-flex" href="{% url 'document_detail' object.expression_frbr_uri %}">
+    <a class="mb-2 d-flex" href="{% url 'document_detail' object.expression_frbr_uri|strip_first_character %}">
       <span class="flex-grow-1">{{ object.title }}</span>
       <span>{{ object.date }}</span>
     </a>

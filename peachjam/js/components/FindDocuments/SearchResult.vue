@@ -43,7 +43,7 @@ export default {
   },
   computed: {
     href () {
-      return `/documents${this.item.expression_frbr_uri}/`;
+      return `${this.item.expression_frbr_uri}/`;
     }
   },
   methods: {

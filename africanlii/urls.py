@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_page
 
 from africanlii import views
@@ -32,13 +32,8 @@ urlpatterns = [
         views.GenericDocumentListView.as_view(),
         name="generic_document_list",
     ),
-    path(
-        "documents<path:expression_frbr_uri>/",
-        views.DocumentDetailViewResolver.as_view(),
-        name="document_detail",
-    ),
-    path(
-        "documents<path:expression_frbr_uri>/source",
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/source$",
         cache_page(60 * 60 * 24)(views.DocumentSourceView.as_view()),
         name="document_source",
     ),
@@ -47,8 +42,8 @@ urlpatterns = [
         views.AuthorListView.as_view(),
         name="authors",
     ),
-    path(
-        "documents<path:expression_frbr_uri>/source.pdf",
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/source.pdf$",
         cache_page(60 * 60 * 24)(views.DocumentSourcePDFView.as_view()),
         name="document_source_pdf",
     ),
@@ -68,6 +63,11 @@ urlpatterns = [
     ),
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
     path("i18n/", include("django.conf.urls.i18n")),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/$",
+        views.DocumentDetailViewResolver.as_view(),
+        name="document_detail",
+    ),
 ]
 
 if settings.DEBUG:

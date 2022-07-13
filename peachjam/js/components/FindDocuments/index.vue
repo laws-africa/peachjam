@@ -78,7 +78,10 @@
                   </a>
                 </div>
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_doc_type"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
                   <strong>Document type</strong>
                   <a
@@ -90,14 +93,16 @@
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_doc_type"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_doc_type.doc_type.buckets)"
                   :selection="filters.doc_type"
                   :loading="loading"
                   @changed="(x) => filters.doc_type = x"
                 />
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_authoring_body"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
                   <strong>Author</strong>
                   <a
@@ -109,14 +114,16 @@
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_authoring_body"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_authoring_body.authoring_body.buckets)"
                   :selection="filters.authoring_body"
                   :loading="loading"
                   @changed="(x) => filters.authoring_body = x"
                 />
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_jurisdiction"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
                   <strong>Jurisdiction</strong>
                   <a
@@ -128,14 +135,16 @@
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_jurisdiction"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_jurisdiction.jurisdiction.buckets)"
                   :selection="filters.jurisdiction"
                   :loading="loading"
                   @changed="(x) => filters.jurisdiction = x"
                 />
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_locality"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
                   <strong>Locality</strong>
                   <a
@@ -147,7 +156,6 @@
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_locality"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_locality.locality.buckets)"
                   :selection="filters.locality"
                   :loading="loading"
@@ -155,27 +163,10 @@
                 />
               </li>
 
-              <li class="list-group-item">
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>Year</strong>
-                  <a
-                    v-if="filters.year.length"
-                    href="#"
-                    @click.prevent="() => filters.year = []"
-                  >
-                    Clear
-                  </a>
-                </div>
-                <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_year"
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_year.year.buckets)"
-                  :selection="filters.year"
-                  :loading="loading"
-                  @changed="(x) => filters.year = x"
-                />
-              </li>
-
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_matter_type"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
                   <strong>Matter type</strong>
                   <a
@@ -187,14 +178,16 @@
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_matter_type"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_matter_type.matter_type.buckets)"
                   :selection="filters.matter_type"
                   :loading="loading"
                   @changed="(x) => filters.matter_type = x"
                 />
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_nature"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
                   <strong>Document nature</strong>
                   <a
@@ -206,14 +199,16 @@
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_nature"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_nature.nature.buckets)"
                   :selection="filters.nature"
                   :loading="loading"
                   @changed="(x) => filters.nature = x"
                 />
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_language"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
                   <strong>Language</strong>
                   <a
@@ -225,11 +220,31 @@
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_language"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_language.language.buckets)"
                   :selection="filters.language"
                   :loading="loading"
                   @changed="(x) => filters.language = x"
+                />
+              </li>
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_year"
+                class="list-group-item"
+              >
+                <div class="d-flex justify-content-between mb-2">
+                  <strong>Year</strong>
+                  <a
+                    v-if="filters.year.length"
+                    href="#"
+                    @click.prevent="() => filters.year = []"
+                  >
+                    Clear
+                  </a>
+                </div>
+                <TermFacet
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_year.year.buckets)"
+                  :selection="filters.year"
+                  :loading="loading"
+                  @changed="(x) => filters.year = x"
                 />
               </li>
             </ul>
