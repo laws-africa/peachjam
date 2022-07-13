@@ -16,19 +16,22 @@ interface iPdfLib {
 class PdfRenderer {
   protected pdf: any;
   protected pdfContentWrapper: HTMLElement | null;
-  protected previewPanelsContainer: HTMLElement | null;
   protected root: HTMLElement;
   protected scrollListenerActive: boolean;
   protected pdfContentMarks: any[];
   private readonly pdfSize: string | undefined;
+  public onPreviewPanelClick: () => void;
   constructor (root: HTMLElement) {
     this.root = root;
     this.pdf = root.dataset.pdf;
     this.pdfSize = root.dataset.pdfSize;
-    this.pdfContentWrapper = root.querySelector('.pdf-renderer__content');
-    this.previewPanelsContainer = root.querySelector('.pdf-renderer__previews__inner');
+    this.pdfContentWrapper = root.querySelector('.pdf-content');
     this.scrollListenerActive = true;
     this.pdfContentMarks = [];
+    this.onPreviewPanelClick = () => {};
+    this.root.addEventListener('preview-panel-clicked', () => {
+      this.onPreviewPanelClick();
+    });
 
     const observer = new MutationObserver(() => {
       const progressBarElement: HTMLElement | null = root.querySelector('.progress-bar');
@@ -41,9 +44,9 @@ class PdfRenderer {
     observer.observe(this.root, { attributes: true });
     this.setupPdfAndPreviewPanels().then(() => {
       this.root.removeAttribute('data-loading-progress');
-      this.root.removeAttribute('data-is-loading');
+      this.root.removeAttribute('data-pdf-loading');
 
-      const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-renderer__content__page'));
+      const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-content__page'));
       const previewPanels = Array.from(root.querySelectorAll('.preview-panel'));
       for (const previewPanel of previewPanels) {
         previewPanel.addEventListener('click', (e) => this.handlePreviewPanelClick(e));
@@ -57,8 +60,9 @@ class PdfRenderer {
               current = root.querySelector(`.preview-panel[data-page="${page.dataset.page}"]`);
               if (current) {
                 this.activatePreviewPanel(current);
-                if (this.previewPanelsContainer) {
-                  this.previewPanelsContainer.scrollTop = current.offsetTop - (current.offsetHeight * 2);
+                const scrollableContainer = this.root.querySelector('[data-preview-scroll-container]');
+                if (scrollableContainer) {
+                  scrollableContainer.scrollTop = (current.offsetTop + current.clientHeight) - (current.offsetHeight * 2);
                 }
               }
             }
@@ -80,8 +84,9 @@ class PdfRenderer {
   }
 
   handlePreviewPanelClick (e: Event) {
+    this.root.dispatchEvent(new CustomEvent('preview-panel-clicked'));
     const targetPage = e.currentTarget && e.currentTarget instanceof HTMLElement
-      ? this.root.querySelector(`.pdf-renderer__content__page[data-page="${e.currentTarget.dataset.page}"]`)
+      ? this.root.querySelector(`.pdf-content__page[data-page="${e.currentTarget.dataset.page}"]`)
       : null;
     if (e.currentTarget) {
       this.activatePreviewPanel(e.currentTarget);
@@ -113,18 +118,18 @@ class PdfRenderer {
     const loadingTask = pdfjsLib.getDocument(this.pdf);
 
     loadingTask.onProgress = (data: { loaded: number }) => {
-      if(this.pdfSize) {
+      if (this.pdfSize) {
         /*
         * The progress bar represents the progress of two processes
         *  1) loading the pdf data (first 50%)
         *  2) creating the pdf associating html and inserting it into the DOM (last 50%)
         * */
-        this.root.setAttribute('data-loading-progress', `${data.loaded / parseInt(this.pdfSize)/2}`);
+        this.root.setAttribute('data-loading-progress', `${data.loaded / parseInt(this.pdfSize) / 2}`);
       }
     };
 
     try {
-      this.root.setAttribute('data-is-loading', '');
+      this.root.setAttribute('data-pdf-loading', '');
       const pdf = await loadingTask.promise;
       const numPages = pdf.numPages;
       const listOfGetPages = Array.from(Array(numPages), (_, index) => pdf.getPage(index + 1));
@@ -134,7 +139,7 @@ class PdfRenderer {
         const elementRendered = document.createElement('div');
         elementRendered.setAttribute('id', String(index + 1));
         elementRendered.dataset.page = String(index + 1);
-        elementRendered.classList.add('pdf-renderer__content__page');
+        elementRendered.classList.add('pdf-content__page');
         elementRendered.style.position = 'relative';
         const canvas = document.createElement('canvas');
         canvas.style.display = 'block';
@@ -182,11 +187,12 @@ class PdfRenderer {
         pageNumber.classList.add('preview-panel__page-number');
         pageNumber.innerText = String(index + 1);
         panelPreview.append(target, pageNumber);
-        if (this.previewPanelsContainer) {
-          this.previewPanelsContainer.appendChild(panelPreview);
+        const previewPanelsContainer = this.root.querySelector('.pdf-previews');
+        if (previewPanelsContainer) {
+          previewPanelsContainer.appendChild(panelPreview);
         }
         const currentLoadingProgress = this.root.getAttribute('data-loading-progress');
-        if(currentLoadingProgress) {
+        if (currentLoadingProgress) {
           const progressIncrement = 0.5 / pages.length;
           this.root.setAttribute('data-loading-progress', `${parseFloat(currentLoadingProgress) + progressIncrement}`);
         }

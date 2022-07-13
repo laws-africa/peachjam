@@ -1,24 +1,131 @@
 {% load peachjam %}
 {% load i18n %}
 
-{% if document.content_html %}
-  {% if document.content_html_is_akn %}
-    <div class="row">
-      <div class="col-lg-3 d-none d-lg-block">
-        <aside class="toc">
+<div class="document-content"
+     data-component="DocumentContent"
+     data-display-type="{{ display_type }}"
+>
+
+  <div id="navigation-content" class="d-none">
+    <div class="navigation__inner">
+      <nav>
+        <div class="nav nav-tabs" id="navigation-tab" role="tablist">
+          {% if display_type == 'akn' and document.toc_json %}
+            <button class="nav-link"
+                    id="akn-toc-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#akn-toc"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-toc"
+                    aria-selected="true">
+              Table of contents
+            </button>
+          {% endif %}
+          {% if display_type == 'pdf' %}
+            <button class="nav-link"
+                    id="pdf-previews-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#pdf-previews"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-toc"
+                    aria-selected="true">
+              PDF previews
+            </button>
+          {% endif %}
+          <button class="nav-link"
+                  id="navigation-search-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#navigation-search"
+                  type="button"
+                  role="tab"
+                  aria-controls="nav-search"
+                  aria-selected="false">
+            Search
+          </button>
+        </div>
+      </nav>
+      <div class="tab-content" id="navigation-tab-content" data-preview-scroll-container>
+        <div class="tab-pane fade h-100"
+             id="navigation-search"
+             role="tabpanel"
+             aria-labelledby="nav-search-tab"
+        >
+          <div data-doc-search class="h-100"></div>
+        </div>
+        {% if display_type == 'akn' and document.toc_json %}
+        <div class="tab-pane fade h-100"
+             id="akn-toc"
+             role="tabpanel"
+             aria-labelledby="toc-tab">
+          <aside class="toc">
             <la-table-of-contents-controller
               items="{{ document.toc_json|jsonify }}"
               expand-all-btn-classes="btn btn-secondary btn-sm"
               collapse-all-btn-classes="btn btn-secondary btn-sm"
               title-filter-clear-btn-classes="btn btn-secondary btn-sm"
-              search-filter-input-classes="form-control"
+              title-filter-input-classes="form-control"
             ></la-table-of-contents-controller>
           </aside>
+        </div>
+        {% endif %}
+        {% if display_type == 'pdf' %}
+        <div class="tab-pane fade pdf-previews-pane"
+             id="pdf-previews"
+             role="tabpanel"
+             aria-labelledby="pdf-previews">
+          <div class="pdf-previews"></div>
+        </div>
+        {% endif %}
       </div>
-      <div class="col-lg-9">
-        <div class="la-akoma-ntoso-with-gutter">
+    </div>
+  </div>
+
+  {% if display_type == 'pdf' %}
+    <div data-pdf="{% url 'document_source_pdf' document.expression_frbr_uri|strip_first_character %}"
+         data-pdf-size="{{ document.source_file.file.size }}"
+         data-pdf-loading>
+    </div>
+  {% endif %}
+  <div class="document-content__toggle">
+    <button class="btn btn-primary"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#navigation-offcanvas"
+            aria-controls="navigation-offcanvas">
+      Navigate document
+    </button>
+  </div>
+
+  <div class="offcanvas offcanvas-start document-content__offcanvas"
+       tabindex="-1"
+       id="navigation-offcanvas"
+       aria-labelledby="navigation-offcanvasLabel"
+  >
+    <div class="offcanvas-header justify-content-end">
+      <button type="button"
+              class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="navigation" data-offcanvas-body>
+    </div>
+  </div>
+
+
+  <div class="document-content__inner">
+    <div class="navigation" id="navigation-column">
+    </div>
+    <div class="content-and-enrichments" data-component="RelationshipEnrichments">
+      <div class="content-and-enrichments__inner la-akoma-ntoso-with-gutter"
+       {% if not perms.peachjam.add_relationship %}
+         data-readonly="true"
+       {% endif %}
+       data-work-id="{{ document.work_id }}"
+       data-work-frbr-uri="{{ document.work_frbr_uri }}"
+      >
+        {% if display_type == 'akn' %}
           <la-akoma-ntoso
-            id="akn"
+            data-document-element
             expression-frbr-uri="{{ document.expression_frbr_uri }}"
             class="flash-target"
           >
@@ -27,31 +134,28 @@
 
             {{ document.content_html|safe }}
           </la-akoma-ntoso>
-          <la-gutter></la-gutter>
-        </div>
+        {% endif %}
+        {% if display_type == 'html' %}
+          <div class="content" data-document-element>
+            {{ document.content_html|safe }}
+          </div>
+        {% endif %}
+
+        {% if display_type == 'pdf' %}
+          <div class="content" data-document-element>
+            <div class="pdf-loading">
+              <div class="text-center mb-2"><strong>Loading PDF...</strong></div>
+              <div class="progress">
+                <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
+                     role="progressbar">
+                </div>
+              </div>
+            </div>
+            <div class="pdf-content"></div>
+          </div>
+        {% endif %}
+        <la-gutter></la-gutter>
       </div>
-    </div>
-  {% else %}
-    {{ document.content_html|safe }}
-  {% endif %}
-{% else %}
-  <div data-component="PdfRenderer"
-       data-pdf="{% url 'document_source_pdf' expression_frbr_uri=document.expression_frbr_uri %}"
-       data-pdf-size="{{ document.source_file.file.size }}"
-       data-is-loading
-  >
-    <div class="pdf-loading-text text-center mb-2"><strong>Loading PDF...</strong></div>
-    <div class="progress">
-      <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
-           role="progressbar">
-      </div>
-    </div>
-    <div class="pdf-renderer">
-      <div class="pdf-renderer__previews">
-      <div class="pdf-renderer__previews__inner"></div>
-    </div>
-    <div class="pdf-renderer__content"></div>
-    <div class="pdf-renderer__right"></div>
     </div>
   </div>
-{% endif %}
+</div>

@@ -11,6 +11,7 @@ from django_elasticsearch_dsl_drf.filter_backends import (
 )
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from elasticsearch_dsl import DateHistogramFacet
+from rest_framework.permissions import AllowAny
 
 from peachjam_search.documents import SearchableDocument
 from peachjam_search.serializers import SearchableDocumentSerializer
@@ -27,6 +28,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     document = SearchableDocument
     serializer_class = SearchableDocumentSerializer
+    permission_classes = (AllowAny,)
     filter_backends = [
         OrderingFilterBackend,
         DefaultOrderingFilterBackend,

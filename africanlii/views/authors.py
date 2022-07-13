@@ -1,114 +1,39 @@
-from itertools import chain
-
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django.views.generic import ListView
 
-from africanlii.forms import BaseDocumentFilterForm
-from africanlii.models import AuthoringBody, Court
-from peachjam.models import CoreDocument
+from africanlii.views.generic_views import FilteredDocumentListView
+from peachjam.models import Author, CoreDocument
 
 
-def add_facet_data_to_context(years, doc_types):
-    return {
-        "years": years,
-        "doc_types": doc_types,
-        "alphabet": [
-            "a",
-            "b",
-            "c",
-            "d",
-            "e",
-            "f",
-            "g",
-            "h",
-            "i",
-            "j",
-            "k",
-            "l",
-            "m",
-            "n",
-            "o",
-            "p",
-            "q",
-            "r",
-            "s",
-            "t",
-            "u",
-            "v",
-            "w",
-            "x",
-            "y",
-            "z",
-        ],
-    }
-
-
-class BaseAuthorListView(ListView):
+class AuthorListView(FilteredDocumentListView):
     context_object_name = "documents"
     paginate_by = 20
-
-
-class CourtListView(BaseAuthorListView):
-    template_name = "africanlii/_court_detail.html"
-    model = Court
-
-    def get_queryset(self):
-        self.form = BaseDocumentFilterForm(self.request.GET)
-        self.form.is_valid()
-        court = get_object_or_404(self.model, pk=self.kwargs["pk"])
-        queryset = court.judgment_set.all()
-        return self.form.filter_queryset(queryset)
-
-    def get_context_data(self, **kwargs):
-        context = super(CourtListView, self).get_context_data(**kwargs)
-        court = get_object_or_404(self.model, pk=self.kwargs["pk"])
-        years = list(set(court.judgment_set.values_list("date__year", flat=True)))
-        doc_types = list(set(court.judgment_set.values_list("doc_type", flat=True)))
-
-        context["author"] = court
-        context["facet_data"] = add_facet_data_to_context(years, doc_types)
-
-        return context
-
-
-class AuthoringBodyListView(BaseAuthorListView):
+    model = CoreDocument
     template_name = "africanlii/_author_detail.html"
-    model = AuthoringBody
+
+    def get_base_queryset(self):
+        return CoreDocument.objects.filter(
+            Q(genericdocument__author=self.author)
+            | Q(legalinstrument__author=self.author)
+            | Q(judgment__author=self.author)
+        )
 
     def get_queryset(self):
-        self.form = BaseDocumentFilterForm(self.request.GET)
-        self.form.is_valid()
-        authoring_body = get_object_or_404(self.model, pk=self.kwargs["pk"])
-
-        queryset = CoreDocument.objects.filter(
-            genericdocument__authoring_body=authoring_body
-        ) | CoreDocument.objects.filter(legalinstrument__authoring_body=authoring_body)
-
-        return self.form.filter_queryset(queryset)
+        self.author = get_object_or_404(Author, pk=self.kwargs["pk"])
+        return super().get_queryset()
 
     def get_context_data(self, **kwargs):
-        context = super(AuthoringBodyListView, self).get_context_data(**kwargs)
-        authoring_body = get_object_or_404(self.model, pk=self.kwargs["pk"])
-
-        generic_doc_years = authoring_body.genericdocument_set.values_list(
-            "date__year", flat=True
-        )
-        legal_instrument_years = authoring_body.legalinstrument_set.values_list(
-            "date__year", flat=True
-        )
-        years = list(set((chain(generic_doc_years, legal_instrument_years))))
-
-        generic_document_doc_type = authoring_body.genericdocument_set.values_list(
-            "doc_type", flat=True
-        )
-        legal_instrument_doc_type = authoring_body.legalinstrument_set.values_list(
-            "doc_type", flat=True
-        )
+        context = super().get_context_data(**kwargs)
         doc_types = list(
-            set(chain(generic_document_doc_type, legal_instrument_doc_type))
+            set(
+                self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="doc_type"
+                ).values_list("doc_type", flat=True)
+            )
         )
 
-        context["author"] = authoring_body
-        context["facet_data"] = add_facet_data_to_context(years, doc_types)
+        context["author"] = self.author
+        context["author_listing_view"] = True
+        context["facet_data"]["doc_types"] = doc_types
 
         return context

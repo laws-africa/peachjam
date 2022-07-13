@@ -1,64 +1,72 @@
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
 from africanlii.forms import BaseDocumentFilterForm
-from africanlii.models import AuthoringBody, Court
-from peachjam.models import CoreDocument
+from africanlii.utils import lowercase_alphabet
+from peachjam.models import (
+    CitationLink,
+    CoreDocument,
+    GenericDocument,
+    Judgment,
+    LegalInstrument,
+    Predicate,
+    Relationship,
+)
+from peachjam_api.serializers import (
+    CitationLinkSerializer,
+    PredicateSerializer,
+    RelationshipSerializer,
+)
 
 
-class FilteredDocumentListView(ListView, BaseDocumentFilterForm):
+class FilteredDocumentListView(ListView):
     """Generic List View class for filtering documents."""
+
+    def get_base_queryset(self):
+        return self.model.objects.all()
 
     def get_queryset(self):
         self.form = BaseDocumentFilterForm(self.request.GET)
         self.form.is_valid()
-        queryset = self.model.objects.all()
-        return self.form.filter_queryset(queryset)
+        return self.form.filter_queryset(self.get_base_queryset())
 
     def get_context_data(self, **kwargs):
-        context = super(FilteredDocumentListView, self).get_context_data(**kwargs)
-        years = list(set(self.model.objects.values_list("date__year", flat=True)))
-        courts = list(Court.objects.values_list("name", flat=True))
-        authoring_bodies = list(AuthoringBody.objects.values_list("name", flat=True))
+        context = super().get_context_data(**kwargs)
+
+        # Initialize facet data values
+        if self.model in [GenericDocument, LegalInstrument, Judgment]:
+            authors = list(
+                {
+                    a
+                    for a in self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="author"
+                    ).values_list("author__name", flat=True)
+                    if a
+                }
+            )
+        # Legislation objects don't have an associated author, hence empty authors list
+        else:
+            authors = []
+
+        years = list(
+            set(
+                self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="year"
+                ).values_list("date__year", flat=True)
+            )
+        )
 
         context["facet_data"] = {
             "years": years,
-            "courts": courts,
-            "authoring_bodies": authoring_bodies,
-            "alphabet": [
-                "a",
-                "b",
-                "c",
-                "d",
-                "e",
-                "f",
-                "g",
-                "h",
-                "i",
-                "j",
-                "k",
-                "l",
-                "m",
-                "n",
-                "o",
-                "p",
-                "q",
-                "r",
-                "s",
-                "t",
-                "u",
-                "v",
-                "w",
-                "x",
-                "y",
-                "z",
-            ],
+            "authors": authors,
+            "alphabet": lowercase_alphabet(),
         }
         return context
 
 
 class BaseDocumentDetailView(DetailView):
     slug_field = "expression_frbr_uri"
-    slug_url_kwarg = "expression_frbr_uri"
+    slug_url_kwarg = "frbr_uri"
     context_object_name = "document"
 
     def get_context_data(self, **kwargs):
@@ -68,6 +76,13 @@ class BaseDocumentDetailView(DetailView):
             work_frbr_uri=self.object.work_frbr_uri
         ).exclude(pk=self.object.pk)
 
+        # citation links for a document
+        doc = get_object_or_404(CoreDocument, pk=self.object.pk)
+        citation_links = CitationLink.objects.filter(document=doc)
+        context["citation_links"] = CitationLinkSerializer(
+            citation_links, many=True
+        ).data
+
         # language versions that match current document date
         context["language_versions"] = all_versions.filter(date=self.object.date)
 
@@ -75,5 +90,47 @@ class BaseDocumentDetailView(DetailView):
         context["date_versions"] = all_versions.filter(
             language=self.object.language
         ).order_by("-date")
+
+        # provision relationships
+        rels = [
+            r
+            for r in Relationship.for_subject_document(
+                context["document"]
+            ).prefetch_related(
+                "subject_work",
+                "subject_work__documents",
+                "object_work",
+                "object_work__documents",
+            )
+            if r.subject_target_id
+        ] + [
+            r
+            for r in Relationship.for_object_document(
+                context["document"]
+            ).prefetch_related(
+                "subject_work",
+                "subject_work__documents",
+                "object_work",
+                "object_work__documents",
+            )
+            if r.object_target_id
+        ]
+        context["provision_relationships"] = RelationshipSerializer(
+            rels, many=True
+        ).data
+
+        if self.request.user.has_perm("peachjam.add_relationship"):
+            context["predicates_json"] = PredicateSerializer(
+                Predicate.objects.all(), many=True
+            ).data
+
+        if context["document"].content_html:
+            context["display_type"] = (
+                "akn" if context["document"].content_html_is_akn else "html"
+            )
+        elif hasattr(context["document"], "source_file"):
+            context["display_type"] = "pdf"
+        else:
+            context["display_type"] = None
 
         return context

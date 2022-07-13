@@ -26,7 +26,7 @@
                 v-if="loading"
                 class="circle-loader--lt"
               />
-              <span v-else>Search</span>
+              <span v-else>{{ $t('Search') }}</span>
             </button>
           </div>
         </div>
@@ -36,13 +36,13 @@
         v-if="error"
         class="mt-3 alert alert-warning"
       >
-        Oops, something went wrong. {{ error }}
+        {{ $t('Oops, something went wrong.') }} {{ error }}
       </div>
       <div
         v-if="searchInfo.count === 0"
         class="mt-3"
       >
-        No documents match your search.
+        {{ $t('No documents match your search.') }}
       </div>
       <div class="mt-3">
         <!--        <DidYouMean-->
@@ -67,87 +67,95 @@
                 >
                   ×
                 </a>
-                <strong>Filters</strong>
+                <strong>{{ $t('Filters') }}</strong>
                 <div>
                   <a
                     v-if="showClearAllFiltersBtn"
                     href="#"
                     @click.prevent="clearAllFilters"
                   >
-                    Clear All
+                    {{ $t('Clear all') }}
                   </a>
                 </div>
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_doc_type"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Document type</strong>
+                  <strong>{{ $t('Document type') }}</strong>
                   <a
                     v-if="filters.doc_type.length"
                     href="#"
                     @click.prevent="() => filters.doc_type = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_doc_type"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_doc_type.doc_type.buckets)"
                   :selection="filters.doc_type"
                   :loading="loading"
                   @changed="(x) => filters.doc_type = x"
                 />
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_authoring_body"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Author</strong>
+                  <strong>{{ $t('Author') }}</strong>
                   <a
                     v-if="filters.authoring_body.length"
                     href="#"
                     @click.prevent="() => filters.authoring_body = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_authoring_body"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_authoring_body.authoring_body.buckets)"
                   :selection="filters.authoring_body"
                   :loading="loading"
                   @changed="(x) => filters.authoring_body = x"
                 />
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_jurisdiction"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Jurisdiction</strong>
+                  <strong>{{ $t('Jurisdiction') }}</strong>
                   <a
                     v-if="filters.jurisdiction.length"
                     href="#"
                     @click.prevent="() => filters.jurisdiction = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_jurisdiction"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_jurisdiction.jurisdiction.buckets)"
                   :selection="filters.jurisdiction"
                   :loading="loading"
                   @changed="(x) => filters.jurisdiction = x"
                 />
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_locality"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Locality</strong>
+                  <strong>{{ $t('Locality') }}</strong>
                   <a
                     v-if="filters.locality.length"
                     href="#"
                     @click.prevent="() => filters.locality = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_locality"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_locality.locality.buckets)"
                   :selection="filters.locality"
                   :loading="loading"
@@ -155,81 +163,88 @@
                 />
               </li>
 
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_matter_type"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Year</strong>
-                  <a
-                    v-if="filters.year.length"
-                    href="#"
-                    @click.prevent="() => filters.year = []"
-                  >
-                    Clear
-                  </a>
-                </div>
-                <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_year"
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_year.year.buckets)"
-                  :selection="filters.year"
-                  :loading="loading"
-                  @changed="(x) => filters.year = x"
-                />
-              </li>
-
-              <li class="list-group-item">
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>Matter type</strong>
+                  <strong>{{ $t('Matter type') }}</strong>
                   <a
                     v-if="filters.matter_type.length"
                     href="#"
                     @click.prevent="() => filters.matter_type = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_matter_type"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_matter_type.matter_type.buckets)"
                   :selection="filters.matter_type"
                   :loading="loading"
                   @changed="(x) => filters.matter_type = x"
                 />
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_nature"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Document nature</strong>
+                  <strong>{{ $t('Document nature') }}</strong>
                   <a
                     v-if="filters.nature.length"
                     href="#"
                     @click.prevent="() => filters.nature = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_nature"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_nature.nature.buckets)"
                   :selection="filters.nature"
                   :loading="loading"
                   @changed="(x) => filters.nature = x"
                 />
               </li>
-              <li class="list-group-item">
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_language"
+                class="list-group-item"
+              >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Language</strong>
+                  <strong>{{ $t('Language') }}</strong>
                   <a
                     v-if="filters.language.length"
                     href="#"
                     @click.prevent="() => filters.language = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
-                  v-if="searchInfo.facets && searchInfo.facets._filter_language"
                   :buckets="sortGenericBuckets(searchInfo.facets._filter_language.language.buckets)"
                   :selection="filters.language"
                   :loading="loading"
                   @changed="(x) => filters.language = x"
+                />
+              </li>
+              <li
+                v-if="searchInfo.facets && searchInfo.facets._filter_year"
+                class="list-group-item"
+              >
+                <div class="d-flex justify-content-between mb-2">
+                  <strong>{{ $t('Year') }}</strong>
+                  <a
+                    v-if="filters.year.length"
+                    href="#"
+                    @click.prevent="() => filters.year = []"
+                  >
+                    {{ $t('Clear') }}
+                  </a>
+                </div>
+                <TermFacet
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_year.year.buckets)"
+                  :selection="filters.year"
+                  :loading="loading"
+                  @changed="(x) => filters.year = x"
                 />
               </li>
             </ul>

@@ -6,33 +6,28 @@ class BaseDocumentFilterForm(forms.Form):
     using facets such as year and alphabetical title.
     """
 
-    alphabet = forms.CharField(required=False)
     year = forms.CharField(required=False)
-    court = forms.CharField(required=False)
-    authoring_body = forms.CharField(required=False)
+    alphabet = forms.CharField(required=False)
+    author = forms.CharField(required=False)
     doc_type = forms.CharField(required=False)
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset, exclude=None):
 
         year = self.cleaned_data.get("year")
         alphabet = self.cleaned_data.get("alphabet")
-        court = self.cleaned_data.get("court")
-        authoring_body = self.cleaned_data.get("authoring_body")
+        author = self.cleaned_data.get("author")
         doc_type = self.cleaned_data.get("doc_type")
 
-        if year:
+        if year and exclude != "year":
             queryset = queryset.filter(date__year=year)
 
-        if alphabet:
+        if alphabet and exclude != "alphabet":
             queryset = queryset.filter(title__istartswith=alphabet)
 
-        if court:
-            queryset = queryset.filter(court__name=court)
+        if author and exclude != "author":
+            queryset = queryset.filter(author__name__iexact=author)
 
-        if authoring_body:
-            queryset = queryset.filter(authoring_body__name__iexact=authoring_body)
-
-        if doc_type:
+        if doc_type and exclude != "doc_type":
             queryset = queryset.filter(doc_type=doc_type)
 
         return queryset

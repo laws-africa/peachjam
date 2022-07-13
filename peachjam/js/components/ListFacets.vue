@@ -6,73 +6,28 @@
   >
     <ul class="list-group">
       <li class="list-group-item bg-light d-flex justify-content-between align-items-center">
-        <strong>Filters</strong>
+        <strong>{{ $t('Filters') }}</strong>
         <a
           v-if="showClearAllFilter"
           href="#"
           @click.prevent="clearAll"
         >
-          Clear all
+          {{ $t('Clear all') }}
         </a>
       </li>
       <li
-        v-if="years.length"
+        v-if="authors.length"
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>Year</strong>
+          <strong>{{ $t('Authoring Body') }}</strong>
           <div class="d-flex align-items-center">
             <a
-              v-if="getUrlParamValue('year').length"
+              v-if="getUrlParamValue('author').length"
               href="#"
-              @click.prevent="clearFacet('year')"
+              @click.prevent="clearFacet('author')"
             >
-              Clear
-            </a>
-            <div
-              v-if="loading"
-              class="circle-loader ms-2"
-            />
-          </div>
-        </div>
-        <div class="facets-scrollable">
-          <div
-            v-for="(year, index) in sortDescending(years)"
-            :key="index"
-            class="d-flex justify-content-between align-items-center"
-          >
-            <div class="form-check">
-              <input
-                :id="year"
-                class="form-check-input"
-                type="checkbox"
-                name="year"
-                :value="year"
-                :checked="inputChecked('year', year)"
-              >
-              <label
-                class="form-check-label"
-                :for="year"
-              >
-                {{ year }}
-              </label>
-            </div>
-          </div>
-        </div>
-      </li>
-      <li
-        v-if="authoringBodies.length"
-        class="list-group-item"
-      >
-        <div class="d-flex justify-content-between mb-2">
-          <strong>Authoring Body</strong>
-          <div class="d-flex align-items-center">
-            <a
-              v-if="getUrlParamValue('authoring_body').length"
-              href="#"
-              @click.prevent="clearFacet('authoring_body')"
-            >
-              Clear
+              {{ $t('Clear') }}
             </a>
             <span
               v-if="loading"
@@ -82,24 +37,24 @@
         </div>
         <div class="facets-scrollable">
           <div
-            v-for="(authoringBody, index) in sortAlphabetically(authoringBodies)"
+            v-for="(author, index) in sortAlphabetically(authors)"
             :key="index"
             class="d-flex justify-content-between align-items-center"
           >
             <div class="form-check">
               <input
-                :id="authoringBody"
+                :id="author"
                 class="form-check-input"
                 type="radio"
-                name="authoring_body"
-                :value="authoringBody"
-                :checked="inputChecked('authoring_body', authoringBody)"
+                name="author"
+                :value="author"
+                :checked="inputChecked('author', author)"
               >
               <label
                 class="form-check-label"
-                :for="authoringBody"
+                :for="author"
               >
-                {{ authoringBody }}
+                {{ author }}
               </label>
             </div>
           </div>
@@ -110,14 +65,14 @@
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>Document type</strong>
+          <strong>{{ $t('Document type') }}</strong>
           <div class="d-flex align-items-center">
             <a
               v-if="getUrlParamValue('doc_type').length"
               href="#"
               @click.prevent="clearFacet('doc_type')"
             >
-              Clear
+              {{ $t('Clear') }}
             </a>
             <span
               v-if="loading"
@@ -155,14 +110,14 @@
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>Court</strong>
+          <strong>{{ $t('Court') }}</strong>
           <div class="d-flex align-items-center">
             <a
               v-if="getUrlParamValue('court').length"
               href="#"
               @click.prevent="clearFacet('court')"
             >
-              Clear
+              {{ $t('Clear') }}
             </a>
             <span
               v-if="loading"
@@ -196,18 +151,63 @@
         </div>
       </li>
       <li
+        v-if="years.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Year</strong>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="getUrlParamValue('year').length"
+              href="#"
+              @click.prevent="clearFacet('year')"
+            >
+              {{ $t('Clear') }}
+            </a>
+            <div
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
+        </div>
+        <div class="facets-scrollable">
+          <div
+            v-for="(year, index) in sortDescending(years)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                :id="year"
+                class="form-check-input"
+                type="checkbox"
+                name="year"
+                :value="year"
+                :checked="inputChecked('year', year)"
+              >
+              <label
+                class="form-check-label"
+                :for="year"
+              >
+                {{ year }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li
         v-if="alphabet.length"
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>Alphabetical</strong>
+          <strong>{{ $t('Alphabetical') }}</strong>
           <div class="d-flex align-items-center">
             <a
               v-if="getUrlParamValue('alphabet').length"
               href="#"
               @click.prevent="clearFacet('alphabet')"
             >
-              Clear
+              {{ $t('Clear') }}
             </a>
             <span
               v-if="loading"
@@ -242,7 +242,7 @@
 export default {
   name: 'ListFacets',
   props: {
-    authoringBodies: {
+    authors: {
       type: Array,
       default: () => []
     },
@@ -265,13 +265,12 @@ export default {
   },
   data: () => {
     return {
-      loading: false,
-      author: null
+      loading: false
     };
   },
   computed: {
     showClearAllFilter () {
-      return ['alphabet', 'year', 'authoring_body', 'court'].some(key => this.getUrlParamValue(key).length);
+      return ['alphabet', 'year', 'author', 'court'].some(key => this.getUrlParamValue(key).length);
     }
   },
   methods: {
