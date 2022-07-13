@@ -97,6 +97,8 @@ class BaseDocumentResource(resources.ModelResource):
                             "mimetype": mime,
                         },
                     )
+            # extract citations
+            instance.extract_citations()
 
 
 class GenericDocumentResource(BaseDocumentResource):

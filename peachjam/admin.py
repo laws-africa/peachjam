@@ -117,6 +117,7 @@ class DocumentAdmin(admin.ModelAdmin):
     readonly_fields = ("expression_frbr_uri", "work", "created_at", "updated_at")
     exclude = ("doc_type",)
     date_hierarchy = "date"
+    actions = ["extract_citations"]
 
     fieldsets = [
         (
@@ -229,6 +230,15 @@ class DocumentAdmin(admin.ModelAdmin):
         rel.delete()
         info = self.model._meta.app_label, self.model._meta.model_name
         return redirect("admin:%s_%s_relationships" % info, object_id=object_id)
+
+    def extract_citations(self, request, queryset):
+        count = 0
+        for doc in queryset:
+            count += 1
+            doc.extract_citations()
+        self.message_user(request, f"Extracted citations from {count} documents.")
+
+    extract_citations.short_description = "Extract citations"
 
 
 class TaxonomyAdmin(TreeAdmin):

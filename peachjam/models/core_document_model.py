@@ -147,6 +147,18 @@ class CoreDocument(models.Model):
             "object_work", "object_work__documents"
         )
 
+    def extract_citations(self):
+        """Run citation extraction on this document. If the document has content_html,
+        extraction will be run on that. Otherwise, if the document as a PDF source file,
+        extraction will be run on that.
+        """
+        from peachjam.analysis.citations import citation_analyser
+        from peachjam.models.citations import CitationLink
+
+        # delete existing citation links
+        CitationLink.objects.filter(document=self).delete()
+        citation_analyser.extract_citations(self)
+
 
 def file_location(instance, filename):
     if not instance.document.pk:

@@ -5,7 +5,6 @@ from django import forms
 from django.core.files import File
 from docpipe.pipeline import PipelineContext
 
-from peachjam.analysis.citations import citation_analyser
 from peachjam.models import CoreDocument, Ingestor, Relationship, SourceFile, Work
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.plugins import plugins
@@ -83,7 +82,7 @@ class NewDocumentFormMixin:
 
     def run_analysis(self):
         """Apply analysis pipelines for this newly created document."""
-        citation_analyser.extract_citations(self.instance)
+        self.instance.extract_citations()
 
     @classmethod
     def adjust_fieldsets(cls, fieldsets):
