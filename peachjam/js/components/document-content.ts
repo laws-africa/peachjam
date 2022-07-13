@@ -1,7 +1,8 @@
-import { createApp } from 'vue';
 import DocumentSearch from './DocumentSearch/index.vue';
 import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
+import { createAndMountApp } from '../utils/vue-utils';
+import { i18n } from '../i18n';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -71,13 +72,16 @@ class DocumentContent {
 
     const targetMountElement = this.root.querySelector('[data-doc-search]');
     if (targetMountElement) {
-      const app = createApp(DocumentSearch, {
-        document: documentElement,
-        docType: root.getAttribute('data-display-type'),
-        mountElement: targetMountElement
+      this.searchApp = createAndMountApp({
+        component: DocumentSearch,
+        props: {
+          document: documentElement,
+          docType: root.getAttribute('data-display-type'),
+          mountElement: targetMountElement
+        },
+        use: [i18n],
+        mountTarget: targetMountElement as HTMLElement
       });
-      this.searchApp = app;
-      app.mount(targetMountElement);
       targetMountElement.addEventListener('going-to-snippet', () => {
         this.navOffCanvas?.hide();
       });

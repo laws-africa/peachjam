@@ -1,5 +1,6 @@
 import ListFacets from './ListFacets.vue';
-import { createApp } from 'vue';
+import { i18n } from '../i18n';
+import { createAndMountApp } from '../utils/vue-utils';
 
 class DocumentList {
   constructor (root: HTMLElement) {
@@ -17,12 +18,18 @@ class DocumentList {
         authors = [];
       }
     }
-    createApp(ListFacets, {
-      alphabet,
-      years,
-      authors,
-      docTypes
-    }).mount(facetsElement);
+
+    createAndMountApp({
+      component: ListFacets,
+      props: {
+        alphabet,
+        years,
+        authors,
+        docTypes
+      },
+      use: [i18n],
+      mountTarget: facetsElement
+    });
   }
 }
 
