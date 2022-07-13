@@ -2,6 +2,7 @@ import copy
 
 from ckeditor.widgets import CKEditorWidget
 from django import forms
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.http.response import FileResponse
@@ -10,6 +11,7 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as __
 from import_export.admin import ImportMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
@@ -114,16 +116,23 @@ class DocumentAdmin(admin.ModelAdmin):
     inlines = [DocumentTopicInline, SourceFileInline]
     list_display = ("title", "date")
     search_fields = ("title", "date")
-    readonly_fields = ("expression_frbr_uri", "work", "created_at", "updated_at")
+    readonly_fields = (
+        "expression_frbr_uri",
+        "work",
+        "created_at",
+        "updated_at",
+        "toc_json",
+    )
     exclude = ("doc_type",)
     date_hierarchy = "date"
 
     fieldsets = [
         (
-            None,
+            __("Key details"),
             {
                 "fields": [
-                    ("jurisdiction", "locality"),
+                    "jurisdiction",
+                    "locality",
                     "title",
                     "date",
                     "language",
@@ -131,17 +140,28 @@ class DocumentAdmin(admin.ModelAdmin):
                 ]
             },
         ),
-        (None, {"fields": ["citation", "source_url"]}),
         (
-            "Content",
+            __("Additional details"),
+            {"fields": ["citation", "source_url", "created_at", "updated_at"]},
+        ),
+        (
+            __("Content"),
             {
                 "fields": [
-                    "content_html_is_akn",
                     "content_html",
                 ]
             },
         ),
-        ("Advanced", {"classes": ("collapse",), "fields": ["toc_json"]}),
+        (
+            __("Advanced"),
+            {
+                "classes": ("collapse",),
+                "fields": [
+                    "toc_json",
+                    "content_html_is_akn",
+                ],
+            },
+        ),
     ]
 
     new_document_form_mixin = NewDocumentFormMixin
@@ -265,19 +285,23 @@ class CaseNumberAdmin(admin.TabularInline):
 class JudgmentAdmin(ImportMixin, DocumentAdmin):
     resource_class = JudgmentResource
     inlines = [CaseNumberAdmin] + DocumentAdmin.inlines
+    filter_horizontal = ("judges",)
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
-    fieldsets[0][1]["fields"].insert(1, "case_name")
-    fieldsets[0][1]["fields"].extend(["author", "judges"])
+    fieldsets[0][1]["fields"].insert(3, "author")
+    fieldsets[0][1]["fields"].insert(4, "case_name")
+    fieldsets[0][1]["fields"].insert(7, "mnc")
     # remove work_frbr_uri, we'll generate it automatically
     fieldsets[0][1]["fields"] = [
         f for f in fieldsets[0][1]["fields"] if f != "work_frbr_uri"
     ]
-    fieldsets[1][1]["fields"].insert(0, "mnc")
+    fieldsets[1][1]["fields"].insert(0, "judges")
     fieldsets[2][1]["fields"].extend(
         ["headnote_holding", "additional_citations", "flynote"]
     )
     fieldsets[3][1]["fields"].extend(["serial_number"])
-    readonly_fields = ("mnc", "serial_number", "title")
+    readonly_fields = ["mnc", "serial_number", "title", "citation"] + list(
+        DocumentAdmin.readonly_fields
+    )
 
 
 @admin.register(Predicate)
@@ -316,3 +340,5 @@ admin.site.register(GenericDocument, GenericDocumentAdmin)
 admin.site.register(Legislation, LegislationAdmin)
 admin.site.register(LegalInstrument, LegalInstrumentAdmin)
 admin.site.register(Judgment, JudgmentAdmin)
+
+admin.site.site_header = settings.PEACHJAM["APP_NAME"]
