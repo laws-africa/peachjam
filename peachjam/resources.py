@@ -124,18 +124,21 @@ class JudgmentResource(BaseDocumentResource):
     class Meta(BaseDocumentResource.Meta):
         model = Judgment
 
-    def before_import_row(self, row, **kwargs):
+    def after_import_row(self, row, instance, row_number=None, **kwargs):
+        super().after_import_row(row, instance, row_number, **kwargs)
+
+        judgment = Judgment.objects.get(pk=instance.object_id)
+
         if row["judges"]:
             for judge in list(map(str.strip, row["judges"].split("|"))):
-                Judge.objects.get_or_create(name=judge)
+                judge, _ = Judge.objects.get_or_create(name=judge)
+                judgment.judges.add(judge)
 
-    def after_import_row(self, row, row_result, row_number=None, **kwargs):
-        super().after_import_row(row, row_result, row_number, **kwargs)
         for case_number in row["case_numbers"]:
             if case_number["number"]:
                 MatterType.objects.get_or_create(name=case_number["matter_type"])
                 CaseNumber.objects.create(
-                    document=Judgment.objects.get(pk=row_result.object_id),
+                    document=judgment,
                     number=case_number["number"],
                     year=case_number["year"],
                     matter_type=MatterType.objects.get(name=case_number["matter_type"]),
