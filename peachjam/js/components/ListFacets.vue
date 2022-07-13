@@ -200,7 +200,7 @@
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>{{ $t("Alphabetical") }}</strong>
+          <strong>{{ $t('Alphabetical') }}</strong>
           <div class="d-flex align-items-center">
             <a
               v-if="getUrlParamValue('alphabet').length"

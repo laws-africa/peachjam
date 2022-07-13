@@ -19,7 +19,7 @@
           class="btn btn-secondary"
           type="submit"
         >
-          {{ $t("Search") }}
+          {{ $t('Search') }}
         </button>
       </div>
       <div
@@ -29,13 +29,13 @@
         <a
           href="#"
           @click.prevent="clear"
-        >{{ $t("Clear") }}</a>
+        >{{ $t('Clear') }}</a>
       </div>
       <div
         v-if="!marks.length && q"
         class="mt-2"
       >
-        {{ $t("No results") }}
+        {{ $t('No results') }}
       </div>
     </form>
     <div class="doc-search__results">
