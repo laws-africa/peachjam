@@ -1,4 +1,5 @@
 {
+  "{reverse_verb} this provision": "{reverse_verb} this provision",
   "Alphabetical": "Alphabetical",
   "Author": "Author",
   "Authoring Body": "Authoring Body",
@@ -19,7 +20,6 @@
   "Page": "Page",
   "Search": "Search",
   "Search document content": "Search document content",
-  "this provision": "this provision",
   "This provision": "This provision",
   "Year": "Year"
 }
