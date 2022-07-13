@@ -74,7 +74,7 @@
                     href="#"
                     @click.prevent="clearAllFilters"
                   >
-                    {{ $t('Clear All') }}
+                    {{ $t('Clear all') }}
                   </a>
                 </div>
               </li>
