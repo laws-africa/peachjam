@@ -97,8 +97,14 @@ class BaseDocumentResource(resources.ModelResource):
                             "mimetype": mime,
                         },
                     )
+
+            # try to extract content from docx files
+            if not instance.content_html:
+                instance.extract_content_from_source_file()
+
             # extract citations
             instance.extract_citations()
+            instance.save()
 
 
 class GenericDocumentResource(BaseDocumentResource):

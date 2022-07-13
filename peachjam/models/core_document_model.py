@@ -7,8 +7,11 @@ from countries_plus.models import Country
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
+from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
+
+from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 
 
 class Locality(models.Model):
@@ -157,7 +160,21 @@ class CoreDocument(models.Model):
 
         # delete existing citation links
         CitationLink.objects.filter(document=self).delete()
-        citation_analyser.extract_citations(self)
+        return citation_analyser.extract_citations(self)
+
+    def extract_content_from_source_file(self):
+        """Re-extract content from DOCX source files, overwriting anything in content_html."""
+        if (
+            not self.content_html_is_akn
+            and hasattr(self, "source_file")
+            and self.source_file.mimetype in DOC_MIMETYPES
+        ):
+            context = PipelineContext(word_pipeline)
+            context.source_file = self.source_file.file
+            word_pipeline(context)
+            # TODO: attachments
+            self.content_html = context.html_text
+            return True
 
 
 def file_location(instance, filename):
