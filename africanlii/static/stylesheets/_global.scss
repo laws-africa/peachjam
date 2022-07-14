@@ -49,6 +49,11 @@ mark {
   background-color: transparent !important;
 }
 
+.offcanvas {
+  @include media-breakpoint-down(lg) {
+    width: 300px;
+  }
+}
 
 footer {
   .footer-logos {
