@@ -1,8 +1,8 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
-from africanlii.views.generic_views import FilteredDocumentListView
 from peachjam.models import Author, CoreDocument
+from peachjam.views.generic_views import FilteredDocumentListView
 
 
 class AuthorListView(FilteredDocumentListView):

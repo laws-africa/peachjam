@@ -1,9 +1,9 @@
 from africanlii.registry import registry
-from africanlii.views.generic_views import (
+from peachjam.models import GenericDocument
+from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
-from peachjam.models import GenericDocument
 
 
 class GenericDocumentListView(FilteredDocumentListView):
