@@ -3,6 +3,8 @@ import RelationshipEnrichmentList from './RelationshipEnrichmentList.vue';
 import { IRelationshipEnrichment } from './enrichment';
 import { GutterEnrichmentManager, IGutterEnrichmentProvider } from '@lawsafrica/indigo-akn/dist/enrichments';
 import { IRangeTarget } from '@lawsafrica/indigo-akn/dist/ranges';
+import { i18n } from '../../i18n';
+import { createAndMountApp } from '../../utils/vue-utils';
 
 export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   root: HTMLElement;
@@ -31,13 +33,18 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
     }
 
     // @ts-ignore
-    this.listComponent = createApp(defineComponent(RelationshipEnrichmentList), {
-      gutter: this.gutter,
-      viewRoot: this.root,
-      enrichments: this.enrichments,
-      readonly: this.readonly,
-      thisWorkFrbrUri: this.workFrbrUri
-    }).mount(document.createElement('div'));
+    this.listComponent = createAndMountApp({
+      component: RelationshipEnrichmentList,
+      props: {
+        gutter: this.gutter,
+        viewRoot: this.root,
+        enrichments: this.enrichments,
+        readonly: this.readonly,
+        thisWorkFrbrUri: this.workFrbrUri
+      },
+      use: [i18n],
+      mountTarget: document.createElement('div') as HTMLElement
+    });
 
     const observer = new MutationObserver(() => {
       // @ts-ignore
