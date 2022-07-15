@@ -66,6 +66,7 @@ import Mark from 'mark.js';
 import HTMLSnippets from './HTMLSnippets.vue';
 import PdfSnippets from './PdfSnippets.vue';
 import AknSnippets from './AknSnippets.vue';
+import { scrollToElement } from '../../utils/function';
 
 export default {
   name: 'DocumentSearch',
@@ -120,44 +121,17 @@ export default {
 
     goToSnippet (node) {
       this.mountElement.dispatchEvent(new CustomEvent('going-to-snippet'));
-      scrollToElement(node, 60).then(() => {
-        node.style.outline = '2px solid transparent';
-        node.style.transition = 'outline-color 400ms ease-in-out';
-        node.style.outlineColor = 'var(--bs-primary)';
-        window.setTimeout(() => {
-          node.style.outlineColor = 'transparent';
-        }, 400);
-      });
-
-      function scrollToElement (elem, offset = 0) {
-        const rect = elem.getBoundingClientRect();
-        const targetPosition = Math.floor(rect.top + self.pageYOffset - offset);
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
+      // Wait for offset canvas to close then scroll
+      window.setTimeout(() => {
+        scrollToElement(node, 60).then(() => {
+          node.style.outline = '2px solid transparent';
+          node.style.transition = 'outline-color 400ms ease-in-out';
+          node.style.outlineColor = 'var(--bs-primary)';
+          window.setTimeout(() => {
+            node.style.outlineColor = 'transparent';
+          }, 400);
         });
-
-        return new Promise((resolve, reject) => {
-          const failed = setTimeout(() => {
-            // eslint-disable-next-line prefer-promise-reject-errors
-            reject();
-          }, 2000);
-          const scrollHandler = () => {
-            if (self.pageYOffset === targetPosition) {
-              window.removeEventListener('scroll', scrollHandler);
-              clearTimeout(failed);
-              resolve();
-            }
-          };
-          if (self.pageYOffset === targetPosition) {
-            clearTimeout(failed);
-            resolve();
-          } else {
-            window.addEventListener('scroll', scrollHandler);
-            elem.getBoundingClientRect();
-          }
-        });
-      }
+      }, 300);
     }
   }
 
