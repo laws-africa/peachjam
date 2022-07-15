@@ -60,9 +60,6 @@ class Judgment(CoreDocument):
             self.serial_number = self.generate_serial_number()
             self.mnc = self.generate_citation()
 
-        # when assigning the MNC, also ensure the FRBR URI is correct, since they are directly linked
-        self.assign_frbr_uri()
-
     def generate_serial_number(self):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
         # use select_for_update to lock the touched rows, to avoid a race condition and duplicate serial numbers
@@ -80,16 +77,13 @@ class Judgment(CoreDocument):
             year=self.date.year, author=self.author.code, serial=self.serial_number
         )
 
-    def assign_frbr_uri(self):
-        self.work_frbr_uri = self.generate_work_frbr_uri()
-
     def generate_work_frbr_uri(self):
-        """Generate a work FRBR URI based on the MNC data."""
-        place = [self.jurisdiction.iso.lower()]
-        if self.locality:
-            place.append(self.locality.code)
-        place = "-".join(place).lower()
-        return f"/akn/{place}/judgment/{self.author.code.lower()}/{self.date.year}/{self.serial_number}"
+        # enforce certain defaults for judgment FRBR URIs
+        self.frbr_uri_doctype = "judgment"
+        self.frbr_uri_actor = self.author.code.lower()
+        self.frbr_uri_date = self.date.year
+        self.frbr_uri_number = str(self.serial_number)
+        return super().generate_work_frbr_uri()
 
     def assign_title(self):
         """Assign an automatically generated title based on the judgment details.

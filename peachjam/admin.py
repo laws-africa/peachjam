@@ -114,7 +114,13 @@ class DocumentAdmin(admin.ModelAdmin):
     inlines = [DocumentTopicInline, SourceFileInline]
     list_display = ("title", "date")
     search_fields = ("title", "date")
-    readonly_fields = ("expression_frbr_uri", "work", "created_at", "updated_at")
+    readonly_fields = (
+        "expression_frbr_uri",
+        "work",
+        "created_at",
+        "updated_at",
+        "work_frbr_uri",
+    )
     exclude = ("doc_type",)
     date_hierarchy = "date"
     actions = ["extract_citations", "reextract_content"]
@@ -128,11 +134,23 @@ class DocumentAdmin(admin.ModelAdmin):
                     "title",
                     "date",
                     "language",
-                    "work_frbr_uri",
                 ]
             },
         ),
         (None, {"fields": ["citation", "source_url"]}),
+        (
+            "Work identification",
+            {
+                "fields": [
+                    "work_frbr_uri",
+                    "frbr_uri_doctype",
+                    "frbr_uri_subtype",
+                    "frbr_uri_actor",
+                    "frbr_uri_date",
+                    "frbr_uri_number",
+                ],
+            },
+        ),
         (
             "Content",
             {
@@ -291,16 +309,23 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].insert(1, "case_name")
     fieldsets[0][1]["fields"].extend(["author", "judges"])
-    # remove work_frbr_uri, we'll generate it automatically
-    fieldsets[0][1]["fields"] = [
-        f for f in fieldsets[0][1]["fields"] if f != "work_frbr_uri"
-    ]
     fieldsets[1][1]["fields"].insert(0, "mnc")
-    fieldsets[2][1]["fields"].extend(
+    fieldsets[2][1]["classes"] = ["collapse"]
+    fieldsets[3][1]["fields"].extend(
         ["headnote_holding", "additional_citations", "flynote"]
     )
-    fieldsets[3][1]["fields"].extend(["serial_number"])
-    readonly_fields = ("mnc", "serial_number", "title")
+    fieldsets[4][1]["fields"].extend(["serial_number"])
+    readonly_fields = (
+        "mnc",
+        "serial_number",
+        "title",
+        "work_frbr_uri",
+        "frbr_uri_doctype",
+        "frbr_uri_subtype",
+        "frbr_uri_actor",
+        "frbr_uri_date",
+        "frbr_uri_number",
+    )
 
 
 @admin.register(Predicate)
