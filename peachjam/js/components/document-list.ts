@@ -2,11 +2,14 @@ import ListFacets from './ListFacets.vue';
 import { i18n } from '../i18n';
 import { createAndMountApp } from '../utils/vue-utils';
 
+type FacetType = [] | undefined
+
 class DocumentList {
   constructor (root: HTMLElement) {
-    const facetsElement:any = root.querySelector('#list-facets');
+    const mountTargets: HTMLElement[] = Array.from(root.querySelectorAll('[data-list-facets]'));
     const facetDataJsonElement = root.querySelector('#facet-data');
-    let alphabet, years, authors, docTypes;
+
+    let alphabet: FacetType, years: FacetType, authors: FacetType, docTypes: FacetType;
     if (facetDataJsonElement && facetDataJsonElement.textContent) {
       alphabet = JSON.parse(facetDataJsonElement.textContent).alphabet;
       years = JSON.parse(facetDataJsonElement.textContent).years;
@@ -19,16 +22,18 @@ class DocumentList {
       }
     }
 
-    createAndMountApp({
-      component: ListFacets,
-      props: {
-        alphabet,
-        years,
-        authors,
-        docTypes
-      },
-      use: [i18n],
-      mountTarget: facetsElement
+    mountTargets.forEach(mountTarget => {
+      createAndMountApp({
+        component: ListFacets,
+        props: {
+          alphabet,
+          years,
+          authors,
+          docTypes
+        },
+        use: [i18n],
+        mountTarget
+      });
     });
   }
 }
