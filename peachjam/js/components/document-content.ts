@@ -106,8 +106,14 @@ class DocumentContent {
 
     window.addEventListener('resize', debounce(() => {
       const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      const inputs: HTMLInputElement[] = Array.from(this.root.querySelectorAll('input'));
+      // If window resize was triggered by device virtual keyboard, dont place content
+      if (inputs.some(input => input === document.activeElement)) {
+        return;
+      }
       placeContent(vw);
-    }, 200));
+    }
+    , 200));
   }
 }
 
