@@ -8,9 +8,7 @@ import peachjam.frbr_uri
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam", "0005_auto_20220705_1131"),
-    ]
+    dependencies = [("peachjam", "0008_peachjamsettings")]
 
     operations = [
         migrations.AddField(

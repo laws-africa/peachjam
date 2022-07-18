@@ -9,7 +9,7 @@ import peachjam.frbr_uri
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0007_backfill_frbr_uri_components"),
+        ("peachjam", "0010_backfill_frbr_uri_components"),
     ]
 
     operations = [
