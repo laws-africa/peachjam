@@ -2,6 +2,7 @@ import debounce from 'lodash/debounce';
 import items from '../items.json';
 // @ts-ignore
 import { markRange, rangeToTarget, targetToRange } from '../dom';
+import { scrollToElement } from '../utils/function';
 
 type GlobalWorkerOptionsType = {
   [key: string]: any,
@@ -93,16 +94,9 @@ class PdfRenderer {
     }
     if (targetPage) {
       this.scrollListenerActive = false;
-      let scrollTimeout:ReturnType<typeof setTimeout>;
-      const windowScrollerListn = () => {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-          window.removeEventListener('scroll', windowScrollerListn);
-          this.scrollListenerActive = true;
-        }, 100);
-      };
-      window.addEventListener('scroll', windowScrollerListn);
-      targetPage.scrollIntoView({ behavior: 'smooth' });
+      scrollToElement(targetPage as HTMLElement).then(() => {
+        this.scrollListenerActive = true;
+      });
     }
   }
 

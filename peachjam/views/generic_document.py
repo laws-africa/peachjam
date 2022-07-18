@@ -1,13 +1,13 @@
 from africanlii.registry import registry
-from africanlii.views.generic_views import (
+from peachjam.models import GenericDocument
+from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
-from peachjam.models import GenericDocument
 
 
 class GenericDocumentListView(FilteredDocumentListView):
-    template_name = "africanlii/generic_document_list.html"
+    template_name = "peachjam/generic_document_list.html"
     context_object_name = "documents"
     paginate_by = 20
     model = GenericDocument
@@ -20,4 +20,4 @@ class GenericDocumentListView(FilteredDocumentListView):
 @registry.register_doc_type("generic_document")
 class GenericDocumentDetailView(BaseDocumentDetailView):
     model = GenericDocument
-    template_name = "africanlii/generic_document_detail.html"
+    template_name = "peachjam/generic_document_detail.html"

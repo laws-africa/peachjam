@@ -26,7 +26,7 @@
                 v-if="loading"
                 class="circle-loader--lt"
               />
-              <span v-else>Search</span>
+              <span v-else>{{ $t('Search') }}</span>
             </button>
           </div>
         </div>
@@ -36,13 +36,13 @@
         v-if="error"
         class="mt-3 alert alert-warning"
       >
-        Oops, something went wrong. {{ error }}
+        {{ $t('Oops, something went wrong.') }} {{ error }}
       </div>
       <div
         v-if="searchInfo.count === 0"
         class="mt-3"
       >
-        No documents match your search.
+        {{ $t('No documents match your search.') }}
       </div>
       <div class="mt-3">
         <!--        <DidYouMean-->
@@ -67,14 +67,14 @@
                 >
                   ×
                 </a>
-                <strong>Filters</strong>
+                <strong>{{ $t('Filters') }}</strong>
                 <div>
                   <a
                     v-if="showClearAllFiltersBtn"
                     href="#"
                     @click.prevent="clearAllFilters"
                   >
-                    Clear All
+                    {{ $t('Clear all') }}
                   </a>
                 </div>
               </li>
@@ -83,13 +83,13 @@
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Document type</strong>
+                  <strong>{{ $t('Document type') }}</strong>
                   <a
                     v-if="filters.doc_type.length"
                     href="#"
                     @click.prevent="() => filters.doc_type = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
@@ -104,13 +104,13 @@
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Author</strong>
+                  <strong>{{ $t('Author') }}</strong>
                   <a
                     v-if="filters.authoring_body.length"
                     href="#"
                     @click.prevent="() => filters.authoring_body = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
@@ -125,13 +125,13 @@
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Jurisdiction</strong>
+                  <strong>{{ $t('Jurisdiction') }}</strong>
                   <a
                     v-if="filters.jurisdiction.length"
                     href="#"
                     @click.prevent="() => filters.jurisdiction = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
@@ -146,13 +146,13 @@
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Locality</strong>
+                  <strong>{{ $t('Locality') }}</strong>
                   <a
                     v-if="filters.locality.length"
                     href="#"
                     @click.prevent="() => filters.locality = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
@@ -168,13 +168,13 @@
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Matter type</strong>
+                  <strong>{{ $t('Matter type') }}</strong>
                   <a
                     v-if="filters.matter_type.length"
                     href="#"
                     @click.prevent="() => filters.matter_type = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
@@ -189,13 +189,13 @@
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Document nature</strong>
+                  <strong>{{ $t('Document nature') }}</strong>
                   <a
                     v-if="filters.nature.length"
                     href="#"
                     @click.prevent="() => filters.nature = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
@@ -210,13 +210,13 @@
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Language</strong>
+                  <strong>{{ $t('Language') }}</strong>
                   <a
                     v-if="filters.language.length"
                     href="#"
                     @click.prevent="() => filters.language = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
@@ -231,13 +231,13 @@
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
-                  <strong>Year</strong>
+                  <strong>{{ $t('Year') }}</strong>
                   <a
                     v-if="filters.year.length"
                     href="#"
                     @click.prevent="() => filters.year = []"
                   >
-                    Clear
+                    {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
