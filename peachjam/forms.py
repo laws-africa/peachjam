@@ -3,10 +3,8 @@ from os.path import splitext
 
 from django import forms
 from django.core.files import File
-from docpipe.pipeline import PipelineContext
 
 from peachjam.models import CoreDocument, Ingestor, Relationship, SourceFile, Work
-from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.plugins import plugins
 
 
@@ -58,17 +56,10 @@ class NewDocumentFormMixin:
         obj = super().save(commit)
         if self.cleaned_data.get("upload_file"):
             self.process_upload_file(self.cleaned_data["upload_file"])
+            self.run_analysis()
         return obj
 
     def process_upload_file(self, upload_file):
-        if upload_file.content_type in DOC_MIMETYPES:
-            # pass the document through the word pipeline
-            context = PipelineContext(word_pipeline)
-            context.source_file = upload_file
-            word_pipeline(context)
-            # TODO: attachments
-            self.instance.content_html = context.html_text
-
         # store the uploaded file
         self.instance.save()
         upload_file.seek(0)
@@ -78,6 +69,15 @@ class NewDocumentFormMixin:
             file=File(upload_file, name=f"{self.instance.title[-250:]}{file_ext}"),
             mimetype=upload_file.content_type,
         ).save()
+
+        # extract content, if we can
+        if self.instance.extract_content_from_source_file():
+            self.instance.save()
+
+    def run_analysis(self):
+        """Apply analysis pipelines for this newly created document."""
+        if self.instance.extract_citations():
+            self.instance.save()
 
     @classmethod
     def adjust_fieldsets(cls, fieldsets):

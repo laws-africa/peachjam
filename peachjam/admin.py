@@ -143,6 +143,7 @@ class DocumentAdmin(admin.ModelAdmin):
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
+    actions = ["extract_citations", "reextract_content"]
 
     fieldsets = [
         (
@@ -267,6 +268,28 @@ class DocumentAdmin(admin.ModelAdmin):
         rel.delete()
         info = self.model._meta.app_label, self.model._meta.model_name
         return redirect("admin:%s_%s_relationships" % info, object_id=object_id)
+
+    def extract_citations(self, request, queryset):
+        count = 0
+        for doc in queryset:
+            count += 1
+            if doc.extract_citations():
+                doc.save()
+        self.message_user(request, f"Extracted citations from {count} documents.")
+
+    extract_citations.short_description = "Extract citations"
+
+    def reextract_content(self, request, queryset):
+        """Re-extract content from source files that are Word documents, overwriting content_html."""
+        count = 0
+        for doc in queryset:
+            if doc.extract_content_from_source_file():
+                count += 1
+                doc.extract_citations()
+                doc.save()
+        self.message_user(request, f"Re-imported content from {count} documents.")
+
+    reextract_content.short_description = "Re-extract content from DOCX files"
 
 
 class TaxonomyAdmin(TreeAdmin):

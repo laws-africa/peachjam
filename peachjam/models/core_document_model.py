@@ -7,7 +7,11 @@ from countries_plus.models import Country
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
+from docpipe.pipeline import PipelineContext
+from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
+
+from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 
 
 class Locality(models.Model):
@@ -104,6 +108,10 @@ class CoreDocument(models.Model):
         frbr_uri.language = self.language.iso_639_3
         return frbr_uri.expression_uri()
 
+    def expression_uri(self):
+        """Parsed form of expression_frbr_uri."""
+        return FrbrUri.parse(self.expression_frbr_uri)
+
     def save(self, *args, **kwargs):
         self.expression_frbr_uri = self.generate_expression_frbr_uri()
 
@@ -142,6 +150,32 @@ class CoreDocument(models.Model):
         return Relationship.for_object_document(self).prefetch_related(
             "object_work", "object_work__documents"
         )
+
+    def extract_citations(self):
+        """Run citation extraction on this document. If the document has content_html,
+        extraction will be run on that. Otherwise, if the document as a PDF source file,
+        extraction will be run on that.
+        """
+        from peachjam.analysis.citations import citation_analyser
+        from peachjam.models.citations import CitationLink
+
+        # delete existing citation links
+        CitationLink.objects.filter(document=self).delete()
+        return citation_analyser.extract_citations(self)
+
+    def extract_content_from_source_file(self):
+        """Re-extract content from DOCX source files, overwriting anything in content_html."""
+        if (
+            not self.content_html_is_akn
+            and hasattr(self, "source_file")
+            and self.source_file.mimetype in DOC_MIMETYPES
+        ):
+            context = PipelineContext(word_pipeline)
+            context.source_file = self.source_file.file
+            word_pipeline(context)
+            # TODO: attachments
+            self.content_html = context.html_text
+            return True
 
 
 def file_location(instance, filename):
@@ -187,3 +221,11 @@ class SourceFile(AttachmentAbstractModel):
         if not self.mimetype:
             self.mimetype = magic.from_buffer(self.file.read(), mime=True)
         return super().save(*args, **kwargs)
+
+    def as_pdf(self):
+        if self.filename.endswith(".pdf"):
+            return self.file
+
+        # convert with soffice
+        suffix = os.path.splitext(self.filename)[1].replace(".", "")
+        return soffice_convert(self.file, suffix, "pdf")[0]

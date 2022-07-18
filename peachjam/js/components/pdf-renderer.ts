@@ -131,7 +131,7 @@ class PdfRenderer {
       await asyncForEach(pages, async (page, index) => {
         const viewport = page.getViewport({ scale: 1 });
         const elementRendered = document.createElement('div');
-        elementRendered.setAttribute('id', String(index + 1));
+        elementRendered.setAttribute('id', `page-${index + 1}`);
         elementRendered.dataset.page = String(index + 1);
         elementRendered.classList.add('pdf-content__page');
         elementRendered.style.position = 'relative';

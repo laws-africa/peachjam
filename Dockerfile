@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt /tmp/requirements.txt
 
 # LibreOffice
-RUN apt-get update && apt-get install -y libreoffice
+RUN apt-get update && apt-get install -y libreoffice poppler-utils
 
 RUN pip install -q --upgrade pip \
   && pip install -q --upgrade setuptools \

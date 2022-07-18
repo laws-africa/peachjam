@@ -4,10 +4,10 @@ boto3==1.21.38
 certifi==2021.10.8
 cffi==1.15.0
 charset-normalizer==2.0.12
-cobalt==5.0.0
+cobalt==6.0.0
 cryptography==36.0.1
 defusedxml==0.7.1
-git+https://github.com/laws-africa/docpipe.git@fac46c6f7ffe51f23e96b63488cb1cc45d2de6a7#egg=docpipe
+git+https://github.com/laws-africa/docpipe.git@46f6b18edf354260a7e5dd63e67f51dc4c4a9c77#egg=docpipe
 dj-database-url==0.5.0
 Django==3.2.13
 django-allauth==0.49.0
