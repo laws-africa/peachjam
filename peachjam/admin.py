@@ -2,6 +2,7 @@ import copy
 
 from ckeditor.widgets import CKEditorWidget
 from django import forms
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.http.response import FileResponse
@@ -10,6 +11,7 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as __
 from import_export.admin import ImportMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
@@ -32,12 +34,21 @@ from peachjam.models import (
     Legislation,
     Locality,
     MatterType,
+    PeachJamSettings,
     Predicate,
     Relationship,
     SourceFile,
     Taxonomy,
+    pj_settings,
 )
 from peachjam.resources import GenericDocumentResource, JudgmentResource
+
+
+class PeachJamSettingsAdmin(admin.ModelAdmin):
+    filter_horizontal = (
+        "document_languages",
+        "document_jurisdictions",
+    )
 
 
 class SourceFileFilter(admin.SimpleListFilter):
@@ -112,6 +123,14 @@ class DocumentForm(forms.ModelForm):
 
         super().__init__(data, *args, **kwargs)
 
+        # adjust form based on peach jam site settings
+        settings = pj_settings()
+        self.fields["language"].initial = settings.default_document_language
+        if settings.document_languages.exists():
+            self.fields["language"].queryset = settings.document_languages
+        if settings.document_languages.exists():
+            self.fields["jurisdiction"].queryset = settings.document_jurisdictions
+
         if "frbr_uri_doctype" in self.fields:
             # customise doctype options for different document models
             self.fields["frbr_uri_doctype"].choices = [
@@ -133,6 +152,7 @@ class DocumentAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
         "work_frbr_uri",
+        "toc_json",
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
@@ -140,17 +160,29 @@ class DocumentAdmin(admin.ModelAdmin):
 
     fieldsets = [
         (
-            None,
+            __("Key details"),
             {
                 "fields": [
-                    ("jurisdiction", "locality"),
+                    "jurisdiction",
+                    "locality",
                     "title",
                     "date",
                     "language",
                 ]
             },
         ),
-        (None, {"fields": ["citation", "source_url", "expression_frbr_uri"]}),
+        (
+            __("Additional details"),
+            {
+                "fields": [
+                    "citation",
+                    "source_url",
+                    "created_at",
+                    "updated_at",
+                    "expression_frbr_uri",
+                ]
+            },
+        ),
         (
             "Work identification",
             {
@@ -165,15 +197,23 @@ class DocumentAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Content",
+            __("Content"),
             {
                 "fields": [
-                    "content_html_is_akn",
                     "content_html",
                 ]
             },
         ),
-        ("Advanced", {"classes": ("collapse",), "fields": ["toc_json"]}),
+        (
+            __("Advanced"),
+            {
+                "classes": ("collapse",),
+                "fields": [
+                    "toc_json",
+                    "content_html_is_akn",
+                ],
+            },
+        ),
     ]
 
     new_document_form_mixin = NewDocumentFormMixin
@@ -319,26 +359,28 @@ class CaseNumberAdmin(admin.TabularInline):
 class JudgmentAdmin(ImportMixin, DocumentAdmin):
     resource_class = JudgmentResource
     inlines = [CaseNumberAdmin] + DocumentAdmin.inlines
+    filter_horizontal = ("judges",)
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
-    fieldsets[0][1]["fields"].insert(1, "case_name")
-    fieldsets[0][1]["fields"].extend(["author", "judges"])
-    fieldsets[1][1]["fields"].insert(0, "mnc")
+    fieldsets[0][1]["fields"].insert(3, "author")
+    fieldsets[0][1]["fields"].insert(4, "case_name")
+    fieldsets[0][1]["fields"].insert(7, "mnc")
+    fieldsets[1][1]["fields"].insert(0, "judges")
     fieldsets[2][1]["classes"] = ["collapse"]
     fieldsets[3][1]["fields"].extend(
         ["headnote_holding", "additional_citations", "flynote"]
     )
     fieldsets[4][1]["fields"].extend(["serial_number"])
-    readonly_fields = (
+    readonly_fields = [
         "mnc",
         "serial_number",
         "title",
-        "work_frbr_uri",
+        "citation",
         "frbr_uri_doctype",
         "frbr_uri_subtype",
         "frbr_uri_actor",
         "frbr_uri_date",
         "frbr_uri_number",
-    )
+    ] + list(DocumentAdmin.readonly_fields)
 
 
 @admin.register(Predicate)
@@ -372,8 +414,11 @@ admin.site.register(
         MatterType,
     ]
 )
+admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)
 admin.site.register(Taxonomy, TaxonomyAdmin)
 admin.site.register(GenericDocument, GenericDocumentAdmin)
 admin.site.register(Legislation, LegislationAdmin)
 admin.site.register(LegalInstrument, LegalInstrumentAdmin)
 admin.site.register(Judgment, JudgmentAdmin)
+
+admin.site.site_header = settings.PEACHJAM["APP_NAME"]

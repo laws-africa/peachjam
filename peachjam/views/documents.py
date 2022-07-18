@@ -18,7 +18,7 @@ def view_attachment(attachment):
 
 
 class HomePageView(TemplateView):
-    template_name = "africanlii/home.html"
+    template_name = "africanlii/../templates/peachjam/home.html"
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="dispatch")

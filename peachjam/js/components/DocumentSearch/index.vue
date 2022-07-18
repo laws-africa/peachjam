@@ -10,8 +10,8 @@
           type="text"
           required
           class="form-control"
-          placeholder="Search document content"
-          aria-label="Search document content"
+          :placeholder="$t('Search document content')"
+          :aria-label="$t('Search document content')"
           aria-describedby="search-content-button"
           minlength="3"
         >
@@ -19,7 +19,7 @@
           class="btn btn-secondary"
           type="submit"
         >
-          Search
+          {{ $t('Search') }}
         </button>
       </div>
       <div
@@ -29,13 +29,13 @@
         <a
           href="#"
           @click.prevent="clear"
-        >Clear</a>
+        >{{ $t('Clear') }}</a>
       </div>
       <div
         v-if="!marks.length && q"
         class="mt-2"
       >
-        No results
+        {{ $t('No results') }}
       </div>
     </form>
     <div class="doc-search__results">
@@ -66,6 +66,7 @@ import Mark from 'mark.js';
 import HTMLSnippets from './HTMLSnippets.vue';
 import PdfSnippets from './PdfSnippets.vue';
 import AknSnippets from './AknSnippets.vue';
+import { scrollToElement } from '../../utils/function';
 
 export default {
   name: 'DocumentSearch',
@@ -120,44 +121,17 @@ export default {
 
     goToSnippet (node) {
       this.mountElement.dispatchEvent(new CustomEvent('going-to-snippet'));
-      scrollToElement(node, 60).then(() => {
-        node.style.outline = '2px solid transparent';
-        node.style.transition = 'outline-color 400ms ease-in-out';
-        node.style.outlineColor = 'var(--bs-primary)';
-        window.setTimeout(() => {
-          node.style.outlineColor = 'transparent';
-        }, 400);
-      });
-
-      function scrollToElement (elem, offset = 0) {
-        const rect = elem.getBoundingClientRect();
-        const targetPosition = Math.floor(rect.top + self.pageYOffset - offset);
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
+      // Wait for offset canvas to close then scroll
+      window.setTimeout(() => {
+        scrollToElement(node, 60).then(() => {
+          node.style.outline = '2px solid transparent';
+          node.style.transition = 'outline-color 400ms ease-in-out';
+          node.style.outlineColor = 'var(--bs-primary)';
+          window.setTimeout(() => {
+            node.style.outlineColor = 'transparent';
+          }, 400);
         });
-
-        return new Promise((resolve, reject) => {
-          const failed = setTimeout(() => {
-            // eslint-disable-next-line prefer-promise-reject-errors
-            reject();
-          }, 2000);
-          const scrollHandler = () => {
-            if (self.pageYOffset === targetPosition) {
-              window.removeEventListener('scroll', scrollHandler);
-              clearTimeout(failed);
-              resolve();
-            }
-          };
-          if (self.pageYOffset === targetPosition) {
-            clearTimeout(failed);
-            resolve();
-          } else {
-            window.addEventListener('scroll', scrollHandler);
-            elem.getBoundingClientRect();
-          }
-        });
-      }
+      }, 300);
     }
   }
 

@@ -34,13 +34,16 @@ class Judgment(CoreDocument):
     additional_citations = models.TextField(blank=True)
     flynote = models.TextField(blank=True)
     case_name = models.CharField(
-        max_length=4096, help_text="Party names for use in title", null=True, blank=True
+        max_length=4096,
+        help_text="Party names for use in title",
+        null=False,
+        blank=False,
     )
     serial_number = models.IntegerField(
-        null=True, help_text="Serial number for MNC, unique for a year and an author."
+        null=False, help_text="Serial number for MNC, unique for a year and an author."
     )
     mnc = models.CharField(
-        max_length=4096, help_text="Media neutral citation", null=True, blank=True
+        max_length=4096, help_text="Media neutral citation", null=False, blank=False
     )
 
     CITATION_DATE_FORMAT = "(%d %B %Y)"

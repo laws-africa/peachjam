@@ -29,26 +29,6 @@
         </div>
         <div><a href="https://indigotrust.org.uk/" target="_blank" rel="noreferrer">{% trans 'Indigo Trust' %}</a></div>
         <div><a href="https://www.eeas.europa.eu/" target="_blank" rel="noreferrer">{% trans 'European Union' %}</a></div>
-        <div><a href="http://clfafrica.org" target="_blank" rel="noreferrer">{% trans 'African Commercial Law Foundation' %}</a></div>
-        <div>
-          <a href="https://www.opensocietyfoundations.org/" target="_blank" rel="noreferrer">
-            {% trans 'Open Society Foundations' %}
-          </a>
-        </div>
-        <div>
-          <a href="http://cedartower.co.za/" target="_blank" rel="noreferrer">
-            {% trans 'CedarTower Services' %}
-          </a>
-        </div>
-        <div>
-          <a href="http://saipar.org/" target="_blank" rel="noreferrer">
-          {% trans 'Southern African Institute for Policy and Research' %}
-          </a>
-        </div>
-        <div><a href="http://www.lrfzim.com/" target="_blank" rel="noreferrer">
-          {% trans 'Legal Resources Foundation - Zimbabwe' %}
-        </a>
-        </div>
       </div>
       <div class="col-lg-4 mb-3">
         <div class="mb-2"><strong>{% trans 'Other African Legal Information Institutions' %}</strong></div>
@@ -72,37 +52,39 @@
       </div>
     </div>
     <hr/>
-    <div class="d-block d-lg-flex align-items-center">
-      <div class="text-center text-lg-start me-0 me-lg-4 mb-4 mb-lg-0">
-        <a href="https://uct.ac.za/"
-           target="_blank"
-           rel="noreferrer"
-        >
-          <img src="{% static 'images/uct-logo.svg' %}" alt="uct-logo" height="40"/>
-        </a>
-      </div>
-      <div class="text-center text-lg-start me-0 me-lg-5 mb-4 mb-lg-0">
-        <a href="https://laws.africa/" target="_blank" rel="noreferrer">
-          <img src="{% static 'images/laws-africa-logo-horizontal.png' %}" alt="laws-africa-logo" height="40"/>
-        </a>
-      </div>
-      <div class="text-center text-lg-start me-0 me-lg-5 mb-4 mb-lg-0">
-        <a href="https://www.indigotrust.org.uk/" target="_blank" rel="noreferrer">
-          <img src="{% static 'images/indigo-trust-logo.jpg' %}" alt="indigo-trust-logo" height="40"/>
-        </a>
-      </div>
-
-      <div class="text-center text-lg-start me-0 me-lg-5 mb-4 mb-lg-0">
-        <a href="https://www.eeas.europa.eu" target="_blank" rel="noreferrer">
-          <img src="{% static 'images/eeas-logo.svg' %}" alt="european-union-external-action-logo" height="40"/>
-        </a>
-      </div>
-
-      <div class="text-center text-lg-start me-0 me-lg-5 mb-4 mb-lg-0">
-        <a href="https://www.sigrid-rausing-trust.org/z" target="_blank" rel="noreferrer">
-          <img src="{% static 'images/srt-logo.jpg' %}" alt="sigrid-rausing-trust-logo" height="40"/>
-        </a>
-      </div>
+    <div class="footer-logos">
+      <a class="footer-logos__item"
+         href="https://uct.ac.za/"
+         target="_blank"
+         rel="noreferrer"
+      >
+        <img src="{% static 'images/uct-logo.svg' %}" alt="uct-logo" />
+      </a>
+      <a
+          href="https://laws.africa/"
+          target="_blank"
+          rel="noreferrer"
+          class="footer-logos__item">
+        <img src="{% static 'images/laws-africa-logo-horizontal.png' %}" alt="laws-africa-logo" />
+      </a>
+      <a href="https://www.indigotrust.org.uk/"
+         target="_blank"
+         rel="noreferrer"
+         class="footer-logos__item"
+      >
+        <img src="{% static 'images/indigo-trust-logo.jpg' %}" alt="indigo-trust-logo" />
+      </a>
+      <a href="https://www.eeas.europa.eu"
+         target="_blank"
+         rel="noreferrer"
+         class="footer-logos__item"
+      >
+        <img src="{% static 'images/eeas-logo.svg' %}"
+             alt="european-union-external-action-logo" />
+      </a>
+      <a class="footer-logos__item" href="https://www.sigrid-rausing-trust.org/" target="_blank" rel="noreferrer">
+        <img src="{% static 'images/srt-logo.jpg' %}" alt="sigrid-rausing-trust-logo"/>
+      </a>
     </div>
   </div>
 </footer>

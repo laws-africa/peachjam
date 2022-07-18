@@ -3,7 +3,6 @@ from django.conf.urls.static import static
 from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_page
 
-from africanlii import views
 from africanlii.feeds import (
     CoreDocumentAtomSiteNewsFeed,
     GenericDocumentAtomSiteNewsFeed,
@@ -11,6 +10,7 @@ from africanlii.feeds import (
     LegalInstrumentAtomSiteNewsFeed,
     LegislationAtomSiteNewsFeed,
 )
+from peachjam import views
 
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),

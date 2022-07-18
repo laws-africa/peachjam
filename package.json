@@ -32,6 +32,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "eslint-plugin-vue": "^8.5.0",
+    "i18next-parser": "^0.13.0",
     "lodash.debounce": "^4.0.8",
     "mark.js": "^8.11.1",
     "sass": "^1.53.0",
@@ -49,6 +50,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.2",
     "vue": "^3.2.31",
+    "vue-i18n": "^9.1.10",
     "vue-select": "^4.0.0-beta.3"
   }
 }
