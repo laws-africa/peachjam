@@ -94,6 +94,13 @@
     }
   }
 
+  .pdf-previews {
+    padding-bottom: 10rem;
+    @include media-breakpoint-up(lg) {
+      padding-bottom: 5rem;
+    }
+  }
+
   .preview-panel {
     border: none;
     max-width: 200px;
