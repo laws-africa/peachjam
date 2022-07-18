@@ -104,7 +104,14 @@ class DocumentForm(forms.ModelForm):
     headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
 
     def __init__(self, *args, **kwargs):
-        super(DocumentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+        if "frbr_uri_doctype" in self.fields:
+            # customise doctype options for different document models
+            self.fields["frbr_uri_doctype"].choices = [
+                (x, x) for x in self.Meta.model.frbr_uri_doctypes
+            ]
+
         if self.instance and self.instance.content_html_is_akn:
             self.fields["content_html"].widget.attrs["readonly"] = True
 
@@ -137,7 +144,7 @@ class DocumentAdmin(admin.ModelAdmin):
                 ]
             },
         ),
-        (None, {"fields": ["citation", "source_url"]}),
+        (None, {"fields": ["citation", "source_url", "expression_frbr_uri"]}),
         (
             "Work identification",
             {

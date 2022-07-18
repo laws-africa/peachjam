@@ -1,5 +1,6 @@
 from django.db import models
 
+from peachjam.frbr_uri import FRBR_URI_DOCTYPES
 from peachjam.models import CoreDocument
 from peachjam.models.author import Author
 
@@ -18,6 +19,8 @@ class GenericDocument(CoreDocument):
         DocumentNature, on_delete=models.PROTECT, null=False, blank=False
     )
 
+    frbr_uri_doctypes = ["doc", "statement"]
+
     def __str__(self):
         return self.title
 
@@ -32,6 +35,8 @@ class LegalInstrument(CoreDocument):
         DocumentNature, on_delete=models.PROTECT, null=False, blank=False
     )
 
+    frbr_uri_doctypes = [x for x in FRBR_URI_DOCTYPES if x != "judgment"]
+
     def __str__(self):
         return self.title
 
@@ -42,6 +47,8 @@ class LegalInstrument(CoreDocument):
 
 class Legislation(CoreDocument):
     metadata_json = models.JSONField(null=False, blank=False)
+
+    frbr_uri_doctypes = ["act"]
 
     class Meta:
         verbose_name_plural = "Legislation"

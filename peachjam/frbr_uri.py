@@ -5,7 +5,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
 # TODO: get these from cobalt
-frbr_uri_doctypes = ((x, x) for x in ["act", "judgment", "document"])
+FRBR_URI_DOCTYPES = ["act", "doc", "judgment", "statement"]
+FRBR_URI_DOCTYPE_CHOICES = ((x, x) for x in FRBR_URI_DOCTYPES)
 
 validate_frbr_uri_component = RegexValidator(
     r"^[a-z0-9_-]+$", "Only lowercase letters, numbers, _ and - allowed"

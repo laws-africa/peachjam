@@ -12,7 +12,8 @@ from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
 
 from peachjam.frbr_uri import (
-    frbr_uri_doctypes,
+    FRBR_URI_DOCTYPE_CHOICES,
+    FRBR_URI_DOCTYPES,
     validate_frbr_uri_component,
     validate_frbr_uri_date,
 )
@@ -84,7 +85,7 @@ class CoreDocument(models.Model):
 
     # components used to build the work FRBR URI
     frbr_uri_doctype = models.CharField(
-        max_length=20, choices=frbr_uri_doctypes, null=False, blank=False
+        max_length=20, choices=FRBR_URI_DOCTYPE_CHOICES, null=False, blank=False
     )
     frbr_uri_subtype = models.CharField(
         max_length=100,
@@ -122,6 +123,9 @@ class CoreDocument(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # options for the FRBR URI doctypes
+    frbr_uri_doctypes = FRBR_URI_DOCTYPES
 
     class Meta:
         ordering = ["doc_type", "title"]
@@ -164,8 +168,9 @@ class CoreDocument(models.Model):
             self.jurisdiction.iso.lower(),
             self.locality.code if self.locality else None,
             self.frbr_uri_doctype,
-            self.frbr_uri_subtype,
-            self.frbr_uri_actor,
+            # TODO: this works around a bug that FrbrUri cannot differentiate between an actor and a subtype
+            self.frbr_uri_subtype or self.frbr_uri_actor,
+            self.frbr_uri_actor if self.frbr_uri_subtype else None,
             self.frbr_uri_date,
             self.frbr_uri_number,
         )

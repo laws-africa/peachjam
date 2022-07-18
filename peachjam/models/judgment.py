@@ -48,6 +48,8 @@ class Judgment(CoreDocument):
     MNC_FORMAT = "[{year}] {author} {serial}"
     """ Format string to use for building short MNCs. """
 
+    frbr_uri_doctypes = ["judgment"]
+
     class Meta:
         ordering = ["title"]
 
@@ -81,7 +83,7 @@ class Judgment(CoreDocument):
         # enforce certain defaults for judgment FRBR URIs
         self.frbr_uri_doctype = "judgment"
         self.frbr_uri_actor = self.author.code.lower()
-        self.frbr_uri_date = self.date.year
+        self.frbr_uri_date = str(self.date.year)
         self.frbr_uri_number = str(self.serial_number)
         return super().generate_work_frbr_uri()
 
