@@ -11,10 +11,6 @@
     }
   }
 
-  .document-content__offcanvas {
-    width: 300px;
-  }
-
   .navigation {
     position: sticky;
     top: 0;
@@ -95,6 +91,13 @@
       @include media-breakpoint-up(lg) {
         display: block;
       }
+    }
+  }
+
+  .pdf-previews {
+    padding-bottom: 10rem;
+    @include media-breakpoint-up(lg) {
+      padding-bottom: 5rem;
     }
   }
 

@@ -92,7 +92,9 @@ class CoreDocument(models.Model):
     def clean(self):
         if self.work_frbr_uri:
             try:
-                FrbrUri.parse(self.work_frbr_uri)
+                parsed = FrbrUri.parse(self.work_frbr_uri)
+                if parsed.prefix != "akn":
+                    raise ValueError()
             except ValueError:
                 raise ValidationError({"work_frbr_uri": "Invalid FRBR URI."})
 
@@ -103,8 +105,7 @@ class CoreDocument(models.Model):
         return frbr_uri.expression_uri()
 
     def save(self, *args, **kwargs):
-        if not self.expression_frbr_uri:
-            self.expression_frbr_uri = self.generate_expression_frbr_uri()
+        self.expression_frbr_uri = self.generate_expression_frbr_uri()
 
         # ensure a matching work exists
         if self.work_frbr_uri and (
@@ -168,7 +169,7 @@ class Image(AttachmentAbstractModel):
     SAVE_FOLDER = "images"
 
     document = models.ForeignKey(
-        CoreDocument, related_name="images", on_delete=models.PROTECT
+        CoreDocument, related_name="images", on_delete=models.CASCADE
     )
     file = models.ImageField(upload_to=file_location, max_length=1024)
 
@@ -177,7 +178,7 @@ class SourceFile(AttachmentAbstractModel):
     SAVE_FOLDER = "source_file"
 
     document = models.OneToOneField(
-        CoreDocument, related_name="source_file", on_delete=models.PROTECT
+        CoreDocument, related_name="source_file", on_delete=models.CASCADE
     )
     file = models.FileField(upload_to=file_location, max_length=1024)
 

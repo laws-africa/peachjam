@@ -73,10 +73,21 @@ cd peachjam && django-admin makemessages -a
 
 And then commit the changes. CrowdIn will pick up any changed strings and make them available for translation. Once they are translated, it will open a pull request to merge the changes into master.
 
-Once merged into master, you must [tell Django to compile the .po files to .mo files](https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#compiling-message-files):
+Once merged into `main`, you must [tell Django to compile the .po files to .mo files](https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#compiling-message-files):
 
 ```bash
 django-admin compilemessages
 ```
 
 And then commit the changes.
+
+## i18n-vue translations
+Translations for `vue` components are stored in `peachjam/js/locale`.
+If the translation syntax is added/updated/deleted (`$t()`), run the following command to update the  `json` files in
+`peachjam/js/locale`
+```
+i18next './peachjam/js/**/*.{js,vue}'
+```
+And then commit the changes.
+CrowdIn will pick up any changed strings on `main` and make them available for translation. Once they are translated,
+it will open a pull request to merge the changes into `main`.
