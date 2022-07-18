@@ -103,8 +103,14 @@ class DocumentForm(forms.ModelForm):
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
     headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, data=None, *args, **kwargs):
+        if data:
+            # derive some defaults from other fields
+            data = data.copy()
+            if "frbr_uri_date" in self.base_fields and not data.get("frbr_uri_date"):
+                data["frbr_uri_date"] = data.get("date")
+
+        super().__init__(data, *args, **kwargs)
 
         if "frbr_uri_doctype" in self.fields:
             # customise doctype options for different document models

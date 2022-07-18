@@ -144,7 +144,7 @@ class CoreDocument(models.Model):
         try:
             FrbrUri.parse(self.generate_work_frbr_uri())
         except ValueError:
-            raise ValidationError({"work_frbr_uri": "Invalid FRBR URI"})
+            raise ValidationError("Invalid FRBR URI")
 
     def generate_expression_frbr_uri(self):
         frbr_uri = FrbrUri.parse(self.work_frbr_uri)
@@ -162,10 +162,11 @@ class CoreDocument(models.Model):
 
     def generate_work_frbr_uri(self):
         """Generate a work FRBR URI for this document."""
-        self.frbr_uri_date = self.frbr_uri_date or self.date.strftime("%Y-%m-%d")
+        if not self.frbr_uri_date and self.date:
+            self.frbr_uri_date = self.date.strftime("%Y-%m-%d")
 
         frbr_uri = FrbrUri(
-            self.jurisdiction.iso.lower(),
+            self.jurisdiction.iso.lower() if hasattr(self, "jurisdiction") else "",
             self.locality.code if self.locality else None,
             self.frbr_uri_doctype,
             # TODO: this works around a bug that FrbrUri cannot differentiate between an actor and a subtype
