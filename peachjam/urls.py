@@ -14,10 +14,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.auth import views
 from django.urls import include, path
 
 urlpatterns = [
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
+    path(
+        "admin/login/",
+        views.LoginView.as_view(template_name="admin/login.html"),
+        name="login",
+    ),
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("api/", include("peachjam_api.urls")),
