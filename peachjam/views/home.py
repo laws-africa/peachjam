@@ -12,7 +12,7 @@ from peachjam.models import (
 
 
 class HomePageView(TemplateView):
-    template_name = "africanlii/home.html"
+    template_name = "peachjam/home.html"
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
