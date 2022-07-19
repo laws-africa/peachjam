@@ -8,7 +8,7 @@
       {% if author_listing_view %}
         <th scope="col">{% trans 'Document Type' %}</th>
       {% else %}
-        <th scope="col">{% trans 'Jurisdiction' %}</th>
+        <th scope="col">{% trans 'Regional Body' %}</th>
       {% endif %}
     </tr>
     </thead>
@@ -23,9 +23,9 @@
       </td>
       <td style="white-space: nowrap;">{{ document.date }}</td>
       {% if author_listing_view %}
-        <td>{{ document.doc_type }}</td>
+        <td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>
       {% else %}
-        <td>{{ document.jurisdiction }}</td>
+        <td >{{ document.author }}</td>
       {% endif %}
     </tr>
     {% endfor %}
