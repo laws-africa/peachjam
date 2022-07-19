@@ -1,3 +1,77 @@
+{% load static %}
+{% load i18n %}
+
 <header>
-  header content
+  <div class="bg-dark p-2">
+    <div class="container d-flex justify-content-between">
+      <a href="https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance"
+           target="_blank"
+           rel="noreferrer">
+          <img class="me-4" src="{% static 'images/cso-agp-logo-horizontal.png' %}" alt="africanlii" height="40" />
+        </a>
+    </div>
+  </div>
+  <nav class="navbar navbar-expand-lg shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii" width="120" />
+      </a>
+
+      <button class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarText"
+              aria-controls="navbarText"
+              aria-expanded="false"
+              aria-label="Toggle navigation">
+        <i class="bi bi-list" style="font-size: 35px"></i>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link {% ifequal request.path '/judgments/'%} active {% endifequal%}" href="{% url 'judgment_list' %}">{% trans 'Decisions' %}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% ifequal request.path '/generic_documents/'%} active {% endifequal%}" href="{% url 'generic_document_list' %}">{% trans 'AU Documents' %}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% ifequal request.path '/legal_instruments/'%} active {% endifequal%}" href="{% url 'legal_instrument_list' %}">{% trans 'Treaties and Protocols' %}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="{% url 'legislation_list' %}">{% trans 'Legislation' %}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% ifequal request.path '/about/'%} active {% endifequal%}" href="{% url 'about' %}">{% trans 'About' %}</a>
+          </li>
+        </ul>
+
+        {% if request.path == '/' %}
+        {% else %}
+          <form method="get" action="/search/">
+            <div class="input-group">
+              <input type="text" class="form-control"
+              placeholder="Search documents"
+              aria-label="Search documents"
+              aria-describedby="button-addon2"
+              name="q"
+              >
+              <button class="btn btn-dark" type="submit" id="button-addon2">
+                <i class="bi bi-search text-white"></i>
+              </button>
+            </div>
+          </form>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+          <ul class="navbar-nav">
+            <li class="nav-link">
+              <a class="nav-link" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
+            </li>
+          </ul>
+        {% endif %}
+        {% include 'peachjam/set_language.html' %}
+      </div>
+    </div>
+  </nav>
 </header>
