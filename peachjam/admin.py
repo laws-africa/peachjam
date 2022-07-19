@@ -400,6 +400,13 @@ class IngestorAdmin(admin.ModelAdmin):
     inlines = [IngestorSettingInline]
     readonly_fields = ("last_refreshed_at",)
     form = IngestorForm
+    actions = ["reset_ingestor_refresh_date"]
+
+    def reset_ingestor_refresh_date(self, request, queryset):
+        queryset.update(last_refreshed_at=None)
+        self.message_user(request, "Ingestor last refresh date has been reset.")
+
+    reset_ingestor_refresh_date.short_description = "Reset ingestor last refresh date"
 
 
 admin.site.register(
