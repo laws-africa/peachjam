@@ -156,6 +156,7 @@ class DocumentAdmin(admin.ModelAdmin):
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
+    prepopulated_fields = {"frbr_uri_number": ("title",)}
     actions = ["extract_citations", "reextract_content"]
 
     fieldsets = [
@@ -381,6 +382,7 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
         "frbr_uri_date",
         "frbr_uri_number",
     ] + list(DocumentAdmin.readonly_fields)
+    prepopulated_fields = {}
 
 
 @admin.register(Predicate)
