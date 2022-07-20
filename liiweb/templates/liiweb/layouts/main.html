@@ -1,0 +1,16 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load sass_tags %}
+{% load static %}
+
+{% block head-js %}
+  <script defer src="{% static 'bootstrap/dist/js/bootstrap.bundle.js' %}"></script>
+  <script defer src="{% static 'lib/pdfjs/pdf.js' %}"></script>
+  <!--  app-prod.js depends on pdf.js to be loaded-->
+  <script defer src="{% static 'js/app-prod.js' %}"></script>
+
+  {{ block.super }}
+{% endblock %}
+
+{% block head-css %}
+  <link rel="stylesheet" href="{% sass_src 'stylesheets/app.scss' %}" type="text/css">
+{% endblock %}

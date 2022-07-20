@@ -1,0 +1,35 @@
+{% extends "liiweb/layouts/main.html" %}
+{% load i18n %}
+
+{% block title %} Home {% endblock %}
+
+{% block page-content %}
+  <section class="hero">
+    {% block hero-img %}{% endblock %}
+    <div class="hero__content">
+      {% block hero-content %}
+      <div>
+
+      </div>
+        <p class="display-6">
+          Title hero text hero
+        </p>
+        <p class="display-3">
+          Smaller hero text over hero
+        </p>
+      {% endblock %}
+    </div>
+  </section>
+  <section class="pb-5 pt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-lg-9">
+          Recent documents content
+        </div>
+        <div class="col-12 col-lg-3">
+          <div>About blurb</div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
