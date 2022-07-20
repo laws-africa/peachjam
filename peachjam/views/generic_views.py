@@ -23,8 +23,6 @@ class FilteredDocumentListView(ListView):
     """Generic List View class for filtering documents."""
 
     def get(self, request, *args, **kwargs):
-        # params = QueryDict(mutable=True)
-        # params.update(request.GET)
         self.form = BaseDocumentFilterForm(request.GET)
         self.form.is_valid()
 
@@ -33,11 +31,8 @@ class FilteredDocumentListView(ListView):
     def get_base_queryset(self):
         return self.model.objects.all()
 
-    def get_queryset(self, filter=True):
-        qs = self.get_base_queryset()
-        if filter:
-            qs = self.form.filter_queryset(qs)
-        return qs
+    def get_queryset(self):
+        return self.form.filter_queryset(self.get_base_queryset())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
