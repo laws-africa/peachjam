@@ -1,0 +1,33 @@
+{% extends 'peachjam/footer.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block footer-classes %}shadow{% endblock %}
+
+{% block first-content-column %}
+  <div class="mb-3">
+    <strong>{% trans 'About' %}</strong>
+  </div>
+    <p>
+      {% blocktrans %}
+        Lawlibrary.org.za is curated by the African Legal Information Institute (AfricanLII) at the
+        <a href="http://www.dgru.uct.ac.za/">Democratic Governance and Rights Unit</a>, Faculty of Law, University of
+        Cape Town (UCT) and in partnership with UCT's <a href="http://www.jifa.uct.ac.za/">Judicial Institute for Africa</a>
+        (JIFA) and <a href="http://laws.africa/">Laws.Africa</a> NPO. AfricanLII and Laws.Africa are members of the regional
+        and global Free Access to Law community and subscribe to the principles of the
+        <a href="http://www.falm.info/declaration/">Montreal Declaration on Free Access to Law.</a>
+      {% endblocktrans %}
+    </p>
+{% endblock %}
+
+{% block second-content-column %}
+  <div class="mb-2"><strong>{% trans 'Our partners' %}</strong></div>
+  <div><a href="https://agp.africanlii.org/" target="_blank" rel="noreferrer">{% trans 'AfricanLII' %}</a></div>
+  <div><a href="http://www.jifa.uct.ac.za/" target="_blank" rel="noreferrer">{% trans 'JIFA' %}</a></div>
+  <div><a href="https://laws.africa/" target="_blank" rel="noreferrer">{% trans 'Laws.Africa' %}</a></div>
+{% endblock %}
+
+{% block third-content-column %}
+  <div class="mb-2"><strong>{% trans 'Other African Legal Information Institutions' %}</strong></div>
+{% endblock %}
