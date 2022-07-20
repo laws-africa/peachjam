@@ -20,7 +20,7 @@
         class="list-group-item"
       >
         <div class="d-flex justify-content-between mb-2">
-          <strong>{{ $t('Authoring Body') }}</strong>
+          <strong>{{ $t('Regional Body') }}</strong>
           <div class="d-flex align-items-center">
             <a
               v-if="getUrlParamValue('author').length"
