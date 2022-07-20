@@ -1,11 +1,4 @@
+//Bootstrap overrides
 @import "variables";
-
-@import "bootstrap/scss/bootstrap";
-
-@import "global";
-@import "navbar";
-@import "footer";
-@import "document-content";
-@import "loaders";
-@import "letter-radiobox";
-@import "toc";
+//Base styles
+@import "../peachjam/static/stylesheets/app.scss";
