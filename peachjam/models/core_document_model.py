@@ -11,6 +11,12 @@ from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
 
+from peachjam.frbr_uri import (
+    FRBR_URI_DOCTYPE_CHOICES,
+    FRBR_URI_DOCTYPES,
+    validate_frbr_uri_component,
+    validate_frbr_uri_date,
+)
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 
 
@@ -74,12 +80,52 @@ class CoreDocument(models.Model):
     locality = models.ForeignKey(
         Locality, on_delete=models.PROTECT, null=True, blank=True
     )
+
+    work_frbr_uri = models.CharField(max_length=1024, null=False, blank=False)
+
+    # components used to build the work FRBR URI
+    frbr_uri_doctype = models.CharField(
+        max_length=20, choices=FRBR_URI_DOCTYPE_CHOICES, null=False, blank=False
+    )
+    frbr_uri_subtype = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        validators=[validate_frbr_uri_component],
+        help_text="Document subtype. Lowercase letters, numbers _ and - only.",
+    )
+    frbr_uri_actor = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        validators=[validate_frbr_uri_component],
+        help_text="Originating actor. Lowercase letters, numbers _ and - only.",
+    )
+    frbr_uri_date = models.CharField(
+        max_length=10,
+        null=False,
+        blank=False,
+        validators=[validate_frbr_uri_date],
+        help_text="YYYY, YYYY-MM, or YYYY-MM-DD",
+    )
+    frbr_uri_number = models.CharField(
+        max_length=1024,
+        null=False,
+        blank=False,
+        validators=[validate_frbr_uri_component],
+        help_text="Unique number or short title identifying this work. Lowercase letters, numbers _ and - only.",
+    )
+
     expression_frbr_uri = models.CharField(
         max_length=1024, null=False, blank=False, unique=True
     )
-    work_frbr_uri = models.CharField(max_length=1024, null=False, blank=False)
+    """This is derived from the work_frbr_uri, language and date."""
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # options for the FRBR URI doctypes
+    frbr_uri_doctypes = FRBR_URI_DOCTYPES
 
     class Meta:
         ordering = ["doc_type", "title"]
@@ -94,13 +140,11 @@ class CoreDocument(models.Model):
         return f"{self.expression_frbr_uri}/"
 
     def clean(self):
-        if self.work_frbr_uri:
-            try:
-                parsed = FrbrUri.parse(self.work_frbr_uri)
-                if parsed.prefix != "akn":
-                    raise ValueError()
-            except ValueError:
-                raise ValidationError({"work_frbr_uri": "Invalid FRBR URI."})
+        super().clean()
+        try:
+            FrbrUri.parse(self.generate_work_frbr_uri())
+        except ValueError:
+            raise ValidationError("Invalid FRBR URI")
 
     def generate_expression_frbr_uri(self):
         frbr_uri = FrbrUri.parse(self.work_frbr_uri)
@@ -112,13 +156,33 @@ class CoreDocument(models.Model):
         """Parsed form of expression_frbr_uri."""
         return FrbrUri.parse(self.expression_frbr_uri)
 
+    def assign_frbr_uri(self):
+        """Generate and store a Work FRBR URI for this document."""
+        self.work_frbr_uri = self.generate_work_frbr_uri()
+
+    def generate_work_frbr_uri(self):
+        """Generate a work FRBR URI for this document."""
+        if not self.frbr_uri_date and self.date:
+            self.frbr_uri_date = self.date.strftime("%Y-%m-%d")
+
+        frbr_uri = FrbrUri(
+            self.jurisdiction.iso.lower() if hasattr(self, "jurisdiction") else "",
+            self.locality.code if self.locality else None,
+            self.frbr_uri_doctype,
+            # TODO: this works around a bug that FrbrUri cannot differentiate between an actor and a subtype
+            self.frbr_uri_subtype or self.frbr_uri_actor,
+            self.frbr_uri_actor if self.frbr_uri_subtype else None,
+            self.frbr_uri_date,
+            self.frbr_uri_number,
+        )
+        return frbr_uri.work_uri(work_component=False)
+
     def save(self, *args, **kwargs):
+        self.assign_frbr_uri()
         self.expression_frbr_uri = self.generate_expression_frbr_uri()
 
         # ensure a matching work exists
-        if self.work_frbr_uri and (
-            not hasattr(self, "work") or self.work.frbr_uri != self.work_frbr_uri
-        ):
+        if not hasattr(self, "work") or self.work.frbr_uri != self.work_frbr_uri:
             self.work, _ = Work.objects.get_or_create(
                 frbr_uri=self.work_frbr_uri,
                 defaults={

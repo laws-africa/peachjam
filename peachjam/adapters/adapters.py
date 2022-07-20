@@ -1,9 +1,11 @@
 import logging
 import re
+from datetime import datetime
 from tempfile import NamedTemporaryFile
 
 import magic
 import requests
+from cobalt import FrbrUri
 from dateutil import parser
 from django.core.files import File
 from django.utils.text import slugify
@@ -69,18 +71,18 @@ class IndigoAdapter(Adapter):
         from languages_plus.models import Language
 
         from peachjam.models import (
+            Author,
             DocumentNature,
             GenericDocument,
             LegalInstrument,
             Legislation,
             Locality,
-            Work,
         )
 
         logger.info(f"Updating document ... {url}")
 
         document = self.client_get(f"{url}.json").json()
-        frbr_uri = document["frbr_uri"]
+        frbr_uri = FrbrUri.parse(document["frbr_uri"])
         title = document["title"]
         expression_frbr_uri = document["expression_frbr_uri"]
         toc_json = self.get_toc_json(url)
@@ -88,16 +90,12 @@ class IndigoAdapter(Adapter):
         jurisdiction = Country.objects.get(iso__iexact=document["country"])
         language = Language.objects.get(iso_639_3__iexact=document["language"])
         locality = Locality.objects.get(code=document["locality"])
-        work, _ = Work.objects.update_or_create(
-            frbr_uri=frbr_uri, defaults={"title": title}
-        )
 
         field_data = {
             "title": title,
             "created_at": document["created_at"],
             "updated_at": document["updated_at"],
-            "work_frbr_uri": frbr_uri,
-            "date": document["expression_date"],
+            "date": datetime.strptime(document["expression_date"], "%Y-%m-%d").date(),
             "content_html_is_akn": True,
             "source_url": document["publication_document"]["url"]
             if document["publication_document"]
@@ -107,8 +105,16 @@ class IndigoAdapter(Adapter):
             "language": language,
             "toc_json": toc_json,
             "content_html": content_html,
-            "work": work,
+            "frbr_uri_subtype": frbr_uri.subtype,
+            "frbr_uri_number": frbr_uri.number,
+            "frbr_uri_doctype": frbr_uri.doctype,
         }
+
+        if frbr_uri.actor:
+            field_data["frbr_uri_actor"] = frbr_uri.actor
+            field_data["author"] = Author.objects.update_or_create(code=frbr_uri.actor)[
+                0
+            ]
 
         if document["nature"] == "act":
             if (
