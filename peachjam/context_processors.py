@@ -12,4 +12,5 @@ def general(request):
         "SENTRY_DSN_KEY": settings.PEACHJAM["SENTRY_DSN_KEY"],
         "SENTRY_ENVIRONMENT": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
         "GOOGLE_ANALYTICS_ID": settings.GOOGLE_ANALYTICS_ID,
+        "APP_STYLES": settings.APP_STYLES,
     }
