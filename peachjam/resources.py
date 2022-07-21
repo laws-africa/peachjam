@@ -33,11 +33,18 @@ class JurisdictionWidget(ForeignKeyWidget):
         return None
 
 
+class AuthorWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if value:
+            return self.model.objects.get(code__iexact=value)
+        return None
+
+
 class BaseDocumentResource(resources.ModelResource):
     author = fields.Field(
         column_name="author",
         attribute="author",
-        widget=ForeignKeyWidget(Author, field="code"),
+        widget=AuthorWidget(Author),
     )
     language = fields.Field(
         attribute="language",
@@ -72,7 +79,6 @@ class BaseDocumentResource(resources.ModelResource):
         row["frbr_uri_date"] = frbr_uri.date
 
         if frbr_uri.actor:
-            Author.objects.update_or_create(code=frbr_uri.actor)
             row["frbr_uri_actor"] = frbr_uri.actor
             row["author"] = frbr_uri.actor
 

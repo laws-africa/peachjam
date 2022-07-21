@@ -72,6 +72,7 @@ class IndigoAdapter(Adapter):
 
         from peachjam.models import (
             Author,
+            CoreDocument,
             DocumentNature,
             GenericDocument,
             LegalInstrument,
@@ -84,7 +85,6 @@ class IndigoAdapter(Adapter):
         document = self.client_get(f"{url}.json").json()
         frbr_uri = FrbrUri.parse(document["frbr_uri"])
         title = document["title"]
-        expression_frbr_uri = document["expression_frbr_uri"]
         toc_json = self.get_toc_json(url)
         content_html = self.client_get(url + ".html").text
         jurisdiction = Country.objects.get(iso__iexact=document["country"])
@@ -95,26 +95,36 @@ class IndigoAdapter(Adapter):
             "title": title,
             "created_at": document["created_at"],
             "updated_at": document["updated_at"],
-            "date": datetime.strptime(document["expression_date"], "%Y-%m-%d").date(),
             "content_html_is_akn": True,
             "source_url": document["publication_document"]["url"]
             if document["publication_document"]
             else None,
-            "jurisdiction": jurisdiction,
-            "locality": locality,
             "language": language,
             "toc_json": toc_json,
             "content_html": content_html,
+        }
+
+        frbr_uri_data = {
+            "locality": locality,
+            "jurisdiction": jurisdiction,
             "frbr_uri_subtype": frbr_uri.subtype,
             "frbr_uri_number": frbr_uri.number,
             "frbr_uri_doctype": frbr_uri.doctype,
+            "frbr_uri_date": frbr_uri.date,
+            "language": language,
+            "date": datetime.strptime(document["expression_date"], "%Y-%m-%d").date(),
         }
 
         if frbr_uri.actor:
-            field_data["frbr_uri_actor"] = frbr_uri.actor
-            field_data["author"] = Author.objects.update_or_create(code=frbr_uri.actor)[
-                0
-            ]
+            frbr_uri_data["frbr_uri_actor"] = frbr_uri.actor
+            field_data["author"] = Author.objects.get(code__iexact=frbr_uri.actor)
+
+        doc = CoreDocument(**frbr_uri_data)
+        doc.work_frbr_uri = doc.generate_work_frbr_uri()
+        expression_frbr_uri = doc.generate_expression_frbr_uri()
+
+        if frbr_uri.work_uri() != doc.work_frbr_uri:
+            raise Exception("FRBR URIs do not match.")
 
         if document["nature"] == "act":
             if (
@@ -137,9 +147,11 @@ class IndigoAdapter(Adapter):
             )[0]
 
         logger.info(model)
-        doc, _ = model.objects.update_or_create(
-            expression_frbr_uri=expression_frbr_uri, defaults={**field_data}
+        doc, new = model.objects.update_or_create(
+            expression_frbr_uri=expression_frbr_uri,
+            defaults={**field_data, **frbr_uri_data},
         )
+        logger.info(f"New document: {new}")
         self.download_source_file(f"{url}.pdf", doc, title)
 
     def client_get(self, url):
