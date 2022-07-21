@@ -49,7 +49,14 @@
           </form>
         {% endif %}
 
-        <!--TODO: put Logout and authenticated back -->
+        {% if user.is_authenticated %}
+          <ul class="navbar-nav">
+            <li class="nav-link">
+              <a class="nav-link" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
+            </li>
+          </ul>
+        {% endif %}
+        {% include 'peachjam/set_language.html' %}
       </div>
     </div>
   </nav>
