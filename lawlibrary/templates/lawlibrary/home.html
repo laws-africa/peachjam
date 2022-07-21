@@ -8,9 +8,40 @@
 {% endblock %}
 
 {% block hero-content %}
-  <p class="display-4">Welcome to the digital Law Library of South Africa</p>
-  <p class="display-6">
+  <h1 class="mb-4">Welcome to the digital Law Library of South Africa</h1>
+  <h4 class="mb-4">
     Reliable and current access to the law of South Africa: annotated and consolidated legislation, case summaries,
     caselaw collections by subject, and legal commentary. Read, use and share the law freely.
-  </p>
+  </h4>
+  <form method="get" action="/search/" class="d-flex">
+    <input type="text" class="form-control form-control-lg flex-grow-1" placeholder="Search documents" aria-label="Search documents" aria-describedby="button-addon2" autofocus="" name="q">
+    <input type="submit" class="btn btn-primary ms-2" value="Search">
+  </form>
+{% endblock %}
+
+{% block first-column-content %}
+<h2 class="mb-4 heading-underlined">Recent Judgments</h2>
+{% endblock %}
+
+{% block second-column-content %}
+<div>
+  <strong>About</strong>
+</div>
+<p>
+  LawLibrary.org.za is a project of the AfricanLII and Judicial Institute for Africa at the University of Cape Town.
+  Legislation digitised by Laws.Africa.
+</p>
+
+<ul class="nav nav-tabs" id="aboutTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="facebook-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Home</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="twitter-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Profile</button>
+  </li>
+</ul>
+<div class="tab-content" id="aboutTabContent">
+  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="facebook-tab">...</div>
+  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="twitter-tab">...</div>
+</div>
 {% endblock %}
