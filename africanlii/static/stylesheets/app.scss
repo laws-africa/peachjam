@@ -1,0 +1,8 @@
+//Bootstrap overrides
+@import "variables";
+//Base styles
+@import "../peachjam/static/stylesheets/app.scss";
+
+footer {
+  @extend .bg-dark, .text-white;
+}

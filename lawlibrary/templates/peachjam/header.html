@@ -1,0 +1,28 @@
+{% extends 'peachjam/header.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block top-bar %}
+    <div class="bg-dark p-2">
+      <div class="container d-flex justify-content-between">
+        <a href="https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance"
+             target="_blank"
+             rel="noreferrer">
+          <img class="me-4" src="{% static 'images/cso-agp-logo-horizontal.png' %}" alt="africanlii" height="40" />
+        </a>
+      </div>
+  </div>
+{% endblock %}
+{% block navbar-logo %}
+    <img src="{% static 'images/lawlibrary-logo.png' %}" alt="lawlibrary" width="70" />
+{% endblock %}
+
+{% block nav-items %}
+  <li class="nav-item">
+    <a class="nav-link {% ifequal request.path '/judgements/'%} active {% endifequal%}" href="#">{% trans 'Judgements' %}</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="#">{% trans 'Legislation' %}</a>
+  </li>
+
+{% endblock %}

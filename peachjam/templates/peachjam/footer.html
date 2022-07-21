@@ -1,90 +1,47 @@
 {% load static %}
 {% load i18n %}
 
-<footer class="bg-dark text-white pt-4 pb-4">
+<footer class="pt-4 pb-4">
   <div class="container">
     <div class="row">
       <div class="col-lg-4">
-        <div class="mb-3">
-          <strong>{% trans 'About AfricanLII' %}</strong>
-        </div>
-        <p>
-          {% blocktrans %}
-            AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of
-            the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and
-            federates search across all open access African national law available through the
-            <a class="text-primary" href="https://www.openlawafrica.org/" target="_blank" rel="noreferrer">Open Law Africa</a> community of LIIs.
-          {% endblocktrans %}
-        </p>
-        <p>
-          {% blocktrans %}
-            The publication of the African Union material is co-sponsored by the European Union and is part of the <a class="text-primary" href="https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/" target="_blank" rel="noreferrer">Data
-          for Governance Alliance project</a>.
-          {% endblocktrans %}
-        </p>
+        {% block first-content-column %}
+          <div class="mb-3">
+            <strong>First column title</strong>
+          </div>
+          <p>Column content</p>
+        {% endblock %}
       </div>
       <div class="col-lg-4 mb-3">
-        <div class="mb-2"><strong>{% trans 'With support from' %}</strong></div>
-        <div><a href="https://www.sigrid-rausing-trust.org/" target="_blank" rel="noreferrer">{% trans 'Sigrid Rausing Trust' %}</a>
-        </div>
-        <div><a href="https://indigotrust.org.uk/" target="_blank" rel="noreferrer">{% trans 'Indigo Trust' %}</a></div>
-        <div><a href="https://www.eeas.europa.eu/" target="_blank" rel="noreferrer">{% trans 'European Union' %}</a></div>
+        {% block second-content-column %}
+          <div class="mb-3">
+            <strong>Second column title</strong>
+          </div>
+          <p>Column content</p>
+        {% endblock %}
       </div>
       <div class="col-lg-4 mb-3">
-        <div class="mb-2"><strong>{% trans 'Other African Legal Information Institutions' %}</strong></div>
-        <div><a href="https://africanlii.org/" target="_blank" rel="noreferrer">{% trans 'AfricanLII' %}</a></div>
-        <div><a href="https://ghalii.org/" target="_blank" rel="noreferrer">{% trans 'GhaLII' %}</a></div>
-        <div><a href="http://kenyalaw.org/" target="_blank" rel="noreferrer">{% trans 'Kenya Law' %}</a></div>
-        <div><a href="https://lawlibrary.org.za/" target="_blank" rel="noreferrer">{% trans 'LawLibrary ZA' %}</a></div>
-        <div><a href="https://lesotholii.org/" target="_blank" rel="noreferrer">{% trans 'LesothoLII' %}</a></div>
-        <div><a href="http://liberlii.org/" target="_blank" rel="noreferrer">{% trans 'LiberLII' %}</a></div>
-        <div><a href="https://malawilii.org/" target="_blank" rel="noreferrer">{% trans 'MalawiLII' %}</a></div>
-        <div><a href="https://namiblii.org/" target="_blank" rel="noreferrer">{% trans 'NamibLII' %}</a></div>
-        <div><a href="https://nigerialii.org/" target="_blank" rel="noreferrer">{% trans 'NigeriaLII' %}</a></div>
-        <div><a href="https://openbylaws.org.za/" target="_blank" rel="noreferrer">{% trans 'OpenbyLaws ZA' %}</a></div>
-        <div><a href="https://seylii.org/" target="_blank" rel="noreferrer">{% trans 'SeyLII' %}</a></div>
-        <div><a href="https://sierralii.org/" target="_blank" rel="noreferrer">{% trans 'SieraLII' %}</a></div>
-        <div><a href="https://eswatinilii.org/" target="_blank" rel="noreferrer">{% trans 'eSwatiniLII' %}</a></div>
-        <div><a href="https://tanzlii.org/" target="_blank" rel="noreferrer">{% trans 'TanzLII' %}</a></div>
-        <div><a href="https://ulii.org/" target="_blank" rel="noreferrer">{% trans 'UgandaLII' %}</a></div>
-        <div><a href="https://zambialii.org/" target="_blank" rel="noreferrer">{% trans 'ZambiaLII' %}</a></div>
-        <div><a href="https://zimlii.org/" target="_blank" rel="noreferrer">{% trans 'ZimLII' %}</a></div>
+        {% block third-content-column %}
+          <div class="mb-3">
+            <strong>Third column title</strong>
+          </div>
+          <p>Column content</p>
+        {% endblock %}
       </div>
     </div>
     <hr/>
-    <div class="footer-logos">
-      <a class="footer-logos__item"
-         href="https://uct.ac.za/"
-         target="_blank"
-         rel="noreferrer"
-      >
-        <img src="{% static 'images/uct-logo.svg' %}" alt="uct-logo" />
-      </a>
-      <a
-          href="https://laws.africa/"
-          target="_blank"
-          rel="noreferrer"
-          class="footer-logos__item">
-        <img src="{% static 'images/laws-africa-logo-horizontal.png' %}" alt="laws-africa-logo" />
-      </a>
-      <a href="https://www.indigotrust.org.uk/"
-         target="_blank"
-         rel="noreferrer"
-         class="footer-logos__item"
-      >
-        <img src="{% static 'images/indigo-trust-logo.jpg' %}" alt="indigo-trust-logo" />
-      </a>
-      <a href="https://www.eeas.europa.eu"
-         target="_blank"
-         rel="noreferrer"
-         class="footer-logos__item"
-      >
-        <img src="{% static 'images/eeas-logo.svg' %}"
-             alt="european-union-external-action-logo" />
-      </a>
-      <a class="footer-logos__item" href="https://www.sigrid-rausing-trust.org/" target="_blank" rel="noreferrer">
-        <img src="{% static 'images/srt-logo.jpg' %}" alt="sigrid-rausing-trust-logo"/>
-      </a>
-    </div>
+    {% block footer-logos %}
+      <div class="footer-logos">
+        <div class="footer-logos__item">
+          Footer logo item
+        </div>
+        <div class="footer-logos__item">
+          Footer logo item
+        </div>
+        <div class="footer-logos__item">
+          Footer logo item
+        </div>
+      </div>
+    {% endblock %}
   </div>
 </footer>

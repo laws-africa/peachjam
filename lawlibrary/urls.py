@@ -2,9 +2,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
 
-urlpatterns = [
-    path("", include("peachjam.urls")),
-]
+from lawlibrary import views
+
+urlpatterns = [path("", views.HomePageView.as_view(), name="home_page")]
 
 if settings.DEBUG:
     import debug_toolbar
