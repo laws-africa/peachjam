@@ -1,2 +1,6 @@
 @import "variables";
 @import "../liiweb/static/stylesheets/app";
+
+footer {
+  @extend .shadow;
+}
