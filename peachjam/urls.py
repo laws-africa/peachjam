@@ -40,7 +40,7 @@ from peachjam.views import (
     LegislationListView,
 )
 
-urlpatterns = [
+common_url_patterns = [
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
     path(
         "admin/login/",
@@ -50,6 +50,10 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("api/", include("peachjam_api.urls")),
+    path("i18n/", include("django.conf.urls.i18n")),
+]
+
+urlpatterns = common_url_patterns + [
     path("", HomePageView.as_view(), name="home_page"),
     path("judgments/", JudgmentListView.as_view(), name="judgment_list"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
@@ -98,7 +102,6 @@ urlpatterns = [
         "feeds/legislation.xml", LegislationAtomSiteNewsFeed(), name="legislation_feed"
     ),
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
-    path("i18n/", include("django.conf.urls.i18n")),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/$",
         DocumentDetailViewResolver.as_view(),
