@@ -19,7 +19,6 @@ from peachjam.models import (
     Locality,
     MatterType,
     SourceFile,
-    Work,
 )
 
 from .download import download_source_file
@@ -67,17 +66,15 @@ class BaseDocumentResource(resources.ModelResource):
         row["language"] = frbr_uri.default_language
         row["jurisdiction"] = frbr_uri.country
         row["locality"] = frbr_uri.locality
+        row["frbr_uri_number"] = frbr_uri.number
+        row["frbr_uri_doctype"] = frbr_uri.doctype
+        row["frbr_uri_subtype"] = frbr_uri.subtype
+        row["frbr_uri_date"] = frbr_uri.date
 
-        work, _ = Work.objects.update_or_create(
-            frbr_uri=frbr_uri, defaults={"title": row["title"]}
-        )
-        row["work"] = work.id
-        row["author"] = row["author_obj"]["code"]
-
-        Author.objects.get_or_create(
-            code=row["author_obj"]["code"],
-            name=row["author_obj"]["name"],
-        )
+        if frbr_uri.actor:
+            Author.objects.update_or_create(code=frbr_uri.actor)
+            row["frbr_uri_actor"] = frbr_uri.actor
+            row["author"] = frbr_uri.actor
 
         logger.info(f"Importing row: {row}")
 

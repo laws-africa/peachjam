@@ -1,4 +1,4 @@
-import { createApp, defineComponent, ComponentPublicInstance } from 'vue';
+import { ComponentPublicInstance } from 'vue';
 import RelationshipEnrichmentList from './RelationshipEnrichmentList.vue';
 import { IRelationshipEnrichment } from './enrichment';
 import { GutterEnrichmentManager, IGutterEnrichmentProvider } from '@lawsafrica/indigo-akn/dist/enrichments';

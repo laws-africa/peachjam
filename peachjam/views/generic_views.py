@@ -22,12 +22,16 @@ from peachjam_api.serializers import (
 class FilteredDocumentListView(ListView):
     """Generic List View class for filtering documents."""
 
+    def get(self, request, *args, **kwargs):
+        self.form = BaseDocumentFilterForm(request.GET)
+        self.form.is_valid()
+
+        return super(FilteredDocumentListView, self).get(request, *args, **kwargs)
+
     def get_base_queryset(self):
         return self.model.objects.all()
 
     def get_queryset(self):
-        self.form = BaseDocumentFilterForm(self.request.GET)
-        self.form.is_valid()
         return self.form.filter_queryset(self.get_base_queryset())
 
     def get_context_data(self, **kwargs):

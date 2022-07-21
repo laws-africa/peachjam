@@ -51,6 +51,8 @@ class Judgment(CoreDocument):
     MNC_FORMAT = "[{year}] {author} {serial}"
     """ Format string to use for building short MNCs. """
 
+    frbr_uri_doctypes = ["judgment"]
+
     class Meta:
         ordering = ["title"]
 
@@ -62,9 +64,6 @@ class Judgment(CoreDocument):
         if self.mnc != self.generate_citation():
             self.serial_number = self.generate_serial_number()
             self.mnc = self.generate_citation()
-
-        # when assigning the MNC, also ensure the FRBR URI is correct, since they are directly linked
-        self.assign_frbr_uri()
 
     def generate_serial_number(self):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
@@ -83,16 +82,15 @@ class Judgment(CoreDocument):
             year=self.date.year, author=self.author.code, serial=self.serial_number
         )
 
-    def assign_frbr_uri(self):
-        self.work_frbr_uri = self.generate_work_frbr_uri()
-
     def generate_work_frbr_uri(self):
-        """Generate a work FRBR URI based on the MNC data."""
-        place = [self.jurisdiction.iso.lower()]
-        if self.locality:
-            place.append(self.locality.code)
-        place = "-".join(place).lower()
-        return f"/akn/{place}/judgment/{self.author.code.lower()}/{self.date.year}/{self.serial_number}"
+        # enforce certain defaults for judgment FRBR URIs
+        self.frbr_uri_doctype = "judgment"
+        self.frbr_uri_actor = (
+            self.author.code.lower() if hasattr(self, "author") else None
+        )
+        self.frbr_uri_date = str(self.date.year) if self.date else ""
+        self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
+        return super().generate_work_frbr_uri()
 
     def assign_title(self):
         """Assign an automatically generated title based on the judgment details.

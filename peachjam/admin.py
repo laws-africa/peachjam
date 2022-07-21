@@ -114,8 +114,14 @@ class DocumentForm(forms.ModelForm):
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
     headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, data=None, *args, **kwargs):
+        if data:
+            # derive some defaults from other fields
+            data = data.copy()
+            if "frbr_uri_date" in self.base_fields and not data.get("frbr_uri_date"):
+                data["frbr_uri_date"] = data.get("date")
+
+        super().__init__(data, *args, **kwargs)
 
         # adjust form based on peach jam site settings
         settings = pj_settings()
@@ -124,6 +130,12 @@ class DocumentForm(forms.ModelForm):
             self.fields["language"].queryset = settings.document_languages
         if settings.document_languages.exists():
             self.fields["jurisdiction"].queryset = settings.document_jurisdictions
+
+        if "frbr_uri_doctype" in self.fields:
+            # customise doctype options for different document models
+            self.fields["frbr_uri_doctype"].choices = [
+                (x, x) for x in self.Meta.model.frbr_uri_doctypes
+            ]
 
         if self.instance and self.instance.content_html_is_akn:
             self.fields["content_html"].widget.attrs["readonly"] = True
@@ -139,10 +151,12 @@ class DocumentAdmin(admin.ModelAdmin):
         "work",
         "created_at",
         "updated_at",
+        "work_frbr_uri",
         "toc_json",
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
+    prepopulated_fields = {"frbr_uri_number": ("title",)}
     actions = ["extract_citations", "reextract_content"]
 
     fieldsets = [
@@ -155,13 +169,33 @@ class DocumentAdmin(admin.ModelAdmin):
                     "title",
                     "date",
                     "language",
-                    "work_frbr_uri",
                 ]
             },
         ),
         (
             __("Additional details"),
-            {"fields": ["citation", "source_url", "created_at", "updated_at"]},
+            {
+                "fields": [
+                    "citation",
+                    "source_url",
+                    "created_at",
+                    "updated_at",
+                    "expression_frbr_uri",
+                ]
+            },
+        ),
+        (
+            "Work identification",
+            {
+                "fields": [
+                    "work_frbr_uri",
+                    "frbr_uri_doctype",
+                    "frbr_uri_subtype",
+                    "frbr_uri_actor",
+                    "frbr_uri_date",
+                    "frbr_uri_number",
+                ],
+            },
         ),
         (
             __("Content"),
@@ -331,18 +365,24 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].insert(3, "author")
     fieldsets[0][1]["fields"].insert(4, "case_name")
     fieldsets[0][1]["fields"].insert(7, "mnc")
-    # remove work_frbr_uri, we'll generate it automatically
-    fieldsets[0][1]["fields"] = [
-        f for f in fieldsets[0][1]["fields"] if f != "work_frbr_uri"
-    ]
     fieldsets[1][1]["fields"].insert(0, "judges")
-    fieldsets[2][1]["fields"].extend(
+    fieldsets[2][1]["classes"] = ["collapse"]
+    fieldsets[3][1]["fields"].extend(
         ["headnote_holding", "additional_citations", "flynote"]
     )
-    fieldsets[3][1]["fields"].extend(["serial_number"])
-    readonly_fields = ["mnc", "serial_number", "title", "citation"] + list(
-        DocumentAdmin.readonly_fields
-    )
+    fieldsets[4][1]["fields"].extend(["serial_number"])
+    readonly_fields = [
+        "mnc",
+        "serial_number",
+        "title",
+        "citation",
+        "frbr_uri_doctype",
+        "frbr_uri_subtype",
+        "frbr_uri_actor",
+        "frbr_uri_date",
+        "frbr_uri_number",
+    ] + list(DocumentAdmin.readonly_fields)
+    prepopulated_fields = {}
 
 
 @admin.register(Predicate)
@@ -362,6 +402,13 @@ class IngestorAdmin(admin.ModelAdmin):
     inlines = [IngestorSettingInline]
     readonly_fields = ("last_refreshed_at",)
     form = IngestorForm
+    actions = ["reset_ingestor_refresh_date"]
+
+    def reset_ingestor_refresh_date(self, request, queryset):
+        queryset.update(last_refreshed_at=None)
+        self.message_user(request, "Ingestor last refresh date has been reset.")
+
+    reset_ingestor_refresh_date.short_description = "Reset ingestor last refresh date"
 
 
 admin.site.register(

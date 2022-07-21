@@ -20,6 +20,8 @@ class JudgmentTestCase(TestCase):
         )
         j.assign_mnc()
         self.assertEquals("[2019] EACJ 1", j.mnc)
+
+        j.assign_frbr_uri()
         self.assertEquals("/akn/za/judgment/eacj/2019/1", j.work_frbr_uri)
 
         mnc = j.mnc
