@@ -3,8 +3,11 @@ from django.conf.urls.static import static
 from django.urls import include, path
 
 from lawlibrary import views
+from peachjam.urls import common_url_patterns
 
-urlpatterns = [path("", views.HomePageView.as_view(), name="home_page")]
+urlpatterns = common_url_patterns + [
+    path("", views.HomePageView.as_view(), name="home_page")
+]
 
 if settings.DEBUG:
     import debug_toolbar
