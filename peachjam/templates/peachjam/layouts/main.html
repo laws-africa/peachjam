@@ -2,9 +2,16 @@
 {% load static %}
 {% load sass_tags %}
 
-{% block head-css %}{% endblock %}
+{% block head-css %}
+    <link rel="stylesheet" href="{% sass_src APP_STYLES  %}" type="text/css">
+{% endblock %}
 
 {% block head-js %}
+  <script defer src="{% static 'bootstrap/dist/js/bootstrap.bundle.js' %}"></script>
+  <script defer src="{% static 'lib/pdfjs/pdf.js' %}"></script>
+  <!--  app-prod.js depends on pdf.js to be loaded-->
+  <script defer src="{% static 'js/app-prod.js' %}"></script>
+
   {% if not DEBUG %}
     <!-- sentry -->
     <script defer src="https://browser.sentry-cdn.com/6.18.1/bundle.min.js" integrity="sha384-XOitiDSsTajhNQgwzQ7iHMlM2Q2ODCW6aw3m1QgMVrDOqsNhFao1VjB39qXNMOZW" crossorigin="anonymous"></script>

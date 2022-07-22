@@ -160,3 +160,4 @@ cython_debug/
 
 staticfiles
 .DS_Store
+.sass-cache

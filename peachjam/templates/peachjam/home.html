@@ -1,78 +1,7 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
-
 {% block title %} {% trans 'Home' %} {% endblock %}
 
 {% block page-content %}
-<section class="pb-5 pt-5">
-  <div class="container">
-    <p class="display-6 text-center">
-      {% blocktrans trimmed %}
-        We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
-        with and understand the African Union agenda.
-      {% endblocktrans %}
-    </p>
-    <p class="display-6 text-center">
-      {% blocktrans trimmed %}
-        Search through {{ documents_count }} AU documents on the AfricanLII platform.
-      {% endblocktrans %}
-    </p>
-
-    <div class="row mt-5">
-        <div class="col-md-9 mx-auto">
-          <form method="get" action="/search/" class="d-flex">
-              <input type="text" class="form-control form-control-lg flex-grow-1"
-                    placeholder="Search documents"
-                    aria-label="Search documents"
-                    aria-describedby="button-addon2"
-                    autofocus
-                    name="q"
-              >
-              <input type="submit" class="btn btn-primary ms-2" value="Search">
-          </form>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="pb-5 pt-5">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Regional Body' %}</h2>
-    <div class="row">
-      {% for author in authors %}
-        <div class="col-md-6 col-sm-12">
-            <a href="{% url 'authors' author.id %}">{{ author.name }}</a>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<section class="pb-5 pt-5 bg-light">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text='View more Judgements' view_more_url_name='judgment_list' %}
-  </div>
-</section>
-
-<section class="pb-5 pt-5">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent AU Documents' %}</h2>
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_documents  view_more_text='View more AU Documents' view_more_url_name='generic_document_list' %}
-  </div>
-</section>
-
-<section class="pb-5 pt-5 bg-light">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Legal Instruments' %}</h2>
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_instruments view_more_text='View more Legal Instruments' view_more_url_name='legal_instrument_list' %}
-  </div>
-</section>
-
-<section class="pb-5 pt-5">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Treaties and Protocols ' %}</h2>
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text='View more Treaties and Protocols' view_more_url_name='legislation_list' %}
-  </div>
-</section>
+  <section>Page content</section>
 {% endblock %}
