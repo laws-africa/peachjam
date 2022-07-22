@@ -20,7 +20,7 @@ from django.contrib.auth import views
 from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_page
 
-from africanlii.feeds import (
+from peachjam.feeds import (
     CoreDocumentAtomSiteNewsFeed,
     GenericDocumentAtomSiteNewsFeed,
     JudgmentAtomSiteNewsFeed,
