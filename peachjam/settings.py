@@ -351,5 +351,3 @@ if DEBUG:
 GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
 
 CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}
-
-APP_STYLES = "stylesheets/peachjam.scss"
