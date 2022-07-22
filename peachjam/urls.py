@@ -40,20 +40,7 @@ from peachjam.views import (
     LegislationListView,
 )
 
-common_url_patterns = [
-    path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
-    path(
-        "admin/login/",
-        views.LoginView.as_view(template_name="admin/login.html"),
-        name="login",
-    ),
-    path("admin/", admin.site.urls),
-    path("accounts/", include("allauth.urls")),
-    path("api/", include("peachjam_api.urls")),
-    path("i18n/", include("django.conf.urls.i18n")),
-]
-
-urlpatterns = common_url_patterns + [
+urlpatterns = [
     path("", HomePageView.as_view(), name="home_page"),
     path("judgments/", JudgmentListView.as_view(), name="judgment_list"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
@@ -107,6 +94,16 @@ urlpatterns = common_url_patterns + [
         DocumentDetailViewResolver.as_view(),
         name="document_detail",
     ),
+    path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
+    path(
+        "admin/login/",
+        views.LoginView.as_view(template_name="admin/login.html"),
+        name="login",
+    ),
+    path("admin/", admin.site.urls),
+    path("accounts/", include("allauth.urls")),
+    path("api/", include("peachjam_api.urls")),
+    path("i18n/", include("django.conf.urls.i18n")),
 ]
 
 if settings.DEBUG:
