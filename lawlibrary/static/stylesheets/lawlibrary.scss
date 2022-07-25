@@ -3,5 +3,5 @@
 @import "pages/index";
 
 footer {
-  @extend .shadow;
+  background-color: $gray-100;
 }
