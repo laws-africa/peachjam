@@ -16,7 +16,10 @@
       caselaw collections by subject, and legal commentary. Read, use and share the law freely.
     {% endblocktrans %}
   </h4>
-  <form method="get" action="/search/" class="d-flex">
+
+  <div class="row">
+    <div class="col-12 col-lg-6">
+      <form method="get" action="/search/" class="d-flex mb-4">
     <input type="text" class="form-control form-control-lg flex-grow-1"
            placeholder="{% trans 'Search documents' %}"
            aria-label="Search documents"
@@ -24,6 +27,23 @@
            autofocus="" name="q">
     <input type="submit" class="btn btn-primary ms-2 text-white" value="{% trans 'Search' %}">
   </form>
+      <div class="d-flex justify-content-between">
+        <img height="26"
+             class="me-4"
+             src="{% static 'images/africanlii-logo.svg' %}"
+             alt="africanlii-logo" />
+        <img height="26"
+             class="me-4"
+             src="{% static 'images/jifa.jpg' %}"
+             alt="jifa-logo"
+        />
+        <img height="26"
+             src="{% static 'images/laws-africa-logo.png' %}"
+             alt="laws-logo"
+        />
+  </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block first-column-content %}
@@ -52,6 +72,22 @@
     Legislation digitised by Laws.Africa.
   {% endblocktrans %}
 </p>
+<div class="d-flex justify-content-between">
+  <img height="26"
+       class="me-4"
+       src="{% static 'images/africanlii-logo.svg' %}"
+       alt="africanlii-logo" />
+  <img height="26"
+       class="me-4"
+       src="{% static 'images/jifa.jpg' %}"
+       alt="jifa-logo"
+  />
+  <img height="26"
+       src="{% static 'images/laws-africa-logo.png' %}"
+       alt="laws-logo"
+  />
+</div>
+
 
 <ul class="nav nav-tabs about-tabs" role="tablist">
   <li class="nav-item" role="presentation">
