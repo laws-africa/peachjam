@@ -1,1 +1,23 @@
-Judgement List
+<h1>Judgement List</h1>
+<hr>
+
+<h2>Judgments</h2>
+{% for judgment in recent_judgments %}
+    <p>
+        {{ judgment }}
+    </p>
+{% endfor %}
+
+<hr>
+
+<h2>Court Classes</h2>
+{% for court_class in court_classes %}
+    {{ court_class }}
+{% endfor %}
+
+<hr>
+
+<h2>Courts</h2>
+{% for court in courts %}
+    <p><a href="{% url 'court_detail' court.pk %}">{{ court }}</a></p>
+{% endfor %}
