@@ -47,19 +47,8 @@
 {% endblock %}
 
 {% block first-column-content %}
-<h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
-<a class="mb-2 d-flex" href="#">
-  <span class="flex-grow-1">Lorem title</span>
-  <span>01/01/2022</span>
-</a>
-<a class="mb-2 d-flex" href="#">
-  <span class="flex-grow-1">Lorem title</span>
-  <span>01/01/2022</span>
-</a>
-<a class="mb-2 d-flex" href="#">
-  <span class="flex-grow-1">Lorem title</span>
-  <span>01/01/2022</span>
-</a>
+  <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text='View more Judgements' view_more_url_name='judgment_list' %}
 {% endblock %}
 
 {% block second-column-content %}
