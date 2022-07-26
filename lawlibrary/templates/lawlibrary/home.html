@@ -20,13 +20,13 @@
   <div class="row">
     <div class="col-12 col-lg-6">
       <form method="get" action="/search/" class="d-flex mb-4">
-    <input type="text" class="form-control form-control-lg flex-grow-1"
-           placeholder="{% trans 'Search documents' %}"
-           aria-label="Search documents"
-           aria-describedby="button-addon2"
-           autofocus="" name="q">
-    <input type="submit" class="btn btn-primary ms-2 text-white" value="{% trans 'Search' %}">
-  </form>
+        <input type="text" class="form-control form-control-lg flex-grow-1"
+               placeholder="{% trans 'Search documents' %}"
+               aria-label="Search documents"
+               aria-describedby="button-addon2"
+               autofocus="" name="q">
+        <input type="submit" class="btn btn-primary ms-2 text-white" value="{% trans 'Search' %}">
+      </form>
       <div class="d-flex justify-content-between">
         <img height="26"
              class="me-4"
@@ -72,7 +72,7 @@
     Legislation digitised by Laws.Africa.
   {% endblocktrans %}
 </p>
-<div class="d-flex justify-content-between">
+<div class="d-flex justify-content-between mb-4 mb-lg-0">
   <img height="26"
        class="me-4"
        src="{% static 'images/africanlii-logo.svg' %}"
@@ -89,7 +89,7 @@
 </div>
 
 
-<ul class="nav nav-tabs about-tabs" role="tablist">
+<ul class="nav nav-tabs about-tabs d-flex justify-content-center d-lg-block" role="tablist">
   <li class="nav-item" role="presentation">
     <button class="nav-link fb-nav-link active"
             id="facebook-tab"
@@ -122,7 +122,8 @@
        id="facebook-tab-content"
        role="tabpanel"
        aria-labelledby="facebook-tab-content">
-    <iframe width="248px"
+    <div class="d-flex justify-content-center justify-content-lg-start">
+      <iframe width="248px"
             height="400px"
             frameborder="0"
             allowtransparency="true"
@@ -132,9 +133,11 @@
             src="https://www.facebook.com/v7.0/plugins/page.php?adapt_container_width=true&amp;app_id=323754998056442&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fx%2Fconnect%2Fxd_arbiter%2F%3Fversion%3D46%23cb%3Dfff64532b89928%26domain%3Dlawlibrary.org.za%26is_canvas%3Dfalse%26origin%3Dhttps%253A%252F%252Flawlibrary.org.za%252Ff3480a77dff53bc%26relation%3Dparent.parent&amp;container_width=248&amp;height=400&amp;hide_cover=false&amp;href=https%3A%2F%2Fwww.facebook.com%2Fafricanlii%2F&amp;locale=en_US&amp;sdk=joey&amp;show_facepile=false&amp;small_header=true&amp;tabs=timeline&amp;width=248"
             style="border: none; visibility: visible; width: 248px; height: 400px;">
     </iframe>
+    </div>
   </div>
   <div class="tab-pane fade" id="twitter-tab-content" role="tabpanel" aria-labelledby="twitter-tab">
-    <a class="twitter-timeline"
+    <div class="justify-content-center justify-content-md-start">
+      <a class="twitter-timeline"
        data-width="248"
        data-height="400"
        href="https://twitter.com/AfricanLII?ref_src=twsrc%5Etfw">
@@ -142,6 +145,7 @@
     </a>
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8">
     </script>
+    </div>
   </div>
 </div>
 {% endblock %}
