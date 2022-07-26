@@ -30,7 +30,7 @@
     {% block head-css %}{% endblock %}
     {% block head-js %}{% endblock %}
   </head>
-  <body>
+  <body class="{% block body-class %}{% endblock %}">
 
     {% block header %}{% endblock %}
     {% block body-content %}{% endblock %}

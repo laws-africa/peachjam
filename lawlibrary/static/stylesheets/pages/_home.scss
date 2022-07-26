@@ -1,0 +1,10 @@
+.home-template {
+ .about-tabs {
+  .fb-nav-link.active {
+    border-bottom-color: $facebook-color;
+  }
+  .twitter-nav-link.active {
+    border-bottom-color: $twitter-color;
+  }
+}
+}
