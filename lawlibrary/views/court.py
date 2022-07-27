@@ -11,12 +11,11 @@ class CourtDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         court = get_object_or_404(Author, pk=self.kwargs["pk"])
-        context = super(CourtDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         judgments = Judgment.objects.filter(author=court)
 
         context["court"] = court
         context["judgments"] = judgments
 
-        print(judgments)
         return context
