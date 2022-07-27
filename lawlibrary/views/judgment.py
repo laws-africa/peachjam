@@ -13,12 +13,16 @@ class JudgmentListView(ListView):
     def get_context_data(self, **kwargs):
         context = super(JudgmentListView, self).get_context_data(**kwargs)
 
-        court_classes = CourtClass.objects.values_list("name", flat=True)
-        court_class_ids = list(court_classes.values_list("id", flat=True))
-        courts = CourtDetail.objects.filter(court_class__in=court_class_ids)
+        courts = []
+        for court_class in CourtClass.objects.all():
+            court_dict = {
+                "court_class": court_class.name,
+                "courts": CourtDetail.objects.filter(court_class=court_class),
+            }
+            courts.append(court_dict)
+
         recent_judgments = Judgment.objects.order_by("-date")[:30]
 
-        context["court_classes"] = court_classes
         context["courts"] = courts
         context["recent_judgments"] = recent_judgments
 
