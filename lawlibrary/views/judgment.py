@@ -1,6 +1,6 @@
 from django.views.generic import ListView
 
-from liiweb.models import CourtClass, CourtDetail
+from liiweb.models import CourtClass
 from peachjam.models import Judgment
 
 
@@ -15,20 +15,17 @@ class JudgmentListView(ListView):
 
         grouped_courts = []
         for court_class in CourtClass.objects.all():
-            court_dict = {"title": court_class.name, "items": []}
-            for court_detail in CourtDetail.objects.filter(court_class=court_class):
-                court_dict["items"] = [
-                    {
-                        "title": court_detail.court.name,
-                        "href": f"/court/{court_detail.court.pk}/",
-                    }
-                ]
+            court_dict = {
+                "title": court_class.name,
+                "items": [
+                    {"title": court_detail.court.name, "id": court_detail.court.pk}
+                    for court_detail in court_class.courtdetail_set.all()
+                ],
+            }
 
             grouped_courts.append(court_dict)
 
-        recent_judgments = Judgment.objects.order_by("-date")[:30]
-
         context["grouped_courts"] = grouped_courts
-        context["recent_judgments"] = recent_judgments
+        context["recent_judgments"] = Judgment.objects.order_by("-date")[:30]
 
         return context

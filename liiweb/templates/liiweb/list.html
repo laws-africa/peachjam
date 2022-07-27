@@ -13,7 +13,7 @@
               <div class="row mb-5">
                 {% for item in group.items %}
                   <div class="col-12 col-lg-4">
-                    <a href="{{item.href}}">{{item.title}}</a>
+                    <a href="{% url 'court_detail' item.id  %}">{{ item.title }}</a>
                   </div>
                 {% endfor %}
               </div>
