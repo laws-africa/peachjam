@@ -20,7 +20,7 @@ class JudgmentListView(ListView):
                 court_dict["items"] = [
                     {
                         "title": court_detail.court.name,
-                        "href": f"/court/{court_detail.court.pk}",
+                        "href": f"/court/{court_detail.court.pk}/",
                     }
                 ]
 
