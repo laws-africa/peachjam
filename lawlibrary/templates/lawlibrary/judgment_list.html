@@ -1,19 +1,13 @@
-<h1>Judgement List</h1>
-<hr>
+{% extends "liiweb/list.html" %}
 
-<h2>Judgments</h2>
-{% for judgment in recent_judgments %}
-    <p>
-        {{ judgment }}
-    </p>
-{% endfor %}
+  {% block grouped-links-block %}
+    {% with groups=grouped_courts %}
+      {{ block.super }}
+    {% endwith %}
+  {% endblock %}
 
-<hr>
-
-
-<hr>
-
-<h2>Courts</h2>
-{% for court in courts %}
-    <p><a href="{% url 'court_detail' court.pk %}">{{ court }}</a></p>
-{% endfor %}
+  {% block recent-documents-block %}
+    {% with title="Recent documents" recent_documents=recent_judgments %}
+      {{ block.super }}
+    {% endwith %}
+  {% endblock %}
