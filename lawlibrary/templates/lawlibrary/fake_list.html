@@ -1,0 +1,13 @@
+{% extends "liiweb/list.html" %}
+
+  {% block grouped-links-block %}
+    {% with groups=grouped_courts item_detail_namespace="court_list" %}
+      {{ block.super }}
+    {% endwith %}
+  {% endblock %}
+
+  {% block recent-documents-block %}
+    {% with title="Recent judgements" recent_documents=recent_judgments %}
+      {{ block.super }}
+    {% endwith %}
+  {% endblock %}

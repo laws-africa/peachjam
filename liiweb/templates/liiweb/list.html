@@ -13,12 +13,12 @@
               <div class="row mb-5">
                 {% for item in group.items %}
                   <div class="col-12 col-lg-4">
-                    <a href="{% url 'court_detail' item.id  %}">{{ item.title }}</a>
+                    <a href="{% url item_detail_namespace item.id  %}">{{ item.title }}</a>
                   </div>
                 {% endfor %}
               </div>
             {% else %}
-              <div class="mb-4">No courts found</div>
+              <div class="mb-4">No results found</div>
             {% endif %}
           {% endfor %}
         {% endif %}

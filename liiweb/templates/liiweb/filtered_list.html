@@ -1,0 +1,29 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n %}
+
+{% block content %}
+  <div class="d-none d-lg-flex align-items-center">
+    <i class="bi bi-calendar"></i>
+    <div class="d-flex">
+      {% for year in years %}
+        {% if year == yearselected %}
+          <span class="p-2">{{ year }}</span>
+        {% else %}
+          <a class="p-2" href="{% url 'year_court_list' court_id year %}">{{ year }}</a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <select class="form-select d-block d-lg-none" data-component="NavigationSelect">
+    {% for year in years %}
+      <option
+          value="{% url 'year_court_list' court_id year %}"
+          {% if year == yearselected %} selected {% endif %}
+      >
+        {{ year }}
+      </option>
+    {% endfor %}
+  </select>
+  {{block.super}}
+{% endblock %}
