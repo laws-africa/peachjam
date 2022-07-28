@@ -10,7 +10,11 @@
 
 <hr>
 
+<h2>Years</h2>
 <ul>
+    <li>
+        <a href="{% url 'court_detail' code %}">Any</a>
+    </li>
   {% for y in years %}
     <li>
       <a href="{% url 'year' code y %}" class="{% if y|slugify == year|add:"" %} active {% endif %}">{{ y }}</a>
