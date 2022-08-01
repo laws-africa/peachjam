@@ -16,7 +16,7 @@ class AuthorListView(FilteredDocumentListView):
             Q(genericdocument__author=self.author)
             | Q(legalinstrument__author=self.author)
             | Q(judgment__author=self.author)
-        ).order_by("-date")
+        )
 
     def get_queryset(self):
         self.author = get_object_or_404(Author, pk=self.kwargs["pk"])

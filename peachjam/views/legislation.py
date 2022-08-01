@@ -12,10 +12,6 @@ class LegislationListView(FilteredDocumentListView):
     context_object_name = "documents"
     paginate_by = 20
 
-    def get_queryset(self):
-        queryset = super(LegislationListView, self).get_queryset()
-        return queryset.order_by("-date")
-
 
 @registry.register_doc_type("legislation")
 class LegislationDetailView(BaseDocumentDetailView):
