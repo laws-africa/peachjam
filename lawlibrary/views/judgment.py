@@ -1,6 +1,6 @@
 from django.views.generic import ListView
 
-from liiweb.models import CourtClass
+from liiweb.models.court import CourtClass
 from peachjam.models import Judgment
 
 
