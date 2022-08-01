@@ -1,27 +1,46 @@
-<h1>Court Detail View</h1>
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n %}
 
-<b>Judgments by: </b> {{ court }}
+{% block title %}{% trans 'Judgement List' %}{% endblock %}
 
-<hr>
+{% block page-title %}
+    <h1 class="m-0">{% trans 'Judgements List' %}</h1>
+{% endblock %}
 
-{% for document in documents %}
-    <p>{{ document.title }}</p>
-{% endfor %}
+{% block content %}
+  <div class="d-none d-lg-flex align-items-center">
+    {% if years %}
+      <i class="bi bi-calendar"></i>
+      <div class="d-flex">
+        <a class="p-2"
+           href="{% url 'court_detail' court.code %}"
+        >
+          Any
+        </a>
+        {% for y in years %}
+          {% if y == year %}
+            <span class="p-2">{{ year }}</span>
+          {% else %}
+            <a class="p-2"
+               href="{% url 'year' court.code y %}">
+              {{ y }}
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
 
-<hr>
-
-<h2>Years</h2>
-<ul>
-    <li>
-        <a href="{% url 'court_detail' court.code %}">Any</a>
-    </li>
-  {% for y in years %}
-    <li>
-      <a href="{% url 'year' court.code y %}" class="{% if y|slugify == year|add:"" %} active {% endif %}">{{ y }}</a>
-    </li>
-  {% endfor %}
-</ul>
-
-{% for author in authors  %}
-  {{ author }}
-{% endfor %}
+  <select class="form-select d-block d-lg-none" data-component="NavigationSelect">
+    <option value="{% url 'court_detail' court.code %}">Any</option>
+    {% for y in years %}
+      <option
+          value="{% url 'year' court.code y %}"
+          {% if y == year %} selected {% endif %}
+      >
+        {{ y }}
+      </option>
+    {% endfor %}
+  </select>
+  {{block.super}}
+{% endblock %}
