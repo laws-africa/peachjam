@@ -2,13 +2,13 @@
 
   {% block title %} Judgement List {% endblock %}
 
-  {% block grouped-links-block %}
+  {% block grouped-links %}
     {% with groups=grouped_courts url_name="court_detail" %}
       {{ block.super }}
     {% endwith %}
   {% endblock %}
 
-  {% block recent-documents-block %}
+  {% block recent-documents %}
     {% with title="Recent documents" recent_documents=recent_judgments %}
       {{ block.super }}
     {% endwith %}

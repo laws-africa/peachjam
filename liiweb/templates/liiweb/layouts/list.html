@@ -3,7 +3,7 @@
 {% block page-content %}
   <section class="pt-5 pb-5">
     <div class="container">
-      {% block grouped-links-block %}
+      {% block grouped-links %}
         {% if groups %}
           {% for group in groups %}
             <h4 class="heading-underlined">
@@ -24,7 +24,7 @@
         {% endif %}
       {% endblock %}
 
-      {% block recent-documents-block %}
+      {% block recent-documents %}
         <h4 class="heading-underlined">
           {% if title %}
             {{ title }}
