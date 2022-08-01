@@ -3,9 +3,9 @@ from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, TemplateView, View
 
-from africanlii.registry import registry
-from africanlii.utils import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument
+from peachjam.registry import registry
+from peachjam.utils import add_slash_to_frbr_uri
 
 
 def view_attachment(attachment):

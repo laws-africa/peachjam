@@ -1,8 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
-from africanlii.forms import BaseDocumentFilterForm
-from africanlii.utils import lowercase_alphabet
+from peachjam.forms import BaseDocumentFilterForm
 from peachjam.models import (
     CitationLink,
     CoreDocument,
@@ -12,6 +11,7 @@ from peachjam.models import (
     Predicate,
     Relationship,
 )
+from peachjam.utils import lowercase_alphabet
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,
