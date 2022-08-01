@@ -44,9 +44,10 @@ class BaseCourtDetailView(FilteredDocumentListView):
             judges.remove(None)
 
         context["court"] = self.author
+        if "year" in self.kwargs:
+            context["year"] = self.kwargs["year"]
         context["facet_data"] = {
             "judges": judges,
-            "years": years,
             "alphabet": lowercase_alphabet(),
         }
 
