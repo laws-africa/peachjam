@@ -1,0 +1,39 @@
+{% extends "peachjam/layouts/main.html" %}
+
+{% block page-content %}
+  <section class="pt-5 pb-5">
+    <div class="container">
+      {% block grouped-links-block %}
+        {% if groups %}
+          {% for group in groups %}
+            <h4 class="heading-underlined">
+              {{ group.title }}
+            </h4>
+            {% if group.items|length > 0 %}
+              <div class="row mb-5">
+                {% for item in group.items %}
+                  <div class="col-12 col-lg-4">
+                    <a href="{% url url_name item.code  %}">{{ item.title }}</a>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="mb-4">No courts found</div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endblock %}
+
+      {% block recent-documents-block %}
+        <h4 class="heading-underlined">
+          {% if title %}
+            {{ title }}
+          {% else %}
+            Recent documents
+          {% endif %}
+        </h4>
+        {% include 'peachjam/_document_table.html' with documents=recent_documents hide_pagination=True %}
+      {% endblock %}
+    </div>
+  </section>
+{% endblock %}
