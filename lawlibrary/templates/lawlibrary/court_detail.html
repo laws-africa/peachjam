@@ -4,8 +4,8 @@
 
 <hr>
 
-{% for judgment in judgments %}
-    <p>{{ judgment }}</p>
+{% for document in documents %}
+    <p>{{ document.title }}</p>
 {% endfor %}
 
 <hr>
@@ -13,11 +13,11 @@
 <h2>Years</h2>
 <ul>
     <li>
-        <a href="{% url 'court_detail' code %}">Any</a>
+        <a href="{% url 'court_detail' court.code %}">Any</a>
     </li>
   {% for y in years %}
     <li>
-      <a href="{% url 'year' code y %}" class="{% if y|slugify == year|add:"" %} active {% endif %}">{{ y }}</a>
+      <a href="{% url 'year' court.code y %}" class="{% if y|slugify == year|add:"" %} active {% endif %}">{{ y }}</a>
     </li>
   {% endfor %}
 </ul>
