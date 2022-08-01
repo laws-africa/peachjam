@@ -105,6 +105,53 @@
           </div>
         </div>
       </li>
+
+      <li
+        v-if="judges.length"
+        class="list-group-item"
+      >
+        <div class="d-flex justify-content-between mb-2">
+          <strong>{{ $t('Judges') }}</strong>
+          <div class="d-flex align-items-center">
+            <a
+              v-if="getUrlParamValue('judge').length"
+              href="#"
+              @click.prevent="clearFacet('judge')"
+            >
+              {{ $t('Clear') }}
+            </a>
+            <span
+              v-if="loading"
+              class="circle-loader ms-2"
+            />
+          </div>
+        </div>
+        <div class="facets-scrollable">
+          <div
+            v-for="(judge, index) in sortAlphabetically(judges)"
+            :key="index"
+            class="d-flex justify-content-between align-items-center"
+          >
+            <div class="form-check">
+              <input
+                :id="judge"
+                class="form-check-input"
+                type="radio"
+                name="judge"
+                :value="judges"
+                :checked="inputChecked('judge', judge)"
+              >
+              <label
+                class="form-check-label"
+                :for="judge"
+              >
+                {{ judge }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </li>
+
       <li
         v-if="courts.length"
         class="list-group-item"
@@ -242,6 +289,10 @@
 export default {
   name: 'ListFacets',
   props: {
+    judges: {
+      type: Array,
+      default: () => []
+    },
     authors: {
       type: Array,
       default: () => []
