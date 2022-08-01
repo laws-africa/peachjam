@@ -1,7 +1,9 @@
-{% extends "liiweb/list.html" %}
+{% extends "liiweb/layouts/list.html" %}
+
+  {% block title %} Judgement List {% endblock %}
 
   {% block grouped-links-block %}
-    {% with groups=grouped_courts %}
+    {% with groups=grouped_courts url_name="court_detail" %}
       {{ block.super }}
     {% endwith %}
   {% endblock %}
