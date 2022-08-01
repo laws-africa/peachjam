@@ -16,7 +16,6 @@ class BaseDocumentFilterForm(forms.Form):
     def __init__(self, data, *args, **kwargs):
         self.params = QueryDict(mutable=True)
         self.params.update(data)
-        print(self.params)
 
         super().__init__(self.params, *args, **kwargs)
 
