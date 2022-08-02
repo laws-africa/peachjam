@@ -1,10 +1,26 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
 
-{% block title %}{% trans 'Judgement List' %}{% endblock %}
+{% block title %}
+  {% if year %}
+    {% blocktrans with court_name=court.name year=year%}
+      {{ court_name }} - {{ year }}
+    {% endblocktrans %}
+  {% else %}
+    {% trans court.name %}
+  {% endif %}
+{% endblock %}
 
 {% block page-title %}
-    <h1 class="m-0">{% trans 'Judgements List' %}</h1>
+    <h1 class="m-0">
+      {% if year %}
+        {% blocktrans with court_name=court.name year=year%}
+          {{ court_name }} - {{ year }}
+        {% endblocktrans %}
+      {% else %}
+        {% trans court.name %}
+      {% endif %}
+    </h1>
 {% endblock %}
 
 {% block content %}
