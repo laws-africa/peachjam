@@ -26,20 +26,14 @@
     <div class="d-none d-lg-flex align-items-center mb-3">
       <i class="bi bi-calendar"></i>
       <div class="d-flex">
-        <a class="p-2"
-           href="{% url 'court_detail' court.code %}"
-        >
+        <a class="btn btn-link {% if not year %}disabled{% endif %}" href="{% url 'court_detail' court.code %}">
           All years
         </a>
         {% for y in years %}
-          {% if y == year %}
-            <span class="p-2">{{ year }}</span>
-          {% else %}
-            <a class="p-2"
-               href="{% url 'year' court.code y %}">
-              {{ y }}
-            </a>
-          {% endif %}
+          <a class="btn btn-link {% if y == year %}disabled{% endif %}"
+             href="{% url 'year' court.code y %}">
+            {{ y }}
+          </a>
         {% endfor %}
       </div>
     </div>
@@ -61,5 +55,11 @@
 {% endblock %}
 
 {% block content %}
-  {{block.super}}
+  {% if documents %}
+    {% include 'liiweb/_judgment_table.html'%}
+
+    {% include 'peachjam/_pagination.html' %}
+  {% else %}
+    <p>{% trans 'No documents found.' %}</p>
+  {% endif %}
 {% endblock %}
