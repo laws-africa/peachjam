@@ -92,6 +92,10 @@ class Judgment(CoreDocument):
         self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
         return super().generate_work_frbr_uri()
 
+    def clean(self):
+        self.assign_mnc()
+        super().clean()
+
     def assign_title(self):
         """Assign an automatically generated title based on the judgment details.
 

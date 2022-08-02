@@ -32,7 +32,7 @@ class FilteredDocumentListView(ListView):
         return self.model.objects.all()
 
     def get_queryset(self):
-        return self.form.filter_queryset(self.get_base_queryset())
+        return self.form.filter_queryset(self.get_base_queryset()).order_by("-date")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

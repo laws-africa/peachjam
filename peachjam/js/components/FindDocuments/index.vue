@@ -241,7 +241,7 @@
                   </a>
                 </div>
                 <TermFacet
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_year.year.buckets)"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_year.year.buckets, true)"
                   :selection="filters.year"
                   :loading="loading"
                   @changed="(x) => filters.year = x"
@@ -349,22 +349,6 @@ export default {
   },
 
   methods: {
-    sortDateBuckets (items, ascending = false) {
-      const buckets = [...items];
-      if (ascending) {
-        buckets.sort((a, b) =>
-          moment(a).isBefore(moment(b)) ? -1 : 1
-        );
-      } else {
-        buckets.sort((a, b) =>
-          moment(a).isBefore(moment(b)) ? 1 : -1
-        );
-      }
-      return buckets.map(bucket => ({
-        ...bucket,
-        key: moment(bucket.key).format('YYYY')
-      }));
-    },
     sortGenericBuckets (items, reverse = false) {
       const buckets = [...items];
       buckets.sort((a, b) => a.key.localeCompare(b.key));
