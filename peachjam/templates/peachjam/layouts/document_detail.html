@@ -26,53 +26,61 @@
             <div class="row">
               <div class="col-md-6">
                 {% block document-metadata-content %}
-                  <dl class="row">
+                  <dl class="row document-metadata-list">
 
-                    {% if document.jurisdiction %}
-                      <dt class="col-4">Jurisdiction </dt>
-                      <dd class="col-8 text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
-                    {% endif %}
+                    {% block document-metadata-content-jurisdiction %}
+                      {% if document.jurisdiction %}
+                        <dt class="col-4">{% trans 'Jurisdiction' %}</dt>
+                        <dd class="col-8 text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
+                      {% endif %}
+                    {% endblock %}
 
-                    {% if document.author %}
-                      <dt class="col-4">Author</dt>
-                      <dd class="col-8 text-muted">{{ document.author }}</dd>
-                    {% endif %}
+                    {% block document-metadata-content-author %}
+                      {% if document.author %}
+                        <dt class="col-4">{% trans 'Author' %}</dt>
+                        <dd class="col-8 text-muted">{{ document.author }}</dd>
+                      {% endif %}
+                    {% endblock %}
 
-                    <dt class="col-4">Date</dt>
-                    {% if date_versions %}
-                      <dd class="col-8">
-                        <div class="dropdown">
-                          <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ document.date }}
-                          </a>
-                          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                            {% for version in date_versions %}
-                              <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
-                            {% endfor %}
-                          </ul>
-                        </div>
-                      </dd>
-                    {% else %}
-                      <dd class="col-8 text-muted">{{ document.date }}</dd>
-                    {% endif %}
+                    {% block document-metadata-content-date %}
+                      <dt class="col-4">{% trans 'Date' %}</dt>
+                      {% if date_versions %}
+                        <dd class="col-8">
+                          <div class="dropdown">
+                            <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                              {{ document.date }}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                              {% for version in date_versions %}
+                                <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
+                              {% endfor %}
+                            </ul>
+                          </div>
+                        </dd>
+                      {% else %}
+                        <dd class="col-8 text-muted">{{ document.date }}</dd>
+                      {% endif %}
+                    {% endblock %}
 
-                    <dt class="col-4">{% translate 'Language' %}</dt>
-                    {% if language_versions %}
-                      <dd class="col-8">
-                        <div class="dropdown">
-                          <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ document.language }}
-                          </a>
-                          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                            {% for version in language_versions %}
-                              <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
-                            {% endfor %}
-                          </ul>
-                        </div>
-                      </dd>
-                    {% else %}
-                      <dd class="col-8 text-muted">{{ document.language }} </dd>
-                    {% endif %}
+                    {% block document-metadata-content-language %}
+                      <dt class="col-4">{% translate 'Language' %}</dt>
+                      {% if language_versions %}
+                        <dd class="col-8">
+                          <div class="dropdown">
+                            <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                              {{ document.language }}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                              {% for version in language_versions %}
+                                <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
+                              {% endfor %}
+                            </ul>
+                          </div>
+                        </dd>
+                      {% else %}
+                        <dd class="col-8 text-muted">{{ document.language }} </dd>
+                      {% endif %}
+                    {% endblock %}
                   </dl>
                 {% endblock %}
 
@@ -128,6 +136,8 @@
 
     {{ citation_links|json_script:"citation-links" }}
 
-    {% block content %}{% endblock %}
+    {% block content %}
+      {% include 'peachjam/_document_content.html' with document=document %}
+    {% endblock %}
   </main>
 {% endblock %}
