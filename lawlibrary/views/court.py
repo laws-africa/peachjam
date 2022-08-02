@@ -60,7 +60,7 @@ class CourtDetailView(BaseCourtDetailView):
     pass
 
 
-class YearView(BaseCourtDetailView):
+class CourtYearView(BaseCourtDetailView):
     """View for filtering a court's judgments, based on the year."""
 
     pass
