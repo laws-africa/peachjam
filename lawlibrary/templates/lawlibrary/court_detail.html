@@ -31,7 +31,7 @@
         </a>
         {% for y in years %}
           <a class="btn btn-link {% if y == year %}disabled{% endif %}"
-             href="{% url 'year' court.code y %}">
+             href="{% url 'court_year' court.code y %}">
             {{ y }}
           </a>
         {% endfor %}
@@ -44,7 +44,7 @@
       <option value="{% url 'court_detail' court.code %}">All years</option>
       {% for y in years %}
         <option
-          value="{% url 'year' court.code y %}"
+          value="{% url 'court_year' court.code y %}"
           {% if y == year %} selected {% endif %}
         >
           {{ y }}

@@ -5,6 +5,9 @@
 
 {% block page-content %}
   <main class="container-fluid py-5">
+    {% block breadcrumbs %}
+    {% endblock %}
+
     {% block document-title %}
       <h1 class="heading-underlined mb-4">{{ document.title }}</h1>
     {% endblock %}
