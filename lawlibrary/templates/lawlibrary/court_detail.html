@@ -48,7 +48,7 @@
   </div>
 
   <select class="form-select d-block d-lg-none" data-component="NavigationSelect">
-    <option value="{% url 'court_detail' court.code %}">Any</option>
+    <option value="{% url 'court_detail' court.code %}">All years</option>
     {% for y in years %}
       <option
           value="{% url 'year' court.code y %}"
