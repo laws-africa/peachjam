@@ -14,11 +14,10 @@ class BaseCourtDetailView(FilteredDocumentListView):
     template_name = "lawlibrary/court_detail.html"
 
     def get_base_queryset(self):
+        qs = super().get_base_queryset().filter(author=self.author)
         if "year" in self.kwargs:
-            return self.model.objects.filter(
-                author=self.author, date__year=self.kwargs["year"]
-            )
-        return self.model.objects.filter(author=self.author)
+            qs = qs.filter(date__year=self.kwargs["year"])
+        return qs
 
     def get_queryset(self):
         self.author = get_object_or_404(Author, code=self.kwargs["code"])
@@ -27,12 +26,11 @@ class BaseCourtDetailView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        years = list(
-            set(
-                self.model.objects.filter(author=self.author).values_list(
-                    "date__year", flat=True
-                )
-            )
+        years = (
+            self.model.objects.filter(author=self.author)
+            .order_by()
+            .values_list("date__year", flat=True)
+            .distinct()
         )
 
         context["years"] = sorted(years, reverse=True)
