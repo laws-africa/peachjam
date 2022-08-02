@@ -11,21 +11,19 @@
   {% endif %}
 {% endblock %}
 
-{% block page-title %}
-    <h1 class="m-0">
-      {% if year %}
-        {% blocktrans with court_name=court.name year=year%}
-          {{ court_name }} - {{ year }}
-        {% endblocktrans %}
-      {% else %}
-        {% trans court.name %}
-      {% endif %}
-    </h1>
-{% endblock %}
+{% block page-header %}
+  <h1 class="mb-3">
+    {% if year %}
+      {% blocktrans with court_name=court.name year=year%}
+        {{ court_name }} - {{ year }}
+      {% endblocktrans %}
+    {% else %}
+      {% trans court.name %}
+    {% endif %}
+  </h1>
 
-{% block content %}
-  <div class="d-none d-lg-flex align-items-center">
-    {% if years %}
+  {% if years %}
+    <div class="d-none d-lg-flex align-items-center mb-3">
       <i class="bi bi-calendar"></i>
       <div class="d-flex">
         <a class="p-2"
@@ -44,19 +42,24 @@
           {% endif %}
         {% endfor %}
       </div>
-    {% endif %}
-  </div>
+    </div>
+  {% endif %}
 
-  <select class="form-select d-block d-lg-none" data-component="NavigationSelect">
-    <option value="{% url 'court_detail' court.code %}">All years</option>
-    {% for y in years %}
-      <option
+  {% if years %}
+    <select class="form-select d-block d-lg-none" data-component="NavigationSelect">
+      <option value="{% url 'court_detail' court.code %}">All years</option>
+      {% for y in years %}
+        <option
           value="{% url 'year' court.code y %}"
           {% if y == year %} selected {% endif %}
-      >
-        {{ y }}
-      </option>
-    {% endfor %}
-  </select>
+        >
+          {{ y }}
+        </option>
+      {% endfor %}
+    </select>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
   {{block.super}}
 {% endblock %}
