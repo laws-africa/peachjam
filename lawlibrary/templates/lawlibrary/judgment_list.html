@@ -1,15 +1,41 @@
-{% extends "liiweb/layouts/list.html" %}
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
 
-  {% block title %} Judgement List {% endblock %}
+{% block title %} Judgement List {% endblock %}
 
-  {% block grouped-links %}
-    {% with groups=grouped_courts url_name="court_detail" %}
-      {{ block.super }}
-    {% endwith %}
-  {% endblock %}
+{% block page-content %}
+  <section class="pt-5 pb-5">
+    <div class="container">
+      <h1 class="mb-4">{% trans 'Judgment List' %}</h1>
+      {% if grouped_courts %}
+        <div class="row">
+          {% for group in grouped_courts %}
+            <div class="col-md-3 col-12 mb-4">
+              <h4 class="heading-underlined">
+              {{ group.title }}
+              </h4>
+              {% if group.items|length > 0 %}
+                {% for item in group.items %}
+                    <div>
+                      <a href="{% url 'court_detail' item.code  %}">{{ item.title }}</a>
+                    </div>
+                  {% endfor %}
+              {% else %}
+                <div>No courts found</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
 
-  {% block recent-documents %}
-    {% with title="Recent documents" recent_documents=recent_judgments %}
-      {{ block.super }}
-    {% endwith %}
-  {% endblock %}
+      <h4 class="heading-underlined">
+        {% if title %}
+          {{ title }}
+        {% else %}
+          Recent documents
+        {% endif %}
+      </h4>
+      {% include 'peachjam/_document_table.html' with documents=recent_judgments hide_pagination=True %}
+    </div>
+  </section>
+{% endblock %}
