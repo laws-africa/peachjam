@@ -1,5 +1,10 @@
 .document-content {
 
+  .content.content__html {
+    // content
+    line-height: normal;
+  }
+
   .document-content__toggle {
     @extend .mb-4;
     position: sticky;
