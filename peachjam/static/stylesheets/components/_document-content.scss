@@ -1,7 +1,7 @@
 .document-content {
 
   .content.content__html {
-    // content
+    // reset line height so html documents use their default, rather than bootstrap's adjusted line height
     line-height: normal;
   }
 
