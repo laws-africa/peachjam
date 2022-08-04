@@ -1,14 +1,15 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
 
-{% block title %} Judgement List {% endblock %}
+{% block title %}{% trans 'Judgements' %}{% endblock %}
 
 {% block page-content %}
   <section class="pt-5 pb-5">
     <div class="container">
-      <h1 class="mb-4">{% trans 'Judgment List' %}</h1>
+      <h1 class="mb-4">{% trans 'Judgments' %}</h1>
+
       {% if grouped_courts %}
-        <div class="row">
+        <div class="row mb-3">
           {% for group in grouped_courts %}
             <div class="col-md-3 col-12 mb-4">
               <h4 class="heading-underlined">
@@ -32,10 +33,10 @@
         {% if title %}
           {{ title }}
         {% else %}
-          Recent documents
+          {% trans 'Recent judgments' %}
         {% endif %}
       </h4>
-      {% include 'peachjam/_document_table.html' with documents=recent_judgments hide_pagination=True %}
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments %}
     </div>
   </section>
 {% endblock %}

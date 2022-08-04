@@ -138,7 +138,7 @@
                 class="form-check-input"
                 type="radio"
                 name="judge"
-                :value="judges"
+                :value="judge"
                 :checked="inputChecked('judge', judge)"
               >
               <label

@@ -7,7 +7,9 @@ urlpatterns = [
     path("judgments/", views.JudgmentListView.as_view(), name="judgment_list"),
     path("judgments/<str:code>/", views.CourtDetailView.as_view(), name="court_detail"),
     path(
-        "judgments/<str:code>/<int:year>/", views.CourtYearView.as_view(), name="year"
+        "judgments/<str:code>/<int:year>/",
+        views.CourtYearView.as_view(),
+        name="court_year",
     ),
     path("", include("liiweb.urls")),
 ]
