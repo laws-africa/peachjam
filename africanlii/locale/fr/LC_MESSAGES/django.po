@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-13 15:53+0300\n"
-"PO-Revision-Date: 2022-08-05 06:43\n"
+"PO-Revision-Date: 2022-08-05 07:43\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/africanlii/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 65\n"
+"X-Crowdin-File: /main/africanlii/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 63\n"
 
 #: templates/africanlii/_author_detail.html:8
 #: templates/africanlii/_court_detail.html:8
@@ -74,7 +74,7 @@ msgid "\n"
 "          Our specific goals are to:\n"
 "        "
 msgstr "\n"
-"Cette plateforme panafricaine sert de centre d'échange d'informations sur tous les aspects de l'agenda de l'Architecture africaine de gouvernance (AGA), y compris les chartes, les protocoles, les communications, les décisions juridiques pertinentes, la politique, la mise en œuvre, le suivi et le matériel connexe. L'objectif global est d'établir une collaboration efficace entre les citoyens africains et les organisations de la société civile d'une part, et les membres de l'AGA d'autre part, afin de renforcer la mise en œuvre de l'agenda de la plateforme AGA en matière de démocratie, de gouvernance et de droits de l'homme. Nos objectifs spécifiques sont les suivants :        "
+"Cette plateforme panafricaine sert de centre d'échange d'informations sur tous les aspects de l'agenda de l'Architecture africaine de gouvernance (AGA), y compris les chartes, les protocoles, les communications, les décisions juridiques pertinentes, la politique, la mise en œuvre, le suivi et le matériel connexe. L'objectif global est d'établir une collaboration efficace entre les citoyens africains et les organisations de la société civile d'une part, et les membres de l'AGA d'autre part, afin de renforcer la mise en œuvre de l'agenda de la plateforme AGA en matière de démocratie, de gouvernance et de droits de l'homme. Nos objectifs spécifiques sont les suivants :"
 
 #: templates/africanlii/about.html:22
 msgid "\n"
@@ -99,7 +99,7 @@ msgid "\n"
 "            Capacitate civil society on all levels to access, interpret and effectively use AGA information\n"
 "          "
 msgstr "\n"
-"            Donner à la société civile, à tous les niveaux, les moyens d'accéder aux informations de l'AGA, de les interpréter et de les utiliser efficacement\n\n"
+"            Donner à la société civile, à tous les niveaux, les moyens d'accéder aux informations de l'AGA, de les interpréter et de les utiliser efficacement.\n"
 "          "
 
 #: templates/africanlii/about.html:38
@@ -119,7 +119,7 @@ msgid "\n"
 "          the Indigo Trust and the Sigrid Rausing Trust. The initial phase of the project runs from 2021 to 2024.\n"
 "        "
 msgstr "\n"
-"          Cette plateforme est développée et maintenue conjointement par <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII </a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> avec des fonds de l'Union européenne, de l'Indigo Trust et du Sigrid Rausing Trust. La phase initiale du projet s'étend de 2021 à 2024.\n\n"
+"          Cette plateforme est développée et maintenue conjointement par <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> avec des fonds de l'Union européenne, de l'Indigo Trust et du Sigrid Rausing Trust. La phase initiale du projet s'étend de 2021 à 2024. \n"
 "        "
 
 #: templates/africanlii/about.html:53
@@ -134,7 +134,7 @@ msgid "\n"
 "          such as human rights, the environment, commercial law and finance.\n"
 "        "
 msgstr "\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> est un programme de l'unité \"Gouvernance démocratique et droits\" du département de droit public de l'université du Cap. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII </a>aide les gouvernements, les universités et les organisations à but non lucratif à publier le droit des pays africains en accès libre durable. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII </a>héberge des collections sélectionnées sur divers sujets de droit africain, tels que les droits de l'homme, l'environnement, le droit commercial et la finance.\n\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> est un programme de l'unité \"Gouvernance démocratique et droits\" du département de droit public de l'université du Cap. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII </a>aide les gouvernements, les universités et les organisations à but non lucratif à publier le droit des pays africains en accès libre durable. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII </a>héberge des collections sélectionnées sur divers sujets de droit africain, tels que les droits de l'homme, l'environnement, le droit commercial et la finance. \n\n"
 "        "
 
 #: templates/africanlii/about.html:64
@@ -163,7 +163,8 @@ msgid "\n"
 "          of the rule of law, access to justice, and innovation.\n"
 "        "
 msgstr "\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII </a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborent pour libérer la valeur de l'information juridique numérique africaine afin de soutenir l'État de droit, l'accès à la justice et l'innovation.        "
+"         <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborent pour libérer la valeur de l'information juridique numérique africaine afin de soutenir l'État de droit, l'accès à la justice et l'innovation.\n\n"
+"        "
 
 #: templates/africanlii/about.html:84
 msgid "Find out more"
@@ -203,7 +204,7 @@ msgid "\n"
 "        with and understand the African Union agenda. Search through %(documents_count)s AU documents on the AfricanLII platform\n"
 "      "
 msgstr "\n"
-"        Nous numérisons le droit et la politique de l'architecture de gouvernance africaine et aidons les Africains et le monde à se connecter et à comprendre l'agenda de l'Union africaine. Recherchez parmi %(documents_count)s documents de l'UA sur la plateforme AfricanLII\n"
+"        Nous numérisons le droit et la politique de l'architecture de gouvernance africaine et aidons les Africains et le monde à se connecter et à comprendre l'agenda de l'Union africaine. Recherchez parmi %(documents_count)s documents de l'UA sur la plateforme AfricanLII\n\n"
 "      "
 
 #: templates/africanlii/home.html:38
