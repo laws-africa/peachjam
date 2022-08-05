@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     "sass_processor",
     "import_export",
     "treebeard",
-    # "background_task",
+    "background_task",
     "ckeditor",
 ]
 
