@@ -60,8 +60,7 @@
             <select
               v-model="relationship.predicate_id"
               class="form-control mb-3"
-              required
-              :disabled="!predicates.length"
+              :required="!predicates.length"
             >
               <option
                 v-if="!predicates.length"
