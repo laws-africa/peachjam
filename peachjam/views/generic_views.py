@@ -138,3 +138,8 @@ class BaseDocumentDetailView(DetailView):
             context["display_type"] = None
 
         return context
+
+    def get_notices(self, notices=None):
+        if notices is None:
+            notices = []
+        return notices
