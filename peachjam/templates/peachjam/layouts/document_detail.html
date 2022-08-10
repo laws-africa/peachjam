@@ -4,130 +4,210 @@
 {% block title %}{{ document.title }}{% endblock %}
 
 {% block page-content %}
-  <main class="container-fluid py-5">
-    {% block document-title %}
-      <h1 class="heading-underlined mb-4">{{ document.title }}</h1>
-    {% endblock %}
+<main class="container-fluid py-5">
+  {% block document-title %}
+  <h1 class="heading-underlined mb-4">{{ document.title }}</h1>
+  {% endblock %}
 
-    {% if perms.peachjam.change_coredocument %}
-      <a href="{{ document|admin_url:'change' }}">Edit</a>
-    {% endif %}
+  {% if perms.peachjam.change_coredocument %}
+  <a href="{{ document|admin_url:'change' }}">Edit</a>
+  {% endif %}
 
-    {% if perms.peachjam.add_relationship %}
-      {{ predicates_json|json_script:"predicates" }}
-    {% endif %}
+  {% if perms.peachjam.add_relationship %}
+  {{ predicates_json|json_script:"predicates" }}
+  {% endif %}
 
-    {{ provision_relationships|json_script:"provision-relationships" }}
+  {{ provision_relationships|json_script:"provision-relationships" }}
 
-    <div class="mb-5">
-      <div class="card">
-        <div class="card-body">
-          {% block document-metadata %}
+
+  <ul style="margin-bottom: 1px;" class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#document-detail-tab"
+              type="button"
+              role="tab" aria-controls="home" aria-selected="true">
+        Document detail
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#history-tab" type="button"
+              role="tab" aria-controls="profile" aria-selected="false">
+        History
+      </button>
+    </li>
+  </ul>
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active"
+         id="document-detail-tab"
+         role="tabpanel"
+         aria-labelledby="document-detail-tab"
+    >
+      <div class="mb-5">
+        <div class="card">
+          <div class="card-body">
+            {% block document-metadata %}
             <div class="row">
               <div class="col-md-6">
                 {% block document-metadata-content %}
-                  <dl class="row">
+                <dl class="row">
 
-                    {% if document.jurisdiction %}
-                      <dt class="col-4">Jurisdiction </dt>
-                      <dd class="col-8 text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
-                    {% endif %}
+                  {% if document.jurisdiction %}
+                  <dt class="col-4">Jurisdiction</dt>
+                  <dd class="col-8 text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{
+                      document.locality
+                    }}
+                  </dd>
+                  {% endif %}
+                  {% endif %}
 
-                    {% if document.author %}
-                      <dt class="col-4">Author</dt>
-                      <dd class="col-8 text-muted">{{ document.author }}</dd>
-                    {% endif %}
+                  {% if document.author %}
+                  <dt class="col-4">Author</dt>
+                  <dd class="col-8 text-muted">{{ document.author }}</dd>
+                  {% endif %}
 
-                    <dt class="col-4">Date</dt>
-                    {% if date_versions %}
-                      <dd class="col-8">
-                        <div class="dropdown">
-                          <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ document.date }}
-                          </a>
-                          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                            {% for version in date_versions %}
-                              <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
-                            {% endfor %}
-                          </ul>
-                        </div>
-                      </dd>
-                    {% else %}
-                      <dd class="col-8 text-muted">{{ document.date }}</dd>
-                    {% endif %}
+                  <dt class="col-4">Date</dt>
+                  {% if date_versions %}
+                  <dd class="col-8">
+                    <div class="dropdown">
+                      <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button"
+                         id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ document.date }}
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        {% for version in date_versions %}
+                        <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </dd>
+                  {% else %}
+                  <dd class="col-8 text-muted">{{ document.date }}</dd>
+                  {% endif %}
 
-                    <dt class="col-4">{% translate 'Language' %}</dt>
-                    {% if language_versions %}
-                      <dd class="col-8">
-                        <div class="dropdown">
-                          <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ document.language }}
-                          </a>
-                          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                            {% for version in language_versions %}
-                              <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
-                            {% endfor %}
-                          </ul>
-                        </div>
-                      </dd>
-                    {% else %}
-                      <dd class="col-8 text-muted">{{ document.language }} </dd>
-                    {% endif %}
-                  </dl>
+                  <dt class="col-4">{% translate 'Language' %}</dt>
+                  {% if language_versions %}
+                  <dd class="col-8">
+                    <div class="dropdown">
+                      <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button"
+                         id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ document.language }}
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        {% for version in language_versions %}
+                        <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.language }}</a>
+                        </li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </dd>
+                  {% else %}
+                  <dd class="col-8 text-muted">{{ document.language }}</dd>
+                  {% endif %}
+                </dl>
                 {% endblock %}
 
                 {% if document.source_file %}
-                  <div>
-                    <a class="card-link" href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}">Download document</a> ({{ document.source_file.file.size|filesizeformat }})
-                  </div>
+                <div>
+                  <a class="card-link"
+                     href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}">Download
+                    document</a> ({{ document.source_file.file.size|filesizeformat }})
+                </div>
                 {% endif %}
               </div>
 
               <div class="col-md-6">
                 {% block document-relationships-content %}
-                  {% with document.relationships_as_subject as relationships %}
-                    {% if relationships %}
-                      <h5>{% translate 'This document' %}...</h5>
+                {% with document.relationships_as_subject as relationships %}
+                {% if relationships %}
+                <h5>{% translate 'This document' %}...</h5>
 
-                      <ul class="list-unstyled">
-                        {% for rel in relationships %}
-                          {% if rel.object_document %}
-                            <li>
-                              ... {% translate rel.predicate.verb %}
-                              <a href="{% url 'document_detail' expression_frbr_uri=rel.object_document.expression_frbr_uri %}">{{ rel.object_document.title }}</a>
-                            </li>
-                          {% endif %}
-                        {% endfor %}
-                      </ul>
-                    {% endif %}
-                  {% endwith %}
+                <ul class="list-unstyled">
+                  {% for rel in relationships %}
+                  {% if rel.object_document %}
+                  <li>
+                    ... {% translate rel.predicate.verb %}
+                    <a href="{% url 'document_detail' expression_frbr_uri=rel.object_document.expression_frbr_uri %}">{{
+                        rel.object_document.title
+                      }}</a>
+                  </li>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
 
-                  {% with document.relationships_as_object as relationships %}
-                    {% if relationships %}
-                      <h5>{% translate 'Related documents' %}</h5>
+                {% with document.relationships_as_object as relationships %}
+                {% if relationships %}
+                <h5>{% translate 'Related documents' %}</h5>
 
-                      <ul class="list-unstyled">
-                        {% for rel in relationships %}
-                          {% if rel.subject_document %}
-                            <li>
-                              <a href="{% url 'document_detail' expression_frbr_uri=rel.subject_document.expression_frbr_uri %}">{{ rel.subject_document.title }}</a>
-                              {% translate rel.predicate.reverse_verb %} this document.
-                            </li>
-                          {% endif %}
-                        {% endfor %}
-                      </ul>
-                    {% endif %}
-                  {% endwith %}
+                <ul class="list-unstyled">
+                  {% for rel in relationships %}
+                  {% if rel.subject_document %}
+                  <li>
+                    <a href="{% url 'document_detail' expression_frbr_uri=rel.subject_document.expression_frbr_uri %}">{{
+                        rel.subject_document.title
+                      }}</a>
+                    {% translate rel.predicate.reverse_verb %} this document.
+                  </li>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
                 {% endblock %}
               </div>
             </div>
-          {% endblock %}
+            {% endblock %}
+          </div>
+        </div>
+      </div>
+
+      {{ citation_links|json_script:"citation-links" }}
+
+      {% block content %}{% endblock %}
+    </div>
+    <div class="tab-pane fade"
+         id="history-tab" role="tabpanel"
+         aria-labelledby="history-tab">
+      <div class="card">
+        <div class="card-body">
+          <h4>History of this document</h4>
+          <div class="timeline">
+            <div class="timeline__item">
+              <div class="timeline__item__content">
+                <div class="timeline__item__content__header">
+                  <div class="title">4 February 2022</div>
+                  <div class="tag">
+                    this version
+                  </div>
+                </div>
+                <p>
+                  <i>Amended by <a href="#">Sub-Council: Amendment</a></i>
+                </p>
+                <div>
+                  <a href="#" class="btn btn-outline-primary">Read this version</a>
+                </div>
+              </div>
+            </div>
+            <div class="timeline__item">
+              <div class="timeline__item__content">
+                <div class="timeline__item__content__header">
+                  <div class="title">4 February 2022</div>
+                  <div class="tag">
+                    this version
+                  </div>
+                </div>
+                <p>
+                  <i>Amended by <a href="#">Sub-Council: Amendment</a></i>
+                </p>
+                <div>
+                  <a href="#" class="btn btn-outline-primary">Read this version</a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
-    {{ citation_links|json_script:"citation-links" }}
-
-    {% block content %}{% endblock %}
-  </main>
+  </div>
+</main>
 {% endblock %}
