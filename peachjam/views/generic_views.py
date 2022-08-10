@@ -81,8 +81,8 @@ class BaseDocumentDetailView(DetailView):
         ).exclude(pk=self.object.pk)
 
         # citation links for a document
-        doc = get_object_or_404(CoreDocument, pk=self.object.pk)
-        citation_links = CitationLink.objects.filter(document=doc)
+        self.doc = get_object_or_404(CoreDocument, pk=self.object.pk)
+        citation_links = CitationLink.objects.filter(document=self.doc)
         context["citation_links"] = CitationLinkSerializer(
             citation_links, many=True
         ).data
@@ -138,3 +138,8 @@ class BaseDocumentDetailView(DetailView):
             context["display_type"] = None
 
         return context
+
+    def get_notices(self, notices=None):
+        if notices is None:
+            notices = []
+        return notices
