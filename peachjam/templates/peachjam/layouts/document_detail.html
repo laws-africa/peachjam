@@ -94,7 +94,9 @@
                           {% if rel.object_document %}
                             <li>
                               ... {% translate rel.predicate.verb %}
-                              <a href="{% url 'document_detail' expression_frbr_uri=rel.object_document.expression_frbr_uri %}">{{ rel.object_document.title }}</a>
+                              <a href="{% url 'document_detail' rel.object_document.expression_frbr_uri|strip_first_character %}">
+                                {{ rel.object_document.title }}
+                              </a>
                             </li>
                           {% endif %}
                         {% endfor %}
@@ -110,7 +112,9 @@
                         {% for rel in relationships %}
                           {% if rel.subject_document %}
                             <li>
-                              <a href="{% url 'document_detail' expression_frbr_uri=rel.subject_document.expression_frbr_uri %}">{{ rel.subject_document.title }}</a>
+                              <a href="{% url 'document_detail' rel.subject_document.expression_frbr_uri|strip_first_character %}">
+                                {{ rel.subject_document.title }}
+                              </a>
                               {% translate rel.predicate.reverse_verb %} this document.
                             </li>
                           {% endif %}
