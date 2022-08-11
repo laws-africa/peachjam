@@ -11,6 +11,7 @@ class BaseDocumentFilterForm(forms.Form):
     alphabet = forms.CharField(required=False)
     author = forms.CharField(required=False)
     doc_type = forms.CharField(required=False)
+    judge = forms.CharField(required=False)
 
     def __init__(self, data, *args, **kwargs):
         self.params = QueryDict(mutable=True)
@@ -24,6 +25,7 @@ class BaseDocumentFilterForm(forms.Form):
         alphabet = self.cleaned_data.get("alphabet")
         author = self.params.getlist("author")
         doc_type = self.params.getlist("doc_type")
+        judge = self.params.getlist("judge")
 
         if year and exclude != "year":
             queryset = queryset.filter(date__year__in=year)
@@ -36,5 +38,8 @@ class BaseDocumentFilterForm(forms.Form):
 
         if doc_type and exclude != "doc_type":
             queryset = queryset.filter(doc_type__in=doc_type)
+
+        if judge and exclude != "judge":
+            queryset = queryset.filter(judges__name__in=judge)
 
         return queryset

@@ -4,7 +4,7 @@
 {% block title %}{{ document.title }}{% endblock %}
 
 {% block page-content %}
-<main class="container py-3" data-component="DocumentList">
+<div class="container py-3" data-component="DocumentList">
   <div class="offcanvas offcanvas-start" tabindex="-1" id="list-facets-offcanvas"
        aria-labelledby="offcanvasLastFacetLabel">
     <div class="offcanvas-header justify-content-end">
@@ -14,16 +14,19 @@
       <div data-list-facets></div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-md-3 d-none d-lg-block"></div>
-    <div class="col-md-9">
-      <div class="mb-2">
-        {% block page-title %}
-        <h1 class="m-0">{% trans 'Documents' %}</h1>
-        {% endblock %}
+
+  {% block page-header %}
+    <div class="row">
+      <div class="col-lg-3 d-none d-lg-block"></div>
+      <div class="col-lg-9">
+        <div class="mb-2">
+          {% block page-title %}
+            <h1 class="m-0">{% trans 'Documents' %}</h1>
+          {% endblock %}
+        </div>
       </div>
     </div>
-  </div>
+  {% endblock %}
 
   <div class="d-block d-lg-none my-2">
     <button class="btn btn-primary"
@@ -36,22 +39,22 @@
   </div>
 
   <div class="row">
-    <div class="col-md-3 d-none d-lg-block">
+    <div class="col-lg-3 d-none d-lg-block">
       <div data-list-facets></div>
     </div>
-    <div class="col-md-9">
+    <div class="col-lg-9">
       <div class="position-relative">
         {% block content %}
-        {% if documents %}
-        {% include 'peachjam/_document_table.html'%}
-        {% else %}
-        <p>{% trans 'No documents found.' %}</p>
-        {% endif %}
+          {% if documents %}
+            {% include 'peachjam/_document_table.html'%}
+          {% else %}
+            <p>{% trans 'No documents found.' %}</p>
+          {% endif %}
         {% endblock%}
       </div>
     </div>
   </div>
 
   {{ facet_data|json_script:"facet-data" }}
-</main>
+</div>
 {% endblock %}
