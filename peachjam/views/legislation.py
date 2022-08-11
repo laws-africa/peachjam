@@ -1,3 +1,4 @@
+import datetime
 import json
 from collections import namedtuple
 
@@ -37,7 +38,7 @@ class LegislationDetailView(BaseDocumentDetailView):
             msg = "This {} was repealed on {} by <a href='{}'>{}</a>"
             notices.append(
                 {
-                    "type": messages.WARNING,
+                    "type": messages.ERROR,
                     "html": format_html(
                         msg.format(
                             self.object.metadata_json["type_name"],
@@ -49,9 +50,46 @@ class LegislationDetailView(BaseDocumentDetailView):
                 }
             )
 
-        # TODO: Out-of-date legislation
+            msg = (
+                "This is the latest version of this {} as it was when it was repealed."
+            )
+            notices.append(
+                {
+                    "type": messages.INFO,
+                    "html": format_html(
+                        msg.format(
+                            self.object.metadata_json["type_name"],
+                        )
+                    ),
+                }
+            )
 
-        # TODO: Up-to-date legislation
+        # fetch the points in time
+        points_in_time = self.get_points_in_time()
+        latest_expression = points_in_time[-1]
+
+        for idx, point_in_time in enumerate(points_in_time):
+            if point_in_time != latest_expression:
+                msg = (
+                    "This is the version of this {} as it was from {} to {}. "
+                    "<a href={}>Read the version currently in force</a>"
+                )
+                notices.append(
+                    {
+                        "type": messages.WARNING,
+                        "html": format_html(
+                            msg.format(
+                                self.object.metadata_json["type_name"],
+                                point_in_time.expressions[0].expression_date,
+                                datetime.datetime.strptime(
+                                    points_in_time[idx + 1].date, "%Y-%m-%d"
+                                )
+                                - datetime.timedelta(days=1),
+                                latest_expression.expressions[0].expression_frbr_uri,
+                            )
+                        ),
+                    }
+                )
 
         return notices
 
@@ -60,6 +98,15 @@ class LegislationDetailView(BaseDocumentDetailView):
         if repeal_info:
             return json.loads(
                 repeal_info, object_hook=self.custom_metadata_json_decoder
+            )
+
+    def get_points_in_time(self):
+        points_in_time = json.dumps(
+            self.object.metadata_json.get("points_in_time", None)
+        )
+        if points_in_time:
+            return json.loads(
+                points_in_time, object_hook=self.custom_metadata_json_decoder
             )
 
     def custom_metadata_json_decoder(self, json_data):
