@@ -32,14 +32,14 @@
           <a
             v-if="objectDocument"
             target="_blank"
-            :href="objectWorkHref"
+            :href="`${objectDocument.expression_frbr_uri}/`"
           >{{ objectDocument.title }}</a><span v-else>{{ enrichment.object_work.frbr_uri }} xx</span>.
         </div>
         <div v-else>
           <a
             v-if="subjectDocument"
             target="_blank"
-            :href="subjectWorkHref"
+            :href="`${subjectDocument.expression_frbr_uri}/`"
           >{{ subjectDocument.title }}</a><span v-else>{{ enrichment.subject_work.frbr_uri }}</span>.
           {{ $t('{reverse_verb} this provision', { reverse_verb: enrichment.predicate.reverse_verb }) }}.
         </div>
@@ -74,12 +74,6 @@ export default {
   }),
 
   computed: {
-    objectWorkHref () {
-      return `${window.location.origin}${this.objectDocument.expression_frbr_uri}/`;
-    },
-    subjectWorkHref () {
-      return `${window.location.origin}${this.subjectDocument.expression_frbr_uri}/`;
-    },
     isForwards () {
       return this.enrichment.subject_work.frbr_uri === this.thisWorkFrbrUri;
     },
