@@ -1,6 +1,4 @@
-import datetime
-import json
-from collections import namedtuple
+from datetime import datetime, timedelta
 
 from django.contrib import messages
 from django.utils.html import format_html
@@ -25,14 +23,8 @@ class LegislationDetailView(BaseDocumentDetailView):
     model = Legislation
     template_name = "peachjam/legislation_detail.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["notices"] = self.get_notices()
-        return context
-
     def get_notices(self):
         notices = super().get_notices()
-
         repeal = self.get_repeal_info()
         if self.object.repealed and repeal:
             msg = "This {} was repealed on {} by <a href='{}'>{}</a>"
@@ -42,9 +34,9 @@ class LegislationDetailView(BaseDocumentDetailView):
                     "html": format_html(
                         msg.format(
                             self.object.metadata_json["type_name"],
-                            repeal.date,
-                            repeal.repealing_uri,
-                            repeal.repealing_title,
+                            repeal["date"],
+                            repeal["repealing_uri"],
+                            repeal["repealing_title"],
                         )
                     ),
                 }
@@ -80,36 +72,22 @@ class LegislationDetailView(BaseDocumentDetailView):
                         "html": format_html(
                             msg.format(
                                 self.object.metadata_json["type_name"],
-                                point_in_time.expressions[0].expression_date,
-                                datetime.datetime.strptime(
-                                    points_in_time[idx + 1].date, "%Y-%m-%d"
-                                )
-                                - datetime.timedelta(days=1),
-                                latest_expression.expressions[0].expression_frbr_uri,
+                                point_in_time["expressions"][0]["expression_date"],
+                                datetime.strptime(
+                                    points_in_time[idx + 1]["date"], "%Y-%m-%d"
+                                ).date()
+                                - timedelta(days=1),
+                                latest_expression["expressions"][0][
+                                    "expression_frbr_uri"
+                                ],
                             )
                         ),
                     }
                 )
-
         return notices
 
     def get_repeal_info(self):
-        repeal_info = json.dumps(self.object.metadata_json.get("repeal", None))
-        if repeal_info:
-            return json.loads(
-                repeal_info, object_hook=self.custom_metadata_json_decoder
-            )
+        return self.object.metadata_json.get("repeal", None)
 
     def get_points_in_time(self):
-        points_in_time = json.dumps(
-            self.object.metadata_json.get("points_in_time", None)
-        )
-        if points_in_time:
-            return json.loads(
-                points_in_time, object_hook=self.custom_metadata_json_decoder
-            )
-
-    def custom_metadata_json_decoder(self, json_data):
-        return namedtuple("decoded_metadata_json", json_data.keys())(
-            *json_data.values()
-        )
+        return self.object.metadata_json.get("points_in_time", None)
