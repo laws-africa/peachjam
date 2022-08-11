@@ -107,6 +107,7 @@
 
           <div class="modal-footer">
             <button
+              disabled
               class="btn btn-outline-secondary"
               type="button"
               @click="reverse"
