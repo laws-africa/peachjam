@@ -1,5 +1,5 @@
-from africanlii.registry import registry
 from peachjam.models import LegalInstrument
+from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
