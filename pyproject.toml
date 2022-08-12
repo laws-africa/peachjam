@@ -10,12 +10,11 @@ name = "peachjam"
 version = "0.0.1"
 description = "A Django app to manage legal documents."
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 classifiers = [
     "Environment :: Web Environment",
     "Framework :: Django :: 3.2",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.8",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
