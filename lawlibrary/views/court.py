@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 
-from africanlii.utils import lowercase_alphabet
 from peachjam.models import Author, Judgment
+from peachjam.utils import lowercase_alphabet
 from peachjam.views.generic_views import FilteredDocumentListView
 
 

@@ -1,7 +1,7 @@
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
-from django.views.generic import DetailView, TemplateView, View
+from django.views.generic import DetailView, View
 
 from peachjam.models import CoreDocument
 from peachjam.registry import registry
@@ -15,10 +15,6 @@ def view_attachment(attachment):
     response["Content-Disposition"] = f"inline; filename={attachment.instance.filename}"
     response["Content-Length"] = str(attachment.instance.file.size)
     return response
-
-
-class HomePageView(TemplateView):
-    template_name = "africanlii/../templates/peachjam/home.html"
 
 
 class DocumentDetailViewResolver(View):
