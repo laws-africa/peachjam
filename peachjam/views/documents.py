@@ -21,12 +21,10 @@ class HomePageView(TemplateView):
     template_name = "africanlii/../templates/peachjam/home.html"
 
 
-# @method_decorator(add_slash_to_frbr_uri(), name="dispatch")
 class DocumentDetailViewResolver(View):
     """Resolver view that returns detail views for documents based on their doc_type."""
 
     def dispatch(self, request, *args, **kwargs):
-
         obj = get_object_or_404(
             CoreDocument, expression_frbr_uri=add_slash(kwargs.get("frbr_uri"))
         )
