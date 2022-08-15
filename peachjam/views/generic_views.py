@@ -1,8 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
-from africanlii.forms import BaseDocumentFilterForm
-from africanlii.utils import lowercase_alphabet
+from peachjam.forms import BaseDocumentFilterForm
 from peachjam.models import (
     CitationLink,
     CoreDocument,
@@ -12,6 +11,7 @@ from peachjam.models import (
     Predicate,
     Relationship,
 )
+from peachjam.utils import add_slash, lowercase_alphabet
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,
@@ -72,6 +72,11 @@ class BaseDocumentDetailView(DetailView):
     slug_field = "expression_frbr_uri"
     slug_url_kwarg = "frbr_uri"
     context_object_name = "document"
+
+    def get_object(self, *args, **kwargs):
+        return self.model.objects.get(
+            expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri"))
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

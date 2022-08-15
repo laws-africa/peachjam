@@ -6,9 +6,12 @@
       <span>{{ object.date }}</span>
     </a>
   {% endfor %}
-  <a class="mt-3 btn btn-primary text-white" href="{% url view_more_url_name %}">
-    {{ view_more_text }}
-  </a>
+
+  {% if view_more_url_name %}
+    <a class="mt-3 btn btn-primary text-white" href="{% url view_more_url_name %}">
+      {{ view_more_text }}
+    </a>
+  {% endif %}
 {% else %}
   <p>{% trans 'No documents found.' %}</p>
 {% endif %}

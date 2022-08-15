@@ -4,7 +4,7 @@
       class="h5"
       target="_blank"
       rel="noreferrer"
-      :href="href"
+      :href="item.expression_frbr_uri"
     >
       {{ item.title }}
     </a>
@@ -39,11 +39,6 @@ export default {
       default () {
         return {};
       }
-    }
-  },
-  computed: {
-    href () {
-      return `${this.item.expression_frbr_uri}/`;
     }
   },
   methods: {

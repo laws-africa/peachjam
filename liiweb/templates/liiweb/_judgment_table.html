@@ -1,0 +1,25 @@
+{% load i18n %}
+
+<table class="table">
+  <thead>
+  <tr>
+    <th scope="col" style="width: 80%">{% trans 'Title' %}</th>
+    <th scope="col">{% trans 'Date' %}</th>
+    <th scope="col">{% trans 'Judges' %}</th>
+  </tr>
+  </thead>
+
+  <tbody>
+  {% for document in documents %}
+    <tr>
+      <td>
+        <div class="mb-2">
+          <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+        </div>
+      </td>
+      <td style="white-space: nowrap;">{{ document.date }}</td>
+      <td>{{ document.judges_string }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>

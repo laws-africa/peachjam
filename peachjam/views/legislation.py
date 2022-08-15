@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from django.contrib import messages
 from django.utils.html import format_html
 
-from africanlii.registry import registry
 from peachjam.models import Legislation
+from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,

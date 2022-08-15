@@ -90,7 +90,7 @@ urlpatterns = [
     ),
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
     re_path(
-        r"^(?P<frbr_uri>akn/.*)/$",
+        r"^(?P<frbr_uri>akn/.*)$",
         DocumentDetailViewResolver.as_view(),
         name="document_detail",
     ),
