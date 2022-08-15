@@ -84,7 +84,12 @@ class LegislationDetailView(BaseDocumentDetailView):
                         ),
                     }
                 )
+        self.add_notices_to_messages(notices)
         return notices
+
+    def add_notices_to_messages(self, notices):
+        for notice in notices:
+            messages.add_message(self.request, notice["type"], notice["html"])
 
     def get_repeal_info(self):
         return self.object.metadata_json.get("repeal", None)

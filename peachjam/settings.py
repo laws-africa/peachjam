@@ -351,3 +351,14 @@ if DEBUG:
 GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
 
 CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}
+
+
+# Messages
+from django.contrib.messages import constants as messages  # noqa
+
+MESSAGE_TAGS = {
+    messages.INFO: "alert-primary",
+    messages.SUCCESS: "alert-success",
+    messages.WARNING: "alert-warning",
+    messages.ERROR: "alert-danger",
+}
