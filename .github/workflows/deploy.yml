@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  deploy-agp:
     name: Deploy to agp.africanlii.org
     runs-on: ubuntu-latest
     concurrency: agp.africanlii.org
@@ -19,4 +19,20 @@ jobs:
       with:
         ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
         git_remote_url: 'ssh://dokku@web2.laws.africa:22/agp'
+        git_push_flags: '--force'
+
+  deploy-lawlibrary:
+    name: Deploy to lawlibrary
+    runs-on: ubuntu-latest
+    concurrency: lawlibrary.org.za
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: git push to lawlibrary.org.za
+      uses: dokku/github-action@master
+      with:
+        ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+        git_remote_url: 'ssh://dokku@web2.laws.africa:22/lawlibrary'
         git_push_flags: '--force'
