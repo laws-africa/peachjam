@@ -1,5 +1,5 @@
 from django.http import Http404, HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, View
 
@@ -21,9 +21,25 @@ class DocumentDetailViewResolver(View):
     """Resolver view that returns detail views for documents based on their doc_type."""
 
     def dispatch(self, request, *args, **kwargs):
-        obj = get_object_or_404(
-            CoreDocument, expression_frbr_uri=add_slash(kwargs.get("frbr_uri"))
-        )
+        # redirect /akn/foo/ to /akn/foo because FRBR URIs don't end in /
+        if kwargs["frbr_uri"].endswith("/"):
+            return redirect("document_detail", frbr_uri=kwargs["frbr_uri"][:-1])
+
+        frbr_uri = add_slash(kwargs["frbr_uri"])
+        obj = CoreDocument.objects.filter(expression_frbr_uri=frbr_uri).first()
+        if not obj:
+            # try looking based on the work URI instead, and use the latest expression
+            # TODO: take the user's preferred language into account
+            obj = (
+                CoreDocument.objects.filter(work_frbr_uri=frbr_uri)
+                .latest_expression()
+                .first()
+            )
+            if obj:
+                return redirect(obj.get_absolute_url())
+
+        if not obj:
+            raise Http404()
 
         view_class = registry.views.get(obj.doc_type)
         if view_class:
