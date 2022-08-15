@@ -1,11 +1,11 @@
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
-from django.views.generic import DetailView, TemplateView, View
+from django.views.generic import DetailView, View
 
-from africanlii.registry import registry
-from africanlii.utils import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument
+from peachjam.registry import registry
+from peachjam.utils import add_slash, add_slash_to_frbr_uri
 
 
 def view_attachment(attachment):
@@ -17,17 +17,12 @@ def view_attachment(attachment):
     return response
 
 
-class HomePageView(TemplateView):
-    template_name = "africanlii/../templates/peachjam/home.html"
-
-
-@method_decorator(add_slash_to_frbr_uri(), name="dispatch")
 class DocumentDetailViewResolver(View):
     """Resolver view that returns detail views for documents based on their doc_type."""
 
     def dispatch(self, request, *args, **kwargs):
         obj = get_object_or_404(
-            CoreDocument, expression_frbr_uri=kwargs.get("frbr_uri")
+            CoreDocument, expression_frbr_uri=add_slash(kwargs.get("frbr_uri"))
         )
 
         view_class = registry.views.get(obj.doc_type)

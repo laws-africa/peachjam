@@ -1,0 +1,65 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n %}
+
+{% block title %}
+  {% if year %}
+    {% blocktrans with court_name=court.name year=year%}
+      {{ court_name }} - {{ year }}
+    {% endblocktrans %}
+  {% else %}
+    {% trans court.name %}
+  {% endif %}
+{% endblock %}
+
+{% block page-header %}
+  <h1 class="mb-3">
+    {% if year %}
+      {% blocktrans with court_name=court.name year=year%}
+        {{ court_name }} - {{ year }}
+      {% endblocktrans %}
+    {% else %}
+      {% trans court.name %}
+    {% endif %}
+  </h1>
+
+  {% if years %}
+    <div class="d-none d-lg-flex align-items-center mb-3">
+      <i class="bi bi-calendar"></i>
+      <div class="d-flex">
+        <a class="btn btn-link {% if not year %}disabled{% endif %}" href="{% url 'court_detail' court.code %}">
+          All years
+        </a>
+        {% for y in years %}
+          <a class="btn btn-link {% if y == year %}disabled{% endif %}"
+             href="{% url 'court_year' court.code y %}">
+            {{ y }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if years %}
+    <select class="form-select d-block d-lg-none" data-component="NavigationSelect">
+      <option value="{% url 'court_detail' court.code %}">All years</option>
+      {% for y in years %}
+        <option
+          value="{% url 'court_year' court.code y %}"
+          {% if y == year %} selected {% endif %}
+        >
+          {{ y }}
+        </option>
+      {% endfor %}
+    </select>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% if documents %}
+    {% include 'liiweb/_judgment_table.html'%}
+
+    {% include 'peachjam/_pagination.html' %}
+  {% else %}
+    <p>{% trans 'No documents found.' %}</p>
+  {% endif %}
+{% endblock %}

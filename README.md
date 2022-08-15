@@ -151,3 +151,20 @@ The following steps outline the procedure to deploy a new Peachjam based applica
 - On the dokku server, scale up the processes to run these tasks:
 
       dokku ps:scale <app_name> tasks=1 tasks2=1
+
+# License
+
+Copyright 2022 Laws.Africa.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
