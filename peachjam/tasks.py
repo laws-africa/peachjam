@@ -1,8 +1,16 @@
 import logging
 
+import sentry_sdk
 from background_task import background
+from background_task.signals import task_error, task_started, task_successful
+from django.apps import apps
+from django.dispatch import receiver
 
 log = logging.getLogger(__name__)
+
+
+def get_elasticapm_client():
+    return apps.get_app_config("elasticapm").client
 
 
 @background(remove_existing_tasks=True)
@@ -35,3 +43,29 @@ def run_ingestors():
         ingestor.check_for_updates()
 
     log.info("Running ingestors done")
+
+
+# monitor background tasks with elastic-apm
+@receiver(task_started)
+def bg_task_started(sender, **kwargs):
+    client = get_elasticapm_client()
+    client.begin_transaction(transaction_type="task")
+
+
+@receiver(task_successful)
+def bg_task_success(sender, completed_task, **kwargs):
+    client = get_elasticapm_client()
+    client.end_transaction(name=completed_task.task_name, result="success")
+
+
+@receiver(task_error)
+def bg_task_error(sender, task, **kwargs):
+    # report errors to elasticapm
+    client = get_elasticapm_client()
+    client.capture_exception()
+    client.end_transaction(name=task.task_name, result="error")
+
+    # report errors to sentry
+    with sentry_sdk.push_scope() as scope:
+        scope.transaction = task.task_name
+        sentry_sdk.capture_exception()
