@@ -1,0 +1,18 @@
+{% extends 'peachjam/judgment_detail.html' %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'court_detail' document.author.code %}">{{ document.author.name }}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'court_year' document.author.code document.date.year %}">{{ document.date.year }}</a>
+      </li>
+    </ol>
+  </nav>
+{% endblock %}
