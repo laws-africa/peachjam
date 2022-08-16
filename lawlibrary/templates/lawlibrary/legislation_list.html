@@ -1,0 +1,5 @@
+<h1>Legislation List</h1>
+
+{% for legislation in national_legislation_list %}
+    <p>{{ legislation.title }} - {{ legislation.citation }} - {{ legislation.locality }}</p>
+{% endfor %}
