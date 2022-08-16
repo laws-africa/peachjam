@@ -26,14 +26,16 @@ class LegislationDetailView(BaseDocumentDetailView):
     def get_notices(self):
         notices = super().get_notices()
         repeal = self.get_repeal_info()
+        friendly_type = self.object.metadata_json["type_name"]
+
         if self.object.repealed and repeal:
-            msg = "This {} was repealed on {} by <a href='{}'>{}</a>"
+            msg = "This {} was repealed on {} by <a href='{}'>{}</a>."
             notices.append(
                 {
                     "type": messages.ERROR,
                     "html": format_html(
                         msg.format(
-                            self.object.metadata_json["type_name"],
+                            friendly_type,
                             repeal["date"],
                             repeal["repealing_uri"],
                             repeal["repealing_title"],
@@ -42,54 +44,55 @@ class LegislationDetailView(BaseDocumentDetailView):
                 }
             )
 
-            msg = (
-                "This is the latest version of this {} as it was when it was repealed."
-            )
+        current_object_date = self.object.date.strftime("%Y-%m-%d")
+
+        points_in_time = self.get_points_in_time()
+        dates = [point_in_time["date"] for point_in_time in points_in_time]
+        index = dates.index(current_object_date)
+
+        if index == len(dates) - 1:
+            if self.object.repealed and repeal:
+                msg = "This is the version of this {} as it was when it was repealed."
+            else:
+                msg = "This is the latest version of this {}."
+
             notices.append(
                 {
                     "type": messages.INFO,
+                    "html": format_html(msg.format(friendly_type)),
+                }
+            )
+        else:
+            date = datetime.strptime(dates[index + 1], "%Y-%m-%d").date() - timedelta(
+                days=1
+            )
+
+            if self.object.repealed and repeal:
+                msg = (
+                    "This is the version of this {} as it was from {} to {}. "
+                    "<a href='{}'>Read the version as it was when it was repealed</a>."
+                )
+            else:
+                msg = (
+                    "This is the version of this {} as it was from {} to {}. "
+                    "<a href='{}'>Read the version currently in force</a>."
+                )
+
+            notices.append(
+                {
+                    "type": messages.WARNING,
                     "html": format_html(
                         msg.format(
-                            self.object.metadata_json["type_name"],
+                            friendly_type,
+                            current_object_date,
+                            date,
+                            points_in_time[-1]["expressions"][0]["expression_frbr_uri"],
                         )
                     ),
                 }
             )
 
-        # fetch the points in time
-        points_in_time = self.get_points_in_time()
-        latest_expression = points_in_time[-1]
-
-        for idx, point_in_time in enumerate(points_in_time):
-            if point_in_time != latest_expression:
-                msg = (
-                    "This is the version of this {} as it was from {} to {}. "
-                    "<a href={}>Read the version currently in force</a>"
-                )
-                notices.append(
-                    {
-                        "type": messages.WARNING,
-                        "html": format_html(
-                            msg.format(
-                                self.object.metadata_json["type_name"],
-                                point_in_time["expressions"][0]["expression_date"],
-                                datetime.strptime(
-                                    points_in_time[idx + 1]["date"], "%Y-%m-%d"
-                                ).date()
-                                - timedelta(days=1),
-                                latest_expression["expressions"][0][
-                                    "expression_frbr_uri"
-                                ],
-                            )
-                        ),
-                    }
-                )
-        self.add_notices_to_messages(notices)
         return notices
-
-    def add_notices_to_messages(self, notices):
-        for notice in notices:
-            messages.add_message(self.request, notice["type"], notice["html"])
 
     def get_repeal_info(self):
         return self.object.metadata_json.get("repeal", None)
