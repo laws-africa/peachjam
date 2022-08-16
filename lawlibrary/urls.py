@@ -11,5 +11,6 @@ urlpatterns = [
         views.CourtYearView.as_view(),
         name="court_year",
     ),
+    path("legislation/", views.LegislationListView.as_view(), name="legislation_list"),
     path("", include("liiweb.urls")),
 ]
