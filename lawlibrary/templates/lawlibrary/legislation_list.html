@@ -1,5 +1,24 @@
 <h1>Legislation List</h1>
 
-{% for legislation in national_legislation_list %}
-    <p>{{ legislation.title }} - {{ legislation.citation }} - {{ legislation.locality }}</p>
-{% endfor %}
+<h2>Provincial Legislation</h2>
+{% if provincial_legislation_list %}
+    <div>
+        {% for group in provincial_legislation_list %}
+        <div>
+            {% if group.items|length > 0 %}
+            {% for locality in group.localities %}
+                <div>
+                    <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div>No provincial legislations found</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<h2>National Legislation</h2>
+
+{{ national_legislation_list|json_script:"national-legislation-table" }}
