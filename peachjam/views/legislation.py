@@ -44,53 +44,57 @@ class LegislationDetailView(BaseDocumentDetailView):
                 }
             )
 
-        current_object_date = self.object.date.strftime("%Y-%m-%d")
-
         points_in_time = self.get_points_in_time()
-        dates = [point_in_time["date"] for point_in_time in points_in_time]
-        index = dates.index(current_object_date)
+        if points_in_time:
+            current_object_date = self.object.date.strftime("%Y-%m-%d")
+            dates = [point_in_time["date"] for point_in_time in points_in_time]
+            index = dates.index(current_object_date)
 
-        if index == len(dates) - 1:
-            if self.object.repealed and repeal:
-                msg = "This is the version of this {} as it was when it was repealed."
-            else:
-                msg = "This is the latest version of this {}."
+            if index == len(dates) - 1:
+                if self.object.repealed and repeal:
+                    msg = (
+                        "This is the version of this {} as it was when it was repealed."
+                    )
+                else:
+                    msg = "This is the latest version of this {}."
 
-            notices.append(
-                {
-                    "type": messages.INFO,
-                    "html": format_html(msg.format(friendly_type)),
-                }
-            )
-        else:
-            date = datetime.strptime(dates[index + 1], "%Y-%m-%d").date() - timedelta(
-                days=1
-            )
-
-            if self.object.repealed and repeal:
-                msg = (
-                    "This is the version of this {} as it was from {} to {}. "
-                    "<a href='{}'>Read the version as it was when it was repealed.</a>"
+                notices.append(
+                    {
+                        "type": messages.INFO,
+                        "html": format_html(msg.format(friendly_type)),
+                    }
                 )
             else:
-                msg = (
-                    "This is the version of this {} as it was from {} to {}. "
-                    "<a href='{}'>Read the version currently in force.</a>"
-                )
+                date = datetime.strptime(
+                    dates[index + 1], "%Y-%m-%d"
+                ).date() - timedelta(days=1)
 
-            notices.append(
-                {
-                    "type": messages.WARNING,
-                    "html": format_html(
-                        msg.format(
-                            friendly_type,
-                            current_object_date,
-                            date,
-                            points_in_time[-1]["expressions"][0]["expression_frbr_uri"],
-                        )
-                    ),
-                }
-            )
+                if self.object.repealed and repeal:
+                    msg = (
+                        "This is the version of this {} as it was from {} to {}. "
+                        "<a href='{}'>Read the version as it was when it was repealed</a>."
+                    )
+                else:
+                    msg = (
+                        "This is the version of this {} as it was from {} to {}. "
+                        "<a href='{}'>Read the version currently in force</a>."
+                    )
+
+                notices.append(
+                    {
+                        "type": messages.WARNING,
+                        "html": format_html(
+                            msg.format(
+                                friendly_type,
+                                current_object_date,
+                                date,
+                                points_in_time[-1]["expressions"][0][
+                                    "expression_frbr_uri"
+                                ],
+                            )
+                        ),
+                    }
+                )
 
         return notices
 
