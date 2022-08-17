@@ -1,8 +1,9 @@
 from rest_framework import viewsets
 
-from peachjam.models import CitationLink, Relationship, Work
+from peachjam.models import CitationLink, Legislation, Relationship, Work
 from peachjam_api.serializers import (
     CitationLinkSerializer,
+    LegislationSerializer,
     RelationshipSerializer,
     WorkSerializer,
 )
@@ -25,3 +26,8 @@ class WorksViewSet(viewsets.ReadOnlyModelViewSet):
 class CitationLinkViewSet(viewsets.ModelViewSet):
     queryset = CitationLink.objects.all()
     serializer_class = CitationLinkSerializer
+
+
+class LegislationViewSet(viewsets.ModelViewSet):
+    queryset = Legislation.objects.all()
+    serializer_class = LegislationSerializer
