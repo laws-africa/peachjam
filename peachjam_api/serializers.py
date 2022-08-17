@@ -1,6 +1,13 @@
 from rest_framework import serializers
 
-from peachjam.models import CitationLink, CoreDocument, Predicate, Relationship, Work
+from peachjam.models import (
+    CitationLink,
+    CoreDocument,
+    Legislation,
+    Predicate,
+    Relationship,
+    Work,
+)
 
 
 class WorkSerializer(serializers.ModelSerializer):
@@ -60,3 +67,9 @@ class CitationLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = CitationLink
         fields = ("document", "text", "url", "target_id", "target_selectors")
+
+
+class LegislationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Legislation
+        fields = ("title", "citation")
