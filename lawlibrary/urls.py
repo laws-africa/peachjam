@@ -12,5 +12,10 @@ urlpatterns = [
         name="court_year",
     ),
     path("legislation/", views.LegislationListView.as_view(), name="legislation_list"),
+    path(
+        "legislation/<str:code>/",
+        views.ProvincialLegislationListView.as_view(),
+        name="provincial_legislation_list",
+    ),
     path("", include("liiweb.urls")),
 ]
