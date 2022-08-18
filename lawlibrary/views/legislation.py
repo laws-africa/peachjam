@@ -12,9 +12,13 @@ class LegislationListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["national_legislation_list"] = LegislationSerializer(
-            self.model.objects.filter(locality=None), many=True
-        ).data
+        qs = (
+            self.get_queryset()
+            .filter(locality=None)
+            .distinct("work_frbr_uri")
+            .order_by("work_frbr_uri", "-date")
+        )
+        context["national_legislation_list"] = LegislationSerializer(qs, many=True).data
 
         provincial_legislation_list = []
 
@@ -38,10 +42,14 @@ class LegislationListView(ListView):
 
     def get_jurisdictions(self):
         return (
-            self.model.objects.order_by("jurisdiction__name")
+            self.get_queryset()
+            .order_by("jurisdiction__name")
             .values_list("jurisdiction__name", flat=True)
             .distinct()
         )
+
+    def get_queryset(self):
+        return super().get_queryset()
 
 
 class ProvincialLegislationListView(ListView):
@@ -52,7 +60,14 @@ class ProvincialLegislationListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["legislation_table"] = LegislationSerializer(
-            self.model.objects.filter(locality__code=self.kwargs["code"]), many=True
-        ).data
+        qs = (
+            self.get_queryset()
+            .filter(locality__code=self.kwargs["code"])
+            .distinct("work_frbr_uri")
+            .order_by("work_frbr_uri", "-date")
+        )
+        context["legislation_table"] = LegislationSerializer(qs, many=True).data
         return context
+
+    def get_queryset(self):
+        return super().get_queryset()
