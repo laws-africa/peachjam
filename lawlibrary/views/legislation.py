@@ -49,7 +49,7 @@ class LegislationListView(ListView):
         )
 
     def get_queryset(self):
-        return super().get_queryset()
+        return super().get_queryset().exclude(repealed=True)
 
 
 class ProvincialLegislationListView(ListView):
@@ -70,4 +70,4 @@ class ProvincialLegislationListView(ListView):
         return context
 
     def get_queryset(self):
-        return super().get_queryset()
+        return super().get_queryset().exclude(repealed=True)
