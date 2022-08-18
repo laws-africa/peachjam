@@ -37,9 +37,6 @@ class LegislationListView(ListView):
             provincial_legislation_list.append(country_dict)
 
         context["provincial_legislation_list"] = provincial_legislation_list
-
-        print(self.get_years())
-
         context["facet_data"] = {"years": self.get_years()}
 
         return context
@@ -47,7 +44,6 @@ class LegislationListView(ListView):
     def get_jurisdictions(self):
         return (
             self.get_queryset()
-            .filter(locality=None)
             .order_by("jurisdiction__name")
             .values_list("jurisdiction__name", flat=True)
             .distinct()
@@ -66,6 +62,10 @@ class LegislationListView(ListView):
         )
         return sorted(qs, reverse=True)
 
+    # TODO: fetch taxonomies
+    def get_taxonomies(self):
+        pass
+
 
 class ProvincialLegislationListView(ListView):
     model = Legislation
@@ -81,8 +81,8 @@ class ProvincialLegislationListView(ListView):
             .distinct("work_frbr_uri")
             .order_by("work_frbr_uri", "-date")
         )
-        context["legislation_table"] = LegislationSerializer(qs, many=True).data
 
+        context["legislation_table"] = LegislationSerializer(qs, many=True).data
         context["facet_data"] = {"years": self.get_years()}
 
         return context
