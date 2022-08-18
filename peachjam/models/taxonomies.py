@@ -22,7 +22,9 @@ class Taxonomy(MP_Node):
 
 
 class DocumentTopic(models.Model):
-    document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
+    document = models.ForeignKey(
+        CoreDocument, related_name="taxonomies", on_delete=models.CASCADE
+    )
     topic = models.ForeignKey(Taxonomy, on_delete=models.CASCADE)
 
     class Meta:
