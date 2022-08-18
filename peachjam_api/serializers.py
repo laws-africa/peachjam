@@ -72,4 +72,4 @@ class CitationLinkSerializer(serializers.ModelSerializer):
 class LegislationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Legislation
-        fields = ("title", "citation")
+        fields = ("title", "citation", "work_frbr_uri", "repealed")
