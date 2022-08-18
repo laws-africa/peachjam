@@ -1,9 +1,14 @@
 <template>
   <div class="row">
-    <div class="col-lg-3">
+    <div
+      v-if="showSideFilters"
+      class="col col-lg-3"
+    >
       <secondary-facets />
     </div>
-    <div class="col-lg-9">
+    <div
+      class="col"
+    >
       <div class="card legislation-table">
         <div class="card-header">
           <div class="input-group">
@@ -150,6 +155,7 @@ export default {
     SecondaryFacets
   },
   data: () => ({
+    showSideFilters: false,
     tableData: [],
     filteredData: [],
     selectedFilterKey: 'title',
@@ -185,6 +191,9 @@ export default {
   },
 
   mounted () {
+    const root = this.$el.closest('[data-vue-component="LegislationTable"]');
+    if (Object.keys(root.dataset).includes('showSideFacets')) this.showSideFilters = true;
+
     // To use this component json element #legislation-table-data must be in the dom
     const jsonElement = document.querySelector('#legislation-table');
     this.tableData = JSON.parse(jsonElement.textContent);
