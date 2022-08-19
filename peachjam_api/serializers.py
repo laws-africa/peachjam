@@ -8,6 +8,7 @@ from peachjam.models import (
     Relationship,
     Work,
 )
+from peachjam.models.taxonomies import DocumentTopic, Taxonomy
 
 
 class WorkSerializer(serializers.ModelSerializer):
@@ -69,7 +70,31 @@ class CitationLinkSerializer(serializers.ModelSerializer):
         fields = ("document", "text", "url", "target_id", "target_selectors")
 
 
+class TaxonomySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Taxonomy
+        fields = ("name",)
+
+
+class DocumentTopicSerializer(serializers.ModelSerializer):
+    topic = TaxonomySerializer()
+
+    class Meta:
+        model = DocumentTopic
+        fields = ("topic",)
+
+
 class LegislationSerializer(serializers.ModelSerializer):
+
+    taxonomies = DocumentTopicSerializer(many=True)
+
     class Meta:
         model = Legislation
-        fields = ("title", "citation", "work_frbr_uri", "repealed", "date")
+        fields = (
+            "title",
+            "citation",
+            "work_frbr_uri",
+            "repealed",
+            "date",
+            "taxonomies",
+        )
