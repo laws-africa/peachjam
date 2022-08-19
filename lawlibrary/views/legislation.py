@@ -90,7 +90,10 @@ class ProvincialLegislationListView(ListView):
         )
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
-        context["facet_data"] = {"years": self.get_years()}
+        context["facet_data"] = {
+            "years": self.get_years(),
+            "taxonomies": self.get_taxonomies(),
+        }
 
         return context
 
@@ -106,3 +109,13 @@ class ProvincialLegislationListView(ListView):
             .distinct()
         )
         return sorted(qs, reverse=True)
+
+    def get_taxonomies(self):
+        taxonomies = []
+        for legislation in self.get_queryset().filter(
+            locality__code=self.kwargs["code"]
+        ):
+            for taxonomy in legislation.taxonomies.all():
+                if taxonomy.topic.name not in taxonomies:
+                    taxonomies.append(taxonomy.topic.name)
+        return taxonomies
