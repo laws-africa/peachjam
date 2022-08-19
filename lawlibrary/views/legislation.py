@@ -52,9 +52,6 @@ class LegislationListView(ListView):
             .distinct()
         )
 
-    def get_queryset(self):
-        return super().get_queryset()
-
     def get_years(self):
         qs = (
             self.get_queryset()
@@ -66,12 +63,20 @@ class LegislationListView(ListView):
         return sorted(qs, reverse=True)
 
     def get_taxonomies(self):
-        taxonomies = []
-        for legislation in self.get_queryset().filter(locality=None):
-            for taxonomy in legislation.taxonomies.all():
-                if taxonomy.topic.name not in taxonomies:
-                    taxonomies.append(taxonomy.topic.name)
-        return taxonomies
+        return (
+            self.get_queryset()
+            .filter(locality=None)
+            .values_list("taxonomies__topic__name", flat=True)
+        )
+
+    def get_repeal_statuses(self):
+        return (
+            self.get_queryset()
+            .filter(locality=None)
+            .order_by()
+            .values_list("repealed", flat=True)
+            .distinct()
+        )
 
 
 class ProvincialLegislationListView(ListView):
@@ -97,9 +102,6 @@ class ProvincialLegislationListView(ListView):
 
         return context
 
-    def get_queryset(self):
-        return super().get_queryset()
-
     def get_years(self):
         qs = (
             self.get_queryset()
@@ -111,11 +113,8 @@ class ProvincialLegislationListView(ListView):
         return sorted(qs, reverse=True)
 
     def get_taxonomies(self):
-        taxonomies = []
-        for legislation in self.get_queryset().filter(
-            locality__code=self.kwargs["code"]
-        ):
-            for taxonomy in legislation.taxonomies.all():
-                if taxonomy.topic.name not in taxonomies:
-                    taxonomies.append(taxonomy.topic.name)
-        return taxonomies
+        return (
+            self.get_queryset()
+            .filter(locality__code=self.kwargs["code"])
+            .values_list("taxonomies__topic__name", flat=True)
+        )
