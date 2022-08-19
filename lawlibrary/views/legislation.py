@@ -23,7 +23,7 @@ class LegislationListView(ListView):
         provincial_legislation_list = []
 
         for jurisdiction in self.get_jurisdictions():
-            country_dict = {
+            locality_dict = {
                 "localities": [
                     {
                         "code": locality.code,
@@ -34,10 +34,13 @@ class LegislationListView(ListView):
                     )
                 ],
             }
-            provincial_legislation_list.append(country_dict)
+            provincial_legislation_list.append(locality_dict)
 
         context["provincial_legislation_list"] = provincial_legislation_list
-        context["facet_data"] = {"years": self.get_years()}
+        context["facet_data"] = {
+            "years": self.get_years(),
+            "taxonomies": self.get_taxonomies(),
+        }
 
         return context
 
@@ -62,9 +65,13 @@ class LegislationListView(ListView):
         )
         return sorted(qs, reverse=True)
 
-    # TODO: fetch taxonomies
     def get_taxonomies(self):
-        pass
+        taxonomies = []
+        for legislation in self.get_queryset().filter(locality=None):
+            for taxonomy in legislation.taxonomies.all():
+                if taxonomy.topic.name not in taxonomies:
+                    taxonomies.append(taxonomy.topic.name)
+        return taxonomies
 
 
 class ProvincialLegislationListView(ListView):
