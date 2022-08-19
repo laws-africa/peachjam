@@ -37,11 +37,6 @@ class LegislationListView(ListView):
             provincial_legislation_list.append(locality_dict)
 
         context["provincial_legislation_list"] = provincial_legislation_list
-        context["facet_data"] = {
-            "years": self.get_years(),
-            "taxonomies": self.get_taxonomies(),
-        }
-
         return context
 
     def get_jurisdictions(self):
@@ -49,32 +44,6 @@ class LegislationListView(ListView):
             self.get_queryset()
             .order_by("jurisdiction__name")
             .values_list("jurisdiction__name", flat=True)
-            .distinct()
-        )
-
-    def get_years(self):
-        qs = (
-            self.get_queryset()
-            .filter(locality=None)
-            .order_by()
-            .values_list("date__year", flat=True)
-            .distinct()
-        )
-        return sorted(qs, reverse=True)
-
-    def get_taxonomies(self):
-        return (
-            self.get_queryset()
-            .filter(locality=None)
-            .values_list("taxonomies__topic__name", flat=True)
-        )
-
-    def get_repeal_statuses(self):
-        return (
-            self.get_queryset()
-            .filter(locality=None)
-            .order_by()
-            .values_list("repealed", flat=True)
             .distinct()
         )
 
@@ -95,10 +64,6 @@ class ProvincialLegislationListView(ListView):
         )
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
-        context["facet_data"] = {
-            "years": self.get_years(),
-            "taxonomies": self.get_taxonomies(),
-        }
 
         return context
 
@@ -111,10 +76,3 @@ class ProvincialLegislationListView(ListView):
             .distinct()
         )
         return sorted(qs, reverse=True)
-
-    def get_taxonomies(self):
-        return (
-            self.get_queryset()
-            .filter(locality__code=self.kwargs["code"])
-            .values_list("taxonomies__topic__name", flat=True)
-        )
