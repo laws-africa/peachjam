@@ -37,7 +37,20 @@ class LegislationListView(ListView):
             provincial_legislation_list.append(locality_dict)
 
         context["provincial_legislation_list"] = provincial_legislation_list
+
+        context["facet_data"] = {"years": self.get_years()}
+
         return context
+
+    def get_years(self):
+        qs = (
+            self.get_queryset()
+            .filter(locality=None)
+            .order_by()
+            .values_list("date__year", flat=True)
+            .distinct()
+        )
+        return sorted(qs, reverse=True)
 
     def get_jurisdictions(self):
         return (
@@ -64,6 +77,7 @@ class ProvincialLegislationListView(ListView):
         )
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
+        context["facet_data"] = {"years": self.get_years()}
 
         return context
 
