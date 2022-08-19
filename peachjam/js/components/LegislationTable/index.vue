@@ -4,7 +4,7 @@
       v-if="showSideFilters"
       class="col col-lg-3"
     >
-      <secondary-facets />
+      <SecondaryFacets v-model="facets" />
     </div>
     <div
       class="col"
@@ -114,7 +114,7 @@
           <div class="column">
             <div>
               <a
-                href="www.musangowope.com"
+                href="#"
                 target="_blank"
               >{{ row.title }}</a>
             </div>
@@ -155,6 +155,7 @@ export default {
     SecondaryFacets
   },
   data: () => ({
+    facets: [],
     showSideFilters: false,
     tableData: [],
     filteredData: [],
@@ -195,8 +196,33 @@ export default {
     if (Object.keys(root.dataset).includes('showSideFacets')) this.showSideFilters = true;
 
     // To use this component json element #legislation-table-data must be in the dom
-    const jsonElement = document.querySelector('#legislation-table');
-    this.tableData = JSON.parse(jsonElement.textContent);
+    const tableJsonElement = document.getElementById('legislation-table');
+    const facetDataElement = document.getElementById('facet-data');
+    this.tableData = JSON.parse(tableJsonElement.textContent);
+    const facetData = JSON.parse(facetDataElement.textContent);
+    this.facets = [
+      {
+        title: 'Taxonomies',
+        type: 'checkbox',
+        name: 'taxonomies',
+        value: [],
+        options: facetData.taxonomies.map(taxonomy => ({
+          label: taxonomy,
+          value: taxonomy
+        }))
+      },
+
+      {
+        title: 'Years',
+        type: 'radio',
+        name: 'years',
+        value: null,
+        options: facetData.years.map(year => ({
+          label: year,
+          value: year
+        }))
+      }
+    ];
     this.filterData();
   },
 
