@@ -21,7 +21,7 @@ from rest_framework.permissions import AllowAny
 from peachjam_search.documents import SearchableDocument
 from peachjam_search.serializers import SearchableDocumentSerializer
 
-CACHE_SECS = 15 * 60
+CACHE_SECS = 0
 
 
 class PageQueryBackend(BaseSearchQueryBackend):
@@ -31,7 +31,6 @@ class PageQueryBackend(BaseSearchQueryBackend):
     def construct_search(cls, request, view, search_backend):
         queries = []
         for search_term in search_backend.get_search_query_params(request):
-            print(search_term)
             queries.append(
                 Q(
                     "nested",
@@ -68,9 +67,6 @@ class PageQueryBackend(BaseSearchQueryBackend):
 class CustomSearchBackend(BaseSearchFilterBackend):
     query_backends = [PageQueryBackend]
 
-    def get_query_backends(self, request, view):
-        return self.query_backends
-
 
 class SearchView(TemplateView):
     template_name = "peachjam_search/search.html"
@@ -89,7 +85,6 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         FacetedFilterSearchFilterBackend,
         SourceBackend,
         HighlightBackend,
-        CustomSearchBackend,
     ]
 
     ordering_fields = {"date": "_date", "title": "title"}
@@ -116,6 +111,8 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "judges",
         "content",
     )
+
+    search_nested_fields = {"pages": {"path": "pages", "fields": ["body"]}}
 
     faceted_search_fields = {
         "doc_type": {
@@ -156,7 +153,18 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
                 "number_of_fragments": 2,
             }
         },
+        "pages.body": {
+            "options": {
+                "pre_tags": ["<mark>"],
+                "post_tags": ["</mark>"],
+                "fragment_size": 80,
+                "number_of_fragments": 2,
+            },
+            "fields": ["pages.body"],
+        },
     }
+
+    source = {"excludes": ["pages"]}
 
     @method_decorator(cache_page(CACHE_SECS))
     def dispatch(self, request, *args, **kwargs):
