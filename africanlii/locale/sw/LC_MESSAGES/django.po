@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-08-22 15:05+0200\n"
-"PO-Revision-Date: 2022-07-13 14:39\n"
+"PO-Revision-Date: 2022-08-22 13:13\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -22,26 +22,17 @@ msgid "About AfricanLII"
 msgstr "Kuhusu AfricanLII"
 
 #: templates/peachjam/footer.html:11
-msgid ""
-"\n"
-"      AfricanLII is an open-access research platform for African law jointly "
-"operated by the AfricanLII programme of\n"
-"      the University of Cape Town and Laws.Africa. AfricanLII publishes the "
-"law and policy of the African Union and\n"
-"      federates search across all open access African national law available "
-"through the\n"
-"      <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" "
-"target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of LIIs.\n"
+msgid "\n"
+"      AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of\n"
+"      the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and\n"
+"      federates search across all open access African national law available through the\n"
+"      <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of LIIs.\n"
 "    "
 msgstr ""
 
 #: templates/peachjam/footer.html:19
-msgid ""
-"\n"
-"      The publication of the African Union material is co-sponsored by the "
-"European Union and is part of the <a class=\"text-primary\" href=\"https://"
-"www.afrobarometer.org/impact/informing-the-public-discourse/data-for-"
-"governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data\n"
+msgid "\n"
+"      The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data\n"
 "    for Governance Alliance project</a>.\n"
 "    "
 msgstr ""
@@ -67,10 +58,9 @@ msgid "Other African Legal Information Institutions"
 msgstr "Taasisi Nyingine za Kisheria za Kiafrika"
 
 #: templates/peachjam/footer.html:35
-#, fuzzy
 #| msgid "About AfricanLII"
 msgid "AfricanLII"
-msgstr "Kuhusu AfricanLII"
+msgstr ""
 
 #: templates/peachjam/footer.html:36
 msgid "GhaLII"
@@ -149,10 +139,9 @@ msgid "Treaties and Protocols"
 msgstr "Mikataba na Itifaki"
 
 #: templates/peachjam/header.html:31
-#, fuzzy
 #| msgid "Legislation List"
 msgid "Legislation"
-msgstr "Orodha ya Mikataba na Itifaki"
+msgstr ""
 
 #: templates/peachjam/header.html:34
 msgid "About"
@@ -163,7 +152,6 @@ msgid "Home"
 msgstr "Sebule"
 
 #: templates/peachjam/home.html:10
-#, fuzzy
 #| msgid ""
 #| "\n"
 #| "        We digitise the law and policy of the African Governance "
@@ -171,21 +159,12 @@ msgstr "Sebule"
 #| "        with and understand the African Union agenda. Search through "
 #| "%(documents_count)s AU documents on the AfricanLII platform\n"
 #| "      "
-msgid ""
-"We digitise the law and policy of the African Governance Architecture and "
-"help Africans and the world connect with and understand the African Union "
-"agenda."
+msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
 msgstr ""
-"\n"
-"Tunaweka kidigitali sheria na sera ya Usanifu wa Utawala wa Kiafrika na "
-"kusaidia Waafrika na ulimwengu kuungana na kuelewa ajenda ya Umoja wa "
-"Afrika. Tafuta kupitia hati %(documents_count)s za AU kwenye jukwaa la "
-"AfricanLII      "
 
 #: templates/peachjam/home.html:16
 #, python-format
-msgid ""
-"Search through %(documents_count)s AU documents on the AfricanLII platform."
+msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
 msgstr ""
 
 #: templates/peachjam/home.html:40
@@ -463,3 +442,4 @@ msgstr "Mikataba na Itifaki za Hivi Karibuni "
 
 #~ msgid "Logout"
 #~ msgstr "Ondoka"
+
