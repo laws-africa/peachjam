@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 44\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 50\n"
 
 #: settings.py:193
 msgid "English"
@@ -31,12 +31,12 @@ msgstr "Swahili"
 
 #: templates/account/base.html:16
 msgid "Need help? Please email <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
-msgstr ""
+msgstr "Besoin d'aide ? Veuillez envoyer un e-mail à <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
 
 #: templates/account/login.html:5
 #| msgid "Log Out"
 msgid "Log In"
-msgstr ""
+msgstr "Se connecter"
 
 #: templates/account/login.html:13 templates/account/login.html:58
 #: templates/account/password_reset_from_key.html:57
@@ -44,28 +44,30 @@ msgstr ""
 #: templates/admin/login.html:63
 #| msgid "Log Out"
 msgid "Log in"
-msgstr ""
+msgstr "Se connecter"
 
 #: templates/account/login.html:30 templates/account/password_reset.html:18
 msgid "Email address"
-msgstr ""
+msgstr "Adresse e-mail"
 
 #: templates/account/login.html:42
 #| msgid "Reset Password"
 msgid "Password"
-msgstr ""
+msgstr "Mot de passe"
 
 #: templates/account/login.html:45
 #| msgid "Reset Your Password"
 msgid "Forgot your password?"
-msgstr ""
+msgstr "Mot de passe oublié ?"
 
 #: templates/account/login.html:76
 #, python-format
 msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
+msgstr "\n"
+"            Connectez-vous à %(provider.name)s\n"
+"          "
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
@@ -82,13 +84,13 @@ msgstr "Réinitialiser votre mot de passe"
 
 #: templates/account/password_reset.html:12
 msgid "Forgotten your password? Enter your e-mail address below, and we"
-msgstr ""
+msgstr "Vous avez oublié votre mot de passe ? Entrez votre adresse e-mail ci-dessous, et nous"
 
 #: templates/account/password_reset.html:30
 #: templates/account/password_reset_from_key.html:51
 #| msgid "Reset Password"
 msgid "Reset password"
-msgstr ""
+msgstr "Réinitialiser le mot de passe"
 
 #: templates/account/password_reset_from_key.html:7
 msgid "Bad Token"
@@ -107,11 +109,11 @@ msgstr "Le lien de réinitialisation du mot de passe n'est pas valide, peut-êtr
 #: templates/account/password_reset_from_key.html:27
 #| msgid "Reset Password"
 msgid "New Password"
-msgstr ""
+msgstr "Nouveau mot de passe"
 
 #: templates/account/password_reset_from_key.html:39
 msgid "New Password (again)"
-msgstr ""
+msgstr "Nouveau mot de passe (encore)"
 
 #: templates/account/password_reset_from_key.html:56
 msgid "Your password is now reset."
@@ -120,29 +122,29 @@ msgstr "Votre mot de passe est maintenant réinitialisé."
 #: templates/account/password_reset_from_key_done.html:4
 #| msgid "Reset Password"
 msgid "Change Password"
-msgstr ""
+msgstr "Changer le mot de passe"
 
 #: templates/account/password_reset_from_key_done.html:8
 #| msgid "Your password is now reset."
 msgid "Your password has been reset."
-msgstr ""
+msgstr "Votre mot de passe a été réinitialisé."
 
 #: templates/admin/login.html:23
 msgid "Please correct the error below."
-msgstr ""
+msgstr "Veuillez corriger l'erreur ci-dessous."
 
 #: templates/admin/login.html:23
 msgid "Please correct the errors below."
-msgstr ""
+msgstr "Veuillez corriger les erreurs ci-dessous."
 
 #: templates/admin/login.html:39
 #, python-format
 msgid "You are authenticated as %(username)s, but are not authorized to access this page. Would you like to login to a different account?"
-msgstr ""
+msgstr "Vous êtes authentifié en tant que %(username)s, mais vous n'êtes pas autorisé à accéder à cette page. Souhaitez-vous vous connecter à un autre compte ?"
 
 #: templates/admin/login.html:59
 msgid "Forgotten your password or username?"
-msgstr ""
+msgstr "Vous avez oublié votre mot de passe ou votre nom d'utilisateur ?"
 
 #: templates/admin/peachjam_document_relationships.html:6
 #: templates/peachjam/home.html:3
@@ -151,50 +153,50 @@ msgstr "Accueil"
 
 #: templates/admin/peachjam_document_relationships.html:10
 msgid "Relationships"
-msgstr ""
+msgstr "Relations"
 
 #: templates/peachjam/_author_detail.html:8
 #, python-format
 msgid " Documents by %(author)s "
-msgstr ""
+msgstr " Documents par %(author)s "
 
 #: templates/peachjam/_document_table.html:6
 msgid "Title"
-msgstr ""
+msgstr "Titre de la page"
 
 #: templates/peachjam/_document_table.html:7
 #: templates/peachjam/layouts/document_detail.html:49
 #: templates/peachjam/legislation_detail.html:10
 msgid "Date"
-msgstr ""
+msgstr "Date"
 
 #: templates/peachjam/_document_table.html:9
 msgid "Document Type"
-msgstr ""
+msgstr "Type de document"
 
 #: templates/peachjam/_document_table.html:11
 msgid "Regional Body"
-msgstr ""
+msgstr "Corps régional"
 
 #: templates/peachjam/_pagination.html:6
 msgid "first"
-msgstr ""
+msgstr "premier"
 
 #: templates/peachjam/_pagination.html:7
 msgid "previous"
-msgstr ""
+msgstr "Précédent"
 
 #: templates/peachjam/_pagination.html:11
 msgid "Page"
-msgstr ""
+msgstr "Page"
 
 #: templates/peachjam/_pagination.html:15
 msgid "next"
-msgstr ""
+msgstr "suivant"
 
 #: templates/peachjam/_pagination.html:16
 msgid "last"
-msgstr ""
+msgstr "dernier"
 
 #: templates/peachjam/_recent_document_list.html:16
 #: templates/peachjam/layouts/document_list.html:51
@@ -203,11 +205,11 @@ msgstr "Aucun document trouvé."
 
 #: templates/peachjam/about.html:4
 msgid "About"
-msgstr ""
+msgstr "À propos de"
 
 #: templates/peachjam/about.html:9
 msgid "About the platform"
-msgstr ""
+msgstr "À propos de la plateforme"
 
 #: templates/peachjam/about.html:11
 msgid "\n"
@@ -226,13 +228,18 @@ msgid "\n"
 "            Increase overall awareness of the AGA agenda and popular perceptions about democracy, governance and human\n"
 "            rights among civil society organisations (CSOs) and AGA members\n"
 "          "
-msgstr ""
+msgstr "\n"
+"            Augmentez la sensibilisation générale au programme AGA et aux perceptions populaires sur la démocratie, la gouvernance et les droits de l'homme\n"
+"            parmi les organisations de la société civile (OSC) et les membres de l'AGA\n"
+"          "
 
 #: templates/peachjam/about.html:28
 msgid "\n"
 "            Supply complete, accurate and re-usable AGA information to allow AGA and CSOs to work towards shared goals\n"
 "          "
-msgstr ""
+msgstr "\n"
+"            Fournissez des informations AGA complètes, précises et réutilisables pour permettre à AGA et aux OSC de travailler dans le sens d'objectifs partagés\n"
+"          "
 
 #: templates/peachjam/about.html:33
 msgid "\n"
@@ -247,7 +254,10 @@ msgid "\n"
 "            Strengthen monitoring, develop insights, and improve national-level implementation by developing linkages\n"
 "            between regional and member-states’ law and policy.\n"
 "          "
-msgstr ""
+msgstr "\n"
+"            Renforcer la surveillance, développer des idées et améliorer la mise en œuvre au niveau national en développant des liaisons\n"
+"            entre la loi et la politique des états régionaux et membres.\n"
+"          "
 
 #: templates/peachjam/about.html:45
 msgid "\n"
@@ -261,7 +271,7 @@ msgstr "\n"
 
 #: templates/peachjam/about.html:53
 msgid "Platform developers"
-msgstr ""
+msgstr "Développeurs de plateformes"
 
 #: templates/peachjam/about.html:56
 msgid "\n"
@@ -304,73 +314,76 @@ msgstr "\n"
 
 #: templates/peachjam/about.html:84
 msgid "Find out more"
-msgstr ""
+msgstr "En savoir plus"
 
 #: templates/peachjam/about.html:86
 msgid "\n"
 "          Visit <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a>\n"
 "          or contact us on <a href=\"mailto:info@laws.africa\">info@laws.africa</a> for more information.\n"
 "        "
-msgstr ""
+msgstr "\n"
+"          Visitez <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a>\n"
+"          ou contactez-nous à <a href=\"mailto:info@laws.africa\">info@laws.africa</a> pour plus d'informations.\n"
+"        "
 
 #: templates/peachjam/about.html:98
 msgid "Our partners"
-msgstr ""
+msgstr "Nos partenaires"
 
 #: templates/peachjam/generic_document_list.html:4
 msgid "Generic Document List"
-msgstr ""
+msgstr "Liste de documents génériques"
 
 #: templates/peachjam/generic_document_list.html:7
 msgid "AU Documents"
-msgstr ""
+msgstr "Documents de l'UA"
 
 #: templates/peachjam/header.html:55
 msgid "Logout"
-msgstr ""
+msgstr "Déconnexion"
 
 #: templates/peachjam/judgment_list.html:4
 #: templates/peachjam/judgment_list.html:7
 msgid "Judgment List"
-msgstr ""
+msgstr "Liste des juges"
 
 #: templates/peachjam/layouts/document_detail.html:36
 msgid "Jurisdiction"
-msgstr ""
+msgstr "Juridiction"
 
 #: templates/peachjam/layouts/document_detail.html:43
 msgid "Author"
-msgstr ""
+msgstr "Auteur"
 
 #: templates/peachjam/layouts/document_detail.html:69
 #: templates/peachjam/legislation_detail.html:8
 msgid "Language"
-msgstr ""
+msgstr "Langue"
 
 #: templates/peachjam/layouts/document_detail.html:101
 msgid "This document"
-msgstr ""
+msgstr "Ce document"
 
 #: templates/peachjam/layouts/document_detail.html:118
 msgid "Related documents"
-msgstr ""
+msgstr "Documents connexes"
 
 #: templates/peachjam/layouts/document_list.html:24
 msgid "Documents"
-msgstr ""
+msgstr "Documents"
 
 #: templates/peachjam/legal_instrument_list.html:4
 msgid "Legal Instrument List"
-msgstr ""
+msgstr "Liste d'instruments légaux"
 
 #: templates/peachjam/legal_instrument_list.html:7
 msgid "Treaties and Protocols List"
-msgstr ""
+msgstr "Liste des traités et protocoles"
 
 #: templates/peachjam/legislation_list.html:4
 #: templates/peachjam/legislation_list.html:7
 msgid "Legislation List"
-msgstr ""
+msgstr "Liste des législations"
 
 #~ msgid "Welcome to Peach Jam"
 #~ msgstr "Bienvenue dans Peach Jam"
