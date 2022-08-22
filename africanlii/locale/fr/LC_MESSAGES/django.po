@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-08-22 15:05+0200\n"
-"PO-Revision-Date: 2022-07-13 14:39\n"
+"PO-Revision-Date: 2022-08-22 13:13\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -14,37 +14,36 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/africanlii/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 65\n"
+"X-Crowdin-File: /main/africanlii/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 63\n"
 
 #: templates/peachjam/footer.html:8
 msgid "About AfricanLII"
 msgstr "À propos d'AfricanLII"
 
 #: templates/peachjam/footer.html:11
-msgid ""
-"\n"
-"      AfricanLII is an open-access research platform for African law jointly "
-"operated by the AfricanLII programme of\n"
-"      the University of Cape Town and Laws.Africa. AfricanLII publishes the "
-"law and policy of the African Union and\n"
-"      federates search across all open access African national law available "
-"through the\n"
-"      <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" "
-"target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of LIIs.\n"
+msgid "\n"
+"      AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of\n"
+"      the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and\n"
+"      federates search across all open access African national law available through the\n"
+"      <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of LIIs.\n"
 "    "
-msgstr ""
+msgstr "\n"
+"      AfricanLII est une plate-forme de recherche ouverte pour le droit africain gérée conjointement par le programme AfricanLII de\n"
+"      l'Université du Cap et les Lois. friction. AfricanLII publie la loi et la politique de l'Union africaine et\n"
+"      fédérée la recherche sur toutes les lois nationales africaines en accès libre disponibles via la communauté de\n"
+"      <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> de LIIs.\n"
+"    "
 
 #: templates/peachjam/footer.html:19
-msgid ""
-"\n"
-"      The publication of the African Union material is co-sponsored by the "
-"European Union and is part of the <a class=\"text-primary\" href=\"https://"
-"www.afrobarometer.org/impact/informing-the-public-discourse/data-for-"
-"governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data\n"
+msgid "\n"
+"      The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data\n"
 "    for Governance Alliance project</a>.\n"
 "    "
-msgstr ""
+msgstr "\n"
+"      La publication du matériel de l'Union africaine est coparrainée par l'Union européenne et fait partie du projet <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Données\n"
+"    de l'Alliance de gouvernance</a>.\n"
+"    "
 
 #: templates/peachjam/footer.html:27
 msgid "With support from"
@@ -52,93 +51,92 @@ msgstr "Avec le support de"
 
 #: templates/peachjam/footer.html:28
 msgid "Sigrid Rausing Trust"
-msgstr ""
+msgstr "Sigrid Rausing Trust"
 
 #: templates/peachjam/footer.html:29
 msgid "Indigo Trust"
-msgstr ""
+msgstr "Indigo Trust"
 
 #: templates/peachjam/footer.html:30
 msgid "European Union"
-msgstr ""
+msgstr "Union européenne"
 
 #: templates/peachjam/footer.html:34
 msgid "Other African Legal Information Institutions"
 msgstr "Autres institutions africaines d'information juridique"
 
 #: templates/peachjam/footer.html:35
-#, fuzzy
 #| msgid "About AfricanLII"
 msgid "AfricanLII"
-msgstr "À propos d'AfricanLII"
+msgstr "AfricanLII"
 
 #: templates/peachjam/footer.html:36
 msgid "GhaLII"
-msgstr ""
+msgstr "GhaLII"
 
 #: templates/peachjam/footer.html:37
 msgid "Kenya Law"
-msgstr ""
+msgstr "Loi kényane"
 
 #: templates/peachjam/footer.html:38
 msgid "LawLibrary ZA"
-msgstr ""
+msgstr "Bibliothèque de lois ZA"
 
 #: templates/peachjam/footer.html:39
 msgid "LesothoLII"
-msgstr ""
+msgstr "LesothoLII"
 
 #: templates/peachjam/footer.html:40
 msgid "LiberLII"
-msgstr ""
+msgstr "LiberLII"
 
 #: templates/peachjam/footer.html:41
 msgid "MalawiLII"
-msgstr ""
+msgstr "MalawiLII"
 
 #: templates/peachjam/footer.html:42
 msgid "NamibLII"
-msgstr ""
+msgstr "NamibLII"
 
 #: templates/peachjam/footer.html:43
 msgid "NigeriaLII"
-msgstr ""
+msgstr "NigeriaLII"
 
 #: templates/peachjam/footer.html:44
 msgid "OpenbyLaws ZA"
-msgstr ""
+msgstr "ZA OpenbyLaws"
 
 #: templates/peachjam/footer.html:45
 msgid "SeyLII"
-msgstr ""
+msgstr "SeyLII"
 
 #: templates/peachjam/footer.html:46
 msgid "SieraLII"
-msgstr ""
+msgstr "SieraLII"
 
 #: templates/peachjam/footer.html:47
 msgid "eSwatiniLII"
-msgstr ""
+msgstr "eSwatiniLII"
 
 #: templates/peachjam/footer.html:48
 msgid "TanzLII"
-msgstr ""
+msgstr "TanzLII"
 
 #: templates/peachjam/footer.html:49
 msgid "UgandaLII"
-msgstr ""
+msgstr "UgandaLII"
 
 #: templates/peachjam/footer.html:50
 msgid "ZambiaLII"
-msgstr ""
+msgstr "ZambiaLII"
 
 #: templates/peachjam/footer.html:51
 msgid "ZimLII"
-msgstr ""
+msgstr "ZimLII"
 
 #: templates/peachjam/header.html:22
 msgid "Decisions"
-msgstr ""
+msgstr "Décisions"
 
 #: templates/peachjam/header.html:25
 msgid "AU Documents"
@@ -149,10 +147,9 @@ msgid "Treaties and Protocols"
 msgstr "Traités et protocoles"
 
 #: templates/peachjam/header.html:31
-#, fuzzy
 #| msgid "Legislation List"
 msgid "Legislation"
-msgstr "Liste des législations"
+msgstr "Législation"
 
 #: templates/peachjam/header.html:34
 msgid "About"
@@ -163,7 +160,6 @@ msgid "Home"
 msgstr "Accueil"
 
 #: templates/peachjam/home.html:10
-#, fuzzy
 #| msgid ""
 #| "\n"
 #| "        We digitise the law and policy of the African Governance "
@@ -171,27 +167,17 @@ msgstr "Accueil"
 #| "        with and understand the African Union agenda. Search through "
 #| "%(documents_count)s AU documents on the AfricanLII platform\n"
 #| "      "
-msgid ""
-"We digitise the law and policy of the African Governance Architecture and "
-"help Africans and the world connect with and understand the African Union "
-"agenda."
-msgstr ""
-"\n"
-"        Nous numérisons la loi et la politique de l’Architecture de "
-"Gouvernance Africaine et aidons les Africains et le monde à relier\n"
-"        et à comprendre le programme de l’Union Africaine. Rechercher dans "
-"%(documents_count)s documents AU sur la plateforme AfricanLII\n"
-"      "
+msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
+msgstr "Nous numérisons la loi et la politique de l’Architecture de Gouvernance Africaine et aidons les Africains et le monde à relier et comprendre le programme de l’Union Africaine."
 
 #: templates/peachjam/home.html:16
 #, python-format
-msgid ""
-"Search through %(documents_count)s AU documents on the AfricanLII platform."
-msgstr ""
+msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
+msgstr "Recherchez %(documents_count)s documents en AU sur la plateforme AfricanLII."
 
 #: templates/peachjam/home.html:40
 msgid "Regional Body"
-msgstr ""
+msgstr "Corps régional"
 
 #: templates/peachjam/home.html:53
 msgid "Recent Judgments"
@@ -460,3 +446,4 @@ msgstr "Traités et protocoles récents "
 
 #~ msgid "Logout"
 #~ msgstr "Déconnexion"
+
