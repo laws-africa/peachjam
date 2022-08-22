@@ -1,6 +1,10 @@
+from itertools import groupby
+
 from django.views.generic import ListView
 
 from peachjam.models import Legislation, Locality
+from peachjam.registry import registry
+from peachjam.views import BaseDocumentDetailView
 from peachjam_api.serializers import LegislationSerializer
 
 
@@ -90,3 +94,90 @@ class ProvincialLegislationListView(ListView):
             .distinct()
         )
         return sorted(qs, reverse=True)
+
+
+@registry.register_doc_type("legislation")
+class LegislationDetailView(BaseDocumentDetailView):
+    model = Legislation
+    template_name = "lawlibrary/legislation_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        timeline_events = self.get_timeline_events()
+        context["timeline_events"] = timeline_events
+        return context
+
+    def get_timeline_events(self):
+        events = []
+
+        work = self.object.metadata_json
+        expressions = {
+            point_in_time["date"]: point_in_time["expressions"][0]
+            for point_in_time in work["points_in_time"]
+        }
+
+        if work["assent_date"]:
+            events.append(
+                {
+                    "date": work["assent_date"],
+                    "event": "assent",
+                }
+            )
+
+        if work["publication_date"]:
+            events.append(
+                {
+                    "date": work["publication_date"],
+                    "event": "publication",
+                }
+            )
+
+        if work["commencement_date"]:
+            events.append(
+                {
+                    "date": work["commencement_date"],
+                    "event": "commencement",
+                }
+            )
+
+        events.extend(
+            [
+                {
+                    "date": amendment["date"],
+                    "event": "amendment",
+                    "amending_title": amendment["amending_title"],
+                    "amending_uri": amendment["amending_uri"],
+                }
+                for amendment in work["amendments"]
+            ]
+        )
+
+        if work["repeal"]:
+            events.append(
+                {
+                    "date": work["repeal"]["date"],
+                    "event": "repeal",
+                    "repealing_title": work["repeal"]["repealing_title"],
+                    "repealing_uri": work["repeal"]["repealing_uri"],
+                }
+            )
+
+        events.sort(key=lambda event: event["date"])
+        events = [
+            {
+                "date": date,
+                "events": list(group),
+            }
+            for date, group in groupby(events, lambda event: event["date"])
+        ]
+
+        for event in events:
+            for e in event["events"]:
+                del e["date"]
+            uri = expressions.get(event["date"], {}).get("expression_frbr_uri")
+            if uri:
+                event["expression_frbr_uri"] = uri[4:]
+
+        events.sort(key=lambda event: event["date"], reverse=True)
+
+        return events
