@@ -155,6 +155,18 @@ class CoreDocument(models.Model):
         except ValueError:
             raise ValidationError("Invalid FRBR URI: " + frbr_uri)
 
+        self.assign_frbr_uri()
+        expression_frbr_uri = self.generate_expression_frbr_uri()
+        if (
+            self.__class__.objects.filter(expression_frbr_uri=expression_frbr_uri)
+            .exclude(pk=self.pk)
+            .exists()
+        ):
+            raise ValidationError(
+                "Document with this Expression FRBR URI already exists!"
+                + expression_frbr_uri
+            )
+
     def generate_expression_frbr_uri(self):
         frbr_uri = FrbrUri.parse(self.work_frbr_uri)
         frbr_uri.expression_date = f"@{datestring(self.date)}"
