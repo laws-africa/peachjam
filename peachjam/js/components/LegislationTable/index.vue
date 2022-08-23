@@ -1,101 +1,130 @@
 <template>
-  <div class="row">
+  <div>
     <div
-      v-if="showSideFilters"
-      class="col col-lg-3"
+      id="mobile-legislation-facets"
+      ref="mobile-legislation-facets-ref"
+      class="offcanvas offcanvas-start"
+      tabindex="-1"
+      aria-labelledby="mobile-legislation-facets"
     >
-      <SecondaryFacets v-model="facets" />
+      <div class="offcanvas-body">
+        <SecondaryFacets
+          v-if="windowWith < 992"
+          v-model="facets"
+        />
+      </div>
     </div>
-    <div
-      class="col"
-    >
-      <div class="card legislation-table">
-        <div class="card-header">
-          <input
-            v-model="q"
-            type="text"
-            class="form-control"
-            placeholder="Search documents"
+    <div class="row">
+      <div
+        v-if="showSideFacets"
+        class="col col-lg-3 d-none d-lg-block"
+      >
+        <SecondaryFacets
+          v-if="windowWith > 992"
+          v-model="facets"
+        />
+      </div>
+      <div
+        class="col col-lg-9"
+      >
+        <div class="d-block d-lg-none mb-2">
+          <button
+            class="btn btn-primary"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#mobile-legislation-facets"
+            aria-controls="mobile-legislation-facets"
           >
+            Filters
+          </button>
         </div>
-        <div
-          class="legislation-table__row"
-        >
-          <div class="column-caret" />
-          <div class="column">
-            <strong>{{ tableData.length }} documents in total</strong>
-          </div>
-        </div>
-        <div class="legislation-table__row headings">
-          <div class="column-caret" />
-          <div
-            class="column d-flex align-items-center"
-            role="button"
-            @click="updateSort('title')"
-          >
-            <strong>Title</strong>
-            <i
-              v-if="sortableFields.title === 'asc'"
-              class="bi bi-sort-up ms-2"
-            />
-            <i
-              v-if="sortableFields.title === 'desc'"
-              class="bi bi-sort-down ms-2"
-            />
+        <div class="card legislation-table">
+          <div class="card-header">
+            <input
+              v-model="q"
+              type="text"
+              class="form-control"
+              placeholder="Search documents"
+            >
           </div>
           <div
-            class="column"
-            role="button"
-            @click="updateSort('citation')"
-          >
-            <strong>Numbered title</strong>
-            <i
-              v-if="sortableFields.citation === 'asc'"
-              class="bi bi-sort-up ms-2"
-            />
-            <i
-              v-if="sortableFields.citation === 'desc'"
-              class="bi bi-sort-down ms-2"
-            />
-          </div>
-        </div>
-        <template v-if="filteredData.length">
-          <div
-            v-for="(row, index) in filteredData"
-            :key="index"
             class="legislation-table__row"
           >
+            <div class="column-caret" />
+            <div class="column">
+              <strong>{{ tableData.length }} documents in total</strong>
+            </div>
+          </div>
+          <div class="legislation-table__row headings">
+            <div class="column-caret" />
             <div
-              class="column-caret"
-              data-bs-toggle="collapse"
-              :data-bs-target="`#row-accordion-${index}`"
-              aria-expanded="false"
+              class="column d-flex align-items-center"
               role="button"
-              :aria-controls="`row-accordion-${index}`"
+              @click="updateSort('title')"
             >
+              <strong>Title</strong>
               <i
-                v-if="row.sublegs"
-                class="bi bi-caret-right-fill"
+                v-if="sortableFields.title === 'asc'"
+                class="bi bi-sort-up ms-2"
               />
               <i
-                v-if="row.sublegs"
-                class="bi bi-caret-down-fill"
+                v-if="sortableFields.title === 'desc'"
+                class="bi bi-sort-down ms-2"
               />
             </div>
-            <div class="column">
-              <div>
-                <a
-                  :href="`${row.work_frbr_uri}/`"
-                  target="_blank"
-                >{{ row.title }}</a>
-              </div>
-              <div class="column__subtitle">
-                {{ row.frbr_uri }}
-              </div>
+            <div
+              class="column"
+              role="button"
+              @click="updateSort('citation')"
+            >
+              <strong>Numbered title</strong>
+              <i
+                v-if="sortableFields.citation === 'asc'"
+                class="bi bi-sort-up ms-2"
+              />
+              <i
+                v-if="sortableFields.citation === 'desc'"
+                class="bi bi-sort-down ms-2"
+              />
             </div>
-            <div class="column">
-              {{ row.citation }}
-            </div>
+          </div>
+          <template v-if="filteredData.length">
+            <div
+              v-for="(row, index) in filteredData"
+              :key="index"
+              class="legislation-table__row"
+            >
+              <div
+                class="column-caret"
+                data-bs-toggle="collapse"
+                :data-bs-target="`#row-accordion-${index}`"
+                aria-expanded="false"
+                role="button"
+                :aria-controls="`row-accordion-${index}`"
+              >
+                <i
+                  v-if="row.sublegs"
+                  class="bi bi-caret-right-fill"
+                />
+                <i
+                  v-if="row.sublegs"
+                  class="bi bi-caret-down-fill"
+                />
+              </div>
+              <div class="column">
+                <div>
+                  <a
+                    :href="`${row.work_frbr_uri}/`"
+                    target="_blank"
+                  >{{ row.title }}</a>
+                </div>
+                <div class="column__subtitle">
+                  {{ row.frbr_uri }}
+                </div>
+              </div>
+              <div class="column">
+                {{ row.citation }}
+              </div>
             <!-- TODO: Establish content requirement for sublegs, then implement accordion syntax -->
             <!--            <div-->
             <!--              v-if="row.sublegs"-->
@@ -112,19 +141,20 @@
             <!--                </div>-->
             <!--              </div>-->
             <!--            </div>-->
-          </div>
-        </template>
-        <div
-          v-else
-          class="legislation-table__row"
-        >
+            </div>
+          </template>
           <div
-            class="column-caret"
-          />
-          <div
-            class="column"
+            v-else
+            class="legislation-table__row"
           >
-            No documents found
+            <div
+              class="column-caret"
+            />
+            <div
+              class="column"
+            >
+              No documents found
+            </div>
           </div>
         </div>
       </div>
@@ -141,11 +171,13 @@ export default {
     SecondaryFacets
   },
   data: () => ({
+    offCanvasFacets: null,
     facets: [],
-    showSideFilters: false,
+    showSideFacets: false,
     tableData: [],
     filteredData: [],
     q: '',
+    windowWith: window.innerWidth,
     sortableFields: {
       title: 'asc',
       citation: ''
@@ -159,13 +191,18 @@ export default {
       this.filterData();
     },
     facets () {
+      this.offCanvasFacets.hide();
       this.filterData();
     }
   },
 
   mounted () {
+    this.offCanvasFacets = new window.bootstrap.Offcanvas(this.$refs['mobile-legislation-facets-ref']);
+    window.addEventListener('resize', () => {
+      this.windowWith = window.innerWidth;
+    });
     const root = this.$el.closest('[data-vue-component="LegislationTable"]');
-    if (Object.keys(root.dataset).includes('showSideFacets')) this.showSideFilters = true;
+    if (Object.keys(root.dataset).includes('showSideFacets')) this.showSideFacets = true;
 
     // To use this component json element #legislation-table-data must be in the dom
     const tableJsonElement = document.getElementById('legislation-table');
@@ -254,7 +291,7 @@ export default {
         });
       });
 
-      if (this.showSideFilters) {
+      if (this.showSideFacets) {
         const facetDict = {};
         this.facets.forEach(facet => {
           if (!facet.value || (Array.isArray(facet.value) && !facet.value.length)) return;
