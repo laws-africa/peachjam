@@ -197,6 +197,12 @@ export default {
           value: key
         }));
       };
+      const yearsOptions = generateOptions(yearsValuesCount);
+      const taxonomyOptions = generateOptions(taxonomiesValuesCount);
+      // Sort alphabetically
+      taxonomyOptions.sort((a, b) => a.value.localeCompare(b.value));
+      // Sort descending
+      yearsOptions.sort((a, b) => b.value - a.value);
 
       this.facets = [
         {
@@ -204,14 +210,14 @@ export default {
           name: 'year',
           type: 'radio',
           value: null,
-          options: generateOptions(yearsValuesCount)
+          options: yearsOptions
         },
         {
           title: 'Taxonomies',
           name: 'taxonomies',
           type: 'checkboxes',
           value: [],
-          options: generateOptions(taxonomiesValuesCount)
+          options: taxonomyOptions
         },
         {
           title: 'Repealed',
