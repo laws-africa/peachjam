@@ -227,14 +227,6 @@ export default {
       };
       this.$emit('update:modelValue', data);
     }
-    // sortAlphabetically (items) {
-    //   const sorted = [...items];
-    //   return sorted.sort((a, b) => a.localeCompare(b));
-    // },
-    // sortDescending (items) {
-    //   const sorted = [...items];
-    //   return sorted.sort((a, b) => b - a);
-    // }
   }
 };
 </script>
