@@ -71,6 +71,7 @@ class CitationLinkSerializer(serializers.ModelSerializer):
 
 class LegislationSerializer(serializers.ModelSerializer):
     taxonomies = serializers.ReadOnlyField(source="get_taxonomies")
+    year = serializers.ReadOnlyField(source="get_year")
 
     class Meta:
         model = Legislation
@@ -79,6 +80,6 @@ class LegislationSerializer(serializers.ModelSerializer):
             "citation",
             "work_frbr_uri",
             "repealed",
-            "date",
+            "year",
             "taxonomies",
         )
