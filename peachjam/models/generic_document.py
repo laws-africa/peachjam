@@ -55,6 +55,16 @@ class Legislation(CoreDocument):
     class Meta:
         verbose_name_plural = "Legislation"
 
+    @property
+    def get_taxonomies(self):
+        return list(
+            self.taxonomies.distinct("topic").values_list("topic__name", flat=True)
+        )
+
+    @property
+    def get_year(self):
+        return self.date.year
+
     def __str__(self):
         return self.title
 

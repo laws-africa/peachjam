@@ -41,9 +41,6 @@ class LegislationListView(ListView):
             provincial_legislation_list.append(locality_dict)
 
         context["provincial_legislation_list"] = provincial_legislation_list
-
-        context["facet_data"] = {"years": self.get_years()}
-
         return context
 
     def get_years(self):
