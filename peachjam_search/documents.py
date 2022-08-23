@@ -101,8 +101,9 @@ class SearchableDocument(Document):
 
     def prepare_pages(self, instance):
         """Extract pages from PDF"""
-        if hasattr(instance, "source_file"):
-
+        if hasattr(instance, "source_file") and instance.source_file.filename.endswith(
+            ".pdf"
+        ):
             text = pdf_to_text(instance.source_file.file.path)
 
             if not text:

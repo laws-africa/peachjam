@@ -19,7 +19,6 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "jurisdiction",
             "locality",
             "citation",
-            "content",
             "expression_frbr_uri",
             "work_frbr_uri",
             "authoring_body",
@@ -27,11 +26,8 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "matter_type",
             "case_number_string",
             "court",
-            "headnote_holding",
-            "flynote",
             "judges",
             "highlight",
-            "pages",
         ]
 
     def get_highlight(self, obj):
