@@ -11,92 +11,136 @@
       </a>
     </li>
     <template
-      v-for="(facet, index) in facets"
+      v-for="(facet, index) in modelValue"
       :key="index"
     >
-      <li
-        v-if="facet.options.length"
-        class="list-group-item"
-      >
-        <div class="d-flex justify-content-between mb-2">
-          <strong>{{ facet.title }}</strong>
+      <!-- Facets with options are type radio or checkboxes -->
+      <template v-if="facet.options && facet.options.length">
+        <li
+          class="list-group-item"
+        >
+          <div class="d-flex justify-content-between mb-2">
+            <strong>{{ facet.title }}</strong>
+            <div class="d-flex align-items-center">
+              <a
+                v-if="facet.type === 'checkboxes' && facet.value.length"
+                href="#"
+                @click.prevent="clearFacet(facet.name)"
+              >
+                {{ $t('Clear') }}
+              </a>
+
+              <a
+                v-if="facet.value && facet.type !== 'checkboxes'"
+                href="#"
+                @click.prevent="clearFacet(facet.name)"
+              >
+                {{ $t('Clear') }}
+              </a>
+              <span
+                v-if="loading"
+                class="circle-loader ms-2"
+              />
+            </div>
+          </div>
+          <div class="facets-scrollable">
+            <template v-if="facet.type === 'checkboxes'">
+              <div
+                v-for="(option, optIndex) in facet.options"
+                :key="optIndex"
+                class="d-flex justify-content-between align-items-center"
+              >
+                <div
+                  class="form-check"
+                >
+                  <input
+                    :id="`${facet.name}_${optIndex}`"
+                    :value="option.value"
+                    class="form-check-input"
+                    type="checkbox"
+                    :name="facet.name"
+                    :checked="facet.value.some(value => String(value) === String(option.value))"
+                    @input="(e) => handleChange(e, facet)"
+                  >
+                  <label
+                    class="form-check-label"
+                    :for="`${facet.name}_${optIndex}`"
+                  >
+                    {{ option.label }}
+                  </label>
+                </div>
+              </div>
+            </template>
+            <template v-if="facet.type === 'radio'">
+              <div
+                v-for="(option, optIndex) in facet.options"
+                :key="optIndex"
+                class="d-flex justify-content-between align-items-center"
+              >
+                <div
+                  class="form-check"
+                >
+                  <input
+                    :id="`${facet.name}_${optIndex}`"
+                    :checked="String(facet.value) === String(option.value)"
+                    :value="option.value"
+                    class="form-check-input"
+                    type="radio"
+                    :name="facet.name"
+                    @input="(e) => handleChange(e, facet)"
+                  >
+                  <label
+                    class="form-check-label"
+                    :for="`${facet.name}_${optIndex}`"
+                  >
+                    {{ option.label }}
+                  </label>
+                </div>
+              </div>
+            </template>
+          </div>
+        </li>
+      </template>
+      <template v-if="facet.type === 'boolean'">
+        <div class="list-group-item d-flex justify-content-between mb-2">
+          <div
+            class="d-flex justify-content-between align-items-center"
+          >
+            <div
+              class="form-check"
+            >
+              <input
+                :id="facet.name"
+                :checked="facet.value"
+                class="form-check-input"
+                type="checkbox"
+                :name="facet.name"
+                @input="(e) => handleChange(e, facet)"
+              >
+              <label
+                class="form-check-label"
+                :for="facet.name"
+              >
+                {{ facet.title }}
+              </label>
+            </div>
+          </div>
           <div class="d-flex align-items-center">
             <a
-              v-if="facet.type === 'checkbox' && facet.value.length"
+              v-if="facet.value"
               href="#"
               @click.prevent="clearFacet(facet.name)"
             >
               {{ $t('Clear') }}
             </a>
 
-            <a
-              v-if="facet.value && facet.type !== 'checkbox'"
-              href="#"
-              @click.prevent="clearFacet(facet.name)"
-            >
-              {{ $t('Clear') }}
-            </a>
             <span
               v-if="loading"
               class="circle-loader ms-2"
             />
           </div>
         </div>
-        <div class="facets-scrollable">
-          <template v-if="facet.type === 'checkbox'">
-            <div
-              v-for="(option, optIndex) in facet.options"
-              :key="optIndex"
-              class="d-flex justify-content-between align-items-center"
-            >
-              <div
-                class="form-check"
-              >
-                <input
-                  :id="`${facet.name}_${optIndex}`"
-                  v-model="facet.value"
-                  :value="option.value"
-                  class="form-check-input"
-                  type="checkbox"
-                  :name="facet.name"
-                >
-                <label
-                  class="form-check-label"
-                  :for="`${facet.name}_${optIndex}`"
-                >
-                  {{ option.label }}
-                </label>
-              </div>
-            </div>
-          </template>
-          <template v-if="facet.type === 'radio'">
-            <div
-              v-for="(option, optIndex) in facet.options"
-              :key="optIndex"
-              class="d-flex justify-content-between align-items-center"
-            >
-              <div
-                class="form-check"
-              >
-                <input
-                  :id="`${facet.name}_${optIndex}`"
-                  v-model="facet.value"
-                  :value="option.value"
-                  class="form-check-input"
-                  type="radio"
-                  :name="facet.name"
-                >
-                <label
-                  class="form-check-label"
-                  :for="`${facet.name}_${optIndex}`"
-                >
-                  {{ option.label }}
-                </label>
-              </div>
-            </div>
-          </template>
-        </div>
-      </li>
+      </template>
     </template>
   </ul>
 </template>
@@ -115,14 +159,11 @@ export default {
       default: false
     }
   },
-  emits: ['clear-all', 'clear-facet', 'update:modelValue'],
-  data: () => ({
-    facets: []
-  }),
+  emits: ['update:modelValue'],
   computed: {
     showClearAllFilter () {
       return this.modelValue.some(item => {
-        if (item.type === 'checkbox') {
+        if (item.type === 'checkboxes') {
           return item.value.length;
         } else {
           return item.value;
@@ -130,30 +171,52 @@ export default {
       });
     }
   },
-  watch: {
-    value: {
-      immediate: true,
-      deep: true,
-      handler () {
-        this.facets = this.modelValue;
-      }
-    },
-    facets: {
-      deep: true,
-      handler () {
-        this.$emit('update:modelValue', this.facets);
-      }
-    }
-  },
   methods: {
+    clearSingleFacet (data, fieldName) {
+      const targetIndex = data.findIndex(facet => facet.name === fieldName);
+      if (data[targetIndex].type === 'checkboxes') {
+        data[targetIndex].value = [];
+      } else if (data[targetIndex.type === 'boolean']) {
+        data[targetIndex].value = false;
+      } else {
+        data[targetIndex].value = null;
+      }
+      return data;
+    },
     clearFacet (fieldName) {
-      const targetIndex = this.facets.findIndex(facet => facet.name === fieldName);
-      this.facets[targetIndex].value = this.facets[targetIndex].type === 'checkbox' ? [] : null;
+      const data = this.clearSingleFacet(this.modelValue, fieldName);
+      this.$emit('update:modelValue', [...data]);
     },
     clearAll () {
-      this.facets.forEach((facet, index) => {
-        this.facets[index].value = facet.type === 'checkbox' ? [] : null;
+      let data = this.modelValue;
+      this.modelValue.forEach((facet) => {
+        data = this.clearSingleFacet(data, facet.name);
       });
+      this.$emit('update:modelValue', [...data]);
+    },
+    handleChange (e, facet) {
+      const targetIndex = this.modelValue.findIndex(item => item.name === facet.name);
+      const data = [...this.modelValue];
+
+      const getValue = () => {
+        let newValue = e.target.value;
+        if (facet.type === 'boolean') {
+          newValue = e.target.checked;
+        }
+        if (facet.type === 'checkboxes') {
+          if (e.target.checked) {
+            newValue = [...data[targetIndex].value, e.target.value];
+          } else {
+            newValue = data[targetIndex].value.filter(item => String(item) !== String(e.target.value));
+          }
+        }
+        return newValue;
+      };
+      data[targetIndex] = {
+        ...data[targetIndex],
+        value: getValue()
+      };
+      this.$emit('update:modelValue', data);
     }
     // sortAlphabetically (items) {
     //   const sorted = [...items];
