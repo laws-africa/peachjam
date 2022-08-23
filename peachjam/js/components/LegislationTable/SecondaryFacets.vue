@@ -51,7 +51,7 @@
                 class="d-flex justify-content-between align-items-center"
               >
                 <div
-                  class="form-check"
+                  class="form-check flex-grow-1"
                 >
                   <input
                     :id="`${facet.name}_${optIndex}`"
@@ -69,6 +69,11 @@
                     {{ option.label }}
                   </label>
                 </div>
+                <div>
+                  <span
+                    class="badge bg-light text-dark"
+                  >{{ option.count }}</span>
+                </div>
               </div>
             </template>
             <template v-if="facet.type === 'radio'">
@@ -78,7 +83,7 @@
                 class="d-flex justify-content-between align-items-center"
               >
                 <div
-                  class="form-check"
+                  class="form-check flex-grow-1"
                 >
                   <input
                     :id="`${facet.name}_${optIndex}`"
@@ -96,13 +101,20 @@
                     {{ option.label }}
                   </label>
                 </div>
+                <div>
+                  <span
+                    class="badge bg-light text-dark"
+                  >
+                    {{ option.count }}
+                  </span>
+                </div>
               </div>
             </template>
           </div>
         </li>
       </template>
       <template v-if="facet.type === 'boolean'">
-        <div class="list-group-item d-flex justify-content-between mb-2">
+        <div class="list-group-item d-flex justify-content-between">
           <div
             class="d-flex justify-content-between align-items-center"
           >
@@ -121,19 +133,16 @@
                 class="form-check-label"
                 :for="facet.name"
               >
-                {{ facet.title }}
+                <strong>{{ facet.title }}</strong>
               </label>
             </div>
           </div>
           <div class="d-flex align-items-center">
-            <a
-              v-if="facet.value"
-              href="#"
-              @click.prevent="clearFacet(facet.name)"
+            <span
+              class="badge bg-light text-dark"
             >
-              {{ $t('Clear') }}
-            </a>
-
+              {{ facet.count }}
+            </span>
             <span
               v-if="loading"
               class="circle-loader ms-2"

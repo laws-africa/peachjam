@@ -217,7 +217,8 @@ export default {
           title: 'Repealed',
           name: 'repealed',
           type: 'boolean',
-          value: true
+          value: true,
+          count: this.filteredData.filter(item => item.repealed).length
         }
       ];
     },
