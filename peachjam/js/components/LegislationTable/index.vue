@@ -11,42 +11,12 @@
     >
       <div class="card legislation-table">
         <div class="card-header">
-          <div class="input-group">
-            <button
-              class="btn btn-outline-secondary dropdown-toggle"
-              type="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Search by {{ filters[selectedFilterKey].label }}
-            </button>
-            <ul class="dropdown-menu">
-              <li>
-                <button
-                  type="button"
-                  class="dropdown-item"
-                  @click="updateFilterBy('title')"
-                >
-                  Title
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  class="dropdown-item"
-                  @click="updateFilterBy('citation')"
-                >
-                  Numbered title
-                </button>
-              </li>
-            </ul>
-            <input
-              v-model="filters[selectedFilterKey].value"
-              type="text"
-              class="form-control"
-              placeholder="Search documents"
-            >
-          </div>
+          <input
+            v-model="q"
+            type="text"
+            class="form-control"
+            placeholder="Search documents"
+          >
         </div>
         <div
           class="legislation-table__row"
@@ -89,56 +59,72 @@
             />
           </div>
         </div>
+        <template v-if="filteredData.length">
+          <div
+            v-for="(row, index) in filteredData"
+            :key="index"
+            class="legislation-table__row"
+          >
+            <div
+              class="column-caret"
+              data-bs-toggle="collapse"
+              :data-bs-target="`#row-accordion-${index}`"
+              aria-expanded="false"
+              role="button"
+              :aria-controls="`row-accordion-${index}`"
+            >
+              <i
+                v-if="row.sublegs"
+                class="bi bi-caret-right-fill"
+              />
+              <i
+                v-if="row.sublegs"
+                class="bi bi-caret-down-fill"
+              />
+            </div>
+            <div class="column">
+              <div>
+                <a
+                  :href="`${row.work_frbr_uri}/`"
+                  target="_blank"
+                >{{ row.title }}</a>
+              </div>
+              <div class="column__subtitle">
+                {{ row.frbr_uri }}
+              </div>
+            </div>
+            <div class="column">
+              {{ row.citation }}
+            </div>
+            <!-- TODO: Establish content requirement for sublegs, then implement accordion syntax -->
+            <!--            <div-->
+            <!--              v-if="row.sublegs"-->
+            <!--              :id="`row-accordion-${index}`"-->
+            <!--              class="accordion-collapse collapse column__accordion accordion"-->
+            <!--              data-bs-parent=".legislation-table__row"-->
+            <!--            >-->
+            <!--              <div class="accordion-body">-->
+            <!--                <div-->
+            <!--                  v-for="(leg, subleg_index) in row.sublegs"-->
+            <!--                  :key="subleg_index"-->
+            <!--                >-->
+            <!--                  {{ leg.title }}-->
+            <!--                </div>-->
+            <!--              </div>-->
+            <!--            </div>-->
+          </div>
+        </template>
         <div
-          v-for="(row, index) in filteredData"
-          :key="index"
+          v-else
           class="legislation-table__row"
         >
           <div
             class="column-caret"
-            data-bs-toggle="collapse"
-            :data-bs-target="`#row-accordion-${index}`"
-            aria-expanded="false"
-            role="button"
-            :aria-controls="`row-accordion-${index}`"
-          >
-            <i
-              v-if="row.sublegs"
-              class="bi bi-caret-right-fill"
-            />
-            <i
-              v-if="row.sublegs"
-              class="bi bi-caret-down-fill"
-            />
-          </div>
-          <div class="column">
-            <div>
-              <a
-                href="#"
-                target="_blank"
-              >{{ row.title }}</a>
-            </div>
-            <div class="column__subtitle">
-              {{ row.frbr_uri }}
-            </div>
-          </div>
-          <div class="column">
-            {{ row.citation }}
-          </div>
+          />
           <div
-            v-if="row.sublegs"
-            :id="`row-accordion-${index}`"
-            class="accordion-collapse collapse column__accordion accordion"
-            data-bs-parent=".legislation-table__row"
+            class="column"
           >
-            <div class="accordion-body">
-              <div
-                v-for="(leg, subleg_index) in row.sublegs"
-                :key="subleg_index"
-              >
-                {{ leg.title }}
-              </div>
-            </div>
+            No documents found
           </div>
         </div>
       </div>
@@ -159,35 +145,21 @@ export default {
     showSideFilters: false,
     tableData: [],
     filteredData: [],
-    selectedFilterKey: 'title',
-    filters: {
-      title: {
-        label: 'title',
-        value: ''
-      },
-      citation: {
-        label: 'numbered title',
-        value: ''
-      }
-
-    },
+    q: '',
     sortableFields: {
       title: 'asc',
       citation: ''
     }
   }),
   watch: {
-    filters: {
-      deep: true,
-      handler () {
-        this.filterData();
-      }
+    q () {
+      this.filterData();
     },
-    sortableFields: {
-      deep: true,
-      handler () {
-        this.filterData();
-      }
+    sortableFields () {
+      this.filterData();
+    },
+    facets () {
+      this.filterData();
     }
   },
 
@@ -197,39 +169,57 @@ export default {
 
     // To use this component json element #legislation-table-data must be in the dom
     const tableJsonElement = document.getElementById('legislation-table');
-    const facetDataElement = document.getElementById('facet-data');
     this.tableData = JSON.parse(tableJsonElement.textContent);
-    const facetData = JSON.parse(facetDataElement.textContent);
-    this.facets = [
-      {
-        title: 'Taxonomies',
-        type: 'checkbox',
-        name: 'taxonomies',
-        value: [],
-        options: facetData.taxonomies.map(taxonomy => ({
-          label: taxonomy,
-          value: taxonomy
-        }))
-      },
-
-      {
-        title: 'Years',
-        type: 'radio',
-        name: 'years',
-        value: null,
-        options: facetData.years.map(year => ({
-          label: year,
-          value: year
-        }))
-      }
-    ];
     this.filterData();
+    this.setFacets();
   },
 
   methods: {
-    updateFilterBy (field) {
-      Object.keys(this.filters).forEach(key => { this.filters[key].value = ''; });
-      this.selectedFilterKey = field;
+    setFacets () {
+      const yearsValuesCount = {};
+      const resultsWithYears = this.filteredData.filter(item => item.year);
+      resultsWithYears.forEach(result => {
+        yearsValuesCount[result.year] = (yearsValuesCount[result.year] || 0) + 1;
+      });
+
+      const taxonomiesValuesCount = {};
+      const resultsWithTaxonomies = this.filteredData.filter(item => item.taxonomies.length);
+      resultsWithTaxonomies.forEach(item => {
+        item.taxonomies.forEach(taxonomy => {
+          taxonomiesValuesCount[taxonomy] = (taxonomiesValuesCount[taxonomy] || 0) + 1;
+        });
+      });
+
+      const generateOptions = (count) => {
+        return Object.keys(count).map(key => ({
+          label: key,
+          count: count[key],
+          value: key
+        }));
+      };
+
+      this.facets = [
+        {
+          title: 'Years',
+          name: 'year',
+          type: 'radio',
+          value: null,
+          options: generateOptions(yearsValuesCount)
+        },
+        {
+          title: 'Taxonomies',
+          name: 'taxonomies',
+          type: 'checkboxes',
+          value: [],
+          options: generateOptions(taxonomiesValuesCount)
+        },
+        {
+          title: 'Repealed',
+          name: 'repealed',
+          type: 'boolean',
+          value: true
+        }
+      ];
     },
     updateSort (field) {
       let newSortValue;
@@ -251,9 +241,31 @@ export default {
     filterData () {
       let data = [...this.tableData];
       data = data.filter(item => {
-        const fieldValue = item[this.selectedFilterKey] || '';
-        return fieldValue.toLowerCase().includes(this.filters[this.selectedFilterKey].value.toLowerCase());
+        return ['title', 'citation'].some(key => {
+          const value = item[key] || '';
+          return value.toLowerCase().includes(this.q.toLowerCase());
+        });
       });
+
+      if (this.showSideFilters) {
+        const facetDict = {};
+        this.facets.forEach(facet => {
+          if (!facet.value || (Array.isArray(facet.value) && !facet.value.length)) return;
+          facetDict[facet.name] = facet.value;
+        });
+        Object.keys(facetDict).forEach(key => {
+          data = data.filter(item => {
+            if (Array.isArray(facetDict[key])) {
+              const arr1 = facetDict[key].map(x => String(x));
+              const arr2 = item[key].map(x => String(x));
+              return arr1.some(item => arr2.includes(item));
+            } else {
+              return String(item[key]) === String(facetDict[key]);
+            }
+          });
+        });
+      }
+
       Object.keys(this.sortableFields).forEach(key => {
         if (this.sortableFields[key]) {
           data.sort((a, b) => {
