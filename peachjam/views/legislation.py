@@ -26,7 +26,7 @@ class LegislationDetailView(BaseDocumentDetailView):
     def get_notices(self):
         notices = super().get_notices()
         repeal = self.get_repeal_info()
-        friendly_type = self.object.metadata_json["type_name"]
+        friendly_type = self.object.metadata_json.get("type_name", None)
 
         if self.object.repealed and repeal:
             msg = "This {} was repealed on {} by <a href='{}'>{}</a>."
