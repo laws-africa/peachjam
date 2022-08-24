@@ -24,7 +24,48 @@
 </template>
 
 <script>
-// TODO: This will replace ListFacets. Testing for now in LegislationTable
+/**
+ *  TODO: This will replace ListFacets. Testing for now in LegislationTable
+ *  Sample data shape for v-model of this component
+ * {
+ *     type: 'radio',
+ *     name: 'radio',
+ *     title: 'Radio options',
+ *     value: 'radio-option-one',
+ *     options: [
+ *       {
+ *         label: 'Radio option 1',
+ *         value: 'radio-option-one'
+ *       },
+ *       {
+ *         label: 'Radio option 2',
+ *         value: 'radio-option-two'
+ *       }
+ *     ]
+ *   },
+ *   {
+ *     type: 'checkboxes',
+ *     name: 'checkbox',
+ *     title: 'Checkbox options',
+ *     value: 'checkbox-option-one',
+ *     options: [
+ *       {
+ *         label: 'Checkbox option 1',
+ *         value: 'checkbox-option-one'
+ *       },
+ *       {
+ *         label: 'Checkbox option 2',
+ *         value: 'checkbox-option-two'
+ *       }
+ *     ]
+ *   },
+ *   {
+ *     type: 'boolean',
+ *     name: 'boolean',
+ *     title: 'Boolean',
+ *     value: false
+ *   }
+ * **/
 import SingleFacet from './SingleFacet.vue';
 export default {
   name: 'SecondaryFacets',
@@ -100,6 +141,7 @@ export default {
     }
   }
 };
+
 </script>
 
 <style scoped>
