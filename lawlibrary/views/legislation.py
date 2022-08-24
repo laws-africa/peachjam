@@ -75,6 +75,7 @@ class ProvincialLegislationListView(ListView):
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
         context["facet_data"] = {"years": self.get_years()}
+        context["locality"] = Locality.objects.get(code=self.kwargs["code"])
 
         return context
 
