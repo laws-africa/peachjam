@@ -133,6 +133,8 @@ class LegislationDetailView(BaseDocumentDetailView):
                 {
                     "date": work["publication_date"],
                     "event": "publication",
+                    "publication_name": work["publication_name"] or None,
+                    "publication_number": work["publication_number"] or None,
                 }
             )
 
@@ -179,7 +181,8 @@ class LegislationDetailView(BaseDocumentDetailView):
             for e in event["events"]:
                 del e["date"]
             uri = expressions.get(event["date"], {}).get("expression_frbr_uri")
-            event["expression_frbr_uri"] = uri
+            if uri:
+                event["expression_frbr_uri"] = uri
 
         events.sort(key=lambda event: event["date"], reverse=True)
 
