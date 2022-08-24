@@ -22,6 +22,7 @@ class PdfRenderer {
   protected pdfContentMarks: any[];
   private readonly pdfSize: string | undefined;
   public onPreviewPanelClick: () => void;
+  public onPdfLoaded: () => void;
   constructor (root: HTMLElement) {
     this.root = root;
     this.pdf = root.dataset.pdf;
@@ -33,6 +34,8 @@ class PdfRenderer {
     this.root.addEventListener('preview-panel-clicked', () => {
       this.onPreviewPanelClick();
     });
+    this.onPdfLoaded = () => {};
+    this.root.addEventListener('pdf-loaded', () => this.onPdfLoaded());
 
     const observer = new MutationObserver(() => {
       const progressBarElement: HTMLElement | null = root.querySelector('.progress-bar');
@@ -46,6 +49,7 @@ class PdfRenderer {
     this.setupPdfAndPreviewPanels().then(() => {
       this.root.removeAttribute('data-loading-progress');
       this.root.removeAttribute('data-pdf-loading');
+      this.root.dispatchEvent(new CustomEvent('pdf-loaded'));
 
       const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-content__page'));
       const previewPanels = Array.from(root.querySelectorAll('.preview-panel'));
@@ -54,20 +58,16 @@ class PdfRenderer {
       }
 
       window.addEventListener('scroll', debounce(() => {
-        if (this.scrollListenerActive) {
-          let current: HTMLElement | null;
-          for (const page of pages) {
-            if (window.scrollY >= page.offsetTop) {
-              current = root.querySelector(`.preview-panel[data-page="${page.dataset.page}"]`);
-              if (current) {
-                this.activatePreviewPanel(current);
-                const scrollableContainer = this.root.querySelector('[data-preview-scroll-container]');
-                if (scrollableContainer) {
-                  scrollableContainer.scrollTop = (current.offsetTop + current.clientHeight) - (current.offsetHeight * 2);
-                }
-              }
-            }
-          }
+        if (!this.scrollListenerActive) return;
+        let current: HTMLElement | null;
+        for (const page of pages) {
+          if (!(window.scrollY >= page.offsetTop)) return;
+          current = root.querySelector(`.preview-panel[data-page="${page.dataset.page}"]`);
+          if (!current) return;
+          this.activatePreviewPanel(current);
+          const scrollableContainer = this.root.querySelector('[data-preview-scroll-container]');
+          if (!scrollableContainer) return;
+          scrollableContainer.scrollTop = (current.offsetTop + current.clientHeight) - (current.offsetHeight * 2);
         }
       }, 20));
     });
@@ -86,18 +86,26 @@ class PdfRenderer {
 
   handlePreviewPanelClick (e: Event) {
     this.root.dispatchEvent(new CustomEvent('preview-panel-clicked'));
-    const targetPage = e.currentTarget && e.currentTarget instanceof HTMLElement
-      ? this.root.querySelector(`.pdf-content__page[data-page="${e.currentTarget.dataset.page}"]`)
-      : null;
-    if (e.currentTarget) {
-      this.activatePreviewPanel(e.currentTarget);
-    }
-    if (targetPage) {
-      this.scrollListenerActive = false;
-      scrollToElement(targetPage as HTMLElement).then(() => {
-        this.scrollListenerActive = true;
-      });
-    }
+    if (!e.currentTarget) return;
+    this.activatePreviewPanel(e.currentTarget);
+    if (!(e.currentTarget instanceof HTMLElement)) return;
+    this.scrollToPage(e.currentTarget.dataset.page);
+  }
+
+  scrollToPage (pageNumber: string | number | undefined) {
+    const targetPage = this.root.querySelector(`.pdf-content__page[data-page="${pageNumber}"]`);
+    if (!targetPage) return;
+    this.scrollListenerActive = false;
+    scrollToElement(targetPage as HTMLElement).then(() => {
+      this.scrollListenerActive = true;
+    });
+  }
+
+  triggerScrollToPage (pageNumber: string | number) {
+    const panel = this.root.querySelector(`.preview-panel[data-page='${pageNumber}']`);
+    if (!panel) return;
+    this.activatePreviewPanel(panel);
+    this.scrollToPage(pageNumber);
   }
 
   async setupPdfAndPreviewPanels () {
