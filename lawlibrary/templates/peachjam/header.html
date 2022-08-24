@@ -14,4 +14,9 @@
       {% trans 'Judgments' %}
     </a>
   </li>
+  <li class="nav-item">
+    <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="{% url 'legislation_list' %}">
+      {% trans 'Legislation' %}
+    </a>
+  </li>
 {% endblock %}
