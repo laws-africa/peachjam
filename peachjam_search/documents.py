@@ -101,20 +101,21 @@ class SearchableDocument(Document):
 
     def prepare_pages(self, instance):
         """Extract pages from PDF"""
-        if hasattr(instance, "source_file") and instance.source_file.filename.endswith(
-            ".pdf"
-        ):
-            text = pdf_to_text(instance.source_file.file.path)
+        if not instance.content_html:
+            if hasattr(
+                instance, "source_file"
+            ) and instance.source_file.filename.endswith(".pdf"):
+                text = pdf_to_text(instance.source_file.file.path)
 
-            if not text:
-                raise ValueError(
-                    f"Couldn't any text to search for the pdf text for {instance}"
-                )
-            page_texts = text.split("\x0c")
-            pages = []
-            for i, page in enumerate(page_texts):
-                i = i + 1
-                page = page.strip()
-                if page:
-                    pages.append({"page_num": i, "body": page})
-            return pages
+                if not text:
+                    raise ValueError(
+                        f"Couldn't index any text to search in the pdf for {instance}"
+                    )
+                page_texts = text.split("\x0c")
+                pages = []
+                for i, page in enumerate(page_texts):
+                    i = i + 1
+                    page = page.strip()
+                    if page:
+                        pages.append({"page_num": i, "body": page})
+                return pages
