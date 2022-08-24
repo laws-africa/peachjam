@@ -164,6 +164,7 @@
 
 <script>
 import SecondaryFacets from './SecondaryFacets.vue';
+import debounce from 'lodash/debounce';
 
 export default {
   name: 'LegislationTable',
@@ -195,12 +196,13 @@ export default {
       this.filterData();
     }
   },
+  beforeUnmount () {
+    window.removeEventListener('resize', this.setWindowWidth);
+  },
 
   mounted () {
     this.offCanvasFacets = new window.bootstrap.Offcanvas(this.$refs['mobile-legislation-facets-ref']);
-    window.addEventListener('resize', () => {
-      this.windowWith = window.innerWidth;
-    });
+    window.addEventListener('resize', this.setWindowWidth);
     const root = this.$el.closest('[data-vue-component="LegislationTable"]');
     if (Object.keys(root.dataset).includes('showSideFacets')) this.showSideFacets = true;
 
@@ -212,6 +214,9 @@ export default {
   },
 
   methods: {
+    setWindowWidth: debounce(function () {
+      this.windowWith = window.innerWidth;
+    }, 100),
     setFacets () {
       const yearsValuesCount = {};
       const resultsWithYears = this.filteredData.filter(item => item.year);
