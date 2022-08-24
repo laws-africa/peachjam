@@ -20,8 +20,9 @@
                   </div>
                 </div>
               {% endfor %}
+
             {% else %}
-              <div>No provincial legislations found</div>
+              <div>{% trans 'No provincial legislation found' %}</div>
             {% endif %}
           </div>
           {% endfor %}
@@ -33,4 +34,3 @@
   </div>
 </section>
 {% endblock %}
-
