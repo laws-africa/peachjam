@@ -67,10 +67,8 @@ class ProvincialLegislationListView(ListView):
             .distinct("work_frbr_uri")
             .order_by("work_frbr_uri", "-date")
         )
-        years = qs.values_list("date__year", flat=True)
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
-        context["facet_data"] = {"years": sorted(years, reverse=True)}
         context["locality"] = self.locality
 
         return context
