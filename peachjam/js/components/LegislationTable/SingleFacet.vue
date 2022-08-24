@@ -1,5 +1,4 @@
 <template>
-  <!-- Facets with options are type radio or checkboxes -->
   <template v-if="facet.options && facet.options.length">
     <li
       class="list-group-item"
