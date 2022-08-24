@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 
 from peachjam.models import Legislation, Locality
@@ -53,12 +54,16 @@ class ProvincialLegislationListView(ListView):
     template_name = "lawlibrary/provincial_legislation_list.html"
     context_object_name = "documents"
 
+    def get(self, request, *args, **kwargs):
+        self.locality = get_object_or_404(Locality, code=self.kwargs["code"])
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         qs = (
             self.get_queryset()
-            .filter(locality__code=self.kwargs["code"])
+            .filter(locality=self.locality)
             .distinct("work_frbr_uri")
             .order_by("work_frbr_uri", "-date")
         )
@@ -66,6 +71,6 @@ class ProvincialLegislationListView(ListView):
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
         context["facet_data"] = {"years": sorted(years, reverse=True)}
-        context["locality"] = Locality.objects.get(code=self.kwargs["code"])
+        context["locality"] = self.locality
 
         return context
