@@ -2,6 +2,7 @@ import logging
 
 from background_task import background
 from django.apps import apps
+from django_elasticsearch_dsl.apps import DEDConfig
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.signals import (
     BaseSignalProcessor,
@@ -19,9 +20,11 @@ class BackgroundTaskSearchProcessor(RealTimeSignalProcessor):
     """
 
     def handle_save(self, sender, instance, **kwargs):
-        if instance.__class__ in registry._models:
-            if not kwargs.get("raw"):
-                search_model_saved(sender._meta.label, instance.pk)
+        if not DEDConfig.autosync_enabled():
+            return
+
+        if instance.__class__ in registry._models and not kwargs.get("raw"):
+            search_model_saved(sender._meta.label, instance.pk)
 
 
 def get_processor():
