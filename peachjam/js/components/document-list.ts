@@ -9,12 +9,13 @@ class DocumentList {
     const mountTargets: HTMLElement[] = Array.from(root.querySelectorAll('[data-list-facets]'));
     const facetDataJsonElement = root.querySelector('#facet-data');
 
-    let alphabet: FacetType, years: FacetType, authors: FacetType, docTypes: FacetType;
+    let alphabet: FacetType, years: FacetType, authors: FacetType, docTypes: FacetType, judges: FacetType;
     if (facetDataJsonElement && facetDataJsonElement.textContent) {
       alphabet = JSON.parse(facetDataJsonElement.textContent).alphabet;
       years = JSON.parse(facetDataJsonElement.textContent).years;
       docTypes = JSON.parse(facetDataJsonElement.textContent).doc_types;
       authors = JSON.parse(facetDataJsonElement.textContent).authors;
+      judges = JSON.parse(facetDataJsonElement.textContent).judges;
 
       // Treaties and protocols don't have associated authors
       if (window.location.href.includes('/legislation/')) {
@@ -29,7 +30,8 @@ class DocumentList {
           alphabet,
           years,
           authors,
-          docTypes
+          docTypes,
+          judges
         },
         use: [i18n],
         mountTarget

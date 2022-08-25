@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-13 15:55+0300\n"
-"PO-Revision-Date: 2022-07-13 14:39\n"
+"POT-Creation-Date: 2022-08-22 15:05+0200\n"
+"PO-Revision-Date: 2022-08-22 13:13\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -17,17 +17,57 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 50\n"
 
-#: settings.py:185
+#: settings.py:193
 msgid "English"
 msgstr "Anglais"
 
-#: settings.py:186
+#: settings.py:194
 msgid "French"
 msgstr "Français"
 
-#: settings.py:187
+#: settings.py:195
 msgid "Swahili"
 msgstr "Swahili"
+
+#: templates/account/base.html:16
+msgid "Need help? Please email <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
+msgstr "Besoin d'aide ? Veuillez envoyer un e-mail à <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
+
+#: templates/account/login.html:5
+#| msgid "Log Out"
+msgid "Log In"
+msgstr "Se connecter"
+
+#: templates/account/login.html:13 templates/account/login.html:58
+#: templates/account/password_reset_from_key.html:57
+#: templates/account/password_reset_from_key_done.html:10
+#: templates/admin/login.html:63
+#| msgid "Log Out"
+msgid "Log in"
+msgstr "Se connecter"
+
+#: templates/account/login.html:30 templates/account/password_reset.html:18
+msgid "Email address"
+msgstr "Adresse e-mail"
+
+#: templates/account/login.html:42
+#| msgid "Reset Password"
+msgid "Password"
+msgstr "Mot de passe"
+
+#: templates/account/login.html:45
+#| msgid "Reset Your Password"
+msgid "Forgot your password?"
+msgstr "Mot de passe oublié ?"
+
+#: templates/account/login.html:76
+#, python-format
+msgid "\n"
+"            Log in with %(provider.name)s\n"
+"          "
+msgstr "\n"
+"            Connectez-vous à %(provider.name)s\n"
+"          "
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:17
@@ -42,11 +82,22 @@ msgstr "Êtes-vous sûr de vouloir vous déconnecter ?"
 msgid "Reset Your Password"
 msgstr "Réinitialiser votre mot de passe"
 
+#: templates/account/password_reset.html:12
+msgid "Forgotten your password? Enter your e-mail address below, and we"
+msgstr "Vous avez oublié votre mot de passe ? Entrez votre adresse e-mail ci-dessous, et nous"
+
+#: templates/account/password_reset.html:30
+#: templates/account/password_reset_from_key.html:51
+#| msgid "Reset Password"
+msgid "Reset password"
+msgstr "Réinitialiser le mot de passe"
+
 #: templates/account/password_reset_from_key.html:7
 msgid "Bad Token"
 msgstr "Mauvais jeton"
 
 #: templates/account/password_reset_from_key.html:7
+#: templates/account/password_reset_from_key_done.html:7
 msgid "Reset Password"
 msgstr "Réinitialiser le mot de passe"
 
@@ -55,13 +106,284 @@ msgstr "Réinitialiser le mot de passe"
 msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
 msgstr "Le lien de réinitialisation du mot de passe n'est pas valide, peut-être parce qu'il a déjà été utilisé. Veuillez demander une <a href=\"%(passwd_reset_url)s\">nouvelle réinitialisation du mot de passe</a>."
 
+#: templates/account/password_reset_from_key.html:27
+#| msgid "Reset Password"
+msgid "New Password"
+msgstr "Nouveau mot de passe"
+
+#: templates/account/password_reset_from_key.html:39
+msgid "New Password (again)"
+msgstr "Nouveau mot de passe (encore)"
+
 #: templates/account/password_reset_from_key.html:56
 msgid "Your password is now reset."
 msgstr "Votre mot de passe est maintenant réinitialisé."
 
-#: templates/peachjam/_recent_document_list.html:13
+#: templates/account/password_reset_from_key_done.html:4
+#| msgid "Reset Password"
+msgid "Change Password"
+msgstr "Changer le mot de passe"
+
+#: templates/account/password_reset_from_key_done.html:8
+#| msgid "Your password is now reset."
+msgid "Your password has been reset."
+msgstr "Votre mot de passe a été réinitialisé."
+
+#: templates/admin/login.html:23
+msgid "Please correct the error below."
+msgstr "Veuillez corriger l'erreur ci-dessous."
+
+#: templates/admin/login.html:23
+msgid "Please correct the errors below."
+msgstr "Veuillez corriger les erreurs ci-dessous."
+
+#: templates/admin/login.html:39
+#, python-format
+msgid "You are authenticated as %(username)s, but are not authorized to access this page. Would you like to login to a different account?"
+msgstr "Vous êtes authentifié en tant que %(username)s, mais vous n'êtes pas autorisé à accéder à cette page. Souhaitez-vous vous connecter à un autre compte ?"
+
+#: templates/admin/login.html:59
+msgid "Forgotten your password or username?"
+msgstr "Vous avez oublié votre mot de passe ou votre nom d'utilisateur ?"
+
+#: templates/admin/peachjam_document_relationships.html:6
+#: templates/peachjam/home.html:3
+msgid "Home"
+msgstr "Accueil"
+
+#: templates/admin/peachjam_document_relationships.html:10
+msgid "Relationships"
+msgstr "Relations"
+
+#: templates/peachjam/_author_detail.html:8
+#, python-format
+msgid " Documents by %(author)s "
+msgstr " Documents par %(author)s "
+
+#: templates/peachjam/_document_table.html:6
+msgid "Title"
+msgstr "Titre de la page"
+
+#: templates/peachjam/_document_table.html:7
+#: templates/peachjam/layouts/document_detail.html:49
+#: templates/peachjam/legislation_detail.html:10
+msgid "Date"
+msgstr "Date"
+
+#: templates/peachjam/_document_table.html:9
+msgid "Document Type"
+msgstr "Type de document"
+
+#: templates/peachjam/_document_table.html:11
+msgid "Regional Body"
+msgstr "Corps régional"
+
+#: templates/peachjam/_pagination.html:6
+msgid "first"
+msgstr "premier"
+
+#: templates/peachjam/_pagination.html:7
+msgid "previous"
+msgstr "Précédent"
+
+#: templates/peachjam/_pagination.html:11
+msgid "Page"
+msgstr "Page"
+
+#: templates/peachjam/_pagination.html:15
+msgid "next"
+msgstr "suivant"
+
+#: templates/peachjam/_pagination.html:16
+msgid "last"
+msgstr "dernier"
+
+#: templates/peachjam/_recent_document_list.html:16
+#: templates/peachjam/layouts/document_list.html:51
 msgid "No documents found."
 msgstr "Aucun document trouvé."
+
+#: templates/peachjam/about.html:4
+msgid "About"
+msgstr "À propos de"
+
+#: templates/peachjam/about.html:9
+msgid "About the platform"
+msgstr "À propos de la plateforme"
+
+#: templates/peachjam/about.html:11
+msgid "\n"
+"          This Pan-African platform serves as an information clearinghouse on all aspects of the African Governance\n"
+"          Architecture (AGA) agenda, including charters, protocols, communications, relevant legal decisions, policy,\n"
+"          implementation, monitoring, and related material. The overall objective is to build effective collaboration\n"
+"          between African citizens and civil society organisations on the one hand, and AGA members on the other, to\n"
+"          strengthen implementation of the AGA platform’s agenda with respect to democracy, governance, and human rights.\n"
+"          Our specific goals are to:\n"
+"        "
+msgstr "\n"
+"Cette plateforme panafricaine sert de centre d'échange d'informations sur tous les aspects de l'agenda de l'Architecture africaine de gouvernance (AGA), y compris les chartes, les protocoles, les communications, les décisions juridiques pertinentes, la politique, la mise en œuvre, le suivi et le matériel connexe. L'objectif global est d'établir une collaboration efficace entre les citoyens africains et les organisations de la société civile d'une part, et les membres de l'AGA d'autre part, afin de renforcer la mise en œuvre de l'agenda de la plateforme AGA en matière de démocratie, de gouvernance et de droits de l'homme. Nos objectifs spécifiques sont les suivants :        "
+
+#: templates/peachjam/about.html:22
+msgid "\n"
+"            Increase overall awareness of the AGA agenda and popular perceptions about democracy, governance and human\n"
+"            rights among civil society organisations (CSOs) and AGA members\n"
+"          "
+msgstr "\n"
+"            Augmentez la sensibilisation générale au programme AGA et aux perceptions populaires sur la démocratie, la gouvernance et les droits de l'homme\n"
+"            parmi les organisations de la société civile (OSC) et les membres de l'AGA\n"
+"          "
+
+#: templates/peachjam/about.html:28
+msgid "\n"
+"            Supply complete, accurate and re-usable AGA information to allow AGA and CSOs to work towards shared goals\n"
+"          "
+msgstr "\n"
+"            Fournissez des informations AGA complètes, précises et réutilisables pour permettre à AGA et aux OSC de travailler dans le sens d'objectifs partagés\n"
+"          "
+
+#: templates/peachjam/about.html:33
+msgid "\n"
+"            Capacitate civil society on all levels to access, interpret and effectively use AGA information\n"
+"          "
+msgstr "\n"
+"            Donner à la société civile, à tous les niveaux, les moyens d'accéder aux informations de l'AGA, de les interpréter et de les utiliser efficacement\n\n"
+"          "
+
+#: templates/peachjam/about.html:38
+msgid "\n"
+"            Strengthen monitoring, develop insights, and improve national-level implementation by developing linkages\n"
+"            between regional and member-states’ law and policy.\n"
+"          "
+msgstr "\n"
+"            Renforcer la surveillance, développer des idées et améliorer la mise en œuvre au niveau national en développant des liaisons\n"
+"            entre la loi et la politique des états régionaux et membres.\n"
+"          "
+
+#: templates/peachjam/about.html:45
+msgid "\n"
+"          This platform is developed and maintained jointly by <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> with funds from the European Union,\n"
+"          the Indigo Trust and the Sigrid Rausing Trust. The initial phase of the project runs from 2021 to 2024.\n"
+"        "
+msgstr "\n"
+"          Cette plateforme est développée et maintenue conjointement par <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> avec des fonds de l'Union européenne, de l'Indigo Trust et du Sigrid Rausing Trust. La phase initiale du projet s'étend de 2021 à 2024.\n\n"
+"        "
+
+#: templates/peachjam/about.html:53
+msgid "Platform developers"
+msgstr "Développeurs de plateformes"
+
+#: templates/peachjam/about.html:56
+msgid "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University\n"
+"          of Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> helps governments, academia and non-profit organisations publish the law of African\n"
+"          countries for sustainable open access. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> hosts curated collections on various subjects of African law,\n"
+"          such as human rights, the environment, commercial law and finance.\n"
+"        "
+msgstr "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> est un programme de l'unité \"Gouvernance démocratique et droits\" du département de droit public de l'université du Cap. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII </a>aide les gouvernements, les universités et les organisations à but non lucratif à publier le droit des pays africains en accès libre durable. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII </a>héberge des collections sélectionnées sur divers sujets de droit africain, tels que les droits de l'homme, l'environnement, le droit commercial et la finance.\n\n"
+"        "
+
+#: templates/peachjam/about.html:64
+msgid "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> convenes a network of 16 African LIIs - a collaborative group of governments, organizations, and\n"
+"          individuals in Africa, dedicated to free access to law on our continent.\n"
+"        "
+msgstr "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> réunit un réseau de 16 IIL africaines - un groupe collaboratif de gouvernements, d'organisations et de particuliers en Afrique, qui se consacre au libre accès au droit sur notre continent.\n\n"
+"        "
+
+#: templates/peachjam/about.html:70
+msgid "\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> helps African governments to sustainably digitise their legal information for public use, through open\n"
+"          law software, capacity-building, training, partnerships and support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions\n"
+"          lower the cost of digitisation, archival and publication of primary legal information, and create opportunities for\n"
+"          rich interactivity, advanced research and justice sector innovation.\n"
+"        "
+msgstr "\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> aide les gouvernements africains à numériser durablement leurs informations juridiques à des fins d'utilisation publique, grâce à des logiciels de droit ouvert, au renforcement des capacités, à la formation, aux partenariats et au soutien. Les solutions technologiques de droit ouvert de <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> réduisent le coût de la numérisation, de l'archivage et de la publication des informations juridiques primaires, et créent des opportunités pour une riche interactivité, une recherche avancée et une innovation dans le secteur de la justice.\n\n"
+"        "
+
+#: templates/peachjam/about.html:78
+msgid "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborate in unlocking the value of African digital legal information in support\n"
+"          of the rule of law, access to justice, and innovation.\n"
+"        "
+msgstr "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborent pour libérer la valeur de l'information juridique numérique africaine afin de soutenir l'État de droit, l'accès à la justice et l'innovation.        "
+
+#: templates/peachjam/about.html:84
+msgid "Find out more"
+msgstr "En savoir plus"
+
+#: templates/peachjam/about.html:86
+msgid "\n"
+"          Visit <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a>\n"
+"          or contact us on <a href=\"mailto:info@laws.africa\">info@laws.africa</a> for more information.\n"
+"        "
+msgstr "\n"
+"          Visitez <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a>\n"
+"          ou contactez-nous à <a href=\"mailto:info@laws.africa\">info@laws.africa</a> pour plus d'informations.\n"
+"        "
+
+#: templates/peachjam/about.html:98
+msgid "Our partners"
+msgstr "Nos partenaires"
+
+#: templates/peachjam/generic_document_list.html:4
+msgid "Generic Document List"
+msgstr "Liste de documents génériques"
+
+#: templates/peachjam/generic_document_list.html:7
+msgid "AU Documents"
+msgstr "Documents de l'UA"
+
+#: templates/peachjam/header.html:55
+msgid "Logout"
+msgstr "Déconnexion"
+
+#: templates/peachjam/judgment_list.html:4
+#: templates/peachjam/judgment_list.html:7
+msgid "Judgment List"
+msgstr "Liste des juges"
+
+#: templates/peachjam/layouts/document_detail.html:36
+msgid "Jurisdiction"
+msgstr "Juridiction"
+
+#: templates/peachjam/layouts/document_detail.html:43
+msgid "Author"
+msgstr "Auteur"
+
+#: templates/peachjam/layouts/document_detail.html:69
+#: templates/peachjam/legislation_detail.html:8
+msgid "Language"
+msgstr "Langue"
+
+#: templates/peachjam/layouts/document_detail.html:101
+msgid "This document"
+msgstr "Ce document"
+
+#: templates/peachjam/layouts/document_detail.html:118
+msgid "Related documents"
+msgstr "Documents connexes"
+
+#: templates/peachjam/layouts/document_list.html:24
+msgid "Documents"
+msgstr "Documents"
+
+#: templates/peachjam/legal_instrument_list.html:4
+msgid "Legal Instrument List"
+msgstr "Liste d'instruments légaux"
+
+#: templates/peachjam/legal_instrument_list.html:7
+msgid "Treaties and Protocols List"
+msgstr "Liste des traités et protocoles"
+
+#: templates/peachjam/legislation_list.html:4
+#: templates/peachjam/legislation_list.html:7
+msgid "Legislation List"
+msgstr "Liste des législations"
 
 #~ msgid "Welcome to Peach Jam"
 #~ msgstr "Bienvenue dans Peach Jam"

@@ -3,6 +3,7 @@ import PdfRenderer from './pdf-renderer';
 import { RelationshipEnrichments } from './RelationshipEnrichment';
 import DocumentList from './document-list';
 import DocumentContent from './document-content';
+import NavigationSelect from './navigation-select';
 
 const components: Record<string, any> = {
   // Data components
@@ -10,6 +11,7 @@ const components: Record<string, any> = {
   DocumentList,
   RelationshipEnrichments,
   DocumentContent,
+  NavigationSelect,
   // Vue components
   FindDocuments
 };

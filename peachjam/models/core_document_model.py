@@ -45,6 +45,12 @@ class Work(models.Model):
         return f"{self.frbr_uri} - {self.title}"
 
 
+class CoreDocumentQuerySet(models.QuerySet):
+    def latest_expression(self):
+        """Select only the most recent expression for documents with the same frbr_uri."""
+        return self.distinct("work_frbr_uri").order_by("work_frbr_uri", "-date")
+
+
 class CoreDocument(models.Model):
     DOC_TYPE_CHOICES = (
         ("core_document", "Core Document"),
@@ -53,6 +59,8 @@ class CoreDocument(models.Model):
         ("legal_instrument", "Legal Instrument"),
         ("judgment", "Judgment"),
     )
+
+    objects = CoreDocumentQuerySet.as_manager()
 
     work = models.ForeignKey(
         Work, null=False, on_delete=models.PROTECT, related_name="documents"
@@ -137,14 +145,15 @@ class CoreDocument(models.Model):
         return self._meta.get_fields()
 
     def get_absolute_url(self):
-        return f"{self.expression_frbr_uri}/"
+        return self.expression_frbr_uri
 
     def clean(self):
         super().clean()
+        frbr_uri = self.generate_work_frbr_uri()
         try:
-            FrbrUri.parse(self.generate_work_frbr_uri())
+            FrbrUri.parse(frbr_uri)
         except ValueError:
-            raise ValidationError("Invalid FRBR URI")
+            raise ValidationError("Invalid FRBR URI: " + frbr_uri)
 
     def generate_expression_frbr_uri(self):
         frbr_uri = FrbrUri.parse(self.work_frbr_uri)

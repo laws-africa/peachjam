@@ -10,10 +10,8 @@
 
 {% block nav-items %}
   <li class="nav-item">
-    <a class="nav-link {% ifequal request.path '/judgements/'%} active {% endifequal%}" href="#">{% trans 'Judgements' %}</a>
+    <a class="nav-link {% ifequal request.path '/judgments/'%} active {% endifequal%}" href="{% url 'judgment_list' %}">
+      {% trans 'Judgments' %}
+    </a>
   </li>
-  <li class="nav-item">
-    <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="#">{% trans 'Legislation' %}</a>
-  </li>
-
 {% endblock %}

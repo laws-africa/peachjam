@@ -1,7 +1,7 @@
 from django.db import models
 
 from peachjam.frbr_uri import FRBR_URI_DOCTYPES
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, Work
 from peachjam.models.author import Author
 
 
@@ -47,6 +47,8 @@ class LegalInstrument(CoreDocument):
 
 class Legislation(CoreDocument):
     metadata_json = models.JSONField(null=False, blank=False)
+    repealed = models.BooleanField(default=False, null=False)
+    parent_work = models.ForeignKey(Work, null=True, on_delete=models.PROTECT)
 
     frbr_uri_doctypes = ["act"]
 

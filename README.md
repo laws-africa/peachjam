@@ -77,7 +77,7 @@ Translations for the project are stored in the `locale` directory. Translations 
 If you have added or changed strings that need translating, you must [tell Django to update the .po files](https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#localization-how-to-create-language-files) so that translations can be supplied through CrowdIn.
 
 ```bash
-cd peachjam && django-admin makemessages -a
+for d in peachjam africanlii; do pushd $d; django-admin makemessages -a; popd; done
 ```
 
 And then commit the changes. CrowdIn will pick up any changed strings and make them available for translation. Once they are translated, it will open a pull request to merge the changes into master.
@@ -100,3 +100,71 @@ i18next './peachjam/js/**/*.{js,vue}'
 And then commit the changes.
 CrowdIn will pick up any changed strings on `main` and make them available for translation. Once they are translated,
 it will open a pull request to merge the changes into `main`.
+
+## Deployment
+Peachjam can be deployed to a server that has [Dokku](https://dokku.com/) installed. This allows for easy config based deployments using Docker containers.
+The following steps outline the procedure to deploy a new Peachjam based application.
+
+#### Application Setup and Configuration
+- SSH into the server with dokku installed and create a new application using Dokku's `apps:create` command
+
+      dokku apps:create <app_name>
+- Setup the domain for the application
+
+      dokku domains:set <app_name> <domain_name>
+- Add the relevant environment variables using the dokku config:set command. The required configuration values can be found in the env.example file.
+
+      dokku config:set CONFIG1=value CONFIG2=value
+-
+#### SSL
+- Enable LetsEncrypt for SSL/TLS. Dokku allows easy setup of SSL using the letsencrypt plugin. On the server, install the letsencrypt dokku plugin:
+
+      sudo dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
+- Configure letsencrypt with your email address, so you get reminders about renewing certificates:
+
+      dokku config:set --no-restart <app_name> DOKKU_LETSENCRYPT_EMAIL=your@email.tld
+
+- Install the certificate. Before you install the certificate, your website's domain name must be setup and pointing at this server, so that you can prove that you own the domain.
+
+      dokku letsencrypt <app_name>
+
+- Letsencrypt certificates expire every three months. Let's setup a cron job to renew certificates automatically:
+
+      dokku letsencrypt:cron-job --add
+
+- You can also manually renew a certificate when it's close to expiry:
+
+      dokku letsencrypt:auto-renew
+
+
+#### Build and Deploy
+- Dokku will build and deploy the application automatically on git push. First add the remote to the git
+
+      git remote add dokku dokku@<your_server_domain>:<app_name>
+- To trigger a build and deploy
+
+      git push dokku <branch_name>:master
+
+#### Background Tasks
+
+- Peachjam runs various background tasks as separate processes. They can be specified within the Procfile.
+- On the dokku server, scale up the processes to run these tasks:
+
+      dokku ps:scale <app_name> tasks=1 tasks2=1
+
+# License
+
+Copyright 2022 Laws.Africa.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.

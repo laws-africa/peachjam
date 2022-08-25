@@ -89,7 +89,6 @@ class IndigoAdapter(Adapter):
         content_html = self.client_get(url + ".html").text
         jurisdiction = Country.objects.get(iso__iexact=document["country"])
         language = Language.objects.get(iso_639_3__iexact=document["language"])
-        locality = Locality.objects.get(code=document["locality"])
 
         field_data = {
             "title": title,
@@ -105,7 +104,6 @@ class IndigoAdapter(Adapter):
         }
 
         frbr_uri_data = {
-            "locality": locality,
             "jurisdiction": jurisdiction,
             "frbr_uri_subtype": frbr_uri.subtype,
             "frbr_uri_number": frbr_uri.number,
@@ -114,6 +112,8 @@ class IndigoAdapter(Adapter):
             "language": language,
             "date": datetime.strptime(document["expression_date"], "%Y-%m-%d").date(),
         }
+        if document["locality"]:
+            frbr_uri_data["locality"] = Locality.objects.get(code=document["locality"])
 
         if frbr_uri.actor:
             frbr_uri_data["frbr_uri_actor"] = frbr_uri.actor
@@ -127,12 +127,7 @@ class IndigoAdapter(Adapter):
             raise Exception("FRBR URIs do not match.")
 
         if document["nature"] == "act":
-            if (
-                document["subtype"] == "charter"
-                or "protocol"
-                or "convention"
-                or "treaty"
-            ):
+            if document["subtype"] in ["charter", "protocol", "convention", "treaty"]:
                 model = LegalInstrument
                 field_data["nature"] = DocumentNature.objects.update_or_create(
                     name=document["subtype"]

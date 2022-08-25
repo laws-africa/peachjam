@@ -4,6 +4,7 @@ media/
 
 peachjam/static/js/app-prod.js
 peachjam/static/js/*.app-prod.js
+peachjam.egg-info/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -17,7 +18,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-# dist/
+dist/
 downloads/
 eggs/
 .eggs/
@@ -167,3 +168,5 @@ peachjam/static/stylesheets/peachjam.css
 africanlii/static/stylesheets/africanlii.css
 lawlibrary/static/stylesheets/lawlibrary.css
 liiweb/static/stylesheets/liiweb.css
+
+.vscode

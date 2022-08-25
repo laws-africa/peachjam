@@ -1,0 +1,42 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+
+{% block title %}{% trans 'Judgements' %}{% endblock %}
+
+{% block page-content %}
+  <section class="pt-5 pb-5">
+    <div class="container">
+      <h1 class="mb-4">{% trans 'Judgments' %}</h1>
+
+      {% if grouped_courts %}
+        <div class="row mb-3">
+          {% for group in grouped_courts %}
+            <div class="col-md-3 col-12 mb-4">
+              <h4 class="heading-underlined">
+              {{ group.title }}
+              </h4>
+              {% if group.items|length > 0 %}
+                {% for item in group.items %}
+                    <div>
+                      <a href="{% url 'court_detail' item.code  %}">{{ item.title }}</a>
+                    </div>
+                  {% endfor %}
+              {% else %}
+                <div>No courts found</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <h4 class="heading-underlined">
+        {% if title %}
+          {{ title }}
+        {% else %}
+          {% trans 'Recent judgments' %}
+        {% endif %}
+      </h4>
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments %}
+    </div>
+  </section>
+{% endblock %}

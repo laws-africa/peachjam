@@ -1,0 +1,16 @@
+{% extends 'peachjam/layouts/document_detail.html' %}
+{% load i18n %}
+
+{% block document-metadata-content-author %}
+  {% if document.doc_type == 'judgment' %}
+    <dt class="col-4">{% trans 'Court' %}</dt>
+    <dd class="col-8 text-muted">
+      <a href="{% url 'court_detail' document.author.code %}">{{ document.author.name }}</a>
+    </dd>
+
+    <dt class="col-4">{% trans 'Judges' %}</dt>
+    <dd class="col-8 text-muted">{{ document.judges_string }}</dd>
+  {% else %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}
