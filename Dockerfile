@@ -18,7 +18,5 @@ RUN apt-get install -y nodejs
 COPY . /app
 WORKDIR /app
 
-# install npm requirements
-RUN npm ci --no-audit --prefer-offline
+# install sass for compiling assets before deploying
 RUN npm i -g sass
-RUN npx webpack --mode production
