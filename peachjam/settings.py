@@ -231,6 +231,9 @@ ELASTICSEARCH_DSL = {
         "timeout": 5,
     },
 }
+ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
+    "peachjam_search.tasks.BackgroundTaskSearchProcessor"
+)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
