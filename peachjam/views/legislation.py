@@ -115,12 +115,16 @@ class LegislationDetailView(BaseDocumentDetailView):
         events = []
 
         work = self.object.metadata_json
-        expressions = {
-            point_in_time["date"]: point_in_time["expressions"][0]
-            for point_in_time in work["points_in_time"]
-        }
 
-        if work["assent_date"]:
+        points_in_time = self.get_points_in_time()
+        if points_in_time:
+            expressions = {
+                point_in_time["date"]: point_in_time["expressions"][0]
+                for point_in_time in points_in_time
+            }
+
+        assent_date = self.object.metadata_json.get("assent_date", None)
+        if assent_date:
             events.append(
                 {
                     "date": work["assent_date"],
@@ -128,45 +132,50 @@ class LegislationDetailView(BaseDocumentDetailView):
                 }
             )
 
-        if work["publication_date"]:
+        publication_date = self.object.metadata_json.get("publication_date", None)
+        if publication_date:
             events.append(
                 {
-                    "date": work["publication_date"],
+                    "date": publication_date,
                     "event": "publication",
-                    "publication_name": work["publication_name"] or None,
-                    "publication_number": work["publication_number"] or None,
-                    "publication_url": work["publication_document"]["url"] or None,
+                    "publication_name": work["publication_name"],
+                    "publication_number": work["publication_number"],
+                    "publication_url": work["publication_document"]["url"],
                 }
             )
 
-        if work["commencement_date"]:
+        commencement_date = self.object.metadata_json.get("commencement_date", None)
+        if commencement_date:
             events.append(
                 {
-                    "date": work["commencement_date"],
+                    "date": commencement_date,
                     "event": "commencement",
                     "friendly_type": work["type_name"],
                 }
             )
 
-        events.extend(
-            [
-                {
-                    "date": amendment["date"],
-                    "event": "amendment",
-                    "amending_title": amendment["amending_title"],
-                    "amending_uri": amendment["amending_uri"],
-                }
-                for amendment in work["amendments"]
-            ]
-        )
+        amendments = self.object.metadata_json.get("amendments", None)
+        if amendments:
+            events.extend(
+                [
+                    {
+                        "date": amendment["date"],
+                        "event": "amendment",
+                        "amending_title": amendment["amending_title"],
+                        "amending_uri": amendment["amending_uri"],
+                    }
+                    for amendment in amendments
+                ]
+            )
 
-        if work["repeal"]:
+        repeal = self.get_repeal_info()
+        if repeal:
             events.append(
                 {
-                    "date": work["repeal"]["date"],
+                    "date": repeal["date"],
                     "event": "repeal",
-                    "repealing_title": work["repeal"]["repealing_title"],
-                    "repealing_uri": work["repeal"]["repealing_uri"],
+                    "repealing_title": repeal["repealing_title"],
+                    "repealing_uri": repeal["repealing_uri"],
                 }
             )
 
