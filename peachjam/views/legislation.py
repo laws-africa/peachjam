@@ -135,6 +135,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                     "event": "publication",
                     "publication_name": work["publication_name"] or None,
                     "publication_number": work["publication_number"] or None,
+                    "publication_url": work["publication_document"]["url"] or None,
                 }
             )
 
@@ -143,6 +144,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                 {
                     "date": work["commencement_date"],
                     "event": "commencement",
+                    "friendly_type": work["type_name"],
                 }
             )
 
