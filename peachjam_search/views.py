@@ -21,7 +21,7 @@ from rest_framework.permissions import AllowAny
 from peachjam_search.documents import SearchableDocument
 from peachjam_search.serializers import SearchableDocumentSerializer
 
-CACHE_SECS = 60 * 60
+CACHE_SECS = 15 * 60
 
 
 class NestedPageQueryBackend(BaseSearchQueryBackend):
