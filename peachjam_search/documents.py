@@ -1,6 +1,7 @@
 from django.conf import settings
-from django_elasticsearch_dsl import Document, fields
+from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
+from docpipe.pdf import pdf_to_text
 from lxml import etree
 
 from peachjam.models import (
@@ -39,6 +40,13 @@ class SearchableDocument(Document):
     # GenericDocument, LegalInstrument
     author = fields.KeywordField()
     nature = fields.KeywordField()
+
+    pages = fields.NestedField(
+        properties={
+            "page_num": fields.IntegerField(),
+            "body": fields.TextField(analyzer="standard", fields={"exact": Text()}),
+        }
+    )
 
     class Index:
         # TODO: make this configurable per website
@@ -90,3 +98,24 @@ class SearchableDocument(Document):
         if instance.content_html:
             root = etree.HTML(instance.content_html)
             return " ".join(root.itertext())
+
+    def prepare_pages(self, instance):
+        """Extract pages from PDF"""
+        if not instance.content_html:
+            if hasattr(
+                instance, "source_file"
+            ) and instance.source_file.filename.endswith(".pdf"):
+                text = pdf_to_text(instance.source_file.file.path)
+
+                if not text:
+                    raise ValueError(
+                        f"Couldn't index any text to search in the pdf for {instance}"
+                    )
+                page_texts = text.split("\x0c")
+                pages = []
+                for i, page in enumerate(page_texts):
+                    i = i + 1
+                    page = page.strip()
+                    if page:
+                        pages.append({"page_num": i, "body": page})
+                return pages

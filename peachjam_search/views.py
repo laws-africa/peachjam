@@ -9,14 +9,66 @@ from django_elasticsearch_dsl_drf.filter_backends import (
     OrderingFilterBackend,
     SourceBackend,
 )
+from django_elasticsearch_dsl_drf.filter_backends.search.query_backends import (
+    BaseSearchQueryBackend,
+    SimpleQueryStringQueryBackend,
+)
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from elasticsearch_dsl import DateHistogramFacet
+from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
 from rest_framework.permissions import AllowAny
 
 from peachjam_search.documents import SearchableDocument
 from peachjam_search.serializers import SearchableDocumentSerializer
 
 CACHE_SECS = 15 * 60
+
+
+class NestedPageQueryBackend(BaseSearchQueryBackend):
+    """Does a nested page search, and includes highlights."""
+
+    @classmethod
+    def construct_search(cls, request, view, search_backend):
+        search_term = " ".join(search_backend.get_search_query_params(request))
+        return [
+            Q(
+                "nested",
+                path="pages",
+                query=Q(
+                    "bool",
+                    must=[
+                        SimpleQueryString(
+                            query=search_term,
+                            default_operator="and",
+                            quote_field_suffix=".exact",
+                            fields=["pages.body"],
+                        )
+                    ],
+                    should=[
+                        MatchPhrase(pages__body={"query": search_term, "slop": 2}),
+                    ],
+                ),
+                inner_hits={
+                    "_source": ["pages.page_num"],
+                    "highlight": {
+                        "fields": {"pages.body": {}},
+                        "pre_tags": ["<mark>"],
+                        "post_tags": ["</mark>"],
+                        "fragment_size": 80,
+                        "number_of_fragments": 2,
+                    },
+                },
+            )
+        ]
+
+
+class SearchFilterBackend(CompoundSearchFilterBackend):
+    query_backends = [
+        # Use ES's SimpleQueryString search support which allows quotes, +foo, -bar etc.
+        SimpleQueryStringQueryBackend(),
+        # Customised search on PDF page content
+        NestedPageQueryBackend,
+    ]
 
 
 class SearchView(TemplateView):
@@ -30,15 +82,22 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     serializer_class = SearchableDocumentSerializer
     permission_classes = (AllowAny,)
     filter_backends = [
+        # lets the use specify order with ordering=field
         OrderingFilterBackend,
+        # applies a default ordering
         DefaultOrderingFilterBackend,
-        CompoundSearchFilterBackend,
+        # supports filtering and facets by various fields
         FacetedFilterSearchFilterBackend,
+        # do the actual search against the various fields
+        SearchFilterBackend,
+        # overrides the fields that are fetched from ES
         SourceBackend,
         HighlightBackend,
     ]
 
+    # allowed and default ordering
     ordering_fields = {"date": "_date", "title": "title"}
+    ordering = ("_score", "date")
 
     filter_fields = {
         "doc_type": "doc_type",
@@ -51,17 +110,13 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "year": "year",
     }
 
-    search_fields = (
-        "title",
-        "author",
-        "jurisdiction",
-        "locality",
-        "citation",
-        "matter_type",
-        "content_html",
-        "judges",
-        "content",
-    )
+    search_fields = {
+        "title": {"boost": 2},
+        "author": None,
+        "citation": None,
+        "judges": None,
+        "content": None,
+    }
 
     faceted_search_fields = {
         "doc_type": {
@@ -101,8 +156,11 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
                 "fragment_size": 80,
                 "number_of_fragments": 2,
             }
-        },
+        }
     }
+
+    # TODO perhaps better to explicitly include specific fields
+    source = {"excludes": ["pages", "content", "flynote", "headnote_holding"]}
 
     @method_decorator(cache_page(CACHE_SECS))
     def dispatch(self, request, *args, **kwargs):

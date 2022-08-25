@@ -58,6 +58,12 @@ class DocumentContent {
       }
       this.pdfRenderer = new PdfRenderer(root);
       this.pdfRenderer.onPreviewPanelClick = () => { this.navOffCanvas?.hide(); };
+      this.pdfRenderer.onPdfLoaded = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetPage = urlParams.get('page');
+        if (!targetPage) return;
+        this.pdfRenderer?.triggerScrollToPage(targetPage);
+      };
     }
 
     // Close navOffCanvas on lac-toc title click
