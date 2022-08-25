@@ -7,9 +7,15 @@
     role="dialog"
     aria-hidden="true"
   >
-    <div class="modal-dialog modal-lg" role="document">
+    <div
+      class="modal-dialog modal-lg"
+      role="document"
+    >
       <div class="modal-content">
-        <form @submit.prevent="save" ref="form">
+        <form
+          ref="form"
+          @submit.prevent="save"
+        >
           <div class="modal-header">
             <h5 class="modal-title">
               Add relationship
@@ -23,7 +29,9 @@
           </div>
 
           <div class="modal-body">
-            <p v-if="isForwards">The selection...</p>
+            <p v-if="isForwards">
+              The selection...
+            </p>
 
             <v-select
               v-if="!isForwards"
@@ -35,7 +43,7 @@
               :reduce="w => w.id"
               @search="onSearch"
             >
-              <template slot="no-options">
+              <template #no-options>
                 Search for a document...
               </template>
 
@@ -45,15 +53,21 @@
                   :required="!relationship.subject_work_id"
                   v-bind="attributes"
                   v-on="events"
-                />
+                >
               </template>
             </v-select>
 
             <select
               v-model="relationship.predicate_id"
               class="form-control mb-3"
-              required
+              :required="!predicates.length"
             >
+              <option
+                v-if="!predicates.length"
+                value=""
+              >
+                No options available. Add Predicates in admin to have options.
+              </option>
               <option
                 v-for="p in predicates"
                 :key="p.id"
@@ -72,7 +86,7 @@
               :reduce="w => w.id"
               @search="onSearch"
             >
-              <template slot="no-options">
+              <template #no-options>
                 Search for a document...
               </template>
 
@@ -82,15 +96,18 @@
                   :required="!relationship.object_work_id"
                   v-bind="attributes"
                   v-on="events"
-                />
+                >
               </template>
             </v-select>
 
-            <p v-else>... the selection.</p>
+            <p v-else>
+              ... the selection.
+            </p>
           </div>
 
           <div class="modal-footer">
             <button
+              disabled
               class="btn btn-outline-secondary"
               type="button"
               @click="reverse"
@@ -153,7 +170,7 @@ export default {
   mounted () {
     document.body.appendChild(this.$el);
     this.predicates = JSON.parse(document.getElementById('predicates').innerText || '[]');
-    this.relationship.predicate_id = this.predicates[0].id;
+    this.relationship.predicate_id = this.predicates.length ? this.predicates[0].id : '';
     this.modal = new bootstrap.Modal(this.$el);
     this.$el.addEventListener('hidePrevented.bs.modal', this.close);
     this.modal.show();

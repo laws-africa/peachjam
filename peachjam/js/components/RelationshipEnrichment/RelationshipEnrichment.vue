@@ -31,13 +31,15 @@
           {{ enrichment.predicate.verb }}
           <a
             v-if="objectDocument"
-            :href="`/documents${objectDocument.expression_frbr_uri}`"
+            target="_blank"
+            :href="`${objectDocument.expression_frbr_uri}/`"
           >{{ objectDocument.title }}</a><span v-else>{{ enrichment.object_work.frbr_uri }} xx</span>.
         </div>
         <div v-else>
           <a
             v-if="subjectDocument"
-            :href="`/documents${subjectDocument.expression_frbr_uri}`"
+            target="_blank"
+            :href="`${subjectDocument.expression_frbr_uri}/`"
           >{{ subjectDocument.title }}</a><span v-else>{{ enrichment.subject_work.frbr_uri }}</span>.
           {{ $t('{reverse_verb} this provision', { reverse_verb: enrichment.predicate.reverse_verb }) }}.
         </div>
