@@ -6,6 +6,7 @@ from django.utils.html import format_html
 
 from peachjam.models import Legislation
 from peachjam.registry import registry
+from peachjam.utils import convert_string_date_to_datetime
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
@@ -127,7 +128,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if assent_date:
             events.append(
                 {
-                    "date": work["assent_date"],
+                    "date": convert_string_date_to_datetime(work["assent_date"]),
                     "event": "assent",
                 }
             )
@@ -136,7 +137,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if publication_date:
             events.append(
                 {
-                    "date": publication_date,
+                    "date": convert_string_date_to_datetime(publication_date),
                     "event": "publication",
                     "publication_name": work["publication_name"],
                     "publication_number": work["publication_number"],
@@ -148,7 +149,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if commencement_date:
             events.append(
                 {
-                    "date": commencement_date,
+                    "date": convert_string_date_to_datetime(commencement_date),
                     "event": "commencement",
                     "friendly_type": work["type_name"],
                 }
@@ -159,7 +160,7 @@ class LegislationDetailView(BaseDocumentDetailView):
             events.extend(
                 [
                     {
-                        "date": amendment["date"],
+                        "date": convert_string_date_to_datetime(amendment["date"]),
                         "event": "amendment",
                         "amending_title": amendment["amending_title"],
                         "amending_uri": amendment["amending_uri"],
@@ -172,7 +173,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if repeal:
             events.append(
                 {
-                    "date": repeal["date"],
+                    "date": convert_string_date_to_datetime(repeal["date"]),
                     "event": "repeal",
                     "repealing_title": repeal["repealing_title"],
                     "repealing_uri": repeal["repealing_uri"],

@@ -1,3 +1,4 @@
+import datetime
 import string
 from functools import wraps
 
@@ -23,3 +24,7 @@ def add_slash_to_frbr_uri(*args, **kwargs):
         return _wrapped_view
 
     return decorator
+
+
+def convert_string_date_to_datetime(date):
+    return datetime.datetime.strptime(date, "%Y-%m-%d")

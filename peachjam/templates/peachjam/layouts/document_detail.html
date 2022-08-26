@@ -166,18 +166,18 @@
         <div class="card-body">
           <h4>History of this document</h4>
 
-          {% if events %}
+          {% if timeline_events %}
             <div class="vertical-timeline">
-              {% for history_item in events %}
+              {% for history_item in timeline_events %}
                 <div class="vertical-timeline__item">
                     <div class="vertical-timeline__item__content">
                       <div class="vertical-timeline__item__content__header">
-                        <div class="title">{{ history_item.date }}</div>
+                        <div class="title">{{ history_item.date|date:"d F Y" }}</div>
                         <div class="tag">
                           this version
                         </div>
                       </div>
-                      {% for event in history_item.events %}
+                      {% for event in timeline_events.events %}
                         <div>
                           {% if event.event == "amendment" %}
                             Amended by
