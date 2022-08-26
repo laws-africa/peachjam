@@ -21,8 +21,26 @@
 
     <h1>{% trans "National Legislation" %}</h1>
 
+    <nav class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <a class="nav-link {% if not view.variant %}active{% endif %}" href="{% url 'legislation_list' %}">Main Acts</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}" href="{% url 'legislation_list_repealed' %}">Repealed legislation</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if view.variant == 'all' %}active{% endif %}" href="{% url 'legislation_list_all' %}">All legislation</a>
+      </li>
+    </nav>
+
+    {% if view.variant == 'repealed' %}
+      <div class="alert alert-danger">
+        You are viewing repealed legislation which is no longer in force.
+      </div>
+    {% endif %}
+
     <div data-vue-component="LegislationTable" data-show-side-facets></div>
-    {{ national_legislation_list|json_script:"legislation-table" }}
+    {{ legislation_table|json_script:"legislation-table" }}
   </div>
 </section>
 {% endblock %}
