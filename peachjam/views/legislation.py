@@ -6,7 +6,6 @@ from django.utils.html import format_html
 
 from peachjam.models import Legislation
 from peachjam.registry import registry
-from peachjam.utils import parse_string_date
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
@@ -111,6 +110,7 @@ class LegislationDetailView(BaseDocumentDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["current_object_date"] = self.object.date.strftime("%Y-%m-%d")
         context["timeline_events"] = self.get_timeline_events()
         context["friendly_type"] = self.get_friendly_type()
         return context
@@ -131,7 +131,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if assent_date:
             events.append(
                 {
-                    "date": parse_string_date(work["assent_date"]),
+                    "date": (work["assent_date"]),
                     "event": "assent",
                 }
             )
@@ -140,7 +140,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if publication_date:
             events.append(
                 {
-                    "date": parse_string_date(publication_date),
+                    "date": (publication_date),
                     "event": "publication",
                     "publication_name": work["publication_name"],
                     "publication_number": work["publication_number"],
@@ -152,7 +152,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if commencement_date:
             events.append(
                 {
-                    "date": parse_string_date(commencement_date),
+                    "date": (commencement_date),
                     "event": "commencement",
                     "friendly_type": work["type_name"],
                 }
@@ -163,7 +163,7 @@ class LegislationDetailView(BaseDocumentDetailView):
             events.extend(
                 [
                     {
-                        "date": parse_string_date(amendment["date"]),
+                        "date": (amendment["date"]),
                         "event": "amendment",
                         "amending_title": amendment["amending_title"],
                         "amending_uri": amendment["amending_uri"],
@@ -176,7 +176,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if repeal:
             events.append(
                 {
-                    "date": parse_string_date(repeal["date"]),
+                    "date": (repeal["date"]),
                     "event": "repeal",
                     "repealing_title": repeal["repealing_title"],
                     "repealing_uri": repeal["repealing_uri"],
