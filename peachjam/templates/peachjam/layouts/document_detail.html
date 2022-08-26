@@ -22,7 +22,25 @@
 
     {{ provision_relationships|json_script:"provision-relationships" }}
 
-    <div class="mb-5">
+    <ul style="margin-bottom: 1px;" class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#document-detail-tab"
+                type="button"
+                role="tab" aria-controls="document-detail-tab" aria-selected="true">
+          Document detail
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button"
+                role="tab" aria-controls="history-tab" aria-selected="false">
+          History
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="document-detail-tab" role="tabpanel" aria-labelledby="document-detail-tab">
+         <div class="mb-5">
       <div class="card">
         <div class="card-body">
           {% block document-metadata %}
@@ -137,10 +155,66 @@
       </div>
     </div>
 
-    {{ citation_links|json_script:"citation-links" }}
+        {{ citation_links|json_script:"citation-links" }}
 
-    {% block content %}
-      {% include 'peachjam/_document_content.html' with document=document %}
-    {% endblock %}
+        {% block content %}
+          {% include 'peachjam/_document_content.html' with document=document %}
+        {% endblock %}
+      </div>
+      <div class="tab-pane fade" id="history-tab" role="tabpanel" aria-labelledby="history-tab">
+        <div class="card">
+        <div class="card-body">
+          <h4>History of this document</h4>
+
+          {% if events %}
+            <div class="vertical-timeline">
+              {% for history_item in events %}
+                <div class="vertical-timeline__item">
+                    <div class="vertical-timeline__item__content">
+                      <div class="vertical-timeline__item__content__header">
+                        <div class="title">{{ history_item.date }}</div>
+                        <div class="tag">
+                          this version
+                        </div>
+                      </div>
+                      {% for event in history_item.events %}
+                        <div>
+                          {% if event.event == "amendment" %}
+                            Amended by
+                            <a href="{{ event.amending_uri }}/eng/"><i>{{ event.amending_title }}</i></a>
+
+                          {% elif event.event == "assent" %}
+                            Assented to by council.
+
+                          {% elif event.event == "commencement" %}
+                            {{work.type_name }} commences.
+
+                          {% elif event.event == "publication" %}
+                            Published in
+                            <a href="{{ work.publication_document.url }}">{{ work.full_publication }}</a>
+
+                          {% elif event.event == "repeal" %}
+                            Repealed by
+                            <a href="{{ event.repealing_uri }}/eng/"><i>{{ event.repealing_title }}</i></a>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+
+                      {% if document.date != page.expression_date %}
+                        {% if document.expression_frbr_uri %}
+                          <a class="btn btn-outline-primary mt-2" href="{{ document.expression_frbr_uri }}/">Read this version</a>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                  </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div>No events</div>
+          {% endif %}
+        </div>
+      </div>
+      </div>
+    </div>
   </main>
 {% endblock %}
