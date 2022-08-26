@@ -26,5 +26,5 @@ def add_slash_to_frbr_uri(*args, **kwargs):
     return decorator
 
 
-def convert_string_date_to_datetime(date):
+def parse_string_date(date):
     return datetime.datetime.strptime(date, "%Y-%m-%d")
