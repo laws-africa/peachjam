@@ -4,57 +4,60 @@
 {% block title %}{{ document.title }}{% endblock %}
 
 {% block page-content %}
-<div class="container py-3" data-component="DocumentList">
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="list-facets-offcanvas"
-       aria-labelledby="offcanvasLastFacetLabel">
-    <div class="offcanvas-header justify-content-end">
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  <div class="container pb-5" data-component="DocumentList">
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="list-facets-offcanvas"
+         aria-labelledby="offcanvasLastFacetLabel">
+      <div class="offcanvas-header justify-content-end">
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div data-list-facets></div>
+      </div>
     </div>
-    <div class="offcanvas-body">
-      <div data-list-facets></div>
-    </div>
-  </div>
 
-  {% block page-header %}
+    {% block breadcrumbs %}
+    {% endblock %}
+
+    {% block page-header %}
+      <div class="row">
+        <div class="col-lg-3 d-none d-lg-block"></div>
+        <div class="col-lg-9">
+          <div class="mb-2">
+            {% block page-title %}
+              <h1 class="m-0">{% trans 'Documents' %}</h1>
+            {% endblock %}
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+
+    <div class="d-block d-lg-none my-2">
+      <button class="btn btn-primary"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#list-facets-offcanvas"
+                aria-controls="list-facets-offcanvas">
+          Filters
+        </button>
+    </div>
+
     <div class="row">
-      <div class="col-lg-3 d-none d-lg-block"></div>
+      <div class="col-lg-3 d-none d-lg-block">
+        <div data-list-facets></div>
+      </div>
       <div class="col-lg-9">
-        <div class="mb-2">
-          {% block page-title %}
-            <h1 class="m-0">{% trans 'Documents' %}</h1>
-          {% endblock %}
+        <div class="position-relative">
+          {% block content %}
+            {% if documents %}
+              {% include 'peachjam/_document_table.html'%}
+            {% else %}
+              <p>{% trans 'No documents found.' %}</p>
+            {% endif %}
+          {% endblock%}
         </div>
       </div>
     </div>
-  {% endblock %}
 
-  <div class="d-block d-lg-none my-2">
-    <button class="btn btn-primary"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#list-facets-offcanvas"
-              aria-controls="list-facets-offcanvas">
-        Filters
-      </button>
+    {{ facet_data|json_script:"facet-data" }}
   </div>
-
-  <div class="row">
-    <div class="col-lg-3 d-none d-lg-block">
-      <div data-list-facets></div>
-    </div>
-    <div class="col-lg-9">
-      <div class="position-relative">
-        {% block content %}
-          {% if documents %}
-            {% include 'peachjam/_document_table.html'%}
-          {% else %}
-            <p>{% trans 'No documents found.' %}</p>
-          {% endif %}
-        {% endblock%}
-      </div>
-    </div>
-  </div>
-
-  {{ facet_data|json_script:"facet-data" }}
-</div>
 {% endblock %}
