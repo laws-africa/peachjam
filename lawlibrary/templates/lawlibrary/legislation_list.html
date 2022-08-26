@@ -8,15 +8,11 @@
     {% if provinces %}
       <h2>{% trans 'Provincial Legislation' %}</h2>
 
-      <div class="mb-3">
+      <div class="mb-4">
         <div class="row mb-2">
           {% for locality in provinces %}
-            <div class="col-lg-4">
-              <div class="card">
-                <div class="card-body">
-                  <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
-                </div>
-              </div>
+            <div class="col-6 col-md-3 col-lg-2">
+              <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
             </div>
           {% endfor %}
         </div>
