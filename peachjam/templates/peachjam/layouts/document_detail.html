@@ -169,7 +169,7 @@
                           this version
                         </div>
                       </div>
-                      {% for event in timeline_events.events %}
+                      {% for event in history_item.events %}
                         <div>
                           {% if event.event == "amendment" %}
                             Amended by
@@ -179,11 +179,11 @@
                             Assented to by council.
 
                           {% elif event.event == "commencement" %}
-                            {{work.type_name }} commences.
+                            {{ friendly_type }} commences.
 
                           {% elif event.event == "publication" %}
                             Published in
-                            <a href="{{ work.publication_document.url }}">{{ work.full_publication }}</a>
+                            <a href="{{ event.publication_url }}">{{ event.publication_name }} no. {{ event.publication_number }}</a>
 
                           {% elif event.event == "repeal" %}
                             Repealed by
