@@ -92,7 +92,6 @@ class IndigoAdapter(Adapter):
         frbr_uri = FrbrUri.parse(document["frbr_uri"])
         title = document["title"]
         toc_json = self.get_toc_json(url)
-        content_html = self.client_get(url + ".html").text
         jurisdiction = Country.objects.get(iso__iexact=document["country"])
         language = Language.objects.get(iso_639_3__iexact=document["language"])
 
@@ -106,7 +105,7 @@ class IndigoAdapter(Adapter):
             else None,
             "language": language,
             "toc_json": toc_json,
-            "content_html": content_html,
+            "content_html": self.get_content_html(document),
             "citation": document["numbered_title"],
         }
 
@@ -154,12 +153,25 @@ class IndigoAdapter(Adapter):
             defaults={**field_data, **frbr_uri_data},
         )
         logger.info(f"New document: {new}")
-        self.download_source_file(f"{url}.pdf", doc, title)
+
+        if document["stub"]:
+            # for stub documents, use the publication document as the source file
+            pubdoc = document["publication_document"]
+            if pubdoc and pubdoc["url"]:
+                self.download_source_file(pubdoc["url"], doc, title)
+        else:
+            # the source file is the PDF version
+            self.download_source_file(f"{url}.pdf", doc, title)
 
     def client_get(self, url):
         r = self.client.get(url)
         r.raise_for_status()
         return r
+
+    def get_content_html(self, document):
+        if document["stub"]:
+            return None
+        return self.client_get(document["url"] + ".html").text
 
     def get_toc_json(self, url):
         def remove_subparagraph(d):
