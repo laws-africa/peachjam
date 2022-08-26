@@ -1,3 +1,5 @@
+from tempfile import NamedTemporaryFile
+
 from django.conf import settings
 from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
@@ -105,7 +107,11 @@ class SearchableDocument(Document):
             if hasattr(
                 instance, "source_file"
             ) and instance.source_file.filename.endswith(".pdf"):
-                text = pdf_to_text(instance.source_file.file.path)
+                # get the file
+                with NamedTemporaryFile(suffix=".pdf") as f:
+                    f.write(instance.source_file.file.read())
+                    f.flush()
+                    text = pdf_to_text(f.name)
 
                 if not text:
                     raise ValueError(
