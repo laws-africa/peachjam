@@ -1,0 +1,14 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %} {% trans 'Provincial Legislation' %} {% endblock %}
+
+{% block page-content %}
+<section class="py-5">
+  <div class="container">
+    <h1>{% blocktrans with locality=locality.name %}{{ locality }} Legislation{% endblocktrans %}</h1>
+
+    <div data-vue-component="LegislationTable" data-show-side-facets></div>
+    {{ legislation_table|json_script:"legislation-table" }}
+  </div>
+</section>
+{% endblock %}

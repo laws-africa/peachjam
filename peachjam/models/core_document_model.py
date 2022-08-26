@@ -147,6 +147,16 @@ class CoreDocument(models.Model):
     def get_absolute_url(self):
         return self.expression_frbr_uri
 
+    @property
+    def get_taxonomies(self):
+        return list(
+            self.taxonomies.distinct("topic").values_list("topic__name", flat=True)
+        )
+
+    @property
+    def year(self):
+        return self.date.year
+
     def clean(self):
         super().clean()
         frbr_uri = self.generate_work_frbr_uri()

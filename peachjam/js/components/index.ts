@@ -4,6 +4,7 @@ import { RelationshipEnrichments } from './RelationshipEnrichment';
 import DocumentList from './document-list';
 import DocumentContent from './document-content';
 import NavigationSelect from './navigation-select';
+import LegislationTable from './LegislationTable/index.vue';
 
 const components: Record<string, any> = {
   // Data components
@@ -13,7 +14,8 @@ const components: Record<string, any> = {
   DocumentContent,
   NavigationSelect,
   // Vue components
-  FindDocuments
+  FindDocuments,
+  LegislationTable
 };
 
 export default components;
