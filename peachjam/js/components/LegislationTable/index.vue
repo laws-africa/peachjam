@@ -52,7 +52,7 @@
           >
             <div class="column-caret" />
             <div class="column">
-              <strong>{{ tableData.length }} documents in total</strong>
+              {{ filteredData.length }} of {{ tableData.length }} documents
             </div>
           </div>
           <div class="legislation-table__row headings">
@@ -286,12 +286,14 @@ export default {
     },
     filterData () {
       let data = [...this.tableData];
-      data = data.filter(item => {
-        return ['title', 'citation'].some(key => {
-          const value = item[key] || '';
-          return value.toLowerCase().includes(this.q.toLowerCase());
+      if (this.q.trim()) {
+        data = data.filter(item => {
+          return ['title', 'citation'].some(key => {
+            const value = item[key] || '';
+            return value.toLowerCase().includes(this.q.toLowerCase());
+          });
         });
-      });
+      }
 
       if (this.showSideFacets) {
         const facetDict = {};
