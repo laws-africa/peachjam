@@ -52,7 +52,7 @@
           >
             <div class="column-caret" />
             <div class="column">
-              <strong>{{ tableData.length }} documents in total</strong>
+              {{ filteredData.length }} of {{ tableData.length }} documents
             </div>
           </div>
           <div class="legislation-table__row headings">
@@ -113,10 +113,7 @@
               </div>
               <div class="column">
                 <div>
-                  <a
-                    :href="`${row.work_frbr_uri}/`"
-                    target="_blank"
-                  >{{ row.title }}</a>
+                  <a :href="`${row.work_frbr_uri}`">{{ row.title }}</a>
                 </div>
                 <div class="column__subtitle">
                   {{ row.frbr_uri }}
@@ -265,7 +262,7 @@ export default {
           title: 'Repealed',
           name: 'repealed',
           type: 'boolean',
-          value: true,
+          value: false,
           count: this.filteredData.filter(item => item.repealed).length
         }
       ];
@@ -289,12 +286,14 @@ export default {
     },
     filterData () {
       let data = [...this.tableData];
-      data = data.filter(item => {
-        return ['title', 'citation'].some(key => {
-          const value = item[key] || '';
-          return value.toLowerCase().includes(this.q.toLowerCase());
+      if (this.q.trim()) {
+        data = data.filter(item => {
+          return ['title', 'citation'].some(key => {
+            const value = item[key] || '';
+            return value.toLowerCase().includes(this.q.toLowerCase());
+          });
         });
-      });
+      }
 
       if (this.showSideFacets) {
         const facetDict = {};

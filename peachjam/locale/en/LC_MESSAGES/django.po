@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-13 15:55+0300\n"
+"POT-Creation-Date: 2022-08-22 15:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,16 +18,53 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: settings.py:185
+#: settings.py:193
 msgid "English"
 msgstr ""
 
-#: settings.py:186
+#: settings.py:194
 msgid "French"
 msgstr ""
 
-#: settings.py:187
+#: settings.py:195
 msgid "Swahili"
+msgstr ""
+
+#: templates/account/base.html:16
+msgid ""
+"Need help? Please email <a href=\"mailto:"
+"{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
+msgstr ""
+
+#: templates/account/login.html:5
+msgid "Log In"
+msgstr ""
+
+#: templates/account/login.html:13 templates/account/login.html:58
+#: templates/account/password_reset_from_key.html:57
+#: templates/account/password_reset_from_key_done.html:10
+#: templates/admin/login.html:63
+msgid "Log in"
+msgstr ""
+
+#: templates/account/login.html:30 templates/account/password_reset.html:18
+msgid "Email address"
+msgstr ""
+
+#: templates/account/login.html:42
+msgid "Password"
+msgstr ""
+
+#: templates/account/login.html:45
+msgid "Forgot your password?"
+msgstr ""
+
+#: templates/account/login.html:76
+#, python-format
+msgid ""
+"\n"
+"            Log in with %(provider.name)s\n"
+"          "
 msgstr ""
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
@@ -43,11 +80,21 @@ msgstr ""
 msgid "Reset Your Password"
 msgstr ""
 
+#: templates/account/password_reset.html:12
+msgid "Forgotten your password? Enter your e-mail address below, and we"
+msgstr ""
+
+#: templates/account/password_reset.html:30
+#: templates/account/password_reset_from_key.html:51
+msgid "Reset password"
+msgstr ""
+
 #: templates/account/password_reset_from_key.html:7
 msgid "Bad Token"
 msgstr ""
 
 #: templates/account/password_reset_from_key.html:7
+#: templates/account/password_reset_from_key_done.html:7
 msgid "Reset Password"
 msgstr ""
 
@@ -59,10 +106,301 @@ msgid ""
 "a>."
 msgstr ""
 
+#: templates/account/password_reset_from_key.html:27
+msgid "New Password"
+msgstr ""
+
+#: templates/account/password_reset_from_key.html:39
+msgid "New Password (again)"
+msgstr ""
+
 #: templates/account/password_reset_from_key.html:56
 msgid "Your password is now reset."
 msgstr ""
 
-#: templates/peachjam/_recent_document_list.html:13
+#: templates/account/password_reset_from_key_done.html:4
+msgid "Change Password"
+msgstr ""
+
+#: templates/account/password_reset_from_key_done.html:8
+msgid "Your password has been reset."
+msgstr ""
+
+#: templates/admin/login.html:23
+msgid "Please correct the error below."
+msgstr ""
+
+#: templates/admin/login.html:23
+msgid "Please correct the errors below."
+msgstr ""
+
+#: templates/admin/login.html:39
+#, python-format
+msgid ""
+"You are authenticated as %(username)s, but are not authorized to access this "
+"page. Would you like to login to a different account?"
+msgstr ""
+
+#: templates/admin/login.html:59
+msgid "Forgotten your password or username?"
+msgstr ""
+
+#: templates/admin/peachjam_document_relationships.html:6
+#: templates/peachjam/home.html:3
+msgid "Home"
+msgstr ""
+
+#: templates/admin/peachjam_document_relationships.html:10
+msgid "Relationships"
+msgstr ""
+
+#: templates/peachjam/_author_detail.html:8
+#, python-format
+msgid " Documents by %(author)s "
+msgstr ""
+
+#: templates/peachjam/_document_table.html:6
+msgid "Title"
+msgstr ""
+
+#: templates/peachjam/_document_table.html:7
+#: templates/peachjam/layouts/document_detail.html:49
+#: templates/peachjam/legislation_detail.html:10
+msgid "Date"
+msgstr ""
+
+#: templates/peachjam/_document_table.html:9
+msgid "Document Type"
+msgstr ""
+
+#: templates/peachjam/_document_table.html:11
+msgid "Regional Body"
+msgstr ""
+
+#: templates/peachjam/_pagination.html:6
+msgid "first"
+msgstr ""
+
+#: templates/peachjam/_pagination.html:7
+msgid "previous"
+msgstr ""
+
+#: templates/peachjam/_pagination.html:11
+msgid "Page"
+msgstr ""
+
+#: templates/peachjam/_pagination.html:15
+msgid "next"
+msgstr ""
+
+#: templates/peachjam/_pagination.html:16
+msgid "last"
+msgstr ""
+
+#: templates/peachjam/_recent_document_list.html:16
+#: templates/peachjam/layouts/document_list.html:51
 msgid "No documents found."
+msgstr ""
+
+#: templates/peachjam/about.html:4
+msgid "About"
+msgstr ""
+
+#: templates/peachjam/about.html:9
+msgid "About the platform"
+msgstr ""
+
+#: templates/peachjam/about.html:11
+msgid ""
+"\n"
+"          This Pan-African platform serves as an information clearinghouse "
+"on all aspects of the African Governance\n"
+"          Architecture (AGA) agenda, including charters, protocols, "
+"communications, relevant legal decisions, policy,\n"
+"          implementation, monitoring, and related material. The overall "
+"objective is to build effective collaboration\n"
+"          between African citizens and civil society organisations on the "
+"one hand, and AGA members on the other, to\n"
+"          strengthen implementation of the AGA platform’s agenda with "
+"respect to democracy, governance, and human rights.\n"
+"          Our specific goals are to:\n"
+"        "
+msgstr ""
+
+#: templates/peachjam/about.html:22
+msgid ""
+"\n"
+"            Increase overall awareness of the AGA agenda and popular "
+"perceptions about democracy, governance and human\n"
+"            rights among civil society organisations (CSOs) and AGA members\n"
+"          "
+msgstr ""
+
+#: templates/peachjam/about.html:28
+msgid ""
+"\n"
+"            Supply complete, accurate and re-usable AGA information to allow "
+"AGA and CSOs to work towards shared goals\n"
+"          "
+msgstr ""
+
+#: templates/peachjam/about.html:33
+msgid ""
+"\n"
+"            Capacitate civil society on all levels to access, interpret and "
+"effectively use AGA information\n"
+"          "
+msgstr ""
+
+#: templates/peachjam/about.html:38
+msgid ""
+"\n"
+"            Strengthen monitoring, develop insights, and improve national-"
+"level implementation by developing linkages\n"
+"            between regional and member-states’ law and policy.\n"
+"          "
+msgstr ""
+
+#: templates/peachjam/about.html:45
+msgid ""
+"\n"
+"          This platform is developed and maintained jointly by <a href="
+"\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
+"with funds from the European Union,\n"
+"          the Indigo Trust and the Sigrid Rausing Trust. The initial phase "
+"of the project runs from 2021 to 2024.\n"
+"        "
+msgstr ""
+
+#: templates/peachjam/about.html:53
+msgid "Platform developers"
+msgstr ""
+
+#: templates/peachjam/about.html:56
+msgid ""
+"\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
+"a> is a programme of the Democratic Governance and Rights Unit at the "
+"Department of Public Law, University\n"
+"          of Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank"
+"\">AfricanLII</a> helps governments, academia and non-profit organisations "
+"publish the law of African\n"
+"          countries for sustainable open access. <a href=\"https://"
+"africanlii.org/\" target=\"_blank\">AfricanLII</a> hosts curated collections "
+"on various subjects of African law,\n"
+"          such as human rights, the environment, commercial law and "
+"finance.\n"
+"        "
+msgstr ""
+
+#: templates/peachjam/about.html:64
+msgid ""
+"\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
+"a> convenes a network of 16 African LIIs - a collaborative group of "
+"governments, organizations, and\n"
+"          individuals in Africa, dedicated to free access to law on our "
+"continent.\n"
+"        "
+msgstr ""
+
+#: templates/peachjam/about.html:70
+msgid ""
+"\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
+"helps African governments to sustainably digitise their legal information "
+"for public use, through open\n"
+"          law software, capacity-building, training, partnerships and "
+"support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</"
+"a> Open Law Technology solutions\n"
+"          lower the cost of digitisation, archival and publication of "
+"primary legal information, and create opportunities for\n"
+"          rich interactivity, advanced research and justice sector "
+"innovation.\n"
+"        "
+msgstr ""
+
+#: templates/peachjam/about.html:78
+msgid ""
+"\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
+"a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
+"collaborate in unlocking the value of African digital legal information in "
+"support\n"
+"          of the rule of law, access to justice, and innovation.\n"
+"        "
+msgstr ""
+
+#: templates/peachjam/about.html:84
+msgid "Find out more"
+msgstr ""
+
+#: templates/peachjam/about.html:86
+msgid ""
+"\n"
+"          Visit <a href=\"https://openlawafrica.org/\" target=\"_blank"
+"\">openlawafrica.org</a>\n"
+"          or contact us on <a href=\"mailto:info@laws.africa\">info@laws."
+"africa</a> for more information.\n"
+"        "
+msgstr ""
+
+#: templates/peachjam/about.html:98
+msgid "Our partners"
+msgstr ""
+
+#: templates/peachjam/generic_document_list.html:4
+msgid "Generic Document List"
+msgstr ""
+
+#: templates/peachjam/generic_document_list.html:7
+msgid "AU Documents"
+msgstr ""
+
+#: templates/peachjam/header.html:55
+msgid "Logout"
+msgstr ""
+
+#: templates/peachjam/judgment_list.html:4
+#: templates/peachjam/judgment_list.html:7
+msgid "Judgment List"
+msgstr ""
+
+#: templates/peachjam/layouts/document_detail.html:36
+msgid "Jurisdiction"
+msgstr ""
+
+#: templates/peachjam/layouts/document_detail.html:43
+msgid "Author"
+msgstr ""
+
+#: templates/peachjam/layouts/document_detail.html:69
+#: templates/peachjam/legislation_detail.html:8
+msgid "Language"
+msgstr ""
+
+#: templates/peachjam/layouts/document_detail.html:101
+msgid "This document"
+msgstr ""
+
+#: templates/peachjam/layouts/document_detail.html:118
+msgid "Related documents"
+msgstr ""
+
+#: templates/peachjam/layouts/document_list.html:24
+msgid "Documents"
+msgstr ""
+
+#: templates/peachjam/legal_instrument_list.html:4
+msgid "Legal Instrument List"
+msgstr ""
+
+#: templates/peachjam/legal_instrument_list.html:7
+msgid "Treaties and Protocols List"
+msgstr ""
+
+#: templates/peachjam/legislation_list.html:4
+#: templates/peachjam/legislation_list.html:7
+msgid "Legislation List"
 msgstr ""

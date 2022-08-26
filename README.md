@@ -21,7 +21,8 @@ source .venv/bin/activate
 ```
 - Install requirements.
 ```
-pip install -r requirements.txt
+pip install -e .
+pip install psycopg2-binary==2.9.3
 ```
 
 - Ensure you have PostgreSQL installed and running. Create a postgresql user with username and password peachjam, and create a corresponding database called peachjam.
@@ -77,7 +78,7 @@ Translations for the project are stored in the `locale` directory. Translations 
 If you have added or changed strings that need translating, you must [tell Django to update the .po files](https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#localization-how-to-create-language-files) so that translations can be supplied through CrowdIn.
 
 ```bash
-cd peachjam && django-admin makemessages -a
+for d in peachjam africanlii; do pushd $d; django-admin makemessages -a; popd; done
 ```
 
 And then commit the changes. CrowdIn will pick up any changed strings and make them available for translation. Once they are translated, it will open a pull request to merge the changes into master.

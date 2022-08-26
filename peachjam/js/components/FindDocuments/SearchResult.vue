@@ -21,12 +21,25 @@
     <div>
       {{ item.jurisdiction }}
     </div>
-    <div>
+    <div class="mb-2">
       <span
         class="snippet"
         v-html="highlights(item)"
       />
     </div>
+    <template
+      v-if="item.pages.length"
+    >
+      <div
+        v-for="(page, index) in item.pages"
+        :key="index"
+      >
+        <span>
+          <a :href="`${item.expression_frbr_uri}?page=${page.page_num}`">Page {{ page.page_num }}</a>:
+        </span>
+        <span v-html="page.highlight['pages.body'].join(' ... ')" />
+      </div>
+    </template>
   </li>
 </template>
 

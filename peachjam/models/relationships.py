@@ -46,11 +46,19 @@ class Relationship(models.Model):
 
     def subject_document(self):
         # TODO: better way of doing this for the view? choose the right language?
-        return self.subject_documents()[0]
+        documents = self.subject_documents()
+        if documents.count() > 0:
+            return documents[0]
+        else:
+            return None
 
     def object_document(self):
         # TODO: better way of doing this for the view? choose the right language?
-        return self.object_documents()[0]
+        documents = self.object_documents()
+        if documents.count() > 0:
+            return documents[0]
+        else:
+            return None
 
     @classmethod
     def for_subject_document(cls, doc):

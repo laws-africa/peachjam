@@ -20,6 +20,5 @@ export const createAndMountApp = ({
   use?.forEach(plugin => {
     app.use(plugin);
   });
-  app.mount(mountTarget);
-  return app;
+  return app.mount(mountTarget);
 };

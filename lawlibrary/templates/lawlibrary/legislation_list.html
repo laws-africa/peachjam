@@ -5,32 +5,23 @@
 {% block page-content %}
 <section class="py-5">
   <div class="container">
-    <h2 class="mb-4">{% trans 'Provincial Legislation' %}</h2>
-    {% if provincial_legislation_list %}
-      <div>
-        {% for group in provincial_legislation_list %}
-          <div class="row mb-2">
-            {% if group.items|length > 0 %}
-              {% for locality in group.localities %}
-                <div class="col-lg-4">
-                  <div class="card">
-                    <div class="card-body">
-                      <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
-                    </div>
-                  </div>
-                </div>
-              {% endfor %}
+    {% if provinces %}
+      <h2>{% trans 'Provincial Legislation' %}</h2>
 
-            {% else %}
-              <div>{% trans 'No provincial legislation found' %}</div>
-            {% endif %}
-          </div>
+      <div class="mb-4">
+        <div class="row mb-2">
+          {% for locality in provinces %}
+            <div class="col-6 col-md-3 col-lg-2">
+              <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
+            </div>
           {% endfor %}
+        </div>
       </div>
     {% endif %}
 
-    <h2>National Legislation</h2>
-    <div data-vue-component="LegislationTable"></div>
+    <h1>{% trans "National Legislation" %}</h1>
+
+    <div data-vue-component="LegislationTable" data-show-side-facets></div>
     {{ national_legislation_list|json_script:"legislation-table" }}
   </div>
 </section>

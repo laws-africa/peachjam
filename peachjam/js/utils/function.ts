@@ -16,7 +16,7 @@ export function scrollToElement (elem: HTMLElement, offset = 0) {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           observer.unobserve(entry.target);
-          resolve(elem);
+          window.setTimeout(() => { resolve(elem); }, 1000);
         }
       });
     });
