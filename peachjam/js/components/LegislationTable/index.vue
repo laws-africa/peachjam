@@ -113,10 +113,7 @@
               </div>
               <div class="column">
                 <div>
-                  <a
-                    :href="`${row.work_frbr_uri}/`"
-                    target="_blank"
-                  >{{ row.title }}</a>
+                  <a :href="`${row.work_frbr_uri}`">{{ row.title }}</a>
                 </div>
                 <div class="column__subtitle">
                   {{ row.frbr_uri }}
@@ -265,7 +262,7 @@ export default {
           title: 'Repealed',
           name: 'repealed',
           type: 'boolean',
-          value: true,
+          value: false,
           count: this.filteredData.filter(item => item.repealed).length
         }
       ];
