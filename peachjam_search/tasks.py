@@ -26,7 +26,9 @@ class BackgroundTaskSearchProcessor(RealTimeSignalProcessor):
 
         # this assumes that only documents are being indexed with elasticsearch
         if isinstance(instance, CoreDocument):
-            search_model_saved(sender._meta.label, instance.pk)
+            # queue up the task for 60 seconds from now, so that quick edits to the document don't all trigger
+            # a re-index
+            search_model_saved(sender._meta.label, instance.pk, schedule=60)
 
 
 def get_processor():
