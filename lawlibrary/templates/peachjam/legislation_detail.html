@@ -1,0 +1,16 @@
+{% extends 'peachjam/layouts/document_detail.html' %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    {% if locality %}
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }} legislation</a></li>
+      </ol>
+    {% else %}
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'legislation_list' %}">National legislation</a></li>
+      </ol>
+    {% endif %}
+  </nav>
+{% endblock %}
