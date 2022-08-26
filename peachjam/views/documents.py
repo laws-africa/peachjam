@@ -8,15 +8,6 @@ from peachjam.registry import registry
 from peachjam.utils import add_slash, add_slash_to_frbr_uri
 
 
-def view_attachment(attachment):
-    response = HttpResponse(
-        attachment.file.read(), content_type=attachment.instance.mimetype
-    )
-    response["Content-Disposition"] = f"inline; filename={attachment.instance.filename}"
-    response["Content-Length"] = str(attachment.instance.file.size)
-    return response
-
-
 class DocumentDetailViewResolver(View):
     """Resolver view that returns detail views for documents based on their doc_type."""
 
@@ -57,8 +48,15 @@ class DocumentSourceView(DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         if hasattr(self.object, "source_file") and self.object.source_file.file:
-            file = self.object.source_file.file.open()
-            return view_attachment(file)
+            source_file = self.object.source_file
+            file = source_file.file.open()
+            bytes = file.read()
+            response = HttpResponse(bytes, content_type=source_file.mimetype)
+            response[
+                "Content-Disposition"
+            ] = f"inline; filename={source_file.filename_for_download()}"
+            response["Content-Length"] = str(len(bytes))
+            return response
         raise Http404
 
 
