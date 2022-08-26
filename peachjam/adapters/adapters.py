@@ -50,21 +50,27 @@ class IndigoAdapter(Adapter):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
         of document identifiers (expression FRBR URIs) which must be updated.
         """
-        updated_docs_list = self.get_updated_documents(last_refreshed)
-        return [d["url"] for d in updated_docs_list]
+        return self.get_updated_documents(last_refreshed)
 
     def get_doc_list(self):
         return self.client_get(self.url).json()["results"]
 
     def get_updated_documents(self, last_refreshed):
-        if last_refreshed is None:
-            return self.get_doc_list()
-
-        return [
+        docs = [
             document
             for document in self.get_doc_list()
-            if parser.parse(document["updated_at"]) > last_refreshed
+            if last_refreshed is None
+            or parser.parse(document["updated_at"]) > last_refreshed
         ]
+
+        urls = []
+        for doc in docs:
+            # if a document is out of date, also ensure we update its other expressions
+            for pit in doc["points_in_time"]:
+                for expr in pit["expressions"]:
+                    urls.append(expr["url"])
+
+        return urls
 
     def update_document(self, url):
         from countries_plus.models import Country
