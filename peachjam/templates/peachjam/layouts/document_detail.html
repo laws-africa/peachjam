@@ -162,20 +162,19 @@
             <div class="vertical-timeline">
               {% for history_item in timeline_events %}
                 <div class="vertical-timeline__item">
-                    <div class="vertical-timeline__item__content">
-                      <div class="vertical-timeline__item__content__header">
-                        <div class="title">{{ history_item.date|parse_string_date|date:"d F Y" }}</div>
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="mb-0">
+                        {{ history_item.date|parse_string_date|date:"d F Y" }}
                         {% if history_item.date == current_object_date %}
-                          <div class="tag">
-                            this version
-                          </div>
+                          <span class="badge rounded-pill bg-primary">this version</span>
                         {% endif %}
-                      </div>
+                      </h5>
                       {% for event in history_item.events %}
                         <div>
                           {% if event.event == "amendment" %}
                             Amended by
-                            <a href="{{ event.amending_uri }}"><i>{{ event.amending_title }}</i></a>
+                            <a href="{{ event.amending_uri }}/eng/"><i>{{ event.amending_title }}</i></a>
 
                           {% elif event.event == "assent" %}
                             Assented to by council.
@@ -189,18 +188,19 @@
 
                           {% elif event.event == "repeal" %}
                             Repealed by
-                            <a href="{{ event.repealing_uri }}"><i>{{ event.repealing_title }}</i></a>
+                            <a href="{{ event.repealing_uri }}/eng/"><i>{{ event.repealing_title }}</i></a>
                           {% endif %}
                         </div>
                       {% endfor %}
 
-                      {% if document.date != page.expression_date %}
+                      {% if history_item.date != current_object_date %}
                         {% if document.expression_frbr_uri %}
                           <a class="btn btn-outline-primary mt-2" href="{{ document.expression_frbr_uri }}/">Read this version</a>
                         {% endif %}
                       {% endif %}
                     </div>
-                  </div>
+                </div>
+              </div>
               {% endfor %}
             </div>
           {% else %}
