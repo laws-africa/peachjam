@@ -121,11 +121,10 @@ class LegislationDetailView(BaseDocumentDetailView):
         work = self.object.metadata_json
 
         points_in_time = self.get_points_in_time()
-        if points_in_time:
-            expressions = {
-                point_in_time["date"]: point_in_time["expressions"][0]
-                for point_in_time in points_in_time
-            }
+        expressions = {
+            point_in_time["date"]: point_in_time["expressions"][0]
+            for point_in_time in points_in_time or []
+        }
 
         assent_date = self.object.metadata_json.get("assent_date", None)
         if assent_date:
