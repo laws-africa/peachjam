@@ -199,7 +199,8 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
+DATE_FORMAT = "j F Y"
 
 USE_TZ = True
 
@@ -231,6 +232,9 @@ ELASTICSEARCH_DSL = {
         "timeout": 5,
     },
 }
+ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
+    "peachjam_search.tasks.BackgroundTaskSearchProcessor"
+)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

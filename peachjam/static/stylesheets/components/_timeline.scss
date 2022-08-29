@@ -46,29 +46,3 @@
     z-index: 1;
   }
 }
-
-/* The actual content */
-.vertical-timeline__item__content {
-  padding: 20px 30px;
-  background-color: $gray-100;
-  position: relative;
-  border-radius: 6px;
-}
-
-.vertical-timeline__item__content__header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-
-  .title {
-    margin-right: 1rem;
-    margin-bottom: 0;
-    font-size: $h4-font-size;
-  }
-  .tag {
-    background-color: $primary;
-    color: white;
-    padding: 0.25rem;
-    border-radius: 5px;
-  }
-}

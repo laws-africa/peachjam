@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ("background_task", "0002_auto_20170927_1109"),
         ("countries_plus", "0005_auto_20160224_1804"),
         ("languages_plus", "0004_auto_20171214_0004"),
     ]
