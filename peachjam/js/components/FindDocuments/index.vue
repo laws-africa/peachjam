@@ -100,24 +100,24 @@
                 />
               </li>
               <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_authoring_body"
+                v-if="searchInfo.facets && searchInfo.facets._filter_author"
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
                   <strong>{{ $t('Author') }}</strong>
                   <a
-                    v-if="filters.authoring_body.length"
+                    v-if="filters.author.length"
                     href="#"
-                    @click.prevent="() => filters.authoring_body = []"
+                    @click.prevent="() => filters.author = []"
                   >
                     {{ $t('Clear') }}
                   </a>
                 </div>
                 <TermFacet
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_authoring_body.authoring_body.buckets)"
-                  :selection="filters.authoring_body"
+                  :buckets="sortGenericBuckets(searchInfo.facets._filter_author.author.buckets)"
+                  :selection="filters.author"
                   :loading="loading"
-                  @changed="(x) => filters.authoring_body = x"
+                  @changed="(x) => filters.author = x"
                 />
               </li>
               <li
@@ -305,7 +305,7 @@ export default {
       drawerOpen: false,
       filters: {
         doc_type: [],
-        authoring_body: [],
+        author: [],
         jurisdiction: [],
         locality: [],
         year: [],
