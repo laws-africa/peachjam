@@ -143,14 +143,60 @@ class IndigoAdapter(Adapter):
             )[0]
 
         logger.info(model)
-        doc, new = model.objects.update_or_create(
+        created_doc, new = model.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri,
             defaults={**field_data, **frbr_uri_data},
         )
         logger.info(f"New document: {new}")
-        self.download_source_file(f"{url}.pdf", doc, title)
+        self.download_source_file(f"{url}.pdf", created_doc, title)
 
-        # fetch relationships
+    #
+    #     relationships = self.import_relationships(document, created_doc)
+    #
+    # def import_relationships(self, document, created_document):
+    #     relationships = []
+    #     if document["repeal"]:
+    #         subject_work = created_document.work
+    #         predicate = "x"
+    #         existent_doc = CoreDocument.objects.filter(
+    #             expression_frbr_uri=document["repeal"]["repealing_uri"]
+    #         ).first()
+    #         if not existent_doc:
+    #             object_work = self.update_document(document["repeal"]["repealing_uri"])
+    #
+    #         object_work = existent_doc.work
+    #
+    #         repeal_relationship = Relationship.objects.create(
+    #             subject_work=subject_work, predicate=predicate, object_work=object_work
+    #         )
+    #
+    #         relationships.append(repeal_relationship)
+    #
+    #     return relationships
+
+    #     if document["amendments"]:
+    #         subject_work =
+    #         predicate =
+    #         object_work =
+    #         amendment_relationship = Relationship.objects.create(
+    #             subject_work=subject_work,
+    #             predicate=predicate,
+    #             object_work=object_work
+    #         )
+    #         relationships.append(amendment_relationship)
+    #
+    #     if document["commencements"]:
+    #         subject_work =
+    #         predicate =
+    #         object_work =
+    #         commencement_relationship = Relationship.objects.create(
+    #             subject_work=subject_work,
+    #             predicate=predicate,
+    #             object_work=object_work
+    #         )
+    #         relationships.append(commencement_relationship)
+    #
+    #     return relationships
 
     def client_get(self, url):
         r = self.client.get(url)
