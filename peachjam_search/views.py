@@ -101,7 +101,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     filter_fields = {
         "doc_type": "doc_type",
-        "authoring_body": "authoring_body",
+        "author": "author",
         "jurisdiction": "jurisdiction",
         "locality": "locality",
         "matter_type": "matter_type",
@@ -122,8 +122,8 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "doc_type": {
             "field": "doc_type",
         },
-        "authoring_body": {
-            "field": "authoring_body",
+        "author": {
+            "field": "author",
         },
         "jurisdiction": {
             "field": "jurisdiction",
