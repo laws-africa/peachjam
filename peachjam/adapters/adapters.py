@@ -150,6 +150,8 @@ class IndigoAdapter(Adapter):
         logger.info(f"New document: {new}")
         self.download_source_file(f"{url}.pdf", doc, title)
 
+        # fetch relationships
+
     def client_get(self, url):
         r = self.client.get(url)
         r.raise_for_status()
