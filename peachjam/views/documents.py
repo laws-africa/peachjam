@@ -55,7 +55,7 @@ class DocumentSourceView(DetailView):
             response[
                 "Content-Disposition"
             ] = f"inline; filename={source_file.filename_for_download()}"
-            response["Content-Length"] = str(len(bytes))
+            response["Content-Length"] = str(len(file_bytes))
             return response
         raise Http404
 
