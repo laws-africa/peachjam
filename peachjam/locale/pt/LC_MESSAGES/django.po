@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: pt\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 44\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 50\n"
 
 #: settings.py:193
 msgid "English"
@@ -44,7 +44,7 @@ msgstr "Efetuar Login"
 #: templates/admin/login.html:63
 #| msgid "Log Out"
 msgid "Log in"
-msgstr "Efectuar Login"
+msgstr "Efetuar Login"
 
 #: templates/account/login.html:30 templates/account/password_reset.html:18
 msgid "Email address"
@@ -58,7 +58,7 @@ msgstr "Senha"
 #: templates/account/login.html:45
 #| msgid "Reset Your Password"
 msgid "Forgot your password?"
-msgstr "Esqueceu a sua senha?"
+msgstr "Esqueceu-se da sua senha?"
 
 #: templates/account/login.html:76
 #, python-format
@@ -66,7 +66,7 @@ msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
 msgstr "\n"
-"            Inicie sessão com %(provider.name)s\n"
+"            Efetuar Login com %(provider.name)s\n"
 "          "
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
@@ -99,7 +99,7 @@ msgstr "Código ruim"
 #: templates/account/password_reset_from_key.html:7
 #: templates/account/password_reset_from_key_done.html:7
 msgid "Reset Password"
-msgstr "Redefinir a Senha"
+msgstr "Redefinir a senha"
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
@@ -122,7 +122,7 @@ msgstr "Sua senha foi redefinida."
 #: templates/account/password_reset_from_key_done.html:4
 #| msgid "Reset Password"
 msgid "Change Password"
-msgstr "Mudar a senha"
+msgstr "Mudar a Senha"
 
 #: templates/account/password_reset_from_key_done.html:8
 #| msgid "Your password is now reset."
@@ -135,7 +135,7 @@ msgstr "Por favor corrige o erro abaixo."
 
 #: templates/admin/login.html:23
 msgid "Please correct the errors below."
-msgstr "Por favor, corrija os erros abaixo."
+msgstr "Por favor corrige o erro abaixo."
 
 #: templates/admin/login.html:39
 #, python-format
@@ -144,7 +144,7 @@ msgstr "Você está autenticado como %(username)s, mas não está autorizado a a
 
 #: templates/admin/login.html:59
 msgid "Forgotten your password or username?"
-msgstr "Esqueceu sua senha ou nome de usuário?"
+msgstr "Esqueceu sua senha ou usuário?"
 
 #: templates/admin/peachjam_document_relationships.html:6
 #: templates/peachjam/home.html:3
@@ -221,8 +221,8 @@ msgid "\n"
 "          Our specific goals are to:\n"
 "        "
 msgstr "\n"
-"          Esta plataforma Pan-Africana serve como um centro de informações sobre todos os aspectos da agenda da Arquitetura\n"
-"          Governança Africana (AGA), incluindo cartas, protocolos, comunicações, decisões legais relevantes, política,\n"
+"          Esta plataforma Pan-Africana serve como um centro de informações sobre todos os aspectos da agenda da Arquitectura \n"
+"          de Governação Africana (AGA), incluindo cartas, protocolos, comunicações, decisões legais relevantes, política,\n"
 "          implementação, monitoramento e material relacionado. O objectivo global é construir uma colaboração eficaz\n"
 "          entre os cidadãos africanos e as organizações da sociedade civil, por um lado, e membros AGA, por outro lado, para\n"
 "          reforçar a implementação da agenda da plataforma AGA no que diz respeito à democracia, governação e direitos humanos.\n"
@@ -273,7 +273,7 @@ msgid "\n"
 "        "
 msgstr "\n"
 "          Essa plataforma é desenvolvida e mantida conjuntamente por <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> e\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Leis. frica</a> com fundos da União Europeia,\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> com fundos da União Europeia,\n"
 "          o Indigo Trust e o Sigrid Rausing Trust. A fase inicial do projecto vai de 2021 para 2024.\n"
 "        "
 
@@ -313,9 +313,9 @@ msgid "\n"
 "          rich interactivity, advanced research and justice sector innovation.\n"
 "        "
 msgstr "\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> ajuda os governos africanos a digitalizarem de forma sustentável as suas informações legais para uso público, através de software aberto\n"
-"          de legislação, reforço de capacidades, formação, parcerias e apoio. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions\n"
-"          reduz o custo da digitalização, arquivo e publicação de informação jurídica primária, e cria oportunidades para uma\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a>  auxilia os governos africanos a digitalizar de forma sustentável a sua informação legal para uso público, através de\n"
+"          software de direito, desenvolvimento de capacidades, formação, parcerias e apoio. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions\n"
+"          reduzem o custo da digitalização, arquivo e publicação de informação jurídica primária, e criam oportunidades para\n"
 "          interactividade rica, investigação avançada e inovação no sector da justiça.\n"
 "        \n"
 "        "
@@ -326,8 +326,8 @@ msgid "\n"
 "          of the rule of law, access to justice, and innovation.\n"
 "        "
 msgstr "\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> e <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> colaboram  no desvendar do valor da informação jurídica digital africana em apoio\n"
-"          do Estado de direito, acesso à justiça e à inovação.\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> e <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> colabore no desbloqueio do valor da informação jurídica digital africana em apoio\n"
+"          do Estado de direito. acesso à justiça e à inovação.\n"
 "        "
 
 #: templates/peachjam/about.html:84
