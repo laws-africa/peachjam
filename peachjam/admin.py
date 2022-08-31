@@ -402,13 +402,17 @@ class IngestorAdmin(admin.ModelAdmin):
     inlines = [IngestorSettingInline]
     readonly_fields = ("last_refreshed_at",)
     form = IngestorForm
-    actions = ["reset_ingestor_refresh_date"]
+    actions = ["refresh_all_content"]
 
-    def reset_ingestor_refresh_date(self, request, queryset):
+    def refresh_all_content(self, request, queryset):
+        from peachjam.tasks import run_ingestors
+
         queryset.update(last_refreshed_at=None)
-        self.message_user(request, "Ingestor last refresh date has been reset.")
+        # queue up the background ingestor update task
+        run_ingestors()
+        self.message_user(request, "Refreshing content in the background.")
 
-    reset_ingestor_refresh_date.short_description = "Reset ingestor last refresh date"
+    refresh_all_content.short_description = "Refresh all content"
 
 
 admin.site.register(
