@@ -4,140 +4,161 @@
 {% block title %}{{ document.title }}{% endblock %}
 
 {% block page-content %}
-  <main class="pb-5">
-    <div class="container">
-      {% block breadcrumbs %}
-      {% endblock %}
+  <main class="container-fluid py-5">
+    {% block breadcrumbs %}
+    {% endblock %}
 
-      {% block document-title %}
-        <h1 class="mb-4 mt-2">{{ document.title }}</h1>
-      {% endblock %}
+    {% block document-title %}
+      <h1 class="mb-4 mt-2">{{ document.title }}</h1>
+    {% endblock %}
 
-      <div class="mb-5">
-        <div class="card">
-          <div class="card-body">
-            {% block document-metadata %}
-              <div class="row">
-                <div class="col-md-6">
-                  {% block document-metadata-content %}
-                    <dl class="row document-metadata-list">
+    {% if perms.peachjam.change_coredocument %}
+      <a href="{{ document|admin_url:'change' }}">Edit</a>
+    {% endif %}
 
-                      {% block document-metadata-content-jurisdiction %}
-                        {% if document.jurisdiction %}
-                          <dt class="col-4">{% trans 'Jurisdiction' %}</dt>
-                          <dd class="col-8 text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
-                        {% endif %}
-                      {% endblock %}
+    {% if perms.peachjam.add_relationship %}
+      {{ predicates_json|json_script:"predicates" }}
+    {% endif %}
 
-                      {% block document-metadata-content-author %}
-                        {% if document.author %}
-                          <dt class="col-4">{% trans 'Author' %}</dt>
-                          <dd class="col-8 text-muted">{{ document.author }}</dd>
-                        {% endif %}
-                      {% endblock %}
+    {{ provision_relationships|json_script:"provision-relationships" }}
 
-                      {% block document-metadata-content-date %}
-                        <dt class="col-4">{% trans 'Date' %}</dt>
-                        {% if date_versions %}
-                          <dd class="col-8">
-                            <div class="dropdown">
-                              <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ document.date }}
-                              </a>
-                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                {% for version in date_versions %}
-                                  <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
-                                {% endfor %}
-                              </ul>
-                            </div>
-                          </dd>
-                        {% else %}
-                          <dd class="col-8 text-muted">{{ document.date }}</dd>
-                        {% endif %}
-                      {% endblock %}
+    <ul style="margin-bottom: 1px;" class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#document-detail-tab" type="button" role="tab" aria-controls="document-detail-tab" aria-selected="true">
+          Document detail
+        </button>
+      </li>
+      {% if timeline_events %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button" role="tab" aria-controls="history-tab" aria-selected="false">
+            History
+          </button>
+        </li>
+      {% endif %}
+    </ul>
 
-                      {% block document-metadata-content-language %}
-                        <dt class="col-4">{% translate 'Language' %}</dt>
-                        {% if language_versions %}
-                          <dd class="col-8">
-                            <div class="dropdown">
-                              <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ document.language }}
-                              </a>
-                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                {% for version in language_versions %}
-                                  <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
-                                {% endfor %}
-                              </ul>
-                            </div>
-                          </dd>
-                        {% else %}
-                          <dd class="col-8 text-muted">{{ document.language }} </dd>
-                        {% endif %}
-                      {% endblock %}
-                    </dl>
-                  {% endblock %}
+    <div class="tab-content" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="document-detail-tab" role="tabpanel" aria-labelledby="document-detail-tab">
+        <div class="mb-5">
+          <div class="card">
+            <div class="card-body">
+              {% block document-metadata %}
+                <div class="row">
+                  <div class="col-md-6">
+                    {% block document-metadata-content %}
+                      <dl class="row document-metadata-list">
 
-                  {% if document.source_file %}
-                    <div>
-                      <a
-                        class="card-link" href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
-                      >{% trans "Download" %} {{ document.source_file.filename_extension|upper }}</a>
-                      ({{ document.source_file.size|filesizeformat }})
-                    </div>
-                  {% endif %}
-                </div>
-
-                <div class="col-md-6">
-                  {% block document-relationships-content %}
-                    {% if document.relationships_as_subject or document.relationships_as_object %}
-                      <h5>{% translate 'Related documents' %}</h5>
-
-                      <ul class="list-unstyled">
-                        {% for rel in document.relationships_as_subject %}
-                          {% if rel.object_document %}
-                            <li>
-                              {% translate rel.predicate.verb as verb %}
-                              {{ verb|capfirst }}
-                              <a href="{% url 'document_detail' frbr_uri=rel.object_document.expression_frbr_uri|strip_first_character %}">{{ rel.object_document.title }}</a>
-                            </li>
+                        {% block document-metadata-content-jurisdiction %}
+                          {% if document.jurisdiction %}
+                            <dt class="col-4">{% trans 'Jurisdiction' %}</dt>
+                            <dd class="col-8 text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
                           {% endif %}
-                        {% endfor %}
+                        {% endblock %}
 
-                        {% for rel in document.relationships_as_object %}
-                          {% if rel.subject_document %}
-                            <li>
-                              {% translate rel.predicate.reverse_verb as verb %}
-                              {{ verb|capfirst }}
-                              <a href="{% url 'document_detail' frbr_uri=rel.subject_document.expression_frbr_uri|strip_first_character %}">{{ rel.subject_document.title }}</a>
-                            </li>
+                        {% block document-metadata-content-author %}
+                          {% if document.author %}
+                            <dt class="col-4">{% trans 'Author' %}</dt>
+                            <dd class="col-8 text-muted">{{ document.author }}</dd>
                           {% endif %}
-                        {% endfor %}
-                      </ul>
+                        {% endblock %}
+
+
+                        {% block document-metadata-content-date %}
+                          <dt class="col-4">{% trans 'Date' %}</dt>
+                          {% if date_versions %}
+                            <dd class="col-8">
+                              <div class="dropdown">
+                                <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                  {{ document.date }}
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                  {% for version in date_versions %}
+                                    <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
+                                  {% endfor %}
+                                </ul>
+                              </div>
+                            </dd>
+                          {% else %}
+                            <dd class="col-8 text-muted">{{ document.date }}</dd>
+                          {% endif %}
+                        {% endblock %}
+
+                        {% block document-metadata-content-language %}
+                          <dt class="col-4">{% translate 'Language' %}</dt>
+                          {% if language_versions %}
+                            <dd class="col-8">
+                              <div class="dropdown">
+                                <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                  {{ document.language }}
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                  {% for version in language_versions %}
+                                    <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
+                                  {% endfor %}
+                                </ul>
+                              </div>
+                            </dd>
+                          {% else %}
+                            <dd class="col-8 text-muted">{{ document.language }} </dd>
+                          {% endif %}
+                        {% endblock %}
+                      </dl>
+                    {% endblock %}
+
+                    {% if document.source_file %}
+                      <div>
+                        <a class="card-link" href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}">Download document</a> ({{ document.source_file.file.size|filesizeformat }})
+                      </div>
                     {% endif %}
-                  {% endblock %}
-                </div>
-              </div>
-            {% endblock %}
+                  </div>
 
-            {% if perms.peachjam.change_coredocument %}
-              <a href="{{ document|admin_url:'change' }}">Edit document</a>
-            {% endif %}
+                  <div class="col-md-6">
+                    {% block document-relationships-content %}
+                      {% if document.relationships_as_subject or document.relationships_as_object %}
+                        <h5>{% translate 'Related documents' %}</h5>
+
+                        <ul class="list-unstyled">
+                          {% for rel in document.relationships_as_subject %}
+                            {% if rel.object_document %}
+                              <li>
+                                {% translate rel.predicate.verb as verb %}
+                                {{ verb|capfirst }}
+                                <a href="{% url 'document_detail' frbr_uri=rel.object_document.expression_frbr_uri|strip_first_character %}">{{ rel.object_document.title }}</a>
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+
+                          {% for rel in document.relationships_as_object %}
+                            {% if rel.subject_document %}
+                              <li>
+                                {% translate rel.predicate.reverse_verb as verb %}
+                                {{ verb|capfirst }}
+                                <a href="{% url 'document_detail' frbr_uri=rel.subject_document.expression_frbr_uri|strip_first_character %}">{{ rel.subject_document.title }}</a>
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+                        </ul>
+                      {% endif %}
+                    {% endblock %}
+                  </div>
+                </div>
+              {% endblock %}
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="container-fluid">
-      {% block content %}
-        {% include 'peachjam/_document_content.html' with document=document %}
-      {% endblock %}
+        {{ citation_links|json_script:"citation-links" }}
+
+        {% block content %}
+          {% include 'peachjam/_document_content.html' with document=document %}
+        {% endblock %}
+      </div>
+
+      {% if timeline_events %}
+        <div class="tab-pane fade" id="history-tab" role="tabpanel" aria-labelledby="history-tab">
+          {% include 'peachjam/_timeline_events.html' %}
+        </div>
+      {% endif %}
     </div>
   </main>
-
-  {% if perms.peachjam.add_relationship %}
-    {{ predicates_json|json_script:"predicates" }}
-  {% endif %}
-  {{ citation_links|json_script:"citation-links" }}
-  {{ provision_relationships|json_script:"provision-relationships" }}
 {% endblock %}
