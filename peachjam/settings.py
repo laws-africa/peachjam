@@ -199,7 +199,8 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
+DATE_FORMAT = "j F Y"
 
 USE_TZ = True
 
@@ -228,9 +229,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ELASTICSEARCH_DSL = {
     "default": {
         "hosts": os.environ.get("ELASTICSEARCH_HOST", "localhost:9200"),
-        "timeout": 5,
+        "timeout": 30,
     },
 }
+ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
+    "peachjam_search.tasks.BackgroundTaskSearchProcessor"
+)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

@@ -3,26 +3,31 @@
 {% block title %} {% trans 'Legislation' %} {% endblock %}
 
 {% block page-content %}
-<section class="py-5">
-  <div class="container">
-    {% if provinces %}
-      <h2>{% trans 'Provincial Legislation' %}</h2>
+  <section class="pb-5">
+    <div class="container">
+      {% block breadcrumbs %}
+      {% endblock %}
 
-      <div class="mb-4">
-        <div class="row mb-2">
-          {% for locality in provinces %}
-            <div class="col-6 col-md-3 col-lg-2">
-              <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
-            </div>
-          {% endfor %}
+      <h1 class="mt-2">{% trans 'Legislation' %}</h1>
+
+      {% if provinces %}
+        <h4 class="mt-2">{% trans 'Provincial Legislation' %}</h4>
+
+        <div class="mb-4">
+          <div class="row mb-2">
+            {% for locality in provinces %}
+              <div class="col-6 col-md-3 col-lg-2">
+                <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
+              </div>
+            {% endfor %}
+          </div>
         </div>
-      </div>
-    {% endif %}
+      {% endif %}
 
-    <h1>{% trans "National Legislation" %}</h1>
+      <h1>{% trans "National Legislation" %}</h1>
 
-    <div data-vue-component="LegislationTable" data-show-side-facets></div>
-    {{ national_legislation_list|json_script:"legislation-table" }}
-  </div>
-</section>
+      <div data-vue-component="LegislationTable" data-show-side-facets></div>
+      {{ national_legislation_list|json_script:"legislation-table" }}
+    </div>
+  </section>
 {% endblock %}
