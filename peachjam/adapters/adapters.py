@@ -21,28 +21,22 @@ class Adapter:
         self.settings = settings
         self.predicates = [
             {
-                "amendment": {
-                    "name": "amended by",
-                    "slug": "amended-by",
-                    "verb": "is amended by",
-                    "reverse_verb": "amends",
-                }
+                "name": "amended by",
+                "slug": "amended-by",
+                "verb": "is amended by",
+                "reverse_verb": "amends",
             },
             {
-                "repeal": {
-                    "name": "repealed by",
-                    "slug": "repealed-by",
-                    "verb": "is repealed by",
-                    "reverse_verb": "repeals",
-                }
+                "name": "repealed by",
+                "slug": "repealed-by",
+                "verb": "is repealed by",
+                "reverse_verb": "repeals",
             },
             {
-                "commencement": {
-                    "name": "commenced by",
-                    "slug": "commenced-by",
-                    "verb": "is commenced by",
-                    "reverse_verb": "commences",
-                }
+                "name": "commenced by",
+                "slug": "commenced-by",
+                "verb": "is commenced by",
+                "reverse_verb": "commences",
             },
         ]
 
@@ -177,35 +171,44 @@ class IndigoAdapter(Adapter):
         logger.info(f"New document: {new}")
         self.download_source_file(f"{url}.pdf", created_doc, title)
 
-        relationships = self.import_relationships(document, created_doc)
-        print(relationships)
+        self.import_relationships(document, created_doc)
 
     def import_relationships(self, imported_document, created_document):
-
-        relationships = []
+        subject_work = created_document.work
+        object_work, created = Work.objects.get_or_create(
+            frbr_uri=FrbrUri.parse(imported_document["frbr_uri"]),
+            title=imported_document["title"],
+        )
 
         if imported_document["repeal"]:
-            subject_work = created_document.work
-            predicate = Predicate.objects.get_or_create(
-                slug=self.predicates[1]["repeal"]["slug"],
-                defaults={
-                    "name": self.predicates[1]["repeal"]["name"],
-                    "slug": self.predicates[1]["repeal"]["slug"],
-                    "verb": self.predicates[1]["repeal"]["verb"],
-                    "reverse_verb": self.predicates[1]["repeal"]["reverse_verb"],
-                },
-            )
-            object_work, created = Work.objects.get_or_create(
-                frbr_uri=FrbrUri.parse(imported_document["frbr_uri"]),
-                title=imported_document["title"],
-            )
+            self.create_relationship(1, subject_work, object_work)
 
-            repeal_relationship = Relationship.objects.create(
-                subject_work=subject_work, predicate=predicate, object_work=object_work
-            )
-            relationships.append(repeal_relationship)
+        if imported_document["amendments"]:
+            self.create_relationship(0, subject_work, object_work)
 
-        return relationships
+        if imported_document["commencements"]:
+            self.create_relationship(2, subject_work, object_work)
+
+    def create_relationship(self, predicate_index, subject_work, object_work):
+        predicate, created = Predicate.objects.get_or_create(
+            slug=self.predicates[predicate_index]["slug"],
+            defaults={
+                "name": self.predicates[predicate_index]["name"],
+                "slug": self.predicates[predicate_index]["slug"],
+                "verb": self.predicates[predicate_index]["verb"],
+                "reverse_verb": self.predicates[predicate_index]["reverse_verb"],
+            },
+        )
+
+        # Just some preliminary debugging that'll be chucked later ;)
+        print("Subject Work-->", subject_work)
+        print("Predicate-->", predicate)
+        print("Object Work-->", object_work)
+
+        Relationship.objects.create(
+            subject_work=subject_work, predicate=predicate, object_work=object_work
+        )
+        logger.info(f"Relationship for {subject_work} document has been created")
 
     def client_get(self, url):
         r = self.client.get(url)
