@@ -28,11 +28,13 @@
           Document detail
         </button>
       </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button" role="tab" aria-controls="history-tab" aria-selected="false">
-          History
-        </button>
-      </li>
+      {% if timeline_events %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button" role="tab" aria-controls="history-tab" aria-selected="false">
+            History
+          </button>
+        </li>
+      {% endif %}
     </ul>
 
     <div class="tab-content" id="pills-tabContent">
@@ -150,9 +152,12 @@
           {% include 'peachjam/_document_content.html' with document=document %}
         {% endblock %}
       </div>
-      <div class="tab-pane fade" id="history-tab" role="tabpanel" aria-labelledby="history-tab">
-        {% include 'peachjam/_timeline_events.html' %}
-      </div>
+
+      {% if timeline_events %}
+        <div class="tab-pane fade" id="history-tab" role="tabpanel" aria-labelledby="history-tab">
+          {% include 'peachjam/_timeline_events.html' %}
+        </div>
+      {% endif %}
     </div>
   </main>
 {% endblock %}
