@@ -88,7 +88,10 @@
   {% if display_type == 'pdf' %}
     <div data-pdf="{% url 'document_source_pdf' document.expression_frbr_uri|strip_first_character %}"
          data-pdf-size="{{ document.source_file.file.size }}"
-         data-pdf-loading>
+         {% if document.source_file.file.size > 5242880 %}
+            data-large-pdf
+         {% endif %}
+         data-pdf-standby>
     </div>
   {% endif %}
   <div class="document-content__toggle">
@@ -149,14 +152,21 @@
         {% if display_type == 'pdf' %}
           <div class="content" data-document-element>
             <div class="pdf-loading">
-              <div class="text-center mb-2"><strong>Loading PDF...</strong></div>
+              <div class="text-center mb-2"><strong>{% trans 'Loading PDF...' %}</strong></div>
               <div class="progress">
                 <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
                      role="progressbar">
                 </div>
               </div>
             </div>
+
             <div class="pdf-content"></div>
+            <div class="pdf-large-prompt">
+              <p>{% trans 'This current document is more than 5MB. Proceed to load?' %}</p>
+              <button class="btn btn-primary" type="button" data-load-doc-button>
+                {% trans 'Load document' %}
+              </button>
+            </div>
           </div>
         {% endif %}
         <la-gutter></la-gutter>
