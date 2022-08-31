@@ -8,7 +8,7 @@ class PeachJamConfig(AppConfig):
     def ready(self):
         import peachjam.adapters  # noqa
 
-        if not settings.DEBUG:
+        if settings.DEBUG:
             from peachjam.tasks import run_ingestors
 
             run_ingestors(repeat=60 * 60 * 24)

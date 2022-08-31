@@ -10,6 +10,7 @@ from dateutil import parser
 from django.core.files import File
 from django.utils.text import slugify
 
+from peachjam.models import Predicate, Relationship, Work
 from peachjam.plugins import plugins
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,32 @@ logger = logging.getLogger(__name__)
 class Adapter:
     def __init__(self, settings):
         self.settings = settings
+        self.predicates = [
+            {
+                "amendment": {
+                    "name": "amended by",
+                    "slug": "amended-by",
+                    "verb": "is amended by",
+                    "reverse_verb": "amends",
+                }
+            },
+            {
+                "repeal": {
+                    "name": "repealed by",
+                    "slug": "repealed-by",
+                    "verb": "is repealed by",
+                    "reverse_verb": "repeals",
+                }
+            },
+            {
+                "commencement": {
+                    "name": "commenced by",
+                    "slug": "commenced-by",
+                    "verb": "is commenced by",
+                    "reverse_verb": "commences",
+                }
+            },
+        ]
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -150,53 +177,35 @@ class IndigoAdapter(Adapter):
         logger.info(f"New document: {new}")
         self.download_source_file(f"{url}.pdf", created_doc, title)
 
-    #
-    #     relationships = self.import_relationships(document, created_doc)
-    #
-    # def import_relationships(self, document, created_document):
-    #     relationships = []
-    #     if document["repeal"]:
-    #         subject_work = created_document.work
-    #         predicate = "x"
-    #         existent_doc = CoreDocument.objects.filter(
-    #             expression_frbr_uri=document["repeal"]["repealing_uri"]
-    #         ).first()
-    #         if not existent_doc:
-    #             object_work = self.update_document(document["repeal"]["repealing_uri"])
-    #
-    #         object_work = existent_doc.work
-    #
-    #         repeal_relationship = Relationship.objects.create(
-    #             subject_work=subject_work, predicate=predicate, object_work=object_work
-    #         )
-    #
-    #         relationships.append(repeal_relationship)
-    #
-    #     return relationships
+        relationships = self.import_relationships(document, created_doc)
+        print(relationships)
 
-    #     if document["amendments"]:
-    #         subject_work =
-    #         predicate =
-    #         object_work =
-    #         amendment_relationship = Relationship.objects.create(
-    #             subject_work=subject_work,
-    #             predicate=predicate,
-    #             object_work=object_work
-    #         )
-    #         relationships.append(amendment_relationship)
-    #
-    #     if document["commencements"]:
-    #         subject_work =
-    #         predicate =
-    #         object_work =
-    #         commencement_relationship = Relationship.objects.create(
-    #             subject_work=subject_work,
-    #             predicate=predicate,
-    #             object_work=object_work
-    #         )
-    #         relationships.append(commencement_relationship)
-    #
-    #     return relationships
+    def import_relationships(self, imported_document, created_document):
+
+        relationships = []
+
+        if imported_document["repeal"]:
+            subject_work = created_document.work
+            predicate = Predicate.objects.get_or_create(
+                slug=self.predicates[1]["repeal"]["slug"],
+                defaults={
+                    "name": self.predicates[1]["repeal"]["name"],
+                    "slug": self.predicates[1]["repeal"]["slug"],
+                    "verb": self.predicates[1]["repeal"]["verb"],
+                    "reverse_verb": self.predicates[1]["repeal"]["reverse_verb"],
+                },
+            )
+            object_work, created = Work.objects.get_or_create(
+                frbr_uri=FrbrUri.parse(imported_document["frbr_uri"]),
+                title=imported_document["title"],
+            )
+
+            repeal_relationship = Relationship.objects.create(
+                subject_work=subject_work, predicate=predicate, object_work=object_work
+            )
+            relationships.append(repeal_relationship)
+
+        return relationships
 
     def client_get(self, url):
         r = self.client.get(url)
