@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/africanlii/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 63\n"
+"X-Crowdin-File: /main/africanlii/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 65\n"
 
 #: templates/peachjam/footer.html:8
 msgid "About AfricanLII"
@@ -41,7 +41,7 @@ msgid "\n"
 "    for Governance Alliance project</a>.\n"
 "    "
 msgstr "\n"
-"      La publication du matériel de l'Union africaine est coparrainée par l'Union européenne et fait partie du projet <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Données\n"
+"      La publication du matériel de l'Union Africaine est coparrainée par l'Union européenne et fait partie du projet <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Données\n"
 "    de l'Alliance de gouvernance</a>.\n"
 "    "
 
@@ -173,7 +173,7 @@ msgstr "Nous numérisons la loi et la politique de l’Architecture de Gouvernan
 #: templates/peachjam/home.html:16
 #, python-format
 msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
-msgstr "Recherchez %(documents_count)s documents en AU sur la plateforme Africain."
+msgstr "Recherchez %(documents_count)s documents en AU sur la plateforme AfricanLII."
 
 #: templates/peachjam/home.html:40
 msgid "Regional Body"
@@ -189,11 +189,11 @@ msgstr "Documents récents de l'UA"
 
 #: templates/peachjam/home.html:67
 msgid "Recent Legal Instruments"
-msgstr "Derniers instruments juridiques"
+msgstr "Derniers Instruments Juridiques"
 
 #: templates/peachjam/home.html:74
 msgid "Recent Treaties and Protocols "
-msgstr "Traités et protocoles récents "
+msgstr "Traités et Protocoles récents "
 
 #, python-format
 #~ msgid " Documents by %(author)s "
