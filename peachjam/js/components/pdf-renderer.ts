@@ -35,7 +35,7 @@ class PdfRenderer {
     this.onPdfLoaded = () => {};
     this.root.addEventListener('pdf-loaded', () => this.onPdfLoaded());
 
-    const loadingProgressObserver = new MutationObserver(() => {
+    const observer = new MutationObserver(() => {
       const progressBarElement: HTMLElement | null = root.querySelector('.progress-bar');
       const loadingProgress = root.getAttribute('data-loading-progress');
       if (progressBarElement && loadingProgress) {
@@ -43,50 +43,45 @@ class PdfRenderer {
         progressBarElement.innerText = `${Math.ceil(parseFloat(loadingProgress) * 100)}%`;
       }
     });
-    loadingProgressObserver.observe(this.root, {
+    observer.observe(this.root, {
       attributeFilter: ['data-loading-progress']
     });
 
-    const startPdfSetupObserver = new MutationObserver(() => {
-      if (!Object.keys(this.root.dataset).includes('startPdfSetup')) return;
-      this.setupPdfAndPreviewPanels().then(() => {
-        this.root.removeAttribute('data-loading-progress');
-        this.root.removeAttribute('data-pdf-loading');
-        this.root.dispatchEvent(new CustomEvent('pdf-loaded'));
-
-        const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-content__page'));
-        const previewPanels = Array.from(root.querySelectorAll('.preview-panel'));
-        for (const previewPanel of previewPanels) {
-          previewPanel.addEventListener('click', (e) => this.handlePreviewPanelClick(e));
-        }
-
-        window.addEventListener('scroll', debounce(() => {
-          if (!this.scrollListenerActive) return;
-          let current: HTMLElement | null;
-          for (const page of pages) {
-            if (!(window.scrollY >= page.offsetTop)) return;
-            current = root.querySelector(`.preview-panel[data-page="${page.dataset.page}"]`);
-            if (!current) return;
-            this.activatePreviewPanel(current);
-            const scrollableContainer = this.root.querySelector('[data-preview-scroll-container]');
-            if (!scrollableContainer) return;
-            scrollableContainer.scrollTop = (current.offsetTop + current.clientHeight) - (current.offsetHeight * 2);
-          }
-        }, 20));
-      });
-    });
-
-    startPdfSetupObserver.observe(this.root, {
-      attributeFilter: ['data-start-pdf-setup']
-    });
-
     this.root.querySelector('button[data-load-doc-button]')?.addEventListener('click', () => {
-      this.root.removeAttribute('data-large-pdf');
-      this.root.dataset.startPdfSetup = '';
+      this.loadPdf();
     });
 
     if (Object.keys(this.root.dataset).includes('largePdf')) return;
-    this.root.dataset.startPdfSetup = '';
+    this.loadPdf();
+  }
+
+  loadPdf () {
+    this.root.removeAttribute('data-large-pdf');
+    this.setupPdfAndPreviewPanels().then(() => {
+      this.root.removeAttribute('data-loading-progress');
+      this.root.removeAttribute('data-pdf-loading');
+      this.root.dispatchEvent(new CustomEvent('pdf-loaded'));
+
+      const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-content__page'));
+      const previewPanels = Array.from(this.root.querySelectorAll('.preview-panel'));
+      for (const previewPanel of previewPanels) {
+        previewPanel.addEventListener('click', (e) => this.handlePreviewPanelClick(e));
+      }
+
+      window.addEventListener('scroll', debounce(() => {
+        if (!this.scrollListenerActive) return;
+        let current: HTMLElement | null;
+        for (const page of pages) {
+          if (!(window.scrollY >= page.offsetTop)) return;
+          current = this.root.querySelector(`.preview-panel[data-page="${page.dataset.page}"]`);
+          if (!current) return;
+          this.activatePreviewPanel(current);
+          const scrollableContainer = this.root.querySelector('[data-preview-scroll-container]');
+          if (!scrollableContainer) return;
+          scrollableContainer.scrollTop = (current.offsetTop + current.clientHeight) - (current.offsetHeight * 2);
+        }
+      }, 20));
+    });
   }
 
   activatePreviewPanel (nextActivePreviewPanel: HTMLElement | EventTarget) {
