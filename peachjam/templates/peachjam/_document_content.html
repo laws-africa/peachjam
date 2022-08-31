@@ -162,7 +162,11 @@
 
             <div class="pdf-content"></div>
             <div class="pdf-large-prompt">
-              <p>{% trans 'This current document is more than 5MB. Proceed to load?' %}</p>
+              <p>
+                {% blocktrans with filesize=document.source_file.file.size|filesizeformat trimmed %}
+                  This document is {{ filesize }}. Do you want to load it?
+                {% endblocktrans %}
+              </p>
               <button class="btn btn-primary" type="button" data-load-doc-button>
                 {% trans 'Load document' %}
               </button>
