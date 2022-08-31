@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-08-22 15:05+0200\n"
-"PO-Revision-Date: 2022-08-31 16:18\n"
+"PO-Revision-Date: 2022-08-31 17:26\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -63,7 +63,7 @@ msgstr "Union européenne"
 
 #: templates/peachjam/footer.html:34
 msgid "Other African Legal Information Institutions"
-msgstr "Autres institutions africaines d'information juridique"
+msgstr "Autres Institutions Africaines d'information Juridique"
 
 #: templates/peachjam/footer.html:35
 #| msgid "About AfricanLII"
@@ -173,7 +173,7 @@ msgstr "Nous numérisons la loi et la politique de l’Architecture de Gouvernan
 #: templates/peachjam/home.html:16
 #, python-format
 msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
-msgstr "Recherchez %(documents_count)s documents en AU sur la plateforme AfricanLII."
+msgstr "Recherchez %(documents_count)s documents en AU sur la plateforme Africain."
 
 #: templates/peachjam/home.html:40
 msgid "Regional Body"
