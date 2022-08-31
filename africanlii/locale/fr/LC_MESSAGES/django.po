@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-08-22 15:05+0200\n"
-"PO-Revision-Date: 2022-08-25 13:38\n"
+"PO-Revision-Date: 2022-08-31 16:18\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -144,7 +144,7 @@ msgstr "Documents de l'UA"
 
 #: templates/peachjam/header.html:28
 msgid "Treaties and Protocols"
-msgstr "Traités et protocoles"
+msgstr "Traités et Protocoles"
 
 #: templates/peachjam/header.html:31
 #| msgid "Legislation List"
