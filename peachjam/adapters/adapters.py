@@ -10,6 +10,7 @@ from dateutil import parser
 from django.core.files import File
 from django.utils.text import slugify
 
+from peachjam.models import Predicate, Relationship, Work
 from peachjam.plugins import plugins
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,26 @@ logger = logging.getLogger(__name__)
 class Adapter:
     def __init__(self, settings):
         self.settings = settings
+        self.predicates = [
+            {
+                "name": "amended by",
+                "slug": "amended-by",
+                "verb": "is amended by",
+                "reverse_verb": "amends",
+            },
+            {
+                "name": "repealed by",
+                "slug": "repealed-by",
+                "verb": "is repealed by",
+                "reverse_verb": "repeals",
+            },
+            {
+                "name": "commenced by",
+                "slug": "commenced-by",
+                "verb": "is commenced by",
+                "reverse_verb": "commences",
+            },
+        ]
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -50,27 +71,21 @@ class IndigoAdapter(Adapter):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
         of document identifiers (expression FRBR URIs) which must be updated.
         """
-        return self.get_updated_documents(last_refreshed)
+        updated_docs_list = self.get_updated_documents(last_refreshed)
+        return [d["url"] for d in updated_docs_list]
 
     def get_doc_list(self):
         return self.client_get(self.url).json()["results"]
 
     def get_updated_documents(self, last_refreshed):
-        docs = [
+        if last_refreshed is None:
+            return self.get_doc_list()
+
+        return [
             document
             for document in self.get_doc_list()
-            if last_refreshed is None
-            or parser.parse(document["updated_at"]) > last_refreshed
+            if parser.parse(document["updated_at"]) > last_refreshed
         ]
-
-        urls = []
-        for doc in docs:
-            # if a document is out of date, also ensure we update its other expressions
-            for pit in doc["points_in_time"]:
-                for expr in pit["expressions"]:
-                    urls.append(expr["url"])
-
-        return urls
 
     def update_document(self, url):
         from countries_plus.models import Country
@@ -92,6 +107,7 @@ class IndigoAdapter(Adapter):
         frbr_uri = FrbrUri.parse(document["frbr_uri"])
         title = document["title"]
         toc_json = self.get_toc_json(url)
+        content_html = self.client_get(url + ".html").text
         jurisdiction = Country.objects.get(iso__iexact=document["country"])
         language = Language.objects.get(iso_639_3__iexact=document["language"])
 
@@ -105,7 +121,7 @@ class IndigoAdapter(Adapter):
             else None,
             "language": language,
             "toc_json": toc_json,
-            "content_html": self.get_content_html(document),
+            "content_html": content_html,
             "citation": document["numbered_title"],
         }
 
@@ -148,30 +164,55 @@ class IndigoAdapter(Adapter):
             )[0]
 
         logger.info(model)
-        doc, new = model.objects.update_or_create(
+        created_doc, new = model.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri,
             defaults={**field_data, **frbr_uri_data},
         )
         logger.info(f"New document: {new}")
+        self.download_source_file(f"{url}.pdf", created_doc, title)
 
-        if document["stub"]:
-            # for stub documents, use the publication document as the source file
-            pubdoc = document["publication_document"]
-            if pubdoc and pubdoc["url"]:
-                self.download_source_file(pubdoc["url"], doc, title)
-        else:
-            # the source file is the PDF version
-            self.download_source_file(f"{url}.pdf", doc, title)
+        self.import_relationships(document, created_doc)
+
+    def import_relationships(self, imported_document, created_document):
+        subject_work = created_document.work
+        object_work, created = Work.objects.get_or_create(
+            frbr_uri=FrbrUri.parse(imported_document["frbr_uri"]),
+            title=imported_document["title"],
+        )
+
+        if imported_document["repeal"]:
+            self.create_relationship(1, subject_work, object_work)
+
+        if imported_document["amendments"]:
+            self.create_relationship(0, subject_work, object_work)
+
+        if imported_document["commencements"]:
+            self.create_relationship(2, subject_work, object_work)
+
+    def create_relationship(self, relationship, subject_work, object_work):
+        predicate, created = Predicate.objects.get_or_create(
+            slug=self.predicates[relationship]["slug"],
+            defaults={
+                "name": self.predicates[relationship]["name"],
+                "slug": self.predicates[relationship]["slug"],
+                "verb": self.predicates[relationship]["verb"],
+                "reverse_verb": self.predicates[relationship]["reverse_verb"],
+            },
+        )
+
+        print("Subject Work-->", subject_work)
+        print("Predicate-->", predicate)
+        print("Object Work-->", object_work)
+
+        Relationship.objects.create(
+            subject_work=subject_work, predicate=predicate, object_work=object_work
+        )
+        logger.info(f"Relationship for {subject_work} document has been created")
 
     def client_get(self, url):
         r = self.client.get(url)
         r.raise_for_status()
         return r
-
-    def get_content_html(self, document):
-        if document["stub"]:
-            return None
-        return self.client_get(document["url"] + ".html").text
 
     def get_toc_json(self, url):
         def remove_subparagraph(d):
