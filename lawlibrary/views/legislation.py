@@ -11,7 +11,7 @@ class LegislationListView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         qs = (
-            Legislation.objects.filter(locality=None)
+            Legislation.objects.filter(locality=None, metadata_json__stub=False)
             .distinct("work_frbr_uri")
             .order_by("work_frbr_uri", "-date")
         )
@@ -30,7 +30,7 @@ class ProvincialLegislationListView(TemplateView):
 
         context["locality"] = locality = Locality.objects.get(code=self.kwargs["code"])
         qs = (
-            Legislation.objects.filter(locality=locality)
+            Legislation.objects.filter(locality=locality, metadata_json__stub=False)
             .distinct("work_frbr_uri")
             .order_by("work_frbr_uri", "-date")
         )

@@ -1,8 +1,12 @@
+import logging
+
 from django.db import models
 from django.utils import timezone
 
 from peachjam.plugins import plugins
 from peachjam.tasks import update_document
+
+log = logging.getLogger(__name__)
 
 
 class IngestorSetting(models.Model):
@@ -24,12 +28,17 @@ class Ingestor(models.Model):
 
     def check_for_updates(self):
         adapter = self.get_adapter()
+        log.info(
+            f"Checking for ingestor updates for {self}, last_refresh_at {self.last_refreshed_at}"
+        )
         docs = adapter.check_for_updates(self.last_refreshed_at)
+        log.info(f"{len(docs)} documents to update")
         for doc in docs:
             update_document(self.id, doc)
 
         self.last_refreshed_at = timezone.now()
         self.save()
+        log.info(f"Finished checking for ingestor updates for {self}")
 
     def update_document(self, document_id):
         adapter = self.get_adapter()

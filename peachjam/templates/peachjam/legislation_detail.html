@@ -1,15 +1,8 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
 {% load i18n %}
 
-{% block document-metadata-content %}
-  <div class="row">
-    <div class="col-sm-6">
-      <dl class="row mb-0">
-        <dt class="col-4">{% trans 'Language' %}</dt>
-        <dd class="col-8">{{ document.language.name }}</dd>
-        <dt class="col-4">{% trans 'Date' %}</dt>
-        <dd class="col-8">{{ document.date }}</dd>
-      </dl>
-    </div>
-  </div>
+{% block document-metadata-content-author %}
+{% endblock %}
+
+{% block document-metadata-content-jurisdiction %}
 {% endblock %}
