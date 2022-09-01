@@ -10,7 +10,6 @@ from dateutil import parser
 from django.core.files import File
 from django.utils.text import slugify
 
-from peachjam.models import Predicate, Relationship, Work
 from peachjam.plugins import plugins
 
 logger = logging.getLogger(__name__)
@@ -19,26 +18,6 @@ logger = logging.getLogger(__name__)
 class Adapter:
     def __init__(self, settings):
         self.settings = settings
-        self.predicates = [
-            {
-                "name": "amended by",
-                "slug": "amended-by",
-                "verb": "is amended by",
-                "reverse_verb": "amends",
-            },
-            {
-                "name": "repealed by",
-                "slug": "repealed-by",
-                "verb": "is repealed by",
-                "reverse_verb": "repeals",
-            },
-            {
-                "name": "commenced by",
-                "slug": "commenced-by",
-                "verb": "is commenced by",
-                "reverse_verb": "commences",
-            },
-        ]
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -169,7 +148,7 @@ class IndigoAdapter(Adapter):
             )[0]
 
         logger.info(model)
-        created_doc, new = model.objects.update_or_create(
+        doc, new = model.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri,
             defaults={**field_data, **frbr_uri_data},
         )
@@ -179,49 +158,10 @@ class IndigoAdapter(Adapter):
             # for stub documents, use the publication document as the source file
             pubdoc = document["publication_document"]
             if pubdoc and pubdoc["url"]:
-                self.download_source_file(pubdoc["url"], created_doc, title)
+                self.download_source_file(pubdoc["url"], doc, title)
         else:
             # the source file is the PDF version
-            self.download_source_file(f"{url}.pdf", created_doc, title)
-
-        self.import_relationships(document, created_doc)
-
-    def import_relationships(self, imported_document, created_document):
-        subject_work = created_document.work
-        object_work, created = Work.objects.get_or_create(
-            frbr_uri=FrbrUri.parse(imported_document["frbr_uri"]),
-            title=imported_document["title"],
-        )
-
-        if imported_document["repeal"]:
-            self.create_relationship(1, subject_work, object_work)
-
-        if imported_document["amendments"]:
-            self.create_relationship(0, subject_work, object_work)
-
-        if imported_document["commencements"]:
-            self.create_relationship(2, subject_work, object_work)
-
-    def create_relationship(self, predicate_index, subject_work, object_work):
-        predicate, created = Predicate.objects.get_or_create(
-            slug=self.predicates[predicate_index]["slug"],
-            defaults={
-                "name": self.predicates[predicate_index]["name"],
-                "slug": self.predicates[predicate_index]["slug"],
-                "verb": self.predicates[predicate_index]["verb"],
-                "reverse_verb": self.predicates[predicate_index]["reverse_verb"],
-            },
-        )
-
-        # Just some preliminary debugging that'll be chucked later ;)
-        print("Subject Work-->", subject_work)
-        print("Predicate-->", predicate)
-        print("Object Work-->", object_work)
-
-        Relationship.objects.create(
-            subject_work=subject_work, predicate=predicate, object_work=object_work
-        )
-        logger.info(f"Relationship for {subject_work} document has been created")
+            self.download_source_file(f"{url}.pdf", doc, title)
 
     def client_get(self, url):
         r = self.client.get(url)
