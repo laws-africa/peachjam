@@ -314,8 +314,11 @@ class SourceFile(AttachmentAbstractModel):
     file = models.FileField(upload_to=file_location, max_length=1024)
 
     def save(self, *args, **kwargs):
-        # store this so that we don't have to calculate
-        self.size = self.file.size
+        try:
+            # store this so that we don't have to calculate
+            self.size = self.file.size
+        except FileNotFoundError:
+            pass
         self.filename = self.file.name
         if not self.mimetype:
             self.mimetype = magic.from_buffer(self.file.read(), mime=True)
