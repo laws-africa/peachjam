@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-08-22 15:05+0200\n"
-"PO-Revision-Date: 2022-08-22 17:30\n"
+"PO-Revision-Date: 2022-08-31 20:11\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: pt\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 44\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 50\n"
 
 #: settings.py:193
 msgid "English"
@@ -23,7 +23,7 @@ msgstr "Inglês"
 
 #: settings.py:194
 msgid "French"
-msgstr "francês"
+msgstr "Francês"
 
 #: settings.py:195
 msgid "Swahili"
@@ -36,7 +36,7 @@ msgstr "Precisa de ajuda? Envie um email para <a href=\"mailto:{{ SUPPORT_EMAIL 
 #: templates/account/login.html:5
 #| msgid "Log Out"
 msgid "Log In"
-msgstr "Iniciar sessão"
+msgstr "Efetuar Login"
 
 #: templates/account/login.html:13 templates/account/login.html:58
 #: templates/account/password_reset_from_key.html:57
@@ -53,7 +53,7 @@ msgstr "Endereço de e-mail"
 #: templates/account/login.html:42
 #| msgid "Reset Password"
 msgid "Password"
-msgstr "Palavra-passe"
+msgstr "Senha"
 
 #: templates/account/login.html:45
 #| msgid "Reset Your Password"
@@ -66,7 +66,7 @@ msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
 msgstr "\n"
-"            Inicie sessão com %(provider.name)s\n"
+"            Efetuar Login com %(provider.name)s\n"
 "          "
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
@@ -109,7 +109,7 @@ msgstr "O link de redefinição de senha era inválido, possivelmente porque já
 #: templates/account/password_reset_from_key.html:27
 #| msgid "Reset Password"
 msgid "New Password"
-msgstr "Nova Palavra-Passe"
+msgstr "Nova Senha"
 
 #: templates/account/password_reset_from_key.html:39
 msgid "New Password (again)"
@@ -122,7 +122,7 @@ msgstr "Sua senha foi redefinida."
 #: templates/account/password_reset_from_key_done.html:4
 #| msgid "Reset Password"
 msgid "Change Password"
-msgstr "Mudar a senha"
+msgstr "Mudar a Senha"
 
 #: templates/account/password_reset_from_key_done.html:8
 #| msgid "Your password is now reset."
@@ -131,11 +131,11 @@ msgstr "Sua senha foi redefinida."
 
 #: templates/admin/login.html:23
 msgid "Please correct the error below."
-msgstr "Corrija os erros abaixo."
+msgstr "Por favor corrige o erro abaixo."
 
 #: templates/admin/login.html:23
 msgid "Please correct the errors below."
-msgstr "Por favor corrija os erros abaixo."
+msgstr "Por favor corrige o erro abaixo."
 
 #: templates/admin/login.html:39
 #, python-format
@@ -149,7 +149,7 @@ msgstr "Esqueceu sua senha ou usuário?"
 #: templates/admin/peachjam_document_relationships.html:6
 #: templates/peachjam/home.html:3
 msgid "Home"
-msgstr "Residencial"
+msgstr "Página inicial"
 
 #: templates/admin/peachjam_document_relationships.html:10
 msgid "Relationships"
@@ -168,7 +168,7 @@ msgstr "Título"
 #: templates/peachjam/layouts/document_detail.html:49
 #: templates/peachjam/legislation_detail.html:10
 msgid "Date"
-msgstr "Encontro"
+msgstr "Data"
 
 #: templates/peachjam/_document_table.html:9
 msgid "Document Type"
@@ -176,7 +176,7 @@ msgstr "Tipo de documento"
 
 #: templates/peachjam/_document_table.html:11
 msgid "Regional Body"
-msgstr "Corpo Regional"
+msgstr "Órgão Regional"
 
 #: templates/peachjam/_pagination.html:6
 msgid "first"
@@ -184,7 +184,7 @@ msgstr "primeiro(a)"
 
 #: templates/peachjam/_pagination.html:7
 msgid "previous"
-msgstr "anteriores"
+msgstr "anterior"
 
 #: templates/peachjam/_pagination.html:11
 msgid "Page"
@@ -205,7 +205,7 @@ msgstr "Nenhum documento encontrado."
 
 #: templates/peachjam/about.html:4
 msgid "About"
-msgstr "SOBRE"
+msgstr "Sobre"
 
 #: templates/peachjam/about.html:9
 msgid "About the platform"
@@ -221,8 +221,8 @@ msgid "\n"
 "          Our specific goals are to:\n"
 "        "
 msgstr "\n"
-"          Esta plataforma Pan-Africana serve como um centro de informações sobre todos os aspectos da agenda da Arquitetura\n"
-"          Governança Africana (AGA), incluindo cartas, protocolos, comunicações, decisões legais relevantes, política,\n"
+"          Esta plataforma Pan-Africana serve como um centro de informações sobre todos os aspectos da agenda da Arquitectura \n"
+"          de Governação Africana (AGA), incluindo cartas, protocolos, comunicações, decisões legais relevantes, política,\n"
 "          implementação, monitoramento e material relacionado. O objectivo global é construir uma colaboração eficaz\n"
 "          entre os cidadãos africanos e as organizações da sociedade civil, por um lado, e membros AGA, por outro lado, para\n"
 "          reforçar a implementação da agenda da plataforma AGA no que diz respeito à democracia, governação e direitos humanos.\n"
@@ -252,7 +252,7 @@ msgid "\n"
 "            Capacitate civil society on all levels to access, interpret and effectively use AGA information\n"
 "          "
 msgstr "\n"
-"            Capacite a sociedade civil em todos os níveis para acessar, interpretar e usar efetivamente informações AGA\n"
+"            Capacitar a sociedade civil em todos os níveis para aceder, interpretar e usar efectivamente informações AGA\n"
 "          "
 
 #: templates/peachjam/about.html:38
@@ -273,7 +273,7 @@ msgid "\n"
 "        "
 msgstr "\n"
 "          Essa plataforma é desenvolvida e mantida conjuntamente por <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> e\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Leis. frica</a> com fundos da União Europeia,\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> com fundos da União Europeia,\n"
 "          o Indigo Trust e o Sigrid Rausing Trust. A fase inicial do projecto vai de 2021 para 2024.\n"
 "        "
 
@@ -312,7 +312,13 @@ msgid "\n"
 "          lower the cost of digitisation, archival and publication of primary legal information, and create opportunities for\n"
 "          rich interactivity, advanced research and justice sector innovation.\n"
 "        "
-msgstr ""
+msgstr "\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a>  auxilia os governos africanos a digitalizar de forma sustentável a sua informação legal para uso público, através de\n"
+"          software de direito, desenvolvimento de capacidades, formação, parcerias e apoio. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions\n"
+"          reduzem o custo da digitalização, arquivo e publicação de informação jurídica primária, e criam oportunidades para\n"
+"          interactividade rica, investigação avançada e inovação no sector da justiça.\n"
+"        \n"
+"        "
 
 #: templates/peachjam/about.html:78
 msgid "\n"
@@ -320,7 +326,7 @@ msgid "\n"
 "          of the rule of law, access to justice, and innovation.\n"
 "        "
 msgstr "\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> e <a href=\"https://laws.africa/\" target=\"_blank\">Leis. frica</a> colabore no desbloqueio do valor da informação jurídica digital africana em apoio\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> e <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> colabore no desbloqueio do valor da informação jurídica digital africana em apoio\n"
 "          do Estado de direito. acesso à justiça e à inovação.\n"
 "        "
 
@@ -335,7 +341,7 @@ msgid "\n"
 "        "
 msgstr "\n"
 "          Visite <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a>\n"
-"          ou contate-nos em <a href=\"mailto:info@laws.africa\">info@laws.africa</a> para mais informações.\n"
+"          ou contacte-nos em <a href=\"mailto:info@laws.africa\">info@laws.africa</a> para mais informações.\n"
 "        "
 
 #: templates/peachjam/about.html:98
@@ -344,11 +350,11 @@ msgstr "Nossos parceiros"
 
 #: templates/peachjam/generic_document_list.html:4
 msgid "Generic Document List"
-msgstr "Lista de documentos genéricos"
+msgstr "Lista de Documentos Genéricos"
 
 #: templates/peachjam/generic_document_list.html:7
 msgid "AU Documents"
-msgstr "Documentos AU"
+msgstr "Documentos da UA"
 
 #: templates/peachjam/header.html:55
 msgid "Logout"
@@ -370,7 +376,7 @@ msgstr "Autor"
 #: templates/peachjam/layouts/document_detail.html:69
 #: templates/peachjam/legislation_detail.html:8
 msgid "Language"
-msgstr "IDIOMA"
+msgstr "Idioma"
 
 #: templates/peachjam/layouts/document_detail.html:101
 msgid "This document"
@@ -386,7 +392,7 @@ msgstr "Documentos"
 
 #: templates/peachjam/legal_instrument_list.html:4
 msgid "Legal Instrument List"
-msgstr "Lista de instrumentos legais"
+msgstr "Lista de Instrumentos Jurídicos"
 
 #: templates/peachjam/legal_instrument_list.html:7
 msgid "Treaties and Protocols List"
