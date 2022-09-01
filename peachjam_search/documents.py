@@ -80,11 +80,13 @@ class SearchableDocument(Document):
     def prepare_doc_type(self, instance):
         return instance.get_doc_type_display()
 
-    def prepare_authoring_body(self, instance):
+    def prepare_author(self, instance):
         if instance.doc_type == "generic_document":
-            return instance.genericdocument.author.name
+            if instance.genericdocument.author:
+                return instance.genericdocument.author.name
         elif instance.doc_type == "legal_instrument":
-            return instance.legalinstrument.author.name
+            if instance.legalinstrument.author:
+                return instance.legalinstrument.author.name
 
     def prepare_nature(self, instance):
         if instance.doc_type == "generic_document":

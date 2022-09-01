@@ -10,20 +10,25 @@ log = logging.getLogger(__name__)
 
 
 def get_elasticapm_client():
-    return apps.get_app_config("elasticapm").client
+    try:
+        return apps.get_app_config("elasticapm").client
+    except LookupError:
+        log.warning(
+            "Django app elasticapm not installed. Background tasks will not have metrics."
+        )
+        return None
 
 
 @background(remove_existing_tasks=True)
 def update_document(ingestor_id, document_id):
     from peachjam.models import Ingestor
 
-    log.info(f"Updating document {document_id} with ingestor {ingestor_id}")
-
     ingestor = Ingestor.objects.filter(pk=ingestor_id).first()
     if not ingestor:
         log.info(f"No ingestor with id {ingestor_id} exists, ignoring.")
         return
 
+    log.info(f"Updating document {document_id} with ingestor {ingestor}")
     try:
         ingestor.update_document(document_id)
     except Exception as e:
@@ -49,21 +54,24 @@ def run_ingestors():
 @receiver(task_started)
 def bg_task_started(sender, **kwargs):
     client = get_elasticapm_client()
-    client.begin_transaction(transaction_type="task")
+    if client:
+        client.begin_transaction(transaction_type="task")
 
 
 @receiver(task_successful)
 def bg_task_success(sender, completed_task, **kwargs):
     client = get_elasticapm_client()
-    client.end_transaction(name=completed_task.task_name, result="success")
+    if client:
+        client.end_transaction(name=completed_task.task_name, result="success")
 
 
 @receiver(task_error)
 def bg_task_error(sender, task, **kwargs):
     # report errors to elasticapm
     client = get_elasticapm_client()
-    client.capture_exception()
-    client.end_transaction(name=task.task_name, result="error")
+    if client:
+        client.capture_exception()
+        client.end_transaction(name=task.task_name, result="error")
 
     # report errors to sentry
     with sentry_sdk.push_scope() as scope:

@@ -1,4 +1,5 @@
 import os
+import re
 
 import magic
 from cobalt import FrbrUri
@@ -286,6 +287,7 @@ def file_location(instance, filename):
 class AttachmentAbstractModel(models.Model):
     filename = models.CharField(max_length=1024, null=False, blank=False)
     mimetype = models.CharField(max_length=1024, null=False, blank=False)
+    size = models.BigIntegerField(default=0)
 
     def __str__(self):
         return f"{self.filename}"
@@ -312,6 +314,8 @@ class SourceFile(AttachmentAbstractModel):
     file = models.FileField(upload_to=file_location, max_length=1024)
 
     def save(self, *args, **kwargs):
+        # store this so that we don't have to calculate
+        self.size = self.file.size
         self.filename = self.file.name
         if not self.mimetype:
             self.mimetype = magic.from_buffer(self.file.read(), mime=True)
@@ -324,3 +328,12 @@ class SourceFile(AttachmentAbstractModel):
         # convert with soffice
         suffix = os.path.splitext(self.filename)[1].replace(".", "")
         return soffice_convert(self.file, suffix, "pdf")[0]
+
+    def filename_extension(self):
+        return os.path.splitext(self.filename)[1][1:]
+
+    def filename_for_download(self):
+        """Return a generated filename appropriate for use when downloading this source file."""
+        ext = os.path.splitext(self.filename)[1]
+        title = re.sub(r"[^a-zA-Z0-9() ]", "", self.document.title)
+        return title + ext
