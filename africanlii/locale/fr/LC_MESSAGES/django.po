@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-08-22 15:05+0200\n"
-"PO-Revision-Date: 2022-08-31 17:26\n"
+"PO-Revision-Date: 2022-09-01 09:00\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/africanlii/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 65\n"
+"X-Crowdin-File: /main/africanlii/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 63\n"
 
 #: templates/peachjam/footer.html:8
 msgid "About AfricanLII"
@@ -41,7 +41,7 @@ msgid "\n"
 "    for Governance Alliance project</a>.\n"
 "    "
 msgstr "\n"
-"      La publication du matériel de l'Union Africaine est coparrainée par l'Union européenne et fait partie du projet <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Données\n"
+"      La publication du matériel de l'Union africaine est coparrainée par l'Union européenne et fait partie du projet <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Données\n"
 "    de l'Alliance de gouvernance</a>.\n"
 "    "
 
@@ -173,7 +173,7 @@ msgstr "Nous numérisons la loi et la politique de l’Architecture de Gouvernan
 #: templates/peachjam/home.html:16
 #, python-format
 msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
-msgstr "Recherchez %(documents_count)s documents en AU sur la plateforme AfricanLII."
+msgstr "Recherchez %(documents_count)s documents en AU sur la plateforme Africain."
 
 #: templates/peachjam/home.html:40
 msgid "Regional Body"
@@ -189,11 +189,11 @@ msgstr "Documents récents de l'UA"
 
 #: templates/peachjam/home.html:67
 msgid "Recent Legal Instruments"
-msgstr "Derniers Instruments Juridiques"
+msgstr "Derniers instruments juridiques"
 
 #: templates/peachjam/home.html:74
 msgid "Recent Treaties and Protocols "
-msgstr "Traités et Protocoles récents "
+msgstr "Traités et protocoles récents "
 
 #, python-format
 #~ msgid " Documents by %(author)s "
