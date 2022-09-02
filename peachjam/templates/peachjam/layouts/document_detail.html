@@ -116,21 +116,21 @@
 
                           <ul class="list-unstyled">
                             {% for rel in document.relationships_as_subject %}
-                              {% if rel.object_document %}
+                              {% if rel.object_work %}
                                 <li>
                                   {% translate rel.predicate.verb as verb %}
                                   {{ verb|capfirst }}
-                                  <a href="{% url 'document_detail' frbr_uri=rel.object_document.expression_frbr_uri|strip_first_character %}">{{ rel.object_document.title }}</a>
+                                  <a href="{% url 'document_detail' frbr_uri=rel.object_work.frbr_uri|strip_first_character %}">{{ rel.object_work.title }}</a>
                                 </li>
                               {% endif %}
                             {% endfor %}
 
                             {% for rel in document.relationships_as_object %}
-                              {% if rel.subject_document %}
+                              {% if rel.subject_work %}
                                 <li>
                                   {% translate rel.predicate.reverse_verb as verb %}
                                   {{ verb|capfirst }}
-                                  <a href="{% url 'document_detail' frbr_uri=rel.subject_document.expression_frbr_uri|strip_first_character %}">{{ rel.subject_document.title }}</a>
+                                  <a href="{% url 'document_detail' frbr_uri=rel.subject_work.expression_frbr_uri|strip_first_character %}">{{ rel.subject_work.title }}</a>
                                 </li>
                               {% endif %}
                             {% endfor %}
