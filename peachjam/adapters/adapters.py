@@ -195,22 +195,12 @@ class IndigoAdapter(Adapter):
                 frbr_uri=FrbrUri.parse(imported_document["repeal"]["repealing_uri"]),
                 title=imported_document["repeal"]["repealing_title"],
             )
-
-            predicate, created = Predicate.objects.get_or_create(
-                slug=self.predicates[1]["slug"],
-                defaults={
-                    "name": self.predicates[1]["name"],
-                    "slug": self.predicates[1]["slug"],
-                    "verb": self.predicates[1]["verb"],
-                    "reverse_verb": self.predicates[1]["reverse_verb"],
-                },
-            )
-            Relationship.objects.get_or_create(
+            self.create_relationship(
+                predicate_idx=1,
                 subject_work=subject_work,
                 object_work=repealing_work,
-                predicate=predicate,
+                relationship="Repeal",
             )
-            logger.info("Created repeal relationship")
 
         if imported_document["amendments"]:
             for amendment in imported_document["amendments"]:
@@ -219,23 +209,12 @@ class IndigoAdapter(Adapter):
                         frbr_uri=FrbrUri.parse(amendment["amending_uri"]),
                         title=amendment["amending_title"],
                     )
-
-                    predicate, created = Predicate.objects.get_or_create(
-                        slug=self.predicates[0]["slug"],
-                        defaults={
-                            "name": self.predicates[0]["name"],
-                            "slug": self.predicates[0]["slug"],
-                            "verb": self.predicates[0]["verb"],
-                            "reverse_verb": self.predicates[0]["reverse_verb"],
-                        },
-                    )
-
-                    Relationship.objects.get_or_create(
+                    self.create_relationship(
+                        predicate_idx=0,
                         subject_work=subject_work,
                         object_work=amending_work,
-                        predicate=predicate,
+                        relationship="Amending",
                     )
-                    logger.info("Created amending relationship")
 
         if imported_document["commencements"]:
             for commencement in imported_document["commencements"]:
@@ -247,22 +226,31 @@ class IndigoAdapter(Adapter):
                         frbr_uri=FrbrUri.parse(commencement["commencing_frbr_uri"]),
                         title=commencement["commencing_title"],
                     )
-
-                    predicate, created = Predicate.objects.get_or_create(
-                        slug=self.predicates[2]["slug"],
-                        defaults={
-                            "name": self.predicates[2]["name"],
-                            "slug": self.predicates[2]["slug"],
-                            "verb": self.predicates[2]["verb"],
-                            "reverse_verb": self.predicates[2]["reverse_verb"],
-                        },
-                    )
-                    Relationship.objects.get_or_create(
+                    self.create_relationship(
+                        predicate_idx=2,
                         subject_work=subject_work,
                         object_work=commencing_work,
-                        predicate=predicate,
+                        relationship="Commencing",
                     )
-                    logger.info("Created commencing relationship")
+
+    def create_relationship(
+        self, predicate_idx, subject_work, object_work, relationship
+    ):
+        predicate, created = Predicate.objects.get_or_create(
+            slug=self.predicates[predicate_idx]["slug"],
+            defaults={
+                "name": self.predicates[predicate_idx]["name"],
+                "slug": self.predicates[predicate_idx]["slug"],
+                "verb": self.predicates[predicate_idx]["verb"],
+                "reverse_verb": self.predicates[predicate_idx]["reverse_verb"],
+            },
+        )
+        Relationship.objects.get_or_create(
+            subject_work=subject_work,
+            object_work=object_work,
+            predicate=predicate,
+        )
+        logger.info(f"{relationship} relationship created")
 
     def client_get(self, url):
         r = self.client.get(url)
