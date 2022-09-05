@@ -19,26 +19,23 @@ logger = logging.getLogger(__name__)
 class Adapter:
     def __init__(self, settings):
         self.settings = settings
-        self.predicates = [
-            {
+        self.predicates = {
+            "amended-by": {
                 "name": "amended by",
-                "slug": "amended-by",
                 "verb": "is amended by",
                 "reverse_verb": "amends",
             },
-            {
+            "repealed-by": {
                 "name": "repealed by",
-                "slug": "repealed-by",
                 "verb": "is repealed by",
                 "reverse_verb": "repeals",
             },
-            {
+            "commenced-by": {
                 "name": "commenced by",
-                "slug": "commenced-by",
                 "verb": "is commenced by",
                 "reverse_verb": "commences",
             },
-        ]
+        }
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -191,28 +188,26 @@ class IndigoAdapter(Adapter):
 
         if imported_document["repeal"]:
             repealing_work, _ = Work.objects.get_or_create(
-                frbr_uri=FrbrUri.parse(imported_document["repeal"]["repealing_uri"]),
+                frbr_uri=imported_document["repeal"]["repealing_uri"],
                 title=imported_document["repeal"]["repealing_title"],
             )
             self.create_relationship(
-                predicate_idx=1,
+                "repealed-by",
                 subject_work=subject_work,
                 object_work=repealing_work,
-                relationship="Repeal",
             )
 
         if imported_document["amendments"]:
             for amendment in imported_document["amendments"]:
                 if amendment["amending_uri"] and amendment["amending_title"]:
                     amending_work, _ = Work.objects.get_or_create(
-                        frbr_uri=FrbrUri.parse(amendment["amending_uri"]),
+                        frbr_uri=amendment["amending_uri"],
                         title=amendment["amending_title"],
                     )
                     self.create_relationship(
-                        predicate_idx=0,
+                        "amended-by",
                         subject_work=subject_work,
                         object_work=amending_work,
-                        relationship="Amending",
                     )
 
         if imported_document["commencements"]:
@@ -222,26 +217,24 @@ class IndigoAdapter(Adapter):
                     and commencement["commencing_title"]
                 ):
                     commencing_work, _ = Work.objects.get_or_create(
-                        frbr_uri=FrbrUri.parse(commencement["commencing_frbr_uri"]),
+                        frbr_uri=commencement["commencing_frbr_uri"],
                         title=commencement["commencing_title"],
                     )
                     self.create_relationship(
-                        predicate_idx=2,
+                        "commenced-by",
                         subject_work=subject_work,
                         object_work=commencing_work,
-                        relationship="Commencing",
                     )
+        logger.info(f"Fetching of relationships for {subject_work} is complete!")
 
-    def create_relationship(
-        self, predicate_idx, subject_work, object_work, relationship
-    ):
+    def create_relationship(self, slug, subject_work, object_work):
         predicate, created = Predicate.objects.get_or_create(
-            slug=self.predicates[predicate_idx]["slug"],
+            slug=slug,
             defaults={
-                "name": self.predicates[predicate_idx]["name"],
-                "slug": self.predicates[predicate_idx]["slug"],
-                "verb": self.predicates[predicate_idx]["verb"],
-                "reverse_verb": self.predicates[predicate_idx]["reverse_verb"],
+                "name": self.predicates[slug]["name"],
+                "slug": slug,
+                "verb": self.predicates[slug]["verb"],
+                "reverse_verb": self.predicates[slug]["reverse_verb"],
             },
         )
         Relationship.objects.get_or_create(
@@ -249,7 +242,7 @@ class IndigoAdapter(Adapter):
             object_work=object_work,
             predicate=predicate,
         )
-        logger.info(f"{relationship} relationship created")
+        logger.info(f"{self.predicates[slug]['name']} relationship created")
 
     def client_get(self, url):
         r = self.client.get(url)
