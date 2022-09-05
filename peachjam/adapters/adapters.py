@@ -10,6 +10,7 @@ from dateutil import parser
 from django.core.files import File
 from django.utils.text import slugify
 
+from peachjam.models import Predicate, Relationship, Work
 from peachjam.plugins import plugins
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,23 @@ logger = logging.getLogger(__name__)
 class Adapter:
     def __init__(self, settings):
         self.settings = settings
+        self.predicates = {
+            "amended-by": {
+                "name": "amended by",
+                "verb": "is amended by",
+                "reverse_verb": "amends",
+            },
+            "repealed-by": {
+                "name": "repealed by",
+                "verb": "is repealed by",
+                "reverse_verb": "repeals",
+            },
+            "commenced-by": {
+                "name": "commenced by",
+                "verb": "is commenced by",
+                "reverse_verb": "commences",
+            },
+        }
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -148,7 +166,7 @@ class IndigoAdapter(Adapter):
             )[0]
 
         logger.info(model)
-        doc, new = model.objects.update_or_create(
+        created_doc, new = model.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri,
             defaults={**field_data, **frbr_uri_data},
         )
@@ -158,10 +176,73 @@ class IndigoAdapter(Adapter):
             # for stub documents, use the publication document as the source file
             pubdoc = document["publication_document"]
             if pubdoc and pubdoc["url"]:
-                self.download_source_file(pubdoc["url"], doc, title)
+                self.download_source_file(pubdoc["url"], created_doc, title)
         else:
             # the source file is the PDF version
-            self.download_source_file(f"{url}.pdf", doc, title)
+            self.download_source_file(f"{url}.pdf", created_doc, title)
+
+        self.fetch_relationships(document, created_doc)
+
+    def fetch_relationships(self, imported_document, created_document):
+        subject_work = created_document.work
+
+        if imported_document["repeal"]:
+            repealing_work, _ = Work.objects.get_or_create(
+                frbr_uri=imported_document["repeal"]["repealing_uri"],
+                title=imported_document["repeal"]["repealing_title"],
+            )
+            self.create_relationship(
+                "repealed-by",
+                subject_work=subject_work,
+                object_work=repealing_work,
+            )
+
+        if imported_document["amendments"]:
+            for amendment in imported_document["amendments"]:
+                if amendment["amending_uri"] and amendment["amending_title"]:
+                    amending_work, _ = Work.objects.get_or_create(
+                        frbr_uri=amendment["amending_uri"],
+                        title=amendment["amending_title"],
+                    )
+                    self.create_relationship(
+                        "amended-by",
+                        subject_work=subject_work,
+                        object_work=amending_work,
+                    )
+
+        if imported_document["commencements"]:
+            for commencement in imported_document["commencements"]:
+                if (
+                    commencement["commencing_frbr_uri"]
+                    and commencement["commencing_title"]
+                ):
+                    commencing_work, _ = Work.objects.get_or_create(
+                        frbr_uri=commencement["commencing_frbr_uri"],
+                        title=commencement["commencing_title"],
+                    )
+                    self.create_relationship(
+                        "commenced-by",
+                        subject_work=subject_work,
+                        object_work=commencing_work,
+                    )
+        logger.info(f"Fetching of relationships for {subject_work} is complete!")
+
+    def create_relationship(self, slug, subject_work, object_work):
+        predicate, created = Predicate.objects.get_or_create(
+            slug=slug,
+            defaults={
+                "name": self.predicates[slug]["name"],
+                "slug": slug,
+                "verb": self.predicates[slug]["verb"],
+                "reverse_verb": self.predicates[slug]["reverse_verb"],
+            },
+        )
+        Relationship.objects.get_or_create(
+            subject_work=subject_work,
+            object_work=object_work,
+            predicate=predicate,
+        )
+        logger.info(f"{self.predicates[slug]['name']} relationship created")
 
     def client_get(self, url):
         r = self.client.get(url)
