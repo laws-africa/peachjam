@@ -185,7 +185,6 @@ class IndigoAdapter(Adapter):
             self.download_source_file(f"{url}.pdf", created_doc, title)
 
         self.fetch_relationships(document, created_doc)
-        logger.info("Fetching of relationships is complete!")
 
     def fetch_relationships(self, imported_document, created_document):
         subject_work = created_document.work
