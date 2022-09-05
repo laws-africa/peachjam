@@ -61,9 +61,10 @@ class Judgment(CoreDocument):
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned."""
-        if self.mnc != self.generate_citation():
-            self.serial_number = self.generate_serial_number()
-            self.mnc = self.generate_citation()
+        if self.date and hasattr(self, "author"):
+            if self.mnc != self.generate_citation():
+                self.serial_number = self.generate_serial_number()
+                self.mnc = self.generate_citation()
 
     def generate_serial_number(self):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
