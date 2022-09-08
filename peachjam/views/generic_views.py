@@ -80,10 +80,6 @@ class BaseDocumentDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # get all versions that match current document work_frbr_uri
-        all_versions = CoreDocument.objects.filter(
-            work_frbr_uri=self.object.work_frbr_uri
-        ).exclude(pk=self.object.pk)
 
         # citation links for a document
         doc = get_object_or_404(CoreDocument, pk=self.object.pk)
@@ -92,6 +88,10 @@ class BaseDocumentDetailView(DetailView):
             citation_links, many=True
         ).data
 
+        # get all versions that match current document work_frbr_uri
+        all_versions = CoreDocument.objects.filter(
+            work_frbr_uri=self.object.work_frbr_uri
+        )
         # language versions that match current document date
         context["language_versions"] = all_versions.filter(date=self.object.date)
 
