@@ -8,7 +8,7 @@
     position: absolute;
     width: 6px;
     background-color: $gray-200;
-    top: 0;
+    top: 20px;
     bottom: 0;
     left: 0;
     margin-left: -3px;
@@ -23,14 +23,14 @@
   &:before {
     content: " ";
     position: absolute;
-    top: 22px;
+    top: 18px;
     z-index: 1;
     left: 30px;
     width: 0;
     height: 0;
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
-    border-right: 10px solid $gray-100;
+    border-right: 10px solid $border-color;
   }
 
   &:after {
