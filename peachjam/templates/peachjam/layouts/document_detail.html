@@ -58,7 +58,7 @@
 
                     {% block document-metadata-content-date %}
                       <dt class="col-4">{% trans 'Date' %}</dt>
-                      {% if date_versions %}
+                      {% if date_versions|length > 1 %}
                         <dd class="col-8">
                           <div class="dropdown">
                             <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
@@ -66,7 +66,7 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                               {% for version in date_versions %}
-                                <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
+                                <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
                               {% endfor %}
                             </ul>
                           </div>
@@ -78,7 +78,7 @@
 
                     {% block document-metadata-content-language %}
                       <dt class="col-4">{% translate 'Language' %}</dt>
-                      {% if language_versions %}
+                      {% if language_versions|length > 1 %}
                         <dd class="col-8">
                           <div class="dropdown">
                             <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
@@ -86,7 +86,7 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                               {% for version in language_versions %}
-                                <li><a class="dropdown-item" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
+                                <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
                               {% endfor %}
                             </ul>
                           </div>
