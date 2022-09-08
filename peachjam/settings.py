@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 
 import sentry_sdk
+from django.contrib.messages import constants as messages
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -355,3 +356,12 @@ if DEBUG:
 GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
 
 CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}
+
+
+MESSAGE_TAGS = {
+    messages.DEBUG: "alert-secondary",
+    messages.INFO: "alert-info",
+    messages.SUCCESS: "alert-success",
+    messages.WARNING: "alert-warning",
+    messages.ERROR: "alert-danger",
+}
