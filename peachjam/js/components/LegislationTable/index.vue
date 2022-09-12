@@ -257,13 +257,6 @@ export default {
           type: 'checkboxes',
           value: [],
           options: taxonomyOptions
-        },
-        {
-          title: 'Repealed',
-          name: 'repealed',
-          type: 'boolean',
-          value: false,
-          count: this.filteredData.filter(item => item.repealed).length
         }
       ];
     },

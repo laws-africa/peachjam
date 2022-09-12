@@ -13,9 +13,29 @@ urlpatterns = [
     ),
     path("legislation/", views.LegislationListView.as_view(), name="legislation_list"),
     path(
+        "legislation/repealed",
+        views.LegislationListView.as_view(variant="repealed"),
+        name="legislation_list_repealed",
+    ),
+    path(
+        "legislation/all",
+        views.LegislationListView.as_view(variant="all"),
+        name="legislation_list_all",
+    ),
+    path(
         "legislation/<str:code>/",
         views.ProvincialLegislationListView.as_view(),
         name="provincial_legislation_list",
+    ),
+    path(
+        "legislation/<str:code>/repealed",
+        views.ProvincialLegislationListView.as_view(variant="repealed"),
+        name="provincial_legislation_list_repealed",
+    ),
+    path(
+        "legislation/<str:code>/all",
+        views.ProvincialLegislationListView.as_view(variant="all"),
+        name="provincial_legislation_list_all",
     ),
     path("", include("liiweb.urls")),
 ]
