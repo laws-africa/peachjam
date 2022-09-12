@@ -3,44 +3,49 @@
 {% block title %} {% trans 'Legislation' %} {% endblock %}
 
 {% block page-content %}
-<section class="py-5">
-  <div class="container">
-    {% if provinces %}
-      <h2>{% trans 'Provincial Legislation' %}</h2>
+  <section class="pb-5">
+    <div class="container">
+      {% block breadcrumbs %}
+      {% endblock %}
 
-      <div class="mb-4">
-        <div class="row mb-2">
-          {% for locality in provinces %}
-            <div class="col-6 col-md-3 col-lg-2">
-              <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
-            </div>
-          {% endfor %}
+      <h1 class="mt-2">{% trans 'Legislation' %}</h1>
+
+      {% if provinces %}
+        <h4 class="mt-2">{% trans 'Provincial Legislation' %}</h4>
+
+        <div class="mb-4">
+          <div class="row mb-2">
+            {% for locality in provinces %}
+              <div class="col-6 col-md-3 col-lg-2">
+                <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
+              </div>
+            {% endfor %}
+          </div>
         </div>
-      </div>
-    {% endif %}
+      {% endif %}
 
-    <h1>{% trans "National Legislation" %}</h1>
+      <h1>{% trans "National Legislation" %}</h1>
 
-    <nav class="nav nav-tabs mb-3">
-      <li class="nav-item">
-        <a class="nav-link {% if not view.variant %}active{% endif %}" href="{% url 'legislation_list' %}">Main Acts</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}" href="{% url 'legislation_list_repealed' %}">Repealed legislation</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% if view.variant == 'all' %}active{% endif %}" href="{% url 'legislation_list_all' %}">All legislation</a>
-      </li>
-    </nav>
+      <nav class="nav nav-tabs mb-3">
+        <li class="nav-item">
+          <a class="nav-link {% if not view.variant %}active{% endif %}" href="{% url 'legislation_list' %}">Current legislation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}" href="{% url 'legislation_list_repealed' %}">Repealed legislation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if view.variant == 'all' %}active{% endif %}" href="{% url 'legislation_list_all' %}">All legislation</a>
+        </li>
+      </nav>
 
-    {% if view.variant == 'repealed' %}
-      <div class="alert alert-danger">
-        You are viewing repealed legislation which is no longer in force.
-      </div>
-    {% endif %}
+      {% if view.variant == 'repealed' %}
+        <div class="alert alert-danger">
+          You are viewing repealed legislation which is no longer in force.
+        </div>
+      {% endif %}
 
-    <div data-vue-component="LegislationTable" data-show-side-facets></div>
-    {{ legislation_table|json_script:"legislation-table" }}
-  </div>
-</section>
+      <div data-vue-component="LegislationTable" data-show-side-facets></div>
+      {{ legislation_table|json_script:"legislation-table" }}
+    </div>
+  </section>
 {% endblock %}

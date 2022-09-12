@@ -15,7 +15,7 @@
       {{ item.citation }}
     </div>
     <div>
-      <span v-if="item.authoring_body"><strong>{{ item.authoring_body }}</strong> - </span>
+      <span v-if="item.author"><strong>{{ item.author }}</strong> - </span>
       <span class="text-muted">{{ item.date }}</span>
     </div>
     <div>

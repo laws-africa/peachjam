@@ -3,30 +3,33 @@
 {% block title %} {% trans 'Provincial Legislation' %} {% endblock %}
 
 {% block page-content %}
-<section class="py-5">
-  <div class="container">
-    <h1>{% blocktrans with locality=locality.name %}{{ locality }} Legislation{% endblocktrans %}</h1>
+  <section class="pb-5">
+    <div class="container">
+      {% block breadcrumbs %}
+      {% endblock %}
 
-    <nav class="nav nav-tabs mb-3">
-      <li class="nav-item">
-        <a class="nav-link {% if not view.variant %}active{% endif %}" href="{% url 'provincial_legislation_list' locality.code %}">Main Acts</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}" href="{% url 'provincial_legislation_list_repealed' locality.code  %}">Repealed legislation</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% if view.variant == 'all' %}active{% endif %}" href="{% url 'provincial_legislation_list_all' locality.code %}">All legislation</a>
-      </li>
-    </nav>
+      <h1 class="mt-2">{% blocktrans with locality=locality.name %}{{ locality }} Legislation{% endblocktrans %}</h1>
 
-    {% if view.variant == 'repealed' %}
-      <div class="alert alert-danger">
-        You are viewing repealed legislation which is no longer in force.
-      </div>
-    {% endif %}
+      <nav class="nav nav-tabs mb-3">
+        <li class="nav-item">
+          <a class="nav-link {% if not view.variant %}active{% endif %}" href="{% url 'provincial_legislation_list' locality.code %}">Current legislation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}" href="{% url 'provincial_legislation_list_repealed' locality.code  %}">Repealed legislation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if view.variant == 'all' %}active{% endif %}" href="{% url 'provincial_legislation_list_all' locality.code %}">All legislation</a>
+        </li>
+      </nav>
 
-    <div data-vue-component="LegislationTable" data-show-side-facets></div>
-    {{ legislation_table|json_script:"legislation-table" }}
-  </div>
-</section>
+      {% if view.variant == 'repealed' %}
+        <div class="alert alert-danger">
+          You are viewing repealed legislation which is no longer in force.
+        </div>
+      {% endif %}
+
+      <div data-vue-component="LegislationTable" data-show-side-facets></div>
+      {{ legislation_table|json_script:"legislation-table" }}
+    </div>
+  </section>
 {% endblock %}

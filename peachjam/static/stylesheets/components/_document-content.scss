@@ -256,11 +256,7 @@
     display: none;
   }
 
-  &[data-pdf-loading] {
-    .pdf-loading {
-      display: block;
-    }
-
+  &[data-pdf-standby], &[data-pdf-loading] {
     .navigation {
       opacity: 0;
     }
@@ -271,6 +267,29 @@
 
     .document-content__toggle {
       display: none;
+    }
+  }
+
+  &[data-pdf-standby] {
+    .pdf-loading {
+      display: none;
+    }
+  }
+
+  &[data-pdf-loading] {
+    .pdf-loading {
+      display: block;
+    }
+  }
+
+  .pdf-large-prompt {
+    text-align: center;
+    display: none;
+  }
+
+  &[data-large-pdf] {
+    .pdf-large-prompt {
+      display: block;
     }
   }
 

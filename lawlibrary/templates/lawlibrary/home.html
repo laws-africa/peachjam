@@ -1,6 +1,5 @@
 {% extends "liiweb/home.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %} {% trans 'Home' %} {% endblock %}
 
@@ -18,11 +17,11 @@
   </h4>
 
   <div class="row">
-    <div class="col-12 col-lg-6">
+    <div class="col-12 col-lg-10">
       <form method="get" action="/search/" class="d-flex mb-4">
         <input type="text" class="form-control form-control-lg flex-grow-1"
-               placeholder="{% trans 'Search documents' %}"
-               aria-label="Search documents"
+               placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+               aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                aria-describedby="button-addon2"
                autofocus="" name="q">
         <input type="submit" class="btn btn-primary ms-2 text-white" value="{% trans 'Search' %}">
@@ -47,8 +46,17 @@
 {% endblock %}
 
 {% block first-column-content %}
-  <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
-      {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text='View more Judgements' view_more_url_name='judgment_list' %}
+
+  <section class="pb-3 pt-3">
+    <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text='View more Judgements' view_more_url_name='judgment_list' %}
+  </section>
+
+  <section class="pb-3 pt-3">
+    <h2 class="mb-4 heading-underlined">{% trans 'Recent Legislation' %}</h2>
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text='View more Legislation' view_more_url_name='legislation_list' %}
+  </section>
+
 {% endblock %}
 
 {% block second-column-content %}

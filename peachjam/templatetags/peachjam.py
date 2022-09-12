@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django import template
@@ -22,3 +23,8 @@ def admin_url(obj, verb):
 @register.filter
 def strip_first_character(value):
     return value[1:]
+
+
+@register.filter
+def parse_string_date(date):
+    return datetime.datetime.strptime(date, "%Y-%m-%d")

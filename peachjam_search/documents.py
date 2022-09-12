@@ -1,3 +1,5 @@
+from tempfile import NamedTemporaryFile
+
 from django.conf import settings
 from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
@@ -78,11 +80,13 @@ class SearchableDocument(Document):
     def prepare_doc_type(self, instance):
         return instance.get_doc_type_display()
 
-    def prepare_authoring_body(self, instance):
+    def prepare_author(self, instance):
         if instance.doc_type == "generic_document":
-            return instance.genericdocument.author.name
+            if instance.genericdocument.author:
+                return instance.genericdocument.author.name
         elif instance.doc_type == "legal_instrument":
-            return instance.legalinstrument.author.name
+            if instance.legalinstrument.author:
+                return instance.legalinstrument.author.name
 
     def prepare_nature(self, instance):
         if instance.doc_type == "generic_document":
@@ -105,7 +109,11 @@ class SearchableDocument(Document):
             if hasattr(
                 instance, "source_file"
             ) and instance.source_file.filename.endswith(".pdf"):
-                text = pdf_to_text(instance.source_file.file.path)
+                # get the file
+                with NamedTemporaryFile(suffix=".pdf") as f:
+                    f.write(instance.source_file.file.read())
+                    f.flush()
+                    text = pdf_to_text(f.name)
 
                 if not text:
                     raise ValueError(

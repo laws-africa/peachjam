@@ -50,12 +50,12 @@ class DocumentSourceView(DetailView):
         if hasattr(self.object, "source_file") and self.object.source_file.file:
             source_file = self.object.source_file
             file = source_file.file.open()
-            bytes = file.read()
-            response = HttpResponse(bytes, content_type=source_file.mimetype)
+            file_bytes = file.read()
+            response = HttpResponse(file_bytes, content_type=source_file.mimetype)
             response[
                 "Content-Disposition"
             ] = f"inline; filename={source_file.filename_for_download()}"
-            response["Content-Length"] = str(len(bytes))
+            response["Content-Length"] = str(len(file_bytes))
             return response
         raise Http404
 
