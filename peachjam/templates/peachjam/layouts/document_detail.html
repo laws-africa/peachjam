@@ -13,6 +13,8 @@
         <h1 class="mb-4 mt-2">{{ document.title }}</h1>
       {% endblock %}
 
+      {% include 'peachjam/_notices.html' with messages=notices %}
+
       {% if perms.peachjam.change_coredocument %}
         <a href="{{ document|admin_url:'change' }}">Edit</a>
       {% endif %}
