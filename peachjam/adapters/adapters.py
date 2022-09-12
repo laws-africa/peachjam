@@ -170,6 +170,11 @@ class IndigoAdapter(Adapter):
             expression_frbr_uri=expression_frbr_uri,
             defaults={**field_data, **frbr_uri_data},
         )
+
+        if document["repeal"] and isinstance(created_doc, Legislation):
+            created_doc.repealed = True
+            created_doc.save()
+
         logger.info(f"New document: {new}")
 
         if document["stub"]:

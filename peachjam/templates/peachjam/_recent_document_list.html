@@ -3,7 +3,7 @@
   {% for object in documents %}
     <a class="mb-2 d-flex" href="{% url 'document_detail' object.expression_frbr_uri|strip_first_character %}">
       <span class="flex-grow-1">{{ object.title }}</span>
-      <span>{{ object.date }}</span>
+      <span class="text-nowrap">{{ object.date }}</span>
     </a>
   {% endfor %}
 
