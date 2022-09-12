@@ -28,7 +28,7 @@
 
       <nav class="nav nav-tabs mb-3">
         <li class="nav-item">
-          <a class="nav-link {% if not view.variant %}active{% endif %}" href="{% url 'legislation_list' %}">Current legislation</a>
+          <a class="nav-link {% if view.variant == 'current' %}active{% endif %}" href="{% url 'legislation_list' %}">Current legislation</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}" href="{% url 'legislation_list_repealed' %}">Repealed legislation</a>

@@ -7,7 +7,7 @@ from peachjam_api.serializers import LegislationSerializer
 
 class LegislationListView(TemplateView):
     template_name = "lawlibrary/legislation_list.html"
-    variant = None
+    variant = "current"
 
     def get_queryset(self):
         return (
@@ -21,8 +21,8 @@ class LegislationListView(TemplateView):
             pass
         elif self.variant == "repealed":
             qs = qs.filter(repealed=True)
-        else:
-            qs = qs.filter(metadata_json__stub=False)
+        elif self.variant == "current":
+            qs = qs.filter(repealed=False, metadata_json__stub=False)
         return qs
 
     def get_context_data(self, **kwargs):
