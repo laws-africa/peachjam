@@ -7,3 +7,4 @@ from .home import *
 from .judgment import *
 from .legal_instrument import *
 from .legislation import *
+from .taxonomy import *
