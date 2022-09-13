@@ -94,7 +94,7 @@
               :key="index"
               :class="`legislation-table__row ${row.children.length ? 'has-children' : ''}`"
               role="button"
-              @click.stop="handleRowClick"
+              @click="handleRowClick"
             >
               <div
                 v-if="row.children.length"
@@ -147,13 +147,13 @@
                       :key="subleg_index"
                     >
                       <div class="row">
-                        <div class="column">
+                        <div class="col">
                           <a
                             :href="`${row.work_frbr_uri}`"
                             target="_blank"
                           >{{ subleg.title }}</a>
                         </div>
-                        <div class="column">
+                        <div class="col">
                           {{ subleg.citation }}
                         </div>
                       </div>
