@@ -137,7 +137,7 @@ class JudgmentResource(BaseDocumentResource):
 
     def before_import_row(self, row, **kwargs):
         Author.objects.get_or_create(
-            code=row["court_obj"]["code"], defaults={"name": row["court_obj"]["code"]}
+            code=row["court_obj"]["code"], defaults={"name": row["court_obj"]["name"]}
         )
 
     def after_import_row(self, row, instance, row_number=None, **kwargs):
