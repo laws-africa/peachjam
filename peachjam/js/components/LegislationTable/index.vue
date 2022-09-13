@@ -103,11 +103,11 @@
                 :aria-controls="`row-accordion-${index}`"
               >
                 <i
-                  v-if="row.sublegs"
+                  v-if="row.children.length"
                   class="bi bi-caret-right-fill"
                 />
                 <i
-                  v-if="row.sublegs"
+                  v-if="row.children.length"
                   class="bi bi-caret-down-fill"
                 />
               </div>
@@ -122,22 +122,24 @@
               <div class="column">
                 {{ row.citation }}
               </div>
-            <!-- TODO: Establish content requirement for sublegs, then implement accordion syntax -->
-            <!--            <div-->
-            <!--              v-if="row.sublegs"-->
-            <!--              :id="`row-accordion-${index}`"-->
-            <!--              class="accordion-collapse collapse column__accordion accordion"-->
-            <!--              data-bs-parent=".legislation-table__row"-->
-            <!--            >-->
-            <!--              <div class="accordion-body">-->
-            <!--                <div-->
-            <!--                  v-for="(leg, subleg_index) in row.sublegs"-->
-            <!--                  :key="subleg_index"-->
-            <!--                >-->
-            <!--                  {{ leg.title }}-->
-            <!--                </div>-->
-            <!--              </div>-->
-            <!--            </div>-->
+              <div
+                v-if="row.children.length"
+                :id="`row-accordion-${index}`"
+                class="accordion-collapse collapse column__accordion accordion"
+                data-bs-parent=".legislation-table__row"
+              >
+                <div class="accordion-body">
+                  <div
+                    v-for="(subleg, subleg_index) in row.children"
+                    :key="subleg_index"
+                  >
+                    <a
+                      :href="`${row.work_frbr_uri}`"
+                      target="_blank"
+                    >{{ subleg.title }}</a> ({{ subleg.citation }})
+                  </div>
+                </div>
+              </div>
             </div>
           </template>
           <div
