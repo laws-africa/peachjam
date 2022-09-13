@@ -73,11 +73,6 @@ urlpatterns = [
     ),
     # document detail views
     re_path(
-        r"^(?P<frbr_uri>akn/.*)$",
-        DocumentDetailViewResolver.as_view(),
-        name="document_detail",
-    ),
-    re_path(
         r"^(?P<frbr_uri>akn/.*)/source$",
         cache_page(60 * 60 * 24)(DocumentSourceView.as_view()),
         name="document_source",
@@ -86,6 +81,11 @@ urlpatterns = [
         r"^(?P<frbr_uri>akn/.*)/source.pdf$",
         cache_page(60 * 60 * 24)(DocumentSourcePDFView.as_view()),
         name="document_source_pdf",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)$",
+        DocumentDetailViewResolver.as_view(),
+        name="document_detail",
     ),
     # feeds
     path("feeds/judgments.xml", JudgmentAtomSiteNewsFeed(), name="judgment_feed"),
