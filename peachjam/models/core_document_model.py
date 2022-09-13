@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 
@@ -9,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
 from docpipe.pipeline import PipelineContext
-from docpipe.soffice import soffice_convert
+from docpipe.soffice import SOfficeError, soffice_convert
 from languages_plus.models import Language
 
 from peachjam.frbr_uri import (
@@ -19,6 +20,8 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_date,
 )
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
+
+log = logging.getLogger(__name__)
 
 
 class Locality(models.Model):
@@ -268,7 +271,12 @@ class CoreDocument(models.Model):
         ):
             context = PipelineContext(word_pipeline)
             context.source_file = self.source_file.file
-            word_pipeline(context)
+            try:
+                word_pipeline(context)
+            except SOfficeError as e:
+                log.error(e.message, exc_info=e)
+                return False
+
             # TODO: attachments
             self.content_html = context.html_text
             return True
