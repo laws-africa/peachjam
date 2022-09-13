@@ -6,9 +6,6 @@ from peachjam.views.generic_views import FilteredDocumentListView
 
 
 class AuthorDetailView(FilteredDocumentListView):
-    context_object_name = "documents"
-    paginate_by = 20
-    model = CoreDocument
     template_name = "peachjam/author_detail.html"
 
     def get_base_queryset(self):

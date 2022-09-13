@@ -8,8 +8,6 @@ from peachjam.views.generic_views import FilteredDocumentListView
 class BaseCourtDetailView(FilteredDocumentListView):
     """Generic List View class for filtering a court's judgments."""
 
-    context_object_name = "documents"
-    paginate_by = 20
     model = Judgment
     template_name = "lawlibrary/court_detail.html"
 

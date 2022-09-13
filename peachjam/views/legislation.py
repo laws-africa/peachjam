@@ -15,8 +15,6 @@ from peachjam.views.generic_views import (
 class LegislationListView(FilteredDocumentListView):
     model = Legislation
     template_name = "peachjam/legislation_list.html"
-    context_object_name = "documents"
-    paginate_by = 20
 
 
 @registry.register_doc_type("legislation")

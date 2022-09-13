@@ -1,14 +1,11 @@
 from django.shortcuts import get_object_or_404
 
-from peachjam.models import CoreDocument, Taxonomy
+from peachjam.models import Taxonomy
 from peachjam.views.generic_views import FilteredDocumentListView
 
 
 class TaxonomyDetailView(FilteredDocumentListView):
-    model = CoreDocument
     template_name = "peachjam/taxonomy_detail.html"
-    context_object_name = "documents"
-    paginate_by = 20
 
     def get(self, request, slug, *args, **kwargs):
         self.taxonomy = get_object_or_404(Taxonomy, slug=slug)

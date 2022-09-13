@@ -1,14 +1,11 @@
 from countries_plus.models import Country
 from django.shortcuts import get_object_or_404
 
-from peachjam.models import CoreDocument, Locality
+from peachjam.models import Locality
 from peachjam.views import FilteredDocumentListView
 
 
 class PlaceDetailView(FilteredDocumentListView):
-    context_object_name = "documents"
-    paginate_by = 20
-    model = CoreDocument
     template_name = "peachjam/place_detail.html"
 
     def get(self, request, code, *args, **kwargs):
