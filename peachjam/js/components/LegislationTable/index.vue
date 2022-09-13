@@ -95,6 +95,7 @@
               class="legislation-table__row"
             >
               <div
+                v-if="row.children.length"
                 class="column-caret"
                 data-bs-toggle="collapse"
                 :data-bs-target="`#row-accordion-${index}`"
@@ -103,14 +104,16 @@
                 :aria-controls="`row-accordion-${index}`"
               >
                 <i
-                  v-if="row.children.length"
                   class="bi bi-caret-right-fill"
                 />
                 <i
-                  v-if="row.children.length"
                   class="bi bi-caret-down-fill"
                 />
               </div>
+              <div
+                v-else
+                class="column-caret"
+              />
               <div class="column">
                 <div>
                   <a :href="`${row.work_frbr_uri}`">{{ row.title }}</a>
