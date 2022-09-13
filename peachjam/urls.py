@@ -29,7 +29,7 @@ from peachjam.feeds import (
 )
 from peachjam.views import (
     AboutPageView,
-    AuthorListView,
+    AuthorDetailView,
     DocumentDetailViewResolver,
     DocumentSourcePDFView,
     DocumentSourceView,
@@ -51,8 +51,8 @@ urlpatterns = [
     # listing views
     path(
         "authors/<int:pk>/",
-        AuthorListView.as_view(),
-        name="authors",
+        AuthorDetailView.as_view(),
+        name="author",
     ),
     path("judgments/", JudgmentListView.as_view(), name="judgment_list"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
