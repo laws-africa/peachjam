@@ -32,11 +32,11 @@ export default {
   name: 'SearchPagination',
   props: {
     search: {
-      type: String,
+      type: Object,
       required: true
     },
     page: {
-      type: String,
+      type: Number,
       required: true
     }
   },

@@ -12,24 +12,17 @@
       {{ item.matter_type }}
     </div>
     <div>
-      {{ item.citation }}
+      <i>{{ item.citation }}</i>
     </div>
-    <div>
-      <span v-if="item.author"><strong>{{ item.author }}</strong> - </span>
-      <span class="text-muted">{{ item.date }}</span>
+    <div class="text-muted">
+      {{ item.date }}
+      <strong v-if="item.author" class="ms-3">{{ item.author }}</strong>
     </div>
-    <div>
+    <div class="text-muted">
       {{ item.jurisdiction }}
+      <span v-if="item.locality">· {{ item.locality }}</span>
     </div>
-    <div class="mb-2">
-      <span
-        class="snippet"
-        v-html="highlights(item)"
-      />
-    </div>
-    <template
-      v-if="item.pages.length"
-    >
+    <div v-if="item.pages.length">
       <div
         v-for="(page, index) in item.pages"
         :key="index"
@@ -39,7 +32,13 @@
         </span>
         <span v-html="page.highlight['pages.body'].join(' ... ')" />
       </div>
-    </template>
+    </div>
+    <div v-else>
+      <span
+          class="snippet"
+          v-html="highlights(item)"
+      />
+    </div>
   </li>
 </template>
 
