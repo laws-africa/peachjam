@@ -248,9 +248,8 @@ REST_FRAMEWORK = {
 
 # Elastic APM
 APM_SERVER_URL = os.environ.get("APM_SERVER_URL", "")
-ELK_PROJECT = "peachjam-staging"
 ELASTIC_APM = {
-    "SERVICE_NAME": ELK_PROJECT,
+    "SERVICE_NAME": os.environ.get("APM_SERVICE_NAME", PEACHJAM["APP_NAME"]),
     "SERVER_URL": APM_SERVER_URL,
 }
 if not DEBUG and APM_SERVER_URL:

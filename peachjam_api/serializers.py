@@ -69,14 +69,27 @@ class CitationLinkSerializer(serializers.ModelSerializer):
         fields = ("document", "text", "url", "target_id", "target_selectors")
 
 
+class ChildLegislationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Legislation
+        fields = (
+            "title",
+            "citation",
+            "work_frbr_uri",
+            "repealed",
+        )
+
+
 class LegislationSerializer(serializers.ModelSerializer):
     taxonomies = serializers.ReadOnlyField(source="get_taxonomies")
     year = serializers.ReadOnlyField()
+    children = ChildLegislationSerializer(many=True, read_only=True)
 
     class Meta:
         model = Legislation
         fields = (
             "title",
+            "children",
             "citation",
             "work_frbr_uri",
             "repealed",
