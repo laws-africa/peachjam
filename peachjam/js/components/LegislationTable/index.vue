@@ -44,7 +44,7 @@
               v-model="q"
               type="text"
               class="form-control"
-              placeholder="Search documents"
+              placeholder="Filter legislation"
             >
           </div>
           <div
@@ -157,16 +157,12 @@
           </template>
           <div
             v-else
-            class="legislation-table__row"
+            class="p-2 text-center"
           >
-            <div
-              class="indent"
-            />
-            <div
-              class="column"
-            >
-              No documents found
-            </div>
+            No legislation found. <a
+              :href="`/search/?q=${q}`"
+              target="_blank"
+            >Try searching instead</a>
           </div>
         </div>
       </div>
