@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-13 18:13+0200\n"
-"PO-Revision-Date: 2022-08-25 13:38\n"
+"PO-Revision-Date: 2022-09-14 06:57\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -14,31 +14,19 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/africanlii/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 63\n"
+"X-Crowdin-File: /main/africanlii/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 65\n"
 
 #: templates/peachjam/footer.html:8
 msgid "About AfricanLII"
 msgstr "Kuhusu AfricanLII"
 
 #: templates/peachjam/footer.html:11
-msgid ""
-"AfricanLII is an open-access research platform for African law jointly "
-"operated by the AfricanLII programme of the University of Cape Town and Laws."
-"Africa. AfricanLII publishes the law and policy of the African Union and "
-"federates search across all open access African national law available "
-"through the <a class=\"text-primary\" href=\"https://www.openlawafrica.org/"
-"\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of "
-"LIIs."
+msgid "AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and federates search across all open access African national law available through the <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of LIIs."
 msgstr ""
 
 #: templates/peachjam/footer.html:19
-msgid ""
-"The publication of the African Union material is co-sponsored by the "
-"European Union and is part of the <a class=\"text-primary\" href=\"https://"
-"www.afrobarometer.org/impact/informing-the-public-discourse/data-for-"
-"governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for "
-"Governance Alliance project</a>."
+msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
 msgstr ""
 
 #: templates/peachjam/footer.html:27
@@ -154,16 +142,12 @@ msgid "Home"
 msgstr "Sebule"
 
 #: templates/peachjam/home.html:10
-msgid ""
-"We digitise the law and policy of the African Governance Architecture and "
-"help Africans and the world connect with and understand the African Union "
-"agenda."
+msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
 msgstr ""
 
 #: templates/peachjam/home.html:16
 #, python-format
-msgid ""
-"Search through %(documents_count)s AU documents on the AfricanLII platform."
+msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
 msgstr ""
 
 #: templates/peachjam/home.html:40
@@ -175,40 +159,36 @@ msgid "Recent Judgments"
 msgstr "Hukumu za Hivi Karibuni"
 
 #: templates/peachjam/home.html:54
-#, fuzzy
 #| msgid "Recent Judgments"
 msgid "View more judgments"
-msgstr "Hukumu za Hivi Karibuni"
+msgstr ""
 
 #: templates/peachjam/home.html:61
 msgid "Recent AU Documents"
 msgstr "Nyaraka za AU za Hivi Karibuni"
 
 #: templates/peachjam/home.html:62
-#, fuzzy
 #| msgid "Recent AU Documents"
 msgid "View more AU documents"
-msgstr "Nyaraka za AU za Hivi Karibuni"
+msgstr ""
 
 #: templates/peachjam/home.html:69
 msgid "Recent Legal Instruments"
 msgstr "Vyombo vya Kisheria vya Hivi Karibuni"
 
 #: templates/peachjam/home.html:70
-#, fuzzy
 #| msgid "Recent Legal Instruments"
 msgid "View more legal instruments"
-msgstr "Vyombo vya Kisheria vya Hivi Karibuni"
+msgstr ""
 
 #: templates/peachjam/home.html:77
 msgid "Recent Treaties and Protocols "
 msgstr "Mikataba na Itifaki za Hivi Karibuni "
 
 #: templates/peachjam/home.html:78
-#, fuzzy
 #| msgid "Recent Treaties and Protocols "
 msgid "View more treaties and protocols"
-msgstr "Mikataba na Itifaki za Hivi Karibuni "
+msgstr ""
 
 #, python-format
 #~ msgid " Documents by %(author)s "
@@ -461,3 +441,4 @@ msgstr "Mikataba na Itifaki za Hivi Karibuni "
 
 #~ msgid "Logout"
 #~ msgstr "Déconnexion"
+
