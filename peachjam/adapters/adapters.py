@@ -197,9 +197,9 @@ class IndigoAdapter(Adapter):
                 defaults={"title": imported_document["parent_work"]["title"]},
             )
             created_document.parent_work = parent_work
+            logger.info(f"Set parent to {parent_work}")
         else:
             created_document.parent_work = None
-        logger.info(f"Set parent to {parent_work}")
         created_document.save()
 
     def fetch_relationships(self, imported_document, created_document):
