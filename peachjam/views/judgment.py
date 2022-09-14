@@ -9,6 +9,7 @@ from peachjam.views.generic_views import (
 class JudgmentListView(FilteredDocumentListView):
     model = Judgment
     template_name = "peachjam/judgment_list.html"
+    navbar_link = "judgments"
 
     def get_queryset(self):
         queryset = super(JudgmentListView, self).get_queryset()

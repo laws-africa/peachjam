@@ -10,6 +10,7 @@ from peachjam_api.serializers import LegislationSerializer
 class LegislationListView(TemplateView):
     template_name = "lawlibrary/legislation_list.html"
     variant = "current"
+    navbar_link = "legislation"
 
     def get_queryset(self):
         return (

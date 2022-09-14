@@ -15,6 +15,7 @@ from peachjam.views.generic_views import (
 class LegislationListView(FilteredDocumentListView):
     model = Legislation
     template_name = "peachjam/legislation_list.html"
+    navbar_link = "legislation"
 
 
 @registry.register_doc_type("legislation")
