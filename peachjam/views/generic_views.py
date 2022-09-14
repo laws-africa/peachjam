@@ -26,9 +26,10 @@ class FilteredDocumentListView(ListView):
     context_object_name = "documents"
     paginate_by = 50
     model = CoreDocument
+    form_class = BaseDocumentFilterForm
 
     def get(self, request, *args, **kwargs):
-        self.form = BaseDocumentFilterForm(request.GET)
+        self.form = self.form_class(request.GET)
         self.form.is_valid()
 
         return super(FilteredDocumentListView, self).get(request, *args, **kwargs)
