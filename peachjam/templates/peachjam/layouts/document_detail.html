@@ -51,6 +51,19 @@
                       {% endif %}
                     {% endblock %}
 
+                    {% block document-metadata-content-citation %}
+                      {% if document.citation %}
+                        <dt class="col-4">{% trans 'Citation' %}</dt>
+                        <dd class="col-8 text-muted">
+                          {{ document.citation }}
+                          <button type="button" class="btn btn-secondary btn-xs ms-2"
+                                  title="{% trans "Copy to clipboard" %}" data-component="CopyToClipboard"
+                                  data-value="{{ document.citation }}"
+                                  data-confirmation="{% trans "Copied!" %}">{% trans "Copy" %}</button>
+                        </dd>
+                      {% endif %}
+                    {% endblock %}
+
                     {% block document-metadata-content-author %}
                       {% if document.author %}
                         <dt class="col-4">{% trans 'Author' %}</dt>

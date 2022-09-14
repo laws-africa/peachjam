@@ -1,18 +1,22 @@
-import FindDocuments from './FindDocuments/index.vue';
+import { CopyToClipboard } from './clipboard';
 import PdfRenderer from './pdf-renderer';
 import { RelationshipEnrichments } from './RelationshipEnrichment';
 import DocumentList from './document-list';
 import DocumentContent from './document-content';
 import NavigationSelect from './navigation-select';
+
+import FindDocuments from './FindDocuments/index.vue';
 import LegislationTable from './LegislationTable/index.vue';
 
 const components: Record<string, any> = {
   // Data components
-  PdfRenderer,
-  DocumentList,
-  RelationshipEnrichments,
+  CopyToClipboard,
   DocumentContent,
+  DocumentList,
   NavigationSelect,
+  PdfRenderer,
+  RelationshipEnrichments,
+
   // Vue components
   FindDocuments,
   LegislationTable
