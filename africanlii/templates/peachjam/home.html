@@ -37,11 +37,11 @@
 
 <section class="pb-5 pt-5">
   <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Regional Body' %}</h2>
+    <h2 class="mb-4 heading-underlined">{% trans 'Regional Bodies' %}</h2>
     <div class="row">
       {% for author in authors %}
         <div class="col-md-6 col-sm-12">
-            <a href="{% url 'authors' author.id %}">{{ author.name }}</a>
+          <a href="{% url 'author' author.id %}">{{ author.name }}</a>
         </div>
       {% endfor %}
     </div>
@@ -51,28 +51,32 @@
 <section class="pb-5 pt-5 bg-light">
   <div class="container">
     <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text='View more Judgements' view_more_url_name='judgment_list' %}
+    {% trans 'View more judgments' as text %}
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
   </div>
 </section>
 
 <section class="pb-5 pt-5">
   <div class="container">
     <h2 class="mb-4 heading-underlined">{% trans 'Recent AU Documents' %}</h2>
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_documents  view_more_text='View more AU Documents' view_more_url_name='generic_document_list' %}
+    {% trans 'View more AU documents' as text %}
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_documents  view_more_text=text view_more_url_name='generic_document_list' %}
   </div>
 </section>
 
 <section class="pb-5 pt-5 bg-light">
   <div class="container">
     <h2 class="mb-4 heading-underlined">{% trans 'Recent Legal Instruments' %}</h2>
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_instruments view_more_text='View more Legal Instruments' view_more_url_name='legal_instrument_list' %}
+    {% trans 'View more legal instruments' as text %}
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_instruments view_more_text=text view_more_url_name='legal_instrument_list' %}
   </div>
 </section>
 
 <section class="pb-5 pt-5">
   <div class="container">
     <h2 class="mb-4 heading-underlined">{% trans 'Recent Treaties and Protocols ' %}</h2>
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text='View more Treaties and Protocols' view_more_url_name='legislation_list' %}
+    {% trans 'View more treaties and protocols' as text %}
+    {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
   </div>
 </section>
 {% endblock %}
