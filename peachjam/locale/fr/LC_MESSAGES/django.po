@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-13 18:13+0200\n"
-"PO-Revision-Date: 2022-09-14 06:56\n"
+"PO-Revision-Date: 2022-09-14 06:57\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 44\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 50\n"
 
 #: settings.py:193
 msgid "English"
@@ -79,8 +79,9 @@ msgid "Reset Your Password"
 msgstr "Réinitialiser votre mot de passe"
 
 #: templates/account/password_reset.html:12
+#| msgid "Forgotten your password? Enter your e-mail address below, and we"
 msgid "Forgotten your password? Enter your e-mail address below, and we'll send you an e-mail allowing you to reset it."
-msgstr ""
+msgstr "Vous avez oublié votre mot de passe ? Entrez votre adresse e-mail ci-dessous et nous vous enverrons un e-mail vous permettant de le réinitialiser."
 
 #: templates/account/password_reset.html:30
 #: templates/account/password_reset_from_key.html:51
@@ -149,17 +150,17 @@ msgstr "Relations"
 
 #: templates/peachjam/_document_content.html:155
 msgid "Loading PDF..."
-msgstr ""
+msgstr "Chargement du PDF..."
 
 #: templates/peachjam/_document_content.html:166
 #, python-format
 msgid "This document is %(filesize)s. Do you want to load it?"
-msgstr ""
+msgstr "Ce document est %(filesize)s. Voulez-vous le charger ?"
 
 #: templates/peachjam/_document_content.html:171
-#| msgid "AU Documents"
+#| msgid "Related documents"
 msgid "Load document"
-msgstr ""
+msgstr "Charger le document"
 
 #: templates/peachjam/_document_table.html:6
 msgid "Title"
@@ -176,7 +177,7 @@ msgstr "premier"
 
 #: templates/peachjam/_pagination.html:7
 msgid "previous"
-msgstr "Précédent"
+msgstr "précédent"
 
 #: templates/peachjam/_pagination.html:11
 msgid "Page"
@@ -335,7 +336,7 @@ msgstr "Documents de l'UA"
 #: templates/peachjam/header.html:41 templates/peachjam/header.html:42
 #, python-format
 msgid "Search %(APP_NAME)s"
-msgstr ""
+msgstr "Rechercher dans %(APP_NAME)s"
 
 #: templates/peachjam/header.html:56
 msgid "Logout"
@@ -345,7 +346,7 @@ msgstr "Déconnexion"
 #: templates/peachjam/judgment_list.html:7
 #| msgid "Judgment List"
 msgid "Judgments"
-msgstr ""
+msgstr "Jugements"
 
 #: templates/peachjam/layouts/document_detail.html:49
 msgid "Jurisdiction"
@@ -369,6 +370,7 @@ msgstr "Documents"
 
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
+#| msgid "Treaties and Protocols List"
 msgid "Treaties and Protocols"
 msgstr "Traités et Protocoles"
 
@@ -378,11 +380,20 @@ msgstr "Traités et Protocoles"
 msgid "Legislation"
 msgstr "Législation"
 
+#~ msgid "Document Type"
+#~ msgstr "Type de document"
+
+#~ msgid "Regional Body"
+#~ msgstr "Corps régional"
+
 #~ msgid "Generic Document List"
-#~ msgstr "Orodha ya Hati za Jumla"
+#~ msgstr "Liste de documents génériques"
+
+#~ msgid "This document"
+#~ msgstr "Ce document"
 
 #~ msgid "Legal Instrument List"
-#~ msgstr "Orodha ya Vyombo vya Kisheria"
+#~ msgstr "Liste d'instruments légaux"
 
 #~ msgid "Welcome to Peach Jam"
 #~ msgstr "Bienvenue dans Peach Jam"
