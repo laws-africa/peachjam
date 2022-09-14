@@ -29,7 +29,7 @@ from peachjam.feeds import (
 )
 from peachjam.views import (
     AboutPageView,
-    AuthorListView,
+    AuthorDetailView,
     DocumentDetailViewResolver,
     DocumentSourcePDFView,
     DocumentSourceView,
@@ -38,10 +38,22 @@ from peachjam.views import (
     JudgmentListView,
     LegalInstrumentListView,
     LegislationListView,
+    TaxonomyDetailView,
 )
 
 urlpatterns = [
     path("", HomePageView.as_view(), name="home_page"),
+    path(
+        "about/",
+        AboutPageView.as_view(),
+        name="about",
+    ),
+    # listing views
+    path(
+        "authors/<int:pk>/",
+        AuthorDetailView.as_view(),
+        name="author",
+    ),
     path("judgments/", JudgmentListView.as_view(), name="judgment_list"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
     path(
@@ -50,30 +62,32 @@ urlpatterns = [
         name="legal_instrument_list",
     ),
     path(
-        "about/",
-        AboutPageView.as_view(),
-        name="about",
-    ),
-    path(
         "generic_documents/",
         GenericDocumentListView.as_view(),
         name="generic_document_list",
     ),
+    path(
+        "taxonomy/<slug:slug>",
+        TaxonomyDetailView.as_view(),
+        name="taxonomy_detail",
+    ),
+    # document detail views
     re_path(
         r"^(?P<frbr_uri>akn/.*)/source$",
         cache_page(60 * 60 * 24)(DocumentSourceView.as_view()),
         name="document_source",
-    ),
-    path(
-        "authors/<int:pk>/",
-        AuthorListView.as_view(),
-        name="authors",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/source.pdf$",
         cache_page(60 * 60 * 24)(DocumentSourcePDFView.as_view()),
         name="document_source_pdf",
     ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)$",
+        DocumentDetailViewResolver.as_view(),
+        name="document_detail",
+    ),
+    # feeds
     path("feeds/judgments.xml", JudgmentAtomSiteNewsFeed(), name="judgment_feed"),
     path(
         "feeds/generic_documents.xml",
@@ -89,11 +103,7 @@ urlpatterns = [
         "feeds/legislation.xml", LegislationAtomSiteNewsFeed(), name="legislation_feed"
     ),
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
-    re_path(
-        r"^(?P<frbr_uri>akn/.*)$",
-        DocumentDetailViewResolver.as_view(),
-        name="document_detail",
-    ),
+    # separate apps
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
     path(
         "admin/login/",
