@@ -36,6 +36,7 @@ class LegislationListView(TemplateView):
 
 class ProvincialLegislationView(TemplateView):
     template_name = "lawlibrary/provincial_legislation.html"
+    navbar_link = "legislation/provincial/"
 
     def get_context_data(self, **kwargs):
         codes = "mp ec nc kzn gp wc lim nw fs".split()
