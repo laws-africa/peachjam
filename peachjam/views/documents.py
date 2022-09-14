@@ -1,5 +1,5 @@
 from django.http import Http404, HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, View
 
@@ -67,3 +67,23 @@ class DocumentSourcePDFView(DocumentSourceView):
             return HttpResponse(file.read(), content_type="application/pdf")
 
         return Http404
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+class DocumentMediaView(DetailView):
+    """Serve an image file, such as
+
+    /akn/za/judgment/afchpr/2022/1/eng@2022-09-14/media/tmpwx2063x2_html_31b3ed1b55e86754.png
+    """
+
+    model = CoreDocument
+    slug_field = "expression_frbr_uri"
+    slug_url_kwarg = "frbr_uri"
+
+    def render_to_response(self, context, **response_kwargs):
+        img = get_object_or_404(self.object.images, filename=self.kwargs["filename"])
+        file = img.file.open()
+        file_bytes = file.read()
+        response = HttpResponse(file_bytes, content_type=img.mimetype)
+        response["Content-Length"] = str(len(file_bytes))
+        return response

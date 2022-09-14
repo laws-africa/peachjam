@@ -31,6 +31,7 @@ from peachjam.views import (
     AboutPageView,
     AuthorDetailView,
     DocumentDetailViewResolver,
+    DocumentMediaView,
     DocumentSourcePDFView,
     DocumentSourceView,
     GenericDocumentListView,
@@ -81,6 +82,11 @@ urlpatterns = [
         r"^(?P<frbr_uri>akn/.*)/source.pdf$",
         cache_page(60 * 60 * 24)(DocumentSourcePDFView.as_view()),
         name="document_source_pdf",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/media/(?P<filename>.+)$",
+        cache_page(60 * 60 * 24)(DocumentMediaView.as_view()),
+        name="document_media",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)$",
