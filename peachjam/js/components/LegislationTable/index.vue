@@ -50,13 +50,13 @@
           <div
             class="legislation-table__row"
           >
-            <div class="column-caret" />
+            <div class="indent" />
             <div class="column">
               {{ filteredData.length }} of {{ tableData.length }} documents
             </div>
           </div>
           <div class="legislation-table__row headings">
-            <div class="column-caret" />
+            <div class="indent" />
             <div
               class="column d-flex align-items-center"
               role="button"
@@ -92,28 +92,31 @@
             <div
               v-for="(row, index) in filteredData"
               :key="index"
-              class="legislation-table__row"
+              :class="`legislation-table__row ${row.children.length ? 'has-children' : ''}`"
+              role="button"
+              @click="handleRowClick"
             >
               <div
-                class="column-caret"
-                data-bs-toggle="collapse"
-                :data-bs-target="`#row-accordion-${index}`"
-                aria-expanded="false"
-                role="button"
-                :aria-controls="`row-accordion-${index}`"
+                v-if="row.children.length"
+                class="column-caret indent"
               >
                 <i
-                  v-if="row.sublegs"
                   class="bi bi-caret-right-fill"
                 />
                 <i
-                  v-if="row.sublegs"
                   class="bi bi-caret-down-fill"
                 />
               </div>
+              <div
+                v-else
+                class="indent"
+              />
               <div class="column">
                 <div>
-                  <a :href="`${row.work_frbr_uri}`">{{ row.title }}</a>
+                  <a
+                    :href="`${row.work_frbr_uri}`"
+                    target="_blank"
+                  >{{ row.title }}</a>
                 </div>
                 <div class="column__subtitle">
                   {{ row.frbr_uri }}
@@ -122,22 +125,34 @@
               <div class="column">
                 {{ row.citation }}
               </div>
-            <!-- TODO: Establish content requirement for sublegs, then implement accordion syntax -->
-            <!--            <div-->
-            <!--              v-if="row.sublegs"-->
-            <!--              :id="`row-accordion-${index}`"-->
-            <!--              class="accordion-collapse collapse column__accordion accordion"-->
-            <!--              data-bs-parent=".legislation-table__row"-->
-            <!--            >-->
-            <!--              <div class="accordion-body">-->
-            <!--                <div-->
-            <!--                  v-for="(leg, subleg_index) in row.sublegs"-->
-            <!--                  :key="subleg_index"-->
-            <!--                >-->
-            <!--                  {{ leg.title }}-->
-            <!--                </div>-->
-            <!--              </div>-->
-            <!--            </div>-->
+              <div
+                v-if="row.children.length"
+                :id="`row-accordion-${index}`"
+                class="accordion-collapse collapse accordion"
+                data-bs-parent=".legislation-table__row"
+              >
+                <div class="d-flex">
+                  <div class="indent" />
+                  <div class="accordion-body flex-grow-1">
+                    <div
+                      v-for="(subleg, subleg_index) in row.children"
+                      :key="subleg_index"
+                    >
+                      <div class="row">
+                        <div class="col">
+                          <a
+                            :href="`${row.work_frbr_uri}`"
+                            target="_blank"
+                          >{{ subleg.title }}</a>
+                        </div>
+                        <div class="col">
+                          {{ subleg.citation }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </template>
           <div
@@ -145,7 +160,7 @@
             class="legislation-table__row"
           >
             <div
-              class="column-caret"
+              class="indent"
             />
             <div
               class="column"
@@ -174,6 +189,7 @@ export default {
     showSideFacets: false,
     tableData: [],
     filteredData: [],
+    lockAccordion: false,
     q: '',
     windowWith: window.innerWidth,
     sortableFields: {
@@ -211,6 +227,23 @@ export default {
   },
 
   methods: {
+    handleRowClick (e) {
+      const parentRow = e.target.closest('.legislation-table__row');
+      if (!parentRow.classList.contains('has-children')) return;
+      if (Array.from(parentRow.querySelectorAll('a')).some(a => e.target === a || a.contains(e.target))) return;
+      if (this.lockAccordion) return;
+      const collapseElement = parentRow.querySelector('.collapse');
+      collapseElement.addEventListener('shown.bs.collapse', () => {
+        this.lockAccordion = false;
+      });
+      collapseElement.addEventListener('hidden.bs.collapse', () => {
+        this.lockAccordion = false;
+      });
+      this.lockAccordion = true;
+      // Async action
+      parentRow.classList.toggle('expanded');
+      return new window.bootstrap.Collapse(collapseElement);
+    },
     setWindowWidth: debounce(function () {
       this.windowWith = window.innerWidth;
     }, 100),
@@ -327,39 +360,57 @@ export default {
 </script>
 
 <style scoped>
-.legislation-table__row.headings {
-  border-bottom: 1px solid var(--bs-primary);
-  margin-bottom: 0.5rem;
-}
-
-.legislation-table__row.headings i {
-  font-size: 18px;
-}
-
 .legislation-table__row {
   display: flex;
   width: 100%;
   padding: 0.25rem;
   border-bottom: 1px solid var(--bs-gray-200);
   flex-wrap: wrap;
+  cursor: default !important;
+  transition: background-color 300ms ease-in-out;
 }
 
-.column-caret[aria-expanded="false"] .bi-caret-down-fill {
-  display: none;
+.legislation-table__row.has-children {
+  cursor: pointer !important;
 }
 
-.column-caret[aria-expanded="true"] .bi-caret-right-fill {
-  display: none;
+.legislation-table__row.has-children:hover {
+  background-color: var(--bs-light);
 }
 
-.legislation-table__row .column-caret {
-  width: 30px;
+.legislation-table__row.headings {
+  border-bottom: 1px solid var(--bs-primary);
+}
+
+.legislation-table__row.headings i {
+  font-size: 18px;
+}
+
+.column-caret {
   text-align: center;
+}
+
+.legislation-table__row .column-caret .bi-caret-down-fill {
+  display: none;
+}
+
+.legislation-table__row.expanded .column-caret .bi-caret-down-fill {
+  display: block;
+}
+
+.legislation-table__row.expanded .column-caret .bi-caret-right-fill {
+  display: none;
+}
+
+.indent {
+  width: 30px;
 }
 
 .legislation-table__row .column {
   flex:1;
   width: 100%;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .legislation-table__row .column__subtitle {
