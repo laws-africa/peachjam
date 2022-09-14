@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n peachjam %}
 
 <ul class="pagination">
   {% if page_obj.has_previous %}
@@ -7,10 +7,17 @@
     </li>
   {% endif %}
 
-  {% for num in paginator.page_range %}
+{% get_proper_elided_page_range paginator page_obj.number as page_range %} <!-- here -->
+  {% for num in page_range %}
+    {% if num == paginator.ELLIPSIS %}
+    <li class="page-item">
+      <span class="page-link">{{ paginator.ELLIPSIS }}</span>
+    </li>
+      {% else %}
     <li class="page-item {% if page_obj.number == num %}active{% endif %}">
       <a class="page-link" href="?page={{ num }}">{{ num }}</a>
     </li>
+    {% endif %}
   {% endfor %}
 
   {% if page_obj.has_next %}
