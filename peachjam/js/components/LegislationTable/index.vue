@@ -134,14 +134,6 @@
                 <div class="d-flex">
                   <div class="indent" />
                   <div class="accordion-body flex-grow-1">
-                    <div class="row">
-                      <div class="col">
-                        <strong>Title</strong>
-                      </div>
-                      <div class="col">
-                        <strong>Citation</strong>
-                      </div>
-                    </div>
                     <div
                       v-for="(subleg, subleg_index) in row.children"
                       :key="subleg_index"
