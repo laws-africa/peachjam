@@ -12,6 +12,7 @@ class BaseCourtDetailView(FilteredDocumentListView):
     model = Judgment
     template_name = "lawlibrary/court_detail.html"
     form_class = CourtViewFilterForm
+    navbar_link = "judgments"
 
     def get_base_queryset(self):
         qs = super().get_base_queryset().filter(author=self.author)

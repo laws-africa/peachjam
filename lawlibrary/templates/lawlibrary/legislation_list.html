@@ -8,25 +8,9 @@
       {% block breadcrumbs %}
       {% endblock %}
 
-      <h1 class="mt-2">{% trans 'Legislation' %}</h1>
+      <h1 class="mt-2 mb-4">{% trans 'National Legislation' %}</h1>
 
-      {% if provinces %}
-        <h4 class="mt-2">{% trans 'Provincial Legislation' %}</h4>
-
-        <div class="mb-4">
-          <div class="row mb-2">
-            {% for locality in provinces %}
-              <div class="col-6 col-md-3 col-lg-2">
-                <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      {% endif %}
-
-      <h1>{% trans "National Legislation" %}</h1>
-
-      <nav class="nav nav-tabs mb-3">
+      <nav class="nav nav-tabs mb-3 border-bottom">
         <li class="nav-item">
           <a class="nav-link {% if view.variant == 'current' %}active{% endif %}" href="{% url 'legislation_list' %}">Current legislation</a>
         </li>
