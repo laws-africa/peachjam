@@ -22,6 +22,10 @@ from peachjam_api.serializers import (
 class FilteredDocumentListView(ListView):
     """Generic List View class for filtering documents."""
 
+    context_object_name = "documents"
+    paginate_by = 50
+    model = CoreDocument
+
     def get(self, request, *args, **kwargs):
         self.form = BaseDocumentFilterForm(request.GET)
         self.form.is_valid()

@@ -9,8 +9,6 @@ from peachjam.views.generic_views import (
 class LegalInstrumentListView(FilteredDocumentListView):
     model = LegalInstrument
     template_name = "peachjam/legal_instrument_list.html"
-    context_object_name = "documents"
-    paginate_by = 20
 
     def get_queryset(self):
         queryset = super(LegalInstrumentListView, self).get_queryset()

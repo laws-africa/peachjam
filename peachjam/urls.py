@@ -38,6 +38,7 @@ from peachjam.views import (
     JudgmentListView,
     LegalInstrumentListView,
     LegislationListView,
+    PlaceDetailView,
     TaxonomyDetailView,
 )
 
@@ -54,6 +55,7 @@ urlpatterns = [
         AuthorDetailView.as_view(),
         name="author",
     ),
+    path("place/<str:code>", PlaceDetailView.as_view(), name="place"),
     path("judgments/", JudgmentListView.as_view(), name="judgment_list"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
     path(

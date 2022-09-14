@@ -31,6 +31,9 @@ class Locality(models.Model):
         ordering = ["name"]
         unique_together = ["name", "jurisdiction"]
 
+    def place_code(self):
+        return f"{self.jurisdiction.pk.lower()}-{self.code}"
+
     def __str__(self):
         return self.name
 
