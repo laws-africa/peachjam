@@ -162,7 +162,7 @@
             No legislation found. <a
               :href="`/search/?q=${q}`"
               target="_blank"
-            >Try searching instead</a>
+            >Try searching instead</a>.
           </div>
         </div>
       </div>
