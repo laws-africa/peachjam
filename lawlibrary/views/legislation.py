@@ -30,9 +30,18 @@ class LegislationListView(TemplateView):
 
         qs = self.filter_queryset(self.get_queryset())
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
-        context["provinces"] = Locality.objects.filter(jurisdiction__iso="ZA")
 
         return context
+
+
+class ProvincialLegislationView(TemplateView):
+    template_name = "lawlibrary/provincial_legislation.html"
+
+    def get_context_data(self, **kwargs):
+        codes = "mp ec nc kzn gp wc lim nw fs".split()
+        provinces = Locality.objects.filter(code__in=codes)
+        groups = provinces[:5], provinces[6:]
+        return super().get_context_data(province_groups=groups, **kwargs)
 
 
 class ProvincialLegislationListView(LegislationListView):

@@ -16,7 +16,12 @@
   </li>
   <li class="nav-item">
     <a class="nav-link {% ifequal request.path '/legislation/'%} active {% endifequal%}" href="{% url 'legislation_list' %}">
-      {% trans 'Legislation' %}
+      {% trans 'National Legislation' %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% ifequal request.path '/legislation/provincial/' %} active {% endifequal%}" href="{% url 'provincial_legislation' %}">
+      {% trans 'Provincial Legislation' %}
     </a>
   </li>
   <li class="nav-item">
