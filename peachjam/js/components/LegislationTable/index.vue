@@ -160,7 +160,7 @@
             class="p-2 text-center"
           >
             No legislation found. <a
-              :href="`/search/?q=${q}`"
+              :href="`/search/?q=${encodeURIComponent(q)}`"
               target="_blank"
             >Try searching instead</a>.
           </div>
