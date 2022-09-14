@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-13 18:13+0200\n"
-"PO-Revision-Date: 2022-09-14 06:57\n"
+"PO-Revision-Date: 2022-09-14 09:44\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -174,7 +174,7 @@ msgstr "Recherchez %(documents_count)s documents en AU sur la plateforme Africai
 #: templates/peachjam/home.html:40
 #| msgid "Regional Body"
 msgid "Regional Bodies"
-msgstr "Organismes régionaux"
+msgstr "Corps régionaux"
 
 #: templates/peachjam/home.html:53
 msgid "Recent Judgments"
