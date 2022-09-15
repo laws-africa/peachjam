@@ -90,7 +90,7 @@ class LegislationDetailView(BaseDocumentDetailView):
 
                 notices.append(
                     {
-                        "type": messages.INFO,
+                        "type": messages.WARNING,
                         "html": format_html(
                             msg.format(
                                 friendly_type,
