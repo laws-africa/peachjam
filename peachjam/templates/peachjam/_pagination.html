@@ -7,7 +7,7 @@
     </li>
   {% endif %}
 
-{% get_proper_elided_page_range paginator page_obj.number as page_range %} <!-- here -->
+{% get_proper_elided_page_range paginator page_obj.number as page_range %}
   {% for num in page_range %}
     {% if num == paginator.ELLIPSIS %}
     <li class="page-item">
