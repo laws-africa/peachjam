@@ -50,6 +50,12 @@ class Work(models.Model):
         return f"{self.frbr_uri} - {self.title}"
 
 
+class CoreDocumentManager(models.Manager):
+    def get_queryset(self):
+        # defer expensive fields
+        return super().get_queryset().defer("content_html", "toc_json")
+
+
 class CoreDocumentQuerySet(models.QuerySet):
     def latest_expression(self):
         """Select only the most recent expression for documents with the same frbr_uri."""
@@ -65,7 +71,7 @@ class CoreDocument(models.Model):
         ("judgment", "Judgment"),
     )
 
-    objects = CoreDocumentQuerySet.as_manager()
+    objects = CoreDocumentManager.from_queryset(CoreDocumentQuerySet)()
 
     work = models.ForeignKey(
         Work, null=False, on_delete=models.PROTECT, related_name="documents"
