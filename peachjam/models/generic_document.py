@@ -1,7 +1,12 @@
 from django.db import models
 
 from peachjam.frbr_uri import FRBR_URI_DOCTYPES
-from peachjam.models import CoreDocument, Work
+from peachjam.models import (
+    CoreDocument,
+    CoreDocumentManager,
+    CoreDocumentQuerySet,
+    Work,
+)
 from peachjam.models.author import Author
 
 
@@ -45,7 +50,15 @@ class LegalInstrument(CoreDocument):
         return super().save(*args, **kwargs)
 
 
+class LegislationManager(CoreDocumentManager):
+    def get_queryset(self):
+        # defer expensive fields
+        return super().get_queryset().defer("metadata_json")
+
+
 class Legislation(CoreDocument):
+    objects = LegislationManager.from_queryset(CoreDocumentQuerySet)()
+
     metadata_json = models.JSONField(null=False, blank=False)
     repealed = models.BooleanField(default=False, null=False)
     parent_work = models.ForeignKey(Work, null=True, on_delete=models.PROTECT)

@@ -17,8 +17,6 @@ class LegislationListView(TemplateView):
             Legislation.objects.filter(locality=None)
             .distinct("work_frbr_uri")
             .order_by("work_frbr_uri", "-date")
-            # don't load expensive, un-used fields
-            .exclude(["content_html", "metadata_json"])
         )
 
     def filter_queryset(self, qs):
