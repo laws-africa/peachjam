@@ -1,1 +1,28 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
+{% load i18n %}
+
+{% block document-metadata-content-citation %}
+  {{ block.super }}
+
+  {% if document.mnc %}
+    <dt class="col-4">{% trans 'Media Neutral Citation' %}</dt>
+    <dd class="col-8 text-muted">
+      {{ document.mnc }}
+      <button type="button" class="btn btn-secondary btn-xs ms-2"
+              title="{% trans "Copy to clipboard" %}" data-component="CopyToClipboard"
+              data-value="{{ document.mnc }}"
+              data-confirmation="{% trans "Copied!" %}">{% trans "Copy" %}</button>
+    </dd>
+  {% endif %}
+
+  {% with document.case_numbers.all as case_numbers %}
+    {% if case_numbers %}
+      <dt class="col-4">{% trans 'Case number' %}</dt>
+      <dd class="col-8 text-muted">
+        {% for cn in case_numbers %}
+          {{ cn.string }}{% if not forloop.last %}; {% endif %}
+        {% endfor %}
+      </dd>
+    {% endif %}
+  {% endwith %}
+{% endblock %}
