@@ -28,6 +28,7 @@ class SearchableDocument(Document):
     locality = fields.KeywordField(attr="locality.name")
     expression_frbr_uri = fields.KeywordField()
     work_frbr_uri = fields.KeywordField()
+    is_most_recent = fields.BooleanField()
     created_at = fields.DateField()
     updated_at = fields.DateField()
 

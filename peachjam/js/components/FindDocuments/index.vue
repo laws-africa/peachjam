@@ -426,6 +426,7 @@ export default {
           params.append('page', this.page);
           params.append('ordering', this.ordering);
           params.append('highlight', 'content');
+          params.append('is_most_recent', 'true');
 
           for (const key of Object.keys(this.filters)) {
             for (const x of this.filters[key]) {
