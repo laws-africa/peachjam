@@ -1,7 +1,7 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
 
-{% block title %}{% trans 'Judgements' %}{% endblock %}
+{% block title %}{% trans 'Judgments' %}{% endblock %}
 
 {% block page-content %}
   <section class="pb-5">
@@ -37,8 +37,6 @@
         {% endif %}
       </h4>
       {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments %}
-
-      {% include 'peachjam/_pagination.html' %}
     </div>
   </section>
 {% endblock %}
