@@ -8,7 +8,7 @@
       aria-labelledby="mobile-legislation-facets"
     >
       <div class="offcanvas-body">
-        <SecondaryFacets
+        <FilterFacets
           v-if="windowWith < 992"
           v-model="facets"
         />
@@ -19,7 +19,7 @@
         v-if="showSideFacets"
         class="col col-lg-3 d-none d-lg-block"
       >
-        <SecondaryFacets
+        <FilterFacets
           v-if="windowWith > 992"
           v-model="facets"
         />
@@ -160,13 +160,13 @@
 </template>
 
 <script>
-import SecondaryFacets from './SecondaryFacets.vue';
+import FilterFacets from '../FilterFacets/index.vue';
 import debounce from 'lodash/debounce';
 
 export default {
   name: 'LegislationTable',
   components: {
-    SecondaryFacets
+    FilterFacets
   },
   data: () => ({
     offCanvasFacets: null,
