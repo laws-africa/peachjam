@@ -137,6 +137,12 @@ class Judgment(CoreDocument):
 
 
 class CaseNumber(models.Model):
+    string_override = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        help_text="Override for full case number string",
+    )
     string = models.CharField(max_length=1024, null=True, blank=True)
     number = models.PositiveIntegerField(null=True, blank=True)
     year = models.PositiveIntegerField(null=True, blank=True)
@@ -152,6 +158,8 @@ class CaseNumber(models.Model):
         return str(self.string)
 
     def get_case_number_string(self):
+        if self.string_override:
+            return self.string_override
         return f"{self.matter_type or ''} {self.number} of {self.year}".strip()
 
     def save(self, *args, **kwargs):
