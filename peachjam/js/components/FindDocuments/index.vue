@@ -79,7 +79,7 @@
                 </div>
               </li>
               <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_doc_type"
+                v-if="searchInfo.facets && searchInfo.facets._filter_doc_type.doc_type.buckets.length"
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
@@ -100,7 +100,7 @@
                 />
               </li>
               <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_author"
+                v-if="searchInfo.facets && searchInfo.facets._filter_author.author.buckets.length"
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
@@ -121,7 +121,7 @@
                 />
               </li>
               <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_jurisdiction"
+                v-if="searchInfo.facets && searchInfo.facets._filter_jurisdiction.jurisdiction.buckets.length"
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
@@ -142,7 +142,7 @@
                 />
               </li>
               <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_locality"
+                v-if="searchInfo.facets && searchInfo.facets._filter_locality.locality.buckets.length"
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
@@ -164,7 +164,7 @@
               </li>
 
               <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_matter_type"
+                v-if="searchInfo.facets && searchInfo.facets._filter_matter_type.matter_type.buckets.length"
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
@@ -185,7 +185,7 @@
                 />
               </li>
               <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_nature"
+                v-if="searchInfo.facets && searchInfo.facets._filter_nature.nature.buckets.length"
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
@@ -206,7 +206,7 @@
                 />
               </li>
               <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_language"
+                v-if="searchInfo.facets && searchInfo.facets._filter_language.language.buckets.length"
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
@@ -227,7 +227,7 @@
                 />
               </li>
               <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_year"
+                v-if="searchInfo.facets && searchInfo.facets._filter_year.year.buckets.length"
                 class="list-group-item"
               >
                 <div class="d-flex justify-content-between mb-2">
