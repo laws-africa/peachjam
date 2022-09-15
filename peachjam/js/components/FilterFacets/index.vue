@@ -4,11 +4,18 @@
       class="list-group-item bg-light d-flex justify-content-between align-items-center"
     >
       <strong>{{ $t("Filters") }}</strong>
-      <a v-if="showClearAllFilter" href="#" @click.prevent="clearAll">
+      <a
+        v-if="showClearAllFilter"
+        href="#"
+        @click.prevent="clearAll"
+      >
         {{ $t("Clear all") }}
       </a>
     </li>
-    <template v-for="(facet, index) in modelValue" :key="index">
+    <template
+      v-for="(facet, index) in modelValue"
+      :key="index"
+    >
       <SingleFacet
         :facet="facet"
         @on-change="handleChange"
@@ -61,45 +68,45 @@
  *     value: false
  *   }
  * **/
-import SingleFacet from "./SingleFacet.vue";
+import SingleFacet from './SingleFacet.vue';
 export default {
-  name: "FilterFacets",
+  name: 'FilterFacets',
   components: { SingleFacet },
   props: {
     modelValue: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     loading: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
-  emits: ["update:modelValue"],
+  emits: ['update:modelValue'],
   computed: {
-    showClearAllFilter() {
+    showClearAllFilter () {
       return this.modelValue.some((item) => {
-        if (item.type === "checkboxes") {
+        if (item.type === 'checkboxes') {
           return item.value.length;
         } else {
           return item.value;
         }
       });
-    },
+    }
   },
   methods: {
-    clearSingleFacet(data, fieldName) {
+    clearSingleFacet (data, fieldName) {
       const targetIndex = data.findIndex((facet) => facet.name === fieldName);
-      if (data[targetIndex].type === "checkboxes") {
+      if (data[targetIndex].type === 'checkboxes') {
         data[targetIndex].value = [];
-      } else if (data[targetIndex.type === "boolean"]) {
+      } else if (data[targetIndex.type === 'boolean']) {
         data[targetIndex].value = false;
       } else {
         data[targetIndex].value = null;
       }
       return data;
     },
-    clearFacet(fieldName) {
+    clearFacet (fieldName) {
       const queryString = window.location.search;
 
       if (queryString) {
@@ -111,9 +118,9 @@ export default {
       }
 
       const data = this.clearSingleFacet(this.modelValue, fieldName);
-      this.$emit("update:modelValue", [...data]);
+      this.$emit('update:modelValue', [...data]);
     },
-    clearAll() {
+    clearAll () {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
 
@@ -127,9 +134,9 @@ export default {
         }
         data = this.clearSingleFacet(data, facet.name);
       });
-      this.$emit("update:modelValue", [...data]);
+      this.$emit('update:modelValue', [...data]);
     },
-    handleChange(e, facet) {
+    handleChange (e, facet) {
       const targetIndex = this.modelValue.findIndex(
         (item) => item.name === facet.name
       );
@@ -137,10 +144,10 @@ export default {
 
       const getValue = () => {
         let newValue = e.target.value;
-        if (facet.type === "boolean") {
+        if (facet.type === 'boolean') {
           newValue = e.target.checked;
         }
-        if (facet.type === "checkboxes") {
+        if (facet.type === 'checkboxes') {
           if (e.target.checked) {
             newValue = [...data[targetIndex].value, e.target.value];
           } else {
@@ -153,11 +160,11 @@ export default {
       };
       data[targetIndex] = {
         ...data[targetIndex],
-        value: getValue(),
+        value: getValue()
       };
-      this.$emit("update:modelValue", data);
-    },
-  },
+      this.$emit('update:modelValue', data);
+    }
+  }
 };
 </script>
 
