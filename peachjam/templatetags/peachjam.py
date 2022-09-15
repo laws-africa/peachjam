@@ -66,4 +66,4 @@ def query_string(*args, **kwargs):
             del query_dict[k]
 
     qs = query_dict.urlencode()
-    return f"?{qs}" if qs else ""
+    return f"{qs}" if qs else ""
