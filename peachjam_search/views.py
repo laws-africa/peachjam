@@ -108,6 +108,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "nature": "nature",
         "language": "language",
         "year": "year",
+        "is_most_recent": "is_most_recent",
     }
 
     search_fields = {

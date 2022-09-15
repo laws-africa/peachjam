@@ -296,6 +296,19 @@ class CoreDocument(models.Model):
 
             return True
 
+    def is_most_recent(self):
+        """Is this the most recent document for this work?
+
+        Note that there can be multiple most recent documents, all at the same data but in different languages.
+        """
+        return (
+            self.work.documents.filter(language=self.language)
+            .order_by("-date")
+            .values_list("pk", flat=True)
+            .first()
+            == self.pk
+        )
+
 
 def file_location(instance, filename):
     if not instance.document.pk:
