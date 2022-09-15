@@ -2,6 +2,7 @@ import datetime
 import json
 
 from django import template
+from django.core.paginator import Paginator
 from django.http import QueryDict
 from django.urls import reverse
 
@@ -29,6 +30,14 @@ def strip_first_character(value):
 @register.filter
 def parse_string_date(date):
     return datetime.datetime.strptime(date, "%Y-%m-%d")
+
+
+@register.simple_tag
+def get_proper_elided_page_range(p, number, on_each_side=3, on_ends=2):
+    paginator = Paginator(p.object_list, p.per_page)
+    return paginator.get_elided_page_range(
+        number=number, on_each_side=on_each_side, on_ends=on_ends
+    )
 
 
 @register.simple_tag

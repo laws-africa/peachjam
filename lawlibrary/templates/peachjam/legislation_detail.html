@@ -5,7 +5,10 @@
   <nav aria-label="breadcrumb">
     {% if locality %}
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }} legislation</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'provincial_legislation' %}">{% trans 'Provincial Legislation' %}</a></li>
+      </ol>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a></li>
       </ol>
     {% else %}
       <ol class="breadcrumb">

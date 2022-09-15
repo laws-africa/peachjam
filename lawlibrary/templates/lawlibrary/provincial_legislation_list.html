@@ -6,11 +6,16 @@
   <section class="pb-5">
     <div class="container">
       {% block breadcrumbs %}
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'provincial_legislation' %}">{% trans 'Provincial Legislation' %}</a></li>
+          </ol>
+        </nav>
       {% endblock %}
 
-      <h1 class="mt-2">{% blocktrans with locality=locality.name %}{{ locality }} Legislation{% endblocktrans %}</h1>
+      <h1 class="mt-2 mb-4">{% blocktrans with locality=locality.name %}{{ locality }} Legislation{% endblocktrans %}</h1>
 
-      <nav class="nav nav-tabs mb-3">
+      <nav class="nav nav-tabs mb-3 border-bottom">
         <li class="nav-item">
           <a class="nav-link {% if view.variant == 'current' %}active{% endif %}" href="{% url 'provincial_legislation_list' locality.code %}">Current legislation</a>
         </li>

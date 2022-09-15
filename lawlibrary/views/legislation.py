@@ -10,6 +10,7 @@ from peachjam_api.serializers import LegislationSerializer
 class LegislationListView(TemplateView):
     template_name = "lawlibrary/legislation_list.html"
     variant = "current"
+    navbar_link = "legislation"
 
     def get_queryset(self):
         return (
@@ -36,7 +37,6 @@ class LegislationListView(TemplateView):
         qs = self.add_children(qs)
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
-        context["provinces"] = Locality.objects.filter(jurisdiction__iso="ZA")
 
         return context
 
@@ -59,9 +59,21 @@ class LegislationListView(TemplateView):
         return qs
 
 
+class ProvincialLegislationView(TemplateView):
+    template_name = "lawlibrary/provincial_legislation.html"
+    navbar_link = "legislation/provincial"
+
+    def get_context_data(self, **kwargs):
+        codes = "mp ec nc kzn gp wc lim nw fs".split()
+        provinces = Locality.objects.filter(code__in=codes)
+        groups = provinces[:5], provinces[5:]
+        return super().get_context_data(province_groups=groups, **kwargs)
+
+
 class ProvincialLegislationListView(LegislationListView):
     model = Legislation
     template_name = "lawlibrary/provincial_legislation_list.html"
+    navbar_link = "legislation/provincial"
 
     def get(self, *args, **kwargs):
         self.locality = get_object_or_404(Locality, code=kwargs["code"])
