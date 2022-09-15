@@ -61,9 +61,10 @@ class Judgment(CoreDocument):
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned."""
-        if self.mnc != self.generate_citation():
-            self.serial_number = self.generate_serial_number()
-            self.mnc = self.generate_citation()
+        if self.date and hasattr(self, "author"):
+            if self.mnc != self.generate_citation():
+                self.serial_number = self.generate_serial_number()
+                self.mnc = self.generate_citation()
 
     def generate_serial_number(self):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
@@ -136,6 +137,12 @@ class Judgment(CoreDocument):
 
 
 class CaseNumber(models.Model):
+    string_override = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        help_text="Override for full case number string",
+    )
     string = models.CharField(max_length=1024, null=True, blank=True)
     number = models.PositiveIntegerField(null=True, blank=True)
     year = models.PositiveIntegerField(null=True, blank=True)
@@ -151,6 +158,8 @@ class CaseNumber(models.Model):
         return str(self.string)
 
     def get_case_number_string(self):
+        if self.string_override:
+            return self.string_override
         return f"{self.matter_type or ''} {self.number} of {self.year}".strip()
 
     def save(self, *args, **kwargs):

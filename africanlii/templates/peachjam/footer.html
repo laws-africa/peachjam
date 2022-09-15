@@ -8,7 +8,7 @@
     <strong>{% trans 'About AfricanLII' %}</strong>
   </div>
   <p>
-    {% blocktrans %}
+    {% blocktrans trimmed %}
       AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of
       the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and
       federates search across all open access African national law available through the
@@ -16,9 +16,9 @@
     {% endblocktrans %}
   </p>
   <p>
-    {% blocktrans %}
-      The publication of the African Union material is co-sponsored by the European Union and is part of the <a class="text-primary" href="https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/" target="_blank" rel="noreferrer">Data
-    for Governance Alliance project</a>.
+    {% blocktrans trimmed %}
+      The publication of the African Union material is co-sponsored by the European Union and is part of the
+      <a class="text-primary" href="https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/" target="_blank" rel="noreferrer">Data for Governance Alliance project</a>.
     {% endblocktrans %}
   </p>
 {% endblock %}

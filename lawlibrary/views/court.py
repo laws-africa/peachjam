@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 
+from lawlibrary.forms import CourtViewFilterForm
 from peachjam.models import Author, Judgment
 from peachjam.utils import lowercase_alphabet
 from peachjam.views.generic_views import FilteredDocumentListView
@@ -8,10 +9,10 @@ from peachjam.views.generic_views import FilteredDocumentListView
 class BaseCourtDetailView(FilteredDocumentListView):
     """Generic List View class for filtering a court's judgments."""
 
-    context_object_name = "documents"
-    paginate_by = 20
     model = Judgment
     template_name = "lawlibrary/court_detail.html"
+    form_class = CourtViewFilterForm
+    navbar_link = "judgments"
 
     def get_base_queryset(self):
         qs = super().get_base_queryset().filter(author=self.author)

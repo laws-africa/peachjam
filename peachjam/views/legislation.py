@@ -15,14 +15,21 @@ from peachjam.views.generic_views import (
 class LegislationListView(FilteredDocumentListView):
     model = Legislation
     template_name = "peachjam/legislation_list.html"
-    context_object_name = "documents"
-    paginate_by = 20
+    navbar_link = "legislation"
 
 
 @registry.register_doc_type("legislation")
 class LegislationDetailView(BaseDocumentDetailView):
     model = Legislation
     template_name = "peachjam/legislation_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["current_object_date"] = self.object.date.strftime("%Y-%m-%d")
+        context["timeline_events"] = self.get_timeline_events()
+        context["friendly_type"] = self.get_friendly_type()
+        context["notices"] = self.get_notices()
+        return context
 
     def get_notices(self):
         notices = super().get_notices()
@@ -87,8 +94,10 @@ class LegislationDetailView(BaseDocumentDetailView):
                         "html": format_html(
                             msg.format(
                                 friendly_type,
-                                current_object_date,
-                                date,
+                                datetime.strptime(
+                                    current_object_date, "%Y-%m-%d"
+                                ).strftime("%d %B %Y"),
+                                date.strftime("%d %B %Y"),
                                 points_in_time[-1]["expressions"][0][
                                     "expression_frbr_uri"
                                 ],
@@ -107,13 +116,6 @@ class LegislationDetailView(BaseDocumentDetailView):
 
     def get_points_in_time(self):
         return self.object.metadata_json.get("points_in_time", None)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["current_object_date"] = self.object.date.strftime("%Y-%m-%d")
-        context["timeline_events"] = self.get_timeline_events()
-        context["friendly_type"] = self.get_friendly_type()
-        return context
 
     def get_timeline_events(self):
         events = []

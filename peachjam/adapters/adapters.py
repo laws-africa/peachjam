@@ -170,6 +170,11 @@ class IndigoAdapter(Adapter):
             expression_frbr_uri=expression_frbr_uri,
             defaults={**field_data, **frbr_uri_data},
         )
+
+        if document["repeal"] and isinstance(created_doc, Legislation):
+            created_doc.repealed = True
+            created_doc.save()
+
         logger.info(f"New document: {new}")
 
         if document["stub"]:
@@ -181,7 +186,21 @@ class IndigoAdapter(Adapter):
             # the source file is the PDF version
             self.download_source_file(f"{url}.pdf", created_doc, title)
 
+        self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
+
+    def set_parent(self, imported_document, created_document):
+        # handle parent as a special relationship
+        if imported_document["parent_work"]:
+            parent_work, _ = Work.objects.get_or_create(
+                frbr_uri=imported_document["parent_work"]["frbr_uri"],
+                defaults={"title": imported_document["parent_work"]["title"]},
+            )
+            created_document.parent_work = parent_work
+            logger.info(f"Set parent to {parent_work}")
+        else:
+            created_document.parent_work = None
+        created_document.save()
 
     def fetch_relationships(self, imported_document, created_document):
         subject_work = created_document.work
@@ -189,7 +208,7 @@ class IndigoAdapter(Adapter):
         if imported_document["repeal"]:
             repealing_work, _ = Work.objects.get_or_create(
                 frbr_uri=imported_document["repeal"]["repealing_uri"],
-                title=imported_document["repeal"]["repealing_title"],
+                defaults={"title": imported_document["repeal"]["repealing_title"]},
             )
             self.create_relationship(
                 "repealed-by",
@@ -202,7 +221,7 @@ class IndigoAdapter(Adapter):
                 if amendment["amending_uri"] and amendment["amending_title"]:
                     amending_work, _ = Work.objects.get_or_create(
                         frbr_uri=amendment["amending_uri"],
-                        title=amendment["amending_title"],
+                        defaults={"title": amendment["amending_title"]},
                     )
                     self.create_relationship(
                         "amended-by",
@@ -218,7 +237,7 @@ class IndigoAdapter(Adapter):
                 ):
                     commencing_work, _ = Work.objects.get_or_create(
                         frbr_uri=commencement["commencing_frbr_uri"],
-                        title=commencement["commencing_title"],
+                        defaults={"title": commencement["commencing_title"]},
                     )
                     self.create_relationship(
                         "commenced-by",

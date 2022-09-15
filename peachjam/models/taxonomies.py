@@ -7,7 +7,7 @@ from peachjam.models import CoreDocument
 
 class Taxonomy(MP_Node):
     name = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True)
     node_order_by = ["name"]
 
     class Meta:

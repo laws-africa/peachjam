@@ -1,14 +1,13 @@
-from django.views.generic import ListView
+from django.views.generic import TemplateView
 
 from liiweb.models.court import CourtClass
 from peachjam.models import Judgment
 
 
-class JudgmentListView(ListView):
+class JudgmentListView(TemplateView):
     model = Judgment
     template_name = "lawlibrary/judgment_list.html"
-    context_object_name = "documents"
-    paginate_by = 20
+    navbar_link = "judgments"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -6,6 +6,7 @@ from cobalt import FrbrUri
 from cobalt.akn import datestring
 from countries_plus.models import Country
 from django.core.exceptions import ValidationError
+from django.core.files import File
 from django.db import models
 from django.utils.functional import cached_property
 from docpipe.pipeline import PipelineContext
@@ -31,6 +32,9 @@ class Locality(models.Model):
         ordering = ["name"]
         unique_together = ["name", "jurisdiction"]
 
+    def place_code(self):
+        return f"{self.jurisdiction.pk.lower()}-{self.code}"
+
     def __str__(self):
         return self.name
 
@@ -44,6 +48,12 @@ class Work(models.Model):
 
     def __str__(self):
         return f"{self.frbr_uri} - {self.title}"
+
+
+class CoreDocumentManager(models.Manager):
+    def get_queryset(self):
+        # defer expensive fields
+        return super().get_queryset().defer("content_html", "toc_json")
 
 
 class CoreDocumentQuerySet(models.QuerySet):
@@ -61,7 +71,7 @@ class CoreDocument(models.Model):
         ("judgment", "Judgment"),
     )
 
-    objects = CoreDocumentQuerySet.as_manager()
+    objects = CoreDocumentManager.from_queryset(CoreDocumentQuerySet)()
 
     work = models.ForeignKey(
         Work, null=False, on_delete=models.PROTECT, related_name="documents"
@@ -260,7 +270,10 @@ class CoreDocument(models.Model):
         return citation_analyser.extract_citations(self)
 
     def extract_content_from_source_file(self):
-        """Re-extract content from DOCX source files, overwriting anything in content_html."""
+        """Re-extract content from DOCX source files, overwriting anything in content_html and associated images.
+
+        This requires that the document has already been saved, in order to associate image attachments.
+        """
         if (
             not self.content_html_is_akn
             and hasattr(self, "source_file")
@@ -269,9 +282,32 @@ class CoreDocument(models.Model):
             context = PipelineContext(word_pipeline)
             context.source_file = self.source_file.file
             word_pipeline(context)
-            # TODO: attachments
             self.content_html = context.html_text
+
+            for img in self.images.all():
+                img.delete()
+
+            for attachment in context.attachments:
+                if attachment.content_type.startswith("image/"):
+                    img = Image.from_docpipe_attachment(attachment)
+                    img.document = self
+                    img.save()
+                    self.images.add(img)
+
             return True
+
+    def is_most_recent(self):
+        """Is this the most recent document for this work?
+
+        Note that there can be multiple most recent documents, all at the same data but in different languages.
+        """
+        return (
+            self.work.documents.filter(language=self.language)
+            .order_by("-date")
+            .values_list("pk", flat=True)
+            .first()
+            == self.pk
+        )
 
 
 def file_location(instance, filename):
@@ -303,6 +339,16 @@ class Image(AttachmentAbstractModel):
         CoreDocument, related_name="images", on_delete=models.CASCADE
     )
     file = models.ImageField(upload_to=file_location, max_length=1024)
+
+    @classmethod
+    def from_docpipe_attachment(cls, attachment):
+        f = File(attachment.file, name=attachment.filename)
+        return Image(
+            filename=attachment.filename,
+            mimetype=attachment.content_type,
+            size=f.size,
+            file=f,
+        )
 
 
 class SourceFile(AttachmentAbstractModel):

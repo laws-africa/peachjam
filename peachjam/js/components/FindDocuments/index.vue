@@ -293,6 +293,7 @@ export default {
           params.append('page', this.page);
           params.append('ordering', this.ordering);
           params.append('highlight', 'content');
+          params.append('is_most_recent', 'true');
 
           this.facets.forEach(facet => {
             facet.value.forEach(value => {

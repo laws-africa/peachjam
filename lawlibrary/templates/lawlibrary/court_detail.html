@@ -17,11 +17,9 @@
       <li class="breadcrumb-item">
         <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
       </li>
-      {% if year %}
-        <li class="breadcrumb-item">
-          <a href="{% url 'court_detail' court.code %}">{{ court.name }}</a>
-        </li>
-      {% endif %}
+      <li class="breadcrumb-item">
+        <a href="{% url 'court_detail' court.code %}">{{ court.name }}</a>
+      </li>
     </ol>
   </nav>
 {% endblock %}
