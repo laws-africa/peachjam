@@ -239,6 +239,11 @@ class DocumentAdmin(admin.ModelAdmin):
 
         return super().get_form(request, obj, **kwargs)
 
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        # after saving related models, also save this model again so that it can update fields based on related changes
+        form.instance.save()
+
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.model_name
 
@@ -346,6 +351,8 @@ class LegislationAdmin(ImportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[3][1]["fields"].extend(["metadata_json"])
     fieldsets[2][1]["classes"] = ("collapse",)
+    fieldsets[4][1]["fields"].extend(["parent_work"])
+    readonly_fields = ["parent_work"] + list(DocumentAdmin.readonly_fields)
 
 
 class CaseNumberAdmin(admin.TabularInline):
@@ -354,7 +361,7 @@ class CaseNumberAdmin(admin.TabularInline):
     verbose_name = "Case number"
     verbose_name_plural = "Case numbers"
     readonly_fields = ["string"]
-    fields = ["matter_type", "number", "year"]
+    fields = ["matter_type", "number", "year", "string_override"]
 
 
 class JudgmentAdmin(ImportMixin, DocumentAdmin):

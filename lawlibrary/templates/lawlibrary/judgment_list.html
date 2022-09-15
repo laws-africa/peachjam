@@ -1,7 +1,7 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
 
-{% block title %}{% trans 'Judgements' %}{% endblock %}
+{% block title %}{% trans 'Judgments' %}{% endblock %}
 
 {% block page-content %}
   <section class="pb-5">
@@ -11,7 +11,7 @@
       {% if grouped_courts %}
         <div class="row mb-3">
           {% for group in grouped_courts %}
-            <div class="col-md-3 col-12 mb-4">
+            <div class="col-md-4 col-12 mb-3">
               <h4 class="heading-underlined">
               {{ group.title }}
               </h4>

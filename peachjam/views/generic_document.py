@@ -8,9 +8,8 @@ from peachjam.views.generic_views import (
 
 class GenericDocumentListView(FilteredDocumentListView):
     template_name = "peachjam/generic_document_list.html"
-    context_object_name = "documents"
-    paginate_by = 20
     model = GenericDocument
+    navbar_link = "generic_documents"
 
     def get_queryset(self):
         queryset = super(GenericDocumentListView, self).get_queryset()

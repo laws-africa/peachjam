@@ -5,6 +5,11 @@
 
 Project Peach Jam
 
+## Prerequisites
+- postgresql
+- pip
+- elasticsearch
+- global sass
 
 ## Local Setup
 - Clone the repository

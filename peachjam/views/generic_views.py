@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
+from lxml import html
 
 from peachjam.forms import BaseDocumentFilterForm
 from peachjam.models import (
@@ -22,8 +23,13 @@ from peachjam_api.serializers import (
 class FilteredDocumentListView(ListView):
     """Generic List View class for filtering documents."""
 
+    context_object_name = "documents"
+    paginate_by = 50
+    model = CoreDocument
+    form_class = BaseDocumentFilterForm
+
     def get(self, request, *args, **kwargs):
-        self.form = BaseDocumentFilterForm(request.GET)
+        self.form = self.form_class(request.GET)
         self.form.is_valid()
 
         return super(FilteredDocumentListView, self).get(request, *args, **kwargs)
@@ -80,10 +86,6 @@ class BaseDocumentDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # get all versions that match current document work_frbr_uri
-        all_versions = CoreDocument.objects.filter(
-            work_frbr_uri=self.object.work_frbr_uri
-        ).exclude(pk=self.object.pk)
 
         # citation links for a document
         doc = get_object_or_404(CoreDocument, pk=self.object.pk)
@@ -92,6 +94,10 @@ class BaseDocumentDetailView(DetailView):
             citation_links, many=True
         ).data
 
+        # get all versions that match current document work_frbr_uri
+        all_versions = CoreDocument.objects.filter(
+            work_frbr_uri=self.object.work_frbr_uri
+        )
         # language versions that match current document date
         context["language_versions"] = all_versions.filter(date=self.object.date)
 
@@ -137,6 +143,7 @@ class BaseDocumentDetailView(DetailView):
             context["display_type"] = (
                 "akn" if context["document"].content_html_is_akn else "html"
             )
+            self.prefix_images(context["document"])
         elif hasattr(context["document"], "source_file"):
             context["display_type"] = "pdf"
         else:
@@ -148,3 +155,15 @@ class BaseDocumentDetailView(DetailView):
 
     def get_notices(self):
         return []
+
+    def prefix_images(self, document):
+        """Rewrite image URLs so that we can server them correctly."""
+        root = html.fromstring(document.content_html)
+
+        for img in root.xpath(".//img[@src]"):
+            if not img.attrib["src"].startswith("/"):
+                img.attrib["src"] = (
+                    document.expression_frbr_uri + "/media/" + img.attrib["src"]
+                )
+
+        document.content_html = html.tostring(root, encoding="unicode")
