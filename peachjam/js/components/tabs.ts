@@ -1,14 +1,14 @@
 export class ToggleTab {
-  btn: HTMLElement;
+  anchor: HTMLElement;
 
-  constructor (btn: HTMLElement) {
-    this.btn = btn;
-    this.btn.addEventListener('click', (e) => this.clicked(e));
+  constructor (anchor: HTMLAnchorElement) {
+    this.anchor = anchor;
+    this.anchor.addEventListener('click', (e) => this.clicked(e));
   }
 
   clicked (e: Event) {
     e.preventDefault();
-    const href = this.btn.getAttribute('href');
+    const href = this.anchor.getAttribute('href');
     if (href) {
       const trigger = document.querySelector(`[data-bs-target="${href}"]`);
       if (trigger) {
