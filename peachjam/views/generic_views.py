@@ -106,7 +106,34 @@ class BaseDocumentDetailView(DetailView):
             language=self.object.language
         ).order_by("-date")
 
-        # provision relationships
+        self.add_relationships(context)
+        self.add_provision_relationships(context)
+
+        if context["document"].content_html:
+            context["display_type"] = (
+                "akn" if context["document"].content_html_is_akn else "html"
+            )
+            self.prefix_images(context["document"])
+        elif hasattr(context["document"], "source_file"):
+            context["display_type"] = "pdf"
+        else:
+            context["display_type"] = None
+
+        context["notices"] = self.get_notices()
+
+        return context
+
+    def add_relationships(self, context):
+        context["relationships_as_subject"] = rels_as_subject = list(
+            context["document"].relationships_as_subject.all()
+        )
+        context["relationships_as_object"] = rels_as_object = list(
+            context["document"].relationships_as_object.all()
+        )
+        context["relationship_limit"] = 4
+        context["n_relationships"] = len(rels_as_subject) + len(rels_as_object)
+
+    def add_provision_relationships(self, context):
         rels = [
             r
             for r in Relationship.for_subject_document(
@@ -138,20 +165,6 @@ class BaseDocumentDetailView(DetailView):
             context["predicates_json"] = PredicateSerializer(
                 Predicate.objects.all(), many=True
             ).data
-
-        if context["document"].content_html:
-            context["display_type"] = (
-                "akn" if context["document"].content_html_is_akn else "html"
-            )
-            self.prefix_images(context["document"])
-        elif hasattr(context["document"], "source_file"):
-            context["display_type"] = "pdf"
-        else:
-            context["display_type"] = None
-
-        context["notices"] = self.get_notices()
-
-        return context
 
     def get_notices(self):
         return []
