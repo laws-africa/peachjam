@@ -1,7 +1,7 @@
 {% load peachjam i18n %}
 {% if articles %}
   {% for article in articles %}
-    <a class="mb-2 d-flex" href="#">
+    <a class="mb-2 d-flex" href="{% url 'article_detail' article.slug %}">
       <span class="flex-grow-1">{{ article.title }}</span>
       <span class="text-nowrap">{{ article.date }}</span>
     </a>
