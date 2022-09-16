@@ -20,18 +20,28 @@
       {% endif %}
 
       <ul class="nav nav-tabs border-bottom" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#document-detail-tab" type="button" role="tab" aria-controls="document-detail-tab" aria-selected="true">
-            Document detail
-          </button>
-        </li>
-        {% if timeline_events %}
+        {% block document-tabs %}
           <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button" role="tab" aria-controls="history-tab" aria-selected="false">
-              History
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#document-detail-tab" type="button" role="tab" aria-controls="document-detail-tab" aria-selected="true">
+              {% trans "Document detail" %}
             </button>
           </li>
-        {% endif %}
+          {% if timeline_events %}
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button" role="tab" aria-controls="history-tab" aria-selected="false">
+                {% trans "History" %}
+              </button>
+            </li>
+          {% endif %}
+          {% if n_relationships %}
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#related-tab" type="button" role="tab" aria-controls="related-tab" aria-selected="false">
+                {% trans "Related documents" %}
+                <span class="badge bg-secondary">{{ n_relationships }}</span>
+              </button>
+            </li>
+          {% endif %}
+        {% endblock %}
       </ul>
     </div>
 
@@ -138,29 +148,35 @@
 
               <div class="col-md-6">
                 {% block document-relationships-content %}
-                  {% if document.relationships_as_subject or document.relationships_as_object %}
+                  {% if n_relationships %}
                     <h5>{% translate 'Related documents' %}</h5>
 
                     <ul class="list-unstyled">
-                      {% for rel in document.relationships_as_subject %}
-                        {% if rel.object_work %}
-                          <li>
-                            {% translate rel.predicate.verb as verb %}
-                            {{ verb|capfirst }}
-                            <a href="{% url 'document_detail' frbr_uri=rel.object_work.frbr_uri|strip_first_character %}">{{ rel.object_work.title }}</a>
-                          </li>
-                        {% endif %}
-                      {% endfor %}
+                      {% if n_relationships > relationship_limit %}
+                        <li>
+                          <a href="#related-tab" data-component="ToggleTab">{% blocktrans %}{{ n_relationships }} related documents{% endblocktrans %}</a>
+                        </li>
+                      {% else %}
+                        {% for rel in relationships_as_subject %}
+                          {% if rel.object_work %}
+                            <li>
+                              {% translate rel.predicate.verb as verb %}
+                              {{ verb|capfirst }}
+                              <a href="{% url 'document_detail' frbr_uri=rel.object_work.frbr_uri|strip_first_character %}">{{ rel.object_work.title }}</a>
+                            </li>
+                          {% endif %}
+                        {% endfor %}
 
-                      {% for rel in document.relationships_as_object %}
-                        {% if rel.subject_work %}
-                          <li>
-                            {% translate rel.predicate.reverse_verb as verb %}
-                            {{ verb|capfirst }}
-                            <a href="{% url 'document_detail' frbr_uri=rel.subject_work.frbr_uri|strip_first_character %}">{{ rel.subject_work.title }}</a>
-                          </li>
-                        {% endif %}
-                      {% endfor %}
+                        {% for rel in document.relationships_as_object %}
+                          {% if rel.subject_work %}
+                            <li>
+                              {% translate rel.predicate.reverse_verb as verb %}
+                              {{ verb|capfirst }}
+                              <a href="{% url 'document_detail' frbr_uri=rel.subject_work.frbr_uri|strip_first_character %}">{{ rel.subject_work.title }}</a>
+                            </li>
+                          {% endif %}
+                        {% endfor %}
+                      {% endif %}
                     </ul>
                   {% endif %}
                 {% endblock %}
@@ -182,6 +198,14 @@
         <div class="tab-pane fade" id="history-tab" role="tabpanel" aria-labelledby="history-tab">
           <div class="container">
             {% include 'peachjam/_timeline_events.html' %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if n_relationships %}
+        <div class="tab-pane fade" id="related-tab" role="tabpanel" aria-labelledby="related-tab">
+          <div class="container">
+            {% include 'peachjam/_related_documents.html' %}
           </div>
         </div>
       {% endif %}
