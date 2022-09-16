@@ -1,1 +1,18 @@
-<h1>Article List</h1>
+{% load i18n %}
+
+{% block title %} {% trans 'Articles' %} {% endblock title %}
+
+
+{% block content %}
+  {% for article in object_list %}
+    <div>
+      <div>
+        <span>{{ article.title }}</span>
+        <span>by {{ article.author }} | {{ article.date }}</span>
+      </div>
+      <div>
+          <img src="{{ article.image.url }}"> {{ article.summary }}
+      </div>
+    </div>
+  {% endfor %}
+{% endblock content %}

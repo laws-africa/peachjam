@@ -1,10 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<h1>Article Detail</h1>
+
+{% block content %}
+  <div>
+      <h2>{{ article.title }}</h2>
+      <img src="{{ article.image.url }}">
+      <p>by {{ article.author }} | {{ article.date }}</p>
+      <p>{{ article.body }}</p>
+  </div>
+
+  <p>Back to <a href="{% url 'article_list' %}">Blog</a></p>
+{% endblock content %}
