@@ -206,8 +206,12 @@ class LegislationDetailView(BaseDocumentDetailView):
         return events
 
     def get_child_documents(self):
-        return (
+        docs = (
             self.model.objects.filter(parent_work=self.object.work)
             .distinct("work_frbr_uri")
-            .order_by("work_frbr_uri", "title")
+            .order_by("work_frbr_uri", "-date")
         )
+        # now sort by title
+        # TODO: we're not guaranteed to get documents in the same language, here
+        docs = sorted(docs, key=lambda d: d.title)
+        return docs
