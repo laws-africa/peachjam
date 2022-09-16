@@ -1,9 +1,9 @@
 {% load peachjam i18n %}
 {% if articles %}
-  {% for object in documents %}
+  {% for article in articles %}
     <a class="mb-2 d-flex" href="#">
-      <span class="flex-grow-1">{{ object.title }}</span>
-      <span class="text-nowrap">{{ object.date }}</span>
+      <span class="flex-grow-1">{{ article.title }}</span>
+      <span class="text-nowrap">{{ article.date }}</span>
     </a>
   {% endfor %}
 
