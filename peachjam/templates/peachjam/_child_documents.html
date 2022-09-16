@@ -1,0 +1,23 @@
+{% load peachjam i18n %}
+
+<h4>{% trans "Subsidiary legislation" %}</h4>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col" style="width: 70%">{% trans 'Title' %}</th>
+      <th scope="col">{% trans 'Numbered title' %}</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for document in child_documents %}
+      <tr>
+        <td>
+          <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+        </td>
+        <td>{{ document.citation }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
