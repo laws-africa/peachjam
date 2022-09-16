@@ -1,6 +1,31 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
 {% load i18n peachjam %}
 
+{% block document-tabs %}
+  {{ block.super }}
+
+  {% if child_documents %}
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#children-tab" type="button" role="tab" aria-controls="children-tab">
+        {% trans "Subsidiary legislation" %}
+        <span class="badge bg-secondary">{{ child_documents|length }}</span>
+      </button>
+    </li>
+  {% endif %}
+{% endblock %}
+
+{% block document-tab-panes %}
+  {{ block.super }}
+
+  {% if child_documents %}
+    <div class="tab-pane fade" id="children-tab" role="tabpanel" aria-labelledby="children-tab">
+      <div class="container">
+        {% include 'peachjam/_child_documents.html' %}
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+
 {% block document-metadata-content-author %}
 {% endblock %}
 

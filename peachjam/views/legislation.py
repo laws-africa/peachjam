@@ -29,6 +29,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         context["timeline_events"] = self.get_timeline_events()
         context["friendly_type"] = self.get_friendly_type()
         context["notices"] = self.get_notices()
+        context["child_documents"] = self.get_child_documents()
         return context
 
     def get_notices(self):
@@ -203,3 +204,10 @@ class LegislationDetailView(BaseDocumentDetailView):
         events.sort(key=lambda event: event["date"], reverse=True)
 
         return events
+
+    def get_child_documents(self):
+        return (
+            self.model.objects.filter(parent_work=self.object.work)
+            .distinct("work_frbr_uri")
+            .order_by("work_frbr_uri", "title")
+        )
