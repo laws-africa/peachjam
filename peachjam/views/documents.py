@@ -89,7 +89,7 @@ class DocumentSourcePDFView(DocumentSourceView):
             file = self.object.source_file.as_pdf()
             return HttpResponse(file.read(), content_type="application/pdf")
 
-        return Http404
+        raise Http404
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
