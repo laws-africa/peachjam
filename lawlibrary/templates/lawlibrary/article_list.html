@@ -4,14 +4,20 @@
 
 
 {% block content %}
-  {% for article in object_list %}
+  {% for article in articles %}
     <div>
+        {% if article.image.url %}
+          <div>
+              <span>
+                  <a href="{% url 'article_detail' article.slug %}">
+                    <img src="{{ article.image.url }}">
+                  </a>
+              </span>
+          </div>
+        {% endif %}
       <div>
-        <span>{{ article.title }}</span>
-          <span>by <a href="{% url 'user_profile' user.slug %}">{{ article.author }}</a> | {{ article.date }}</span>
-      </div>
-      <div>
-          <img src="{{ article.image.url }}"> {{ article.summary }}
+        <span><a href="{% url 'article_detail' article.slug %}">{{ article.title }}</a></span>
+          <span>by <a href="{% url 'user_profile' article.author.userprofile.slug %}">{{ article.author.first_name }} {{ article.author.last_name }}</a> | {{ article.date }}</span>
       </div>
     </div>
   {% endfor %}

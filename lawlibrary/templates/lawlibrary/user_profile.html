@@ -2,10 +2,8 @@
 
 {% block content %}
   <div>
-      <h2>{{ user.first_name }} {{ user.last_name }}</h2>
-      <img src="{{ user.photo.url }}">
-      <p>{{ user.profile_description }}</p>
-      <p>by <a href="">{{ article.author }}</a> | {{ article.date }}</p>
-      <p>{{ article.body }}</p>
+      <h2>{{ user_profile.user.first_name }} {{ user_profile.user.last_name }}</h2>
+      <img src="{{ user_profile.photo.url }}">
+      <p>{{ user_profile.profile_description }}</p>
   </div>
 {% endblock content %}
