@@ -18,6 +18,7 @@
     >
       <SingleFacet
         :facet="facet"
+        :loading="loading"
         @on-change="handleChange"
         @clear-facet="clearFacet"
       />
@@ -26,48 +27,6 @@
 </template>
 
 <script>
-/**
- *  TODO: This will replace ListFacets. Testing for now in LegislationTable
- *  Sample data shape for v-model of this component
- * {
- *     type: 'radio',
- *     name: 'radio',
- *     title: 'Radio options',
- *     value: 'radio-option-one',
- *     options: [
- *       {
- *         label: 'Radio option 1',
- *         value: 'radio-option-one'
- *       },
- *       {
- *         label: 'Radio option 2',
- *         value: 'radio-option-two'
- *       }
- *     ]
- *   },
- *   {
- *     type: 'checkboxes',
- *     name: 'checkbox',
- *     title: 'Checkbox options',
- *     value: 'checkbox-option-one',
- *     options: [
- *       {
- *         label: 'Checkbox option 1',
- *         value: 'checkbox-option-one'
- *       },
- *       {
- *         label: 'Checkbox option 2',
- *         value: 'checkbox-option-two'
- *       }
- *     ]
- *   },
- *   {
- *     type: 'boolean',
- *     name: 'boolean',
- *     title: 'Boolean',
- *     value: false
- *   }
- * **/
 import SingleFacet from './SingleFacet.vue';
 export default {
   name: 'FilterFacets',
@@ -79,7 +38,7 @@ export default {
     },
     loading: {
       type: Boolean,
-      default: true
+      default: false
     }
   },
   emits: ['update:modelValue'],
@@ -106,6 +65,7 @@ export default {
       }
       return data;
     },
+
     clearFacet (fieldName) {
       const queryString = window.location.search;
 
@@ -120,6 +80,7 @@ export default {
       const data = this.clearSingleFacet(this.modelValue, fieldName);
       this.$emit('update:modelValue', [...data]);
     },
+
     clearAll () {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
@@ -136,6 +97,7 @@ export default {
       });
       this.$emit('update:modelValue', [...data]);
     },
+
     handleChange (e, facet) {
       const targetIndex = this.modelValue.findIndex(
         (item) => item.name === facet.name

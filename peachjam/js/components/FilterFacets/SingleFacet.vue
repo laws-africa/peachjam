@@ -5,20 +5,13 @@
         <strong>{{ facet.title }}</strong>
         <div class="d-flex align-items-center">
           <a
-            v-if="facet.type === 'checkboxes' && facet.value.length"
+            v-if="showClearFilter"
             href="#"
             @click.prevent="$emit('clear-facet', facet.name)"
           >
             {{ $t('Clear') }}
           </a>
 
-          <a
-            v-if="facet.value && facet.type !== 'checkboxes'"
-            href="#"
-            @click.prevent="$emit('clear-facet', facet.name)"
-          >
-            {{ $t('Clear') }}
-          </a>
           <span
             v-if="loading"
             class="circle-loader ms-2"
@@ -155,7 +148,16 @@ export default {
       default: false
     }
   },
-  emits: ['clear-facet', 'on-change']
+  emits: ['clear-facet', 'on-change'],
+  computed: {
+    showClearFilter () {
+      if (this.facet.type === 'checkboxes') {
+        return this.facet.value.length;
+      } else {
+        return this.facet.value;
+      }
+    }
+  }
 };
 </script>
 
