@@ -8,7 +8,7 @@
     <div>
       <div>
         <span>{{ article.title }}</span>
-        <span>by {{ article.author }} | {{ article.date }}</span>
+          <span>by <a href="{% url 'user_profile' user.slug %}">{{ article.author }}</a> | {{ article.date }}</span>
       </div>
       <div>
           <img src="{{ article.image.url }}"> {{ article.summary }}
