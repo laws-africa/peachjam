@@ -50,6 +50,12 @@ class Work(models.Model):
         return f"{self.frbr_uri} - {self.title}"
 
 
+class CoreDocumentManager(models.Manager):
+    def get_queryset(self):
+        # defer expensive fields
+        return super().get_queryset().defer("content_html", "toc_json")
+
+
 class CoreDocumentQuerySet(models.QuerySet):
     def latest_expression(self):
         """Select only the most recent expression for documents with the same frbr_uri."""
@@ -65,7 +71,7 @@ class CoreDocument(models.Model):
         ("judgment", "Judgment"),
     )
 
-    objects = CoreDocumentQuerySet.as_manager()
+    objects = CoreDocumentManager.from_queryset(CoreDocumentQuerySet)()
 
     work = models.ForeignKey(
         Work, null=False, on_delete=models.PROTECT, related_name="documents"
@@ -289,6 +295,19 @@ class CoreDocument(models.Model):
                     self.images.add(img)
 
             return True
+
+    def is_most_recent(self):
+        """Is this the most recent document for this work?
+
+        Note that there can be multiple most recent documents, all at the same data but in different languages.
+        """
+        return (
+            self.work.documents.filter(language=self.language)
+            .order_by("-date")
+            .values_list("pk", flat=True)
+            .first()
+            == self.pk
+        )
 
 
 def file_location(instance, filename):

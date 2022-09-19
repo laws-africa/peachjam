@@ -20,155 +20,197 @@
       {% endif %}
 
       <ul class="nav nav-tabs border-bottom" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#document-detail-tab" type="button" role="tab" aria-controls="document-detail-tab" aria-selected="true">
-            Document detail
-          </button>
-        </li>
-        {% if timeline_events %}
+        {% block document-tabs %}
           <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button" role="tab" aria-controls="history-tab" aria-selected="false">
-              History
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#document-detail-tab" type="button" role="tab" aria-controls="document-detail-tab" aria-selected="true">
+              {% trans "Document detail" %}
             </button>
           </li>
-        {% endif %}
+          {% if timeline_events %}
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button" role="tab" aria-controls="history-tab" aria-selected="false">
+                {% trans "History" %}
+              </button>
+            </li>
+          {% endif %}
+          {% if n_relationships %}
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#related-tab" type="button" role="tab" aria-controls="related-tab" aria-selected="false">
+                {% trans "Related documents" %}
+                <span class="badge bg-secondary">{{ n_relationships }}</span>
+              </button>
+            </li>
+          {% endif %}
+        {% endblock %}
       </ul>
     </div>
 
     <div class="tab-content mt-3">
-      <div class="tab-pane fade show active" id="document-detail-tab" role="tabpanel" aria-labelledby="document-detail-tab">
-        <div class="container">
-          {% block document-metadata %}
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                {% block document-metadata-content %}
-                  <dl class="row document-metadata-list">
-
-                    {% block document-metadata-content-jurisdiction %}
-                      {% if document.jurisdiction %}
-                        <dt class="col-4">{% trans 'Jurisdiction' %}</dt>
-                        <dd class="col-8 text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
-                      {% endif %}
-                    {% endblock %}
-
-                    {% block document-metadata-content-citation %}
-                      {% if document.citation %}
-                        <dt class="col-4">{% trans 'Citation' %}</dt>
-                        <dd class="col-8 text-muted">
-                          {{ document.citation }}
-                          <button type="button" class="btn btn-secondary btn-xs ms-2"
-                                  title="{% trans "Copy to clipboard" %}" data-component="CopyToClipboard"
-                                  data-value="{{ document.citation }}"
-                                  data-confirmation="{% trans "Copied!" %}">{% trans "Copy" %}</button>
-                        </dd>
-                      {% endif %}
-                    {% endblock %}
-
-                    {% block document-metadata-content-author %}
-                      {% if document.author %}
-                        <dt class="col-4">{% trans 'Author' %}</dt>
-                        <dd class="col-8 text-muted"><a href="{% url 'author' document.author.pk %}">{{ document.author }}</a></dd>
-                      {% endif %}
-                    {% endblock %}
-
-                    {% block document-metadata-content-date %}
-                      <dt class="col-4">{% trans 'Date' %}</dt>
-                      {% if date_versions|length > 1 %}
-                        <dd class="col-8">
-                          <div class="dropdown">
-                            <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                              {{ document.date }}
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                              {% for version in date_versions %}
-                                <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
-                              {% endfor %}
-                            </ul>
-                          </div>
-                        </dd>
-                      {% else %}
-                        <dd class="col-8 text-muted">{{ document.date }}</dd>
-                      {% endif %}
-                    {% endblock %}
-
-                    {% block document-metadata-content-language %}
-                      <dt class="col-4">{% translate 'Language' %}</dt>
-                      {% if language_versions|length > 1 %}
-                        <dd class="col-8">
-                          <div class="dropdown">
-                            <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                              {{ document.language }}
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                              {% for version in language_versions %}
-                                <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
-                              {% endfor %}
-                            </ul>
-                          </div>
-                        </dd>
-                      {% else %}
-                        <dd class="col-8 text-muted">{{ document.language }} </dd>
-                      {% endif %}
-                    {% endblock %}
-                  </dl>
-                {% endblock %}
-
-                {% if document.source_file %}
-                  <div>
-                    <a class="card-link" href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}">Download document</a> ({{ document.source_file.file.size|filesizeformat }})
-                  </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-6">
-                {% block document-relationships-content %}
-                  {% if document.relationships_as_subject or document.relationships_as_object %}
-                    <h5>{% translate 'Related documents' %}</h5>
-
-                    <ul class="list-unstyled">
-                      {% for rel in document.relationships_as_subject %}
-                        {% if rel.object_work %}
-                          <li>
-                            {% translate rel.predicate.verb as verb %}
-                            {{ verb|capfirst }}
-                            <a href="{% url 'document_detail' frbr_uri=rel.object_work.frbr_uri|strip_first_character %}">{{ rel.object_work.title }}</a>
-                          </li>
-                        {% endif %}
-                      {% endfor %}
-
-                      {% for rel in document.relationships_as_object %}
-                        {% if rel.subject_work %}
-                          <li>
-                            {% translate rel.predicate.reverse_verb as verb %}
-                            {{ verb|capfirst }}
-                            <a href="{% url 'document_detail' frbr_uri=rel.subject_work.frbr_uri|strip_first_character %}">{{ rel.subject_work.title }}</a>
-                          </li>
-                        {% endif %}
-                      {% endfor %}
-                    </ul>
-                  {% endif %}
-                {% endblock %}
-              </div>
-            </div>
-          {% endblock %}
-
-          <hr class="mb-5">
-        </div>
-
-        <div class="container-fluid">
-          {% block content %}
-            {% include 'peachjam/_document_content.html' with document=document %}
-          {% endblock %}
-        </div>
-      </div>
-
-      {% if timeline_events %}
-        <div class="tab-pane fade" id="history-tab" role="tabpanel" aria-labelledby="history-tab">
+      {% block document-tab-panes %}
+        <div class="tab-pane fade show active" id="document-detail-tab" role="tabpanel" aria-labelledby="document-detail-tab">
           <div class="container">
-            {% include 'peachjam/_timeline_events.html' %}
+            {% block document-metadata %}
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {% block document-metadata-content %}
+                    <dl class="row document-metadata-list">
+
+                      {% block document-metadata-content-jurisdiction %}
+                        {% if document.jurisdiction %}
+                          <dt class="col-4">{% trans 'Jurisdiction' %}</dt>
+                          <dd class="col-8 text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
+                        {% endif %}
+                      {% endblock %}
+
+                      {% block document-metadata-content-citation %}
+                        {% if document.citation %}
+                          <dt class="col-4">{% trans 'Citation' %}</dt>
+                          <dd class="col-8 text-muted">
+                            {{ document.citation }}
+                            <button type="button" class="btn btn-secondary btn-xs ms-2"
+                                    title="{% trans "Copy to clipboard" %}" data-component="CopyToClipboard"
+                                    data-value="{{ document.citation }}"
+                                    data-confirmation="{% trans "Copied!" %}">{% trans "Copy" %}</button>
+                          </dd>
+                        {% endif %}
+                      {% endblock %}
+
+                      {% block document-metadata-content-author %}
+                        {% if document.author %}
+                          <dt class="col-4">{% trans 'Author' %}</dt>
+                          <dd class="col-8 text-muted"><a href="{% url 'author' document.author.pk %}">{{ document.author }}</a></dd>
+                        {% endif %}
+                      {% endblock %}
+
+                      {% block document-metadata-content-date %}
+                        <dt class="col-4">{% trans 'Date' %}</dt>
+                        {% if date_versions|length > 1 %}
+                          <dd class="col-8">
+                            <div class="dropdown">
+                              <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ document.date }}
+                              </a>
+                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                {% for version in date_versions %}
+                                  <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
+                                {% endfor %}
+                              </ul>
+                            </div>
+                          </dd>
+                        {% else %}
+                          <dd class="col-8 text-muted">{{ document.date }}</dd>
+                        {% endif %}
+                      {% endblock %}
+
+                      {% block document-metadata-content-language %}
+                        <dt class="col-4">{% translate 'Language' %}</dt>
+                        {% if language_versions|length > 1 %}
+                          <dd class="col-8">
+                            <div class="dropdown">
+                              <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ document.language }}
+                              </a>
+                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                {% for version in language_versions %}
+                                  <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
+                                {% endfor %}
+                              </ul>
+                            </div>
+                          </dd>
+                        {% else %}
+                          <dd class="col-8 text-muted">{{ document.language }} </dd>
+                        {% endif %}
+                      {% endblock %}
+
+                      {% block document-metadata-content-download %}
+                        {% if document.source_file %}
+                          <dt class="col-4">{% translate 'Download' %}</dt>
+                          <dd class="col-8">
+                            <div>
+                              <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
+                                 target="_blank"
+                              >{% trans "Download" %} {{ document.source_file.filename_extension|upper }}</a>
+                              ({{ document.source_file.file.size|filesizeformat }})
+                            </div>
+
+                            {% if document.source_file.filename_extension != "pdf" %}
+                              <div>
+                                <a href="{% url 'document_source_pdf' document.expression_frbr_uri|strip_first_character %}"
+                                   target="_blank"
+                                >{% trans "Download" %} PDF</a>
+                              </div>
+                            {% endif %}
+                          </dd>
+                        {% endif %}
+                      {% endblock %}
+                    </dl>
+                  {% endblock %}
+                </div>
+
+                <div class="col-md-6">
+                  {% block document-relationships-content %}
+                    {% if n_relationships %}
+                      <h5>{% translate 'Related documents' %}</h5>
+
+                      <ul class="list-unstyled">
+                        {% if n_relationships > relationship_limit %}
+                          <li>
+                            <a href="#related-tab" data-component="ToggleTab">{% blocktrans %}{{ n_relationships }} related documents{% endblocktrans %}</a>
+                          </li>
+                        {% else %}
+                          {% for rel in relationships_as_subject %}
+                            {% if rel.object_work %}
+                              <li>
+                                {% translate rel.predicate.verb as verb %}
+                                {{ verb|capfirst }}
+                                <a href="{% url 'document_detail' frbr_uri=rel.object_work.frbr_uri|strip_first_character %}">{{ rel.object_work.title }}</a>
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+
+                          {% for rel in document.relationships_as_object %}
+                            {% if rel.subject_work %}
+                              <li>
+                                {% translate rel.predicate.reverse_verb as verb %}
+                                {{ verb|capfirst }}
+                                <a href="{% url 'document_detail' frbr_uri=rel.subject_work.frbr_uri|strip_first_character %}">{{ rel.subject_work.title }}</a>
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+                        {% endif %}
+                      </ul>
+                    {% endif %}
+                  {% endblock %}
+                </div>
+              </div>
+            {% endblock %}
+
+            <hr class="mb-5">
+          </div>
+
+          <div class="container-fluid">
+            {% block content %}
+              {% include 'peachjam/_document_content.html' with document=document %}
+            {% endblock %}
           </div>
         </div>
-      {% endif %}
+
+        {% if timeline_events %}
+          <div class="tab-pane fade" id="history-tab" role="tabpanel" aria-labelledby="history-tab">
+            <div class="container">
+              {% include 'peachjam/_timeline_events.html' %}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if n_relationships %}
+          <div class="tab-pane fade" id="related-tab" role="tabpanel" aria-labelledby="related-tab">
+            <div class="container">
+              {% include 'peachjam/_related_documents.html' %}
+            </div>
+          </div>
+        {% endif %}
+      {% endblock %}
     </div>
 
     {% if perms.peachjam.add_relationship %}

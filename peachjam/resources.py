@@ -136,9 +136,11 @@ class JudgmentResource(BaseDocumentResource):
         model = Judgment
 
     def before_import_row(self, row, **kwargs):
-        Author.objects.get_or_create(
-            code=row["court_obj"]["code"], defaults={"name": row["court_obj"]["name"]}
-        )
+        if "court_obj" in row:
+            Author.objects.get_or_create(
+                code=row["court_obj"]["code"],
+                defaults={"name": row["court_obj"]["name"]},
+            )
 
     def after_import_row(self, row, instance, row_number=None, **kwargs):
         super().after_import_row(row, instance, row_number, **kwargs)
@@ -150,12 +152,21 @@ class JudgmentResource(BaseDocumentResource):
                 judge, _ = Judge.objects.get_or_create(name=judge)
                 judgment.judges.add(judge)
 
-        for case_number in row["case_numbers"]:
-            if case_number["number"]:
-                MatterType.objects.get_or_create(name=case_number["matter_type"])
-                CaseNumber.objects.create(
-                    document=judgment,
-                    number=case_number["number"],
-                    year=case_number["year"],
-                    matter_type=MatterType.objects.get(name=case_number["matter_type"]),
-                )
+        if "string_override" in row:
+            CaseNumber.objects.create(
+                string_override=row["string_override"], document=judgment
+            )
+        elif "case_numbers" in row:
+            for case_number in row["case_numbers"]:
+                if case_number["number"]:
+                    MatterType.objects.get_or_create(name=case_number["matter_type"])
+                    CaseNumber.objects.create(
+                        document=judgment,
+                        number=case_number["number"],
+                        year=case_number["year"],
+                        matter_type=MatterType.objects.get(
+                            name=case_number["matter_type"]
+                        ),
+                    )
+
+        judgment.save()
