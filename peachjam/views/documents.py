@@ -1,9 +1,11 @@
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
+from django.utils.translation import get_language
 from django.views.generic import DetailView, View
+from languages_plus.models import Language
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, pj_settings
 from peachjam.registry import registry
 from peachjam.utils import add_slash, add_slash_to_frbr_uri
 
@@ -17,20 +19,13 @@ class DocumentDetailViewResolver(View):
             return redirect("document_detail", frbr_uri=kwargs["frbr_uri"][:-1])
 
         frbr_uri = add_slash(kwargs["frbr_uri"])
-        obj = CoreDocument.objects.filter(expression_frbr_uri=frbr_uri).first()
-        if not obj:
-            # try looking based on the work URI instead, and use the latest expression
-            # TODO: take the user's preferred language into account
-            obj = (
-                CoreDocument.objects.filter(work_frbr_uri=frbr_uri)
-                .latest_expression()
-                .first()
-            )
-            if obj:
-                return redirect(obj.get_absolute_url())
+        obj, exact = self.get_document_for_frbr_uri(frbr_uri)
 
         if not obj:
             raise Http404()
+
+        if not exact:
+            return redirect(obj.get_absolute_url())
 
         view_class = registry.views.get(obj.doc_type)
         if view_class:
@@ -38,6 +33,34 @@ class DocumentDetailViewResolver(View):
             view.setup(request, *args, **kwargs)
 
             return view.dispatch(request, *args, **kwargs)
+
+    def get_document_for_frbr_uri(self, frbr_uri):
+        obj = CoreDocument.objects.filter(expression_frbr_uri=frbr_uri).first()
+        if obj:
+            return obj, True
+
+        # try looking based on the work URI instead, and use the latest expression
+        qs = CoreDocument.objects.filter(work_frbr_uri=frbr_uri)
+
+        # first, look for one in the user's preferred language
+        lang = get_language()
+        if lang:
+            lang = Language.objects.filter(pk=lang).first()
+            if lang:
+                obj = qs.filter(language=lang).latest_expression().first()
+                if obj:
+                    return obj, False
+
+        # try the default site language
+        lang = pj_settings().default_document_language
+        if lang:
+            obj = qs.filter(language=lang).latest_expression().first()
+            if obj:
+                return obj, False
+
+        # just get any one
+        obj = qs.latest_expression().first()
+        return obj, False
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")

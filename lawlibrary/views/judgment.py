@@ -18,7 +18,9 @@ class JudgmentListView(TemplateView):
                 "title": court_class.name,
                 "items": [
                     {"title": court_detail.court.name, "code": court_detail.court.code}
-                    for court_detail in court_class.courtdetail_set.all()
+                    for court_detail in court_class.courtdetail_set.order_by(
+                        "court__name"
+                    )
                 ],
             }
 

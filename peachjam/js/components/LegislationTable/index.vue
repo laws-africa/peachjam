@@ -141,7 +141,7 @@
                       <div class="row">
                         <div class="col">
                           <a
-                            :href="`${row.work_frbr_uri}`"
+                            :href="`${subleg.work_frbr_uri}`"
                             target="_blank"
                           >{{ subleg.title }}</a>
                         </div>

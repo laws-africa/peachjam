@@ -29,6 +29,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         context["timeline_events"] = self.get_timeline_events()
         context["friendly_type"] = self.get_friendly_type()
         context["notices"] = self.get_notices()
+        context["child_documents"] = self.get_child_documents()
         return context
 
     def get_notices(self):
@@ -132,7 +133,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if assent_date:
             events.append(
                 {
-                    "date": work["assent_date"],
+                    "date": work.get("assent_date"),
                     "event": "assent",
                 }
             )
@@ -143,9 +144,11 @@ class LegislationDetailView(BaseDocumentDetailView):
                 {
                     "date": publication_date,
                     "event": "publication",
-                    "publication_name": work["publication_name"],
-                    "publication_number": work["publication_number"],
-                    "publication_url": work["publication_document"]["url"],
+                    "publication_name": work.get("publication_name"),
+                    "publication_number": work.get("publication_number"),
+                    "publication_url": work.get("publication_document", {}).get("url")
+                    if work.get("publication_document")
+                    else None,
                 }
             )
 
@@ -155,7 +158,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                 {
                     "date": commencement_date,
                     "event": "commencement",
-                    "friendly_type": work["type_name"],
+                    "friendly_type": work.get("type_name"),
                 }
             )
 
@@ -164,10 +167,10 @@ class LegislationDetailView(BaseDocumentDetailView):
             events.extend(
                 [
                     {
-                        "date": amendment["date"],
+                        "date": amendment.get("date"),
                         "event": "amendment",
-                        "amending_title": amendment["amending_title"],
-                        "amending_uri": amendment["amending_uri"],
+                        "amending_title": amendment.get("amending_title"),
+                        "amending_uri": amendment.get("amending_uri"),
                     }
                     for amendment in amendments
                 ]
@@ -177,10 +180,10 @@ class LegislationDetailView(BaseDocumentDetailView):
         if repeal:
             events.append(
                 {
-                    "date": repeal["date"],
+                    "date": repeal.get("date"),
                     "event": "repeal",
-                    "repealing_title": repeal["repealing_title"],
-                    "repealing_uri": repeal["repealing_uri"],
+                    "repealing_title": repeal.get("repealing_title"),
+                    "repealing_uri": repeal.get("repealing_uri"),
                 }
             )
 
@@ -203,3 +206,14 @@ class LegislationDetailView(BaseDocumentDetailView):
         events.sort(key=lambda event: event["date"], reverse=True)
 
         return events
+
+    def get_child_documents(self):
+        docs = (
+            self.model.objects.filter(parent_work=self.object.work)
+            .distinct("work_frbr_uri")
+            .order_by("work_frbr_uri", "-date")
+        )
+        # now sort by title
+        # TODO: we're not guaranteed to get documents in the same language, here
+        docs = sorted(docs, key=lambda d: d.title)
+        return docs
