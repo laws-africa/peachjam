@@ -90,6 +90,10 @@ class BaseDocumentResource(resources.ModelResource):
                 source_file = download_source_file(instance.source_url)
                 if source_file:
                     mime = magic.from_file(source_file.name, mime=True)
+
+                    if mime == "application/zip":
+                        mime, _ = mimetypes.guess_type(instance.source_url)
+
                     file_ext = mimetypes.guess_extension(mime)
                     SourceFile.objects.update_or_create(
                         document=instance,
