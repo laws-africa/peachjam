@@ -146,7 +146,9 @@ class LegislationDetailView(BaseDocumentDetailView):
                     "event": "publication",
                     "publication_name": work.get("publication_name"),
                     "publication_number": work.get("publication_number"),
-                    "publication_url": work.get("publication_document", {}).get("url"),
+                    "publication_url": work.get("publication_document", {}).get("url")
+                    if work.get("publication_document")
+                    else None,
                 }
             )
 
