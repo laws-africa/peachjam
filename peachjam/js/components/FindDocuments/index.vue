@@ -19,14 +19,17 @@
             <button
               type="submit"
               class="btn btn-sm btn-primary"
-              style="border-top-right-radius: 0.2rem; border-bottom-right-radius: 0.2rem"
+              style="
+                border-top-right-radius: 0.2rem;
+                border-bottom-right-radius: 0.2rem;
+              "
               :disabled="loading"
             >
               <span
                 v-if="loading"
                 class="circle-loader--lt"
               />
-              <span v-else>{{ $t('Search') }}</span>
+              <span v-else>{{ $t("Search") }}</span>
             </button>
           </div>
         </div>
@@ -36,13 +39,13 @@
         v-if="error"
         class="mt-3 alert alert-warning"
       >
-        {{ $t('Oops, something went wrong.') }} {{ error }}
+        {{ $t("Oops, something went wrong.") }} {{ error }}
       </div>
       <div
         v-if="searchInfo.count === 0"
         class="mt-3"
       >
-        {{ $t('No documents match your search.') }}
+        {{ $t("No documents match your search.") }}
       </div>
       <div class="mt-3">
         <!--        <DidYouMean-->
@@ -54,16 +57,17 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col col-lg-3 d-none d-lg-block">
-          <FilterFacets v-model="facets" />
+          <FilterFacets
+            v-model="facets"
+            :loading="loading"
+          />
         </div>
 
         <div class="col-md-12 col-lg-9 search-pane position-relative">
           <div class="search-results">
             <div v-if="searchInfo.count">
               <div class="mb-3 d-flex justify-content-between">
-                <div>
-                  {{ searchInfo.count }} documents found.
-                </div>
+                <div>{{ searchInfo.count }} documents found.</div>
               </div>
 
               <ul class="list-unstyled">
@@ -201,24 +205,28 @@ export default {
       }
       return buckets;
     },
+
     getUrlParamValue (key) {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
       return urlParams.getAll(key);
     },
+
     handlePageChange (newPage) {
       this.page = newPage;
       this.search();
       document.body.scrollTop = 0; // For Safari
       document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
     },
+
     handleSubmit () {
       this.page = 1;
       this.q = this.$refs['search-input'].value.trim();
       this.search();
     },
+
     clearAllFilters () {
-      this.facets.forEach(facet => {
+      this.facets.forEach((facet) => {
         if (facet.value.length > 0) {
           facet.value = [];
         }
@@ -236,8 +244,8 @@ export default {
         params.set('ordering', this.ordering);
       }
 
-      this.facets.forEach(facet => {
-        facet.value.forEach(value => {
+      this.facets.forEach((facet) => {
+        facet.value.forEach((value) => {
           params.append(facet.name, value);
         });
       });
@@ -249,11 +257,13 @@ export default {
       // load state from URL
       const params = new URLSearchParams(window.location.search);
       // skip the first event if there's a query, because the page load will already have sent it
-      this.q = this.$refs['search-input'].value = (params.get('q') || '').trim();
+      this.q = this.$refs['search-input'].value = (
+        params.get('q') || ''
+      ).trim();
       this.page = parseInt(params.get('page')) || this.page;
       this.ordering = params.get('ordering') || this.ordering;
 
-      this.facets.forEach(facet => {
+      this.facets.forEach((facet) => {
         if (params.has(facet.name)) {
           facet.value = params.getAll(facet.name);
         }
@@ -270,17 +280,30 @@ export default {
 
     formatFacets () {
       const generateOptions = (buckets) => {
-        return buckets.map(bucket => ({
+        return buckets.map((bucket) => ({
           label: bucket.key,
           count: bucket.doc_count,
           value: bucket.key
         }));
       };
 
-      this.facets.forEach(facet => {
+      this.facets.forEach((facet) => {
         if (facet.name === 'year') {
-          facet.options = generateOptions(this.sortGenericBuckets(this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets, true));
-        } else facet.options = generateOptions(this.sortGenericBuckets(this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets));
+          facet.options = generateOptions(
+            this.sortGenericBuckets(
+              this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
+                .buckets,
+              true
+            )
+          );
+        } else {
+          facet.options = generateOptions(
+            this.sortGenericBuckets(
+              this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
+                .buckets
+            )
+          );
+        }
         facet.value = this.getUrlParamValue(facet.name);
       });
     },
@@ -295,18 +318,20 @@ export default {
           params.append('highlight', 'content');
           params.append('is_most_recent', 'true');
 
-          this.facets.forEach(facet => {
-            facet.value.forEach(value => {
+          this.facets.forEach((facet) => {
+            facet.value.forEach((value) => {
               params.append(facet.name, value);
             });
           });
 
           // facets that we want the API to return
-          this.facets.forEach(facet => {
+          this.facets.forEach((facet) => {
             params.append('facet', facet.name);
           });
 
-          return `${window.location.origin}/search/api/documents/?${params.toString()}`;
+          return `${
+            window.location.origin
+          }/search/api/documents/?${params.toString()}`;
         };
 
         this.loadingCount = this.loadingCount + 1;
@@ -320,7 +345,11 @@ export default {
               if (this.searchInfo.count === 0) {
                 this.clearAllFilters();
               }
-              window.history.replaceState(null, '', document.location.pathname + '?' + this.serialiseState());
+              window.history.replaceState(
+                null,
+                '',
+                document.location.pathname + '?' + this.serialiseState()
+              );
               this.formatFacets();
             } else {
               this.error = response.statusText;
