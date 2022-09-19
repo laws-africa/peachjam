@@ -4,7 +4,7 @@
   <div>
       <h2>{{ article.title }}</h2>
       <img src="{{ article.image.url }}">
-      <p>by <a href="{% url 'user_profile' user.slug %}">{{ article.author }}</a> | {{ article.date }}</p>
+      <p>by <a href="{% url 'user_profile' %}">{{ article.author }}</a> | {{ article.date }}</p>
       <p>{{ article.body }}</p>
   </div>
 

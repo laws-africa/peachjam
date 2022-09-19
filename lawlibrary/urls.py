@@ -48,8 +48,6 @@ urlpatterns = [
         views.ArticleDetailView.as_view(),
         name="article_detail",
     ),
-    path(
-        "users/<slug:slug>/", views.UserProfileDetailView.as_view(), name="user_profile"
-    ),
+    path("users/", views.UserProfileDetailView.as_view(), name="user_profile"),
     path("", include("liiweb.urls")),
 ]
