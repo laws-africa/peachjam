@@ -133,7 +133,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if assent_date:
             events.append(
                 {
-                    "date": work["assent_date"],
+                    "date": work.get("assent_date"),
                     "event": "assent",
                 }
             )
@@ -144,9 +144,9 @@ class LegislationDetailView(BaseDocumentDetailView):
                 {
                     "date": publication_date,
                     "event": "publication",
-                    "publication_name": work["publication_name"],
-                    "publication_number": work["publication_number"],
-                    "publication_url": work["publication_document"]["url"],
+                    "publication_name": work.get("publication_name"),
+                    "publication_number": work.get("publication_number"),
+                    "publication_url": work.get("publication_document", {}).get("url"),
                 }
             )
 
@@ -156,7 +156,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                 {
                     "date": commencement_date,
                     "event": "commencement",
-                    "friendly_type": work["type_name"],
+                    "friendly_type": work.get("type_name"),
                 }
             )
 
@@ -165,10 +165,10 @@ class LegislationDetailView(BaseDocumentDetailView):
             events.extend(
                 [
                     {
-                        "date": amendment["date"],
+                        "date": amendment.get("date"),
                         "event": "amendment",
-                        "amending_title": amendment["amending_title"],
-                        "amending_uri": amendment["amending_uri"],
+                        "amending_title": amendment.get("amending_title"),
+                        "amending_uri": amendment.get("amending_uri"),
                     }
                     for amendment in amendments
                 ]
@@ -178,10 +178,10 @@ class LegislationDetailView(BaseDocumentDetailView):
         if repeal:
             events.append(
                 {
-                    "date": repeal["date"],
+                    "date": repeal.get("date"),
                     "event": "repeal",
-                    "repealing_title": repeal["repealing_title"],
-                    "repealing_uri": repeal["repealing_uri"],
+                    "repealing_title": repeal.get("repealing_title"),
+                    "repealing_uri": repeal.get("repealing_uri"),
                 }
             )
 
