@@ -4,7 +4,10 @@
     method="get"
     @change="submit"
   >
-    <FilterFacets v-model="facets" />
+    <FilterFacets
+      v-model="facets"
+      :loading="loading"
+    />
   </form>
 </template>
 
@@ -39,22 +42,18 @@ export default {
       default: () => []
     }
   },
+
   data: () => {
     return {
       loading: false,
       facets: []
     };
   },
-  computed: {
-    showClearAllFilter () {
-      return ['alphabet', 'year', 'author', 'court'].some(
-        (key) => this.getUrlParamValue(key).length
-      );
-    }
-  },
+
   mounted () {
     this.loadFacets();
   },
+
   methods: {
     getDocTypeLabel (value) {
       return value
@@ -62,88 +61,86 @@ export default {
         .map((word) => `${word[0].toUpperCase()}${word.slice(1, word.length)}`)
         .join(' ');
     },
+
     sortAlphabetically (items) {
       const sorted = [...items];
       return sorted.sort((a, b) => a.localeCompare(b));
     },
+
     sortDescending (items) {
       const sorted = [...items];
       return sorted.sort((a, b) => b - a);
     },
+
     getUrlParamValue (key) {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
       return urlParams.getAll(key);
     },
-    inputChecked (key, value) {
-      return this.getUrlParamValue(key).includes(value.toString());
-    },
-    clearAll () {
-      window.location.href = `${window.location.origin}${window.location.pathname}`;
-    },
-    clearFacet (key) {
-      const queryString = window.location.search;
-      const urlParams = new URLSearchParams(queryString);
-      urlParams.delete(key);
-      window.location.href = `${window.location.origin}${
-        window.location.pathname
-      }?${urlParams.toString()}`;
-    },
+
     submit () {
       this.loading = true;
-
       this.$refs.form.submit();
     },
+
     loadFacets () {
-      const facetTitle = {
-        alphabet: 'Alphabetical',
-        authors: 'Regional Body',
-        courts: 'Court',
-        docTypes: 'Document type',
-        judges: 'Judges',
-        years: 'Year'
-      };
-      const formatOptions = (options) => {
-        return options.map((option) => ({
-          label: option,
-          value: option
-        }));
+      const facetTitles = [
+        { key: 'authors', value: 'Regional Body' },
+        { key: 'courts', value: 'Court' },
+        { key: 'docTypes', value: 'Document type' },
+        { key: 'judges', value: 'Judges' },
+        { key: 'years', value: 'Year' },
+        { key: 'alphabet', value: 'Alphabetical' }
+      ];
+
+      const formatOptions = (options, key) => {
+        return options.map((option) => {
+          if (key === 'docTypes') {
+            return {
+              label: this.getDocTypeLabel(option),
+              value: option
+            };
+          }
+          return {
+            label: option,
+            value: option
+          };
+        });
       };
 
-      for (const key in this.$props) {
-        if (this.$props[key].length && key !== 'alphabet') {
-          if (key === 'years') {
-            this.facets.push({
-              title: facetTitle[key],
-              name: key,
-              type: 'checkboxes',
-              value: this.getUrlParamValue(key),
-              options: formatOptions(this.sortDescending(this.$props[key]))
-            });
-          } else {
-            this.facets.push({
-              title: facetTitle[key],
-              name: key,
-              type: 'radio',
-              value: this.getUrlParamValue(key).length
-                ? this.getUrlParamValue(key)[0]
-                : null,
-              options: formatOptions(this.sortAlphabetically(this.$props[key]))
-            });
-          }
+      this.facets = facetTitles.map(facet => {
+        if (!this.$props[facet.key].length) return {};
+
+        if (facet.key === 'alphabet') {
+          return {
+            title: facet.value,
+            name: facet.key,
+            type: 'letter-radio',
+            value: this.getUrlParamValue(facet.key).length
+              ? this.getUrlParamValue(facet.key)[0]
+              : null,
+            options: formatOptions(this.alphabet, facet.key)
+          };
+        } else if (facet.key === 'years') {
+          return {
+            title: facet.value,
+            name: facet.key,
+            type: 'checkboxes',
+            value: this.getUrlParamValue(facet.key),
+            options: formatOptions(this.sortDescending(this.years, facet.key))
+          };
+        } else {
+          return {
+            title: facet.value,
+            name: facet.key,
+            type: 'radio',
+            value: this.getUrlParamValue(facet.key).length
+              ? this.getUrlParamValue(facet.key)[0]
+              : null,
+            options: formatOptions(this.sortAlphabetically(this.$props[facet.key]), facet.key)
+          };
         }
-      }
-      if (this.alphabet.length) {
-        this.facets.push({
-          title: facetTitle.alphabet,
-          name: 'alphabet',
-          type: 'letter-radio',
-          value: this.getUrlParamValue('alphabet').length
-            ? this.getUrlParamValue('alphabet')[0]
-            : null,
-          options: formatOptions(this.alphabet)
-        });
-      }
+      });
     }
   }
 };
