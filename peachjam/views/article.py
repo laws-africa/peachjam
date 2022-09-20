@@ -27,3 +27,7 @@ class UserProfileDetailView(DetailView):
     model = UserProfile
     template_name = "peachjam/user_profile.html"
     context_object_name = "user_profile"
+
+    def get_object(self):
+        print(self.__dict__)
+        return get_object_or_404(UserProfile, user__username=self.kwargs["username"])

@@ -131,7 +131,7 @@ urlpatterns = [
         ArticleDetailView.as_view(),
         name="article_detail",
     ),
-    path("users/<str:username>/", UserProfileDetailView.as_view(), name="user_profile"),
+    path("users/<username>/", UserProfileDetailView.as_view(), name="user_profile"),
 ]
 
 if settings.DEBUG:
