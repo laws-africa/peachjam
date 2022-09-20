@@ -2,7 +2,7 @@
   <div class="doc-search">
     <form
       class="doc-search__form mb-2"
-      @submit.prevent="() => q = $refs.q.value"
+      @submit.prevent="() => (q = $refs.q.value)"
     >
       <div class="input-group">
         <input
@@ -19,7 +19,7 @@
           class="btn btn-secondary"
           type="submit"
         >
-          {{ $t('Search') }}
+          {{ $t("Search") }}
         </button>
       </div>
       <div
@@ -29,13 +29,13 @@
         <a
           href="#"
           @click.prevent="clear"
-        >{{ $t('Clear') }}</a>
+        >{{ $t("Clear") }}</a>
       </div>
       <div
         v-if="!marks.length && q"
         class="mt-2"
       >
-        {{ $t('No results') }}
+        {{ $t("No results") }}
       </div>
     </form>
     <div class="doc-search__results">
@@ -104,10 +104,21 @@ export default {
       this.searchDoc(newValue);
     }
   },
+  mounted () {
+    this.preserveSearchQuery();
+  },
   methods: {
     clear () {
       this.$refs.q.value = '';
       this.q = '';
+    },
+    preserveSearchQuery () {
+      const params = new URLSearchParams(window.location.search);
+      const queryString = params.get('q');
+      if (queryString) {
+        this.$refs.q.value = queryString;
+        this.q = queryString;
+      }
     },
     searchDoc (q) {
       if (!this.markInstance) {
@@ -134,7 +145,6 @@ export default {
       }, 300);
     }
   }
-
 };
 </script>
 
