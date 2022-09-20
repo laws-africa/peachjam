@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "django_filters",
     "django_elasticsearch_dsl",
     "django_elasticsearch_dsl_drf",
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -83,6 +84,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "peachjam.urls"
 
+JAZZMIN_SETTINGS = {"site_icon": None}
+JAZZMIN_SETTINGS["show_ui_builder"] = True
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
