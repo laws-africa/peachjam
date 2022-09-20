@@ -18,6 +18,7 @@ from treebeard.forms import movenodeform_factory
 
 from peachjam.forms import IngestorForm, NewDocumentFormMixin, RelationshipForm
 from peachjam.models import (
+    Article,
     Author,
     CaseNumber,
     CitationLink,
@@ -39,6 +40,7 @@ from peachjam.models import (
     Relationship,
     SourceFile,
     Taxonomy,
+    UserProfile,
     pj_settings,
 )
 from peachjam.resources import GenericDocumentResource, JudgmentResource
@@ -420,6 +422,20 @@ class IngestorAdmin(admin.ModelAdmin):
         self.message_user(request, "Refreshing content in the background.")
 
     refresh_all_content.short_description = "Refresh all content"
+
+
+class ArticleForm(forms.ModelForm):
+    body = forms.CharField(widget=CKEditorWidget())
+
+
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    form = ArticleForm
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    pass
 
 
 admin.site.register(

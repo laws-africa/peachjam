@@ -62,7 +62,7 @@
   <section class="pb-3 pt-3">
     <h2 class="mb-4 heading-underlined">{% trans 'Recent Articles' %}</h2>
     {% trans 'View more articles' as text %}
-    {% include 'lawlibrary/_recent_articles.html' with articles=recent_articles view_more_text=text view_more_url_name='article_list' %}
+    {% include 'peachjam/_recent_articles.html' with articles=recent_articles view_more_text=text view_more_url_name='article_list' %}
   </section>
 
 {% endblock %}

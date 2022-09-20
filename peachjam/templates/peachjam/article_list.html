@@ -1,0 +1,23 @@
+{% load i18n %}
+
+{% block title %} {% trans 'Articles' %} {% endblock title %}
+
+{% block content %}
+  {% for article in articles %}
+    <div>
+      {% if article.image.url %}
+        <div>
+            <span>
+                <a href="{% url 'article_detail' article.slug %}">
+                  <img src="{{ article.image.url }}">
+                </a>
+            </span>
+        </div>
+      {% endif %}
+      <div>
+        <span><a href="{% url 'article_detail' article.slug %}">{{ article.title }}</a></span>
+          <span>by <a href="{% url 'user_profile' article.author.username %}">{{ article.author.first_name }} {{ article.author.last_name }}</a> | {{ article.date }}</span>
+      </div>
+    </div>
+  {% endfor %}
+{% endblock content %}

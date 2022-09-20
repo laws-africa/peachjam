@@ -29,6 +29,8 @@ from peachjam.feeds import (
 )
 from peachjam.views import (
     AboutPageView,
+    ArticleDetailView,
+    ArticleListView,
     AuthorDetailView,
     DocumentDetailViewResolver,
     DocumentMediaView,
@@ -41,6 +43,7 @@ from peachjam.views import (
     LegislationListView,
     PlaceDetailView,
     TaxonomyDetailView,
+    UserProfileDetailView,
 )
 
 urlpatterns = [
@@ -122,6 +125,13 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
+    path("articles/", ArticleListView.as_view(), name="article_list"),
+    path(
+        "articles/<slug:slug>/",
+        ArticleDetailView.as_view(),
+        name="article_detail",
+    ),
+    path("users/<str:username>/", UserProfileDetailView.as_view(), name="user_profile"),
 ]
 
 if settings.DEBUG:

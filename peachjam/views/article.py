@@ -6,13 +6,13 @@ from peachjam.models import Article, UserProfile
 
 class ArticleListView(ListView):
     model = Article
-    template_name = "lawlibrary/article_list.html"
+    template_name = "peachjam/article_list.html"
     context_object_name = "articles"
 
 
 class ArticleDetailView(DetailView):
     model = Article
-    template_name = "lawlibrary/article_detail.html"
+    template_name = "peachjam/article_detail.html"
     context_object_name = "article"
 
     def get_context_data(self, **kwargs):
@@ -25,5 +25,5 @@ class ArticleDetailView(DetailView):
 
 class UserProfileDetailView(DetailView):
     model = UserProfile
-    template_name = "lawlibrary/user_profile.html"
+    template_name = "peachjam/user_profile.html"
     context_object_name = "user_profile"
