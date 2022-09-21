@@ -59,12 +59,6 @@
     {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
   </section>
 
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Articles' %}</h2>
-    {% trans 'View more articles' as text %}
-    {% include 'peachjam/_recent_articles.html' with articles=recent_articles view_more_text=text view_more_url_name='article_list' %}
-  </section>
-
 {% endblock %}
 
 {% block second-column-content %}
