@@ -2,7 +2,6 @@
   <form
     ref="form"
     method="get"
-    @change="submit"
   >
     <FilterFacets
       v-model="facets"
@@ -43,15 +42,17 @@ export default {
     }
   },
 
-  data: () => {
+  data () {
     return {
       loading: false,
-      facets: []
+      facets: this.getFacets()
     };
   },
 
-  mounted () {
-    this.loadFacets();
+  watch: {
+    facets () {
+      this.$nextTick(() => this.submit());
+    }
   },
 
   methods: {
@@ -83,7 +84,7 @@ export default {
       this.$refs.form.submit();
     },
 
-    loadFacets () {
+    getFacets () {
       const facetTitles = [
         { key: 'authors', value: 'Regional Body' },
         { key: 'courts', value: 'Court' },
@@ -108,7 +109,7 @@ export default {
         });
       };
 
-      this.facets = facetTitles.map(facet => {
+      return facetTitles.map(facet => {
         if (!this.$props[facet.key].length) return {};
 
         if (facet.key === 'alphabet') {

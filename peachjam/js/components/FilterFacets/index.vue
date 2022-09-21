@@ -67,32 +67,13 @@ export default {
     },
 
     clearFacet (fieldName) {
-      const queryString = window.location.search;
-
-      if (queryString) {
-        const urlParams = new URLSearchParams(queryString);
-        urlParams.delete(fieldName);
-        window.location.href = `${window.location.origin}${
-          window.location.pathname
-        }?${urlParams.toString()}`;
-      }
-
       const data = this.clearSingleFacet(this.modelValue, fieldName);
       this.$emit('update:modelValue', [...data]);
     },
 
     clearAll () {
-      const queryString = window.location.search;
-      const urlParams = new URLSearchParams(queryString);
-
       let data = this.modelValue;
       this.modelValue.forEach((facet) => {
-        if (urlParams.has(facet.name)) {
-          urlParams.delete(facet.name);
-          window.location.href = `${window.location.origin}${
-            window.location.pathname
-          }?${urlParams.toString()}`;
-        }
         data = this.clearSingleFacet(data, facet.name);
       });
       this.$emit('update:modelValue', [...data]);
