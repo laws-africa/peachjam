@@ -10,6 +10,8 @@
 
       <h1 class="mt-2 mb-4">{% trans 'National Legislation' %}</h1>
 
+      {% include 'lawlibrary/_legislation_alert.html' %}
+
       <nav class="nav nav-tabs mb-3 border-bottom">
         <li class="nav-item">
           <a class="nav-link {% if view.variant == 'current' %}active{% endif %}" href="{% url 'legislation_list' %}">Current legislation</a>

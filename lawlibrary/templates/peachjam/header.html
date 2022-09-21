@@ -3,7 +3,9 @@
 {% load i18n %}
 
 {% block top-bar %}
+  {% include 'lawlibrary/_early_preview_warning.html' %}
 {% endblock %}
+
 {% block navbar-logo %}
     <img src="{% static 'images/lawlibrary-logo.png' %}" alt="lawlibrary" width="70" />
 {% endblock %}
