@@ -22,6 +22,7 @@ class Ingestor(models.Model):
     adapter = models.CharField(max_length=2048)
     last_refreshed_at = models.DateTimeField(null=True, blank=True)
     name = models.CharField(max_length=255)
+    enabled = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
