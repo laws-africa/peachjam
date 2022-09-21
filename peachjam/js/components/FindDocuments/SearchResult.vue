@@ -31,7 +31,7 @@
         :key="index"
       >
         <span>
-          <a :href="`${item.expression_frbr_uri}?page=${page.page_num}`">Page {{ page.page_num }}</a>:
+          <a :href="`${item.expression_frbr_uri}?q=${query}&page=${page.page_num}`">Page {{ page.page_num }}</a>:
         </span>
         <span v-html="page.highlight['pages.body'].join(' ... ')" />
       </div>
