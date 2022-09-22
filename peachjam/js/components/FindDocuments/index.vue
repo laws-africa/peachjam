@@ -227,7 +227,7 @@ export default {
 
     clearAllFilters () {
       this.facets.forEach((facet) => {
-        if (facet.value.length > 0) {
+        if (facet.value.length) {
           facet.value = [];
         }
       });
