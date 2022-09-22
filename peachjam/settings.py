@@ -84,8 +84,64 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "peachjam.urls"
 
-JAZZMIN_SETTINGS = {"site_icon": None}
-JAZZMIN_SETTINGS["show_ui_builder"] = True
+JAZZMIN_SETTINGS = {
+    "site_title": "Peachjam",
+    "site_header": "Peachjam",
+    "site_brand": None,
+    "site_icon": None,
+    "site_logo": "/images/africanlii-logo.svg",
+    "welcome_sign": "Welcome to Peachjam Admin",
+    # Copyright on the footer
+    "copyright": "Peachjam",
+    "show_sidebar": True,
+    # Whether to auto expand the menu
+    "navigation_expanded": True,
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "users.User": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "admin.LogEntry": "fas fa-file",
+        "peachjam.Judgment": "fa fa-balance-scale",
+        "peachjam.Judge": "fa fa-gavel",
+        "peachjam.JudgmentMediaSummaryFile": "fa fa-folder-open",
+    },
+    "related_modal_active": False,
+    "custom_js": None,
+    "custom_css": "stylesheets/jazzmin_admin.css",
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": True,
+    "brand_small_text": False,
+    "accent": "accent-teal",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": False,
+    "sidebar": "sidebar-dark-info",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success",
+    },
+}
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",

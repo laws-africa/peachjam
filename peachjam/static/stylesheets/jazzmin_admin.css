@@ -1,0 +1,14 @@
+.img-circle {
+    border-radius: 5px;
+}
+.card-header {
+    padding: 0.5rem 0.5rem;
+}
+
+.card-body {
+    padding: 0.5rem;
+}
+
+.table-sm td {
+    padding: 0.1rem;
+}
