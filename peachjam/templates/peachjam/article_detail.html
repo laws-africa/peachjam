@@ -1,23 +1,23 @@
 {% extends 'peachjam/layouts/main.html' %}
 <h1>Article Detail</h1>
 
-{% block content %}
+{% block page-content %}
   <div>
 	  {% if article.image %}
-	    {{ article.author.username }}
 	    <h2>{{ article.title }}</h2>
 	    <img src="{{ article.image.url }}">
-	    <p>by <a href="{% url 'user_profile' user_profile.user.username %}">{{ article.author.first_name }} {{ article.author.last_name }}</a> | {{ article.date|date:"F d, Y"}}</p>
+	    <p>by <a href="{% url 'user_profile' article.author.username %}">{{ article.author.first_name }} {{ article.author.last_name }}</a> | {{ article.date|date:"F d, Y"}}</p>
 	    <p>{{ article.body }}</p>
 	  {% endif %}
   </div>
 
   <div>
-    <img src="{{ user_profile.photo.url }}">
-    <h2><a href="{% url 'user_profile' user_profile.user.username %}">{{ user_profile.user.first_name }} {{ user_profile.user.last_name }}</a></h2>
-    <h2><a href="{% url 'user_profile' user_profile.user.username %}">More about the author</a></h2>
+    {% if user_profile.photo %}
+      <img src="{{ user_profile.photo.url }}">
+    {% endif %}
+    <h2><a href="{% url 'user_profile' article.author.username %}">{{ article.author.first_name }} {{ article.author.last_name }}</a></h2>
+    <h2><a href="{% url 'user_profile' article.author.username %}">More about the author</a></h2>
     <p>{{ user_profile.profile_description|truncatewords:10 }}</p>
   </div>
 
-  <p>Back to <a href="{% url 'article_list' %}">Blog</a></p>
-{% endblock content %}
+{% endblock page-content %}

@@ -8,6 +8,8 @@ class ArticleListView(ListView):
     model = Article
     template_name = "peachjam/article_list.html"
     context_object_name = "articles"
+    navbar_link = "articles"
+    paginate_by = 5
 
 
 class ArticleDetailView(DetailView):
@@ -18,7 +20,7 @@ class ArticleDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["user_profile"] = get_object_or_404(
-            UserProfile, pk=self.object.author.pk
+            UserProfile, user__pk=self.object.author.pk
         )
         return context
 
