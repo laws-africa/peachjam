@@ -110,8 +110,6 @@ export default {
       };
 
       return facetTitles.map(facet => {
-        if (!this.$props[facet.key].length) return {};
-
         if (facet.key === 'alphabet') {
           return {
             title: facet.value,
