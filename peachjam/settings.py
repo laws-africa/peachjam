@@ -91,10 +91,8 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "site_logo": "/images/africanlii-logo.svg",
     "welcome_sign": "Welcome to Peachjam Admin",
-    # Copyright on the footer
-    "copyright": "Peachjam",
+    "copyright": "Laws.Africa",
     "show_sidebar": True,
-    # Whether to auto expand the menu
     "navigation_expanded": True,
     "icons": {
         "account.EmailAddress": "fa fa-envelope",
@@ -131,9 +129,8 @@ JAZZMIN_SETTINGS = {
         "socialaccount.SocialApp": "fa fa-puzzle-piece",
     },
     "related_modal_active": False,
-    "custom_js": None,
     "custom_css": "stylesheets/jazzmin_admin.css",
-    "show_ui_builder": True,
+    "show_ui_builder": False,
     "changeform_format": "horizontal_tabs",
 }
 
@@ -153,9 +150,9 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_small_text": False,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
+    "sidebar_nav_compact_style": True,
     "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
+    "sidebar_nav_flat_style": True,
     "button_classes": {
         "primary": "btn-primary",
         "secondary": "btn-secondary",
