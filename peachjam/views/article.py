@@ -9,6 +9,7 @@ class ArticleListView(ListView):
     template_name = "peachjam/article_list.html"
     context_object_name = "articles"
     navbar_link = "articles"
+    ordering = ["-id"]
     paginate_by = 5
 
 
