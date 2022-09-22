@@ -4,7 +4,7 @@
       class="h5"
       target="_blank"
       rel="noreferrer"
-      :href="`${item.expression_frbr_uri}?q=${query}`"
+      :href="`${item.expression_frbr_uri}?q=${encodeURIComponent(query)}`"
     >
       {{ item.title }}
     </a>
@@ -31,7 +31,7 @@
         :key="index"
       >
         <span>
-          <a :href="`${item.expression_frbr_uri}?q=${query}&page=${page.page_num}`">Page {{ page.page_num }}</a>:
+          <a :href="`${item.expression_frbr_uri}?q=${encodeURIComponent(query)}&page=${page.page_num}`">Page {{ page.page_num }}</a>:
         </span>
         <span v-html="page.highlight['pages.body'].join(' ... ')" />
       </div>
