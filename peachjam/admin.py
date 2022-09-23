@@ -113,6 +113,7 @@ class DocumentForm(forms.ModelForm):
     content_html = forms.CharField(widget=CKEditorWidget(), required=False)
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
     headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
+    date = forms.DateField(widget=forms.SelectDateWidget())
 
     def __init__(self, data=None, *args, **kwargs):
         if data:
