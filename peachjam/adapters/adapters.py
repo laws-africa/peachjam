@@ -141,7 +141,10 @@ class IndigoAdapter(Adapter):
 
         if frbr_uri.actor:
             frbr_uri_data["frbr_uri_actor"] = frbr_uri.actor
-            field_data["author"] = Author.objects.get(code__iexact=frbr_uri.actor)
+            author, _ = Author.objects.get_or_create(
+                code=frbr_uri.actor, defaults={"name": frbr_uri.actor}
+            )
+            field_data["author"] = author
 
         doc = CoreDocument(**frbr_uri_data)
         doc.work_frbr_uri = doc.generate_work_frbr_uri()
