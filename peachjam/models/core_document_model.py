@@ -368,14 +368,6 @@ class SourceFile(AttachmentAbstractModel):
     )
     file = models.FileField(upload_to=file_location, max_length=1024)
 
-    def save(self, *args, **kwargs):
-        # store this so that we don't have to calculate
-        self.size = self.file.size
-        self.filename = self.file.name
-        if not self.mimetype:
-            self.mimetype = magic.from_buffer(self.file.read(), mime=True)
-        return super().save(*args, **kwargs)
-
     def as_pdf(self):
         if self.filename.endswith(".pdf"):
             return self.file

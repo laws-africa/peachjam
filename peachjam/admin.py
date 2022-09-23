@@ -87,7 +87,7 @@ admin.site.register(SourceFile, SourceFileAdmin)
 
 class BaseAttachmentFileInline(admin.TabularInline):
     extra = 0
-    readonly_fields = ("filename", "mimetype", "attachment_link")
+    readonly_fields = ("filename", "mimetype", "attachment_link", "size")
 
     def attachment_link(self, obj):
         if obj.pk:
@@ -437,7 +437,6 @@ admin.site.register(
         Author,
         DocumentNature,
         Judge,
-        JudgmentMediaSummaryFile,
         MatterType,
     ]
 )
