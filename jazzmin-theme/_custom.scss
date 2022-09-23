@@ -1,18 +1,18 @@
-// jazzmin adds p-5 everywhere :(
-.card .card-body.p-5 {
-  padding: $card-spacer-x !important;
-}
-
-// make .table act like .table-sm
-.table {
-  th,
-  td {
-    padding: $table-cell-padding-sm;
+.theme-peachjam {
+  // jazzmin adds p-5 everywhere :(
+  .card .card-body.p-5 {
+    padding: $card-spacer-x !important;
   }
-}
+
+  // make .table act like .table-sm
+  .table {
+    th,
+    td {
+      padding: $table-cell-padding-sm;
+    }
+  }
 
 
-body.theme-peachjam {
   // django overrides
   .related-widget-wrapper select {
     font-size: $font-size-base;
@@ -36,5 +36,9 @@ body.theme-peachjam {
   .field-null_boolean select,
   .field-file_path select {
     font-size: $font-size-base;
+  }
+
+  .main-sidebar .brand-link .brand-image {
+    display: none;
   }
 }

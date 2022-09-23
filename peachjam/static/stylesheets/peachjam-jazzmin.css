@@ -9183,35 +9183,36 @@ a.text-dark:hover, a.text-dark:focus {
   visibility: hidden !important;
 }
 
-.card .card-body.p-5 {
+.theme-peachjam .card .card-body.p-5 {
   padding: 1.25rem !important;
 }
-
-.table th,
-.table td {
+.theme-peachjam .table th,
+.theme-peachjam .table td {
   padding: 0.3rem;
 }
-
-body.theme-peachjam .related-widget-wrapper select {
+.theme-peachjam .related-widget-wrapper select {
   font-size: 0.875rem;
 }
-body.theme-peachjam .vTextField,
-body.theme-peachjam .vLargeTextField,
-body.theme-peachjam .vURLField,
-body.theme-peachjam .vIntegerField,
-body.theme-peachjam .vBigIntegerField,
-body.theme-peachjam .vForeignKeyRawIdAdminField,
-body.theme-peachjam .vDateField,
-body.theme-peachjam .vTimeField,
-body.theme-peachjam .field-float input[type=number],
-body.theme-peachjam .field-decimal input[type=number],
-body.theme-peachjam .field-time input[type=text],
-body.theme-peachjam .field-duration input[type=text],
-body.theme-peachjam .field-identifier input[type=text],
-body.theme-peachjam .field-generic_ip_address input[type=text],
-body.theme-peachjam .field-null_boolean select,
-body.theme-peachjam .field-file_path select {
+.theme-peachjam .vTextField,
+.theme-peachjam .vLargeTextField,
+.theme-peachjam .vURLField,
+.theme-peachjam .vIntegerField,
+.theme-peachjam .vBigIntegerField,
+.theme-peachjam .vForeignKeyRawIdAdminField,
+.theme-peachjam .vDateField,
+.theme-peachjam .vTimeField,
+.theme-peachjam .field-float input[type=number],
+.theme-peachjam .field-decimal input[type=number],
+.theme-peachjam .field-time input[type=text],
+.theme-peachjam .field-duration input[type=text],
+.theme-peachjam .field-identifier input[type=text],
+.theme-peachjam .field-generic_ip_address input[type=text],
+.theme-peachjam .field-null_boolean select,
+.theme-peachjam .field-file_path select {
   font-size: 0.875rem;
+}
+.theme-peachjam .main-sidebar .brand-link .brand-image {
+  display: none;
 }
 
 /*# sourceMappingURL=peachjam-jazzmin.css.map */
