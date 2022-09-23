@@ -324,12 +324,21 @@ class AttachmentAbstractModel(models.Model):
     filename = models.CharField(max_length=1024, null=False, blank=False)
     mimetype = models.CharField(max_length=1024, null=False, blank=False)
     size = models.BigIntegerField(default=0)
+    file = models.FileField()
 
     def __str__(self):
         return f"{self.filename}"
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs):
+        self.size = self.file.size
+        self.filename = self.file.name
+
+        if not self.mimetype:
+            self.mimetype = magic.from_buffer(self.file.read(), mime=True)
+        return super().save(*args, **kwargs)
 
 
 class Image(AttachmentAbstractModel):

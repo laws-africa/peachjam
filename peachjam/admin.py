@@ -85,8 +85,7 @@ class SourceFileAdmin(admin.ModelAdmin):
 admin.site.register(SourceFile, SourceFileAdmin)
 
 
-class SourceFileInline(admin.TabularInline):
-    model = SourceFile
+class BaseAttachmentFileInline(admin.TabularInline):
     extra = 0
     readonly_fields = ("filename", "mimetype", "attachment_link")
 
@@ -102,6 +101,10 @@ class SourceFileInline(admin.TabularInline):
                 ),
                 title=obj.filename,
             )
+
+
+class SourceFileInline(BaseAttachmentFileInline):
+    model = SourceFile
 
 
 class DocumentTopicInline(admin.TabularInline):
@@ -364,9 +367,13 @@ class CaseNumberAdmin(admin.TabularInline):
     fields = ["matter_type", "number", "year", "string_override"]
 
 
+class JudgmentMediaSummaryFileInline(BaseAttachmentFileInline):
+    model = JudgmentMediaSummaryFile
+
+
 class JudgmentAdmin(ImportMixin, DocumentAdmin):
     resource_class = JudgmentResource
-    inlines = [CaseNumberAdmin] + DocumentAdmin.inlines
+    inlines = [CaseNumberAdmin, JudgmentMediaSummaryFileInline] + DocumentAdmin.inlines
     filter_horizontal = ("judges",)
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].insert(3, "author")
