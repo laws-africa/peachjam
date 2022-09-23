@@ -324,12 +324,21 @@ class AttachmentAbstractModel(models.Model):
     filename = models.CharField(max_length=1024, null=False, blank=False)
     mimetype = models.CharField(max_length=1024, null=False, blank=False)
     size = models.BigIntegerField(default=0)
+    file = models.FileField()
 
     def __str__(self):
         return f"{self.filename}"
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs):
+        self.size = self.file.size
+        self.filename = self.file.name
+
+        if not self.mimetype:
+            self.mimetype = magic.from_buffer(self.file.read(), mime=True)
+        return super().save(*args, **kwargs)
 
 
 class Image(AttachmentAbstractModel):
@@ -358,14 +367,6 @@ class SourceFile(AttachmentAbstractModel):
         CoreDocument, related_name="source_file", on_delete=models.CASCADE
     )
     file = models.FileField(upload_to=file_location, max_length=1024)
-
-    def save(self, *args, **kwargs):
-        # store this so that we don't have to calculate
-        self.size = self.file.size
-        self.filename = self.file.name
-        if not self.mimetype:
-            self.mimetype = magic.from_buffer(self.file.read(), mime=True)
-        return super().save(*args, **kwargs)
 
     def as_pdf(self):
         if self.filename.endswith(".pdf"):
