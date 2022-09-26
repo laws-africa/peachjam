@@ -59,14 +59,13 @@ class DocumentContent {
       this.pdfRenderer = new PdfRenderer(root);
       this.pdfRenderer.onPreviewPanelClick = () => { this.navOffCanvas?.hide(); };
       this.pdfRenderer.onPdfLoaded = () => {
-        const searchInput: HTMLInputElement | null = this.root.querySelector('[aria-label="Search document content"]');
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchQuery = urlParams.get('q');
         const searchForm: HTMLFormElement | null = this.root.querySelector('.doc-search__form');
-        if (searchInput) {
-          searchInput.value = 'law';
+        if (searchQuery) {
           searchForm?.requestSubmit();
         }
 
-        const urlParams = new URLSearchParams(window.location.search);
         const targetPage = urlParams.get('page');
         if (!targetPage) return;
         this.pdfRenderer?.triggerScrollToPage(targetPage);
