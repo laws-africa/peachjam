@@ -15,6 +15,8 @@
 
       <h1 class="mt-2 mb-4">{% blocktrans with locality=locality.name %}{{ locality }} Legislation{% endblocktrans %}</h1>
 
+      {% include 'lawlibrary/_legislation_alert.html' %}
+
       <nav class="nav nav-tabs mb-3 border-bottom">
         <li class="nav-item">
           <a class="nav-link {% if view.variant == 'current' %}active{% endif %}" href="{% url 'provincial_legislation_list' locality.code %}">Current legislation</a>

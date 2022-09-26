@@ -30,7 +30,11 @@ class RemoveTags(Stage):
 
 class CleanStyles(Stage):
     # styles we explicitly want to remove
-    style_blacklist = {"p": set("line-height".split()), None: set()}
+    style_blacklist = {
+        "p": set("line-height".split()),
+        # disallow "position: *" everywhere as it can move content outside of the document borders
+        None: set("position".split()),
+    }
 
     def __call__(self, context):
         for elem in context.html.xpath(".//*[@style]"):
