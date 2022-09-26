@@ -1,13 +1,15 @@
 <template>
   <ul class="list-group">
-    <li class="list-group-item bg-light d-flex justify-content-between align-items-center">
-      <strong>{{ $t('Filters') }}</strong>
+    <li
+      class="list-group-item bg-light d-flex justify-content-between align-items-center"
+    >
+      <strong>{{ $t("Filters") }}</strong>
       <a
         v-if="showClearAllFilter"
         href="#"
         @click.prevent="clearAll"
       >
-        {{ $t('Clear all') }}
+        {{ $t("Clear all") }}
       </a>
     </li>
     <template
@@ -16,6 +18,7 @@
     >
       <SingleFacet
         :facet="facet"
+        :loading="loading"
         @on-change="handleChange"
         @clear-facet="clearFacet"
       />
@@ -24,51 +27,9 @@
 </template>
 
 <script>
-/**
- *  TODO: This will replace ListFacets. Testing for now in LegislationTable
- *  Sample data shape for v-model of this component
- * {
- *     type: 'radio',
- *     name: 'radio',
- *     title: 'Radio options',
- *     value: 'radio-option-one',
- *     options: [
- *       {
- *         label: 'Radio option 1',
- *         value: 'radio-option-one'
- *       },
- *       {
- *         label: 'Radio option 2',
- *         value: 'radio-option-two'
- *       }
- *     ]
- *   },
- *   {
- *     type: 'checkboxes',
- *     name: 'checkbox',
- *     title: 'Checkbox options',
- *     value: 'checkbox-option-one',
- *     options: [
- *       {
- *         label: 'Checkbox option 1',
- *         value: 'checkbox-option-one'
- *       },
- *       {
- *         label: 'Checkbox option 2',
- *         value: 'checkbox-option-two'
- *       }
- *     ]
- *   },
- *   {
- *     type: 'boolean',
- *     name: 'boolean',
- *     title: 'Boolean',
- *     value: false
- *   }
- * **/
 import SingleFacet from './SingleFacet.vue';
 export default {
-  name: 'SecondaryFacets',
+  name: 'FilterFacets',
   components: { SingleFacet },
   props: {
     modelValue: {
@@ -83,7 +44,7 @@ export default {
   emits: ['update:modelValue'],
   computed: {
     showClearAllFilter () {
-      return this.modelValue.some(item => {
+      return this.modelValue.some((item) => {
         if (item.type === 'checkboxes') {
           return item.value.length;
         } else {
@@ -94,7 +55,7 @@ export default {
   },
   methods: {
     clearSingleFacet (data, fieldName) {
-      const targetIndex = data.findIndex(facet => facet.name === fieldName);
+      const targetIndex = data.findIndex((facet) => facet.name === fieldName);
       if (data[targetIndex].type === 'checkboxes') {
         data[targetIndex].value = [];
       } else if (data[targetIndex.type === 'boolean']) {
@@ -104,10 +65,12 @@ export default {
       }
       return data;
     },
+
     clearFacet (fieldName) {
       const data = this.clearSingleFacet(this.modelValue, fieldName);
       this.$emit('update:modelValue', [...data]);
     },
+
     clearAll () {
       let data = this.modelValue;
       this.modelValue.forEach((facet) => {
@@ -115,8 +78,11 @@ export default {
       });
       this.$emit('update:modelValue', [...data]);
     },
+
     handleChange (e, facet) {
-      const targetIndex = this.modelValue.findIndex(item => item.name === facet.name);
+      const targetIndex = this.modelValue.findIndex(
+        (item) => item.name === facet.name
+      );
       const data = [...this.modelValue];
 
       const getValue = () => {
@@ -128,7 +94,9 @@ export default {
           if (e.target.checked) {
             newValue = [...data[targetIndex].value, e.target.value];
           } else {
-            newValue = data[targetIndex].value.filter(item => String(item) !== String(e.target.value));
+            newValue = data[targetIndex].value.filter(
+              (item) => String(item) !== String(e.target.value)
+            );
           }
         }
         return newValue;
@@ -141,7 +109,6 @@ export default {
     }
   }
 };
-
 </script>
 
 <style scoped>

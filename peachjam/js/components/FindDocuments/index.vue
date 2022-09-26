@@ -19,14 +19,17 @@
             <button
               type="submit"
               class="btn btn-sm btn-primary"
-              style="border-top-right-radius: 0.2rem; border-bottom-right-radius: 0.2rem"
+              style="
+                border-top-right-radius: 0.2rem;
+                border-bottom-right-radius: 0.2rem;
+              "
               :disabled="loading"
             >
               <span
                 v-if="loading"
                 class="circle-loader--lt"
               />
-              <span v-else>{{ $t('Search') }}</span>
+              <span v-else>{{ $t("Search") }}</span>
             </button>
           </div>
         </div>
@@ -36,13 +39,13 @@
         v-if="error"
         class="mt-3 alert alert-warning"
       >
-        {{ $t('Oops, something went wrong.') }} {{ error }}
+        {{ $t("Oops, something went wrong.") }} {{ error }}
       </div>
       <div
         v-if="searchInfo.count === 0"
         class="mt-3"
       >
-        {{ $t('No documents match your search.') }}
+        {{ $t("No documents match your search.") }}
       </div>
       <div class="mt-3">
         <!--        <DidYouMean-->
@@ -53,211 +56,18 @@
     </div>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-md-12 col-lg-3">
-          <div
-            v-if="searchInfo.count"
-            class="search-facets"
-          >
-            <ul class="list-group">
-              <li class="list-group-item bg-light d-flex justify-content-between align-items-center search-facets__header">
-                <a
-                  href="#"
-                  class="d-lg-none"
-                  style="font-size: 24px"
-                >
-                  ×
-                </a>
-                <strong>{{ $t('Filters') }}</strong>
-                <div>
-                  <a
-                    v-if="showClearAllFiltersBtn"
-                    href="#"
-                    @click.prevent="clearAllFilters"
-                  >
-                    {{ $t('Clear all') }}
-                  </a>
-                </div>
-              </li>
-              <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_doc_type.doc_type.buckets.length"
-                class="list-group-item"
-              >
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ $t('Document type') }}</strong>
-                  <a
-                    v-if="filters.doc_type.length"
-                    href="#"
-                    @click.prevent="() => filters.doc_type = []"
-                  >
-                    {{ $t('Clear') }}
-                  </a>
-                </div>
-                <TermFacet
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_doc_type.doc_type.buckets)"
-                  :selection="filters.doc_type"
-                  :loading="loading"
-                  @changed="(x) => filters.doc_type = x"
-                />
-              </li>
-              <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_author.author.buckets.length"
-                class="list-group-item"
-              >
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ $t('Author') }}</strong>
-                  <a
-                    v-if="filters.author.length"
-                    href="#"
-                    @click.prevent="() => filters.author = []"
-                  >
-                    {{ $t('Clear') }}
-                  </a>
-                </div>
-                <TermFacet
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_author.author.buckets)"
-                  :selection="filters.author"
-                  :loading="loading"
-                  @changed="(x) => filters.author = x"
-                />
-              </li>
-              <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_jurisdiction.jurisdiction.buckets.length"
-                class="list-group-item"
-              >
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ $t('Jurisdiction') }}</strong>
-                  <a
-                    v-if="filters.jurisdiction.length"
-                    href="#"
-                    @click.prevent="() => filters.jurisdiction = []"
-                  >
-                    {{ $t('Clear') }}
-                  </a>
-                </div>
-                <TermFacet
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_jurisdiction.jurisdiction.buckets)"
-                  :selection="filters.jurisdiction"
-                  :loading="loading"
-                  @changed="(x) => filters.jurisdiction = x"
-                />
-              </li>
-              <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_locality.locality.buckets.length"
-                class="list-group-item"
-              >
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ $t('Locality') }}</strong>
-                  <a
-                    v-if="filters.locality.length"
-                    href="#"
-                    @click.prevent="() => filters.locality = []"
-                  >
-                    {{ $t('Clear') }}
-                  </a>
-                </div>
-                <TermFacet
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_locality.locality.buckets)"
-                  :selection="filters.locality"
-                  :loading="loading"
-                  @changed="(x) => filters.locality = x"
-                />
-              </li>
-
-              <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_matter_type.matter_type.buckets.length"
-                class="list-group-item"
-              >
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ $t('Matter type') }}</strong>
-                  <a
-                    v-if="filters.matter_type.length"
-                    href="#"
-                    @click.prevent="() => filters.matter_type = []"
-                  >
-                    {{ $t('Clear') }}
-                  </a>
-                </div>
-                <TermFacet
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_matter_type.matter_type.buckets)"
-                  :selection="filters.matter_type"
-                  :loading="loading"
-                  @changed="(x) => filters.matter_type = x"
-                />
-              </li>
-              <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_nature.nature.buckets.length"
-                class="list-group-item"
-              >
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ $t('Document nature') }}</strong>
-                  <a
-                    v-if="filters.nature.length"
-                    href="#"
-                    @click.prevent="() => filters.nature = []"
-                  >
-                    {{ $t('Clear') }}
-                  </a>
-                </div>
-                <TermFacet
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_nature.nature.buckets)"
-                  :selection="filters.nature"
-                  :loading="loading"
-                  @changed="(x) => filters.nature = x"
-                />
-              </li>
-              <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_language.language.buckets.length"
-                class="list-group-item"
-              >
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ $t('Language') }}</strong>
-                  <a
-                    v-if="filters.language.length"
-                    href="#"
-                    @click.prevent="() => filters.language = []"
-                  >
-                    {{ $t('Clear') }}
-                  </a>
-                </div>
-                <TermFacet
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_language.language.buckets)"
-                  :selection="filters.language"
-                  :loading="loading"
-                  @changed="(x) => filters.language = x"
-                />
-              </li>
-              <li
-                v-if="searchInfo.facets && searchInfo.facets._filter_year.year.buckets.length"
-                class="list-group-item"
-              >
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ $t('Year') }}</strong>
-                  <a
-                    v-if="filters.year.length"
-                    href="#"
-                    @click.prevent="() => filters.year = []"
-                  >
-                    {{ $t('Clear') }}
-                  </a>
-                </div>
-                <TermFacet
-                  :buckets="sortGenericBuckets(searchInfo.facets._filter_year.year.buckets, true)"
-                  :selection="filters.year"
-                  :loading="loading"
-                  @changed="(x) => filters.year = x"
-                />
-              </li>
-            </ul>
-          </div>
+        <div class="col col-lg-3 d-none d-lg-block">
+          <FilterFacets
+            v-model="facets"
+            :loading="loading"
+          />
         </div>
 
         <div class="col-md-12 col-lg-9 search-pane position-relative">
           <div class="search-results">
             <div v-if="searchInfo.count">
               <div class="mb-3 d-flex justify-content-between">
-                <div>
-                  {{ searchInfo.count }}  documents found.
-                </div>
+                <div>{{ searchInfo.count }} documents found.</div>
               </div>
 
               <ul class="list-unstyled">
@@ -289,12 +99,11 @@
 <script>
 import SearchResult from './SearchResult.vue';
 import SearchPagination from './SearchPagination.vue';
-import TermFacet from './TermFacet.vue';
-import moment from 'moment';
+import FilterFacets from '../FilterFacets/index.vue';
 
 export default {
   name: 'FindDocuments',
-  components: { SearchResult, SearchPagination, TermFacet },
+  components: { SearchResult, SearchPagination, FilterFacets },
   data: () => {
     return {
       loadingCount: 0,
@@ -304,30 +113,70 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
-      filters: {
-        doc_type: [],
-        author: [],
-        jurisdiction: [],
-        locality: [],
-        year: [],
-        date: [],
-        matter_type: [],
-        nature: [],
-        language: []
-      }
+      facets: [
+        {
+          title: 'Document type',
+          name: 'doc_type',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
+        {
+          title: 'Author',
+          name: 'author',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
+        {
+          title: 'Jurisdiction',
+          name: 'jurisdiction',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
+        {
+          title: 'Locality',
+          name: 'locality',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
+        {
+          title: 'Matter type',
+          name: 'matter_type',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
+        {
+          title: 'Document nature',
+          name: 'nature',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
+        {
+          title: 'Language',
+          name: 'language',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
+        {
+          title: 'Year',
+          name: 'year',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        }
+      ]
     };
   },
 
   computed: {
     loading () {
       return this.loadingCount > 0;
-    },
-    showClearAllFiltersBtn () {
-      return Object.keys(this.filters).some(key => this.filters[key].length);
-    },
-
-    selectedFiltersCount () {
-      return Object.keys(this.filters).map(key => this.filters[key].length).reduce((pv, cv) => pv + cv, 0);
     }
   },
 
@@ -336,8 +185,7 @@ export default {
       this.search();
     },
 
-    filters: {
-      deep: true,
+    facets: {
       handler () {
         this.page = 1;
         this.search();
@@ -358,21 +206,30 @@ export default {
       }
       return buckets;
     },
+
+    getUrlParamValue (key) {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      return urlParams.getAll(key);
+    },
+
     handlePageChange (newPage) {
       this.page = newPage;
       this.search();
       document.body.scrollTop = 0; // For Safari
       document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
     },
+
     handleSubmit () {
       this.page = 1;
       this.q = this.$refs['search-input'].value.trim();
       this.search();
     },
+
     clearAllFilters () {
-      Object.keys(this.filters).forEach(key => {
-        if (this.filters[key].length) {
-          this.filters[key] = [];
+      this.facets.forEach((facet) => {
+        if (facet.value.length) {
+          facet.value = [];
         }
       });
     },
@@ -388,27 +245,30 @@ export default {
         params.set('ordering', this.ordering);
       }
 
-      for (const filter of Object.keys(this.filters)) {
-        for (const f of this.filters[filter]) {
-          params.append(filter, f);
-        }
-      }
+      this.facets.forEach((facet) => {
+        facet.value.forEach((value) => {
+          params.append(facet.name, value);
+        });
+      });
+
       return params.toString();
     },
 
     loadState () {
       // load state from URL
-      const params = new URLSearchParams(document.location.search);
+      const params = new URLSearchParams(window.location.search);
       // skip the first event if there's a query, because the page load will already have sent it
-      this.q = this.$refs['search-input'].value = (params.get('q') || '').trim();
+      this.q = this.$refs['search-input'].value = (
+        params.get('q') || ''
+      ).trim();
       this.page = parseInt(params.get('page')) || this.page;
       this.ordering = params.get('ordering') || this.ordering;
 
-      for (const filter of Object.keys(this.filters)) {
-        if (params.has(filter)) {
-          this.filters[filter] = params.getAll(filter);
+      this.facets.forEach((facet) => {
+        if (params.has(facet.name)) {
+          facet.value = params.getAll(facet.name);
         }
-      }
+      });
 
       this.search();
     },
@@ -417,6 +277,36 @@ export default {
       this.q = q;
       this.$refs['search-input'].value = q;
       this.search();
+    },
+
+    formatFacets () {
+      const generateOptions = (buckets) => {
+        return buckets.map((bucket) => ({
+          label: bucket.key,
+          count: bucket.doc_count,
+          value: bucket.key
+        }));
+      };
+
+      this.facets.forEach((facet) => {
+        if (facet.name === 'year') {
+          facet.options = generateOptions(
+            this.sortGenericBuckets(
+              this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
+                .buckets,
+              true
+            )
+          );
+        } else {
+          facet.options = generateOptions(
+            this.sortGenericBuckets(
+              this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
+                .buckets
+            )
+          );
+        }
+        facet.value = this.getUrlParamValue(facet.name);
+      });
     },
 
     async search () {
@@ -429,18 +319,20 @@ export default {
           params.append('highlight', 'content');
           params.append('is_most_recent', 'true');
 
-          for (const key of Object.keys(this.filters)) {
-            for (const x of this.filters[key]) {
-              params.append(key, x);
-            }
-          }
+          this.facets.forEach((facet) => {
+            facet.value.forEach((value) => {
+              params.append(facet.name, value);
+            });
+          });
 
           // facets that we want the API to return
-          for (const facet of Object.keys(this.filters)) {
-            params.append('facet', facet);
-          }
+          this.facets.forEach((facet) => {
+            params.append('facet', facet.name);
+          });
 
-          return `${window.location.origin}/search/api/documents/?${params.toString()}`;
+          return `${
+            window.location.origin
+          }/search/api/documents/?${params.toString()}`;
         };
 
         this.loadingCount = this.loadingCount + 1;
@@ -454,7 +346,12 @@ export default {
               if (this.searchInfo.count === 0) {
                 this.clearAllFilters();
               }
-              window.history.replaceState(null, '', document.location.pathname + '?' + this.serialiseState());
+              window.history.replaceState(
+                null,
+                '',
+                document.location.pathname + '?' + this.serialiseState()
+              );
+              this.formatFacets();
             } else {
               this.error = response.statusText;
             }

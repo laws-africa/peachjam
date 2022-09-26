@@ -8,8 +8,11 @@
       <a href="{% url 'court_detail' document.author.code %}">{{ document.author.name }}</a>
     </dd>
 
-    <dt class="col-4">{% trans 'Judges' %}</dt>
-    <dd class="col-8 text-muted">{{ document.judges_string }}</dd>
+    {% if document.judges_string %}
+      <dt class="col-4">{% trans 'Judges' %}</dt>
+      <dd class="col-8 text-muted">{{ document.judges_string }}</dd>
+    {% endif %}
+
   {% else %}
     {{ block.super }}
   {% endif %}
