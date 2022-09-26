@@ -51,41 +51,43 @@
             class="legislation-table__row"
           >
             <div class="indent" />
-            <div class="column">
+            <div class="col">
               {{ filteredData.length }} of {{ tableData.length }} documents
             </div>
           </div>
           <div class="legislation-table__row headings">
             <div class="indent" />
-            <div
-              class="column d-flex align-items-center"
-              role="button"
-              @click="updateSort('title')"
-            >
-              <strong>Title</strong>
-              <i
-                v-if="sortableFields.title === 'asc'"
-                class="bi bi-sort-up ms-2"
-              />
-              <i
-                v-if="sortableFields.title === 'desc'"
-                class="bi bi-sort-down ms-2"
-              />
-            </div>
-            <div
-              class="column"
-              role="button"
-              @click="updateSort('citation')"
-            >
-              <strong>Numbered title</strong>
-              <i
-                v-if="sortableFields.citation === 'asc'"
-                class="bi bi-sort-up ms-2"
-              />
-              <i
-                v-if="sortableFields.citation === 'desc'"
-                class="bi bi-sort-down ms-2"
-              />
+            <div class="row flex-grow-1">
+              <div
+                class="col-8 align-items-center"
+                role="button"
+                @click="updateSort('title')"
+              >
+                <strong>Title</strong>
+                <i
+                  v-if="sortableFields.title === 'asc'"
+                  class="bi bi-sort-up ms-2"
+                />
+                <i
+                  v-if="sortableFields.title === 'desc'"
+                  class="bi bi-sort-down ms-2"
+                />
+              </div>
+              <div
+                class="col-4"
+                role="button"
+                @click="updateSort('citation')"
+              >
+                <strong>Numbered title</strong>
+                <i
+                  v-if="sortableFields.citation === 'asc'"
+                  class="bi bi-sort-up ms-2"
+                />
+                <i
+                  v-if="sortableFields.citation === 'desc'"
+                  class="bi bi-sort-down ms-2"
+                />
+              </div>
             </div>
           </div>
           <template v-if="filteredData.length">
@@ -111,19 +113,15 @@
                 v-else
                 class="indent"
               />
-              <div class="column">
-                <div>
+              <div class="row flex-grow-1">
+                <div class="col-8">
                   <a
                     :href="`${row.work_frbr_uri}`"
-                    target="_blank"
                   >{{ row.title }}</a>
                 </div>
-                <div class="column__subtitle">
-                  {{ row.frbr_uri }}
+                <div class="col-4">
+                  {{ row.citation }}
                 </div>
-              </div>
-              <div class="column">
-                {{ row.citation }}
               </div>
               <div
                 v-if="row.children.length"
@@ -131,23 +129,20 @@
                 class="accordion-collapse collapse accordion"
                 data-bs-parent=".legislation-table__row"
               >
-                <div class="d-flex">
-                  <div class="indent" />
-                  <div class="accordion-body flex-grow-1">
-                    <div
-                      v-for="(subleg, subleg_index) in row.children"
-                      :key="subleg_index"
-                    >
-                      <div class="row">
-                        <div class="col">
-                          <a
-                            :href="`${subleg.work_frbr_uri}`"
-                            target="_blank"
-                          >{{ subleg.title }}</a>
-                        </div>
-                        <div class="col">
-                          {{ subleg.citation }}
-                        </div>
+                <div class="accordion-body">
+                  <div
+                    v-for="(subleg, subleg_index) in row.children"
+                    :key="subleg_index"
+                    class="d-flex"
+                  >
+                    <div class="row flex-grow-1">
+                      <div class="col-8 column-subleg">
+                        <a
+                          :href="`${subleg.work_frbr_uri}`"
+                        >{{ subleg.title }}</a>
+                      </div>
+                      <div class="col-4 column-subleg">
+                        {{ subleg.citation }}
                       </div>
                     </div>
                   </div>
@@ -407,6 +402,10 @@ export default {
   width: 100%;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
+}
+.column-subleg {
+  padding-left: 50px;
+  padding-bottom: 7px;
 }
 
 .legislation-table__row .column__subtitle {
