@@ -9,8 +9,10 @@ class ArticleListView(ListView):
     template_name = "peachjam/article_list.html"
     context_object_name = "articles"
     navbar_link = "articles"
-    ordering = ["-id"]
     paginate_by = 5
+
+    def get_queryset(self):
+        return Article.objects.filter(published=True).order_by("-date")
 
 
 class ArticleDetailView(DetailView):

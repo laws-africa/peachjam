@@ -3,6 +3,12 @@
 
 {% block page-content %}
 <div class="container mt-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href={% url 'article_list' %}>Blog</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{ article.title }}</li>
+        </ol>
+      </nav>
   <div class="row">
     <div class="col-lg-8">
       <article>

@@ -439,6 +439,8 @@ class ArticleForm(forms.ModelForm):
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     form = ArticleForm
+    list_display = ("date", "title", "published")
+    list_editable = ("title", "published")
 
 
 @admin.register(UserProfile)

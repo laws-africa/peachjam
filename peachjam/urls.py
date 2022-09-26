@@ -21,6 +21,7 @@ from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_page
 
 from peachjam.feeds import (
+    ArticleAtomSiteNewsFeed,
     CoreDocumentAtomSiteNewsFeed,
     GenericDocumentAtomSiteNewsFeed,
     JudgmentAtomSiteNewsFeed,
@@ -114,6 +115,7 @@ urlpatterns = [
         "feeds/legislation.xml", LegislationAtomSiteNewsFeed(), name="legislation_feed"
     ),
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
+    path("feeds/articles.xml", ArticleAtomSiteNewsFeed(), name="article_feed"),
     # separate apps
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
     path(

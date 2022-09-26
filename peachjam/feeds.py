@@ -4,6 +4,7 @@ from django.contrib.syndication.views import Feed
 from django.utils.feedgenerator import Atom1Feed
 
 from peachjam.models import (
+    Article,
     CoreDocument,
     GenericDocument,
     Judgment,
@@ -79,3 +80,14 @@ class CoreDocumentFeed(BaseFeed):
 
 class CoreDocumentAtomSiteNewsFeed(CoreDocumentFeed, BaseAtomFeed):
     subtitle = CoreDocumentFeed.description
+
+
+class ArticleFeed(BaseFeed):
+    model = Article
+    title = "Articles"
+    link = "/articles/"
+    description = "Updates on changes and additions to articles"
+
+
+class ArticleAtomSiteNewsFeed(ArticleFeed, BaseAtomFeed):
+    subtitle = ArticleFeed.description
