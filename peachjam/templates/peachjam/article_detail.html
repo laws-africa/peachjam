@@ -2,42 +2,36 @@
 <h1>Article Detail</h1>
 
 {% block page-content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-lg-8">
+      <article>
+        <header class="mb-4">
+          <h1 class="fw-bolder mb-1">{{ article.title }}</h1>
+          <div class="text-muted fst-italic mb-2">Posted on {{ article.date }} by <a href={% url 'user_profile' article.author.username %}>{{ article.author.first_name }} {{ article.author.last_name }}</a></div>
+        </header>
+        {% if article.image %}
+          <figure class="mb-4"><img class="img-fluid rounded" src={{ article.image.url }}></figure>
+          <section class="mb-5">
+        {% endif %}
+          {{ article.body|safe }}
+        </section>
+      </article>
+    </div>
 
-        <div class="container mt-5">
-            <div class="row">
-                <div class="col-lg-8">
-                    <article>
-                        <header class="mb-4">
-                            <h1 class="fw-bolder mb-1">{{ article.title }}</h1>
-                            <div class="text-muted fst-italic mb-2">Posted on {{ article.date }} by <a href={% url 'user_profile' article.author.username %}>{{ article.author.first_name }} {{ article.author.last_name }}</a></div>
-
-                        </header>
-                        <figure class="mb-4"><img class="img-fluid rounded" src="https://dummyimage.com/900x400/ced4da/6c757d.jpg" alt="..." /></figure>
-                        <section class="mb-5">
-                            {{ article.body }}
-                        </section>
-                    </article>
-                </div>
-
-                <div class="col-lg-4">
-                    <!-- Side widget-->
-                    <div class="card mb-4">
-                    <div class="card-header"></div>
-                      {% if user_profile.photo %}
-                        <img src="{{ user_profile.photo.url }}">
-                      {% endif %}
-                      <h2><a href="{% url 'user_profile' article.author.username %}">{{ article.author.first_name }} {{ article.author.last_name }}</a></h2>
-                      <h2><a href="{% url 'user_profile' article.author.username %}">More about the author</a></h2>
-                      <p>{{ user_profile.profile_description|truncatewords:10 }}</p>
-                    </div>
-                </div>
-            </div>
+    <div class="col-lg-4">
+      <div class="card" style="width: 18rem;">
+        {% if user_profile.photo %}
+          <img class="card-img-top" src={{ user_profile.photo.url }} alt="Author Profile Photo">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">
+            <a href="{% url 'user_profile' article.author.username %}">{{ article.author.first_name }} {{ article.author.last_name }}</a>
+          </h5>
+          <p class="card-text">{{ user_profile.profile_description|truncatewords:6 }}</p>
+          <a href="{% url 'user_profile' article.author.username %}" class="btn btn-primary">More about the author</a>
         </div>
-
-
-
-  <div>
-
-  </div>
-
+      </div>
+    </div>
+</div>
 {% endblock page-content %}
