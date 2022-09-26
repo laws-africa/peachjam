@@ -94,4 +94,12 @@
     {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
   </div>
 </section>
+
+<section class="pb-5 pt-5 bg-light">
+  <div class="container">
+    <h2 class="mb-4 heading-underlined">{% trans 'Recent Articles' %}</h2>
+    {% trans 'View more articles' as text %}
+    {% include 'peachjam/_recent_articles_list.html' with articles=recent_articles view_more_text=text view_more_url_name='article_list' %}
+  </div>
+</section>
 {% endblock %}
