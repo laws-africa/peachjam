@@ -6,10 +6,6 @@ from django.utils.text import slugify
 
 
 def file_location(instance, filename):
-    if not instance.pk:
-        raise ValueError(
-            "Article/UserProfile object must be saved before a file can be attached."
-        )
     filename = os.path.basename(filename)
     return f"{instance.SAVE_FOLDER}/{instance.pk}/{filename}"
 
