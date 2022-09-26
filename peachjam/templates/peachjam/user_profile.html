@@ -1,9 +1,36 @@
-<h1>User Profile</h1>
+{% extends 'peachjam/layouts/main.html' %}
 
-{% block content %}
-  <div>
-      <h2>{{ user_profile.user.first_name }} {{ user_profile.user.last_name }}</h2>
-      <img src="{{ user_profile.photo.url }}">
-      <p>{{ user_profile.profile_description }}</p>
-  </div>
-{% endblock content %}
+{% load i18n %}
+
+{% block title %} {% trans 'User Profile' %} {% endblock title %}
+
+{% block page-content %}
+
+<div class="container mt-4 mb-2">
+  <section>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href={% url 'article_list' %}>Blog</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ user_profile.user.first_name }} {{ user_profile.user.last_name }}</li>
+      </ol>
+    </nav>
+    <h4 class="mt-5"><strong>{{ user_profile.user.first_name }} {{ user_profile.user.last_name }}</strong></h4>
+    <div class="col mt-3">
+      <div class="card mb-3">
+        <div class="row g-0">
+          {% if user_profile.photo %}
+            <div class="col-md-4">
+              <img class="img-fluid rounded-start" src={{ user_profile.photo.url }} alt="Author Profile Photo"/>
+            </div>
+          {% endif %}
+          <div class="col-md-8">
+            <div class="card-body">
+              <p class="card-text">{{ user_profile.profile_description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock page-content %}
