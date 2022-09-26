@@ -117,6 +117,11 @@ export default {
       const queryString = params.get('q');
       if (queryString) {
         this.$refs.q.value = queryString;
+        const searchTab = document.querySelector('#navigation-search-tab');
+        searchTab.click();
+      }
+
+      if (this.docType !== 'pdf') {
         this.q = queryString;
       }
     },
