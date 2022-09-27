@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Max
 
@@ -43,6 +44,13 @@ class Judgment(CoreDocument):
     serial_number = models.IntegerField(
         null=False, help_text="Serial number for MNC, unique for a year and an author."
     )
+    serial_number_override = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        help_text="You can override the auto generated MNC serial number",
+    )
+
     mnc = models.CharField(
         max_length=4096, help_text="Media neutral citation", null=False, blank=False
     )
@@ -63,8 +71,8 @@ class Judgment(CoreDocument):
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned."""
         if self.date and hasattr(self, "author"):
+            self.serial_number = self.generate_serial_number()
             if self.mnc != self.generate_citation():
-                self.serial_number = self.generate_serial_number()
                 self.mnc = self.generate_citation()
 
     def generate_serial_number(self):
@@ -75,6 +83,14 @@ class Judgment(CoreDocument):
         )
         if self.pk:
             query = query.exclude(pk=self.pk)
+
+        serial_nums = [s["serial_number"] for s in query.values("serial_number")]
+
+        if self.serial_number_override:
+            if int(self.serial_number_override) in serial_nums:
+                raise ValidationError("Serial number already in use.")
+            else:
+                return self.serial_number_override
 
         num = query.aggregate(num=Max("serial_number"))
         return (num["num"] or 0) + 1

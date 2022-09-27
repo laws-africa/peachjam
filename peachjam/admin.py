@@ -1,4 +1,5 @@
 import copy
+from datetime import date
 
 from ckeditor.widgets import CKEditorWidget
 from django import forms
@@ -116,7 +117,9 @@ class DocumentForm(forms.ModelForm):
     content_html = forms.CharField(widget=CKEditorWidget(), required=False)
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
     headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
-    date = forms.DateField(widget=forms.SelectDateWidget())
+    date = forms.DateField(
+        widget=forms.SelectDateWidget(years=range(1950, date.today().year + 1))
+    )
 
     def __init__(self, data=None, *args, **kwargs):
         if data:
@@ -385,7 +388,7 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     fieldsets[3][1]["fields"].extend(
         ["headnote_holding", "additional_citations", "flynote"]
     )
-    fieldsets[4][1]["fields"].extend(["serial_number"])
+    fieldsets[4][1]["fields"].extend(["serial_number_override", "serial_number"])
     readonly_fields = [
         "mnc",
         "serial_number",
