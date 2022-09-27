@@ -19,6 +19,8 @@ from peachjam.models import (
     Author,
     CaseNumber,
     CitationLink,
+    Court,
+    CourtClass,
     DocumentNature,
     DocumentTopic,
     GenericDocument,
@@ -470,6 +472,8 @@ admin.site.register(
         DocumentNature,
         Judge,
         MatterType,
+        Court,
+        CourtClass,
     ]
 )
 admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)

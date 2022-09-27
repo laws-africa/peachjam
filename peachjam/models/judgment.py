@@ -1,8 +1,7 @@
 from django.db import models
 from django.db.models import Max
 
-from peachjam.models import CoreDocument, file_location
-from peachjam.models.author import Author
+from peachjam.models import Author, CoreDocument, file_location
 from peachjam.models.core_document_model import AttachmentAbstractModel
 
 
@@ -28,8 +27,32 @@ class MatterType(models.Model):
         ordering = ["name"]
 
 
+class CourtClass(models.Model):
+    name = models.CharField(max_length=100, null=False, unique=True)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name_plural = "Court classes"
+
+    def __str__(self):
+        return self.name
+
+
+class Court(models.Model):
+    name = models.CharField(max_length=255, null=False, unique=True)
+    code = models.SlugField(max_length=255, null=False, unique=True)
+    court_class = models.ForeignKey(
+        CourtClass, related_name="courts", on_delete=models.PROTECT
+    )
+
+    def __str__(self):
+        return self.name
+
+
 class Judgment(CoreDocument):
-    author = models.ForeignKey(Author, on_delete=models.PROTECT)
+    court = models.ForeignKey(Court, on_delete=models.PROTECT, null=True)
+    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=False)
     judges = models.ManyToManyField(Judge, blank=True)
     headnote_holding = models.TextField(blank=True)
     additional_citations = models.TextField(blank=True)
