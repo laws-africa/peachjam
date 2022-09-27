@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.contrib.auth import views
 from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_page
+from django.views.generic import TemplateView
 
 from peachjam.feeds import (
     CoreDocumentAtomSiteNewsFeed,
@@ -122,6 +123,12 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
+    path(
+        "robots.txt",
+        TemplateView.as_view(
+            template_name="peachjam/robots.txt", content_type="text/plain"
+        ),
+    ),
 ]
 
 if settings.DEBUG:
