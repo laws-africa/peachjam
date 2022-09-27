@@ -126,6 +126,16 @@ class PdfRenderer {
         await callback(array[index], index, array);
       }
     };
+
+    // Wait until pdfLib has GlobalWorkerOptions loaded then proceed
+    await new Promise((resolve) => {
+      const interval = setInterval(() => {
+        Object.keys(pdfjsLib).includes('GlobalWorkerOptions');
+        resolve(true);
+        clearInterval(interval);
+      }, 50);
+    });
+
     pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/lib/pdfjs/pdf.worker.js';
 
     const loadingTask = pdfjsLib.getDocument(this.pdf);
