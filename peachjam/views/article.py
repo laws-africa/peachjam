@@ -34,5 +34,4 @@ class UserProfileDetailView(DetailView):
     context_object_name = "user_profile"
 
     def get_object(self):
-        print(self.__dict__)
         return get_object_or_404(UserProfile, user__username=self.kwargs["username"])
