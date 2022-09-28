@@ -372,13 +372,23 @@ class JudgmentMediaSummaryFileInline(BaseAttachmentFileInline):
     model = JudgmentMediaSummaryFile
 
 
+class JudgmentAdminForm(forms.ModelForm):
+    hearing_date = forms.DateField(widget=forms.SelectDateWidget(), required=False)
+
+    class Meta:
+        model = Judgment
+        fields = ("hearing_date",)
+
+
 class JudgmentAdmin(ImportMixin, DocumentAdmin):
+    form = JudgmentAdminForm
     resource_class = JudgmentResource
     inlines = [CaseNumberAdmin, JudgmentMediaSummaryFileInline] + DocumentAdmin.inlines
     filter_horizontal = ("judges",)
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].insert(3, "author")
     fieldsets[0][1]["fields"].insert(4, "case_name")
+    fieldsets[0][1]["fields"].insert(4, "hearing_date")
     fieldsets[0][1]["fields"].insert(7, "mnc")
     fieldsets[1][1]["fields"].insert(0, "judges")
     fieldsets[2][1]["classes"] = ["collapse"]
