@@ -24,9 +24,7 @@
           v-model="facets"
         />
       </div>
-      <div
-        class="col col-lg-9"
-      >
+      <div class="col col-lg-9">
         <div class="d-block d-lg-none mb-2">
           <button
             class="btn btn-primary"
@@ -47,46 +45,46 @@
               placeholder="Filter legislation"
             >
           </div>
-          <div
-            class="legislation-table__row"
-          >
+          <div class="table-row legislation-table__row">
             <div class="indent" />
-            <div class="col">
+            <div class="content__title">
               {{ filteredData.length }} of {{ tableData.length }} documents
             </div>
           </div>
-          <div class="legislation-table__row headings">
+          <div class="table-row legislation-table__row headings">
             <div class="indent" />
-            <div class="row flex-grow-1">
-              <div
-                class="col-8 align-items-center"
-                role="button"
-                @click="updateSort('title')"
-              >
-                <strong>Title</strong>
-                <i
-                  v-if="sortableFields.title === 'asc'"
-                  class="bi bi-sort-up ms-2"
-                />
-                <i
-                  v-if="sortableFields.title === 'desc'"
-                  class="bi bi-sort-down ms-2"
-                />
-              </div>
-              <div
-                class="col-4"
-                role="button"
-                @click="updateSort('citation')"
-              >
-                <strong>Numbered title</strong>
-                <i
-                  v-if="sortableFields.citation === 'asc'"
-                  class="bi bi-sort-up ms-2"
-                />
-                <i
-                  v-if="sortableFields.citation === 'desc'"
-                  class="bi bi-sort-down ms-2"
-                />
+            <div class="table-row__content-col">
+              <div class="content">
+                <div
+                  class="content__title align-items-center"
+                  role="button"
+                  @click="updateSort('title')"
+                >
+                  <strong>Title</strong>
+                  <i
+                    v-if="sortableFields.title === 'asc'"
+                    class="bi bi-sort-up ms-2"
+                  />
+                  <i
+                    v-if="sortableFields.title === 'desc'"
+                    class="bi bi-sort-down ms-2"
+                  />
+                </div>
+                <div
+                  class="content__numbered-title"
+                  role="button"
+                  @click="updateSort('citation')"
+                >
+                  <strong>Numbered title</strong>
+                  <i
+                    v-if="sortableFields.citation === 'asc'"
+                    class="bi bi-sort-up ms-2"
+                  />
+                  <i
+                    v-if="sortableFields.citation === 'desc'"
+                    class="bi bi-sort-down ms-2"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -94,7 +92,9 @@
             <div
               v-for="(row, index) in filteredData"
               :key="index"
-              :class="`legislation-table__row ${row.children.length ? 'has-children' : ''}`"
+              :class="`table-row legislation-table__row ${
+                row.children.length ? 'has-children' : ''
+              }`"
               role="button"
               @click="handleRowClick"
             >
@@ -102,47 +102,46 @@
                 v-if="row.children.length"
                 class="column-caret indent"
               >
-                <i
-                  class="bi bi-caret-right-fill"
-                />
-                <i
-                  class="bi bi-caret-down-fill"
-                />
+                <i class="bi bi-caret-right-fill" />
+                <i class="bi bi-caret-down-fill" />
               </div>
               <div
                 v-else
                 class="indent"
               />
-              <div class="row flex-grow-1">
-                <div class="col-8">
-                  <a
-                    :href="`${row.work_frbr_uri}`"
-                  >{{ row.title }}</a>
-                </div>
-                <div class="col-4">
-                  {{ row.citation }}
-                </div>
-              </div>
-              <div
-                v-if="row.children.length"
-                :id="`row-accordion-${index}`"
-                class="accordion-collapse collapse accordion"
-                data-bs-parent=".legislation-table__row"
-              >
-                <div class="accordion-body">
+              <div class="table-row__content-col">
+                <div class="content">
+                  <div class="content__title">
+                    <a :href="`${row.work_frbr_uri}`">{{ row.title }}</a>
+                  </div>
+                  <div class="content__numbered-title">
+                    {{ row.citation }}
+                  </div>
                   <div
-                    v-for="(subleg, subleg_index) in row.children"
-                    :key="subleg_index"
-                    class="d-flex"
+                    v-if="row.children.length"
+                    :id="`row-accordion-${index}`"
+                    class="accordion-collapse collapse accordion content__children"
+                    data-bs-parent=".legislation-table__row"
                   >
-                    <div class="row flex-grow-1">
-                      <div class="col-8 column-subleg">
-                        <a
-                          :href="`${subleg.work_frbr_uri}`"
-                        >{{ subleg.title }}</a>
-                      </div>
-                      <div class="col-4 column-subleg">
-                        {{ subleg.citation }}
+                    <div class="accordion-body p-0">
+                      <div
+                        v-for="(subleg, subleg_index) in row.children"
+                        :key="subleg_index"
+                        class="table-row mb-3"
+                      >
+                        <div class="indent" />
+                        <div class="table-row__content-col">
+                          <div class="content">
+                            <div class="content__title">
+                              <a :href="`${subleg.work_frbr_uri}`">{{
+                                subleg.title
+                              }}</a>
+                            </div>
+                            <div class="content__numbered-title">
+                              {{ subleg.citation }}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -154,7 +153,8 @@
             v-else
             class="p-2 text-center"
           >
-            No legislation found. <a
+            No legislation found.
+            <a
               :href="`/search/?q=${encodeURIComponent(q)}`"
               target="_blank"
             >Try searching instead</a>.
@@ -205,10 +205,12 @@ export default {
   },
 
   mounted () {
-    this.offCanvasFacets = new window.bootstrap.Offcanvas(this.$refs['mobile-legislation-facets-ref']);
+    this.offCanvasFacets = new window.bootstrap.Offcanvas(
+      this.$refs['mobile-legislation-facets-ref']
+    );
     window.addEventListener('resize', this.setWindowWidth);
     const root = this.$el.closest('[data-vue-component="LegislationTable"]');
-    if (Object.keys(root.dataset).includes('showSideFacets')) this.showSideFacets = true;
+    if (Object.keys(root.dataset).includes('showSideFacets')) { this.showSideFacets = true; }
 
     // To use this component json element #legislation-table-data must be in the dom
     const tableJsonElement = document.getElementById('legislation-table');
@@ -221,7 +223,11 @@ export default {
     handleRowClick (e) {
       const parentRow = e.target.closest('.legislation-table__row');
       if (!parentRow.classList.contains('has-children')) return;
-      if (Array.from(parentRow.querySelectorAll('a')).some(a => e.target === a || a.contains(e.target))) return;
+      if (
+        Array.from(parentRow.querySelectorAll('a')).some(
+          (a) => e.target === a || a.contains(e.target)
+        )
+      ) { return; }
       if (this.lockAccordion) return;
       const collapseElement = parentRow.querySelector('.collapse');
       collapseElement.addEventListener('shown.bs.collapse', () => {
@@ -240,21 +246,25 @@ export default {
     }, 100),
     setFacets () {
       const yearsValuesCount = {};
-      const resultsWithYears = this.filteredData.filter(item => item.year);
-      resultsWithYears.forEach(result => {
-        yearsValuesCount[result.year] = (yearsValuesCount[result.year] || 0) + 1;
+      const resultsWithYears = this.filteredData.filter((item) => item.year);
+      resultsWithYears.forEach((result) => {
+        yearsValuesCount[result.year] =
+          (yearsValuesCount[result.year] || 0) + 1;
       });
 
       const taxonomiesValuesCount = {};
-      const resultsWithTaxonomies = this.filteredData.filter(item => item.taxonomies.length);
-      resultsWithTaxonomies.forEach(item => {
-        item.taxonomies.forEach(taxonomy => {
-          taxonomiesValuesCount[taxonomy] = (taxonomiesValuesCount[taxonomy] || 0) + 1;
+      const resultsWithTaxonomies = this.filteredData.filter(
+        (item) => item.taxonomies.length
+      );
+      resultsWithTaxonomies.forEach((item) => {
+        item.taxonomies.forEach((taxonomy) => {
+          taxonomiesValuesCount[taxonomy] =
+            (taxonomiesValuesCount[taxonomy] || 0) + 1;
         });
       });
 
       const generateOptions = (count) => {
-        return Object.keys(count).map(key => ({
+        return Object.keys(count).map((key) => ({
           label: key,
           count: count[key],
           value: key
@@ -304,8 +314,8 @@ export default {
     filterData () {
       let data = [...this.tableData];
       if (this.q.trim()) {
-        data = data.filter(item => {
-          return ['title', 'citation'].some(key => {
+        data = data.filter((item) => {
+          return ['title', 'citation'].some((key) => {
             const value = item[key] || '';
             return value.toLowerCase().includes(this.q.toLowerCase());
           });
@@ -314,16 +324,19 @@ export default {
 
       if (this.showSideFacets) {
         const facetDict = {};
-        this.facets.forEach(facet => {
-          if (!facet.value || (Array.isArray(facet.value) && !facet.value.length)) return;
+        this.facets.forEach((facet) => {
+          if (
+            !facet.value ||
+            (Array.isArray(facet.value) && !facet.value.length)
+          ) { return; }
           facetDict[facet.name] = facet.value;
         });
-        Object.keys(facetDict).forEach(key => {
-          data = data.filter(item => {
+        Object.keys(facetDict).forEach((key) => {
+          data = data.filter((item) => {
             if (Array.isArray(facetDict[key])) {
-              const arr1 = facetDict[key].map(x => String(x));
-              const arr2 = item[key].map(x => String(x));
-              return arr1.some(item => arr2.includes(item));
+              const arr1 = facetDict[key].map((x) => String(x));
+              const arr2 = item[key].map((x) => String(x));
+              return arr1.some((item) => arr2.includes(item));
             } else {
               return String(item[key]) === String(facetDict[key]);
             }
@@ -331,7 +344,7 @@ export default {
         });
       }
 
-      Object.keys(this.sortableFields).forEach(key => {
+      Object.keys(this.sortableFields).forEach((key) => {
         if (this.sortableFields[key]) {
           data.sort((a, b) => {
             const fa = a[key] ? a[key].toLowerCase() : '';
@@ -352,11 +365,8 @@ export default {
 
 <style scoped>
 .legislation-table__row {
-  display: flex;
-  width: 100%;
   padding: 0.25rem;
   border-bottom: 1px solid var(--bs-gray-200);
-  flex-wrap: wrap;
   cursor: default !important;
   transition: background-color 300ms ease-in-out;
 }
@@ -394,25 +404,34 @@ export default {
 }
 
 .indent {
-  width: 30px;
+  flex: 0 0 30px;
 }
 
-.legislation-table__row .column {
-  flex:1;
+.table-row__content-col {
+  flex: 1;
+}
+
+.table-row {
+  display: flex;
   width: 100%;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-}
-.column-subleg {
-  padding-left: 50px;
-  padding-bottom: 7px;
+  flex-wrap: wrap;
 }
 
-.legislation-table__row .column__subtitle {
-  color: var(--bs-gray-500);
+.table-row .content {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
 }
 
-.legislation-table__row .accordion {
-  width: 100%;
+.content__children {
+  grid-column: 1/13;
+  margin-top: 10px;
+}
+
+.content__title {
+  grid-column: 1/8;
+}
+
+.content__numbered-title {
+  grid-column: 9/13;
 }
 </style>
