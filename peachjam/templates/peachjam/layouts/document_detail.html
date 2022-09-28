@@ -5,44 +5,46 @@
 
 {% block page-content %}
   <main class="pb-5">
-    <div class="container">
-      {% block breadcrumbs %}
-      {% endblock %}
-
-      {% block document-title %}
-        <h1 class="mb-4 mt-2">{{ document.title }}</h1>
-      {% endblock %}
-
-      {% include 'peachjam/_notices.html' with messages=notices %}
-
-      {% if perms.peachjam.change_coredocument %}
-        <a href="{{ document|admin_url:'change' }}">Edit</a>
-      {% endif %}
-
-      <ul class="nav nav-tabs border-bottom" role="tablist">
-        {% block document-tabs %}
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#document-detail-tab" type="button" role="tab" aria-controls="document-detail-tab" aria-selected="true">
-              {% trans "Document detail" %}
-            </button>
-          </li>
-          {% if timeline_events %}
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button" role="tab" aria-controls="history-tab" aria-selected="false">
-                {% trans "History" %}
-              </button>
-            </li>
-          {% endif %}
-          {% if n_relationships %}
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#related-tab" type="button" role="tab" aria-controls="related-tab" aria-selected="false">
-                {% trans "Related documents" %}
-                <span class="badge bg-secondary">{{ n_relationships }}</span>
-              </button>
-            </li>
-          {% endif %}
+    <div class="bg-light d-flex">
+      <div class="container">
+        {% block breadcrumbs %}
         {% endblock %}
-      </ul>
+
+        {% block document-title %}
+          <h1 class="mb-3 mt-4">{{ document.title }}</h1>
+        {% endblock %}
+
+        {% include 'peachjam/_notices.html' with messages=notices %}
+
+        {% if perms.peachjam.change_coredocument %}
+          <a href="{{ document|admin_url:'change' }}">Edit</a>
+        {% endif %}
+
+        <ul class="nav nav-tabs border-bottom" role="tablist">
+          {% block document-tabs %}
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#document-detail-tab" type="button" role="tab" aria-controls="document-detail-tab" aria-selected="true">
+                {% trans "Document detail" %}
+              </button>
+            </li>
+            {% if timeline_events %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button" role="tab" aria-controls="history-tab" aria-selected="false">
+                  {% trans "History" %}
+                </button>
+              </li>
+            {% endif %}
+            {% if n_relationships %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#related-tab" type="button" role="tab" aria-controls="related-tab" aria-selected="false">
+                  {% trans "Related documents" %}
+                  <span class="badge bg-secondary">{{ n_relationships }}</span>
+                </button>
+              </li>
+            {% endif %}
+          {% endblock %}
+        </ul>
+      </div>
     </div>
 
     <div class="tab-content mt-3">
