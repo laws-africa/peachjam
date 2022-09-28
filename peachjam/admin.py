@@ -420,7 +420,6 @@ class IngestorAdmin(admin.ModelAdmin):
     actions = ["refresh_all_content"]
     fields = ("adapter", "name", "last_refreshed_at", "enabled")
     list_display = ("name", "last_refreshed_at", "enabled")
-    list_editable = ("enabled",)
 
     def refresh_all_content(self, request, queryset):
         from peachjam.tasks import run_ingestors
