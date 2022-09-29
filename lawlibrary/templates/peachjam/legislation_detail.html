@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block breadcrumbs %}
-  <nav aria-label="breadcrumb">
+  <nav aria-label="breadcrumb" class="mt-3">
     {% if locality %}
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{% url 'provincial_legislation' %}">{% trans 'Provincial Legislation' %}</a></li>
