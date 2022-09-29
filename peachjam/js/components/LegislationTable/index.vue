@@ -47,7 +47,7 @@
           </div>
           <div class="table-row legislation-table__row">
             <div class="indent" />
-            <div class="content__title">
+            <div>
               {{ filteredData.length }} of {{ tableData.length }} documents
             </div>
           </div>
@@ -127,20 +127,13 @@
                       <div
                         v-for="(subleg, subleg_index) in row.children"
                         :key="subleg_index"
-                        class="table-row mb-3"
+                        class="content mb-3"
                       >
-                        <div class="indent" />
-                        <div class="table-row__content-col">
-                          <div class="content">
-                            <div class="content__title">
-                              <a :href="`${subleg.work_frbr_uri}`">{{
-                                subleg.title
-                              }}</a>
-                            </div>
-                            <div class="content__numbered-title">
-                              {{ subleg.citation }}
-                            </div>
-                          </div>
+                        <div class="content__title">
+                          <a :href="`${subleg.work_frbr_uri}`">{{ subleg.title }}</a>
+                        </div>
+                        <div class="content__numbered-title">
+                          {{ subleg.citation }}
                         </div>
                       </div>
                     </div>
@@ -419,6 +412,7 @@ export default {
 
 .table-row .content {
   display: grid;
+  grid-gap: 1rem;
   grid-template-columns: repeat(12, 1fr);
 }
 
@@ -427,8 +421,12 @@ export default {
   margin-top: 10px;
 }
 
+.content__children .content__title {
+  padding-left: 30px;
+}
+
 .content__title {
-  grid-column: 1/8;
+  grid-column: 1/9;
 }
 
 .content__numbered-title {
