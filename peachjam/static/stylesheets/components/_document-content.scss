@@ -295,18 +295,19 @@
 
 }
 
+$dt-width: 125px;
+
 .document-metadata-list {
   margin-bottom: 0px;
-}
-
-.document-metadata-list__row {
   display: flex;
-  flex-flow: row nowrap;
+  flex-wrap: wrap;
 
   dt {
-    flex: 0 0 100px;
+    width: $dt-width;
+    flex: 0 0 $dt-width;
   }
-  dl {
-    flex: 1;
+  dd {
+    width: calc(100% - #{$dt-width});
+    flex: 0 0 calc(100% - #{$dt-width});
   }
 }

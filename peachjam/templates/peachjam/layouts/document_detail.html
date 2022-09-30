@@ -55,19 +55,19 @@
               <div class="row">
                 <div class="col-md mb-3">
                   {% block document-metadata-content %}
-                    <dl class="row document-metadata-list">
+                    <dl class="document-metadata-list">
 
                       {% block document-metadata-content-jurisdiction %}
                         {% if document.jurisdiction %}
-                          <dt class="col-4">{% trans 'Jurisdiction' %}</dt>
-                          <dd class="col-8 text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
+                          <dt>{% trans 'Jurisdiction' %}</dt>
+                          <dd class="text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
                         {% endif %}
                       {% endblock %}
 
                       {% block document-metadata-content-citation %}
                         {% if document.citation %}
-                          <dt class="col-4">{% trans 'Citation' %}</dt>
-                          <dd class="col-8 text-muted">
+                          <dt>{% trans 'Citation' %}</dt>
+                          <dd class="text-muted">
                             {{ document.citation }}
                             <button type="button" class="btn btn-secondary btn-xs ms-2"
                                     title="{% trans "Copy to clipboard" %}" data-component="CopyToClipboard"
@@ -79,15 +79,15 @@
 
                       {% block document-metadata-content-author %}
                         {% if document.author %}
-                          <dt class="col-4">{% trans 'Author' %}</dt>
-                          <dd class="col-8 text-muted"><a href="{% url 'author' document.author.pk %}">{{ document.author }}</a></dd>
+                          <dt>{% trans 'Author' %}</dt>
+                          <dd class="text-muted"><a href="{% url 'author' document.author.pk %}">{{ document.author }}</a></dd>
                         {% endif %}
                       {% endblock %}
 
                       {% block document-metadata-content-date %}
-                        <dt class="col-4">{% trans 'Date' %}</dt>
+                        <dt>{% trans 'Date' %}</dt>
                         {% if date_versions|length > 1 %}
-                          <dd class="col-8">
+                          <dd>
                             <div class="dropdown">
                               <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
                                 {{ document.date }}
@@ -100,14 +100,14 @@
                             </div>
                           </dd>
                         {% else %}
-                          <dd class="col-8 text-muted">{{ document.date }}</dd>
+                          <dd class="text-muted">{{ document.date }}</dd>
                         {% endif %}
                       {% endblock %}
 
                       {% block document-metadata-content-language %}
-                        <dt class="col-4">{% translate 'Language' %}</dt>
+                        <dt>{% translate 'Language' %}</dt>
                         {% if language_versions|length > 1 %}
-                          <dd class="col-8">
+                          <dd>
                             <div class="dropdown">
                               <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
                                 {{ document.language }}
@@ -120,14 +120,14 @@
                             </div>
                           </dd>
                         {% else %}
-                          <dd class="col-8 text-muted">{{ document.language }} </dd>
+                          <dd class="text-muted">{{ document.language }} </dd>
                         {% endif %}
                       {% endblock %}
 
                       {% block document-metadata-content-download %}
                         {% if document.source_file %}
-                          <dt class="col-4">{% translate 'Download' %}</dt>
-                          <dd class="col-8">
+                          <dt>{% translate 'Download' %}</dt>
+                          <dd>
                             <div>
                               <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
                                  target="_blank"
