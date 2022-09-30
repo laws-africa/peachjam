@@ -19,7 +19,9 @@ class Article(models.Model):
     date = models.DateField(null=False, blank=False)
     title = models.CharField(max_length=1024, null=False, blank=False)
     body = models.TextField()
-    author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, related_name="articles"
+    )
     image = models.ImageField(upload_to=file_location, blank=True, null=True)
     summary = models.TextField()
     slug = models.SlugField(max_length=1024, unique=True, editable=False)

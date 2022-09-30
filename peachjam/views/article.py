@@ -38,5 +38,10 @@ class UserProfileDetailView(DetailView):
     template_name = "peachjam/user_profile.html"
     context_object_name = "user_profile"
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(UserProfile, user__username=self.kwargs["username"])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["articles"] = context["object"].user.articles.order_by("-date")
+        return context
