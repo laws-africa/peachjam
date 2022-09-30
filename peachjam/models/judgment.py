@@ -85,7 +85,7 @@ class Judgment(CoreDocument):
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned."""
-        if self.date and hasattr(self, "author"):
+        if self.date and hasattr(self, "court"):
             if self.mnc != self.generate_citation():
                 self.serial_number = self.generate_serial_number()
                 self.mnc = self.generate_citation()
@@ -94,7 +94,7 @@ class Judgment(CoreDocument):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
         # use select_for_update to lock the touched rows, to avoid a race condition and duplicate serial numbers
         query = Judgment.objects.select_for_update().filter(
-            date__year=self.date.year, author=self.author
+            date__year=self.date.year, court=self.court
         )
         if self.pk:
             query = query.exclude(pk=self.pk)
@@ -104,14 +104,14 @@ class Judgment(CoreDocument):
 
     def generate_citation(self):
         return self.MNC_FORMAT.format(
-            year=self.date.year, author=self.author.code, serial=self.serial_number
+            year=self.date.year, author=self.court.code, serial=self.serial_number
         )
 
     def generate_work_frbr_uri(self):
         # enforce certain defaults for judgment FRBR URIs
         self.frbr_uri_doctype = "judgment"
         self.frbr_uri_actor = (
-            self.author.code.lower() if hasattr(self, "author") else None
+            self.court.code.lower() if hasattr(self, "court") else None
         )
         self.frbr_uri_date = str(self.date.year) if self.date else ""
         self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
