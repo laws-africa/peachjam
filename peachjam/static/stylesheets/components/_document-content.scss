@@ -298,3 +298,15 @@
 .document-metadata-list {
   margin-bottom: 0px;
 }
+
+.document-metadata-list__row {
+  display: flex;
+  flex-flow: row nowrap;
+
+  dt {
+    flex: 0 0 100px;
+  }
+  dl {
+    flex: 1;
+  }
+}
