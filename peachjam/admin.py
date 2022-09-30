@@ -443,6 +443,16 @@ class ArticleAdmin(admin.ModelAdmin):
     list_display_links = ("title",)
     fields = ("title", "date", "published", "image", "summary", "body", "author")
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields["author"].initial = request.user
+        if not request.user.is_superuser:
+            # limit author choices to the current user
+            form.base_fields["author"].queryset = request.user.__class__.objects.filter(
+                pk=request.user.pk
+            )
+        return form
+
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
