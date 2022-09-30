@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0018_casenumber_string_override"),
+        ("peachjam", "0019_article_userprofile"),
     ]
 
     operations = [
