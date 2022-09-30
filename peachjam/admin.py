@@ -3,20 +3,17 @@ import copy
 from ckeditor.widgets import CKEditorWidget
 from django import forms
 from django.conf import settings
-from django.contrib import admin, messages
-from django.contrib.admin.utils import unquote
+from django.contrib import admin
 from django.http.response import FileResponse
-from django.shortcuts import get_object_or_404, redirect
-from django.template.response import TemplateResponse
+from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
 from django.utils.html import format_html
-from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as __
 from import_export.admin import ImportMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from peachjam.forms import IngestorForm, NewDocumentFormMixin, RelationshipForm
+from peachjam.forms import IngestorForm, NewDocumentFormMixin
 from peachjam.models import (
     Author,
     CaseNumber,
@@ -39,6 +36,7 @@ from peachjam.models import (
     Relationship,
     SourceFile,
     Taxonomy,
+    Work,
     pj_settings,
 )
 from peachjam.resources import GenericDocumentResource, JudgmentResource
@@ -158,6 +156,7 @@ class DocumentAdmin(admin.ModelAdmin):
         "updated_at",
         "work_frbr_uri",
         "toc_json",
+        "work_link",
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
@@ -169,6 +168,7 @@ class DocumentAdmin(admin.ModelAdmin):
             __("Key details"),
             {
                 "fields": [
+                    "work_link",
                     "jurisdiction",
                     "locality",
                     "title",
@@ -250,68 +250,27 @@ class DocumentAdmin(admin.ModelAdmin):
         form.instance.save()
 
     def get_urls(self):
-        info = self.model._meta.app_label, self.model._meta.model_name
-
         return [
             path(
                 "source_files/<int:pk>",
                 self.admin_site.admin_view(self.download_sourcefile),
                 name="peachjam_source_file",
             ),
-            path(
-                "<path:object_id>/relationships/",
-                self.admin_site.admin_view(self.relationships),
-                name="%s_%s_relationships" % info,
-            ),
-            path(
-                "<path:object_id>/relationships/<path:rel_id>/delete",
-                self.admin_site.admin_view(self.delete_relationship),
-                name="%s_%s_delete_relationship" % info,
-            ),
         ] + super().get_urls()
+
+    def work_link(self, instance):
+        if instance.work:
+            return format_html(
+                '<a href="{}">{}</a>',
+                reverse("admin:peachjam_work_change", args=[instance.work.id]),
+                instance.work,
+            )
+
+    work_link.short_description = "Work"
 
     def download_sourcefile(self, request, pk):
         source_file = get_object_or_404(SourceFile.objects, pk=pk)
         return FileResponse(source_file.file)
-
-    def relationships(self, request, object_id):
-        model = self.model
-        obj = self.get_object(request, unquote(object_id))
-        if obj is None:
-            return self._get_obj_does_not_exist_redirect(
-                request, model._meta, object_id
-            )
-
-        form = RelationshipForm(obj.work, request.POST)
-        if request.method == "POST":
-            if form.is_valid():
-                form.save()
-                form = RelationshipForm(obj.work)
-
-        opts = model._meta
-        context = {
-            **self.admin_site.each_context(request),
-            "title": "Relationships",
-            "subtitle": obj,
-            "module_name": str(capfirst(opts.verbose_name_plural)),
-            "object": obj,
-            "opts": opts,
-            "preserved_filters": self.get_preserved_filters(request),
-            "relationships": Relationship.for_subject_document(obj).all(),
-            "form": form,
-        }
-        request.current_app = self.admin_site.name
-
-        return TemplateResponse(
-            request, "admin/peachjam_document_relationships.html", context
-        )
-
-    def delete_relationship(self, request, object_id, rel_id):
-        rel = get_object_or_404(Relationship.objects, pk=rel_id)
-        messages.success(request, f"{rel} deleted.")
-        rel.delete()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        return redirect("admin:%s_%s_relationships" % info, object_id=object_id)
 
     def extract_citations(self, request, queryset):
         count = 0
@@ -441,6 +400,25 @@ class IngestorAdmin(admin.ModelAdmin):
         self.message_user(request, "Refreshing content in the background.")
 
     refresh_all_content.short_description = "Refresh all content"
+
+
+class RelationshipInline(admin.TabularInline):
+    model = Relationship
+    fk_name = "subject_work"
+    fields = ("predicate", "object_work")
+
+
+@admin.register(Work)
+class WorkAdmin(admin.ModelAdmin):
+    fields = ("title", "frbr_uri")
+    search_fields = ("title", "frbr_uri")
+    list_display = fields
+    readonly_fields = fields
+    inlines = [RelationshipInline]
+
+    def has_add_permission(self, request):
+        # disallow adding works, they are managed automatically
+        return False
 
 
 admin.site.register(
