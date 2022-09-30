@@ -15,6 +15,7 @@ from treebeard.forms import movenodeform_factory
 
 from peachjam.forms import IngestorForm, NewDocumentFormMixin
 from peachjam.models import (
+    Article,
     Author,
     CaseNumber,
     CitationLink,
@@ -36,6 +37,7 @@ from peachjam.models import (
     Relationship,
     SourceFile,
     Taxonomy,
+    UserProfile,
     Work,
     pj_settings,
 )
@@ -400,6 +402,44 @@ class IngestorAdmin(admin.ModelAdmin):
         self.message_user(request, "Refreshing content in the background.")
 
     refresh_all_content.short_description = "Refresh all content"
+
+
+class ArticleForm(forms.ModelForm):
+    body = forms.CharField(widget=CKEditorWidget())
+
+
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    form = ArticleForm
+    list_display = ("title", "date", "published")
+    list_display_links = ("title",)
+    fields = (
+        "title",
+        "slug",
+        "date",
+        "published",
+        "image",
+        "topics",
+        "summary",
+        "body",
+        "author",
+    )
+    prepopulated_fields = {"slug": ("title",)}
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields["author"].initial = request.user
+        if not request.user.is_superuser:
+            # limit author choices to the current user
+            form.base_fields["author"].queryset = request.user.__class__.objects.filter(
+                pk=request.user.pk
+            )
+        return form
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    pass
 
 
 class RelationshipInline(admin.TabularInline):

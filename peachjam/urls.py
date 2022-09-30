@@ -22,6 +22,7 @@ from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 
 from peachjam.feeds import (
+    ArticleAtomSiteNewsFeed,
     CoreDocumentAtomSiteNewsFeed,
     GenericDocumentAtomSiteNewsFeed,
     JudgmentAtomSiteNewsFeed,
@@ -30,6 +31,9 @@ from peachjam.feeds import (
 )
 from peachjam.views import (
     AboutPageView,
+    ArticleDetailView,
+    ArticleListView,
+    ArticleTopicListView,
     AuthorDetailView,
     DocumentDetailViewResolver,
     DocumentMediaView,
@@ -42,6 +46,7 @@ from peachjam.views import (
     LegislationListView,
     PlaceDetailView,
     TaxonomyDetailView,
+    UserProfileDetailView,
 )
 
 urlpatterns = [
@@ -112,6 +117,7 @@ urlpatterns = [
         "feeds/legislation.xml", LegislationAtomSiteNewsFeed(), name="legislation_feed"
     ),
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
+    path("feeds/articles.xml", ArticleAtomSiteNewsFeed(), name="article_feed"),
     # separate apps
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
     path(
@@ -123,6 +129,18 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
+    path("articles/", ArticleListView.as_view(), name="article_list"),
+    path(
+        "articles/<slug:topic>",
+        ArticleTopicListView.as_view(),
+        name="article_topic_list",
+    ),
+    path(
+        "articles/<str:date>/<str:author>/<slug:slug>",
+        ArticleDetailView.as_view(),
+        name="article_detail",
+    ),
+    path("users/<username>", UserProfileDetailView.as_view(), name="user_profile"),
     path(
         "robots.txt",
         TemplateView.as_view(
