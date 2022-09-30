@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
                 ("summary", models.TextField()),
                 (
                     "slug",
-                    models.SlugField(editable=False, max_length=1024, unique=True),
+                    models.SlugField(max_length=1024, unique=True),
                 ),
                 ("published", models.BooleanField(default=False)),
                 (
