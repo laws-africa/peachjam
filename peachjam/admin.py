@@ -167,12 +167,12 @@ class DocumentAdmin(admin.ModelAdmin):
             __("Key details"),
             {
                 "fields": [
+                    "work_link",
                     "jurisdiction",
                     "locality",
                     "title",
                     "date",
                     "language",
-                    "work_link",
                 ]
             },
         ),
