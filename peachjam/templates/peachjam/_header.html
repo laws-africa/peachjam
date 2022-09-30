@@ -52,11 +52,22 @@
 
         {% if user.is_authenticated %}
           <ul class="navbar-nav">
-            <li class="nav-link">
-              <a class="nav-link" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
-            </li>
+            {% block navbar-user-menu %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  {{ user }}
+                </a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
+                    <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
+                  </li>
+                </ul>
+              </li>
+            {% endblock %}
           </ul>
         {% endif %}
+
         {% include 'peachjam/_set_language.html' %}
       </div>
     </div>

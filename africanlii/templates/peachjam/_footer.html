@@ -1,32 +1,33 @@
-{% extends 'peachjam/footer.html' %}
+{% extends 'peachjam/_footer.html' %}
 
 {% load static %}
 {% load i18n %}
 
 {% block first-content-column %}
   <div class="mb-3">
-    <strong>{% trans 'About' %}</strong>
+    <strong>{% trans 'About AfricanLII' %}</strong>
   </div>
-    <p>
-      {% blocktrans trimmed %}
-        Lawlibrary.org.za is curated by the African Legal Information Institute (AfricanLII) at the
-        <a href="http://www.dgru.uct.ac.za/">Democratic Governance and Rights Unit</a>, Faculty of Law, University of
-        Cape Town (UCT) and in partnership with UCT's <a href="http://www.jifa.uct.ac.za/">Judicial Institute for Africa</a>
-        (JIFA) and <a href="http://laws.africa/">Laws.Africa</a> NPO. AfricanLII and Laws.Africa are members of the regional
-        and global Free Access to Law community and subscribe to the principles of the
-        <a href="http://www.falm.info/declaration/">Montreal Declaration on Free Access to Law.</a>
-      {% endblocktrans %}
-    </p>
+  <p>
+    {% blocktrans trimmed %}
+      AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of
+      the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and
+      federates search across all open access African national law available through the
+      <a class="text-primary" href="https://www.openlawafrica.org/" target="_blank" rel="noreferrer">Open Law Africa</a> community of LIIs.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      The publication of the African Union material is co-sponsored by the European Union and is part of the
+      <a class="text-primary" href="https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/" target="_blank" rel="noreferrer">Data for Governance Alliance project</a>.
+    {% endblocktrans %}
+  </p>
 {% endblock %}
 
 {% block second-content-column %}
-  <div class="mb-2"><strong>{% trans 'Our partners' %}</strong></div>
-  <div><a href="https://agp.africanlii.org/" target="_blank" rel="noreferrer">{% trans 'AfricanLII' %}</a></div>
-  <div><a href="http://www.jifa.uct.ac.za/" target="_blank" rel="noreferrer">{% trans 'JIFA' %}</a></div>
-  <div class="mb-4"><a href="https://laws.africa/" target="_blank" rel="noreferrer">{% trans 'Laws.Africa' %}</a></div>
-
   <div class="mb-2"><strong>{% trans 'With support from' %}</strong></div>
-  <div><a href="https://www.uct.ac.za/" target="_blank" rel="noreferrer">{% trans 'University of Cape Town' %}</a></div>
+  <div><a href="https://www.sigrid-rausing-trust.org/" target="_blank" rel="noreferrer">{% trans 'Sigrid Rausing Trust' %}</a></div>
+  <div><a href="https://indigotrust.org.uk/" target="_blank" rel="noreferrer">{% trans 'Indigo Trust' %}</a></div>
+  <div><a href="https://www.eeas.europa.eu/" target="_blank" rel="noreferrer">{% trans 'European Union' %}</a></div>
 {% endblock %}
 
 {% block third-content-column %}
@@ -50,35 +51,40 @@
   <div><a href="https://zimlii.org/" target="_blank" rel="noreferrer">{% trans 'ZimLII' %}</a></div>
 {% endblock %}
 
+
 {% block footer-logos %}
   <div class="footer-logos">
-    <a href="https://www.uct.ac.za/"
-       target="_blank"
-       rel="noreferrer"
-       class="footer-logos__item"
-    >
-      <img src="{% static 'images/uct-logo.svg' %}" alt="UCT logo">
-    </a>
-    <a href="https://laws.africa/"
-       target="_blank"
-       rel="noreferrer"
-       class="footer-logos__item"
-    >
-      <img src="{% static 'images/laws-africa-logo-horizontal.png' %}" alt="Laws.Africa logo">
-    </a>
     <a class="footer-logos__item"
-       href="https://agp.africanlii.org/"
+       href="https://uct.ac.za/"
        target="_blank"
        rel="noreferrer"
     >
-      <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII logo">
+      <img src="{% static 'images/uct-logo.svg' %}" alt="uct-logo" />
     </a>
     <a
-        href="http://www.jifa.uct.ac.za/"
+        href="https://laws.africa/"
         target="_blank"
         rel="noreferrer"
         class="footer-logos__item">
-      <img src="{% static 'images/jifa.png' %}" alt="JIFA logo">
+      <img src="{% static 'images/laws-africa-logo-horizontal-white.png' %}" alt="laws-africa-logo" />
+    </a>
+    <a href="https://www.indigotrust.org.uk/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item"
+    >
+      <img src="{% static 'images/indigo-trust-logo.jpg' %}" alt="indigo-trust-logo" />
+    </a>
+    <a href="https://www.eeas.europa.eu"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item"
+    >
+      <img src="{% static 'images/eeas-logo.svg' %}"
+           alt="european-union-external-action-logo" />
+    </a>
+    <a class="footer-logos__item" href="https://www.sigrid-rausing-trust.org/" target="_blank" rel="noreferrer">
+      <img src="{% static 'images/srt-logo.jpg' %}" alt="sigrid-rausing-trust-logo"/>
     </a>
   </div>
 {% endblock %}
