@@ -34,6 +34,26 @@ class JudgmentTestCase(TestCase):
         j.assign_mnc()
         self.assertEquals(mnc, j.mnc)
 
+    def test_assign_mnc_sn_override(self):
+        j = Judgment(
+            language=Language.objects.get(pk="en"),
+            author=Author.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+        j.assign_mnc()
+        self.assertEquals("[2019] EACJ 1", j.mnc)
+
+        j.serial_number_override = "999a"
+        j.assign_mnc()
+        self.assertEquals("[2019] EACJ 999a", j.mnc)
+        self.assertIsNone(j.serial_number)
+
+        j.serial_number_override = None
+        j.assign_mnc()
+        self.assertEquals("[2019] EACJ 1", j.mnc)
+        self.assertEquals(1, j.serial_number)
+
     def test_assign_title(self):
         j = Judgment(
             language=Language.objects.get(pk="en"),

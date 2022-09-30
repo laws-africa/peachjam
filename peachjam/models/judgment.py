@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Max
 
@@ -42,7 +41,9 @@ class Judgment(CoreDocument):
         blank=False,
     )
     serial_number = models.IntegerField(
-        null=False, help_text="Serial number for MNC, unique for a year and an author."
+        # TODO: this must be changed to True
+        null=False,
+        help_text="Serial number for MNC, unique for a year and an author.",
     )
     serial_number_override = models.CharField(
         max_length=1024,
@@ -71,12 +72,18 @@ class Judgment(CoreDocument):
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned."""
         if self.date and hasattr(self, "author"):
-            self.serial_number = self.generate_serial_number()
             if self.mnc != self.generate_citation():
+                self.serial_number = (
+                    None
+                    if self.serial_number_override
+                    else self.generate_serial_number()
+                )
                 self.mnc = self.generate_citation()
 
     def generate_serial_number(self):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
+        assert self.serial_number_override is None
+
         # use select_for_update to lock the touched rows, to avoid a race condition and duplicate serial numbers
         query = Judgment.objects.select_for_update().filter(
             date__year=self.date.year, author=self.author
@@ -84,20 +91,14 @@ class Judgment(CoreDocument):
         if self.pk:
             query = query.exclude(pk=self.pk)
 
-        serial_nums = [s["serial_number"] for s in query.values("serial_number")]
-
-        if self.serial_number_override:
-            if int(self.serial_number_override) in serial_nums:
-                raise ValidationError("Serial number already in use.")
-            else:
-                return self.serial_number_override
-
         num = query.aggregate(num=Max("serial_number"))
         return (num["num"] or 0) + 1
 
     def generate_citation(self):
         return self.MNC_FORMAT.format(
-            year=self.date.year, author=self.author.code, serial=self.serial_number
+            year=self.date.year,
+            author=self.author.code,
+            serial=(self.serial_number_override or self.serial_number),
         )
 
     def generate_work_frbr_uri(self):
