@@ -19,6 +19,12 @@ class ArticleDetailView(DetailView):
     template_name = "peachjam/article_detail.html"
     context_object_name = "article"
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(
+            date=self.kwargs["date"], author__username=self.kwargs["author"]
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["user_profile"] = get_object_or_404(

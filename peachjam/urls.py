@@ -130,11 +130,11 @@ urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
     path("articles/", ArticleListView.as_view(), name="article_list"),
     path(
-        "articles/<slug:slug>/",
+        "articles/<str:date>/<str:author>/<slug:slug>",
         ArticleDetailView.as_view(),
         name="article_detail",
     ),
-    path("users/<username>/", UserProfileDetailView.as_view(), name="user_profile"),
+    path("users/<username>", UserProfileDetailView.as_view(), name="user_profile"),
     path(
         "robots.txt",
         TemplateView.as_view(

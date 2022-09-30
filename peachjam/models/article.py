@@ -2,6 +2,7 @@ import os
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 
 
@@ -24,6 +25,16 @@ class Article(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse(
+            "article_detail",
+            kwargs={
+                "date": self.date.strftime("%Y-%m-%d"),
+                "author": self.author.username,
+                "slug": self.slug,
+            },
+        )
 
     def save(self, *args, **kwargs):
         if not self.slug:
