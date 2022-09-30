@@ -1,41 +1,54 @@
 {% extends 'peachjam/layouts/main.html' %}
-<h1>Article Detail</h1>
+{% load i18n peachjam %}
+
+{% block title %}{{ article.title }}{% endblock %}
 
 {% block page-content %}
-<div class="container mt-4 mb-2">
+<div class="container pb-5">
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href={% url 'article_list' %}>Blog</a></li>
+      <li class="breadcrumb-item"><a href={% url 'article_list' %}>{% trans "Articles" %}</a></li>
       <li class="breadcrumb-item active" aria-current="page">{{ article.title }}</li>
     </ol>
   </nav>
+
   <div class="row">
-    <div class="col-lg-8">
-      <article>
+    <div class="col-lg-8 mb-5">
+      <article class="article">
         <header class="mb-4">
-          <h1 class="fw-bolder mb-1">{{ article.title }}</h1>
-          <div class="text-muted fst-italic mb-2">Posted on {{ article.date }} by <a href={% url 'user_profile' article.author.username %}>{{ article.author.first_name }} {{ article.author.last_name }}</a></div>
+          {% if article.image %}
+            <figure class="mb-4"><img class="img-fluid rounded" src={{ article.image.url }}></figure>
+          {% endif %}
+
+          <h1>{{ article.title }}</h1>
+          <div class="text-muted mb-2">
+            {{ article.date }}
+            ·
+            <a href={% url 'user_profile' article.author.username %}>{% user_name article.author %}</a>
+          </div>
         </header>
-        {% if article.image %}
-          <figure class="mb-4"><img class="img-fluid rounded" src={{ article.image.url }}></figure>
-          <section class="mb-5">
-        {% endif %}
+
+        <p class="lead">
+          {{ article.summary }}
+        </p>
+
+        <div class="article-body">
           {{ article.body|safe }}
-        </section>
+        </div>
       </article>
     </div>
 
-    <div class="col-lg-4">
-      <div class="card" style="width: 18rem;">
+    <div class="col-lg-3">
+      <div class="card">
         {% if user_profile.photo %}
-          <img class="card-img-top" src={{ user_profile.photo.url }} alt="Author Profile Photo">
+          <img class="user-profile-photo mt-3" src="{{ user_profile.photo.url }}" alt="User profile photo">
         {% endif %}
         <div class="card-body">
           <h5 class="card-title">
-            <a href="{% url 'user_profile' article.author.username %}">{{ article.author.first_name }} {{ article.author.last_name }}</a>
+            <a href="{% url 'user_profile' article.author.username %}">{% user_name article.author %}</a>
           </h5>
           <p class="card-text">{{ user_profile.profile_description|truncatewords:6 }}</p>
-          <a href="{% url 'user_profile' article.author.username %}" class="btn btn-primary">More about the author</a>
+          <a href="{% url 'user_profile' article.author.username %}" class="btn btn-primary">{% trans "About the author" %}</a>
         </div>
       </div>
     </div>

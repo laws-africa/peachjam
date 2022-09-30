@@ -1,50 +1,37 @@
 {% extends 'peachjam/layouts/main.html' %}
-
-{% load i18n %}
+{% load i18n peachjam %}
 
 {% block title %} {% trans 'Articles' %} {% endblock title %}
 
 {% block page-content %}
   <div class="container">
-    <section>
-      <section class="text-center">
-        <h4 class="mt-5 mb-5"><strong>Latest Articles</strong></h4>
-      <div class="col mt-3">
-        {% for article in articles %}
-        <div class="card mb-3" >
-          <div class="row g-0">
+    {% block article-list-title %}
+      <h1 class="my-4">{% trans "Latest Articles" %}</h1>
+    {% endblock %}
+
+    {% for article in articles %}
+      <div class="mb-3">
+        <div class="row">
+          <div class="col-3 col-lg-2">
             {% if article.image %}
-              <div class="col-md-4">
-                <a href="{% url 'article_detail' article.slug %}">
-                  <img src={{ article.image.url }} alt="Article Image" class="img-fluid rounded-start" />
-                </a>
-              </div>
+              <a href="{% url 'article_detail' article.slug %}">
+                <img src="{{ article.image.url }}" alt="{{ article.title }}" class="img-fluid" />
+              </a>
             {% endif %}
-            <div class="col-md-8">
-              <div class="card-body">
-                <h5 class="card-title">
-                  <a href="{% url 'article_detail' article.slug %}">{{ article.title }}</a>
-                </h5>
-                <p class="card-text">
-                  {{ article.summary }}
-                </p>
-                <p class="card-text">
-                  <small class="text-muted">
-                    {{ article.date }} | <a href={% url 'user_profile' article.author.username %}>{{ article.author.first_name }} {{ article.author.last_name }}</a>
-                  </small>
-                </p>
-              </div>
-            </div>
+          </div>
+          <div class="col-9 col-lg-10">
+            <h5><a href="{% url 'article_detail' article.slug %}">{{ article.title }}</a></h5>
+            <p class="text-muted">
+              {{ article.date }}
+              ·
+              <a href={% url 'user_profile' article.author.username %}>{% user_name article.author %}</a>
+            </p>
+            <p>{{ article.summary }}</p>
           </div>
         </div>
-        {% endfor %}
       </div>
+    {% endfor %}
 
-      {% if not hide_pagination %}
-        {% include 'peachjam/_pagination.html' %}
-      {% endif %}
-
-      </div>
-    </section>
-    </div>
+    {% include 'peachjam/_pagination.html' %}
+  </div>
 {% endblock page-content %}

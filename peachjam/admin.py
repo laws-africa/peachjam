@@ -441,7 +441,7 @@ class ArticleAdmin(admin.ModelAdmin):
     form = ArticleForm
     list_display = ("title", "date", "published")
     list_display_links = ("title",)
-    list_editable = ("published",)
+    fields = ("title", "date", "published", "image", "summary", "body", "author")
 
 
 @admin.register(UserProfile)

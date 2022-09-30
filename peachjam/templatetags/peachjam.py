@@ -67,3 +67,15 @@ def query_string(*args, **kwargs):
 
     qs = query_dict.urlencode()
     return f"{qs}" if qs else ""
+
+
+@register.simple_tag
+def user_name(user):
+    if user.first_name:
+        name = user.first_name
+        if user.last_name:
+            name = user.first_name + " " + user.last_name
+    else:
+        name = user.username
+
+    return name

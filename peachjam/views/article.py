@@ -6,17 +6,16 @@ from peachjam.models import Article, UserProfile
 
 class ArticleListView(ListView):
     model = Article
+    queryset = Article.objects.filter(published=True).order_by("-date")
     template_name = "peachjam/article_list.html"
     context_object_name = "articles"
     navbar_link = "articles"
     paginate_by = 5
 
-    def get_queryset(self):
-        return Article.objects.filter(published=True).order_by("-date")
-
 
 class ArticleDetailView(DetailView):
     model = Article
+    queryset = Article.objects.filter(published=True)
     template_name = "peachjam/article_detail.html"
     context_object_name = "article"
 
