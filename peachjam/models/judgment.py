@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import Max
 
-from peachjam.models import Author, CoreDocument, file_location
+from peachjam.models import CoreDocument, file_location
 from peachjam.models.core_document_model import AttachmentAbstractModel
 
 
@@ -43,7 +43,7 @@ class Court(models.Model):
     name = models.CharField(max_length=255, null=False, unique=True)
     code = models.SlugField(max_length=255, null=False, unique=True)
     court_class = models.ForeignKey(
-        CourtClass, related_name="courts", on_delete=models.PROTECT
+        CourtClass, related_name="courts", on_delete=models.PROTECT, null=True
     )
 
     def __str__(self):
@@ -52,7 +52,6 @@ class Court(models.Model):
 
 class Judgment(CoreDocument):
     court = models.ForeignKey(Court, on_delete=models.PROTECT, null=True)
-    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=False)
     judges = models.ManyToManyField(Judge, blank=True)
     headnote_holding = models.TextField(blank=True)
     additional_citations = models.TextField(blank=True)
