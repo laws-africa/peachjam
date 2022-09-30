@@ -24,8 +24,9 @@ class Article(models.Model):
     )
     image = models.ImageField(upload_to=file_location, blank=True, null=True)
     summary = models.TextField()
-    slug = models.SlugField(max_length=1024, unique=True, editable=False)
+    slug = models.SlugField(max_length=1024, unique=True)
     published = models.BooleanField(default=False)
+    topics = models.ManyToManyField("peachjam.Taxonomy")
 
     def __str__(self):
         return self.title

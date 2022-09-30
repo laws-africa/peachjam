@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
-from peachjam.models import Article, UserProfile
+from peachjam.models import Article, Taxonomy, UserProfile
 
 
 class ArticleListView(ListView):
@@ -11,6 +11,20 @@ class ArticleListView(ListView):
     context_object_name = "articles"
     navbar_link = "articles"
     paginate_by = 5
+
+
+class ArticleTopicListView(ArticleListView):
+    template_name = "peachjam/article_topic_list.html"
+
+    def get(self, *args, **kwargs):
+        self.topic = get_object_or_404(Taxonomy.objects.filter(slug=kwargs["topic"]))
+        return super().get(*args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(topics=self.topic)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(topic=self.topic, **kwargs)
 
 
 class ArticleDetailView(DetailView):
@@ -31,7 +45,7 @@ class ArticleDetailView(DetailView):
             UserProfile, user__pk=self.object.author.pk
         )
         context["more_articles"] = (
-            Article.objects.filter(author=self.object.author)
+            Article.objects.filter(author=self.object.author, published=True)
             .exclude(pk=self.object.pk)
             .order_by("-date")[:5]
         )
@@ -48,5 +62,7 @@ class UserProfileDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["articles"] = context["object"].user.articles.order_by("-date")
+        context["articles"] = (
+            context["object"].user.articles.filter(published=True).order_by("-date")
+        )
         return context

@@ -26,6 +26,14 @@
             ·
             <a href={% url 'user_profile' article.author.username %}>{% user_name article.author %}</a>
           </div>
+
+          <ul class="text-muted list-inline">
+            {% for topic in article.topics.all %}
+              <li class="list-inline-item">
+                <a href="{% url 'article_topic_list' topic.slug %}">{{ topic }}</a>
+              </li>
+            {% endfor %}
+          </ul>
         </header>
 
         <p class="lead">

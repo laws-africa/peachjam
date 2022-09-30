@@ -441,7 +441,18 @@ class ArticleAdmin(admin.ModelAdmin):
     form = ArticleForm
     list_display = ("title", "date", "published")
     list_display_links = ("title",)
-    fields = ("title", "date", "published", "image", "summary", "body", "author")
+    fields = (
+        "title",
+        "slug",
+        "date",
+        "published",
+        "image",
+        "topics",
+        "summary",
+        "body",
+        "author",
+    )
+    prepopulated_fields = {"slug": ("title",)}
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)

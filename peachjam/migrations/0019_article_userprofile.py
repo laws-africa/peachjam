@@ -85,8 +85,13 @@ class Migration(migrations.Migration):
                     "author",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
+                        related_name="articles",
                         to=settings.AUTH_USER_MODEL,
                     ),
+                ),
+                (
+                    "topics",
+                    models.ManyToManyField(to="peachjam.Taxonomy"),
                 ),
             ],
         ),

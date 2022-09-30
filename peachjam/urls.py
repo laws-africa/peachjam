@@ -33,6 +33,7 @@ from peachjam.views import (
     AboutPageView,
     ArticleDetailView,
     ArticleListView,
+    ArticleTopicListView,
     AuthorDetailView,
     DocumentDetailViewResolver,
     DocumentMediaView,
@@ -129,6 +130,11 @@ urlpatterns = [
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
     path("articles/", ArticleListView.as_view(), name="article_list"),
+    path(
+        "articles/<slug:topic>",
+        ArticleTopicListView.as_view(),
+        name="article_topic_list",
+    ),
     path(
         "articles/<str:date>/<str:author>/<slug:slug>",
         ArticleDetailView.as_view(),

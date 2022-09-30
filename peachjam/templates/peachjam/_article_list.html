@@ -12,11 +12,20 @@
       </div>
       <div class="col-9 col-lg-10">
         <h5><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h5>
-        <p class="text-muted">
-          {{ article.date }}
-          ·
-          <a href={% url 'user_profile' article.author.username %}>{% user_name article.author %}</a>
-        </p>
+
+        <ul class="text-muted list-inline text-muted">
+          <li class="list-inline-item">
+            {{ article.date }}
+          </li>
+          <li class="list-inline-item">
+            <a href={% url 'user_profile' article.author.username %}>{% user_name article.author %}</a>
+          </li>
+          {% for topic in article.topics.all %}
+            <li class="list-inline-item">
+              <a href="{% url 'article_topic_list' topic.slug %}">{{ topic }}</a>
+            </li>
+          {% endfor %}
+        </ul>
         <p>{{ article.summary }}</p>
       </div>
     </div>
