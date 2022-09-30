@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("peachjam", "0018_casenumber_string_override"),
+        ("peachjam", "0019_ingestor_enabled"),
     ]
 
     operations = [

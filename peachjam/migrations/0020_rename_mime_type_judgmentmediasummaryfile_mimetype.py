@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0019_ingestor_enabled"),
+        ("peachjam", "0019_article_userprofile"),
     ]
 
     operations = [
