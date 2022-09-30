@@ -7,6 +7,13 @@ from django.db import migrations, models
 import peachjam.models.article
 
 
+def create_user_profiles(apps, schema_editor):
+    User = apps.get_model("auth", "User")
+    UserProfile = apps.get_model("peachjam", "UserProfile")
+    for user in User.objects.all():
+        UserProfile.objects.get_or_create(user=user)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -83,4 +90,5 @@ class Migration(migrations.Migration):
                 ),
             ],
         ),
+        migrations.RunPython(create_user_profiles, migrations.RunPython.noop),
     ]
