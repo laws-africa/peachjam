@@ -148,7 +148,8 @@ class DocumentForm(forms.ModelForm):
 class DocumentAdmin(admin.ModelAdmin):
     form = DocumentForm
     inlines = [DocumentTopicInline, SourceFileInline]
-    list_display = ("title", "date")
+    list_display = ("title", "jurisdiction", "locality", "language", "date")
+    list_filter = ("jurisdiction", "locality", "language")
     search_fields = ("title", "date")
     readonly_fields = (
         "expression_frbr_uri",
