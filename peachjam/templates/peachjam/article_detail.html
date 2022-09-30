@@ -39,7 +39,7 @@
     </div>
 
     <div class="col-lg-3">
-      <div class="card">
+      <div class="card mb-3">
         {% if user_profile.photo %}
           <img class="user-profile-photo mt-3" src="{{ user_profile.photo.url }}" alt="User profile photo">
         {% endif %}
@@ -51,6 +51,14 @@
           <a href="{% url 'user_profile' article.author.username %}" class="btn btn-primary">{% trans "About the author" %}</a>
         </div>
       </div>
+
+      {% if more_articles %}
+        {% user_name article.author as username %}
+        <h4>{% blocktrans trimmed %}Recent articles by {{ username }}{% endblocktrans %}</h4>
+
+        {% include 'peachjam/_article_list.html' with articles=more_articles %}
+      {% endif %}
     </div>
+
 </div>
 {% endblock page-content %}

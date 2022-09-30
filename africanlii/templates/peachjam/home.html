@@ -99,7 +99,12 @@
   <div class="container">
     <h2 class="mb-4 heading-underlined">{% trans 'Recent Articles' %}</h2>
     {% trans 'View more articles' as text %}
-    {% include 'peachjam/_recent_articles_list.html' with articles=recent_articles view_more_text=text view_more_url_name='article_list' %}
+
+    {% include 'peachjam/_article_list.html' with articles=recent_articles %}
+
+    <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">
+      {% trans "View more commentary" %}
+    </a>
   </div>
 </section>
 {% endblock %}

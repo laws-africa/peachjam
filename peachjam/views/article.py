@@ -30,6 +30,11 @@ class ArticleDetailView(DetailView):
         context["user_profile"] = get_object_or_404(
             UserProfile, user__pk=self.object.author.pk
         )
+        context["more_articles"] = (
+            Article.objects.filter(author=self.object.author)
+            .exclude(pk=self.object.pk)
+            .order_by("-date")[:5]
+        )
         return context
 
 
