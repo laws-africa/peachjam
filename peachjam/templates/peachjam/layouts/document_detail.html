@@ -4,8 +4,8 @@
 {% block title %}{{ document.title }}{% endblock %}
 
 {% block page-content %}
-  <main class="pb-5">
-    <div class="bg-light d-flex">
+  <div class="pb-5">
+    <div class="bg-light">
       <div class="container">
         {% block breadcrumbs %}
         {% endblock %}
@@ -221,5 +221,5 @@
 
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
-  </main>
+  </div>
 {% endblock %}
