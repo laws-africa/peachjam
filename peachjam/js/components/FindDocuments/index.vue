@@ -75,6 +75,7 @@
                   v-for="item in searchInfo.results"
                   :key="item.key"
                   :item="item"
+                  :query="q"
                 />
               </ul>
 

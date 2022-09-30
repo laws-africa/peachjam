@@ -150,7 +150,8 @@ class DocumentForm(forms.ModelForm):
 class DocumentAdmin(admin.ModelAdmin):
     form = DocumentForm
     inlines = [DocumentTopicInline, SourceFileInline]
-    list_display = ("title", "date")
+    list_display = ("title", "jurisdiction", "locality", "language", "date")
+    list_filter = ("jurisdiction", "locality", "language")
     search_fields = ("title", "date")
     readonly_fields = (
         "expression_frbr_uri",
@@ -374,13 +375,23 @@ class JudgmentMediaSummaryFileInline(BaseAttachmentFileInline):
     model = JudgmentMediaSummaryFile
 
 
+class JudgmentAdminForm(forms.ModelForm):
+    hearing_date = forms.DateField(widget=forms.SelectDateWidget(), required=False)
+
+    class Meta:
+        model = Judgment
+        fields = ("hearing_date",)
+
+
 class JudgmentAdmin(ImportMixin, DocumentAdmin):
+    form = JudgmentAdminForm
     resource_class = JudgmentResource
     inlines = [CaseNumberAdmin, JudgmentMediaSummaryFileInline] + DocumentAdmin.inlines
     filter_horizontal = ("judges",)
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].insert(3, "author")
     fieldsets[0][1]["fields"].insert(4, "case_name")
+    fieldsets[0][1]["fields"].insert(4, "hearing_date")
     fieldsets[0][1]["fields"].insert(7, "mnc")
     fieldsets[1][1]["fields"].insert(0, "judges")
     fieldsets[2][1]["classes"] = ["collapse"]
@@ -420,6 +431,8 @@ class IngestorAdmin(admin.ModelAdmin):
     readonly_fields = ("last_refreshed_at",)
     form = IngestorForm
     actions = ["refresh_all_content"]
+    fields = ("adapter", "name", "last_refreshed_at", "enabled")
+    list_display = ("name", "last_refreshed_at", "enabled")
 
     def refresh_all_content(self, request, queryset):
         from peachjam.tasks import run_ingestors

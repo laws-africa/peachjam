@@ -4,7 +4,7 @@
       class="h5"
       target="_blank"
       rel="noreferrer"
-      :href="item.expression_frbr_uri"
+      :href="`${item.expression_frbr_uri}?q=${encodeURIComponent(query)}`"
     >
       {{ item.title }}
     </a>
@@ -16,7 +16,10 @@
     </div>
     <div class="text-muted">
       {{ item.date }}
-      <strong v-if="item.author" class="ms-3">{{ item.author }}</strong>
+      <strong
+        v-if="item.author"
+        class="ms-3"
+      >{{ item.author }}</strong>
     </div>
     <div class="text-muted">
       {{ item.jurisdiction }}
@@ -28,15 +31,15 @@
         :key="index"
       >
         <span>
-          <a :href="`${item.expression_frbr_uri}?page=${page.page_num}`">Page {{ page.page_num }}</a>:
+          <a :href="`${item.expression_frbr_uri}?q=${encodeURIComponent(query)}&page=${page.page_num}`">Page {{ page.page_num }}</a>:
         </span>
         <span v-html="page.highlight['pages.body'].join(' ... ')" />
       </div>
     </div>
     <div v-else>
       <span
-          class="snippet"
-          v-html="highlights(item)"
+        class="snippet"
+        v-html="highlights(item)"
       />
     </div>
   </li>
@@ -51,6 +54,10 @@ export default {
       default () {
         return {};
       }
+    },
+    query: {
+      type: String,
+      default: () => ''
     }
   },
   methods: {

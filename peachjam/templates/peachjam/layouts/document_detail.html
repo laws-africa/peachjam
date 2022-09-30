@@ -51,7 +51,7 @@
           <div class="container">
             {% block document-metadata %}
               <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md mb-3">
                   {% block document-metadata-content %}
                     <dl class="row document-metadata-list">
 
@@ -147,9 +147,9 @@
                   {% endblock %}
                 </div>
 
-                <div class="col-md-6">
-                  {% block document-relationships-content %}
-                    {% if n_relationships %}
+                {% if n_relationships %}
+                  <div class="col-md">
+                    {% block document-relationships-content %}
                       <h5>{% translate 'Related documents' %}</h5>
 
                       <ul class="list-unstyled">
@@ -179,9 +179,9 @@
                           {% endfor %}
                         {% endif %}
                       </ul>
-                    {% endif %}
-                  {% endblock %}
-                </div>
+                    {% endblock %}
+                  </div>
+                {% endif %}
               </div>
             {% endblock %}
 

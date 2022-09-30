@@ -6,7 +6,11 @@ class PeachJamConfig(AppConfig):
     name = "peachjam"
 
     def ready(self):
+        import jazzmin.settings
+
         import peachjam.adapters  # noqa
+
+        jazzmin.settings.THEMES["peachjam"] = "stylesheets/peachjam-jazzmin.css"
 
         if not settings.DEBUG:
             from peachjam.tasks import run_ingestors
