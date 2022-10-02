@@ -45,11 +45,10 @@ class Judgment(CoreDocument):
         null=False,
         help_text="Serial number for MNC, unique for a year and an author.",
     )
-    serial_number_override = models.CharField(
-        max_length=1024,
+    serial_number_override = models.IntegerField(
         null=True,
         blank=True,
-        help_text="You can override the auto generated MNC serial number",
+        help_text="Specific MNC serial number assigned by the court.",
     )
 
     mnc = models.CharField(
@@ -74,16 +73,14 @@ class Judgment(CoreDocument):
         """Assign an MNC to this judgment, if one hasn't already been assigned."""
         if self.date and hasattr(self, "author"):
             if self.mnc != self.generate_citation():
-                self.serial_number = (
-                    None
-                    if self.serial_number_override
-                    else self.generate_serial_number()
-                )
+                self.serial_number = self.generate_serial_number()
                 self.mnc = self.generate_citation()
 
     def generate_serial_number(self):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
-        assert self.serial_number_override is None
+        # if there's an override, use it
+        if self.serial_number_override:
+            return self.serial_number_override
 
         # use select_for_update to lock the touched rows, to avoid a race condition and duplicate serial numbers
         query = Judgment.objects.select_for_update().filter(

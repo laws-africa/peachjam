@@ -44,12 +44,13 @@ class JudgmentTestCase(TestCase):
         j.assign_mnc()
         self.assertEquals("[2019] EACJ 1", j.mnc)
 
-        j.serial_number_override = "999a"
+        j.serial_number_override = 999
         j.assign_mnc()
-        self.assertEquals("[2019] EACJ 999a", j.mnc)
-        self.assertIsNone(j.serial_number)
+        self.assertEquals("[2019] EACJ 999", j.mnc)
+        self.assertEquals(999, j.serial_number)
 
         j.serial_number_override = None
+        j.serial_number = None
         j.assign_mnc()
         self.assertEquals("[2019] EACJ 1", j.mnc)
         self.assertEquals(1, j.serial_number)

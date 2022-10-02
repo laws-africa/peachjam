@@ -354,13 +354,14 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].insert(3, "author")
     fieldsets[0][1]["fields"].insert(4, "case_name")
     fieldsets[0][1]["fields"].insert(7, "mnc")
+    fieldsets[0][1]["fields"].insert(8, "serial_number_override")
+    fieldsets[0][1]["fields"].insert(9, "serial_number")
     fieldsets[0][1]["fields"].append("hearing_date")
     fieldsets[1][1]["fields"].insert(0, "judges")
     fieldsets[2][1]["classes"] = ["collapse"]
     fieldsets[3][1]["fields"].extend(
         ["headnote_holding", "additional_citations", "flynote"]
     )
-    fieldsets[4][1]["fields"].extend(["serial_number_override", "serial_number"])
     readonly_fields = [
         "mnc",
         "serial_number",
