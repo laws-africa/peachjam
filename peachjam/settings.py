@@ -395,22 +395,24 @@ JAZZMIN_UI_TWEAKS = {
 
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": False,
-    "loggers": {
-        "africanlii": {"handlers": ["console"], "level": "DEBUG"},
-        "peachjam": {"handlers": ["console"], "level": "DEBUG"},
-    },
+    "disable_existing_loggers": True,
     "handlers": {
         "console": {
+            "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
     },
     "formatters": {
         "simple": {
-            "format": "%(asctime)s %(levelname)s %(message)s",
+            "format": "%(asctime)s %(levelname)s %(module)s %(process)d %(thread)d %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         }
+    },
+    "loggers": {
+        "": {"handlers": ["console"], "level": "ERROR"},
+        "django": {"level": "INFO"},
+        "peachjam": {"handlers": ["console"], "level": "DEBUG" if DEBUG else "INFO"},
     },
 }
 
