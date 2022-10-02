@@ -1,0 +1,16 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n peachjam %}
+
+{% block title %} {% trans 'Articles' %} {% endblock title %}
+
+{% block page-content %}
+  <div class="container">
+    {% block article-list-title %}
+      <h1 class="my-4">{% trans "Latest Articles" %}</h1>
+    {% endblock %}
+
+    {% include "peachjam/_article_list.html" %}
+
+    {% include 'peachjam/_pagination.html' %}
+  </div>
+{% endblock page-content %}

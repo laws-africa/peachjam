@@ -60,6 +60,12 @@ class DocumentContent {
       this.pdfRenderer.onPreviewPanelClick = () => { this.navOffCanvas?.hide(); };
       this.pdfRenderer.onPdfLoaded = () => {
         const urlParams = new URLSearchParams(window.location.search);
+        const searchQuery = urlParams.get('q');
+        const searchForm: HTMLFormElement | null = this.root.querySelector('.doc-search__form');
+        if (searchQuery) {
+          searchForm?.requestSubmit();
+        }
+
         const targetPage = urlParams.get('page');
         if (!targetPage) return;
         this.pdfRenderer?.triggerScrollToPage(targetPage);

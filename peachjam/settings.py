@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "django_filters",
     "django_elasticsearch_dsl",
     "django_elasticsearch_dsl_drf",
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -327,24 +328,91 @@ GOOGLE_SERVICE_ACCOUNT_CREDENTIALS = {
 }
 
 
+JAZZMIN_SETTINGS = {
+    "site_title": PEACHJAM["APP_NAME"],
+    "site_header": PEACHJAM["APP_NAME"],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "icons": {
+        "account.EmailAddress": "fa fa-envelope",
+        "auth": "fas fa-users-cog",
+        "auth.User": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "peachjam.Judgment": "fa fa-balance-scale",
+        "background_task.CompletedTask": "fa fa-calendar-check",
+        "background_task.Task": "fa fa-tasks",
+        "countries_plus.Country": "fa fa-globe",
+        "languages_plus.CultureCode": "fa fa-align-justify",
+        "languages_plus.Language": "fa fa-language",
+        "peachjam.Judge": "fa fa-gavel",
+        "peachjam.JudgmentMediaSummaryFile": "fa fa-folder-open",
+        "peachjam.Author": "fa fa-pencil-alt",
+        "peachjam.Legislation": "fa fa-book",
+        "peachjam.CitationLink": "fa fa-link",
+        "liiweb.CourtClass": "fa fa-building",
+        "liiweb.CourtDetail": "fa fa-list-alt",
+        "peachjam.GenericDocument": "fa fa-copy",
+        "peachjam.LegalInstrument": "fa fa-briefcase",
+        "peachjam.Locality": "fa fa-map",
+        "peachjam.Ingestor": "fa fa-download",
+        "peachjam.Image": "fa fa-file-image",
+        "peachjam.MatterType": "fa fa-list",
+        "peachjam.PeachjamSettings": "fa fa-wrench",
+        "peachjam.DocumentNature": "fa fa-list",
+        "peachjam.SourceFile": "fa fa-file-archive",
+        "peachjam.Taxonomy": "fa fa-tags",
+        "peachjam.Predicate": "fa fa-exchange-alt",
+        "django.Site": "fa fa-server",
+        "socialaccount.SocialAccount": "fa fa-users",
+        "socialaccount.SocialToken": "fa fa-key",
+        "socialaccount.SocialApp": "fa fa-puzzle-piece",
+    },
+    "related_modal_active": True,
+    "show_ui_builder": False,
+    "topmenu_links": [
+        {"app": "peachjam"},
+        {"app": "liiweb"},
+    ],
+    "changeform_format": "horizontal_tabs",
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "theme": "peachjam",
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-info",
+    "sidebar_nav_compact_style": True,
+    "sidebar_nav_flat_style": True,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success",
+    },
+}
+
+
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": False,
-    "loggers": {
-        "africanlii": {"handlers": ["console"], "level": "DEBUG"},
-        "peachjam": {"handlers": ["console"], "level": "DEBUG"},
-    },
+    "disable_existing_loggers": True,
     "handlers": {
         "console": {
+            "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
     },
     "formatters": {
         "simple": {
-            "format": "%(asctime)s %(levelname)s %(message)s",
+            "format": "%(asctime)s %(levelname)s %(module)s %(process)d %(thread)d %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         }
+    },
+    "loggers": {
+        "": {"handlers": ["console"], "level": "ERROR"},
+        "django": {"level": "INFO"},
+        "peachjam": {"handlers": ["console"], "level": "DEBUG" if DEBUG else "INFO"},
     },
 }
 

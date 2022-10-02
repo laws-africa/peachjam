@@ -158,6 +158,29 @@ The following steps outline the procedure to deploy a new Peachjam based applica
 
       dokku ps:scale <app_name> tasks=1 tasks2=1
 
+## Admin theme
+
+Peachjam customises the Django admin view using [Django Jazzmin](https://django-jazzmin.readthedocs.io/). We build
+a custom bundle of Bootstrap 4 specifically for the admin area from the [jazzmin-theme](jazzmin-theme) directory.
+
+To make changes to it:
+
+```bash
+cd jazzmin-theme
+npm i
+# make your changes to peachjam-jazzmin.scss
+# ...
+npm run watch
+```
+
+Once you're done, run:
+
+```bash
+npm run build
+```
+
+and commit both your changes, and the updated [peachjam/static/stylesheets/peachjam-jazzmin.css](peachjam/static/stylesheets/peachjam-jazzmin.css).
+
 # License
 
 Copyright 2022 Laws.Africa.

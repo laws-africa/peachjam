@@ -55,6 +55,7 @@ class Judgment(CoreDocument):
     mnc = models.CharField(
         max_length=4096, help_text="Media neutral citation", null=False, blank=False
     )
+    hearing_date = models.DateField(null=True, blank=True)
 
     CITATION_DATE_FORMAT = "(%d %B %Y)"
 

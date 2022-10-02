@@ -1,0 +1,72 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n peachjam %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block page-content %}
+<div class="container pb-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href={% url 'article_list' %}>{% trans "Articles" %}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ article.title }}</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <div class="col-lg-8 mb-5">
+      <article class="article">
+        <header class="mb-4">
+          {% if article.image %}
+            <figure class="mb-4"><img class="img-fluid rounded" src={{ article.image.url }}></figure>
+          {% endif %}
+
+          <h1>{{ article.title }}</h1>
+          <div class="text-muted mb-2">
+            {{ article.date }}
+            ·
+            <a href={% url 'user_profile' article.author.username %}>{% user_name article.author %}</a>
+          </div>
+
+          <ul class="text-muted list-inline">
+            {% for topic in article.topics.all %}
+              <li class="list-inline-item">
+                <a href="{% url 'article_topic_list' topic.slug %}">{{ topic }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </header>
+
+        <p class="lead">
+          {{ article.summary }}
+        </p>
+
+        <div class="article-body">
+          {{ article.body|safe }}
+        </div>
+      </article>
+    </div>
+
+    <div class="col-lg-3">
+      <div class="card mb-3">
+        {% if user_profile.photo %}
+          <img class="user-profile-photo mt-3" src="{{ user_profile.photo.url }}" alt="User profile photo">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">
+            <a href="{% url 'user_profile' article.author.username %}">{% user_name article.author %}</a>
+          </h5>
+          <p class="card-text">{{ user_profile.profile_description|truncatewords:6 }}</p>
+          <a href="{% url 'user_profile' article.author.username %}" class="btn btn-primary">{% trans "About the author" %}</a>
+        </div>
+      </div>
+
+      {% if more_articles %}
+        {% user_name article.author as username %}
+        <h4>{% blocktrans trimmed %}Recent articles by {{ username }}{% endblocktrans %}</h4>
+
+        {% include 'peachjam/_article_list.html' with articles=more_articles %}
+      {% endif %}
+    </div>
+
+</div>
+{% endblock page-content %}
