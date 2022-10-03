@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-03 13:26+0200\n"
-"PO-Revision-Date: 2022-10-03 11:31\n"
+"PO-Revision-Date: 2022-10-03 11:30\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: pt\n"
-"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 50\n"
+"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 44\n"
 
 #: settings.py:193
 msgid "English"
@@ -66,7 +66,7 @@ msgstr "Efetuar Login"
 #: templates/account/password_reset_from_key_done.html:10
 #: templates/admin/login.html:63
 msgid "Log in"
-msgstr "Efetuar Login"
+msgstr "Efectuar Login"
 
 #: templates/account/login.html:30 templates/account/password_reset.html:18
 msgid "Email address"
@@ -78,7 +78,7 @@ msgstr "Senha"
 
 #: templates/account/login.html:45
 msgid "Forgot your password?"
-msgstr "Esqueceu-se da sua senha?"
+msgstr "Esqueceu a sua senha?"
 
 #: templates/account/login.html:76
 #, python-format
@@ -86,7 +86,7 @@ msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
 msgstr "\n"
-"            Efetuar Login com %(provider.name)s\n"
+"            Inicie sessão com %(provider.name)s\n"
 "          "
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
@@ -103,7 +103,6 @@ msgid "Reset Your Password"
 msgstr "Redefinir sua senha"
 
 #: templates/account/password_reset.html:12
-#| msgid "Forgotten your password? Enter your e-mail address below, and we"
 msgid "Forgotten your password? Enter your e-mail address below, and we'll send you an e-mail allowing you to reset it."
 msgstr "Esqueceu sua senha? Digite seu endereço de e-mail abaixo e enviaremos um e-mail para você redefini-la."
 
@@ -119,7 +118,7 @@ msgstr "Código ruim"
 #: templates/account/password_reset_from_key.html:7
 #: templates/account/password_reset_from_key_done.html:7
 msgid "Reset Password"
-msgstr "Redefinir a senha"
+msgstr "Redefinir a Senha"
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
@@ -140,7 +139,7 @@ msgstr "Sua senha foi redefinida."
 
 #: templates/account/password_reset_from_key_done.html:4
 msgid "Change Password"
-msgstr "Mudar a Senha"
+msgstr "Mudar a senha"
 
 #: templates/account/password_reset_from_key_done.html:8
 msgid "Your password has been reset."
@@ -152,7 +151,7 @@ msgstr "Por favor corrige o erro abaixo."
 
 #: templates/admin/login.html:23
 msgid "Please correct the errors below."
-msgstr "Por favor corrige o erro abaixo."
+msgstr "Por favor, corrija os erros abaixo."
 
 #: templates/admin/login.html:39
 #, python-format
@@ -161,7 +160,7 @@ msgstr "Você está autenticado como %(username)s, mas não está autorizado a a
 
 #: templates/admin/login.html:59
 msgid "Forgotten your password or username?"
-msgstr "Esqueceu sua senha ou usuário?"
+msgstr "Esqueceu sua senha ou nome de usuário?"
 
 #: templates/peachjam/_child_documents.html:3
 #: templates/peachjam/legislation_detail.html:10
@@ -188,7 +187,7 @@ msgid "This document is %(filesize)s. Do you want to load it?"
 msgstr "Este documento é %(filesize)s. Você deseja carregá-lo?"
 
 #: templates/peachjam/_document_content.html:171
-#| msgid "Related documents"
+#| msgid "AU Documents"
 msgid "Load document"
 msgstr "Carregar documento"
 
@@ -248,8 +247,8 @@ msgid "\n"
 "          Our specific goals are to:\n"
 "        "
 msgstr "\n"
-"          Esta plataforma Pan-Africana serve como um centro de informações sobre todos os aspectos da agenda da Arquitectura \n"
-"          de Governação Africana (AGA), incluindo cartas, protocolos, comunicações, decisões legais relevantes, política,\n"
+"          Esta plataforma Pan-Africana serve como um centro de informações sobre todos os aspectos da agenda da Arquitetura\n"
+"          Governança Africana (AGA), incluindo cartas, protocolos, comunicações, decisões legais relevantes, política,\n"
 "          implementação, monitoramento e material relacionado. O objectivo global é construir uma colaboração eficaz\n"
 "          entre os cidadãos africanos e as organizações da sociedade civil, por um lado, e membros AGA, por outro lado, para\n"
 "          reforçar a implementação da agenda da plataforma AGA no que diz respeito à democracia, governação e direitos humanos.\n"
@@ -300,7 +299,7 @@ msgid "\n"
 "        "
 msgstr "\n"
 "          Essa plataforma é desenvolvida e mantida conjuntamente por <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> e\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> com fundos da União Europeia,\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Leis. frica</a> com fundos da União Europeia,\n"
 "          o Indigo Trust e o Sigrid Rausing Trust. A fase inicial do projecto vai de 2021 para 2024.\n"
 "        "
 
@@ -340,9 +339,9 @@ msgid "\n"
 "          rich interactivity, advanced research and justice sector innovation.\n"
 "        "
 msgstr "\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a>  auxilia os governos africanos a digitalizar de forma sustentável a sua informação legal para uso público, através de\n"
-"          software de direito, desenvolvimento de capacidades, formação, parcerias e apoio. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions\n"
-"          reduzem o custo da digitalização, arquivo e publicação de informação jurídica primária, e criam oportunidades para\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> ajuda os governos africanos a digitalizarem de forma sustentável as suas informações legais para uso público, através de software aberto\n"
+"          de legislação, reforço de capacidades, formação, parcerias e apoio. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions\n"
+"          reduz o custo da digitalização, arquivo e publicação de informação jurídica primária, e cria oportunidades para uma\n"
 "          interactividade rica, investigação avançada e inovação no sector da justiça.\n"
 "        \n"
 "        "
@@ -353,8 +352,8 @@ msgid "\n"
 "          of the rule of law, access to justice, and innovation.\n"
 "        "
 msgstr "\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> e <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> colabore no desbloqueio do valor da informação jurídica digital africana em apoio\n"
-"          do Estado de direito. acesso à justiça e à inovação.\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> e <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> colaboram  no desvendar do valor da informação jurídica digital africana em apoio\n"
+"          do Estado de direito, acesso à justiça e à inovação.\n"
 "        "
 
 #: templates/peachjam/about.html:84
@@ -443,7 +442,7 @@ msgid "Judgments"
 msgstr "Julgamentos"
 
 #: templates/peachjam/layouts/document_detail.html:27
-#| msgid "Document Type"
+#| msgid "Documents"
 msgid "Document detail"
 msgstr "Detalhe do documento"
 
@@ -485,7 +484,6 @@ msgstr "Documentos"
 
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
-#| msgid "Treaties and Protocols List"
 msgid "Treaties and Protocols"
 msgstr "Tratados e Protocolos"
 
@@ -499,32 +497,23 @@ msgstr "Principal trabalho"
 msgid "Legislation"
 msgstr "Legislação"
 
-#~ msgid "Relationships"
-#~ msgstr "Relations"
-
 #~ msgid "first"
-#~ msgstr "premier"
+#~ msgstr "kwanza"
 
 #~ msgid "Page"
-#~ msgstr "Page"
+#~ msgstr "Ukurasa"
 
 #~ msgid "next"
-#~ msgstr "suivant"
+#~ msgstr "ifuatayo"
 
 #~ msgid "last"
-#~ msgstr "dernier"
-
-#~ msgid "Regional Body"
-#~ msgstr "Corps régional"
+#~ msgstr "ya mwisho"
 
 #~ msgid "Generic Document List"
-#~ msgstr "Liste de documents génériques"
-
-#~ msgid "This document"
-#~ msgstr "Ce document"
+#~ msgstr "Orodha ya Hati za Jumla"
 
 #~ msgid "Legal Instrument List"
-#~ msgstr "Liste d'instruments légaux"
+#~ msgstr "Orodha ya Vyombo vya Kisheria"
 
 #~ msgid "Welcome to Peach Jam"
 #~ msgstr "Bienvenue dans Peach Jam"
