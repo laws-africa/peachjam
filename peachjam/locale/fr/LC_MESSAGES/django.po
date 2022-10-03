@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-03 13:26+0200\n"
-"PO-Revision-Date: 2022-10-03 11:30\n"
+"PO-Revision-Date: 2022-10-03 11:31\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 44\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 50\n"
 
 #: settings.py:193
 msgid "English"
@@ -31,27 +31,27 @@ msgstr "Swahili"
 
 #: templates/404.html:4 templates/404.html:9
 msgid "Not found (Error 404)"
-msgstr ""
+msgstr "Non trouvé (Erreur 404)"
 
 #: templates/404.html:11
 msgid "We couldn't find the page you're looking for. The link may be outdated or incorrect."
-msgstr ""
+msgstr "Nous n'avons pas pu trouver la page que vous cherchez. Le lien est peut-être obsolète ou incorrect."
 
 #: templates/404.html:17 templates/500.html:17
 msgid "Go to the homepage."
-msgstr ""
+msgstr "Aller à la page d'accueil."
 
 #: templates/404.html:20 templates/500.html:20
 msgid "Try searching for what you're looking for."
-msgstr ""
+msgstr "Essayez de chercher ce que vous cherchez."
 
 #: templates/500.html:4 templates/500.html:9
 msgid "Something went wrong (Error 500)"
-msgstr ""
+msgstr "Quelque chose s'est mal passé (Erreur 500)"
 
 #: templates/500.html:11
 msgid "Something went wrong. Please try again in a short while."
-msgstr ""
+msgstr "Une erreur s'est produite. Veuillez réessayer dans un instant."
 
 #: templates/account/base.html:16
 msgid "Need help? Please email <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
@@ -103,6 +103,7 @@ msgid "Reset Your Password"
 msgstr "Réinitialiser votre mot de passe"
 
 #: templates/account/password_reset.html:12
+#| msgid "Forgotten your password? Enter your e-mail address below, and we"
 msgid "Forgotten your password? Enter your e-mail address below, and we'll send you an e-mail allowing you to reset it."
 msgstr "Vous avez oublié votre mot de passe ? Entrez votre adresse e-mail ci-dessous et nous vous enverrons un e-mail vous permettant de le réinitialiser."
 
@@ -166,7 +167,7 @@ msgstr "Vous avez oublié votre mot de passe ou votre nom d'utilisateur ?"
 #: templates/peachjam/legislation_detail.html:10
 #| msgid "Legislation List"
 msgid "Subsidiary legislation"
-msgstr ""
+msgstr "Législation subsidiaire"
 
 #: templates/peachjam/_child_documents.html:8
 #: templates/peachjam/_document_table.html:6
@@ -175,7 +176,7 @@ msgstr "Titre de la page"
 
 #: templates/peachjam/_child_documents.html:9
 msgid "Numbered title"
-msgstr ""
+msgstr "Titre numéroté"
 
 #: templates/peachjam/_document_content.html:155
 msgid "Loading PDF..."
@@ -187,7 +188,7 @@ msgid "This document is %(filesize)s. Do you want to load it?"
 msgstr "Ce document est %(filesize)s. Voulez-vous le charger ?"
 
 #: templates/peachjam/_document_content.html:171
-#| msgid "AU Documents"
+#| msgid "Related documents"
 msgid "Load document"
 msgstr "Charger le document"
 
@@ -203,7 +204,7 @@ msgstr "Rechercher dans %(APP_NAME)s"
 
 #: templates/peachjam/_header.html:62
 msgid "Admin"
-msgstr ""
+msgstr "Administrateur"
 
 #: templates/peachjam/_header.html:63
 msgid "Logout"
@@ -212,11 +213,11 @@ msgstr "Déconnexion"
 #: templates/peachjam/_pagination.html:6
 #| msgid "previous"
 msgid "Previous"
-msgstr ""
+msgstr "Précédent"
 
 #: templates/peachjam/_pagination.html:25
 msgid "Next"
-msgstr ""
+msgstr "Suivant"
 
 #: templates/peachjam/_recent_document_list.html:16
 #: templates/peachjam/layouts/document_list.html:52
@@ -360,21 +361,21 @@ msgstr "Nos partenaires"
 #: templates/peachjam/article_list.html:4
 #: templates/peachjam/user_profile.html:23
 msgid "Articles"
-msgstr ""
+msgstr "Articles"
 
 #: templates/peachjam/article_detail.html:59
 #| msgid "About the platform"
 msgid "About the author"
-msgstr ""
+msgstr "À propos de l'auteur"
 
 #: templates/peachjam/article_detail.html:65
 #, python-format
 msgid "Recent articles by %(username)s"
-msgstr ""
+msgstr "Articles récents par %(username)s"
 
 #: templates/peachjam/article_list.html:9
 msgid "Latest Articles"
-msgstr ""
+msgstr "Derniers articles"
 
 #: templates/peachjam/author_detail.html:7
 #, python-format
@@ -392,30 +393,30 @@ msgstr "Accueil"
 
 #: templates/peachjam/judgment_detail.html:8
 msgid "Media Neutral Citation"
-msgstr ""
+msgstr "Référence médiatique neutre"
 
 #: templates/peachjam/judgment_detail.html:12
 #: templates/peachjam/layouts/document_detail.html:73
 msgid "Copy to clipboard"
-msgstr ""
+msgstr "Copier dans le presse-papiers"
 
 #: templates/peachjam/judgment_detail.html:14
 #: templates/peachjam/layouts/document_detail.html:75
 msgid "Copied!"
-msgstr ""
+msgstr "Copié!"
 
 #: templates/peachjam/judgment_detail.html:14
 #: templates/peachjam/layouts/document_detail.html:75
 msgid "Copy"
-msgstr ""
+msgstr "Copie"
 
 #: templates/peachjam/judgment_detail.html:19
 msgid "Hearing date"
-msgstr ""
+msgstr "Date de l'audition"
 
 #: templates/peachjam/judgment_detail.html:27
 msgid "Case number"
-msgstr ""
+msgstr "Numéro de cas"
 
 #: templates/peachjam/judgment_list.html:4
 #: templates/peachjam/judgment_list.html:7
@@ -424,13 +425,13 @@ msgid "Judgments"
 msgstr "Jugements"
 
 #: templates/peachjam/layouts/document_detail.html:27
-#| msgid "Documents"
+#| msgid "Document Type"
 msgid "Document detail"
-msgstr ""
+msgstr "Détail du document"
 
 #: templates/peachjam/layouts/document_detail.html:33
 msgid "History"
-msgstr ""
+msgstr "Historique"
 
 #: templates/peachjam/layouts/document_detail.html:62
 msgid "Jurisdiction"
@@ -439,7 +440,7 @@ msgstr "Juridiction"
 #: templates/peachjam/layouts/document_detail.html:69
 #| msgid "Legislation List"
 msgid "Citation"
-msgstr ""
+msgstr "Référence"
 
 #: templates/peachjam/layouts/document_detail.html:82
 msgid "Author"
@@ -453,12 +454,12 @@ msgstr "Langue"
 #: templates/peachjam/layouts/document_detail.html:134
 #: templates/peachjam/layouts/document_detail.html:142
 msgid "Download"
-msgstr ""
+msgstr "Télécharger"
 
 #: templates/peachjam/layouts/document_detail.html:160
 #, python-format
 msgid "%(n_relationships)s related documents"
-msgstr ""
+msgstr "%(n_relationships)s documents connexes"
 
 #: templates/peachjam/layouts/document_list.html:26
 msgid "Documents"
@@ -466,12 +467,13 @@ msgstr "Documents"
 
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
+#| msgid "Treaties and Protocols List"
 msgid "Treaties and Protocols"
 msgstr "Traités et Protocoles"
 
 #: templates/peachjam/legislation_detail.html:34
 msgid "Primary work"
-msgstr ""
+msgstr "Travail principal"
 
 #: templates/peachjam/legislation_list.html:4
 #: templates/peachjam/legislation_list.html:7
@@ -479,23 +481,32 @@ msgstr ""
 msgid "Legislation"
 msgstr "Législation"
 
+#~ msgid "Relationships"
+#~ msgstr "Relations"
+
 #~ msgid "first"
-#~ msgstr "kwanza"
+#~ msgstr "premier"
 
 #~ msgid "Page"
-#~ msgstr "Ukurasa"
+#~ msgstr "Page"
 
 #~ msgid "next"
-#~ msgstr "ifuatayo"
+#~ msgstr "suivant"
 
 #~ msgid "last"
-#~ msgstr "ya mwisho"
+#~ msgstr "dernier"
+
+#~ msgid "Regional Body"
+#~ msgstr "Corps régional"
 
 #~ msgid "Generic Document List"
-#~ msgstr "Orodha ya Hati za Jumla"
+#~ msgstr "Liste de documents génériques"
+
+#~ msgid "This document"
+#~ msgstr "Ce document"
 
 #~ msgid "Legal Instrument List"
-#~ msgstr "Orodha ya Vyombo vya Kisheria"
+#~ msgstr "Liste d'instruments légaux"
 
 #~ msgid "Welcome to Peach Jam"
 #~ msgstr "Bienvenue dans Peach Jam"
