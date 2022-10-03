@@ -349,6 +349,7 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     resource_class = JudgmentResource
     inlines = [CaseNumberAdmin, JudgmentMediaSummaryFileInline] + DocumentAdmin.inlines
     filter_horizontal = ("judges",)
+    list_filter = (*DocumentAdmin.list_filter, "court")
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "case_name")
