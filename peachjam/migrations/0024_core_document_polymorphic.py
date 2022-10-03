@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("peachjam", "0021_auto_20220923_1111"),
+        ("peachjam", "0023_article_userprofile"),
     ]
 
     operations = [
