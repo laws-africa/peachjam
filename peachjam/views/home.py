@@ -28,7 +28,7 @@ class HomePageView(TemplateView):
             Q(legalinstrument__isnull=True),
         )
 
-        courts = Court.objects.exclude(Q(judgment__isnull=True))
+        courts = Court.objects.all()
 
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents
