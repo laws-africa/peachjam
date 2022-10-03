@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
@@ -156,6 +157,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
                 "post_tags": ["</mark>"],
                 "fragment_size": 80,
                 "number_of_fragments": 2,
+                "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
             }
         }
     }
