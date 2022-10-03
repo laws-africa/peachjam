@@ -295,6 +295,19 @@
 
 }
 
+$dt-width: 125px;
+
 .document-metadata-list {
   margin-bottom: 0px;
+  display: flex;
+  flex-wrap: wrap;
+
+  dt {
+    width: $dt-width;
+    flex: 0 0 $dt-width;
+  }
+  dd {
+    width: calc(100% - #{$dt-width});
+    flex: 0 0 calc(100% - #{$dt-width});
+  }
 }
