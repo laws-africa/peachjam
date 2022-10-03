@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-13 18:13+0200\n"
+"POT-Creation-Date: 2022-10-03 13:26+0200\n"
 "PO-Revision-Date: 2022-08-31 17:26\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -17,11 +17,11 @@ msgstr ""
 "X-Crowdin-File: /main/africanlii/locale/sw/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 65\n"
 
-#: templates/peachjam/footer.html:8
+#: templates/peachjam/_footer.html:8
 msgid "About AfricanLII"
 msgstr "À propos d'AfricanLII"
 
-#: templates/peachjam/footer.html:11
+#: templates/peachjam/_footer.html:11
 #, fuzzy
 #| msgid ""
 #| "\n"
@@ -55,7 +55,7 @@ msgstr ""
 "target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> de LIIs.\n"
 "    "
 
-#: templates/peachjam/footer.html:19
+#: templates/peachjam/_footer.html:19
 #, fuzzy
 #| msgid ""
 #| "\n"
@@ -81,111 +81,115 @@ msgstr ""
 "    de l'Alliance de gouvernance</a>.\n"
 "    "
 
-#: templates/peachjam/footer.html:27
+#: templates/peachjam/_footer.html:27
 msgid "With support from"
 msgstr "Avec le support de"
 
-#: templates/peachjam/footer.html:28
+#: templates/peachjam/_footer.html:28
 msgid "Sigrid Rausing Trust"
 msgstr "Sigrid Rausing Trust"
 
-#: templates/peachjam/footer.html:29
+#: templates/peachjam/_footer.html:29
 msgid "Indigo Trust"
 msgstr "Indigo Trust"
 
-#: templates/peachjam/footer.html:30
+#: templates/peachjam/_footer.html:30
 msgid "European Union"
 msgstr "Union européenne"
 
-#: templates/peachjam/footer.html:34
+#: templates/peachjam/_footer.html:34
 msgid "Other African Legal Information Institutions"
 msgstr "Autres Institutions Africaines d'information Juridique"
 
-#: templates/peachjam/footer.html:35
+#: templates/peachjam/_footer.html:35
 msgid "AfricanLII"
 msgstr "AfricanLII"
 
-#: templates/peachjam/footer.html:36
+#: templates/peachjam/_footer.html:36
 msgid "GhaLII"
 msgstr "GhaLII"
 
-#: templates/peachjam/footer.html:37
+#: templates/peachjam/_footer.html:37
 msgid "Kenya Law"
 msgstr "Loi kényane"
 
-#: templates/peachjam/footer.html:38
+#: templates/peachjam/_footer.html:38
 msgid "LawLibrary ZA"
 msgstr "Bibliothèque de lois ZA"
 
-#: templates/peachjam/footer.html:39
+#: templates/peachjam/_footer.html:39
 msgid "LesothoLII"
 msgstr "LesothoLII"
 
-#: templates/peachjam/footer.html:40
+#: templates/peachjam/_footer.html:40
 msgid "LiberLII"
 msgstr "LiberLII"
 
-#: templates/peachjam/footer.html:41
+#: templates/peachjam/_footer.html:41
 msgid "MalawiLII"
 msgstr "MalawiLII"
 
-#: templates/peachjam/footer.html:42
+#: templates/peachjam/_footer.html:42
 msgid "NamibLII"
 msgstr "NamibLII"
 
-#: templates/peachjam/footer.html:43
+#: templates/peachjam/_footer.html:43
 msgid "NigeriaLII"
 msgstr "NigeriaLII"
 
-#: templates/peachjam/footer.html:44
+#: templates/peachjam/_footer.html:44
 msgid "OpenbyLaws ZA"
 msgstr "ZA OpenbyLaws"
 
-#: templates/peachjam/footer.html:45
+#: templates/peachjam/_footer.html:45
 msgid "SeyLII"
 msgstr "SeyLII"
 
-#: templates/peachjam/footer.html:46
+#: templates/peachjam/_footer.html:46
 msgid "SieraLII"
 msgstr "SieraLII"
 
-#: templates/peachjam/footer.html:47
+#: templates/peachjam/_footer.html:47
 msgid "eSwatiniLII"
 msgstr "eSwatiniLII"
 
-#: templates/peachjam/footer.html:48
+#: templates/peachjam/_footer.html:48
 msgid "TanzLII"
 msgstr "TanzLII"
 
-#: templates/peachjam/footer.html:49
+#: templates/peachjam/_footer.html:49
 msgid "UgandaLII"
 msgstr "UgandaLII"
 
-#: templates/peachjam/footer.html:50
+#: templates/peachjam/_footer.html:50
 msgid "ZambiaLII"
 msgstr "ZambiaLII"
 
-#: templates/peachjam/footer.html:51
+#: templates/peachjam/_footer.html:51
 msgid "ZimLII"
 msgstr "ZimLII"
 
-#: templates/peachjam/header.html:22
+#: templates/peachjam/_header.html:22
 msgid "Decisions"
 msgstr "Décisions"
 
-#: templates/peachjam/header.html:25
+#: templates/peachjam/_header.html:25
 msgid "AU Documents"
 msgstr "Documents de l'UA"
 
-#: templates/peachjam/header.html:28
+#: templates/peachjam/_header.html:28
 msgid "Treaties and Protocols"
 msgstr "Traités et Protocoles"
 
-#: templates/peachjam/header.html:31
+#: templates/peachjam/_header.html:31
 msgid "Legislation"
 msgstr "Législation"
 
-#: templates/peachjam/header.html:34
+#: templates/peachjam/_header.html:34
+msgid "Commentary"
+msgstr ""
+
+#: templates/peachjam/_header.html:37
 msgid "About"
 msgstr "À propos de"
 
@@ -210,51 +214,65 @@ msgid ""
 msgstr ""
 "Recherchez %(documents_count)s documents en AU sur la plateforme AfricanLII."
 
-#: templates/peachjam/home.html:40
+#: templates/peachjam/home.html:42
 #, fuzzy
 #| msgid "Regional Body"
 msgid "Regional Bodies"
 msgstr "Corps régional"
 
 #: templates/peachjam/home.html:53
+msgid "Regional Economic Communities"
+msgstr ""
+
+#: templates/peachjam/home.html:68
 msgid "Recent Judgments"
 msgstr "Jugements récents"
 
-#: templates/peachjam/home.html:54
+#: templates/peachjam/home.html:69
 #, fuzzy
 #| msgid "Recent Judgments"
 msgid "View more judgments"
 msgstr "Jugements récents"
 
-#: templates/peachjam/home.html:61
+#: templates/peachjam/home.html:76
 msgid "Recent AU Documents"
 msgstr "Documents récents de l'UA"
 
-#: templates/peachjam/home.html:62
+#: templates/peachjam/home.html:77
 #, fuzzy
 #| msgid "Recent AU Documents"
 msgid "View more AU documents"
 msgstr "Documents récents de l'UA"
 
-#: templates/peachjam/home.html:69
+#: templates/peachjam/home.html:84
 msgid "Recent Legal Instruments"
 msgstr "Derniers Instruments Juridiques"
 
-#: templates/peachjam/home.html:70
+#: templates/peachjam/home.html:85
 #, fuzzy
 #| msgid "Recent Legal Instruments"
 msgid "View more legal instruments"
 msgstr "Derniers Instruments Juridiques"
 
-#: templates/peachjam/home.html:77
+#: templates/peachjam/home.html:92
 msgid "Recent Treaties and Protocols "
 msgstr "Traités et Protocoles récents "
 
-#: templates/peachjam/home.html:78
+#: templates/peachjam/home.html:93
 #, fuzzy
 #| msgid "Recent Treaties and Protocols "
 msgid "View more treaties and protocols"
 msgstr "Traités et Protocoles récents "
+
+#: templates/peachjam/home.html:100
+msgid "Latest Commentary"
+msgstr ""
+
+#: templates/peachjam/home.html:104
+#, fuzzy
+#| msgid "Recent Judgments"
+msgid "View more commentary"
+msgstr "Jugements récents"
 
 #, python-format
 #~ msgid " Documents by %(author)s "
