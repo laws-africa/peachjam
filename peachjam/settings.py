@@ -59,7 +59,6 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.sites",
     "django.contrib.staticfiles",
@@ -423,3 +422,5 @@ if DEBUG:
 GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
 
 CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
