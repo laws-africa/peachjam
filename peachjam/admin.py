@@ -350,7 +350,7 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     inlines = [CaseNumberAdmin, JudgmentMediaSummaryFileInline] + DocumentAdmin.inlines
     filter_horizontal = ("judges",)
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
-    fieldsets[0][1]["fields"].insert(3, "author")
+    fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "case_name")
     fieldsets[0][1]["fields"].insert(4, "hearing_date")
     fieldsets[0][1]["fields"].insert(7, "mnc")
