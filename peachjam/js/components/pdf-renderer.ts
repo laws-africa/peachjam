@@ -81,6 +81,8 @@ class PdfRenderer {
           scrollableContainer.scrollTop = (current.offsetTop + current.clientHeight) - (current.offsetHeight * 2);
         }
       }, 20));
+    }).catch((e:ErrorEvent) => {
+      this.root.innerText = e.message;
     });
   }
 
@@ -120,7 +122,10 @@ class PdfRenderer {
   }
 
   async setupPdfAndPreviewPanels () {
-    const pdfjsLib = (window as { [key: string]: any })['pdfjs-dist/build/pdf'] as iPdfLib;
+    const pdfjsLib = (window as { [key: string]: any }).pdfjsLib as iPdfLib;
+    if (!pdfjsLib) {
+      throw new Error('Failed to load pdf.js');
+    }
     const asyncForEach = async (array: any[], callback: (arg0: any, arg1: number, arg2: any[]) => any) => {
       for (let index = 0; index < array.length; index++) {
         await callback(array[index], index, array);

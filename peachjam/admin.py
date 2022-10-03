@@ -3,21 +3,19 @@ import copy
 from ckeditor.widgets import CKEditorWidget
 from django import forms
 from django.conf import settings
-from django.contrib import admin, messages
-from django.contrib.admin.utils import unquote
+from django.contrib import admin
 from django.http.response import FileResponse
-from django.shortcuts import get_object_or_404, redirect
-from django.template.response import TemplateResponse
+from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
 from django.utils.html import format_html
-from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as __
 from import_export.admin import ImportMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from peachjam.forms import IngestorForm, NewDocumentFormMixin, RelationshipForm
+from peachjam.forms import IngestorForm, NewDocumentFormMixin
 from peachjam.models import (
+    Article,
     Author,
     CaseNumber,
     CitationLink,
@@ -39,6 +37,8 @@ from peachjam.models import (
     Relationship,
     SourceFile,
     Taxonomy,
+    UserProfile,
+    Work,
     pj_settings,
 )
 from peachjam.resources import GenericDocumentResource, JudgmentResource
@@ -148,7 +148,8 @@ class DocumentForm(forms.ModelForm):
 class DocumentAdmin(admin.ModelAdmin):
     form = DocumentForm
     inlines = [DocumentTopicInline, SourceFileInline]
-    list_display = ("title", "date")
+    list_display = ("title", "jurisdiction", "locality", "language", "date")
+    list_filter = ("jurisdiction", "locality", "language")
     search_fields = ("title", "date")
     readonly_fields = (
         "expression_frbr_uri",
@@ -157,6 +158,7 @@ class DocumentAdmin(admin.ModelAdmin):
         "updated_at",
         "work_frbr_uri",
         "toc_json",
+        "work_link",
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
@@ -168,6 +170,7 @@ class DocumentAdmin(admin.ModelAdmin):
             __("Key details"),
             {
                 "fields": [
+                    "work_link",
                     "jurisdiction",
                     "locality",
                     "title",
@@ -249,68 +252,27 @@ class DocumentAdmin(admin.ModelAdmin):
         form.instance.save()
 
     def get_urls(self):
-        info = self.model._meta.app_label, self.model._meta.model_name
-
         return [
             path(
                 "source_files/<int:pk>",
                 self.admin_site.admin_view(self.download_sourcefile),
                 name="peachjam_source_file",
             ),
-            path(
-                "<path:object_id>/relationships/",
-                self.admin_site.admin_view(self.relationships),
-                name="%s_%s_relationships" % info,
-            ),
-            path(
-                "<path:object_id>/relationships/<path:rel_id>/delete",
-                self.admin_site.admin_view(self.delete_relationship),
-                name="%s_%s_delete_relationship" % info,
-            ),
         ] + super().get_urls()
+
+    def work_link(self, instance):
+        if instance.work:
+            return format_html(
+                '<a href="{}">{}</a>',
+                reverse("admin:peachjam_work_change", args=[instance.work.id]),
+                instance.work,
+            )
+
+    work_link.short_description = "Work"
 
     def download_sourcefile(self, request, pk):
         source_file = get_object_or_404(SourceFile.objects, pk=pk)
         return FileResponse(source_file.file)
-
-    def relationships(self, request, object_id):
-        model = self.model
-        obj = self.get_object(request, unquote(object_id))
-        if obj is None:
-            return self._get_obj_does_not_exist_redirect(
-                request, model._meta, object_id
-            )
-
-        form = RelationshipForm(obj.work, request.POST)
-        if request.method == "POST":
-            if form.is_valid():
-                form.save()
-                form = RelationshipForm(obj.work)
-
-        opts = model._meta
-        context = {
-            **self.admin_site.each_context(request),
-            "title": "Relationships",
-            "subtitle": obj,
-            "module_name": str(capfirst(opts.verbose_name_plural)),
-            "object": obj,
-            "opts": opts,
-            "preserved_filters": self.get_preserved_filters(request),
-            "relationships": Relationship.for_subject_document(obj).all(),
-            "form": form,
-        }
-        request.current_app = self.admin_site.name
-
-        return TemplateResponse(
-            request, "admin/peachjam_document_relationships.html", context
-        )
-
-    def delete_relationship(self, request, object_id, rel_id):
-        rel = get_object_or_404(Relationship.objects, pk=rel_id)
-        messages.success(request, f"{rel} deleted.")
-        rel.delete()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        return redirect("admin:%s_%s_relationships" % info, object_id=object_id)
 
     def extract_citations(self, request, queryset):
         count = 0
@@ -372,7 +334,16 @@ class JudgmentMediaSummaryFileInline(BaseAttachmentFileInline):
     model = JudgmentMediaSummaryFile
 
 
+class JudgmentAdminForm(DocumentForm):
+    hearing_date = forms.DateField(widget=forms.SelectDateWidget(), required=False)
+
+    class Meta:
+        model = Judgment
+        fields = ("hearing_date",)
+
+
 class JudgmentAdmin(ImportMixin, DocumentAdmin):
+    form = JudgmentAdminForm
     resource_class = JudgmentResource
     inlines = [CaseNumberAdmin, JudgmentMediaSummaryFileInline] + DocumentAdmin.inlines
     filter_horizontal = ("judges",)
@@ -380,6 +351,7 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].insert(3, "author")
     fieldsets[0][1]["fields"].insert(4, "case_name")
     fieldsets[0][1]["fields"].insert(7, "mnc")
+    fieldsets[0][1]["fields"].append("hearing_date")
     fieldsets[1][1]["fields"].insert(0, "judges")
     fieldsets[2][1]["classes"] = ["collapse"]
     fieldsets[3][1]["fields"].extend(
@@ -418,6 +390,8 @@ class IngestorAdmin(admin.ModelAdmin):
     readonly_fields = ("last_refreshed_at",)
     form = IngestorForm
     actions = ["refresh_all_content"]
+    fields = ("adapter", "name", "last_refreshed_at", "enabled")
+    list_display = ("name", "last_refreshed_at", "enabled")
 
     def refresh_all_content(self, request, queryset):
         from peachjam.tasks import run_ingestors
@@ -428,6 +402,63 @@ class IngestorAdmin(admin.ModelAdmin):
         self.message_user(request, "Refreshing content in the background.")
 
     refresh_all_content.short_description = "Refresh all content"
+
+
+class ArticleForm(forms.ModelForm):
+    body = forms.CharField(widget=CKEditorWidget())
+
+
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    form = ArticleForm
+    list_display = ("title", "date", "published")
+    list_display_links = ("title",)
+    fields = (
+        "title",
+        "slug",
+        "date",
+        "published",
+        "image",
+        "topics",
+        "summary",
+        "body",
+        "author",
+    )
+    prepopulated_fields = {"slug": ("title",)}
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields["author"].initial = request.user
+        if not request.user.is_superuser:
+            # limit author choices to the current user
+            form.base_fields["author"].queryset = request.user.__class__.objects.filter(
+                pk=request.user.pk
+            )
+        return form
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    pass
+
+
+class RelationshipInline(admin.TabularInline):
+    model = Relationship
+    fk_name = "subject_work"
+    fields = ("predicate", "object_work")
+
+
+@admin.register(Work)
+class WorkAdmin(admin.ModelAdmin):
+    fields = ("title", "frbr_uri")
+    search_fields = ("title", "frbr_uri")
+    list_display = fields
+    readonly_fields = fields
+    inlines = [RelationshipInline]
+
+    def has_add_permission(self, request):
+        # disallow adding works, they are managed automatically
+        return False
 
 
 admin.site.register(

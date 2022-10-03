@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-  <nav aria-label="breadcrumb" class="mt-2">
+  <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item">
         <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
@@ -25,7 +25,7 @@
 {% endblock %}
 
 {% block page-header %}
-  <h1 class="mb-3">
+  <h1 class="my-4">
     {% if year %}
       {% blocktrans with court_name=court.name year=year%}
         {{ court_name }} - {{ year }}
