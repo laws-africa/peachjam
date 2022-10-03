@@ -117,3 +117,14 @@ footer {
 .twitter-background {
   color: $twitter-color;
 }
+
+
+@each $state, $value in $theme-colors {
+  $alert-color: shift-color($value, $alert-color-scale);
+  a {
+    color: shade-color($alert-color, 20%);
+    &:hover {
+      color: shade-color($alert-color, 20%);
+    }
+  }
+}
