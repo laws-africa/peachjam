@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-03 13:26+0200\n"
-"PO-Revision-Date: 2022-10-03 11:31\n"
+"PO-Revision-Date: 2022-10-03 11:30\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 44\n"
+"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 50\n"
 
 #: settings.py:193
 msgid "English"
@@ -101,6 +101,7 @@ msgid "Reset Your Password"
 msgstr "Weka upya nenosiri lako"
 
 #: templates/account/password_reset.html:12
+#| msgid "Forgotten your password? Enter your e-mail address below, and we"
 msgid "Forgotten your password? Enter your e-mail address below, and we'll send you an e-mail allowing you to reset it."
 msgstr ""
 
@@ -185,7 +186,7 @@ msgid "This document is %(filesize)s. Do you want to load it?"
 msgstr ""
 
 #: templates/peachjam/_document_content.html:171
-#| msgid "AU Documents"
+#| msgid "Related documents"
 msgid "Load document"
 msgstr ""
 
@@ -410,7 +411,7 @@ msgid "Judgments"
 msgstr "Hukumu"
 
 #: templates/peachjam/layouts/document_detail.html:27
-#| msgid "Documents"
+#| msgid "Document Type"
 msgid "Document detail"
 msgstr ""
 
@@ -452,6 +453,7 @@ msgstr "Nyaraka"
 
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
+#| msgid "Treaties and Protocols List"
 msgid "Treaties and Protocols"
 msgstr "Mikataba na Itifaki"
 
@@ -465,23 +467,32 @@ msgstr ""
 msgid "Legislation"
 msgstr ""
 
+#~ msgid "Relationships"
+#~ msgstr "Relations"
+
 #~ msgid "first"
-#~ msgstr "kwanza"
+#~ msgstr "premier"
 
 #~ msgid "Page"
-#~ msgstr "Ukurasa"
+#~ msgstr "Page"
 
 #~ msgid "next"
-#~ msgstr "ifuatayo"
+#~ msgstr "suivant"
 
 #~ msgid "last"
-#~ msgstr "ya mwisho"
+#~ msgstr "dernier"
+
+#~ msgid "Regional Body"
+#~ msgstr "Corps régional"
 
 #~ msgid "Generic Document List"
-#~ msgstr "Orodha ya Hati za Jumla"
+#~ msgstr "Liste de documents génériques"
+
+#~ msgid "This document"
+#~ msgstr "Ce document"
 
 #~ msgid "Legal Instrument List"
-#~ msgstr "Orodha ya Vyombo vya Kisheria"
+#~ msgstr "Liste d'instruments légaux"
 
 #~ msgid "Welcome to Peach Jam"
 #~ msgstr "Bienvenue dans Peach Jam"
