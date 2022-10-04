@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "treebeard",
     "background_task",
     "ckeditor",
+    "polymorphic",
 ]
 
 MIDDLEWARE = [

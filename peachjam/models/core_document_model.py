@@ -12,6 +12,9 @@ from django.utils.functional import cached_property
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
+from polymorphic.managers import PolymorphicManager
+from polymorphic.models import PolymorphicModel
+from polymorphic.query import PolymorphicQuerySet
 
 from peachjam.frbr_uri import (
     FRBR_URI_DOCTYPE_CHOICES,
@@ -50,19 +53,19 @@ class Work(models.Model):
         return f"{self.frbr_uri} - {self.title}"
 
 
-class CoreDocumentManager(models.Manager):
+class CoreDocumentManager(PolymorphicManager):
     def get_queryset(self):
         # defer expensive fields
         return super().get_queryset().defer("content_html", "toc_json")
 
 
-class CoreDocumentQuerySet(models.QuerySet):
+class CoreDocumentQuerySet(PolymorphicQuerySet):
     def latest_expression(self):
         """Select only the most recent expression for documents with the same frbr_uri."""
         return self.distinct("work_frbr_uri").order_by("work_frbr_uri", "-date")
 
 
-class CoreDocument(models.Model):
+class CoreDocument(PolymorphicModel):
     DOC_TYPE_CHOICES = (
         ("core_document", "Core Document"),
         ("legislation", "Legislation"),
