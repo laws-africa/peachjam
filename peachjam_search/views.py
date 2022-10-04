@@ -102,6 +102,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     filter_fields = {
         "doc_type": "doc_type",
+        "court": "court",
         "author": "author",
         "jurisdiction": "jurisdiction",
         "locality": "locality",
@@ -118,6 +119,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "citation": None,
         "judges": None,
         "content": None,
+        "court": None,
     }
 
     faceted_search_fields = {
@@ -148,6 +150,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "language": {
             "field": "language",
         },
+        "court": {"field": "court"},
     }
 
     highlight_fields = {

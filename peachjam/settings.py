@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "treebeard",
     "background_task",
     "ckeditor",
+    "polymorphic",
 ]
 
 MIDDLEWARE = [
@@ -264,6 +265,7 @@ if not DEBUG and APM_SERVER_URL:
         "elasticapm.contrib.django.middleware.Catch404Middleware",
     ] + MIDDLEWARE
 
+
 # Sentry
 if not DEBUG:
     sentry_logging = LoggingIntegration(
@@ -275,7 +277,7 @@ if not DEBUG:
         environment=PEACHJAM["SENTRY_ENVIRONMENT"],
         integrations=[DjangoIntegration(), sentry_logging],
         send_default_pii=True,
-        traces_sample_rate=0.5,  # sample 50% of the requests for performance metrics
+        traces_sample_rate=0.5,  # sample 50% of requests for performance metrics
     )
 
 DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}

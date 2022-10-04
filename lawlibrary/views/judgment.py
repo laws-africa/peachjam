@@ -1,7 +1,6 @@
 from django.views.generic import TemplateView
 
-from liiweb.models.court import CourtClass
-from peachjam.models import Judgment
+from peachjam.models import CourtClass, Judgment
 
 
 class JudgmentListView(TemplateView):
@@ -17,10 +16,8 @@ class JudgmentListView(TemplateView):
             court_dict = {
                 "title": court_class.name,
                 "items": [
-                    {"title": court_detail.court.name, "code": court_detail.court.code}
-                    for court_detail in court_class.courtdetail_set.order_by(
-                        "court__name"
-                    )
+                    {"title": court.name, "code": court.code}
+                    for court in court_class.courts.order_by("name")
                 ],
             }
 

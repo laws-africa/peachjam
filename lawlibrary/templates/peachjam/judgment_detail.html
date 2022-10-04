@@ -8,10 +8,10 @@
         <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
       </li>
       <li class="breadcrumb-item">
-        <a href="{% url 'court_detail' document.author.code %}">{{ document.author.name }}</a>
+        <a href="{% url 'court_detail' document.court.code %}">{{ document.court.name }}</a>
       </li>
       <li class="breadcrumb-item">
-        <a href="{% url 'court_year' document.author.code document.date.year %}">{{ document.date.year }}</a>
+        <a href="{% url 'court_year' document.court.code document.date.year %}">{{ document.date.year }}</a>
       </li>
     </ol>
   </nav>

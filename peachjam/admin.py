@@ -19,6 +19,8 @@ from peachjam.models import (
     Author,
     CaseNumber,
     CitationLink,
+    Court,
+    CourtClass,
     DocumentNature,
     DocumentTopic,
     GenericDocument,
@@ -347,8 +349,9 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     resource_class = JudgmentResource
     inlines = [CaseNumberAdmin, JudgmentMediaSummaryFileInline] + DocumentAdmin.inlines
     filter_horizontal = ("judges",)
+    list_filter = (*DocumentAdmin.list_filter, "court")
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
-    fieldsets[0][1]["fields"].insert(3, "author")
+    fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "case_name")
     fieldsets[0][1]["fields"].insert(7, "mnc")
     fieldsets[0][1]["fields"].append("hearing_date")
@@ -470,6 +473,8 @@ admin.site.register(
         DocumentNature,
         Judge,
         MatterType,
+        Court,
+        CourtClass,
     ]
 )
 admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)
