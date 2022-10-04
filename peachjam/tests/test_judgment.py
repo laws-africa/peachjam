@@ -4,17 +4,17 @@ from countries_plus.models import Country
 from django.test import TestCase
 from languages_plus.models import Language
 
-from peachjam.models import Author, CaseNumber, Judgment
+from peachjam.models import CaseNumber, Court, Judgment
 
 
 class JudgmentTestCase(TestCase):
-    fixtures = ["tests/authors", "tests/countries", "tests/languages"]
+    fixtures = ["tests/courts", "tests/countries", "tests/languages"]
     maxDiff = None
 
     def test_assign_mnc(self):
         j = Judgment(
             language=Language.objects.get(pk="en"),
-            author=Author.objects.first(),
+            court=Court.objects.first(),
             date=datetime.date(2019, 1, 1),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
@@ -37,7 +37,7 @@ class JudgmentTestCase(TestCase):
     def test_assign_title(self):
         j = Judgment(
             language=Language.objects.get(pk="en"),
-            author=Author.objects.first(),
+            court=Court.objects.first(),
             date=datetime.date(2019, 1, 1),
             jurisdiction=Country.objects.get(pk="ZA"),
             case_name="Foo v Bar",
@@ -52,7 +52,7 @@ class JudgmentTestCase(TestCase):
 
     def test_assign_title_no_case_numbers(self):
         j = Judgment(
-            author=Author.objects.first(),
+            court=Court.objects.first(),
             date=datetime.date(2019, 1, 1),
             jurisdiction=Country.objects.get(pk="ZA"),
             case_name="Foo v Bar",
@@ -64,7 +64,7 @@ class JudgmentTestCase(TestCase):
     def test_assign_title_string_override(self):
         j = Judgment(
             language=Language.objects.get(pk="en"),
-            author=Author.objects.first(),
+            court=Court.objects.first(),
             date=datetime.date(2019, 1, 1),
             jurisdiction=Country.objects.get(pk="ZA"),
             case_name="Foo v Bar",
