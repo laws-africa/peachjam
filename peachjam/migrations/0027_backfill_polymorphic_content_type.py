@@ -35,7 +35,7 @@ def backfill_polymorphic_content_types(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0024_core_document_polymorphic"),
+        ("peachjam", "0026_core_document_polymorphic"),
     ]
 
     operations = [
