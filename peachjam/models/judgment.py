@@ -96,7 +96,7 @@ class Judgment(CoreDocument):
         return self.MNC_FORMAT.format(
             year=self.date.year,
             author=self.author.code,
-            serial=(self.serial_number_override or self.serial_number),
+            serial=self.serial_number,
         )
 
     def generate_work_frbr_uri(self):
