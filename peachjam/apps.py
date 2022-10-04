@@ -9,6 +9,7 @@ class PeachJamConfig(AppConfig):
         import jazzmin.settings
 
         import peachjam.adapters  # noqa
+        import peachjam.signals  # noqa
 
         jazzmin.settings.THEMES["peachjam"] = "stylesheets/peachjam-jazzmin.css"
 
