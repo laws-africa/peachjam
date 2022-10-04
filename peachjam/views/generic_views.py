@@ -43,8 +43,10 @@ class FilteredDocumentListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        authors = []
+        courts = []
         # Initialize facet data values
-        if self.model in [GenericDocument, LegalInstrument, Judgment]:
+        if self.model in [GenericDocument, LegalInstrument]:
             authors = list(
                 {
                     a
@@ -55,8 +57,16 @@ class FilteredDocumentListView(ListView):
                 }
             )
         # Legislation objects don't have an associated author, hence empty authors list
-        else:
-            authors = []
+        elif self.model is Judgment:
+            courts = list(
+                {
+                    a
+                    for a in self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="courts"
+                    ).values_list("court__name", flat=True)
+                    if a
+                }
+            )
 
         years = list(
             set(
@@ -69,6 +79,7 @@ class FilteredDocumentListView(ListView):
         context["facet_data"] = {
             "years": years,
             "authors": authors,
+            "courts": courts,
             "alphabet": lowercase_alphabet(),
         }
         return context
