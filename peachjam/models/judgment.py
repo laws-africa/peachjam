@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import Max
 
-from peachjam.models import CoreDocument, file_location
+from peachjam.models import CoreDocument
 from peachjam.models.core_document_model import AttachmentAbstractModel
 
 
@@ -191,18 +191,14 @@ class CaseNumber(models.Model):
         return super().save(*args, **kwargs)
 
 
-class JudgmentMediaSummaryFile(AttachmentAbstractModel):
-    SAVE_FOLDER = "media_summary_files"
-
-    document = models.ForeignKey(
-        Judgment, related_name="media_summaries", on_delete=models.CASCADE
-    )
-    file = models.FileField(upload_to=file_location)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ["document", "filename"]
+class AttachedFileNature(models.Model):
+    name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
+    description = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.filename}"
+        return self.name
+
+
+class AttachedFiles(AttachmentAbstractModel):
+    document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
+    nature = models.ForeignKey(AttachedFileNature, on_delete=models.CASCADE)
