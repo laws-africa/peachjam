@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-13 18:13+0200\n"
+"POT-Creation-Date: 2022-10-03 13:26+0200\n"
 "PO-Revision-Date: 2022-08-25 13:38\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -28,6 +28,32 @@ msgstr "Kifaransa"
 #: settings.py:195
 msgid "Swahili"
 msgstr "Kiswahili"
+
+#: templates/404.html:4 templates/404.html:9
+msgid "Not found (Error 404)"
+msgstr ""
+
+#: templates/404.html:11
+msgid ""
+"We couldn't find the page you're looking for. The link may be outdated or "
+"incorrect."
+msgstr ""
+
+#: templates/404.html:17 templates/500.html:17
+msgid "Go to the homepage."
+msgstr ""
+
+#: templates/404.html:20 templates/500.html:20
+msgid "Try searching for what you're looking for."
+msgstr ""
+
+#: templates/500.html:4 templates/500.html:9
+msgid "Something went wrong (Error 500)"
+msgstr ""
+
+#: templates/500.html:11
+msgid "Something went wrong. Please try again in a short while."
+msgstr ""
 
 #: templates/account/base.html:16
 msgid ""
@@ -149,13 +175,20 @@ msgstr ""
 msgid "Forgotten your password or username?"
 msgstr ""
 
-#: templates/admin/peachjam_document_relationships.html:6
-#: templates/peachjam/home.html:3
-msgid "Home"
-msgstr "Sebule"
+#: templates/peachjam/_child_documents.html:3
+#: templates/peachjam/legislation_detail.html:10
+#, fuzzy
+#| msgid "Legislation List"
+msgid "Subsidiary legislation"
+msgstr "Orodha ya Mikataba na Itifaki"
 
-#: templates/admin/peachjam_document_relationships.html:10
-msgid "Relationships"
+#: templates/peachjam/_child_documents.html:8
+#: templates/peachjam/_document_table.html:6
+msgid "Title"
+msgstr "Mada"
+
+#: templates/peachjam/_child_documents.html:9
+msgid "Numbered title"
 msgstr ""
 
 #: templates/peachjam/_document_content.html:155
@@ -173,39 +206,44 @@ msgstr ""
 msgid "Load document"
 msgstr "Nyaraka za AU"
 
-#: templates/peachjam/_document_table.html:6
-msgid "Title"
-msgstr "Mada"
-
 #: templates/peachjam/_document_table.html:8
-#: templates/peachjam/layouts/document_detail.html:62
+#: templates/peachjam/layouts/document_detail.html:88
 msgid "Date"
 msgstr "Tarehe"
 
-#: templates/peachjam/_pagination.html:6
-msgid "first"
-msgstr "kwanza"
+#: templates/peachjam/_header.html:41 templates/peachjam/_header.html:42
+#, python-format
+msgid "Search %(APP_NAME)s"
+msgstr ""
 
-#: templates/peachjam/_pagination.html:7
-msgid "previous"
+#: templates/peachjam/_header.html:62
+msgid "Admin"
+msgstr ""
+
+#: templates/peachjam/_header.html:63
+msgid "Logout"
+msgstr "Ondoka"
+
+#: templates/peachjam/_pagination.html:6
+#, fuzzy
+#| msgid "previous"
+msgid "Previous"
 msgstr "iliyopita"
 
-#: templates/peachjam/_pagination.html:11
-msgid "Page"
-msgstr "Ukurasa"
-
-#: templates/peachjam/_pagination.html:15
-msgid "next"
-msgstr "ifuatayo"
-
-#: templates/peachjam/_pagination.html:16
-msgid "last"
-msgstr "ya mwisho"
+#: templates/peachjam/_pagination.html:25
+msgid "Next"
+msgstr ""
 
 #: templates/peachjam/_recent_document_list.html:16
-#: templates/peachjam/layouts/document_list.html:54
+#: templates/peachjam/layouts/document_list.html:52
 msgid "No documents found."
 msgstr "Hakuna hati zilizopatikana."
+
+#: templates/peachjam/_related_documents.html:3
+#: templates/peachjam/layouts/document_detail.html:40
+#: templates/peachjam/layouts/document_detail.html:155
+msgid "Related documents"
+msgstr ""
 
 #: templates/peachjam/about.html:4
 msgid "About"
@@ -417,6 +455,27 @@ msgstr ""
 msgid "Our partners"
 msgstr "Washirika wetu"
 
+#: templates/peachjam/article_detail.html:10
+#: templates/peachjam/article_list.html:4
+#: templates/peachjam/user_profile.html:23
+msgid "Articles"
+msgstr ""
+
+#: templates/peachjam/article_detail.html:59
+#, fuzzy
+#| msgid "About the platform"
+msgid "About the author"
+msgstr "Kuhusu jukwaa"
+
+#: templates/peachjam/article_detail.html:65
+#, python-format
+msgid "Recent articles by %(username)s"
+msgstr ""
+
+#: templates/peachjam/article_list.html:9
+msgid "Latest Articles"
+msgstr ""
+
 #: templates/peachjam/author_detail.html:7
 #, python-format
 msgid " Documents by %(author)s "
@@ -427,14 +486,36 @@ msgstr " Nyaraka za %(author)s "
 msgid "AU Documents"
 msgstr "Nyaraka za AU"
 
-#: templates/peachjam/header.html:41 templates/peachjam/header.html:42
-#, python-format
-msgid "Search %(APP_NAME)s"
+#: templates/peachjam/home.html:3
+msgid "Home"
+msgstr "Sebule"
+
+#: templates/peachjam/judgment_detail.html:8
+msgid "Media Neutral Citation"
 msgstr ""
 
-#: templates/peachjam/header.html:56
-msgid "Logout"
-msgstr "Ondoka"
+#: templates/peachjam/judgment_detail.html:12
+#: templates/peachjam/layouts/document_detail.html:73
+msgid "Copy to clipboard"
+msgstr ""
+
+#: templates/peachjam/judgment_detail.html:14
+#: templates/peachjam/layouts/document_detail.html:75
+msgid "Copied!"
+msgstr ""
+
+#: templates/peachjam/judgment_detail.html:14
+#: templates/peachjam/layouts/document_detail.html:75
+msgid "Copy"
+msgstr ""
+
+#: templates/peachjam/judgment_detail.html:19
+msgid "Hearing date"
+msgstr ""
+
+#: templates/peachjam/judgment_detail.html:27
+msgid "Case number"
+msgstr ""
 
 #: templates/peachjam/judgment_list.html:4
 #: templates/peachjam/judgment_list.html:7
@@ -443,23 +524,46 @@ msgstr "Ondoka"
 msgid "Judgments"
 msgstr "Orodha ya Hukumu"
 
-#: templates/peachjam/layouts/document_detail.html:49
+#: templates/peachjam/layouts/document_detail.html:27
+#, fuzzy
+#| msgid "Documents"
+msgid "Document detail"
+msgstr "Nyaraka"
+
+#: templates/peachjam/layouts/document_detail.html:33
+msgid "History"
+msgstr ""
+
+#: templates/peachjam/layouts/document_detail.html:62
 msgid "Jurisdiction"
 msgstr "Mamlaka"
 
-#: templates/peachjam/layouts/document_detail.html:56
+#: templates/peachjam/layouts/document_detail.html:69
+#, fuzzy
+#| msgid "Legislation List"
+msgid "Citation"
+msgstr "Orodha ya Mikataba na Itifaki"
+
+#: templates/peachjam/layouts/document_detail.html:82
 msgid "Author"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:82
+#: templates/peachjam/layouts/document_detail.html:108
 msgid "Language"
 msgstr "Lugha"
 
-#: templates/peachjam/layouts/document_detail.html:113
-msgid "Related documents"
+#: templates/peachjam/layouts/document_detail.html:129
+#: templates/peachjam/layouts/document_detail.html:134
+#: templates/peachjam/layouts/document_detail.html:142
+msgid "Download"
 msgstr ""
 
-#: templates/peachjam/layouts/document_list.html:27
+#: templates/peachjam/layouts/document_detail.html:160
+#, python-format
+msgid "%(n_relationships)s related documents"
+msgstr ""
+
+#: templates/peachjam/layouts/document_list.html:26
 msgid "Documents"
 msgstr "Nyaraka"
 
@@ -468,12 +572,28 @@ msgstr "Nyaraka"
 msgid "Treaties and Protocols"
 msgstr ""
 
+#: templates/peachjam/legislation_detail.html:34
+msgid "Primary work"
+msgstr ""
+
 #: templates/peachjam/legislation_list.html:4
 #: templates/peachjam/legislation_list.html:7
 #, fuzzy
 #| msgid "Legislation List"
 msgid "Legislation"
 msgstr "Orodha ya Mikataba na Itifaki"
+
+#~ msgid "first"
+#~ msgstr "kwanza"
+
+#~ msgid "Page"
+#~ msgstr "Ukurasa"
+
+#~ msgid "next"
+#~ msgstr "ifuatayo"
+
+#~ msgid "last"
+#~ msgstr "ya mwisho"
 
 #~ msgid "Generic Document List"
 #~ msgstr "Orodha ya Hati za Jumla"

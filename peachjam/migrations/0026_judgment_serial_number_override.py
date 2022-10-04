@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0023_article_userprofile"),
+        ("peachjam", "0025_remove_judgment_author"),
     ]
 
     operations = [

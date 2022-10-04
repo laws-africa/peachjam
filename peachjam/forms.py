@@ -98,7 +98,8 @@ class BaseDocumentFilterForm(forms.Form):
 
         year = self.params.getlist("year")
         alphabet = self.cleaned_data.get("alphabet")
-        author = self.params.getlist("author")
+        authors = self.params.getlist("authors")
+        courts = self.params.getlist("courts")
         doc_type = self.params.getlist("doc_type")
 
         if year and exclude != "year":
@@ -107,8 +108,11 @@ class BaseDocumentFilterForm(forms.Form):
         if alphabet and exclude != "alphabet":
             queryset = queryset.filter(title__istartswith=alphabet)
 
-        if author and exclude != "author":
-            queryset = queryset.filter(author__name__in=author)
+        if authors and exclude != "author":
+            queryset = queryset.filter(author__name__in=authors)
+
+        if courts and exclude != "courts":
+            queryset = queryset.filter(court__name__in=courts)
 
         if doc_type and exclude != "doc_type":
             queryset = queryset.filter(doc_type__in=doc_type)

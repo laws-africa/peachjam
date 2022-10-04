@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models import Max
 
 from peachjam.models import CoreDocument, file_location
-from peachjam.models.author import Author
 from peachjam.models.core_document_model import AttachmentAbstractModel
 
 
@@ -28,8 +27,31 @@ class MatterType(models.Model):
         ordering = ["name"]
 
 
+class CourtClass(models.Model):
+    name = models.CharField(max_length=100, null=False, unique=True)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name_plural = "Court classes"
+
+    def __str__(self):
+        return self.name
+
+
+class Court(models.Model):
+    name = models.CharField(max_length=255, null=False, unique=True)
+    code = models.SlugField(max_length=255, null=False, unique=True)
+    court_class = models.ForeignKey(
+        CourtClass, related_name="courts", on_delete=models.PROTECT, null=True
+    )
+
+    def __str__(self):
+        return self.name
+
+
 class Judgment(CoreDocument):
-    author = models.ForeignKey(Author, on_delete=models.PROTECT)
+    court = models.ForeignKey(Court, on_delete=models.PROTECT, null=True)
     judges = models.ManyToManyField(Judge, blank=True)
     headnote_holding = models.TextField(blank=True)
     additional_citations = models.TextField(blank=True)
@@ -71,7 +93,7 @@ class Judgment(CoreDocument):
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned."""
-        if self.date and hasattr(self, "author"):
+        if self.date and hasattr(self, "court"):
             if self.mnc != self.generate_citation():
                 self.serial_number = self.generate_serial_number()
                 self.mnc = self.generate_citation()
@@ -84,7 +106,7 @@ class Judgment(CoreDocument):
 
         # use select_for_update to lock the touched rows, to avoid a race condition and duplicate serial numbers
         query = Judgment.objects.select_for_update().filter(
-            date__year=self.date.year, author=self.author
+            date__year=self.date.year, court=self.court
         )
         if self.pk:
             query = query.exclude(pk=self.pk)
@@ -94,16 +116,14 @@ class Judgment(CoreDocument):
 
     def generate_citation(self):
         return self.MNC_FORMAT.format(
-            year=self.date.year,
-            author=self.author.code,
-            serial=self.serial_number,
+            year=self.date.year, author=self.court.code, serial=self.serial_number
         )
 
     def generate_work_frbr_uri(self):
         # enforce certain defaults for judgment FRBR URIs
         self.frbr_uri_doctype = "judgment"
         self.frbr_uri_actor = (
-            self.author.code.lower() if hasattr(self, "author") else None
+            self.court.code.lower() if hasattr(self, "court") else None
         )
         self.frbr_uri_date = str(self.date.year) if self.date else ""
         self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
