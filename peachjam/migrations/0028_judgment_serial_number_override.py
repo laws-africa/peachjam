@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0025_remove_judgment_author"),
+        ("peachjam", "0027_backfill_polymorphic_content_type"),
     ]
 
     operations = [
