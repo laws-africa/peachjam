@@ -15,6 +15,7 @@ import logging
 import os
 from pathlib import Path
 
+import dj_database_url
 import sentry_sdk
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -155,8 +156,6 @@ if DEBUG:
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-import dj_database_url  # noqa
-
 default_db_url = "postgres://peachjam:peachjam@localhost:5432/peachjam"
 db_config = dj_database_url.config(
     default=os.environ.get("DATABASE_URL", default_db_url)
@@ -416,3 +415,19 @@ GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
 CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_COOKIE_SECURE = True
+
+# Caches
+if DEBUG:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        },
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": "/var/tmp/django_cache",
+        },
+    }

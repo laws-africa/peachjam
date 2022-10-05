@@ -1,8 +1,8 @@
-$font-family-sans-serif: Lato, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-$font-size-base: 0.875rem;
+$font-family-sans-serif: Lato, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !default;
+$font-size-base: 0.875rem !default;
 
-$h1-font-size: $font-size-base * 2.25;
+$h1-font-size: $font-size-base * 2.25 !default;
 
 //Colors
-$facebook-color: #1A77F2;
-$twitter-color: #2AA1F2;
+$facebook-color: #1A77F2 !default;
+$twitter-color: #2AA1F2 !default;
