@@ -252,20 +252,6 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 10,
 }
 
-# Elastic APM
-APM_SERVER_URL = os.environ.get("APM_SERVER_URL", "")
-ELASTIC_APM = {
-    "SERVICE_NAME": os.environ.get("APM_SERVICE_NAME", PEACHJAM["APP_NAME"]),
-    "SERVER_URL": APM_SERVER_URL,
-}
-if not DEBUG and APM_SERVER_URL:
-    INSTALLED_APPS = INSTALLED_APPS + ["elasticapm.contrib.django"]
-    MIDDLEWARE = [
-        "elasticapm.contrib.django.middleware.TracingMiddleware",
-        "elasticapm.contrib.django.middleware.Catch404Middleware",
-    ] + MIDDLEWARE
-
-
 # Sentry
 if not DEBUG:
     sentry_logging = LoggingIntegration(
