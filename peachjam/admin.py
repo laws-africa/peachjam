@@ -1,4 +1,5 @@
 import copy
+from datetime import date
 
 from ckeditor.widgets import CKEditorWidget
 from django import forms
@@ -118,7 +119,9 @@ class DocumentForm(forms.ModelForm):
     content_html = forms.CharField(widget=CKEditorWidget(), required=False)
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
     headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
-    date = forms.DateField(widget=forms.SelectDateWidget())
+    date = forms.DateField(
+        widget=forms.SelectDateWidget(years=range(1950, date.today().year + 1))
+    )
 
     def __init__(self, data=None, *args, **kwargs):
         if data:
@@ -343,6 +346,16 @@ class JudgmentAdminForm(DocumentForm):
         model = Judgment
         fields = ("hearing_date",)
 
+    def save(self, *args, **kwargs):
+        if (
+            "serial_number_override" in self.changed_data
+            and not self.cleaned_data["serial_number_override"]
+        ):
+            # if the serial number override is reset, then also clear the serial number so that it is
+            # re-assigned
+            self.instance.serial_number = None
+        return super().save(*args, **kwargs)
+
 
 class JudgmentAdmin(ImportMixin, DocumentAdmin):
     form = JudgmentAdminForm
@@ -354,13 +367,14 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "case_name")
     fieldsets[0][1]["fields"].insert(7, "mnc")
+    fieldsets[0][1]["fields"].insert(8, "serial_number_override")
+    fieldsets[0][1]["fields"].insert(9, "serial_number")
     fieldsets[0][1]["fields"].append("hearing_date")
     fieldsets[1][1]["fields"].insert(0, "judges")
     fieldsets[2][1]["classes"] = ["collapse"]
     fieldsets[3][1]["fields"].extend(
         ["headnote_holding", "additional_citations", "flynote"]
     )
-    fieldsets[4][1]["fields"].extend(["serial_number"])
     readonly_fields = [
         "mnc",
         "serial_number",
