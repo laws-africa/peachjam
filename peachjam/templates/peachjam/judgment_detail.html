@@ -5,8 +5,8 @@
   {{ block.super }}
 
   {% if document.mnc %}
-    <dt class="col-4">{% trans 'Media Neutral Citation' %}</dt>
-    <dd class="col-8 text-muted">
+    <dt>{% trans 'Media Neutral Citation' %}</dt>
+    <dd class="text-muted">
       {{ document.mnc }}
       <button type="button" class="btn btn-secondary btn-xs ms-2"
               title="{% trans "Copy to clipboard" %}" data-component="CopyToClipboard"
@@ -16,16 +16,16 @@
   {% endif %}
 
   {% if document.hearing_date %}
-    <dt class="col-4">{% trans 'Hearing date' %}</dt>
-    <dd class="col-8 text-muted">
+    <dt>{% trans 'Hearing date' %}</dt>
+    <dd class="text-muted">
       {{ document.hearing_date }}
     </dd>
   {% endif %}
 
   {% with document.case_numbers.all as case_numbers %}
     {% if case_numbers %}
-      <dt class="col-4">{% trans 'Case number' %}</dt>
-      <dd class="col-8 text-muted">
+      <dt>{% trans 'Case number' %}</dt>
+      <dd class="text-muted">
         {% for cn in case_numbers %}
           {{ cn.string }}{% if not forloop.last %}; {% endif %}
         {% endfor %}
