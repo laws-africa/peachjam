@@ -161,16 +161,16 @@ class JudgmentResource(BaseDocumentResource):
                 string_override=row["string_override"], document=judgment
             )
         elif "case_numbers" in row:
-            for case_number in row["case_numbers"]:
-                if case_number["number"]:
-                    MatterType.objects.get_or_create(name=case_number["matter_type"])
-                    CaseNumber.objects.create(
-                        document=judgment,
-                        number=case_number["number"],
-                        year=case_number["year"],
-                        matter_type=MatterType.objects.get(
-                            name=case_number["matter_type"]
-                        ),
+            for case_number in list(map(str.strip, row["case_numbers"].split("|"))):
+                if row["matter_type"]:
+                    matter_type, _ = MatterType.objects.get_or_create(
+                        name=row["matter_type"]
                     )
+                CaseNumber.objects.create(
+                    document=judgment,
+                    number=case_number[0],
+                    year=case_number[1],
+                    matter_type=MatterType.objects.get(name=row["matter_type"]),
+                )
 
         judgment.save()

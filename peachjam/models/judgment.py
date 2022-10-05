@@ -63,8 +63,16 @@ class Judgment(CoreDocument):
         blank=False,
     )
     serial_number = models.IntegerField(
-        null=False, help_text="Serial number for MNC, unique for a year and an author."
+        # TODO: this must be changed to True
+        null=False,
+        help_text="Serial number for MNC, unique for a year and an author.",
     )
+    serial_number_override = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Specific MNC serial number assigned by the court.",
+    )
+
     mnc = models.CharField(
         max_length=4096, help_text="Media neutral citation", null=False, blank=False
     )
@@ -84,14 +92,22 @@ class Judgment(CoreDocument):
         return self.title
 
     def assign_mnc(self):
-        """Assign an MNC to this judgment, if one hasn't already been assigned."""
+        """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
         if self.date and hasattr(self, "court"):
-            if self.mnc != self.generate_citation():
+            if (
+                self.mnc != self.generate_citation()
+                or self.serial_number_override
+                and self.serial_number != self.serial_number_override
+            ):
                 self.serial_number = self.generate_serial_number()
                 self.mnc = self.generate_citation()
 
     def generate_serial_number(self):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
+        # if there's an override, use it
+        if self.serial_number_override:
+            return self.serial_number_override
+
         # use select_for_update to lock the touched rows, to avoid a race condition and duplicate serial numbers
         query = Judgment.objects.select_for_update().filter(
             date__year=self.date.year, court=self.court
@@ -155,7 +171,6 @@ class Judgment(CoreDocument):
     def save(self, *args, **kwargs):
         self.doc_type = "judgment"
         self.assign_mnc()
-        # TODO: only do this from the form?
         self.assign_title()
         return super().save(*args, **kwargs)
 
