@@ -1,5 +1,6 @@
 import logging
 import mimetypes
+import re
 
 import magic
 from cobalt import FrbrUri
@@ -17,6 +18,7 @@ from peachjam.models import (
     GenericDocument,
     Judge,
     Judgment,
+    JudgmentMediaSummaryFile,
     Locality,
     MatterType,
     SourceFile,
@@ -161,16 +163,27 @@ class JudgmentResource(BaseDocumentResource):
                 defaults={"name": row["court_obj"]["name"]},
             )
 
+        source_files = row["source_url"].split("|")
+        docx = re.compile(r".docx?$")
+        pdf = re.compile(r".pdf$")
+        for file in source_files:
+            match_docx = docx.search(file)
+            match_pdf = pdf.search(file)
+            if match_docx:
+                row["source_url"] = file
+            elif match_pdf:
+                row["source_url"] = file
+
     def after_import_row(self, row, instance, row_number=None, **kwargs):
         super().after_import_row(row, instance, row_number, **kwargs)
 
         judgment = Judgment.objects.get(pk=instance.object_id)
 
-        if "string_override" in row:
+        if row["case_string_override"]:
             CaseNumber.objects.create(
-                string_override=row["string_override"], document=judgment
+                string_override=row["case_string_override"], document=judgment
             )
-        elif "case_numbers" in row:
+        elif row["case_numbers"]:
             for c in list(map(str.strip, row["case_numbers"].split("|"))):
 
                 case_number_values = c.split("/")
@@ -178,7 +191,7 @@ class JudgmentResource(BaseDocumentResource):
                     number=case_number_values[0], year=case_number_values[1]
                 )
 
-                if len(c.split("/")) == 3:
+                if len(case_number_values) == 3:
                     case_number.matter_type = MatterType.objects.get_or_create(
                         name=case_number_values[2]
                     )[0]
@@ -187,3 +200,14 @@ class JudgmentResource(BaseDocumentResource):
                 case_number.save()
 
         judgment.save()
+
+        if row["media_summary_file"]:
+            summary_file = download_source_file(row["media_summary_file"])
+            mime, _ = mimetypes.guess_type(row["media_summary_file"])
+            ext = mimetypes.guess_extension(mime)
+            JudgmentMediaSummaryFile.objects.update_or_create(
+                document=judgment,
+                defaults={
+                    "file": File(summary_file, name=f"{judgment.title[-250:]}{ext}")
+                },
+            )
