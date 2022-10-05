@@ -63,7 +63,7 @@ class DocumentContent {
         const searchQuery = urlParams.get('q');
         const searchForm: HTMLFormElement | null = this.root.querySelector('.doc-search__form');
         if (searchQuery) {
-          searchForm?.requestSubmit();
+          searchForm?.dispatchEvent(new Event('submit'));
         }
 
         const targetPage = urlParams.get('page');
