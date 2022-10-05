@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models import Max
 
 from peachjam.models import CoreDocument
-from peachjam.models.core_document_model import AttachmentAbstractModel
 
 
 class Judge(models.Model):
@@ -204,16 +203,3 @@ class CaseNumber(models.Model):
     def save(self, *args, **kwargs):
         self.string = self.get_case_number_string()
         return super().save(*args, **kwargs)
-
-
-class AttachedFileNature(models.Model):
-    name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
-    description = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.name
-
-
-class AttachedFiles(AttachmentAbstractModel):
-    document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
-    nature = models.ForeignKey(AttachedFileNature, on_delete=models.CASCADE)

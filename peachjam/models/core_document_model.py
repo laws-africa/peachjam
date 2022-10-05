@@ -387,3 +387,21 @@ class SourceFile(AttachmentAbstractModel):
         ext = os.path.splitext(self.filename)[1]
         title = re.sub(r"[^a-zA-Z0-9() ]", "", self.document.title)
         return title + ext
+
+
+class AttachedFileNature(models.Model):
+    name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class AttachedFiles(AttachmentAbstractModel):
+    SAVE_FOLDER = "attachments"
+
+    document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
+    nature = models.ForeignKey(AttachedFileNature, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name_plural = "Attached Files"

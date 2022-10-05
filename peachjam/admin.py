@@ -17,6 +17,7 @@ from treebeard.forms import movenodeform_factory
 from peachjam.forms import IngestorForm, NewDocumentFormMixin
 from peachjam.models import (
     Article,
+    AttachedFileNature,
     AttachedFiles,
     Author,
     CaseNumber,
@@ -489,6 +490,7 @@ admin.site.register(
         MatterType,
         Court,
         CourtClass,
+        AttachedFileNature,
     ]
 )
 admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)
