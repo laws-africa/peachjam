@@ -6,12 +6,13 @@ from cobalt import FrbrUri
 from countries_plus.models import Country
 from django.core.files.base import File
 from import_export import fields, resources
-from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
+from import_export.widgets import CharWidget, ForeignKeyWidget, ManyToManyWidget
 from languages_plus.models import Language
 
 from peachjam.models import (
     Author,
     CaseNumber,
+    Court,
     DocumentNature,
     GenericDocument,
     Judge,
@@ -70,7 +71,7 @@ class BaseDocumentResource(resources.ModelResource):
 
     def before_import_row(self, row, **kwargs):
         frbr_uri = FrbrUri.parse(row["work_frbr_uri"])
-        row["language"] = frbr_uri.default_language
+        row["language"] = frbr_uri.default_language or "eng"
         row["jurisdiction"] = frbr_uri.country
         row["locality"] = frbr_uri.locality
         row["frbr_uri_number"] = frbr_uri.number
@@ -129,12 +130,26 @@ class GenericDocumentResource(BaseDocumentResource):
         DocumentNature.objects.get_or_create(name=row["nature"])
 
 
+class JudgesWidget(ManyToManyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        judges = list(map(" ".join, list(map(str.split, value.split(self.separator)))))
+        for j in judges:
+            judge, _ = self.model.objects.get_or_create(name=j)
+        return self.model.objects.filter(name__in=judges)
+
+
 class JudgmentResource(BaseDocumentResource):
     judges = fields.Field(
         column_name="judges",
         attribute="judges",
-        widget=ManyToManyWidget(Judge, field="name"),
+        widget=JudgesWidget(Judge, separator="|", field="name"),
     )
+    court = fields.Field(
+        column_name="court",
+        attribute="court",
+        widget=ForeignKeyWidget(Court, field="name"),
+    )
+    case_numbers = fields.Field(column_name="case_numbers", widget=CharWidget)
 
     class Meta(BaseDocumentResource.Meta):
         model = Judgment
@@ -151,26 +166,24 @@ class JudgmentResource(BaseDocumentResource):
 
         judgment = Judgment.objects.get(pk=instance.object_id)
 
-        if row["judges"]:
-            for judge in list(map(str.strip, row["judges"].split("|"))):
-                judge, _ = Judge.objects.get_or_create(name=judge)
-                judgment.judges.add(judge)
-
         if "string_override" in row:
             CaseNumber.objects.create(
                 string_override=row["string_override"], document=judgment
             )
         elif "case_numbers" in row:
-            for case_number in list(map(str.strip, row["case_numbers"].split("|"))):
-                if row["matter_type"]:
-                    matter_type, _ = MatterType.objects.get_or_create(
-                        name=row["matter_type"]
-                    )
-                CaseNumber.objects.create(
-                    document=judgment,
-                    number=case_number[0],
-                    year=case_number[1],
-                    matter_type=MatterType.objects.get(name=row["matter_type"]),
+            for c in list(map(str.strip, row["case_numbers"].split("|"))):
+
+                case_number_values = c.split("/")
+                case_number = CaseNumber(
+                    number=case_number_values[0], year=case_number_values[1]
                 )
+
+                if len(c.split("/")) == 3:
+                    case_number.matter_type = MatterType.objects.get_or_create(
+                        name=case_number_values[2]
+                    )[0]
+
+                case_number.document = judgment
+                case_number.save()
 
         judgment.save()
