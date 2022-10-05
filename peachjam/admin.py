@@ -346,6 +346,16 @@ class JudgmentAdminForm(DocumentForm):
         model = Judgment
         fields = ("hearing_date",)
 
+    def save(self, *args, **kwargs):
+        if (
+            "serial_number_override" in self.changed_data
+            and not self.cleaned_data["serial_number_override"]
+        ):
+            # if the serial number override is reset, then also clear the serial number so that it is
+            # re-assigned
+            self.instance.serial_number = None
+        return super().save(*args, **kwargs)
+
 
 class JudgmentAdmin(ImportMixin, DocumentAdmin):
     form = JudgmentAdminForm

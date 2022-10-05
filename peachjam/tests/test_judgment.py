@@ -41,20 +41,68 @@ class JudgmentTestCase(TestCase):
             date=datetime.date(2019, 1, 1),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
-        j.assign_mnc()
+        j.save()
+        j.refresh_from_db()
         self.assertEquals("[2019] EACJ 1", j.mnc)
 
-        j.serial_number = None
         j.serial_number_override = 999
-        j.assign_mnc()
+        j.save()
+        j.refresh_from_db()
         self.assertEquals("[2019] EACJ 999", j.mnc)
         self.assertEquals(999, j.serial_number)
 
+    def test_clear_serial_number_override(self):
+        j = Judgment(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+        j.serial_number_override = 999
+        j.save()
+        j.refresh_from_db()
+        self.assertEquals("[2019] EACJ 999", j.mnc)
+
+        # clearing the override doesn't automatically force a re-assignment of the serial number
         j.serial_number_override = None
-        j.serial_number = None
-        j.assign_mnc()
-        self.assertEquals("[2019] EACJ 1", j.mnc)
+        j.save()
+        j.refresh_from_db()
+        self.assertEquals("[2019] EACJ 999", j.mnc)
+        self.assertEquals(999, j.serial_number)
+
+    def test_assign_mnc_re_save(self):
+        j = Judgment(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+        j.save()
+        j.refresh_from_db()
         self.assertEquals(1, j.serial_number)
+        self.assertEquals("[2019] EACJ 1", j.mnc)
+
+        j2 = Judgment(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 2, 2),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+        j2.save()
+        j2.refresh_from_db()
+        self.assertEquals(2, j2.serial_number)
+        self.assertEquals("[2019] EACJ 2", j2.mnc)
+
+        # now re-save j
+        j.save()
+        j.refresh_from_db()
+        self.assertEquals(1, j.serial_number)
+        self.assertEquals("[2019] EACJ 1", j.mnc)
+
+        j2.save()
+        j2.refresh_from_db()
+        self.assertEquals(2, j2.serial_number)
+        self.assertEquals("[2019] EACJ 2", j2.mnc)
 
     def test_assign_title(self):
         j = Judgment(
