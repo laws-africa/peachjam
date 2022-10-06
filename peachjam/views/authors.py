@@ -12,7 +12,6 @@ class AuthorDetailView(FilteredDocumentListView):
         return CoreDocument.objects.filter(
             Q(genericdocument__author=self.author)
             | Q(legalinstrument__author=self.author)
-            | Q(judgment__author=self.author)
         )
 
     def get_queryset(self):

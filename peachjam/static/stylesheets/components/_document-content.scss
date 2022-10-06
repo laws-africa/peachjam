@@ -294,20 +294,25 @@
   }
 
 }
-
-$dt-width: 125px;
-
 .document-metadata-list {
+  --dt-width: 100px;
+
+  @media (min-width: 425px) {
+    --dt-width: 150px;
+  }
+
   margin-bottom: 0px;
   display: flex;
   flex-wrap: wrap;
 
   dt {
-    width: $dt-width;
-    flex: 0 0 $dt-width;
+    width: var(--dt-width);
+    flex: 0 0 var(--dt-width);
   }
   dd {
-    width: calc(100% - #{$dt-width});
-    flex: 0 0 calc(100% - #{$dt-width});
+    padding-left: 0.5rem;
+    width: calc(100% - var(--dt-width));
+    flex: 0 0 calc(100% - var(--dt-width));
   }
+
 }

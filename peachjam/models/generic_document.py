@@ -29,6 +29,9 @@ class GenericDocument(CoreDocument):
     def __str__(self):
         return self.title
 
+    def get_doc_type_display(self):
+        return "Document"
+
     def save(self, *args, **kwargs):
         self.doc_type = "generic_document"
         return super().save(*args, **kwargs)

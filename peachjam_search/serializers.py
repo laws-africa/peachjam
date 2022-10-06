@@ -21,7 +21,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "citation",
             "expression_frbr_uri",
             "work_frbr_uri",
-            "authoring_body",
+            "author",
             "nature",
             "matter_type",
             "case_number_string",

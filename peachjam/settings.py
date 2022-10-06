@@ -233,6 +233,11 @@ ELASTICSEARCH_DSL = {
         "timeout": 30,
     },
 }
+
+ELASTICSEARCH_MAX_ANALYZED_OFFSET = os.environ.get(
+    "ELASTICSEARCH_MAX_ANALYZED_OFFSET", 2000000
+)
+
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
     "peachjam_search.tasks.BackgroundTaskSearchProcessor"
 )
