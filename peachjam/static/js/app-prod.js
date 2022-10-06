@@ -2726,7 +2726,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _DocumentSearch_index_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./DocumentSearch/index.vue */ \"./peachjam/js/components/DocumentSearch/index.vue\");\n/* harmony import */ var _pdf_renderer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pdf-renderer */ \"./peachjam/js/components/pdf-renderer.ts\");\n/* harmony import */ var lodash_debounce__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lodash/debounce */ \"./node_modules/lodash/debounce.js\");\n/* harmony import */ var lodash_debounce__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(lodash_debounce__WEBPACK_IMPORTED_MODULE_2__);\n/* harmony import */ var _utils_vue_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils/vue-utils */ \"./peachjam/js/utils/vue-utils.ts\");\n/* harmony import */ var _i18n__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../i18n */ \"./peachjam/js/i18n.ts\");\n\n\n\n\n\nvar OffCanvas = /** @class */ (function () {\n    function OffCanvas(element) {\n        this.offCanvas = new window.bootstrap.Offcanvas(element);\n        this.body = element.querySelector('[data-offcanvas-body]');\n    }\n    OffCanvas.prototype.show = function () {\n        this.offCanvas.show();\n    };\n    OffCanvas.prototype.hide = function () {\n        this.offCanvas.hide();\n    };\n    return OffCanvas;\n}());\nvar DocumentContent = /** @class */ (function () {\n    function DocumentContent(root) {\n        var _this = this;\n        this.root = root;\n        this.navOffCanvas = undefined;\n        // Activate first tab\n        var firstTabEl = this.root.querySelector('#navigation-tab .nav-link:first-child');\n        if (firstTabEl) {\n            var firstTab = new window.bootstrap.Tab(firstTabEl);\n            firstTab.show();\n        }\n        var documentElement = this.root.querySelector('[data-document-element]');\n        var navColumn = this.root.querySelector('#navigation-column');\n        var navContent = this.root.querySelector('#navigation-content .navigation__inner');\n        var navOffCanvasElement = this.root.querySelector('#navigation-offcanvas');\n        if (navColumn && navOffCanvasElement && navContent) {\n            this.navOffCanvas = new OffCanvas(navOffCanvasElement);\n            if (this.navOffCanvas.body) {\n                this.setupResponsiveContentTransporter(navColumn, this.navOffCanvas.body, navContent);\n            }\n        }\n        // if pdf setup pdf renderer instance\n        if (root.getAttribute('data-display-type') === 'pdf') {\n            // get dataset attributes\n            var pdfAttrsElement_1 = this.root.querySelector('[data-pdf]');\n            if (pdfAttrsElement_1) {\n                Object.keys(pdfAttrsElement_1.dataset).forEach(function (key) { root.dataset[key] = pdfAttrsElement_1.dataset[key]; });\n            }\n            this.pdfRenderer = new _pdf_renderer__WEBPACK_IMPORTED_MODULE_1__[\"default\"](root);\n            this.pdfRenderer.onPreviewPanelClick = function () { var _a; (_a = _this.navOffCanvas) === null || _a === void 0 ? void 0 : _a.hide(); };\n            this.pdfRenderer.onPdfLoaded = function () {\n                var _a;\n                var urlParams = new URLSearchParams(window.location.search);\n                var searchQuery = urlParams.get('q');\n                var searchForm = _this.root.querySelector('.doc-search__form');\n                if (searchQuery) {\n                    searchForm === null || searchForm === void 0 ? void 0 : searchForm.dispatchEvent(new Event('submit'));\n                }\n                var targetPage = urlParams.get('page');\n                if (!targetPage)\n                    return;\n                (_a = _this.pdfRenderer) === null || _a === void 0 ? void 0 : _a.triggerScrollToPage(targetPage);\n            };\n        }\n        // Close navOffCanvas on lac-toc title click\n        if (root.getAttribute('data-display-type') === 'akn') {\n            var element = root.querySelector('la-table-of-contents-controller');\n            if (element) {\n                element.addEventListener('itemTitleClicked', function () {\n                    var _a;\n                    (_a = _this.navOffCanvas) === null || _a === void 0 ? void 0 : _a.hide();\n                });\n            }\n        }\n        var targetMountElement = this.root.querySelector('[data-doc-search]');\n        if (targetMountElement) {\n            this.searchApp = (0,_utils_vue_utils__WEBPACK_IMPORTED_MODULE_3__.createAndMountApp)({\n                component: _DocumentSearch_index_vue__WEBPACK_IMPORTED_MODULE_0__[\"default\"],\n                props: {\n                    document: documentElement,\n                    docType: root.getAttribute('data-display-type'),\n                    mountElement: targetMountElement\n                },\n                use: [_i18n__WEBPACK_IMPORTED_MODULE_4__.i18n],\n                mountTarget: targetMountElement\n            });\n            targetMountElement.addEventListener('going-to-snippet', function () {\n                var _a;\n                (_a = _this.navOffCanvas) === null || _a === void 0 ? void 0 : _a.hide();\n            });\n        }\n    }\n    DocumentContent.prototype.setupResponsiveContentTransporter = function (desktopElement, mobileElement, content) {\n        var _this = this;\n        var placeContent = function (vw) {\n            var _a;\n            // reference _variables.scss for grid-breakpoints\n            if (vw < 992) {\n                // transport content to mobile element on tablet/mobile view\n                mobileElement.appendChild(content);\n            }\n            else {\n                (_a = _this.navOffCanvas) === null || _a === void 0 ? void 0 : _a.hide();\n                // transport content to desktop element on desktop view\n                desktopElement.appendChild(content);\n            }\n        };\n        var initialVw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);\n        placeContent(initialVw);\n        window.addEventListener('resize', lodash_debounce__WEBPACK_IMPORTED_MODULE_2___default()(function () {\n            var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);\n            var inputs = Array.from(_this.root.querySelectorAll('input'));\n            // If window resize was triggered by device virtual keyboard, dont place content\n            if (inputs.some(function (input) { return input === document.activeElement; })) {\n                return;\n            }\n            placeContent(vw);\n        }, 200));\n    };\n    return DocumentContent;\n}());\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (DocumentContent);\n\n\n//# sourceURL=webpack://peach-jam/./peachjam/js/components/document-content.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _DocumentSearch_index_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./DocumentSearch/index.vue */ \"./peachjam/js/components/DocumentSearch/index.vue\");\n/* harmony import */ var _pdf_renderer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pdf-renderer */ \"./peachjam/js/components/pdf-renderer.ts\");\n/* harmony import */ var lodash_debounce__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lodash/debounce */ \"./node_modules/lodash/debounce.js\");\n/* harmony import */ var lodash_debounce__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(lodash_debounce__WEBPACK_IMPORTED_MODULE_2__);\n/* harmony import */ var _utils_vue_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils/vue-utils */ \"./peachjam/js/utils/vue-utils.ts\");\n/* harmony import */ var _i18n__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../i18n */ \"./peachjam/js/i18n.ts\");\n\n\n\n\n\nvar OffCanvas = /** @class */ (function () {\n    function OffCanvas(element) {\n        this.offCanvas = new window.bootstrap.Offcanvas(element);\n        this.body = element.querySelector('[data-offcanvas-body]');\n    }\n    OffCanvas.prototype.show = function () {\n        this.offCanvas.show();\n    };\n    OffCanvas.prototype.hide = function () {\n        this.offCanvas.hide();\n    };\n    return OffCanvas;\n}());\nvar DocumentContent = /** @class */ (function () {\n    function DocumentContent(root) {\n        var _this = this;\n        this.root = root;\n        this.navOffCanvas = undefined;\n        // Activate first tab\n        var firstTabEl = this.root.querySelector('#navigation-tab .nav-link:first-child');\n        if (firstTabEl) {\n            var firstTab = new window.bootstrap.Tab(firstTabEl);\n            firstTab.show();\n        }\n        var documentElement = this.root.querySelector('[data-document-element]');\n        var navColumn = this.root.querySelector('#navigation-column');\n        var navContent = this.root.querySelector('#navigation-content .navigation__inner');\n        var navOffCanvasElement = this.root.querySelector('#navigation-offcanvas');\n        if (navColumn && navOffCanvasElement && navContent) {\n            this.navOffCanvas = new OffCanvas(navOffCanvasElement);\n            if (this.navOffCanvas.body) {\n                this.setupResponsiveContentTransporter(navColumn, this.navOffCanvas.body, navContent);\n            }\n        }\n        // if pdf setup pdf renderer instance\n        if (root.getAttribute('data-display-type') === 'pdf') {\n            // get dataset attributes\n            var pdfAttrsElement_1 = this.root.querySelector('[data-pdf]');\n            if (pdfAttrsElement_1) {\n                Object.keys(pdfAttrsElement_1.dataset).forEach(function (key) { root.dataset[key] = pdfAttrsElement_1.dataset[key]; });\n            }\n            this.pdfRenderer = new _pdf_renderer__WEBPACK_IMPORTED_MODULE_1__[\"default\"](root);\n            this.pdfRenderer.onPreviewPanelClick = function () { var _a; (_a = _this.navOffCanvas) === null || _a === void 0 ? void 0 : _a.hide(); };\n            this.pdfRenderer.onPdfLoaded = function () {\n                var _a;\n                var urlParams = new URLSearchParams(window.location.search);\n                var search = urlParams.get('q');\n                var searchForm = _this.root.querySelector('.doc-search__form');\n                if (search) {\n                    searchForm === null || searchForm === void 0 ? void 0 : searchForm.dispatchEvent(new Event('submit'));\n                }\n                var targetPage = urlParams.get('page');\n                if (!targetPage)\n                    return;\n                (_a = _this.pdfRenderer) === null || _a === void 0 ? void 0 : _a.triggerScrollToPage(targetPage);\n            };\n        }\n        // Close navOffCanvas on lac-toc title click\n        if (root.getAttribute('data-display-type') === 'akn') {\n            var element = root.querySelector('la-table-of-contents-controller');\n            if (element) {\n                element.addEventListener('itemTitleClicked', function () {\n                    var _a;\n                    (_a = _this.navOffCanvas) === null || _a === void 0 ? void 0 : _a.hide();\n                });\n            }\n        }\n        var targetMountElement = this.root.querySelector('[data-doc-search]');\n        if (targetMountElement) {\n            this.searchApp = (0,_utils_vue_utils__WEBPACK_IMPORTED_MODULE_3__.createAndMountApp)({\n                component: _DocumentSearch_index_vue__WEBPACK_IMPORTED_MODULE_0__[\"default\"],\n                props: {\n                    document: documentElement,\n                    docType: root.getAttribute('data-display-type'),\n                    mountElement: targetMountElement\n                },\n                use: [_i18n__WEBPACK_IMPORTED_MODULE_4__.i18n],\n                mountTarget: targetMountElement\n            });\n            targetMountElement.addEventListener('going-to-snippet', function () {\n                var _a;\n                (_a = _this.navOffCanvas) === null || _a === void 0 ? void 0 : _a.hide();\n            });\n        }\n    }\n    DocumentContent.prototype.setupResponsiveContentTransporter = function (desktopElement, mobileElement, content) {\n        var _this = this;\n        var placeContent = function (vw) {\n            var _a;\n            // reference _variables.scss for grid-breakpoints\n            if (vw < 992) {\n                // transport content to mobile element on tablet/mobile view\n                mobileElement.appendChild(content);\n            }\n            else {\n                (_a = _this.navOffCanvas) === null || _a === void 0 ? void 0 : _a.hide();\n                // transport content to desktop element on desktop view\n                desktopElement.appendChild(content);\n            }\n        };\n        var initialVw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);\n        placeContent(initialVw);\n        window.addEventListener('resize', lodash_debounce__WEBPACK_IMPORTED_MODULE_2___default()(function () {\n            var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);\n            var inputs = Array.from(_this.root.querySelectorAll('input'));\n            // If window resize was triggered by device virtual keyboard, dont place content\n            if (inputs.some(function (input) { return input === document.activeElement; })) {\n                return;\n            }\n            placeContent(vw);\n        }, 200));\n    };\n    return DocumentContent;\n}());\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (DocumentContent);\n\n\n//# sourceURL=webpack://peach-jam/./peachjam/js/components/document-content.ts?");
 
 /***/ }),
 
@@ -3944,7 +3944,7 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/ 	
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -3958,20 +3958,20 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 			loaded: false,
 /******/ 			exports: {}
 /******/ 		};
-/******/ 	
+/******/
 /******/ 		// Execute the module function
 /******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/ 	
+/******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-/******/ 	
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/ 	
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = __webpack_modules__;
-/******/ 	
+/******/
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat get default export */
 /******/ 	(() => {
@@ -3984,7 +3984,7 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 			return getter;
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -3996,7 +3996,7 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 			}
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/ensure chunk */
 /******/ 	(() => {
 /******/ 		__webpack_require__.f = {};
@@ -4009,7 +4009,7 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 			}, []));
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/get javascript chunk filename */
 /******/ 	(() => {
 /******/ 		// This function allow to reference async chunks
@@ -4018,7 +4018,7 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 			return "" + chunkId + ".app-prod.js";
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/global */
 /******/ 	(() => {
 /******/ 		__webpack_require__.g = (function() {
@@ -4030,12 +4030,12 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 			}
 /******/ 		})();
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/load script */
 /******/ 	(() => {
 /******/ 		var inProgress = {};
@@ -4054,7 +4054,7 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 			if(!script) {
 /******/ 				needAttach = true;
 /******/ 				script = document.createElement('script');
-/******/ 		
+/******/
 /******/ 				script.charset = 'utf-8';
 /******/ 				script.timeout = 120;
 /******/ 				if (__webpack_require__.nc) {
@@ -4081,7 +4081,7 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 			needAttach && document.head.appendChild(script);
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	(() => {
 /******/ 		// define __esModule on exports
@@ -4092,7 +4092,7 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/node module decorator */
 /******/ 	(() => {
 /******/ 		__webpack_require__.nmd = (module) => {
@@ -4101,7 +4101,7 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 			return module;
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/publicPath */
 /******/ 	(() => {
 /******/ 		var scriptUrl;
@@ -4121,23 +4121,23 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 		scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
 /******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/jsonp chunk loading */
 /******/ 	(() => {
 /******/ 		// no baseURI
-/******/ 		
+/******/
 /******/ 		// object to store loaded and loading chunks
 /******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
 /******/ 			"app": 0
 /******/ 		};
-/******/ 		
+/******/
 /******/ 		__webpack_require__.f.j = (chunkId, promises) => {
 /******/ 				// JSONP chunk loading for javascript
 /******/ 				var installedChunkData = __webpack_require__.o(installedChunks, chunkId) ? installedChunks[chunkId] : undefined;
 /******/ 				if(installedChunkData !== 0) { // 0 means "already installed".
-/******/ 		
+/******/
 /******/ 					// a Promise means "currently loading".
 /******/ 					if(installedChunkData) {
 /******/ 						promises.push(installedChunkData[2]);
@@ -4146,7 +4146,7 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 							// setup Promise in chunk cache
 /******/ 							var promise = new Promise((resolve, reject) => (installedChunkData = installedChunks[chunkId] = [resolve, reject]));
 /******/ 							promises.push(installedChunkData[2] = promise);
-/******/ 		
+/******/
 /******/ 							// start chunk loading
 /******/ 							var url = __webpack_require__.p + __webpack_require__.u(chunkId);
 /******/ 							// create error before stack unwound to get useful stacktrace later
@@ -4171,17 +4171,17 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 					}
 /******/ 				}
 /******/ 		};
-/******/ 		
+/******/
 /******/ 		// no prefetching
-/******/ 		
+/******/
 /******/ 		// no preloaded
-/******/ 		
+/******/
 /******/ 		// no HMR
-/******/ 		
+/******/
 /******/ 		// no HMR manifest
-/******/ 		
+/******/
 /******/ 		// no on chunks loaded
-/******/ 		
+/******/
 /******/ 		// install a JSONP callback for chunk loading
 /******/ 		var webpackJsonpCallback = (parentChunkLoadingFunction, data) => {
 /******/ 			var [chunkIds, moreModules, runtime] = data;
@@ -4204,20 +4204,20 @@ eval("module.exports = JSON.parse('{\"{reverse_verb} this provision\":\"{reverse
 /******/ 				}
 /******/ 				installedChunks[chunkId] = 0;
 /******/ 			}
-/******/ 		
+/******/
 /******/ 		}
-/******/ 		
+/******/
 /******/ 		var chunkLoadingGlobal = self["webpackChunkpeach_jam"] = self["webpackChunkpeach_jam"] || [];
 /******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
 /******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 /******/ 	})();
-/******/ 	
+/******/
 /************************************************************************/
-/******/ 	
+/******/
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module can't be inlined because the eval devtool is used.
 /******/ 	var __webpack_exports__ = __webpack_require__("./peachjam/js/app.ts");
-/******/ 	
+/******/
 /******/ })()
 ;
