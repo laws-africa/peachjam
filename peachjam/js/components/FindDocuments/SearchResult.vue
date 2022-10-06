@@ -15,11 +15,15 @@
       <i>{{ item.citation }}</i>
     </div>
     <div class="text-muted">
-      {{ item.date }}
-      <strong
+      {{ item.date }} <span class="ms-3">{{ item.doc_type }}</span>
+      <span
+        v-if="item.court"
+        class="ms-3"
+      >{{ item.court }}</span>
+      <span
         v-if="item.author"
         class="ms-3"
-      >{{ item.author }}</strong>
+      >{{ item.author }}</span>
     </div>
     <div class="text-muted">
       {{ item.jurisdiction }}
