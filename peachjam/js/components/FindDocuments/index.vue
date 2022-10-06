@@ -66,8 +66,25 @@
         <div class="col-md-12 col-lg-9 search-pane position-relative">
           <div class="search-results">
             <div v-if="searchInfo.count">
-              <div class="mb-3 d-flex justify-content-between">
+              <div class="mb-3 sort-body">
                 <div>{{ searchInfo.count }} documents found.</div>
+                <div class="sort__inner">
+                  Sort by
+                  <select
+                    v-model="ordering"
+                    class="ms-2"
+                  >
+                    <option value="-score">
+                      Revelance
+                    </option>
+                    <option value="date">
+                      Date (oldest first)
+                    </option>
+                    <option value="-date">
+                      Date (newest first)
+                    </option>
+                  </select>
+                </div>
               </div>
 
               <ul class="list-unstyled">
@@ -417,5 +434,19 @@ export default {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.2);
   z-index: 9;
+}
+
+.sort-body {
+  display: flex;
+  justify-content: space-between;
+}
+
+@media screen and (max-width: 400px) {
+  .sort-body {
+    flex-direction: column;
+  }
+  .sort__inner {
+    margin-top: 10px;
+  }
 }
 </style>
