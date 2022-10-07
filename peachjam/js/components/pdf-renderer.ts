@@ -9,11 +9,6 @@ type GlobalWorkerOptionsType = {
   workerSrc: string
 }
 
-type PageType = {
-  [key: string]: any,
-  view: [left: number, top: number, width: number, height: number]
-}
-
 interface iPdfLib {
   [key: string]: any,
   GlobalWorkerOptions: GlobalWorkerOptionsType,
@@ -158,7 +153,7 @@ class PdfRenderer {
       const numPages = pdf.numPages;
       const listOfGetPages = Array.from(Array(numPages), (_, index) => pdf.getPage(index + 1));
       const pages = await Promise.all(listOfGetPages);
-      await asyncForEach(pages, async (page: PageType, index) => {
+      await asyncForEach(pages, async (page, index) => {
         const docElement = document.querySelector('[data-document-element]');
         if (!docElement) return;
         const docElementWidth = docElement.clientWidth || 0;
