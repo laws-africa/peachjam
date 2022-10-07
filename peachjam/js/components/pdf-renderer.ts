@@ -160,22 +160,20 @@ class PdfRenderer {
       const pages = await Promise.all(listOfGetPages);
       await asyncForEach(pages, async (page: PageType, index) => {
         const docElement = document.querySelector('[data-document-element]');
-        const docElementWidth = docElement?.clientWidth || 0;
-        /*
-        * Determine scale to fit document element width
-        * page.view[2] is the document page width
-        * */
-        const scale = (docElementWidth / page.view[2]);
-
-        const viewport = page.getViewport({ scale });
+        if (!docElement) return;
+        const docElementWidth = docElement.clientWidth || 0;
+        const scale = 2;
+        let viewport = page.getViewport({ scale });
 
         const canvas = document.createElement('canvas');
         canvas.style.display = 'block';
-        const context = canvas.getContext('2d');
-        canvas.width = docElementWidth;
-        // page.view[3] is the document height
-        canvas.height = page.view[3] * scale;
+        // set the logical size of the canvas to match the scaled-up size of the viewport
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        // force the canvas to be the width of the container in the dom
+        canvas.style.width = `${docElementWidth}px`;
 
+        const context = canvas.getContext('2d');
         const renderContext = {
           canvasContext: context,
           viewport
@@ -200,10 +198,18 @@ class PdfRenderer {
         const textLayer = document.createElement('div');
         textLayer.classList.add('textLayer');
 
+        // when rendering the text layer, we want the renderer to know that we'll place the text on top
+        // of a canvas that has been scaled up/down to fit into the containing div; so we need to calculate
+        // the scale required to go from the original PDF width, to the container width.
+        viewport = page.getViewport({ scale: 1 });
+        const textScale = docElementWidth / viewport.width;
+        // this viewport will have the correct scale to render text to, to be placed directly over the canvas
+        viewport = page.getViewport({ scale: textScale });
+
         textLayer.style.left = `${canvas.offsetLeft}px`;
         textLayer.style.top = `${canvas.offsetTop}px`;
-        textLayer.style.height = `${canvas.height}px`;
-        textLayer.style.width = `${canvas.width}px`;
+        textLayer.style.height = `${viewport.height}px`;
+        textLayer.style.width = `${viewport.width}px`;
 
         pdfjsLib.renderTextLayer({
           textContent,
