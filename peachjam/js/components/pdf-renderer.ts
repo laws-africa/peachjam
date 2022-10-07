@@ -163,7 +163,7 @@ class PdfRenderer {
         const docElementWidth = docElement?.clientWidth || 0;
         /*
         * Determine scale to fit document element width
-        * page.view[2] is page width
+        * page.view[2] is the document page width
         * */
         const scale = (docElementWidth / page.view[2]);
 
@@ -173,7 +173,7 @@ class PdfRenderer {
         canvas.style.display = 'block';
         const context = canvas.getContext('2d');
         canvas.width = docElementWidth;
-        // page.view[3] is height
+        // page.view[3] is the document height
         canvas.height = page.view[3] * scale;
 
         const renderContext = {
