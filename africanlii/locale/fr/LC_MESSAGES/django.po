@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-03 13:26+0200\n"
+"POT-Creation-Date: 2022-10-07 16:03+0200\n"
 "PO-Revision-Date: 2022-08-31 17:26\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -213,6 +213,15 @@ msgid ""
 "Search through %(documents_count)s AU documents on the AfricanLII platform."
 msgstr ""
 "Recherchez %(documents_count)s documents en AU sur la plateforme AfricanLII."
+
+#: templates/peachjam/home.html:25 templates/peachjam/home.html:26
+#, python-format
+msgid "Search %(APP_NAME)s"
+msgstr ""
+
+#: templates/peachjam/home.html:31
+msgid "Search"
+msgstr ""
 
 #: templates/peachjam/home.html:42
 #, fuzzy
