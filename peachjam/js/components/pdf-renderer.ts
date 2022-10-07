@@ -9,6 +9,11 @@ type GlobalWorkerOptionsType = {
   workerSrc: string
 }
 
+type PageType = {
+  [key: string]: any,
+  view: [left: number, top: number, width: number, height: number]
+}
+
 interface iPdfLib {
   [key: string]: any,
   GlobalWorkerOptions: GlobalWorkerOptionsType,
@@ -153,23 +158,35 @@ class PdfRenderer {
       const numPages = pdf.numPages;
       const listOfGetPages = Array.from(Array(numPages), (_, index) => pdf.getPage(index + 1));
       const pages = await Promise.all(listOfGetPages);
-      await asyncForEach(pages, async (page, index) => {
-        const viewport = page.getViewport({ scale: 1 });
-        const elementRendered = document.createElement('div');
-        elementRendered.setAttribute('id', `page-${index + 1}`);
-        elementRendered.dataset.page = String(index + 1);
-        elementRendered.classList.add('pdf-content__page');
-        elementRendered.style.position = 'relative';
+      await asyncForEach(pages, async (page: PageType, index) => {
+        const docElement = document.querySelector('[data-document-element]');
+        const docElementWidth = docElement?.clientWidth || 0;
+        /*
+        * Determine scale to fit document element width
+        * page.view[2] is page width
+        * */
+        const scale = (docElementWidth / page.view[2]);
+
+        const viewport = page.getViewport({ scale });
+
         const canvas = document.createElement('canvas');
         canvas.style.display = 'block';
         const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+        canvas.width = docElementWidth;
+        // page.view[3] is height
+        canvas.height = page.view[3] * scale;
 
         const renderContext = {
           canvasContext: context,
           viewport
         };
+
+        const elementRendered = document.createElement('div');
+        elementRendered.setAttribute('id', `page-${index + 1}`);
+        elementRendered.dataset.page = String(index + 1);
+        elementRendered.classList.add('pdf-content__page');
+        elementRendered.style.position = 'relative';
+
         const renderTask = page.render(renderContext);
         elementRendered.appendChild(canvas);
         // Canvas must be mounted first so textLayer can get offset values
