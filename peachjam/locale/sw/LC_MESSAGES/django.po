@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 50\n"
+"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 44\n"
 
 #: settings.py:194
 msgid "English"
@@ -101,7 +101,6 @@ msgid "Reset Your Password"
 msgstr "Weka upya nenosiri lako"
 
 #: templates/account/password_reset.html:12
-#| msgid "Forgotten your password? Enter your e-mail address below, and we"
 msgid "Forgotten your password? Enter your e-mail address below, and we'll send you an e-mail allowing you to reset it."
 msgstr ""
 
@@ -191,7 +190,7 @@ msgid "This document is %(filesize)s. Do you want to load it?"
 msgstr ""
 
 #: templates/peachjam/_document_content.html:171
-#| msgid "Related documents"
+#| msgid "AU Documents"
 msgid "Load document"
 msgstr ""
 
@@ -416,7 +415,7 @@ msgid "Judgments"
 msgstr "Hukumu"
 
 #: templates/peachjam/layouts/document_detail.html:27
-#| msgid "Document Type"
+#| msgid "Documents"
 msgid "Document detail"
 msgstr ""
 
@@ -458,7 +457,6 @@ msgstr "Nyaraka"
 
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
-#| msgid "Treaties and Protocols List"
 msgid "Treaties and Protocols"
 msgstr "Mikataba na Itifaki"
 
@@ -472,29 +470,20 @@ msgstr ""
 msgid "Legislation"
 msgstr ""
 
-#~ msgid "Relationships"
-#~ msgstr "Relations"
-
 #~ msgid "first"
-#~ msgstr "premier"
+#~ msgstr "kwanza"
 
 #~ msgid "next"
-#~ msgstr "suivant"
+#~ msgstr "ifuatayo"
 
 #~ msgid "last"
-#~ msgstr "dernier"
-
-#~ msgid "Regional Body"
-#~ msgstr "Corps régional"
+#~ msgstr "ya mwisho"
 
 #~ msgid "Generic Document List"
-#~ msgstr "Liste de documents génériques"
-
-#~ msgid "This document"
-#~ msgstr "Ce document"
+#~ msgstr "Orodha ya Hati za Jumla"
 
 #~ msgid "Legal Instrument List"
-#~ msgstr "Liste d'instruments légaux"
+#~ msgstr "Orodha ya Vyombo vya Kisheria"
 
 #~ msgid "Welcome to Peach Jam"
 #~ msgstr "Bienvenue dans Peach Jam"
