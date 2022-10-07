@@ -308,3 +308,10 @@
   }
 
 }
+
+.to-the-top {
+  position: fixed;
+  right: 10px;
+  bottom: 0px;
+  z-index: 10;
+}
