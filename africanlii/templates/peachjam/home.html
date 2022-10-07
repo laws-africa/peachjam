@@ -22,13 +22,13 @@
         <div class="col-md-9 mx-auto">
           <form method="get" action="/search/" class="d-flex">
               <input type="text" class="form-control form-control-lg flex-grow-1"
-                    placeholder="Search {{ APP_NAME }}"
-                    aria-label="Search {{ APP_NAME }}"
+                    placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                    aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                     aria-describedby="button-addon2"
                     autofocus
                     name="q"
               >
-              <input type="submit" class="btn btn-primary ms-2" value="Search">
+              <input type="submit" class="btn btn-primary ms-2" value="{% trans "Search" %}">
           </form>
       </div>
     </div>
