@@ -242,14 +242,6 @@
   .pdf-content__page {
     @extend .shadow-sm;
     @extend .mb-4;
-
-    canvas,
-    .textLayer {
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    overflow-y: auto;
   }
 
   .pdf-loading {
