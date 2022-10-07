@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-03 13:26+0200\n"
-"PO-Revision-Date: 2022-10-03 11:31\n"
+"POT-Creation-Date: 2022-10-07 16:03+0200\n"
+"PO-Revision-Date: 2022-10-07 15:07\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -17,15 +17,15 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 44\n"
 
-#: settings.py:193
+#: settings.py:194
 msgid "English"
 msgstr "Anglais"
 
-#: settings.py:194
+#: settings.py:195
 msgid "French"
 msgstr "Français"
 
-#: settings.py:195
+#: settings.py:196
 msgid "Swahili"
 msgstr "Swahili"
 
@@ -176,6 +176,11 @@ msgstr "Titre de la page"
 #: templates/peachjam/_child_documents.html:9
 msgid "Numbered title"
 msgstr "Titre numéroté"
+
+#: templates/peachjam/_document_content.html:37
+#| msgid "Page"
+msgid "Pages"
+msgstr "Pages"
 
 #: templates/peachjam/_document_content.html:155
 msgid "Loading PDF..."
@@ -481,9 +486,6 @@ msgstr "Législation"
 
 #~ msgid "first"
 #~ msgstr "kwanza"
-
-#~ msgid "Page"
-#~ msgstr "Ukurasa"
 
 #~ msgid "next"
 #~ msgstr "ifuatayo"
