@@ -73,7 +73,7 @@ class BaseDocumentResource(resources.ModelResource):
 
     def before_import_row(self, row, **kwargs):
         frbr_uri = FrbrUri.parse(row["work_frbr_uri"])
-        row["language"] = frbr_uri.default_language or "eng"
+        row["language"] = frbr_uri.default_language
         row["jurisdiction"] = frbr_uri.country
         row["locality"] = frbr_uri.locality
         row["frbr_uri_number"] = frbr_uri.number
@@ -134,7 +134,10 @@ class GenericDocumentResource(BaseDocumentResource):
 
 class JudgesWidget(ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
-        judges = list(map(" ".join, list(map(str.split, value.split(self.separator)))))
+
+        # Remove extra white space around and in between the judges names
+        judges = [" ".join(j.split()) for j in value.split(self.separator)]
+
         for j in judges:
             judge, _ = self.model.objects.get_or_create(name=j)
         return self.model.objects.filter(name__in=judges)
@@ -163,14 +166,16 @@ class JudgmentResource(BaseDocumentResource):
                 defaults={"name": row["court_obj"]["name"]},
             )
 
-        source_files = row["source_url"].split("|")
-        docx = re.compile(r".docx?$")
-        pdf = re.compile(r".pdf$")
+        source_files = [x.strip() for x in row["source_url"].split("|")]
+        docx = re.compile(r"\.docx?$")
+        pdf = re.compile(r"\.pdf$")
         for file in source_files:
             match_docx = docx.search(file)
             match_pdf = pdf.search(file)
+            # prefer the .docx file if available, otherwise use .pdf, ignore .rtf
             if match_docx:
                 row["source_url"] = file
+                break
             elif match_pdf:
                 row["source_url"] = file
 
@@ -184,7 +189,10 @@ class JudgmentResource(BaseDocumentResource):
                 string_override=row["case_string_override"], document=judgment
             )
         elif row["case_numbers"]:
-            for c in list(map(str.strip, row["case_numbers"].split("|"))):
+            # expected format: 31/2001|45/2002|20/2003
+            # or: 31/2001/Application|45/2002/Application|20/2003/Application
+
+            for c in [x.strip() for x in row["case_numbers"].split("|")]:
 
                 case_number_values = c.split("/")
                 case_number = CaseNumber(
