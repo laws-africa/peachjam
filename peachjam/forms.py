@@ -83,7 +83,7 @@ class BaseDocumentFilterForm(forms.Form):
     using facets such as year and alphabetical title.
     """
 
-    year = forms.CharField(required=False)
+    years = forms.CharField(required=False)
     alphabet = forms.CharField(required=False)
     author = forms.CharField(required=False)
     doc_type = forms.CharField(required=False)
@@ -96,14 +96,14 @@ class BaseDocumentFilterForm(forms.Form):
 
     def filter_queryset(self, queryset, exclude=None):
 
-        year = self.params.getlist("year")
+        years = self.params.getlist("years")
         alphabet = self.cleaned_data.get("alphabet")
         authors = self.params.getlist("authors")
         courts = self.params.getlist("courts")
         doc_type = self.params.getlist("doc_type")
 
-        if year and exclude != "year":
-            queryset = queryset.filter(date__year__in=year)
+        if years and exclude != "year":
+            queryset = queryset.filter(date__year__in=years)
 
         if alphabet and exclude != "alphabet":
             queryset = queryset.filter(title__istartswith=alphabet)
