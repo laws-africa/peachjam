@@ -9,11 +9,18 @@ export class CopyToClipboard {
   }
 
   copy () {
-    navigator.clipboard.writeText(this.root.dataset.value || '').then(() => {
-      this.root.innerText = this.root.dataset.confirmation || 'Copied!';
-      setTimeout(() => {
-        this.root.innerText = this.text;
-      }, 1500);
-    });
+    navigator.clipboard.writeText(this.root.dataset.value || '')
+      .then(() => {
+        this.root.innerText = this.root.dataset.confirmation || 'Copied!';
+        setTimeout(() => {
+          this.root.innerText = this.text;
+        }, 1500);
+      })
+      .catch(() => {
+        this.root.innerText = 'Copy failed!';
+        setTimeout(() => {
+          this.root.innerText = this.text;
+        }, 1500);
+      });
   }
 }
