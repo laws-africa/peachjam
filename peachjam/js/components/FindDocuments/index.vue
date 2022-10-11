@@ -399,6 +399,12 @@ export default {
   margin-right: auto;
 }
 
+@media screen and (max-width: 768px) {
+  .search-input-container {
+    width: 100%;
+  }
+}
+
 .search-input-container button[type="submit"] {
   height: 100%;
 }
