@@ -75,7 +75,7 @@
                     class="ms-2"
                   >
                     <option value="-score">
-                      Revelance
+                      Relevance
                     </option>
                     <option value="date">
                       Date (oldest first)
