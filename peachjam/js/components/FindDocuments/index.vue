@@ -146,6 +146,13 @@ export default {
           options: []
         },
         {
+          title: 'Court',
+          name: 'court',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
+        {
           title: 'Jurisdiction',
           name: 'jurisdiction',
           type: 'checkboxes',
