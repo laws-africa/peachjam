@@ -1,15 +1,22 @@
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
-from peachjam.models import CoreDocument, Court
+from peachjam.models import Court, Judgment
+from peachjam.utils import lowercase_alphabet
 from peachjam.views.generic_views import FilteredDocumentListView
 
 
 class CourtDetailView(FilteredDocumentListView):
+    """List View class for filtering a court's judgments."""
+
+    model = Judgment
     template_name = "peachjam/court_detail.html"
+    navbar_link = "judgments"
 
     def get_base_queryset(self):
-        return CoreDocument.objects.filter(Q(judgment__court=self.court))
+        qs = super().get_base_queryset().filter(court=self.court)
+        if "year" in self.kwargs:
+            qs = qs.filter(date__year=self.kwargs["year"])
+        return qs
 
     def get_queryset(self):
         self.court = get_object_or_404(Court, code=self.kwargs["code"])
@@ -17,16 +24,28 @@ class CourtDetailView(FilteredDocumentListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        doc_types = list(
-            set(
-                self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="doc_type"
-                ).values_list("doc_type", flat=True)
-            )
+
+        years = (
+            self.model.objects.filter(court=self.court)
+            .order_by()
+            .values_list("date__year", flat=True)
+            .distinct()
         )
 
+        context["years"] = sorted(years, reverse=True)
+
+        judges = list(
+            set(self.get_base_queryset().values_list("judges__name", flat=True))
+        )
+        if None in judges:
+            judges.remove(None)
+
         context["court"] = self.court
-        context["author_listing_view"] = True
-        context["facet_data"]["doc_types"] = doc_types
+        if "year" in self.kwargs:
+            context["year"] = self.kwargs["year"]
+        context["facet_data"] = {
+            "judges": judges,
+            "alphabet": lowercase_alphabet(),
+        }
 
         return context
