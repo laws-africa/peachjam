@@ -1,10 +1,13 @@
 {
+  "{document_count} documents found": "{document_count} documents found",
   "{reverse_verb} this provision": "{reverse_verb} this provision",
   "Alphabetical": "Alphabetical",
   "Author": "Author",
   "Clear": "Clear",
   "Clear all": "Clear all",
   "Court": "Court",
+  "Date (newest first)": "Date (newest first)",
+  "Date (oldest first)": "Date (oldest first)",
   "Delete": "Delete",
   "Document nature": "Document nature",
   "Document type": "Document type",
@@ -19,8 +22,10 @@
   "Oops, something went wrong": "Oops, something went wrong.",
   "Page": "Page",
   "Regional Body": "Regional Body",
+  "Relevance": "Relevance",
   "Search": "Search",
   "Search document content": "Search document content",
+  "Sort by": "Sort by",
   "This provision": "This provision",
   "Year": "Year"
 }

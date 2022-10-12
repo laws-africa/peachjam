@@ -66,8 +66,25 @@
         <div class="col-md-12 col-lg-9 search-pane position-relative">
           <div class="search-results">
             <div v-if="searchInfo.count">
-              <div class="mb-3 d-flex justify-content-between">
-                <div>{{ searchInfo.count }} documents found.</div>
+              <div class="mb-3 sort-body">
+                <div>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</div>
+                <div class="sort__inner">
+                  {{ $t('Sort by') }}
+                  <select
+                    v-model="ordering"
+                    class="ms-2"
+                  >
+                    <option value="-score">
+                      {{ $t('Relevance') }}
+                    </option>
+                    <option value="date">
+                      {{ $t('Date (oldest first)') }}
+                    </option>
+                    <option value="-date">
+                      {{ $t('Date (newest first)') }}
+                    </option>
+                  </select>
+                </div>
               </div>
 
               <ul class="list-unstyled">
@@ -93,6 +110,19 @@
         </div>
       </div>
     </div>
+
+    <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
+    <div v-if="false">
+      {{ $t('Document type') }}
+      {{ $t('Author') }}
+      {{ $t('Court') }}
+      {{ $t('Jurisdiction') }}
+      {{ $t('Locality') }}
+      {{ $t('Matter type') }}
+      {{ $t('Document nature') }}
+      {{ $t('Language') }}
+      {{ $t('Year') }}
+    </div>
   </div>
 </template>
 
@@ -104,7 +134,7 @@ import FilterFacets from '../FilterFacets/index.vue';
 export default {
   name: 'FindDocuments',
   components: { SearchResult, SearchPagination, FilterFacets },
-  data: () => {
+  data () {
     return {
       loadingCount: 0,
       error: null,
@@ -115,63 +145,63 @@ export default {
       drawerOpen: false,
       facets: [
         {
-          title: 'Document type',
+          title: this.$t('Document type'),
           name: 'doc_type',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Author',
+          title: this.$t('Author'),
           name: 'author',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Court',
+          title: this.$t('Court'),
           name: 'court',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Jurisdiction',
+          title: this.$t('Jurisdiction'),
           name: 'jurisdiction',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Locality',
+          title: this.$t('Locality'),
           name: 'locality',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Matter type',
+          title: this.$t('Matter type'),
           name: 'matter_type',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Document nature',
+          title: this.$t('Document nature'),
           name: 'nature',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Language',
+          title: this.$t('Language'),
           name: 'language',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Year',
+          title: this.$t('Year'),
           name: 'year',
           type: 'checkboxes',
           value: [],
@@ -382,6 +412,12 @@ export default {
   margin-right: auto;
 }
 
+@media screen and (max-width: 768px) {
+  .search-input-container {
+    width: 100%;
+  }
+}
+
 .search-input-container button[type="submit"] {
   height: 100%;
 }
@@ -424,5 +460,19 @@ export default {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.2);
   z-index: 9;
+}
+
+.sort-body {
+  display: flex;
+  justify-content: space-between;
+}
+
+@media screen and (max-width: 400px) {
+  .sort-body {
+    flex-direction: column;
+  }
+  .sort__inner {
+    margin-top: 10px;
+  }
 }
 </style>

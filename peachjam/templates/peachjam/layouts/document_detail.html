@@ -149,9 +149,9 @@
                   {% endblock %}
                 </div>
 
-                {% if n_relationships %}
-                  <div class="col-md">
-                    {% block document-relationships-content %}
+                {% block document-relationships-content %}
+                  {% if n_relationships %}
+                    <div class="col-md">
                       <h5>{% translate 'Related documents' %}</h5>
 
                       <ul class="list-unstyled">
@@ -181,9 +181,9 @@
                           {% endfor %}
                         {% endif %}
                       </ul>
-                    {% endblock %}
-                  </div>
-                {% endif %}
+                    </div>
+                  {% endif %}
+                {% endblock %}
               </div>
             {% endblock %}
 
