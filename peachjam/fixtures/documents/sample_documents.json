@@ -1,13 +1,13 @@
 [
-{
-    "fields": {
-        "code": "ECOWASCJ",
-        "court_class": null,
-        "name": "ECOWAS Community Court of Justice"
+    {
+        "fields": {
+            "code": "ECOWASCJ",
+            "court_class": null,
+            "name": "ECOWAS Community Court of Justice"
+        },
+        "model": "peachjam.court",
+        "pk": 1
     },
-    "model": "peachjam.court",
-    "pk": 1
-},
     {
         "fields": {
             "area": "390580.00",
@@ -3150,7 +3150,10 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
-            "polymorphic_ctype": 1,
+            "polymorphic_ctype": [
+                "peachjam",
+                "genericdocument"
+            ],
             "source_url": "https://api.laws.africa/v2/akn/aa-au/doc/activity-report/2017/nn/media/publication/aa-au-doc-activity-report-2017-nn-publication-document.pdf",
             "title": "Activity Report of the Pan-African Parliament, July 2016 to June 2017",
             "toc_json": [
@@ -3316,7 +3319,10 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
-            "polymorphic_ctype": 1,
+            "polymorphic_ctype": [
+                "peachjam",
+                "genericdocument"
+            ],
             "source_url": "https://api.laws.africa/v2/akn/aa-au/doc/activity-report/2017/nn/media/publication/aa-au-doc-activity-report-2017-nn-publication-document.pdf",
             "title": "Activity Report of the Pan-African Parliament, July 2016 to June 2017",
             "toc_json": [
@@ -3664,7 +3670,10 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
-            "polymorphic_ctype": 3,
+            "polymorphic_ctype": [
+                "peachjam",
+                "legalinstrument"
+            ],
             "source_url": "https://api.laws.africa/v2/akn/aa-au/act/charter/2007/elections-democracy-and-governance/media/publication/aa-au-act-charter-2007-elections-democracy-and-governance-publication-document.pdf",
             "title": "African Charter on Elections, Democracy and Governance",
             "toc_json": [
@@ -5892,7 +5901,10 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
-            "polymorphic_ctype": 3,
+            "polymorphic_ctype": [
+                "peachjam",
+                "legalinstrument"
+            ],
             "source_url": "https://api.laws.africa/v2/akn/aa-au/act/charter/2007/democracy-elections-and-governance/media/publication/aa-au-act-charter-2007-democracy-elections-and-governance-publication-document.pdf",
             "title": "African Charter on Democracy, Elections and Governance",
             "toc_json": [
@@ -8136,7 +8148,10 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
-            "polymorphic_ctype": 4,
+            "polymorphic_ctype": [
+                "peachjam",
+                "judgment"
+            ],
             "source_url": "https://media.africanlii.org/files/judgments/ecowascj/2016/52/2016-ecowascj-52.pdf",
             "title": "Obi vs Federal Republic of Nigeria [2016] ECOWASCJ 52 (09 November 2016)",
             "toc_json": null,
@@ -8172,7 +8187,10 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
-            "polymorphic_ctype": 4,
+            "polymorphic_ctype": [
+                "peachjam",
+                "judgment"
+            ],
             "source_url": "https://media.africanlii.org/files/judgments/ecowascj/2018/17/2018-ecowascj-17.pdf",
             "title": "Ababacar and Ors vs Senegal [2018] ECOWASCJ 17 (29 June 2018)",
             "toc_json": null,
@@ -8242,7 +8260,10 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
-            "polymorphic_ctype": 3,
+            "polymorphic_ctype": [
+                "peachjam",
+                "legislation"
+            ],
             "source_url": "https://api.laws.africa/v2/akn/aa-au/act/pact/2005/non-aggression-and-common-defence/media/publication/aa-au-act-pact-2005-non-aggression-and-common-defence-publication-document.pdf",
             "title": "African Union Non-Aggression and Common Defence Pact",
             "toc_json": [
@@ -9117,7 +9138,10 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
-            "polymorphic_ctype": 3,
+            "polymorphic_ctype": [
+                "peachjam",
+                "legislation"
+            ],
             "source_url": "https://api.laws.africa/v2/akn/aa-au/act/1969/civil-aviation-commission/media/publication/aa-au-act-1969-civil-aviation-commission-publication-document.pdf",
             "title": "African Civil Aviation Commission Constitution (AFCAC)",
             "toc_json": [
