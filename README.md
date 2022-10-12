@@ -56,7 +56,7 @@ python manage.py setup_countries_languages
 - To load sample documents for development purposes there is a fixture file included. Run the command
 
 ```
-python manage.py loaddata ./peachjam/fixtures/documents/sample_documents.json.gz
+python manage.py loaddata ./peachjam/fixtures/documents/sample_documents.json
 ```
 
 - Create a superuser for the admin.
