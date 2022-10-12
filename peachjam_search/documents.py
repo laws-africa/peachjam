@@ -1,18 +1,13 @@
 from tempfile import NamedTemporaryFile
 
 from django.conf import settings
+from django.utils.functional import classproperty
 from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
 from docpipe.pdf import pdf_to_text
 from lxml import etree
 
-from peachjam.models import (
-    CoreDocument,
-    GenericDocument,
-    Judgment,
-    LegalInstrument,
-    Legislation,
-)
+from peachjam.models import CoreDocument
 
 
 @registry.register_document
@@ -59,8 +54,18 @@ class SearchableDocument(Document):
         # that will be prepared for searching will be subclasses of CoreDocument (eg. Judgment, etc.)
         model = CoreDocument
 
-        # to ensure the CoreDocument will be re-saved when Judgment, Legislation etc is updated
-        related_models = [GenericDocument, Judgment, LegalInstrument, Legislation]
+        @classproperty
+        def related_models(cls):
+            # to ensure the CoreDocument will be re-saved when subclass models are updated
+            # recursively find subclasses
+            def related(klass):
+                res = []
+                for subclass in klass.__subclasses__():
+                    res.append(subclass)
+                    res.extend(related(subclass))
+                return res
+
+            return related(CoreDocument)
 
     def get_instances_from_related(self, related_instance):
         """Retrieve the CoreDocument instance from the related instance to ensure it is re-indexed

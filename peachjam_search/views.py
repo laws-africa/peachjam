@@ -97,7 +97,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     ]
 
     # allowed and default ordering
-    ordering_fields = {"date": "_date", "title": "title"}
+    ordering_fields = {"date": "date", "title": "title"}
     ordering = ("_score", "date")
 
     filter_fields = {
