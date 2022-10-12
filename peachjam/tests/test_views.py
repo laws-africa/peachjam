@@ -13,14 +13,41 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # documents
-        self.assertEqual(response.context_data["documents_count"], 8)
-        self.assertEqual(len(response.context_data["recent_judgments"]), 2)
-        self.assertEqual(len(response.context_data["recent_documents"]), 2)
-        self.assertEqual(len(response.context_data["recent_instruments"]), 2)
-        self.assertEqual(len(response.context_data["recent_legislation"]), 2)
+        self.assertEqual(response.context_data.get("documents_count"), 8)
+
+        recent_judgments = [
+            r_j.title for r_j in response.context_data.get("recent_judgments")
+        ]
+        self.assertIn(
+            "Obi vs Federal Republic of Nigeria [2016] ECOWASCJ 52 (09 November 2016)",
+            recent_judgments,
+        )
+
+        recent_documents = [
+            r_d.title for r_d in response.context_data.get("recent_documents")
+        ]
+        self.assertIn(
+            "Activity Report of the Pan-African Parliament, July 2016 to June 2017",
+            recent_documents,
+        )
+
+        recent_instruments = [
+            r_i.title for r_i in response.context_data.get("recent_instruments")
+        ]
+        self.assertIn(
+            "African Charter on Elections, Democracy and Governance", recent_instruments
+        )
+
+        recent_legislation = [
+            r_l.title for r_l in response.context_data.get("recent_legislation")
+        ]
+        self.assertIn(
+            "African Union Non-Aggression and Common Defence Pact", recent_legislation
+        )
 
         # authors
-        self.assertEqual(len(response.context_data["authors"]), 1)
+        authors = [c.name for c in response.context_data.get("authors")]
+        self.assertIn("ECOWAS Community Court of Justice", authors)
 
     def test_judgment_listing(self):
         response = self.client.get("/judgments/")
