@@ -154,9 +154,9 @@
                               {% for attachedfile in document.attachedfiles_set.all %}
                                 <li>
                                   <a href="{{ attachedfile.file.url }}" target="_blank">
-                                    {% trans "Download" %} {{ attachedfile.nature.name }}</a>
-                                    ({{ attachedfile.size|filesizeformat }})
+                                    {% trans "Download" %} {{ attachedfile.nature.name }}
                                   </a>
+                                  ({{ attachedfile.size|filesizeformat }})
                                 </li>
                               {% endfor %}
                             </ul>
