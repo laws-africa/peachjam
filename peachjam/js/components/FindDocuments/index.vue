@@ -67,7 +67,17 @@
             <FilterFacets
               v-model="facets"
               :loading="loading"
-            />
+            >
+              <template #header-title>
+                <button
+                  type="button"
+                  class="btn-close d-lg-none"
+                  aria-label="Close"
+                  @click="() => drawerOpen = false"
+                />
+                <strong class="filter-facet-title">{{ $t("Filters") }}</strong>
+              </template>
+            </FilterFacets>
           </MobileFacetsDrawer>
         </div>
 
@@ -493,5 +503,15 @@ export default {
   .sort__inner {
     margin-top: 10px;
   }
+}
+
+@media screen and (max-width: 992px) {
+ .filter-facet-title {
+  position: absolute;
+  margin: auto;
+  left: 0;
+  right: 0;
+  width: 40px;
+}
 }
 </style>
