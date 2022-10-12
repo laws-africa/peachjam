@@ -3,20 +3,55 @@
 {% load static %}
 {% load i18n %}
 
+{% block newsletter-form %}
+  <h2 class="mb-2">{% trans 'Subscribe' %}</h2>
+  <div class="row">
+    <div class="col-12 col-md-6 mb-2">
+      <p class="lead mb-0">
+        {% trans 'Subscribe to the LawLibrary newsletter for updates and news on South African legal information.' %}
+      </p>
+    </div>
+    <div class="col-12 col-md-6 mb-2">
+      <form
+            action="https://lawlibrary.us10.list-manage.com/subscribe/post?u=4f4bdccc4d82422fd556af74f&amp;id=da4493f83c&amp;f_id=00a23be2f0"
+            method="post"
+            name="mc-embedded-subscribe-form"
+            target="_blank"
+        >
+          <div style="position: absolute; left: -5000px;" aria-hidden="true">
+            <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+            <input
+                type="text"
+                name="b_4f4bdccc4d82422fd556af74f_da4493f83c"
+                tabindex="-1"
+                value="">
+          </div>
+          <div class="input-group">
+            <input type="email" value="" name="EMAIL" class="form-control" placeholder="email address"
+                   required="">
+            <div class="input-group-append">
+              <input type="submit" value="Subscribe" name="subscribe" class="btn btn-secondary">
+            </div>
+          </div>
+        </form>
+    </div>
+  </div>
+  <hr />
+{% endblock %}
 {% block first-content-column %}
   <div class="mb-3">
     <strong>{% trans 'About' %}</strong>
   </div>
-    <p>
-      {% blocktrans trimmed %}
-        Lawlibrary.org.za is curated by the African Legal Information Institute (AfricanLII) at the
-        <a href="http://www.dgru.uct.ac.za/">Democratic Governance and Rights Unit</a>, Faculty of Law, University of
-        Cape Town (UCT) and in partnership with UCT's <a href="http://www.jifa.uct.ac.za/">Judicial Institute for Africa</a>
-        (JIFA) and <a href="http://laws.africa/">Laws.Africa</a> NPO. AfricanLII and Laws.Africa are members of the regional
-        and global Free Access to Law community and subscribe to the principles of the
-        <a href="http://www.falm.info/declaration/">Montreal Declaration on Free Access to Law.</a>
-      {% endblocktrans %}
-    </p>
+  <p>
+    {% blocktrans trimmed %}
+      Lawlibrary.org.za is curated by the African Legal Information Institute (AfricanLII) at the
+      <a href="http://www.dgru.uct.ac.za/">Democratic Governance and Rights Unit</a>, Faculty of Law, University of
+      Cape Town (UCT) and in partnership with UCT's <a href="http://www.jifa.uct.ac.za/">Judicial Institute for Africa</a>
+      (JIFA) and <a href="http://laws.africa/">Laws.Africa</a> NPO. AfricanLII and Laws.Africa are members of the regional
+      and global Free Access to Law community and subscribe to the principles of the
+      <a href="http://www.falm.info/declaration/">Montreal Declaration on Free Access to Law.</a>
+    {% endblocktrans %}
+  </p>
 {% endblock %}
 
 {% block second-content-column %}
