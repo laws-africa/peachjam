@@ -1,10 +1,13 @@
 {
+  "{document_count} documents found": "{document_count} documents found",
   "{reverse_verb} this provision": "{reverse_verb} cette disposition",
   "Alphabetical": "Alphabétique",
   "Author": "Auteur",
   "Clear": "Nettoyer",
   "Clear all": "Effacer tout",
   "Court": "Cour",
+  "Date (newest first)": "Date (newest first)",
+  "Date (oldest first)": "Date (oldest first)",
   "Delete": "Supprimez",
   "Document nature": "Type de document",
   "Document type": "Type de document",
@@ -19,8 +22,10 @@
   "Oops, something went wrong": "Oups, une erreur s'est produite.",
   "Page": "Ukurasa",
   "Regional Body": "Corps régional",
+  "Relevance": "Relevance",
   "Search": "Chercher",
   "Search document content": "Rechercher le contenu du document",
+  "Sort by": "Sort by",
   "This provision": "Cette disposition",
   "Year": "Année"
 }
