@@ -104,7 +104,7 @@ class BaseDocumentFilterForm(forms.Form):
         doc_type = self.params.getlist("doc_type")
         judges = self.params.getlist("judges")
 
-        if years and exclude != "year":
+        if years and exclude != "years":
             queryset = queryset.filter(date__year__in=years)
 
         if alphabet and exclude != "alphabet":
