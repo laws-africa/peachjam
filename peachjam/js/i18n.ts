@@ -2,7 +2,7 @@ import { createI18n } from 'vue-i18n';
 
 const languageSelect: HTMLSelectElement | null = document.getElementById('language') as HTMLSelectElement;
 const langs = languageSelect ? Array.from(languageSelect.querySelectorAll('option'))
-  .map(option => option.value) : [];
+  .map(option => option.value) : ['en'];
 const selectedLang = languageSelect ? languageSelect.options[languageSelect.selectedIndex].value : 'en';
 
 const loadJSONFile = (url = '') => {
