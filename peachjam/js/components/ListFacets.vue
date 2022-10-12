@@ -8,6 +8,15 @@
       :loading="loading"
     />
   </form>
+  <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
+  <div v-if="false">
+    {{ $t('Regional Body') }}
+    {{ $t('Court') }}
+    {{ $t('Document type') }}
+    {{ $t('Judges') }}
+    {{ $t('Year') }}
+    {{ $t('Alphabetical') }}
+  </div>
 </template>
 
 <script>
