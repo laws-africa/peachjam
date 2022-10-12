@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-03 13:26+0200\n"
+"POT-Creation-Date: 2022-10-07 16:03+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: settings.py:193
+#: settings.py:194
 msgid "English"
 msgstr ""
 
-#: settings.py:194
+#: settings.py:195
 msgid "French"
 msgstr ""
 
-#: settings.py:195
+#: settings.py:196
 msgid "Swahili"
 msgstr ""
 
@@ -185,6 +185,10 @@ msgstr ""
 
 #: templates/peachjam/_child_documents.html:9
 msgid "Numbered title"
+msgstr ""
+
+#: templates/peachjam/_document_content.html:37
+msgid "Pages"
 msgstr ""
 
 #: templates/peachjam/_document_content.html:155

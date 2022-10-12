@@ -60,10 +60,10 @@ class DocumentContent {
       this.pdfRenderer.onPreviewPanelClick = () => { this.navOffCanvas?.hide(); };
       this.pdfRenderer.onPdfLoaded = () => {
         const urlParams = new URLSearchParams(window.location.search);
-        const searchQuery = urlParams.get('q');
+        const search = urlParams.get('q');
         const searchForm: HTMLFormElement | null = this.root.querySelector('.doc-search__form');
-        if (searchQuery) {
-          searchForm?.requestSubmit();
+        if (search) {
+          searchForm?.dispatchEvent(new Event('submit'));
         }
 
         const targetPage = urlParams.get('page');

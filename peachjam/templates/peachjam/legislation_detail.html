@@ -31,8 +31,8 @@
 
 {% block document-metadata-content-date %}
   {% if document.parent_work %}
-    <dt class="col-4">{% trans 'Primary work' %}</dt>
-    <dd class="col-8 text-muted">
+    <dt>{% trans 'Primary work' %}</dt>
+    <dd class="text-muted">
       <a href="{% url 'document_detail' document.parent_work.frbr_uri|strip_first_character %}">{{ document.parent_work.title }}</a>
     </dd>
   {% endif %}

@@ -3,14 +3,14 @@
 
 {% block document-metadata-content-author %}
   {% if document.doc_type == 'judgment' %}
-    <dt class="col-4">{% trans 'Court' %}</dt>
-    <dd class="col-8 text-muted">
+    <dt>{% trans 'Court' %}</dt>
+    <dd class="text-muted">
       <a href="{% url 'court_detail' document.court.code %}">{{ document.court.name }}</a>
     </dd>
 
     {% if document.judges_string %}
-      <dt class="col-4">{% trans 'Judges' %}</dt>
-      <dd class="col-8 text-muted">{{ document.judges_string }}</dd>
+      <dt>{% trans 'Judges' %}</dt>
+      <dd class="text-muted">{{ document.judges_string }}</dd>
     {% endif %}
 
   {% else %}
