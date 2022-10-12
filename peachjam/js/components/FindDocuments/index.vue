@@ -67,21 +67,21 @@
           <div class="search-results">
             <div v-if="searchInfo.count">
               <div class="mb-3 sort-body">
-                <div>{{ searchInfo.count }} documents found.</div>
+                <div>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</div>
                 <div class="sort__inner">
-                  Sort by
+                  {{ $t('Sort by') }}
                   <select
                     v-model="ordering"
                     class="ms-2"
                   >
                     <option value="-score">
-                      Relevance
+                      {{ $t('Relevance') }}
                     </option>
                     <option value="date">
-                      Date (oldest first)
+                      {{ $t('Date (oldest first)') }}
                     </option>
                     <option value="-date">
-                      Date (newest first)
+                      {{ $t('Date (newest first)') }}
                     </option>
                   </select>
                 </div>
@@ -110,6 +110,19 @@
         </div>
       </div>
     </div>
+
+    <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
+    <div v-if="false">
+      {{ $t('Document type') }}
+      {{ $t('Author') }}
+      {{ $t('Court') }}
+      {{ $t('Jurisdiction') }}
+      {{ $t('Locality') }}
+      {{ $t('Matter type') }}
+      {{ $t('Document nature') }}
+      {{ $t('Language') }}
+      {{ $t('Year') }}
+    </div>
   </div>
 </template>
 
@@ -121,7 +134,7 @@ import FilterFacets from '../FilterFacets/index.vue';
 export default {
   name: 'FindDocuments',
   components: { SearchResult, SearchPagination, FilterFacets },
-  data: () => {
+  data () {
     return {
       loadingCount: 0,
       error: null,
@@ -132,63 +145,63 @@ export default {
       drawerOpen: false,
       facets: [
         {
-          title: 'Document type',
+          title: this.$t('Document type'),
           name: 'doc_type',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Author',
+          title: this.$t('Author'),
           name: 'author',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Court',
+          title: this.$t('Court'),
           name: 'court',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Jurisdiction',
+          title: this.$t('Jurisdiction'),
           name: 'jurisdiction',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Locality',
+          title: this.$t('Locality'),
           name: 'locality',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Matter type',
+          title: this.$t('Matter type'),
           name: 'matter_type',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Document nature',
+          title: this.$t('Document nature'),
           name: 'nature',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Language',
+          title: this.$t('Language'),
           name: 'language',
           type: 'checkboxes',
           value: [],
           options: []
         },
         {
-          title: 'Year',
+          title: this.$t('Year'),
           name: 'year',
           type: 'checkboxes',
           value: [],
