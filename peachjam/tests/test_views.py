@@ -53,8 +53,15 @@ class PeachjamViewsTest(TestCase):
         response = self.client.get("/judgments/")
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(len(response.context_data["documents"]), 2)
-        self.assertEqual(len(response.context_data["facet_data"]["courts"]), 1)
+        documents = [doc.title for doc in response.context_data.get("documents")]
+        self.assertIn(
+            "Ababacar and Ors vs Senegal [2018] ECOWASCJ 17 (29 June 2018)",
+            documents,
+        )
+        self.assertIn(
+            "ECOWAS Community Court of Justice",
+            response.context_data["facet_data"]["courts"],
+        )
         self.assertEqual(response.context_data["facet_data"]["years"], [2016, 2018])
 
     def test_judgment_detail(self):
@@ -75,8 +82,11 @@ class PeachjamViewsTest(TestCase):
         response = self.client.get("/legislation/")
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(len(response.context_data["documents"]), 2)
-        self.assertEqual(len(response.context_data["facet_data"]["courts"]), 0)
+        documents = [doc.title for doc in response.context_data.get("documents")]
+        self.assertIn(
+            "African Civil Aviation Commission Constitution (AFCAC)",
+            documents,
+        )
         self.assertEqual(response.context_data["facet_data"]["years"], [1969, 2005])
 
     def test_legislation_detail(self):
@@ -98,9 +108,11 @@ class PeachjamViewsTest(TestCase):
         response = self.client.get("/legal_instruments/")
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(len(response.context_data["documents"]), 2)
-        self.assertEqual(len(response.context_data["facet_data"]["authors"]), 0)
-        self.assertEqual(len(response.context_data["facet_data"]["courts"]), 0)
+        documents = [doc.title for doc in response.context_data.get("documents")]
+        self.assertIn(
+            "African Charter on Democracy, Elections and Governance",
+            documents,
+        )
         self.assertEqual(response.context_data["facet_data"]["years"], [2007])
 
     def test_legal_instrument_detail(self):
@@ -121,9 +133,11 @@ class PeachjamViewsTest(TestCase):
         response = self.client.get("/generic_documents/")
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(len(response.context_data["documents"]), 2)
-        self.assertEqual(len(response.context_data["facet_data"]["courts"]), 0)
-        self.assertEqual(len(response.context_data["facet_data"]["authors"]), 0)
+        documents = [doc.title for doc in response.context_data.get("documents")]
+        self.assertIn(
+            "Activity Report of the Pan-African Parliament, July 2016 to June 2017",
+            documents,
+        )
         self.assertEqual(response.context_data["facet_data"]["years"], [2017])
 
     def test_generic_document_detail(self):
