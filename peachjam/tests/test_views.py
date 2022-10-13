@@ -45,9 +45,8 @@ class PeachjamViewsTest(TestCase):
             "African Union Non-Aggression and Common Defence Pact", recent_legislation
         )
 
-        # authors
-        authors = [c.name for c in response.context.get("authors")]
-        self.assertIn("ECOWAS Community Court of Justice", authors)
+        courts = [c.name for c in response.context.get("courts")]
+        self.assertIn("ECOWAS Community Court of Justice", courts)
 
     def test_judgment_listing(self):
         response = self.client.get("/judgments/")
