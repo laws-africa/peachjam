@@ -71,7 +71,7 @@ class FilteredDocumentListView(ListView):
         years = list(
             set(
                 self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="year"
+                    self.get_base_queryset(), exclude="years"
                 ).values_list("date__year", flat=True)
             )
         )

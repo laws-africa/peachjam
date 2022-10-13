@@ -35,6 +35,7 @@ class HomePageView(TemplateView):
         context["recent_instruments"] = recent_instruments
         context["recent_legislation"] = recent_legislation
         context["documents_count"] = documents_count
-        context["authors"] = list(authors) + list(courts)
+        context["authors"] = authors
+        context["courts"] = courts
 
         return self.render_to_response(context)
