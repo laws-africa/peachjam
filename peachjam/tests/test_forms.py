@@ -12,11 +12,12 @@ class BaseDocumentFilterFormTestCase(TestCase):
     maxDiff = None
 
     def test_years_filter(self):
+        # single year
         response = self.client.get("/legal_instruments/?years=2007")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["facet_data"]["years"], [2007])
 
-    def test_years_filter_with_multiple_years(self):
+        # multiple years
         legal_instrument = LegalInstrument(
             title="African Civil Aviation Commission Constitution (AFCAC)",
             language=Language.objects.get(pk="en"),
