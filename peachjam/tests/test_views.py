@@ -31,20 +31,6 @@ class PeachjamViewsTest(TestCase):
             recent_documents,
         )
 
-        recent_instruments = [
-            r_i.title for r_i in response.context.get("recent_instruments")
-        ]
-        self.assertIn(
-            "African Charter on Elections, Democracy and Governance", recent_instruments
-        )
-
-        recent_legislation = [
-            r_l.title for r_l in response.context.get("recent_legislation")
-        ]
-        self.assertIn(
-            "African Union Non-Aggression and Common Defence Pact", recent_legislation
-        )
-
         courts = [c.name for c in response.context.get("courts")]
         self.assertIn("ECOWAS Community Court of Justice", courts)
 
@@ -75,7 +61,6 @@ class PeachjamViewsTest(TestCase):
             "/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29",
         )
         self.assertTrue(hasattr(response.context["document"], "court"))
-        self.assertEqual(response.context["document"].date.year, 2018)
 
     def test_legislation_listing(self):
         response = self.client.get("/legislation/")
@@ -99,9 +84,7 @@ class PeachjamViewsTest(TestCase):
             response.context["document"].expression_frbr_uri,
             "/akn/aa-au/act/pact/2005/non-aggression-and-common-defence/eng@2005-01-31",
         )
-        self.assertEqual(response.context["document"].date.year, 2005)
         self.assertTrue(hasattr(response.context["document"], "repealed"))
-        self.assertFalse(hasattr(response.context["document"], "author"))
 
     def test_legal_instrument_listing(self):
         response = self.client.get("/legal_instruments/")
@@ -125,7 +108,6 @@ class PeachjamViewsTest(TestCase):
             response.context["document"].expression_frbr_uri,
             "/akn/aa-au/act/charter/2007/elections-democracy-and-governance/eng@2007-01-30",
         )
-        self.assertEqual(response.context["document"].date.year, 2007)
         self.assertTrue(hasattr(response.context["document"], "author"))
 
     def test_generic_document_listing(self):
@@ -150,5 +132,4 @@ class PeachjamViewsTest(TestCase):
             response.context["document"].expression_frbr_uri,
             "/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03",
         )
-        self.assertEqual(response.context["document"].date.year, 2017)
         self.assertTrue(hasattr(response.context["document"], "author"))
