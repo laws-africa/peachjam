@@ -71,11 +71,10 @@ class BaseDocumentFilterFormTestCase(TestCase):
         )
 
     def test_alphabet_filter(self):
-        # African Charter on Elections, Democracy and Governance
         response = self.client.get("/legal_instruments/?alphabet=a")
         documents = response.context.get("documents")
 
-        for doc in documents:
-            assert doc.title.startswith("A")
-
         self.assertEqual(response.status_code, 200)
+
+        for doc in documents:
+            self.assertTrue(doc.title.startswith("A"))
