@@ -69,3 +69,13 @@ class BaseDocumentFilterFormTestCase(TestCase):
         self.assertEqual(
             response.context["facet_data"]["years"], [2022, 1972, 1990, 2007]
         )
+
+    def test_alphabet_filter(self):
+        # African Charter on Elections, Democracy and Governance
+        response = self.client.get("/legal_instruments/?alphabet=a")
+        documents = response.context.get("documents")
+
+        for doc in documents:
+            assert doc.title.startswith("A")
+
+        self.assertEqual(response.status_code, 200)
