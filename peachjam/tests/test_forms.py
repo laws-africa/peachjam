@@ -72,9 +72,9 @@ class BaseDocumentFilterFormTestCase(TestCase):
 
     def test_alphabet_filter(self):
         response = self.client.get("/legal_instruments/?alphabet=a")
-        documents = response.context.get("documents")
 
         self.assertEqual(response.status_code, 200)
 
-        for doc in documents:
-            self.assertTrue(doc.title.startswith("A"))
+        documents = response.context.get("documents")
+        for title in [doc.title for doc in documents]:
+            self.assertTrue(title.startswith("A"))
