@@ -10,8 +10,8 @@
             ref="search-input"
             type="text"
             class="form-control"
-            placeholder="Search documents"
-            aria-label="Search documents"
+            :placeholder="$t('Search documents')"
+            :aria-label="$t('Search documents')"
             aria-describedby="basic-addon2"
             required
           >
@@ -72,7 +72,7 @@
                 <button
                   type="button"
                   class="btn-close d-lg-none"
-                  aria-label="Close"
+                  :aria-label="$t('Close')"
                   @click="() => drawerOpen = false"
                 />
                 <strong class="filter-facet-title">{{ $t("Filters") }}</strong>
