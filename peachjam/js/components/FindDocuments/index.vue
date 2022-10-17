@@ -10,8 +10,8 @@
             ref="search-input"
             type="text"
             class="form-control"
-            placeholder="Search documents"
-            aria-label="Search documents"
+            :placeholder="$t('Search documents')"
+            :aria-label="$t('Search documents')"
             aria-describedby="basic-addon2"
             required
           >
@@ -32,6 +32,15 @@
               <span v-else>{{ $t("Search") }}</span>
             </button>
           </div>
+          <button
+            v-if="searchInfo.count"
+            type="button"
+            style="border-radius: 0.2rem"
+            class="btn btn-sm btn-secondary ms-1 d-lg-none"
+            @click="() => drawerOpen = true"
+          >
+            Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
+          </button>
         </div>
       </form>
 
@@ -47,20 +56,29 @@
       >
         {{ $t("No documents match your search.") }}
       </div>
-      <div class="mt-3">
-        <!--        <DidYouMean-->
-        <!--          :q="q"-->
-        <!--          @suggest="suggest"-->
-        <!--        />-->
-      </div>
     </div>
     <div class="container-fluid">
       <div class="row">
-        <div class="col col-lg-3 d-none d-lg-block">
-          <FilterFacets
-            v-model="facets"
-            :loading="loading"
-          />
+        <div class="col col-lg-3">
+          <MobileFacetsDrawer
+            :open="drawerOpen"
+            @outside-drawer-click="() => drawerOpen = false"
+          >
+            <FilterFacets
+              v-model="facets"
+              :loading="loading"
+            >
+              <template #header-title>
+                <button
+                  type="button"
+                  class="btn-close d-lg-none"
+                  :aria-label="$t('Close')"
+                  @click="() => drawerOpen = false"
+                />
+                <strong class="filter-facet-title">{{ $t("Filters") }}</strong>
+              </template>
+            </FilterFacets>
+          </MobileFacetsDrawer>
         </div>
 
         <div class="col-md-12 col-lg-9 search-pane position-relative">
@@ -130,10 +148,11 @@
 import SearchResult from './SearchResult.vue';
 import SearchPagination from './SearchPagination.vue';
 import FilterFacets from '../FilterFacets/index.vue';
+import MobileFacetsDrawer from './MobileSideDrawer.vue';
 
 export default {
   name: 'FindDocuments',
-  components: { SearchResult, SearchPagination, FilterFacets },
+  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets },
   data () {
     return {
       loadingCount: 0,
@@ -212,6 +231,9 @@ export default {
   },
 
   computed: {
+    selectedFacetsCount () {
+      return this.facets.map(facet => facet.value.length).reduce((pv, cv) => pv + cv, 0);
+    },
     loading () {
       return this.loadingCount > 0;
     }
@@ -253,8 +275,6 @@ export default {
     handlePageChange (newPage) {
       this.page = newPage;
       this.search();
-      document.body.scrollTop = 0; // For Safari
-      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
     },
 
     handleSubmit () {
@@ -398,6 +418,9 @@ export default {
         }
 
         this.loadingCount = this.loadingCount - 1;
+        this.drawerOpen = false;
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
       }
     }
   }
@@ -410,11 +433,17 @@ export default {
   width: 66%;
   margin-left: auto;
   margin-right: auto;
+  padding-bottom: 1rem;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 992px) {
   .search-input-container {
     width: 100%;
+    padding-top: 1rem;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 9;
   }
 }
 
@@ -474,5 +503,15 @@ export default {
   .sort__inner {
     margin-top: 10px;
   }
+}
+
+@media screen and (max-width: 992px) {
+ .filter-facet-title {
+  position: absolute;
+  margin: auto;
+  left: 0;
+  right: 0;
+  width: 40px;
+}
 }
 </style>
