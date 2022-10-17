@@ -23,7 +23,7 @@
             <button
               type="button"
               class="btn-close"
-              aria-label="Close"
+              :aria-label="$t('Close')"
               @click="close"
             />
           </div>
