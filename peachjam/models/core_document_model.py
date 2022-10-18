@@ -405,3 +405,6 @@ class AttachedFiles(AttachmentAbstractModel):
 
     class Meta:
         verbose_name_plural = "Attached Files"
+
+    def extension(self):
+        return os.path.splitext(self.filename)[1].replace(".", "")
