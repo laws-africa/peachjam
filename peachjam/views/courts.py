@@ -33,8 +33,12 @@ class CourtDetailView(FilteredDocumentListView):
         )
 
         judges = list(
-            set(self.get_base_queryset().values_list("judges__name", flat=True))
+            self.get_base_queryset()
+            .order_by("judges__name")
+            .values_list("judges__name", flat=True)
+            .distinct()
         )
+
         if None in judges:
             judges.remove(None)
 
