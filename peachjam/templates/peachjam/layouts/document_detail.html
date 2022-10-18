@@ -149,29 +149,16 @@
                       {% block document-metadata-media-summary-download %}
                         {% if document.attachedfiles_set %}
                           {% for attachedfile in document.attachedfiles_set.all %}
-                            {% if attachedfile.nature.name == 'Media summary' %}
-                              <dt>{% translate 'Media summary' %}</dt>
-                              <dd>
-                                <a href="{{ attachedfile.file.url }}" target="_blank">
-                                  {% trans "Download" %} {{ attachedfile.extension|upper }}
-                                </a>
-                                ({{ attachedfile.size|filesizeformat }})
-                              </dd>
-                            {% endif %}
-
-                            {% if attachedfile.nature.name == 'Original document' %}
-                              <dt>{% translate 'Original document' %}</dt>
-                              <dd>
-                                <a href="{{ attachedfile.file.url }}" target="_blank">
-                                  {% trans "Download" %} {{ attachedfile.extension|upper }}
-                                </a>
-                                ({{ attachedfile.size|filesizeformat }})
-                              </dd>
-                            {% endif %}
-                            {% endfor %}
+                            <dt>{{ attachedfile.nature.name }}</dt>
+                            <dd>
+                              <a href="{{ attachedfile.file.url }}" target="_blank">
+                                {% trans "Download" %} {{ attachedfile.extension|upper }}
+                              </a>
+                              ({{ attachedfile.size|filesizeformat }})
+                            </dd>
+                          {% endfor %}
                         {% endif %}
                       {% endblock %}
-
                     </dl>
                   {% endblock %}
                 </div>
