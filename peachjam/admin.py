@@ -17,6 +17,8 @@ from treebeard.forms import movenodeform_factory
 from peachjam.forms import IngestorForm, NewDocumentFormMixin
 from peachjam.models import (
     Article,
+    AttachedFileNature,
+    AttachedFiles,
     Author,
     CaseNumber,
     CitationLink,
@@ -30,7 +32,6 @@ from peachjam.models import (
     IngestorSetting,
     Judge,
     Judgment,
-    JudgmentMediaSummaryFile,
     LegalInstrument,
     Legislation,
     Locality,
@@ -335,8 +336,8 @@ class CaseNumberAdmin(admin.TabularInline):
     fields = ["matter_type", "number", "year", "string_override"]
 
 
-class JudgmentMediaSummaryFileInline(BaseAttachmentFileInline):
-    model = JudgmentMediaSummaryFile
+class AttachedFilesInline(BaseAttachmentFileInline):
+    model = AttachedFiles
 
 
 class JudgmentAdminForm(DocumentForm):
@@ -360,7 +361,7 @@ class JudgmentAdminForm(DocumentForm):
 class JudgmentAdmin(ImportMixin, DocumentAdmin):
     form = JudgmentAdminForm
     resource_class = JudgmentResource
-    inlines = [CaseNumberAdmin, JudgmentMediaSummaryFileInline] + DocumentAdmin.inlines
+    inlines = [CaseNumberAdmin, AttachedFilesInline] + DocumentAdmin.inlines
     filter_horizontal = ("judges",)
     list_filter = (*DocumentAdmin.list_filter, "court")
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
@@ -489,6 +490,7 @@ admin.site.register(
         MatterType,
         Court,
         CourtClass,
+        AttachedFileNature,
     ]
 )
 admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)

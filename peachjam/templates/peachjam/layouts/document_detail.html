@@ -145,6 +145,20 @@
                           </dd>
                         {% endif %}
                       {% endblock %}
+
+                      {% block document-metadata-media-summary-download %}
+                        {% if document.attachedfiles_set %}
+                          {% for attachedfile in document.attachedfiles_set.all %}
+                            <dt>{{ attachedfile.nature.name }}</dt>
+                            <dd>
+                              <a href="{{ attachedfile.file.url }}" target="_blank">
+                                {% trans "Download" %} {{ attachedfile.extension|upper }}
+                              </a>
+                              ({{ attachedfile.size|filesizeformat }})
+                            </dd>
+                          {% endfor %}
+                        {% endif %}
+                      {% endblock %}
                     </dl>
                   {% endblock %}
                 </div>

@@ -11,6 +11,8 @@ from import_export.widgets import CharWidget, ForeignKeyWidget, ManyToManyWidget
 from languages_plus.models import Language
 
 from peachjam.models import (
+    AttachedFileNature,
+    AttachedFiles,
     Author,
     CaseNumber,
     Court,
@@ -18,7 +20,6 @@ from peachjam.models import (
     GenericDocument,
     Judge,
     Judgment,
-    JudgmentMediaSummaryFile,
     Locality,
     MatterType,
     SourceFile,
@@ -213,9 +214,14 @@ class JudgmentResource(BaseDocumentResource):
             summary_file = download_source_file(row["media_summary_file"])
             mime, _ = mimetypes.guess_type(row["media_summary_file"])
             ext = mimetypes.guess_extension(mime)
-            JudgmentMediaSummaryFile.objects.update_or_create(
+            media_summary_file_nature, _ = AttachedFileNature.objects.get_or_create(
+                name="Media summary"
+            )
+
+            AttachedFiles.objects.update_or_create(
                 document=judgment,
                 defaults={
-                    "file": File(summary_file, name=f"{judgment.title[-250:]}{ext}")
+                    "file": File(summary_file, name=f"{judgment.title[-250:]}{ext}"),
+                    "nature": media_summary_file_nature,
                 },
             )
