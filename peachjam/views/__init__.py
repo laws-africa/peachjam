@@ -2,6 +2,7 @@
 from .about import *
 from .article import *
 from .authors import *
+from .courts import *
 from .documents import *
 from .generic_document import *
 from .home import *

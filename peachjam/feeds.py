@@ -18,6 +18,9 @@ class BaseFeed(Feed):
     model = None
 
     def items(self):
+        if self.model in [Article]:
+            return self.model.objects.order_by("-date")[:100]
+
         return self.model.objects.order_by("-created_at")[:100]
 
     def item_pubdate(self, item):
