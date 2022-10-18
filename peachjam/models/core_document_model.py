@@ -1,3 +1,4 @@
+import datetime
 import os
 import re
 
@@ -173,6 +174,13 @@ class CoreDocument(PolymorphicModel):
 
     def clean(self):
         super().clean()
+
+        if self.date is None:
+            raise ValidationError("Invalid Date")
+
+        if self.date > datetime.date.today():
+            raise ValidationError("You cannot set a future date for the document")
+
         frbr_uri = self.generate_work_frbr_uri()
         try:
             FrbrUri.parse(frbr_uri)

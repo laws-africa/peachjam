@@ -8,6 +8,7 @@ from django.contrib import admin
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
+from django.utils.dates import MONTHS
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as __
 from import_export.admin import ImportMixin
@@ -115,13 +116,48 @@ class DocumentTopicInline(admin.TabularInline):
     extra = 1
 
 
+class DateSelectorWidget(forms.MultiWidget):
+    def __init__(self, attrs=None):
+        widgets = [
+            forms.NumberInput(
+                attrs={
+                    "placeholder": "Day",
+                    "min": 1,
+                    "max": 31,
+                    "class": "vIntegerField mx-1",
+                }
+            ),
+            forms.Select(attrs={"placeholder": "Month"}, choices=MONTHS.items()),
+            forms.NumberInput(
+                attrs={
+                    "placeholder": "Year",
+                    "min": 1500,
+                    "max": date.today().year,
+                    "class": "vIntegerField mx-1",
+                }
+            ),
+        ]
+        super().__init__(widgets, attrs)
+
+    def decompress(self, value):
+        if isinstance(value, date):
+            return [value.day, value.month, value.year]
+        elif isinstance(value, str):
+            year, month, day = value.split("-")
+            return [day, month, year]
+        return [None, None, None]
+
+    def value_from_datadict(self, data, files, name):
+        day, month, year = super().value_from_datadict(data, files, name)
+        # DateField expects a single string that it can parse into a date.
+        return "{}-{}-{}".format(year, month, day)
+
+
 class DocumentForm(forms.ModelForm):
     content_html = forms.CharField(widget=CKEditorWidget(), required=False)
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
     headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
-    date = forms.DateField(
-        widget=forms.SelectDateWidget(years=range(1950, date.today().year + 1))
-    )
+    date = forms.DateField(widget=DateSelectorWidget())
 
     def __init__(self, data=None, *args, **kwargs):
         if data:
@@ -340,7 +376,7 @@ class JudgmentMediaSummaryFileInline(BaseAttachmentFileInline):
 
 
 class JudgmentAdminForm(DocumentForm):
-    hearing_date = forms.DateField(widget=forms.SelectDateWidget(), required=False)
+    hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
 
     class Meta:
         model = Judgment
