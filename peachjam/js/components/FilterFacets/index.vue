@@ -1,9 +1,11 @@
 <template>
   <ul class="list-group">
     <li
-      class="list-group-item bg-light d-flex justify-content-between align-items-center"
+      class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center"
     >
-      <strong>{{ $t("Filters") }}</strong>
+      <slot name="header-title">
+        <strong>{{ $t("Filters") }}</strong>
+      </slot>
       <a
         v-if="showClearAllFilter"
         href="#"

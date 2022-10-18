@@ -1,21 +1,24 @@
 import logging
 import mimetypes
+import re
 
 import magic
 from cobalt import FrbrUri
 from countries_plus.models import Country
 from django.core.files.base import File
 from import_export import fields, resources
-from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
+from import_export.widgets import CharWidget, ForeignKeyWidget, ManyToManyWidget
 from languages_plus.models import Language
 
 from peachjam.models import (
     Author,
     CaseNumber,
+    Court,
     DocumentNature,
     GenericDocument,
     Judge,
     Judgment,
+    JudgmentMediaSummaryFile,
     Locality,
     MatterType,
     SourceFile,
@@ -129,12 +132,29 @@ class GenericDocumentResource(BaseDocumentResource):
         DocumentNature.objects.get_or_create(name=row["nature"])
 
 
+class JudgesWidget(ManyToManyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+
+        # Remove extra white space around and in between the judges names
+        judges = [" ".join(j.split()) for j in value.split(self.separator)]
+
+        for j in judges:
+            judge, _ = self.model.objects.get_or_create(name=j)
+        return self.model.objects.filter(name__in=judges)
+
+
 class JudgmentResource(BaseDocumentResource):
     judges = fields.Field(
         column_name="judges",
         attribute="judges",
-        widget=ManyToManyWidget(Judge, field="name"),
+        widget=JudgesWidget(Judge, separator="|", field="name"),
     )
+    court = fields.Field(
+        column_name="court",
+        attribute="court",
+        widget=ForeignKeyWidget(Court, field="name"),
+    )
+    case_numbers = fields.Field(column_name="case_numbers", widget=CharWidget)
 
     class Meta(BaseDocumentResource.Meta):
         model = Judgment
@@ -146,31 +166,56 @@ class JudgmentResource(BaseDocumentResource):
                 defaults={"name": row["court_obj"]["name"]},
             )
 
+        source_files = [x.strip() for x in row["source_url"].split("|")]
+        docx = re.compile(r"\.docx?$")
+        pdf = re.compile(r"\.pdf$")
+        for file in source_files:
+            match_docx = docx.search(file)
+            match_pdf = pdf.search(file)
+            # prefer the .docx file if available, otherwise use .pdf, ignore .rtf
+            if match_docx:
+                row["source_url"] = file
+                break
+            elif match_pdf:
+                row["source_url"] = file
+
     def after_import_row(self, row, instance, row_number=None, **kwargs):
         super().after_import_row(row, instance, row_number, **kwargs)
 
         judgment = Judgment.objects.get(pk=instance.object_id)
 
-        if row["judges"]:
-            for judge in list(map(str.strip, row["judges"].split("|"))):
-                judge, _ = Judge.objects.get_or_create(name=judge)
-                judgment.judges.add(judge)
-
-        if "string_override" in row:
+        if row["case_string_override"]:
             CaseNumber.objects.create(
-                string_override=row["string_override"], document=judgment
+                string_override=row["case_string_override"], document=judgment
             )
-        elif "case_numbers" in row:
-            for case_number in list(map(str.strip, row["case_numbers"].split("|"))):
-                if row["matter_type"]:
-                    matter_type, _ = MatterType.objects.get_or_create(
-                        name=row["matter_type"]
-                    )
-                CaseNumber.objects.create(
-                    document=judgment,
-                    number=case_number[0],
-                    year=case_number[1],
-                    matter_type=MatterType.objects.get(name=row["matter_type"]),
+        elif row["case_numbers"]:
+            # expected format: 31/2001|45/2002|20/2003
+            # or: 31/2001/Application|45/2002/Application|20/2003/Application
+
+            for c in [x.strip() for x in row["case_numbers"].split("|")]:
+
+                case_number_values = c.split("/")
+                case_number = CaseNumber(
+                    number=case_number_values[0], year=case_number_values[1]
                 )
 
+                if len(case_number_values) == 3:
+                    case_number.matter_type = MatterType.objects.get_or_create(
+                        name=case_number_values[2]
+                    )[0]
+
+                case_number.document = judgment
+                case_number.save()
+
         judgment.save()
+
+        if row["media_summary_file"]:
+            summary_file = download_source_file(row["media_summary_file"])
+            mime, _ = mimetypes.guess_type(row["media_summary_file"])
+            ext = mimetypes.guess_extension(mime)
+            JudgmentMediaSummaryFile.objects.update_or_create(
+                document=judgment,
+                defaults={
+                    "file": File(summary_file, name=f"{judgment.title[-250:]}{ext}")
+                },
+            )
