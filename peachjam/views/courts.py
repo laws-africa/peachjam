@@ -38,17 +38,17 @@ class CourtDetailView(FilteredDocumentListView):
             .values_list("judges__name", flat=True)
             .distinct()
         )
-
         if None in judges:
             judges.remove(None)
 
         context["court"] = self.court
         if "year" in self.kwargs:
             context["year"] = self.kwargs["year"]
+
         context["facet_data"] = {
             "judges": judges,
             "alphabet": lowercase_alphabet(),
-            "years": list(years),
+            "years": list(set(years)),
         }
 
         return context
