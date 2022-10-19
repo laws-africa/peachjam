@@ -27,16 +27,18 @@ class CourtDetailView(FilteredDocumentListView):
 
         years = (
             self.model.objects.filter(court=self.court)
-            .order_by()
+            .order_by("-date")
             .values_list("date__year", flat=True)
             .distinct()
         )
 
-        context["years"] = sorted(years, reverse=True)
-
         judges = list(
-            set(self.get_base_queryset().values_list("judges__name", flat=True))
+            self.get_base_queryset()
+            .order_by("judges__name")
+            .values_list("judges__name", flat=True)
+            .distinct()
         )
+
         if None in judges:
             judges.remove(None)
 
@@ -46,6 +48,7 @@ class CourtDetailView(FilteredDocumentListView):
         context["facet_data"] = {
             "judges": judges,
             "alphabet": lowercase_alphabet(),
+            "years": list(years),
         }
 
         return context
