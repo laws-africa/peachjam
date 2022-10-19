@@ -1,13 +1,28 @@
 import components from './components';
 import '@lawsafrica/web-components/dist/components/la-akoma-ntoso';
-import '@lawsafrica/web-components/dist/components/la-gutter';
-import '@lawsafrica/web-components/dist/components/la-gutter-item';
-import '@lawsafrica/web-components/dist/components/la-table-of-contents-controller';
-import '@lawsafrica/web-components/dist/components/la-decorate-internal-refs';
-import '@lawsafrica/web-components/dist/components/la-decorate-terms';
+
+import {
+  LaAkomaNtoso, LaGutter, LaGutterItem, LaTableOfContentsController, LaDecorateInternalRefs, LaDecorateTerms
+} from '@lawsafrica/law-widgets-vue';
+
 // @ts-ignore
 import { i18n } from './i18n';
 import { createAndMountApp } from './utils/vue-utils';
+import { defineComponent } from 'vue';
+
+/*
+* This will register web components for vanilla or vue usage
+* */
+defineComponent({
+  components: {
+    LaAkomaNtoso,
+    LaDecorateInternalRefs,
+    LaDecorateTerms,
+    LaGutter,
+    LaGutterItem,
+    LaTableOfContentsController
+  }
+});
 
 class PeachJam {
   private components: any[];
