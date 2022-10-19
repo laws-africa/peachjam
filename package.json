@@ -44,7 +44,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "@lawsafrica/law-widgets-vue": "^1.0.1",
+    "@lawsafrica/law-widgets": "^1.0.2",
     "dom-anchor-text-position": "^5.0.0",
     "dom-anchor-text-quote": "^4.0.2",
     "lodash": "^4.17.21",
