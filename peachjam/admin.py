@@ -119,6 +119,7 @@ class DocumentTopicInline(admin.TabularInline):
 
 class DateSelectorWidget(forms.MultiWidget):
     def __init__(self, attrs=None):
+        months = [("", "Month")] + list(MONTHS.items())
         widgets = [
             forms.NumberInput(
                 attrs={
@@ -128,7 +129,7 @@ class DateSelectorWidget(forms.MultiWidget):
                     "class": "vIntegerField mx-1",
                 }
             ),
-            forms.Select(attrs={"placeholder": "Month"}, choices=MONTHS.items()),
+            forms.Select(attrs={"placeholder": "Month"}, choices=months),
             forms.NumberInput(
                 attrs={
                     "placeholder": "Year",
@@ -151,6 +152,8 @@ class DateSelectorWidget(forms.MultiWidget):
     def value_from_datadict(self, data, files, name):
         day, month, year = super().value_from_datadict(data, files, name)
         # DateField expects a single string that it can parse into a date.
+        if not day and not month and not year:
+            return None
         return "{}-{}-{}".format(year, month, day)
 
 
