@@ -1,5 +1,4 @@
 import components from './components';
-import '@lawsafrica/web-components/dist/components/la-akoma-ntoso';
 
 import {
   LaAkomaNtoso, LaGutter, LaGutterItem, LaTableOfContentsController, LaDecorateInternalRefs, LaDecorateTerms
