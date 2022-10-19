@@ -20,7 +20,12 @@ const peachJamConfig = {
         test: /\.vue$/,
         use: [
           {
-            loader: 'vue-loader'
+            loader: 'vue-loader',
+            options: {
+              compilerOptions: {
+                isCustomElement: tag => tag.startsWith('la-')
+              }
+            }
           }
         ]
       },
