@@ -1,13 +1,28 @@
 import components from './components';
-import '@lawsafrica/web-components/dist/components/la-akoma-ntoso';
-import '@lawsafrica/web-components/dist/components/la-gutter';
-import '@lawsafrica/web-components/dist/components/la-gutter-item';
-import '@lawsafrica/web-components/dist/components/la-table-of-contents-controller';
-import '@lawsafrica/web-components/dist/components/la-decorate-internal-refs';
-import '@lawsafrica/web-components/dist/components/la-decorate-terms';
+
 // @ts-ignore
 import { i18n } from './i18n';
 import { createAndMountApp } from './utils/vue-utils';
+
+import {
+  LaAkomaNtoso,
+  LaGutter,
+  LaGutterItem,
+  LaTableOfContentsController,
+  LaTableOfContents,
+  LaTocItem,
+  LaDecorateInternalRefs,
+  LaDecorateTerms
+} from '@lawsafrica/law-widgets/dist/components';
+
+customElements.define('la-akoma-ntoso', LaAkomaNtoso as any);
+customElements.define('la-gutter', LaGutter as any);
+customElements.define('la-gutter-item', LaGutterItem as any);
+customElements.define('la-decorate-internal-refs', LaDecorateInternalRefs as any);
+customElements.define('la-decorate-terms', LaDecorateTerms as any);
+customElements.define('la-table-of-contents-controller', LaTableOfContentsController as any);
+customElements.define('la-table-of-contents', LaTableOfContents as any);
+customElements.define('la-toc-item', LaTocItem as any);
 
 class PeachJam {
   private components: any[];
