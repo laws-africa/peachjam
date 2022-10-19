@@ -171,3 +171,5 @@ liiweb/static/stylesheets/liiweb.css
 # Image upload folders
 articles/
 user_profiles/
+
+vendors-node_modules*
