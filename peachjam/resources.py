@@ -223,5 +223,6 @@ class JudgmentResource(BaseDocumentResource):
                 defaults={
                     "file": File(summary_file, name=f"{judgment.title[-250:]}{ext}"),
                     "nature": media_summary_file_nature,
+                    "mimetype": mime,
                 },
             )
