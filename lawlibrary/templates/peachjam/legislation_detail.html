@@ -3,16 +3,26 @@
 
 {% block breadcrumbs %}
   <nav aria-label="breadcrumb">
-    {% if locality %}
+    {% if document.locality %}
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'provincial_legislation' %}">{% trans 'Provincial Legislation' %}</a></li>
-      </ol>
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a></li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'provincial_legislation' %}">
+            {% trans 'Provincial Legislation' %}
+          </a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'provincial_legislation_list' document.locality.code %}">
+            {{ document.locality.name }}
+          </a>
+        </li>
       </ol>
     {% else %}
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'legislation_list' %}">National legislation</a></li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'legislation_list' %}">
+            {% trans 'National legislation' %}
+          </a>
+        </li>
       </ol>
     {% endif %}
   </nav>
