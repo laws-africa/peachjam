@@ -2,15 +2,15 @@ from peachjam.models import GenericDocument
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
-    BaseQuerysetPrefetchMixin,
     FilteredDocumentListView,
 )
 
 
-class GenericDocumentListView(FilteredDocumentListView, BaseQuerysetPrefetchMixin):
+class GenericDocumentListView(FilteredDocumentListView):
     template_name = "peachjam/generic_document_list.html"
     model = GenericDocument
     navbar_link = "generic_documents"
+    queryset = GenericDocument.objects.prefetch_related("author", "nature")
 
     def get_queryset(self):
         queryset = super(GenericDocumentListView, self).get_queryset()

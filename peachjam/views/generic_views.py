@@ -20,13 +20,6 @@ from peachjam_api.serializers import (
 )
 
 
-class BaseQuerysetPrefetchMixin:
-    model = None
-
-    def get_base_queryset(self):
-        return self.model.objects.prefetch_related("author", "nature")
-
-
 class FilteredDocumentListView(ListView):
     """Generic List View class for filtering documents."""
 
