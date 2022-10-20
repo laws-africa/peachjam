@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-07 16:03+0200\n"
-"PO-Revision-Date: 2022-10-20 16:19\n"
+"PO-Revision-Date: 2022-10-20 18:24\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -35,23 +35,23 @@ msgstr "Não encontrado (Erro 404)"
 
 #: templates/404.html:11
 msgid "We couldn't find the page you're looking for. The link may be outdated or incorrect."
-msgstr "Nós não conseguimos encontrar a página que você está procurando. O link pode estar desatualizado ou incorreto."
+msgstr "Nós não conseguimos encontrar a página que você está procurando. O link pode estar desatualizado ou incorrecto."
 
 #: templates/404.html:17 templates/500.html:17
 msgid "Go to the homepage."
-msgstr "Ir para a página inicial."
+msgstr "Ir à página inicial."
 
 #: templates/404.html:20 templates/500.html:20
 msgid "Try searching for what you're looking for."
-msgstr "Tente procurar o que você está procurando."
+msgstr "Tente pesquisar o que procura."
 
 #: templates/500.html:4 templates/500.html:9
 msgid "Something went wrong (Error 500)"
-msgstr "Algo deu errado (Erro 500)"
+msgstr "Ocorreu um erro (Erro 500)"
 
 #: templates/500.html:11
 msgid "Something went wrong. Please try again in a short while."
-msgstr "Algo deu errado. Por favor, tente novamente mais tarde."
+msgstr "Ocorreu um erro. Por favor, tente novamente mais tarde."
 
 #: templates/account/base.html:16
 msgid "Need help? Please email <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
@@ -104,7 +104,7 @@ msgstr "Redefinir sua senha"
 
 #: templates/account/password_reset.html:12
 msgid "Forgotten your password? Enter your e-mail address below, and we'll send you an e-mail allowing you to reset it."
-msgstr "Esqueceu sua senha? Digite seu endereço de e-mail abaixo e enviaremos um e-mail para você redefini-la."
+msgstr "Esqueceu sua senha? Digite seu endereço de e-mail abaixo e enviaremos um e-mail para redefini-la."
 
 #: templates/account/password_reset.html:30
 #: templates/account/password_reset_from_key.html:51
@@ -180,7 +180,7 @@ msgstr "Título numerado"
 #: templates/peachjam/_document_content.html:37
 #| msgid "Page"
 msgid "Pages"
-msgstr "páginas"
+msgstr "Páginas"
 
 #: templates/peachjam/_document_content.html:155
 msgid "Loading PDF..."
@@ -189,7 +189,7 @@ msgstr "Carregando PDF..."
 #: templates/peachjam/_document_content.html:166
 #, python-format
 msgid "This document is %(filesize)s. Do you want to load it?"
-msgstr "Este documento é %(filesize)s. Você deseja carregá-lo?"
+msgstr "Este documento é %(filesize)s. Deseja carregá-lo?"
 
 #: templates/peachjam/_document_content.html:171
 #| msgid "AU Documents"
@@ -397,7 +397,7 @@ msgstr "Artigos recentes por %(username)s"
 
 #: templates/peachjam/article_list.html:9
 msgid "Latest Articles"
-msgstr "Últimos Artigos"
+msgstr "Artigos mais recentes"
 
 #: templates/peachjam/author_detail.html:7
 #, python-format
@@ -430,11 +430,11 @@ msgstr "Copiado!"
 #: templates/peachjam/judgment_detail.html:14
 #: templates/peachjam/layouts/document_detail.html:75
 msgid "Copy"
-msgstr "copiar"
+msgstr "Copiar"
 
 #: templates/peachjam/judgment_detail.html:19
 msgid "Hearing date"
-msgstr "Data auditiva"
+msgstr "Data da audiência"
 
 #: templates/peachjam/judgment_detail.html:27
 msgid "Case number"
@@ -462,7 +462,7 @@ msgstr "Jurisdição"
 #: templates/peachjam/layouts/document_detail.html:69
 #| msgid "Legislation List"
 msgid "Citation"
-msgstr "Referência"
+msgstr "Citação"
 
 #: templates/peachjam/layouts/document_detail.html:82
 msgid "Author"
@@ -476,7 +476,7 @@ msgstr "Idioma"
 #: templates/peachjam/layouts/document_detail.html:134
 #: templates/peachjam/layouts/document_detail.html:142
 msgid "Download"
-msgstr "BAIXAR"
+msgstr "Descarregar"
 
 #: templates/peachjam/layouts/document_detail.html:160
 #, python-format
@@ -494,7 +494,7 @@ msgstr "Tratados e Protocolos"
 
 #: templates/peachjam/legislation_detail.html:34
 msgid "Primary work"
-msgstr "Principal trabalho"
+msgstr "Trabalho principal"
 
 #: templates/peachjam/legislation_list.html:4
 #: templates/peachjam/legislation_list.html:7
