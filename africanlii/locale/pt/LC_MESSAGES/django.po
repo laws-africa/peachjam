@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-07 16:03+0200\n"
-"PO-Revision-Date: 2022-10-12 09:01\n"
+"PO-Revision-Date: 2022-10-20 16:19\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -156,7 +156,7 @@ msgstr "Legislação"
 
 #: templates/peachjam/_header.html:34
 msgid "Commentary"
-msgstr "Comentario"
+msgstr "Comentário"
 
 #: templates/peachjam/_header.html:37
 msgid "About"
@@ -187,7 +187,7 @@ msgstr "Pesquisa"
 #: templates/peachjam/home.html:42
 #| msgid "Regional Body"
 msgid "Regional Bodies"
-msgstr "Corpos Regionais"
+msgstr "Órgãos Regionais"
 
 #: templates/peachjam/home.html:53
 msgid "Regional Economic Communities"
@@ -209,7 +209,7 @@ msgstr "Documentos recentes da UA"
 #: templates/peachjam/home.html:77
 #| msgid "Recent AU Documents"
 msgid "View more AU documents"
-msgstr "Ver mais documentos do AU"
+msgstr "Ver mais documentos do UA"
 
 #: templates/peachjam/home.html:84
 msgid "Recent Legal Instruments"
@@ -231,7 +231,7 @@ msgstr "Ver mais tratados e protocolos"
 
 #: templates/peachjam/home.html:100
 msgid "Latest Commentary"
-msgstr "Último comentário"
+msgstr "Comentário mais recente"
 
 #: templates/peachjam/home.html:104
 #| msgid "Recent Judgments"
