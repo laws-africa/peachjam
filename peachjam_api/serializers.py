@@ -81,7 +81,7 @@ class ChildLegislationSerializer(serializers.ModelSerializer):
 
 
 class LegislationSerializer(serializers.ModelSerializer):
-    taxonomies = serializers.ReadOnlyField(source="get_taxonomies")
+    taxonomies = serializers.SerializerMethodField("get_taxonomies")
     year = serializers.ReadOnlyField()
     children = ChildLegislationSerializer(many=True, read_only=True)
 
@@ -96,3 +96,6 @@ class LegislationSerializer(serializers.ModelSerializer):
             "year",
             "taxonomies",
         )
+
+    def get_taxonomies(self, instance):
+        return [x.topic.name for x in instance.taxonomies.all()]
