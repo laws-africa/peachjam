@@ -11,6 +11,9 @@ class GenericDocumentListView(FilteredDocumentListView):
     model = GenericDocument
     navbar_link = "generic_documents"
 
+    def get_base_queryset(self):
+        return self.model.objects.prefetch_related("author", "nature")
+
     def get_queryset(self):
         queryset = super(GenericDocumentListView, self).get_queryset()
         return queryset.order_by("-date")
