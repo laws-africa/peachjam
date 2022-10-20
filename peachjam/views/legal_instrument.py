@@ -2,12 +2,11 @@ from peachjam.models import LegalInstrument
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
-    BaseQuerysetPrefetchMixin,
     FilteredDocumentListView,
 )
 
 
-class LegalInstrumentListView(FilteredDocumentListView, BaseQuerysetPrefetchMixin):
+class LegalInstrumentListView(FilteredDocumentListView):
     model = LegalInstrument
     template_name = "peachjam/legal_instrument_list.html"
     navbar_link = "legal_instruments"
