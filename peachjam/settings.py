@@ -192,6 +192,7 @@ LANGUAGE_CODE = "en-us"
 LANGUAGES = [
     ("en", _("English")),
     ("fr", _("French")),
+    ("pt", _("Portuguese")),
     ("sw", _("Swahili")),
 ]
 
