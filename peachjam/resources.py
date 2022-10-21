@@ -122,7 +122,7 @@ class GenericDocumentResource(BaseDocumentResource):
     nature = fields.Field(
         column_name="nature",
         attribute="nature",
-        widget=ForeignKeyWidget(DocumentNature, field="name"),
+        widget=ForeignKeyWidget(DocumentNature, field="code"),
     )
 
     class Meta(BaseDocumentResource.Meta):
@@ -130,7 +130,7 @@ class GenericDocumentResource(BaseDocumentResource):
 
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
-        DocumentNature.objects.get_or_create(name=row["nature"])
+        DocumentNature.objects.get_or_create(code=row["nature"])
 
 
 class JudgesWidget(ManyToManyWidget):

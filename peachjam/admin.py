@@ -518,13 +518,19 @@ class WorkAdmin(admin.ModelAdmin):
         return False
 
 
+@admin.register(DocumentNature)
+class DocumentNatureAdmin(admin.ModelAdmin):
+    search_fields = ("name", "code")
+    list_display = ("name", "code")
+    prepopulated_fields = {"code": ("name",)}
+
+
 admin.site.register(
     [
         Image,
         Locality,
         CitationLink,
         Author,
-        DocumentNature,
         Judge,
         MatterType,
         Court,
