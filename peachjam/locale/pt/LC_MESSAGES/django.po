@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-07 16:03+0200\n"
-"PO-Revision-Date: 2022-10-21 11:21\n"
+"POT-Creation-Date: 2022-10-21 21:07+0200\n"
+"PO-Revision-Date: 2022-10-21 19:13\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -14,18 +14,18 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: pt\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 44\n"
+"X-Crowdin-File: /main/peachjam/locale/en/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 99\n"
 
-#: settings.py:194
+#: settings.py:193
 msgid "English"
 msgstr "Inglês"
 
-#: settings.py:195
+#: settings.py:194
 msgid "French"
 msgstr "Francês"
 
-#: settings.py:196
+#: settings.py:195
 msgid "Swahili"
 msgstr "Suaíli"
 
@@ -66,7 +66,7 @@ msgstr "Efetuar Login"
 #: templates/account/password_reset_from_key_done.html:10
 #: templates/admin/login.html:63
 msgid "Log in"
-msgstr "Efectuar Login"
+msgstr "Efetuar Login"
 
 #: templates/account/login.html:30 templates/account/password_reset.html:18
 msgid "Email address"
@@ -78,7 +78,7 @@ msgstr "Senha"
 
 #: templates/account/login.html:45
 msgid "Forgot your password?"
-msgstr "Esqueceu a sua senha?"
+msgstr "Esqueceu-se da sua senha?"
 
 #: templates/account/login.html:76
 #, python-format
@@ -86,7 +86,7 @@ msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
 msgstr "\n"
-"            Inicie sessão com %(provider.name)s\n"
+"            Efetuar Login com %(provider.name)s\n"
 "          "
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
@@ -118,7 +118,7 @@ msgstr "Código ruim"
 #: templates/account/password_reset_from_key.html:7
 #: templates/account/password_reset_from_key_done.html:7
 msgid "Reset Password"
-msgstr "Redefinir a Senha"
+msgstr "Redefinir a senha"
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
@@ -139,7 +139,7 @@ msgstr "Sua senha foi redefinida."
 
 #: templates/account/password_reset_from_key_done.html:4
 msgid "Change Password"
-msgstr "Mudar a senha"
+msgstr "Mudar a Senha"
 
 #: templates/account/password_reset_from_key_done.html:8
 msgid "Your password has been reset."
@@ -151,7 +151,7 @@ msgstr "Por favor corrige o erro abaixo."
 
 #: templates/admin/login.html:23
 msgid "Please correct the errors below."
-msgstr "Por favor, corrija os erros abaixo."
+msgstr "Por favor corrige o erro abaixo."
 
 #: templates/admin/login.html:39
 #, python-format
@@ -160,11 +160,10 @@ msgstr "Você está autenticado como %(username)s, mas não está autorizado a a
 
 #: templates/admin/login.html:59
 msgid "Forgotten your password or username?"
-msgstr "Esqueceu sua senha ou nome de usuário?"
+msgstr "Esqueceu sua senha ou usuário?"
 
 #: templates/peachjam/_child_documents.html:3
 #: templates/peachjam/legislation_detail.html:10
-#| msgid "Legislation List"
 msgid "Subsidiary legislation"
 msgstr "Legislação subsidiária"
 
@@ -178,7 +177,6 @@ msgid "Numbered title"
 msgstr "Título numerado"
 
 #: templates/peachjam/_document_content.html:37
-#| msgid "Page"
 msgid "Pages"
 msgstr "Páginas"
 
@@ -192,9 +190,12 @@ msgid "This document is %(filesize)s. Do you want to load it?"
 msgstr "Este documento é %(filesize)s. Deseja carregá-lo?"
 
 #: templates/peachjam/_document_content.html:171
-#| msgid "AU Documents"
 msgid "Load document"
 msgstr "Carregar documento"
+
+#: templates/peachjam/_document_content.html:182
+msgid "To the top"
+msgstr "Para o topo"
 
 #: templates/peachjam/_document_table.html:8
 #: templates/peachjam/layouts/document_detail.html:88
@@ -215,7 +216,6 @@ msgid "Logout"
 msgstr "Desconectar"
 
 #: templates/peachjam/_pagination.html:6
-#| msgid "previous"
 msgid "Previous"
 msgstr "Anterior"
 
@@ -230,7 +230,7 @@ msgstr "Nenhum documento encontrado."
 
 #: templates/peachjam/_related_documents.html:3
 #: templates/peachjam/layouts/document_detail.html:40
-#: templates/peachjam/layouts/document_detail.html:155
+#: templates/peachjam/layouts/document_detail.html:169
 msgid "Related documents"
 msgstr "Documentos relacionados"
 
@@ -252,8 +252,8 @@ msgid "\n"
 "          Our specific goals are to:\n"
 "        "
 msgstr "\n"
-"          Esta plataforma Pan-Africana serve como um centro de informações sobre todos os aspectos da agenda da Arquitetura\n"
-"          Governança Africana (AGA), incluindo cartas, protocolos, comunicações, decisões legais relevantes, política,\n"
+"          Esta plataforma Pan-Africana serve como um centro de informações sobre todos os aspectos da agenda da Arquitectura \n"
+"          de Governação Africana (AGA), incluindo cartas, protocolos, comunicações, decisões legais relevantes, política,\n"
 "          implementação, monitoramento e material relacionado. O objectivo global é construir uma colaboração eficaz\n"
 "          entre os cidadãos africanos e as organizações da sociedade civil, por um lado, e membros AGA, por outro lado, para\n"
 "          reforçar a implementação da agenda da plataforma AGA no que diz respeito à democracia, governação e direitos humanos.\n"
@@ -304,7 +304,7 @@ msgid "\n"
 "        "
 msgstr "\n"
 "          Essa plataforma é desenvolvida e mantida conjuntamente por <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> e\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Leis. frica</a> com fundos da União Europeia,\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> com fundos da União Europeia,\n"
 "          o Indigo Trust e o Sigrid Rausing Trust. A fase inicial do projecto vai de 2021 para 2024.\n"
 "        "
 
@@ -386,7 +386,6 @@ msgid "Articles"
 msgstr "Artigos"
 
 #: templates/peachjam/article_detail.html:59
-#| msgid "About the platform"
 msgid "About the author"
 msgstr "Sobre o autor"
 
@@ -403,6 +402,11 @@ msgstr "Artigos mais recentes"
 #, python-format
 msgid " Documents by %(author)s "
 msgstr " Documentos por %(author)s "
+
+#: templates/peachjam/court_detail.html:7
+#, python-format
+msgid "Documents by %(court)s"
+msgstr "Documentos por %(court)s"
 
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
@@ -442,12 +446,10 @@ msgstr "Número do processo"
 
 #: templates/peachjam/judgment_list.html:4
 #: templates/peachjam/judgment_list.html:7
-#| msgid "Judgment List"
 msgid "Judgments"
 msgstr "Julgamentos"
 
 #: templates/peachjam/layouts/document_detail.html:27
-#| msgid "Documents"
 msgid "Document detail"
 msgstr "Detalhe do documento"
 
@@ -460,7 +462,6 @@ msgid "Jurisdiction"
 msgstr "Jurisdição"
 
 #: templates/peachjam/layouts/document_detail.html:69
-#| msgid "Legislation List"
 msgid "Citation"
 msgstr "Citação"
 
@@ -475,10 +476,11 @@ msgstr "Idioma"
 #: templates/peachjam/layouts/document_detail.html:129
 #: templates/peachjam/layouts/document_detail.html:134
 #: templates/peachjam/layouts/document_detail.html:142
+#: templates/peachjam/layouts/document_detail.html:155
 msgid "Download"
 msgstr "Descarregar"
 
-#: templates/peachjam/layouts/document_detail.html:160
+#: templates/peachjam/layouts/document_detail.html:174
 #, python-format
 msgid "%(n_relationships)s related documents"
 msgstr "%(n_relationships)s documentos relacionados"
@@ -490,36 +492,14 @@ msgstr "Documentos"
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
 msgid "Treaties and Protocols"
-msgstr "Tratados e Protocolos"
+msgstr ""
 
 #: templates/peachjam/legislation_detail.html:34
 msgid "Primary work"
-msgstr "Trabalho principal"
+msgstr ""
 
 #: templates/peachjam/legislation_list.html:4
 #: templates/peachjam/legislation_list.html:7
-#| msgid "Legislation List"
 msgid "Legislation"
-msgstr "Legislação"
-
-#~ msgid "first"
-#~ msgstr "kwanza"
-
-#~ msgid "next"
-#~ msgstr "ifuatayo"
-
-#~ msgid "last"
-#~ msgstr "ya mwisho"
-
-#~ msgid "Generic Document List"
-#~ msgstr "Orodha ya Hati za Jumla"
-
-#~ msgid "Legal Instrument List"
-#~ msgstr "Orodha ya Vyombo vya Kisheria"
-
-#~ msgid "Welcome to Peach Jam"
-#~ msgstr "Bienvenue dans Peach Jam"
-
-#~ msgid "More text that needs translation"
-#~ msgstr "Plus de texte qui nécessite une traduction"
+msgstr ""
 
