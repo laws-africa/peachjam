@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-07 16:03+0200\n"
-"PO-Revision-Date: 2022-10-21 10:15\n"
+"PO-Revision-Date: 2022-10-21 11:20\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 50\n"
+"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 44\n"
 
 #: settings.py:194
 msgid "English"
@@ -103,7 +103,6 @@ msgid "Reset Your Password"
 msgstr "Réinitialiser votre mot de passe"
 
 #: templates/account/password_reset.html:12
-#| msgid "Forgotten your password? Enter your e-mail address below, and we"
 msgid "Forgotten your password? Enter your e-mail address below, and we'll send you an e-mail allowing you to reset it."
 msgstr "Vous avez oublié votre mot de passe ? Entrez votre adresse e-mail ci-dessous et nous vous enverrons un e-mail vous permettant de le réinitialiser."
 
@@ -193,7 +192,7 @@ msgid "This document is %(filesize)s. Do you want to load it?"
 msgstr "Ce document est %(filesize)s. Voulez-vous le charger ?"
 
 #: templates/peachjam/_document_content.html:171
-#| msgid "Related documents"
+#| msgid "AU Documents"
 msgid "Load document"
 msgstr "Charger le document"
 
@@ -430,7 +429,7 @@ msgid "Judgments"
 msgstr "Jugements"
 
 #: templates/peachjam/layouts/document_detail.html:27
-#| msgid "Document Type"
+#| msgid "Documents"
 msgid "Document detail"
 msgstr "Détail du document"
 
@@ -472,7 +471,6 @@ msgstr "Documents"
 
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
-#| msgid "Treaties and Protocols List"
 msgid "Treaties and Protocols"
 msgstr "Traités et Protocoles"
 
@@ -486,29 +484,20 @@ msgstr "Travail principal"
 msgid "Legislation"
 msgstr "Législation"
 
-#~ msgid "Relationships"
-#~ msgstr "Relations"
-
 #~ msgid "first"
-#~ msgstr "premier"
+#~ msgstr "kwanza"
 
 #~ msgid "next"
-#~ msgstr "suivant"
+#~ msgstr "ifuatayo"
 
 #~ msgid "last"
-#~ msgstr "dernier"
-
-#~ msgid "Regional Body"
-#~ msgstr "Corps régional"
+#~ msgstr "ya mwisho"
 
 #~ msgid "Generic Document List"
-#~ msgstr "Liste de documents génériques"
-
-#~ msgid "This document"
-#~ msgstr "Ce document"
+#~ msgstr "Orodha ya Hati za Jumla"
 
 #~ msgid "Legal Instrument List"
-#~ msgstr "Liste d'instruments légaux"
+#~ msgstr "Orodha ya Vyombo vya Kisheria"
 
 #~ msgid "Welcome to Peach Jam"
 #~ msgstr "Bienvenue dans Peach Jam"
