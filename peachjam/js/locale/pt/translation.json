@@ -1,7 +1,7 @@
 {
   "{document_count} documents found": "{document_count} documentos encontrados",
   "{reverse_verb} this provision": "{reverse_verb} esta disposição",
-  "Alphabetical": "Alfabético",
+  "Alphabetical": "Alfabeto",
   "Author": "Autor",
   "Clear": "Limpar",
   "Clear all": "Excluir todos",
@@ -20,11 +20,11 @@
   "No documents match your search": "Não existem documentos que correspondam à sua pesquisa.",
   "No results": "Sem resultados",
   "Oops, something went wrong": "Oops, ocorreu um erro.",
-  "Page": "Órgão regional",
-  "Regional Body": "Órgão regional",
+  "Page": "Página",
+  "Regional Body": "Órgão Regional",
   "Relevance": "Relevância",
   "Search": "Pesquisar",
-  "Search document content": "Pesquisar conteúdo de documentos",
+  "Search document content": "Pesquisa de conteúdo de documentos",
   "Sort by": "Classificar por",
   "This provision": "Esta disposição",
   "Year": "Ano"
