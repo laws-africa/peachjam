@@ -52,7 +52,7 @@ class BaseDocumentResource(resources.ModelResource):
     )
     language = fields.Field(
         attribute="language",
-        widget=ForeignKeyWidget(Language, field="iso_639_3"),
+        widget=ForeignKeyWidget(Language, field="iso_639_2T"),
     )
     jurisdiction = fields.Field(
         attribute="jurisdiction", widget=JurisdictionWidget(Country)
