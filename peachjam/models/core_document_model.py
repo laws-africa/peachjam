@@ -163,12 +163,6 @@ class CoreDocument(PolymorphicModel):
         return self.expression_frbr_uri
 
     @property
-    def get_taxonomies(self):
-        return list(
-            self.taxonomies.distinct("topic").values_list("topic__name", flat=True)
-        )
-
-    @property
     def year(self):
         return self.date.year
 
