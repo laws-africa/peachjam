@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-07 16:03+0200\n"
-"PO-Revision-Date: 2022-08-31 17:26\n"
+"PO-Revision-Date: 2022-10-21 10:15\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/peachjam/locale/fr/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 50\n"
+"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 44\n"
 
 #: settings.py:194
 msgid "English"
@@ -31,37 +31,31 @@ msgstr "Swahili"
 
 #: templates/404.html:4 templates/404.html:9
 msgid "Not found (Error 404)"
-msgstr ""
+msgstr "Non trouvé (Erreur 404)"
 
 #: templates/404.html:11
-msgid ""
-"We couldn't find the page you're looking for. The link may be outdated or "
-"incorrect."
-msgstr ""
+msgid "We couldn't find the page you're looking for. The link may be outdated or incorrect."
+msgstr "Nous n'avons pas pu trouver la page que vous cherchez. Le lien est peut-être obsolète ou incorrect."
 
 #: templates/404.html:17 templates/500.html:17
 msgid "Go to the homepage."
-msgstr ""
+msgstr "Aller à la page d'accueil."
 
 #: templates/404.html:20 templates/500.html:20
 msgid "Try searching for what you're looking for."
-msgstr ""
+msgstr "Essayez de chercher ce que vous cherchez."
 
 #: templates/500.html:4 templates/500.html:9
 msgid "Something went wrong (Error 500)"
-msgstr ""
+msgstr "Quelque chose s'est mal passé (Erreur 500)"
 
 #: templates/500.html:11
 msgid "Something went wrong. Please try again in a short while."
-msgstr ""
+msgstr "Une erreur s'est produite. Veuillez réessayer dans un instant."
 
 #: templates/account/base.html:16
-msgid ""
-"Need help? Please email <a href=\"mailto:"
-"{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
-msgstr ""
-"Besoin d'aide ? Veuillez envoyer un e-mail à <a href=\"mailto:"
-"{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
+msgid "Need help? Please email <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
+msgstr "Besoin d'aide ? Veuillez envoyer un e-mail à <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
 
 #: templates/account/login.html:5
 msgid "Log In"
@@ -88,12 +82,10 @@ msgstr "Mot de passe oublié ?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Connectez-vous à %(provider.name)s\n"
 "          "
 
@@ -111,14 +103,8 @@ msgid "Reset Your Password"
 msgstr "Réinitialiser votre mot de passe"
 
 #: templates/account/password_reset.html:12
-#, fuzzy
-#| msgid "Forgotten your password? Enter your e-mail address below, and we"
-msgid ""
-"Forgotten your password? Enter your e-mail address below, and we'll send you "
-"an e-mail allowing you to reset it."
-msgstr ""
-"Vous avez oublié votre mot de passe ? Entrez votre adresse e-mail ci-"
-"dessous, et nous"
+msgid "Forgotten your password? Enter your e-mail address below, and we'll send you an e-mail allowing you to reset it."
+msgstr "Vous avez oublié votre mot de passe ? Entrez votre adresse e-mail ci-dessous et nous vous enverrons un e-mail vous permettant de le réinitialiser."
 
 #: templates/account/password_reset.html:30
 #: templates/account/password_reset_from_key.html:51
@@ -136,14 +122,8 @@ msgstr "Réinitialiser le mot de passe"
 
 #: templates/account/password_reset_from_key.html:11
 #, python-format
-msgid ""
-"The password reset link was invalid, possibly because it has already been "
-"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
-"a>."
-msgstr ""
-"Le lien de réinitialisation du mot de passe n'est pas valide, peut-être "
-"parce qu'il a déjà été utilisé. Veuillez demander une <a href="
-"\"%(passwd_reset_url)s\">nouvelle réinitialisation du mot de passe</a>."
+msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
+msgstr "Le lien de réinitialisation du mot de passe n'est pas valide, peut-être parce qu'il a déjà été utilisé. Veuillez demander une <a href=\"%(passwd_reset_url)s\">nouvelle réinitialisation du mot de passe</a>."
 
 #: templates/account/password_reset_from_key.html:27
 msgid "New Password"
@@ -175,13 +155,8 @@ msgstr "Veuillez corriger les erreurs ci-dessous."
 
 #: templates/admin/login.html:39
 #, python-format
-msgid ""
-"You are authenticated as %(username)s, but are not authorized to access this "
-"page. Would you like to login to a different account?"
-msgstr ""
-"Vous êtes authentifié en tant que %(username)s, mais vous n'êtes pas "
-"autorisé à accéder à cette page. Souhaitez-vous vous connecter à un autre "
-"compte ?"
+msgid "You are authenticated as %(username)s, but are not authorized to access this page. Would you like to login to a different account?"
+msgstr "Vous êtes authentifié en tant que %(username)s, mais vous n'êtes pas autorisé à accéder à cette page. Souhaitez-vous vous connecter à un autre compte ?"
 
 #: templates/admin/login.html:59
 msgid "Forgotten your password or username?"
@@ -189,10 +164,9 @@ msgstr "Vous avez oublié votre mot de passe ou votre nom d'utilisateur ?"
 
 #: templates/peachjam/_child_documents.html:3
 #: templates/peachjam/legislation_detail.html:10
-#, fuzzy
 #| msgid "Legislation List"
 msgid "Subsidiary legislation"
-msgstr "Liste des législations"
+msgstr "Législation subsidiaire"
 
 #: templates/peachjam/_child_documents.html:8
 #: templates/peachjam/_document_table.html:6
@@ -201,28 +175,26 @@ msgstr "Titre de la page"
 
 #: templates/peachjam/_child_documents.html:9
 msgid "Numbered title"
-msgstr ""
+msgstr "Titre numéroté"
 
 #: templates/peachjam/_document_content.html:37
-#, fuzzy
 #| msgid "Page"
 msgid "Pages"
-msgstr "Page"
+msgstr "Pages"
 
 #: templates/peachjam/_document_content.html:155
 msgid "Loading PDF..."
-msgstr ""
+msgstr "Chargement du PDF..."
 
 #: templates/peachjam/_document_content.html:166
 #, python-format
 msgid "This document is %(filesize)s. Do you want to load it?"
-msgstr ""
+msgstr "Ce document est %(filesize)s. Voulez-vous le charger ?"
 
 #: templates/peachjam/_document_content.html:171
-#, fuzzy
-#| msgid "Related documents"
+#| msgid "AU Documents"
 msgid "Load document"
-msgstr "Documents connexes"
+msgstr "Charger le document"
 
 #: templates/peachjam/_document_table.html:8
 #: templates/peachjam/layouts/document_detail.html:88
@@ -232,25 +204,24 @@ msgstr "Date"
 #: templates/peachjam/_header.html:41 templates/peachjam/_header.html:42
 #, python-format
 msgid "Search %(APP_NAME)s"
-msgstr ""
+msgstr "Rechercher dans %(APP_NAME)s"
 
 #: templates/peachjam/_header.html:62
 msgid "Admin"
-msgstr ""
+msgstr "Administrateur"
 
 #: templates/peachjam/_header.html:63
 msgid "Logout"
 msgstr "Déconnexion"
 
 #: templates/peachjam/_pagination.html:6
-#, fuzzy
 #| msgid "previous"
 msgid "Previous"
-msgstr "précédent"
+msgstr "Précédent"
 
 #: templates/peachjam/_pagination.html:25
 msgid "Next"
-msgstr ""
+msgstr "Suivant"
 
 #: templates/peachjam/_recent_document_list.html:16
 #: templates/peachjam/layouts/document_list.html:52
@@ -272,108 +243,61 @@ msgid "About the platform"
 msgstr "À propos de la plateforme"
 
 #: templates/peachjam/about.html:11
-msgid ""
-"\n"
-"          This Pan-African platform serves as an information clearinghouse "
-"on all aspects of the African Governance\n"
-"          Architecture (AGA) agenda, including charters, protocols, "
-"communications, relevant legal decisions, policy,\n"
-"          implementation, monitoring, and related material. The overall "
-"objective is to build effective collaboration\n"
-"          between African citizens and civil society organisations on the "
-"one hand, and AGA members on the other, to\n"
-"          strengthen implementation of the AGA platform’s agenda with "
-"respect to democracy, governance, and human rights.\n"
+msgid "\n"
+"          This Pan-African platform serves as an information clearinghouse on all aspects of the African Governance\n"
+"          Architecture (AGA) agenda, including charters, protocols, communications, relevant legal decisions, policy,\n"
+"          implementation, monitoring, and related material. The overall objective is to build effective collaboration\n"
+"          between African citizens and civil society organisations on the one hand, and AGA members on the other, to\n"
+"          strengthen implementation of the AGA platform’s agenda with respect to democracy, governance, and human rights.\n"
 "          Our specific goals are to:\n"
 "        "
-msgstr ""
-"\n"
-"Cette plateforme panafricaine sert de centre d'échange d'informations sur "
-"tous les aspects de l'agenda de l'Architecture africaine de gouvernance "
-"(AGA), y compris les chartes, les protocoles, les communications, les "
-"décisions juridiques pertinentes, la politique, la mise en œuvre, le suivi "
-"et le matériel connexe. L'objectif global est d'établir une collaboration "
-"efficace entre les citoyens africains et les organisations de la société "
-"civile d'une part, et les membres de l'AGA d'autre part, afin de renforcer "
-"la mise en œuvre de l'agenda de la plateforme AGA en matière de démocratie, "
-"de gouvernance et de droits de l'homme. Nos objectifs spécifiques sont les "
-"suivants :        "
+msgstr "\n"
+"Cette plateforme panafricaine sert de centre d'échange d'informations sur tous les aspects de l'agenda de l'Architecture africaine de gouvernance (AGA), y compris les chartes, les protocoles, les communications, les décisions juridiques pertinentes, la politique, la mise en œuvre, le suivi et le matériel connexe. L'objectif global est d'établir une collaboration efficace entre les citoyens africains et les organisations de la société civile d'une part, et les membres de l'AGA d'autre part, afin de renforcer la mise en œuvre de l'agenda de la plateforme AGA en matière de démocratie, de gouvernance et de droits de l'homme. Nos objectifs spécifiques sont les suivants :        "
 
 #: templates/peachjam/about.html:22
-msgid ""
-"\n"
-"            Increase overall awareness of the AGA agenda and popular "
-"perceptions about democracy, governance and human\n"
+msgid "\n"
+"            Increase overall awareness of the AGA agenda and popular perceptions about democracy, governance and human\n"
 "            rights among civil society organisations (CSOs) and AGA members\n"
 "          "
-msgstr ""
-"\n"
-"            Augmentez la sensibilisation générale au programme AGA et aux "
-"perceptions populaires sur la démocratie, la gouvernance et les droits de "
-"l'homme\n"
-"            parmi les organisations de la société civile (OSC) et les "
-"membres de l'AGA\n"
+msgstr "\n"
+"            Augmentez la sensibilisation générale au programme AGA et aux perceptions populaires sur la démocratie, la gouvernance et les droits de l'homme\n"
+"            parmi les organisations de la société civile (OSC) et les membres de l'AGA\n"
 "          "
 
 #: templates/peachjam/about.html:28
-msgid ""
-"\n"
-"            Supply complete, accurate and re-usable AGA information to allow "
-"AGA and CSOs to work towards shared goals\n"
+msgid "\n"
+"            Supply complete, accurate and re-usable AGA information to allow AGA and CSOs to work towards shared goals\n"
 "          "
-msgstr ""
-"\n"
-"            Fournissez des informations AGA complètes, précises et "
-"réutilisables pour permettre à AGA et aux OSC de travailler dans le sens "
-"d'objectifs partagés\n"
+msgstr "\n"
+"            Fournissez des informations AGA complètes, précises et réutilisables pour permettre à AGA et aux OSC de travailler dans le sens d'objectifs partagés\n"
 "          "
 
 #: templates/peachjam/about.html:33
-msgid ""
-"\n"
-"            Capacitate civil society on all levels to access, interpret and "
-"effectively use AGA information\n"
+msgid "\n"
+"            Capacitate civil society on all levels to access, interpret and effectively use AGA information\n"
 "          "
-msgstr ""
-"\n"
-"            Donner à la société civile, à tous les niveaux, les moyens "
-"d'accéder aux informations de l'AGA, de les interpréter et de les utiliser "
-"efficacement\n"
-"\n"
+msgstr "\n"
+"            Donner à la société civile, à tous les niveaux, les moyens d'accéder aux informations de l'AGA, de les interpréter et de les utiliser efficacement\n\n"
 "          "
 
 #: templates/peachjam/about.html:38
-msgid ""
-"\n"
-"            Strengthen monitoring, develop insights, and improve national-"
-"level implementation by developing linkages\n"
+msgid "\n"
+"            Strengthen monitoring, develop insights, and improve national-level implementation by developing linkages\n"
 "            between regional and member-states’ law and policy.\n"
 "          "
-msgstr ""
-"\n"
-"            Renforcer la surveillance, développer des idées et améliorer la "
-"mise en œuvre au niveau national en développant des liaisons\n"
+msgstr "\n"
+"            Renforcer la surveillance, développer des idées et améliorer la mise en œuvre au niveau national en développant des liaisons\n"
 "            entre la loi et la politique des états régionaux et membres.\n"
 "          "
 
 #: templates/peachjam/about.html:45
-msgid ""
-"\n"
-"          This platform is developed and maintained jointly by <a href="
-"\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
-"with funds from the European Union,\n"
-"          the Indigo Trust and the Sigrid Rausing Trust. The initial phase "
-"of the project runs from 2021 to 2024.\n"
+msgid "\n"
+"          This platform is developed and maintained jointly by <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> with funds from the European Union,\n"
+"          the Indigo Trust and the Sigrid Rausing Trust. The initial phase of the project runs from 2021 to 2024.\n"
 "        "
-msgstr ""
-"\n"
-"          Cette plateforme est développée et maintenue conjointement par <a "
-"href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href="
-"\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> avec des fonds de "
-"l'Union européenne, de l'Indigo Trust et du Sigrid Rausing Trust. La phase "
-"initiale du projet s'étend de 2021 à 2024.\n"
-"\n"
+msgstr "\n"
+"          Cette plateforme est développée et maintenue conjointement par <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> avec des fonds de l'Union européenne, de l'Indigo Trust et du Sigrid Rausing Trust. La phase initiale du projet s'étend de 2021 à 2024.\n\n"
 "        "
 
 #: templates/peachjam/about.html:53
@@ -381,116 +305,56 @@ msgid "Platform developers"
 msgstr "Développeurs de plateformes"
 
 #: templates/peachjam/about.html:56
-msgid ""
-"\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
-"a> is a programme of the Democratic Governance and Rights Unit at the "
-"Department of Public Law, University\n"
-"          of Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank"
-"\">AfricanLII</a> helps governments, academia and non-profit organisations "
-"publish the law of African\n"
-"          countries for sustainable open access. <a href=\"https://"
-"africanlii.org/\" target=\"_blank\">AfricanLII</a> hosts curated collections "
-"on various subjects of African law,\n"
-"          such as human rights, the environment, commercial law and "
-"finance.\n"
+msgid "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University\n"
+"          of Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> helps governments, academia and non-profit organisations publish the law of African\n"
+"          countries for sustainable open access. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> hosts curated collections on various subjects of African law,\n"
+"          such as human rights, the environment, commercial law and finance.\n"
 "        "
-msgstr ""
-"\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
-"a> est un programme de l'unité \"Gouvernance démocratique et droits\" du "
-"département de droit public de l'université du Cap. <a href=\"https://"
-"africanlii.org/\" target=\"_blank\">AfricanLII </a>aide les gouvernements, "
-"les universités et les organisations à but non lucratif à publier le droit "
-"des pays africains en accès libre durable. <a href=\"https://africanlii.org/"
-"\" target=\"_blank\">AfricanLII </a>héberge des collections sélectionnées "
-"sur divers sujets de droit africain, tels que les droits de l'homme, "
-"l'environnement, le droit commercial et la finance.\n"
-"\n"
+msgstr "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> est un programme de l'unité \"Gouvernance démocratique et droits\" du département de droit public de l'université du Cap. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII </a>aide les gouvernements, les universités et les organisations à but non lucratif à publier le droit des pays africains en accès libre durable. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII </a>héberge des collections sélectionnées sur divers sujets de droit africain, tels que les droits de l'homme, l'environnement, le droit commercial et la finance.\n\n"
 "        "
 
 #: templates/peachjam/about.html:64
-msgid ""
-"\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
-"a> convenes a network of 16 African LIIs - a collaborative group of "
-"governments, organizations, and\n"
-"          individuals in Africa, dedicated to free access to law on our "
-"continent.\n"
+msgid "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> convenes a network of 16 African LIIs - a collaborative group of governments, organizations, and\n"
+"          individuals in Africa, dedicated to free access to law on our continent.\n"
 "        "
-msgstr ""
-"\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
-"a> réunit un réseau de 16 IIL africaines - un groupe collaboratif de "
-"gouvernements, d'organisations et de particuliers en Afrique, qui se "
-"consacre au libre accès au droit sur notre continent.\n"
-"\n"
+msgstr "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> réunit un réseau de 16 IIL africaines - un groupe collaboratif de gouvernements, d'organisations et de particuliers en Afrique, qui se consacre au libre accès au droit sur notre continent.\n\n"
 "        "
 
 #: templates/peachjam/about.html:70
-msgid ""
-"\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
-"helps African governments to sustainably digitise their legal information "
-"for public use, through open\n"
-"          law software, capacity-building, training, partnerships and "
-"support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</"
-"a> Open Law Technology solutions\n"
-"          lower the cost of digitisation, archival and publication of "
-"primary legal information, and create opportunities for\n"
-"          rich interactivity, advanced research and justice sector "
-"innovation.\n"
+msgid "\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> helps African governments to sustainably digitise their legal information for public use, through open\n"
+"          law software, capacity-building, training, partnerships and support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions\n"
+"          lower the cost of digitisation, archival and publication of primary legal information, and create opportunities for\n"
+"          rich interactivity, advanced research and justice sector innovation.\n"
 "        "
-msgstr ""
-"\n"
-"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
-"aide les gouvernements africains à numériser durablement leurs informations "
-"juridiques à des fins d'utilisation publique, grâce à des logiciels de droit "
-"ouvert, au renforcement des capacités, à la formation, aux partenariats et "
-"au soutien. Les solutions technologiques de droit ouvert de <a href="
-"\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> réduisent le coût "
-"de la numérisation, de l'archivage et de la publication des informations "
-"juridiques primaires, et créent des opportunités pour une riche "
-"interactivité, une recherche avancée et une innovation dans le secteur de la "
-"justice.\n"
-"\n"
+msgstr "\n"
+"          <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> aide les gouvernements africains à numériser durablement leurs informations juridiques à des fins d'utilisation publique, grâce à des logiciels de droit ouvert, au renforcement des capacités, à la formation, aux partenariats et au soutien. Les solutions technologiques de droit ouvert de <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> réduisent le coût de la numérisation, de l'archivage et de la publication des informations juridiques primaires, et créent des opportunités pour une riche interactivité, une recherche avancée et une innovation dans le secteur de la justice.\n\n"
 "        "
 
 #: templates/peachjam/about.html:78
-msgid ""
-"\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
-"a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
-"collaborate in unlocking the value of African digital legal information in "
-"support\n"
+msgid "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborate in unlocking the value of African digital legal information in support\n"
 "          of the rule of law, access to justice, and innovation.\n"
 "        "
-msgstr ""
-"\n"
-"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</"
-"a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> "
-"collaborent pour libérer la valeur de l'information juridique numérique "
-"africaine afin de soutenir l'État de droit, l'accès à la justice et "
-"l'innovation.        "
+msgstr "\n"
+"          <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborent pour libérer la valeur de l'information juridique numérique africaine afin de soutenir l'État de droit, l'accès à la justice et l'innovation.        "
 
 #: templates/peachjam/about.html:84
 msgid "Find out more"
 msgstr "En savoir plus"
 
 #: templates/peachjam/about.html:86
-msgid ""
-"\n"
-"          Visit <a href=\"https://openlawafrica.org/\" target=\"_blank"
-"\">openlawafrica.org</a>\n"
-"          or contact us on <a href=\"mailto:info@laws.africa\">info@laws."
-"africa</a> for more information.\n"
+msgid "\n"
+"          Visit <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a>\n"
+"          or contact us on <a href=\"mailto:info@laws.africa\">info@laws.africa</a> for more information.\n"
 "        "
-msgstr ""
-"\n"
-"          Visitez <a href=\"https://openlawafrica.org/\" target=\"_blank"
-"\">openlawafrica.org</a>\n"
-"          ou contactez-nous à <a href=\"mailto:info@laws.africa\">info@laws."
-"africa</a> pour plus d'informations.\n"
+msgstr "\n"
+"          Visitez <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a>\n"
+"          ou contactez-nous à <a href=\"mailto:info@laws.africa\">info@laws.africa</a> pour plus d'informations.\n"
 "        "
 
 #: templates/peachjam/about.html:98
@@ -501,22 +365,21 @@ msgstr "Nos partenaires"
 #: templates/peachjam/article_list.html:4
 #: templates/peachjam/user_profile.html:23
 msgid "Articles"
-msgstr ""
+msgstr "Articles"
 
 #: templates/peachjam/article_detail.html:59
-#, fuzzy
 #| msgid "About the platform"
 msgid "About the author"
-msgstr "À propos de la plateforme"
+msgstr "À propos de l'auteur"
 
 #: templates/peachjam/article_detail.html:65
 #, python-format
 msgid "Recent articles by %(username)s"
-msgstr ""
+msgstr "Articles récents par %(username)s"
 
 #: templates/peachjam/article_list.html:9
 msgid "Latest Articles"
-msgstr ""
+msgstr "Derniers articles"
 
 #: templates/peachjam/author_detail.html:7
 #, python-format
@@ -534,57 +397,54 @@ msgstr "Accueil"
 
 #: templates/peachjam/judgment_detail.html:8
 msgid "Media Neutral Citation"
-msgstr ""
+msgstr "Référence médiatique neutre"
 
 #: templates/peachjam/judgment_detail.html:12
 #: templates/peachjam/layouts/document_detail.html:73
 msgid "Copy to clipboard"
-msgstr ""
+msgstr "Copier dans le presse-papiers"
 
 #: templates/peachjam/judgment_detail.html:14
 #: templates/peachjam/layouts/document_detail.html:75
 msgid "Copied!"
-msgstr ""
+msgstr "Copié !"
 
 #: templates/peachjam/judgment_detail.html:14
 #: templates/peachjam/layouts/document_detail.html:75
 msgid "Copy"
-msgstr ""
+msgstr "Copie"
 
 #: templates/peachjam/judgment_detail.html:19
 msgid "Hearing date"
-msgstr ""
+msgstr "Date de l'audience"
 
 #: templates/peachjam/judgment_detail.html:27
 msgid "Case number"
-msgstr ""
+msgstr "Numéro de cas"
 
 #: templates/peachjam/judgment_list.html:4
 #: templates/peachjam/judgment_list.html:7
-#, fuzzy
 #| msgid "Judgment List"
 msgid "Judgments"
-msgstr "Liste des juges"
+msgstr "Jugements"
 
 #: templates/peachjam/layouts/document_detail.html:27
-#, fuzzy
-#| msgid "Document Type"
+#| msgid "Documents"
 msgid "Document detail"
-msgstr "Type de document"
+msgstr "Détail du document"
 
 #: templates/peachjam/layouts/document_detail.html:33
 msgid "History"
-msgstr ""
+msgstr "Historique"
 
 #: templates/peachjam/layouts/document_detail.html:62
 msgid "Jurisdiction"
 msgstr "Juridiction"
 
 #: templates/peachjam/layouts/document_detail.html:69
-#, fuzzy
 #| msgid "Legislation List"
 msgid "Citation"
-msgstr "Liste des législations"
+msgstr "Référence"
 
 #: templates/peachjam/layouts/document_detail.html:82
 msgid "Author"
@@ -598,12 +458,12 @@ msgstr "Langue"
 #: templates/peachjam/layouts/document_detail.html:134
 #: templates/peachjam/layouts/document_detail.html:142
 msgid "Download"
-msgstr ""
+msgstr "Télécharger"
 
 #: templates/peachjam/layouts/document_detail.html:160
 #, python-format
 msgid "%(n_relationships)s related documents"
-msgstr ""
+msgstr "%(n_relationships)s documents connexes"
 
 #: templates/peachjam/layouts/document_list.html:26
 msgid "Documents"
@@ -611,48 +471,37 @@ msgstr "Documents"
 
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
-#, fuzzy
-#| msgid "Treaties and Protocols List"
 msgid "Treaties and Protocols"
-msgstr "Liste des traités et protocoles"
+msgstr "Traités et Protocoles"
 
 #: templates/peachjam/legislation_detail.html:34
 msgid "Primary work"
-msgstr ""
+msgstr "Travail principal"
 
 #: templates/peachjam/legislation_list.html:4
 #: templates/peachjam/legislation_list.html:7
-#, fuzzy
 #| msgid "Legislation List"
 msgid "Legislation"
-msgstr "Liste des législations"
-
-#~ msgid "Relationships"
-#~ msgstr "Relations"
+msgstr "Législation"
 
 #~ msgid "first"
-#~ msgstr "premier"
+#~ msgstr "kwanza"
 
 #~ msgid "next"
-#~ msgstr "suivant"
+#~ msgstr "ifuatayo"
 
 #~ msgid "last"
-#~ msgstr "dernier"
-
-#~ msgid "Regional Body"
-#~ msgstr "Corps régional"
+#~ msgstr "ya mwisho"
 
 #~ msgid "Generic Document List"
-#~ msgstr "Liste de documents génériques"
-
-#~ msgid "This document"
-#~ msgstr "Ce document"
+#~ msgstr "Orodha ya Hati za Jumla"
 
 #~ msgid "Legal Instrument List"
-#~ msgstr "Liste d'instruments légaux"
+#~ msgstr "Orodha ya Vyombo vya Kisheria"
 
 #~ msgid "Welcome to Peach Jam"
 #~ msgstr "Bienvenue dans Peach Jam"
 
 #~ msgid "More text that needs translation"
 #~ msgstr "Plus de texte qui nécessite une traduction"
+
