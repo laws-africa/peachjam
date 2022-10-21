@@ -111,7 +111,7 @@ class IndigoAdapter(Adapter):
         title = document["title"]
         toc_json = self.get_toc_json(url)
         jurisdiction = Country.objects.get(iso__iexact=document["country"])
-        language = Language.objects.get(iso_639_3__iexact=document["language"])
+        language = Language.objects.get(iso_639_2T__iexact=document["language"])
 
         field_data = {
             "title": title,
