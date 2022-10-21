@@ -3297,7 +3297,8 @@
     {
         "fields": {
             "description": "",
-            "name": "activity-report"
+            "name": "Activity report",
+            "code": "activity-report"
         },
         "model": "peachjam.documentnature",
         "pk": 8
@@ -5879,7 +5880,8 @@
     {
         "fields": {
             "description": "",
-            "name": "charter"
+            "name": "Charter",
+            "code": "charter"
         },
         "model": "peachjam.documentnature",
         "pk": 3
