@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-07 16:03+0200\n"
-"PO-Revision-Date: 2022-08-31 20:11\n"
+"PO-Revision-Date: 2022-10-21 10:15\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -22,65 +22,12 @@ msgid "About AfricanLII"
 msgstr "Sobre AfricanLII"
 
 #: templates/peachjam/_footer.html:11
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "      AfricanLII is an open-access research platform for African law "
-#| "jointly operated by the AfricanLII programme of\n"
-#| "      the University of Cape Town and Laws.Africa. AfricanLII publishes "
-#| "the law and policy of the African Union and\n"
-#| "      federates search across all open access African national law "
-#| "available through the\n"
-#| "      <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" "
-#| "target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of "
-#| "LIIs.\n"
-#| "    "
-msgid ""
-"AfricanLII is an open-access research platform for African law jointly "
-"operated by the AfricanLII programme of the University of Cape Town and Laws."
-"Africa. AfricanLII publishes the law and policy of the African Union and "
-"federates search across all open access African national law available "
-"through the <a class=\"text-primary\" href=\"https://www.openlawafrica.org/"
-"\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of "
-"LIIs."
-msgstr ""
-"\n"
-"      AfricanLII é uma plataforma de pesquisa de acesso aberto para a lei "
-"africana, co-operada pelo programa AfricanLII da\n"
-"      Universidade da Cidade do Cabo e Laws.Africa. A Africana LII publica a "
-"lei e a política da União Africana e a\n"
-"      federa busca em toda a legislação nacional africana de acesso aberto "
-"disponível através da\n"
-"      <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" "
-"target=\"_blank\" rel=\"noreferrer\">comunidade do Open Law Africa</a> dos "
-"LIIs.\n"
-"    "
+msgid "AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and federates search across all open access African national law available through the <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of LIIs."
+msgstr "AfricanLII é uma plataforma de investigação de acesso aberto para o direito africano, gerida conjuntamente pelo programa AfricanLII da Universidade da Cidade do Cabo e das Leias. Africano LII publica a lei e a política da União Africana e federa busca em toda a legislação nacional africana de acesso aberto disponível através da <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Comunidade de Direito Aberto África</a> de LIIs."
 
 #: templates/peachjam/_footer.html:19
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "      The publication of the African Union material is co-sponsored by "
-#| "the European Union and is part of the <a class=\"text-primary\" href="
-#| "\"https://www.afrobarometer.org/impact/informing-the-public-discourse/"
-#| "data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer"
-#| "\">Data\n"
-#| "    for Governance Alliance project</a>.\n"
-#| "    "
-msgid ""
-"The publication of the African Union material is co-sponsored by the "
-"European Union and is part of the <a class=\"text-primary\" href=\"https://"
-"www.afrobarometer.org/impact/informing-the-public-discourse/data-for-"
-"governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for "
-"Governance Alliance project</a>."
-msgstr ""
-"\n"
-"      A publicação do material da União Africana é co-patrocinada pela União "
-"Europeia e faz parte do <a class=\"text-primary\" href=\"https://www."
-"afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-"
-"alliance/\" target=\"_blank\" rel=\"noreferrer\">Projeto da Aliança de "
-"Dados\n"
-"    para Governação</a>.    "
+msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
+msgstr "A publicação do material da União Africana é co-patrocinada pela União Europeia e faz parte do <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">projeto da Aliança de Dados para a Governação</a>."
 
 #: templates/peachjam/_footer.html:27
 msgid "With support from"
@@ -188,7 +135,7 @@ msgstr "Legislação"
 
 #: templates/peachjam/_header.html:34
 msgid "Commentary"
-msgstr ""
+msgstr "Comentário"
 
 #: templates/peachjam/_header.html:37
 msgid "About"
@@ -199,90 +146,75 @@ msgid "Home"
 msgstr "Página inicial"
 
 #: templates/peachjam/home.html:10
-msgid ""
-"We digitise the law and policy of the African Governance Architecture and "
-"help Africans and the world connect with and understand the African Union "
-"agenda."
-msgstr ""
-"Digitalizamos a lei e a política da Arquitetura da Governação Africana e "
-"ajudamos os Africanos e o mundo a ligarem-se e a compreenderem a agenda da "
-"União Africana."
+msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
+msgstr "Digitalizamos a lei e a política da Arquitetura da Governação Africana e ajudamos os Africanos e o mundo a ligarem-se e a compreenderem a agenda da União Africana."
 
 #: templates/peachjam/home.html:16
 #, python-format
-msgid ""
-"Search through %(documents_count)s AU documents on the AfricanLII platform."
-msgstr ""
-"Procure por %(documents_count)s documentos da UA na plataforma AfricanLII."
+msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
+msgstr "Procure por %(documents_count)s documentos da UA na plataforma AfricanLII."
 
 #: templates/peachjam/home.html:25 templates/peachjam/home.html:26
 #, python-format
 msgid "Search %(APP_NAME)s"
-msgstr ""
+msgstr "Pesquisar %(APP_NAME)s"
 
 #: templates/peachjam/home.html:31
 msgid "Search"
-msgstr ""
+msgstr "Pesquisa"
 
 #: templates/peachjam/home.html:42
-#, fuzzy
-#| msgid "Regional Body"
 msgid "Regional Bodies"
-msgstr "Órgão Regional"
+msgstr "Órgãos Regionais"
 
 #: templates/peachjam/home.html:53
 msgid "Regional Economic Communities"
-msgstr ""
+msgstr "Comunidades Económicas Regionais"
 
 #: templates/peachjam/home.html:68
 msgid "Recent Judgments"
 msgstr "Julgamentos Recentes"
 
 #: templates/peachjam/home.html:69
-#, fuzzy
 #| msgid "Recent Judgments"
 msgid "View more judgments"
-msgstr "Julgamentos Recentes"
+msgstr "Ver mais julgamentos"
 
 #: templates/peachjam/home.html:76
 msgid "Recent AU Documents"
 msgstr "Documentos recentes da UA"
 
 #: templates/peachjam/home.html:77
-#, fuzzy
 #| msgid "Recent AU Documents"
 msgid "View more AU documents"
-msgstr "Documentos recentes da UA"
+msgstr "Ver mais documentos do UA"
 
 #: templates/peachjam/home.html:84
 msgid "Recent Legal Instruments"
 msgstr "Instrumentos Jurídicos Recentes"
 
 #: templates/peachjam/home.html:85
-#, fuzzy
 #| msgid "Recent Legal Instruments"
 msgid "View more legal instruments"
-msgstr "Instrumentos Jurídicos Recentes"
+msgstr "Ver mais instrumentos jurídicos"
 
 #: templates/peachjam/home.html:92
 msgid "Recent Treaties and Protocols "
 msgstr "Tratados e Protocolos Recentes "
 
 #: templates/peachjam/home.html:93
-#, fuzzy
 #| msgid "Recent Treaties and Protocols "
 msgid "View more treaties and protocols"
-msgstr "Tratados e Protocolos Recentes "
+msgstr "Ver mais tratados e protocolos"
 
 #: templates/peachjam/home.html:100
 msgid "Latest Commentary"
-msgstr ""
+msgstr "Comentário mais recente"
 
 #: templates/peachjam/home.html:104
-#, fuzzy
 #| msgid "Recent Judgments"
 msgid "View more commentary"
-msgstr "Julgamentos Recentes"
+msgstr "Ver mais comentários"
 
 #, python-format
 #~ msgid " Documents by %(author)s "
@@ -535,3 +467,4 @@ msgstr "Julgamentos Recentes"
 
 #~ msgid "Logout"
 #~ msgstr "Déconnexion"
+
