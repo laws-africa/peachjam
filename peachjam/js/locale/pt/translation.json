@@ -1,10 +1,13 @@
 {
+  "{document_count} documents found": "{document_count} documentos encontrados",
   "{reverse_verb} this provision": "{reverse_verb} esta disposição",
   "Alphabetical": "Alfabética",
   "Author": "Autor",
   "Clear": "Limpar",
   "Clear all": "Limpar tudo",
   "Court": "Tribunal",
+  "Date (newest first)": "Data (mais recente primeiro)",
+  "Date (oldest first)": "Data (mais antigo primeiro)",
   "Delete": "Excluir",
   "Document nature": "Natureza do documento",
   "Document type": "Tipo de documento",
@@ -19,8 +22,10 @@
   "Oops, something went wrong": "Ops, algo deu errado.",
   "Page": "Página",
   "Regional Body": "Órgão Regional",
+  "Relevance": "Relevância",
   "Search": "Pesquisa",
   "Search document content": "Pesquisar conteúdo de documento",
+  "Sort by": "Classificar por",
   "This provision": "Esta disposição",
   "Year": "Ano"
 }
