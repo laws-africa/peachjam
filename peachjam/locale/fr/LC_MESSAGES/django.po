@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-21 21:07+0200\n"
-"PO-Revision-Date: 2022-10-21 20:14\n"
+"PO-Revision-Date: 2022-10-21 21:30\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -170,7 +170,7 @@ msgstr "Législation subsidiaire"
 #: templates/peachjam/_child_documents.html:8
 #: templates/peachjam/_document_table.html:6
 msgid "Title"
-msgstr "Titre de la page"
+msgstr "Titre"
 
 #: templates/peachjam/_child_documents.html:9
 msgid "Numbered title"
