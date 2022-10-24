@@ -36,7 +36,7 @@ def get_processor():
     return BaseSignalProcessor(config.signal_processor.connections)
 
 
-@background(remove_existing_tasks=True)
+@background(queue="peachjam", remove_existing_tasks=True)
 def search_model_saved(model_name, pk):
     model = apps.get_model(model_name)
     instance = model.objects.filter(pk=pk).first()
