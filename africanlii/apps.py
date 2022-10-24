@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from django.utils.translation import gettext as _
 
 
 class AfricanliiConfig(AppConfig):
@@ -10,7 +11,10 @@ class AfricanliiConfig(AppConfig):
 
         from liiweb.citations import MncMatcher
         from peachjam.analysis.citations import citation_analyser
+        from peachjam.models import Author
 
         citation_analyser.matchers.append(AchprResolutionMatcher)
         citation_analyser.matchers.append(ActMatcher)
         citation_analyser.matchers.append(MncMatcher)
+
+        Author.model_label = _("Regional Body")
