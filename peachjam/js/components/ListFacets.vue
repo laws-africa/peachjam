@@ -95,12 +95,12 @@ export default {
 
     getFacets () {
       const facetTitles = [
-        { key: 'authors', value: 'Regional Body' },
-        { key: 'courts', value: 'Court' },
-        { key: 'docTypes', value: 'Document type' },
-        { key: 'judges', value: 'Judges' },
-        { key: 'years', value: 'Year' },
-        { key: 'alphabet', value: 'Alphabetical' }
+        { key: 'authors', value: this.$t('Regional Body') },
+        { key: 'courts', value: this.$t('Court') },
+        { key: 'docTypes', value: this.$t('Document type') },
+        { key: 'judges', value: this.$t('Judges') },
+        { key: 'years', value: this.$t('Year') },
+        { key: 'alphabet', value: this.$t('Alphabetical') }
       ];
 
       const formatOptions = (options, key) => {
