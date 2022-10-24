@@ -24,7 +24,7 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_date,
 )
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
-from peachjam.s3 import DynamicStorageFileField
+from peachjam.storage import DynamicStorageFileField
 
 
 class Locality(models.Model):

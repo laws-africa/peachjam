@@ -297,6 +297,15 @@ if not DEBUG:
     AWS_SIGNATURE_VERSION = "s3v4"
     AWS_QUERYSTRING_AUTH = True
 
+    DYNAMIC_STORAGE = {
+        "PREFIXES": {
+            "s3": {
+                "storage": "peachjam.storage.DynamicS3Boto3Storage",
+            }
+        },
+        "DEFAULTS": {"": f"s3:{AWS_STORAGE_BUCKET_NAME}:"},
+    }
+
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 
 GOOGLE_SERVICE_ACCOUNT_CREDENTIALS = {
