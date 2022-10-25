@@ -5,7 +5,7 @@ from background_task import background
 log = logging.getLogger(__name__)
 
 
-@background(remove_existing_tasks=True)
+@background(queue="peachjam", remove_existing_tasks=True)
 def update_document(ingestor_id, document_id):
     from peachjam.models import Ingestor
 
@@ -28,7 +28,7 @@ def update_document(ingestor_id, document_id):
     log.info("Ingestor is disabled, ignoring.")
 
 
-@background(remove_existing_tasks=True)
+@background(queue="peachjam", remove_existing_tasks=True)
 def run_ingestors():
     from peachjam.models import Ingestor
 
