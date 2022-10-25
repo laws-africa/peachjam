@@ -93,18 +93,41 @@ class DynamicStorageFileField(models.FileField):
 
 
 class DynamicS3Boto3Storage(S3Boto3Storage):
-    """S3 storage that knows how to add and strip the bucket prefix from the filename."""
+    """S3 storage that knows how to add and strip the bucket prefix from the filename.
+
+    Additionally, if silent_readonly is set, then this storage will silently discard
+    write operations.
+    """
 
     prefix = "s3"
 
     def __init__(self, name, *args, **kwargs):
         prefix, bucket, _ = name.split(":", 2)
+        config = self.get_dynamic_storage_config(bucket)
+        self.silent_readonly = config.pop("silent_readonly", False)
+        kwargs.update(config)
         kwargs["bucket_name"] = bucket
         super().__init__(*args, **kwargs)
 
+    def get_dynamic_storage_config(self, bucket):
+        return (
+            settings.DYNAMIC_STORAGE["PREFIXES"][self.prefix]
+            .get("buckets", {})
+            .get(bucket, {})
+        )
+
     def _save(self, name, content):
+        if self.silent_readonly:
+            # no-op if readonly
+            return self.format_name(self._clean_name(name))
+
         # after saving, format the name so it has all the details
         return self.format_name(super()._save(name, content))
+
+    def delete(self, name):
+        # no-op if readonly
+        if not self.silent_readonly:
+            super().delete(name)
 
     def format_name(self, name):
         if not name.startswith(self.prefix + ":"):

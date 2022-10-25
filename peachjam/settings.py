@@ -301,6 +301,11 @@ if not DEBUG:
         "PREFIXES": {
             "s3": {
                 "storage": "peachjam.storage.DynamicS3Boto3Storage",
+                "buckets": {
+                    "gazettes": {
+                        "silent_readonly": True,
+                    }
+                },
             }
         },
         "DEFAULTS": {"": f"s3:{AWS_STORAGE_BUCKET_NAME}:"},
