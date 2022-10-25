@@ -75,6 +75,11 @@ class SearchFilterBackend(CompoundSearchFilterBackend):
 class SearchView(TemplateView):
     template_name = "peachjam_search/search.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["labels"] = {"author": "Regional body"}
+        return context
+
 
 class DocumentSearchViewSet(BaseDocumentViewSet):
     """API endpoint that allows document to be searched."""
