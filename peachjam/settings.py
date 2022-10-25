@@ -432,3 +432,6 @@ else:
             "LOCATION": "/var/tmp/django_cache",
         },
     }
+
+# Override X-Frame-Options header value
+X_FRAME_OPTIONS = "ALLOW"
