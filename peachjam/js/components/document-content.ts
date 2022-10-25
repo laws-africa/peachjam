@@ -40,7 +40,7 @@ class DocumentContent {
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
 
     const tocSetupOnTab = this.setupTocForTab();
-    // If toc setup and mounted successful activate toc tab otherwise activate search tab
+    // If toc setup and mounted successfully, activate toc tab otherwise activate search tab
     if (tocSetupOnTab && tocTabTriggerEl) {
       tocTabTriggerEl.classList.remove('d-none');
       const tocTab = new (window as { [key: string]: any }).bootstrap.Tab(tocTabTriggerEl);
