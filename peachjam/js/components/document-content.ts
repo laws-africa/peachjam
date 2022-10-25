@@ -4,6 +4,12 @@ import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../utils/vue-utils';
 import { i18n } from '../i18n';
 
+type TOCItemType = {
+  [key: string]: any;
+  title?: string;
+  children?: TOCItemType[];
+}
+
 class OffCanvas {
   protected offCanvas: any;
   body: HTMLElement | null;
@@ -30,12 +36,20 @@ class DocumentContent {
     this.root = root;
     this.navOffCanvas = undefined;
 
-    // Activate first tab
-    const firstTabEl = this.root.querySelector('#navigation-tab .nav-link:first-child');
-    if (firstTabEl) {
-      const firstTab = new (window as { [key: string]: any }).bootstrap.Tab(firstTabEl);
-      firstTab.show();
+    const tocTabTriggerEl = this.root.querySelector('#toc-tab');
+    const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
+
+    const tocSetupOnTab = this.setupTocForTab();
+    // If toc setup and mounted successful activate toc tab otherwise activate search tab
+    if (tocSetupOnTab && tocTabTriggerEl) {
+      tocTabTriggerEl.classList.remove('d-none');
+      const tocTab = new (window as { [key: string]: any }).bootstrap.Tab(tocTabTriggerEl);
+      tocTab.show();
+    } else if (searchTabTriggerEl) {
+      const searchTab = new (window as { [key: string]: any }).bootstrap.Tab(searchTabTriggerEl);
+      searchTab.show();
     }
+
     const documentElement: HTMLElement | null = this.root.querySelector('[data-document-element]');
 
     const navColumn: HTMLElement | null = this.root.querySelector('#navigation-column');
@@ -126,6 +140,81 @@ class DocumentContent {
       placeContent(vw);
     }
     , 200));
+  }
+
+  setupTocForTab () {
+    // If there is no toc item don't create and mount la-toc-controller
+    const tocItems = this.getTocItems();
+    if (!tocItems.length) return false;
+    const tocController = this.createTocController(tocItems);
+    const tocContainer = this.root.querySelector('.toc');
+    if (!tocContainer) return;
+    tocContainer.appendChild(tocController);
+    return true;
+  }
+
+  createTocController (items: []) {
+    const laTocController = document.createElement('la-table-of-contents-controller');
+    laTocController.items = items;
+    laTocController.expandAllBtnClasses = 'btn btn-secondary btn-sm';
+    laTocController.collapseAllBtnClasses = 'btn btn-secondary btn-sm';
+    laTocController.titleFilterInputClasses = 'form-control';
+    laTocController.titleFilterClearBtnClasses = 'btn btn-secondary btn-sm';
+    return laTocController;
+  }
+
+  getTocItems = () => {
+    let items = [];
+    if (this.root.getAttribute('data-display-type') === 'akn') {
+      const aknTocJsonElement: HTMLElement | null = this.root.querySelector('#akn_toc_json');
+      items = aknTocJsonElement && JSON.parse(aknTocJsonElement.textContent as string)
+        ? JSON.parse(aknTocJsonElement.textContent as string) : [];
+    } else if (this.root.getAttribute('data-display-type') === 'html') {
+      const content: HTMLElement | null = this.root.querySelector('.content__html');
+      items = content ? this.generateHtmlTocItems(content) : [];
+    }
+    return items;
+  }
+
+  generateHtmlTocItems = (content: HTMLElement) => {
+    let stack: any;
+    const items: TOCItemType[] = [];
+
+    content.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5').forEach((heading) => {
+      const item = {
+        type: heading.tagName,
+        title: heading.innerText,
+        id: heading.id,
+        children: []
+      };
+
+      // top level
+      if (!stack) {
+        items.push(item);
+        stack = [item];
+      } else {
+        // find the best sibling for this entry; if the stack is at h3 and we have h2, find an h2 or h1
+        while (stack.length && stack[stack.length - 1].type > heading.tagName) {
+          stack.pop();
+        }
+        const top = stack[stack.length - 1];
+
+        if (top.type === heading.tagName) {
+          // siblings
+          if (stack.length > 1) {
+            stack[stack.length - 2].children.push(item);
+          } else {
+            items.push(item);
+          }
+          stack[stack.length - 1] = item;
+        } else {
+          // child
+          top.children.push(item);
+          stack.push(item);
+        }
+      }
+    });
+    return items;
   }
 }
 
