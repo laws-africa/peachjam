@@ -75,14 +75,12 @@ class FilteredDocumentListView(ListView):
                 ).values_list("date__year", flat=True)
             )
         )
-        labels = {"Author": "Regional body"}
 
         context["facet_data"] = {
             "years": years,
             "authors": authors,
             "courts": courts,
             "alphabet": lowercase_alphabet(),
-            "labels": labels,
         }
         return context
 
