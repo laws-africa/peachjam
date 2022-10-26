@@ -119,9 +119,9 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     }
 
     search_fields = {
-        "title": {"boost": 2},
+        "title": {"boost": 6},
         "author": None,
-        "citation": None,
+        "citation": {"boost": 4},
         "judges": None,
         "content": None,
         "court": None,

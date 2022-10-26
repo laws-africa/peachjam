@@ -11,7 +11,7 @@
     <div>
       {{ item.matter_type }}
     </div>
-    <div>
+    <div v-if="item.citation && item.citation !== item.title">
       <i>{{ item.citation }}</i>
     </div>
     <div class="text-muted">
