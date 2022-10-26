@@ -79,7 +79,7 @@
 
                       {% block document-metadata-content-author %}
                         {% if document.author %}
-                          <dt>{% trans 'Author' %}</dt>
+                          <dt>{{ document.author.model_label }}</dt>
                           <dd class="text-muted"><a href="{% url 'author' document.author.pk %}">{{ document.author }}</a></dd>
                         {% endif %}
                       {% endblock %}
