@@ -434,4 +434,4 @@ else:
     }
 
 # Override X-Frame-Options header value
-X_FRAME_OPTIONS = "ALLOW"
+X_FRAME_OPTIONS = "SAMEORIGIN"
