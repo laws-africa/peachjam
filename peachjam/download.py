@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def download_source_file(url):
+    url = urllib.parse.quote(url, safe=":/")
     # check if the url is a Google doc url
     google_regex = re.compile(r"google")
     if google_regex.search(url):
