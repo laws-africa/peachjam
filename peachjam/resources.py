@@ -3,6 +3,7 @@ import mimetypes
 import re
 
 import magic
+import requests.exceptions
 from cobalt import FrbrUri
 from countries_plus.models import Country
 from django.core.files.base import File
@@ -87,6 +88,15 @@ class BaseDocumentResource(resources.ModelResource):
             row["author"] = frbr_uri.actor
 
         logger.info(f"Importing row: {row}")
+
+    def skip_row(self, instance, original):
+        try:
+            r = requests.head(instance.source_url)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.error(e)
+            return True
+        return super().skip_row(instance, original)
 
     def after_save_instance(self, instance, using_transactions, dry_run):
         if not dry_run:

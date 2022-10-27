@@ -55,12 +55,8 @@ def download_file_from_google(file_id):
 
 
 def download_with_urllib(url):
-    try:
-        f = NamedTemporaryFile()
-        r = requests.get(url)
-        r.raise_for_status()
-        f.write(r.content)
-        return f
-    except requests.exceptions.HTTPError as e:
-        logger.error(e)
-        return None
+    f = NamedTemporaryFile()
+    r = requests.get(url)
+    r.raise_for_status()
+    f.write(r.content)
+    return f
