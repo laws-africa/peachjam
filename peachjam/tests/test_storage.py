@@ -1,4 +1,5 @@
 import datetime
+import unittest.util
 from unittest.mock import ANY, Mock, call
 
 from countries_plus.models import Country
@@ -12,6 +13,11 @@ from peachjam.storage import DynamicS3Boto3Storage
 
 class TestableStorage(DynamicS3Boto3Storage):
     pass
+
+
+# don't truncate diff strings
+# see https://stackoverflow.com/questions/43842675/how-to-prevent-truncating-of-string-in-unit-test-python
+unittest.util._MAX_LENGTH = 999999999
 
 
 @override_settings(
