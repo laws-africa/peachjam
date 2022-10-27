@@ -1,9 +1,9 @@
 import io
 import logging
 import re
-import urllib
 from tempfile import NamedTemporaryFile
 
+import requests
 from django.conf import settings
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 def download_source_file(url):
-    url = urllib.parse.quote(url, safe=":/")
     # check if the url is a Google doc url
     google_regex = re.compile(r"google")
     if google_regex.search(url):
@@ -58,9 +57,10 @@ def download_file_from_google(file_id):
 def download_with_urllib(url):
     try:
         f = NamedTemporaryFile()
-        urllib.request.urlretrieve(url, f.name)
-    except urllib.error.HTTPError as e:
+        r = requests.get(url)
+        r.raise_for_status()
+        f.write(r.content)
+        return f
+    except requests.exceptions.HTTPError as e:
         logger.error(e)
         return None
-    else:
-        return f
