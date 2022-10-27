@@ -47,6 +47,7 @@ from peachjam.views import (
     LegislationListView,
     PlaceDetailView,
     TaxonomyDetailView,
+    TaxonomyListView,
     UserProfileDetailView,
 )
 
@@ -81,6 +82,7 @@ urlpatterns = [
         GenericDocumentListView.as_view(),
         name="generic_document_list",
     ),
+    path("taxonomy/", TaxonomyListView.as_view(), name="taxonomy_list"),
     path(
         "taxonomy/<slug:slug>",
         TaxonomyDetailView.as_view(),

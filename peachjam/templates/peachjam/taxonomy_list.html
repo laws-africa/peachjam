@@ -1,0 +1,26 @@
+<h1>Taxonomy</h1>
+
+<ul>
+  {% for taxonomy in taxonomies %}
+    {% if taxonomy.is_root %}
+      <li>
+        <a href={% url 'taxonomy_detail' taxonomy.slug %}>{{ taxonomy.name }}</a>
+        {% for child in taxonomy.get_children %}
+          <ul>
+            <li><a href="">{{ child.name }}</a></li>
+          </ul>
+        {% endfor %}
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+{#<a href="/category/furniture">Furniture</a>#}
+{#        <ul class="children">#}
+{#          <li class="has-children">#}
+{#            <a href="/category/chairs">Chairs</a>#}
+{#            <ul class="children">#}
+{#              <li><a href="/category/chairs">Office chairs</a></li>#}
+{#            </ul>#}
+{#          </li>#}
+{#        </ul>#}

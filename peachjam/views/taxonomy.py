@@ -1,7 +1,17 @@
 from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView
 
 from peachjam.models import Taxonomy
 from peachjam.views.generic_views import FilteredDocumentListView
+
+
+class TaxonomyListView(TemplateView):
+    template_name = "peachjam/taxonomy_list.html"
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        context["taxonomies"] = Taxonomy.get_tree()
+        return self.render_to_response(context)
 
 
 class TaxonomyDetailView(FilteredDocumentListView):
