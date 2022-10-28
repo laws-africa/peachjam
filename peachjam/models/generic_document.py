@@ -12,6 +12,7 @@ from peachjam.models.author import Author
 
 class DocumentNature(models.Model):
     name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
+    code = models.SlugField(max_length=1024, null=False, unique=True)
     description = models.TextField(blank=True)
 
     def __str__(self):
@@ -30,7 +31,7 @@ class GenericDocument(CoreDocument):
         return self.title
 
     def get_doc_type_display(self):
-        return "Document"
+        return self.nature.name
 
     def save(self, *args, **kwargs):
         self.doc_type = "generic_document"
@@ -47,6 +48,9 @@ class LegalInstrument(CoreDocument):
 
     def __str__(self):
         return self.title
+
+    def get_doc_type_display(self):
+        return self.nature.name
 
     def save(self, *args, **kwargs):
         self.doc_type = "legal_instrument"

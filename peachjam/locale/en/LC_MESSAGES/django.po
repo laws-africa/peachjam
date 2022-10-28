@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-07 16:03+0200\n"
+"POT-Creation-Date: 2022-10-21 21:07+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: settings.py:194
+#: settings.py:193
 msgid "English"
 msgstr ""
 
-#: settings.py:195
+#: settings.py:194
 msgid "French"
 msgstr ""
 
-#: settings.py:196
+#: settings.py:195
 msgid "Swahili"
 msgstr ""
 
@@ -204,6 +204,10 @@ msgstr ""
 msgid "Load document"
 msgstr ""
 
+#: templates/peachjam/_document_content.html:182
+msgid "To the top"
+msgstr ""
+
 #: templates/peachjam/_document_table.html:8
 #: templates/peachjam/layouts/document_detail.html:88
 msgid "Date"
@@ -237,7 +241,7 @@ msgstr ""
 
 #: templates/peachjam/_related_documents.html:3
 #: templates/peachjam/layouts/document_detail.html:40
-#: templates/peachjam/layouts/document_detail.html:155
+#: templates/peachjam/layouts/document_detail.html:169
 msgid "Related documents"
 msgstr ""
 
@@ -413,6 +417,11 @@ msgstr ""
 msgid " Documents by %(author)s "
 msgstr ""
 
+#: templates/peachjam/court_detail.html:7
+#, python-format
+msgid "Documents by %(court)s"
+msgstr ""
+
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
 msgid "AU Documents"
@@ -481,10 +490,11 @@ msgstr ""
 #: templates/peachjam/layouts/document_detail.html:129
 #: templates/peachjam/layouts/document_detail.html:134
 #: templates/peachjam/layouts/document_detail.html:142
+#: templates/peachjam/layouts/document_detail.html:155
 msgid "Download"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:160
+#: templates/peachjam/layouts/document_detail.html:174
 #, python-format
 msgid "%(n_relationships)s related documents"
 msgstr ""

@@ -1,37 +1,50 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-21 21:07+0200\n"
-"PO-Revision-Date: 2022-10-21 19:38\n"
-"Last-Translator: \n"
-"Language-Team: Swahili\n"
-"Language: sw_KE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
-"X-Crowdin-Project-ID: 4\n"
-"X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/africanlii/locale/en/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 101\n"
 
 #: templates/peachjam/_footer.html:8
 msgid "About AfricanLII"
-msgstr "Kuhusu AfricanLII"
+msgstr ""
 
 #: templates/peachjam/_footer.html:11
-msgid "AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and federates search across all open access African national law available through the <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of LIIs."
+msgid ""
+"AfricanLII is an open-access research platform for African law jointly "
+"operated by the AfricanLII programme of the University of Cape Town and Laws."
+"Africa. AfricanLII publishes the law and policy of the African Union and "
+"federates search across all open access African national law available "
+"through the <a class=\"text-primary\" href=\"https://www.openlawafrica.org/"
+"\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of "
+"LIIs."
 msgstr ""
 
 #: templates/peachjam/_footer.html:19
-msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
+msgid ""
+"The publication of the African Union material is co-sponsored by the "
+"European Union and is part of the <a class=\"text-primary\" href=\"https://"
+"www.afrobarometer.org/impact/informing-the-public-discourse/data-for-"
+"governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for "
+"Governance Alliance project</a>."
 msgstr ""
 
 #: templates/peachjam/_footer.html:27
 msgid "With support from"
-msgstr "Kwa msaada kutoka"
+msgstr ""
 
 #: templates/peachjam/_footer.html:28
 msgid "Sigrid Rausing Trust"
@@ -47,7 +60,7 @@ msgstr ""
 
 #: templates/peachjam/_footer.html:34
 msgid "Other African Legal Information Institutions"
-msgstr "Taasisi Nyingine za Kisheria za Kiafrika"
+msgstr ""
 
 #: templates/peachjam/_footer.html:35
 msgid "AfricanLII"
@@ -123,11 +136,11 @@ msgstr ""
 
 #: templates/peachjam/_header.html:25
 msgid "AU Documents"
-msgstr "Nyaraka za AU"
+msgstr ""
 
 #: templates/peachjam/_header.html:28
 msgid "Treaties and Protocols"
-msgstr "Mikataba na Itifaki"
+msgstr ""
 
 #: templates/peachjam/_header.html:31
 msgid "Legislation"
@@ -139,19 +152,23 @@ msgstr ""
 
 #: templates/peachjam/_header.html:37
 msgid "About"
-msgstr "Kuhusu"
+msgstr ""
 
 #: templates/peachjam/home.html:4
 msgid "Home"
-msgstr "Sebule"
+msgstr ""
 
 #: templates/peachjam/home.html:10
-msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
+msgid ""
+"We digitise the law and policy of the African Governance Architecture and "
+"help Africans and the world connect with and understand the African Union "
+"agenda."
 msgstr ""
 
 #: templates/peachjam/home.html:16
 #, python-format
-msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
+msgid ""
+"Search through %(documents_count)s AU documents on the AfricanLII platform."
 msgstr ""
 
 #: templates/peachjam/home.html:25 templates/peachjam/home.html:26
@@ -177,7 +194,7 @@ msgstr ""
 
 #: templates/peachjam/home.html:77
 msgid "Recent Judgments"
-msgstr "Hukumu za Hivi Karibuni"
+msgstr ""
 
 #: templates/peachjam/home.html:78
 msgid "View more judgments"
@@ -185,7 +202,7 @@ msgstr ""
 
 #: templates/peachjam/home.html:85
 msgid "Recent AU Documents"
-msgstr "Nyaraka za AU za Hivi Karibuni"
+msgstr ""
 
 #: templates/peachjam/home.html:86
 msgid "View more AU documents"
@@ -193,7 +210,7 @@ msgstr ""
 
 #: templates/peachjam/home.html:93
 msgid "Recent Legal Instruments"
-msgstr "Vyombo vya Kisheria vya Hivi Karibuni"
+msgstr ""
 
 #: templates/peachjam/home.html:94
 msgid "View more legal instruments"
@@ -201,7 +218,7 @@ msgstr ""
 
 #: templates/peachjam/home.html:101
 msgid "Recent Treaties and Protocols "
-msgstr "Mikataba na Itifaki za Hivi Karibuni "
+msgstr ""
 
 #: templates/peachjam/home.html:102
 msgid "View more treaties and protocols"
@@ -214,4 +231,3 @@ msgstr ""
 #: templates/peachjam/home.html:113
 msgid "View more commentary"
 msgstr ""
-

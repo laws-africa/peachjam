@@ -79,7 +79,7 @@
 
                       {% block document-metadata-content-author %}
                         {% if document.author %}
-                          <dt>{% trans 'Author' %}</dt>
+                          <dt>{{ document.author.model_label }}</dt>
                           <dd class="text-muted"><a href="{% url 'author' document.author.pk %}">{{ document.author }}</a></dd>
                         {% endif %}
                       {% endblock %}
@@ -122,6 +122,11 @@
                         {% else %}
                           <dd class="text-muted">{{ document.language }} </dd>
                         {% endif %}
+                      {% endblock %}
+
+                      {% block document-metadata-content-doctype %}
+                        <dt>{% trans 'Type' %}</dt>
+                        <dd class="text-muted">{% trans document.get_doc_type_display %}</dd>
                       {% endblock %}
 
                       {% block document-metadata-content-download %}

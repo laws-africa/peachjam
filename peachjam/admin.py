@@ -271,6 +271,11 @@ class DocumentAdmin(admin.ModelAdmin):
 
     new_document_form_mixin = NewDocumentFormMixin
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.prefetch_related("locality", "jurisdiction")
+        return qs
+
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
         if obj is None:
@@ -352,10 +357,20 @@ class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["author", "nature"])
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.prefetch_related("author", "nature")
+        return qs
+
 
 class LegalInstrumentAdmin(ImportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["author", "nature"])
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.prefetch_related("author", "nature")
+        return qs
 
 
 class LegislationAdmin(ImportMixin, DocumentAdmin):
@@ -518,13 +533,19 @@ class WorkAdmin(admin.ModelAdmin):
         return False
 
 
+@admin.register(DocumentNature)
+class DocumentNatureAdmin(admin.ModelAdmin):
+    search_fields = ("name", "code")
+    list_display = ("name", "code")
+    prepopulated_fields = {"code": ("name",)}
+
+
 admin.site.register(
     [
         Image,
         Locality,
         CitationLink,
         Author,
-        DocumentNature,
         Judge,
         MatterType,
         Court,

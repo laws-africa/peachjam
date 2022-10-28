@@ -192,6 +192,7 @@ LANGUAGE_CODE = "en-us"
 LANGUAGES = [
     ("en", _("English")),
     ("fr", _("French")),
+    ("pt", _("Portuguese")),
     ("sw", _("Swahili")),
 ]
 
@@ -448,3 +449,15 @@ else:
             "LOCATION": "/var/tmp/django_cache",
         },
     }
+
+# Override X-Frame-Options header value
+X_FRAME_OPTIONS = "SAMEORIGIN"
+
+# Setup request id logging
+LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
+REQUEST_ID_RESPONSE_HEADER = "X-Request-Id"
+LOGGING["filters"] = {"request_id": {"()": "log_request_id.filters.RequestIDFilter"}}
+LOGGING["formatters"]["simple"][
+    "format"
+] = "%(asctime)s %(levelname)s %(module)s %(request_id)s %(process)d %(thread)d %(message)s"
+LOGGING["handlers"]["console"]["filters"] = ["request_id"]

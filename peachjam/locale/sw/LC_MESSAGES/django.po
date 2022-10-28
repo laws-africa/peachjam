@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-07 16:03+0200\n"
-"PO-Revision-Date: 2022-10-21 10:15\n"
+"POT-Creation-Date: 2022-10-21 21:07+0200\n"
+"PO-Revision-Date: 2022-10-21 19:38\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -14,18 +14,18 @@ msgstr ""
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
-"X-Crowdin-File: /main/peachjam/locale/sw/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 44\n"
+"X-Crowdin-File: /main/peachjam/locale/en/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 99\n"
 
-#: settings.py:194
+#: settings.py:193
 msgid "English"
 msgstr "Kiingereza"
 
-#: settings.py:195
+#: settings.py:194
 msgid "French"
 msgstr "Kifaransa"
 
-#: settings.py:196
+#: settings.py:195
 msgid "Swahili"
 msgstr "Kiswahili"
 
@@ -162,7 +162,6 @@ msgstr ""
 
 #: templates/peachjam/_child_documents.html:3
 #: templates/peachjam/legislation_detail.html:10
-#| msgid "Legislation List"
 msgid "Subsidiary legislation"
 msgstr ""
 
@@ -176,7 +175,6 @@ msgid "Numbered title"
 msgstr ""
 
 #: templates/peachjam/_document_content.html:37
-#| msgid "Page"
 msgid "Pages"
 msgstr ""
 
@@ -190,8 +188,11 @@ msgid "This document is %(filesize)s. Do you want to load it?"
 msgstr ""
 
 #: templates/peachjam/_document_content.html:171
-#| msgid "AU Documents"
 msgid "Load document"
+msgstr ""
+
+#: templates/peachjam/_document_content.html:182
+msgid "To the top"
 msgstr ""
 
 #: templates/peachjam/_document_table.html:8
@@ -213,7 +214,6 @@ msgid "Logout"
 msgstr "Ondoka"
 
 #: templates/peachjam/_pagination.html:6
-#| msgid "previous"
 msgid "Previous"
 msgstr ""
 
@@ -228,7 +228,7 @@ msgstr "Hakuna hati zilizopatikana."
 
 #: templates/peachjam/_related_documents.html:3
 #: templates/peachjam/layouts/document_detail.html:40
-#: templates/peachjam/layouts/document_detail.html:155
+#: templates/peachjam/layouts/document_detail.html:169
 msgid "Related documents"
 msgstr ""
 
@@ -354,7 +354,6 @@ msgid "Articles"
 msgstr ""
 
 #: templates/peachjam/article_detail.html:59
-#| msgid "About the platform"
 msgid "About the author"
 msgstr ""
 
@@ -371,6 +370,11 @@ msgstr ""
 #, python-format
 msgid " Documents by %(author)s "
 msgstr " Nyaraka za %(author)s "
+
+#: templates/peachjam/court_detail.html:7
+#, python-format
+msgid "Documents by %(court)s"
+msgstr ""
 
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
@@ -410,12 +414,10 @@ msgstr ""
 
 #: templates/peachjam/judgment_list.html:4
 #: templates/peachjam/judgment_list.html:7
-#| msgid "Judgment List"
 msgid "Judgments"
 msgstr "Hukumu"
 
 #: templates/peachjam/layouts/document_detail.html:27
-#| msgid "Documents"
 msgid "Document detail"
 msgstr ""
 
@@ -428,7 +430,6 @@ msgid "Jurisdiction"
 msgstr "Mamlaka"
 
 #: templates/peachjam/layouts/document_detail.html:69
-#| msgid "Legislation List"
 msgid "Citation"
 msgstr ""
 
@@ -443,10 +444,11 @@ msgstr "Lugha"
 #: templates/peachjam/layouts/document_detail.html:129
 #: templates/peachjam/layouts/document_detail.html:134
 #: templates/peachjam/layouts/document_detail.html:142
+#: templates/peachjam/layouts/document_detail.html:155
 msgid "Download"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:160
+#: templates/peachjam/layouts/document_detail.html:174
 #, python-format
 msgid "%(n_relationships)s related documents"
 msgstr ""
@@ -466,28 +468,6 @@ msgstr ""
 
 #: templates/peachjam/legislation_list.html:4
 #: templates/peachjam/legislation_list.html:7
-#| msgid "Legislation List"
 msgid "Legislation"
 msgstr ""
-
-#~ msgid "first"
-#~ msgstr "kwanza"
-
-#~ msgid "next"
-#~ msgstr "ifuatayo"
-
-#~ msgid "last"
-#~ msgstr "ya mwisho"
-
-#~ msgid "Generic Document List"
-#~ msgstr "Orodha ya Hati za Jumla"
-
-#~ msgid "Legal Instrument List"
-#~ msgstr "Orodha ya Vyombo vya Kisheria"
-
-#~ msgid "Welcome to Peach Jam"
-#~ msgstr "Bienvenue dans Peach Jam"
-
-#~ msgid "More text that needs translation"
-#~ msgstr "Plus de texte qui nécessite une traduction"
 

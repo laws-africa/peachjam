@@ -78,6 +78,10 @@ class SearchableDocument(Document):
     def prepare_doc_type(self, instance):
         return instance.get_doc_type_display()
 
+    def prepare_citation(self, instance):
+        # if there is no citation, fall back to the title so as not to penalise documents that don't have a citation
+        return instance.citation or instance.title
+
     def prepare_judges(self, instance):
         if instance.doc_type == "judgment":
             return [j.name for j in instance.judges.all()]

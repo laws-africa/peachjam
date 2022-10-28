@@ -1,0 +1,31 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-21 21:07+0200\n"
+"PO-Revision-Date: 2022-10-21 19:38\n"
+"Last-Translator: \n"
+"Language-Team: Swahili\n"
+"Language: sw_KE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"X-Crowdin-Project-ID: 4\n"
+"X-Crowdin-Language: sw\n"
+"X-Crowdin-File: /main/liiweb/locale/en/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 103\n"
+
+#: templates/liiweb/_judgment_table.html:6
+msgid "Title"
+msgstr "Mada"
+
+#: templates/liiweb/_judgment_table.html:7
+msgid "Judges"
+msgstr ""
+
+#: templates/liiweb/_judgment_table.html:8
+msgid "Date"
+msgstr "Tarehe"
+

@@ -171,7 +171,7 @@ export default {
           options: []
         },
         {
-          title: this.$t('Author'),
+          title: JSON.parse(document.querySelector('#data-labels').textContent).author,
           name: 'author',
           type: 'checkboxes',
           value: [],

@@ -75,6 +75,11 @@ class SearchFilterBackend(CompoundSearchFilterBackend):
 class SearchView(TemplateView):
     template_name = "peachjam_search/search.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["labels"] = {"author": "Regional body"}
+        return context
+
 
 class DocumentSearchViewSet(BaseDocumentViewSet):
     """API endpoint that allows document to be searched."""
@@ -114,9 +119,9 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     }
 
     search_fields = {
-        "title": {"boost": 2},
+        "title": {"boost": 6},
         "author": None,
-        "citation": None,
+        "citation": {"boost": 4},
         "judges": None,
         "content": None,
         "court": None,

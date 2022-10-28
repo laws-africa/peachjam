@@ -157,7 +157,7 @@ class IndigoAdapter(Adapter):
             if document["subtype"] in ["charter", "protocol", "convention", "treaty"]:
                 model = LegalInstrument
                 field_data["nature"] = DocumentNature.objects.update_or_create(
-                    name=document["subtype"]
+                    code=document["subtype"], defaults={"name": document["subtype"]}
                 )[0]
             else:
                 model = Legislation
@@ -165,7 +165,7 @@ class IndigoAdapter(Adapter):
         else:
             model = GenericDocument
             field_data["nature"] = DocumentNature.objects.update_or_create(
-                name=document["subtype"]
+                code=document["subtype"], defaults={"name": document["subtype"]}
             )[0]
 
         logger.info(model)
