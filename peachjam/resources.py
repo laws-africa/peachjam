@@ -63,10 +63,7 @@ class SourceFileWidget(CharWidget):
 
 class SkipRowWidget(BooleanWidget):
     def clean(self, value, row=None, **kwargs):
-        if value in ["true, True, TRUE, yes, Yes, YES"]:
-            return True
-        else:
-            return False
+        return bool(value)
 
 
 class BaseDocumentResource(resources.ModelResource):
@@ -113,7 +110,7 @@ class BaseDocumentResource(resources.ModelResource):
             row["frbr_uri_actor"] = frbr_uri.actor
             row["author"] = frbr_uri.actor
 
-        logger.info("Importing row: {row}")
+        logger.info(f"Importing row: {row}")
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
         return row["skip"]
@@ -148,11 +145,19 @@ class BaseDocumentResource(resources.ModelResource):
             instance.save()
 
 
+class DocumentNatureWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        nature, _ = self.model.objects.get_or_create(
+            code=value, defaults={"name": value}
+        )
+        return nature
+
+
 class GenericDocumentResource(BaseDocumentResource):
     nature = fields.Field(
         column_name="nature",
         attribute="nature",
-        widget=ForeignKeyWidget(DocumentNature, field="code"),
+        widget=DocumentNatureWidget(DocumentNature, field="code"),
     )
 
     class Meta(BaseDocumentResource.Meta):
@@ -160,7 +165,6 @@ class GenericDocumentResource(BaseDocumentResource):
 
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
-        DocumentNature.objects.get_or_create(code=row["nature"])
 
 
 class JudgesWidget(ManyToManyWidget):
@@ -183,46 +187,20 @@ class JudgmentResource(BaseDocumentResource):
     court = fields.Field(
         column_name="court",
         attribute="court",
-        widget=ForeignKeyWidget(Court, field="name"),
+        widget=ForeignKeyWidget(Court, field="code"),
     )
     case_numbers = fields.Field(column_name="case_numbers", widget=CharWidget)
 
     class Meta(BaseDocumentResource.Meta):
         model = Judgment
 
-    def before_import_row(self, row, **kwargs):
-        if "court_obj" in row:
-            Author.objects.get_or_create(
-                code=row["court_obj"]["code"],
-                defaults={"name": row["court_obj"]["name"]},
-            )
-
-        source_files = [x.strip() for x in row["source_url"].split("|")]
-        docx = re.compile(r"\.docx?$")
-        pdf = re.compile(r"\.pdf$")
-        for file in source_files:
-            match_docx = docx.search(file)
-            match_pdf = pdf.search(file)
-            # prefer the .docx file if available, otherwise use .pdf, ignore .rtf
-            if match_docx:
-                row["source_url"] = file
-                break
-            elif match_pdf:
-                row["source_url"] = file
-
-    def after_import_row(self, row, instance, row_number=None, **kwargs):
-        super().after_import_row(row, instance, row_number, **kwargs)
-
-        judgment = Judgment.objects.get(pk=instance.object_id)
-
+    @staticmethod
+    def get_case_numbers(row):
+        case_numbers = []
         if row["case_string_override"]:
-            CaseNumber.objects.create(
-                string_override=row["case_string_override"], document=judgment
-            )
+            case_number = CaseNumber(string_override=row["case_string_override"])
+            case_numbers.append(case_number)
         elif row["case_numbers"]:
-            # expected format: 31/2001|45/2002|20/2003
-            # or: 31/2001/Application|45/2002/Application|20/2003/Application
-
             for c in [x.strip() for x in row["case_numbers"].split("|")]:
 
                 case_number_values = c.split("/")
@@ -234,9 +212,40 @@ class JudgmentResource(BaseDocumentResource):
                     case_number.matter_type = MatterType.objects.get_or_create(
                         name=case_number_values[2]
                     )[0]
+                case_numbers.append(case_number)
 
-                case_number.document = judgment
-                case_number.save()
+        return case_numbers
+
+    @staticmethod
+    def get_source_url(row):
+        source_url = None
+        source_files = [x.strip() for x in row["source_url"].split("|")]
+        docx = re.compile(r"\.docx?$")
+        pdf = re.compile(r"\.pdf$")
+        for file in source_files:
+            match_docx = docx.search(file)
+            match_pdf = pdf.search(file)
+            # prefer the .docx file if available, otherwise use .pdf, ignore .rtf
+            if match_docx:
+                source_url = file
+                break
+            elif match_pdf:
+                source_url = file
+
+        return source_url
+
+    def before_import_row(self, row, **kwargs):
+        logger.info(f"Importing row: {row}")
+        row["source_url"] = self.get_source_url(row)
+
+    def after_import_row(self, row, instance, row_number=None, **kwargs):
+        super().after_import_row(row, instance, row_number, **kwargs)
+
+        judgment = Judgment.objects.get(pk=instance.object_id)
+
+        for case_number in self.get_case_numbers(row):
+            case_number.document = judgment
+            case_number.save()
 
         judgment.save()
 
