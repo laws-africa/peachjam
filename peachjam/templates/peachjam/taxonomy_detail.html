@@ -4,11 +4,15 @@
 {% block title %}{{ taxonomy.name }} | {{ current_child.name }}{% endblock %}
 
 {% block page-title %}
-  <nav class="mt-4" aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href={% url 'primary_taxonomy_list' %}>Taxonomy</a></li>
-      <li class="breadcrumb-item"><a href="#">{{ taxonomy.name }}</a></li>
-      <li class="breadcrumb-item active" aria-current="page">{{ current_child.name }}</li>
-    </ol>
-  </nav>
+  <h1 class="mt-2">{{ taxonomy.name }}</h1>
+{% endblock %}
+
+
+{% block taxonomy-list %}
+  <h1>{{ current_child.name }}</h1>
+  <ul>
+  {% for child in current_child.get_children %}
+    {% include "peachjam/_taxonomy_tree.html" %}
+  {% endfor %}
+  </ul>
 {% endblock %}

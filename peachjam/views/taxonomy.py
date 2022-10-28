@@ -47,7 +47,6 @@ class TaxonomyDetailView(FilteredDocumentListView):
         context = super().get_context_data(**kwargs)
 
         context["taxonomy"] = self.taxonomy
-        print(self.kwargs)
         context["current_child"] = get_object_or_404(
             Taxonomy, slug=self.kwargs["taxonomy_detail_slug"]
         )
