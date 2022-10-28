@@ -42,7 +42,7 @@ WHERE file like 'file:%'
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0030_attachement_location"),
+        ("peachjam", "0033_alter_documentnature_code"),
     ]
 
     operations = [migrations.RunPython(add_s3_bucket, remove_s3_bucket)]
