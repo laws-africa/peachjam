@@ -1,8 +1,14 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
 
-{% block title %}{{ taxonomy.name }}{% endblock %}
+{% block title %}{{ taxonomy.name }} | {{ current_child.name }}{% endblock %}
 
 {% block page-title %}
-  <h1 class="mt-2">{{ taxonomy.name }}</h1>
+  <nav class="mt-4" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href={% url 'primary_taxonomy_list' %}>Taxonomy</a></li>
+      <li class="breadcrumb-item"><a href="#">{{ taxonomy.name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ current_child.name }}</li>
+    </ol>
+  </nav>
 {% endblock %}

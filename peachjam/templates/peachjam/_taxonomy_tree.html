@@ -1,0 +1,14 @@
+<li>
+  <a href="#">
+    {{ taxonomy }}
+  </a>
+  {%if taxonomy.get_children %}
+    <ul>
+     {% for child in taxonomy.get_children %}
+        {% with taxonomy=child template_name="peachjam/_taxonomy_tree.html" %}
+          {% include template_name %}
+        {% endwith %}
+     {% endfor %}
+     </ul>
+  {% endif %}
+</li>
