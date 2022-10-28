@@ -7,8 +7,14 @@ import requests.exceptions
 from cobalt import FrbrUri
 from countries_plus.models import Country
 from django.core.files.base import File
+from django.forms import ValidationError
 from import_export import fields, resources
-from import_export.widgets import CharWidget, ForeignKeyWidget, ManyToManyWidget
+from import_export.widgets import (
+    BooleanWidget,
+    CharWidget,
+    ForeignKeyWidget,
+    ManyToManyWidget,
+)
 from languages_plus.models import Language
 
 from peachjam.models import (
@@ -45,6 +51,24 @@ class AuthorWidget(ForeignKeyWidget):
         return None
 
 
+class SourceFileWidget(CharWidget):
+    def clean(self, value, row=None, **kwargs):
+        try:
+            r = requests.head(value)
+            r.raise_for_status()
+            return value
+        except requests.exceptions.HTTPError as e:
+            raise ValidationError(e)
+
+
+class SkipRowWidget(BooleanWidget):
+    def clean(self, value, row=None, **kwargs):
+        if value in ["true, True, TRUE, yes, Yes, YES"]:
+            return True
+        else:
+            return False
+
+
 class BaseDocumentResource(resources.ModelResource):
     author = fields.Field(
         column_name="author",
@@ -61,6 +85,8 @@ class BaseDocumentResource(resources.ModelResource):
     locality = fields.Field(
         attribute="locality", widget=ForeignKeyWidget(Locality, field="code")
     )
+    source_url = fields.Field(attribute="source_url", widget=SourceFileWidget())
+    skip = fields.Field(attribute="skip", widget=SkipRowWidget())
 
     class Meta:
         exclude = (
@@ -87,16 +113,10 @@ class BaseDocumentResource(resources.ModelResource):
             row["frbr_uri_actor"] = frbr_uri.actor
             row["author"] = frbr_uri.actor
 
-        logger.info(f"Importing row: {row}")
+        logger.info("Importing row: {row}")
 
-    def skip_row(self, instance, original):
-        try:
-            r = requests.head(instance.source_url)
-            r.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            logger.error(e)
-            return True
-        return super().skip_row(instance, original)
+    def skip_row(self, instance, original, row, import_validation_errors=None):
+        return row["skip"]
 
     def after_save_instance(self, instance, using_transactions, dry_run):
         if not dry_run:
