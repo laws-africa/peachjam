@@ -51,7 +51,7 @@ class DynamicS3StorageTestCase(TestCase):
             [
                 call.Bucket("fake-bucket"),
                 call.Bucket().Object(
-                    f"media/core_document/{sf.pk}/source_file/test.txt"
+                    f"media/core_document/{self.doc.pk}/source_file/test.txt"
                 ),
                 call.Bucket().Object().upload_fileobj(cf, ExtraArgs=ANY, Config=ANY),
             ],
@@ -59,7 +59,7 @@ class DynamicS3StorageTestCase(TestCase):
         )
 
         self.assertEqual(
-            [f"s3:fake-bucket:media/core_document/{sf.pk}/source_file/test.txt"],
+            [f"s3:fake-bucket:media/core_document/{self.doc.pk}/source_file/test.txt"],
             list(SourceFile.objects.filter(pk=sf.pk).values_list("file", flat=True)),
         )
 
@@ -70,7 +70,7 @@ class DynamicS3StorageTestCase(TestCase):
             [
                 call.Bucket("fake-bucket"),
                 call.Bucket().Object(
-                    f"media/core_document/{sf.pk}/source_file/test.txt"
+                    f"media/core_document/{self.doc.pk}/source_file/test.txt"
                 ),
                 call.Bucket().Object().load(),
                 call.Bucket().Object().download_fileobj(ANY, Config=ANY),
@@ -86,7 +86,7 @@ class DynamicS3StorageTestCase(TestCase):
             [
                 call.Bucket("fake-bucket"),
                 call.Bucket().Object(
-                    f"media/core_document/{sf.pk}/source_file/test.txt"
+                    f"media/core_document/{self.doc.pk}/source_file/test.txt"
                 ),
                 call.Bucket().Object().load(),
                 call.Bucket().Object().download_fileobj(ANY, Config=ANY),
@@ -102,7 +102,7 @@ class DynamicS3StorageTestCase(TestCase):
             [
                 call.Bucket("fake-bucket"),
                 call.Bucket().Object(
-                    f"media/core_document/{sf.pk}/source_file/test.txt"
+                    f"media/core_document/{self.doc.pk}/source_file/test.txt"
                 ),
                 call.Bucket().Object().content_length(),
             ],
