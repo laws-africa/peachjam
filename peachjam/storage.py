@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.files.storage import default_storage
+from django.core.files.storage import FileSystemStorage, default_storage
 from django.db import models
 from django.db.models.fields.files import FieldFile
 from django.utils.module_loading import import_string
@@ -92,7 +92,44 @@ class DynamicStorageFileField(models.FileField):
         return super().pre_save(model_instance, add)
 
 
-class DynamicS3Boto3Storage(S3Boto3Storage):
+class DynamicStorageMixin:
+    """Mixin for make a storage dynamic. Ensures that the storage is used for its configured prefix, and adds/removes
+    the prefix information from the file name when necessary.
+    """
+
+    prefix = None
+
+    def __init__(self, name, *args, **kwargs):
+        prefix, rest = name.split(":", 1)
+        assert prefix == self.prefix
+        config = self.get_dynamic_storage_config(rest, *args, **kwargs)
+        kwargs.update(config)
+        super().__init__(*args, **kwargs)
+
+    def get_dynamic_storage_config(self, name, *args, **kwargs):
+        return {}
+
+    def _save(self, name, content):
+        # after saving, format the name so it has all the details
+        return self.format_name(super()._save(name, content))
+
+    def format_name(self, name):
+        """Add prefix information to the name."""
+        if not name.startswith(self.prefix + ":"):
+            return f"{self.prefix}:{name}"
+
+    def unformat_name(self, name):
+        """Remove prefix information from the name."""
+        if name.startswith(self.prefix + ":"):
+            return name.split(":", 1)[-1]
+        return name
+
+
+class DynamicFileSystemStorage(DynamicStorageMixin, FileSystemStorage):
+    prefix = "file"
+
+
+class DynamicS3Boto3Storage(DynamicStorageMixin, S3Boto3Storage):
     """S3 storage that knows how to add and strip the bucket prefix from the filename.
 
     Additionally, if silent_readonly is set, then this storage will silently discard
@@ -101,28 +138,23 @@ class DynamicS3Boto3Storage(S3Boto3Storage):
 
     prefix = "s3"
 
-    def __init__(self, name, *args, **kwargs):
-        prefix, bucket, _ = name.split(":", 2)
-        config = self.get_dynamic_storage_config(bucket)
-        self.silent_readonly = config.pop("silent_readonly", False)
-        kwargs.update(config)
-        kwargs["bucket_name"] = bucket
-        super().__init__(*args, **kwargs)
-
-    def get_dynamic_storage_config(self, bucket):
-        return (
+    def get_dynamic_storage_config(self, info, *args, **kwargs):
+        bucket = info.split(":", 1)[0]
+        self.silent_readonly = kwargs.pop("silent_readonly", False)
+        config = super().get_dynamic_storage_config(info, *args, **kwargs)
+        config.update(
             settings.DYNAMIC_STORAGE["PREFIXES"][self.prefix]
             .get("buckets", {})
             .get(bucket, {})
         )
+        config["bucket_name"] = bucket
+        return config
 
     def _save(self, name, content):
         if self.silent_readonly:
             # no-op if readonly
             return self.format_name(self._clean_name(name))
-
-        # after saving, format the name so it has all the details
-        return self.format_name(super()._save(name, content))
+        return super()._save(name, content)
 
     def delete(self, name):
         # no-op if readonly

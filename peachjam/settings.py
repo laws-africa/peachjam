@@ -289,6 +289,20 @@ SASS_PROCESSOR_INCLUDE_DIRS = [
     os.path.join(BASE_DIR, "node_modules"),
 ]
 
+# Configure dynamic file storage for fields which use it. This is a type of storage which can dynamically
+# determine whether an individual file is in S3 or a local file.
+#
+# In DEBUG mode, we default to the default locale file storage. In production, we use S3.
+DYNAMIC_STORAGE = {
+    # use file storage by default
+    "DEFAULTS": {"": "file:"},
+    "PREFIXES": {
+        # storage backends for the different prefixes
+        "file": {"storage": "peachjam.storage.DynamicFileSystemStorage"},
+        "s3": {"storage": "peachjam.storage.DynamicS3Boto3Storage"},
+    },
+}
+
 if not DEBUG:
     # AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set as env variables
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
@@ -297,14 +311,8 @@ if not DEBUG:
     AWS_SIGNATURE_VERSION = "s3v4"
     AWS_QUERYSTRING_AUTH = True
 
-    DYNAMIC_STORAGE = {
-        "PREFIXES": {
-            "s3": {
-                "storage": "peachjam.storage.DynamicS3Boto3Storage",
-            }
-        },
-        "DEFAULTS": {"": f"s3:{AWS_STORAGE_BUCKET_NAME}:"},
-    }
+    # In production, use S3 and the default S3 bucket
+    DYNAMIC_STORAGE["DEFAULTS"][""] = f"s3:{AWS_STORAGE_BUCKET_NAME}:"
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 
