@@ -140,7 +140,6 @@ class DynamicS3Boto3Storage(DynamicStorageMixin, S3Boto3Storage):
 
     def get_dynamic_storage_config(self, info, *args, **kwargs):
         bucket = info.split(":", 1)[0]
-        self.silent_readonly = kwargs.pop("silent_readonly", False)
         config = super().get_dynamic_storage_config(info, *args, **kwargs)
         config.update(
             settings.DYNAMIC_STORAGE["PREFIXES"][self.prefix]
@@ -148,6 +147,7 @@ class DynamicS3Boto3Storage(DynamicStorageMixin, S3Boto3Storage):
             .get(bucket, {})
         )
         config["bucket_name"] = bucket
+        self.silent_readonly = config.pop("silent_readonly", False)
         return config
 
     def _save(self, name, content):
