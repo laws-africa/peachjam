@@ -130,32 +130,39 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     faceted_search_fields = {
         "doc_type": {
             "field": "doc_type",
+            "options": {"size": 100},
         },
         "author": {
             "field": "author",
+            "options": {"size": 100},
         },
         "jurisdiction": {
             "field": "jurisdiction",
+            "options": {"size": 100},
         },
         "locality": {
             "field": "locality",
+            "options": {"size": 100},
         },
         "matter_type": {
             "field": "matter_type",
+            "options": {"size": 100},
         },
         "date": {
             "field": "date",
             "facet": DateHistogramFacet,
-            "options": {"interval": "year"},
+            "options": {"interval": "year", "size": 100},
         },
-        "year": {"field": "year"},
+        "year": {"field": "year", "options": {"size": 100}},
         "nature": {
             "field": "nature",
+            "options": {"size": 100},
         },
         "language": {
             "field": "language",
+            "options": {"size": 100},
         },
-        "court": {"field": "court"},
+        "court": {"field": "court", "options": {"size": 100}},
     }
 
     highlight_fields = {
