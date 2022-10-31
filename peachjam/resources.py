@@ -196,23 +196,26 @@ class JudgmentResource(BaseDocumentResource):
 
     @staticmethod
     def get_case_numbers(row):
-        case_numbers = []
-        if row["case_string_override"]:
-            case_number = CaseNumber(string_override=row["case_string_override"])
-            case_numbers.append(case_number)
-        elif row["case_numbers"]:
-            for c in [x.strip() for x in row["case_numbers"].split("|")]:
 
-                case_number_values = c.split("/")
-                case_number = CaseNumber(
-                    number=case_number_values[0], year=case_number_values[1]
-                )
+        case_number_numeric = [int(n) for n in row["case_number_numeric"].split("|")]
+        case_number_year = row["case_number_year"].split("|")
+        case_string_override = row["case_string_override"].split("|")
+        values = [case_number_numeric, case_number_year, case_string_override]
+        keys = ["number", "year", "string_override"]
 
-                if len(case_number_values) == 3:
-                    case_number.matter_type = MatterType.objects.get_or_create(
-                        name=case_number_values[2]
-                    )[0]
-                case_numbers.append(case_number)
+        if row["matter_type"]:
+            matter_type = row["matter_type"].split("|")
+            matter_types = [
+                MatterType.objects.get_or_create(name=m)[0] for m in matter_type
+            ]
+            keys.append("matter_type")
+            values.append(matter_types)
+
+        combined_data = zip(*values)
+        case_numbers_data = [
+            {k: v for (k, v) in zip(keys, data)} for data in combined_data
+        ]
+        case_numbers = [CaseNumber(**data) for data in case_numbers_data]
 
         return case_numbers
 
