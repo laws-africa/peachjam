@@ -168,6 +168,12 @@
                   {% endblock %}
                 </div>
 
+                {% block document-taxonomies %}
+                  {% if taxonomies %}
+                    {% include "peachjam/_taxonomies.html" %}
+                  {% endif %}
+                {% endblock %}
+
                 {% block document-relationships-content %}
                   {% if n_relationships %}
                     <div class="col-md">
@@ -204,12 +210,6 @@
                   {% endif %}
                 {% endblock %}
               </div>
-            {% endblock %}
-
-            {% block document-taxonomies %}
-              {% if taxonomies %}
-                {% include 'peachjam/_taxonomies.html' %}
-              {% endif %}
             {% endblock %}
 
             <hr class="mb-5">

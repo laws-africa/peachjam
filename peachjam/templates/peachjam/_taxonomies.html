@@ -1,10 +1,10 @@
 {% load peachjam i18n %}
 
-<dt>{% trans 'Taxonomies' %}</dt>
-<dd class="text-muted">
+<div class="col-md">
+  <h5>{% translate 'Taxonomies' %}</h5>
   {% for taxonomy in taxonomies %}
     <a href={% url 'secondary_taxonomy_list' taxonomy.topic.slug %}>
       {{ taxonomy.topic }}{% if not forloop.last %}
     </a> > {% endif %}
   {% endfor %}
-</dd>
+</div>
