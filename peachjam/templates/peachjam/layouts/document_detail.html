@@ -207,7 +207,9 @@
             {% endblock %}
 
             {% block document-taxonomies %}
-              {% include 'peachjam/_taxonomies.html' %}
+              {% if taxonomies %}
+                {% include 'peachjam/_taxonomies.html' %}
+              {% endif %}
             {% endblock %}
 
             <hr class="mb-5">
