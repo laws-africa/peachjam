@@ -1,0 +1,17 @@
+{% load peachjam i18n %}
+
+<h4>{% trans "Taxonomies" %}</h4>
+
+<div class="row">
+
+  {% if document.taxonomies %}
+    {% for taxonomy in document.taxonomies.all %}
+      {% for object in taxonomy.topic.get_children %}
+        <a href="#">
+          {{ object.name }}{% if not forloop.last %}
+        </a> > {% endif %}
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+
+</div>

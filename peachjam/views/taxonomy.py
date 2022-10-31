@@ -24,9 +24,6 @@ class SecondaryTaxonomyListView(ListView):
         )
         return super().get(request, *args, **kwargs)
 
-    def get_base_queryset(self):
-        return super().get_base_queryset().filter(taxonomies__topic=self.taxonomy)
-
     def get_context_data(self, **kwargs):
         return super().get_context_data(taxonomy=self.taxonomy, **kwargs)
 
