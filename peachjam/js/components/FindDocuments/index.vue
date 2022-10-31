@@ -66,6 +66,7 @@
           >
             <FilterFacets
               v-model="facets"
+              v-if="searchInfo.count"
               :loading="loading"
             >
               <template #header-title>
