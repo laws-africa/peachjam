@@ -19,9 +19,7 @@ class SecondaryTaxonomyListView(ListView):
     model = Taxonomy
 
     def get(self, request, *args, **kwargs):
-        self.taxonomy = get_object_or_404(
-            Taxonomy, slug=self.kwargs["secondary_taxonomy_slug"]
-        )
+        self.taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["slug"])
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -32,21 +30,18 @@ class TaxonomyDetailView(FilteredDocumentListView):
     template_name = "peachjam/taxonomy_detail.html"
 
     def get(self, request, *args, **kwargs):
-        self.taxonomy = get_object_or_404(
-            Taxonomy, slug=self.kwargs["secondary_taxonomy_slug"]
-        )
+
+        self.top_level, self.primary, self.secondary = request.path.split("/")[-3:]
+        self.taxonomy = get_object_or_404(Taxonomy, slug=self.primary)
+        print(self.kwargs)
         return super().get(request, *args, **kwargs)
 
     def get_base_queryset(self):
-        taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["taxonomy_detail_slug"])
-        return super().get_base_queryset().filter(taxonomies__topic=taxonomy)
+        return super().get_base_queryset().filter(taxonomies__topic=self.taxonomy)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context["taxonomy"] = self.taxonomy
-        context["current_child"] = get_object_or_404(
-            Taxonomy, slug=self.kwargs["taxonomy_detail_slug"]
-        )
 
         return context

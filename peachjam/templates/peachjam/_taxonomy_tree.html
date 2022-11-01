@@ -1,14 +1,18 @@
 <li>
-  <a href={% url 'taxonomy_detail' current_child.slug child.slug %}>
-    {{ child.name }}
-  </a>
-  {% if child.get_children %}
-    <ul>
-      {% for child_item in child.get_children %}
-        {% with child=child_item template_name="peachjam/_taxonomy_tree.html" %}
-          {% include template_name %}
-        {% endwith %}
-      {% endfor %}
-    </ul>
-  {% endif %}
+{#  {% with request.path|add:taxonomy.slug as taxonomy_slug %}#}
+    <a href={% url 'taxonomy_detail' request.path child.slug %}>
+      {{ child.name }}
+    </a>
+    {% if child.get_children %}
+      <ul>
+        {% for child_item in child.get_children %}
+          {% with child=child_item template_name="peachjam/_taxonomy_tree.html" %}
+            {% include template_name %}
+          {% endwith %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+{#  {% endwith %}#}
+
+
 </li>

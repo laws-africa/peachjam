@@ -10,7 +10,7 @@
 
 {% block taxonomy-list %}
   <ul>
-  {% for child in current_child.get_children %}
+  {% for child in taxonomy.get_children %}
     {% include "peachjam/_taxonomy_tree.html" %}
   {% endfor %}
   </ul>

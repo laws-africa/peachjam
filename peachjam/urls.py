@@ -85,12 +85,12 @@ urlpatterns = [
     ),
     path("taxonomy/", PrimaryTaxonomyListView.as_view(), name="primary_taxonomy_list"),
     path(
-        "taxonomy/<slug:secondary_taxonomy_slug>",
+        "taxonomy/<slug:slug>",
         SecondaryTaxonomyListView.as_view(),
         name="secondary_taxonomy_list",
     ),
     path(
-        "taxonomy/<slug:secondary_taxonomy_slug>/<slug:taxonomy_detail_slug>/",
+        "taxonomy/<path:taxonomy_detail_path>/<slug:slug>",
         TaxonomyDetailView.as_view(),
         name="taxonomy_detail",
     ),
