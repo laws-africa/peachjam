@@ -93,7 +93,7 @@
           aria-labelledby="nav-profile-tab"
         >
           <AdvancedSearch
-            v-model="advancedFilters"
+            v-model="advancedFields"
             :global-search-value="q"
             @global-search-change="value => q = value"
             @submit="search"
@@ -223,7 +223,7 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
-      advancedFilters: {
+      advancedFields: {
         title: '',
         judges: '',
         headnote_holding: '',
@@ -440,7 +440,7 @@ export default {
 
     async search () {
       // if one of the search fields is true perform search
-      if (this.q || ['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.advancedFilters[key])) {
+      if (this.q || ['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.advancedFields[key])) {
         const generateUrl = () => {
           const params = new URLSearchParams();
           params.append('search', this.q);
@@ -459,8 +459,8 @@ export default {
           this.facets.forEach((facet) => {
             params.append('facet', facet.name);
           });
-          Object.keys(this.advancedFilters).forEach(key => {
-            const value = this.advancedFilters[key];
+          Object.keys(this.advancedFields).forEach(key => {
+            const value = this.advancedFields[key];
             if (!value) return;
             if (key === 'date' && value.date_from && value.date_to) {
               const dateFrom = moment(value.date_from).locale(getUserLocale()).format('YYYY-MM-DD');
