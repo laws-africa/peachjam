@@ -23,3 +23,7 @@ export function scrollToElement (elem: HTMLElement, offset = 0) {
     observer.observe(elem);
   });
 }
+
+export const getUserLocale = () => navigator.languages && navigator.languages.length
+  ? navigator.languages[0]
+  : navigator.language;
