@@ -8,6 +8,7 @@ from cobalt import FrbrUri
 from countries_plus.models import Country
 from django.core.files.base import File
 from django.forms import ValidationError
+from django.utils.text import slugify
 from import_export import fields, resources
 from import_export.widgets import (
     BooleanWidget,
@@ -130,7 +131,8 @@ class BaseDocumentResource(resources.ModelResource):
                         document=instance,
                         defaults={
                             "file": File(
-                                source_file, name=f"{instance.title[-250:]}{file_ext}"
+                                source_file,
+                                name=f"{slugify(instance.title[-250:])}{file_ext}",
                             ),
                             "mimetype": mime,
                         },
@@ -263,7 +265,9 @@ class JudgmentResource(BaseDocumentResource):
             AttachedFiles.objects.update_or_create(
                 document=judgment,
                 defaults={
-                    "file": File(summary_file, name=f"{judgment.title[-250:]}{ext}"),
+                    "file": File(
+                        summary_file, name=f"{slugify(judgment.title[-250:])}{ext}"
+                    ),
                     "nature": media_summary_file_nature,
                     "mimetype": mime,
                 },
