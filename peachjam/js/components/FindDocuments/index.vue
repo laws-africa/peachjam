@@ -410,7 +410,7 @@ export default {
 
       Object.keys(this.advancedFields).forEach(key => {
         if (!params.has(key)) return;
-        if (key === 'date_from' || key === 'date_to') {
+        if (key === 'date') {
           this.advancedFields.date[key] = params.get(key);
         } else {
           this.advancedFields[key] = params.get(key);
