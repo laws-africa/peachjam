@@ -4,28 +4,28 @@
       <form @submit.prevent="$emit('submit')">
         <div class="row">
           <div class="col-12 mb-3">
-            <label for="global">{{ $t("Search all documents") }}</label>
+            <label for="global">{{ $t("Search all documents:") }}</label>
             <input
               id="global"
               name="global"
               type="text"
               class="form-control"
               :value="globalSearchValue"
-              :aria-describedby="$t('Search all documents')"
-              :placeholder="$t('Lorem all document search')"
+              :aria-describedby="$t('Search all documents:')"
+              :placeholder="$t('Search documents by all fields')"
               @input="onGlobalSearch"
             >
           </div>
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="title">{{ $t("Title") }}</label>
+              <label for="title">{{ $t("Title:") }}</label>
               <input
                 id="title"
                 name="title"
                 type="text"
                 class="form-control"
                 :aria-describedby="$t('Title')"
-                :placeholder="$t('Enter document title')"
+                :placeholder="$t('Search documents by title')"
                 :value="modelValue.title"
                 @input="onChange"
               >
@@ -33,14 +33,14 @@
           </div>
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="judges">{{ $t("Judges") }}</label>
+              <label for="judges">{{ $t("Judges:") }}</label>
               <input
                 id="judges"
                 name="judges"
                 type="text"
                 class="form-control"
                 :aria-describedby="$t('Judges')"
-                :placeholder="$t('Enter document judges')"
+                :placeholder="$t('Search documents by judges')"
                 :value="modelValue.judges"
                 @input="onChange"
               >
@@ -49,14 +49,14 @@
 
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="headnote_holding">{{ $t("Headnote holding") }}</label>
+              <label for="headnote_holding">{{ $t("Headnote holding:") }}</label>
               <input
                 id="headnote_holding"
                 type="text"
                 name="headnote_holding"
                 class="form-control"
                 :aria-describedby="$t('Headnote holding')"
-                :placeholder="$t('Enter document headnote holding')"
+                :placeholder="$t('Search documents by headnote holding')"
                 :value="modelValue.headnote_holding"
                 @input="onChange"
               >
@@ -65,14 +65,14 @@
 
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="flynote">{{ $t("Flynote") }}</label>
+              <label for="flynote">{{ $t("Flynote:") }}</label>
               <input
                 id="flynote"
                 name="flynote"
                 type="text"
                 class="form-control"
                 :aria-describedby="$t('Flynote')"
-                :placeholder="$t('Enter document flynote')"
+                :placeholder="$t('Search documents by flynote')"
                 :value="modelValue.flynote"
                 @input="onChange"
               >
@@ -81,31 +81,28 @@
 
           <div class="col-12 mb-3">
             <div class="form-group">
-              <label for="content">{{ $t('Content') }}</label>
+              <label for="content">{{ $t('Content:') }}</label>
               <textarea
                 id="content"
                 name="content"
                 class="form-control"
                 :aria-describedby="$t('Content')"
-                :placeholder="$t('Enter document content')"
+                :placeholder="$t('Search documents by content')"
                 :value="modelValue.content"
                 @input="onChange"
               />
             </div>
           </div>
-          <div class="col-12">
-            <strong>Filter by date</strong>
-          </div>
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="date_from">{{ $t("Date from") }}</label>
+              <label for="date_from">{{ $t("Date from:") }}</label>
               <input
                 id="date_from"
                 name="date_from"
                 type="date"
                 class="form-control"
-                :aria-describedby="$t('Date from')"
-                :placeholder="$t('Enter document date from')"
+                :aria-describedby="$t('Date from:')"
+                :placeholder="$t('Enter start date')"
                 :value="modelValue.date.date_from"
                 :disabled="disableDate"
                 @change="onDateChange"
@@ -114,19 +111,25 @@
           </div>
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="date_to">{{ $t("Date to") }}</label>
+              <label for="date_to">{{ $t("Date to:") }}</label>
               <input
                 id="date_to"
                 name="date_to"
                 type="date"
                 class="form-control"
-                :aria-describedby="$t('Date to')"
-                :placeholder="$t('Enter document date to')"
+                :aria-describedby="$t('Date to:')"
+                :placeholder="$t('Enter end date')"
                 :value="modelValue.date.date_to"
                 :disabled="disableDate"
                 @change="onDateChange"
               >
             </div>
+          </div>
+          <div
+            v-if="invalidDateRange"
+            class="col-12 mb-3 text-danger"
+          >
+            {{ $t('The date range you have selected is invalid. Please chose a correct date range.') }}
           </div>
         </div>
         <div class="text-end">
@@ -143,6 +146,7 @@
 </template>
 
 <script>
+
 export default {
   name: 'AdvancedSearch',
   props: {
@@ -156,13 +160,36 @@ export default {
     }
   },
   emits: ['submit', 'update:modelValue', 'global-search-change'],
-  data: () => ({
-    validationMessage: false
-  }),
+
   computed: {
+    invalidDateRange () {
+      if (!this.modelValue.date.date_from && !this.modelValue.date.date_to) {
+        return false;
+      }
+      const from = new Date(this.modelValue.date.date_from);
+      const to = new Date(this.modelValue.date.date_to);
+      return from > to;
+    },
     disableDate () {
       // Disable dates if there are no search values
       return !(['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.modelValue[key]) || this.globalSearchValue);
+    }
+  },
+
+  watch: {
+    disableDate: {
+      handler (newValue) {
+        // When disabling calendar set date input values to null
+        if (newValue) {
+          this.$emit('update:modelValue', {
+            ...this.modelValue,
+            date: {
+              date_from: null,
+              date_to: null
+            }
+          });
+        }
+      }
     }
   },
   methods: {
