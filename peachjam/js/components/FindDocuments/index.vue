@@ -1,48 +1,105 @@
 <template>
   <div id="search">
     <div class="search-input-container">
-      <form
-        class="d-flex align-items-center"
-        @submit.prevent="handleSubmit"
-      >
-        <div class="input-group">
-          <input
-            ref="search-input"
-            type="text"
-            class="form-control"
-            :placeholder="$t('Search documents')"
-            :aria-label="$t('Search documents')"
-            aria-describedby="basic-addon2"
-            required
+      <nav>
+        <div
+          id="nav-tab"
+          class="nav nav-tabs"
+          role="tablist"
+        >
+          <button
+            id="nav-home-tab"
+            class="nav-link active"
+            data-bs-toggle="tab"
+            data-bs-target="#nav-home"
+            type="button"
+            role="tab"
+            aria-controls="nav-home"
+            aria-selected="true"
           >
-          <div class="input-group-append">
-            <button
-              type="submit"
-              class="btn btn-sm btn-primary"
-              style="
+            Search
+          </button>
+          <button
+            id="nav-profile-tab"
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#nav-profile"
+            type="button"
+            role="tab"
+            aria-controls="nav-profile"
+            aria-selected="false"
+          >
+            Advanced
+          </button>
+        </div>
+      </nav>
+      <div
+        id="nav-tabContent"
+        class="tab-content"
+      >
+        <div
+          id="nav-home"
+          class="tab-pane fade show active"
+          role="tabpanel"
+          aria-labelledby="nav-home-tab"
+        >
+          <form
+            class="d-flex align-items-center mb-2"
+            @submit.prevent="handleSubmit"
+          >
+            <div class="input-group">
+              <input
+                ref="search-input"
+                type="text"
+                class="form-control"
+                :placeholder="$t('Search documents')"
+                :aria-label="$t('Search documents')"
+                aria-describedby="basic-addon2"
+                required
+              >
+              <div class="input-group-append">
+                <button
+                  type="submit"
+                  class="btn btn-sm btn-primary"
+                  style="
                 border-top-right-radius: 0.2rem;
                 border-bottom-right-radius: 0.2rem;
               "
-              :disabled="loading"
-            >
-              <span
-                v-if="loading"
-                class="circle-loader--lt"
-              />
-              <span v-else>{{ $t("Search") }}</span>
-            </button>
-          </div>
-          <button
-            v-if="searchInfo.count"
-            type="button"
-            style="border-radius: 0.2rem"
-            class="btn btn-sm btn-secondary ms-1 d-lg-none"
-            @click="() => drawerOpen = true"
-          >
-            Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
-          </button>
+                  :disabled="loading"
+                >
+                  <span
+                    v-if="loading"
+                    class="circle-loader--lt"
+                  />
+                  <span v-else>{{ $t("Search") }}</span>
+                </button>
+              </div>
+              <button
+                v-if="searchInfo.count"
+                type="button"
+                style="border-radius: 0.2rem"
+                class="btn btn-sm btn-secondary ms-1 d-lg-none"
+                @click="() => drawerOpen = true"
+              >
+                Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+        <div
+          id="nav-profile"
+          class="tab-pane fade"
+          role="tabpanel"
+          aria-labelledby="nav-profile-tab"
+        >
+          <AdvancedSearch
+            v-model="advancedFilters"
+            :global-search-value="q"
+            @global-search-change="value => q = value"
+            @submit="search"
+          />
+        </div>
+      </div>
 
       <div
         v-if="error"
@@ -150,10 +207,13 @@ import SearchResult from './SearchResult.vue';
 import SearchPagination from './SearchPagination.vue';
 import FilterFacets from '../FilterFacets/index.vue';
 import MobileFacetsDrawer from './MobileSideDrawer.vue';
+import AdvancedSearch from './AdvancedSearch.vue';
+import moment from 'moment';
+import { getUserLocale } from '../../utils/function';
 
 export default {
   name: 'FindDocuments',
-  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets },
+  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
   data () {
     return {
       loadingCount: 0,
@@ -163,6 +223,17 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
+      advancedFilters: {
+        title: '',
+        judges: '',
+        headnote_holding: '',
+        flynote: '',
+        content: '',
+        date: {
+          date_from: null,
+          date_to: null
+        }
+      },
       facets: [
         {
           title: this.$t('Document type'),
@@ -368,7 +439,8 @@ export default {
     },
 
     async search () {
-      if (this.q !== '') {
+      // if one of the search fields is true perform search
+      if (this.q || ['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.advancedFilters[key])) {
         const generateUrl = () => {
           const params = new URLSearchParams();
           params.append('search', this.q);
@@ -387,9 +459,19 @@ export default {
           this.facets.forEach((facet) => {
             params.append('facet', facet.name);
           });
-
+          Object.keys(this.advancedFilters).forEach(key => {
+            const value = this.advancedFilters[key];
+            if (!value) return;
+            if (key === 'date' && value.date_from && value.date_to) {
+              const dateFrom = moment(value.date_from).locale(getUserLocale()).format('YYYY-MM-DD');
+              const dateTo = moment(value.date_to).locale(getUserLocale()).format('YYYY-MM-DD');
+              params.append('date__range', `${dateFrom}__${dateTo}`);
+            } else {
+              params.append(`search__${key}`, value);
+            }
+          });
           return `${
-            window.location.origin
+              window.location.origin
           }/search/api/documents/?${params.toString()}`;
         };
 
