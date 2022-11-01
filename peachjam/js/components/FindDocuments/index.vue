@@ -8,25 +8,25 @@
           role="tablist"
         >
           <button
-            id="nav-home-tab"
+            id="search-tab"
             class="nav-link active"
             data-bs-toggle="tab"
-            data-bs-target="#nav-home"
+            data-bs-target="#nav-search"
             type="button"
             role="tab"
-            aria-controls="nav-home"
+            aria-controls="nav-search"
             aria-selected="true"
           >
             Search
           </button>
           <button
-            id="nav-profile-tab"
+            id="advanced-search-tab"
             class="nav-link"
             data-bs-toggle="tab"
-            data-bs-target="#nav-profile"
+            data-bs-target="#nav-advanced-search"
             type="button"
             role="tab"
-            aria-controls="nav-profile"
+            aria-controls="nav-advanced-search"
             aria-selected="false"
           >
             Advanced
@@ -38,10 +38,10 @@
         class="tab-content"
       >
         <div
-          id="nav-home"
+          id="nav-search"
           class="tab-pane fade show active"
           role="tabpanel"
-          aria-labelledby="nav-home-tab"
+          aria-labelledby="search-tab"
         >
           <form
             class="d-flex align-items-center mb-2"
@@ -49,7 +49,7 @@
           >
             <div class="input-group">
               <input
-                ref="search-input"
+                v-model="q"
                 type="text"
                 class="form-control"
                 :placeholder="$t('Search documents')"
@@ -87,10 +87,10 @@
           </form>
         </div>
         <div
-          id="nav-profile"
+          id="nav-advanced-search"
           class="tab-pane fade"
           role="tabpanel"
-          aria-labelledby="nav-profile-tab"
+          aria-labelledby="advanced-search-tab"
         >
           <AdvancedSearch
             v-model="advancedFields"
@@ -351,7 +351,6 @@ export default {
 
     handleSubmit () {
       this.page = 1;
-      this.q = this.$refs['search-input'].value.trim();
       this.search();
     },
 
@@ -366,7 +365,7 @@ export default {
     serialiseState () {
       // save state to URL string
       const params = new URLSearchParams();
-      params.set('q', this.q);
+      if (this.q) params.set('q', this.q);
       if (this.page > 1) {
         params.set('page', this.page);
       }
@@ -380,6 +379,18 @@ export default {
         });
       });
 
+      // Set advanced fields to url
+      Object.keys(this.advancedFields).forEach(key => {
+        const value = this.advancedFields[key];
+        if (!value) return;
+        if (key === 'date' && value.date_from && value.date_to) {
+          params.append(key, this.advancedFields.date.date_from);
+          params.append(key, this.advancedFields.date.date_to);
+        } else if (key !== 'date') {
+          params.append(key, value);
+        }
+      });
+
       return params.toString();
     },
 
@@ -387,9 +398,7 @@ export default {
       // load state from URL
       const params = new URLSearchParams(window.location.search);
       // skip the first event if there's a query, because the page load will already have sent it
-      this.q = this.$refs['search-input'].value = (
-        params.get('q') || ''
-      ).trim();
+      this.q = (params.get('q') || '').trim();
       this.page = parseInt(params.get('page')) || this.page;
       this.ordering = params.get('ordering') || this.ordering;
 
@@ -399,12 +408,25 @@ export default {
         }
       });
 
+      Object.keys(this.advancedFields).forEach(key => {
+        if (!params.has(key)) return;
+        if (key === 'date_from' || key === 'date_to') {
+          this.advancedFields.date[key] = params.get(key);
+        } else {
+          this.advancedFields[key] = params.get(key);
+        }
+      });
+      // If advance search params open advanced search tab
+      if (Object.keys(this.advancedFields).some(key => params.has(key))) {
+        const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#advanced-search-tab'));
+        tabTrigger.show();
+      }
+
       this.search();
     },
 
     suggest (q) {
       this.q = q;
-      this.$refs['search-input'].value = q;
       this.search();
     },
 
@@ -443,7 +465,7 @@ export default {
       if (this.q || ['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.advancedFields[key])) {
         const generateUrl = () => {
           const params = new URLSearchParams();
-          params.append('search', this.q);
+          if (this.q) params.append('search', this.q);
           params.append('page', this.page);
           params.append('ordering', this.ordering);
           params.append('highlight', 'content');
@@ -466,7 +488,7 @@ export default {
               const dateFrom = moment(value.date_from).locale(getUserLocale()).format('YYYY-MM-DD');
               const dateTo = moment(value.date_to).locale(getUserLocale()).format('YYYY-MM-DD');
               params.append('date__range', `${dateFrom}__${dateTo}`);
-            } else {
+            } else if (key !== 'date') {
               params.append(`search__${key}`, value);
             }
           });
