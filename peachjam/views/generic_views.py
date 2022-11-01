@@ -131,7 +131,7 @@ class BaseDocumentDetailView(DetailView):
             context["display_type"] = None
 
         context["notices"] = self.get_notices()
-        context["taxonomies"] = doc.taxonomies.all()
+        context["taxonomies"] = doc.taxonomies.prefetch_related("topic")
 
         return context
 

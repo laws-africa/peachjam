@@ -38,7 +38,8 @@ class TaxonomyDetailView(FilteredDocumentListView):
         return super().get(request, *args, **kwargs)
 
     def get_base_queryset(self):
-        return super().get_base_queryset().filter(taxonomies__topic=self.taxonomy)
+        taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["taxonomy_detail_slug"])
+        return super().get_base_queryset().filter(taxonomies__topic=taxonomy)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
