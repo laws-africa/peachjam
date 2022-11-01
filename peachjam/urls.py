@@ -89,8 +89,8 @@ urlpatterns = [
         SecondaryTaxonomyListView.as_view(),
         name="secondary_taxonomy_list",
     ),
-    path(
-        "taxonomy/<path:taxonomy_detail_path>/<slug:slug>",
+    re_path(
+        r"^taxonomy/([\w/]*)/$",
         TaxonomyDetailView.as_view(),
         name="taxonomy_detail",
     ),

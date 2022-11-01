@@ -1,7 +1,6 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
-{% block title %} {% trans 'Home' %} {% endblock %}
-
+{% block title %} {% blocktrans %}{{ taxonomy }} {% endblocktrans %} {% endblock %}
 
 
 {% block page-content %}
@@ -11,7 +10,7 @@
     <ul>
       {% for child in taxonomy.get_children %}
         <li>
-          <a href={% url 'taxonomy_detail' taxonomy.slug child.slug %}>
+          <a href={% url 'taxonomy_detail' taxonomy.slug %}>
             {{ child }}
           </a>
         </li>
