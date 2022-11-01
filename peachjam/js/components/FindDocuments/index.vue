@@ -211,6 +211,18 @@ import AdvancedSearch from './AdvancedSearch.vue';
 import moment from 'moment';
 import { getUserLocale } from '../../utils/function';
 
+const baseAdvancedFields = {
+  title: '',
+  judges: '',
+  headnote_holding: '',
+  flynote: '',
+  content: '',
+  date: {
+    date_from: null,
+    date_to: null
+  }
+};
+
 export default {
   name: 'FindDocuments',
   components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
@@ -223,17 +235,7 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
-      advancedFields: {
-        title: '',
-        judges: '',
-        headnote_holding: '',
-        flynote: '',
-        content: '',
-        date: {
-          date_from: null,
-          date_to: null
-        }
-      },
+      advancedFields: baseAdvancedFields,
       facets: [
         {
           title: this.$t('Document type'),
@@ -351,6 +353,7 @@ export default {
 
     handleSubmit () {
       this.page = 1;
+      this.advancedFields = { ...baseAdvancedFields };
       this.search();
     },
 
@@ -384,8 +387,8 @@ export default {
         const value = this.advancedFields[key];
         if (!value) return;
         if (key === 'date' && value.date_from && value.date_to) {
-          params.append(key, this.advancedFields.date.date_from);
-          params.append(key, this.advancedFields.date.date_to);
+          params.append('date_from', this.advancedFields.date.date_from);
+          params.append('date_to', this.advancedFields.date.date_to);
         } else if (key !== 'date') {
           params.append(key, value);
         }
@@ -408,20 +411,18 @@ export default {
         }
       });
 
-      Object.keys(this.advancedFields).forEach(key => {
-        if (!params.has(key)) return;
-        if (key === 'date') {
-          this.advancedFields.date[key] = params.get(key);
-        } else {
+      const advancedSearchFields = Object.keys(this.advancedFields).filter(key => key !== 'date');
+      if (advancedSearchFields.some(key => params.has(key))) {
+      // if there are advance search fields url params (title, judges, flynote), prefill fields
+        if (params.has('date_from')) this.advancedFields.date.date_from = params.get('date_from');
+        if (params.has('date_to')) this.advancedFields.date.date_to = params.get('date_to');
+        advancedSearchFields.forEach(key => {
+          if (!params.has(key)) return;
           this.advancedFields[key] = params.get(key);
-        }
-      });
-      // If advance search params open advanced search tab
-      if (Object.keys(this.advancedFields).some(key => params.has(key))) {
+        });
         const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#advanced-search-tab'));
         tabTrigger.show();
       }
-
       this.search();
     },
 
