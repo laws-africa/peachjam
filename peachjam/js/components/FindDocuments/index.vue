@@ -211,18 +211,6 @@ import AdvancedSearch from './AdvancedSearch.vue';
 import moment from 'moment';
 import { getUserLocale } from '../../utils/function';
 
-const baseAdvancedFields = {
-  title: '',
-  judges: '',
-  headnote_holding: '',
-  flynote: '',
-  content: '',
-  date: {
-    date_from: null,
-    date_to: null
-  }
-};
-
 export default {
   name: 'FindDocuments',
   components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
@@ -235,7 +223,17 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
-      advancedFields: baseAdvancedFields,
+      advancedFields: {
+        title: '',
+        judges: '',
+        headnote_holding: '',
+        flynote: '',
+        content: '',
+        date: {
+          date_from: null,
+          date_to: null
+        }
+      },
       facets: [
         {
           title: this.$t('Document type'),
@@ -351,9 +349,19 @@ export default {
       this.search();
     },
 
+    clearAdvancedFields () {
+      this.advancedFields.title = '';
+      this.advancedFields.judges = '';
+      this.advancedFields.headnote_holding = '';
+      this.advancedFields.flynote = '';
+      this.advancedFields.content = '';
+      this.advancedFields.date.date_to = null;
+      this.advancedFields.date.date_from = null;
+    },
+
     handleSubmit () {
       this.page = 1;
-      this.advancedFields = { ...baseAdvancedFields };
+      this.clearAdvancedFields();
       this.search();
     },
 
