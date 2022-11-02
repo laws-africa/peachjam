@@ -4,21 +4,21 @@
       <form @submit.prevent="$emit('submit')">
         <div class="row">
           <div class="col-12 mb-3">
-            <label for="global">{{ $t("Search all documents:") }}</label>
+            <label for="global">{{ $t("Search all fields") }}:</label>
             <input
               id="global"
               name="global"
               type="text"
               class="form-control"
               :value="globalSearchValue"
-              :aria-describedby="$t('Search all documents:')"
+              :aria-describedby="$t('Search all documents')"
               :placeholder="$t('Search documents by all fields')"
               @input="onGlobalSearch"
             >
           </div>
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="title">{{ $t("Title:") }}</label>
+              <label for="title">{{ $t("Title") }}:</label>
               <input
                 id="title"
                 name="title"
@@ -33,7 +33,7 @@
           </div>
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="judges">{{ $t("Judges:") }}</label>
+              <label for="judges">{{ $t("Judges") }}:</label>
               <input
                 id="judges"
                 name="judges"
@@ -49,7 +49,7 @@
 
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="headnote_holding">{{ $t("Headnote holding:") }}</label>
+              <label for="headnote_holding">{{ $t("Headnote holding") }}:</label>
               <input
                 id="headnote_holding"
                 type="text"
@@ -65,7 +65,7 @@
 
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="flynote">{{ $t("Flynote:") }}</label>
+              <label for="flynote">{{ $t("Flynote") }}:</label>
               <input
                 id="flynote"
                 name="flynote"
@@ -81,7 +81,7 @@
 
           <div class="col-12 mb-3">
             <div class="form-group">
-              <label for="content">{{ $t('Content:') }}</label>
+              <label for="content">{{ $t('Content') }}:</label>
               <textarea
                 id="content"
                 name="content"
@@ -95,13 +95,13 @@
           </div>
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="date_from">{{ $t("Date from:") }}</label>
+              <label for="date_from">{{ $t("Date from") }}:</label>
               <input
                 id="date_from"
                 name="date_from"
                 type="date"
                 class="form-control"
-                :aria-describedby="$t('Date from:')"
+                :aria-describedby="$t('Date from')"
                 :placeholder="$t('Enter start date')"
                 :value="modelValue.date.date_from"
                 :disabled="disableDate"
@@ -111,13 +111,13 @@
           </div>
           <div class="col-6 mb-3">
             <div class="form-group">
-              <label for="date_to">{{ $t("Date to:") }}</label>
+              <label for="date_to">{{ $t("Date to") }}:</label>
               <input
                 id="date_to"
                 name="date_to"
                 type="date"
                 class="form-control"
-                :aria-describedby="$t('Date to:')"
+                :aria-describedby="$t('Date to')"
                 :placeholder="$t('Enter end date')"
                 :value="modelValue.date.date_to"
                 :disabled="disableDate"
@@ -126,7 +126,7 @@
             </div>
           </div>
           <div
-            v-if="invalidDateRange"
+            v-if="invalidDates"
             class="col-12 mb-3 text-danger"
           >
             {{ $t('The date range you have selected is invalid. Please choose a correct date range.') }}
@@ -162,13 +162,15 @@ export default {
   emits: ['submit', 'update:modelValue', 'global-search-change'],
 
   computed: {
-    invalidDateRange () {
-      if (!this.modelValue.date.date_from && !this.modelValue.date.date_to) {
+    invalidDates () {
+      const datesStrings = [this.modelValue.date.date_from, this.modelValue.date.date_to];
+      if (datesStrings.every(date => !date)) {
         return false;
-      }
-      const from = new Date(this.modelValue.date.date_from);
-      const to = new Date(this.modelValue.date.date_to);
-      return from > to;
+      } else if (datesStrings.every(date => date)) {
+        const from = new Date(datesStrings[0]);
+        const to = new Date(datesStrings[1]);
+        return from > to;
+      } else return !datesStrings.some(string => string);
     },
     disableDate () {
       // Disable dates if there are no search values
