@@ -11,7 +11,7 @@
               type="text"
               class="form-control"
               :value="globalSearchValue"
-              :aria-describedby="$t('Search all documents')"
+              :aria-describedby="$t('Search all fields')"
               :placeholder="$t('Search documents by all fields')"
               @input="onGlobalSearch"
             >
