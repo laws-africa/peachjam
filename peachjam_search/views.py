@@ -25,12 +25,42 @@ from peachjam_search.serializers import SearchableDocumentSerializer
 CACHE_SECS = 15 * 60
 
 
+class MultiFieldSearchQueryBackend(SimpleQueryStringQueryBackend):
+    """Supports searching across multiple fields.
+
+    Specify zero or more query parameters such as search__title=foo
+    """
+
+    def construct_search(self, request, view, search_backend):
+        view_search_fields = view.search_fields
+        assert isinstance(view_search_fields, dict)
+
+        # check for per-field search params
+        query_params = {}
+        for field in view_search_fields.keys():
+            query = request.query_params.get(search_backend.search_param + "__" + field)
+            if query:
+                query_params[field] = query
+
+        return [
+            Q(
+                self.query_type,
+                query=search_term,
+                fields=[self.get_field(field, view_search_fields[field])],
+                **self.get_query_options(request, view, search_backend)
+            )
+            for field, search_term in query_params.items()
+        ]
+
+
 class NestedPageQueryBackend(BaseSearchQueryBackend):
     """Does a nested page search, and includes highlights."""
 
     @classmethod
     def construct_search(cls, request, view, search_backend):
         search_term = " ".join(search_backend.get_search_query_params(request))
+        if not search_term:
+            return []
         return [
             Q(
                 "nested",
@@ -64,12 +94,52 @@ class NestedPageQueryBackend(BaseSearchQueryBackend):
 
 
 class SearchFilterBackend(CompoundSearchFilterBackend):
-    query_backends = [
+    """Custom search backend that builds our boolean query, based on two factors: an all-field search (simple),
+    and a per-field (advanced) search. The two can also be combined.
+
+    1. Simple: a SHOULD query (minimum_should_match=1), for:
+       a. all the fields
+       b. nested page content
+
+    2. Advanced: a MUST query for the specified field(s).
+
+    3. Combined simple and advanced, using both SHOULD and MUST from above.
+    """
+
+    must_backends = [MultiFieldSearchQueryBackend()]
+
+    should_backends = [
         # Use ES's SimpleQueryString search support which allows quotes, +foo, -bar etc.
         SimpleQueryStringQueryBackend(),
         # Customised search on PDF page content
         NestedPageQueryBackend,
     ]
+
+    def filter_queryset(self, request, queryset, view):
+        # must queries
+        must_queries = []
+        for backend in self.must_backends:
+            must_queries.extend(
+                backend.construct_search(
+                    request=request, view=view, search_backend=self
+                )
+            )
+
+        # should queries
+        should_queries = []
+        for backend in self.should_backends:
+            should_queries.extend(
+                backend.construct_search(
+                    request=request, view=view, search_backend=self
+                )
+            )
+
+        return queryset.query(
+            "bool",
+            must=must_queries,
+            should=should_queries,
+            minimum_should_match=1 if should_queries else 0,
+        )
 
 
 class SearchView(TemplateView):
@@ -104,6 +174,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     # allowed and default ordering
     ordering_fields = {"date": "date", "title": "title"}
     ordering = ("_score", "date")
+    simple_query_string_options = {"default_operator": "AND"}
 
     filter_fields = {
         "author": "author",
