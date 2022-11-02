@@ -23,6 +23,7 @@ judgment_import_headers = [
     "judges",
     "media_summary_file",
     "matter_type",
+    "serial_number_override",
 ]
 row = [
     "",
@@ -40,6 +41,7 @@ row = [
     "Maya P|Dambuza JA|Makgoka JA|Gorven JA|Makaula AJA",
     "",
     "",
+    "121",
 ]
 
 
@@ -58,10 +60,16 @@ def mocked_response(*args, **kwargs):
 class JudgmentBulkImportTestCase(TestCase):
     fixtures = ["tests/courts", "tests/countries", "tests/languages"]
 
-    def test_source_file_prefers_docx_over_pdf(self):
+    @mock.patch("peachjam.resources.requests.head", side_effect=mocked_response)
+    @mock.patch(
+        "peachjam.resources.download_source_file", return_value=NamedTemporaryFile()
+    )
+    def test_source_file_prefers_docx_over_pdf(self, mock_request, mock_download):
         dataset = tablib.Dataset(row, headers=judgment_import_headers)
-        source_url = JudgmentResource().get_source_url(dataset.dict[0])
-        self.assertEqual(source_url, "https://mediafile.docx")
+        result = JudgmentResource().import_data(dataset=dataset, dry_run=False)
+        j = Judgment.objects.get(mnc="[2022] EACJ 121")
+        self.assertFalse(result.has_errors())
+        self.assertEqual(j.source_url, "https://mediafile.docx")
 
     def test_case_number_import_without_matter_type(self):
         dataset = tablib.Dataset(row, headers=judgment_import_headers)
