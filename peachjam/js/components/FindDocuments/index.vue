@@ -122,8 +122,8 @@
             @outside-drawer-click="() => drawerOpen = false"
           >
             <FilterFacets
-              v-model="facets"
               v-if="searchInfo.count"
+              v-model="facets"
               :loading="loading"
             >
               <template #header-title>
@@ -144,11 +144,13 @@
             <div v-if="searchInfo.count">
               <div class="mb-3 sort-body">
                 <div>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</div>
-                <div class="sort__inner">
-                  {{ $t('Sort by') }}
+                <div class="sort__inner d-flex align-items-center">
+                  <div style="width: 65px;">
+                    {{ $t('Sort by') }}
+                  </div>
                   <select
                     v-model="ordering"
-                    class="ms-2"
+                    class="ms-2 form-select"
                   >
                     <option value="-score">
                       {{ $t('Relevance') }}
@@ -394,9 +396,15 @@ export default {
       Object.keys(this.advancedFields).forEach(key => {
         const value = this.advancedFields[key];
         if (!value) return;
-        if (key === 'date' && value.date_from && value.date_to) {
-          params.append('date_from', this.advancedFields.date.date_from);
-          params.append('date_to', this.advancedFields.date.date_to);
+        if (key === 'date') {
+          if (value.date_from && value.date_to) {
+            params.append('date_from', this.advancedFields.date.date_from);
+            params.append('date_to', this.advancedFields.date.date_to);
+          } else if (value.date_from) {
+            params.append('date_from', this.advancedFields.date.date_from);
+          } else if (value.date_to) {
+            params.append('date_to', this.advancedFields.date.date_to);
+          }
         } else if (key !== 'date') {
           params.append(key, value);
         }
@@ -493,10 +501,17 @@ export default {
           Object.keys(this.advancedFields).forEach(key => {
             const value = this.advancedFields[key];
             if (!value) return;
-            if (key === 'date' && value.date_from && value.date_to) {
-              const dateFrom = moment(value.date_from).locale(getUserLocale()).format('YYYY-MM-DD');
-              const dateTo = moment(value.date_to).locale(getUserLocale()).format('YYYY-MM-DD');
-              params.append('date__range', `${dateFrom}__${dateTo}`);
+
+            if (key === 'date') {
+              if (value.date_from && value.date_to) {
+                const dateFrom = moment(value.date_from).format('YYYY-MM-DD');
+                const dateTo = moment(value.date_to).format('YYYY-MM-DD');
+                params.append('date__range', `${dateFrom}__${dateTo}`);
+              } else if (value.date_from) {
+                params.append('date__gte', moment(value.date_from).format('YYYY-MM-DD'));
+              } else if (value.date_to) {
+                params.append('date__lte', moment(value.date_to).format('YYYY-MM-DD'));
+              }
             } else if (key !== 'date') {
               params.append(`search__${key}`, value);
             }
