@@ -106,16 +106,17 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     ordering = ("_score", "date")
 
     filter_fields = {
-        "doc_type": "doc_type",
-        "court": "court",
         "author": "author",
+        "court": "court",
+        "date": "date",
+        "doc_type": "doc_type",
+        "is_most_recent": "is_most_recent",
         "jurisdiction": "jurisdiction",
+        "language": "language",
         "locality": "locality",
         "matter_type": "matter_type",
         "nature": "nature",
-        "language": "language",
         "year": "year",
-        "is_most_recent": "is_most_recent",
     }
 
     search_fields = {
