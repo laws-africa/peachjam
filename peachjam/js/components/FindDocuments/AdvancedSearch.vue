@@ -129,7 +129,7 @@
             v-if="invalidDateRange"
             class="col-12 mb-3 text-danger"
           >
-            {{ $t('The date range you have selected is invalid. Please chose a correct date range.') }}
+            {{ $t('The date range you have selected is invalid. Please choose a correct date range.') }}
           </div>
         </div>
         <div class="text-end">
