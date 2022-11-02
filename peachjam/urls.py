@@ -40,15 +40,15 @@ from peachjam.views import (
     DocumentMediaView,
     DocumentSourcePDFView,
     DocumentSourceView,
+    FirstLevelTaxonomyListView,
     GenericDocumentListView,
     HomePageView,
     JudgmentListView,
     LegalInstrumentListView,
     LegislationListView,
     PlaceDetailView,
-    PrimaryTaxonomyListView,
-    SecondaryTaxonomyListView,
     TaxonomyDetailView,
+    TopLevelTaxonomyListView,
     UserProfileDetailView,
 )
 
@@ -83,14 +83,16 @@ urlpatterns = [
         GenericDocumentListView.as_view(),
         name="generic_document_list",
     ),
-    path("taxonomy/", PrimaryTaxonomyListView.as_view(), name="primary_taxonomy_list"),
     path(
-        "taxonomy/<slug:slug>",
-        SecondaryTaxonomyListView.as_view(),
-        name="secondary_taxonomy_list",
+        "taxonomy/", TopLevelTaxonomyListView.as_view(), name="top_level_taxonomy_list"
     ),
-    re_path(
-        r"^taxonomy/([\w/]*)/$",
+    path(
+        "taxonomy/<slug:topic>",
+        FirstLevelTaxonomyListView.as_view(),
+        name="first_level_taxonomy_list",
+    ),
+    path(
+        "taxonomy/<slug:first_level_topic>/<path:topics>",
         TaxonomyDetailView.as_view(),
         name="taxonomy_detail",
     ),

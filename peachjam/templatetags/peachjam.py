@@ -79,3 +79,8 @@ def user_name(user):
         name = user.username
 
     return name
+
+
+@register.filter
+def build_taxonomy_url(path, slug):
+    return path + "/" + slug

@@ -1,17 +1,24 @@
 {% extends 'peachjam/layouts/document_list.html' %}
-{% load i18n %}
+{% load peachjam i18n %}
 
-{% block title %}{{ taxonomy.name }} | {{ current_child.name }}{% endblock %}
+{% block title %}{{ taxonomy.name }}{% endblock %}
 
 {% block page-title %}
-  <h1 class="mt-2">{{ current_child.name }}</h1>
+  <h1 class="mt-2">{{ topic.name }}</h1>
 {% endblock %}
 
 
 {% block taxonomy-list %}
+  <h1>{{ taxonomy }}</h1>
+
   <ul>
-  {% for child in taxonomy.get_children %}
-    {% include "peachjam/_taxonomy_tree.html" %}
-  {% endfor %}
+    {% for taxonomy in taxonomies %}
+      <li>
+        <a href="{{ path|build_taxonomy_url:taxonomy.slug }}">
+          {{ taxonomy.name }}
+        </a>
+      </li>
+    {% endfor %}
   </ul>
+
 {% endblock %}

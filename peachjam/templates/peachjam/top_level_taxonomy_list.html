@@ -10,9 +10,10 @@
     <ul>
     {% for taxonomy in taxonomies %}
       {% if taxonomy.is_root %}
-        <li><a href={% url 'secondary_taxonomy_list' taxonomy.slug %}>{{ taxonomy }}</a></li>
+        <li><a href={% url 'first_level_taxonomy_list' taxonomy.slug %}>{{ taxonomy }}</a></li>
       {% endif %}
     {% endfor %}
     </ul>
+
   </section>
 {% endblock %}

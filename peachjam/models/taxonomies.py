@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 from treebeard.mp_tree import MP_Node
 
@@ -15,6 +16,10 @@ class Taxonomy(MP_Node):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        kwargs = {"slug": self.slug}
+        return reverse("first_level_taxonomy_list", kwargs=kwargs)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
