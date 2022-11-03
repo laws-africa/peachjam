@@ -3,8 +3,13 @@
 <div class="col-md">
   <h5>{% translate 'Taxonomies' %}</h5>
   {% for taxonomy in taxonomies %}
-    <a href="#">
-      {{ taxonomy.topic }} {% if not forloop.last %}
-    </a> > {% endif %}
+    {% for item in taxonomy.topic.get_ancestors %}
+      <a href="{% build_taxonomy_url item %}">
+        {{ item }}
+      </a> &gt;
+    {% endfor %}
+    <a href="{% build_taxonomy_url taxonomy.topic %}">
+      {{ taxonomy.topic }}
+    </a>
   {% endfor %}
 </div>
