@@ -1,48 +1,105 @@
 <template>
   <div id="search">
     <div class="search-input-container">
-      <form
-        class="d-flex align-items-center"
-        @submit.prevent="handleSubmit"
-      >
-        <div class="input-group">
-          <input
-            ref="search-input"
-            type="text"
-            class="form-control"
-            :placeholder="$t('Search documents')"
-            :aria-label="$t('Search documents')"
-            aria-describedby="basic-addon2"
-            required
+      <nav>
+        <div
+          id="nav-tab"
+          class="nav nav-tabs"
+          role="tablist"
+        >
+          <button
+            id="search-tab"
+            class="nav-link active"
+            data-bs-toggle="tab"
+            data-bs-target="#nav-search"
+            type="button"
+            role="tab"
+            aria-controls="nav-search"
+            aria-selected="true"
           >
-          <div class="input-group-append">
-            <button
-              type="submit"
-              class="btn btn-sm btn-primary"
-              style="
+            Search
+          </button>
+          <button
+            id="advanced-search-tab"
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#nav-advanced-search"
+            type="button"
+            role="tab"
+            aria-controls="nav-advanced-search"
+            aria-selected="false"
+          >
+            Advanced
+          </button>
+        </div>
+      </nav>
+      <div
+        id="nav-tabContent"
+        class="tab-content"
+      >
+        <div
+          id="nav-search"
+          class="tab-pane fade show active"
+          role="tabpanel"
+          aria-labelledby="search-tab"
+        >
+          <form
+            class="d-flex align-items-center mb-2"
+            @submit.prevent="handleSubmit"
+          >
+            <div class="input-group">
+              <input
+                v-model="q"
+                type="text"
+                class="form-control"
+                :placeholder="$t('Search documents')"
+                :aria-label="$t('Search documents')"
+                aria-describedby="basic-addon2"
+                required
+              >
+              <div class="input-group-append">
+                <button
+                  type="submit"
+                  class="btn btn-sm btn-primary"
+                  style="
                 border-top-right-radius: 0.2rem;
                 border-bottom-right-radius: 0.2rem;
               "
-              :disabled="loading"
-            >
-              <span
-                v-if="loading"
-                class="circle-loader--lt"
-              />
-              <span v-else>{{ $t("Search") }}</span>
-            </button>
-          </div>
-          <button
-            v-if="searchInfo.count"
-            type="button"
-            style="border-radius: 0.2rem"
-            class="btn btn-sm btn-secondary ms-1 d-lg-none"
-            @click="() => drawerOpen = true"
-          >
-            Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
-          </button>
+                  :disabled="loading"
+                >
+                  <span
+                    v-if="loading"
+                    class="circle-loader--lt"
+                  />
+                  <span v-else>{{ $t("Search") }}</span>
+                </button>
+              </div>
+              <button
+                v-if="searchInfo.count"
+                type="button"
+                style="border-radius: 0.2rem"
+                class="btn btn-sm btn-secondary ms-1 d-lg-none"
+                @click="() => drawerOpen = true"
+              >
+                Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+        <div
+          id="nav-advanced-search"
+          class="tab-pane fade"
+          role="tabpanel"
+          aria-labelledby="advanced-search-tab"
+        >
+          <AdvancedSearch
+            v-model="advancedFields"
+            :global-search-value="q"
+            @global-search-change="value => q = value"
+            @submit="search"
+          />
+        </div>
+      </div>
 
       <div
         v-if="error"
@@ -65,8 +122,8 @@
             @outside-drawer-click="() => drawerOpen = false"
           >
             <FilterFacets
-              v-model="facets"
               v-if="searchInfo.count"
+              v-model="facets"
               :loading="loading"
             >
               <template #header-title>
@@ -87,11 +144,13 @@
             <div v-if="searchInfo.count">
               <div class="mb-3 sort-body">
                 <div>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</div>
-                <div class="sort__inner">
-                  {{ $t('Sort by') }}
+                <div class="sort__inner d-flex align-items-center">
+                  <div style="width: 65px;">
+                    {{ $t('Sort by') }}
+                  </div>
                   <select
                     v-model="ordering"
-                    class="ms-2"
+                    class="ms-2 form-select"
                   >
                     <option value="-score">
                       {{ $t('Relevance') }}
@@ -150,10 +209,13 @@ import SearchResult from './SearchResult.vue';
 import SearchPagination from './SearchPagination.vue';
 import FilterFacets from '../FilterFacets/index.vue';
 import MobileFacetsDrawer from './MobileSideDrawer.vue';
+import AdvancedSearch from './AdvancedSearch.vue';
+import moment from 'moment';
+import { getUserLocale } from '../../utils/function';
 
 export default {
   name: 'FindDocuments',
-  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets },
+  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
   data () {
     return {
       loadingCount: 0,
@@ -163,6 +225,17 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
+      advancedFields: {
+        title: '',
+        judges: '',
+        headnote_holding: '',
+        flynote: '',
+        content: '',
+        date: {
+          date_from: null,
+          date_to: null
+        }
+      },
       facets: [
         {
           title: this.$t('Document type'),
@@ -278,9 +351,19 @@ export default {
       this.search();
     },
 
+    clearAdvancedFields () {
+      this.advancedFields.title = '';
+      this.advancedFields.judges = '';
+      this.advancedFields.headnote_holding = '';
+      this.advancedFields.flynote = '';
+      this.advancedFields.content = '';
+      this.advancedFields.date.date_to = null;
+      this.advancedFields.date.date_from = null;
+    },
+
     handleSubmit () {
       this.page = 1;
-      this.q = this.$refs['search-input'].value.trim();
+      this.clearAdvancedFields();
       this.search();
     },
 
@@ -295,7 +378,7 @@ export default {
     serialiseState () {
       // save state to URL string
       const params = new URLSearchParams();
-      params.set('q', this.q);
+      if (this.q) params.set('q', this.q);
       if (this.page > 1) {
         params.set('page', this.page);
       }
@@ -309,6 +392,24 @@ export default {
         });
       });
 
+      // Set advanced fields to url
+      Object.keys(this.advancedFields).forEach(key => {
+        const value = this.advancedFields[key];
+        if (!value) return;
+        if (key === 'date') {
+          if (value.date_from && value.date_to) {
+            params.append('date_from', this.advancedFields.date.date_from);
+            params.append('date_to', this.advancedFields.date.date_to);
+          } else if (value.date_from) {
+            params.append('date_from', this.advancedFields.date.date_from);
+          } else if (value.date_to) {
+            params.append('date_to', this.advancedFields.date.date_to);
+          }
+        } else if (key !== 'date') {
+          params.append(key, value);
+        }
+      });
+
       return params.toString();
     },
 
@@ -316,9 +417,7 @@ export default {
       // load state from URL
       const params = new URLSearchParams(window.location.search);
       // skip the first event if there's a query, because the page load will already have sent it
-      this.q = this.$refs['search-input'].value = (
-        params.get('q') || ''
-      ).trim();
+      this.q = (params.get('q') || '').trim();
       this.page = parseInt(params.get('page')) || this.page;
       this.ordering = params.get('ordering') || this.ordering;
 
@@ -328,12 +427,23 @@ export default {
         }
       });
 
+      const advancedSearchFields = Object.keys(this.advancedFields).filter(key => key !== 'date');
+      if (advancedSearchFields.some(key => params.has(key))) {
+      // if there are advance search fields url params (title, judges, flynote), prefill fields
+        if (params.has('date_from')) this.advancedFields.date.date_from = params.get('date_from');
+        if (params.has('date_to')) this.advancedFields.date.date_to = params.get('date_to');
+        advancedSearchFields.forEach(key => {
+          if (!params.has(key)) return;
+          this.advancedFields[key] = params.get(key);
+        });
+        const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#advanced-search-tab'));
+        tabTrigger.show();
+      }
       this.search();
     },
 
     suggest (q) {
       this.q = q;
-      this.$refs['search-input'].value = q;
       this.search();
     },
 
@@ -368,10 +478,11 @@ export default {
     },
 
     async search () {
-      if (this.q !== '') {
+      // if one of the search fields is true perform search
+      if (this.q || ['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.advancedFields[key])) {
         const generateUrl = () => {
           const params = new URLSearchParams();
-          params.append('search', this.q);
+          if (this.q) params.append('search', this.q);
           params.append('page', this.page);
           params.append('ordering', this.ordering);
           params.append('highlight', 'content');
@@ -387,9 +498,26 @@ export default {
           this.facets.forEach((facet) => {
             params.append('facet', facet.name);
           });
+          Object.keys(this.advancedFields).forEach(key => {
+            const value = this.advancedFields[key];
+            if (!value) return;
 
+            if (key === 'date') {
+              if (value.date_from && value.date_to) {
+                const dateFrom = moment(value.date_from).format('YYYY-MM-DD');
+                const dateTo = moment(value.date_to).format('YYYY-MM-DD');
+                params.append('date__range', `${dateFrom}__${dateTo}`);
+              } else if (value.date_from) {
+                params.append('date__gte', moment(value.date_from).format('YYYY-MM-DD'));
+              } else if (value.date_to) {
+                params.append('date__lte', moment(value.date_to).format('YYYY-MM-DD'));
+              }
+            } else if (key !== 'date') {
+              params.append(`search__${key}`, value);
+            }
+          });
           return `${
-            window.location.origin
+              window.location.origin
           }/search/api/documents/?${params.toString()}`;
         };
 
