@@ -38,28 +38,55 @@ from .download import download_source_file
 logger = logging.getLogger(__name__)
 
 
-class JurisdictionWidget(ForeignKeyWidget):
+class CharRequiredWidget(CharWidget):
+    def __init__(self, field):
+        self.field = field
+
     def clean(self, value, row=None, *args, **kwargs):
-        if value:
-            return self.model.objects.get(iso__iexact=value)
-        return None
+        if not value:
+            raise ValidationError(f"{self.field} is required")
+        return value
 
 
-class AuthorWidget(ForeignKeyWidget):
+class ForeignKeyRequiredWidget(ForeignKeyWidget):
+    def __init__(self, *args, name=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = name
+
     def clean(self, value, row=None, *args, **kwargs):
-        if value:
-            return self.model.objects.get(code__iexact=value)
-        return None
+        if not value:
+            raise ValidationError(f"{self.name} is required")
+        return self.model.objects.get(**{self.field: value})
 
 
-class SourceFileWidget(CharWidget):
+class SourceFileWidget(CharRequiredWidget):
     def clean(self, value, row=None, **kwargs):
+        super().clean(value)
+        source_url = self.get_source_url(value)
         try:
-            r = requests.head(value)
+            r = requests.head(source_url)
             r.raise_for_status()
-            return value
-        except requests.exceptions.HTTPError as e:
+            return source_url
+        except requests.exceptions.RequestException as e:
             raise ValidationError(e)
+
+    @staticmethod
+    def get_source_url(value):
+        source_url = None
+        source_files = [x.strip() for x in value.split("|")]
+        docx = re.compile(r"\.docx?$")
+        pdf = re.compile(r"\.pdf$")
+        for file in source_files:
+            match_docx = docx.search(file)
+            match_pdf = pdf.search(file)
+            # prefer the .docx file if available, otherwise use .pdf, ignore .rtf
+            if match_docx:
+                source_url = file
+                break
+            elif match_pdf:
+                source_url = file
+
+        return source_url
 
 
 class SkipRowWidget(BooleanWidget):
@@ -67,24 +94,36 @@ class SkipRowWidget(BooleanWidget):
         return bool(value)
 
 
+class AuthorWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            raise ValidationError("author is required")
+        return self.model.objects.get(code__iexact=value)
+
+
 class BaseDocumentResource(resources.ModelResource):
     author = fields.Field(
-        column_name="author",
         attribute="author",
         widget=AuthorWidget(Author),
     )
     language = fields.Field(
         attribute="language",
-        widget=ForeignKeyWidget(Language, field="iso_639_2T"),
+        widget=ForeignKeyRequiredWidget(Language, name="language", field="iso_639_2T"),
     )
     jurisdiction = fields.Field(
-        attribute="jurisdiction", widget=JurisdictionWidget(Country)
+        attribute="jurisdiction",
+        widget=ForeignKeyRequiredWidget(Country, name="jurisdiction", field="iso"),
     )
     locality = fields.Field(
-        attribute="locality", widget=ForeignKeyWidget(Locality, field="code")
+        attribute="locality",
+        widget=ForeignKeyRequiredWidget(Locality, name="locality", field="code"),
     )
-    source_url = fields.Field(attribute="source_url", widget=SourceFileWidget())
+    source_url = fields.Field(
+        attribute="source_url", widget=SourceFileWidget(field="source_url")
+    )
     skip = fields.Field(attribute="skip", widget=SkipRowWidget())
+
+    required_fields = []
 
     class Meta:
         exclude = (
@@ -97,24 +136,20 @@ class BaseDocumentResource(resources.ModelResource):
         )
         import_id_fields = ("expression_frbr_uri",)
 
+    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+
+        dataset_headers = dataset.headers
+        missing_fields = set(self.required_fields).difference(dataset_headers)
+
+        if missing_fields:
+            raise ValidationError(f"Missing Columns: {missing_fields}")
+
     def before_import_row(self, row, **kwargs):
-        frbr_uri = FrbrUri.parse(row["work_frbr_uri"])
-        row["language"] = frbr_uri.default_language
-        row["jurisdiction"] = frbr_uri.country
-        row["locality"] = frbr_uri.locality
-        row["frbr_uri_number"] = frbr_uri.number
-        row["frbr_uri_doctype"] = frbr_uri.doctype
-        row["frbr_uri_subtype"] = frbr_uri.subtype
-        row["frbr_uri_date"] = frbr_uri.date
-
-        if frbr_uri.actor:
-            row["frbr_uri_actor"] = frbr_uri.actor
-            row["author"] = frbr_uri.actor
-
         logger.info(f"Importing row: {row}")
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
-        return row["skip"]
+        if hasattr(row, "skip"):
+            return row["skip"]
 
     def after_save_instance(self, instance, using_transactions, dry_run):
         if not dry_run:
@@ -162,11 +197,34 @@ class GenericDocumentResource(BaseDocumentResource):
         widget=DocumentNatureWidget(DocumentNature, field="code"),
     )
 
+    required_fields = (
+        "author",
+        "date",
+        "jurisdiction",
+        "language",
+        "nature",
+        "source_url",
+        "title",
+        "work_frbr_uri",
+    )
+
     class Meta(BaseDocumentResource.Meta):
         model = GenericDocument
 
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
+        frbr_uri = FrbrUri.parse(row["work_frbr_uri"])
+        row["language"] = frbr_uri.default_language
+        row["jurisdiction"] = str(frbr_uri.country).upper()
+        row["locality"] = frbr_uri.locality
+        row["frbr_uri_number"] = frbr_uri.number
+        row["frbr_uri_doctype"] = frbr_uri.doctype
+        row["frbr_uri_subtype"] = frbr_uri.subtype
+        row["frbr_uri_date"] = frbr_uri.date
+
+        if frbr_uri.actor:
+            row["frbr_uri_actor"] = frbr_uri.actor
+            row["author"] = frbr_uri.actor
 
 
 class JudgesWidget(ManyToManyWidget):
@@ -192,6 +250,16 @@ class JudgmentResource(BaseDocumentResource):
         widget=ForeignKeyWidget(Court, field="code"),
     )
     case_numbers = fields.Field(column_name="case_numbers", widget=CharWidget)
+
+    required_fields = (
+        "case_name",
+        "court",
+        "date",
+        "judges",
+        "jurisdiction",
+        "language",
+        "source_url",
+    )
 
     class Meta(BaseDocumentResource.Meta):
         model = Judgment
@@ -220,28 +288,6 @@ class JudgmentResource(BaseDocumentResource):
         case_numbers = [CaseNumber(**data) for data in case_numbers_data]
 
         return case_numbers
-
-    @staticmethod
-    def get_source_url(row):
-        source_url = None
-        source_files = [x.strip() for x in row["source_url"].split("|")]
-        docx = re.compile(r"\.docx?$")
-        pdf = re.compile(r"\.pdf$")
-        for file in source_files:
-            match_docx = docx.search(file)
-            match_pdf = pdf.search(file)
-            # prefer the .docx file if available, otherwise use .pdf, ignore .rtf
-            if match_docx:
-                source_url = file
-                break
-            elif match_pdf:
-                source_url = file
-
-        return source_url
-
-    def before_import_row(self, row, **kwargs):
-        logger.info(f"Importing row: {row}")
-        row["source_url"] = self.get_source_url(row)
 
     def after_import_row(self, row, instance, row_number=None, **kwargs):
         super().after_import_row(row, instance, row_number, **kwargs)
