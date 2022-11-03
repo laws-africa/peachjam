@@ -4,7 +4,7 @@
       <nav>
         <div
           id="nav-tab"
-          class="nav nav-tabs"
+          class="nav nav-tabs mb-2"
           role="tablist"
         >
           <button
@@ -45,7 +45,7 @@
         >
           <form
             class="d-flex align-items-center mb-2"
-            @submit.prevent="handleSubmit"
+            @submit.prevent="simpleSearch"
           >
             <div class="input-group">
               <input
@@ -96,7 +96,7 @@
             v-model="advancedFields"
             :global-search-value="q"
             @global-search-change="value => q = value"
-            @submit="search"
+            @submit="submit"
           />
         </div>
       </div>
@@ -361,9 +361,13 @@ export default {
       this.advancedFields.date.date_from = null;
     },
 
-    handleSubmit () {
-      this.page = 1;
+    simpleSearch () {
       this.clearAdvancedFields();
+      this.submit();
+    },
+
+    submit () {
+      this.page = 1;
       this.search();
     },
 
