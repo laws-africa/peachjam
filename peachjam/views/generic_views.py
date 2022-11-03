@@ -35,7 +35,7 @@ class FilteredDocumentListView(ListView):
         return super(FilteredDocumentListView, self).get(request, *args, **kwargs)
 
     def get_base_queryset(self):
-        return self.queryset
+        return self.queryset.all()
 
     def get_queryset(self):
         return self.form.filter_queryset(self.get_base_queryset()).order_by("-date")
