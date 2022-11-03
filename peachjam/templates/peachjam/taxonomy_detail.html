@@ -4,22 +4,12 @@
 {% block title %}{{ taxonomy.name }}{% endblock %}
 
 {% block page-title %}
-  <h1 class="mt-2">{{ topic.name }}</h1>
+  <h1 class="mt-2">{{ taxonomy.name }}</h1>
 {% endblock %}
 
 
 {% block taxonomy-list %}
-  <h1>{{ taxonomy }}</h1>
 
-  <ul>
-{#    {% for taxonomy in taxonomies %}#}
-{#      <li>#}
-{#        <a href="{{ path|build_taxonomy_url:taxonomy.slug }}">#}
-{#          {{ taxonomy.name }}#}
-{#        </a>#}
-{#      </li>#}
-{#    {% endfor %}#}
-    {% include "peachjam/_taxonomy_tree.html" %}
-  </ul>
+  {% include "peachjam/_taxonomy_tree.html" %}
 
 {% endblock %}

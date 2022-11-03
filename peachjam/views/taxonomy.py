@@ -46,6 +46,7 @@ class TaxonomyDetailView(FilteredDocumentListView):
         if len(ancestors) > 1:
             context["root"] = ancestors[1]
 
-        context["annotated_list"] = context["root"].get_annotated_list(context["root"])
-        context["path"] = self.request.path
+        context["annotated_taxonomy_tree"] = context["root"].get_annotated_list(
+            context["root"]
+        )
         return context
