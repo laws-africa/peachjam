@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.views.generic import ListView, TemplateView
+from django.views.generic import DetailView, TemplateView
 
 from peachjam.models import Taxonomy
 from peachjam.views.generic_views import FilteredDocumentListView
@@ -14,18 +14,11 @@ class TopLevelTaxonomyListView(TemplateView):
         return self.render_to_response(context)
 
 
-class FirstLevelTaxonomyListView(ListView):
-    template_name = "peachjam/first_level_taxonomy_list.html"
+class FirstLevelTaxonomyDetailView(DetailView):
+    template_name = "peachjam/first_level_taxonomy_detail.html"
     model = Taxonomy
-
-    def get(self, request, *args, **kwargs):
-        self.taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["topic"])
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["taxonomy"] = self.taxonomy
-        return context
+    slug_url_kwarg = "topic"
+    context_object_name = "taxonomy"
 
 
 class TaxonomyDetailView(FilteredDocumentListView):
@@ -48,7 +41,11 @@ class TaxonomyDetailView(FilteredDocumentListView):
         context = super().get_context_data(**kwargs)
 
         context["taxonomy"] = self.taxonomy
-        context["taxonomies"] = self.taxonomy.get_children()
-        context["path"] = self.request.path
+        context["root"] = self.taxonomy
+        ancestors = self.taxonomy.get_ancestors()
+        if len(ancestors) > 1:
+            context["root"] = ancestors[1]
 
+        context["annotated_list"] = context["root"].get_annotated_list(context["root"])
+        context["path"] = self.request.path
         return context

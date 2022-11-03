@@ -12,13 +12,14 @@
   <h1>{{ taxonomy }}</h1>
 
   <ul>
-    {% for taxonomy in taxonomies %}
-      <li>
-        <a href="{{ path|build_taxonomy_url:taxonomy.slug }}">
-          {{ taxonomy.name }}
-        </a>
-      </li>
-    {% endfor %}
+{#    {% for taxonomy in taxonomies %}#}
+{#      <li>#}
+{#        <a href="{{ path|build_taxonomy_url:taxonomy.slug }}">#}
+{#          {{ taxonomy.name }}#}
+{#        </a>#}
+{#      </li>#}
+{#    {% endfor %}#}
+    {% include "peachjam/_taxonomy_tree.html" %}
   </ul>
 
 {% endblock %}

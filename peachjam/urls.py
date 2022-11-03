@@ -40,7 +40,7 @@ from peachjam.views import (
     DocumentMediaView,
     DocumentSourcePDFView,
     DocumentSourceView,
-    FirstLevelTaxonomyListView,
+    FirstLevelTaxonomyDetailView,
     GenericDocumentListView,
     HomePageView,
     JudgmentListView,
@@ -88,7 +88,7 @@ urlpatterns = [
     ),
     path(
         "taxonomy/<slug:topic>",
-        FirstLevelTaxonomyListView.as_view(),
+        FirstLevelTaxonomyDetailView.as_view(),
         name="first_level_taxonomy_list",
     ),
     path(
