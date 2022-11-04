@@ -114,7 +114,10 @@
         {{ $t("No documents match your search.") }}
       </div>
     </div>
-    <div class="container-fluid">
+    <div
+      ref="filters-results-container"
+      class="container-fluid"
+    >
       <div class="row">
         <div class="col col-lg-3">
           <MobileFacetsDrawer
@@ -187,6 +190,13 @@
           />
         </div>
       </div>
+
+      <a
+        href="#search"
+        class="to-the-top btn btn-secondary d-block d-lg-none"
+      >
+        ▲ {{ $t('To the top') }}
+      </a>
     </div>
 
     <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
@@ -211,7 +221,7 @@ import FilterFacets from '../FilterFacets/index.vue';
 import MobileFacetsDrawer from './MobileSideDrawer.vue';
 import AdvancedSearch from './AdvancedSearch.vue';
 import moment from 'moment';
-import { getUserLocale } from '../../utils/function';
+import { scrollToElement } from '../../utils/function';
 
 export default {
   name: 'FindDocuments',
@@ -552,8 +562,7 @@ export default {
 
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
-        document.body.scrollTop = 0; // For Safari
-        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        scrollToElement(this.$refs['filters-results-container']);
       }
     }
   }
@@ -572,11 +581,6 @@ export default {
 @media screen and (max-width: 992px) {
   .search-input-container {
     width: 100%;
-    padding-top: 1rem;
-    position: sticky;
-    top: 0;
-    left: 0;
-    z-index: 9;
   }
 }
 
