@@ -4,6 +4,7 @@ from os.path import splitext
 from django import forms
 from django.core.files import File
 from django.http import QueryDict
+from django.utils.text import slugify
 
 from peachjam.models import CoreDocument, Ingestor, SourceFile
 from peachjam.plugins import plugins
@@ -52,7 +53,9 @@ class NewDocumentFormMixin:
         file_ext = splitext(upload_file.name)[1]
         SourceFile(
             document=self.instance,
-            file=File(upload_file, name=f"{self.instance.title[-250:]}{file_ext}"),
+            file=File(
+                upload_file, name=f"{slugify(self.instance.title[-250:])}{file_ext}"
+            ),
             mimetype=upload_file.content_type,
         ).save()
 
