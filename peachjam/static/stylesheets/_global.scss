@@ -47,6 +47,15 @@ mark {
   padding: 0;
 }
 
+.anntn-highlight {
+  background-color: transparentize($anntn-highlight-color, 0.8);
+  transition: background-color 300ms ease-in-out;
+
+  &.active {
+    background-color: transparentize($anntn-highlight-color, 0.4);
+  }
+}
+
 .result-snippet * {
   font-size: $font-size-base;
 }
