@@ -1,5 +1,8 @@
 <template>
-  <la-gutter-item :anchor.prop="anchorElement">
+  <la-gutter-item
+    :anchor.prop="anchorElement"
+    @click="activate"
+  >
     <div class="card">
       <div class="card-body">
         <div
@@ -89,6 +92,8 @@ export default {
 
   mounted () {
     this.markAndAnchor();
+    window.addEventListener('click', this.handleOutsideClick);
+
     this.gutter.appendChild(this.$el);
   },
 
@@ -96,7 +101,38 @@ export default {
     this.unmark();
   },
 
+  beforeUnmount () {
+    // clean up
+    window.removeEventListener('click', this.handleOutsideClick);
+    this.marks.forEach(mark => {
+      mark.removeEventListener('click', mark.clickFn);
+    });
+  },
+
   methods: {
+    handleOutsideClick (e) {
+      if (!(this.$el.contains(e.target) ||
+          this.$el === e.target ||
+          this.marks.some(mark => mark.contains(e.target) || mark === e.target))) {
+        this.deactivate();
+      }
+    },
+    deactivate () {
+      this.$el.active = false;
+      this.marks.forEach(mark => mark.classList.remove('active'));
+    },
+    activate () {
+      // Deactivate all
+      Array.from(this.viewRoot.querySelectorAll('mark')).forEach(mark => {
+        mark.classList.remove('active');
+      });
+      // Activate gutter item
+      this.$el.active = true;
+      // activate enrichment gutter item marks
+      this.marks.forEach(mark => {
+        mark.classList.add('active');
+      });
+    },
     markAndAnchor () {
       this.unmark();
       const target = {
@@ -106,6 +142,10 @@ export default {
       if (!range) return;
       markRange(range, 'mark', mark => {
         this.marks.push(mark);
+        mark.classList.add('anntn-highlight');
+        mark.clickFn = () => this.activate();
+        // Setup listeners
+        mark.addEventListener('click', mark.clickFn);
         return mark;
       });
       this.anchorElement = this.marks[0];
