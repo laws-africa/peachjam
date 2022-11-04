@@ -16,7 +16,7 @@
               @input="onGlobalSearch"
             >
           </div>
-          <div class="col-6 mb-3">
+          <div class="col-12 col-lg-6 mb-3">
             <div class="form-group">
               <label for="title">{{ $t("Title") }}:</label>
               <input
@@ -31,7 +31,7 @@
               >
             </div>
           </div>
-          <div class="col-6 mb-3">
+          <div class="col-12 col-lg-6 mb-3">
             <div class="form-group">
               <label for="judges">{{ $t("Judges") }}:</label>
               <input
@@ -47,7 +47,7 @@
             </div>
           </div>
 
-          <div class="col-6 mb-3">
+          <div class="col-12 col-lg-6 mb-3">
             <div class="form-group">
               <label for="headnote_holding">{{ $t("Headnote holding") }}:</label>
               <input
@@ -63,7 +63,7 @@
             </div>
           </div>
 
-          <div class="col-6 mb-3">
+          <div class="col-12 col-lg-6 mb-3">
             <div class="form-group">
               <label for="flynote">{{ $t("Flynote") }}:</label>
               <input
@@ -79,7 +79,7 @@
             </div>
           </div>
 
-          <div class="col-12 mb-3">
+          <div class="col-12 col-lg-6 mb-3">
             <div class="form-group">
               <label for="content">{{ $t('Content') }}:</label>
               <input
@@ -94,7 +94,7 @@
               >
             </div>
           </div>
-          <div class="col-6 mb-3">
+          <div class="col-12 col-lg-6 mb-3">
             <div class="form-group">
               <label for="date_from">{{ $t("Date from") }}:</label>
               <input
@@ -110,7 +110,7 @@
               >
             </div>
           </div>
-          <div class="col-6 mb-3">
+          <div class="col-12 col-lg-6 mb-3">
             <div class="form-group">
               <label for="date_to">{{ $t("Date to") }}:</label>
               <input
