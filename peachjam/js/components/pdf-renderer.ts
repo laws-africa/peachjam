@@ -109,7 +109,7 @@ class PdfRenderer {
     const targetPage = this.root.querySelector(`.pdf-content__page[data-page="${pageNumber}"]`);
     if (!targetPage) return;
     this.scrollListenerActive = false;
-    scrollToElement(targetPage as HTMLElement).then(() => {
+    scrollToElement(targetPage as HTMLElement, () => {
       this.scrollListenerActive = true;
     });
   }
