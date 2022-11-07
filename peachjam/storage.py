@@ -169,3 +169,7 @@ class DynamicS3Boto3Storage(DynamicStorageMixin, S3Boto3Storage):
         if name.startswith(self.prefix + ":"):
             return name.split(":", 2)[-1]
         return name
+
+
+def clean_filename(filename):
+    return filename.replace(":", "")
