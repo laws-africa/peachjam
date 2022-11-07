@@ -52,9 +52,9 @@ class Court(models.Model):
 class Judgment(CoreDocument):
     court = models.ForeignKey(Court, on_delete=models.PROTECT, null=True)
     judges = models.ManyToManyField(Judge, blank=True)
-    headnote_holding = models.TextField(blank=True)
-    additional_citations = models.TextField(blank=True)
-    flynote = models.TextField(blank=True)
+    headnote_holding = models.TextField(null=True, blank=True)
+    additional_citations = models.TextField(null=True, blank=True)
+    flynote = models.TextField(null=True, blank=True)
     case_name = models.CharField(
         max_length=4096,
         help_text="Party names for use in title",
