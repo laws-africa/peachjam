@@ -103,7 +103,7 @@ urlpatterns = [
         name="document_media",
     ),
     re_path(
-        r"^(?P<frbr_uri>akn/.*)$",
+        r"^(?P<frbr_uri>akn/?.*)$",
         DocumentDetailViewResolver.as_view(),
         name="document_detail",
     ),
