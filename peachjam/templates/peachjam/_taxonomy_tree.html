@@ -1,5 +1,44 @@
 {% load peachjam %}
 
+<div data-component="TaxonomyTree">
+<!--  TODO: Use serializable data when available-->
+  <script type="application/json" id="taxonomy-tree">
+  [
+    {
+      "title": "Air and climate",
+      "children": [
+        {
+          "title": "Air pollution",
+          "children": [
+            {
+              "title": "Carbon monoxide"
+            },
+            {
+              "title": "Carbon peroxide"
+            },
+            {
+              "title": "Hydrogen Fluoride"
+            }
+          ]
+        },
+        {
+          "title": "Climate change",
+          "children": [
+            {
+              "title": "Carbon emissions"
+            },
+            {
+              "title": "Cloud"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+</script>
+</div>
+
+<!--  TODO: remove current output -->
 {% for item, info in annotated_taxonomy_tree %}
   {% if info.open %}
     <ul><li>
