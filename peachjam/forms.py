@@ -126,3 +126,14 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(judges__name__in=judges)
 
         return queryset
+
+
+class SourceFileForm(forms.ModelForm):
+    class Meta:
+        model = SourceFile
+        fields = "__all__"
+
+    def clean_file(self):
+        # dynamic storage files don't like colons in filenames
+        self.cleaned_data["file"].name = slugify(self.cleaned_data["file"].name)
+        return self.cleaned_data["file"]
