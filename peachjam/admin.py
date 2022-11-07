@@ -15,7 +15,7 @@ from import_export.admin import ImportMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from peachjam.forms import IngestorForm, NewDocumentFormMixin
+from peachjam.forms import IngestorForm, NewDocumentFormMixin, SourceFileForm
 from peachjam.models import (
     Article,
     AttachedFileNature,
@@ -110,6 +110,7 @@ class BaseAttachmentFileInline(admin.TabularInline):
 
 class SourceFileInline(BaseAttachmentFileInline):
     model = SourceFile
+    form = SourceFileForm
 
 
 class DocumentTopicInline(admin.TabularInline):
