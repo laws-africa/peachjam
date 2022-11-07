@@ -136,3 +136,4 @@ class SourceFileForm(forms.ModelForm):
     def clean_file(self):
         # dynamic storage files don't like colons in filenames
         self.cleaned_data["file"].name = slugify(self.cleaned_data["file"].name)
+        return self.cleaned_data["file"]
