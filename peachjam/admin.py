@@ -8,6 +8,7 @@ from django.contrib import admin
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
+from django.utils.dateparse import parse_date
 from django.utils.dates import MONTHS
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as __
@@ -169,9 +170,12 @@ class DocumentForm(forms.ModelForm):
             # derive some defaults from other fields
             data = data.copy()
             if "frbr_uri_date" in self.base_fields and not data.get("frbr_uri_date"):
-                data["frbr_uri_date"] = DateSelectorWidget().value_from_datadict(
-                    data, None, "date"
-                )
+                try:
+                    data["frbr_uri_date"] = parse_date(
+                        DateSelectorWidget().value_from_datadict(data, None, "date")
+                    ).strftime("%Y-%m-%d")
+                except ValueError:
+                    pass
 
         super().__init__(data, *args, **kwargs)
 
