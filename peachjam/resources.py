@@ -6,6 +6,7 @@ import magic
 import requests.exceptions
 from cobalt import FrbrUri
 from countries_plus.models import Country
+from dateutil.parser import parse
 from django.core.files.base import File
 from django.forms import ValidationError
 from django.utils.text import slugify
@@ -101,7 +102,22 @@ class AuthorWidget(ForeignKeyWidget):
         return self.model.objects.get(code__iexact=value)
 
 
+class DateWidget(CharWidget):
+    def __init__(self, *args, name=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = name
+
+    def clean(self, value, row=None, name=None, *args, **kwargs):
+        if self.name == "date" and value is None:
+            raise ValidationError("Date is required")
+
+        if value:
+            return parse(value)
+
+
 class BaseDocumentResource(resources.ModelResource):
+    date = fields.Field(attribute="date", widget=DateWidget(name="date"))
+
     author = fields.Field(
         attribute="author",
         widget=AuthorWidget(Author),
@@ -148,8 +164,7 @@ class BaseDocumentResource(resources.ModelResource):
         logger.info(f"Importing row: {row}")
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
-        if hasattr(row, "skip"):
-            return row["skip"]
+        return row["skip"]
 
     def after_save_instance(self, instance, using_transactions, dry_run):
         if not dry_run:
@@ -241,6 +256,9 @@ class JudgesWidget(ManyToManyWidget):
 
 
 class JudgmentResource(BaseDocumentResource):
+    hearing_date = fields.Field(
+        attribute="hearing_date", widget=DateWidget(name="hearing_date")
+    )
     judges = fields.Field(
         column_name="judges",
         attribute="judges",
@@ -294,29 +312,30 @@ class JudgmentResource(BaseDocumentResource):
     def after_import_row(self, row, instance, row_number=None, **kwargs):
         super().after_import_row(row, instance, row_number, **kwargs)
 
-        judgment = Judgment.objects.get(pk=instance.object_id)
+        judgment = Judgment.objects.filter(pk=instance.object_id).first()
 
-        for case_number in self.get_case_numbers(row):
-            case_number.document = judgment
-            case_number.save()
+        if judgment:
+            for case_number in self.get_case_numbers(row):
+                case_number.document = judgment
+                case_number.save()
 
-        judgment.save()
+            judgment.save()
 
-        if row["media_summary_file"]:
-            summary_file = download_source_file(row["media_summary_file"])
-            mime, _ = mimetypes.guess_type(row["media_summary_file"])
-            ext = mimetypes.guess_extension(mime)
-            media_summary_file_nature, _ = AttachedFileNature.objects.get_or_create(
-                name="Media summary"
-            )
+            if row["media_summary_file"]:
+                summary_file = download_source_file(row["media_summary_file"])
+                mime, _ = mimetypes.guess_type(row["media_summary_file"])
+                ext = mimetypes.guess_extension(mime)
+                media_summary_file_nature, _ = AttachedFileNature.objects.get_or_create(
+                    name="Media summary"
+                )
 
-            AttachedFiles.objects.update_or_create(
-                document=judgment,
-                defaults={
-                    "file": File(
-                        summary_file, name=f"{slugify(judgment.title[-250:])}{ext}"
-                    ),
-                    "nature": media_summary_file_nature,
-                    "mimetype": mime,
-                },
-            )
+                AttachedFiles.objects.update_or_create(
+                    document=judgment,
+                    defaults={
+                        "file": File(
+                            summary_file, name=f"{slugify(judgment.title[-250:])}{ext}"
+                        ),
+                        "nature": media_summary_file_nature,
+                        "mimetype": mime,
+                    },
+                )
