@@ -231,11 +231,13 @@ class JudgesWidget(ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
 
         # Remove extra white space around and in between the judges names
-        judges = [" ".join(j.split()) for j in value.split(self.separator)]
+        if value:
+            judges = [" ".join(j.split()) for j in value.split(self.separator)]
 
-        for j in judges:
-            judge, _ = self.model.objects.get_or_create(name=j)
-        return self.model.objects.filter(name__in=judges)
+            for j in judges:
+                judge, _ = self.model.objects.get_or_create(name=j)
+            return self.model.objects.filter(name__in=judges)
+        return []
 
 
 class JudgmentResource(BaseDocumentResource):
