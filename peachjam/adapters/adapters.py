@@ -106,7 +106,12 @@ class IndigoAdapter(Adapter):
 
         logger.info(f"Updating document ... {url}")
 
-        document = self.client_get(f"{url}.json").json()
+        try:
+            document = self.client_get(f"{url}.json").json()
+        except requests.HTTPError as e:
+            logger.error(f"An error has occurred: {e}")
+            return
+
         frbr_uri = FrbrUri.parse(document["frbr_uri"])
         title = document["title"]
         toc_json = self.get_toc_json(url)
