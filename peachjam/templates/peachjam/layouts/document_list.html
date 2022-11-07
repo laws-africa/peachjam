@@ -29,21 +29,27 @@
       </div>
     {% endblock %}
 
-    {% block taxonomy-list %}
-    {% endblock %}
-
     <div class="d-block d-lg-none my-2">
       <button class="btn btn-primary"
                 type="button"
                 data-bs-toggle="offcanvas"
                 data-bs-target="#list-facets-offcanvas"
                 aria-controls="list-facets-offcanvas">
-          Filters
+          {% trans 'Filters' %}
         </button>
     </div>
 
     <div class="row">
       <div class="col-lg-3 d-none d-lg-block">
+        <div class="list-group  mb-4">
+          <div class="list-group-item bg-light">
+            <strong>{% trans 'Subject area cases indices' %}</strong>
+          </div>
+          <div class="list-group-item">
+            {% block taxonomy-list %}
+            {% endblock %}
+          </div>
+        </div>
         <div data-list-facets></div>
       </div>
       <div class="col-lg-9">
