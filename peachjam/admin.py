@@ -169,7 +169,9 @@ class DocumentForm(forms.ModelForm):
             # derive some defaults from other fields
             data = data.copy()
             if "frbr_uri_date" in self.base_fields and not data.get("frbr_uri_date"):
-                data["frbr_uri_date"] = data.get("date")
+                data["frbr_uri_date"] = DateSelectorWidget().value_from_datadict(
+                    data, None, "date"
+                )
 
         super().__init__(data, *args, **kwargs)
 
