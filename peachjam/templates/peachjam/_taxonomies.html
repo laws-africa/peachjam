@@ -1,12 +1,11 @@
 {% load peachjam i18n %}
 
 <div class="col-md">
-<!--  TODO: Double check if output is correct-->
   <h5>{% translate 'Taxonomies' %}</h5>
   <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);"
        aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      {% for taxonomy in taxonomies %}
+    {% for taxonomy in taxonomies %}
+      <ol class="breadcrumb pt-2">
         {% for item in taxonomy.topic.get_ancestors %}
           <li class="breadcrumb-item">
             <a href="{% build_taxonomy_url item %}">
@@ -19,8 +18,7 @@
             {{ taxonomy.topic }}
           </a>
         </li>
-      {% endfor %}
-
-    </ol>
+      </ol>
+    {% endfor %}
   </nav>
 </div>
