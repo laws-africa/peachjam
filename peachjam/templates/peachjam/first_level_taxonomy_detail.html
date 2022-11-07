@@ -4,13 +4,13 @@
 
 
 {% block page-content %}
-  <section>
-    <h1>{{ taxonomy }}</h1>
+  <section class="container pt-4 pb-5">
+    <h1 class="mb-4">{{ taxonomy }}</h1>
 
     <ul>
       {% for child in taxonomy.get_children %}
         <li>
-          <a href={% url 'taxonomy_detail' taxonomy.slug child.slug %}>
+          <a href="{% url 'taxonomy_detail' taxonomy.slug child.slug %}">
             {{ child }}
           </a>
         </li>

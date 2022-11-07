@@ -4,13 +4,17 @@
 {% block title %} {% trans 'Taxonomy' %} {% endblock %}
 
 {% block page-content %}
-  <section>
-    <h1>{% trans 'Taxonomy' %}</h1>
+  <section class="container pt-4 pb-5">
+    <h1 class="mb-4">{% trans 'Taxonomies' %}</h1>
 
     <ul>
     {% for taxonomy in taxonomies %}
       {% if taxonomy.is_root %}
-        <li><a href={% url 'first_level_taxonomy_list' taxonomy.slug %}>{{ taxonomy }}</a></li>
+        <li>
+          <a href="{% url 'first_level_taxonomy_list' taxonomy.slug %}">
+          {{ taxonomy }}
+          </a>
+        </li>
       {% endif %}
     {% endfor %}
     </ul>
