@@ -8,6 +8,7 @@ from django.utils.text import slugify
 
 from peachjam.models import CoreDocument, Ingestor, SourceFile
 from peachjam.plugins import plugins
+from peachjam.storage import clean_filename
 
 
 def work_choices():
@@ -135,5 +136,5 @@ class SourceFileForm(forms.ModelForm):
 
     def clean_file(self):
         # dynamic storage files don't like colons in filenames
-        self.cleaned_data["file"].name = slugify(self.cleaned_data["file"].name)
+        self.cleaned_data["file"].name = clean_filename(self.cleaned_data["file"].name)
         return self.cleaned_data["file"]
