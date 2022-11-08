@@ -11,4 +11,9 @@ router.register(r"legislation", views.LegislationViewSet, basename="legislation"
 
 urlpatterns = [
     path("", include(router.urls)),
+    path(
+        "v1/ingestors/<int:ingestor_id>/webhook",
+        views.IngestorWebhookView.as_view(),
+        name="ingestor_webhook",
+    ),
 ]

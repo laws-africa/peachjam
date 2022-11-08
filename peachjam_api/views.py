@@ -1,8 +1,12 @@
-from rest_framework import viewsets
+from rest_framework import authentication, viewsets
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from peachjam.models import CitationLink, Legislation, Relationship, Work
+from peachjam.tasks import update_document
 from peachjam_api.serializers import (
     CitationLinkSerializer,
+    IngestorWebHookSerializer,
     LegislationSerializer,
     RelationshipSerializer,
     WorkSerializer,
@@ -31,3 +35,25 @@ class CitationLinkViewSet(viewsets.ModelViewSet):
 class LegislationViewSet(viewsets.ModelViewSet):
     queryset = Legislation.objects.all()
     serializer_class = LegislationSerializer
+
+
+class IngestorWebhookView(APIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = []
+    serializer_class = IngestorWebHookSerializer
+
+    def post(self, request, ingestor_id):
+        body = self.request.data
+
+        serializer = self.serializer_class(data=body)
+        if serializer.is_valid():
+
+            if serializer.data["action"] == "updated":
+                update_document(ingestor_id, serializer.data["data"]["url"])
+
+            elif serializer.action == "deleted":
+                # TODO: delete
+                pass
+
+            return Response({"data": serializer.data, "ingestor_id": ingestor_id})
+        return Response(serializer.errors, status=400)
