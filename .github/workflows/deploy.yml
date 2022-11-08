@@ -50,5 +50,5 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web2.laws.africa:22/senlii'
+          git_remote_url: 'ssh://dokku@senlii.org:22/senlii'
           git_push_flags: '--force'
