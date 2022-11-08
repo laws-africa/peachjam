@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from peachjam.models import CitationLink, Legislation, Relationship, Work
-from peachjam.tasks import update_document
+from peachjam.tasks import delete_document, update_document
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     IngestorWebHookSerializer,
@@ -51,9 +51,10 @@ class IngestorWebhookView(APIView):
             if serializer.data["action"] == "updated":
                 update_document(ingestor_id, serializer.data["data"]["url"])
 
-            elif serializer.action == "deleted":
-                # TODO: delete
-                pass
+            elif serializer.data["action"] == "deleted":
+                delete_document(
+                    ingestor_id, serializer.data["data"]["expression_frbr_uri"]
+                )
 
             return Response({"data": serializer.data, "ingestor_id": ingestor_id})
         return Response(serializer.errors, status=400)
