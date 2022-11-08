@@ -108,9 +108,11 @@ class IndigoAdapter(Adapter):
 
         try:
             document = self.client_get(f"{url}.json").json()
-        except requests.HTTPError as e:
-            logger.error(f"An error has occurred: {e}")
-            return
+        except requests.HTTPError as error:
+            if error.response.status_code == 404:
+                return
+            else:
+                raise error
 
         frbr_uri = FrbrUri.parse(document["frbr_uri"])
         title = document["title"]
