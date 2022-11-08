@@ -79,7 +79,7 @@
             </div>
           </div>
 
-          <div class="col-12 col-lg-6 mb-3">
+          <div class="col-12 mb-3">
             <div class="form-group">
               <label for="content">{{ $t('Content') }}:</label>
               <input
@@ -130,7 +130,7 @@
             v-if="invalidDates"
             class="col-12 mb-3 text-danger"
           >
-            {{ $t('The date range you have selected is invalid. Please choose a correct date range.') }}
+            {{ $t('The date range you have selected is invalid') }}. {{ $t('Please choose a correct date range') }}.
           </div>
         </div>
         <div class="text-end">
