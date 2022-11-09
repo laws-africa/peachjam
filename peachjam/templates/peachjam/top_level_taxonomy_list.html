@@ -8,15 +8,19 @@
     <h1 class="mb-4">{% trans 'Taxonomies' %}</h1>
 
     <ul>
-    {% for taxonomy in taxonomies %}
-      {% if taxonomy.is_root %}
-        <li>
-          <a href="{% url 'first_level_taxonomy_list' taxonomy.slug %}">
-          {{ taxonomy }}
-          </a>
-        </li>
+      {% if taxonomies|length > 0 %}
+        {% for taxonomy in taxonomies %}
+          {% if taxonomy.is_root %}
+            <li>
+              <a href="{% url 'first_level_taxonomy_list' taxonomy.slug %}">
+              {{ taxonomy }}
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <li> {% trans 'No taxonomies found' %} </li>
       {% endif %}
-    {% endfor %}
     </ul>
 
   </section>
