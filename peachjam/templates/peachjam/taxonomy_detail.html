@@ -9,9 +9,5 @@
 
 
 {% block taxonomy-list %}
-
   {% include "peachjam/_taxonomy_tree.html" %}
-
-  {{ annotated_taxonomy_tree|json_script:"annotated-taxonomy-tree" }}
-
 {% endblock %}
