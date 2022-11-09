@@ -20,8 +20,11 @@
         Sentry.init({
         dsn: '{{ SENTRY_DSN_KEY }}',
         environment: '{{ SENTRY_ENVIRONMENT }}',
-        blacklistUrls: [],
-        });
+        whitelistUrls: [
+          /https?:\/\/agp\.africanlii\.org/,
+          /https?:\/\/lawlibrary\.org\.za/,
+        ]
+      });
     });
     </script>
     {% if GOOGLE_ANALYTICS_ID %}
