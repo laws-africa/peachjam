@@ -11,6 +11,7 @@
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
+        <div>{% block mobile-taxonomy-list %}{% endblock %}</div>
         <div data-list-facets></div>
       </div>
     </div>
@@ -41,15 +42,7 @@
 
     <div class="row">
       <div class="col-lg-3 d-none d-lg-block">
-        <div class="list-group  mb-4">
-          <div class="list-group-item bg-light">
-            <strong>{% trans 'Subject area cases indices' %}</strong>
-          </div>
-          <div class="list-group-item">
-            {% block taxonomy-list %}
-            {% endblock %}
-          </div>
-        </div>
+        <div>{% block desktop-taxonomy-list %}{% endblock %}</div>
         <div data-list-facets></div>
       </div>
       <div class="col-lg-9">
@@ -66,5 +59,7 @@
     </div>
 
     {{ facet_data|json_script:"facet-data" }}
+
+    {% block taxonomy-json %}{% endblock %}
   </div>
 {% endblock %}
