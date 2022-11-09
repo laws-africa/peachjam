@@ -166,6 +166,8 @@ peachjam/static/stylesheets/peachjam.css
 africanlii/static/stylesheets/africanlii.css
 lawlibrary/static/stylesheets/lawlibrary.css
 liiweb/static/stylesheets/liiweb.css
+senlii/static/stylesheets/senlii.css
+*.map
 
 .vscode
 # Image upload folders

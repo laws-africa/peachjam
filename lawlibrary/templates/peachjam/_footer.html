@@ -1,45 +1,34 @@
 {% extends 'peachjam/_footer.html' %}
+{% load static i18n %}
 
-{% load static %}
-{% load i18n %}
-
-{% block newsletter-form %}
-  <h2 class="mb-2">{% trans 'Subscribe' %}</h2>
-  <div class="row">
-    <div class="col-12 col-md-6 mb-2">
-      <p class="lead mb-0">
-        {% trans 'Subscribe to the LawLibrary newsletter for updates and news on South African legal information.' %}
-      </p>
-    </div>
-    <div class="col-12 col-md-6 mb-2">
-      <form
-            action="https://lawlibrary.us10.list-manage.com/subscribe/post?u=4f4bdccc4d82422fd556af74f&amp;id=da4493f83c&amp;f_id=00a23be2f0"
-            method="post"
-            name="mc-embedded-subscribe-form"
-            target="_blank"
-        >
-          <div style="position: absolute; left: -5000px;" aria-hidden="true">
-            <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-            <input
-                type="text"
-                name="b_4f4bdccc4d82422fd556af74f_da4493f83c"
-                tabindex="-1"
-                value="">
-          </div>
-          <div class="input-group">
-            <input type="email" value="" name="EMAIL" class="form-control" placeholder="email address"
-                   required="">
-            <input type="submit" value="Subscribe" name="subscribe" class="btn btn-secondary">
-          </div>
-        </form>
-    </div>
-  </div>
-  <hr />
+{% block newsletter-blurb %}
+  {% trans 'Subscribe to the LawLibrary newsletter for updates and news on South African legal information.' %}
 {% endblock %}
-{% block first-content-column %}
-  <div class="mb-3">
-    <strong>{% trans 'About' %}</strong>
-  </div>
+
+{% block newsletter-form-code %}
+  <form
+        action="https://lawlibrary.us10.list-manage.com/subscribe/post?u=4f4bdccc4d82422fd556af74f&amp;id=da4493f83c&amp;f_id=00a23be2f0"
+        method="post"
+        name="mc-embedded-subscribe-form"
+        target="_blank"
+    >
+      <div style="position: absolute; left: -5000px;" aria-hidden="true">
+        <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+        <input
+            type="text"
+            name="b_4f4bdccc4d82422fd556af74f_da4493f83c"
+            tabindex="-1"
+            value="">
+      </div>
+      <div class="input-group">
+        <input type="email" value="" name="EMAIL" class="form-control" placeholder="email address"
+               required="">
+        <input type="submit" value="Subscribe" name="subscribe" class="btn btn-secondary">
+      </div>
+    </form>
+{% endblock %}
+
+{% block about %}
   <p>
     {% blocktrans trimmed %}
       Lawlibrary.org.za is curated by the African Legal Information Institute (AfricanLII) at the
@@ -53,34 +42,14 @@
 {% endblock %}
 
 {% block second-content-column %}
-  <div class="mb-2"><strong>{% trans 'Our partners' %}</strong></div>
+  <h5>{% trans 'Our partners' %}</h5>
+
   <div><a href="https://agp.africanlii.org/" target="_blank" rel="noreferrer">{% trans 'AfricanLII' %}</a></div>
   <div><a href="http://www.jifa.uct.ac.za/" target="_blank" rel="noreferrer">{% trans 'JIFA' %}</a></div>
-  <div class="mb-4"><a href="https://laws.africa/" target="_blank" rel="noreferrer">{% trans 'Laws.Africa' %}</a></div>
+  <div><a href="https://laws.africa/" target="_blank" rel="noreferrer">{% trans 'Laws.Africa' %}</a></div>
 
-  <div class="mb-2"><strong>{% trans 'With support from' %}</strong></div>
+  <h6 class="mt-4">{% trans 'With support from' %}</h6>
   <div><a href="https://www.uct.ac.za/" target="_blank" rel="noreferrer">{% trans 'University of Cape Town' %}</a></div>
-{% endblock %}
-
-{% block third-content-column %}
-  <div class="mb-2"><strong>{% trans 'Other African Legal Information Institutions' %}</strong></div>
-  <div><a href="https://africanlii.org/" target="_blank" rel="noreferrer">{% trans 'AfricanLII' %}</a></div>
-  <div><a href="https://ghalii.org/" target="_blank" rel="noreferrer">{% trans 'GhaLII' %}</a></div>
-  <div><a href="http://kenyalaw.org/" target="_blank" rel="noreferrer">{% trans 'Kenya Law' %}</a></div>
-  <div><a href="https://lawlibrary.org.za/" target="_blank" rel="noreferrer">{% trans 'LawLibrary ZA' %}</a></div>
-  <div><a href="https://lesotholii.org/" target="_blank" rel="noreferrer">{% trans 'LesothoLII' %}</a></div>
-  <div><a href="http://liberlii.org/" target="_blank" rel="noreferrer">{% trans 'LiberLII' %}</a></div>
-  <div><a href="https://malawilii.org/" target="_blank" rel="noreferrer">{% trans 'MalawiLII' %}</a></div>
-  <div><a href="https://namiblii.org/" target="_blank" rel="noreferrer">{% trans 'NamibLII' %}</a></div>
-  <div><a href="https://nigerialii.org/" target="_blank" rel="noreferrer">{% trans 'NigeriaLII' %}</a></div>
-  <div><a href="https://openbylaws.org.za/" target="_blank" rel="noreferrer">{% trans 'OpenbyLaws ZA' %}</a></div>
-  <div><a href="https://seylii.org/" target="_blank" rel="noreferrer">{% trans 'SeyLII' %}</a></div>
-  <div><a href="https://sierralii.org/" target="_blank" rel="noreferrer">{% trans 'SieraLII' %}</a></div>
-  <div><a href="https://eswatinilii.org/" target="_blank" rel="noreferrer">{% trans 'eSwatiniLII' %}</a></div>
-  <div><a href="https://tanzlii.org/" target="_blank" rel="noreferrer">{% trans 'TanzLII' %}</a></div>
-  <div><a href="https://ulii.org/" target="_blank" rel="noreferrer">{% trans 'UgandaLII' %}</a></div>
-  <div><a href="https://zambialii.org/" target="_blank" rel="noreferrer">{% trans 'ZambiaLII' %}</a></div>
-  <div><a href="https://zimlii.org/" target="_blank" rel="noreferrer">{% trans 'ZimLII' %}</a></div>
 {% endblock %}
 
 {% block footer-logos %}
