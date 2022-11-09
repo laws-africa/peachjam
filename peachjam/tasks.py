@@ -28,14 +28,14 @@ def update_document(ingestor_id, document_id):
     log.info("Ingestor is disabled, ignoring.")
 
 
-@background(queue="peachjam", schedule=(60 * 60 * 5), remove_existing_tasks=True)
+@background(queue="peachjam", schedule=(60 * 5), remove_existing_tasks=True)
 def delete_document(ingestor_id, expression_frbr_uri):
     from peachjam.models import Ingestor
 
     ingestor = Ingestor.objects.filter(pk=ingestor_id).first()
 
     if not ingestor:
-        log.info(f"No ingestor with id {ingestor_id:} ")
+        log.info(f"No ingestor with id {ingestor_id} ")
     if ingestor.enabled:
         log.info(f"Deleting document {expression_frbr_uri} with ingestor {ingestor}")
 

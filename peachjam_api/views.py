@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 
 from peachjam.models import CitationLink, Legislation, Relationship, Work
 from peachjam.tasks import delete_document, update_document
+from peachjam_api.permissions import CoreDocumentPermission
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     IngestorWebHookSerializer,
@@ -39,7 +40,7 @@ class LegislationViewSet(viewsets.ModelViewSet):
 
 class IngestorWebhookView(APIView):
     authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = []
+    permission_classes = [CoreDocumentPermission]
     serializer_class = IngestorWebHookSerializer
 
     def post(self, request, ingestor_id):

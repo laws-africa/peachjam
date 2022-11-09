@@ -331,7 +331,7 @@ class IndigoAdapter(Adapter):
     def delete_document(self, expression_frbr_uri):
         url = re.sub(r"/akn.*", expression_frbr_uri, self.url)
         try:
-            document = self.client.get(url)
+            document = self.client_get(url)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
 
