@@ -4,10 +4,19 @@
 {% block title %}{{ taxonomy.name }}{% endblock %}
 
 {% block page-title %}
-  <h1 class="mt-2">{{ taxonomy.name }}</h1>
+  <h1 class="my-4">{{ taxonomy.name }}</h1>
 {% endblock %}
 
 
-{% block taxonomy-list %}
-  {% include "peachjam/_taxonomy_tree.html" %}
-{% endblock %}
+{% if taxonomy_tree|length > 0 %}
+  {% block mobile-taxonomy-list %}
+    <div class="mb-2">{% include "peachjam/_subject-area-cases-indices.html" %}</div>
+  {% endblock %}
+  {% block desktop-taxonomy-list %}
+    <div class="mb-2">{% include "peachjam/_subject-area-cases-indices.html" %}</div>
+  {% endblock %}
+
+  {% block taxonomy-json %}
+    {{ taxonomy_tree|json_script:"taxonomy_tree" }}
+  {% endblock %}
+{% endif %}
