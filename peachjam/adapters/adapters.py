@@ -329,8 +329,16 @@ class IndigoAdapter(Adapter):
             )
 
     def delete_document(self, expression_frbr_uri):
-        document = CoreDocument.objects.filter(
-            expression_frbr_uri=expression_frbr_uri
-        ).first()
-        if document:
-            document.delete()
+        url = re.sub(r"/akn.*", expression_frbr_uri, self.url)
+        try:
+            document = self.client.get(url)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+
+                document = CoreDocument.objects.filter(
+                    expression_frbr_uri=expression_frbr_uri
+                ).first()
+                if document:
+                    document.delete()
+            else:
+                raise e
