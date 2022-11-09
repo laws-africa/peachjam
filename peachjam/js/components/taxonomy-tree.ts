@@ -8,7 +8,7 @@ type ItemType = {
 class TaxonomyTree {
   constructor (root: HTMLElement) {
     const tableOfContents = document.createElement('la-table-of-contents');
-    const jsonElement: HTMLElement | null = root.querySelector('#annotated-taxonomy-tree');
+    const jsonElement: HTMLElement | null = document.getElementById('taxonomy_tree');
     const data = jsonElement && jsonElement.textContent ? JSON.parse(jsonElement.textContent as string) : [];
     const urlParts: string[] = window.location.href.split('/');
     const currentTaxonomy = urlParts[urlParts.length - 1];
