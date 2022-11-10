@@ -45,7 +45,7 @@ class TaxonomyDetailView(FilteredDocumentListView):
         ancestors = self.taxonomy.get_ancestors()
         if len(ancestors) > 1:
             context["root"] = ancestors[1]
-
+        context["ancestors"] = ancestors
         context["root_taxonomy"] = context["root"].get_root().slug
         context["taxonomy_tree"] = list(context["root"].dump_bulk(context["root"]))
         return context
