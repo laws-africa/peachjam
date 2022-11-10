@@ -1,0 +1,74 @@
+{% extends 'peachjam/_footer.html' %}
+{% load static i18n %}
+
+{% block newsletter-form %}
+  <h2 class="mb-2">{% trans 'Subscribe' %}</h2>
+  <div class="row">
+    <div class="col-12 col-md-6 mb-2">
+      <p class="lead mb-0">
+        {% block newsletter-blurb %}
+          {% trans 'Subscribe to the our newsletter for updates and news.' %}
+        {% endblock %}
+      </p>
+    </div>
+
+    <div class="col-12 col-md-6 mb-2">
+      {% block newsletter-form-code %}
+      {% endblock %}
+    </div>
+  </div>
+  <hr>
+{% endblock %}
+
+{% block first-content-column %}
+  <h5>{% trans 'About' %}</h5>
+  {% block about %}{% endblock %}
+{% endblock %}
+
+{% block second-content-column %}
+  <h5>{% trans 'Our partners' %}</h5>
+
+  <div><a href="https://agp.africanlii.org/" target="_blank" rel="noreferrer">{% trans 'AfricanLII' %}</a></div>
+  <div><a href="https://laws.africa/" target="_blank" rel="noreferrer">{% trans 'Laws.Africa' %}</a></div>
+{% endblock %}
+
+{% block third-content-column %}
+  <h5>{% trans 'Other African Legal Information Institutions' %}</h5>
+
+  <div><a href="https://africanlii.org/" target="_blank" rel="noreferrer">{% trans 'AfricanLII' %}</a></div>
+  <div><a href="https://ghalii.org/" target="_blank" rel="noreferrer">{% trans 'GhaLII' %}</a></div>
+  <div><a href="http://kenyalaw.org/" target="_blank" rel="noreferrer">{% trans 'Kenya Law' %}</a></div>
+  <div><a href="https://lawlibrary.org.za/" target="_blank" rel="noreferrer">{% trans 'LawLibrary ZA' %}</a></div>
+  <div><a href="https://lesotholii.org/" target="_blank" rel="noreferrer">{% trans 'LesothoLII' %}</a></div>
+  <div><a href="http://liberlii.org/" target="_blank" rel="noreferrer">{% trans 'LiberLII' %}</a></div>
+  <div><a href="https://malawilii.org/" target="_blank" rel="noreferrer">{% trans 'MalawiLII' %}</a></div>
+  <div><a href="https://namiblii.org/" target="_blank" rel="noreferrer">{% trans 'NamibLII' %}</a></div>
+  <div><a href="https://nigerialii.org/" target="_blank" rel="noreferrer">{% trans 'NigeriaLII' %}</a></div>
+  <div><a href="https://openbylaws.org.za/" target="_blank" rel="noreferrer">{% trans 'OpenbyLaws ZA' %}</a></div>
+  <div><a href="https://seylii.org/" target="_blank" rel="noreferrer">{% trans 'SeyLII' %}</a></div>
+  <div><a href="https://sierralii.org/" target="_blank" rel="noreferrer">{% trans 'SieraLII' %}</a></div>
+  <div><a href="https://eswatinilii.org/" target="_blank" rel="noreferrer">{% trans 'eSwatiniLII' %}</a></div>
+  <div><a href="https://tanzlii.org/" target="_blank" rel="noreferrer">{% trans 'TanzLII' %}</a></div>
+  <div><a href="https://ulii.org/" target="_blank" rel="noreferrer">{% trans 'UgandaLII' %}</a></div>
+  <div><a href="https://zambialii.org/" target="_blank" rel="noreferrer">{% trans 'ZambiaLII' %}</a></div>
+  <div><a href="https://zimlii.org/" target="_blank" rel="noreferrer">{% trans 'ZimLII' %}</a></div>
+{% endblock %}
+
+{% block footer-logos %}
+  <div class="footer-logos">
+    <a href="https://laws.africa/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item"
+    >
+      <img src="{% static 'images/laws-africa-logo-horizontal.png' %}" alt="Laws.Africa logo">
+    </a>
+    <a class="footer-logos__item"
+       href="https://agp.africanlii.org/"
+       target="_blank"
+       rel="noreferrer"
+    >
+      <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII logo">
+    </a>
+  </div>
+{% endblock %}
