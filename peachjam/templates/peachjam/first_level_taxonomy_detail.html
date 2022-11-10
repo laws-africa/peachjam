@@ -4,17 +4,27 @@
 
 
 {% block page-content %}
-  <section class="container pt-4 pb-5">
-    <h1 class="mb-4">{{ taxonomy }}</h1>
-
-    <ul>
-      {% for child in taxonomy.get_children %}
-        <li>
-          <a href="{% url 'taxonomy_detail' taxonomy.slug child.slug %}">
-            {{ child }}
-          </a>
-        </li>
-      {% endfor %}
-    </ul>
-  </section>
+    <section class="container">
+      <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);"
+       aria-label="breadcrumb" >
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="/taxonomy/">{% trans 'Taxonomies' %}</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">{{ taxonomy }}</li>
+        </ol>
+      </nav>
+      <div class="pt-4 pb-5">
+        <h1 class="mb-4">{{ taxonomy }}</h1>
+        <ul>
+          {% for child in taxonomy.get_children %}
+            <li>
+              <a href="{% url 'taxonomy_detail' taxonomy.slug child.slug %}">
+                {{ child }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
 {% endblock %}
