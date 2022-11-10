@@ -18,7 +18,7 @@
         <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
       </li>
       <li class="breadcrumb-item">
-        <a href="{% url 'court_detail' court.code %}">{{ court.name }}</a>
+        <a href="{% url 'court' court.code %}">{{ court.name }}</a>
       </li>
     </ol>
   </nav>
@@ -39,7 +39,7 @@
     <div class="d-none d-lg-flex align-items-center mb-3">
       <i class="bi bi-calendar"></i>
       <div class="d-flex">
-        <a class="btn btn-link {% if not year %}disabled{% endif %}" href="{% url 'court_detail' court.code %}">
+        <a class="btn btn-link {% if not year %}disabled{% endif %}" href="{% url 'court' court.code %}">
           {% trans 'All years' %}
         </a>
         {% for y in years %}
@@ -54,7 +54,7 @@
 
   {% if years %}
     <select class="form-select d-block d-lg-none" data-component="NavigationSelect">
-      <option value="{% url 'court_detail' court.code %}">{% trans 'All years' %}</option>
+      <option value="{% url 'court' court.code %}">{% trans 'All years' %}</option>
       {% for y in years %}
         <option
           value="{% url 'court_year' court.code y %}"
@@ -69,7 +69,7 @@
 
 {% block content %}
   {% if documents %}
-    {% include 'liiweb/_judgment_table.html'%}
+    {% include 'peachjam/_judgment_table.html'%}
 
     {% include 'peachjam/_pagination.html' %}
   {% else %}

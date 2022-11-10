@@ -57,3 +57,7 @@ class CourtDetailView(FilteredDocumentListView):
         }
 
         return context
+
+
+class CourtYearView(CourtDetailView):
+    pass
