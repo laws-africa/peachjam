@@ -10,10 +10,10 @@
 
 {% if taxonomy_tree|length > 0 %}
   {% block mobile-taxonomy-list %}
-    <div class="mb-2">{% include "peachjam/_subject-area-cases-indices.html" %}</div>
+    <div class="mb-2">{% include "peachjam/_taxonomy_tree_facet.html" %}</div>
   {% endblock %}
   {% block desktop-taxonomy-list %}
-    <div class="mb-2">{% include "peachjam/_subject-area-cases-indices.html" %}</div>
+    <div class="mb-2">{% include "peachjam/_taxonomy_tree_facet.html" %}</div>
   {% endblock %}
 
   {% block taxonomy-json %}
