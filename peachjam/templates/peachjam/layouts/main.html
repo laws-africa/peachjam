@@ -20,7 +20,7 @@
         Sentry.init({
         dsn: '{{ SENTRY_DSN_KEY }}',
         environment: '{{ SENTRY_ENVIRONMENT }}',
-        whitelistUrls: [window.location.origin]
+        whitelistUrls: [`${window.location.origin}/static/js/app-prod.js`]
       });
     });
     </script>
