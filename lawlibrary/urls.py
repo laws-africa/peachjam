@@ -43,6 +43,6 @@ urlpatterns = [
         name="provincial_legislation_list_all",
     ),
     path("gazettes", views.GazetteListView.as_view(), name="gazettes"),
-    path("gazettes/<int:year>", views.GazetteListView.as_view(), name="gazettes"),
+    path("gazettes/<int:year>", views.YearView.as_view(), name="gazettes_by_year"),
     path("", include("liiweb.urls")),
 ]

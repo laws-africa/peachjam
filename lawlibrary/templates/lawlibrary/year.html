@@ -1,0 +1,36 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %} {% trans 'Gazettes' %} {{ year }} {% endblock %}
+
+{% block page-content %}
+   <div class="container">
+      <header>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb bg-white px-0">
+            <li class="breadcrumb-item"><a href="{% url 'gazettes' %}">Gazettes</a></li>
+            <li class="breadcrumb-item active">{{ year }}</li>
+          </ol>
+        </nav>
+
+        <h1 class="sans-serif mt-3 mb-3">{{ jurisdiction.name }} Gazettes {{ year }}</h1>
+
+        <div class="row">
+          <form action="/search" method="get" class="d-flex col-md-6 mb-3">
+            <input type="text" class="form-control flex-grow-1" autofocus name="q" placeholder="Search">
+            <input type="submit" class="btn btn-outline-primary ms-2" value="Search">
+          </form>
+        </div>
+
+        <div class="pl-0 d-flex align-items-center">
+          <i class="bi bi-calendar" aria-hidden="true"></i>
+          <ul class="year-nav mb-0 ms-2">
+            {% for y in years %}
+              <li>
+                <a href="{{ y }}" class="{% if y == year %} active {% endif %}">{{ y }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+
+        </div>
+      </header>
+{% endblock %}
