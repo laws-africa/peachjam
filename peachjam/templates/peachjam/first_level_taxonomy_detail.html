@@ -15,15 +15,19 @@
       </nav>
       <div class="pt-4 pb-5">
         <h1 class="mb-4">{{ taxonomy }}</h1>
-        <ul>
-          {% for child in taxonomy.get_children %}
-            <li>
-              <a href="{% url 'taxonomy_detail' taxonomy.slug child.slug %}">
-                {{ child }}
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
+        {% if taxonomy.get_children|length > 0 %}
+          <ul>
+            {% for child in taxonomy.get_children %}
+              <li>
+                <a href="{% url 'taxonomy_detail' taxonomy.slug child.slug %}">
+                  {{ child }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div>{% trans 'No taxonomies found' %}</div>
+        {% endif %}
       </div>
     </section>
 {% endblock %}
