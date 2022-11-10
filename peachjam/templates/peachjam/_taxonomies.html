@@ -1,23 +1,20 @@
 {% load peachjam i18n %}
 
-<div class="col-md">
-  <h5>{% translate 'Taxonomies' %}</h5>
-  <nav class="arrow-divided-breadcrumbs" aria-label="breadcrumb">
-    {% for taxonomy in taxonomies %}
-      <ol class="breadcrumb pt-2">
-        {% for item in taxonomy.topic.get_ancestors %}
-          <li class="breadcrumb-item">
-            <a href="{% build_taxonomy_url item %}">
-              {{ item }}
-            </a>
-          </li>
-        {% endfor %}
-        <li class="breadcrumb-item">
-          <a href="{% build_taxonomy_url taxonomy.topic %}">
-            {{ taxonomy.topic }}
-          </a>
-        </li>
-      </ol>
+<h5>{% translate 'Taxonomies' %}</h5>
+{% for taxonomy in taxonomies %}
+  <div class="d-flex pt-2">
+    {% for item in taxonomy.topic.get_ancestors %}
+      <div class="me-2 d-flex align-items-center">
+        <a class="me-2" href="{% build_taxonomy_url item %}">
+          {{ item }}
+        </a>
+        <i class="bi bi-chevron-right"></i>
+      </div>
     {% endfor %}
-  </nav>
-</div>
+    <div>
+      <a href="{% build_taxonomy_url taxonomy.topic %}">
+        {{ taxonomy.topic }}
+      </a>
+    </div>
+  </div>
+{% endfor %}
