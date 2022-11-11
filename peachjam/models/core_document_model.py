@@ -410,3 +410,10 @@ class AttachedFiles(AttachmentAbstractModel):
 
     def extension(self):
         return os.path.splitext(self.filename)[1].replace(".", "")
+
+
+class AlternativeName(models.Model):
+    document = models.ForeignKey(
+        CoreDocument, on_delete=models.CASCADE, related_name="alternative_names"
+    )
+    title = models.CharField(max_length=1024, null=False, blank=False)
