@@ -13,34 +13,25 @@ class TaxonomyTree {
     const urlParts: string[] = window.location.href.split('/');
     const currentTaxonomy = urlParts[urlParts.length - 1];
 
-    const slugRoot: string | undefined = root.dataset.rootSlug;
+    const slugRoot: string = root.dataset.rootSlug || '';
 
     tableOfContents.items = data.map((item: ItemType) => {
-      // there should always be slugRoot. Contractual dom agreement
-      const slugPath: string[] = [...slugRoot ? [slugRoot] : []];
-      const formatItem = (x: ItemType) => {
-        const hasChildren = Object.keys(x).includes('children');
-        let id;
-        if (hasChildren) {
-          slugPath.push(x.data.slug);
-          id = `/taxonomy/${slugPath.join('/')}`;
-        } else {
-          id = `/taxonomy/${x.data.slug}`;
-        }
-
+      const formatItem = (x: ItemType, ancestors: string[]) => {
+        const newAncestors = [...ancestors, x.data.slug];
         const formatted: ItemType = {
           title: x.data.name,
-          id,
-          slug: x.data.slug,
+          id: newAncestors.join('/'),
           children: []
         };
-        if (hasChildren) {
-          formatted.children = x.children.map(formatItem);
+        if (Object.keys(x).includes('children')) {
+          formatted.children = x.children.map(y => formatItem(y, newAncestors));
         }
         return formatted;
       };
-      return formatItem(item);
+      return formatItem(item, ['taxonomy', slugRoot]);
     });
+
+    root.appendChild(tableOfContents);
 
     // replace hashes with proper links
     tableOfContents.addEventListener('itemRendered', (e) => {
@@ -56,11 +47,10 @@ class TaxonomyTree {
         hrefElement.removeAttribute('href');
         hrefElement.classList.add('active');
       } else {
-        hrefElement.href = hrefElement.href.replace('#', '');
+        const url = new URL(hrefElement.href);
+        hrefElement.href = url.hash.replace('#', '/');
       }
     });
-
-    root.appendChild(tableOfContents);
   }
 }
 
