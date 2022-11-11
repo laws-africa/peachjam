@@ -28,7 +28,6 @@ class TaxonomyTree {
         }
         return formatted;
       };
-      // Sli
       return formatItem(item, ['taxonomy', slugRoot]);
     });
 
