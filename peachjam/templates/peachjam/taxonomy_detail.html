@@ -6,3 +6,13 @@
 {% block page-title %}
   <h1 class="mt-2">{{ taxonomy.name }}</h1>
 {% endblock %}
+
+{% block entity-profile %}
+  {% if entity_profile %}
+    <div>
+      {{ entity_profile.about_html }}
+      <a href="{{ entity_profile.website_url }}" target="_blank"> Visit</a>
+      <img src="{{ entity_profile.profile_photo.url }}"/>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -364,6 +364,7 @@ class DocumentAdmin(admin.ModelAdmin):
 class TaxonomyAdmin(TreeAdmin):
     form = movenodeform_factory(Taxonomy)
     readonly_fields = ("slug",)
+    inlines = [EntityProfileInline]
 
 
 class GenericDocumentAdmin(ImportMixin, DocumentAdmin):

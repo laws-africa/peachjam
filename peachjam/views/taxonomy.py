@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 
-from peachjam.models import Taxonomy
+from peachjam.models import EntityProfile, Taxonomy
 from peachjam.views.generic_views import FilteredDocumentListView
 
 
@@ -15,4 +15,8 @@ class TaxonomyDetailView(FilteredDocumentListView):
         return super().get_base_queryset().filter(taxonomies__topic=self.taxonomy)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(taxonomy=self.taxonomy, **kwargs)
+        context = super().get_context_data(taxonomy=self.taxonomy, **kwargs)
+        context["entity_profile"] = EntityProfile.objects.filter(
+            object_id=self.taxonomy.pk
+        ).first()
+        return context
