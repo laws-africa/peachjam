@@ -52,6 +52,11 @@ from peachjam.models import (
 from peachjam.resources import GenericDocumentResource, JudgmentResource
 
 
+class EntityProfileInline(GenericStackedInline):
+    model = EntityProfile
+    extra = 0
+
+
 class PeachJamSettingsAdmin(admin.ModelAdmin):
     filter_horizontal = (
         "document_languages",
@@ -549,13 +554,13 @@ class DocumentNatureAdmin(admin.ModelAdmin):
     prepopulated_fields = {"code": ("name",)}
 
 
-class EntityProfileInline(GenericStackedInline):
-    model = EntityProfile
-    extra = 0
-
-
 @admin.register(Court)
 class CourtAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
+
+
+@admin.register(Author)
+class AuthorAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]
 
 
@@ -564,7 +569,6 @@ admin.site.register(
         Image,
         Locality,
         CitationLink,
-        Author,
         Judge,
         MatterType,
         CourtClass,
