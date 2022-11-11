@@ -2,7 +2,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models import Max
 
-from peachjam.models import CoreDocument, EntityProfile
+from peachjam.models import CoreDocument
 
 
 class Judge(models.Model):
@@ -45,7 +45,7 @@ class Court(models.Model):
     court_class = models.ForeignKey(
         CourtClass, related_name="courts", on_delete=models.PROTECT, null=True
     )
-    entity_profile = GenericRelation(EntityProfile)
+    entity_profile = GenericRelation("peachjam.EntityProfile")
 
     def __str__(self):
         return self.name

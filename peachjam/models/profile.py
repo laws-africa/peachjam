@@ -11,7 +11,10 @@ class EntityProfile(models.Model):
     about_html = models.TextField(null=True, blank=True)
     website_url = models.URLField(null=True, blank=True)
     address = models.TextField(null=True, blank=True)
-    photo = models.ImageField(
+    profile_photo = models.ImageField(
+        upload_to=entity_profile_photo_filename, null=True, blank=True
+    )
+    background_photo = models.ImageField(
         upload_to=entity_profile_photo_filename, null=True, blank=True
     )
 
