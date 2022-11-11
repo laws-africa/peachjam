@@ -5,6 +5,7 @@ from ckeditor.widgets import CKEditorWidget
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericStackedInline
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
@@ -28,6 +29,7 @@ from peachjam.models import (
     CourtClass,
     DocumentNature,
     DocumentTopic,
+    EntityProfile,
     GenericDocument,
     Image,
     Ingestor,
@@ -547,6 +549,16 @@ class DocumentNatureAdmin(admin.ModelAdmin):
     prepopulated_fields = {"code": ("name",)}
 
 
+class EntityProfileInline(GenericStackedInline):
+    model = EntityProfile
+    extra = 0
+
+
+@admin.register(Court)
+class CourtAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
+
+
 admin.site.register(
     [
         Image,
@@ -555,7 +567,6 @@ admin.site.register(
         Author,
         Judge,
         MatterType,
-        Court,
         CourtClass,
         AttachedFileNature,
     ]
