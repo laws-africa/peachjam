@@ -28,12 +28,13 @@ class TaxonomyTree {
         }
         return formatted;
       };
+      // Sli
       return formatItem(item, ['taxonomy', slugRoot]);
     });
 
     root.appendChild(tableOfContents);
 
-    // replace hashes with proper links
+    // data-slug-root show always have a value. Contractual dom agreement.
     tableOfContents.addEventListener('itemRendered', (e) => {
       const tocItem = e.target as HTMLElement | null;
       if (!tocItem) return;
