@@ -6,3 +6,15 @@
 {% block page-title %}
   <h1 class="mt-2">{% blocktrans %}Documents by {{ court }}{% endblocktrans %}</h1>
 {% endblock %}
+
+{% block entity-profile %}
+  {% with court.entity_profile.first as entity_profile %}
+    {% if entity_profile %}
+      <div>
+        {{ entity_profile.about_html }}
+        <a href="{{ entity_profile.website_url }}" target="_blank"> Visit</a>
+        <img src="{{ entity_profile.photo.url }}"/>
+      </div>
+    {% endif %}
+  {% endwith %}
+{% endblock %}
