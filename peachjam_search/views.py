@@ -197,6 +197,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "judges": None,
         "content": None,
         "court": None,
+        "alternative_names": {"boost": 4},
     }
 
     faceted_search_fields = {
