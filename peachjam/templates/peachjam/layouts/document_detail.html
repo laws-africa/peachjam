@@ -77,6 +77,17 @@
                         {% endif %}
                       {% endblock %}
 
+                      {% block document-metadata-content-alternative-names %}
+                        <dt>{% trans 'Alternative names' %}</dt>
+                        <dd>
+                          {% for alternative_name in document.alternative_names.all %}
+                            {{ alternative_name.title }}{% if not forloop.last %}, {% endif %}
+                          {% empty %}
+                            -
+                          {% endfor %}
+                        </dd>
+                      {% endblock %}
+
                       {% block document-metadata-content-author %}
                         {% if document.author %}
                           <dt>{{ document.author.model_label }}</dt>
