@@ -33,7 +33,7 @@ class TaxonomyTree {
 
     root.appendChild(tableOfContents);
 
-    // data-slug-root show always have a value. Contractual dom agreement.
+    // data-slug-root should always have a value. Contractual dom agreement.
     tableOfContents.addEventListener('itemRendered', (e) => {
       const tocItem = e.target as HTMLElement | null;
       if (!tocItem) return;
