@@ -77,13 +77,67 @@
   {% endif %}
 {% endblock %}
 
+{% block breadcrumbs %}
+  <div class="container mb-3">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="/judgments/">{% trans 'Judgements' %}</a>
+        </li>
+        <li class="breadcrumb-item" aria-current="page">
+          {{ court }}
+        </li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+
 {% block entity-profile %}
   {% with court.entity_profile.first as entity_profile %}
     {% if entity_profile %}
-      <div>
-        {{ entity_profile.about_html }}
-        <a href="{{ entity_profile.website_url }}" target="_blank"> Visit</a>
-        <img src="{{ entity_profile.profile_photo.url }}"/>
+      <div class="entity-profile">
+        <div class="entity-profile__background-photo">
+          <img src="{{ entity_profile.background_photo.url }}"
+             alt="Court background image"
+          />
+        </div>
+
+        <div class="entity-profile__body">
+          {% if entity_profile.profile_photo %}
+            <img src="{{ entity_profile.profile_photo.url }}"
+                 class="entity-profile__body__profile-image img-thumbnail"
+                 alt="profile image"
+            />
+          {% endif %}
+          <div class="entity-profile__body__info">
+            <h1>{{ court }}</h1>
+
+            {% if entity_profile.about_html %}
+              <div class="mb-2">{{ entity_profile.about_html }}</div>
+            {% endif %}
+
+            <div class="row">
+              {% if entity_profile.address %}
+                <div class="col-12 col-sm-6">
+                  <div>
+                    <strong>{% trans 'Physical address:' %}</strong>
+                  </div>
+                  <div>{{ entity_profile.address }}</div>
+                </div>
+              {% endif %}
+
+
+              {% if entity_profile.website_url %}
+                <div class="col-12 col-sm-6">
+                  <div><strong>{% trans 'Visit website:' %}</strong></div>
+                  <a href="{{ entity_profile.website_url }}" target="_blank">
+                    {{ entity_profile.website_url }}
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
       </div>
     {% endif %}
   {% endwith %}
