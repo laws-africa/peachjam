@@ -17,11 +17,11 @@
     <script defer src="https://browser.sentry-cdn.com/6.18.1/bundle.min.js" integrity="sha384-XOitiDSsTajhNQgwzQ7iHMlM2Q2ODCW6aw3m1QgMVrDOqsNhFao1VjB39qXNMOZW" crossorigin="anonymous"></script>
     <script>
     window.addEventListener('load', function() {
-        Sentry.init({
+      Sentry.init({
         dsn: '{{ SENTRY_DSN_KEY }}',
         environment: '{{ SENTRY_ENVIRONMENT }}',
-        whitelistUrls: [`${window.location.origin}/static/js/app-prod.js`]
-      });
+        whitelistUrls: [`${window.location.hostname}/static/js/.+.js$`]
+        });
     });
     </script>
     {% if GOOGLE_ANALYTICS_ID %}
