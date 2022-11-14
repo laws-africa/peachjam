@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
 from peachjam.models import Locality
@@ -61,3 +62,30 @@ class YearView(TemplateView):
         context["years"] = sorted(years, reverse=True)  # TODO: Replace filler years
 
         return context
+
+
+class ProvincialGazetteListView(TemplateView):
+    template_name = "lawlibrary/provincial_gazette_list.html"
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        context["locality"] = get_object_or_404(Locality, code=self.kwargs["code"])
+        context["num_gazettes"] = 10  # TODO: Replace filler numbers
+        years = [
+            2022,
+            2021,
+            2020,
+            2009,
+            2008,
+            2001,
+            1998,
+            1999,
+            1997,
+            1996,
+            1995,
+            1993,
+            1865,
+            1901,
+        ]  # TODO: Replace filler years
+        context["years"] = sorted(years, reverse=True)  # TODO: Replace filler years
+        return self.render_to_response(context)
