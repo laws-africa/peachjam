@@ -20,10 +20,10 @@
       Sentry.init({
         dsn: '{{ SENTRY_DSN_KEY }}',
         environment: '{{ SENTRY_ENVIRONMENT }}',
-        beforeSend (event){
-        return event.request.url.includes(window.location.host) ? event : null;
-      }
-        });
+        beforeSend (event) {
+          return event.request.url === window.location.href ? event : null;
+        }
+      });
     });
     </script>
     {% if GOOGLE_ANALYTICS_ID %}
