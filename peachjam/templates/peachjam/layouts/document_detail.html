@@ -81,7 +81,7 @@
                         <dt>{% trans 'Alternative names' %}</dt>
                         <dd>
                           {% for alternative_name in document.alternative_names.all %}
-                            {{ alternative_name.title }}{% if not forloop.last %}, {% endif %}
+                            <div>{{ alternative_name.title }}</div>
                           {% empty %}
                             -
                           {% endfor %}
