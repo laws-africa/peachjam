@@ -13,7 +13,7 @@
             <ul class="list-unstyled mb-0">
               {% for locality in group %}
                 <li>
-                  <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
+                  <a href="{% url 'provincial_gazette_list' locality.code %}">{{ locality.name }}</a>
                 </li>
               {% endfor %}
             </ul>
@@ -23,24 +23,22 @@
         <h4 class="sans-serif text-muted mt-3 mb-0">{{ num_gazettes }} gazette{{ num_gazettes|pluralize }}</h4>
 
         <div class="col-md-10 mt-5 mb-5">
-            <div class="row">
-              {% for year in years %}
-                <div class="col-md-4 col-sm-6 col-xs-12 status-box">
-                  <div>
-                    <h2><a href="{% url 'gazettes_by_year' year %}">{{ year }}</a></h2>
-                    <p class="status-up"><i class="fas fa-signal" aria-hidden="true"></i>
-                      {{ year_count }} gazette{{ year_count|pluralize }}
-                    </p>
-                  </div>
-                  <div data-year="{{ year.year }}" class="monthly-chart"></div>
+          <div class="row">
+            {% for year in years %}
+              <div class="col-md-4 col-sm-6 col-xs-12 status-box">
+                <div>
+                  <h2><a class="text-decoration-none" href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a></h2>
+                  <p class="status-up"><i class="fas fa-signal" aria-hidden="true"></i>
+                    {{ year.count }} gazette{{ year.count|pluralize }}
+                  </p>
                 </div>
-              {% endfor %}
-            </div>
+                <div data-year="{{ year.month }}" class="monthly-chart"></div>
+              </div>
+            {% endfor %}
           </div>
+        </div>
 
       </div>
-
     </div>
-
   </section>
 {% endblock %}

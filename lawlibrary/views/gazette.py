@@ -1,91 +1,86 @@
+from django.db.models import Count
+from django.db.models.functions import ExtractMonth, ExtractYear
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
-from peachjam.models import Locality
+from peachjam.models import Gazette, Locality
 
 
 class GazetteListView(TemplateView):
     template_name = "lawlibrary/gazette_list.html"
+    codes = "mp ec nc kzn gp wc lim nw fs".split()
+    queryset = Gazette.objects.filter(locality__code__in=codes)
+    provinces = Locality.objects.filter(code__in=codes)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        codes = "mp ec nc kzn gp wc lim nw fs".split()
-        provinces = Locality.objects.filter(code__in=codes)
-        groups = provinces[:5], provinces[5:]
+        groups = self.provinces[:5], self.provinces[5:]
         context["province_groups"] = groups
-        context["num_gazettes"] = 10  # TODO: Replace filler number
-
-        years = [
-            2022,
-            2021,
-            2020,
-            2009,
-            2008,
-            2001,
-            1998,
-            1999,
-            1997,
-            1996,
-            1995,
-            1993,
-            1865,
-            1901,
-        ]  # TODO: Replace filler years
-        context["years"] = years.sort(reverse=True)  # TODO: Replace filler years
-        context["year_count"] = 100  # TODO: Replace filler year_count
+        context["num_gazettes"] = self.queryset.count()
+        context["years"] = self.get_year_stats()
 
         return context
+
+    def get_year_stats(self):
+        return self.queryset.annotate(
+            year=ExtractYear("date"), month=ExtractMonth("date"), count=Count("pk")
+        ).values("year", "month", "count")
 
 
 class YearView(TemplateView):
     template_name = "lawlibrary/year.html"
+    model = Gazette
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        years = [
-            2022,
-            2021,
-            2020,
-            2009,
-            2008,
-            2001,
-            1998,
-            1999,
-            1997,
-            1996,
-            1995,
-            1993,
-            1865,
-            1901,
-        ]  # TODO: Replace filler years
-        context["years"] = sorted(years, reverse=True)  # TODO: Replace filler years
+    def get(self, request, code=None, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
 
-        return context
+        if code is not None:
+            locality = get_object_or_404(Locality, code=code)
+            context["locality"] = locality
+            context["years"] = (
+                self.model.objects.order_by("-date")
+                .filter(locality=locality)
+                .annotate(
+                    year=ExtractYear("date"),
+                    month=ExtractMonth("date"),
+                    count=Count("pk"),
+                )
+                .values("year", "month", "count")
+            )
+
+        else:
+            context["years"] = (
+                self.model.objects.order_by("-date")
+                .annotate(
+                    year=ExtractYear("date"),
+                    month=ExtractMonth("date"),
+                    count=Count("pk"),
+                )
+                .values("year", "month", "count")
+            )
+
+        context["year"] = int(self.kwargs["year"])
+
+        return self.render_to_response(context)
 
 
 class ProvincialGazetteListView(TemplateView):
     template_name = "lawlibrary/provincial_gazette_list.html"
+    model = Gazette
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context["locality"] = get_object_or_404(Locality, code=self.kwargs["code"])
-        context["num_gazettes"] = 10  # TODO: Replace filler numbers
-        years = [
-            2022,
-            2021,
-            2020,
-            2009,
-            2008,
-            2001,
-            1998,
-            1999,
-            1997,
-            1996,
-            1995,
-            1993,
-            1865,
-            1901,
-        ]  # TODO: Replace filler years
-        context["years"] = sorted(years, reverse=True)  # TODO: Replace filler years
+
+        context["locality"] = locality = get_object_or_404(
+            Locality, code=self.kwargs["code"]
+        )
+        context["num_gazettes"] = self.model.objects.filter(locality=locality).count()
+        context["years"] = (
+            self.model.objects.filter(locality=locality)
+            .annotate(
+                year=ExtractYear("date"), month=ExtractMonth("date"), count=Count("pk")
+            )
+            .values("year", "month", "count")
+        )
+
         return self.render_to_response(context)

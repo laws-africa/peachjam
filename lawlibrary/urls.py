@@ -1,3 +1,4 @@
+from django.conf.urls import url
 from django.urls import include, path
 
 from lawlibrary import views
@@ -49,5 +50,10 @@ urlpatterns = [
         name="provincial_gazette_list",
     ),
     path("gazettes/<int:year>", views.YearView.as_view(), name="gazettes_by_year"),
+    url(
+        r"^gazettes/(?P<code>\w+)/(?P<year>\w+)/$",
+        views.YearView.as_view(),
+        name="gazettes_by_year",
+    ),
     path("", include("liiweb.urls")),
 ]

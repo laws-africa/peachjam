@@ -1,6 +1,6 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
-{% block title %} {% trans 'Gazettes' %} {{ year }} {% endblock %}
+{% block title %} {% if locality %} {{ locality }} {% endif %} {% trans 'Gazettes' %} {{ year }} {% endblock %}
 
 {% block page-content %}
    <div class="container">
@@ -8,11 +8,14 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-white px-0">
             <li class="breadcrumb-item"><a href="{% url 'gazettes' %}">Gazettes</a></li>
+            {% if locality %}
+              <li class="breadcrumb-item"><a href="{% url 'provincial_gazette_list' locality.code %}">{{ locality }}</a></li>
+            {% endif %}
             <li class="breadcrumb-item active">{{ year }}</li>
           </ol>
         </nav>
 
-        <h1 class="sans-serif mt-3 mb-3">{{ jurisdiction.name }} Gazettes {{ year }}</h1>
+        <h1 class="sans-serif mt-3 mb-3">{{ locality }} Gazettes {{ year }}</h1>
 
         <div class="row">
           <form action="/search" method="get" class="d-flex col-md-6 mb-3">
@@ -24,13 +27,13 @@
         <div class="pl-0 d-flex align-items-center">
           <i class="bi bi-calendar" aria-hidden="true"></i>
           <ul class="year-nav mb-0 ms-2">
-            {% for y in years %}
+            {% for item in years %}
               <li>
-                <a href="{{ y }}" class="{% if y == year %} active {% endif %}">{{ y }}</a>
+                <a href="{{ item.year }}" class="{% if item.year == year %} active {% endif %}">{{ item.year }}</a>
               </li>
             {% endfor %}
           </ul>
-
         </div>
+
       </header>
 {% endblock %}
