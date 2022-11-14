@@ -5,7 +5,7 @@
   {% if document.doc_type == 'judgment' %}
     <dt>{% trans 'Court' %}</dt>
     <dd class="text-muted">
-      <a href="{% url 'court_detail' document.court.code %}">{{ document.court.name }}</a>
+      <a href="{% url 'court' document.court.code %}">{{ document.court.name }}</a>
     </dd>
 
     {% if document.judges_string %}
