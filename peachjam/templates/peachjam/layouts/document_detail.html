@@ -78,14 +78,16 @@
                       {% endblock %}
 
                       {% block document-metadata-content-alternative-names %}
-                        <dt>{% trans 'Alternative names' %}</dt>
-                        <dd>
-                          {% for alternative_name in document.alternative_names.all %}
-                            <div>{{ alternative_name.title }}</div>
-                          {% empty %}
-                            -
-                          {% endfor %}
-                        </dd>
+                        {% with document.alternative_names.all as alternative_names %}
+                          {% if alternative_names %}
+                            <dt>{% trans 'Alternative names' %}</dt>
+                            <dd>
+                              {% for alternative_name in alternative_names %}
+                                <div>{{ alternative_name.title }}</div>
+                              {% endfor %}
+                            </dd>
+                          {% endif %}
+                        {% endwith %}
                       {% endblock %}
 
                       {% block document-metadata-content-author %}
