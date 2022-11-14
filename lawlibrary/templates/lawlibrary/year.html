@@ -34,6 +34,36 @@
             {% endfor %}
           </ul>
         </div>
-
       </header>
+
+      <div class="post-content mt-4">
+        {% for month, items in gazettes %}
+          {% if items %}
+            <h2 class="sans-serif" id="{{ forloop.counter }}">{{ month }} {{ year }}</h2>
+            <ul>
+              {% for gazette in items %}
+                <li>
+                  <a href="">{{ gazette.name }}</a>
+                  <span class="text-muted m-0">
+                    &nbsp;({{ gazette.size|filesizeformat }}, <a href="{{ gazette.ga_download_url }}" target="_blank">PDF</a>)
+                  </span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="pl-0 mt-5 mb-5 d-flex align-items-center">
+        <i class="bi bi-calendar" aria-hidden="true"></i>
+        <ul class="year-nav mb-0 ms-2">
+          {% for item in years %}
+            <li>
+              <a href="{{ item.year }}" class="{% if item.year == year %} active {% endif %}">{{ item.year }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+
 {% endblock %}
