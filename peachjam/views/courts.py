@@ -6,7 +6,10 @@ from peachjam.views.generic_views import FilteredDocumentListView
 
 
 class CourtDetailView(FilteredDocumentListView):
-    """List View class for filtering a court's judgments."""
+    """List View class for filtering a court's judgments.
+
+    This view may be restricted to a specific year.
+    """
 
     model = Judgment
     template_name = "peachjam/court_detail.html"
@@ -25,11 +28,14 @@ class CourtDetailView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        years = (
-            self.model.objects.filter(court=self.court)
-            .order_by("-date")
-            .values_list("date__year", flat=True)
-            .distinct()
+        context["years"] = sorted(
+            list(
+                self.model.objects.filter(court=self.court)
+                .order_by()
+                .values_list("date__year", flat=True)
+                .distinct()
+            ),
+            reverse=True,
         )
 
         judges = list(
@@ -48,7 +54,10 @@ class CourtDetailView(FilteredDocumentListView):
         context["facet_data"] = {
             "judges": judges,
             "alphabet": lowercase_alphabet(),
-            "years": list(set(years)),
         }
 
         return context
+
+
+class CourtYearView(CourtDetailView):
+    pass
