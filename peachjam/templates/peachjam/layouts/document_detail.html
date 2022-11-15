@@ -81,7 +81,7 @@
                         {% with document.alternative_names.all as alternative_names %}
                           {% if alternative_names %}
                             <dt>{% trans 'Alternative names' %}</dt>
-                            <dd>
+                            <dd class="text-muted">
                               {% for alternative_name in alternative_names %}
                                 <div>{{ alternative_name.title }}</div>
                               {% endfor %}
