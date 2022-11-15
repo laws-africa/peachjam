@@ -11,19 +11,6 @@
   {% endif %}
 {% endblock %}
 
-{% block breadcrumbs %}
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
-      </li>
-      <li class="breadcrumb-item">
-        <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-      </li>
-    </ol>
-  </nav>
-{% endblock %}
-
 {% block page-header %}
   <h1 class="my-4">
     {% if year %}
@@ -77,23 +64,8 @@
   {% endif %}
 {% endblock %}
 
-{% block breadcrumbs %}
-  <div class="container mb-3">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-          <a href="/judgments/">{% trans 'Judgements' %}</a>
-        </li>
-        <li class="breadcrumb-item" aria-current="page">
-          {{ court }}
-        </li>
-      </ol>
-    </nav>
-  </div>
-{% endblock %}
-
 {% block entity-profile %}
-  {% with court.entity_profile as entity_profile %}
+  {% with court.entity_profile.first as entity_profile %}
     {% if entity_profile %}
       {% include 'peachjam/_entity_profile.html' %}
     {% endif %}
