@@ -12,16 +12,18 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
-      </li>
-      <li class="breadcrumb-item">
-        <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-      </li>
-    </ol>
-  </nav>
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb py-2">
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+        </li>
+      </ol>
+    </nav>
+  </div>
 {% endblock %}
 
 {% block page-header %}
