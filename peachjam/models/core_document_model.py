@@ -24,6 +24,7 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_date,
 )
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
+from peachjam.storage import DynamicStorageFileField
 
 
 class Locality(models.Model):
@@ -329,7 +330,7 @@ class AttachmentAbstractModel(models.Model):
     filename = models.CharField(max_length=1024, null=False, blank=False)
     mimetype = models.CharField(max_length=1024, null=False, blank=False)
     size = models.BigIntegerField(default=0)
-    file = models.FileField(upload_to=file_location, max_length=1024)
+    file = DynamicStorageFileField(upload_to=file_location, max_length=1024)
 
     def __str__(self):
         return f"{self.filename}"

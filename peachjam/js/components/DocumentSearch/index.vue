@@ -142,14 +142,14 @@ export default {
       this.mountElement.dispatchEvent(new CustomEvent('going-to-snippet'));
       // Wait for offset canvas to close then scroll
       window.setTimeout(() => {
-        scrollToElement(node, 60).then(() => {
+        scrollToElement(node, () => {
           node.style.outline = '2px solid transparent';
           node.style.transition = 'outline-color 400ms ease-in-out';
           node.style.outlineColor = 'var(--bs-primary)';
           window.setTimeout(() => {
             node.style.outlineColor = 'transparent';
           }, 400);
-        });
+        }, 60);
       }, 300);
     }
   }

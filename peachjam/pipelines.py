@@ -1,3 +1,4 @@
+import cssutils
 from docpipe.html import BodyToDiv, SerialiseHtml, parse_and_clean
 from docpipe.pipeline import Pipeline, PipelineContext, Stage
 from docpipe.soffice import DocToHtml
@@ -47,13 +48,13 @@ class CleanStyles(Stage):
     def clean_style_string(self, tag, s):
         blacklist = self.style_blacklist.get(tag, self.style_blacklist[None])
 
-        # split style string into rules, and rules into pairs
-        # color: red; margin: 0px -> {'color': 'red', 'margin': '0px'}
-        pairs = [a.split(":") for a in s.split(";") if ":" in a]
-        styles = {k.strip(): v.strip() for (k, v) in pairs}
+        style = cssutils.parseStyle(s)
+        if style and s:
+            for k in blacklist:
+                style.removeProperty(k)
 
-        styles = "; ".join(f"{k}: {v}" for k, v in styles.items() if k not in blacklist)
-        return styles
+        if style.getCssText():
+            return style.cssText.replace("\n", " ")
 
 
 word_pipeline = Pipeline(

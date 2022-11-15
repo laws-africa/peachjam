@@ -181,6 +181,10 @@ class DocumentContent {
     const items: TOCItemType[] = [];
 
     content.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5').forEach((heading) => {
+      if (!heading.id) {
+        heading.id = heading.tagName + '_' + Math.floor(Math.random() * 10000);
+      }
+
       const item = {
         type: heading.tagName,
         title: heading.innerText,

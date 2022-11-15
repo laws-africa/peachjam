@@ -36,6 +36,7 @@ from peachjam.views import (
     ArticleTopicListView,
     AuthorDetailView,
     CourtDetailView,
+    CourtYearView,
     DocumentDetailViewResolver,
     DocumentMediaView,
     DocumentSourcePDFView,
@@ -65,13 +66,18 @@ urlpatterns = [
         AuthorDetailView.as_view(),
         name="author",
     ),
+    path("judgments/", JudgmentListView.as_view(), name="judgment_list"),
     path(
-        "courts/<str:code>/",
+        "judgments/<str:code>/",
         CourtDetailView.as_view(),
         name="court",
     ),
+    path(
+        "judgments/<str:code>/<int:year>/",
+        CourtYearView.as_view(),
+        name="court_year",
+    ),
     path("place/<str:code>", PlaceDetailView.as_view(), name="place"),
-    path("judgments/", JudgmentListView.as_view(), name="judgment_list"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
     path(
         "legal_instruments/",
@@ -113,7 +119,7 @@ urlpatterns = [
         name="document_media",
     ),
     re_path(
-        r"^(?P<frbr_uri>akn/.*)$",
+        r"^(?P<frbr_uri>akn/?.*)$",
         DocumentDetailViewResolver.as_view(),
         name="document_detail",
     ),

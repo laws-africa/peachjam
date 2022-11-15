@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "countries_plus",
     "languages_plus",
     "rest_framework",
+    "rest_framework.authtoken",
     "django_filters",
     "django_elasticsearch_dsl",
     "django_elasticsearch_dsl_drf",
@@ -113,6 +114,7 @@ PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
 
 WSGI_APPLICATION = "peachjam.wsgi.application"
 EMAIL_SUBJECT_PREFIX = f"[{PEACHJAM['APP_NAME']}] "
+SERVER_EMAIL = DEFAULT_FROM_EMAIL = PEACHJAM["SUPPORT_EMAIL"]
 
 # Django all-auth
 AUTHENTICATION_BACKENDS = [
@@ -227,6 +229,8 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# effectively, max pages we'll index from documents
+ELASTICSEARCH_DSL_INDEX_SETTINGS = {"index.mapping.nested_objects.limit": "50000"}
 ELASTICSEARCH_DSL = {
     "default": {
         "hosts": os.environ.get("ELASTICSEARCH_HOST", "localhost:9200"),
@@ -244,7 +248,8 @@ ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication"
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissions"],
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
@@ -290,6 +295,20 @@ SASS_PROCESSOR_INCLUDE_DIRS = [
     os.path.join(BASE_DIR, "node_modules"),
 ]
 
+# Configure dynamic file storage for fields which use it. This is a type of storage which can dynamically
+# determine whether an individual file is in S3 or a local file.
+#
+# In DEBUG mode, we default to the default locale file storage. In production, we use S3.
+DYNAMIC_STORAGE = {
+    # use file storage by default
+    "DEFAULTS": {"": "file:"},
+    "PREFIXES": {
+        # storage backends for the different prefixes
+        "file": {"storage": "peachjam.storage.DynamicFileSystemStorage"},
+        "s3": {"storage": "peachjam.storage.DynamicS3Boto3Storage"},
+    },
+}
+
 if not DEBUG:
     # AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set as env variables
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
@@ -297,6 +316,9 @@ if not DEBUG:
     AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "")
     AWS_SIGNATURE_VERSION = "s3v4"
     AWS_QUERYSTRING_AUTH = True
+
+    # In production, use S3 and the default S3 bucket
+    DYNAMIC_STORAGE["DEFAULTS"][""] = f"s3:{AWS_STORAGE_BUCKET_NAME}:"
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 
@@ -403,7 +425,8 @@ LOGGING = {
     "loggers": {
         "": {"handlers": ["console"], "level": "ERROR"},
         "django": {"level": "INFO"},
-        "peachjam": {"handlers": ["console"], "level": "DEBUG" if DEBUG else "INFO"},
+        "peachjam": {"level": "DEBUG" if DEBUG else "INFO"},
+        "background_task": {"level": "INFO"},
     },
 }
 

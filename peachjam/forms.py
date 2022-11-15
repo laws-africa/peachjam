@@ -4,9 +4,11 @@ from os.path import splitext
 from django import forms
 from django.core.files import File
 from django.http import QueryDict
+from django.utils.text import slugify
 
 from peachjam.models import CoreDocument, Ingestor, SourceFile
 from peachjam.plugins import plugins
+from peachjam.storage import clean_filename
 
 
 def work_choices():
@@ -52,7 +54,9 @@ class NewDocumentFormMixin:
         file_ext = splitext(upload_file.name)[1]
         SourceFile(
             document=self.instance,
-            file=File(upload_file, name=f"{self.instance.title[-250:]}{file_ext}"),
+            file=File(
+                upload_file, name=f"{slugify(self.instance.title[-250:])}{file_ext}"
+            ),
             mimetype=upload_file.content_type,
         ).save()
 
@@ -123,3 +127,14 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(judges__name__in=judges)
 
         return queryset
+
+
+class SourceFileForm(forms.ModelForm):
+    class Meta:
+        model = SourceFile
+        fields = "__all__"
+
+    def clean_file(self):
+        # dynamic storage files don't like colons in filenames
+        self.cleaned_data["file"].name = clean_filename(self.cleaned_data["file"].name)
+        return self.cleaned_data["file"]

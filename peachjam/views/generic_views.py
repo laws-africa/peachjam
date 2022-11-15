@@ -35,7 +35,7 @@ class FilteredDocumentListView(ListView):
         return super(FilteredDocumentListView, self).get(request, *args, **kwargs)
 
     def get_base_queryset(self):
-        return self.model.objects.all()
+        return self.queryset or self.model.objects
 
     def get_queryset(self):
         return self.form.filter_queryset(self.get_base_queryset()).order_by("-date")
@@ -186,7 +186,8 @@ class BaseDocumentDetailView(DetailView):
         root = html.fromstring(document.content_html)
 
         for img in root.xpath(".//img[@src]"):
-            if not img.attrib["src"].startswith("/"):
+            src = img.attrib["src"]
+            if not src.startswith("/") and not src.startswith("data:"):
                 img.attrib["src"] = (
                     document.expression_frbr_uri + "/media/" + img.attrib["src"]
                 )

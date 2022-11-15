@@ -10,7 +10,7 @@ from dateutil import parser
 from django.core.files import File
 from django.utils.text import slugify
 
-from peachjam.models import Predicate, Relationship, Work
+from peachjam.models import CoreDocument, Predicate, Relationship, Work
 from peachjam.plugins import plugins
 
 logger = logging.getLogger(__name__)
@@ -106,7 +106,14 @@ class IndigoAdapter(Adapter):
 
         logger.info(f"Updating document ... {url}")
 
-        document = self.client_get(f"{url}.json").json()
+        try:
+            document = self.client_get(f"{url}.json").json()
+        except requests.HTTPError as error:
+            if error.response.status_code == 404:
+                return
+            else:
+                raise error
+
         frbr_uri = FrbrUri.parse(document["frbr_uri"])
         title = document["title"]
         toc_json = self.get_toc_json(url)
@@ -327,3 +334,18 @@ class IndigoAdapter(Adapter):
                     "mimetype": magic.from_file(f.name, mime=True),
                 },
             )
+
+    def delete_document(self, expression_frbr_uri):
+        url = re.sub(r"/akn.*", expression_frbr_uri, self.url)
+        try:
+            document = self.client_get(url)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+
+                document = CoreDocument.objects.filter(
+                    expression_frbr_uri=expression_frbr_uri
+                ).first()
+                if document:
+                    document.delete()
+            else:
+                raise e

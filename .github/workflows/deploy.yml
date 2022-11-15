@@ -18,7 +18,7 @@ jobs:
       uses: dokku/github-action@master
       with:
         ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-        git_remote_url: 'ssh://dokku@web2.laws.africa:22/agp'
+        git_remote_url: 'ssh://dokku@liiweb.africanlii.org:22/agp'
         git_push_flags: '--force'
 
   deploy-lawlibrary:
@@ -36,3 +36,19 @@ jobs:
         ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
         git_remote_url: 'ssh://dokku@web2.laws.africa:22/lawlibrary'
         git_push_flags: '--force'
+
+  deploy-senlii:
+    name: Deploy to senlii
+    runs-on: ubuntu-latest
+    concurrency: senlii.org
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: git push to senlii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@senlii.org:22/senlii'
+          git_push_flags: '--force'

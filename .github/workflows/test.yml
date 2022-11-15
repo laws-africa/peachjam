@@ -5,7 +5,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test-app: ["peachjam --settings=peachjam.settings", "africanlii --settings=africanlii.settings", "lawlibrary --settings=lawlibrary.settings", "liiweb --settings=liiweb.settings"]
+        app:
+          - peachjam
+          - africanlii
+          - lawlibrary
+          - liiweb
     services:
       postgres:
         image: postgres:10
@@ -45,4 +49,4 @@ jobs:
         DATABASE_URL: "postgres://postgres:postgres@localhost:5432/peach-jam"
       run: |
         pre-commit run --all-files
-        python manage.py test ${{ matrix.test-app }}
+        python manage.py test ${{ matrix.app }} --settings=${{ matrix.app }}.settings

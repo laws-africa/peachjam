@@ -42,7 +42,7 @@ export function reverseRelationship (relationship: IRelationshipEnrichment) {
     // @ts-ignore
     const val = relationship[`subject_${attr}`];
     // @ts-ignore
-    relationship[`subject_${attr}`] = relationship[`object_${attr}`]
+    relationship[`subject_${attr}`] = relationship[`object_${attr}`];
     // @ts-ignore
     relationship[`object_${attr}`] = val;
   }

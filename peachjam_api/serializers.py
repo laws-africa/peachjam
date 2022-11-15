@@ -99,3 +99,25 @@ class LegislationSerializer(serializers.ModelSerializer):
 
     def get_taxonomies(self, instance):
         return [x.topic.name for x in instance.taxonomies.all()]
+
+
+class WebhookDataSerializer(serializers.Serializer):
+    url = serializers.CharField()
+    expression_frbr_uri = serializers.CharField()
+
+    class Meta:
+        fields = (
+            "url",
+            "expression_frbr_uri",
+        )
+
+
+class IngestorWebHookSerializer(serializers.Serializer):
+    action = serializers.CharField()
+    data = WebhookDataSerializer()
+
+    class Meta:
+        fields = (
+            "action",
+            "data",
+        )
