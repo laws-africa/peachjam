@@ -1,17 +1,4 @@
 {% load peachjam %}
 
-{% for item, info in annotated_taxonomy_tree %}
-  {% if info.open %}
-    <ul><li>
-  {% else %}
-    </li><li>
-  {% endif %}
-
-    <a href="{% build_taxonomy_url item %}">
-      {{ item }}
-    </a>
-
-  {% for close in info.close %}
-      </li></ul>
-  {% endfor %}
-{% endfor %}
+<div data-component="TaxonomyTree" data-root-slug="{{ root_taxonomy }}">
+</div>

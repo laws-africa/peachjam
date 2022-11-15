@@ -8,6 +8,7 @@ import { ToggleTab } from './tabs';
 
 import FindDocuments from './FindDocuments/index.vue';
 import LegislationTable from './LegislationTable/index.vue';
+import TaxonomyTree from './taxonomy-tree';
 
 const components: Record<string, any> = {
   // Data components
@@ -18,6 +19,7 @@ const components: Record<string, any> = {
   PdfRenderer,
   RelationshipEnrichments,
   ToggleTab,
+  TaxonomyTree,
 
   // Vue components
   FindDocuments,

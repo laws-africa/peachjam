@@ -168,47 +168,48 @@
                   {% endblock %}
                 </div>
 
-                {% block document-taxonomies %}
-                  {% if taxonomies %}
-                    {% include "peachjam/_taxonomies.html" %}
-                  {% endif %}
-                {% endblock %}
+                {% if n_relationships or taxonomies %}
+                  <div class="col-md">
+                    {% block document-taxonomies %}
+                      {% if taxonomies %}
+                        {% include "peachjam/_taxonomies.html" %}
+                      {% endif %}
+                    {% endblock %}
 
-                {% block document-relationships-content %}
-                  {% if n_relationships %}
-                    <div class="col-md">
-                      <h5>{% translate 'Related documents' %}</h5>
+                    {% block document-relationships-content %}
+                      {% if n_relationships %}
+                        <h5>{% translate 'Related documents' %}</h5>
+                        <ul class="list-unstyled">
+                          {% if n_relationships > relationship_limit %}
+                            <li>
+                              <a href="#related-tab" data-component="ToggleTab">{% blocktrans %}{{ n_relationships }} related documents{% endblocktrans %}</a>
+                            </li>
+                          {% else %}
+                            {% for rel in relationships_as_subject %}
+                              {% if rel.object_work %}
+                                <li>
+                                  {% translate rel.predicate.verb as verb %}
+                                  {{ verb|capfirst }}
+                                  <a href="{% url 'document_detail' frbr_uri=rel.object_work.frbr_uri|strip_first_character %}">{{ rel.object_work.title }}</a>
+                                </li>
+                              {% endif %}
+                            {% endfor %}
 
-                      <ul class="list-unstyled">
-                        {% if n_relationships > relationship_limit %}
-                          <li>
-                            <a href="#related-tab" data-component="ToggleTab">{% blocktrans %}{{ n_relationships }} related documents{% endblocktrans %}</a>
-                          </li>
-                        {% else %}
-                          {% for rel in relationships_as_subject %}
-                            {% if rel.object_work %}
-                              <li>
-                                {% translate rel.predicate.verb as verb %}
-                                {{ verb|capfirst }}
-                                <a href="{% url 'document_detail' frbr_uri=rel.object_work.frbr_uri|strip_first_character %}">{{ rel.object_work.title }}</a>
-                              </li>
-                            {% endif %}
-                          {% endfor %}
-
-                          {% for rel in document.relationships_as_object %}
-                            {% if rel.subject_work %}
-                              <li>
-                                {% translate rel.predicate.reverse_verb as verb %}
-                                {{ verb|capfirst }}
-                                <a href="{% url 'document_detail' frbr_uri=rel.subject_work.frbr_uri|strip_first_character %}">{{ rel.subject_work.title }}</a>
-                              </li>
-                            {% endif %}
-                          {% endfor %}
-                        {% endif %}
-                      </ul>
-                    </div>
-                  {% endif %}
-                {% endblock %}
+                            {% for rel in document.relationships_as_object %}
+                              {% if rel.subject_work %}
+                                <li>
+                                  {% translate rel.predicate.reverse_verb as verb %}
+                                  {{ verb|capfirst }}
+                                  <a href="{% url 'document_detail' frbr_uri=rel.subject_work.frbr_uri|strip_first_character %}">{{ rel.subject_work.title }}</a>
+                                </li>
+                              {% endif %}
+                            {% endfor %}
+                          {% endif %}
+                        </ul>
+                      {% endif %}
+                    {% endblock %}
+                  </div>
+                {% endif %}
               </div>
             {% endblock %}
 
