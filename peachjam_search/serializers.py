@@ -29,6 +29,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "judges",
             "highlight",
             "is_most_recent",
+            "alternative_names",
         ]
 
     def get_highlight(self, obj):
