@@ -11,6 +11,19 @@
   {% endif %}
 {% endblock %}
 
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+      </li>
+    </ol>
+  </nav>
+{% endblock %}
+
 {% block page-header %}
   <h1 class="my-4">
     {% if year %}
