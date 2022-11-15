@@ -10,7 +10,7 @@ class TaxonomyTree {
     const tableOfContents = document.createElement('la-table-of-contents');
     const jsonElement: HTMLElement | null = document.getElementById('taxonomy_tree');
     const data = jsonElement && jsonElement.textContent ? JSON.parse(jsonElement.textContent as string) : [];
-    const urlParts: string[] = window.location.href.split('/');
+    const urlParts: string[] = window.location.pathname.split('/');
     const currentTaxonomy = urlParts[urlParts.length - 1];
 
     const slugRoot: string = root.dataset.rootSlug || '';
