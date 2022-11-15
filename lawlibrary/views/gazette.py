@@ -1,4 +1,5 @@
 from itertools import groupby
+from operator import itemgetter
 
 from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
@@ -8,28 +9,41 @@ from django.views.generic import TemplateView
 from peachjam.models import Gazette, Locality
 
 
+def group_years(years):
+    # sort list of years
+    years.sort(key=lambda x: x["year"])
+
+    results = []
+    # group list of years dict by year
+    for key, value in groupby(years, key=itemgetter("year")):
+        year_dict = {"year": key, "count": sum(int(x["count"]) for x in value)}
+        results.append(year_dict)
+    return results
+
+
 class GazetteListView(TemplateView):
     template_name = "lawlibrary/gazette_list.html"
     codes = "mp ec nc kzn gp wc lim nw fs".split()
     queryset = Gazette.objects.filter(locality__code__in=codes)
     provinces = Locality.objects.filter(code__in=codes)
+    model = Gazette
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         groups = self.provinces[:5], self.provinces[5:]
         context["province_groups"] = groups
         context["num_gazettes"] = self.queryset.count()
-        context["years"] = self.get_year_stats()
-        print(context["years"])
-
-        # {'year': 1989, 'month': 11, 'count': 1}
+        context["results"] = self.get_year_stats()
 
         return context
 
     def get_year_stats(self):
-        return self.queryset.annotate(
-            year=ExtractYear("date"), month=ExtractMonth("date"), count=Count("pk")
-        ).values("year", "month", "count")
+        years = list(
+            self.queryset.annotate(
+                year=ExtractYear("date"), month=ExtractMonth("date"), count=Count("pk")
+            ).values("year", "month", "count")
+        )
+        return group_years(years)
 
 
 class YearView(TemplateView):
@@ -43,7 +57,7 @@ class YearView(TemplateView):
         if code is not None:
             locality = get_object_or_404(Locality, code=code)
             context["locality"] = locality
-            context["years"] = (
+            years = list(
                 self.model.objects.order_by("-date")
                 .filter(locality=locality)
                 .annotate(
@@ -53,6 +67,7 @@ class YearView(TemplateView):
                 )
                 .values("year", "month", "count")
             )
+            context["results"] = group_years(years)
             context["gazettes"] = self.group_gazettes(
                 list(
                     self.model.objects.filter(
@@ -62,7 +77,7 @@ class YearView(TemplateView):
             )
 
         else:
-            context["years"] = (
+            years = list(
                 self.model.objects.order_by("-date")
                 .annotate(
                     year=ExtractYear("date"),
@@ -71,6 +86,7 @@ class YearView(TemplateView):
                 )
                 .values("year", "month", "count")
             )
+            context["results"] = group_years(years)
             context["gazettes"] = self.group_gazettes(
                 list(self.model.objects.filter(date__year=self.kwargs["year"]))
             )
@@ -79,13 +95,9 @@ class YearView(TemplateView):
 
         return self.render_to_response(context)
 
-    def sort_gazettes(self, value):
-        for g in value:
-            return [g.title, g.date]
-
     def group_gazettes(self, gazettes):
         months = {m: [] for m in range(1, 13)}
-        self.sort_gazettes(gazettes)
+
         for month, group in groupby(gazettes, key=lambda g: g.date.month):
             months[month] = list(group)
 
@@ -93,8 +105,6 @@ class YearView(TemplateView):
         months = [(m, v) for m, v in months.items()]
         months.sort(key=lambda x: x[0])
         months = [(self.MONTHS[m - 1], v) for m, v in months]
-
-        print(months)
 
         return months
 
@@ -110,12 +120,15 @@ class ProvincialGazetteListView(TemplateView):
             Locality, code=self.kwargs["code"]
         )
         context["num_gazettes"] = self.model.objects.filter(locality=locality).count()
-        context["years"] = (
+
+        years = list(
             self.model.objects.filter(locality=locality)
             .annotate(
                 year=ExtractYear("date"), month=ExtractMonth("date"), count=Count("pk")
             )
             .values("year", "month", "count")
         )
+
+        context["results"] = group_years(years)
 
         return self.render_to_response(context)

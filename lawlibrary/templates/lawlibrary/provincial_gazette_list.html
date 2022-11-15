@@ -20,7 +20,7 @@
 
       <div class="col-md-10 mt-5 mb-5">
         <div class="row">
-          {% for year in years %}
+          {% for year in results %}
             <div class="col-md-4 col-sm-6 col-xs-12 status-box">
               <div>
                 <h2><a class="text-decoration-none" href="{% url 'gazettes_by_year' locality.code year.year %}">{{ year.year }}</a></h2>

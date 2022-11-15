@@ -24,16 +24,8 @@
           </form>
         </div>
 
-        <div class="pl-0 d-flex align-items-center">
-          <i class="bi bi-calendar" aria-hidden="true"></i>
-          <ul class="year-nav mb-0 ms-2">
-            {% for item in years %}
-              <li>
-                <a href="{{ item.year }}" class="{% if item.year == year %} active {% endif %}">{{ item.year }}</a>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
+
+        {% include "lawlibrary/_year_nav.html" %}
       </header>
 
       <div class="post-content mt-4">
@@ -54,16 +46,6 @@
         {% endfor %}
       </div>
 
-      <div class="pl-0 mt-5 mb-5 d-flex align-items-center">
-        <i class="bi bi-calendar" aria-hidden="true"></i>
-        <ul class="year-nav mb-0 ms-2">
-          {% for item in years %}
-            <li>
-              <a href="{{ item.year }}" class="{% if item.year == year %} active {% endif %}">{{ item.year }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-
+      {% include "lawlibrary/_year_nav.html" %}
 
 {% endblock %}

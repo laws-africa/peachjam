@@ -1,0 +1,16 @@
+<div class="pl-0 mt-2 mb-3 d-flex align-items-center">
+  <i class="bi bi-calendar" aria-hidden="true"></i>
+  <ul class="year-nav mb-0 ms-2">
+    {% for item in results %}
+      {% if locality %}
+        <li>
+          <a href="{% url 'gazettes_by_year' locality.code item.year %}" class="{% if item.year == year %} active {% endif %}">{{ item.year }}</a>
+        </li>
+      {% else %}
+        <li>
+          <a href="{% url 'gazettes_by_year' item.year %}" class="{% if item.year == year %} active {% endif %}">{{ item.year }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</div>
