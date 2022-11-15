@@ -1,0 +1,27 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+
+{% block title %} {% trans 'Taxonomy' %} {% endblock %}
+
+{% block page-content %}
+  <section class="container pt-4 pb-5">
+    <h1 class="mb-4">{% trans 'Taxonomies' %}</h1>
+
+    <ul>
+      {% if taxonomies|length > 0 %}
+        {% for taxonomy in taxonomies %}
+          {% if taxonomy.is_root %}
+            <li>
+              <a href="{% url 'first_level_taxonomy_list' taxonomy.slug %}">
+              {{ taxonomy }}
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <li> {% trans 'No taxonomies found' %} </li>
+      {% endif %}
+    </ul>
+
+  </section>
+{% endblock %}
