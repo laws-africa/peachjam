@@ -60,4 +60,4 @@ class CourtDetailView(FilteredDocumentListView):
 
 
 class CourtYearView(CourtDetailView):
-    pass
+    queryset = Judgment.objects.prefetch_related("judges")
