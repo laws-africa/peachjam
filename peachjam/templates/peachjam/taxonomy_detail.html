@@ -1,10 +1,27 @@
 {% extends 'peachjam/layouts/document_list.html' %}
-{% load i18n %}
+{% load peachjam i18n %}
 
 {% block title %}{{ taxonomy.name }}{% endblock %}
 
 {% block page-title %}
-  <h1 class="mt-2">{{ taxonomy.name }}</h1>
+  <h1 class="my-4">{{ taxonomy.name }}</h1>
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/taxonomy/">{% trans 'Taxonomies' %}</a>
+      </li>
+      {% for ancestor in ancestors %}
+        <li class="breadcrumb-item">
+          <a href="{% build_taxonomy_url ancestor %}">
+            {{ ancestor }}
+          </a>
+        </li>
+      {% endfor %}
+    </ol>
+  </nav>
 {% endblock %}
 
 {% block entity-profile %}
@@ -16,3 +33,16 @@
     </div>
   {% endif %}
 {% endblock %}
+
+{% if taxonomy_tree|length > 0 %}
+  {% block mobile-taxonomy-list %}
+    <div class="mb-2">{% include "peachjam/_taxonomy_tree_facet.html" %}</div>
+  {% endblock %}
+  {% block desktop-taxonomy-list %}
+    <div class="mb-2">{% include "peachjam/_taxonomy_tree_facet.html" %}</div>
+  {% endblock %}
+
+  {% block taxonomy-json %}
+    {{ taxonomy_tree|json_script:"taxonomy_tree" }}
+  {% endblock %}
+{% endif %}

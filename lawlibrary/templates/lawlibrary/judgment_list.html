@@ -18,7 +18,7 @@
               {% if courts|length > 0 %}
                 {% for item in courts %}
                     <div>
-                      <a href="{% url 'court_detail' item.code  %}">{{ item.title }}</a>
+                      <a href="{% url 'court' item.code  %}">{{ item.title }}</a>
                     </div>
                   {% endfor %}
               {% else %}

@@ -11,6 +11,7 @@
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
+        <div>{% block mobile-taxonomy-list %}{% endblock %}</div>
         <div data-list-facets></div>
       </div>
     </div>
@@ -36,12 +37,13 @@
                 data-bs-toggle="offcanvas"
                 data-bs-target="#list-facets-offcanvas"
                 aria-controls="list-facets-offcanvas">
-          Filters
+          {% trans 'Filters' %}
         </button>
     </div>
 
     <div class="row">
       <div class="col-lg-3 d-none d-lg-block">
+        <div>{% block desktop-taxonomy-list %}{% endblock %}</div>
         <div data-list-facets></div>
       </div>
       <div class="col-lg-9">
@@ -58,5 +60,7 @@
     </div>
 
     {{ facet_data|json_script:"facet-data" }}
+
+    {% block taxonomy-json %}{% endblock %}
   </div>
 {% endblock %}

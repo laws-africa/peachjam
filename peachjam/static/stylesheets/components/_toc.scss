@@ -5,3 +5,11 @@
   max-height: 100vh;
   overflow-y: auto;
 }
+
+la-table-of-contents {
+  a.active {
+    text-decoration: none;
+    font-weight: bold;
+    color: var(--bs-gray-600);
+  }
+}

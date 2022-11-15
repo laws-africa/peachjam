@@ -24,6 +24,7 @@ class SearchableDocument(Document):
     expression_frbr_uri = fields.KeywordField()
     work_frbr_uri = fields.KeywordField()
     is_most_recent = fields.BooleanField()
+    alternative_names = fields.TextField()
     created_at = fields.DateField()
     updated_at = fields.DateField()
 
@@ -81,6 +82,9 @@ class SearchableDocument(Document):
     def prepare_citation(self, instance):
         # if there is no citation, fall back to the title so as not to penalise documents that don't have a citation
         return instance.citation or instance.title
+
+    def prepare_alternative_names(self, instance):
+        return [a.title for a in instance.alternative_names.all()]
 
     def prepare_judges(self, instance):
         if instance.doc_type == "judgment":
