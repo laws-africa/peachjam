@@ -17,8 +17,8 @@
   align-items: center;
 
   @include media-breakpoint-up(sm) {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
     flex-direction: row;
     align-items: flex-start;
   }
