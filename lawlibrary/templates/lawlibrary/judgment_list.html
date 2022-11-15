@@ -10,15 +10,15 @@
 
       {% if grouped_courts %}
         <div class="row mb-3">
-          {% for group in grouped_courts %}
+          {% for court_class, courts in grouped_courts.items %}
             <div class="col-md-4 col-12 mb-3">
               <h4 class="heading-underlined">
-              {{ group.title }}
+              {{ court_class }}
               </h4>
-              {% if group.items|length > 0 %}
-                {% for item in group.items %}
+              {% if courts|length > 0 %}
+                {% for item in courts %}
                     <div>
-                      <a href="{% url 'court_detail' item.code  %}">{{ item.title }}</a>
+                      <a href="{% url 'court' item.code  %}">{{ item.title }}</a>
                     </div>
                   {% endfor %}
               {% else %}

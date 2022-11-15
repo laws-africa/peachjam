@@ -45,6 +45,10 @@ class Ingestor(models.Model):
         adapter = self.get_adapter()
         adapter.update_document(document_id)
 
+    def delete_document(self, expression_frbr_uri):
+        adapter = self.get_adapter()
+        adapter.delete_document(expression_frbr_uri)
+
     def get_adapter(self):
         klass = plugins.registry["ingestor-adapter"][self.adapter]
         ingestor_settings = IngestorSetting.objects.filter(ingestor=self)

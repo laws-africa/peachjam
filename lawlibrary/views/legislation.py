@@ -41,7 +41,9 @@ class LegislationListView(TemplateView):
 
     def add_children(self, queryset):
         # pull in children (subleg)
-        parents = list({r.work_id for r in queryset.only("work_id")})
+        parents = list(
+            {r.work_id for r in queryset.only("work_id", "polymorphic_ctype_id")}
+        )
 
         children = defaultdict(list)
         children_qs = self.get_queryset().filter(

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "countries_plus",
     "languages_plus",
     "rest_framework",
+    "rest_framework.authtoken",
     "django_filters",
     "django_elasticsearch_dsl",
     "django_elasticsearch_dsl_drf",
@@ -247,7 +248,8 @@ ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication"
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissions"],
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],

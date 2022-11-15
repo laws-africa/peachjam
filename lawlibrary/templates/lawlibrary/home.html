@@ -3,11 +3,7 @@
 
 {% block title %} {% trans 'Home' %} {% endblock %}
 
-{% block hero-img %}
-  <img class="hero__background-img" src="{% static 'images/hero.jpg' %}" alt="lawlibrary" height="40" />
-{% endblock %}
-
-{% block hero-content %}
+{% block hero-headings %}
   <h1 class="mb-4">{% trans 'Welcome to the digital Law Library of South Africa' %}</h1>
   <h4 class="mb-4">
     {% blocktrans trimmed %}
@@ -15,33 +11,23 @@
       caselaw collections by subject, and legal commentary. Read, use and share the law freely.
     {% endblocktrans %}
   </h4>
+{% endblock %}
 
-  <div class="row">
-    <div class="col-12 col-lg-10">
-      <form method="get" action="/search/" class="d-flex mb-4">
-        <input type="text" class="form-control form-control-lg flex-grow-1"
-               placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-               aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-               aria-describedby="button-addon2"
-               autofocus="" name="q">
-        <input type="submit" class="btn btn-primary ms-2" value="{% trans 'Search' %}">
-      </form>
-      <div class="d-flex justify-content-between">
-        <img height="26"
-             class="me-4"
-             src="{% static 'images/africanlii-logo.svg' %}"
-             alt="africanlii-logo" />
-        <img height="26"
-             class="me-4"
-             src="{% static 'images/jifa.png' %}"
-             alt="jifa-logo"
-        />
-        <img height="26"
-             src="{% static 'images/laws-africa-logo.png' %}"
-             alt="laws-logo"
-        />
-  </div>
-    </div>
+{% block hero-logos %}
+  <div class="d-flex justify-content-between">
+    <img height="26"
+         class="me-4"
+         src="{% static 'images/africanlii-logo.svg' %}"
+         alt="africanlii-logo" />
+    <img height="26"
+         class="me-4"
+         src="{% static 'images/jifa.png' %}"
+         alt="jifa-logo"
+    />
+    <img height="26"
+         src="{% static 'images/laws-africa-logo.png' %}"
+         alt="laws-logo"
+    />
   </div>
 {% endblock %}
 
@@ -62,89 +48,89 @@
 {% endblock %}
 
 {% block second-column-content %}
-<div>
-  <strong>{% trans 'About' %}</strong>
-</div>
-<p>
-  {% blocktrans trimmed %}
-    LawLibrary.org.za is a project of the AfricanLII and Judicial Institute for Africa at the University of Cape Town.
-    Legislation digitised by Laws.Africa.
-  {% endblocktrans %}
-</p>
-<div class="d-flex justify-content-between mb-4 mb-lg-4">
-  <img height="26"
-       class="me-4"
-       src="{% static 'images/africanlii-logo.svg' %}"
-       alt="africanlii-logo" />
-  <img height="26"
-       class="me-4"
-       src="{% static 'images/jifa.png' %}"
-       alt="jifa-logo"
-  />
-  <img height="26"
-       src="{% static 'images/laws-africa-logo.png' %}"
-       alt="laws-logo"
-  />
-</div>
+  <div>
+    <strong>{% trans 'About' %}</strong>
+  </div>
+  <p>
+    {% blocktrans trimmed %}
+      LawLibrary.org.za is a project of the AfricanLII and Judicial Institute for Africa at the University of Cape Town.
+      Legislation digitised by Laws.Africa.
+    {% endblocktrans %}
+  </p>
+  <div class="d-flex justify-content-between mb-4 mb-lg-4">
+    <img height="26"
+         class="me-4"
+         src="{% static 'images/africanlii-logo.svg' %}"
+         alt="africanlii-logo" />
+    <img height="26"
+         class="me-4"
+         src="{% static 'images/jifa.png' %}"
+         alt="jifa-logo"
+    />
+    <img height="26"
+         src="{% static 'images/laws-africa-logo.png' %}"
+         alt="laws-logo"
+    />
+  </div>
 
 
-<ul class="nav nav-tabs about-tabs d-flex justify-content-center justify-content-lg-start" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link fb-nav-link active"
-            id="facebook-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#facebook-tab-content"
-            type="button"
-            role="tab"
-            aria-controls="facebook"
-            aria-selected="true">
-      <i class="bi bi bi-facebook facebook-forecolor"></i>
-      <span class="facebook-forecolor">{% trans 'Facebook' %}</span>
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link twitter-nav-link"
-            id="twitter-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#twitter-tab-content"
-            type="button"
-            role="tab"
-            aria-controls="twitter"
-            aria-selected="false">
-      <i class="bi bi bi-twitter twitter-forecolor"></i>
-      <span class="twitter-forecolor">{% trans 'Twitter' %}</span>
-    </button>
-  </li>
-</ul>
-<div class="tab-content">
-  <div class="tab-pane fade show active"
-       id="facebook-tab-content"
-       role="tabpanel"
-       aria-labelledby="facebook-tab-content">
-    <div class="d-flex justify-content-center justify-content-lg-start">
-      <iframe width="248px"
-            height="400px"
-            frameborder="0"
-            allowtransparency="true"
-            allowfullscreen="true"
-            scrolling="no"
-            allow="encrypted-media"
-            src="https://www.facebook.com/v7.0/plugins/page.php?adapt_container_width=true&amp;app_id=323754998056442&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fx%2Fconnect%2Fxd_arbiter%2F%3Fversion%3D46%23cb%3Dfff64532b89928%26domain%3Dlawlibrary.org.za%26is_canvas%3Dfalse%26origin%3Dhttps%253A%252F%252Flawlibrary.org.za%252Ff3480a77dff53bc%26relation%3Dparent.parent&amp;container_width=248&amp;height=400&amp;hide_cover=false&amp;href=https%3A%2F%2Fwww.facebook.com%2Fafricanlii%2F&amp;locale=en_US&amp;sdk=joey&amp;show_facepile=false&amp;small_header=true&amp;tabs=timeline&amp;width=248"
-            style="border: none; visibility: visible; width: 248px; height: 400px;">
-    </iframe>
+  <ul class="nav nav-tabs about-tabs d-flex justify-content-center justify-content-lg-start" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link fb-nav-link active"
+              id="facebook-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#facebook-tab-content"
+              type="button"
+              role="tab"
+              aria-controls="facebook"
+              aria-selected="true">
+        <i class="bi bi bi-facebook facebook-forecolor"></i>
+        <span class="facebook-forecolor">{% trans 'Facebook' %}</span>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link twitter-nav-link"
+              id="twitter-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#twitter-tab-content"
+              type="button"
+              role="tab"
+              aria-controls="twitter"
+              aria-selected="false">
+        <i class="bi bi bi-twitter twitter-forecolor"></i>
+        <span class="twitter-forecolor">{% trans 'Twitter' %}</span>
+      </button>
+    </li>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane fade show active"
+         id="facebook-tab-content"
+         role="tabpanel"
+         aria-labelledby="facebook-tab-content">
+      <div class="d-flex justify-content-center justify-content-lg-start">
+        <iframe width="248px"
+              height="400px"
+              frameborder="0"
+              allowtransparency="true"
+              allowfullscreen="true"
+              scrolling="no"
+              allow="encrypted-media"
+              src="https://www.facebook.com/v7.0/plugins/page.php?adapt_container_width=true&amp;app_id=323754998056442&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fx%2Fconnect%2Fxd_arbiter%2F%3Fversion%3D46%23cb%3Dfff64532b89928%26domain%3Dlawlibrary.org.za%26is_canvas%3Dfalse%26origin%3Dhttps%253A%252F%252Flawlibrary.org.za%252Ff3480a77dff53bc%26relation%3Dparent.parent&amp;container_width=248&amp;height=400&amp;hide_cover=false&amp;href=https%3A%2F%2Fwww.facebook.com%2Fafricanlii%2F&amp;locale=en_US&amp;sdk=joey&amp;show_facepile=false&amp;small_header=true&amp;tabs=timeline&amp;width=248"
+              style="border: none; visibility: visible; width: 248px; height: 400px;">
+      </iframe>
+      </div>
+    </div>
+    <div class="tab-pane fade" id="twitter-tab-content" role="tabpanel" aria-labelledby="twitter-tab">
+      <div class="d-flex justify-content-center justify-content-lg-start">
+        <a class="twitter-timeline"
+         data-width="248"
+         data-height="400"
+         href="https://twitter.com/AfricanLII?ref_src=twsrc%5Etfw">
+        {% trans 'Tweets by AfricanLII' %}
+      </a>
+      <script async src="https://platform.twitter.com/widgets.js" charset="utf-8">
+      </script>
+      </div>
     </div>
   </div>
-  <div class="tab-pane fade" id="twitter-tab-content" role="tabpanel" aria-labelledby="twitter-tab">
-    <div class="d-flex justify-content-center justify-content-lg-start">
-      <a class="twitter-timeline"
-       data-width="248"
-       data-height="400"
-       href="https://twitter.com/AfricanLII?ref_src=twsrc%5Etfw">
-      {% trans 'Tweets by AfricanLII' %}
-    </a>
-    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8">
-    </script>
-    </div>
-  </div>
-</div>
 {% endblock %}
