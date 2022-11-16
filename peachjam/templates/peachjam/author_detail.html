@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block entity-profile %}
-  {% with author.entity_profile.first as entity_profile %}
+  {% with entity_profile_title=author entity_profile=author.entity_profile.first %}
     {% if entity_profile %}
       {% include 'peachjam/_entity_profile.html' %}
     {% endif %}
