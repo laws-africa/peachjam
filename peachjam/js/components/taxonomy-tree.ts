@@ -2,7 +2,7 @@ import { TOCItemType } from '../utils/types-and-interfaces';
 
 class TaxonomyTree {
   constructor (root: HTMLElement) {
-    const tableOfContents = document.createElement('la-table-of-contents');
+    const tocController = createTocController();
     const jsonElement: HTMLElement | null = document.getElementById('taxonomy_tree');
     const data = jsonElement && jsonElement.textContent ? JSON.parse(jsonElement.textContent as string) : [];
     const urlParts: string[] = window.location.pathname.split('/');
@@ -10,7 +10,7 @@ class TaxonomyTree {
 
     const slugRoot: string = root.dataset.rootSlug || '';
 
-    tableOfContents.items = data.map((item: TOCItemType) => {
+    tocController.items = data.map((item: TOCItemType) => {
       const formatItem = (x: TOCItemType, ancestors: string[]) => {
         const newAncestors = [...ancestors, x.data.slug];
         const formatted: TOCItemType = {
@@ -27,14 +27,14 @@ class TaxonomyTree {
       return formatItem(item, ['taxonomy', slugRoot]);
     });
 
-    root.appendChild(tableOfContents);
+    root.appendChild(tocController);
 
     /*
     * Logic to handle rendering items. Two main things happen here:
     * 1) If la-toc-item's anchor element contains #, remove # so it is a proper link
     * 2) If the currentTaxonomy is the same as the la-toc-item's anchor element taxonomy, then apply an active css class
     * */
-    tableOfContents.addEventListener('itemRendered', (e) => {
+    tocController.addEventListener('itemRendered', (e) => {
       const tocItem = e.target as HTMLElement | null;
       if (!tocItem) return;
       const hrefElement = tocItem.querySelector('.content__action__title') as HTMLAnchorElement | null;
