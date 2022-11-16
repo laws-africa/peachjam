@@ -18,6 +18,7 @@ from treebeard.forms import movenodeform_factory
 
 from peachjam.forms import IngestorForm, NewDocumentFormMixin, SourceFileForm
 from peachjam.models import (
+    AlternativeName,
     Article,
     AttachedFileNature,
     AttachedFiles,
@@ -120,6 +121,11 @@ class DocumentTopicInline(admin.TabularInline):
     extra = 1
 
 
+class AlternativeNameInline(admin.TabularInline):
+    model = AlternativeName
+    extra = 1
+
+
 class DateSelectorWidget(forms.MultiWidget):
     def __init__(self, attrs=None):
         months = [("", "Month")] + list(MONTHS.items())
@@ -200,7 +206,7 @@ class DocumentForm(forms.ModelForm):
 
 class DocumentAdmin(admin.ModelAdmin):
     form = DocumentForm
-    inlines = [DocumentTopicInline, SourceFileInline]
+    inlines = [DocumentTopicInline, SourceFileInline, AlternativeNameInline]
     list_display = ("title", "jurisdiction", "locality", "language", "date")
     list_filter = ("jurisdiction", "locality", "language")
     search_fields = ("title", "date")
