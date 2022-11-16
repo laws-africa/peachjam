@@ -37,13 +37,11 @@ urlpatterns = [
         views.ProvincialLegislationListView.as_view(variant="all"),
         name="provincial_legislation_list_all",
     ),
-    path("gazettes", views.GazetteListView.as_view(), name="gazettes"),
     path(
         "gazettes/<str:code>/",
         views.ProvincialGazetteListView.as_view(),
         name="provincial_gazette_list",
     ),
-    path("gazettes/<int:year>", views.YearView.as_view(), name="gazettes_by_year"),
     url(
         r"^gazettes/(?P<code>\w+)/(?P<year>\w+)/$",
         views.YearView.as_view(),

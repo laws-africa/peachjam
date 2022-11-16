@@ -6,6 +6,7 @@ from django.db.models.functions import ExtractMonth, ExtractYear
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
+from liiweb.views import GazetteListView, YearView
 from peachjam.models import Gazette, Locality
 
 
@@ -21,12 +22,11 @@ def group_years(years):
     return results
 
 
-class GazetteListView(TemplateView):
+class LawLibraryGazetteListView(GazetteListView):
     template_name = "lawlibrary/gazette_list.html"
     codes = "mp ec nc kzn gp wc lim nw fs".split()
     queryset = Gazette.objects.filter(locality__code__in=codes)
     provinces = Locality.objects.filter(code__in=codes)
-    model = Gazette
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -46,9 +46,8 @@ class GazetteListView(TemplateView):
         return group_years(years)
 
 
-class YearView(TemplateView):
+class LawLibraryYearView(YearView):
     template_name = "lawlibrary/year.html"
-    model = Gazette
     MONTHS = "January February March April May June July August September October November December".split()
 
     def get(self, request, code=None, *args, **kwargs):
