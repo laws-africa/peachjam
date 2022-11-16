@@ -5,6 +5,7 @@ import { createAndMountApp } from '../utils/vue-utils';
 import { i18n } from '../i18n';
 import DocDiffsManager from './DocDiffs';
 import { generateHtmlTocItems } from '../utils/function';
+import { createTocController } from '../utils/function';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -155,21 +156,11 @@ class DocumentContent {
     // If there is no toc item don't create and mount la-toc-controller
     const tocItems = this.getTocItems();
     if (!tocItems.length) return false;
-    const tocController = this.createTocController(tocItems);
+    const tocController = createTocController(tocItems);
     const tocContainer = this.root.querySelector('.toc');
     if (!tocContainer) return;
     tocContainer.appendChild(tocController);
     return true;
-  }
-
-  createTocController (items: []) {
-    const laTocController = document.createElement('la-table-of-contents-controller');
-    laTocController.items = items;
-    laTocController.expandAllBtnClasses = 'btn btn-secondary btn-sm';
-    laTocController.collapseAllBtnClasses = 'btn btn-secondary btn-sm';
-    laTocController.titleFilterInputClasses = 'form-control';
-    laTocController.titleFilterClearBtnClasses = 'btn btn-secondary btn-sm';
-    return laTocController;
   }
 
   getTocItems = () => {
