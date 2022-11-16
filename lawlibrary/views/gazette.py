@@ -30,6 +30,7 @@ class LawLibraryGazetteListView(GazetteListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         groups = self.provinces[:5], self.provinces[5:]
         context["province_groups"] = groups
         context["num_gazettes"] = self.queryset.count()
