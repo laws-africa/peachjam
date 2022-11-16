@@ -14,7 +14,7 @@
 {% block breadcrumbs %}
   <div class="container">
     <nav aria-label="breadcrumb">
-      <ol class="breadcrumb py-2">
+      <ol class="breadcrumb">
         <li class="breadcrumb-item">
           <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
         </li>
@@ -24,6 +24,16 @@
       </ol>
     </nav>
   </div>
+{% endblock %}
+
+{% block entity-profile %}
+  {% with entity_profile=court.entity_profile.first entity_profile_title=formatted_court_name %}
+    {% if entity_profile %}
+      <div class="mt-3">
+        {% include 'peachjam/_entity_profile.html' %}
+      </div>
+    {% endif %}
+  {% endwith %}
 {% endblock %}
 
 {% block page-header %}
@@ -79,12 +89,4 @@
   {% else %}
     <p>{% trans 'No documents found.' %}</p>
   {% endif %}
-{% endblock %}
-
-{% block entity-profile %}
-  {% with entity_profile=court.entity_profile.first entity_profile_title=formatted_court_name %}
-    {% if entity_profile %}
-      {% include 'peachjam/_entity_profile.html' %}
-    {% endif %}
-  {% endwith %}
 {% endblock %}
