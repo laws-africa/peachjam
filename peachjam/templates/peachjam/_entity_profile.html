@@ -2,9 +2,12 @@
 
 <div class="entity-profile">
   <div class="entity-profile__background-photo">
-    <img src="{{ entity_profile.background_photo.url }}"
-         alt="Court background image"
-    />
+    {% if entity_profile.background_photo %}
+      <img src="{{ entity_profile.background_photo.url }}"
+           alt="Court background image"
+           loading="lazy"
+      />
+    {% endif %}
   </div>
 
   <div class="entity-profile__body">
@@ -12,10 +15,11 @@
       <img src="{{ entity_profile.profile_photo.url }}"
            class="entity-profile__body__profile-image"
            alt="profile image"
+           loading="lazy"
       />
     {% endif %}
     <div class="entity-profile__body__info">
-      <h1>{{ court }}</h1>
+      <h1>{{ entity_profile_title }}</h1>
 
       {% if entity_profile.about_html %}
         <div class="mb-2">{{ entity_profile.about_html }}</div>
