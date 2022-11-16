@@ -33,7 +33,9 @@
         {{ court_name }} - {{ year }}
       {% endblocktrans %}
     {% else %}
-      {% trans court.name %}
+      {% blocktrans with court_name=court.name year=year%}
+        Documents by {{ court_name }}
+      {% endblocktrans %}
     {% endif %}
   </h1>
 
@@ -80,7 +82,7 @@
 {% endblock %}
 
 {% block entity-profile %}
-  {% with court.entity_profile.first as entity_profile %}
+  {% with entity_profile=court.entity_profile.first entity_profile_title=formatted_court_name %}
     {% if entity_profile %}
       {% include 'peachjam/_entity_profile.html' %}
     {% endif %}
