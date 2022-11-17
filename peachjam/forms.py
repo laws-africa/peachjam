@@ -138,3 +138,10 @@ class SourceFileForm(forms.ModelForm):
         # dynamic storage files don't like colons in filenames
         self.cleaned_data["file"].name = clean_filename(self.cleaned_data["file"].name)
         return self.cleaned_data["file"]
+
+    def save(self, commit=True):
+        obj = super().save(commit=True)
+        if "file" in self.changed_data:
+            if obj.document.extract_content_from_source_file():
+                obj.document.save()
+        return obj
