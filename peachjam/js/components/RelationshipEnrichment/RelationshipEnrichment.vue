@@ -3,11 +3,21 @@
     :anchor.prop="anchorElement"
     @click="activate"
   >
+    <i class="bi bi-chat-left" />
     <div class="card">
       <div class="card-body">
+        <div class="mb-2 d-lg-none text-end">
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Close"
+            @click.stop="deactivate"
+          />
+        </div>
+
         <div
           v-if="!readonly"
-          class="float-end"
+          class="float-end d-none d-lg-block"
         >
           <div class="dropdown">
             <a
@@ -168,3 +178,44 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+
+.bi-chat-left {
+  font-size: 24px;
+  color: #a68bdc;
+  display: none;
+  text-align: center;
+  position: relative;
+  z-index: 9;
+}
+
+@media screen and (max-width: 992px) {
+  .card {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transform: translateY(100%);
+    transition: transform ease-in-out 300ms;
+    z-index: 9;
+  }
+
+  .bi-chat-left {
+    display: block;
+  }
+
+  la-gutter-item[active] {
+    z-index: 9;
+  }
+
+  la-gutter-item[active] .card {
+    transform: translateY(0);
+  }
+
+  /*So content is above To the top element*/
+  .card .card-body {
+    padding-bottom: 40px;
+  }
+}
+</style>
