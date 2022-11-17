@@ -185,7 +185,7 @@ class IndigoAdapter(Adapter):
         existing_doc = model.objects.filter(
             expression_frbr_uri=expression_frbr_uri
         ).first()
-        if core_doc and not existing_doc:
+        if core_doc and existing_doc:
             raise Exception(
                 f"The document {expression_frbr_uri} already exists as {existing_doc.doc_type}"
                 f" but not as {model}. Delete the existing document (CoreDocument #{core_doc.pk})."
