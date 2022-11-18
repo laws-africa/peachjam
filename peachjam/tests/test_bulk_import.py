@@ -50,6 +50,7 @@ def mocked_response(*args, **kwargs):
         def __init__(self, data, status_code):
             self.data = data
             self.status_code = status_code
+            self.content = b""
 
         def raise_for_status(self):
             pass
@@ -60,7 +61,7 @@ def mocked_response(*args, **kwargs):
 class JudgmentBulkImportTestCase(TestCase):
     fixtures = ["tests/courts", "tests/countries", "tests/languages"]
 
-    @mock.patch("peachjam.resources.requests.head", side_effect=mocked_response)
+    @mock.patch("peachjam.resources.requests.get", side_effect=mocked_response)
     @mock.patch(
         "peachjam.resources.download_source_file", return_value=NamedTemporaryFile()
     )
@@ -83,7 +84,7 @@ class JudgmentBulkImportTestCase(TestCase):
         case_numbers = JudgmentResource().get_case_numbers(dataset.dict[0])
         self.assertEqual(case_numbers[0].matter_type.name, "CCT")
 
-    @mock.patch("peachjam.resources.requests.head", side_effect=mocked_response)
+    @mock.patch("peachjam.resources.requests.get", side_effect=mocked_response)
     @mock.patch(
         "peachjam.resources.download_source_file", return_value=NamedTemporaryFile()
     )

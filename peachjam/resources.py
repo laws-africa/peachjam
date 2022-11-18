@@ -1,6 +1,10 @@
 import logging
 import mimetypes
 import re
+from datetime import datetime
+from os.path import splitext
+from subprocess import CalledProcessError
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 import magic
 import requests.exceptions
@@ -10,6 +14,8 @@ from dateutil.parser import parse
 from django.core.files.base import File
 from django.forms import ValidationError
 from django.utils.text import slugify
+from docpipe.pdf import pdf_to_text
+from docpipe.soffice import soffice_convert
 from import_export import fields, resources
 from import_export.widgets import (
     BooleanWidget,
@@ -33,6 +39,7 @@ from peachjam.models import (
     MatterType,
     SourceFile,
 )
+from peachjam.pipelines import DOC_MIMETYPES
 
 from .download import download_source_file
 
@@ -65,11 +72,27 @@ class SourceFileWidget(CharRequiredWidget):
         super().clean(value)
         source_url = self.get_source_url(value)
         try:
-            r = requests.head(source_url)
-            r.raise_for_status()
+            with TemporaryDirectory() as dir:
+                with NamedTemporaryFile(dir=dir) as file:
+                    response = requests.get(source_url)
+                    response.raise_for_status()
+                    file.write(response.content)
+                    file.seek(0)
+
+                    mime = magic.from_file(file.name, mime=True)
+                    if mime == "application/pdf":
+                        pdf_to_text(file.name)
+
+                    elif mime in DOC_MIMETYPES:
+                        suffix = splitext(file.name)[1].lstrip(".")
+                        soffice_convert(file, suffix, "html")
             return source_url
-        except requests.exceptions.RequestException as e:
-            raise ValidationError(e)
+        except (
+            requests.exceptions.RequestException,
+            CalledProcessError,
+            KeyError,
+        ) as e:
+            raise ValidationError(f"Error processing source file: {e}")
 
     @staticmethod
     def get_source_url(value):
@@ -112,6 +135,8 @@ class DateWidget(CharWidget):
             raise ValidationError("Date is required")
 
         if value:
+            if type(value) == datetime:
+                return value
             return parse(value)
 
 
