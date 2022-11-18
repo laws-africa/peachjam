@@ -92,7 +92,7 @@ class SourceFileWidget(CharRequiredWidget):
             CalledProcessError,
             KeyError,
         ) as e:
-            raise ValidationError(f"source file error {e}")
+            raise ValidationError(f"Error processing source file: {e}")
 
     @staticmethod
     def get_source_url(value):
