@@ -555,7 +555,7 @@ class DocumentNatureAdmin(admin.ModelAdmin):
 
 
 @admin.register(Gazette)
-class GazetteAdmin(admin.ModelAdmin):
+class GazetteAdmin(DocumentAdmin):
     pass
 
 

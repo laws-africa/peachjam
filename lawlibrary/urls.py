@@ -1,4 +1,3 @@
-from django.conf.urls import url
 from django.urls import include, path
 
 from lawlibrary import views
@@ -40,17 +39,17 @@ urlpatterns = [
     path("gazettes", views.LawLibraryGazetteListView.as_view(), name="gazettes"),
     path(
         "gazettes/<int:year>",
-        views.LawLibraryYearView.as_view(),
+        views.LawLibraryGazetteYearView.as_view(),
         name="gazettes_by_year",
     ),
     path(
         "gazettes/<str:code>/",
-        views.ProvincialGazetteListView.as_view(),
+        views.LawLibraryGazetteListView.as_view(),
         name="provincial_gazette_list",
     ),
-    url(
-        r"^gazettes/(?P<code>\w+)/(?P<year>\w+)/$",
-        views.LawLibraryYearView.as_view(),
+    path(
+        "gazettes/<str:code>/<int:year>",
+        views.LawLibraryGazetteYearView.as_view(),
         name="gazettes_by_year",
     ),
     path("", include("liiweb.urls")),

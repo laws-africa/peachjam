@@ -4,6 +4,7 @@ from .article import *
 from .authors import *
 from .courts import *
 from .documents import *
+from .gazette import *
 from .generic_document import *
 from .home import *
 from .judgment import *
