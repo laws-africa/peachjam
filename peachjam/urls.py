@@ -51,12 +51,14 @@ from peachjam.views import (
     LegislationListView,
     PlaceDetailView,
     TaxonomyDetailView,
+    TermsOfUsePageView,
     TopLevelTaxonomyListView,
     UserProfileDetailView,
 )
 
 urlpatterns = [
     path("", HomePageView.as_view(), name="home_page"),
+    path("/terms-of-use", TermsOfUsePageView.as_view(), name="terms_of_use"),
     path(
         "about/",
         AboutPageView.as_view(),
