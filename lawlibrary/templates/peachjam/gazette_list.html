@@ -4,7 +4,9 @@
 {% block title %} {{ locality.name }} {% trans 'Gazettes' %} {% endblock %}
 
 {% block localities %}
-  {% include 'lawlibrary/_localities.html' %}
+  {% if not locality %}
+    {% include 'lawlibrary/_localities.html' %}
+  {% endif %}
 {% endblock %}
 
 {% block page-title %}
