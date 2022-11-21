@@ -1,9 +1,4 @@
-type ItemType = {
-  [key: string] : any,
-  title: string,
-  id: string,
-  children: ItemType[]
-}
+import { TOCItemType } from '../utils/types-and-interfaces';
 
 class TaxonomyTree {
   constructor (root: HTMLElement) {
@@ -15,10 +10,10 @@ class TaxonomyTree {
 
     const slugRoot: string = root.dataset.rootSlug || '';
 
-    tableOfContents.items = data.map((item: ItemType) => {
-      const formatItem = (x: ItemType, ancestors: string[]) => {
+    tableOfContents.items = data.map((item: TOCItemType) => {
+      const formatItem = (x: TOCItemType, ancestors: string[]) => {
         const newAncestors = [...ancestors, x.data.slug];
-        const formatted: ItemType = {
+        const formatted: TOCItemType = {
           title: x.data.name,
           id: newAncestors.join('/'),
           children: []
