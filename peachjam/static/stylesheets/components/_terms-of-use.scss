@@ -4,6 +4,7 @@
   position: sticky;
   top: 0;
   left:0;
+  overflow-y: auto;
 
   @include media-breakpoint-down(lg) {
     height: auto;
