@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("peachjam", "0036_doc_alternative_names"),
+        ("peachjam", "0037_merge_0036_doc_alternative_names_0036_gazette"),
     ]
 
     operations = [
