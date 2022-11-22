@@ -4,5 +4,13 @@
 {% block title %}{{ author }}{% endblock %}
 
 {% block page-title %}
-  <h1 class="mt-2">{% blocktrans %} Documents by {{ author }} {% endblocktrans %} </h1>
+  <h1 class="my-4">{% blocktrans %} Documents by {{ author }} {% endblocktrans %} </h1>
+{% endblock %}
+
+{% block entity-profile %}
+  {% with entity_profile_title=author entity_profile=author.entity_profile.first %}
+    {% if entity_profile %}
+      {% include 'peachjam/_entity_profile.html' %}
+    {% endif %}
+  {% endwith %}
 {% endblock %}

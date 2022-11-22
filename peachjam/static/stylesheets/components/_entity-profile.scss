@@ -1,0 +1,47 @@
+.entity-profile {
+  @extend .bg-light;
+}
+.entity-profile__background-photo {
+  img {
+    width: 100%;
+    height: 250px;
+    object-position: center;
+    object-fit: cover;
+  }
+}
+
+.entity-profile__body {
+  @extend .container;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @include media-breakpoint-up(sm) {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.entity-profile__body__info {
+  flex: 1;
+}
+
+.entity-profile__body__profile-image {
+  @extend .img-thumbnail;
+  height: 200px;
+  width: 200px;
+  object-position: center;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 2rem;
+
+  @include media-breakpoint-up(sm) {
+    margin-right: 2rem;
+    margin-bottom: 0;
+  }
+}
