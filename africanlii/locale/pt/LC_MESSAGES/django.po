@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-22 16:22+0200\n"
-"PO-Revision-Date: 2022-11-22 14:24\n"
+"PO-Revision-Date: 2022-11-22 15:22\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -47,7 +47,7 @@ msgstr "Outras Instituições Jurídicas Africanas"
 
 #: templates/peachjam/_footer.html:62
 msgid "University of Cape Town"
-msgstr ""
+msgstr "Universidade da Cidade do Cabo"
 
 #: templates/peachjam/_header.html:22
 msgid "Decisions"

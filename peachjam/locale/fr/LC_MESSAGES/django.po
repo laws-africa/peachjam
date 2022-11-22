@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-22 16:22+0200\n"
-"PO-Revision-Date: 2022-11-22 14:24\n"
+"PO-Revision-Date: 2022-11-22 15:21\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -316,17 +316,19 @@ msgstr "Jugements"
 msgid "\n"
 "        %(court_name)s - %(year)s\n"
 "      "
-msgstr ""
+msgstr "\n"
+"        %(court_name)s - %(year)s\n"
+"      "
 
 #: templates/peachjam/court_detail.html:43
 #: templates/peachjam/court_detail.html:57
 msgid "All years"
-msgstr ""
+msgstr "Toutes les années"
 
 #: templates/peachjam/first_level_taxonomy_detail.html:29
 #: templates/peachjam/top_level_taxonomy_list.html:22
 msgid "No taxonomies found"
-msgstr ""
+msgstr "Aucune taxonomie trouvée"
 
 #: templates/peachjam/gazette_detail.html:7
 #: templates/peachjam/gazette_list.html:3
@@ -335,15 +337,15 @@ msgstr ""
 #: templates/peachjam/gazette_year.html:11
 #: templates/peachjam/gazette_year.html:17
 msgid "Gazettes"
-msgstr ""
+msgstr "Gazettes"
 
 #: templates/peachjam/gazette_list.html:20
 #: templates/peachjam/gazette_list.html:38
 #, python-format
 msgid "%(num_gazettes)s gazette"
 msgid_plural "%(num_gazettes)s gazettes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Gazette %(num_gazettes)s"
+msgstr[1] "%(num_gazettes)s gazettes"
 
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
@@ -399,7 +401,7 @@ msgstr "Référence"
 
 #: templates/peachjam/layouts/document_detail.html:83
 msgid "Alternative names"
-msgstr ""
+msgstr "Noms alternatifs"
 
 #: templates/peachjam/layouts/document_detail.html:121
 msgid "Language"
@@ -407,7 +409,7 @@ msgstr "Langue"
 
 #: templates/peachjam/layouts/document_detail.html:141
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 #: templates/peachjam/layouts/document_detail.html:147
 #: templates/peachjam/layouts/document_detail.html:152
@@ -445,5 +447,5 @@ msgstr "Législation"
 
 #: templates/peachjam/top_level_taxonomy_list.html:4
 msgid "Taxonomy"
-msgstr ""
+msgstr "Taxonomie"
 
