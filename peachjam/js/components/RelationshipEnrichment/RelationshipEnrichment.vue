@@ -183,7 +183,7 @@ export default {
 
 .bi-chat-left {
   font-size: 24px;
-  color: #a68bdc;
+  color: var(--anntn-highlight-color);
   display: none;
   text-align: center;
   position: relative;
