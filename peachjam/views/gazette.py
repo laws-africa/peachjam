@@ -27,11 +27,11 @@ def group_years(years):
 
 
 class GazetteListView(TemplateView):
-    model = Gazette
+    queryset = Gazette.objects.prefetch_related("source_file")
     template_name = "peachjam/gazette_list.html"
 
     def get_queryset(self):
-        return self.model.objects
+        return self.queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -53,6 +53,7 @@ class GazetteListView(TemplateView):
 
 class GazetteYearView(FilteredDocumentListView):
     model = Gazette
+    queryset = Gazette.objects.prefetch_related("source_file")
     template_name = "peachjam/gazette_year.html"
     paginate_by = 0
 
