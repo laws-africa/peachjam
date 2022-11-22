@@ -5,7 +5,7 @@ class TermsOfUse {
     const content: HTMLElement | null = root.querySelector('[data-terms-of-use-content]');
     const tocContainer: HTMLElement | null = root.querySelector('[data-table-of-contents]');
     if (!content || !tocContainer) return;
-    const tableOfContents = document.createElement('la-table-of-contents-controller');
+    const tableOfContents = document.createElement('la-table-of-contents');
     tableOfContents.items = generateHtmlTocItems(content);
     tocContainer.appendChild(tableOfContents);
   }
