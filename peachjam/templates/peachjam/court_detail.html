@@ -37,8 +37,8 @@
 
   {% if years %}
     <div class="d-none d-lg-flex align-items-center mb-3">
-      <i class="bi bi-calendar"></i>
-      <div class="d-flex">
+      <i class="bi bi-calendar me-2"></i>
+      <div class="d-flex flex-wrap">
         <a class="btn btn-link {% if not year %}disabled{% endif %}" href="{% url 'court' court.code %}">
           {% trans 'All years' %}
         </a>

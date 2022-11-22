@@ -1,0 +1,14 @@
+{% extends 'peachjam/layouts/document_detail.html' %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a></li>
+      {% if document.locality %}
+        <li class="breadcrumb-item"><a href="{% url 'provincial_gazette_list' document.locality.code %}">{{ document.locality }}</a></li>
+      {% endif %}
+      <li class="breadcrumb-item"><a href="{% url 'gazettes_by_year' year=document.date.year %}">{{ document.date.year }}</a></li>
+    </ol>
+  </nav>
+{% endblock %}

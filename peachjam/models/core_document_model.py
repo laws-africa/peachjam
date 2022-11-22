@@ -70,10 +70,11 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
 class CoreDocument(PolymorphicModel):
     DOC_TYPE_CHOICES = (
         ("core_document", "Core Document"),
-        ("legislation", "Legislation"),
+        ("gazette", "Gazette"),
         ("generic_document", "Generic Document"),
-        ("legal_instrument", "Legal Instrument"),
         ("judgment", "Judgment"),
+        ("legal_instrument", "Legal Instrument"),
+        ("legislation", "Legislation"),
     )
 
     objects = CoreDocumentManager.from_queryset(CoreDocumentQuerySet)()

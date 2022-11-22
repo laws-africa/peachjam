@@ -31,6 +31,7 @@ from peachjam.models import (
     DocumentNature,
     DocumentTopic,
     EntityProfile,
+    Gazette,
     GenericDocument,
     Image,
     Ingestor,
@@ -569,6 +570,11 @@ class CourtAdmin(admin.ModelAdmin):
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]
+
+
+@admin.register(Gazette)
+class GazetteAdmin(DocumentAdmin):
+    pass
 
 
 admin.site.register(
