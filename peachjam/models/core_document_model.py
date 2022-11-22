@@ -6,6 +6,7 @@ import magic
 from cobalt import FrbrUri
 from cobalt.akn import datestring
 from countries_plus.models import Country
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
@@ -47,6 +48,9 @@ class Locality(models.Model):
 class Work(models.Model):
     frbr_uri = models.CharField(max_length=1024, null=False, blank=False, unique=True)
     title = models.CharField(max_length=1024, null=False, blank=False)
+    languages = ArrayField(
+        models.CharField(max_length=3), null=False, blank=False, default=[]
+    )
 
     class Meta:
         ordering = ["title"]
@@ -59,6 +63,14 @@ class CoreDocumentManager(PolymorphicManager):
     def get_queryset(self):
         # defer expensive fields
         return super().get_queryset().defer("content_html", "toc_json")
+
+    def preferred_language(self, language):
+        # return a document if its language is the preferred one, or there are
+        # no documents in the preferred language (and so all docs are returned)
+        return self.get_queryset().filter(
+            models.Q(language_id=language)
+            | ~models.Q(work__languages__contains=[language])
+        )
 
 
 class CoreDocumentQuerySet(PolymorphicQuerySet):
@@ -233,9 +245,7 @@ class CoreDocument(PolymorphicModel):
         if not hasattr(self, "work") or self.work.frbr_uri != self.work_frbr_uri:
             self.work, _ = Work.objects.get_or_create(
                 frbr_uri=self.work_frbr_uri,
-                defaults={
-                    "title": self.title,
-                },
+                defaults={"title": self.title, "languages": [self.language]},
             )
 
         # keep work title in sync with English documents

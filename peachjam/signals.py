@@ -5,7 +5,10 @@ from background_task.signals import (
     task_started,
     task_successful,
 )
+from django.db.models import signals
 from django.dispatch import receiver
+
+from peachjam.models import CoreDocument
 
 
 # monitor background tasks with elastic-apm
@@ -39,3 +42,10 @@ def bg_task_finished(sender, **kwargs):
     if transaction:
         # fake an exit from the transaction context
         transaction.__exit__(None, None, None)
+
+
+@receiver(signals.post_save, sender=CoreDocument)
+def update_language(sender, instance, **kwargs):
+    if not kwargs["raw"]:
+        instance.work.languages = [instance.language]
+        instance.work.save()

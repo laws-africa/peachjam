@@ -219,7 +219,10 @@ class IndigoAdapter(Adapter):
         if imported_document["parent_work"]:
             parent_work, _ = Work.objects.get_or_create(
                 frbr_uri=imported_document["parent_work"]["frbr_uri"],
-                defaults={"title": imported_document["parent_work"]["title"]},
+                defaults={
+                    "title": imported_document["parent_work"]["title"],
+                    "languages": [imported_document["language"]],
+                },
             )
             created_document.parent_work = parent_work
             logger.info(f"Set parent to {parent_work}")
@@ -233,7 +236,10 @@ class IndigoAdapter(Adapter):
         if imported_document["repeal"]:
             repealing_work, _ = Work.objects.get_or_create(
                 frbr_uri=imported_document["repeal"]["repealing_uri"],
-                defaults={"title": imported_document["repeal"]["repealing_title"]},
+                defaults={
+                    "title": imported_document["repeal"]["repealing_title"],
+                    "languages": [imported_document["language"]],
+                },
             )
             self.create_relationship(
                 "repealed-by",
@@ -246,7 +252,10 @@ class IndigoAdapter(Adapter):
                 if amendment["amending_uri"] and amendment["amending_title"]:
                     amending_work, _ = Work.objects.get_or_create(
                         frbr_uri=amendment["amending_uri"],
-                        defaults={"title": amendment["amending_title"]},
+                        defaults={
+                            "title": amendment["amending_title"],
+                            "languages": [imported_document["language"]],
+                        },
                     )
                     self.create_relationship(
                         "amended-by",
@@ -262,7 +271,10 @@ class IndigoAdapter(Adapter):
                 ):
                     commencing_work, _ = Work.objects.get_or_create(
                         frbr_uri=commencement["commencing_frbr_uri"],
-                        defaults={"title": commencement["commencing_title"]},
+                        defaults={
+                            "title": commencement["commencing_title"],
+                            "languages": [imported_document["language"]],
+                        },
                     )
                     self.create_relationship(
                         "commenced-by",
