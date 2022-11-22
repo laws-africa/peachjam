@@ -30,7 +30,7 @@
 .entity-profile__body__profile-image {
   @extend .img-thumbnail;
   height: 200px;
-  min-width: 200px;
+  width: 200px;
   object-position: center;
   object-fit: cover;
   border-radius: 50%;
