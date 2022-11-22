@@ -311,14 +311,29 @@ class JudgmentResource(BaseDocumentResource):
 
     @staticmethod
     def get_case_numbers(row):
+        values = []
+        keys = []
 
-        case_number_numeric = [int(n) for n in row["case_number_numeric"].split("|")]
-        case_number_year = row["case_number_year"].split("|")
-        case_string_override = row["case_string_override"].split("|")
-        values = [case_number_numeric, case_number_year, case_string_override]
-        keys = ["number", "year", "string_override"]
+        if row.get("case_number_numeric"):
+            case_number_numeric = [
+                int(float(n)) for n in str(row["case_number_numeric"]).split("|")
+            ]
+            values.append(case_number_numeric)
+            keys.append("number")
 
-        if row["matter_type"]:
+        if row.get("case_number_year"):
+            case_number_year = [
+                int(float(n)) for n in str(row["case_number_year"]).split("|")
+            ]
+            values.append(case_number_year)
+            keys.append("year")
+
+        if row.get("case_string_override"):
+            case_string_override = str(row["case_string_override"]).split("|")
+            values.append(case_string_override)
+            keys.append("string_override")
+
+        if row.get("matter_type"):
             matter_type = row["matter_type"].split("|")
             matter_types = [
                 MatterType.objects.get_or_create(name=m)[0] for m in matter_type
@@ -346,19 +361,21 @@ class JudgmentResource(BaseDocumentResource):
 
             judgment.save()
 
-            if row["media_summary_file"]:
+            if row.get("media_summary_file"):
                 summary_file = download_source_file(row["media_summary_file"])
                 mime, _ = mimetypes.guess_type(row["media_summary_file"])
                 ext = mimetypes.guess_extension(mime)
-                media_summary_file_nature, _ = AttachedFileNature.objects.get_or_create(
-                    name="Media summary"
-                )
+                (
+                    media_summary_file_nature,
+                    _,
+                ) = AttachedFileNature.objects.get_or_create(name="Media summary")
 
                 AttachedFiles.objects.update_or_create(
                     document=judgment,
                     defaults={
                         "file": File(
-                            summary_file, name=f"{slugify(judgment.title[-250:])}{ext}"
+                            summary_file,
+                            name=f"{slugify(judgment.title[-250:])}{ext}",
                         ),
                         "nature": media_summary_file_nature,
                         "mimetype": mime,
