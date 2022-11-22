@@ -27,6 +27,10 @@
   }
 }
 
+.entity-profile__body__info {
+  flex: 1;
+}
+
 .entity-profile__body__profile-image {
   @extend .img-thumbnail;
   height: 200px;
