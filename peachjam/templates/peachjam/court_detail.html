@@ -2,37 +2,37 @@
 {% load i18n %}
 
 {% block title %}
-  {% if year %}
-    {% blocktrans with court_name=court.name year=year%}
-      {{ court_name }} - {{ year }}
-    {% endblocktrans %}
-  {% else %}
-    {% trans court.name %}
-  {% endif %}
+  {{ formatted_court_name }}
 {% endblock %}
 
 {% block breadcrumbs %}
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
-      </li>
-      <li class="breadcrumb-item">
-        <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-      </li>
-    </ol>
-  </nav>
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+        </li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+
+{% block entity-profile %}
+  {% with entity_profile=court.entity_profile.first entity_profile_title=court.name %}
+    {% if entity_profile %}
+      <div class="mt-3">
+        {% include 'peachjam/_entity_profile.html' %}
+      </div>
+    {% endif %}
+  {% endwith %}
 {% endblock %}
 
 {% block page-header %}
   <h1 class="my-4">
-    {% if year %}
-      {% blocktrans with court_name=court.name year=year%}
-        {{ court_name }} - {{ year }}
-      {% endblocktrans %}
-    {% else %}
-      {% trans court.name %}
-    {% endif %}
+    {{ formatted_court_name }}
   </h1>
 
   {% if years %}

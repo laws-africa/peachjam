@@ -7,6 +7,7 @@ from .gazette import *
 from .generic_document import *
 from .ingestors import *
 from .judgment import *
+from .profile import *
 from .relationships import *
 from .settings import *
 from .taxonomies import *
