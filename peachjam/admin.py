@@ -29,6 +29,7 @@ from peachjam.models import (
     CourtClass,
     DocumentNature,
     DocumentTopic,
+    Gazette,
     GenericDocument,
     Image,
     Ingestor,
@@ -551,6 +552,11 @@ class DocumentNatureAdmin(admin.ModelAdmin):
     search_fields = ("name", "code")
     list_display = ("name", "code")
     prepopulated_fields = {"code": ("name",)}
+
+
+@admin.register(Gazette)
+class GazetteAdmin(DocumentAdmin):
+    pass
 
 
 admin.site.register(

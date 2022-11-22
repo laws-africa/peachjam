@@ -1,0 +1,11 @@
+{% for group in province_groups %}
+  <div class="col-lg">
+    <ul class="list-unstyled mb-0">
+      {% for locality in group %}
+        <li>
+          <a href="{% url 'provincial_gazette_list' locality.code %}">{{ locality.name }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endfor %}
