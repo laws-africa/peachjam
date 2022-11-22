@@ -1,0 +1,33 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+
+{% block title %} {% trans 'Terms of Use' %}{% endblock %}
+
+{% block page-content %}
+  <section class="py-5" data-component="TermsOfUse">
+    <div class="container">
+      <div class="row mb-4">
+        <div class="col-12 col-md-3"></div>
+        <div class="col-12 col-md-9">
+          <h1>
+            {% block page-title %} {% trans 'Terms of Use' %}{% endblock %}
+          </h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 col-md-3">
+          <div class="list-group mb-4">
+            <div class="list-group-item bg-light">
+              <strong>{% trans 'Navigation' %}</strong>
+            </div>
+            <div class="list-group-item" data-table-of-contents>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-9" data-terms-of-use-content>
+          {% block terms-of-use-content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
