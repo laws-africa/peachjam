@@ -28,7 +28,6 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
     const node = document.getElementById('provision-relationships');
     if (node) {
       this.enrichments = JSON.parse(node.innerText || '[]');
-      if (this.enrichments.length) this.gutter?.classList.add('has-enrichments');
     } else {
       this.enrichments = [];
     }
