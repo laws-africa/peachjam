@@ -92,15 +92,16 @@
     }
 
     la-gutter {
-      display: none;
       flex: 0 0 40px;
 
-      &.has-enrichments {
-        display: block;
+      &:empty {
+        display: none;
+        @include media-breakpoint-up(lg) {
+         display: block;
+        }
       }
 
       @include media-breakpoint-up(lg) {
-        display: block;
         flex: 20%;
       }
     }
