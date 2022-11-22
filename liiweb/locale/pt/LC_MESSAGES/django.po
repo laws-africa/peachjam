@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-22 16:22+0200\n"
-"PO-Revision-Date: 2022-10-21 20:14\n"
+"PO-Revision-Date: 2022-11-22 14:24\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -20,37 +20,29 @@ msgstr ""
 #: templates/liiweb/home.html:24 templates/liiweb/home.html:25
 #, python-format
 msgid "Search %(APP_NAME)s"
-msgstr ""
+msgstr "Pesquisar %(APP_NAME)s"
 
 #: templates/liiweb/home.html:28
 msgid "Search"
-msgstr ""
+msgstr "Pesquisa"
 
 #: templates/peachjam/_footer.html:5
 msgid "Subscribe"
-msgstr ""
+msgstr "Inscrever-se"
 
 #: templates/peachjam/_footer.html:10
 msgid "Subscribe to the our newsletter for updates and news."
-msgstr ""
+msgstr "Inscreva-se no nosso boletim informativo para atualizações e notícias."
 
 #: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:10
 msgid "About"
-msgstr ""
+msgstr "Sobre"
 
 #: templates/peachjam/_footer.html:29
 msgid "Our partners"
-msgstr ""
+msgstr "Nossos parceiros"
 
 #: templates/peachjam/_footer.html:36
 msgid "Other African Legal Information Institutions"
-msgstr ""
+msgstr "Outras Instituições Jurídicas Africanas"
 
-#~ msgid "Title"
-#~ msgstr "Título"
-
-#~ msgid "Judges"
-#~ msgstr "Juízes"
-
-#~ msgid "Date"
-#~ msgstr "Data"
