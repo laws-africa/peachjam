@@ -92,9 +92,17 @@
     }
 
     la-gutter {
-      display: none;
+      flex: 0 0 40px;
+
+      &:empty {
+        display: none;
+        @include media-breakpoint-up(lg) {
+         display: block;
+        }
+      }
+
       @include media-breakpoint-up(lg) {
-        display: block;
+        flex: 20%;
       }
     }
   }
