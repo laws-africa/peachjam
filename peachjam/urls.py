@@ -58,7 +58,7 @@ from peachjam.views import (
 
 urlpatterns = [
     path("", HomePageView.as_view(), name="home_page"),
-    path("/terms-of-use", TermsOfUsePageView.as_view(), name="terms_of_use"),
+    path("terms-of-use/", TermsOfUsePageView.as_view(), name="terms_of_use"),
     path(
         "about/",
         AboutPageView.as_view(),
