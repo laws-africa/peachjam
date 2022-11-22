@@ -2,13 +2,7 @@
 {% load i18n %}
 
 {% block title %}
-  {% if year %}
-    {% blocktrans with court_name=court.name year=year%}
-      {{ court_name }} - {{ year }}
-    {% endblocktrans %}
-  {% else %}
-    {% trans court.name %}
-  {% endif %}
+  {{ formatted_court_name }}
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -38,15 +32,7 @@
 
 {% block page-header %}
   <h1 class="my-4">
-    {% if year %}
-      {% blocktrans with court_name=court.name year=year%}
-        {{ court_name }} - {{ year }}
-      {% endblocktrans %}
-    {% else %}
-      {% blocktrans with court_name=court.name year=year%}
-        Documents by {{ court_name }}
-      {% endblocktrans %}
-    {% endif %}
+    {{ formatted_court_name }}
   </h1>
 
   {% if years %}
