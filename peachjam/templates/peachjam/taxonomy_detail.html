@@ -8,20 +8,32 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="/taxonomy/">{% trans 'Taxonomies' %}</a>
-      </li>
-      {% for ancestor in ancestors %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
         <li class="breadcrumb-item">
-          <a href="{% build_taxonomy_url ancestor %}">
-            {{ ancestor }}
-          </a>
+          <a href="/taxonomy/">{% trans 'Taxonomies' %}</a>
         </li>
-      {% endfor %}
-    </ol>
-  </nav>
+        {% for ancestor in ancestors %}
+          <li class="breadcrumb-item">
+            <a href="{% build_taxonomy_url ancestor %}">
+              {{ ancestor }}
+            </a>
+          </li>
+        {% endfor %}
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+
+{% block entity-profile %}
+  {% if entity_profile %}
+    {% with entity_profile_title=taxonomy.name %}
+      <div class="mt-3">
+        {% include 'peachjam/_entity_profile.html' %}
+      </div>
+    {% endwith %}
+  {% endif %}
 {% endblock %}
 
 {% if taxonomy_tree|length > 0 %}

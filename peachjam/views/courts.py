@@ -49,8 +49,12 @@ class CourtDetailView(FilteredDocumentListView):
             judges.remove(None)
 
         context["court"] = self.court
+        context["formatted_court_name"] = self.court.name
         if "year" in self.kwargs:
             context["year"] = self.kwargs["year"]
+            context["formatted_court_name"] = (
+                self.court.name + " - " + str(self.kwargs["year"])
+            )
 
         context["facet_data"] = {
             "judges": judges,

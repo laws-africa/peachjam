@@ -1,0 +1,50 @@
+{% load i18n %}
+
+<div class="entity-profile">
+  <div class="entity-profile__background-photo">
+    {% if entity_profile.background_photo %}
+      <img src="{{ entity_profile.background_photo.url }}"
+           alt="background image"
+           loading="lazy"
+      />
+    {% endif %}
+  </div>
+
+  <div class="entity-profile__body">
+    {% if entity_profile.profile_photo %}
+      <img src="{{ entity_profile.profile_photo.url }}"
+           class="entity-profile__body__profile-image"
+           alt="profile image"
+           loading="lazy"
+      />
+    {% endif %}
+    <div class="entity-profile__body__info">
+      <h1>{{ entity_profile_title }}</h1>
+
+      {% if entity_profile.about_html %}
+        <div class="mb-2">{{ entity_profile.about_html }}</div>
+      {% endif %}
+
+      <div class="row">
+        {% if entity_profile.address %}
+          <div class="col-12 col-sm-6">
+            <div>
+              <strong>{% trans 'Physical address' %}</strong>
+            </div>
+            <div>{{ entity_profile.address }}</div>
+          </div>
+        {% endif %}
+
+
+        {% if entity_profile.website_url %}
+          <div class="col-12 col-sm-6">
+            <div><strong>{% trans 'Visit website' %}</strong></div>
+            <a href="{{ entity_profile.website_url }}" target="_blank">
+              {{ entity_profile.website_url }}
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

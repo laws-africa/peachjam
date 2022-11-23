@@ -187,7 +187,7 @@ class IndigoAdapter(Adapter):
         ).first()
         if core_doc and not existing_doc:
             raise Exception(
-                f"The document {expression_frbr_uri} already exists as {existing_doc.doc_type}"
+                f"The document {expression_frbr_uri} already exists as {core_doc.doc_type}"
                 f" but not as {model}. Delete the existing document (CoreDocument #{core_doc.pk})."
             )
 
