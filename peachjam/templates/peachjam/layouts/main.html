@@ -17,7 +17,7 @@
     document.addEventListener("DOMContentLoaded", function () {
       const pocketlawElements = document.querySelectorAll('.pocketlaw-hidden');
       pocketlawElements.forEach(el => {
-        el.setAttribute('data-user-agent', navigator.userAgent);
+        el.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
       });
     });
   </script>
