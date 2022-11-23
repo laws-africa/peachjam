@@ -4,6 +4,7 @@ import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../utils/vue-utils';
 import { i18n } from '../i18n';
 import { generateHtmlTocItems } from '../utils/function';
+import Diffsets from './diffsets';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -30,6 +31,8 @@ class DocumentContent {
   constructor (root: HTMLElement) {
     this.root = root;
     this.navOffCanvas = undefined;
+
+    this.setupDiffs();
 
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
@@ -107,6 +110,13 @@ class DocumentContent {
         this.navOffCanvas?.hide();
       });
     }
+  }
+
+  setupDiffs () {
+    const gutter: HTMLElement | null = this.root.querySelector('la-gutter');
+    const akn: HTMLElement | null = this.root.querySelector('la-akoma-ntoso');
+    if (!akn || !gutter) return;
+    const instance = new Diffsets(akn, gutter);
   }
 
   setupResponsiveContentTransporter (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
