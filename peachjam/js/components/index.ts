@@ -5,10 +5,11 @@ import DocumentList from './document-list';
 import DocumentContent from './document-content';
 import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
+import TaxonomyTree from './taxonomy-tree';
+import TermsOfUse from './terms-of-use';
 
 import FindDocuments from './FindDocuments/index.vue';
 import LegislationTable from './LegislationTable/index.vue';
-import TaxonomyTree from './taxonomy-tree';
 
 const components: Record<string, any> = {
   // Data components
@@ -20,6 +21,7 @@ const components: Record<string, any> = {
   RelationshipEnrichments,
   ToggleTab,
   TaxonomyTree,
+  TermsOfUse,
 
   // Vue components
   FindDocuments,

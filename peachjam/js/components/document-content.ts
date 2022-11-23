@@ -3,12 +3,7 @@ import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../utils/vue-utils';
 import { i18n } from '../i18n';
-
-type TOCItemType = {
-  [key: string]: any;
-  title?: string;
-  children?: TOCItemType[];
-}
+import { generateHtmlTocItems } from '../utils/function';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -171,53 +166,8 @@ class DocumentContent {
         ? JSON.parse(aknTocJsonElement.textContent as string) : [];
     } else if (this.root.getAttribute('data-display-type') === 'html') {
       const content: HTMLElement | null = this.root.querySelector('.content__html');
-      items = content ? this.generateHtmlTocItems(content) : [];
+      items = content ? generateHtmlTocItems(content) : [];
     }
-    return items;
-  }
-
-  generateHtmlTocItems = (content: HTMLElement) => {
-    let stack: any;
-    const items: TOCItemType[] = [];
-
-    content.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5').forEach((heading) => {
-      if (!heading.id) {
-        heading.id = heading.tagName + '_' + Math.floor(Math.random() * 10000);
-      }
-
-      const item = {
-        type: heading.tagName,
-        title: heading.innerText,
-        id: heading.id,
-        children: []
-      };
-
-      // top level
-      if (!stack) {
-        items.push(item);
-        stack = [item];
-      } else {
-        // find the best sibling for this entry; if the stack is at h3 and we have h2, find an h2 or h1
-        while (stack.length && stack[stack.length - 1].type > heading.tagName) {
-          stack.pop();
-        }
-        const top = stack[stack.length - 1];
-
-        if (top.type === heading.tagName) {
-          // siblings
-          if (stack.length > 1) {
-            stack[stack.length - 2].children.push(item);
-          } else {
-            items.push(item);
-          }
-          stack[stack.length - 1] = item;
-        } else {
-          // child
-          top.children.push(item);
-          stack.push(item);
-        }
-      }
-    });
     return items;
   }
 }
