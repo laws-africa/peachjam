@@ -12,6 +12,16 @@
   <!--  app-prod.js depends on pdf.js to be loaded-->
   <script defer src="{% static 'js/app-prod.js' %}"></script>
 
+ <!-- Small script to add the current user agent to all elements with the class name 'pocketlaw-hidden'. -->
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      const pocketlawElements = document.querySelectorAll('.pocketlaw-hidden');
+      pocketlawElements.forEach(el => {
+        el.setAttribute('data-user-agent', navigator.userAgent);
+      });
+    });
+  </script>
+
   {% if not DEBUG %}
     <!-- sentry -->
     <script
