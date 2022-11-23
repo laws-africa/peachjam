@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, TemplateView
 
-from peachjam.models import Taxonomy
+from peachjam.models import EntityProfile, Taxonomy
 from peachjam.views.generic_views import FilteredDocumentListView
 
 
@@ -41,6 +41,9 @@ class TaxonomyDetailView(FilteredDocumentListView):
         context = super().get_context_data(**kwargs)
 
         context["taxonomy"] = self.taxonomy
+        context["entity_profile"] = EntityProfile.objects.filter(
+            object_id=self.taxonomy.pk
+        ).first()
         context["root"] = self.taxonomy
         ancestors = self.taxonomy.get_ancestors()
         if len(ancestors) > 1:

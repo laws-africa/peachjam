@@ -49,7 +49,7 @@ class Work(models.Model):
     frbr_uri = models.CharField(max_length=1024, null=False, blank=False, unique=True)
     title = models.CharField(max_length=1024, null=False, blank=False)
     languages = ArrayField(
-        models.CharField(max_length=3), null=False, blank=False, default=[]
+        models.CharField(max_length=3), null=False, blank=False, default=list
     )
 
     class Meta:
@@ -64,28 +64,29 @@ class CoreDocumentManager(PolymorphicManager):
         # defer expensive fields
         return super().get_queryset().defer("content_html", "toc_json")
 
-    def preferred_language(self, language):
-        # return a document if its language is the preferred one, or there are
-        # no documents in the preferred language (and so all docs are returned)
-        return self.get_queryset().filter(
-            models.Q(language_id=language)
-            | ~models.Q(work__languages__contains=[language])
-        )
-
 
 class CoreDocumentQuerySet(PolymorphicQuerySet):
     def latest_expression(self):
         """Select only the most recent expression for documents with the same frbr_uri."""
         return self.distinct("work_frbr_uri").order_by("work_frbr_uri", "-date")
 
+    def preferred_language(self, language):
+        # return a document if its language is the preferred one, or there are
+        # no documents in the preferred language (and so all docs are returned)
+        return self.filter(
+            models.Q(language_id=language)
+            | ~models.Q(work__languages__contains=[language])
+        )
+
 
 class CoreDocument(PolymorphicModel):
     DOC_TYPE_CHOICES = (
         ("core_document", "Core Document"),
-        ("legislation", "Legislation"),
+        ("gazette", "Gazette"),
         ("generic_document", "Generic Document"),
-        ("legal_instrument", "Legal Instrument"),
         ("judgment", "Judgment"),
+        ("legal_instrument", "Legal Instrument"),
+        ("legislation", "Legislation"),
     )
 
     objects = CoreDocumentManager.from_queryset(CoreDocumentQuerySet)()
@@ -245,7 +246,7 @@ class CoreDocument(PolymorphicModel):
         if not hasattr(self, "work") or self.work.frbr_uri != self.work_frbr_uri:
             self.work, _ = Work.objects.get_or_create(
                 frbr_uri=self.work_frbr_uri,
-                defaults={"title": self.title, "languages": [self.language]},
+                defaults={"title": self.title, "languages": [self.language.iso_639_3]},
             )
 
         # keep work title in sync with English documents

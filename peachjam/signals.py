@@ -47,5 +47,5 @@ def bg_task_finished(sender, **kwargs):
 @receiver(signals.post_save, sender=CoreDocument)
 def update_language(sender, instance, **kwargs):
     if not kwargs["raw"]:
-        instance.work.languages = [instance.language]
+        instance.work.languages = [instance.language.iso_639_3]
         instance.work.save()

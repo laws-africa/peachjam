@@ -5,6 +5,7 @@ from ckeditor.widgets import CKEditorWidget
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericStackedInline
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
@@ -29,6 +30,8 @@ from peachjam.models import (
     CourtClass,
     DocumentNature,
     DocumentTopic,
+    EntityProfile,
+    Gazette,
     GenericDocument,
     Image,
     Ingestor,
@@ -49,6 +52,11 @@ from peachjam.models import (
     pj_settings,
 )
 from peachjam.resources import GenericDocumentResource, JudgmentResource
+
+
+class EntityProfileInline(GenericStackedInline):
+    model = EntityProfile
+    extra = 0
 
 
 class PeachJamSettingsAdmin(admin.ModelAdmin):
@@ -363,6 +371,7 @@ class DocumentAdmin(admin.ModelAdmin):
 class TaxonomyAdmin(TreeAdmin):
     form = movenodeform_factory(Taxonomy)
     readonly_fields = ("slug",)
+    inlines = [EntityProfileInline]
 
 
 class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
@@ -553,15 +562,28 @@ class DocumentNatureAdmin(admin.ModelAdmin):
     prepopulated_fields = {"code": ("name",)}
 
 
+@admin.register(Court)
+class CourtAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
+
+
+@admin.register(Author)
+class AuthorAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
+
+
+@admin.register(Gazette)
+class GazetteAdmin(DocumentAdmin):
+    pass
+
+
 admin.site.register(
     [
         Image,
         Locality,
         CitationLink,
-        Author,
         Judge,
         MatterType,
-        Court,
         CourtClass,
         AttachedFileNature,
     ]

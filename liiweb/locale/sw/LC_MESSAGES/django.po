@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-21 21:07+0200\n"
-"PO-Revision-Date: 2022-10-21 19:38\n"
+"POT-Creation-Date: 2022-11-22 16:22+0200\n"
+"PO-Revision-Date: 2022-11-22 14:25\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -17,15 +17,32 @@ msgstr ""
 "X-Crowdin-File: /main/liiweb/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 103\n"
 
-#: templates/liiweb/_judgment_table.html:6
-msgid "Title"
-msgstr "Mada"
-
-#: templates/liiweb/_judgment_table.html:7
-msgid "Judges"
+#: templates/liiweb/home.html:24 templates/liiweb/home.html:25
+#, python-format
+msgid "Search %(APP_NAME)s"
 msgstr ""
 
-#: templates/liiweb/_judgment_table.html:8
-msgid "Date"
-msgstr "Tarehe"
+#: templates/liiweb/home.html:28
+msgid "Search"
+msgstr ""
+
+#: templates/peachjam/_footer.html:5
+msgid "Subscribe"
+msgstr ""
+
+#: templates/peachjam/_footer.html:10
+msgid "Subscribe to the our newsletter for updates and news."
+msgstr ""
+
+#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:10
+msgid "About"
+msgstr "Kuhusu"
+
+#: templates/peachjam/_footer.html:29
+msgid "Our partners"
+msgstr "Washirika wetu"
+
+#: templates/peachjam/_footer.html:36
+msgid "Other African Legal Information Institutions"
+msgstr "Taasisi Nyingine za Kisheria za Kiafrika"
 

@@ -79,34 +79,17 @@ pre-commit install
 
 ## Adding translation strings
 
-Translations for the project are stored in the `locale` directory. Translations for strings are added on [CrowdIn](https://crowdin.com/project/lawsafrica-indigo).
+Translations for strings are added on [CrowdIn](https://laws-africa.crowdin.com/).
+
+Django translations are stored in the `locale` directories under each sub-project. Javascript and Vue translations are stored in `peachjam/js/locale/en/translation.json`.
 
 If you have added or changed strings that need translating, you must [tell Django to update the .po files](https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#localization-how-to-create-language-files) so that translations can be supplied through CrowdIn.
 
 ```bash
-for d in peachjam africanlii; do pushd $d; django-admin makemessages -a; popd; done
+scripts/extract-translations.sh
 ```
 
-And then commit the changes. CrowdIn will pick up any changed strings and make them available for translation. Once they are translated, it will open a pull request to merge the changes into master.
-
-Once merged into `main`, you must [tell Django to compile the .po files to .mo files](https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#compiling-message-files):
-
-```bash
-django-admin compilemessages
-```
-
-And then commit the changes.
-
-## i18n-vue translations
-Translations for `vue` components are stored in `peachjam/js/locale`.
-If the translation syntax is added/updated/deleted (`$t()`), run the following command to update the  `json` files in
-`peachjam/js/locale`
-```
-i18next './peachjam/js/**/*.{js,vue}'
-```
-And then commit the changes.
-CrowdIn will pick up any changed strings on `main` and make them available for translation. Once they are translated,
-it will open a pull request to merge the changes into `main`.
+And then commit the changes. CrowdIn will pick up any changed strings and make them available for translation. Once they are translated, it will open a pull request to merge the changes into `main`.
 
 ## Deployment
 Peachjam can be deployed to a server that has [Dokku](https://dokku.com/) installed. This allows for easy config based deployments using Docker containers.

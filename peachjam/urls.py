@@ -42,6 +42,8 @@ from peachjam.views import (
     DocumentSourcePDFView,
     DocumentSourceView,
     FirstLevelTaxonomyDetailView,
+    GazetteListView,
+    GazetteYearView,
     GenericDocumentListView,
     HomePageView,
     JudgmentListView,
@@ -84,6 +86,8 @@ urlpatterns = [
         LegalInstrumentListView.as_view(),
         name="legal_instrument_list",
     ),
+    path("gazettes", GazetteListView.as_view(), name="gazettes"),
+    path("gazettes/<int:year>", GazetteYearView.as_view(), name="gazettes_by_year"),
     path(
         "generic_documents/",
         GenericDocumentListView.as_view(),

@@ -4,6 +4,10 @@
 {% block title %}{{ document.title }}{% endblock %}
 
 {% block page-content %}
+  {% block breadcrumbs %}{% endblock %}
+
+  {% block entity-profile %}{% endblock %}
+
   <div class="container pb-5" data-component="DocumentList">
     <div class="offcanvas offcanvas-start" tabindex="-1" id="list-facets-offcanvas"
          aria-labelledby="offcanvasLastFacetLabel">
@@ -15,9 +19,6 @@
         <div data-list-facets></div>
       </div>
     </div>
-
-    {% block breadcrumbs %}
-    {% endblock %}
 
     {% block page-header %}
       <div class="row">
