@@ -141,3 +141,7 @@ footer {
     }
   }
 }
+
+[data-user-agent*='Pocketlaw'] {
+  display: none;
+}
