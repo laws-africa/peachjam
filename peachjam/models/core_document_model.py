@@ -75,6 +75,8 @@ class CoreDocument(PolymorphicModel):
         ("judgment", "Judgment"),
         ("legal_instrument", "Legal Instrument"),
         ("legislation", "Legislation"),
+        ("book", "Book"),
+        ("journal", "Journal"),
     )
 
     objects = CoreDocumentManager.from_queryset(CoreDocumentQuerySet)()
