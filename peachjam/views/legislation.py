@@ -2,7 +2,9 @@ from datetime import datetime, timedelta
 from itertools import groupby
 
 from django.contrib import messages
-from django.utils.html import format_html
+from django.template.defaultfilters import date as format_date
+from django.utils.html import mark_safe
+from django.utils.translation import gettext as _
 
 from peachjam.models import Legislation
 from peachjam.registry import registry
@@ -38,18 +40,14 @@ class LegislationDetailView(BaseDocumentDetailView):
         friendly_type = self.get_friendly_type()
 
         if self.object.repealed and repeal:
-            msg = "This {} was repealed on {} by <a href='{}'>{}</a>."
+            msg = (
+                f'This {friendly_type} was repealed on %(date)s by <a href="%(repealing_uri)s">'
+                "%(repealing_title)s</a>."
+            )
             notices.append(
                 {
                     "type": messages.ERROR,
-                    "html": format_html(
-                        msg.format(
-                            friendly_type,
-                            repeal["date"],
-                            repeal["repealing_uri"],
-                            repeal["repealing_title"],
-                        )
-                    ),
+                    "html": mark_safe(_(msg) % repeal),
                 }
             )
 
@@ -61,48 +59,40 @@ class LegislationDetailView(BaseDocumentDetailView):
 
             if index == len(dates) - 1:
                 if self.object.repealed and repeal:
-                    msg = (
-                        "This is the version of this {} as it was when it was repealed."
-                    )
+                    msg = f"This is the version of this {friendly_type} as it was when it was repealed."
                 else:
-                    msg = "This is the latest version of this {}."
+                    msg = f"This is the latest version of this {friendly_type}."
 
                 notices.append(
                     {
                         "type": messages.INFO,
-                        "html": format_html(msg.format(friendly_type)),
+                        "html": _(msg),
                     }
                 )
             else:
                 date = datetime.strptime(
                     dates[index + 1], "%Y-%m-%d"
                 ).date() - timedelta(days=1)
+                expression_frbr_uri = points_in_time[-1]["expressions"][0][
+                    "expression_frbr_uri"
+                ]
 
+                msg = f"This is the version of this {friendly_type} as it was from %(date_from)s to %(date_to)s."
                 if self.object.repealed and repeal:
-                    msg = (
-                        "This is the version of this {} as it was from {} to {}. "
-                        "<a href='{}'>Read the version as it was when it was repealed</a>."
-                    )
+                    msg += ' <a href="%(expression_frbr_uri)s">Read the version as it was when it was repealed</a>.'
                 else:
-                    msg = (
-                        "This is the version of this {} as it was from {} to {}. "
-                        "<a href='{}'>Read the version currently in force</a>."
-                    )
+                    msg += ' <a href="%(expression_frbr_uri)s">Read the version currently in force</a>.'
 
                 notices.append(
                     {
                         "type": messages.WARNING,
-                        "html": format_html(
-                            msg.format(
-                                friendly_type,
-                                datetime.strptime(
-                                    current_object_date, "%Y-%m-%d"
-                                ).strftime("%d %B %Y"),
-                                date.strftime("%d %B %Y"),
-                                points_in_time[-1]["expressions"][0][
-                                    "expression_frbr_uri"
-                                ],
-                            )
+                        "html": mark_safe(
+                            _(msg)
+                            % {
+                                "date_from": format_date(self.object.date, "j F Y"),
+                                "date_to": format_date(date, "j F Y"),
+                                "expression_frbr_uri": expression_frbr_uri,
+                            }
                         ),
                     }
                 )
@@ -217,3 +207,19 @@ class LegislationDetailView(BaseDocumentDetailView):
         # TODO: we're not guaranteed to get documents in the same language, here
         docs = sorted(docs, key=lambda d: d.title)
         return docs
+
+
+# Translation strings that include the friendly document type to ensure we have translations for the full string.
+_("This is the version of this Act as it was when it was repealed.")
+_("This is the latest version of this Act.")
+_(
+    'This Act was repealed on %(date)s by <a href="%(repealing_uri)s">%(repealing_title)s</a>.'
+)
+_(
+    'This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href="%(expression_frbr_uri)s">'
+    "Read the version as it was when it was repealed</a>."
+)
+_(
+    'This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href="%(expression_frbr_uri)s">'
+    "Read the version currently in force</a>."
+)
