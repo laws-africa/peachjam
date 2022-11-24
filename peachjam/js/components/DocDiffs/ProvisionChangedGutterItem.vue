@@ -5,13 +5,13 @@
   >
     <div class="card">
       <div class="card-body p-3">
-        <p>This provision has been amended.</p>
+        <p>{{ $t('This provision has been amended') }}.</p>
         <button
           class="btn btn-sm btn-secondary"
           type="button"
           @click="showChanges"
         >
-          What changed?
+          {{ $t('What changed') }}?
         </button>
       </div>
     </div>
