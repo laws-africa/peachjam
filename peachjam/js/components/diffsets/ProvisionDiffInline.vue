@@ -111,6 +111,7 @@ export default {
       if (this.originalElement) {
         this.originalElement.style.display = null;
       }
+      this.$el.dispatchEvent(new CustomEvent('close'));
       this.$el.remove();
     }
   }
