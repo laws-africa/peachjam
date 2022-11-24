@@ -11,7 +11,7 @@
           type="button"
           @click="showChanges"
         >
-          {{ $t('What changed') }}?
+          {{ $t('What changed?') }}
         </button>
       </div>
     </div>
