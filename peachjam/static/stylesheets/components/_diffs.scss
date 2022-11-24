@@ -2,23 +2,23 @@
   ins,
   .ins,
   .ins > .akn-num {
-    background-color: $diff-green;
+    background-color: $diff-green-color;
     text-decoration: none;
   }
 
   img.ins {
-    border: 1px solid adjust-color($diff-green, $lightness: -30%);
+    border: 1px solid adjust-color($diff-green-color, $lightness: -30%);
   }
 
   del,
   .del,
   .del > .akn-num {
-    background-color: $diff-red;
+    background-color: $diff-red-color;
     text-decoration: none;
   }
 
   img.del {
-    border: 1px solid adjust-color($diff-red, $lightness: -30%);
+    border: 1px solid adjust-color($diff-red-color, $lightness: -30%);
   }
 
   .diff-pair {
