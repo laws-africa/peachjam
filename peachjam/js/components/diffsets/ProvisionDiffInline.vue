@@ -47,7 +47,7 @@
       </div>
 
       <div class="card-body reader-provision-changes-inline-body">
-        <template v-if="diffsets">
+        <template v-if="diffsets.length">
           <diff-content
             v-if="diffset"
             :diffset="diffset"
@@ -68,7 +68,20 @@ import DiffContent from './DiffContent.vue';
 export default {
   name: 'ProvisionDiffContentInline',
   components: { DiffContent },
-  props: ['documentId', 'provision'],
+  props: {
+    documentId: {
+      type: String,
+      required: true
+    },
+    provision: {
+      type: Object,
+      required: true
+    },
+    frbrExpressionUri: {
+      type: String,
+      required: true
+    }
+  },
   data: () => ({
     sideBySide: true,
     diffsets: [],
@@ -86,7 +99,8 @@ export default {
 
   methods: {
     async loadDiffContentsets () {
-      const resp = await fetch(`/reader/${this.documentId}/diffsets?id=${this.provision.id}`);
+      const url = `https://services.lawsafrica.com/v1/p/laws.africa/e/diffsets${this.frbrExpressionUri}/?id=${this.provision.id}`;
+      const resp = await fetch(url);
       if (resp.ok) {
         this.diffsets = (await resp.json()).diffsets;
         this.diffset = this.diffsets ? this.diffsets[0] : null;
@@ -98,7 +112,6 @@ export default {
         this.originalElement.style.display = null;
       }
       this.$el.remove();
-      this.$destroy();
     }
   }
 };
@@ -107,6 +120,7 @@ export default {
 <style scoped>
 .card-header {
   background-color: #ffdf80;
+  font-family: var(--bs-body-font-family);
 }
 
 .card-body {
