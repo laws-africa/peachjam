@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-22 16:22+0200\n"
-"PO-Revision-Date: 2022-11-22 15:21\n"
+"PO-Revision-Date: 2022-11-24 09:48\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -71,7 +71,7 @@ msgstr "Commentaire"
 
 #: templates/peachjam/_header.html:37 templates/peachjam/about.html:4
 msgid "About"
-msgstr "À propos de"
+msgstr "À propos"
 
 #: templates/peachjam/about.html:9
 msgid "About the platform"
@@ -216,7 +216,7 @@ msgstr "Rechercher dans %(APP_NAME)s"
 
 #: templates/peachjam/home.html:31
 msgid "Search"
-msgstr "Chercher"
+msgstr "Recherche"
 
 #: templates/peachjam/home.html:42
 msgid "Regional Bodies"
