@@ -3,6 +3,12 @@ import ProvisionDiffInline from './ProvisionDiffInline.vue';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { i18n } from '../../i18n';
 
+export const getBaseUrl = () => {
+  // if localhost use laws.africa otherwise default to domain name of site
+  const partner = window.location.hostname === 'localhost' ? 'laws.africa' : window.location.hostname;
+  return `https://services.lawsafrica.com/v1/p/${partner}`;
+};
+
 class DocDiffsManager {
   private gutter: HTMLElement;
   private inlineDiff: any;
@@ -14,7 +20,7 @@ class DocDiffsManager {
   }
 
   async loadProvisions () {
-    const url = `https://services.lawsafrica.com/v1/p/laws.africa/e/changed-provisions${this.frbrExpressionUri}`;
+    const url = `${getBaseUrl()}/e/changed-provisions${this.frbrExpressionUri}`;
     const response = await fetch(url);
     if (response.ok) {
       const { provisions = [] } = await response.json();

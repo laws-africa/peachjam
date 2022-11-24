@@ -68,6 +68,7 @@
 
 <script>
 import DiffContent from './DiffContent.vue';
+import { getBaseUrl } from './index';
 
 export default {
   name: 'ProvisionDiffContentInline',
@@ -103,7 +104,7 @@ export default {
 
   methods: {
     async loadDiffContentsets () {
-      const url = `https://services.lawsafrica.com/v1/p/laws.africa/e/diffsets${this.frbrExpressionUri}/?id=${this.provision.id}`;
+      const url = `${getBaseUrl()}/e/diffsets${this.frbrExpressionUri}/?id=${this.provision.id}`;
       const resp = await fetch(url);
       if (resp.ok) {
         this.diffsets = (await resp.json()).diffsets;
