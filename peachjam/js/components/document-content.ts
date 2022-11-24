@@ -3,7 +3,7 @@ import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../utils/vue-utils';
 import { i18n } from '../i18n';
-import DocDiffsManager from './diffsets';
+import DocDiffsManager from './DocDiffs';
 import { generateHtmlTocItems } from '../utils/function';
 
 class OffCanvas {
