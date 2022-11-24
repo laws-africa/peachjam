@@ -40,6 +40,10 @@ class DocDiffsManager {
   }
 
   showProvisionChangesInline (provision: any) {
+    // Prevents reinitializing the same inlineDiff if it is the same provision
+    if (this.inlineDiff && this.inlineDiff.provision.id === provision.id) {
+      return;
+    }
     if (this.inlineDiff) {
       this.inlineDiff.close();
     }
@@ -52,6 +56,9 @@ class DocDiffsManager {
       },
       use: [i18n],
       mountTarget: document.createElement('div')
+    });
+    this.inlineDiff.$el.addEventListener('close', () => {
+      this.inlineDiff = null;
     });
   }
 }
