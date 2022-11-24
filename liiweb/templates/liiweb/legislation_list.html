@@ -38,7 +38,26 @@
         </div>
       {% endif %}
 
-      <div data-vue-component="LegislationTable" data-show-side-facets></div>
+      <div data-vue-component="LegislationTable" data-show-side-facets>
+        {% comment %}
+        This ensures that peachjam has links to scrape. This content is replaced when the javacript LegislationTable
+        component runs.
+        {% endcomment %}
+        <ul>
+          {% for item in legislation_table %}
+            <li>
+              <a href="{{ item.work_frbr_uri }}">{{ item.title }}</a>
+              {% if item.children %}
+                <ul>
+                  {% for kid in item.children %}
+                    <li><a href="{{ kid.work_frbr_uri }}">{{ kid.title }}</a></li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
       {{ legislation_table|json_script:"legislation-table" }}
     </div>
   </section>
