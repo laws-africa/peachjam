@@ -1,5 +1,8 @@
 <template>
-  <la-gutter-item :anchor="`#${provision.id}`">
+  <la-gutter-item
+    :anchor="`#${provision.id}`"
+    class="d-none d-lg-block"
+  >
     <div class="card">
       <div class="card-body p-3">
         <p>This provision has been amended.</p>
