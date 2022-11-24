@@ -9,7 +9,7 @@
         aria-haspopup="true"
         aria-expanded="false"
       >
-        Compare to
+        {{ $t('Compare to') }}
         <span v-if="compareTo">{{ compareTo.date }}</span>
       </button>
       <div
@@ -32,7 +32,7 @@
       v-if="loading"
       class="ml-3"
     >
-      Loading...
+      {{ $t('Loading') }}...
     </div>
     <div
       v-if="compareTo"
@@ -42,7 +42,7 @@
         <input
           v-model="sideBySide"
           type="checkbox"
-        > Show changes side-by-side
+        > {{ $t('Show changes side-by-side') }}
       </label>
     </div>
   </div>
@@ -51,7 +51,20 @@
 <script>
 export default {
   name: 'DocumentDiffDropdown',
-  props: ['documents', 'aknRoot', 'documentId'],
+  props: {
+    documents: {
+      type: Array,
+      required: true
+    },
+    aknRoot: {
+      type: HTMLElement,
+      required: true
+    },
+    documentId: {
+      type: String,
+      required: true
+    }
+  },
 
   data: () => ({
     compareTo: null,
