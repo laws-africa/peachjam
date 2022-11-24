@@ -24,7 +24,16 @@
 <script>
 export default {
   name: 'DiffContent',
-  props: ['diffset', 'sideBySide']
+  props: {
+    diffset: {
+      type: Object,
+      required: true
+    },
+    sideBySide: {
+      type: Boolean,
+      required: true
+    }
+  }
 };
 </script>
 
