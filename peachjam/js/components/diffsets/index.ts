@@ -3,20 +3,18 @@ import ProvisionDiffInline from './ProvisionDiffInline.vue';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { i18n } from '../../i18n';
 
-class DocDiffsets {
-  private akn: HTMLElement;
+class DocDiffsManager {
   private gutter: HTMLElement;
   private inlineDiff: any;
-  constructor (akn: HTMLElement, gutter: HTMLElement) {
-    this.akn = akn;
+  private readonly frbrExpressionUri: string;
+  constructor (frbrExpressionUri: string, gutter: HTMLElement) {
+    this.frbrExpressionUri = frbrExpressionUri;
     this.gutter = gutter;
     this.loadProvisions();
   }
 
   async loadProvisions () {
-    const frbrExpressionUri = this.akn.getAttribute('expression-frbr-uri');
-    if (!frbrExpressionUri) return;
-    const url = `https://services.lawsafrica.com/v1/p/laws.africa/e/changed-provisions${frbrExpressionUri}`;
+    const url = `https://services.lawsafrica.com/v1/p/laws.africa/e/changed-provisions${this.frbrExpressionUri}`;
     const response = await fetch(url);
     if (response.ok) {
       const { provisions = [] } = await response.json();
@@ -27,16 +25,14 @@ class DocDiffsets {
   }
 
   decorateChangedProvisions (provisions: any[]) {
-    console.log(provisions);
     provisions.forEach(provision => {
-      const element = document.createElement('div');
       const item = createAndMountApp({
         component: ProvisionChangedGutterItem,
         props: {
           provision
         },
         use: [i18n],
-        mountTarget: element
+        mountTarget: document.createElement('div')
       });
       this.gutter.appendChild(item.$el);
       item.$el.addEventListener('show-changes', (e: CustomEvent) => this.showProvisionChangesInline(e.detail.provision));
@@ -47,19 +43,17 @@ class DocDiffsets {
     if (this.inlineDiff) {
       this.inlineDiff.close();
     }
-    const target = document.createElement('div');
     this.inlineDiff = createAndMountApp({
       component: ProvisionDiffInline,
       props: {
         documentId: provision.id,
-        provision: provision
+        provision: provision,
+        frbrExpressionUri: this.frbrExpressionUri
       },
       use: [i18n],
-      mountTarget: target
+      mountTarget: document.createElement('div')
     });
-
-    this.inlineDiff.$mount();
   }
 }
 
-export default DocDiffsets;
+export default DocDiffsManager;
