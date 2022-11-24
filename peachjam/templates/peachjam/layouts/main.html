@@ -12,6 +12,13 @@
   <!--  app-prod.js depends on pdf.js to be loaded-->
   <script defer src="{% static 'js/app-prod.js' %}"></script>
 
+ <!-- Small script to add the current user agent to the root HTML element -->
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
+    });
+  </script>
+
   {% if not DEBUG %}
     <!-- sentry -->
     <script
