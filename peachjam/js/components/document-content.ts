@@ -3,8 +3,8 @@ import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../utils/vue-utils';
 import { i18n } from '../i18n';
+import DocDiffsManager from './diffsets';
 import { generateHtmlTocItems } from '../utils/function';
-import Diffsets from './diffsets';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -28,9 +28,11 @@ class DocumentContent {
   private pdfRenderer: PdfRenderer | undefined;
   private searchApp: any;
   private navOffCanvas: OffCanvas | undefined;
+  private docDiffsManager: DocDiffsManager | null;
   constructor (root: HTMLElement) {
     this.root = root;
     this.navOffCanvas = undefined;
+    this.docDiffsManager = null;
 
     this.setupDiffs();
 
@@ -116,7 +118,9 @@ class DocumentContent {
     const gutter: HTMLElement | null = this.root.querySelector('la-gutter');
     const akn: HTMLElement | null = this.root.querySelector('la-akoma-ntoso');
     if (!akn || !gutter) return;
-    const instance = new Diffsets(akn, gutter);
+    const frbrExpressionUri = akn.getAttribute('expression-frbr-uri');
+    if (!frbrExpressionUri) return;
+    this.docDiffsManager = new DocDiffsManager(frbrExpressionUri, gutter);
   }
 
   setupResponsiveContentTransporter (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
