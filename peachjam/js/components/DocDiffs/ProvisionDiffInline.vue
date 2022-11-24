@@ -7,14 +7,14 @@
       <div class="card-header">
         <div class="d-flex">
           <div class="h5 flex-grow-1">
-            What changed?
+            {{ $t('What changed') }}?
           </div>
           <button
             type="button"
             class="btn btn-secondary"
             @click="close"
           >
-            Close
+            {{ $t('Close') }}
           </button>
         </div>
 
@@ -26,11 +26,14 @@
               class="form-control"
             >
               <option
-                v-for="(diffset, ix) in diffsets"
+                v-for="(item, ix) in diffsets"
                 :key="ix"
-                :value="diffset"
+                :value="item"
               >
-                Between {{ diffset.prev_expression_date }} and {{ diffset.new_expression_date }}
+                {{ $t('Between {prev_expression_date} and {new_expression_date}', {
+                  prev_expression_date: item.prev_expression_date,
+                  new_expression_date: item.new_expression_date
+                }) }}
               </option>
             </select>
           </div>
@@ -40,7 +43,8 @@
               <input
                 v-model="sideBySide"
                 type="checkbox"
-              > Show changes side-by-side
+              >
+              {{ $t('Show changes side-by-side') }}
             </label>
           </div>
         </div>
@@ -55,7 +59,7 @@
           />
         </template>
         <template v-else>
-          Loading...
+          {{ $t('Loading') }}...
         </template>
       </div>
     </div>
