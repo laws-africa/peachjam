@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-22 16:22+0200\n"
-"PO-Revision-Date: 2022-11-22 15:21\n"
+"PO-Revision-Date: 2022-11-24 13:44\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -195,7 +195,7 @@ msgstr "Pages"
 
 #: templates/peachjam/_document_content.html:48
 msgid "Search"
-msgstr "Chercher"
+msgstr "Recherche"
 
 #: templates/peachjam/_document_content.html:149
 msgid "Loading PDF..."
