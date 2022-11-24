@@ -7,7 +7,7 @@
       <div class="card-header">
         <div class="d-flex">
           <div class="h5 flex-grow-1">
-            {{ $t('What changed') }}?
+            {{ $t('What changed?') }}
           </div>
           <button
             type="button"
