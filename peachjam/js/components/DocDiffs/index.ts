@@ -4,8 +4,9 @@ import { createAndMountApp } from '../../utils/vue-utils';
 import { i18n } from '../../i18n';
 
 export const getBaseUrl = () => {
+  const hostname = window.location.hostname;
   // if localhost use laws.africa otherwise default to domain name of site
-  const partner = window.location.hostname === 'localhost' ? 'laws.africa' : window.location.hostname;
+  const partner = hostname === 'localhost' || hostname === '127.0.0.1' ? 'laws.africa' : window.location.hostname;
   return `https://services.lawsafrica.com/v1/p/${partner}`;
 };
 
