@@ -20,7 +20,13 @@
           {% else %}
             <td >{{ document.author|default_if_none:'' }}</td>
           {% endif %}
-          <td style="white-space: nowrap;">{{ document.date }}</td>
+            <td style="white-space: nowrap;">{{ document.date }}</td>
+
+            <td style="white-space: nowrap;">
+              {% if document.work.languages|length > 1 %}
+                <i class="bi bi-file-text"> Multi-language</i>
+              {% endif %}
+            </td>
         </tr>
       {% endfor %}
     </tbody>
