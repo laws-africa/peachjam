@@ -7,7 +7,6 @@
   "Clear": "Clear",
   "Clear all": "Clear all",
   "Close": "Close",
-  "Compare to": "Compare to",
   "Content": "Content",
   "Court": "Court",
   "Date (newest first)": "Date (newest first)",
@@ -55,5 +54,6 @@
   "Title": "Title",
   "To the top": "To the top",
   "What changed?": "What changed?",
-  "Year": "Year"
+  "Year": "Year",
+  "Years": "Years"
 }

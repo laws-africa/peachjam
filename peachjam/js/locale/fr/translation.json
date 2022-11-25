@@ -7,7 +7,6 @@
   "Clear": "Nettoyer",
   "Clear all": "Effacer tout",
   "Close": "Fermer",
-  "Compare to": "Compare to",
   "Content": "Contenus",
   "Court": "Cour",
   "Date (newest first)": "Date (plus récente en premier)",
@@ -55,5 +54,6 @@
   "Title": "Titre",
   "To the top": "En haut",
   "What changed?": "What changed?",
-  "Year": "Année"
+  "Year": "Année",
+  "Years": "Years"
 }
