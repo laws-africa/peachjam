@@ -9,3 +9,4 @@ class TestPreferredLanguage(TestCase):
         response = self.client.get("/legal_instruments/")
 
         assert response.context.get("documents").count() == 2
+        assert response.context.get("LANGUAGE_CODE") == "en"
