@@ -154,20 +154,22 @@
             v-else
             class="p-2 text-center"
           >
-            No legislation found.
+            {{ $t('No legislation found.') }}
             <a
               :href="`/search/?q=${encodeURIComponent(q)}`"
               target="_blank"
-            >Try searching instead</a>.
+            >
+              {{ $t('Try searching instead') }}
+            </a>.
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
-  <div v-if="false">
-    {{ $t('Years') }}
-    {{ $t('Taxonomies') }}
+    <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
+    <div v-if="false">
+      {{ $t('Years') }}
+      {{ $t('Taxonomies') }}
+    </div>
   </div>
 </template>
 
@@ -215,7 +217,7 @@ export default {
       this.$refs['mobile-legislation-facets-ref']
     );
     window.addEventListener('resize', this.setWindowWidth);
-    const root = this.$el.parentElement; // element with data-vue-component="LegislationTable"
+    const root = this.$el.closest('[data-vue-component="LegislationTable"]');
     if (Object.keys(root.dataset).includes('showSideFacets')) { this.showSideFacets = true; }
 
     // To use this component json element #legislation-table-data must be in the dom
