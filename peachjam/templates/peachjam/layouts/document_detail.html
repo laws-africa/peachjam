@@ -123,17 +123,17 @@
                           <dd>
                             <div class="dropdown">
                               <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ document.language }}
+                                {% trans document.language.name %}
                               </a>
                               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                 {% for version in language_versions %}
-                                  <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
+                                  <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{% trans version.language.name %}</a></li>
                                 {% endfor %}
                               </ul>
                             </div>
                           </dd>
                         {% else %}
-                          <dd class="text-muted">{{ document.language }} </dd>
+                          <dd class="text-muted">{% trans document.language.name %}</dd>
                         {% endif %}
                       {% endblock %}
 
