@@ -156,6 +156,11 @@
       </div>
     </div>
   </div>
+  <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
+  <div v-if="false">
+    {{ $t('Years') }}
+    {{ $t('Taxonomies') }}
+  </div>
 </template>
 
 <script>
@@ -272,14 +277,14 @@ export default {
 
       this.facets = [
         {
-          title: 'Years',
+          title: this.$t('Years'),
           name: 'year',
           type: 'radio',
           value: null,
           options: yearsOptions
         },
         {
-          title: 'Taxonomies',
+          title: this.$t('Taxonomies'),
           name: 'taxonomies',
           type: 'checkboxes',
           value: [],
