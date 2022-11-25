@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-24 14:32+0200\n"
-"PO-Revision-Date: 2022-11-25 07:08\n"
+"PO-Revision-Date: 2022-11-25 08:47\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -35,19 +35,19 @@ msgstr "Ver mais julgamentos"
 
 #: templates/liiweb/home.html:14
 msgid "Recent Legislation"
-msgstr ""
+msgstr "Legislação recente"
 
 #: templates/liiweb/home.html:15
 msgid "View more legislation"
-msgstr ""
+msgstr "Ver mais legislação"
 
 #: templates/liiweb/home.html:20
 msgid "Recent Articles"
-msgstr ""
+msgstr "Artigos Recentes"
 
 #: templates/liiweb/home.html:23
 msgid "View more articles"
-msgstr ""
+msgstr "Ver mais artigos"
 
 #: templates/senlii/home.html:4
 msgid "Home"
