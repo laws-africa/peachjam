@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-24 14:32+0200\n"
-"PO-Revision-Date: 2022-11-25 07:08\n"
+"PO-Revision-Date: 2022-11-25 08:46\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -37,19 +37,19 @@ msgstr "Législation"
 
 #: templates/liiweb/legislation_list.html:19
 msgid "Current legislation"
-msgstr ""
+msgstr "La législation actuelle"
 
 #: templates/liiweb/legislation_list.html:24
 msgid "Repealed legislation"
-msgstr ""
+msgstr "Législation abrogée"
 
 #: templates/liiweb/legislation_list.html:29
 msgid "All legislation"
-msgstr ""
+msgstr "Toutes les lois"
 
 #: templates/liiweb/legislation_list.html:37
 msgid "You are viewing repealed legislation which is no longer in force."
-msgstr ""
+msgstr "Vous voyez une législation abrogée qui n'est plus en vigueur."
 
 #: templates/peachjam/_footer.html:5
 msgid "Subscribe"
