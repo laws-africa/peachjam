@@ -74,7 +74,7 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
         # return a document if its language is the preferred one, or there are
         # no documents in the preferred language (and so all docs are returned)
         return self.filter(
-            models.Q(language_id=language)
+            models.Q(language_id__iso_639_3=language)
             | ~models.Q(work__languages__contains=[language])
         )
 
