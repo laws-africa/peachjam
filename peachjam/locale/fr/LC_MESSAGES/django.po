@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-22 16:22+0200\n"
-"PO-Revision-Date: 2022-11-24 13:44\n"
+"POT-Creation-Date: 2022-11-24 14:32+0200\n"
+"PO-Revision-Date: 2022-11-25 07:08\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -17,7 +17,7 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 99\n"
 
-#: models/author.py:6
+#: models/author.py:7
 msgid "Author"
 msgstr "Auteur"
 
@@ -220,6 +220,14 @@ msgstr "En haut"
 msgid "Date"
 msgstr "Date"
 
+#: templates/peachjam/_entity_profile.html:32
+msgid "Physical address"
+msgstr "Adresse physique"
+
+#: templates/peachjam/_entity_profile.html:41
+msgid "Visit website"
+msgstr "Visiter le site web"
+
 #: templates/peachjam/_header.html:41 templates/peachjam/_header.html:42
 #, python-format
 msgid "Search %(APP_NAME)s"
@@ -247,7 +255,7 @@ msgstr "Suivant"
 
 #: templates/peachjam/_recent_document_list.html:16
 #: templates/peachjam/court_detail.html:76
-#: templates/peachjam/layouts/document_list.html:54
+#: templates/peachjam/layouts/document_list.html:55
 msgid "No documents found."
 msgstr "Aucun document trouvé."
 
@@ -259,7 +267,7 @@ msgstr "Documents connexes"
 
 #: templates/peachjam/_taxonomies.html:3
 #: templates/peachjam/first_level_taxonomy_detail.html:11
-#: templates/peachjam/taxonomy_detail.html:14
+#: templates/peachjam/taxonomy_detail.html:15
 #: templates/peachjam/top_level_taxonomy_list.html:8
 msgid "Taxonomies"
 msgstr "Taxonomies"
@@ -267,6 +275,302 @@ msgstr "Taxonomies"
 #: templates/peachjam/_taxonomy_tree_facet.html:5
 msgid "Subject areas"
 msgstr "Zones thématiques"
+
+#: templates/peachjam/_terms_of_use_content.html:3
+msgid "What do these terms relate to?"
+msgstr "À quoi se réfèrent ces termes?"
+
+#: templates/peachjam/_terms_of_use_content.html:5
+#, python-format
+msgid "These terms of use describe the permitted use for the %(organisation_name)s service available at <a href=\"/\">%(org_link_text)s</a> and its subdomains."
+msgstr "Ces conditions d'utilisation décrivent l'utilisation autorisée pour le service %(organisation_name)s disponible sur <a href=\"/\">%(org_link_text)s</a> et ses sous-domaines."
+
+#: templates/peachjam/_terms_of_use_content.html:11
+msgid "Who are we, and how to contact us?"
+msgstr "Qui sommes-nous et comment nous contacter?"
+
+#: templates/peachjam/_terms_of_use_content.html:14
+#, python-format
+msgid "The %(organisation_name)s service is provided by the %(organisation_name)s programme of the Department of Public Law at the University of Cape Town and Laws.Africa NPO. You can contact us by email at <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> or by filling out <a href=\"/about/\">this form</a>."
+msgstr "Le service %(organisation_name)s est fourni par le programme %(organisation_name)s du Département de droit public de l'Université du Cap et des Lois. frica NPO. Vous pouvez nous contacter par e-mail à <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> ou en remplissant <a href=\"/about/\">ce formulaire</a>."
+
+#: templates/peachjam/_terms_of_use_content.html:23
+#, python-format
+msgid "By using the %(organisation_name)s service you accept these terms"
+msgstr "En utilisant le service %(organisation_name)s , vous acceptez ces conditions"
+
+#: templates/peachjam/_terms_of_use_content.html:28
+#, python-format
+msgid "By using the %(organisation_name)s service, you confirm that you accept these terms of use and agree to comply with them."
+msgstr "En utilisant le service %(organisation_name)s , vous confirmez que vous acceptez ces conditions d'utilisation et acceptez de les respecter."
+
+#: templates/peachjam/_terms_of_use_content.html:33
+msgid "Fair and reasonable use"
+msgstr "Utilisation juste et raisonnable"
+
+#: templates/peachjam/_terms_of_use_content.html:36
+msgid "You must use the service responsibly by not making too many requests. In order to maintain the integrity of the service for everyone, we may block or disable use of the service from certain IP addresses, for making too many requests."
+msgstr "Vous devez utiliser le service de manière responsable en ne faisant pas trop de requêtes. Afin de maintenir l'intégrité du service pour tout le monde, nous pouvons bloquer ou désactiver l'utilisation du service à partir de certaines adresses IP, pour faire trop de requêtes."
+
+#: templates/peachjam/_terms_of_use_content.html:43
+msgid "We are a donor-funded organisation and bulk and frequent scraping affects our costs, endangering the sustainability of the service. There are more efficient ways of obtaining access to our data in bulk. Please email us if you would like to access our data in bulk."
+msgstr "Nous sommes une organisation financée par le donateur et la mise à la ferraille en vrac et fréquente affecte nos coûts, mettant en péril la durabilité du service. Il existe des moyens plus efficaces d'obtenir l'accès à nos données en vrac. Veuillez nous envoyer un courriel si vous souhaitez accéder à nos données en bloc."
+
+#: templates/peachjam/_terms_of_use_content.html:50
+msgid "Crawling and indexing"
+msgstr "Rampage et indexation"
+
+#: templates/peachjam/_terms_of_use_content.html:52
+#, python-format
+msgid "You may access the %(organisation_name)s service through the website, or access the data through our APIs."
+msgstr "Vous pouvez accéder au service %(organisation_name)s via le site web, ou accéder aux données via nos API."
+
+#: templates/peachjam/_terms_of_use_content.html:57
+#, python-format
+msgid "We restrict external indexing of documents by search engine robots or spiders. You must adhere to the instructions in the robots.txt file at: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
+msgstr "Nous limitons l'indexation externe des documents par les robots des moteurs de recherche ou les araignées. Vous devez respecter les instructions du fichier robots.txt à l'adresse suivante: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
+
+#: templates/peachjam/_terms_of_use_content.html:64
+msgid "We may block or disable use of the service from certain IP addresses, if they appear to be compiling a search engine index."
+msgstr "Nous pouvons bloquer ou désactiver l'utilisation du service à partir de certaines adresses IP, si elles semblent compiler un index de moteur de recherche."
+
+#: templates/peachjam/_terms_of_use_content.html:69
+msgid "Coverage"
+msgstr "Couverture"
+
+#: templates/peachjam/_terms_of_use_content.html:72
+#, python-format
+msgid "%(organisation_name)s collects caselaw, legislation, African Union documents, journals, books and other materials through cooperation with regional, governmental, academic and non-profit organisations and sometimes individuals."
+msgstr "%(organisation_name)s recueille des caelaws, des lois, des documents de l’Union africaine, des revues, des livres et d’autres documents par le biais de la coopération avec des organisations régionales, gouvernementales, universitaires et sans but lucratif, et parfois des individus."
+
+#: templates/peachjam/_terms_of_use_content.html:79
+msgid "We strive to ensure high quality standards on all documents published on the platform. Where verification was not possible, this will be indicated on the document concerned."
+msgstr "Nous nous efforçons de garantir des normes de qualité élevées sur tous les documents publiés sur la plate-forme. Si la vérification n'était pas possible, cela sera indiqué sur le document concerné."
+
+#: templates/peachjam/_terms_of_use_content.html:85
+msgid "Errors and omissions"
+msgstr "Erreurs et omissions"
+
+#: templates/peachjam/_terms_of_use_content.html:88
+#, python-format
+msgid "We scan and digitize most of the documents made available on the %(organisation_name)s and affiliate LII websites. We use industry-standard Optical Character Recognition (OCR) software to convert these documents to readable text and there may be errors introduced by this process."
+msgstr "Nous numérisons et numérisons la plupart des documents mis à disposition sur les sites Web %(organisation_name)s et affiliés LII. Nous utilisons un logiciel standard de reconnaissance de caractères optique (OCR) pour convertir ces documents en texte lisible et il peut y avoir des erreurs introduites par ce processus."
+
+#: templates/peachjam/_terms_of_use_content.html:96
+msgid "Please contact us should you encounter errors in any of the documents published and we shall rectify them within a reasonable time."
+msgstr "Veuillez nous contacter si vous rencontrez des erreurs dans les documents publiés et nous les corrigerons dans un délai raisonnable."
+
+#: templates/peachjam/_terms_of_use_content.html:101
+msgid "Disclaimer"
+msgstr "Clause de non-responsabilité"
+
+#: templates/peachjam/_terms_of_use_content.html:103
+#, python-format
+msgid "Although we make every effort to authenticate information and include the source and history of documents published on this service, you should note that information on %(organisation_name)s is:"
+msgstr "Bien que nous fassions tout notre possible pour authentifier les informations et inclure la source et l'histoire des documents publiés sur ce service, vous devriez noter que les informations sur %(organisation_name)s sont :"
+
+#: templates/peachjam/_terms_of_use_content.html:110
+msgid "not necessarily comprehensive, complete, accurate or up-to-date;"
+msgstr "pas nécessairement complète, complète, exacte ou à jour ;"
+
+#: templates/peachjam/_terms_of_use_content.html:112
+#, python-format
+msgid "sometimes linked to external sites over which %(organisation_name)s has no control and for which %(organisation_name)s assumes no responsibility;"
+msgstr "parfois liés à des sites externes sur lesquels %(organisation_name)s n'a aucun contrôle et pour lesquels %(organisation_name)s n'assume aucune responsabilité;"
+
+#: templates/peachjam/_terms_of_use_content.html:118
+msgid "not professional or legal advice (if you need specific advice, you should always consult a suitably qualified professional)."
+msgstr "pas de conseils professionnels ou juridiques (si vous avez besoin de conseils spécifiques, vous devriez toujours consulter un professionnel qualifié)."
+
+#: templates/peachjam/_terms_of_use_content.html:125
+#, python-format
+msgid "%(organisation_name)s and Laws.Africa, members of its staff, and its contractors shall not be liable for any financial or other consequences arising from the use of information or data contained on this site, including the inappropriate, improper or fraudulent use of such information or data."
+msgstr "%(organisation_name)s et Lois. frica, membres de son équipe, et ses contractants ne seront pas responsables des conséquences financières ou autres découlant de l'utilisation des informations ou des données contenues sur ce site, y compris l'utilisation inappropriée, inappropriée ou frauduleuse de ces informations ou données."
+
+#: templates/peachjam/_terms_of_use_content.html:133
+#, python-format
+msgid "%(organisation_name)s does not invite reliance upon, nor accept responsibility for, the information it provides. %(organisation_name)s makes every effort to provide a high-quality service. However, neither %(organisation_name)s nor the providers of data on %(organisation_name)s, give any guarantees, undertakings or warranties concerning the accuracy, completeness or up-to-date nature of the information provided. Users should confirm information from another source if it is of sufficient importance for them to do so."
+msgstr "%(organisation_name)s n'invite pas la confiance et n'accepte pas la responsabilité des renseignements qu'elle fournit. %(organisation_name)s s’efforce de fournir un service de haute qualité. Cependant, ni %(organisation_name)s ni les fournisseurs de données sur %(organisation_name)s, ne donnent aucune garantie, les entreprises ou les garanties concernant l'exactitude, l'exhaustivité ou la nature à jour des renseignements fournis. Les utilisateurs devraient confirmer les informations provenant d'une autre source s'il est suffisamment important pour qu'ils le fassent."
+
+#: templates/peachjam/_terms_of_use_content.html:143
+#, python-format
+msgid "Hypertext links on %(organisation_name)s are (in most cases) inserted by %(organisation_name)s, not by the data providers. Automated insertion of hypertext links on %(organisation_name)s means that links will not be comprehensive or accurate in all cases. Neither %(organisation_name)s nor its providers of data, give any guarantees, undertakings or warranties concerning hypertext linking."
+msgstr "Les liens hypertextes sur %(organisation_name)s sont (dans la plupart des cas) insérés par %(organisation_name)s, pas par les fournisseurs de données. L'insertion automatique de liens hypertextes sur %(organisation_name)s signifie que les liens ne seront pas complets ou exacts dans tous les cas. Ni %(organisation_name)s ni ses fournisseurs de données, ne donnent de garanties, d'engagements ou de garanties concernant le lien hypertexte."
+
+#: templates/peachjam/_terms_of_use_content.html:151
+msgid "Copyright and Licensing"
+msgstr "Copyright et licence"
+
+#: templates/peachjam/_terms_of_use_content.html:153
+#, python-format
+msgid "You may use and re-use primary and secondary law content on %(organisation_name)s under the terms of the Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Attribution-NonCommercial 4.0 International</a> license. Under this license, you may freely use, re-use and redistribute works from %(organisation_name)s provided you credit %(organisation_name)s as your source and your use is not for commercial gain."
+msgstr "Vous pouvez utiliser et réutiliser le contenu du droit primaire et secondaire sur %(organisation_name)s sous les termes du contrat Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Paternité-Pas d'Utilisation Commerciale 4. Licence internationale</a> Sous cette licence, vous pouvez utiliser librement réutiliser et redistribuer des œuvres de %(organisation_name)s à condition que vous créditiez %(organisation_name)s comme source et que votre utilisation ne soit pas à des fins commerciales."
+
+#: templates/peachjam/_terms_of_use_content.html:162
+#, python-format
+msgid "Specific collections on %(organisation_name)s may be licensed under more permissive licenses. Examples of these collections are unedited African Union documentation, national and regional caselaw and government gazettes. Check the landing page of each collection for specific licensing information."
+msgstr "Les collections spécifiques sur %(organisation_name)s peuvent être licenciées sous licence plus permissive. Des exemples de ces collections sont la documentation non éditée de l’Union africaine, les journaux nationaux et régionaux et les journaux gouvernementaux. Consultez la page d'accueil de chaque collection pour obtenir des informations spécifiques sur les licences."
+
+#: templates/peachjam/_terms_of_use_content.html:169
+#, python-format
+msgid "Use of legal materials published by %(organisation_name)s can be subject to additional conditions set by courts, regional and government bodies, and publishers claiming intellectual property rights relating to the documents. %(organisation_name)s makes an effort to indicate the existence of additional conditions on the pages of the relevant databases. Still, Users remain responsible for checking whether their use of the documents is authorised."
+msgstr "L'utilisation du matériel juridique publié par %(organisation_name)s peut être soumise à des conditions supplémentaires définies par les tribunaux, les organismes régionaux et gouvernementaux, ainsi que les éditeurs revendiquant les droits de propriété intellectuelle relatifs aux documents. %(organisation_name)s s'efforce d'indiquer l'existence de conditions supplémentaires sur les pages des bases de données concernées. Néanmoins, l'Utilisateur reste responsable de vérifier si son utilisation des documents est autorisée."
+
+#: templates/peachjam/_terms_of_use_content.html:177
+#, python-format
+msgid "%(organisation_name)s reserves the intellectual property rights on the %(organisation_name)s name, website’s graphics and website design."
+msgstr "%(organisation_name)s se réserve les droits de propriété intellectuelle sur le nom de %(organisation_name)s , les graphiques du site Web et la conception du site Web."
+
+#: templates/peachjam/_terms_of_use_content.html:183
+msgid "Privacy"
+msgstr "Confidentialité"
+
+#: templates/peachjam/_terms_of_use_content.html:185
+#, python-format
+msgid "Information concerning the usage of %(organisation_name)s"
+msgstr "Informations concernant l'utilisation de %(organisation_name)s"
+
+#: templates/peachjam/_terms_of_use_content.html:190
+#, python-format
+msgid "%(organisation_name)s collects information which identifies, for each page accessed on %(organisation_name)s, the network identity of the machine which has accessed it. We use Google Analytics and in-house software to perform this function."
+msgstr "%(organisation_name)s collecte des informations qui identifient, pour chaque page accédée sur %(organisation_name)s, l'identité du réseau de la machine qui y a accès. Nous utilisons Google Analytics et des logiciels internes pour effectuer cette fonction."
+
+#: templates/peachjam/_terms_of_use_content.html:197
+#, python-format
+msgid "%(organisation_name)s retains this usage information for purposes of network analysis, usage analysis, and research into usage patterns to improve the %(organisation_name)s services. Access to and use of this information is restricted to Google Analytics, %(organisation_name)s management and staff, and to researchers working on %(organisation_name)s projects and subject to an agreement to adhere to these Terms of Use."
+msgstr "%(organisation_name)s conserve ces informations d'utilisation à des fins d'analyse du réseau, analyse d'utilisation et recherche de modèles d'utilisation pour améliorer les services %(organisation_name)s . L'accès et l'utilisation de ces informations sont limités à Google Analytics, à la gestion de %(organisation_name)s et au personnel, et aux chercheurs travaillant sur les projets de %(organisation_name)s et sous réserve d'un accord pour se conformer aux présentes conditions d'utilisation."
+
+#: templates/peachjam/_terms_of_use_content.html:206
+#, python-format
+msgid "%(organisation_name)s reserves the right to gather more extensive information than stated above (i) about any attempted access to %(organisation_name)s which raise security issues (and, where necessary, to make disclosures to relevant authorities); and (ii) for network analyses on an occasional basis."
+msgstr "%(organisation_name)s se réserve le droit de recueillir des informations plus complètes que celles indiquées ci-dessus (i) sur toute tentative d'accès à %(organisation_name)s qui soulève des problèmes de sécurité (et, le cas échéant, de divulguer des informations aux autorités compétentes; et (ii) pour des analyses de réseau occasionnelles."
+
+#: templates/peachjam/_terms_of_use_content.html:214
+#, python-format
+msgid "Personal information contained in %(organisation_name)s databases"
+msgstr "Informations personnelles contenues dans les bases de données %(organisation_name)s"
+
+#: templates/peachjam/_terms_of_use_content.html:218
+msgid "Personal information in court cases"
+msgstr "Informations personnelles dans les affaires judiciaires"
+
+#: templates/peachjam/_terms_of_use_content.html:221
+#, python-format
+msgid "%(organisation_name)s publishes comprehensive collections of court decisions with the consent of the public bodies concerned. The electronic dissemination of judgments is in concordance with the open court principle, instituted to ensure the impartiality and transparency of the judicial process by allowing access to the record of judicial proceedings, including judgments. Therefore, %(organisation_name)s operates on the core principle that all citizens and organisations should be provided with free, unconditional and unrestricted access to basic legal materials."
+msgstr "%(organisation_name)s publie des collections complètes de décisions judiciaires avec le consentement des organismes publics concernés. La diffusion électronique des jugements est en accord avec le principe de la Cour ouverte. institué pour assurer l'impartialité et la transparence de la procédure judiciaire en permettant l'accès au dossier des procédures judiciaires, y compris les jugements. Par conséquent, %(organisation_name)s opère selon le principe fondamental selon lequel tous les citoyens et toutes les organisations devraient être fournis gratuitement. un accès inconditionnel et illimité aux documents légaux de base."
+
+#: templates/peachjam/_terms_of_use_content.html:231
+#, python-format
+msgid "%(organisation_name)s undertakes to monitor and delete from published judgments personal information as directed by law or specific court order. %(organisation_name)s retains the right to remove personal information from judgments at its discretion where this is possible without distorting the meaning and context of the document."
+msgstr "%(organisation_name)s s'engage à surveiller et à supprimer les informations personnelles des jugements publiés conformément à la loi ou à une ordonnance spécifique du tribunal. %(organisation_name)s se réserve le droit de retirer les renseignements personnels des jugements à sa discrétion sans fausser le sens et le contexte du document."
+
+#: templates/peachjam/_terms_of_use_content.html:239
+msgid "Personal information in government gazettes"
+msgstr "Informations personnelles dans les gazettes du gouvernement"
+
+#: templates/peachjam/_terms_of_use_content.html:243
+msgid "Government gazettes and official journals are official publications of the states that publish them. The law mandates that certain personal information should be made public via the government gazette and government departments place these public notices in the government gazette with the intent of the contents being made accessible to the public."
+msgstr "Les journaux gouvernementaux et les revues officielles sont des publications officielles des États qui les publient. La loi stipule que certains renseignements personnels doivent être rendus publics par l'intermédiaire du journal gouvernemental et des ministères placent ces avis publics dans le journal du gouvernement dans l'intention de les rendre accessibles au public."
+
+#: templates/peachjam/_terms_of_use_content.html:251
+#, python-format
+msgid "\n"
+"    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
+"  "
+msgstr "\n"
+"    %(organisation_name)s ne peut pas se retirer de la circulation, reproduire ou modifier le gazette gouvernemental.\n"
+"  "
+
+#: templates/peachjam/_terms_of_use_content.html:256
+msgid "Automated monitoring"
+msgstr "Surveillance automatisée"
+
+#: templates/peachjam/_terms_of_use_content.html:258
+#, python-format
+msgid "%(organisation_name)s performs automated monitoring and, where necessary, de-identification of judgments before publication and does not guarantee that all sensitive material has been correctly de-identified."
+msgstr "%(organisation_name)s effectue un suivi automatisé et, le cas échéant, la déidentification des jugements avant publication et ne garantit pas que tous les éléments sensibles ont été correctement déidentifiés."
+
+#: templates/peachjam/_terms_of_use_content.html:265
+#, python-format
+msgid "Should you have concerns over personal information published on the %(organisation_name)s website, please contact us."
+msgstr "Si vous avez des préoccupations au sujet des informations personnelles publiées sur le site Web de %(organisation_name)s , veuillez nous contacter."
+
+#: templates/peachjam/_terms_of_use_content.html:270
+msgid "Your responsible use of personal information"
+msgstr "Votre utilisation responsable des informations personnelles"
+
+#: templates/peachjam/_terms_of_use_content.html:272
+#, python-format
+msgid "\n"
+"    %(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some\n"
+"    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
+"    the land.\n"
+"  "
+msgstr "\n"
+"    %(organisation_name)s utilisateurs doivent noter qu'il y a des limitations légales sur l'utilisation, la publication et la diffusion de certaines\n"
+"    informations personnelles dans les bases de données %(organisation_name)s . Il est de la responsabilité de %(organisation_name)s utilisateurs de se conformer aux lois de\n"
+"    la terre.\n"
+"  "
+
+#: templates/peachjam/_terms_of_use_content.html:279
+msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
+msgstr "Droit de modifier les présentes conditions d'utilisation, les déclarations sur le droit d'auteur et la protection de la vie privée"
+
+#: templates/peachjam/_terms_of_use_content.html:281
+msgid "\n"
+"    We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All\n"
+"    amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace\n"
+"    all previous versions of this document.\n"
+"  "
+msgstr "\n"
+"    Nous nous réservons le droit de modifier à tout moment les présentes conditions d'utilisation, les droits d'auteur et les déclarations de confidentialité et de sécurité. Toutes les\n"
+"    modifications seront affichées sur ce site Web. Sauf indication contraire, la version actuelle remplacera et remplacera\n"
+"    toutes les versions précédentes du présent document.\n"
+"  "
+
+#: templates/peachjam/_terms_of_use_content.html:289
+msgid "If you have any comments or suggestions about this policy, please contact us."
+msgstr "Si vous avez des commentaires ou des suggestions au sujet de cette politique, veuillez nous contacter."
+
+#: templates/peachjam/_terms_of_use_content.html:293
+msgid "Date of notice: 14 November 2022"
+msgstr "Date d'avis : 14 novembre 2022"
+
+#: templates/peachjam/_timeline_events.html:3
+msgid "History of this document"
+msgstr "Historique de ce document"
+
+#: templates/peachjam/_timeline_events.html:13
+msgid "this version"
+msgstr "cette version"
+
+#: templates/peachjam/_timeline_events.html:21
+msgid "Amended by"
+msgstr "Modifié par"
+
+#: templates/peachjam/_timeline_events.html:25
+msgid "Assented to"
+msgstr "Assistée à"
+
+#: templates/peachjam/_timeline_events.html:28
+msgid "Commences"
+msgstr "Commence"
+
+#: templates/peachjam/_timeline_events.html:31
+msgid "Published in"
+msgstr "Publié dans"
+
+#: templates/peachjam/_timeline_events.html:32
+msgid "number"
+msgstr "N°"
+
+#: templates/peachjam/_timeline_events.html:35
+msgid "Repealed by"
+msgstr "Abandonné par"
+
+#: templates/peachjam/_timeline_events.html:43
+msgid "Read this version"
+msgstr "Lire cette version"
 
 #: templates/peachjam/about.html:4 templates/peachjam/about.html:9
 msgid "About"
@@ -296,29 +600,11 @@ msgstr "Derniers articles"
 msgid " Documents by %(author)s "
 msgstr " Documents par %(author)s "
 
-#: templates/peachjam/court_detail.html:6
-#, python-format
-msgid "\n"
-"      %(court_name)s - %(year)s\n"
-"    "
-msgstr "\n"
-"      %(court_name)s - %(year)s\n"
-"    "
-
-#: templates/peachjam/court_detail.html:18
+#: templates/peachjam/court_detail.html:13
 #: templates/peachjam/judgment_list.html:4
 #: templates/peachjam/judgment_list.html:7
 msgid "Judgments"
 msgstr "Jugements"
-
-#: templates/peachjam/court_detail.html:30
-#, python-format
-msgid "\n"
-"        %(court_name)s - %(year)s\n"
-"      "
-msgstr "\n"
-"        %(court_name)s - %(year)s\n"
-"      "
 
 #: templates/peachjam/court_detail.html:43
 #: templates/peachjam/court_detail.html:57
@@ -423,11 +709,11 @@ msgstr "Télécharger"
 msgid "%(n_relationships)s related documents"
 msgstr "%(n_relationships)s documents connexes"
 
-#: templates/peachjam/layouts/document_list.html:27
+#: templates/peachjam/layouts/document_list.html:28
 msgid "Documents"
 msgstr "Documents"
 
-#: templates/peachjam/layouts/document_list.html:39
+#: templates/peachjam/layouts/document_list.html:40
 msgid "Filters"
 msgstr "Filtres"
 
@@ -445,7 +731,41 @@ msgstr "Travail principal"
 msgid "Legislation"
 msgstr "Législation"
 
+#: templates/peachjam/terms_of_use.html:4
+#: templates/peachjam/terms_of_use.html:25
+msgid "Terms of Use"
+msgstr "Conditions d'utilisation"
+
+#: templates/peachjam/terms_of_use.html:11
+#: templates/peachjam/terms_of_use.html:34
+#: templates/peachjam/terms_of_use.html:39
+msgid "Navigation"
+msgstr "Navigation"
+
 #: templates/peachjam/top_level_taxonomy_list.html:4
 msgid "Taxonomy"
 msgstr "Taxonomie"
+
+#: views/legislation.py:213
+msgid "This is the version of this Act as it was when it was repealed."
+msgstr "Il s'agit de la version de la présente loi telle qu'elle était lorsqu'elle a été abrogée."
+
+#: views/legislation.py:214
+msgid "This is the latest version of this Act."
+msgstr "Il s'agit de la dernière version de la présente Loi."
+
+#: views/legislation.py:216
+#, python-format
+msgid "This Act was repealed on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
+msgstr "Cet Acte a été abrogé le %(date)s par <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
+
+#: views/legislation.py:219
+#, python-format
+msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was repealed</a>."
+msgstr "Il s'agit de la version de cet Acte telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lire la version telle qu'elle était quand elle a été abrogée</a>."
+
+#: views/legislation.py:223
+#, python-format
+msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
+msgstr "Il s'agit de la version de cet Acte telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lire la version actuellement en vigueur</a>."
 
