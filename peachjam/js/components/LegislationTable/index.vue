@@ -207,7 +207,7 @@ export default {
       this.$refs['mobile-legislation-facets-ref']
     );
     window.addEventListener('resize', this.setWindowWidth);
-    const root = this.$el.closest('[data-vue-component="LegislationTable"]');
+    const root = this.$el.parentElement; // element with data-vue-component="LegislationTable"
     if (Object.keys(root.dataset).includes('showSideFacets')) { this.showSideFacets = true; }
 
     // To use this component json element #legislation-table-data must be in the dom
