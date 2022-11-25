@@ -7,6 +7,14 @@
       tabindex="-1"
       aria-labelledby="mobile-legislation-facets"
     >
+      <div class="offcanvas-header justify-content-end">
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          :aria-label="$t('Close')"
+        />
+      </div>
       <div class="offcanvas-body">
         <FilterFacets
           v-if="windowWith < 992"
