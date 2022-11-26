@@ -4,6 +4,7 @@ import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../utils/vue-utils';
 import { i18n } from '../i18n';
 import { generateHtmlTocItems } from '../utils/function';
+import PDFCitationLinks from './citation-links';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -27,6 +28,8 @@ class DocumentContent {
   private pdfRenderer: PdfRenderer | undefined;
   private searchApp: any;
   private navOffCanvas: OffCanvas | undefined;
+  private citationLinks: PDFCitationLinks | undefined;
+
   constructor (root: HTMLElement) {
     this.root = root;
     this.navOffCanvas = undefined;
@@ -68,6 +71,9 @@ class DocumentContent {
       this.pdfRenderer = new PdfRenderer(root);
       this.pdfRenderer.onPreviewPanelClick = () => { this.navOffCanvas?.hide(); };
       this.pdfRenderer.onPdfLoaded = () => {
+        // link citations, if any
+        this.citationLinks = new PDFCitationLinks(root);
+
         const urlParams = new URLSearchParams(window.location.search);
         const search = urlParams.get('q');
         const searchForm: HTMLFormElement | null = this.root.querySelector('.doc-search__form');

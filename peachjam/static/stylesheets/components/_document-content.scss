@@ -142,6 +142,10 @@
   }
 
   .pdf-content {
+    .textLayer a {
+      background: white;
+    }
+
     .textLayer {
       position: absolute;
       text-align: initial;
@@ -150,7 +154,6 @@
       right: 0;
       bottom: 0;
       overflow: hidden;
-      opacity: 0.4;
       line-height: 1;
     }
 
@@ -231,7 +234,6 @@
     .textLayer .endOfContent.active {
       top: 0;
     }
-
 
     .pdfPresentationMode:-webkit-full-screen .textLayer span {
       cursor: none;
