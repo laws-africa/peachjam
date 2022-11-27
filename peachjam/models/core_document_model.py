@@ -71,8 +71,9 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
         return self.distinct("work_frbr_uri").order_by("work_frbr_uri", "-date")
 
     def preferred_language(self, language):
-        # return a document if its language is the preferred one, or there are
-        # no documents in the preferred language (and so all docs are returned)
+        """Return documents whose language match the preferred one,
+        or return all docs if there are no documents in the preferred language.
+        """
         return self.filter(
             models.Q(language_id__iso_639_3=language)
             | ~models.Q(work__languages__contains=[language])
@@ -246,8 +247,12 @@ class CoreDocument(PolymorphicModel):
         if not hasattr(self, "work") or self.work.frbr_uri != self.work_frbr_uri:
             self.work, _ = Work.objects.get_or_create(
                 frbr_uri=self.work_frbr_uri,
-                defaults={"title": self.title, "languages": [self.language.iso_639_3]},
+                defaults={"title": self.title},
             )
+            # Update work languages
+            if self.language.iso_639_3 not in self.work.languages:
+                self.work.languages.append(self.language.iso_639_3)
+                self.work.save()
 
         # keep work title in sync with English documents
         if self.language.iso_639_3 == "eng" and self.work.title != self.title:
