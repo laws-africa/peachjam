@@ -12,7 +12,7 @@ class TaxonomyTree {
 
     const slugRoot: string = root.dataset.rootSlug || '';
 
-    tocController.items = data.map((item: TOCItemType) => {
+    tocController.items = data[0].children.map((item: TOCItemType) => {
       const formatItem = (x: TOCItemType, ancestors: string[]) => {
         const newAncestors = [...ancestors, x.data.slug];
         const formatted: TOCItemType = {
