@@ -2,9 +2,9 @@
 
 <div class="list-group mb-4">
   <div class="list-group-item bg-light">
-    <strong>{% trans 'Subject areas' %}</strong>
+    <strong>{{ first_level_taxonomy }}</strong>
   </div>
-  <div class="list-group-item">
+  <div class="list-group-item" style="max-height: 500px; overflow-y: auto">
     {% include "peachjam/_taxonomy_tree.html" %}
   </div>
 </div>
