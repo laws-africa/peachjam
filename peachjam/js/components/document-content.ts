@@ -2,10 +2,11 @@ import DocumentSearch from './DocumentSearch/index.vue';
 import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../utils/vue-utils';
-import { i18n } from '../i18n';
+import { vueI18n } from '../i18n';
 import DocDiffsManager from './DocDiffs';
 import { generateHtmlTocItems } from '../utils/function';
 import { createTocController } from '../utils/function';
+import i18next from 'i18next';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -106,7 +107,7 @@ class DocumentContent {
           docType: root.getAttribute('data-display-type'),
           mountElement: targetMountElement
         },
-        use: [i18n],
+        use: [vueI18n],
         mountTarget: targetMountElement as HTMLElement
       });
       targetMountElement.addEventListener('going-to-snippet', () => {
@@ -157,6 +158,7 @@ class DocumentContent {
     const tocItems = this.getTocItems();
     if (!tocItems.length) return false;
     const tocController = createTocController(tocItems);
+    tocController.titleFilterPlaceholder = i18next.t('Search table of contents');
     const tocContainer = this.root.querySelector('.toc');
     if (!tocContainer) return;
     tocContainer.appendChild(tocController);
