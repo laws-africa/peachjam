@@ -4,8 +4,7 @@ import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../utils/vue-utils';
 import { vueI18n } from '../i18n';
 import DocDiffsManager from './DocDiffs';
-import { generateHtmlTocItems } from '../utils/function';
-import { createTocController } from '../utils/function';
+import { createTocController, generateHtmlTocItems } from '../utils/function';
 import i18next from 'i18next';
 
 class OffCanvas {
