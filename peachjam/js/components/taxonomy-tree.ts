@@ -1,3 +1,5 @@
+import { createTocController } from '../utils/function';
+import i18next from 'i18next';
 import { TOCItemType } from '../utils/types-and-interfaces';
 
 class TaxonomyTree {
@@ -26,6 +28,10 @@ class TaxonomyTree {
       // data-slug-root should always have a value. Contractual dom agreement.
       return formatItem(item, ['taxonomy', slugRoot]);
     });
+
+    tocController.expandAllBtnText = i18next.t('Expand all');
+    tocController.collapseAllBtnText = i18next.t('Collapse all');
+    tocController.titleFilterPlaceholder = i18next.t('Search');
 
     root.appendChild(tocController);
 
