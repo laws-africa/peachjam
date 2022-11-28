@@ -1,7 +1,7 @@
 import components from './components';
 
 // @ts-ignore
-import { i18n } from './i18n';
+import { vueI18n } from './i18n';
 import { createAndMountApp } from './utils/vue-utils';
 
 import {
@@ -51,7 +51,7 @@ class PeachJam {
         const vueComp = components[name];
         createAndMountApp({
           component: vueComp,
-          use: [i18n],
+          use: [vueI18n],
           mountTarget: el as HTMLElement
         });
         (el as any).component = vueComp;
