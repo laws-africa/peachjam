@@ -249,10 +249,6 @@ class CoreDocument(PolymorphicModel):
                 frbr_uri=self.work_frbr_uri,
                 defaults={"title": self.title},
             )
-            # Update work languages
-            if self.language.iso_639_3 not in self.work.languages:
-                self.work.languages.append(self.language.iso_639_3)
-                self.work.save()
 
         # keep work title in sync with English documents
         if self.language.iso_639_3 == "eng" and self.work.title != self.title:

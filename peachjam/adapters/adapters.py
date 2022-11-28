@@ -219,16 +219,8 @@ class IndigoAdapter(Adapter):
         if imported_document["parent_work"]:
             parent_work, _ = Work.objects.get_or_create(
                 frbr_uri=imported_document["parent_work"]["frbr_uri"],
-                defaults={
-                    "title": imported_document["parent_work"]["title"],
-                },
+                defaults={"title": imported_document["parent_work"]["title"]},
             )
-
-            # Update work languages
-            if imported_document["language"] not in parent_work.languages:
-                parent_work.languages.append(imported_document["language"])
-                parent_work.save()
-
             created_document.parent_work = parent_work
             logger.info(f"Set parent to {parent_work}")
         else:
@@ -241,16 +233,8 @@ class IndigoAdapter(Adapter):
         if imported_document["repeal"]:
             repealing_work, _ = Work.objects.get_or_create(
                 frbr_uri=imported_document["repeal"]["repealing_uri"],
-                defaults={
-                    "title": imported_document["repeal"]["repealing_title"],
-                },
+                defaults={"title": imported_document["repeal"]["repealing_title"]},
             )
-
-            # Update work languages
-            if imported_document["language"] not in repealing_work.languages:
-                repealing_work.languages.append(imported_document["language"])
-                repealing_work.save()
-
             self.create_relationship(
                 "repealed-by",
                 subject_work=subject_work,
@@ -262,16 +246,8 @@ class IndigoAdapter(Adapter):
                 if amendment["amending_uri"] and amendment["amending_title"]:
                     amending_work, _ = Work.objects.get_or_create(
                         frbr_uri=amendment["amending_uri"],
-                        defaults={
-                            "title": amendment["amending_title"],
-                        },
+                        defaults={"title": amendment["amending_title"]},
                     )
-
-                    # Update work languages
-                    if imported_document["language"] not in amending_work.languages:
-                        amending_work.languages.append(imported_document["language"])
-                        amending_work.save()
-
                     self.create_relationship(
                         "amended-by",
                         subject_work=subject_work,
@@ -286,14 +262,8 @@ class IndigoAdapter(Adapter):
                 ):
                     commencing_work, _ = Work.objects.get_or_create(
                         frbr_uri=commencement["commencing_frbr_uri"],
-                        defaults={
-                            "title": commencement["commencing_title"],
-                        },
+                        defaults={"title": commencement["commencing_title"]},
                     )
-                    if imported_document["language"] not in commencing_work.languages:
-                        commencing_work.languages.append(imported_document["language"])
-                        commencing_work.save()
-
                     self.create_relationship(
                         "commenced-by",
                         subject_work=subject_work,
