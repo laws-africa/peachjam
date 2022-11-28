@@ -3,7 +3,7 @@ import RelationshipEnrichmentList from './RelationshipEnrichmentList.vue';
 import { IRelationshipEnrichment } from './enrichment';
 import { GutterEnrichmentManager, IGutterEnrichmentProvider } from '@lawsafrica/indigo-akn/dist/enrichments';
 import { IRangeTarget } from '@lawsafrica/indigo-akn/dist/ranges';
-import { i18n } from '../../i18n';
+import { vueI18n } from '../../i18n';
 import { createAndMountApp } from '../../utils/vue-utils';
 
 export class RelationshipEnrichments implements IGutterEnrichmentProvider {
@@ -42,7 +42,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
         readonly: this.readonly,
         thisWorkFrbrUri: this.workFrbrUri
       },
-      use: [i18n],
+      use: [vueI18n],
       mountTarget: document.createElement('div') as HTMLElement
     });
 
