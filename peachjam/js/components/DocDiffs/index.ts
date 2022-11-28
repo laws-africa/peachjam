@@ -1,7 +1,7 @@
 import ProvisionChangedGutterItem from './ProvisionChangedGutterItem.vue';
 import ProvisionDiffInline from './ProvisionDiffInline.vue';
 import { createAndMountApp } from '../../utils/vue-utils';
-import { i18n } from '../../i18n';
+import { vueI18n } from '../../i18n';
 
 export const getBaseUrl = () => {
   const hostname = window.location.hostname;
@@ -38,7 +38,7 @@ class DocDiffsManager {
         props: {
           provision
         },
-        use: [i18n],
+        use: [vueI18n],
         mountTarget: document.createElement('div')
       });
       this.gutter.appendChild(item.$el);
@@ -61,7 +61,7 @@ class DocDiffsManager {
         provision: provision,
         frbrExpressionUri: this.frbrExpressionUri
       },
-      use: [i18n],
+      use: [vueI18n],
       mountTarget: document.createElement('div')
     });
     this.inlineDiff.$el.addEventListener('close', () => {
