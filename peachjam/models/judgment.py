@@ -1,6 +1,8 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models import Max
+from django.template.defaultfilters import date as format_date
+from django.utils.translation import override as lang_override
 
 from peachjam.models import CoreDocument
 
@@ -79,7 +81,7 @@ class Judgment(CoreDocument):
     )
     hearing_date = models.DateField(null=True, blank=True)
 
-    CITATION_DATE_FORMAT = "(%d %B %Y)"
+    CITATION_DATE_FORMAT = "(j F Y)"
 
     MNC_FORMAT = "[{year}] {author} {serial}"
     """ Format string to use for building short MNCs. """
@@ -161,7 +163,8 @@ class Judgment(CoreDocument):
             parts.append(self.mnc)
 
         if self.date:
-            parts.append(self.date.strftime(self.CITATION_DATE_FORMAT))
+            with lang_override(self.language.iso_639_1):
+                parts.append(format_date(self.date, self.CITATION_DATE_FORMAT))
 
         self.title = " ".join(parts)
         self.citation = self.title
