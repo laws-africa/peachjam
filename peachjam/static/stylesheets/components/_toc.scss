@@ -1,3 +1,5 @@
+// Styling dedicated for toc and toc related implements
+
 .toc {
   position: sticky;
   top: 0px;
@@ -34,4 +36,14 @@ la-table-of-contents {
       }
     }
   }
+}
+
+
+.taxonomy-tree-list-group__header {
+  @extend .bg-light;
+}
+
+.taxonomy-tree-list-group__body {
+  max-height: 50vh;
+  overflow-y: auto
 }
