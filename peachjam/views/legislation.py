@@ -152,10 +152,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                 }
             )
 
-        amendments = self.object.metadata_json.get(
-            "amendments", None
-        ) or self.object.metadata_json.get("work_amendments", None)
-        print("amendments", amendments)
+        amendments = self.object.metadata_json.get("work_amendments", None)
         if amendments:
             events.extend(
                 [
