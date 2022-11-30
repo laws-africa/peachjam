@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-24 14:32+0200\n"
-"PO-Revision-Date: 2022-11-25 07:08\n"
+"PO-Revision-Date: 2022-11-30 09:38\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -222,11 +222,11 @@ msgstr "Date"
 
 #: templates/peachjam/_entity_profile.html:32
 msgid "Physical address"
-msgstr "Adresse physique"
+msgstr "Adresse postale"
 
 #: templates/peachjam/_entity_profile.html:41
 msgid "Visit website"
-msgstr "Visiter le site web"
+msgstr "Visiter le site internet"
 
 #: templates/peachjam/_header.html:41 templates/peachjam/_header.html:42
 #, python-format
@@ -274,16 +274,16 @@ msgstr "Taxonomies"
 
 #: templates/peachjam/_taxonomy_tree_facet.html:5
 msgid "Subject areas"
-msgstr "Zones thématiques"
+msgstr "Domaines"
 
 #: templates/peachjam/_terms_of_use_content.html:3
 msgid "What do these terms relate to?"
-msgstr "À quoi se réfèrent ces termes?"
+msgstr "À quoi ces termes se réfèrent-ils ?"
 
 #: templates/peachjam/_terms_of_use_content.html:5
 #, python-format
 msgid "These terms of use describe the permitted use for the %(organisation_name)s service available at <a href=\"/\">%(org_link_text)s</a> and its subdomains."
-msgstr "Ces conditions d'utilisation décrivent l'utilisation autorisée pour le service %(organisation_name)s disponible sur <a href=\"/\">%(org_link_text)s</a> et ses sous-domaines."
+msgstr "Les présentes conditions d'utilisation décrivent l'utilisation autorisée pour le service %(organisation_name)s disponible sur <a href=\"/\">%(org_link_text)s</a> et ses sous-domaines."
 
 #: templates/peachjam/_terms_of_use_content.html:11
 msgid "Who are we, and how to contact us?"
@@ -292,12 +292,12 @@ msgstr "Qui sommes-nous et comment nous contacter?"
 #: templates/peachjam/_terms_of_use_content.html:14
 #, python-format
 msgid "The %(organisation_name)s service is provided by the %(organisation_name)s programme of the Department of Public Law at the University of Cape Town and Laws.Africa NPO. You can contact us by email at <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> or by filling out <a href=\"/about/\">this form</a>."
-msgstr "Le service %(organisation_name)s est fourni par le programme %(organisation_name)s du Département de droit public de l'Université du Cap et des Lois. frica NPO. Vous pouvez nous contacter par e-mail à <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> ou en remplissant <a href=\"/about/\">ce formulaire</a>."
+msgstr "Le service %(organisation_name)s est fourni par le programme %(organisation_name)s du Département de droit public de l'Université du Cap et Laws.Africa NPO. Vous pouvez nous contacter par courriel sur<a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> ou en remplissant <a href=\"/about/\">ce formulaire</a>."
 
 #: templates/peachjam/_terms_of_use_content.html:23
 #, python-format
 msgid "By using the %(organisation_name)s service you accept these terms"
-msgstr "En utilisant le service %(organisation_name)s , vous acceptez ces conditions"
+msgstr "En utilisant le service %(organisation_name)s , vous acceptez ces conditions générales"
 
 #: templates/peachjam/_terms_of_use_content.html:28
 #, python-format
