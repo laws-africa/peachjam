@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-24 14:32+0200\n"
-"PO-Revision-Date: 2022-11-30 09:38\n"
+"PO-Revision-Date: 2022-11-30 10:56\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -302,23 +302,23 @@ msgstr "En utilisant le service %(organisation_name)s , vous acceptez ces condit
 #: templates/peachjam/_terms_of_use_content.html:28
 #, python-format
 msgid "By using the %(organisation_name)s service, you confirm that you accept these terms of use and agree to comply with them."
-msgstr "En utilisant le service %(organisation_name)s , vous confirmez que vous acceptez ces conditions d'utilisation et acceptez de les respecter."
+msgstr "En utilisant le service %(organisation_name)s , vous confirmez que vous acceptez ces conditions d'utilisation et que vous vous engagez à les respecter."
 
 #: templates/peachjam/_terms_of_use_content.html:33
 msgid "Fair and reasonable use"
-msgstr "Utilisation juste et raisonnable"
+msgstr "Utilisation équitable et raisonnable"
 
 #: templates/peachjam/_terms_of_use_content.html:36
 msgid "You must use the service responsibly by not making too many requests. In order to maintain the integrity of the service for everyone, we may block or disable use of the service from certain IP addresses, for making too many requests."
-msgstr "Vous devez utiliser le service de manière responsable en ne faisant pas trop de requêtes. Afin de maintenir l'intégrité du service pour tout le monde, nous pouvons bloquer ou désactiver l'utilisation du service à partir de certaines adresses IP, pour faire trop de requêtes."
+msgstr "Vous devez utiliser le service de manière responsable en ne faisant pas trop de demandes. Afin de maintenir l'intégrité du service pour tous, nous nous réservons le droit de bloquer ou de désactiver l'utilisation du service pour les adresses IP qui ont fait trop de demandes."
 
 #: templates/peachjam/_terms_of_use_content.html:43
 msgid "We are a donor-funded organisation and bulk and frequent scraping affects our costs, endangering the sustainability of the service. There are more efficient ways of obtaining access to our data in bulk. Please email us if you would like to access our data in bulk."
-msgstr "Nous sommes une organisation financée par le donateur et la mise à la ferraille en vrac et fréquente affecte nos coûts, mettant en péril la durabilité du service. Il existe des moyens plus efficaces d'obtenir l'accès à nos données en vrac. Veuillez nous envoyer un courriel si vous souhaitez accéder à nos données en bloc."
+msgstr "Nous sommes une organisation financée par des donateurs et le téléchargement systématique et fréquent a une incidence sur nos coûts, mettant en danger la durabilité du service. Il existe des moyens plus efficaces d'obtenir l'accès à nos données en masse. Veuillez nous envoyer un courriel si vous souhaitez accéder à nos données en masse."
 
 #: templates/peachjam/_terms_of_use_content.html:50
 msgid "Crawling and indexing"
-msgstr "Rampage et indexation"
+msgstr "Rammasage et indexation"
 
 #: templates/peachjam/_terms_of_use_content.html:52
 #, python-format
@@ -328,7 +328,7 @@ msgstr "Vous pouvez accéder au service %(organisation_name)s via le site web, o
 #: templates/peachjam/_terms_of_use_content.html:57
 #, python-format
 msgid "We restrict external indexing of documents by search engine robots or spiders. You must adhere to the instructions in the robots.txt file at: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
-msgstr "Nous limitons l'indexation externe des documents par les robots des moteurs de recherche ou les araignées. Vous devez respecter les instructions du fichier robots.txt à l'adresse suivante: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
+msgstr "Nous limitons l'indexation externe des documents par les robots des moteurs de recherche ou robots d'indexation des moteurs de recherche. Vous devez respecter les instructions du fichier robots.txt à l'adresse suivante: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
 
 #: templates/peachjam/_terms_of_use_content.html:64
 msgid "We may block or disable use of the service from certain IP addresses, if they appear to be compiling a search engine index."
@@ -341,11 +341,11 @@ msgstr "Couverture"
 #: templates/peachjam/_terms_of_use_content.html:72
 #, python-format
 msgid "%(organisation_name)s collects caselaw, legislation, African Union documents, journals, books and other materials through cooperation with regional, governmental, academic and non-profit organisations and sometimes individuals."
-msgstr "%(organisation_name)s recueille des caelaws, des lois, des documents de l’Union africaine, des revues, des livres et d’autres documents par le biais de la coopération avec des organisations régionales, gouvernementales, universitaires et sans but lucratif, et parfois des individus."
+msgstr "%(organisation_name)s recueille des décisions de justice, des lois, des documents de l’Union africaine, des revues, des livres et d’autres documents par le biais de la coopération avec des organisations régionales, gouvernementales, universitaires et sans but lucratif, et parfois des individus."
 
 #: templates/peachjam/_terms_of_use_content.html:79
 msgid "We strive to ensure high quality standards on all documents published on the platform. Where verification was not possible, this will be indicated on the document concerned."
-msgstr "Nous nous efforçons de garantir des normes de qualité élevées sur tous les documents publiés sur la plate-forme. Si la vérification n'était pas possible, cela sera indiqué sur le document concerné."
+msgstr "Nous veillons à garantir des normes de qualité supérieures pour tous les documents publiés sur la plateforme. Lorsque la vérification de l'authenticité n'a pas été possible, il en serait indiqué sur le document concerné."
 
 #: templates/peachjam/_terms_of_use_content.html:85
 msgid "Errors and omissions"
