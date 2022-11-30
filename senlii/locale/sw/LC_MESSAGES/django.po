@@ -5,51 +5,51 @@ msgstr ""
 "POT-Creation-Date: 2022-11-24 14:32+0200\n"
 "PO-Revision-Date: 2022-11-30 14:17\n"
 "Last-Translator: \n"
-"Language-Team: French\n"
-"Language: fr_FR\n"
+"Language-Team: Swahili\n"
+"Language: sw_KE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
-"X-Crowdin-Language: fr\n"
+"X-Crowdin-Language: sw\n"
 "X-Crowdin-File: /main/senlii/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 112\n"
 
 #: settings.py:11
 msgid "French"
-msgstr "Français"
+msgstr "Kifaransa"
 
 #: settings.py:12
 msgid "English"
-msgstr "Anglais"
+msgstr "Kiingereza"
 
 #: templates/liiweb/home.html:8
 msgid "Recent Judgments"
-msgstr "Jugements récents"
+msgstr "Hukumu za Hivi Karibuni"
 
 #: templates/liiweb/home.html:9
 msgid "View more judgments"
-msgstr "Voir plus de jugements"
+msgstr ""
 
 #: templates/liiweb/home.html:14
 msgid "Recent Legislation"
-msgstr "Législation récente"
+msgstr ""
 
 #: templates/liiweb/home.html:15
 msgid "View more legislation"
-msgstr "Voir plus de législation"
+msgstr ""
 
 #: templates/liiweb/home.html:20
 msgid "Recent Articles"
-msgstr "Articles récents"
+msgstr ""
 
 #: templates/liiweb/home.html:23
 msgid "View more articles"
-msgstr "Voir plus d'articles"
+msgstr ""
 
 #: templates/senlii/home.html:4
 msgid "Home"
-msgstr "Accueil"
+msgstr "Sebule"
 
