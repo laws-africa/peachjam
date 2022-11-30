@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-24 14:32+0200\n"
-"PO-Revision-Date: 2022-11-30 10:56\n"
+"PO-Revision-Date: 2022-11-30 11:56\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -354,11 +354,11 @@ msgstr "Erreurs et omissions"
 #: templates/peachjam/_terms_of_use_content.html:88
 #, python-format
 msgid "We scan and digitize most of the documents made available on the %(organisation_name)s and affiliate LII websites. We use industry-standard Optical Character Recognition (OCR) software to convert these documents to readable text and there may be errors introduced by this process."
-msgstr "Nous numérisons et numérisons la plupart des documents mis à disposition sur les sites Web %(organisation_name)s et affiliés LII. Nous utilisons un logiciel standard de reconnaissance de caractères optique (OCR) pour convertir ces documents en texte lisible et il peut y avoir des erreurs introduites par ce processus."
+msgstr "Nous scannons et numérisons la plupart des documents mis à disposition sur les sites Web %(organisation_name)s et affiliés LII. Nous utilisons un logiciel standard de reconnaissance optique de caractères (ROC) pour convertir ces documents en texte lisible mais il peut y avoir des erreurs introduites par ce processus."
 
 #: templates/peachjam/_terms_of_use_content.html:96
 msgid "Please contact us should you encounter errors in any of the documents published and we shall rectify them within a reasonable time."
-msgstr "Veuillez nous contacter si vous rencontrez des erreurs dans les documents publiés et nous les corrigerons dans un délai raisonnable."
+msgstr "Veuillez nous contacter si vous trouverez des erreurs dans les documents publiés et nous les corrigerons dans un délai raisonnable."
 
 #: templates/peachjam/_terms_of_use_content.html:101
 msgid "Disclaimer"
