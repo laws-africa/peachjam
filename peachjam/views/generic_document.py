@@ -14,7 +14,7 @@ class GenericDocumentListView(FilteredDocumentListView):
 
     def get_queryset(self):
         queryset = super(GenericDocumentListView, self).get_queryset()
-        return queryset.order_by("-date")
+        return queryset.order_by("title")
 
 
 @registry.register_doc_type("generic_document")

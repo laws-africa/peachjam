@@ -99,8 +99,8 @@ export default {
         { key: 'courts', value: this.$t('Court') },
         { key: 'docTypes', value: this.$t('Document type') },
         { key: 'judges', value: this.$t('Judges') },
-        { key: 'years', value: this.$t('Year') },
-        { key: 'alphabet', value: this.$t('Alphabetical') }
+        { key: 'alphabet', value: this.$t('Alphabetical') },
+        { key: 'years', value: this.$t('Year') }
       ];
 
       const formatOptions = (options, key) => {
