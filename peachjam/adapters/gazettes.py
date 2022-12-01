@@ -3,7 +3,7 @@ import logging
 from countries_plus.models import Country
 from languages_plus.models import Language
 
-from peachjam.models import CoreDocument, Gazette, Locality
+from peachjam.models import CoreDocument, Gazette, Locality, SourceFile
 from peachjam.plugins import plugins
 
 from .adapters import Adapter
@@ -21,21 +21,22 @@ class GazetteAdapter(Adapter):
         log.info(
             f"Checking for new gazettes from Gazettes.Africa since {last_refreshed}"
         )
-        # if last_refreshed:
-        #     new_gazettes = CoreDocument.objects.filter(
-        #         jurisdiction=self.jurisdiction,
-        #         updated_at__gt=last_refreshed
-        #     ).non_polymorphic().using("gazettes_africa")[:5]
-        # else:
-        new_gazettes = (
-            CoreDocument.objects.filter(
-                jurisdiction=self.jurisdiction,
+        if last_refreshed:
+            new_gazettes = (
+                CoreDocument.objects.filter(
+                    jurisdiction=self.jurisdiction, updated_at__gt=last_refreshed
+                )
+                .non_polymorphic()
+                .using("gazettes_africa")[:5]
             )
-            .non_polymorphic()
-            .using("gazettes_africa")[:5]
-        )
-
-        print(new_gazettes)
+        else:
+            new_gazettes = (
+                CoreDocument.objects.filter(
+                    jurisdiction=self.jurisdiction,
+                )
+                .non_polymorphic()
+                .using("gazettes_africa")[:5]
+            )
 
         return list(new_gazettes.values_list("expression_frbr_uri", flat=True))
 
@@ -72,6 +73,15 @@ class GazetteAdapter(Adapter):
             doc, new = Gazette.objects.update_or_create(
                 expression_frbr_uri=expression_frbr_uri, defaults={**data}
             )
+
+            source_file = SourceFile(
+                document=doc,
+                filename=document.source_file.filename,
+                file=document.source_file.file,
+                size=document.source_file.size,
+                mimetype=document.source_file.mimetype,
+            )
+            source_file.save()
 
             log.info(f"New Document {new}")
             log.info("Update Done.")
