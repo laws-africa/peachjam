@@ -5,7 +5,7 @@
   >
     <div class="card border-warning">
       <div class="card-header">
-        <div class="d-flex">
+        <div class="d-flex mb-2 mb-lg-0">
           <div class="h5 flex-grow-1">
             {{ $t('What changed?') }}
           </div>
@@ -19,7 +19,7 @@
         </div>
 
         <div class="row">
-          <div class="col-6">
+          <div class="col-12 col-lg-6">
             <select
               v-if="diffsets"
               v-model="diffset"
@@ -38,7 +38,7 @@
             </select>
           </div>
 
-          <div class="col-6">
+          <div class="col-6 d-none d-lg-block">
             <label>
               <input
                 v-model="sideBySide"
@@ -69,6 +69,7 @@
 <script>
 import DiffContent from './DiffContent.vue';
 import { getBaseUrl } from './index';
+import debounce from 'lodash/debounce';
 
 export default {
   name: 'ProvisionDiffContentInline',
@@ -90,8 +91,21 @@ export default {
   data: () => ({
     sideBySide: true,
     diffsets: [],
-    diffset: null
+    diffset: null,
+    vw: Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
   }),
+
+  watch: {
+    vw: {
+      immediate: true,
+      handler (newVw) {
+        // Turn off side by side in mobile view
+        if (newVw < 992) {
+          this.sideBySide = false;
+        }
+      }
+    }
+  },
 
   mounted () {
     this.loadDiffContentsets();
@@ -100,9 +114,18 @@ export default {
       this.originalElement.style.display = 'none';
       this.originalElement.insertAdjacentElement('beforebegin', this.$el);
     }
+    window.addEventListener('resize', this.setVw);
+  },
+
+  unmounted () {
+    window.addEventListener('resize', this.setVw);
   },
 
   methods: {
+    setVw: debounce(function () {
+      this.vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    }, 200),
+
     async loadDiffContentsets () {
       const url = `${getBaseUrl()}/e/diffsets${this.frbrExpressionUri}/?id=${this.provision.id}`;
       const resp = await fetch(url);
