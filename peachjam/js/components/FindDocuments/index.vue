@@ -17,7 +17,7 @@
             aria-controls="nav-search"
             aria-selected="true"
           >
-            Search
+            {{ $t('Search') }}
           </button>
           <button
             id="advanced-search-tab"
@@ -29,7 +29,7 @@
             aria-controls="nav-advanced-search"
             aria-selected="false"
           >
-            Advanced
+            {{ $t('Advanced') }}
           </button>
         </div>
       </nav>
