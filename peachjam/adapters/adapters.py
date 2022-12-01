@@ -241,8 +241,8 @@ class IndigoAdapter(Adapter):
                 object_work=repealing_work,
             )
 
-        if imported_document["amendments"]:
-            for amendment in imported_document["amendments"]:
+        if imported_document["work_amendments"]:
+            for amendment in imported_document["work_amendments"]:
                 if amendment["amending_uri"] and amendment["amending_title"]:
                     amending_work, _ = Work.objects.get_or_create(
                         frbr_uri=amendment["amending_uri"],

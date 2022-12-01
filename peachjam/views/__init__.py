@@ -12,3 +12,4 @@ from .legal_instrument import *
 from .legislation import *
 from .place import *
 from .taxonomy import *
+from .terms_of_use import *

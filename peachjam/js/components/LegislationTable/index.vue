@@ -7,6 +7,14 @@
       tabindex="-1"
       aria-labelledby="mobile-legislation-facets"
     >
+      <div class="offcanvas-header justify-content-end">
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          :aria-label="$t('Close')"
+        />
+      </div>
       <div class="offcanvas-body">
         <FilterFacets
           v-if="windowWith < 992"
@@ -146,14 +154,21 @@
             v-else
             class="p-2 text-center"
           >
-            No legislation found.
+            {{ $t('No legislation found.') }}
             <a
               :href="`/search/?q=${encodeURIComponent(q)}`"
               target="_blank"
-            >Try searching instead</a>.
+            >
+              {{ $t('Try searching instead') }}
+            </a>.
           </div>
         </div>
       </div>
+    </div>
+    <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
+    <div v-if="false">
+      {{ $t('Years') }}
+      {{ $t('Taxonomies') }}
     </div>
   </div>
 </template>
@@ -272,14 +287,14 @@ export default {
 
       this.facets = [
         {
-          title: 'Years',
+          title: this.$t('Years'),
           name: 'year',
           type: 'radio',
           value: null,
           options: yearsOptions
         },
         {
-          title: 'Taxonomies',
+          title: this.$t('Taxonomies'),
           name: 'taxonomies',
           type: 'checkboxes',
           value: [],

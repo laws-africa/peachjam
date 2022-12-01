@@ -3,12 +3,8 @@ import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../utils/vue-utils';
 import { i18n } from '../i18n';
-
-type TOCItemType = {
-  [key: string]: any;
-  title?: string;
-  children?: TOCItemType[];
-}
+import DocDiffsManager from './DocDiffs';
+import { generateHtmlTocItems } from '../utils/function';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -32,9 +28,13 @@ class DocumentContent {
   private pdfRenderer: PdfRenderer | undefined;
   private searchApp: any;
   private navOffCanvas: OffCanvas | undefined;
+  private docDiffsManager: DocDiffsManager | null;
   constructor (root: HTMLElement) {
     this.root = root;
     this.navOffCanvas = undefined;
+    this.docDiffsManager = null;
+
+    this.setupDiffs();
 
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
@@ -114,6 +114,15 @@ class DocumentContent {
     }
   }
 
+  setupDiffs () {
+    const gutter: HTMLElement | null = this.root.querySelector('la-gutter');
+    const akn: HTMLElement | null = this.root.querySelector('la-akoma-ntoso');
+    if (!akn || !gutter) return;
+    const frbrExpressionUri = akn.getAttribute('expression-frbr-uri');
+    if (!frbrExpressionUri) return;
+    this.docDiffsManager = new DocDiffsManager(frbrExpressionUri, gutter);
+  }
+
   setupResponsiveContentTransporter (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
     const placeContent = (vw: number) => {
       // reference _variables.scss for grid-breakpoints
@@ -171,53 +180,8 @@ class DocumentContent {
         ? JSON.parse(aknTocJsonElement.textContent as string) : [];
     } else if (this.root.getAttribute('data-display-type') === 'html') {
       const content: HTMLElement | null = this.root.querySelector('.content__html');
-      items = content ? this.generateHtmlTocItems(content) : [];
+      items = content ? generateHtmlTocItems(content) : [];
     }
-    return items;
-  }
-
-  generateHtmlTocItems = (content: HTMLElement) => {
-    let stack: any;
-    const items: TOCItemType[] = [];
-
-    content.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5').forEach((heading) => {
-      if (!heading.id) {
-        heading.id = heading.tagName + '_' + Math.floor(Math.random() * 10000);
-      }
-
-      const item = {
-        type: heading.tagName,
-        title: heading.innerText,
-        id: heading.id,
-        children: []
-      };
-
-      // top level
-      if (!stack) {
-        items.push(item);
-        stack = [item];
-      } else {
-        // find the best sibling for this entry; if the stack is at h3 and we have h2, find an h2 or h1
-        while (stack.length && stack[stack.length - 1].type > heading.tagName) {
-          stack.pop();
-        }
-        const top = stack[stack.length - 1];
-
-        if (top.type === heading.tagName) {
-          // siblings
-          if (stack.length > 1) {
-            stack[stack.length - 2].children.push(item);
-          } else {
-            items.push(item);
-          }
-          stack[stack.length - 1] = item;
-        } else {
-          // child
-          top.children.push(item);
-          stack.push(item);
-        }
-      }
-    });
     return items;
   }
 }
