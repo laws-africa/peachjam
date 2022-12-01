@@ -1,9 +1,13 @@
 <template>
   <la-gutter-item
     :anchor="`#${provision.id}`"
-    class="d-none d-lg-block"
   >
-    <div class="card">
+    <i
+      class="bi bi-clock-history"
+      role="button"
+      @click="showChanges"
+    />
+    <div class="card d-none d-lg-block">
       <div class="card-body p-3">
         <p>{{ $t('This provision has been amended') }}.</p>
         <button
@@ -39,3 +43,21 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.bi-clock-history {
+  font-size: 24px;
+  color: var(--anntn-highlight-color);
+  display: none;
+  text-align: center;
+  position: relative;
+  z-index: 9;
+}
+
+@media screen and (max-width: 992px) {
+  .bi-clock-history {
+    display: block;
+  }
+}
+
+</style>
