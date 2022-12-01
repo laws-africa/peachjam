@@ -3,7 +3,7 @@
     :anchor="`#${provision.id}`"
   >
     <i
-      class="bi bi-clock-history"
+      class="bi bi-clock-history mobile-gutter-item"
       role="button"
       @click="showChanges"
     />
@@ -43,21 +43,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.bi-clock-history {
-  font-size: 24px;
-  color: var(--anntn-highlight-color);
-  display: none;
-  text-align: center;
-  position: relative;
-  z-index: 9;
-}
-
-@media screen and (max-width: 992px) {
-  .bi-clock-history {
-    display: block;
-  }
-}
-
-</style>
