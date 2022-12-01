@@ -3,7 +3,7 @@
     :anchor.prop="anchorElement"
     @click="activate"
   >
-    <i class="bi bi-chat-left" />
+    <i class="bi bi-chat-left mobile-gutter-item" />
     <div class="card">
       <div class="card-body">
         <div class="mb-2 d-lg-none text-end">
@@ -182,9 +182,6 @@ export default {
 <style scoped>
 
 .bi-chat-left {
-  font-size: 24px;
-  color: var(--anntn-highlight-color);
-  display: none;
   text-align: center;
   position: relative;
   z-index: 9;
@@ -199,10 +196,6 @@ export default {
     transform: translateY(100%);
     transition: transform ease-in-out 300ms;
     z-index: 9;
-  }
-
-  .bi-chat-left {
-    display: block;
   }
 
   la-gutter-item[active] {
