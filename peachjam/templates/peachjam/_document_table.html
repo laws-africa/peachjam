@@ -24,7 +24,9 @@
 
             <td style="white-space: nowrap;">
               {% if document.work.languages|length > 1 %}
-                <i class="bi bi-file-text"> Multi-language</i>
+                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Multi-language">
+                  <i class="bi bi-file-text"></i>
+                </span>
               {% endif %}
             </td>
         </tr>
