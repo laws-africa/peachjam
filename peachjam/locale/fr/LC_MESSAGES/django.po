@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-24 14:32+0200\n"
-"PO-Revision-Date: 2022-11-30 23:02\n"
+"PO-Revision-Date: 2022-12-01 00:00\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -399,12 +399,12 @@ msgstr "Les liens hypertextes sur %(organisation_name)s sont (dans la plupart de
 
 #: templates/peachjam/_terms_of_use_content.html:151
 msgid "Copyright and Licensing"
-msgstr "Copyright et licence"
+msgstr "Droits d'auteur et licences"
 
 #: templates/peachjam/_terms_of_use_content.html:153
 #, python-format
 msgid "You may use and re-use primary and secondary law content on %(organisation_name)s under the terms of the Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Attribution-NonCommercial 4.0 International</a> license. Under this license, you may freely use, re-use and redistribute works from %(organisation_name)s provided you credit %(organisation_name)s as your source and your use is not for commercial gain."
-msgstr "Vous pouvez utiliser et réutiliser le contenu du droit primaire et secondaire sur %(organisation_name)s sous les termes du contrat Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Paternité-Pas d'Utilisation Commerciale 4. Licence internationale</a> Sous cette licence, vous pouvez utiliser librement réutiliser et redistribuer des œuvres de %(organisation_name)s à condition que vous créditiez %(organisation_name)s comme source et que votre utilisation ne soit pas à des fins commerciales."
+msgstr "Vous pouvez utiliser et réutiliser le contenu du droit primaire et secondaire sur %(organisation_name)s sous les termes de la licence Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Paternité-Pas d'Utilisation Commerciale 4. Licence internationale</a> Sous cette licence, vous pouvez utiliser librement réutiliser et redistribuer des œuvres de %(organisation_name)s à condition que vous créditiez %(organisation_name)s comme source et que votre utilisation ne soit pas à des fins commerciales."
 
 #: templates/peachjam/_terms_of_use_content.html:162
 #, python-format
