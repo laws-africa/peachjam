@@ -56,9 +56,7 @@ class DocDiffsManager {
     if (this.inlineDiff && this.inlineDiff.provision.id === provision.id) {
       return;
     }
-    if (this.inlineDiff) {
-      this.inlineDiff.close();
-    }
+    if (this.inlineDiff) this.inlineDiff.close();
     this.inlineDiff = createAndMountApp({
       component: ProvisionDiffInline,
       props: {
