@@ -89,8 +89,6 @@ export default {
     }
   },
   data: () => ({
-    originalElement: null,
-    wrapperElement: null,
     sideBySide: true,
     diffsets: [],
     diffset: null,
@@ -112,16 +110,9 @@ export default {
   mounted () {
     this.loadDiffContentsets();
     this.originalElement = document.getElementById(this.provision.id);
-    this.wrapperElement = document.createElement('div');
-    this.wrapperElement.style.position = 'relative';
     if (this.originalElement) {
-      // Hide originalElement behind ProvisionDiffInline via absolute positioning
-      this.originalElement.style.position = 'absolute';
-      this.originalElement.style.visibility = 'none';
-      this.originalElement.style.height = '0';
-      this.originalElement.style.top = '0';
-      this.originalElement.parentNode.insertBefore(this.wrapperElement, this.originalElement);
-      this.wrapperElement.append(this.originalElement, this.$el);
+      this.originalElement.style.display = 'none';
+      this.originalElement.insertAdjacentElement('beforebegin', this.$el);
     }
     window.addEventListener('resize', this.setVw);
   },
@@ -146,15 +137,7 @@ export default {
 
     close () {
       if (this.originalElement) {
-        this.originalElement.style.position = null;
-        this.originalElement.style.visibility = null;
-        this.originalElement.style.height = null;
-        this.originalElement.style.top = null;
-
-        [this.originalElement, this.$el].forEach(element => {
-          this.wrapperElement.insertAdjacentElement('beforebegin', element);
-        });
-        this.wrapperElement.remove();
+        this.originalElement.style.display = null;
       }
       this.$el.dispatchEvent(new CustomEvent('close'));
       this.$el.remove();
