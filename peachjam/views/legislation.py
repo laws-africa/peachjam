@@ -97,6 +97,40 @@ class LegislationDetailView(BaseDocumentDetailView):
                     }
                 )
 
+        amendments = self.object.metadata_json.get("work_amendments", None)
+        if amendments:
+            current_object_date = self.object.date.strftime("%Y-%m-%d")
+            amendment_dates = [amendment["date"] for amendment in amendments]
+            index = amendment_dates.index(current_object_date)
+
+            if index == len(amendment_dates) - 1:
+                msg = f"Amendment - notice for {friendly_type}"
+                notices.append(
+                    {
+                        "type": messages.INFO,
+                        "html": _(msg),
+                    }
+                )
+            else:
+                date = datetime.strptime(
+                    dates[index + 1], "%Y-%m-%d"
+                ).date() - timedelta(days=1)
+                amending_uri = amendments[-1]["amending_uri"]
+                msg = f"This {friendly_type} was amended on "
+                notices.append(
+                    {
+                        "type": messages.WARNING,
+                        "html": mark_safe(
+                            _(msg)
+                            % {
+                                "date_from": format_date(self.object.date, "j F Y"),
+                                "date_to": format_date(date, "j F Y"),
+                                "amending_uri": amending_uri,
+                            }
+                        ),
+                    }
+                )
+
         return notices
 
     def get_repeal_info(self):
