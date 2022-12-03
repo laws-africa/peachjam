@@ -12,6 +12,7 @@ from django.urls import path, reverse
 from django.utils.dateparse import parse_date
 from django.utils.dates import MONTHS
 from django.utils.html import format_html
+from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as __
 from import_export.admin import ImportMixin
 from treebeard.admin import TreeAdmin
@@ -258,7 +259,7 @@ class DocumentAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Work identification",
+            __("Work identification"),
             {
                 "fields": [
                     "work_frbr_uri",
@@ -406,8 +407,8 @@ class LegislationAdmin(ImportMixin, DocumentAdmin):
 class CaseNumberAdmin(admin.TabularInline):
     model = CaseNumber
     extra = 1
-    verbose_name = "Case number"
-    verbose_name_plural = "Case numbers"
+    verbose_name = __("case number")
+    verbose_name_plural = __("case numbers")
     readonly_fields = ["string"]
     fields = ["matter_type", "number", "year", "string_override"]
 
@@ -493,9 +494,9 @@ class IngestorAdmin(admin.ModelAdmin):
         queryset.update(last_refreshed_at=None)
         # queue up the background ingestor update task
         run_ingestors()
-        self.message_user(request, "Refreshing content in the background.")
+        self.message_user(request, _("Refreshing content in the background."))
 
-    refresh_all_content.short_description = "Refresh all content"
+    refresh_all_content.short_description = __("Refresh all content")
 
 
 class ArticleForm(forms.ModelForm):

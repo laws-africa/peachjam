@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 def entity_profile_photo_filename(instance, filename):
@@ -8,14 +9,20 @@ def entity_profile_photo_filename(instance, filename):
 
 
 class EntityProfile(models.Model):
-    about_html = models.TextField(null=True, blank=True)
-    website_url = models.URLField(null=True, blank=True)
-    address = models.TextField(null=True, blank=True)
+    about_html = models.TextField(_("about HTML"), null=True, blank=True)
+    website_url = models.URLField(_("website URL"), null=True, blank=True)
+    address = models.TextField(_("address"), null=True, blank=True)
     profile_photo = models.ImageField(
-        upload_to=entity_profile_photo_filename, null=True, blank=True
+        upload_to=entity_profile_photo_filename,
+        null=True,
+        blank=True,
+        verbose_name=_("profile photo"),
     )
     background_photo = models.ImageField(
-        upload_to=entity_profile_photo_filename, null=True, blank=True
+        upload_to=entity_profile_photo_filename,
+        null=True,
+        blank=True,
+        verbose_name=_("background photo"),
     )
 
     # generic relation details
@@ -25,7 +32,8 @@ class EntityProfile(models.Model):
 
     class Meta:
         unique_together = ("content_type", "object_id")
-        verbose_name_plural = "Profile"
+        verbose_name = _("profile")
+        verbose_name_plural = _("profile")
 
     def __str__(self):
         return f"{self.content_type.model} - #{self.object_id} profile"

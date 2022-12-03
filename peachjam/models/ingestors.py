@@ -2,6 +2,7 @@ import logging
 
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from peachjam.plugins import plugins
 from peachjam.tasks import update_document
@@ -10,19 +11,31 @@ log = logging.getLogger(__name__)
 
 
 class IngestorSetting(models.Model):
-    name = models.CharField(max_length=2048)
-    value = models.CharField(max_length=2048)
-    ingestor = models.ForeignKey("peachjam.Ingestor", on_delete=models.CASCADE)
+    name = models.CharField(_("name"), max_length=2048)
+    value = models.CharField(_("value"), max_length=2048)
+    ingestor = models.ForeignKey(
+        "peachjam.Ingestor", on_delete=models.CASCADE, verbose_name=_("ingestor")
+    )
+
+    class Meta:
+        verbose_name = _("ingestor setting")
+        verbose_name_plural = _("ingestor settings")
 
     def __str__(self):
         return f"{self.name} = {self.value}"
 
 
 class Ingestor(models.Model):
-    adapter = models.CharField(max_length=2048)
-    last_refreshed_at = models.DateTimeField(null=True, blank=True)
-    name = models.CharField(max_length=255)
-    enabled = models.BooleanField(default=True)
+    adapter = models.CharField(_("adapter"), max_length=2048)
+    last_refreshed_at = models.DateTimeField(
+        _("last refreshed at"), null=True, blank=True
+    )
+    name = models.CharField(_("name"), max_length=255)
+    enabled = models.BooleanField(_("enabled"), default=True)
+
+    class Meta:
+        verbose_name = _("ingestor")
+        verbose_name_plural = _("ingestor")
 
     def __str__(self):
         return self.name

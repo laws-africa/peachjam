@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-24 14:32+0200\n"
+"POT-Creation-Date: 2022-12-03 14:55+0000\n"
 "PO-Revision-Date: 2022-11-30 14:17\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -17,9 +17,678 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 99\n"
 
+#: admin.py:497
+msgid "Refreshing content in the background."
+msgstr ""
+
+#: models/article.py:20 models/core_document_model.py:106
+msgid "date"
+msgstr ""
+
+#: models/article.py:21 models/core_document_model.py:55
+#: models/core_document_model.py:105 models/core_document_model.py:487
+#, fuzzy
+#| msgid "Title"
+msgid "title"
+msgstr "Título"
+
+#: models/article.py:22
+msgid "body"
+msgstr ""
+
+#: models/article.py:27 models/author.py:20 models/generic_document.py:35
+#: models/generic_document.py:68
+#, fuzzy
+#| msgid "Author"
+msgid "author"
+msgstr "Autor"
+
+#: models/article.py:30 models/core_document_model.py:402
+msgid "image"
+msgstr ""
+
+#: models/article.py:32
+msgid "summary"
+msgstr ""
+
+#: models/article.py:33 models/relationships.py:7 models/taxonomies.py:11
+msgid "slug"
+msgstr ""
+
+#: models/article.py:34
+#, fuzzy
+#| msgid "Published in"
+msgid "published"
+msgstr "Publicado em"
+
+#: models/article.py:35
+msgid "topics"
+msgstr ""
+
+#: models/article.py:38
+#, fuzzy
+#| msgid "Articles"
+msgid "article"
+msgstr "Artigos"
+
+#: models/article.py:39
+#, fuzzy
+#| msgid "Articles"
+msgid "articles"
+msgstr "Artigos"
+
+#: models/article.py:64
+msgid "user"
+msgstr ""
+
+#: models/article.py:67
+msgid "photo"
+msgstr ""
+
+#: models/article.py:69
+msgid "profile description"
+msgstr ""
+
+#: models/article.py:72
+msgid "user profile"
+msgstr ""
+
+#: models/article.py:73
+msgid "user profiles"
+msgstr ""
+
 #: models/author.py:7
 msgid "Author"
 msgstr "Autor"
+
+#: models/author.py:9 models/core_document_model.py:32
+#: models/core_document_model.py:450 models/generic_document.py:16
+#: models/ingestors.py:14 models/ingestors.py:33 models/judgment.py:12
+#: models/judgment.py:26 models/judgment.py:40 models/judgment.py:53
+#: models/relationships.py:6 models/taxonomies.py:10
+msgid "name"
+msgstr ""
+
+#: models/author.py:10 models/core_document_model.py:36
+#: models/generic_document.py:18 models/judgment.py:54
+msgid "code"
+msgstr ""
+
+#: models/author.py:13 models/judgment.py:63 models/profile.py:35
+#: models/profile.py:36
+msgid "profile"
+msgstr ""
+
+#: models/author.py:21
+#, fuzzy
+#| msgid "Author"
+msgid "authors"
+msgstr "Autor"
+
+#: models/citations.py:12 models/core_document_model.py:397
+#: models/core_document_model.py:423 models/core_document_model.py:466
+#: models/core_document_model.py:485 models/judgment.py:237
+#: models/taxonomies.py:31
+#, fuzzy
+#| msgid "Documents"
+msgid "document"
+msgstr "Documentos"
+
+#: models/citations.py:14
+msgid "text"
+msgstr ""
+
+#: models/citations.py:15
+msgid "url"
+msgstr ""
+
+#: models/citations.py:17
+msgid "target id"
+msgstr ""
+
+#: models/citations.py:19
+msgid "target selectors"
+msgstr ""
+
+#: models/citations.py:22
+#, fuzzy
+#| msgid "Citation"
+msgid "citation link"
+msgstr "Citação"
+
+#: models/citations.py:23
+#, fuzzy
+#| msgid "Citation"
+msgid "citation links"
+msgstr "Citação"
+
+#: models/core_document_model.py:34 models/core_document_model.py:126
+#, fuzzy
+#| msgid "Jurisdiction"
+msgid "jurisdiction"
+msgstr "Jurisdição"
+
+#: models/core_document_model.py:39 models/core_document_model.py:133
+msgid "locality"
+msgstr ""
+
+#: models/core_document_model.py:40
+msgid "localities"
+msgstr ""
+
+#: models/core_document_model.py:53
+msgid "FRBR URI"
+msgstr ""
+
+#: models/core_document_model.py:58 models/core_document_model.py:95
+msgid "work"
+msgstr ""
+
+#: models/core_document_model.py:59
+msgid "works"
+msgstr ""
+
+#: models/core_document_model.py:98
+#, fuzzy
+#| msgid "Document detail"
+msgid "document type"
+msgstr "Detalhe do documento"
+
+#: models/core_document_model.py:108
+msgid "source URL"
+msgstr ""
+
+#: models/core_document_model.py:110
+#, fuzzy
+#| msgid "Citation"
+msgid "citation"
+msgstr "Citação"
+
+#: models/core_document_model.py:111
+msgid "content HTML"
+msgstr ""
+
+#: models/core_document_model.py:112
+msgid "content HTML is AKN"
+msgstr ""
+
+#: models/core_document_model.py:113
+msgid "TOC JSON"
+msgstr ""
+
+#: models/core_document_model.py:119
+#, fuzzy
+#| msgid "Language"
+msgid "language"
+msgstr "Idioma"
+
+#: models/core_document_model.py:137
+msgid "work FRBR URI"
+msgstr ""
+
+#: models/core_document_model.py:142
+msgid "FRBR URI doctype"
+msgstr ""
+
+#: models/core_document_model.py:149
+msgid "FRBR URI subtype"
+msgstr ""
+
+#: models/core_document_model.py:154
+msgid "Document subtype. Lowercase letters, numbers _ and - only."
+msgstr ""
+
+#: models/core_document_model.py:157
+msgid "FRBR URI actor"
+msgstr ""
+
+#: models/core_document_model.py:162
+msgid "Originating actor. Lowercase letters, numbers _ and - only."
+msgstr ""
+
+#: models/core_document_model.py:165
+msgid "FRBR URI date"
+msgstr ""
+
+#: models/core_document_model.py:170
+msgid "YYYY, YYYY-MM, or YYYY-MM-DD"
+msgstr ""
+
+#: models/core_document_model.py:173
+msgid "FRBR URI number"
+msgstr ""
+
+#: models/core_document_model.py:179
+msgid "Unique number or short title identifying this work. Lowercase letters, numbers _ and - only."
+msgstr ""
+
+#: models/core_document_model.py:184
+msgid "expression FRBR URI"
+msgstr ""
+
+#: models/core_document_model.py:188
+msgid "created at"
+msgstr ""
+
+#: models/core_document_model.py:189
+msgid "updated at"
+msgstr ""
+
+#: models/core_document_model.py:214
+msgid "Invalid Date"
+msgstr ""
+
+#: models/core_document_model.py:217
+msgid "You cannot set a future date for the document"
+msgstr ""
+
+#: models/core_document_model.py:223
+#, python-format
+msgid "Invalid FRBR URI: %(uri)s"
+msgstr ""
+
+#: models/core_document_model.py:370
+msgid "filename"
+msgstr ""
+
+#: models/core_document_model.py:371
+msgid "mimetype"
+msgstr ""
+
+#: models/core_document_model.py:372
+msgid "size"
+msgstr ""
+
+#: models/core_document_model.py:373 models/core_document_model.py:399
+msgid "file"
+msgstr ""
+
+#: models/core_document_model.py:403
+#, fuzzy
+#| msgid "Pages"
+msgid "images"
+msgstr "Páginas"
+
+#: models/core_document_model.py:427
+msgid "source file"
+msgstr ""
+
+#: models/core_document_model.py:428
+msgid "source files"
+msgstr ""
+
+#: models/core_document_model.py:452 models/generic_document.py:19
+#: models/judgment.py:13 models/judgment.py:28 models/judgment.py:41
+msgid "description"
+msgstr ""
+
+#: models/core_document_model.py:455
+msgid "attached file nature"
+msgstr ""
+
+#: models/core_document_model.py:456
+msgid "attached file natures"
+msgstr ""
+
+#: models/core_document_model.py:469 models/generic_document.py:42
+#: models/generic_document.py:75
+msgid "nature"
+msgstr ""
+
+#: models/core_document_model.py:473
+msgid "attached file"
+msgstr ""
+
+#: models/core_document_model.py:474
+msgid "attached files"
+msgstr ""
+
+#: models/core_document_model.py:490
+#, fuzzy
+#| msgid "Alternative names"
+msgid "alternative name"
+msgstr "Nomes alternativos"
+
+#: models/core_document_model.py:491
+#, fuzzy
+#| msgid "Alternative names"
+msgid "alternative names"
+msgstr "Nomes alternativos"
+
+#: models/gazette.py:8
+#, fuzzy
+#| msgid "Gazettes"
+msgid "gazette"
+msgstr "Gazettes"
+
+#: models/gazette.py:9
+#, fuzzy
+#| msgid "Gazettes"
+msgid "gazettes"
+msgstr "Gazettes"
+
+#: models/generic_document.py:22
+#, fuzzy
+#| msgid "Document detail"
+msgid "document nature"
+msgstr "Detalhe do documento"
+
+#: models/generic_document.py:23
+#, fuzzy
+#| msgid "Documents"
+msgid "document natures"
+msgstr "Documentos"
+
+#: models/generic_document.py:48
+#, fuzzy
+#| msgid "Related documents"
+msgid "generic document"
+msgstr "Documentos relacionados"
+
+#: models/generic_document.py:49
+#, fuzzy
+#| msgid "Related documents"
+msgid "generic documents"
+msgstr "Documentos relacionados"
+
+#: models/generic_document.py:81
+msgid "legal instrument"
+msgstr ""
+
+#: models/generic_document.py:82
+msgid "legal instruments"
+msgstr ""
+
+#: models/generic_document.py:104
+msgid "metadata JSON"
+msgstr ""
+
+#: models/generic_document.py:105
+#, fuzzy
+#| msgid "Repealed by"
+msgid "repealed"
+msgstr "Repetido por"
+
+#: models/generic_document.py:107
+#, fuzzy
+#| msgid "Primary work"
+msgid "parent work"
+msgstr "Trabalho principal"
+
+#: models/generic_document.py:113 models/generic_document.py:114
+#, fuzzy
+#| msgid "Legislation"
+msgid "legislation"
+msgstr "Legislação"
+
+#: models/ingestors.py:15
+msgid "value"
+msgstr ""
+
+#: models/ingestors.py:17 models/ingestors.py:37 models/ingestors.py:38
+#, fuzzy
+#| msgid "History"
+msgid "ingestor"
+msgstr "Histórico"
+
+#: models/ingestors.py:21
+msgid "ingestor setting"
+msgstr ""
+
+#: models/ingestors.py:22
+msgid "ingestor settings"
+msgstr ""
+
+#: models/ingestors.py:29
+msgid "adapter"
+msgstr ""
+
+#: models/ingestors.py:31
+msgid "last refreshed at"
+msgstr ""
+
+#: models/ingestors.py:34
+msgid "enabled"
+msgstr ""
+
+#: models/judgment.py:17
+#, fuzzy
+#| msgid "Judges"
+msgid "judge"
+msgstr "Juízes"
+
+#: models/judgment.py:18 models/judgment.py:79
+#, fuzzy
+#| msgid "Judges"
+msgid "judges"
+msgstr "Juízes"
+
+#: models/judgment.py:32 models/judgment.py:230
+msgid "matter type"
+msgstr ""
+
+#: models/judgment.py:33
+msgid "matter types"
+msgstr ""
+
+#: models/judgment.py:45 models/judgment.py:60
+msgid "court class"
+msgstr ""
+
+#: models/judgment.py:46
+msgid "court classes"
+msgstr ""
+
+#: models/judgment.py:68 models/judgment.py:77
+msgid "court"
+msgstr ""
+
+#: models/judgment.py:69
+msgid "courts"
+msgstr ""
+
+#: models/judgment.py:80
+msgid "headnote holding"
+msgstr ""
+
+#: models/judgment.py:82
+#, fuzzy
+#| msgid "Media Neutral Citation"
+msgid "additional citations"
+msgstr "Referência Neutra da Mídia"
+
+#: models/judgment.py:84
+msgid "flynote"
+msgstr ""
+
+#: models/judgment.py:86
+#, fuzzy
+#| msgid "Case number"
+msgid "case name"
+msgstr "Número do processo"
+
+#: models/judgment.py:88
+msgid "Party names for use in title"
+msgstr ""
+
+#: models/judgment.py:94
+#, fuzzy
+#| msgid "Case number"
+msgid "serial number"
+msgstr "Número do processo"
+
+#: models/judgment.py:96
+msgid "Serial number for MNC, unique for a year and an author."
+msgstr ""
+
+#: models/judgment.py:99
+msgid "serial number override"
+msgstr ""
+
+#: models/judgment.py:102
+msgid "Specific MNC serial number assigned by the court."
+msgstr ""
+
+#: models/judgment.py:106
+msgid "MNC"
+msgstr ""
+
+#: models/judgment.py:108
+#, fuzzy
+#| msgid "Media Neutral Citation"
+msgid "Media neutral citation"
+msgstr "Referência Neutra da Mídia"
+
+#: models/judgment.py:123
+#, fuzzy
+#| msgid "Judgments"
+msgid "judgment"
+msgstr "Julgamentos"
+
+#: models/judgment.py:124
+#, fuzzy
+#| msgid "Judgments"
+msgid "judgments"
+msgstr "Julgamentos"
+
+#: models/judgment.py:216
+msgid "string override"
+msgstr ""
+
+#: models/judgment.py:220
+msgid "Override for full case number string"
+msgstr ""
+
+#: models/judgment.py:222
+msgid "string"
+msgstr ""
+
+#: models/judgment.py:223 templates/peachjam/_timeline_events.html:32
+msgid "number"
+msgstr "Número"
+
+#: models/judgment.py:224
+#, fuzzy
+#| msgid "All years"
+msgid "year"
+msgstr "Todos os anos"
+
+#: models/judgment.py:242
+#, fuzzy
+#| msgid "Case number"
+msgid "case number"
+msgstr "Número do processo"
+
+#: models/judgment.py:243
+#, fuzzy
+#| msgid "Case number"
+msgid "case numbers"
+msgstr "Número do processo"
+
+#: models/profile.py:12
+msgid "about HTML"
+msgstr ""
+
+#: models/profile.py:13
+msgid "website URL"
+msgstr ""
+
+#: models/profile.py:14
+#, fuzzy
+#| msgid "Email address"
+msgid "address"
+msgstr "Endereço de e-mail"
+
+#: models/profile.py:19
+msgid "profile photo"
+msgstr ""
+
+#: models/profile.py:25
+msgid "background photo"
+msgstr ""
+
+#: models/relationships.py:8
+msgid "verb"
+msgstr ""
+
+#: models/relationships.py:10
+msgid "reverse verb"
+msgstr ""
+
+#: models/relationships.py:12
+msgid "Reversed verbal form of the relationship"
+msgstr ""
+
+#: models/relationships.py:17 models/relationships.py:48
+#: models/relationships.py:59
+msgid "predicate"
+msgstr ""
+
+#: models/relationships.py:18 models/relationships.py:60
+msgid "predicates"
+msgstr ""
+
+#: models/relationships.py:30
+#, fuzzy
+#| msgid "Subject areas"
+msgid "subject work"
+msgstr "Áreas de assunto"
+
+#: models/relationships.py:33
+#, fuzzy
+#| msgid "Subject areas"
+msgid "subject target ID"
+msgstr "Áreas de assunto"
+
+#: models/relationships.py:41
+msgid "object work"
+msgstr ""
+
+#: models/relationships.py:44
+#, fuzzy
+#| msgid "Subject areas"
+msgid "object target ID"
+msgstr "Áreas de assunto"
+
+#: models/settings.py:28
+msgid "default document language"
+msgstr ""
+
+#: models/settings.py:34
+msgid "document languages"
+msgstr ""
+
+#: models/settings.py:40
+#, fuzzy
+#| msgid "Jurisdiction"
+msgid "document jurisdictions"
+msgstr "Jurisdição"
+
+#: models/settings.py:44
+msgid "site settings"
+msgstr ""
+
+#: models/taxonomies.py:15 models/taxonomies.py:16
+#, fuzzy
+#| msgid "Taxonomies"
+msgid "taxonomies"
+msgstr "Taxonomies"
+
+#: models/taxonomies.py:34
+msgid "topic"
+msgstr ""
+
+#: models/taxonomies.py:39
+#, fuzzy
+#| msgid "Document detail"
+msgid "document topic"
+msgstr "Detalhe do documento"
+
+#: models/taxonomies.py:40
+#, fuzzy
+#| msgid "Document detail"
+msgid "document topics"
+msgstr "Detalhe do documento"
 
 #: settings.py:195
 msgid "English"
@@ -90,10 +759,12 @@ msgstr "Esqueceu-se da sua senha?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid "\n"
+msgid ""
+"\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr "\n"
+msgstr ""
+"\n"
 "            Efetuar Login com %(provider.name)s\n"
 "          "
 
@@ -474,10 +1145,12 @@ msgstr "Os jornais oficiais e oficiais são publicações oficiais dos Estados q
 
 #: templates/peachjam/_terms_of_use_content.html:251
 #, python-format
-msgid "\n"
+msgid ""
+"\n"
 "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
 "  "
-msgstr "\n"
+msgstr ""
+"\n"
 "    %(organisation_name)s não pode se retirar de circulação, redact ou alterar o olhar do governo.\n"
 "  "
 
@@ -501,12 +1174,14 @@ msgstr "Seu uso responsável das informações pessoais"
 
 #: templates/peachjam/_terms_of_use_content.html:272
 #, python-format
-msgid "\n"
+msgid ""
+"\n"
 "    %(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some\n"
 "    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
 "    the land.\n"
 "  "
-msgstr "\n"
+msgstr ""
+"\n"
 "    %(organisation_name)s usuários devem notar que existem limitações legais no uso, publicação e divulgação de algumas\n"
 "    informações pessoais em %(organisation_name)s bases de dados. É da responsabilidade dos %(organisation_name)s utilizadores cumprir as leis da\n"
 "    terra.\n"
@@ -517,12 +1192,14 @@ msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
 msgstr "Direito de alterar as afirmações de Termos de uso, Direitos Autorais e Privacidade"
 
 #: templates/peachjam/_terms_of_use_content.html:281
-msgid "\n"
+msgid ""
+"\n"
 "    We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All\n"
 "    amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace\n"
 "    all previous versions of this document.\n"
 "  "
-msgstr "\n"
+msgstr ""
+"\n"
 "    Reservamo-nos o direito de alterar estes termos de uso, direitos autorais e declarações de privacidade e segurança a qualquer momento. Todas as\n"
 "    emendas serão publicadas neste site. A menos que indicado de outro modo, a versão atual substituirá e substituirá\n"
 "    todas as versões anteriores deste documento.\n"
@@ -559,10 +1236,6 @@ msgstr "Commenus"
 #: templates/peachjam/_timeline_events.html:31
 msgid "Published in"
 msgstr "Publicado em"
-
-#: templates/peachjam/_timeline_events.html:32
-msgid "number"
-msgstr "Número"
 
 #: templates/peachjam/_timeline_events.html:35
 msgid "Repealed by"
@@ -768,4 +1441,3 @@ msgstr "Esta é a versão desta Act como era de %(date_from)s para %(date_to)s. 
 #, python-format
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr "Esta é a versão desta Act, como era de %(date_from)s para %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Leia a versão em vigor</a>."
-

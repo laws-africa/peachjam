@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-24 14:32+0200\n"
+"POT-Creation-Date: 2022-12-03 14:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,7 +32,7 @@ msgid "Search"
 msgstr ""
 
 #: templates/liiweb/legislation_list.html:3
-#: templates/liiweb/legislation_list.html:12 templates/peachjam/_header.html:18
+#: templates/liiweb/legislation_list.html:12
 msgid "Legislation"
 msgstr ""
 
@@ -60,7 +60,7 @@ msgstr ""
 msgid "Subscribe to the our newsletter for updates and news."
 msgstr ""
 
-#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:28
+#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:9
 msgid "About"
 msgstr ""
 
@@ -70,12 +70,4 @@ msgstr ""
 
 #: templates/peachjam/_footer.html:36
 msgid "Other African Legal Information Institutions"
-msgstr ""
-
-#: templates/peachjam/_header.html:13
-msgid "Judgments"
-msgstr ""
-
-#: templates/peachjam/_header.html:23
-msgid "Articles"
 msgstr ""
