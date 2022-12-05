@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-03 14:55+0000\n"
-"PO-Revision-Date: 2022-11-30 14:17\n"
+"PO-Revision-Date: 2022-12-05 13:54\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -23,14 +23,12 @@ msgstr ""
 
 #: models/article.py:20 models/core_document_model.py:106
 msgid "date"
-msgstr ""
+msgstr "tarehe"
 
 #: models/article.py:21 models/core_document_model.py:55
 #: models/core_document_model.py:105 models/core_document_model.py:487
-#, fuzzy
-#| msgid "Title"
 msgid "title"
-msgstr "Mada"
+msgstr "mada"
 
 #: models/article.py:22
 msgid "body"
@@ -113,16 +111,14 @@ msgstr ""
 
 #: models/author.py:21
 msgid "authors"
-msgstr ""
+msgstr "waandishi"
 
 #: models/citations.py:12 models/core_document_model.py:397
 #: models/core_document_model.py:423 models/core_document_model.py:466
 #: models/core_document_model.py:485 models/judgment.py:237
 #: models/taxonomies.py:31
-#, fuzzy
-#| msgid "Documents"
 msgid "document"
-msgstr "Nyaraka"
+msgstr ""
 
 #: models/citations.py:14
 msgid "text"
@@ -149,10 +145,8 @@ msgid "citation links"
 msgstr ""
 
 #: models/core_document_model.py:34 models/core_document_model.py:126
-#, fuzzy
-#| msgid "Jurisdiction"
 msgid "jurisdiction"
-msgstr "Mamlaka"
+msgstr "mamlaka"
 
 #: models/core_document_model.py:39 models/core_document_model.py:133
 msgid "locality"
@@ -175,10 +169,8 @@ msgid "works"
 msgstr ""
 
 #: models/core_document_model.py:98
-#, fuzzy
-#| msgid "Documents"
 msgid "document type"
-msgstr "Nyaraka"
+msgstr ""
 
 #: models/core_document_model.py:108
 msgid "source URL"
@@ -201,10 +193,8 @@ msgid "TOC JSON"
 msgstr ""
 
 #: models/core_document_model.py:119
-#, fuzzy
-#| msgid "Language"
 msgid "language"
-msgstr "Lugha"
+msgstr "lugha"
 
 #: models/core_document_model.py:137
 msgid "work FRBR URI"
@@ -346,20 +336,16 @@ msgid "document nature"
 msgstr ""
 
 #: models/generic_document.py:23
-#, fuzzy
-#| msgid "Documents"
 msgid "document natures"
-msgstr "Nyaraka"
+msgstr ""
 
 #: models/generic_document.py:48
 msgid "generic document"
 msgstr ""
 
 #: models/generic_document.py:49
-#, fuzzy
-#| msgid "AU Documents"
 msgid "generic documents"
-msgstr "Nyaraka za AU"
+msgstr ""
 
 #: models/generic_document.py:81
 msgid "legal instrument"
@@ -443,7 +429,7 @@ msgstr ""
 
 #: models/judgment.py:69
 msgid "courts"
-msgstr ""
+msgstr "mahakama"
 
 #: models/judgment.py:80
 msgid "headnote holding"
@@ -490,16 +476,12 @@ msgid "Media neutral citation"
 msgstr ""
 
 #: models/judgment.py:123
-#, fuzzy
-#| msgid "Judgments"
 msgid "judgment"
-msgstr "Hukumu"
+msgstr ""
 
 #: models/judgment.py:124
-#, fuzzy
-#| msgid "Judgments"
 msgid "judgments"
-msgstr "Hukumu"
+msgstr "hukumu"
 
 #: models/judgment.py:216
 msgid "string override"
@@ -595,10 +577,8 @@ msgid "document languages"
 msgstr ""
 
 #: models/settings.py:40
-#, fuzzy
-#| msgid "Jurisdiction"
 msgid "document jurisdictions"
-msgstr "Mamlaka"
+msgstr ""
 
 #: models/settings.py:44
 msgid "site settings"
@@ -613,16 +593,12 @@ msgid "topic"
 msgstr ""
 
 #: models/taxonomies.py:39
-#, fuzzy
-#| msgid "Documents"
 msgid "document topic"
-msgstr "Nyaraka"
+msgstr ""
 
 #: models/taxonomies.py:40
-#, fuzzy
-#| msgid "Documents"
 msgid "document topics"
-msgstr "Nyaraka"
+msgstr ""
 
 #: settings.py:195
 msgid "English"
@@ -693,8 +669,7 @@ msgstr ""
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
 msgstr ""
@@ -1076,8 +1051,7 @@ msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:251
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
 "  "
 msgstr ""
@@ -1102,8 +1076,7 @@ msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:272
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some\n"
 "    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
 "    the land.\n"
@@ -1115,8 +1088,7 @@ msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
 msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:281
-msgid ""
-"\n"
+msgid "\n"
 "    We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All\n"
 "    amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace\n"
 "    all previous versions of this document.\n"
@@ -1359,3 +1331,4 @@ msgstr ""
 #, python-format
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr ""
+
