@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-05 15:54+0000\n"
-"PO-Revision-Date: 2022-12-05 16:19\n"
+"PO-Revision-Date: 2022-12-05 18:00\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: admin.py:239
 msgid "Key details"
-msgstr "Détails de la clé"
+msgstr "Détails essentiels"
 
 #: admin.py:252
 msgid "Additional details"
@@ -27,7 +27,7 @@ msgstr "Détails supplémentaires"
 
 #: admin.py:264
 msgid "Work identification"
-msgstr "Identification professionnelle"
+msgstr "Identification de travail"
 
 #: admin.py:277
 msgid "Content"
@@ -373,7 +373,7 @@ msgstr "nature du document"
 
 #: models/generic_document.py:23
 msgid "document natures"
-msgstr "Natures du document"
+msgstr "types de document"
 
 #: models/generic_document.py:48
 msgid "generic document"
@@ -525,7 +525,7 @@ msgstr "remplacement de chaîne de caractères"
 
 #: models/judgment.py:220
 msgid "Override for full case number string"
-msgstr "Remplacer de la chaîne complète de numéros de cas"
+msgstr "Remplacer pour la chaîne de numéro de cas complet"
 
 #: models/judgment.py:222
 msgid "string"
@@ -1064,7 +1064,7 @@ msgstr "Informations personnelles dans les affaires judiciaires"
 #: templates/peachjam/_terms_of_use_content.html:221
 #, python-format
 msgid "%(organisation_name)s publishes comprehensive collections of court decisions with the consent of the public bodies concerned. The electronic dissemination of judgments is in concordance with the open court principle, instituted to ensure the impartiality and transparency of the judicial process by allowing access to the record of judicial proceedings, including judgments. Therefore, %(organisation_name)s operates on the core principle that all citizens and organisations should be provided with free, unconditional and unrestricted access to basic legal materials."
-msgstr "%(organisation_name)s publie des collections complètes de décisions judiciaires avec le consentement des organismes publics concernés. La diffusion électronique des jugements est en accord avec le principe de la Cour ouverte. institué pour assurer l'impartialité et la transparence de la procédure judiciaire en permettant l'accès au dossier des procédures judiciaires, y compris les jugements. Par conséquent, %(organisation_name)s opère selon le principe fondamental selon lequel tous les citoyens et toutes les organisations devraient être fournis gratuitement. un accès inconditionnel et illimité aux documents légaux de base."
+msgstr "%(organisation_name)s publie des collections complètes des décisions judiciaires avec le consentement des organismes publics concernés. La diffusion électronique des jugements est en accord avec le principe de la Cour ouverte, institué pour assurer l'impartialité et la transparence de la procédure judiciaire en permettant l'accès au dossier des procédures judiciaires, y compris les jugements. Par conséquent, %(organisation_name)s opère selon le principe fondamental selon lequel tous les citoyens et toutes les organisations devraient être fournis gratuitement. un accès inconditionnel et illimité aux documents légaux de base."
 
 #: templates/peachjam/_terms_of_use_content.html:231
 #, python-format
@@ -1073,11 +1073,11 @@ msgstr "%(organisation_name)s s'engage à surveiller et à supprimer les informa
 
 #: templates/peachjam/_terms_of_use_content.html:239
 msgid "Personal information in government gazettes"
-msgstr "Informations personnelles dans les gazettes du gouvernement"
+msgstr "Informations personnelles dans les journaux officielles"
 
 #: templates/peachjam/_terms_of_use_content.html:243
 msgid "Government gazettes and official journals are official publications of the states that publish them. The law mandates that certain personal information should be made public via the government gazette and government departments place these public notices in the government gazette with the intent of the contents being made accessible to the public."
-msgstr "Les journaux gouvernementaux et les revues officielles sont des publications officielles des États qui les publient. La loi stipule que certains renseignements personnels doivent être rendus publics par l'intermédiaire du journal gouvernemental et des ministères placent ces avis publics dans le journal du gouvernement dans l'intention de les rendre accessibles au public."
+msgstr "Les journaux officielles et les revues gouvernementaux sont des publications officielles des États qui les publient. La loi évoque que certains renseignements personnels doivent être rendus publics par l'intermédiaire du journal gouvernemental et des ministères placent ces avis publics dans le journal officiel dans l'intention de les rendre accessibles au public."
 
 #: templates/peachjam/_terms_of_use_content.html:251
 #, python-format
@@ -1085,7 +1085,7 @@ msgid "\n"
 "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
 "  "
 msgstr "\n"
-"    %(organisation_name)s ne peut pas se retirer de la circulation, reproduire ou modifier le gazette gouvernemental.\n"
+"    %(organisation_name)s ne peut pas se retirer de la circulation, reproduire ou modifier le journal officiel.\n"
 "  "
 
 #: templates/peachjam/_terms_of_use_content.html:256
@@ -1115,8 +1115,7 @@ msgid "\n"
 "  "
 msgstr "\n"
 "    %(organisation_name)s utilisateurs doivent noter qu'il y a des limitations légales sur l'utilisation, la publication et la diffusion de certaines\n"
-"    informations personnelles dans les bases de données %(organisation_name)s . Il est de la responsabilité de %(organisation_name)s utilisateurs de se conformer aux lois de\n"
-"    la terre.\n"
+"    informations personnelles dans les bases de données %(organisation_name)s . Il est de la responsabilité de %(organisation_name)s utilisateurs de se conformer aux lois applicables.\n"
 "  "
 
 #: templates/peachjam/_terms_of_use_content.html:279
@@ -1252,7 +1251,7 @@ msgstr "Accueil"
 #: templates/peachjam/journal_list.html:4
 #: templates/peachjam/journal_list.html:7
 msgid "Journals"
-msgstr ""
+msgstr "Journaux"
 
 #: templates/peachjam/judgment_detail.html:8
 msgid "Media Neutral Citation"
