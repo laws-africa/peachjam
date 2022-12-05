@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-24 14:32+0200\n"
-"PO-Revision-Date: 2022-12-05 15:00\n"
+"PO-Revision-Date: 2022-12-05 18:17\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -99,11 +99,11 @@ msgstr "Donner à la société civile, à tous les niveaux, les moyens d'accéde
 
 #: templates/peachjam/about.html:38
 msgid "Strengthen monitoring, develop insights, and improve national-level implementation by developing linkages between regional and member-states’ law and policy."
-msgstr "Renforcer le suivi, développer des idées et améliorer la mise en œuvre au niveau national en établissant des liens entre le droit et la politique des États membres et les États membres."
+msgstr "Renforcer le suivi, développer des idées et améliorer la mise en œuvre au niveau national en établissant des liens entre le droit et la politique des États membres et les lois régionales."
 
 #: templates/peachjam/about.html:45
 msgid "This platform is developed and maintained jointly by <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> with funds from the European Union, the Indigo Trust and the Sigrid Rausing Trust. The initial phase of the project runs from 2021 to 2024."
-msgstr "Cette plate-forme est développée et maintenue conjointement par <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\">Lois. frica</a> avec les fonds de l'Union européenne, de l'Indigo Trust et de la Sigrid Rausing Trust. La phase initiale du projet s’étend de 2021 à 2024."
+msgstr "Cette plate-forme est développée et maintenue conjointement par <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\"> Laws.Africa </a> avec les fonds de l'Union européenne, de l'Indigo Trust et de la Sigrid Rausing Trust. La phase initiale du projet est de 2021 à 2024."
 
 #: templates/peachjam/about.html:53
 msgid "Platform developers"
@@ -115,11 +115,11 @@ msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> est
 
 #: templates/peachjam/about.html:64
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> convenes a network of 16 African LIIs - a collaborative group of governments, organizations, and individuals in Africa, dedicated to free access to law on our continent."
-msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> convoque un réseau de 16 LIIs africains - un groupe collaboratif de gouvernements, des organisations et des individus en Afrique, voués au libre accès à la loi sur notre continent."
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> réunit un réseau de 16 LIIs africaines - un groupe collaboratif de gouvernements, d'organisations et d'individus en Afrique, qui se consacre au libre accès au droit sur notre continent."
 
 #: templates/peachjam/about.html:70
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> helps African governments to sustainably digitise their legal information for public use, through open law software, capacity-building, training, partnerships and support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions lower the cost of digitisation, archival and publication of primary legal information, and create opportunities for rich interactivity, advanced research and justice sector innovation."
-msgstr "<a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> soutient les gouvernements africains à numériser durablement leurs informations juridiques à usage public, par le biais de logiciels de droit ouvert, de renforcement des capacités, de formation, de partenariats et de soutien. <a href=\"https://laws.africa/\" target=\"_blank\">Lois. Les solutions de technologie ouverte de frica</a> réduisent le coût de la numérisation, de l’archivage et de la publication d’informations juridiques primaires, et créer des opportunités pour la riche interactivité, la recherche avancée et l'innovation dans le secteur de la justice."
+msgstr "<a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> soutient les gouvernements africains à numériser durablement leurs informations juridiques à usage public, par le biais de logiciels de droit ouvert, de renforcement des capacités, de formation, de partenariats et de soutien. L'Open Law Technology de <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa's</a> réduit le coût de la numérisation, de l’archivage et de la publication d’informations juridiques primaires, et créer des opportunités pour la riche interactivité, la recherche avancée et l'innovation dans le secteur de la justice."
 
 #: templates/peachjam/about.html:78
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborate in unlocking the value of African digital legal information in support of the rule of law, access to justice, and innovation."

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-05 15:54+0000\n"
-"PO-Revision-Date: 2022-12-05 13:54\n"
+"PO-Revision-Date: 2022-12-05 16:20\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -193,10 +193,8 @@ msgid "FRBR URI"
 msgstr ""
 
 #: models/core_document_model.py:62
-#, fuzzy
-#| msgid "language"
 msgid "languages"
-msgstr "lugha"
+msgstr ""
 
 #: models/core_document_model.py:66 models/core_document_model.py:114
 msgid "work"
@@ -699,8 +697,7 @@ msgstr ""
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
 msgstr ""
@@ -1082,8 +1079,7 @@ msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:251
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
 "  "
 msgstr ""
@@ -1108,8 +1104,7 @@ msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:272
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some\n"
 "    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
 "    the land.\n"
@@ -1121,8 +1116,7 @@ msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
 msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:281
-msgid ""
-"\n"
+msgid "\n"
 "    We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All\n"
 "    amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace\n"
 "    all previous versions of this document.\n"
@@ -1374,3 +1368,4 @@ msgstr ""
 #, python-format
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr ""
+

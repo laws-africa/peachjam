@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-05 15:54+0000\n"
-"PO-Revision-Date: 2022-12-05 15:00\n"
+"PO-Revision-Date: 2022-12-05 18:17\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -18,38 +18,32 @@ msgstr ""
 "X-Crowdin-File-ID: 99\n"
 
 #: admin.py:239
-#, fuzzy
-#| msgid "Document detail"
 msgid "Key details"
-msgstr "Détail du document"
+msgstr "Détails essentiels"
 
 #: admin.py:252
-#, fuzzy
-#| msgid "additional citations"
 msgid "Additional details"
-msgstr "références supplémentaires"
+msgstr "Détails supplémentaires"
 
 #: admin.py:264
 msgid "Work identification"
-msgstr ""
+msgstr "Identification de travail"
 
 #: admin.py:277
-#, fuzzy
-#| msgid "content HTML"
 msgid "Content"
-msgstr "contenu HTML"
+msgstr "Contenus"
 
 #: admin.py:285
 msgid "Advanced"
-msgstr ""
+msgstr "Avancé"
 
 #: admin.py:412 models/judgment.py:242
 msgid "case number"
-msgstr "numéro de cas"
+msgstr "numéro de dossier"
 
 #: admin.py:413 models/judgment.py:243
 msgid "case numbers"
-msgstr "numéros de cas"
+msgstr "numéros de dossier"
 
 #: admin.py:499
 msgid "Refreshing content in the background."
@@ -57,7 +51,7 @@ msgstr "Actualisation du contenu en arrière-plan."
 
 #: admin.py:501
 msgid "Refresh all content"
-msgstr ""
+msgstr "Actualiser tout le contenu"
 
 #: models/article.py:20 models/core_document_model.py:125
 msgid "date"
@@ -199,10 +193,8 @@ msgid "FRBR URI"
 msgstr "FRBR URI"
 
 #: models/core_document_model.py:62
-#, fuzzy
-#| msgid "language"
 msgid "languages"
-msgstr "langue"
+msgstr "langues"
 
 #: models/core_document_model.py:66 models/core_document_model.py:114
 msgid "work"
@@ -242,7 +234,7 @@ msgstr "langue"
 
 #: models/core_document_model.py:156
 msgid "work FRBR URI"
-msgstr "FRBR URI de travail"
+msgstr "travail FRBR URI"
 
 #: models/core_document_model.py:161
 msgid "FRBR URI doctype"
@@ -357,7 +349,7 @@ msgstr "fichier joint"
 
 #: models/core_document_model.py:491
 msgid "attached files"
-msgstr "pièces jointes:"
+msgstr "pièces jointes"
 
 #: models/core_document_model.py:507
 msgid "alternative name"
@@ -369,7 +361,7 @@ msgstr "noms alternatifs"
 
 #: models/gazette.py:8
 msgid "gazette"
-msgstr "gazette"
+msgstr "Journal Officiel"
 
 #: models/gazette.py:9
 msgid "gazettes"
@@ -381,7 +373,7 @@ msgstr "nature du document"
 
 #: models/generic_document.py:23
 msgid "document natures"
-msgstr "Natures du document"
+msgstr "types de document"
 
 #: models/generic_document.py:48
 msgid "generic document"
@@ -409,7 +401,7 @@ msgstr "abrogé"
 
 #: models/generic_document.py:107
 msgid "parent work"
-msgstr "travail parent"
+msgstr "œuvre supérieur"
 
 #: models/generic_document.py:113 models/generic_document.py:114
 msgid "legislation"
@@ -489,11 +481,11 @@ msgstr "flynote"
 
 #: models/judgment.py:86
 msgid "case name"
-msgstr "nom du cas"
+msgstr "nom de l'affaire"
 
 #: models/judgment.py:88
 msgid "Party names for use in title"
-msgstr "Noms de groupe à utiliser dans le titre"
+msgstr "Noms des parties à utiliser dans le titre"
 
 #: models/judgment.py:94
 msgid "serial number"
@@ -501,7 +493,7 @@ msgstr "numéro de série"
 
 #: models/judgment.py:96
 msgid "Serial number for MNC, unique for a year and an author."
-msgstr "Numéro de série pour MNC, unique pour un an et un auteur."
+msgstr "Numéro de série pour CNM, unique pour une année et un auteur."
 
 #: models/judgment.py:99
 msgid "serial number override"
@@ -509,11 +501,11 @@ msgstr "remplacement du numéro de série"
 
 #: models/judgment.py:102
 msgid "Specific MNC serial number assigned by the court."
-msgstr "Numéro de série MNC spécifique assigné par le tribunal."
+msgstr "Numéro de série CNM spécifique attribué par le tribunal."
 
 #: models/judgment.py:106
 msgid "MNC"
-msgstr "MNC"
+msgstr "CNM"
 
 #: models/judgment.py:108
 msgid "Media neutral citation"
@@ -549,7 +541,7 @@ msgstr "année"
 
 #: models/profile.py:12
 msgid "about HTML"
-msgstr "HTML à propos de"
+msgstr "à propos de HTML"
 
 #: models/profile.py:13
 msgid "website URL"
@@ -565,7 +557,7 @@ msgstr "photo de profil"
 
 #: models/profile.py:25
 msgid "background photo"
-msgstr "photo de fond"
+msgstr "photo d'arrière plan"
 
 #: models/relationships.py:8
 msgid "verb"
@@ -573,7 +565,7 @@ msgstr "verbe"
 
 #: models/relationships.py:10
 msgid "reverse verb"
-msgstr "verbe inversé"
+msgstr "inverse du verbe"
 
 #: models/relationships.py:12
 msgid "Reversed verbal form of the relationship"
@@ -590,7 +582,7 @@ msgstr "prédicats"
 
 #: models/relationships.py:30
 msgid "subject work"
-msgstr "objet du travail"
+msgstr "travail du sujet"
 
 #: models/relationships.py:33
 msgid "subject target ID"
@@ -598,7 +590,7 @@ msgstr "ID cible du sujet"
 
 #: models/relationships.py:41
 msgid "object work"
-msgstr "travail objet"
+msgstr "travail d'objet"
 
 #: models/relationships.py:44
 msgid "object target ID"
@@ -606,7 +598,7 @@ msgstr "ID de la cible de l'objet"
 
 #: models/settings.py:28
 msgid "default document language"
-msgstr "langue par défaut du document"
+msgstr "langue du document par défaut"
 
 #: models/settings.py:34
 msgid "document languages"
@@ -705,12 +697,10 @@ msgstr "Mot de passe oublié ?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Connectez-vous à %(provider.name)s\n"
 "          "
 
@@ -839,7 +829,7 @@ msgstr "Date"
 
 #: templates/peachjam/_document_table.html:27
 msgid "Multiple languages available"
-msgstr ""
+msgstr "Plusieurs langues disponibles"
 
 #: templates/peachjam/_entity_profile.html:32
 msgid "Physical address"
@@ -953,7 +943,7 @@ msgstr "Nous pouvons bloquer ou désactiver l'utilisation du service à partir d
 
 #: templates/peachjam/_terms_of_use_content.html:69
 msgid "Coverage"
-msgstr "Couverture"
+msgstr "Étendue"
 
 #: templates/peachjam/_terms_of_use_content.html:72
 #, python-format
@@ -1031,7 +1021,7 @@ msgstr "Les collections spécifiques sur %(organisation_name)s peuvent être lic
 #: templates/peachjam/_terms_of_use_content.html:169
 #, python-format
 msgid "Use of legal materials published by %(organisation_name)s can be subject to additional conditions set by courts, regional and government bodies, and publishers claiming intellectual property rights relating to the documents. %(organisation_name)s makes an effort to indicate the existence of additional conditions on the pages of the relevant databases. Still, Users remain responsible for checking whether their use of the documents is authorised."
-msgstr "L'utilisation du matériel juridique publié par %(organisation_name)s peut être soumise à des conditions supplémentaires définies par les tribunaux, les organismes régionaux et gouvernementaux, ainsi que les éditeurs revendiquant les droits de propriété intellectuelle relatifs aux documents. %(organisation_name)s s'efforce d'indiquer l'existence de conditions supplémentaires sur les pages des bases de données concernées. Néanmoins, l'Utilisateur reste responsable de vérifier si son utilisation des documents est autorisée."
+msgstr "L'utilisation du matériel juridique publié par %(organisation_name)s peut être soumise à des conditions supplémentaires définies par les tribunaux, les organismes régionaux et gouvernementaux, ainsi que les éditeurs revendiquant les droits de propriété intellectuelle relatifs aux documents. %(organisation_name)s s'efforce d'indiquer l'existence de conditions supplémentaires sur les pages des bases de données concernées. Néanmoins, l'utilisateur reste responsable de vérifier si son utilisation des documents est autorisée."
 
 #: templates/peachjam/_terms_of_use_content.html:177
 #, python-format
@@ -1074,7 +1064,7 @@ msgstr "Informations personnelles dans les affaires judiciaires"
 #: templates/peachjam/_terms_of_use_content.html:221
 #, python-format
 msgid "%(organisation_name)s publishes comprehensive collections of court decisions with the consent of the public bodies concerned. The electronic dissemination of judgments is in concordance with the open court principle, instituted to ensure the impartiality and transparency of the judicial process by allowing access to the record of judicial proceedings, including judgments. Therefore, %(organisation_name)s operates on the core principle that all citizens and organisations should be provided with free, unconditional and unrestricted access to basic legal materials."
-msgstr "%(organisation_name)s publie des collections complètes de décisions judiciaires avec le consentement des organismes publics concernés. La diffusion électronique des jugements est en accord avec le principe de la Cour ouverte. institué pour assurer l'impartialité et la transparence de la procédure judiciaire en permettant l'accès au dossier des procédures judiciaires, y compris les jugements. Par conséquent, %(organisation_name)s opère selon le principe fondamental selon lequel tous les citoyens et toutes les organisations devraient être fournis gratuitement. un accès inconditionnel et illimité aux documents légaux de base."
+msgstr "%(organisation_name)s publie des collections complètes des décisions judiciaires avec le consentement des organismes publics concernés. La diffusion électronique des jugements est en accord avec le principe de la Cour ouverte, institué pour assurer l'impartialité et la transparence de la procédure judiciaire en permettant l'accès au dossier des procédures judiciaires, y compris les jugements. Par conséquent, %(organisation_name)s opère selon le principe fondamental selon lequel tous les citoyens et toutes les organisations devraient être fournis gratuitement. un accès inconditionnel et illimité aux documents légaux de base."
 
 #: templates/peachjam/_terms_of_use_content.html:231
 #, python-format
@@ -1083,21 +1073,19 @@ msgstr "%(organisation_name)s s'engage à surveiller et à supprimer les informa
 
 #: templates/peachjam/_terms_of_use_content.html:239
 msgid "Personal information in government gazettes"
-msgstr "Informations personnelles dans les gazettes du gouvernement"
+msgstr "Informations personnelles dans les journaux officielles"
 
 #: templates/peachjam/_terms_of_use_content.html:243
 msgid "Government gazettes and official journals are official publications of the states that publish them. The law mandates that certain personal information should be made public via the government gazette and government departments place these public notices in the government gazette with the intent of the contents being made accessible to the public."
-msgstr "Les journaux gouvernementaux et les revues officielles sont des publications officielles des États qui les publient. La loi stipule que certains renseignements personnels doivent être rendus publics par l'intermédiaire du journal gouvernemental et des ministères placent ces avis publics dans le journal du gouvernement dans l'intention de les rendre accessibles au public."
+msgstr "Les journaux officielles et les revues gouvernementaux sont des publications officielles des États qui les publient. La loi évoque que certains renseignements personnels doivent être rendus publics par l'intermédiaire du journal gouvernemental et des ministères placent ces avis publics dans le journal officiel dans l'intention de les rendre accessibles au public."
 
 #: templates/peachjam/_terms_of_use_content.html:251
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
 "  "
-msgstr ""
-"\n"
-"    %(organisation_name)s ne peut pas se retirer de la circulation, reproduire ou modifier le gazette gouvernemental.\n"
+msgstr "\n"
+"    %(organisation_name)s ne peut pas se retirer de la circulation, reproduire ou modifier le journal officiel.\n"
 "  "
 
 #: templates/peachjam/_terms_of_use_content.html:256
@@ -1120,34 +1108,29 @@ msgstr "Votre utilisation responsable des informations personnelles"
 
 #: templates/peachjam/_terms_of_use_content.html:272
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some\n"
 "    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
 "    the land.\n"
 "  "
-msgstr ""
-"\n"
+msgstr "\n"
 "    %(organisation_name)s utilisateurs doivent noter qu'il y a des limitations légales sur l'utilisation, la publication et la diffusion de certaines\n"
-"    informations personnelles dans les bases de données %(organisation_name)s . Il est de la responsabilité de %(organisation_name)s utilisateurs de se conformer aux lois de\n"
-"    la terre.\n"
+"    informations personnelles dans les bases de données %(organisation_name)s . Il est de la responsabilité de %(organisation_name)s utilisateurs de se conformer aux lois applicables.\n"
 "  "
 
 #: templates/peachjam/_terms_of_use_content.html:279
 msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
-msgstr "Droit de modifier les présentes conditions d'utilisation, les déclarations sur le droit d'auteur et la protection de la vie privée"
+msgstr "Droit de modifier les présentes conditions d'utilisation, les déclarations sur le droit d'auteur et les déclarations de confidentialité"
 
 #: templates/peachjam/_terms_of_use_content.html:281
-msgid ""
-"\n"
+msgid "\n"
 "    We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All\n"
 "    amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace\n"
 "    all previous versions of this document.\n"
 "  "
-msgstr ""
-"\n"
+msgstr "\n"
 "    Nous nous réservons le droit de modifier à tout moment les présentes conditions d'utilisation, les droits d'auteur et les déclarations de confidentialité et de sécurité. Toutes les\n"
-"    modifications seront affichées sur ce site Web. Sauf indication contraire, la version actuelle remplacera et remplacera\n"
+"    modifications seront affichées sur ce site Web. Sauf indication contraire, la version actuelle remplacera  \n"
 "    toutes les versions précédentes du présent document.\n"
 "  "
 
@@ -1157,7 +1140,7 @@ msgstr "Si vous avez des commentaires ou des suggestions au sujet de cette polit
 
 #: templates/peachjam/_terms_of_use_content.html:293
 msgid "Date of notice: 14 November 2022"
-msgstr "Date d'avis : 14 novembre 2022"
+msgstr "Date de la notification: 14 novembre 2022"
 
 #: templates/peachjam/_timeline_events.html:3
 msgid "History of this document"
@@ -1221,7 +1204,7 @@ msgstr " Documents par %(author)s "
 
 #: templates/peachjam/book_list.html:4 templates/peachjam/book_list.html:7
 msgid "Books"
-msgstr ""
+msgstr "Livres"
 
 #: templates/peachjam/court_detail.html:13
 #: templates/peachjam/judgment_list.html:4
@@ -1253,7 +1236,7 @@ msgstr "Journaux officiels"
 #, python-format
 msgid "%(num_gazettes)s gazette"
 msgid_plural "%(num_gazettes)s gazettes"
-msgstr[0] "Gazette %(num_gazettes)s"
+msgstr[0] "%(num_gazettes)s journal officiel"
 msgstr[1] "%(num_gazettes)s Journal Officiel"
 
 #: templates/peachjam/generic_document_list.html:4
@@ -1268,7 +1251,7 @@ msgstr "Accueil"
 #: templates/peachjam/journal_list.html:4
 #: templates/peachjam/journal_list.html:7
 msgid "Journals"
-msgstr ""
+msgstr "Journaux"
 
 #: templates/peachjam/judgment_detail.html:8
 msgid "Media Neutral Citation"
@@ -1397,5 +1380,3 @@ msgstr "Il s'agit de la version de cette loi telle qu'elle était de %(date_from
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr "Il s'agit de la version de cette loi telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lire la version actuellement en vigueur</a>."
 
-#~ msgid "Subject areas"
-#~ msgstr "Domaines"

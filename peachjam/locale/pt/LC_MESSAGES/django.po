@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-05 15:54+0000\n"
-"PO-Revision-Date: 2022-12-05 15:00\n"
+"PO-Revision-Date: 2022-12-05 16:20\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -18,30 +18,24 @@ msgstr ""
 "X-Crowdin-File-ID: 99\n"
 
 #: admin.py:239
-#, fuzzy
-#| msgid "Document detail"
 msgid "Key details"
-msgstr "Detalhe do documento"
+msgstr "Detalhes da chave"
 
 #: admin.py:252
-#, fuzzy
-#| msgid "additional citations"
 msgid "Additional details"
-msgstr "citações adicionais"
+msgstr "Detalhes adicionais"
 
 #: admin.py:264
 msgid "Work identification"
-msgstr ""
+msgstr "Identificação do trabalho"
 
 #: admin.py:277
-#, fuzzy
-#| msgid "content HTML"
 msgid "Content"
-msgstr "conteúdo HTML"
+msgstr "Conteúdo"
 
 #: admin.py:285
 msgid "Advanced"
-msgstr ""
+msgstr "Avançado"
 
 #: admin.py:412 models/judgment.py:242
 msgid "case number"
@@ -57,7 +51,7 @@ msgstr "Atualizando o conteúdo em segundo plano."
 
 #: admin.py:501
 msgid "Refresh all content"
-msgstr ""
+msgstr "Atualizar todo o conteúdo"
 
 #: models/article.py:20 models/core_document_model.py:125
 msgid "date"
@@ -199,10 +193,8 @@ msgid "FRBR URI"
 msgstr "FRBR URI"
 
 #: models/core_document_model.py:62
-#, fuzzy
-#| msgid "language"
 msgid "languages"
-msgstr "idioma"
+msgstr "Idiomas"
 
 #: models/core_document_model.py:66 models/core_document_model.py:114
 msgid "work"
@@ -705,12 +697,10 @@ msgstr "Esqueceu-se da sua senha?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Efetuar Login com %(provider.name)s\n"
 "          "
 
@@ -839,7 +829,7 @@ msgstr "Data"
 
 #: templates/peachjam/_document_table.html:27
 msgid "Multiple languages available"
-msgstr ""
+msgstr "Vários idiomas disponíveis"
 
 #: templates/peachjam/_entity_profile.html:32
 msgid "Physical address"
@@ -1091,12 +1081,10 @@ msgstr "Os jornais oficiais e oficiais são publicações oficiais dos Estados q
 
 #: templates/peachjam/_terms_of_use_content.html:251
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
 "  "
-msgstr ""
-"\n"
+msgstr "\n"
 "    %(organisation_name)s não pode se retirar de circulação, redact ou alterar o olhar do governo.\n"
 "  "
 
@@ -1120,14 +1108,12 @@ msgstr "Seu uso responsável das informações pessoais"
 
 #: templates/peachjam/_terms_of_use_content.html:272
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some\n"
 "    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
 "    the land.\n"
 "  "
-msgstr ""
-"\n"
+msgstr "\n"
 "    %(organisation_name)s usuários devem notar que existem limitações legais no uso, publicação e divulgação de algumas\n"
 "    informações pessoais em %(organisation_name)s bases de dados. É da responsabilidade dos %(organisation_name)s utilizadores cumprir as leis da\n"
 "    terra.\n"
@@ -1138,14 +1124,12 @@ msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
 msgstr "Direito de alterar as afirmações de Termos de uso, Direitos Autorais e Privacidade"
 
 #: templates/peachjam/_terms_of_use_content.html:281
-msgid ""
-"\n"
+msgid "\n"
 "    We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All\n"
 "    amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace\n"
 "    all previous versions of this document.\n"
 "  "
-msgstr ""
-"\n"
+msgstr "\n"
 "    Reservamo-nos o direito de alterar estes termos de uso, direitos autorais e declarações de privacidade e segurança a qualquer momento. Todas as\n"
 "    emendas serão publicadas neste site. A menos que indicado de outro modo, a versão atual substituirá e substituirá\n"
 "    todas as versões anteriores deste documento.\n"
@@ -1221,7 +1205,7 @@ msgstr " Documentos por %(author)s "
 
 #: templates/peachjam/book_list.html:4 templates/peachjam/book_list.html:7
 msgid "Books"
-msgstr ""
+msgstr "Livros"
 
 #: templates/peachjam/court_detail.html:13
 #: templates/peachjam/judgment_list.html:4
@@ -1268,7 +1252,7 @@ msgstr "Página inicial"
 #: templates/peachjam/journal_list.html:4
 #: templates/peachjam/journal_list.html:7
 msgid "Journals"
-msgstr ""
+msgstr "Diários"
 
 #: templates/peachjam/judgment_detail.html:8
 msgid "Media Neutral Citation"
@@ -1397,5 +1381,3 @@ msgstr "Esta é a versão desta Act como era de %(date_from)s para %(date_to)s. 
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr "Esta é a versão desta Act, como era de %(date_from)s para %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Leia a versão em vigor</a>."
 
-#~ msgid "Subject areas"
-#~ msgstr "Áreas de assunto"
