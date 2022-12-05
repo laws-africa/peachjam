@@ -2,9 +2,10 @@ import DocumentSearch from '../DocumentSearch/index.vue';
 import PdfRenderer from '../pdf-renderer';
 import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../../utils/vue-utils';
-import { i18n } from '../../i18n';
-import { generateHtmlTocItems } from '../../utils/function';
+import { vueI18n } from '../../i18n';
+import { createTocController, generateHtmlTocItems } from '../../utils/function';
 import EnrichmentsManager from './enrichments-manager';
+import i18next from 'i18next';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -103,7 +104,7 @@ class DocumentContent {
           docType: root.getAttribute('data-display-type'),
           mountElement: targetMountElement
         },
-        use: [i18n],
+        use: [vueI18n],
         mountTarget: targetMountElement as HTMLElement
       });
       targetMountElement.addEventListener('going-to-snippet', () => {
@@ -146,21 +147,12 @@ class DocumentContent {
     // If there is no toc item don't create and mount la-toc-controller
     const tocItems = this.getTocItems();
     if (!tocItems.length) return false;
-    const tocController = this.createTocController(tocItems);
+    const tocController = createTocController(tocItems);
+    tocController.titleFilterPlaceholder = i18next.t('Search table of contents');
     const tocContainer = this.root.querySelector('.toc');
     if (!tocContainer) return;
     tocContainer.appendChild(tocController);
     return true;
-  }
-
-  createTocController (items: []) {
-    const laTocController = document.createElement('la-table-of-contents-controller');
-    laTocController.items = items;
-    laTocController.expandAllBtnClasses = 'btn btn-secondary btn-sm';
-    laTocController.collapseAllBtnClasses = 'btn btn-secondary btn-sm';
-    laTocController.titleFilterInputClasses = 'form-control';
-    laTocController.titleFilterClearBtnClasses = 'btn btn-secondary btn-sm';
-    return laTocController;
   }
 
   getTocItems = () => {
