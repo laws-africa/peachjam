@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-05 15:54+0000\n"
-"PO-Revision-Date: 2022-12-05 18:17\n"
+"PO-Revision-Date: 2022-12-05 19:13\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -469,7 +469,7 @@ msgstr "cours"
 
 #: models/judgment.py:80
 msgid "headnote holding"
-msgstr "headnote en attente"
+msgstr "résumé détaillé"
 
 #: models/judgment.py:82
 msgid "additional citations"
@@ -477,7 +477,7 @@ msgstr "références supplémentaires"
 
 #: models/judgment.py:84
 msgid "flynote"
-msgstr "flynote"
+msgstr "mot-clé"
 
 #: models/judgment.py:86
 msgid "case name"
@@ -1176,7 +1176,7 @@ msgstr "Lire cette version"
 
 #: templates/peachjam/about.html:4 templates/peachjam/about.html:9
 msgid "About"
-msgstr "À propos de"
+msgstr "À propos"
 
 #: templates/peachjam/article_detail.html:10
 #: templates/peachjam/article_list.html:4
