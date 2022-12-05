@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-24 14:32+0200\n"
-"PO-Revision-Date: 2022-11-30 14:17\n"
+"PO-Revision-Date: 2022-12-05 15:00\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -35,7 +35,7 @@ msgstr "La publication du matériel de l'Union africaine est coparrainée par l'
 
 #: templates/peachjam/_footer.html:24
 msgid "Terms of Use"
-msgstr "Conditions d'utilisation"
+msgstr "Termes et conditions d'utilisation"
 
 #: templates/peachjam/_footer.html:28
 msgid "With support from"
@@ -87,15 +87,15 @@ msgstr "Cette plate-forme panafricaine sert de centre d’information sur tous l
 
 #: templates/peachjam/about.html:22
 msgid "Increase overall awareness of the AGA agenda and popular perceptions about democracy, governance and human rights among civil society organisations (CSOs) and AGA members"
-msgstr "Sensibiliser davantage les organisations de la société civile (OSC) et les membres de l'AGA aux perceptions populaires sur la démocratie, la gouvernance et les droits de l'homme"
+msgstr "Accroître la sensibilisation générale au programme de l'AGA et aux perceptions populaires de la démocratie, de la gouvernance et des droits de l'homme parmi les organisations de la société civile (OSC) et les membres de l'AGA"
 
 #: templates/peachjam/about.html:28
 msgid "Supply complete, accurate and re-usable AGA information to allow AGA and CSOs to work towards shared goals"
-msgstr "Fournir des informations d'AGA complètes, précises et réutilisables afin de permettre à AGA et aux OSC de travailler dans le sens d'objectifs partagés"
+msgstr "Fournir des informations complètes, précises et réutilisables sur l'AGA pour permettre à l'AGA et aux OSC de travailler à des objectifs communs"
 
 #: templates/peachjam/about.html:33
 msgid "Capacitate civil society on all levels to access, interpret and effectively use AGA information"
-msgstr "Capaciter la société civile à tous les niveaux pour accéder, interpréter et utiliser efficacement les informations AGA"
+msgstr "Donner à la société civile, à tous les niveaux, les moyens d'accéder aux informations de l'AGA, de les interpréter et de les utiliser efficacement"
 
 #: templates/peachjam/about.html:38
 msgid "Strengthen monitoring, develop insights, and improve national-level implementation by developing linkages between regional and member-states’ law and policy."
@@ -119,11 +119,11 @@ msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> con
 
 #: templates/peachjam/about.html:70
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> helps African governments to sustainably digitise their legal information for public use, through open law software, capacity-building, training, partnerships and support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions lower the cost of digitisation, archival and publication of primary legal information, and create opportunities for rich interactivity, advanced research and justice sector innovation."
-msgstr "<a href=\"https://laws.africa/\" target=\"_blank\">Lois. frica</a> aide les gouvernements africains à numériser durablement leurs informations juridiques à usage public, par le biais de logiciels de droit ouvert, de renforcement des capacités, de formation, de partenariats et de soutien. <a href=\"https://laws.africa/\" target=\"_blank\">Lois. Les solutions de technologie ouverte de frica</a> réduisent le coût de la numérisation, de l’archivage et de la publication d’informations juridiques primaires, et créer des opportunités pour la riche interactivité, la recherche avancée et l'innovation dans le secteur de la justice."
+msgstr "<a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> soutient les gouvernements africains à numériser durablement leurs informations juridiques à usage public, par le biais de logiciels de droit ouvert, de renforcement des capacités, de formation, de partenariats et de soutien. <a href=\"https://laws.africa/\" target=\"_blank\">Lois. Les solutions de technologie ouverte de frica</a> réduisent le coût de la numérisation, de l’archivage et de la publication d’informations juridiques primaires, et créer des opportunités pour la riche interactivité, la recherche avancée et l'innovation dans le secteur de la justice."
 
 #: templates/peachjam/about.html:78
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborate in unlocking the value of African digital legal information in support of the rule of law, access to justice, and innovation."
-msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\">Lois. frica</a> collabore à la libération de la valeur des informations juridiques numériques africaines à l'appui de l'État de droit, de l'accès à la justice et de l'innovation."
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborent pour libérer la valeur de l'information juridique numérique africaine afin de renforcer l'État de droit, l'accès à la justice et l'innovation."
 
 #: templates/peachjam/about.html:84
 msgid "Find out more"
