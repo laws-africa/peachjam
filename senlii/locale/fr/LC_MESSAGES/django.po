@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-03 14:55+0000\n"
-"PO-Revision-Date: 2022-11-30 14:17\n"
+"PO-Revision-Date: 2022-12-05 13:54\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -50,27 +50,22 @@ msgid "View more articles"
 msgstr "Voir plus d'articles"
 
 #: templates/peachjam/_header.html:13
-#, fuzzy
-#| msgid "Recent Judgments"
 msgid "Judgments"
-msgstr "Jugements récents"
+msgstr "Jugements"
 
 #: templates/peachjam/_header.html:18
-#, fuzzy
-#| msgid "Recent Legislation"
 msgid "Legislation"
-msgstr "Législation récente"
+msgstr "Législation"
 
 #: templates/peachjam/_header.html:23
-#, fuzzy
-#| msgid "Recent Articles"
 msgid "Articles"
-msgstr "Articles récents"
+msgstr "Articles"
 
 #: templates/peachjam/_header.html:28
 msgid "About"
-msgstr ""
+msgstr "À propos de"
 
 #: templates/senlii/home.html:4
 msgid "Home"
 msgstr "Accueil"
+
