@@ -29,7 +29,7 @@
             aria-controls="nav-advanced-search"
             aria-selected="false"
           >
-            {{ $t('Advanced') }}
+            {{ $t('Advanced search') }}
           </button>
         </div>
       </nav>
