@@ -10,7 +10,7 @@ def backfill_work_languages(apps, schema_editor):
         work = Work.objects.get(frbr_uri=doc.work_frbr_uri)
         if doc.language.iso_639_3 not in work.languages:
             work.languages.append(doc.language.iso_639_3)
-            work.languages.save()
+            work.save()
 
 
 class Migration(migrations.Migration):
