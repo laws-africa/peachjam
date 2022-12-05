@@ -18,7 +18,7 @@ jobs:
       uses: dokku/github-action@master
       with:
         ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-        git_remote_url: 'ssh://dokku@lawlibrary.org.za:22/agp'
+        git_remote_url: 'ssh://dokku@agp.africanlii.org:22/agp'
         git_push_flags: '--force'
 
   deploy-lawlibrary:
