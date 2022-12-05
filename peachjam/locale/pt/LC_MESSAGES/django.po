@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-03 14:55+0000\n"
-"PO-Revision-Date: 2022-12-05 13:54\n"
+"PO-Revision-Date: 2022-12-05 15:00\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -385,23 +385,23 @@ msgstr "configuração de estábulo"
 
 #: models/ingestors.py:22
 msgid "ingestor settings"
-msgstr ""
+msgstr "configurações do ingestor"
 
 #: models/ingestors.py:29
 msgid "adapter"
-msgstr ""
+msgstr "adaptador"
 
 #: models/ingestors.py:31
 msgid "last refreshed at"
-msgstr ""
+msgstr "última atualização em"
 
 #: models/ingestors.py:34
 msgid "enabled"
-msgstr ""
+msgstr "habilitado"
 
 #: models/judgment.py:17
 msgid "judge"
-msgstr ""
+msgstr "juiz"
 
 #: models/judgment.py:18 models/judgment.py:79
 msgid "judges"
@@ -413,15 +413,15 @@ msgstr "tipo de matéria"
 
 #: models/judgment.py:33
 msgid "matter types"
-msgstr ""
+msgstr "tipos de assuntos"
 
 #: models/judgment.py:45 models/judgment.py:60
 msgid "court class"
-msgstr ""
+msgstr "aula do tribunal"
 
 #: models/judgment.py:46
 msgid "court classes"
-msgstr ""
+msgstr "aulas de corte"
 
 #: models/judgment.py:68 models/judgment.py:77
 msgid "court"
@@ -429,55 +429,55 @@ msgstr "tribunal"
 
 #: models/judgment.py:69
 msgid "courts"
-msgstr ""
+msgstr "Tribunais"
 
 #: models/judgment.py:80
 msgid "headnote holding"
-msgstr ""
+msgstr "segurando headnote"
 
 #: models/judgment.py:82
 msgid "additional citations"
-msgstr ""
+msgstr "citações adicionais"
 
 #: models/judgment.py:84
 msgid "flynote"
-msgstr ""
+msgstr "nota"
 
 #: models/judgment.py:86
 msgid "case name"
-msgstr ""
+msgstr "nome do caso"
 
 #: models/judgment.py:88
 msgid "Party names for use in title"
-msgstr ""
+msgstr "Nome da party para uso no título"
 
 #: models/judgment.py:94
 msgid "serial number"
-msgstr ""
+msgstr "número de série"
 
 #: models/judgment.py:96
 msgid "Serial number for MNC, unique for a year and an author."
-msgstr ""
+msgstr "Número de série para MNC, único por um ano e autor."
 
 #: models/judgment.py:99
 msgid "serial number override"
-msgstr ""
+msgstr "substituição de número de série"
 
 #: models/judgment.py:102
 msgid "Specific MNC serial number assigned by the court."
-msgstr ""
+msgstr "Número de série MNC específico atribuído pelo tribunal."
 
 #: models/judgment.py:106
 msgid "MNC"
-msgstr ""
+msgstr "MNC"
 
 #: models/judgment.py:108
 msgid "Media neutral citation"
-msgstr ""
+msgstr "Citação neutra de mídia"
 
 #: models/judgment.py:123
 msgid "judgment"
-msgstr ""
+msgstr "julgamento"
 
 #: models/judgment.py:124
 msgid "judgments"
@@ -485,15 +485,15 @@ msgstr "julgamentos"
 
 #: models/judgment.py:216
 msgid "string override"
-msgstr ""
+msgstr "substituição de string"
 
 #: models/judgment.py:220
 msgid "Override for full case number string"
-msgstr ""
+msgstr "Substituir para string de número de caso completo"
 
 #: models/judgment.py:222
 msgid "string"
-msgstr ""
+msgstr "sequência"
 
 #: models/judgment.py:223 templates/peachjam/_timeline_events.html:32
 msgid "number"
@@ -509,96 +509,96 @@ msgstr "número do processo"
 
 #: models/judgment.py:243
 msgid "case numbers"
-msgstr ""
+msgstr "números de casos"
 
 #: models/profile.py:12
 msgid "about HTML"
-msgstr ""
+msgstr "sobre HTML"
 
 #: models/profile.py:13
 msgid "website URL"
-msgstr ""
+msgstr "URL do website"
 
 #: models/profile.py:14
 msgid "address"
-msgstr ""
+msgstr "Endereço"
 
 #: models/profile.py:19
 msgid "profile photo"
-msgstr ""
+msgstr "foto do perfil"
 
 #: models/profile.py:25
 msgid "background photo"
-msgstr ""
+msgstr "foto de fundo"
 
 #: models/relationships.py:8
 msgid "verb"
-msgstr ""
+msgstr "verbo"
 
 #: models/relationships.py:10
 msgid "reverse verb"
-msgstr ""
+msgstr "verbo invertido"
 
 #: models/relationships.py:12
 msgid "Reversed verbal form of the relationship"
-msgstr ""
+msgstr "Forma verbal invertida da relação"
 
 #: models/relationships.py:17 models/relationships.py:48
 #: models/relationships.py:59
 msgid "predicate"
-msgstr ""
+msgstr "predicate"
 
 #: models/relationships.py:18 models/relationships.py:60
 msgid "predicates"
-msgstr ""
+msgstr "pretextos"
 
 #: models/relationships.py:30
 msgid "subject work"
-msgstr ""
+msgstr "assunto trabalho"
 
 #: models/relationships.py:33
 msgid "subject target ID"
-msgstr ""
+msgstr "ID alvo do assunto"
 
 #: models/relationships.py:41
 msgid "object work"
-msgstr ""
+msgstr "trabalho objeto"
 
 #: models/relationships.py:44
 msgid "object target ID"
-msgstr ""
+msgstr "ID alvo do objeto"
 
 #: models/settings.py:28
 msgid "default document language"
-msgstr ""
+msgstr "idioma padrão do documento"
 
 #: models/settings.py:34
 msgid "document languages"
-msgstr ""
+msgstr "idiomas do documento"
 
 #: models/settings.py:40
 msgid "document jurisdictions"
-msgstr ""
+msgstr "jurisdições de documentos"
 
 #: models/settings.py:44
 msgid "site settings"
-msgstr ""
+msgstr "configurações do site"
 
 #: models/taxonomies.py:15 models/taxonomies.py:16
 msgid "taxonomies"
-msgstr ""
+msgstr "taxonomies"
 
 #: models/taxonomies.py:34
 msgid "topic"
-msgstr ""
+msgstr "Tópico"
 
 #: models/taxonomies.py:39
 msgid "document topic"
-msgstr ""
+msgstr "tópico do documento"
 
 #: models/taxonomies.py:40
 msgid "document topics"
-msgstr ""
+msgstr "tópicos do documento"
 
 #: settings.py:195
 msgid "English"
