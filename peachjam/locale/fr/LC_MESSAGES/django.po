@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-05 15:54+0000\n"
-"PO-Revision-Date: 2022-12-05 18:00\n"
+"PO-Revision-Date: 2022-12-05 18:17\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -401,7 +401,7 @@ msgstr "abrogé"
 
 #: models/generic_document.py:107
 msgid "parent work"
-msgstr "travail parent"
+msgstr "œuvre supérieur"
 
 #: models/generic_document.py:113 models/generic_document.py:114
 msgid "legislation"
@@ -943,7 +943,7 @@ msgstr "Nous pouvons bloquer ou désactiver l'utilisation du service à partir d
 
 #: templates/peachjam/_terms_of_use_content.html:69
 msgid "Coverage"
-msgstr "Couverture"
+msgstr "Étendue"
 
 #: templates/peachjam/_terms_of_use_content.html:72
 #, python-format
@@ -1236,7 +1236,7 @@ msgstr "Journaux officiels"
 #, python-format
 msgid "%(num_gazettes)s gazette"
 msgid_plural "%(num_gazettes)s gazettes"
-msgstr[0] "Gazette %(num_gazettes)s"
+msgstr[0] "%(num_gazettes)s journal officiel"
 msgstr[1] "%(num_gazettes)s Journal Officiel"
 
 #: templates/peachjam/generic_document_list.html:4
