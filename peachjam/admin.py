@@ -24,6 +24,7 @@ from peachjam.models import (
     AttachedFileNature,
     AttachedFiles,
     Author,
+    Book,
     CaseNumber,
     CitationLink,
     Court,
@@ -36,6 +37,7 @@ from peachjam.models import (
     Image,
     Ingestor,
     IngestorSetting,
+    Journal,
     Judge,
     Judgment,
     LegalInstrument,
@@ -574,6 +576,16 @@ class AuthorAdmin(admin.ModelAdmin):
 
 @admin.register(Gazette)
 class GazetteAdmin(DocumentAdmin):
+    pass
+
+
+@admin.register(Book)
+class BookAdmin(DocumentAdmin):
+    pass
+
+
+@admin.register(Journal)
+class JournalAdmin(DocumentAdmin):
     pass
 
 

@@ -6,6 +6,7 @@ from .core_document_model import *
 from .gazette import *
 from .generic_document import *
 from .ingestors import *
+from .journals_books import *
 from .judgment import *
 from .profile import *
 from .relationships import *
