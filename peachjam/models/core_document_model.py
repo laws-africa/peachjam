@@ -6,6 +6,7 @@ import magic
 from cobalt import FrbrUri
 from cobalt.akn import datestring
 from countries_plus.models import Country
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
@@ -53,6 +54,13 @@ class Work(models.Model):
         _("FRBR URI"), max_length=1024, null=False, blank=False, unique=True
     )
     title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
+    languages = ArrayField(
+        models.CharField(max_length=3),
+        null=False,
+        blank=False,
+        default=list,
+        verbose_name=_("languages"),
+    )
 
     class Meta:
         verbose_name = _("work")
@@ -74,6 +82,15 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
         """Select only the most recent expression for documents with the same frbr_uri."""
         return self.distinct("work_frbr_uri").order_by("work_frbr_uri", "-date")
 
+    def preferred_language(self, language):
+        """Return documents whose language match the preferred one,
+        or return all docs if there are no documents in the preferred language.
+        """
+        return self.filter(
+            models.Q(language_id__iso_639_3=language)
+            | ~models.Q(work__languages__contains=[language])
+        )
+
 
 class CoreDocument(PolymorphicModel):
     DOC_TYPE_CHOICES = (
@@ -83,6 +100,8 @@ class CoreDocument(PolymorphicModel):
         ("judgment", "Judgment"),
         ("legal_instrument", "Legal Instrument"),
         ("legislation", "Legislation"),
+        ("book", "Book"),
+        ("journal", "Journal"),
     )
 
     objects = CoreDocumentManager.from_queryset(CoreDocumentQuerySet)()
@@ -273,9 +292,7 @@ class CoreDocument(PolymorphicModel):
         if not hasattr(self, "work") or self.work.frbr_uri != self.work_frbr_uri:
             self.work, _ = Work.objects.get_or_create(
                 frbr_uri=self.work_frbr_uri,
-                defaults={
-                    "title": self.title,
-                },
+                defaults={"title": self.title},
             )
 
         # keep work title in sync with English documents

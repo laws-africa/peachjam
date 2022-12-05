@@ -25,6 +25,7 @@ from peachjam.models import (
     AttachedFileNature,
     AttachedFiles,
     Author,
+    Book,
     CaseNumber,
     CitationLink,
     Court,
@@ -37,6 +38,7 @@ from peachjam.models import (
     Image,
     Ingestor,
     IngestorSetting,
+    Journal,
     Judge,
     Judgment,
     LegalInstrument,
@@ -545,7 +547,7 @@ class RelationshipInline(admin.TabularInline):
 
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):
-    fields = ("title", "frbr_uri")
+    fields = ("title", "frbr_uri", "languages")
     search_fields = ("title", "frbr_uri")
     list_display = fields
     readonly_fields = fields
@@ -575,6 +577,16 @@ class AuthorAdmin(admin.ModelAdmin):
 
 @admin.register(Gazette)
 class GazetteAdmin(DocumentAdmin):
+    pass
+
+
+@admin.register(Book)
+class BookAdmin(DocumentAdmin):
+    pass
+
+
+@admin.register(Journal)
+class JournalAdmin(DocumentAdmin):
     pass
 
 

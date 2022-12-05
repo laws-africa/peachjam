@@ -2,6 +2,7 @@
 from .about import *
 from .article import *
 from .authors import *
+from .books import *
 from .courts import *
 from .documents import *
 from .gazette import *
