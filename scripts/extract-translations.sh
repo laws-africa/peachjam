@@ -10,4 +10,4 @@ for d in peachjam africanlii liiweb senlii; do
 done
 
 echo "Extracting translatable strings from javascript"
-i18next './peachjam/js/**/*.{js,vue}'
+i18next './peachjam/js/**/*.{js,ts,vue}'

@@ -51,4 +51,5 @@ class TaxonomyDetailView(FilteredDocumentListView):
         context["ancestors"] = ancestors
         context["root_taxonomy"] = context["root"].get_root().slug
         context["taxonomy_tree"] = list(context["root"].dump_bulk(context["root"]))
+        context["first_level_taxonomy"] = context["taxonomy_tree"][0]["data"]["name"]
         return context

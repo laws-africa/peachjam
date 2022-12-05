@@ -88,3 +88,13 @@ export const generateHtmlTocItems = (content: HTMLElement) => {
   });
   return items;
 };
+
+export const createTocController = (items: [] = []) => {
+  const laTocController = document.createElement('la-table-of-contents-controller');
+  laTocController.items = items;
+  laTocController.expandAllBtnClasses = 'btn btn-secondary btn-sm';
+  laTocController.collapseAllBtnClasses = 'btn btn-secondary btn-sm';
+  laTocController.titleFilterInputClasses = 'form-control';
+  laTocController.titleFilterClearBtnClasses = 'btn btn-secondary btn-sm';
+  return laTocController;
+};

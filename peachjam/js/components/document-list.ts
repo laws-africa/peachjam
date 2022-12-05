@@ -1,5 +1,5 @@
 import ListFacets from './ListFacets.vue';
-import { i18n } from '../i18n';
+import { vueI18n } from '../i18n';
 import { createAndMountApp } from '../utils/vue-utils';
 
 type FacetType = [] | undefined
@@ -18,7 +18,6 @@ class DocumentList {
       judges = JSON.parse(facetDataJsonElement.textContent).judges;
       courts = JSON.parse(facetDataJsonElement.textContent).courts;
 
-
       // Treaties and protocols don't have associated authors
       if (window.location.href.includes('/legislation/')) {
         authors = [];
@@ -36,7 +35,7 @@ class DocumentList {
           judges,
           courts
         },
-        use: [i18n],
+        use: [vueI18n],
         mountTarget
       });
     });
