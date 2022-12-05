@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
@@ -29,12 +30,15 @@ from peachjam.storage import DynamicStorageFileField
 
 
 class Locality(models.Model):
-    name = models.CharField(max_length=255, null=False)
-    jurisdiction = models.ForeignKey(Country, on_delete=models.PROTECT)
-    code = models.CharField(max_length=20, null=False)
+    name = models.CharField(_("name"), max_length=255, null=False)
+    jurisdiction = models.ForeignKey(
+        Country, on_delete=models.PROTECT, verbose_name=_("jurisdiction")
+    )
+    code = models.CharField(_("code"), max_length=20, null=False)
 
     class Meta:
-        verbose_name_plural = "localities"
+        verbose_name = _("locality")
+        verbose_name_plural = _("localities")
         ordering = ["name"]
         unique_together = ["name", "jurisdiction"]
 
@@ -46,13 +50,21 @@ class Locality(models.Model):
 
 
 class Work(models.Model):
-    frbr_uri = models.CharField(max_length=1024, null=False, blank=False, unique=True)
-    title = models.CharField(max_length=1024, null=False, blank=False)
+    frbr_uri = models.CharField(
+        _("FRBR URI"), max_length=1024, null=False, blank=False, unique=True
+    )
+    title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
     languages = ArrayField(
-        models.CharField(max_length=3), null=False, blank=False, default=list
+        models.CharField(max_length=3),
+        null=False,
+        blank=False,
+        default=list,
+        verbose_name=_("languages"),
     )
 
     class Meta:
+        verbose_name = _("work")
+        verbose_name_plural = _("works")
         ordering = ["title"]
 
     def __str__(self):
@@ -95,74 +107,105 @@ class CoreDocument(PolymorphicModel):
     objects = CoreDocumentManager.from_queryset(CoreDocumentQuerySet)()
 
     work = models.ForeignKey(
-        Work, null=False, on_delete=models.PROTECT, related_name="documents"
+        Work,
+        null=False,
+        on_delete=models.PROTECT,
+        related_name="documents",
+        verbose_name=_("work"),
     )
     doc_type = models.CharField(
+        _("document type"),
         max_length=255,
         choices=DOC_TYPE_CHOICES,
         default="core_document",
         null=False,
         blank=False,
     )
-    title = models.CharField(max_length=1024, null=False, blank=False)
-    date = models.DateField(null=False, blank=False)
-    source_url = models.URLField(max_length=2048, null=True, blank=True)
-    citation = models.CharField(max_length=1024, null=True, blank=True)
-    content_html = models.TextField(null=True, blank=True)
-    content_html_is_akn = models.BooleanField(default=False)
-    toc_json = models.JSONField(null=True, blank=True)
+    title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
+    date = models.DateField(_("date"), null=False, blank=False)
+    source_url = models.URLField(
+        _("source URL"), max_length=2048, null=True, blank=True
+    )
+    citation = models.CharField(_("citation"), max_length=1024, null=True, blank=True)
+    content_html = models.TextField(_("content HTML"), null=True, blank=True)
+    content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
+    toc_json = models.JSONField(_("TOC JSON"), null=True, blank=True)
     language = models.ForeignKey(
-        Language, on_delete=models.PROTECT, null=False, blank=False
+        Language,
+        on_delete=models.PROTECT,
+        null=False,
+        blank=False,
+        verbose_name=_("language"),
     )
     jurisdiction = models.ForeignKey(
-        Country, on_delete=models.PROTECT, null=False, blank=False
+        Country,
+        on_delete=models.PROTECT,
+        null=False,
+        blank=False,
+        verbose_name=_("jurisdiction"),
     )
     locality = models.ForeignKey(
-        Locality, on_delete=models.PROTECT, null=True, blank=True
+        Locality,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("locality"),
     )
 
-    work_frbr_uri = models.CharField(max_length=1024, null=False, blank=False)
+    work_frbr_uri = models.CharField(
+        _("work FRBR URI"), max_length=1024, null=False, blank=False
+    )
 
     # components used to build the work FRBR URI
     frbr_uri_doctype = models.CharField(
-        max_length=20, choices=FRBR_URI_DOCTYPE_CHOICES, null=False, blank=False
+        _("FRBR URI doctype"),
+        max_length=20,
+        choices=FRBR_URI_DOCTYPE_CHOICES,
+        null=False,
+        blank=False,
     )
     frbr_uri_subtype = models.CharField(
+        _("FRBR URI subtype"),
         max_length=100,
         null=True,
         blank=True,
         validators=[validate_frbr_uri_component],
-        help_text="Document subtype. Lowercase letters, numbers _ and - only.",
+        help_text=_("Document subtype. Lowercase letters, numbers _ and - only."),
     )
     frbr_uri_actor = models.CharField(
+        _("FRBR URI actor"),
         max_length=100,
         null=True,
         blank=True,
         validators=[validate_frbr_uri_component],
-        help_text="Originating actor. Lowercase letters, numbers _ and - only.",
+        help_text=_("Originating actor. Lowercase letters, numbers _ and - only."),
     )
     frbr_uri_date = models.CharField(
+        _("FRBR URI date"),
         max_length=10,
         null=False,
         blank=False,
         validators=[validate_frbr_uri_date],
-        help_text="YYYY, YYYY-MM, or YYYY-MM-DD",
+        help_text=_("YYYY, YYYY-MM, or YYYY-MM-DD"),
     )
     frbr_uri_number = models.CharField(
+        _("FRBR URI number"),
         max_length=1024,
         null=False,
         blank=False,
         validators=[validate_frbr_uri_component],
-        help_text="Unique number or short title identifying this work. Lowercase letters, numbers _ and - only.",
+        help_text=_(
+            "Unique number or short title identifying this work. Lowercase letters, numbers _ and - only."
+        ),
     )
 
     expression_frbr_uri = models.CharField(
-        max_length=1024, null=False, blank=False, unique=True
+        _("expression FRBR URI"), max_length=1024, null=False, blank=False, unique=True
     )
     """This is derived from the work_frbr_uri, language and date."""
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("updated at"), auto_now=True)
 
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES
@@ -187,16 +230,16 @@ class CoreDocument(PolymorphicModel):
         super().clean()
 
         if self.date is None:
-            raise ValidationError("Invalid Date")
+            raise ValidationError(_("Invalid Date"))
 
         if self.date > datetime.date.today():
-            raise ValidationError("You cannot set a future date for the document")
+            raise ValidationError(_("You cannot set a future date for the document"))
 
         frbr_uri = self.generate_work_frbr_uri()
         try:
             FrbrUri.parse(frbr_uri)
         except ValueError:
-            raise ValidationError("Invalid FRBR URI: " + frbr_uri)
+            raise ValidationError(_("Invalid FRBR URI: %(uri)s") % {"uri": frbr_uri})
 
         self.assign_frbr_uri()
         expression_frbr_uri = self.generate_expression_frbr_uri()
@@ -341,10 +384,10 @@ def file_location(instance, filename):
 
 
 class AttachmentAbstractModel(models.Model):
-    filename = models.CharField(max_length=1024, null=False, blank=False)
-    mimetype = models.CharField(max_length=1024, null=False, blank=False)
-    size = models.BigIntegerField(default=0)
-    file = DynamicStorageFileField(upload_to=file_location, max_length=1024)
+    filename = models.CharField(_("filename"), max_length=1024, null=False, blank=False)
+    mimetype = models.CharField(_("mimetype"), max_length=1024, null=False, blank=False)
+    size = models.BigIntegerField(_("size"), default=0)
+    file = DynamicStorageFileField(_("file"), upload_to=file_location, max_length=1024)
 
     def __str__(self):
         return f"{self.filename}"
@@ -365,9 +408,16 @@ class Image(AttachmentAbstractModel):
     SAVE_FOLDER = "images"
 
     document = models.ForeignKey(
-        CoreDocument, related_name="images", on_delete=models.CASCADE
+        CoreDocument,
+        related_name="images",
+        on_delete=models.CASCADE,
+        verbose_name=_("document"),
     )
-    file = models.ImageField(upload_to=file_location, max_length=1024)
+    file = models.ImageField(_("file"), upload_to=file_location, max_length=1024)
+
+    class Meta:
+        verbose_name = _("image")
+        verbose_name_plural = _("images")
 
     @classmethod
     def from_docpipe_attachment(cls, attachment):
@@ -384,8 +434,15 @@ class SourceFile(AttachmentAbstractModel):
     SAVE_FOLDER = "source_file"
 
     document = models.OneToOneField(
-        CoreDocument, related_name="source_file", on_delete=models.CASCADE
+        CoreDocument,
+        related_name="source_file",
+        on_delete=models.CASCADE,
+        verbose_name=_("document"),
     )
+
+    class Meta:
+        verbose_name = _("source file")
+        verbose_name_plural = _("source files")
 
     def as_pdf(self):
         if self.filename.endswith(".pdf"):
@@ -406,8 +463,14 @@ class SourceFile(AttachmentAbstractModel):
 
 
 class AttachedFileNature(models.Model):
-    name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
-    description = models.TextField(blank=True)
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        verbose_name = _("attached file nature")
+        verbose_name_plural = _("attached file natures")
 
     def __str__(self):
         return self.name
@@ -416,11 +479,16 @@ class AttachedFileNature(models.Model):
 class AttachedFiles(AttachmentAbstractModel):
     SAVE_FOLDER = "attachments"
 
-    document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
-    nature = models.ForeignKey(AttachedFileNature, on_delete=models.CASCADE)
+    document = models.ForeignKey(
+        CoreDocument, on_delete=models.CASCADE, verbose_name=_("document")
+    )
+    nature = models.ForeignKey(
+        AttachedFileNature, on_delete=models.CASCADE, verbose_name=_("nature")
+    )
 
     class Meta:
-        verbose_name_plural = "Attached Files"
+        verbose_name = _("attached file")
+        verbose_name_plural = _("attached files")
 
     def extension(self):
         return os.path.splitext(self.filename)[1].replace(".", "")
@@ -428,6 +496,13 @@ class AttachedFiles(AttachmentAbstractModel):
 
 class AlternativeName(models.Model):
     document = models.ForeignKey(
-        CoreDocument, on_delete=models.CASCADE, related_name="alternative_names"
+        CoreDocument,
+        on_delete=models.CASCADE,
+        related_name="alternative_names",
+        verbose_name=_("document"),
     )
-    title = models.CharField(max_length=1024, null=False, blank=False)
+    title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
+
+    class Meta:
+        verbose_name = _("alternative name")
+        verbose_name_plural = _("alternative names")

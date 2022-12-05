@@ -6,15 +6,19 @@ from django.utils.translation import gettext_lazy as _
 class Author(models.Model):
     model_label = _("Author")
 
-    name = models.CharField(max_length=255, null=False, unique=True)
-    code = models.SlugField(max_length=255, null=False, unique=True)
+    name = models.CharField(_("name"), max_length=255, null=False, unique=True)
+    code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
 
-    entity_profile = GenericRelation("peachjam.EntityProfile")
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
 
     # TODO: Have author_types?
 
     class Meta:
         ordering = ["name"]
+        verbose_name = _("author")
+        verbose_name_plural = _("authors")
 
     def __str__(self):
         return f"{self.name}"
