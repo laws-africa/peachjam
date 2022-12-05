@@ -5,12 +5,12 @@ from django.db import migrations
 
 def backfill_work_languages(apps, schema_editor):
     CoreDocument = apps.get_model("peachjam", "CoreDocument")
-    for doc in CoreDocument.objects.all():
+    for doc in CoreDocument.objects.all().iterator(chunk_size=100):
         Work = apps.get_model("peachjam", "Work")
         work = Work.objects.get(frbr_uri=doc.work_frbr_uri)
         if doc.language.iso_639_3 not in work.languages:
             work.languages.append(doc.language.iso_639_3)
-            work.save()
+            work.languages.save()
 
 
 class Migration(migrations.Migration):
