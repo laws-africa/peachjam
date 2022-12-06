@@ -89,6 +89,8 @@ export default {
     }
   },
   data: () => ({
+    originalElement: null,
+    wrapperElement: null,
     sideBySide: true,
     diffsets: [],
     diffset: null,
@@ -110,15 +112,26 @@ export default {
   mounted () {
     this.loadDiffContentsets();
     this.originalElement = document.getElementById(this.provision.id);
+    this.wrapperElement = document.createElement('div');
+    this.wrapperElement.style.position = 'relative';
     if (this.originalElement) {
-      this.originalElement.style.display = 'none';
-      this.originalElement.insertAdjacentElement('beforebegin', this.$el);
+      /**
+       * the originalElement's gutter item isn't able to properly anchor to originalElement if it has a style: display:none.
+       * So we hide originalElement behind ProvisionDiffInline via absolute positioning, so originalElement's gutter
+       * item can anchor correctly.
+       * */
+      this.originalElement.style.position = 'absolute';
+      this.originalElement.style.visibility = 'hidden';
+      this.originalElement.style.height = '0';
+      this.originalElement.style.top = '0';
+      this.originalElement.insertAdjacentElement('beforebegin', this.wrapperElement);
+      this.wrapperElement.append(this.originalElement, this.$el);
     }
     window.addEventListener('resize', this.setVw);
   },
 
   unmounted () {
-    window.addEventListener('resize', this.setVw);
+    window.removeEventListener('resize', this.setVw);
   },
 
   methods: {
@@ -137,7 +150,14 @@ export default {
 
     close () {
       if (this.originalElement) {
-        this.originalElement.style.display = null;
+        // Place originalElement back to where it was and remove wrapperElement
+        this.wrapperElement.insertAdjacentElement('beforebegin', this.originalElement);
+        this.originalElement.style.position = null;
+        this.originalElement.style.visibility = null;
+        this.originalElement.style.height = null;
+        this.originalElement.style.top = null;
+
+        this.wrapperElement.remove();
       }
       this.$el.dispatchEvent(new CustomEvent('close'));
       this.$el.remove();
