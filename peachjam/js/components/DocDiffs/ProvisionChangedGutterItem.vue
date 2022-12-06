@@ -3,7 +3,7 @@
     :anchor="`#${provision.id}`"
   >
     <i
-      class="bi bi-clock-history mobile-gutter-item"
+      class="bi bi-clock-history mobile-gutter-item-icon"
       role="button"
       @click="showChanges"
     />
