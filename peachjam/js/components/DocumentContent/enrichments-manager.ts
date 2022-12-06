@@ -16,7 +16,12 @@ class EnrichmentsManager {
 
     this.docDiffsManager = this.setDocDiffs();
     this.relationshipsManager = new RelationshipEnrichments(contentAndEnrichmentsElement);
-    this.relationshipsManager.onGutterItemActive = () => this.docDiffsManager?.closeInlineDiff();
+
+    this.gutter?.addEventListener('laItemChanged', (e: any) => {
+      if (e.target.classList.contains('relationship-gutter-item') && e.target.active) {
+        this.docDiffsManager?.closeInlineDiff();
+      }
+    });
   }
 
   setDocDiffs () {

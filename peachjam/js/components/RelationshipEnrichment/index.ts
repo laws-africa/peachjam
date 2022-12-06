@@ -16,7 +16,6 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   workFrbrUri: string;
   workId: string;
   readonly: boolean;
-  onGutterItemActive: () => void = () => false;
 
   constructor (root: HTMLElement) {
     this.root = root;
@@ -25,7 +24,6 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
     this.workFrbrUri = root.dataset.workFrbrUri || '';
     this.workId = root.dataset.workId || '';
     this.readonly = !!root.dataset.readonly;
-    this.onGutterItemActive = () => false;
 
     const node = document.getElementById('provision-relationships');
     if (node) {
@@ -60,8 +58,6 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
       this.manager = new GutterEnrichmentManager(this.root);
       this.manager.addProvider(this);
     }
-
-    this.setupActiveListener();
   }
 
   getButton (target: IRangeTarget): HTMLButtonElement | null {
@@ -70,18 +66,6 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
     btn.type = 'button';
     btn.innerText = 'Add relationship...';
     return btn;
-  }
-
-  setupActiveListener () {
-    if (!this.gutter) return;
-    Array.from(this.gutter.querySelectorAll('la-gutter-item')).forEach(element => {
-      element.addEventListener('laItemChanged', (e) => {
-        // @ts-ignore
-        if (e.target.active) {
-          this.onGutterItemActive();
-        }
-      });
-    });
   }
 
   addEnrichment (target: IRangeTarget): void {
