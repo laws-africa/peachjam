@@ -52,26 +52,53 @@ class LegislationDetailView(BaseDocumentDetailView):
             )
 
         points_in_time = self.get_points_in_time()
+        work_amendments = self.get_work_amendments()
+
         if points_in_time:
             current_object_date = self.object.date.strftime("%Y-%m-%d")
-            dates = [point_in_time["date"] for point_in_time in points_in_time]
-            index = dates.index(current_object_date)
+            point_in_time_dates = [
+                point_in_time["date"] for point_in_time in points_in_time
+            ]
+            work_amendments_dates = [
+                work_amendment["date"] for work_amendment in work_amendments
+            ]
+            latest_amendment_date = work_amendments_dates[-1]
+            index = point_in_time_dates.index(current_object_date)
 
-            if index == len(dates) - 1:
+            if index == len(point_in_time_dates) - 1:
                 if self.object.repealed and repeal:
                     msg = f"This is the version of this {friendly_type} as it was when it was repealed."
+                    notices.append(
+                        {
+                            "type": messages.INFO,
+                            "html": _(msg),
+                        }
+                    )
+
+                elif work_amendments and latest_amendment_date > current_object_date:
+                    msg = (
+                        f"This is the latest available version of this {friendly_type}. "
+                        f"There are outstanding amendments that have not yet been applied. "
+                        f"See the History tab for more information."
+                    )
+                    notices.append(
+                        {
+                            "type": messages.WARNING,
+                            "html": _(msg),
+                        }
+                    )
+
                 else:
                     msg = f"This is the latest version of this {friendly_type}."
-
-                notices.append(
-                    {
-                        "type": messages.INFO,
-                        "html": _(msg),
-                    }
-                )
+                    notices.append(
+                        {
+                            "type": messages.INFO,
+                            "html": _(msg),
+                        }
+                    )
             else:
                 date = datetime.strptime(
-                    dates[index + 1], "%Y-%m-%d"
+                    point_in_time_dates[index + 1], "%Y-%m-%d"
                 ).date() - timedelta(days=1)
                 expression_frbr_uri = points_in_time[-1]["expressions"][0][
                     "expression_frbr_uri"
@@ -97,40 +124,6 @@ class LegislationDetailView(BaseDocumentDetailView):
                     }
                 )
 
-        amendments = self.object.metadata_json.get("work_amendments", None)
-        if amendments:
-            current_object_date = self.object.date.strftime("%Y-%m-%d")
-            amendment_dates = [amendment["date"] for amendment in amendments]
-            index = amendment_dates.index(current_object_date)
-
-            if index == len(amendment_dates) - 1:
-                msg = f"Amendment - notice for {friendly_type}"
-                notices.append(
-                    {
-                        "type": messages.INFO,
-                        "html": _(msg),
-                    }
-                )
-            else:
-                date = datetime.strptime(
-                    dates[index + 1], "%Y-%m-%d"
-                ).date() - timedelta(days=1)
-                amending_uri = amendments[-1]["amending_uri"]
-                msg = f"This {friendly_type} was amended on "
-                notices.append(
-                    {
-                        "type": messages.WARNING,
-                        "html": mark_safe(
-                            _(msg)
-                            % {
-                                "date_from": format_date(self.object.date, "j F Y"),
-                                "date_to": format_date(date, "j F Y"),
-                                "amending_uri": amending_uri,
-                            }
-                        ),
-                    }
-                )
-
         return notices
 
     def get_repeal_info(self):
@@ -141,6 +134,9 @@ class LegislationDetailView(BaseDocumentDetailView):
 
     def get_points_in_time(self):
         return self.object.metadata_json.get("points_in_time", None)
+
+    def get_work_amendments(self):
+        return self.object.metadata_json.get("work_amendments", None)
 
     def get_timeline_events(self):
         events = []
