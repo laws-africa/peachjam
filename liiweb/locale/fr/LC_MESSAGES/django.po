@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-24 14:32+0200\n"
-"PO-Revision-Date: 2022-11-30 14:17\n"
+"POT-Creation-Date: 2022-12-03 14:55+0000\n"
+"PO-Revision-Date: 2022-12-05 13:54\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -31,13 +31,13 @@ msgid "Search"
 msgstr "Recherche"
 
 #: templates/liiweb/legislation_list.html:3
-#: templates/liiweb/legislation_list.html:12 templates/peachjam/_header.html:18
+#: templates/liiweb/legislation_list.html:12
 msgid "Legislation"
 msgstr "Législation"
 
 #: templates/liiweb/legislation_list.html:19
 msgid "Current legislation"
-msgstr "La législation actuelle"
+msgstr "Législation en vigueur"
 
 #: templates/liiweb/legislation_list.html:24
 msgid "Repealed legislation"
@@ -49,7 +49,7 @@ msgstr "Toutes les lois"
 
 #: templates/liiweb/legislation_list.html:37
 msgid "You are viewing repealed legislation which is no longer in force."
-msgstr "Vous voyez une législation abrogée qui n'est plus en vigueur."
+msgstr "Vous consultez une législation abrogée qui n'est plus en vigueur."
 
 #: templates/peachjam/_footer.html:5
 msgid "Subscribe"
@@ -59,7 +59,7 @@ msgstr "S'abonner"
 msgid "Subscribe to the our newsletter for updates and news."
 msgstr "Abonnez-vous à notre newsletter pour les mises à jour et les nouveautés."
 
-#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:28
+#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:9
 msgid "About"
 msgstr "À propos"
 
@@ -70,12 +70,4 @@ msgstr "Nos partenaires"
 #: templates/peachjam/_footer.html:36
 msgid "Other African Legal Information Institutions"
 msgstr "Autres Institutions Africaines d'information Juridique"
-
-#: templates/peachjam/_header.html:13
-msgid "Judgments"
-msgstr "Jugements"
-
-#: templates/peachjam/_header.html:23
-msgid "Articles"
-msgstr "Articles"
 

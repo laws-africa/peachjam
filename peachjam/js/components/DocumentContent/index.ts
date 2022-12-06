@@ -1,10 +1,11 @@
-import DocumentSearch from './DocumentSearch/index.vue';
-import PdfRenderer from './pdf-renderer';
+import DocumentSearch from '../DocumentSearch/index.vue';
+import PdfRenderer from '../pdf-renderer';
 import debounce from 'lodash/debounce';
-import { createAndMountApp } from '../utils/vue-utils';
-import { i18n } from '../i18n';
-import DocDiffsManager from './DocDiffs';
-import { generateHtmlTocItems } from '../utils/function';
+import { createAndMountApp } from '../../utils/vue-utils';
+import { vueI18n } from '../../i18n';
+import { createTocController, generateHtmlTocItems } from '../../utils/function';
+import EnrichmentsManager from './enrichments-manager';
+import i18next from 'i18next';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -28,13 +29,11 @@ class DocumentContent {
   private pdfRenderer: PdfRenderer | undefined;
   private searchApp: any;
   private navOffCanvas: OffCanvas | undefined;
-  private docDiffsManager: DocDiffsManager | null;
+  private enchrichmentsManager: EnrichmentsManager | null;
   constructor (root: HTMLElement) {
     this.root = root;
     this.navOffCanvas = undefined;
-    this.docDiffsManager = null;
-
-    this.setupDiffs();
+    this.enchrichmentsManager = null;
 
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
@@ -105,22 +104,15 @@ class DocumentContent {
           docType: root.getAttribute('data-display-type'),
           mountElement: targetMountElement
         },
-        use: [i18n],
+        use: [vueI18n],
         mountTarget: targetMountElement as HTMLElement
       });
       targetMountElement.addEventListener('going-to-snippet', () => {
         this.navOffCanvas?.hide();
       });
     }
-  }
 
-  setupDiffs () {
-    const gutter: HTMLElement | null = this.root.querySelector('la-gutter');
-    const akn: HTMLElement | null = this.root.querySelector('la-akoma-ntoso');
-    if (!akn || !gutter) return;
-    const frbrExpressionUri = akn.getAttribute('expression-frbr-uri');
-    if (!frbrExpressionUri) return;
-    this.docDiffsManager = new DocDiffsManager(frbrExpressionUri, gutter);
+    this.setupEnrichments();
   }
 
   setupResponsiveContentTransporter (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
@@ -155,21 +147,12 @@ class DocumentContent {
     // If there is no toc item don't create and mount la-toc-controller
     const tocItems = this.getTocItems();
     if (!tocItems.length) return false;
-    const tocController = this.createTocController(tocItems);
+    const tocController = createTocController(tocItems);
+    tocController.titleFilterPlaceholder = i18next.t('Search table of contents');
     const tocContainer = this.root.querySelector('.toc');
     if (!tocContainer) return;
     tocContainer.appendChild(tocController);
     return true;
-  }
-
-  createTocController (items: []) {
-    const laTocController = document.createElement('la-table-of-contents-controller');
-    laTocController.items = items;
-    laTocController.expandAllBtnClasses = 'btn btn-secondary btn-sm';
-    laTocController.collapseAllBtnClasses = 'btn btn-secondary btn-sm';
-    laTocController.titleFilterInputClasses = 'form-control';
-    laTocController.titleFilterClearBtnClasses = 'btn btn-secondary btn-sm';
-    return laTocController;
   }
 
   getTocItems = () => {
@@ -183,6 +166,12 @@ class DocumentContent {
       items = content ? generateHtmlTocItems(content) : [];
     }
     return items;
+  }
+
+  setupEnrichments () {
+    const contentAndEnrichmentsElement = this.root.querySelector('.content-and-enrichments');
+    if (!contentAndEnrichmentsElement) return;
+    this.enchrichmentsManager = new EnrichmentsManager(contentAndEnrichmentsElement as HTMLElement);
   }
 }
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-24 14:32+0200\n"
+"POT-Creation-Date: 2022-12-05 15:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,615 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: admin.py:239
+msgid "Key details"
+msgstr ""
+
+#: admin.py:252
+msgid "Additional details"
+msgstr ""
+
+#: admin.py:264
+msgid "Work identification"
+msgstr ""
+
+#: admin.py:277
+msgid "Content"
+msgstr ""
+
+#: admin.py:285
+msgid "Advanced"
+msgstr ""
+
+#: admin.py:412 models/judgment.py:242
+msgid "case number"
+msgstr ""
+
+#: admin.py:413 models/judgment.py:243
+msgid "case numbers"
+msgstr ""
+
+#: admin.py:499
+msgid "Refreshing content in the background."
+msgstr ""
+
+#: admin.py:501
+msgid "Refresh all content"
+msgstr ""
+
+#: models/article.py:20 models/core_document_model.py:125
+msgid "date"
+msgstr ""
+
+#: models/article.py:21 models/core_document_model.py:56
+#: models/core_document_model.py:124 models/core_document_model.py:504
+msgid "title"
+msgstr ""
+
+#: models/article.py:22
+msgid "body"
+msgstr ""
+
+#: models/article.py:27 models/author.py:20 models/generic_document.py:35
+#: models/generic_document.py:68
+msgid "author"
+msgstr ""
+
+#: models/article.py:30 models/core_document_model.py:419
+msgid "image"
+msgstr ""
+
+#: models/article.py:32
+msgid "summary"
+msgstr ""
+
+#: models/article.py:33 models/relationships.py:7 models/taxonomies.py:11
+msgid "slug"
+msgstr ""
+
+#: models/article.py:34
+msgid "published"
+msgstr ""
+
+#: models/article.py:35
+msgid "topics"
+msgstr ""
+
+#: models/article.py:38
+msgid "article"
+msgstr ""
+
+#: models/article.py:39
+msgid "articles"
+msgstr ""
+
+#: models/article.py:64
+msgid "user"
+msgstr ""
+
+#: models/article.py:67
+msgid "photo"
+msgstr ""
+
+#: models/article.py:69
+msgid "profile description"
+msgstr ""
+
+#: models/article.py:72
+msgid "user profile"
+msgstr ""
+
+#: models/article.py:73
+msgid "user profiles"
+msgstr ""
+
 #: models/author.py:7
 msgid "Author"
+msgstr ""
+
+#: models/author.py:9 models/core_document_model.py:33
+#: models/core_document_model.py:467 models/generic_document.py:16
+#: models/ingestors.py:14 models/ingestors.py:33 models/judgment.py:12
+#: models/judgment.py:26 models/judgment.py:40 models/judgment.py:53
+#: models/relationships.py:6 models/taxonomies.py:10
+msgid "name"
+msgstr ""
+
+#: models/author.py:10 models/core_document_model.py:37
+#: models/generic_document.py:18 models/judgment.py:54
+msgid "code"
+msgstr ""
+
+#: models/author.py:13 models/judgment.py:63 models/profile.py:35
+#: models/profile.py:36
+msgid "profile"
+msgstr ""
+
+#: models/author.py:21
+msgid "authors"
+msgstr ""
+
+#: models/citations.py:12 models/core_document_model.py:414
+#: models/core_document_model.py:440 models/core_document_model.py:483
+#: models/core_document_model.py:502 models/judgment.py:237
+#: models/taxonomies.py:31
+msgid "document"
+msgstr ""
+
+#: models/citations.py:14
+msgid "text"
+msgstr ""
+
+#: models/citations.py:15
+msgid "url"
+msgstr ""
+
+#: models/citations.py:17
+msgid "target id"
+msgstr ""
+
+#: models/citations.py:19
+msgid "target selectors"
+msgstr ""
+
+#: models/citations.py:22
+msgid "citation link"
+msgstr ""
+
+#: models/citations.py:23
+msgid "citation links"
+msgstr ""
+
+#: models/core_document_model.py:35 models/core_document_model.py:145
+msgid "jurisdiction"
+msgstr ""
+
+#: models/core_document_model.py:40 models/core_document_model.py:152
+msgid "locality"
+msgstr ""
+
+#: models/core_document_model.py:41
+msgid "localities"
+msgstr ""
+
+#: models/core_document_model.py:54
+msgid "FRBR URI"
+msgstr ""
+
+#: models/core_document_model.py:62
+msgid "languages"
+msgstr ""
+
+#: models/core_document_model.py:66 models/core_document_model.py:114
+msgid "work"
+msgstr ""
+
+#: models/core_document_model.py:67
+msgid "works"
+msgstr ""
+
+#: models/core_document_model.py:117
+msgid "document type"
+msgstr ""
+
+#: models/core_document_model.py:127
+msgid "source URL"
+msgstr ""
+
+#: models/core_document_model.py:129
+msgid "citation"
+msgstr ""
+
+#: models/core_document_model.py:130
+msgid "content HTML"
+msgstr ""
+
+#: models/core_document_model.py:131
+msgid "content HTML is AKN"
+msgstr ""
+
+#: models/core_document_model.py:132
+msgid "TOC JSON"
+msgstr ""
+
+#: models/core_document_model.py:138
+msgid "language"
+msgstr ""
+
+#: models/core_document_model.py:156
+msgid "work FRBR URI"
+msgstr ""
+
+#: models/core_document_model.py:161
+msgid "FRBR URI doctype"
+msgstr ""
+
+#: models/core_document_model.py:168
+msgid "FRBR URI subtype"
+msgstr ""
+
+#: models/core_document_model.py:173
+msgid "Document subtype. Lowercase letters, numbers _ and - only."
+msgstr ""
+
+#: models/core_document_model.py:176
+msgid "FRBR URI actor"
+msgstr ""
+
+#: models/core_document_model.py:181
+msgid "Originating actor. Lowercase letters, numbers _ and - only."
+msgstr ""
+
+#: models/core_document_model.py:184
+msgid "FRBR URI date"
+msgstr ""
+
+#: models/core_document_model.py:189
+msgid "YYYY, YYYY-MM, or YYYY-MM-DD"
+msgstr ""
+
+#: models/core_document_model.py:192
+msgid "FRBR URI number"
+msgstr ""
+
+#: models/core_document_model.py:198
+msgid "Unique number or short title identifying this work. Lowercase letters, numbers _ and - only."
+msgstr ""
+
+#: models/core_document_model.py:203
+msgid "expression FRBR URI"
+msgstr ""
+
+#: models/core_document_model.py:207
+msgid "created at"
+msgstr ""
+
+#: models/core_document_model.py:208
+msgid "updated at"
+msgstr ""
+
+#: models/core_document_model.py:233
+msgid "Invalid Date"
+msgstr ""
+
+#: models/core_document_model.py:236
+msgid "You cannot set a future date for the document"
+msgstr ""
+
+#: models/core_document_model.py:242
+#, python-format
+msgid "Invalid FRBR URI: %(uri)s"
+msgstr ""
+
+#: models/core_document_model.py:387
+msgid "filename"
+msgstr ""
+
+#: models/core_document_model.py:388
+msgid "mimetype"
+msgstr ""
+
+#: models/core_document_model.py:389
+msgid "size"
+msgstr ""
+
+#: models/core_document_model.py:390 models/core_document_model.py:416
+msgid "file"
+msgstr ""
+
+#: models/core_document_model.py:420
+msgid "images"
+msgstr ""
+
+#: models/core_document_model.py:444
+msgid "source file"
+msgstr ""
+
+#: models/core_document_model.py:445
+msgid "source files"
+msgstr ""
+
+#: models/core_document_model.py:469 models/generic_document.py:19
+#: models/judgment.py:13 models/judgment.py:28 models/judgment.py:41
+msgid "description"
+msgstr ""
+
+#: models/core_document_model.py:472
+msgid "attached file nature"
+msgstr ""
+
+#: models/core_document_model.py:473
+msgid "attached file natures"
+msgstr ""
+
+#: models/core_document_model.py:486 models/generic_document.py:42
+#: models/generic_document.py:75
+msgid "nature"
+msgstr ""
+
+#: models/core_document_model.py:490
+msgid "attached file"
+msgstr ""
+
+#: models/core_document_model.py:491
+msgid "attached files"
+msgstr ""
+
+#: models/core_document_model.py:507
+msgid "alternative name"
+msgstr ""
+
+#: models/core_document_model.py:508
+msgid "alternative names"
+msgstr ""
+
+#: models/gazette.py:8
+msgid "gazette"
+msgstr ""
+
+#: models/gazette.py:9
+msgid "gazettes"
+msgstr ""
+
+#: models/generic_document.py:22
+msgid "document nature"
+msgstr ""
+
+#: models/generic_document.py:23
+msgid "document natures"
+msgstr ""
+
+#: models/generic_document.py:48
+msgid "generic document"
+msgstr ""
+
+#: models/generic_document.py:49
+msgid "generic documents"
+msgstr ""
+
+#: models/generic_document.py:81
+msgid "legal instrument"
+msgstr ""
+
+#: models/generic_document.py:82
+msgid "legal instruments"
+msgstr ""
+
+#: models/generic_document.py:104
+msgid "metadata JSON"
+msgstr ""
+
+#: models/generic_document.py:105
+msgid "repealed"
+msgstr ""
+
+#: models/generic_document.py:107
+msgid "parent work"
+msgstr ""
+
+#: models/generic_document.py:113 models/generic_document.py:114
+msgid "legislation"
+msgstr ""
+
+#: models/ingestors.py:15
+msgid "value"
+msgstr ""
+
+#: models/ingestors.py:17 models/ingestors.py:37 models/ingestors.py:38
+msgid "ingestor"
+msgstr ""
+
+#: models/ingestors.py:21
+msgid "ingestor setting"
+msgstr ""
+
+#: models/ingestors.py:22
+msgid "ingestor settings"
+msgstr ""
+
+#: models/ingestors.py:29
+msgid "adapter"
+msgstr ""
+
+#: models/ingestors.py:31
+msgid "last refreshed at"
+msgstr ""
+
+#: models/ingestors.py:34
+msgid "enabled"
+msgstr ""
+
+#: models/judgment.py:17
+msgid "judge"
+msgstr ""
+
+#: models/judgment.py:18 models/judgment.py:79
+msgid "judges"
+msgstr ""
+
+#: models/judgment.py:32 models/judgment.py:230
+msgid "matter type"
+msgstr ""
+
+#: models/judgment.py:33
+msgid "matter types"
+msgstr ""
+
+#: models/judgment.py:45 models/judgment.py:60
+msgid "court class"
+msgstr ""
+
+#: models/judgment.py:46
+msgid "court classes"
+msgstr ""
+
+#: models/judgment.py:68 models/judgment.py:77
+msgid "court"
+msgstr ""
+
+#: models/judgment.py:69
+msgid "courts"
+msgstr ""
+
+#: models/judgment.py:80
+msgid "headnote holding"
+msgstr ""
+
+#: models/judgment.py:82
+msgid "additional citations"
+msgstr ""
+
+#: models/judgment.py:84
+msgid "flynote"
+msgstr ""
+
+#: models/judgment.py:86
+msgid "case name"
+msgstr ""
+
+#: models/judgment.py:88
+msgid "Party names for use in title"
+msgstr ""
+
+#: models/judgment.py:94
+msgid "serial number"
+msgstr ""
+
+#: models/judgment.py:96
+msgid "Serial number for MNC, unique for a year and an author."
+msgstr ""
+
+#: models/judgment.py:99
+msgid "serial number override"
+msgstr ""
+
+#: models/judgment.py:102
+msgid "Specific MNC serial number assigned by the court."
+msgstr ""
+
+#: models/judgment.py:106
+msgid "MNC"
+msgstr ""
+
+#: models/judgment.py:108
+msgid "Media neutral citation"
+msgstr ""
+
+#: models/judgment.py:123
+msgid "judgment"
+msgstr ""
+
+#: models/judgment.py:124
+msgid "judgments"
+msgstr ""
+
+#: models/judgment.py:216
+msgid "string override"
+msgstr ""
+
+#: models/judgment.py:220
+msgid "Override for full case number string"
+msgstr ""
+
+#: models/judgment.py:222
+msgid "string"
+msgstr ""
+
+#: models/judgment.py:223 templates/peachjam/_timeline_events.html:32
+msgid "number"
+msgstr ""
+
+#: models/judgment.py:224
+msgid "year"
+msgstr ""
+
+#: models/profile.py:12
+msgid "about HTML"
+msgstr ""
+
+#: models/profile.py:13
+msgid "website URL"
+msgstr ""
+
+#: models/profile.py:14
+msgid "address"
+msgstr ""
+
+#: models/profile.py:19
+msgid "profile photo"
+msgstr ""
+
+#: models/profile.py:25
+msgid "background photo"
+msgstr ""
+
+#: models/relationships.py:8
+msgid "verb"
+msgstr ""
+
+#: models/relationships.py:10
+msgid "reverse verb"
+msgstr ""
+
+#: models/relationships.py:12
+msgid "Reversed verbal form of the relationship"
+msgstr ""
+
+#: models/relationships.py:17 models/relationships.py:48
+#: models/relationships.py:59
+msgid "predicate"
+msgstr ""
+
+#: models/relationships.py:18 models/relationships.py:60
+msgid "predicates"
+msgstr ""
+
+#: models/relationships.py:30
+msgid "subject work"
+msgstr ""
+
+#: models/relationships.py:33
+msgid "subject target ID"
+msgstr ""
+
+#: models/relationships.py:41
+msgid "object work"
+msgstr ""
+
+#: models/relationships.py:44
+msgid "object target ID"
+msgstr ""
+
+#: models/settings.py:28
+msgid "default document language"
+msgstr ""
+
+#: models/settings.py:34
+msgid "document languages"
+msgstr ""
+
+#: models/settings.py:40
+msgid "document jurisdictions"
+msgstr ""
+
+#: models/settings.py:44
+msgid "site settings"
+msgstr ""
+
+#: models/taxonomies.py:15 models/taxonomies.py:16
+msgid "taxonomies"
+msgstr ""
+
+#: models/taxonomies.py:34
+msgid "topic"
+msgstr ""
+
+#: models/taxonomies.py:39
+msgid "document topic"
+msgstr ""
+
+#: models/taxonomies.py:40
+msgid "document topics"
 msgstr ""
 
 #: settings.py:195
@@ -220,6 +827,10 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
+#: templates/peachjam/_document_table.html:27
+msgid "Multiple languages available"
+msgstr ""
+
 #: templates/peachjam/_entity_profile.html:32
 msgid "Physical address"
 msgstr ""
@@ -270,10 +881,6 @@ msgstr ""
 #: templates/peachjam/taxonomy_detail.html:15
 #: templates/peachjam/top_level_taxonomy_list.html:8
 msgid "Taxonomies"
-msgstr ""
-
-#: templates/peachjam/_taxonomy_tree_facet.html:5
-msgid "Subject areas"
 msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:3
@@ -553,10 +1160,6 @@ msgstr ""
 msgid "Published in"
 msgstr ""
 
-#: templates/peachjam/_timeline_events.html:32
-msgid "number"
-msgstr ""
-
 #: templates/peachjam/_timeline_events.html:35
 msgid "Repealed by"
 msgstr ""
@@ -591,6 +1194,10 @@ msgstr ""
 #: templates/peachjam/author_detail.html:7
 #, python-format
 msgid " Documents by %(author)s "
+msgstr ""
+
+#: templates/peachjam/book_list.html:4 templates/peachjam/book_list.html:7
+msgid "Books"
 msgstr ""
 
 #: templates/peachjam/court_detail.html:13
@@ -633,6 +1240,11 @@ msgstr ""
 
 #: templates/peachjam/home.html:3
 msgid "Home"
+msgstr ""
+
+#: templates/peachjam/journal_list.html:4
+#: templates/peachjam/journal_list.html:7
+msgid "Journals"
 msgstr ""
 
 #: templates/peachjam/judgment_detail.html:8

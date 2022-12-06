@@ -5,7 +5,7 @@
   >
     <div class="card border-warning">
       <div class="card-header">
-        <div class="d-flex">
+        <div class="d-flex mb-2 mb-lg-0">
           <div class="h5 flex-grow-1">
             {{ $t('What changed?') }}
           </div>
@@ -19,7 +19,7 @@
         </div>
 
         <div class="row">
-          <div class="col-6">
+          <div class="col-12 col-lg-6">
             <select
               v-if="diffsets"
               v-model="diffset"
@@ -38,7 +38,7 @@
             </select>
           </div>
 
-          <div class="col-6">
+          <div class="col-6 d-none d-lg-block">
             <label>
               <input
                 v-model="sideBySide"
@@ -69,6 +69,7 @@
 <script>
 import DiffContent from './DiffContent.vue';
 import { getBaseUrl } from './index';
+import debounce from 'lodash/debounce';
 
 export default {
   name: 'ProvisionDiffContentInline',
@@ -88,21 +89,56 @@ export default {
     }
   },
   data: () => ({
+    originalElement: null,
+    wrapperElement: null,
     sideBySide: true,
     diffsets: [],
-    diffset: null
+    diffset: null,
+    vw: Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
   }),
+
+  watch: {
+    vw: {
+      immediate: true,
+      handler (newVw) {
+        // Turn off side by side in mobile view
+        if (newVw < 992) {
+          this.sideBySide = false;
+        }
+      }
+    }
+  },
 
   mounted () {
     this.loadDiffContentsets();
     this.originalElement = document.getElementById(this.provision.id);
+    this.wrapperElement = document.createElement('div');
+    this.wrapperElement.style.position = 'relative';
     if (this.originalElement) {
-      this.originalElement.style.display = 'none';
-      this.originalElement.insertAdjacentElement('beforebegin', this.$el);
+      /**
+       * the originalElement's gutter item isn't able to properly anchor to originalElement if it has a style: display:none.
+       * So we hide originalElement behind ProvisionDiffInline via absolute positioning, so originalElement's gutter
+       * item can anchor correctly.
+       * */
+      this.originalElement.style.position = 'absolute';
+      this.originalElement.style.visibility = 'hidden';
+      this.originalElement.style.height = '0';
+      this.originalElement.style.top = '0';
+      this.originalElement.insertAdjacentElement('beforebegin', this.wrapperElement);
+      this.wrapperElement.append(this.originalElement, this.$el);
     }
+    window.addEventListener('resize', this.setVw);
+  },
+
+  unmounted () {
+    window.removeEventListener('resize', this.setVw);
   },
 
   methods: {
+    setVw: debounce(function () {
+      this.vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    }, 200),
+
     async loadDiffContentsets () {
       const url = `${getBaseUrl()}/e/diffsets${this.frbrExpressionUri}/?id=${this.provision.id}`;
       const resp = await fetch(url);
@@ -114,7 +150,14 @@ export default {
 
     close () {
       if (this.originalElement) {
-        this.originalElement.style.display = null;
+        // Place originalElement back to where it was and remove wrapperElement
+        this.wrapperElement.insertAdjacentElement('beforebegin', this.originalElement);
+        this.originalElement.style.position = null;
+        this.originalElement.style.visibility = null;
+        this.originalElement.style.height = null;
+        this.originalElement.style.top = null;
+
+        this.wrapperElement.remove();
       }
       this.$el.dispatchEvent(new CustomEvent('close'));
       this.$el.remove();

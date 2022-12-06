@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-24 14:32+0200\n"
-"PO-Revision-Date: 2022-11-30 14:17\n"
+"POT-Creation-Date: 2022-12-03 14:55+0000\n"
+"PO-Revision-Date: 2022-12-05 13:54\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -31,7 +31,7 @@ msgid "Search"
 msgstr "Pesquisa"
 
 #: templates/liiweb/legislation_list.html:3
-#: templates/liiweb/legislation_list.html:12 templates/peachjam/_header.html:18
+#: templates/liiweb/legislation_list.html:12
 msgid "Legislation"
 msgstr "Legislação"
 
@@ -59,7 +59,7 @@ msgstr "Inscrever-se"
 msgid "Subscribe to the our newsletter for updates and news."
 msgstr "Inscreva-se no nosso boletim informativo para atualizações e notícias."
 
-#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:28
+#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:9
 msgid "About"
 msgstr "Sobre"
 
@@ -70,12 +70,4 @@ msgstr "Nossos parceiros"
 #: templates/peachjam/_footer.html:36
 msgid "Other African Legal Information Institutions"
 msgstr "Outras Instituições Jurídicas Africanas"
-
-#: templates/peachjam/_header.html:13
-msgid "Judgments"
-msgstr "Julgamentos"
-
-#: templates/peachjam/_header.html:23
-msgid "Articles"
-msgstr "Artigos"
 

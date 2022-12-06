@@ -1,6 +1,6 @@
 {% load i18n %}
 
-<div class="entity-profile">
+<div class="entity-profile {% if entity_profile.background_photo %} has-background-photo {% endif %}">
   <div class="entity-profile__background-photo">
     {% if entity_profile.background_photo %}
       <img src="{{ entity_profile.background_photo.url }}"

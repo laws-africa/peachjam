@@ -1,4 +1,5 @@
 import { createI18n } from 'vue-i18n';
+import i18n from 'i18next';
 
 const languageSelect: HTMLSelectElement | null = document.getElementById('language') as HTMLSelectElement;
 const langs = languageSelect ? Array.from(languageSelect.querySelectorAll('option'))
@@ -13,17 +14,43 @@ const loadJSONFile = (url = '') => {
   }
 };
 
-const messages: {
+const setUpI8n = () => {
+  const resources: {
   [key: string] : any
 } = {};
 
-langs.forEach(key => {
-  messages[key] = loadJSONFile(`${key}/translation.json`);
-});
+  langs.forEach(key => {
+    resources[key] = {
+      translation: loadJSONFile(`${key}/translation.json`)
+    };
+  });
 
-const options = {
-  fallbackLocale: 'en',
-  locale: selectedLang,
-  messages
+  i18n.init({
+    fallbackLng: 'en',
+    lng: selectedLang,
+    resources
+  });
 };
-export const i18n = createI18n(options);
+
+// Setup Vue i18next for vue files
+const setupVueI8n = () => {
+  const messages: {
+  [key: string] : any
+} = {};
+
+  langs.forEach(key => {
+    messages[key] = loadJSONFile(`${key}/translation.json`);
+  });
+
+  const vueOptions = {
+    fallbackLocale: 'en',
+    locale: selectedLang,
+    messages
+  };
+  return createI18n(vueOptions);
+};
+
+// Setup i8next for js files
+setUpI8n();
+// Setup Vue i18next for vue files
+export const vueI18n = setupVueI8n();
