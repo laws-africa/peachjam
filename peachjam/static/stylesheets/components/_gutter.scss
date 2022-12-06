@@ -1,9 +1,9 @@
 // Dedicated file for la-gutter styling
 
-.mobile-gutter-item {
+.mobile-gutter-item-icon {
   font-size: 24px;
-  color: var(--anntn-highlight-color);
-  @include media-breakpoint-up(lg) {
-    display: none;
-  }
+    color: var(--anntn-highlight-color);
+    @include media-breakpoint-up(lg) {
+      display: none;
+    }
 }
