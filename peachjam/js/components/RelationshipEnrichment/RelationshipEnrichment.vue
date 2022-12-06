@@ -1,9 +1,10 @@
 <template>
   <la-gutter-item
+    class="relationship-gutter-item"
     :anchor.prop="anchorElement"
     @click="activate"
   >
-    <i class="bi bi-chat-left mobile-gutter-item" />
+    <i class="bi bi-chat-left mobile-gutter-item-icon" />
     <div class="card">
       <div class="card-body">
         <div class="mb-2 d-lg-none text-end">
