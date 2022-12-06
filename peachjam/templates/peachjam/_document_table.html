@@ -1,38 +1,40 @@
 {% load i18n %}
 
-<table class="table">
-    <thead>
-    <tr>
-      <th scope="col" style="width: 70%">{% trans 'Title' %}</th>
-      <th scope="col"></th>
-      <th scope="col">{% trans 'Date' %}</th>
-    </tr>
-    </thead>
+<div class="table-responsive">
+  <table class="table">
+      <thead>
+      <tr>
+        <th scope="col" style="width: 70%">{% trans 'Title' %}</th>
+        <th scope="col"></th>
+        <th scope="col">{% trans 'Date' %}</th>
+      </tr>
+      </thead>
 
-    <tbody>
-      {% for document in documents %}
-        <tr>
-          <td>
-            <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-          </td>
-          {% if author_listing_view %}
-            <td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>
-          {% else %}
-            <td >{{ document.author|default_if_none:'' }}</td>
-          {% endif %}
-            <td style="white-space: nowrap;">{{ document.date }}</td>
-
-            <td style="white-space: nowrap;">
-              {% if document.work.languages|length > 1 %}
-                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="{%  trans 'Multiple languages available' %}">
-                  <i class="bi bi-translate"></i>
-                </span>
-              {% endif %}
+      <tbody>
+        {% for document in documents %}
+          <tr>
+            <td>
+              <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
             </td>
-        </tr>
-      {% endfor %}
-    </tbody>
+            {% if author_listing_view %}
+              <td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>
+            {% else %}
+              <td >{{ document.author|default_if_none:'' }}</td>
+            {% endif %}
+              <td style="white-space: nowrap;">{{ document.date }}</td>
+
+              <td style="white-space: nowrap;">
+                {% if document.work.languages|length > 1 %}
+                  <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="{%  trans 'Multiple languages available' %}">
+                    <i class="bi bi-translate"></i>
+                  </span>
+                {% endif %}
+              </td>
+          </tr>
+        {% endfor %}
+      </tbody>
   </table>
+</div>
 
 {% if not hide_pagination %}
   {% include 'peachjam/_pagination.html' %}
