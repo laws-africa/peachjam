@@ -3,6 +3,16 @@
 
 {% block title %}{{ document.title }}{% endblock %}
 
+{% block head-meta %}
+  {{ block.super }}
+  <meta property="og:title" content="{{ document.title }}" />
+  <meta property="og:type" content="book" />
+  <meta property="book:release_date" content="{{ document.date|date:'Y-m-d' }}" />
+  {% if document.author %}
+    <meta property="book:author" content="{{ document.author }}" />
+  {% endif %}
+{% endblock %}
+
 {% block page-content %}
   <div class="pb-5">
     <div class="bg-light">
