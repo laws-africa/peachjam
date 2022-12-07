@@ -130,15 +130,19 @@ class LegislationDetailView(BaseDocumentDetailView):
 
         publication_date = self.object.metadata_json.get("publication_date", None)
         if publication_date:
+            api_url = "https://api.laws.africa/v2/"
+            commons_url = "https://commons.laws.africa/"
+            publication_url = work.get("publication_document", {}).get("url")
+            if publication_url and api_url in publication_url:
+                publication_url = publication_url.replace(api_url, commons_url)
+
             events.append(
                 {
                     "date": publication_date,
                     "event": "publication",
                     "publication_name": work.get("publication_name"),
                     "publication_number": work.get("publication_number"),
-                    "publication_url": work.get("publication_document", {}).get("url")
-                    if work.get("publication_document")
-                    else None,
+                    "publication_url": publication_url,
                 }
             )
 
