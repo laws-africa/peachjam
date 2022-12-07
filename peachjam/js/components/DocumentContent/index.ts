@@ -37,6 +37,7 @@ class DocumentContent {
 
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
+    const pdfPreviewsTabTriggerEl = this.root.querySelector('#pdf-previews-tab');
 
     const tocSetupOnTab = this.setupTocForTab();
     // If toc setup and mounted successfully, activate toc tab otherwise activate search tab
@@ -44,6 +45,9 @@ class DocumentContent {
       tocTabTriggerEl.classList.remove('d-none');
       const tocTab = new (window as { [key: string]: any }).bootstrap.Tab(tocTabTriggerEl);
       tocTab.show();
+    } else if (root.getAttribute('data-display-type') === 'pdf' && pdfPreviewsTabTriggerEl) {
+      const pdfPreviewsTab = new (window as { [key: string]: any }).bootstrap.Tab(pdfPreviewsTabTriggerEl);
+      pdfPreviewsTab.show();
     } else if (searchTabTriggerEl) {
       const searchTab = new (window as { [key: string]: any }).bootstrap.Tab(searchTabTriggerEl);
       searchTab.show();
