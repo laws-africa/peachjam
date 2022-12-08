@@ -1,6 +1,8 @@
 from collections import defaultdict
 
+from django.utils.translation import get_language
 from django.views.generic import TemplateView
+from languages_plus.models import Language
 
 from peachjam.models import Legislation
 from peachjam_api.serializers import LegislationSerializer
@@ -34,6 +36,9 @@ class LegislationListView(TemplateView):
         qs = self.add_children(qs)
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
+        context["three_code_current_lang"] = Language.objects.get(
+            iso_639_1=get_language()
+        ).iso_639_3
 
         return context
 
