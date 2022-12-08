@@ -132,7 +132,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         if publication_date:
             api_url = "https://api.laws.africa/v2/"
             commons_url = "https://commons.laws.africa/"
-            publication_url = work.get("publication_document", {}).get("url")
+            publication_url = (work.get("publication_document") or {}).get("url")
             if publication_url and api_url in publication_url:
                 publication_url = publication_url.replace(api_url, commons_url)
 
