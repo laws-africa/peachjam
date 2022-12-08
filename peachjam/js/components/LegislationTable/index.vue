@@ -41,7 +41,7 @@
             data-bs-target="#mobile-legislation-facets"
             aria-controls="mobile-legislation-facets"
           >
-            Filters
+            {{ $t('Filters') }}
           </button>
         </div>
         <div class="card legislation-table">
@@ -57,6 +57,10 @@
             <div class="indent" />
             <div>
               {{ filteredData.length }} of {{ tableData.length }} documents
+              {{ $t('Between {filtered_data_length} of {table_data_length} documents', {
+                filtered_data_length: filteredData.length,
+                table_data_length: tableData.length
+              }) }}
             </div>
           </div>
           <div class="table-row legislation-table__row headings">
@@ -68,7 +72,7 @@
                   role="button"
                   @click="updateSort('title')"
                 >
-                  <strong>Title</strong>
+                  <strong>{{ $t('Title') }}</strong>
                   <i
                     v-if="sortableFields.title === 'asc'"
                     class="bi bi-sort-up ms-2"
@@ -83,7 +87,7 @@
                   role="button"
                   @click="updateSort('citation')"
                 >
-                  <strong>Numbered title</strong>
+                  <strong>{{ $t('Numbered title') }}</strong>
                   <i
                     v-if="sortableFields.citation === 'asc'"
                     class="bi bi-sort-up ms-2"
@@ -97,58 +101,63 @@
             </div>
           </div>
           <template v-if="filteredData.length">
-            <div
-              v-for="(row, index) in filteredData"
+            <template
+              v-for="(data, index) in filteredData"
               :key="index"
-              :class="`table-row legislation-table__row ${
-                row.children.length ? 'has-children' : ''
-              }`"
-              role="button"
-              @click="handleRowClick"
             >
               <div
-                v-if="row.children.length"
-                class="column-caret indent"
+                v-for="(row, rowIndex) in getApplicableVersions(data)"
+                :key="rowIndex"
+                :class="`table-row legislation-table__row ${
+                  row.children.length ? 'has-children' : ''
+                }`"
+                role="button"
+                @click="handleRowClick"
               >
-                <i class="bi bi-caret-right-fill" />
-                <i class="bi bi-caret-down-fill" />
-              </div>
-              <div
-                v-else
-                class="indent"
-              />
-              <div class="table-row__content-col">
-                <div class="content">
-                  <div class="content__title">
-                    <a :href="`${row.work_frbr_uri}`">{{ row.title }}</a>
-                  </div>
-                  <div class="content__numbered-title">
-                    {{ row.citation }}
-                  </div>
-                  <div
-                    v-if="row.children.length"
-                    :id="`row-accordion-${index}`"
-                    class="accordion-collapse collapse accordion content__children"
-                    data-bs-parent=".legislation-table__row"
-                  >
-                    <div class="accordion-body p-0">
-                      <div
-                        v-for="(subleg, subleg_index) in row.children"
-                        :key="subleg_index"
-                        class="content mb-3"
-                      >
-                        <div class="content__title">
-                          <a :href="`${subleg.work_frbr_uri}`">{{ subleg.title }}</a>
-                        </div>
-                        <div class="content__numbered-title">
-                          {{ subleg.citation }}
+                <div
+                  v-if="row.children.length"
+                  class="column-caret indent"
+                >
+                  <i class="bi bi-caret-right-fill" />
+                  <i class="bi bi-caret-down-fill" />
+                </div>
+                <div
+                  v-else
+                  class="indent"
+                />
+                <div class="table-row__content-col">
+                  <div class="content">
+                    <div class="content__title">
+                      <a :href="row.work_frbr_uri">{{ row.title }}</a>
+                    </div>
+                    <div class="content__numbered-title">
+                      {{ row.citation }}
+                    </div>
+                    <div
+                      v-if="row.children.length"
+                      :id="`row-accordion-${index}`"
+                      class="accordion-collapse collapse accordion content__children"
+                      data-bs-parent=".legislation-table__row"
+                    >
+                      <div class="accordion-body p-0">
+                        <div
+                          v-for="(subleg, subleg_index) in row.children"
+                          :key="subleg_index"
+                          class="content mb-3"
+                        >
+                          <div class="content__title">
+                            <a :href="`${subleg.work_frbr_uri}`">{{ subleg.title }}</a>
+                          </div>
+                          <div class="content__numbered-title">
+                            {{ subleg.citation }}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </template>
           </template>
           <div
             v-else
@@ -183,6 +192,7 @@ export default {
     FilterFacets
   },
   data: () => ({
+    currentLang: null,
     offCanvasFacets: null,
     facets: [],
     showSideFacets: false,
@@ -222,12 +232,26 @@ export default {
 
     // To use this component json element #legislation-table-data must be in the dom
     const tableJsonElement = document.getElementById('legislation-table');
+
+    this.currentLang = root.dataset.currentLang || 'eng';
     this.tableData = JSON.parse(tableJsonElement.textContent);
     this.filterData();
     this.setFacets();
   },
 
   methods: {
+    getApplicableVersions (row) {
+      debugger;
+      if (row.versions[this.currentLang]) {
+        const version = row.versions[this.currentLang];
+        debugger;
+        return [version];
+      } else {
+        const versions = Object.keys(row.versions).map(version => row.versions[version]);
+        debugger;
+        return versions;
+      }
+    },
     handleRowClick (e) {
       const parentRow = e.target.closest('.legislation-table__row');
       if (!parentRow.classList.contains('has-children')) return;
