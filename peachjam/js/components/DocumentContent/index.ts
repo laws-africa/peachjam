@@ -30,18 +30,21 @@ class DocumentContent {
   private searchApp: any;
   private navOffCanvas: OffCanvas | undefined;
   private enchrichmentsManager: EnrichmentsManager | null;
+  private storedDocument: Node | undefined;
+  private tocController: HTMLElement| null;
   constructor (root: HTMLElement) {
     this.root = root;
     this.navOffCanvas = undefined;
     this.enchrichmentsManager = null;
+    this.storedDocument = this.root.querySelector('[data-document-element]')?.cloneNode(true);
+    this.tocController = this.setupTocForTab();
 
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
     const pdfPreviewsTabTriggerEl = this.root.querySelector('#pdf-previews-tab');
 
-    const tocSetupOnTab = this.setupTocForTab();
     // If toc setup and mounted successfully, activate toc tab otherwise activate search tab
-    if (tocSetupOnTab && tocTabTriggerEl) {
+    if (this.tocController && tocTabTriggerEl) {
       tocTabTriggerEl.classList.remove('d-none');
       const tocTab = new (window as { [key: string]: any }).bootstrap.Tab(tocTabTriggerEl);
       tocTab.show();
@@ -52,8 +55,6 @@ class DocumentContent {
       const searchTab = new (window as { [key: string]: any }).bootstrap.Tab(searchTabTriggerEl);
       searchTab.show();
     }
-
-    const documentElement: HTMLElement | null = this.root.querySelector('[data-document-element]');
 
     const navColumn: HTMLElement | null = this.root.querySelector('#navigation-column');
     const navContent: HTMLElement | null = this.root.querySelector('#navigation-content .navigation__inner');
@@ -100,7 +101,8 @@ class DocumentContent {
     }
 
     const targetMountElement = this.root.querySelector('[data-doc-search]');
-    if (targetMountElement) {
+    const documentElement = this.root.querySelector('[data-document-element]');
+    if (targetMountElement && documentElement) {
       this.searchApp = createAndMountApp({
         component: DocumentSearch,
         props: {
@@ -117,6 +119,17 @@ class DocumentContent {
     }
 
     this.setupEnrichments();
+    /**
+    * TODO:
+     * There seems to be some asynchronicity onload of la-table-of-content items
+     * - Possibly add event on la-table-of-content that dispatches when items are loaded
+     * - Secondly establish when this hash change behavior occurs (On specific document type: books and journals?)
+    * */
+    window.setTimeout(() => {
+      this.showDocSectionByHash();
+    }, 500);
+    // Setup listener to trigger this.showDocSectionByHash on hashchange
+    window.addEventListener('hashchange', () => this.showDocSectionByHash());
   }
 
   setupResponsiveContentTransporter (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
@@ -147,16 +160,33 @@ class DocumentContent {
     , 200));
   }
 
+  showDocSectionByHash () {
+    // TODO: Handle case for html document
+    const hash = window.location.hash;
+    const documentElement = this.root.querySelector('[data-document-element]');
+    if (!(this.storedDocument && this.storedDocument instanceof HTMLElement && documentElement)) return;
+    if (hash) {
+      const sectionOfFocus: Node | undefined = this.storedDocument.querySelector(hash)?.cloneNode(true);
+      if (!sectionOfFocus) return;
+      const fragment = document.createElement('la-akoma-ntoso');
+      fragment.appendChild(sectionOfFocus);
+      fragment.dataset.documentElement = 'true';
+      documentElement.replaceWith(fragment);
+    } else {
+      documentElement.replaceWith(this.storedDocument);
+    }
+  }
+
   setupTocForTab () {
     // If there is no toc item don't create and mount la-toc-controller
     const tocItems = this.getTocItems();
-    if (!tocItems.length) return false;
+    if (!tocItems.length) return null;
     const tocController = createTocController(tocItems);
     tocController.titleFilterPlaceholder = i18next.t('Search table of contents');
     const tocContainer = this.root.querySelector('.toc');
-    if (!tocContainer) return;
+    if (!tocContainer) return null;
     tocContainer.appendChild(tocController);
-    return true;
+    return tocController;
   }
 
   getTocItems = () => {
@@ -175,6 +205,7 @@ class DocumentContent {
   setupEnrichments () {
     const contentAndEnrichmentsElement = this.root.querySelector('.content-and-enrichments');
     if (!contentAndEnrichmentsElement) return;
+    // TODO: Add relayout method that can be called in the class
     this.enchrichmentsManager = new EnrichmentsManager(contentAndEnrichmentsElement as HTMLElement);
   }
 }
