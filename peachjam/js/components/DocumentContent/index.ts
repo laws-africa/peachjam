@@ -175,6 +175,7 @@ class DocumentContent {
     } else {
       documentElement.replaceWith(this.storedDocument);
     }
+    this.enchrichmentsManager?.layoutItems();
   }
 
   setupTocForTab () {
