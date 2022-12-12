@@ -7,7 +7,8 @@ class EnrichmentsManager {
   private relationshipsManager: RelationshipEnrichments;
   private root: HTMLElement;
   private docDiffsManager: null | DocDiffsManager;
-  private readonly gutter: HTMLElement | null;
+  // eslint-disable-next-line no-undef
+  private readonly gutter: HTMLLaGutterElement | null;
   private readonly akn: HTMLElement | null;
   constructor (contentAndEnrichmentsElement: HTMLElement) {
     this.root = contentAndEnrichmentsElement;
@@ -22,6 +23,11 @@ class EnrichmentsManager {
         this.docDiffsManager?.closeInlineDiff();
       }
     });
+  }
+
+  layoutItems () {
+    if (!this.gutter) return;
+    this.gutter.layoutItems();
   }
 
   setDocDiffs () {
