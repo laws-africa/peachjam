@@ -187,18 +187,24 @@ class LegislationDetailView(BaseDocumentDetailView):
             )
 
         amendments = self.get_work_amendments()
-        if amendments:
-            events.extend(
-                [
-                    {
-                        "date": amendment.get("date"),
-                        "event": "amendment",
-                        "amending_title": amendment.get("amending_title"),
-                        "amending_uri": amendment.get("amending_uri"),
-                    }
-                    for amendment in amendments
-                ]
-            )
+        if points_in_time and amendments:
+            point_in_time_dates = [
+                point_in_time["date"] for point_in_time in points_in_time
+            ]
+            event = [
+                {
+                    "date": amendment.get("date"),
+                    "event": "amendment",
+                    "amending_title": amendment.get("amending_title"),
+                    "amending_uri": amendment.get("amending_uri"),
+                    "flag": True
+                    if amendment.get("date") not in point_in_time_dates
+                    else False,
+                }
+                for amendment in amendments
+            ]
+
+            events.extend(event)
 
         repeal = self.get_repeal_info()
         if repeal:
