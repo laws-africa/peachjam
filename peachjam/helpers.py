@@ -29,5 +29,6 @@ def add_slash_to_frbr_uri(*args, **kwargs):
 
 
 def get_language(request):
+    """Get language from the request object and return its 3-letter language code."""
     language = get_language_from_request(request)
     return Language.objects.get(iso_639_1__iexact=language).iso_639_3
