@@ -3,6 +3,7 @@ from django.views.generic import DetailView, ListView
 from lxml import html
 
 from peachjam.forms import BaseDocumentFilterForm
+from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
     CitationLink,
     CoreDocument,
@@ -12,7 +13,6 @@ from peachjam.models import (
     Predicate,
     Relationship,
 )
-from peachjam.utils import add_slash, get_language, lowercase_alphabet
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,

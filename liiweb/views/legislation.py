@@ -2,8 +2,8 @@ from collections import defaultdict
 
 from django.views.generic import TemplateView
 
+from peachjam.helpers import get_language
 from peachjam.models import Legislation
-from peachjam.utils import get_language
 from peachjam_api.serializers import LegislationSerializer
 
 

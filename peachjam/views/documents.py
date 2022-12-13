@@ -5,9 +5,9 @@ from django.utils.translation import get_language
 from django.views.generic import DetailView, View
 from languages_plus.models import Language
 
+from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, pj_settings
 from peachjam.registry import registry
-from peachjam.utils import add_slash, add_slash_to_frbr_uri
 
 
 class DocumentDetailViewResolver(View):
