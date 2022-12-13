@@ -127,7 +127,7 @@
                   </div>
                   <div class="content__icon">
                     <i
-                      v-if="row.languages && row.languages.length"
+                      v-if="row.languages.length > 1"
                       class="bi bi-translate"
                     />
                   </div>
