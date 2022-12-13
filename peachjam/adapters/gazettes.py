@@ -1,6 +1,7 @@
 import logging
 
 from countries_plus.models import Country
+from django.db import connection
 from languages_plus.models import Language
 
 from peachjam.models import CoreDocument, Gazette, Locality, SourceFile
@@ -74,12 +75,21 @@ class GazetteAdapter(Adapter):
                 .using("gazettes_africa")
             )
 
+            file_path = ga_source_file[0].pop("file")
+
             if ga_source_file:
-                SourceFile.objects.update_or_create(
-                    document=updated_gazette, defaults={**ga_source_file[0]}
+                updated_source_file, _ = SourceFile.objects.update_or_create(
+                    document=updated_gazette, defaults={"file": f"{file_path}"}
                 )
 
-            log.info(f"New Document {new}")
-            log.info("Update Done.")
+                # update the source file to include the bucket name
+                with connection.cursor() as cursor:
+                    source_file_table = updated_source_file._meta.db_table
+                    sql = f"""
+                        UPDATE  {source_file_table}
+                        SET file = '{file_path}'
+                        WHERE id  = {updated_source_file.pk}
+                        """
+                    cursor.execute(sql)
 
-            return
+            log.info("Update Done.")
