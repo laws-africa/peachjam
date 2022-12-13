@@ -7,21 +7,34 @@
   <section class="container pt-4 pb-5">
     <h1 class="mb-4">{% trans 'Taxonomies' %}</h1>
 
-    <ul>
+    <div>
       {% if taxonomies|length > 0 %}
-        {% for taxonomy in taxonomies %}
-          {% if taxonomy.is_root %}
-            <li>
-              <a href="{% url 'first_level_taxonomy_list' taxonomy.slug %}">
-              {{ taxonomy }}
-              </a>
-            </li>
-          {% endif %}
-        {% endfor %}
+        <div class="row">
+          {% for taxonomy in taxonomies %}
+            {% if taxonomy.is_root and taxonomy.get_children|length > 0%}
+              <div class="col-12 col-lg-6 mb-4">
+                <div class="card">
+                 <div class="card-header">
+                    {{ taxonomy }}
+                  </div>
+                    <ul class="list-group list-group-flush">
+                      {% for child in taxonomy.get_children %}
+                        <li class="list-group-item">
+                          <a href="{% url 'taxonomy_detail' taxonomy.slug child.slug %}">
+                            {{ child }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
       {% else %}
-        <li> {% trans 'No taxonomies found' %} </li>
+        <div> {% trans 'No taxonomies found' %} </div>
       {% endif %}
-    </ul>
+    </div>
 
   </section>
 {% endblock %}
