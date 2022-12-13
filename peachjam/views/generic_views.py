@@ -1,7 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.utils.translation import get_language_from_request
 from django.views.generic import DetailView, ListView
-from languages_plus.models import Language
 from lxml import html
 
 from peachjam.forms import BaseDocumentFilterForm
@@ -14,7 +12,7 @@ from peachjam.models import (
     Predicate,
     Relationship,
 )
-from peachjam.utils import add_slash, lowercase_alphabet
+from peachjam.utils import add_slash, get_language, lowercase_alphabet
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,
@@ -36,13 +34,9 @@ class FilteredDocumentListView(ListView):
 
         return super(FilteredDocumentListView, self).get(request, *args, **kwargs)
 
-    def get_language(self):
-        language = get_language_from_request(self.request)
-        return Language.objects.get(iso_639_1__iexact=language).iso_639_3
-
     def get_base_queryset(self):
         qs = self.queryset or self.model.objects
-        return qs.preferred_language(self.get_language())
+        return qs.preferred_language(get_language(self.request))
 
     def get_queryset(self):
         return self.form.filter_queryset(self.get_base_queryset()).order_by("-date")

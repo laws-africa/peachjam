@@ -1,6 +1,9 @@
 import string
 from functools import wraps
 
+from django.utils.translation import get_language_from_request
+from languages_plus.models import Language
+
 
 def lowercase_alphabet():
     return " ".join(string.ascii_lowercase).split()
@@ -23,3 +26,8 @@ def add_slash_to_frbr_uri(*args, **kwargs):
         return _wrapped_view
 
     return decorator
+
+
+def get_language(request):
+    language = get_language_from_request(request)
+    return Language.objects.get(iso_639_1__iexact=language).iso_639_3

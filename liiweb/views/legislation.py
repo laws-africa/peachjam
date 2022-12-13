@@ -3,6 +3,7 @@ from collections import defaultdict
 from django.views.generic import TemplateView
 
 from peachjam.models import Legislation
+from peachjam.utils import get_language
 from peachjam_api.serializers import LegislationSerializer
 
 
@@ -13,9 +14,10 @@ class LegislationListView(TemplateView):
     model = Legislation
 
     def get_queryset(self):
-        return self.model.objects.distinct("work_frbr_uri").order_by(
+        qs = self.model.objects.distinct("work_frbr_uri").order_by(
             "work_frbr_uri", "-date"
         )
+        return qs.preferred_language(get_language(self.request))
 
     def filter_queryset(self, qs):
         if self.variant == "all":
