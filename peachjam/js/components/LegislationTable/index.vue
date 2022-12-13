@@ -125,6 +125,12 @@
                   <div class="content__numbered-title">
                     {{ row.citation }}
                   </div>
+                  <div class="content__icon">
+                    <i
+                      v-if="row.languages && row.languages.length"
+                      class="bi bi-translate"
+                    />
+                  </div>
                   <div
                     v-if="row.children.length"
                     :id="`row-accordion-${index}`"
@@ -441,10 +447,14 @@ export default {
 }
 
 .content__title {
-  grid-column: 1/9;
+  grid-column: 1/7;
 }
 
 .content__numbered-title {
-  grid-column: 9/13;
+  grid-column: 7/12;
+}
+
+.content__icon {
+  grid-column: 12/13;
 }
 </style>
