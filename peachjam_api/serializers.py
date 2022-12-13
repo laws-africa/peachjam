@@ -84,6 +84,7 @@ class LegislationSerializer(serializers.ModelSerializer):
     taxonomies = serializers.SerializerMethodField("get_taxonomies")
     year = serializers.ReadOnlyField()
     children = ChildLegislationSerializer(many=True, read_only=True)
+    languages = serializers.SerializerMethodField("get_languages")
 
     class Meta:
         model = Legislation
@@ -95,10 +96,14 @@ class LegislationSerializer(serializers.ModelSerializer):
             "repealed",
             "year",
             "taxonomies",
+            "languages",
         )
 
     def get_taxonomies(self, instance):
         return [x.topic.name for x in instance.taxonomies.all()]
+
+    def get_languages(self, instance):
+        return Work.objects.get(frbr_uri=instance.work_frbr_uri).languages
 
 
 class WebhookDataSerializer(serializers.Serializer):
