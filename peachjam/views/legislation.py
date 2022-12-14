@@ -54,7 +54,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         points_in_time = self.get_points_in_time()
         work_amendments = self.get_work_amendments()
 
-        if points_in_time:
+        if points_in_time and work_amendments:
             current_object_date = self.object.date.strftime("%Y-%m-%d")
             point_in_time_dates = [
                 point_in_time["date"] for point_in_time in points_in_time
