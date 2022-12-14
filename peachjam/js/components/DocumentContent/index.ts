@@ -161,21 +161,20 @@ class DocumentContent {
   }
 
   showDocSectionByHash () {
-    // TODO: Handle case for html document
     const hash = window.location.hash;
     const documentElement = this.root.querySelector('[data-document-element]');
     if (!(this.storedDocument && this.storedDocument instanceof HTMLElement && documentElement)) return;
     if (hash) {
-      const sectionOfFocus: Node | undefined = this.storedDocument.querySelector(hash)?.cloneNode(true);
+      const sectionOfFocus = this.storedDocument.querySelector(hash)?.cloneNode(true) as HTMLElement | undefined;
       if (!sectionOfFocus) return;
-      const fragment = document.createElement('la-akoma-ntoso');
-      fragment.appendChild(sectionOfFocus);
-      fragment.dataset.documentElement = 'true';
-      documentElement.replaceWith(fragment);
+      documentElement.innerHTML = sectionOfFocus.outerHTML;
     } else {
-      documentElement.replaceWith(this.storedDocument);
+      documentElement.innerHTML = this.storedDocument.innerHTML;
     }
     this.enchrichmentsManager?.layoutItems();
+    window.setTimeout(() => {
+      document.body.scrollTop = 0;
+    }, 300);
   }
 
   setupTocForTab () {
@@ -206,7 +205,6 @@ class DocumentContent {
   setupEnrichments () {
     const contentAndEnrichmentsElement = this.root.querySelector('.content-and-enrichments');
     if (!contentAndEnrichmentsElement) return;
-    // TODO: Add relayout method that can be called in the class
     this.enchrichmentsManager = new EnrichmentsManager(contentAndEnrichmentsElement as HTMLElement);
   }
 }
