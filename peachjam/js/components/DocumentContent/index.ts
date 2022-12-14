@@ -39,6 +39,13 @@ class DocumentContent {
     this.storedDocument = this.root.querySelector('[data-document-element]')?.cloneNode(true);
     this.tocController = this.setupTocForTab();
 
+    if (this.root.dataset.frbrUriSubtype === 'book') {
+      this.tocController?.addEventListener('itemTitleClicked', (e) => {
+        const customEvt = e as CustomEvent;
+        this.showDocSection(customEvt.detail.target.getAttribute('href').replace('#', ''));
+      });
+    }
+
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
     const pdfPreviewsTabTriggerEl = this.root.querySelector('#pdf-previews-tab');
@@ -119,17 +126,6 @@ class DocumentContent {
     }
 
     this.setupEnrichments();
-    /**
-    * TODO:
-     * There seems to be some asynchronicity onload of la-table-of-content items
-     * - Possibly add event on la-table-of-content that dispatches when items are loaded
-     * - Secondly establish when this hash change behavior occurs (On specific document type: books and journals?)
-    * */
-    window.setTimeout(() => {
-      this.showDocSectionByHash();
-    }, 500);
-    // Setup listener to trigger this.showDocSectionByHash on hashchange
-    window.addEventListener('hashchange', () => this.showDocSectionByHash());
   }
 
   setupResponsiveContentTransporter (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
@@ -160,21 +156,22 @@ class DocumentContent {
     , 200));
   }
 
-  showDocSectionByHash () {
-    const hash = window.location.hash;
+  showDocSection (id:string) {
     const documentElement = this.root.querySelector('[data-document-element]');
-    if (!(this.storedDocument && this.storedDocument instanceof HTMLElement && documentElement)) return;
-    if (hash) {
-      const sectionOfFocus = this.storedDocument.querySelector(hash)?.cloneNode(true) as HTMLElement | undefined;
+    if (!documentElement) return;
+    if (!(this.storedDocument && this.storedDocument instanceof HTMLElement)) return;
+    if (id) {
+      const sectionOfFocus = this.storedDocument.querySelector(`#${id}`)?.cloneNode(true) as HTMLElement | undefined;
       if (!sectionOfFocus) return;
-      documentElement.innerHTML = sectionOfFocus.outerHTML;
+      // Delete content within document element and then append section of focus
+      documentElement.replaceChildren(sectionOfFocus);
     } else {
-      documentElement.innerHTML = this.storedDocument.innerHTML;
+      const storedDocument = this.storedDocument.cloneNode(true);
+      // @ts-ignore
+      documentElement.replaceChildren(...this.storedDocument.children);
+      this.storedDocument = storedDocument;
     }
     this.enchrichmentsManager?.layoutItems();
-    window.setTimeout(() => {
-      document.body.scrollTop = 0;
-    }, 300);
   }
 
   setupTocForTab () {
