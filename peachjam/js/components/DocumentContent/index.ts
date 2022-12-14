@@ -39,11 +39,8 @@ class DocumentContent {
     this.storedDocument = this.root.querySelector('[data-document-element]')?.cloneNode(true);
     this.tocController = this.setupTocForTab();
 
-    if (this.root.dataset.frbrUriSubtype === 'book') {
-      this.tocController?.addEventListener('itemTitleClicked', (e) => {
-        const customEvt = e as CustomEvent;
-        this.showDocSection(customEvt.detail.target.getAttribute('href').replace('#', ''));
-      });
+    if (root.dataset.frbrUriSubtype === 'book' && root.getAttribute('data-display-type') === 'akn') {
+      this.setupBookTocActivity();
     }
 
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
@@ -156,22 +153,26 @@ class DocumentContent {
     , 200));
   }
 
-  showDocSection (id:string) {
-    const documentElement = this.root.querySelector('[data-document-element]');
-    if (!documentElement) return;
-    if (!(this.storedDocument && this.storedDocument instanceof HTMLElement)) return;
-    if (id) {
-      const sectionOfFocus = this.storedDocument.querySelector(`#${id}`)?.cloneNode(true) as HTMLElement | undefined;
-      if (!sectionOfFocus) return;
-      // Delete content within document element and then append section of focus
-      documentElement.replaceChildren(sectionOfFocus);
-    } else {
-      const storedDocument = this.storedDocument.cloneNode(true);
-      // @ts-ignore
-      documentElement.replaceChildren(...this.storedDocument.children);
-      this.storedDocument = storedDocument;
-    }
-    this.enchrichmentsManager?.layoutItems();
+  setupBookTocActivity () {
+    this.tocController?.addEventListener('itemTitleClicked', (e) => {
+      const customEvt = e as CustomEvent;
+      const id = customEvt.detail.target.getAttribute('href').replace('#', '');
+      const documentElement = this.root.querySelector('[data-document-element]');
+      if (!documentElement) return;
+      if (!(this.storedDocument && this.storedDocument instanceof HTMLElement)) return;
+      if (id) {
+        const sectionOfFocus = this.storedDocument.querySelector(`#${id}`)?.cloneNode(true) as HTMLElement | undefined;
+        if (!sectionOfFocus) return;
+        // Delete content within document element and then append section of focus
+        documentElement.replaceChildren(sectionOfFocus);
+      } else {
+        const storedDocument = this.storedDocument.cloneNode(true);
+        // @ts-ignore
+        documentElement.replaceChildren(...this.storedDocument.children);
+        this.storedDocument = storedDocument;
+      }
+      this.enchrichmentsManager?.layoutItems();
+    });
   }
 
   setupTocForTab () {
