@@ -11,6 +11,9 @@
   {% if document.author %}
     <meta property="book:author" content="{{ document.author }}" />
   {% endif %}
+
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="{{ document.title }}"/>
 {% endblock %}
 
 {% block page-content %}
