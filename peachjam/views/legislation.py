@@ -197,7 +197,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                     "event": "amendment",
                     "amending_title": amendment.get("amending_title"),
                     "amending_uri": amendment.get("amending_uri"),
-                    "flag": True
+                    "unapplied_amendment": True
                     if amendment.get("date") not in point_in_time_dates
                     else False,
                 }
