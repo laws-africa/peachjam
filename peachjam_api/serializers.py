@@ -103,7 +103,7 @@ class LegislationSerializer(serializers.ModelSerializer):
         return [x.topic.name for x in instance.taxonomies.all()]
 
     def get_languages(self, instance):
-        return Work.objects.get(frbr_uri=instance.work_frbr_uri).languages
+        return instance.work.languages
 
 
 class WebhookDataSerializer(serializers.Serializer):
