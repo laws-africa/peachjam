@@ -30,13 +30,15 @@ class DocumentContent {
   private searchApp: any;
   private navOffCanvas: OffCanvas | undefined;
   private enchrichmentsManager: EnrichmentsManager | null;
-  private storedDocument: Node | undefined;
+  private originalDocCloned: Node | undefined;
   private tocController: HTMLElement| null;
+  private documentElement: Element | null;
   constructor (root: HTMLElement) {
     this.root = root;
     this.navOffCanvas = undefined;
     this.enchrichmentsManager = null;
-    this.storedDocument = this.root.querySelector('[data-document-element]')?.cloneNode(true);
+    this.documentElement = this.root.querySelector('[data-document-element]');
+    this.originalDocCloned = this.documentElement?.cloneNode(true);
     this.tocController = this.setupTocForTab();
 
     if (root.dataset.frbrUriSubtype === 'book' && root.getAttribute('data-display-type') === 'akn') {
@@ -105,12 +107,11 @@ class DocumentContent {
     }
 
     const targetMountElement = this.root.querySelector('[data-doc-search]');
-    const documentElement = this.root.querySelector('[data-document-element]');
-    if (targetMountElement && documentElement) {
+    if (targetMountElement && this.documentElement) {
       this.searchApp = createAndMountApp({
         component: DocumentSearch,
         props: {
-          document: documentElement,
+          document: this.documentElement,
           docType: root.getAttribute('data-display-type'),
           mountElement: targetMountElement
         },
@@ -157,21 +158,17 @@ class DocumentContent {
     this.tocController?.addEventListener('itemTitleClicked', (e) => {
       const customEvt = e as CustomEvent;
       const id = customEvt.detail.target.getAttribute('href').replace('#', '');
-      const documentElement = this.root.querySelector('[data-document-element]');
-      if (!documentElement) return;
-      if (!(this.storedDocument && this.storedDocument instanceof HTMLElement)) return;
+      if (!this.documentElement) return;
+      if (!(this.originalDocCloned && this.originalDocCloned instanceof HTMLElement)) return;
       if (id) {
-        const sectionOfFocus = this.storedDocument.querySelector(`#${id}`)?.cloneNode(true) as HTMLElement | undefined;
+        const sectionOfFocus = this.originalDocCloned.querySelector(`#${id}`)?.cloneNode(true) as HTMLElement | undefined;
         if (!sectionOfFocus) return;
         // Delete content within document element and then append section of focus
-        documentElement.replaceChildren(sectionOfFocus);
+        this.documentElement.replaceChildren(sectionOfFocus);
       } else {
-        const storedDocument = this.storedDocument.cloneNode(true);
         // @ts-ignore
-        documentElement.replaceChildren(...this.storedDocument.children);
-        this.storedDocument = storedDocument;
+        this.documentElement.replaceChildren(...Array.from(this.originalDocCloned.children).map(node => node.cloneNode(true)));
       }
-      this.enchrichmentsManager?.layoutItems();
     });
   }
 
