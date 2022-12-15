@@ -33,7 +33,7 @@ class LegislationListView(TemplateView):
 
         qs = self.filter_queryset(self.get_queryset())
         qs = qs.prefetch_related(
-            "taxonomies", "taxonomies__topic", "work", "work__languages"
+            "taxonomies", "taxonomies__topic", "work"
         )
         qs = self.add_children(qs)
 
