@@ -41,8 +41,8 @@ class DocumentContent {
     this.originalDocCloned = this.documentElement?.cloneNode(true);
     this.tocController = this.setupTocForTab();
 
-    if (root.dataset.frbrUriSubtype === 'book' && root.getAttribute('data-display-type') === 'akn') {
-      this.setupBookTocActivity();
+    if (root.hasAttribute('data-toc-show-active-item-only')) {
+      this.setupTocShowActiveItemOnly();
     }
 
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
@@ -154,7 +154,7 @@ class DocumentContent {
     , 200));
   }
 
-  setupBookTocActivity () {
+  setupTocShowActiveItemOnly () {
     this.tocController?.addEventListener('itemTitleClicked', (e) => {
       const customEvt = e as CustomEvent;
       const id = customEvt.detail.target.getAttribute('href').replace('#', '');
