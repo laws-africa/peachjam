@@ -37,9 +37,9 @@ class DocumentContent {
     this.root = root;
     this.navOffCanvas = undefined;
     this.enchrichmentsManager = null;
+    this.tocController = this.setupTocForTab();
     this.documentElement = this.root.querySelector('[data-document-element]');
     this.originalDocCloned = this.documentElement?.cloneNode(true);
-    this.tocController = this.setupTocForTab();
 
     if (root.hasAttribute('data-toc-show-active-item-only')) {
       this.setupTocShowActiveItemOnly();

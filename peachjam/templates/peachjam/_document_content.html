@@ -4,7 +4,7 @@
 <div class="document-content"
      data-component="DocumentContent"
      data-display-type="{{ display_type }}"
-     {% if document.frbr_uri_subtype == 'book' and display_type == 'akn' %}
+     {% if document.frbr_uri_subtype == 'book' %}
         data-toc-show-active-item-only
      {% endif %}
 >
