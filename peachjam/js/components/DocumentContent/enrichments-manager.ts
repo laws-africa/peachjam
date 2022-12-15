@@ -25,11 +25,6 @@ class EnrichmentsManager {
     });
   }
 
-  layoutItems () {
-    if (!this.gutter) return;
-    this.gutter.layoutItems();
-  }
-
   setDocDiffs () {
     if (!this.akn || !this.gutter) return null;
     const frbrExpressionUri = this.akn.getAttribute('expression-frbr-uri');
