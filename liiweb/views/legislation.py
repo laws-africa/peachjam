@@ -14,10 +14,12 @@ class LegislationListView(TemplateView):
     model = Legislation
 
     def get_queryset(self):
-        qs = self.model.objects.distinct("work_frbr_uri").order_by(
-            "work_frbr_uri", "-date"
+        qs = (
+            self.model.objects.distinct("work_frbr_uri")
+            .order_by("work_frbr_uri", "-date")
+            .preferred_language(get_language(self.request))
         )
-        return qs.preferred_language(get_language(self.request))
+        return qs
 
     def filter_queryset(self, qs):
         if self.variant == "all":
