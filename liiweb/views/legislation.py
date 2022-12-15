@@ -32,9 +32,7 @@ class LegislationListView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         qs = self.filter_queryset(self.get_queryset())
-        qs = qs.prefetch_related(
-            "taxonomies", "taxonomies__topic", "work"
-        )
+        qs = qs.prefetch_related("taxonomies", "taxonomies__topic", "work")
         qs = self.add_children(qs)
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data

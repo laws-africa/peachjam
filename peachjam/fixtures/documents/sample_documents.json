@@ -9426,6 +9426,29 @@
         "fields": {
             "metadata_json": {
                 "amendments": [],
+                "work_amendments": [{
+                        "date": "2020-08-07",
+                        "amending_uri": "/akn/za/act/gn/2020/r868",
+                        "amending_title": "Department of Health: Directions to Address, Prevent and Combat the Spread of COVID-19: Amendment"
+                    },
+                    {
+                        "date": "2020-12-03",
+                        "amending_uri": "/akn/za/act/gn/2020/1278",
+                        "amending_title": "Department of Health: Directions to Address, Prevent and Combat the Spread of COVID-19: Amendment"
+                    }, {
+                        "date": "2020-12-15",
+                        "amending_uri": "/akn/za/act/gn/2020/1360",
+                        "amending_title": "Department of Health: Directions to Address, Prevent and Combat the Spread of COVID-19: Amendment"
+                    }, {
+                        "date": "2021-03-19",
+                        "amending_uri": "/akn/za/act/gn/2021/240",
+                        "amending_title": "Department of Health: Directions to Address, Prevent and Combat the Spread of COVID-19: Amendment"
+                    }, {
+                        "date": "2022-03-19",
+                        "amending_uri": "/akn/za/act/gn/2022/240",
+                        "amending_title": "Department of Health: Directions to Address, Prevent and Combat the Spread of COVID-19: Amendment"
+                    }
+                ],
                 "as_at_date": null,
                 "assent_date": null,
                 "commenced": true,
@@ -9552,6 +9575,29 @@
         "fields": {
             "metadata_json": {
                 "amendments": [],
+                "work_amendments": [{
+                        "date": "2020-08-07",
+                        "amending_uri": "/akn/za/act/gn/2020/r868",
+                        "amending_title": "Department of Health: Directions to Address, Prevent and Combat the Spread of COVID-19: Amendment"
+                    },
+                    {
+                        "date": "2020-12-03",
+                        "amending_uri": "/akn/za/act/gn/2020/1278",
+                        "amending_title": "Department of Health: Directions to Address, Prevent and Combat the Spread of COVID-19: Amendment"
+                    }, {
+                        "date": "2020-12-15",
+                        "amending_uri": "/akn/za/act/gn/2020/1360",
+                        "amending_title": "Department of Health: Directions to Address, Prevent and Combat the Spread of COVID-19: Amendment"
+                    }, {
+                        "date": "2021-03-19",
+                        "amending_uri": "/akn/za/act/gn/2021/240",
+                        "amending_title": "Department of Health: Directions to Address, Prevent and Combat the Spread of COVID-19: Amendment"
+                    }, {
+                        "date": "2022-03-19",
+                        "amending_uri": "/akn/za/act/gn/2022/240",
+                        "amending_title": "Department of Health: Directions to Address, Prevent and Combat the Spread of COVID-19: Amendment"
+                    }
+                ],
                 "as_at_date": null,
                 "assent_date": null,
                 "commenced": true,

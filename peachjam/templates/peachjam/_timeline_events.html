@@ -12,6 +12,12 @@
             {% if history_item.date == current_object_date %}
               <span class="badge rounded-pill bg-primary">{% trans 'this version' %}</span>
             {% endif %}
+
+            {% for event in history_item.events %}
+              {% if event.unapplied_amendment %}
+                <span class="badge rounded-pill bg-secondary">{% trans 'amendment not yet applied' %}</span>
+              {% endif %}
+            {% endfor %}
           </h5>
         </div>
         <div class="card-body">
