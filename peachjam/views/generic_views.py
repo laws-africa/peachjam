@@ -45,6 +45,8 @@ class FilteredDocumentListView(ListView):
         return qs.preferred_language(self.get_language())
 
     def get_queryset(self):
+        if self.form.data.get("alphabet"):
+            return self.form.filter_queryset(self.get_base_queryset()).order_by("title")
         return self.form.filter_queryset(self.get_base_queryset()).order_by("-date")
 
     def get_context_data(self, **kwargs):
