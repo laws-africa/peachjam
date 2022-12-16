@@ -67,6 +67,18 @@ class Work(models.Model):
         verbose_name_plural = _("works")
         ordering = ["title"]
 
+    def update_languages(self):
+        """Update this work's languages to reflect the distinct languages of its related documents."""
+        langs = list(
+            CoreDocument.objects.filter(work=self)
+            .distinct("language__iso_639_3")
+            .values_list("language__iso_639_3", flat=True)
+            .order_by("language__iso_639_3")
+        )
+        if langs != self.languages:
+            self.languages = langs
+            self.save()
+
     def __str__(self):
         return f"{self.frbr_uri} - {self.title}"
 
