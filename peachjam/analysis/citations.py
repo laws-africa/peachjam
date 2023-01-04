@@ -2,9 +2,9 @@ import shutil
 import tempfile
 
 import lxml.html
-from docpipe.pdf import pdf_to_text
 
 from peachjam.models import CitationLink
+from peachjam.utils import pdfjs_to_text
 
 
 class CitationAnalyser:
@@ -39,7 +39,7 @@ class CitationAnalyser:
             pdf = document.source_file.as_pdf()
             shutil.copyfileobj(pdf, tmp)
             tmp.flush()
-            text = pdf_to_text(tmp.name)
+            text = self.pdf_to_text(tmp.name)
 
         for matcher in self.matchers:
             matcher = matcher()
@@ -50,10 +50,14 @@ class CitationAnalyser:
 
     def store_text_citation_links(self, document, matcher):
         """Transform extracted citations from text into CitationLink objects."""
+        # TODO: adjust extracted matches to remove newlines
         citations = [CitationLink.from_extracted_citation(c) for c in matcher.citations]
         for c in citations:
             c.document = document
         document.citation_links.add(*citations, bulk=False)
+
+    def pdf_to_text(self, fname):
+        return pdfjs_to_text(fname)
 
 
 citation_analyser = CitationAnalyser()
