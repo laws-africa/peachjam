@@ -1,7 +1,6 @@
 import DocumentSearch from '../DocumentSearch/index.vue';
 import PdfRenderer from '../pdf-renderer';
 import debounce from 'lodash/debounce';
-import PDFCitationLinks from './citation-links';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { vueI18n } from '../../i18n';
 import { createTocController, generateHtmlTocItems } from '../../utils/function';
@@ -30,34 +29,59 @@ class DocumentContent {
   private pdfRenderer: PdfRenderer | undefined;
   private searchApp: any;
   private navOffCanvas: OffCanvas | undefined;
-  private citationLinks: PDFCitationLinks | undefined;
-  private enchrichmentsManager: EnrichmentsManager | null;
+  private enchrichmentsManager: EnrichmentsManager | null = null;
 
-  constructor (root: HTMLElement) {
+  constructor(root: HTMLElement) {
     this.root = root;
-    this.navOffCanvas = undefined;
-    this.enchrichmentsManager = null;
 
+    this.setupTabs();
+    this.setupNav();
+    this.setupPdf();
+    this.setupSearch();
+    this.setupEnrichments();
+  }
+
+  setupSearch () {
+    const documentElement: HTMLElement | null = this.root.querySelector('[data-document-element]');
+    const targetMountElement = this.root.querySelector('[data-doc-search]');
+    if (targetMountElement) {
+      this.searchApp = createAndMountApp({
+        component: DocumentSearch,
+        props: {
+          document: documentElement,
+          docType: this.root.getAttribute('data-display-type'),
+          mountElement: targetMountElement
+        },
+        use: [vueI18n],
+        mountTarget: targetMountElement as HTMLElement
+      });
+      targetMountElement.addEventListener('going-to-snippet', () => {
+        this.navOffCanvas?.hide();
+      });
+    }
+  }
+
+  setupTabs () {
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
     const pdfPreviewsTabTriggerEl = this.root.querySelector('#pdf-previews-tab');
-
     const tocSetupOnTab = this.setupTocForTab();
+
     // If toc setup and mounted successfully, activate toc tab otherwise activate search tab
     if (tocSetupOnTab && tocTabTriggerEl) {
       tocTabTriggerEl.classList.remove('d-none');
       const tocTab = new (window as { [key: string]: any }).bootstrap.Tab(tocTabTriggerEl);
       tocTab.show();
-    } else if (root.getAttribute('data-display-type') === 'pdf' && pdfPreviewsTabTriggerEl) {
+    } else if (this.root.getAttribute('data-display-type') === 'pdf' && pdfPreviewsTabTriggerEl) {
       const pdfPreviewsTab = new (window as { [key: string]: any }).bootstrap.Tab(pdfPreviewsTabTriggerEl);
       pdfPreviewsTab.show();
     } else if (searchTabTriggerEl) {
       const searchTab = new (window as { [key: string]: any }).bootstrap.Tab(searchTabTriggerEl);
       searchTab.show();
     }
+  }
 
-    const documentElement: HTMLElement | null = this.root.querySelector('[data-document-element]');
-
+  setupNav () {
     const navColumn: HTMLElement | null = this.root.querySelector('#navigation-column');
     const navContent: HTMLElement | null = this.root.querySelector('#navigation-content .navigation__inner');
     const navOffCanvasElement: HTMLElement | null = this.root.querySelector('#navigation-offcanvas');
@@ -69,18 +93,35 @@ class DocumentContent {
       }
     }
 
+    // Close navOffCanvas on lac-toc title click
+    if (this.root.getAttribute('data-display-type') === 'akn') {
+      const element = this.root.querySelector('la-table-of-contents-controller');
+      if (element) {
+        element.addEventListener('itemTitleClicked', () => {
+          this.navOffCanvas?.hide();
+        });
+      }
+    }
+  }
+
+  setupPdf () {
     // if pdf setup pdf renderer instance
-    if (root.getAttribute('data-display-type') === 'pdf') {
+    if (this.root.getAttribute('data-display-type') === 'pdf') {
       // get dataset attributes
       const pdfAttrsElement: HTMLElement | null = this.root.querySelector('[data-pdf]');
       if (pdfAttrsElement) {
-        Object.keys(pdfAttrsElement.dataset).forEach(key => { root.dataset[key] = pdfAttrsElement.dataset[key]; });
+        Object.keys(pdfAttrsElement.dataset).forEach(key => {
+          this.root.dataset[key] = pdfAttrsElement.dataset[key];
+        });
       }
-      this.pdfRenderer = new PdfRenderer(root);
-      this.pdfRenderer.onPreviewPanelClick = () => { this.navOffCanvas?.hide(); };
+      this.pdfRenderer = new PdfRenderer(this.root);
+      this.pdfRenderer.onPreviewPanelClick = () => {
+        this.navOffCanvas?.hide();
+      };
       this.pdfRenderer.onPdfLoaded = () => {
-        // link citations, if any
-        this.citationLinks = new PDFCitationLinks(root);
+        if (this.enchrichmentsManager) {
+          this.enchrichmentsManager.setupPdfCitationLinks();
+        }
 
         const urlParams = new URLSearchParams(window.location.search);
         const search = urlParams.get('q');
@@ -94,35 +135,6 @@ class DocumentContent {
         this.pdfRenderer?.triggerScrollToPage(targetPage);
       };
     }
-
-    // Close navOffCanvas on lac-toc title click
-    if (root.getAttribute('data-display-type') === 'akn') {
-      const element = root.querySelector('la-table-of-contents-controller');
-      if (element) {
-        element.addEventListener('itemTitleClicked', () => {
-          this.navOffCanvas?.hide();
-        });
-      }
-    }
-
-    const targetMountElement = this.root.querySelector('[data-doc-search]');
-    if (targetMountElement) {
-      this.searchApp = createAndMountApp({
-        component: DocumentSearch,
-        props: {
-          document: documentElement,
-          docType: root.getAttribute('data-display-type'),
-          mountElement: targetMountElement
-        },
-        use: [vueI18n],
-        mountTarget: targetMountElement as HTMLElement
-      });
-      targetMountElement.addEventListener('going-to-snippet', () => {
-        this.navOffCanvas?.hide();
-      });
-    }
-
-    this.setupEnrichments();
   }
 
   setupResponsiveContentTransporter (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
