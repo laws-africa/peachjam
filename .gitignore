@@ -167,6 +167,7 @@ africanlii/static/stylesheets/africanlii.css
 lawlibrary/static/stylesheets/lawlibrary.css
 liiweb/static/stylesheets/liiweb.css
 senlii/static/stylesheets/senlii.css
+ulii/static/stylesheets/ulii.css
 *.map
 
 .vscode

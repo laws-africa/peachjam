@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 
 def file_location(instance, filename):
@@ -16,17 +17,26 @@ def file_location(instance, filename):
 class Article(models.Model):
     SAVE_FOLDER = "articles"
 
-    date = models.DateField(null=False, blank=False)
-    title = models.CharField(max_length=1024, null=False, blank=False)
-    body = models.TextField()
+    date = models.DateField(_("date"), null=False, blank=False)
+    title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
+    body = models.TextField(_("body"))
     author = models.ForeignKey(
-        get_user_model(), on_delete=models.CASCADE, related_name="articles"
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name="articles",
+        verbose_name=_("author"),
     )
-    image = models.ImageField(upload_to=file_location, blank=True, null=True)
-    summary = models.TextField()
-    slug = models.SlugField(max_length=1024, unique=True)
-    published = models.BooleanField(default=False)
-    topics = models.ManyToManyField("peachjam.Taxonomy")
+    image = models.ImageField(
+        _("image"), upload_to=file_location, blank=True, null=True
+    )
+    summary = models.TextField(_("summary"))
+    slug = models.SlugField(_("slug"), max_length=1024, unique=True)
+    published = models.BooleanField(_("published"), default=False)
+    topics = models.ManyToManyField("peachjam.Taxonomy", verbose_name=_("topics"))
+
+    class Meta:
+        verbose_name = _("article")
+        verbose_name_plural = _("articles")
 
     def __str__(self):
         return self.title
@@ -50,9 +60,17 @@ class Article(models.Model):
 class UserProfile(models.Model):
     SAVE_FOLDER = "user_profiles"
 
-    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
-    photo = models.ImageField(upload_to=file_location, blank=True, null=True)
-    profile_description = models.TextField()
+    user = models.OneToOneField(
+        get_user_model(), on_delete=models.CASCADE, verbose_name=_("user")
+    )
+    photo = models.ImageField(
+        _("photo"), upload_to=file_location, blank=True, null=True
+    )
+    profile_description = models.TextField(_("profile description"))
+
+    class Meta:
+        verbose_name = _("user profile")
+        verbose_name_plural = _("user profiles")
 
     def __str__(self):
         return f"{self.user.username}"

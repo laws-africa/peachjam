@@ -7,6 +7,7 @@ from peachjam.views.generic_views import FilteredDocumentListView
 
 class TopLevelTaxonomyListView(TemplateView):
     template_name = "peachjam/top_level_taxonomy_list.html"
+    navbar_link = "taxonomy"
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -19,10 +20,12 @@ class FirstLevelTaxonomyDetailView(DetailView):
     model = Taxonomy
     slug_url_kwarg = "topic"
     context_object_name = "taxonomy"
+    navbar_link = "taxonomy"
 
 
 class TaxonomyDetailView(FilteredDocumentListView):
     template_name = "peachjam/taxonomy_detail.html"
+    navbar_link = "taxonomy"
 
     def get(self, request, *args, **kwargs):
 
@@ -51,4 +54,6 @@ class TaxonomyDetailView(FilteredDocumentListView):
         context["ancestors"] = ancestors
         context["root_taxonomy"] = context["root"].get_root().slug
         context["taxonomy_tree"] = list(context["root"].dump_bulk(context["root"]))
+        context["first_level_taxonomy"] = context["taxonomy_tree"][0]["data"]["name"]
+        context["is_leaf_node"] = not (context["taxonomy_tree"][0].get("children"))
         return context

@@ -1,93 +1,127 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models import Max
+from django.template.defaultfilters import date as format_date
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import override as lang_override
 
 from peachjam.models import CoreDocument
 
 
 class Judge(models.Model):
-    name = models.CharField(max_length=1024, null=False, blank=False)
-    description = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.name
+    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    description = models.TextField(_("description"), blank=True)
 
     class Meta:
         ordering = ["name"]
+        verbose_name = _("judge")
+        verbose_name_plural = _("judges")
+
+    def __str__(self):
+        return self.name
 
 
 class MatterType(models.Model):
-    name = models.CharField(max_length=1024, null=False, blank=False, unique=True)
-    description = models.TextField(blank=True)
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("matter type")
+        verbose_name_plural = _("matter types")
 
     def __str__(self):
         return self.name
 
-    class Meta:
-        ordering = ["name"]
-
 
 class CourtClass(models.Model):
-    name = models.CharField(max_length=100, null=False, unique=True)
-    description = models.TextField(null=True, blank=True)
+    name = models.CharField(_("name"), max_length=100, null=False, unique=True)
+    description = models.TextField(_("description"), null=True, blank=True)
 
     class Meta:
         ordering = ("name",)
-        verbose_name_plural = "Court classes"
+        verbose_name = _("court class")
+        verbose_name_plural = _("court classes")
 
     def __str__(self):
         return self.name
 
 
 class Court(models.Model):
-    name = models.CharField(max_length=255, null=False, unique=True)
-    code = models.SlugField(max_length=255, null=False, unique=True)
+    name = models.CharField(_("name"), max_length=255, null=False, unique=True)
+    code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
     court_class = models.ForeignKey(
-        CourtClass, related_name="courts", on_delete=models.PROTECT, null=True
+        CourtClass,
+        related_name="courts",
+        on_delete=models.PROTECT,
+        null=True,
+        verbose_name=_("court class"),
     )
-    entity_profile = GenericRelation("peachjam.EntityProfile")
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name = _("court")
+        verbose_name_plural = _("courts")
 
     def __str__(self):
         return self.name
 
 
 class Judgment(CoreDocument):
-    court = models.ForeignKey(Court, on_delete=models.PROTECT, null=True)
-    judges = models.ManyToManyField(Judge, blank=True)
-    headnote_holding = models.TextField(null=True, blank=True)
-    additional_citations = models.TextField(null=True, blank=True)
-    flynote = models.TextField(null=True, blank=True)
+    court = models.ForeignKey(
+        Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
+    )
+    judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
+    headnote_holding = models.TextField(_("headnote holding"), null=True, blank=True)
+    additional_citations = models.TextField(
+        _("additional citations"), null=True, blank=True
+    )
+    flynote = models.TextField(_("flynote"), null=True, blank=True)
     case_name = models.CharField(
+        _("case name"),
         max_length=4096,
-        help_text="Party names for use in title",
+        help_text=_("Party names for use in title"),
         null=False,
         blank=False,
     )
     serial_number = models.IntegerField(
         # TODO: this must be changed to True
+        _("serial number"),
         null=False,
-        help_text="Serial number for MNC, unique for a year and an author.",
+        help_text=_("Serial number for MNC, unique for a year and an author."),
     )
     serial_number_override = models.IntegerField(
+        _("serial number override"),
         null=True,
         blank=True,
-        help_text="Specific MNC serial number assigned by the court.",
+        help_text=_("Specific MNC serial number assigned by the court."),
     )
 
     mnc = models.CharField(
-        max_length=4096, help_text="Media neutral citation", null=False, blank=False
+        _("MNC"),
+        max_length=4096,
+        help_text=_("Media neutral citation"),
+        null=False,
+        blank=False,
     )
     hearing_date = models.DateField(null=True, blank=True)
 
-    CITATION_DATE_FORMAT = "(%d %B %Y)"
+    CITATION_DATE_FORMAT = "(j F Y)"
 
     MNC_FORMAT = "[{year}] {author} {serial}"
     """ Format string to use for building short MNCs. """
 
     frbr_uri_doctypes = ["judgment"]
 
-    class Meta:
+    class Meta(CoreDocument.Meta):
         ordering = ["title"]
+        verbose_name = _("judgment")
+        verbose_name_plural = _("judgments")
 
     def __str__(self):
         return self.title
@@ -161,7 +195,8 @@ class Judgment(CoreDocument):
             parts.append(self.mnc)
 
         if self.date:
-            parts.append(self.date.strftime(self.CITATION_DATE_FORMAT))
+            with lang_override(self.language.iso_639_1):
+                parts.append(format_date(self.date, self.CITATION_DATE_FORMAT))
 
         self.title = " ".join(parts)
         self.citation = self.title
@@ -178,21 +213,34 @@ class Judgment(CoreDocument):
 
 class CaseNumber(models.Model):
     string_override = models.CharField(
+        _("string override"),
         max_length=1024,
         null=True,
         blank=True,
-        help_text="Override for full case number string",
+        help_text=_("Override for full case number string"),
     )
-    string = models.CharField(max_length=1024, null=True, blank=True)
-    number = models.PositiveIntegerField(null=True, blank=True)
-    year = models.PositiveIntegerField(null=True, blank=True)
+    string = models.CharField(_("string"), max_length=1024, null=True, blank=True)
+    number = models.PositiveIntegerField(_("number"), null=True, blank=True)
+    year = models.PositiveIntegerField(_("year"), null=True, blank=True)
     matter_type = models.ForeignKey(
-        MatterType, on_delete=models.PROTECT, null=True, blank=True
+        MatterType,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("matter type"),
     )
 
     document = models.ForeignKey(
-        Judgment, related_name="case_numbers", on_delete=models.CASCADE
+        Judgment,
+        related_name="case_numbers",
+        on_delete=models.CASCADE,
+        verbose_name=_("document"),
     )
+
+    class Meta:
+        ordering = ["string"]
+        verbose_name = _("case number")
+        verbose_name_plural = _("case numbers")
 
     def __str__(self):
         return str(self.string)

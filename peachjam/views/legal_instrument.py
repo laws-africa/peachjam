@@ -10,11 +10,11 @@ class LegalInstrumentListView(FilteredDocumentListView):
     model = LegalInstrument
     template_name = "peachjam/legal_instrument_list.html"
     navbar_link = "legal_instruments"
-    queryset = LegalInstrument.objects.prefetch_related("author", "nature")
+    queryset = LegalInstrument.objects.prefetch_related("author", "nature", "work")
 
     def get_queryset(self):
         queryset = super(LegalInstrumentListView, self).get_queryset()
-        return queryset.order_by("-date")
+        return queryset.order_by("title")
 
 
 @registry.register_doc_type("legal_instrument")

@@ -3,6 +3,19 @@
 
 {% block title %}{{ document.title }}{% endblock %}
 
+{% block head-meta %}
+  {{ block.super }}
+  <meta property="og:title" content="{{ document.title }}" />
+  <meta property="og:type" content="book" />
+  <meta property="book:release_date" content="{{ document.date|date:'Y-m-d' }}" />
+  {% if document.author %}
+    <meta property="book:author" content="{{ document.author }}" />
+  {% endif %}
+
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="{{ document.title }}"/>
+{% endblock %}
+
 {% block page-content %}
   <div class="pb-5">
     <div class="bg-light">
@@ -11,7 +24,23 @@
         {% endblock %}
 
         {% block document-title %}
-          <h1 class="py-4">{{ document.title }}</h1>
+          <div class="d-md-flex justify-content-md-between py-4">
+            <h1>{{ document.title }}</h1>
+            <div class="d-flex align-items-center">
+              <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}"
+                 class="btn btn-link"
+                 target="_blank"
+              >
+                <i class="bi bi-twitter twitter-forecolor share-icon"></i>
+              </a>
+              <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+                 class="btn btn-link"
+                 target="_blank"
+              >
+                <i class="bi bi-facebook facebook-forecolor share-icon"></i>
+              </a>
+            </div>
+          </div>
         {% endblock %}
 
         {% include 'peachjam/_notices.html' with messages=notices %}
@@ -123,17 +152,17 @@
                           <dd>
                             <div class="dropdown">
                               <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ document.language }}
+                                {% trans document.language.name %}
                               </a>
                               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                 {% for version in language_versions %}
-                                  <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{{ version.language }}</a></li>
+                                  <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{% trans version.language.name %}</a></li>
                                 {% endfor %}
                               </ul>
                             </div>
                           </dd>
                         {% else %}
-                          <dd class="text-muted">{{ document.language }} </dd>
+                          <dd class="text-muted">{% trans document.language.name %}</dd>
                         {% endif %}
                       {% endblock %}
 

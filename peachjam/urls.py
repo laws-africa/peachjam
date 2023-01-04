@@ -35,6 +35,7 @@ from peachjam.views import (
     ArticleListView,
     ArticleTopicListView,
     AuthorDetailView,
+    BookListView,
     CourtDetailView,
     CourtYearView,
     DocumentDetailViewResolver,
@@ -46,6 +47,7 @@ from peachjam.views import (
     GazetteYearView,
     GenericDocumentListView,
     HomePageView,
+    JournalListView,
     JudgmentListView,
     LegalInstrumentListView,
     LegislationListView,
@@ -95,6 +97,8 @@ urlpatterns = [
         GenericDocumentListView.as_view(),
         name="generic_document_list",
     ),
+    path("books/", BookListView.as_view(), name="book_list"),
+    path("journals/", JournalListView.as_view(), name="journal_list"),
     path(
         "taxonomy/", TopLevelTaxonomyListView.as_view(), name="top_level_taxonomy_list"
     ),

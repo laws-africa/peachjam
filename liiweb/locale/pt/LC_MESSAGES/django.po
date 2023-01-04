@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-22 16:22+0200\n"
-"PO-Revision-Date: 2022-11-22 14:24\n"
+"POT-Creation-Date: 2022-12-03 14:55+0000\n"
+"PO-Revision-Date: 2022-12-05 13:54\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -17,6 +17,10 @@ msgstr ""
 "X-Crowdin-File: /main/liiweb/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 103\n"
 
+#: templates/liiweb/home.html:4
+msgid "Home"
+msgstr "Página inicial"
+
 #: templates/liiweb/home.html:24 templates/liiweb/home.html:25
 #, python-format
 msgid "Search %(APP_NAME)s"
@@ -26,6 +30,27 @@ msgstr "Pesquisar %(APP_NAME)s"
 msgid "Search"
 msgstr "Pesquisa"
 
+#: templates/liiweb/legislation_list.html:3
+#: templates/liiweb/legislation_list.html:12
+msgid "Legislation"
+msgstr "Legislação"
+
+#: templates/liiweb/legislation_list.html:19
+msgid "Current legislation"
+msgstr "Legislação atual"
+
+#: templates/liiweb/legislation_list.html:24
+msgid "Repealed legislation"
+msgstr "Legislação repetida"
+
+#: templates/liiweb/legislation_list.html:29
+msgid "All legislation"
+msgstr "Toda a legislação"
+
+#: templates/liiweb/legislation_list.html:37
+msgid "You are viewing repealed legislation which is no longer in force."
+msgstr "Estão a ver legislação revogada, que já não está em vigor."
+
 #: templates/peachjam/_footer.html:5
 msgid "Subscribe"
 msgstr "Inscrever-se"
@@ -34,7 +59,7 @@ msgstr "Inscrever-se"
 msgid "Subscribe to the our newsletter for updates and news."
 msgstr "Inscreva-se no nosso boletim informativo para atualizações e notícias."
 
-#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:10
+#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:9
 msgid "About"
 msgstr "Sobre"
 

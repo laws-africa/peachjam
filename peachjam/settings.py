@@ -159,12 +159,17 @@ if DEBUG:
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 default_db_url = "postgres://peachjam:peachjam@localhost:5432/peachjam"
-db_config = dj_database_url.config(
-    default=os.environ.get("DATABASE_URL", default_db_url)
+gazette_db_url = "postgres://indigo:indigo@localhost:5432/indigo"
+default_db_config = dj_database_url.config(default=default_db_url)
+gazette_db_config = dj_database_url.config(
+    default=gazette_db_url, env="GAZETTES_DATABASE_URL"
 )
-db_config["ATOMIC_REQUESTS"] = True
+default_db_config["ATOMIC_REQUESTS"] = True
 
-DATABASES = {"default": db_config}
+DATABASES = {
+    "default": default_db_config,
+    "gazettes_africa": gazette_db_config,
+}
 
 
 # Password validation

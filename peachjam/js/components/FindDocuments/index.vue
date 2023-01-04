@@ -17,7 +17,7 @@
             aria-controls="nav-search"
             aria-selected="true"
           >
-            Search
+            {{ $t('Search') }}
           </button>
           <button
             id="advanced-search-tab"
@@ -29,7 +29,7 @@
             aria-controls="nav-advanced-search"
             aria-selected="false"
           >
-            Advanced
+            {{ $t('Advanced search') }}
           </button>
         </div>
       </nav>
@@ -442,8 +442,11 @@ export default {
       });
 
       const advancedSearchFields = Object.keys(this.advancedFields).filter(key => key !== 'date');
-      if (advancedSearchFields.some(key => params.has(key))) {
-      // if there are advance search fields url params (title, judges, flynote), prefill fields
+      /**
+      * if there are advance search fields url params (title, judges, flynote) or show-advanced-tab param, prefill
+       * fields and activate advanced tab
+      * */
+      if (advancedSearchFields.some(key => params.has(key)) || params.get('show-advanced-tab')) {
         if (params.has('date_from')) this.advancedFields.date.date_from = params.get('date_from');
         if (params.has('date_to')) this.advancedFields.date.date_to = params.get('date_to');
         advancedSearchFields.forEach(key => {

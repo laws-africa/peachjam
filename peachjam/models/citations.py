@@ -1,16 +1,26 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from peachjam.models.core_document_model import CoreDocument
 
 
 class CitationLink(models.Model):
     document = models.ForeignKey(
-        CoreDocument, related_name="citation_links", on_delete=models.CASCADE
+        CoreDocument,
+        related_name="citation_links",
+        on_delete=models.CASCADE,
+        verbose_name=_("document"),
     )
-    text = models.TextField(null=False, blank=False)
-    url = models.URLField(max_length=1024)
-    target_id = models.CharField(max_length=1024, null=False, blank=False)
-    target_selectors = models.JSONField()
+    text = models.TextField(_("text"), null=False, blank=False)
+    url = models.URLField(_("url"), max_length=1024)
+    target_id = models.CharField(
+        _("target id"), max_length=1024, null=False, blank=False
+    )
+    target_selectors = models.JSONField(verbose_name=_("target selectors"))
+
+    class Meta:
+        verbose_name = _("citation link")
+        verbose_name_plural = _("citation links")
 
     def __str__(self):
         return f"Citation link for {self.document.doc_type} - {self.document.title}"

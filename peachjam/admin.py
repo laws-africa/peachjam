@@ -12,7 +12,8 @@ from django.urls import path, reverse
 from django.utils.dateparse import parse_date
 from django.utils.dates import MONTHS
 from django.utils.html import format_html
-from django.utils.translation import gettext_lazy as __
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from import_export.admin import ImportMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
@@ -24,6 +25,7 @@ from peachjam.models import (
     AttachedFileNature,
     AttachedFiles,
     Author,
+    Book,
     CaseNumber,
     CitationLink,
     Court,
@@ -36,6 +38,7 @@ from peachjam.models import (
     Image,
     Ingestor,
     IngestorSetting,
+    Journal,
     Judge,
     Judgment,
     LegalInstrument,
@@ -233,7 +236,7 @@ class DocumentAdmin(admin.ModelAdmin):
 
     fieldsets = [
         (
-            __("Key details"),
+            gettext_lazy("Key details"),
             {
                 "fields": [
                     "work_link",
@@ -246,7 +249,7 @@ class DocumentAdmin(admin.ModelAdmin):
             },
         ),
         (
-            __("Additional details"),
+            gettext_lazy("Additional details"),
             {
                 "fields": [
                     "citation",
@@ -258,7 +261,7 @@ class DocumentAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Work identification",
+            gettext_lazy("Work identification"),
             {
                 "fields": [
                     "work_frbr_uri",
@@ -271,7 +274,7 @@ class DocumentAdmin(admin.ModelAdmin):
             },
         ),
         (
-            __("Content"),
+            gettext_lazy("Content"),
             {
                 "fields": [
                     "content_html",
@@ -279,7 +282,7 @@ class DocumentAdmin(admin.ModelAdmin):
             },
         ),
         (
-            __("Advanced"),
+            gettext_lazy("Advanced"),
             {
                 "classes": ("collapse",),
                 "fields": [
@@ -406,8 +409,8 @@ class LegislationAdmin(ImportMixin, DocumentAdmin):
 class CaseNumberAdmin(admin.TabularInline):
     model = CaseNumber
     extra = 1
-    verbose_name = "Case number"
-    verbose_name_plural = "Case numbers"
+    verbose_name = gettext_lazy("case number")
+    verbose_name_plural = gettext_lazy("case numbers")
     readonly_fields = ["string"]
     fields = ["matter_type", "number", "year", "string_override"]
 
@@ -493,9 +496,9 @@ class IngestorAdmin(admin.ModelAdmin):
         queryset.update(last_refreshed_at=None)
         # queue up the background ingestor update task
         run_ingestors()
-        self.message_user(request, "Refreshing content in the background.")
+        self.message_user(request, _("Refreshing content in the background."))
 
-    refresh_all_content.short_description = "Refresh all content"
+    refresh_all_content.short_description = gettext_lazy("Refresh all content")
 
 
 class ArticleForm(forms.ModelForm):
@@ -544,7 +547,7 @@ class RelationshipInline(admin.TabularInline):
 
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):
-    fields = ("title", "frbr_uri")
+    fields = ("title", "frbr_uri", "languages")
     search_fields = ("title", "frbr_uri")
     list_display = fields
     readonly_fields = fields
@@ -574,6 +577,16 @@ class AuthorAdmin(admin.ModelAdmin):
 
 @admin.register(Gazette)
 class GazetteAdmin(DocumentAdmin):
+    pass
+
+
+@admin.register(Book)
+class BookAdmin(DocumentAdmin):
+    pass
+
+
+@admin.register(Journal)
+class JournalAdmin(DocumentAdmin):
     pass
 
 

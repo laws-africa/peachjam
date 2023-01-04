@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class BaseModel(models.Model):
@@ -24,16 +25,23 @@ class PeachJamSettings(BaseModel):
         related_name="+",
         null=True,
         on_delete=models.SET_NULL,
+        verbose_name=_("default document language"),
     )
     document_languages = models.ManyToManyField(
-        "languages_plus.Language", related_name="+", blank=True
+        "languages_plus.Language",
+        related_name="+",
+        blank=True,
+        verbose_name=_("document languages"),
     )
     document_jurisdictions = models.ManyToManyField(
-        "countries_plus.Country", related_name="+", blank=True
+        "countries_plus.Country",
+        related_name="+",
+        blank=True,
+        verbose_name=_("document jurisdictions"),
     )
 
     class Meta:
-        verbose_name = verbose_name_plural = "site settings"
+        verbose_name = verbose_name_plural = _("site settings")
 
     def __str__(self):
         return "Settings"

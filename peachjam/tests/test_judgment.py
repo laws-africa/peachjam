@@ -117,11 +117,12 @@ class JudgmentTestCase(TestCase):
         j.assign_mnc()
         j.assign_title()
         self.assertEquals(
-            "Foo v Bar (2 of 1980) [2019] EACJ 1 (01 January 2019)", j.title
+            "Foo v Bar (2 of 1980) [2019] EACJ 1 (1 January 2019)", j.title
         )
 
     def test_assign_title_no_case_numbers(self):
         j = Judgment(
+            language=Language.objects.get(pk="en"),
             court=Court.objects.first(),
             date=datetime.date(2019, 1, 1),
             jurisdiction=Country.objects.get(pk="ZA"),
@@ -129,7 +130,7 @@ class JudgmentTestCase(TestCase):
         )
         j.assign_mnc()
         j.assign_title()
-        self.assertEquals("Foo v Bar [2019] EACJ 1 (01 January 2019)", j.title)
+        self.assertEquals("Foo v Bar [2019] EACJ 1 (1 January 2019)", j.title)
 
     def test_assign_title_string_override(self):
         j = Judgment(
@@ -146,5 +147,17 @@ class JudgmentTestCase(TestCase):
         j.assign_mnc()
         j.assign_title()
         self.assertEquals(
-            "Foo v Bar (FooBar 99) [2019] EACJ 1 (01 January 2019)", j.title
+            "Foo v Bar (FooBar 99) [2019] EACJ 1 (1 January 2019)", j.title
         )
+
+    def test_title_i18n(self):
+        j = Judgment(
+            language=Language.objects.get(pk="fr"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+        j.assign_mnc()
+        j.assign_title()
+        self.assertEquals("Foo v Bar [2019] EACJ 1 (1 janvier 2019)", j.title)

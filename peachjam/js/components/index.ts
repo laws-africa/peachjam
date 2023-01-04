@@ -2,7 +2,7 @@ import { CopyToClipboard } from './clipboard';
 import PdfRenderer from './pdf-renderer';
 import { RelationshipEnrichments } from './RelationshipEnrichment';
 import DocumentList from './document-list';
-import DocumentContent from './document-content';
+import DocumentContent from './DocumentContent/index';
 import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
 import TaxonomyTree from './taxonomy-tree';

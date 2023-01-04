@@ -1,10 +1,12 @@
-import DocumentSearch from './DocumentSearch/index.vue';
-import PdfRenderer from './pdf-renderer';
+import DocumentSearch from '../DocumentSearch/index.vue';
+import PdfRenderer from '../pdf-renderer';
 import debounce from 'lodash/debounce';
-import { createAndMountApp } from '../utils/vue-utils';
-import { i18n } from '../i18n';
-import { generateHtmlTocItems } from '../utils/function';
 import PDFCitationLinks from './citation-links';
+import { createAndMountApp } from '../../utils/vue-utils';
+import { vueI18n } from '../../i18n';
+import { createTocController, generateHtmlTocItems } from '../../utils/function';
+import EnrichmentsManager from './enrichments-manager';
+import i18next from 'i18next';
 
 class OffCanvas {
   protected offCanvas: any;
@@ -29,13 +31,16 @@ class DocumentContent {
   private searchApp: any;
   private navOffCanvas: OffCanvas | undefined;
   private citationLinks: PDFCitationLinks | undefined;
+  private enchrichmentsManager: EnrichmentsManager | null;
 
   constructor (root: HTMLElement) {
     this.root = root;
     this.navOffCanvas = undefined;
+    this.enchrichmentsManager = null;
 
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
+    const pdfPreviewsTabTriggerEl = this.root.querySelector('#pdf-previews-tab');
 
     const tocSetupOnTab = this.setupTocForTab();
     // If toc setup and mounted successfully, activate toc tab otherwise activate search tab
@@ -43,6 +48,9 @@ class DocumentContent {
       tocTabTriggerEl.classList.remove('d-none');
       const tocTab = new (window as { [key: string]: any }).bootstrap.Tab(tocTabTriggerEl);
       tocTab.show();
+    } else if (root.getAttribute('data-display-type') === 'pdf' && pdfPreviewsTabTriggerEl) {
+      const pdfPreviewsTab = new (window as { [key: string]: any }).bootstrap.Tab(pdfPreviewsTabTriggerEl);
+      pdfPreviewsTab.show();
     } else if (searchTabTriggerEl) {
       const searchTab = new (window as { [key: string]: any }).bootstrap.Tab(searchTabTriggerEl);
       searchTab.show();
@@ -106,13 +114,15 @@ class DocumentContent {
           docType: root.getAttribute('data-display-type'),
           mountElement: targetMountElement
         },
-        use: [i18n],
+        use: [vueI18n],
         mountTarget: targetMountElement as HTMLElement
       });
       targetMountElement.addEventListener('going-to-snippet', () => {
         this.navOffCanvas?.hide();
       });
     }
+
+    this.setupEnrichments();
   }
 
   setupResponsiveContentTransporter (desktopElement: HTMLElement, mobileElement: HTMLElement, content: HTMLElement) {
@@ -147,21 +157,12 @@ class DocumentContent {
     // If there is no toc item don't create and mount la-toc-controller
     const tocItems = this.getTocItems();
     if (!tocItems.length) return false;
-    const tocController = this.createTocController(tocItems);
+    const tocController = createTocController(tocItems);
+    tocController.titleFilterPlaceholder = i18next.t('Search table of contents');
     const tocContainer = this.root.querySelector('.toc');
     if (!tocContainer) return;
     tocContainer.appendChild(tocController);
     return true;
-  }
-
-  createTocController (items: []) {
-    const laTocController = document.createElement('la-table-of-contents-controller');
-    laTocController.items = items;
-    laTocController.expandAllBtnClasses = 'btn btn-secondary btn-sm';
-    laTocController.collapseAllBtnClasses = 'btn btn-secondary btn-sm';
-    laTocController.titleFilterInputClasses = 'form-control';
-    laTocController.titleFilterClearBtnClasses = 'btn btn-secondary btn-sm';
-    return laTocController;
   }
 
   getTocItems = () => {
@@ -175,6 +176,12 @@ class DocumentContent {
       items = content ? generateHtmlTocItems(content) : [];
     }
     return items;
+  }
+
+  setupEnrichments () {
+    const contentAndEnrichmentsElement = this.root.querySelector('.content-and-enrichments');
+    if (!contentAndEnrichmentsElement) return;
+    this.enchrichmentsManager = new EnrichmentsManager(contentAndEnrichmentsElement as HTMLElement);
   }
 }
 

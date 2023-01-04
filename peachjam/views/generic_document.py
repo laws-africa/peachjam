@@ -10,11 +10,11 @@ class GenericDocumentListView(FilteredDocumentListView):
     template_name = "peachjam/generic_document_list.html"
     model = GenericDocument
     navbar_link = "generic_documents"
-    queryset = GenericDocument.objects.prefetch_related("author", "nature")
+    queryset = GenericDocument.objects.prefetch_related("author", "nature", "work")
 
     def get_queryset(self):
         queryset = super(GenericDocumentListView, self).get_queryset()
-        return queryset.order_by("-date")
+        return queryset.order_by("title")
 
 
 @registry.register_doc_type("generic_document")

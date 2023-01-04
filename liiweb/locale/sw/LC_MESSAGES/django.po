@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-22 16:22+0200\n"
-"PO-Revision-Date: 2022-11-22 14:25\n"
+"POT-Creation-Date: 2022-12-03 14:55+0000\n"
+"PO-Revision-Date: 2022-12-05 13:54\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -17,6 +17,10 @@ msgstr ""
 "X-Crowdin-File: /main/liiweb/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 103\n"
 
+#: templates/liiweb/home.html:4
+msgid "Home"
+msgstr "Sebule"
+
 #: templates/liiweb/home.html:24 templates/liiweb/home.html:25
 #, python-format
 msgid "Search %(APP_NAME)s"
@@ -24,6 +28,27 @@ msgstr ""
 
 #: templates/liiweb/home.html:28
 msgid "Search"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:3
+#: templates/liiweb/legislation_list.html:12
+msgid "Legislation"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:19
+msgid "Current legislation"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:24
+msgid "Repealed legislation"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:29
+msgid "All legislation"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:37
+msgid "You are viewing repealed legislation which is no longer in force."
 msgstr ""
 
 #: templates/peachjam/_footer.html:5
@@ -34,7 +59,7 @@ msgstr ""
 msgid "Subscribe to the our newsletter for updates and news."
 msgstr ""
 
-#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:10
+#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:9
 msgid "About"
 msgstr "Kuhusu"
 

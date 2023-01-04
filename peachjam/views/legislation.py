@@ -2,7 +2,9 @@ from datetime import datetime, timedelta
 from itertools import groupby
 
 from django.contrib import messages
-from django.utils.html import format_html
+from django.template.defaultfilters import date as format_date
+from django.utils.html import mark_safe
+from django.utils.translation import gettext as _
 
 from peachjam.models import Legislation
 from peachjam.registry import registry
@@ -38,71 +40,86 @@ class LegislationDetailView(BaseDocumentDetailView):
         friendly_type = self.get_friendly_type()
 
         if self.object.repealed and repeal:
-            msg = "This {} was repealed on {} by <a href='{}'>{}</a>."
+            msg = (
+                f'This {friendly_type} was repealed on %(date)s by <a href="%(repealing_uri)s">'
+                "%(repealing_title)s</a>."
+            )
             notices.append(
                 {
                     "type": messages.ERROR,
-                    "html": format_html(
-                        msg.format(
-                            friendly_type,
-                            repeal["date"],
-                            repeal["repealing_uri"],
-                            repeal["repealing_title"],
-                        )
-                    ),
+                    "html": mark_safe(_(msg) % repeal),
                 }
             )
 
         points_in_time = self.get_points_in_time()
-        if points_in_time:
+        work_amendments = self.get_work_amendments()
+
+        if points_in_time and work_amendments:
             current_object_date = self.object.date.strftime("%Y-%m-%d")
-            dates = [point_in_time["date"] for point_in_time in points_in_time]
-            index = dates.index(current_object_date)
+            point_in_time_dates = [
+                point_in_time["date"] for point_in_time in points_in_time
+            ]
+            work_amendments_dates = [
+                work_amendment["date"] for work_amendment in work_amendments
+            ]
+            latest_amendment_date = work_amendments_dates[-1]
+            index = point_in_time_dates.index(current_object_date)
 
-            if index == len(dates) - 1:
+            if index == len(point_in_time_dates) - 1:
                 if self.object.repealed and repeal:
-                    msg = (
-                        "This is the version of this {} as it was when it was repealed."
+                    msg = f"This is the version of this {friendly_type} as it was when it was repealed."
+                    notices.append(
+                        {
+                            "type": messages.INFO,
+                            "html": _(msg),
+                        }
                     )
-                else:
-                    msg = "This is the latest version of this {}."
 
-                notices.append(
-                    {
-                        "type": messages.INFO,
-                        "html": format_html(msg.format(friendly_type)),
-                    }
-                )
+                elif work_amendments and latest_amendment_date > current_object_date:
+                    msg = (
+                        f"This is the latest available version of this {friendly_type}. "
+                        f"There are outstanding amendments that have not yet been applied. "
+                        f"See the History tab for more information."
+                    )
+                    notices.append(
+                        {
+                            "type": messages.WARNING,
+                            "html": _(msg),
+                        }
+                    )
+
+                else:
+                    msg = f"This is the latest version of this {friendly_type}."
+                    notices.append(
+                        {
+                            "type": messages.INFO,
+                            "html": _(msg),
+                        }
+                    )
             else:
                 date = datetime.strptime(
-                    dates[index + 1], "%Y-%m-%d"
+                    point_in_time_dates[index + 1], "%Y-%m-%d"
                 ).date() - timedelta(days=1)
+                expression_frbr_uri = points_in_time[-1]["expressions"][0][
+                    "expression_frbr_uri"
+                ]
 
+                msg = f"This is the version of this {friendly_type} as it was from %(date_from)s to %(date_to)s."
                 if self.object.repealed and repeal:
-                    msg = (
-                        "This is the version of this {} as it was from {} to {}. "
-                        "<a href='{}'>Read the version as it was when it was repealed</a>."
-                    )
+                    msg += ' <a href="%(expression_frbr_uri)s">Read the version as it was when it was repealed</a>.'
                 else:
-                    msg = (
-                        "This is the version of this {} as it was from {} to {}. "
-                        "<a href='{}'>Read the version currently in force</a>."
-                    )
+                    msg += ' <a href="%(expression_frbr_uri)s">Read the version currently in force</a>.'
 
                 notices.append(
                     {
                         "type": messages.WARNING,
-                        "html": format_html(
-                            msg.format(
-                                friendly_type,
-                                datetime.strptime(
-                                    current_object_date, "%Y-%m-%d"
-                                ).strftime("%d %B %Y"),
-                                date.strftime("%d %B %Y"),
-                                points_in_time[-1]["expressions"][0][
-                                    "expression_frbr_uri"
-                                ],
-                            )
+                        "html": mark_safe(
+                            _(msg)
+                            % {
+                                "date_from": format_date(self.object.date, "j F Y"),
+                                "date_to": format_date(date, "j F Y"),
+                                "expression_frbr_uri": expression_frbr_uri,
+                            }
                         ),
                     }
                 )
@@ -117,6 +134,9 @@ class LegislationDetailView(BaseDocumentDetailView):
 
     def get_points_in_time(self):
         return self.object.metadata_json.get("points_in_time", None)
+
+    def get_work_amendments(self):
+        return self.object.metadata_json.get("work_amendments", None)
 
     def get_timeline_events(self):
         events = []
@@ -140,15 +160,19 @@ class LegislationDetailView(BaseDocumentDetailView):
 
         publication_date = self.object.metadata_json.get("publication_date", None)
         if publication_date:
+            api_url = "https://api.laws.africa/v2/"
+            commons_url = "https://commons.laws.africa/"
+            publication_url = (work.get("publication_document") or {}).get("url")
+            if publication_url and api_url in publication_url:
+                publication_url = publication_url.replace(api_url, commons_url)
+
             events.append(
                 {
                     "date": publication_date,
                     "event": "publication",
                     "publication_name": work.get("publication_name"),
                     "publication_number": work.get("publication_number"),
-                    "publication_url": work.get("publication_document", {}).get("url")
-                    if work.get("publication_document")
-                    else None,
+                    "publication_url": publication_url,
                 }
             )
 
@@ -162,19 +186,25 @@ class LegislationDetailView(BaseDocumentDetailView):
                 }
             )
 
-        amendments = self.object.metadata_json.get("amendments", None)
-        if amendments:
-            events.extend(
-                [
-                    {
-                        "date": amendment.get("date"),
-                        "event": "amendment",
-                        "amending_title": amendment.get("amending_title"),
-                        "amending_uri": amendment.get("amending_uri"),
-                    }
-                    for amendment in amendments
-                ]
-            )
+        amendments = self.get_work_amendments()
+        if points_in_time and amendments:
+            point_in_time_dates = [
+                point_in_time["date"] for point_in_time in points_in_time
+            ]
+            event = [
+                {
+                    "date": amendment.get("date"),
+                    "event": "amendment",
+                    "amending_title": amendment.get("amending_title"),
+                    "amending_uri": amendment.get("amending_uri"),
+                    "unapplied_amendment": bool(
+                        amendment.get("date") not in point_in_time_dates
+                    ),
+                }
+                for amendment in amendments
+            ]
+
+            events.extend(event)
 
         repeal = self.get_repeal_info()
         if repeal:
@@ -217,3 +247,19 @@ class LegislationDetailView(BaseDocumentDetailView):
         # TODO: we're not guaranteed to get documents in the same language, here
         docs = sorted(docs, key=lambda d: d.title)
         return docs
+
+
+# Translation strings that include the friendly document type to ensure we have translations for the full string.
+_("This is the version of this Act as it was when it was repealed.")
+_("This is the latest version of this Act.")
+_(
+    'This Act was repealed on %(date)s by <a href="%(repealing_uri)s">%(repealing_title)s</a>.'
+)
+_(
+    'This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href="%(expression_frbr_uri)s">'
+    "Read the version as it was when it was repealed</a>."
+)
+_(
+    'This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href="%(expression_frbr_uri)s">'
+    "Read the version currently in force</a>."
+)
