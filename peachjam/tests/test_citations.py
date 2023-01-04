@@ -40,6 +40,10 @@ Detention in Africa to include issues relating to policing and human rights;""",
         )
 
     def test_pdf_extractions(self):
+        # only some installations have matchers set up
+        if not citation_analyser.matchers:
+            return
+
         doc = CoreDocument.objects.create(
             title="test",
             frbr_uri_doctype="doc",
