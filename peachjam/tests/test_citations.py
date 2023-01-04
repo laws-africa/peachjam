@@ -66,7 +66,13 @@ Detention in Africa to include issues relating to policing and human rights;""",
                 {
                     "target_id": "page-1",
                     "target_selectors": [
-                        {"end": 104, "start": 79, "type": "TextPositionSelector"}
+                        {"end": 102, "start": 77, "type": "TextPositionSelector"},
+                        {
+                            "exact": "ACHPR/Res.79 (XXXVIII) 05",
+                            "prefix": "ge 1Recalling its Resolution ",
+                            "suffix": " on the Composition andOperat",
+                            "type": "TextQuoteSelector",
+                        },
                     ],
                     "text": "ACHPR/Res.79 (XXXVIII) 05",
                     "url": "/akn/aa-au/statement/resolution/achpr/2005/79",
@@ -74,7 +80,13 @@ Detention in Africa to include issues relating to policing and human rights;""",
                 {
                     "target_id": "page-1",
                     "target_selectors": [
-                        {"end": 229, "start": 205, "type": "TextPositionSelector"}
+                        {"end": 225, "start": 201, "type": "TextPositionSelector"},
+                        {
+                            "exact": "ACHPR/Res.227 (LII) 2012",
+                            "prefix": "Death Penalty, andResolution ",
+                            "suffix": " on the Expansion of the Manda",
+                            "type": "TextQuoteSelector",
+                        },
                     ],
                     "text": "ACHPR/Res.227 (LII) 2012",
                     "url": "/akn/aa-au/statement/resolution/achpr/2012/227",
@@ -82,7 +94,13 @@ Detention in Africa to include issues relating to policing and human rights;""",
                 {
                     "target_id": "page-2",
                     "target_selectors": [
-                        {"end": 245, "start": 211, "type": "TextPositionSelector"}
+                        {"end": 242, "start": 208, "type": "TextPositionSelector"},
+                        {
+                            "exact": "ACHPR/Res.306 (EXT.OS/ XVIII) 2015",
+                            "prefix": "r 1996, as well as Resolution ",
+                            "suffix": "Expanding the Mandate of the ",
+                            "type": "TextQuoteSelector",
+                        },
                     ],
                     "text": "ACHPR/Res.306 (EXT.OS/ XVIII) 2015",
                     "url": "/akn/aa-au/statement/resolution/achpr/2015/306",
