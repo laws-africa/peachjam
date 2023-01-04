@@ -41,26 +41,6 @@ class DocumentContent {
     this.setupEnrichments();
   }
 
-  setupSearch () {
-    const documentElement: HTMLElement | null = this.root.querySelector('[data-document-element]');
-    const targetMountElement = this.root.querySelector('[data-doc-search]');
-    if (targetMountElement) {
-      this.searchApp = createAndMountApp({
-        component: DocumentSearch,
-        props: {
-          document: documentElement,
-          docType: this.root.getAttribute('data-display-type'),
-          mountElement: targetMountElement
-        },
-        use: [vueI18n],
-        mountTarget: targetMountElement as HTMLElement
-      });
-      targetMountElement.addEventListener('going-to-snippet', () => {
-        this.navOffCanvas?.hide();
-      });
-    }
-  }
-
   setupTabs () {
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
@@ -134,6 +114,26 @@ class DocumentContent {
         if (!targetPage) return;
         this.pdfRenderer?.triggerScrollToPage(targetPage);
       };
+    }
+  }
+
+  setupSearch () {
+    const documentElement: HTMLElement | null = this.root.querySelector('[data-document-element]');
+    const targetMountElement = this.root.querySelector('[data-doc-search]');
+    if (targetMountElement) {
+      this.searchApp = createAndMountApp({
+        component: DocumentSearch,
+        props: {
+          document: documentElement,
+          docType: this.root.getAttribute('data-display-type'),
+          mountElement: targetMountElement
+        },
+        use: [vueI18n],
+        mountTarget: targetMountElement as HTMLElement
+      });
+      targetMountElement.addEventListener('going-to-snippet', () => {
+        this.navOffCanvas?.hide();
+      });
     }
   }
 
