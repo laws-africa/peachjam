@@ -37,7 +37,7 @@
         <span>
           <a :href="`${item.expression_frbr_uri}?q=${encodeURIComponent(query)}&page=${page.page_num}`">Page {{ page.page_num }}</a>:
         </span>
-        <span v-html="page.highlight['pages.body'].join(' ... ')" />
+        <span v-if="page.highlight['pages.body']" v-html="page.highlight['pages.body'].join(' ... ')" />
       </div>
     </div>
     <div v-else>

@@ -146,6 +146,10 @@
   }
 
   .pdf-content {
+    .textLayer a {
+      background: white;
+    }
+
     .textLayer {
       position: absolute;
       text-align: initial;
@@ -154,7 +158,6 @@
       right: 0;
       bottom: 0;
       overflow: hidden;
-      opacity: 0.4;
       line-height: 1;
     }
 
@@ -169,7 +172,6 @@
 
     .textLayer mark {
       transform-origin: 0% 0%;
-      color: transparent;
       white-space: pre;
       cursor: text;
     }
@@ -201,14 +203,6 @@
       background-color: rgba(0, 100, 0, 1);
     }
 
-    .textLayer ::-moz-selection {
-      background: rgba(0, 0, 255, 1);
-    }
-
-    .textLayer ::selection {
-      background: rgba(0, 0, 255, 1);
-    }
-
     /* Avoids https://github.com/mozilla/pdf.js/issues/13840 in Chrome */
     .textLayer br::-moz-selection {
       background: transparent;
@@ -235,7 +229,6 @@
     .textLayer .endOfContent.active {
       top: 0;
     }
-
 
     .pdfPresentationMode:-webkit-full-screen .textLayer span {
       cursor: none;

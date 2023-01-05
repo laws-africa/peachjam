@@ -22,6 +22,7 @@ class PdfRenderer {
   protected pdfContentMarks: any[];
   public onPreviewPanelClick: () => void;
   public onPdfLoaded: () => void;
+
   constructor (root: HTMLElement) {
     this.root = root;
     this.pdf = root.dataset.pdf;

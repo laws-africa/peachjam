@@ -1,4 +1,7 @@
+import os
 import string
+import subprocess
+import tempfile
 from functools import wraps
 
 from django.utils.translation import get_language_from_request
@@ -32,3 +35,16 @@ def get_language(request):
     """Get language from the request object and return its 3-letter language code."""
     language = get_language_from_request(request)
     return Language.objects.get(iso_639_1__iexact=language).iso_639_3
+
+
+def pdfjs_to_text(fname):
+    """Extract text from fname using pdfjs-compatible script."""
+    with tempfile.NamedTemporaryFile(suffix=".txt") as outf:
+        cmd = [
+            os.path.join(os.path.dirname(__file__), "..", "bin", "pdfjs-to-text"),
+            fname,
+            outf.name,
+        ]
+
+        subprocess.run(cmd, check=True)
+        return outf.read().decode("utf-8")
