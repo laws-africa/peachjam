@@ -38,6 +38,12 @@ class CitationLink(models.Model):
                     "type": "TextPositionSelector",
                     "start": citation.start,
                     "end": citation.end,
-                }
+                },
+                {
+                    "type": "TextQuoteSelector",
+                    "exact": citation.text,
+                    "prefix": citation.prefix,
+                    "suffix": citation.suffix,
+                },
             ],
         )

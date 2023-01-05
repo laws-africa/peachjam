@@ -1,10 +1,11 @@
 import shutil
 import tempfile
+from bisect import bisect_left
 
 import lxml.html
-from docpipe.pdf import pdf_to_text
 
 from peachjam.models import CitationLink
+from peachjam.utils import pdfjs_to_text
 
 
 class CitationAnalyser:
@@ -39,21 +40,44 @@ class CitationAnalyser:
             pdf = document.source_file.as_pdf()
             shutil.copyfileobj(pdf, tmp)
             tmp.flush()
-            text = pdf_to_text(tmp.name)
+            text = self.pdf_to_text(tmp.name)
 
         for matcher in self.matchers:
             matcher = matcher()
             matcher.extract_text_matches(document.expression_uri(), text)
-            self.store_text_citation_links(document, matcher)
+            # get the indexes of all newlines in text, by page
+            newlines = [
+                [i for i, c in enumerate(page) if c == "\n"]
+                for page in text.split("\x0C")
+            ]
+            self.store_text_citation_links(document, matcher, newlines)
 
         return True
 
-    def store_text_citation_links(self, document, matcher):
+    def store_text_citation_links(self, document, matcher, newlines):
         """Transform extracted citations from text into CitationLink objects."""
-        citations = [CitationLink.from_extracted_citation(c) for c in matcher.citations]
+        citations = [self.make_citation(c, newlines) for c in matcher.citations]
         for c in citations:
             c.document = document
         document.citation_links.add(*citations, bulk=False)
+
+    def make_citation(self, citation, newlines):
+        """Adjust an extracted citation to take into account the fact that pdfjs_to_text adds newlines."""
+        # get this page's newline indexes
+        newlines = newlines[citation.target_id]
+
+        citation.start = citation.start - bisect_left(newlines, citation.start)
+        citation.end = citation.end - bisect_left(newlines, citation.end)
+        if citation.prefix:
+            citation.prefix = citation.prefix.replace("\n", "")
+        if citation.suffix:
+            citation.suffix = citation.suffix.replace("\n", "")
+
+        citation = CitationLink.from_extracted_citation(citation)
+        return citation
+
+    def pdf_to_text(self, fname):
+        return pdfjs_to_text(fname)
 
 
 citation_analyser = CitationAnalyser()

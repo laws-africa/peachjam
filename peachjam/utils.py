@@ -1,4 +1,7 @@
+import os
 import string
+import subprocess
+import tempfile
 from functools import wraps
 
 
@@ -23,3 +26,16 @@ def add_slash_to_frbr_uri(*args, **kwargs):
         return _wrapped_view
 
     return decorator
+
+
+def pdfjs_to_text(fname):
+    """Extract text from fname using pdfjs-compatible script."""
+    with tempfile.NamedTemporaryFile(suffix=".txt") as outf:
+        cmd = [
+            os.path.join(os.path.dirname(__file__), "..", "bin", "pdfjs-to-text"),
+            fname,
+            outf.name,
+        ]
+
+        subprocess.run(cmd, check=True)
+        return outf.read().decode("utf-8")
