@@ -43,6 +43,8 @@ class SearchableDocumentSerializer(DocumentSerializer):
         if hasattr(obj.meta, "inner_hits"):
             for page in obj.meta.inner_hits.pages.hits.hits:
                 info = page._source.to_dict()
-                info["highlight"] = page.highlight.to_dict()
+                info["highlight"] = (
+                    page.highlight.to_dict() if hasattr(page, "highlight") else {}
+                )
                 pages.append(info)
         return pages
