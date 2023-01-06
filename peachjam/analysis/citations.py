@@ -4,8 +4,8 @@ from bisect import bisect_left
 
 import lxml.html
 
+from peachjam.helpers import pdfjs_to_text
 from peachjam.models import CitationLink
-from peachjam.utils import pdfjs_to_text
 
 
 class CitationAnalyser:
