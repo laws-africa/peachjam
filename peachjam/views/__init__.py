@@ -12,5 +12,6 @@ from .judgment import *
 from .legal_instrument import *
 from .legislation import *
 from .place import *
+from .pocketlaw import *
 from .taxonomy import *
 from .terms_of_use import *
