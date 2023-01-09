@@ -163,16 +163,22 @@ class IndigoAdapter(Adapter):
         if document["nature"] == "act":
             if document["subtype"] in ["charter", "protocol", "convention", "treaty"]:
                 model = LegalInstrument
+                document_nature_name = " ".join(
+                    [name.title() for name in document["subtype"].split("-")]
+                )
                 field_data["nature"] = DocumentNature.objects.update_or_create(
-                    code=document["subtype"], defaults={"name": document["subtype"]}
+                    code=document["subtype"], defaults={"name": document_nature_name}
                 )[0]
             else:
                 model = Legislation
                 field_data["metadata_json"] = document
         else:
             model = GenericDocument
+            document_nature_name = " ".join(
+                [name.title() for name in document["subtype"].split("-")]
+            )
             field_data["nature"] = DocumentNature.objects.update_or_create(
-                code=document["subtype"], defaults={"name": document["subtype"]}
+                code=document["subtype"], defaults={"name": document_nature_name}
             )[0]
 
         logger.info(model)
