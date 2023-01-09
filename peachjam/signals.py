@@ -44,10 +44,18 @@ def bg_task_finished(sender, **kwargs):
         transaction.__exit__(None, None, None)
 
 
-@receiver(signals.post_save, sender=CoreDocument)
-def update_language(sender, instance, **kwargs):
-    if not kwargs["raw"]:
-        work = Work.objects.get(frbr_uri=instance.work_frbr_uri)
-        if instance.language.iso_639_3 not in work.languages:
-            work.languages.append(instance.language.iso_639_3)
-            work.save()
+@receiver(signals.post_save)
+def doc_saved_update_language(sender, instance, **kwargs):
+    """Update language list on related work when a subclass of CoreDocument is saved."""
+    if isinstance(instance, CoreDocument) and not kwargs["raw"]:
+        instance.work.update_languages()
+
+
+@receiver(signals.post_delete)
+def doc_deleted_update_language(sender, instance, **kwargs):
+    """Update language list on related work after a subclass of CoreDocument is deleted."""
+    if isinstance(instance, CoreDocument):
+        # get by foreign key, because the actual instance in the db is now gone
+        work = Work.objects.filter(pk=instance.work_id).first()
+        if work:
+            work.update_languages()

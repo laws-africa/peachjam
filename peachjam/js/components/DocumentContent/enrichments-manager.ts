@@ -1,14 +1,18 @@
 import { RelationshipEnrichments } from '../RelationshipEnrichment';
 import DocDiffsManager from '../DocDiffs';
+import PDFCitationLinks from './citation-links';
 
-// Class for handling the setup of all enrichments and interactions between enrichments
-
+/**
+ * Class for handling the setup of all enrichments and interactions between enrichments
+ */
 class EnrichmentsManager {
   private relationshipsManager: RelationshipEnrichments;
   private root: HTMLElement;
   private docDiffsManager: null | DocDiffsManager;
   private readonly gutter: HTMLElement | null;
   private readonly akn: HTMLElement | null;
+  private citationLinks: PDFCitationLinks | null = null;
+
   constructor (contentAndEnrichmentsElement: HTMLElement) {
     this.root = contentAndEnrichmentsElement;
     this.gutter = this.root.querySelector('la-gutter');
@@ -29,6 +33,10 @@ class EnrichmentsManager {
     const frbrExpressionUri = this.akn.getAttribute('expression-frbr-uri');
     if (!frbrExpressionUri) return null;
     return new DocDiffsManager(frbrExpressionUri, this.gutter);
+  }
+
+  setupPdfCitationLinks () {
+    this.citationLinks = new PDFCitationLinks(this.root);
   }
 }
 

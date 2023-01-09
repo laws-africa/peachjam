@@ -108,11 +108,14 @@ class BaseDocumentFilterForm(forms.Form):
         doc_type = self.params.getlist("doc_type")
         judges = self.params.getlist("judges")
 
+        # Order by date descending initially
+        queryset = queryset.order_by("-date")
+
         if years and exclude != "years":
             queryset = queryset.filter(date__year__in=years)
 
         if alphabet and exclude != "alphabet":
-            queryset = queryset.filter(title__istartswith=alphabet)
+            queryset = queryset.order_by("title").filter(title__istartswith=alphabet)
 
         if authors and exclude != "author":
             queryset = queryset.filter(author__name__in=authors)
