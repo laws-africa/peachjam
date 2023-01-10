@@ -19,7 +19,6 @@ from django.contrib import admin
 from django.contrib.auth import views
 from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_page
-from django.views.generic import TemplateView
 
 from peachjam.feeds import (
     ArticleAtomSiteNewsFeed,
@@ -52,6 +51,7 @@ from peachjam.views import (
     LegalInstrumentListView,
     LegislationListView,
     PlaceDetailView,
+    RobotsView,
     TaxonomyDetailView,
     TermsOfUsePageView,
     TopLevelTaxonomyListView,
@@ -175,7 +175,7 @@ urlpatterns = [
     path("users/<username>", UserProfileDetailView.as_view(), name="user_profile"),
     path(
         "robots.txt",
-        TemplateView.as_view(
+        RobotsView.as_view(
             template_name="peachjam/robots.txt", content_type="text/plain"
         ),
     ),
