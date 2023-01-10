@@ -164,8 +164,8 @@ class IndigoAdapter(Adapter):
             if document["subtype"] in ["charter", "protocol", "convention", "treaty"]:
                 model = LegalInstrument
                 document_nature_name = " ".join(
-                    [name.title() for name in document["subtype"].split("-")]
-                )
+                    [name for name in document["subtype"].split("-")]
+                ).capitalize()
                 field_data["nature"] = DocumentNature.objects.update_or_create(
                     code=document["subtype"], defaults={"name": document_nature_name}
                 )[0]
@@ -175,8 +175,8 @@ class IndigoAdapter(Adapter):
         else:
             model = GenericDocument
             document_nature_name = " ".join(
-                [name.title() for name in document["subtype"].split("-")]
-            )
+                [name for name in document["subtype"].split("-")]
+            ).capitalize()
             field_data["nature"] = DocumentNature.objects.update_or_create(
                 code=document["subtype"], defaults={"name": document_nature_name}
             )[0]
