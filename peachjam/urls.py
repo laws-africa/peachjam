@@ -51,6 +51,7 @@ from peachjam.views import (
     LegalInstrumentListView,
     LegislationListView,
     PlaceDetailView,
+    PocketLawResources,
     RobotsView,
     TaxonomyDetailView,
     TermsOfUsePageView,
@@ -178,6 +179,9 @@ urlpatterns = [
         RobotsView.as_view(
             template_name="peachjam/robots.txt", content_type="text/plain"
         ),
+    ),
+    path(
+        "pocketlaw-resources", PocketLawResources.as_view(), name="pocketlaw_resources"
     ),
 ]
 

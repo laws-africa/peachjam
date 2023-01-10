@@ -229,7 +229,6 @@ class DocumentAdmin(admin.ModelAdmin):
         "locality",
         "language",
         "date",
-        "allow_robots",
     )
     list_filter = ("jurisdiction", "locality", "language")
     search_fields = ("title", "date")
@@ -258,7 +257,6 @@ class DocumentAdmin(admin.ModelAdmin):
                     "title",
                     "date",
                     "language",
-                    "allow_robots",
                 ]
             },
         ),
@@ -302,6 +300,7 @@ class DocumentAdmin(admin.ModelAdmin):
                 "fields": [
                     "toc_json",
                     "content_html_is_akn",
+                    "allow_robots",
                 ],
             },
         ),
