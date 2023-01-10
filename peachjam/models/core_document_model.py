@@ -218,6 +218,7 @@ class CoreDocument(PolymorphicModel):
 
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
+    allow_robots = models.BooleanField(_("allow robots"), default=True)
 
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES
