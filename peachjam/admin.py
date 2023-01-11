@@ -223,7 +223,13 @@ class DocumentForm(forms.ModelForm):
 class DocumentAdmin(admin.ModelAdmin):
     form = DocumentForm
     inlines = [DocumentTopicInline, SourceFileInline, AlternativeNameInline]
-    list_display = ("title", "jurisdiction", "locality", "language", "date")
+    list_display = (
+        "title",
+        "jurisdiction",
+        "locality",
+        "language",
+        "date",
+    )
     list_filter = ("jurisdiction", "locality", "language")
     search_fields = ("title", "date")
     readonly_fields = (
@@ -294,6 +300,7 @@ class DocumentAdmin(admin.ModelAdmin):
                 "fields": [
                     "toc_json",
                     "content_html_is_akn",
+                    "allow_robots",
                 ],
             },
         ),
