@@ -188,6 +188,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "matter_type": "matter_type",
         "nature": "nature",
         "year": "year",
+        "judges": "judges",
     }
 
     search_fields = {
@@ -236,6 +237,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             "options": {"size": 100},
         },
         "court": {"field": "court", "options": {"size": 100}},
+        "judges": {"field": "judges", "options": {"size": 100}},
     }
 
     highlight_fields = {

@@ -204,12 +204,14 @@
       {{ $t('Document type') }}
       {{ $t('Author') }}
       {{ $t('Court') }}
+      {{ $t('Judges') }}
       {{ $t('Jurisdiction') }}
       {{ $t('Locality') }}
       {{ $t('Matter type') }}
       {{ $t('Document nature') }}
       {{ $t('Language') }}
       {{ $t('Year') }}
+
     </div>
   </div>
 </template>
@@ -264,6 +266,13 @@ export default {
         {
           title: this.$t('Court'),
           name: 'court',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
+        {
+          title: this.$t('Judges'),
+          name: 'judges',
           type: 'checkboxes',
           value: [],
           options: []
