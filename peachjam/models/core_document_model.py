@@ -457,6 +457,9 @@ class SourceFile(AttachmentAbstractModel):
         on_delete=models.CASCADE,
         verbose_name=_("document"),
     )
+    source_url = models.URLField(
+        _("source URL"), max_length=2048, null=True, blank=True
+    )
 
     class Meta:
         verbose_name = _("source file")
