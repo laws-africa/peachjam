@@ -72,6 +72,10 @@ class DocumentSourceView(DetailView):
     def render_to_response(self, context, **response_kwargs):
         if hasattr(self.object, "source_file") and self.object.source_file.file:
             source_file = self.object.source_file
+
+            if source_file.source_url:
+                return redirect(source_file.source_url)
+
             file = source_file.file.open()
             file_bytes = file.read()
             response = HttpResponse(file_bytes, content_type=source_file.mimetype)
@@ -87,13 +91,11 @@ class DocumentSourcePDFView(DocumentSourceView):
     def render_to_response(self, context, **response_kwargs):
         if hasattr(self.object, "source_file"):
             source_file = self.object.source_file
-            file = source_file.as_pdf()
 
-            # redirect search engine crawlers to the original source files
-            # especially for gazettes
-            if source_file.source_url:
+            if source_file.source_url and source_file.mimetype == "application/pdf":
                 return redirect(source_file.source_url)
 
+            file = source_file.as_pdf()
             return HttpResponse(file.read(), content_type="application/pdf")
 
         raise Http404()

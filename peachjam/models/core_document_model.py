@@ -406,9 +406,6 @@ class AttachmentAbstractModel(models.Model):
     mimetype = models.CharField(_("mimetype"), max_length=1024, null=False, blank=False)
     size = models.BigIntegerField(_("size"), default=0)
     file = DynamicStorageFileField(_("file"), upload_to=file_location, max_length=1024)
-    source_url = models.URLField(
-        _("source URL"), max_length=2048, null=True, blank=True
-    )
 
     def __str__(self):
         return f"{self.filename}"
@@ -459,6 +456,9 @@ class SourceFile(AttachmentAbstractModel):
         related_name="source_file",
         on_delete=models.CASCADE,
         verbose_name=_("document"),
+    )
+    source_url = models.URLField(
+        _("source URL"), max_length=2048, null=True, blank=True
     )
 
     class Meta:
