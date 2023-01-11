@@ -78,8 +78,12 @@ class GazetteAdapter(Adapter):
             file_path = ga_source_file[0].pop("file")
 
             if ga_source_file:
+                source_url = (
+                    f"https://archive.gazettes.africa/{file_path.split(':')[2]}"
+                )
                 updated_source_file, _ = SourceFile.objects.update_or_create(
-                    document=updated_gazette, defaults={"file": f"{file_path}"}
+                    document=updated_gazette,
+                    defaults={"file": f"{file_path}", "source_url": source_url},
                 )
 
                 # update the source file to include the bucket name
