@@ -70,6 +70,7 @@ class ForeignKeyRequiredWidget(ForeignKeyWidget):
 class SourceFileWidget(CharRequiredWidget):
     def clean(self, value, row=None, **kwargs):
         super().clean(value)
+
         source_url = self.get_source_url(value)
         try:
             with TemporaryDirectory() as dir:
@@ -86,7 +87,7 @@ class SourceFileWidget(CharRequiredWidget):
                     elif mime in DOC_MIMETYPES:
                         suffix = splitext(file.name)[1].lstrip(".")
                         soffice_convert(file, suffix, "html")
-            return source_url
+            return value
         except (
             requests.exceptions.RequestException,
             CalledProcessError,
@@ -96,21 +97,35 @@ class SourceFileWidget(CharRequiredWidget):
 
     @staticmethod
     def get_source_url(value):
-        source_url = None
         source_files = [x.strip() for x in value.split("|")]
+
         docx = re.compile(r"\.docx?$")
+        rtf = re.compile(r"\.rtf$")
         pdf = re.compile(r"\.pdf$")
+
+        docx_urls = []
+        rtf_urls = []
+        pdf_urls = []
+
         for file in source_files:
             match_docx = docx.search(file)
+            match_rtf = rtf.search(file)
             match_pdf = pdf.search(file)
-            # prefer the .docx file if available, otherwise use .pdf, ignore .rtf
             if match_docx:
-                source_url = file
-                break
+                docx_urls.append(file)
+            elif match_rtf:
+                rtf_urls.append(file)
             elif match_pdf:
-                source_url = file
+                pdf_urls.append(file)
 
-        return source_url
+        if docx_urls:
+            return docx_urls[0]
+        if rtf_urls:
+            return rtf_urls[0]
+        if pdf_urls:
+            return pdf_urls[0]
+
+        return source_files[0]
 
 
 class SkipRowWidget(BooleanWidget):
@@ -185,6 +200,31 @@ class BaseDocumentResource(resources.ModelResource):
         if missing_fields:
             raise ValidationError(f"Missing Columns: {missing_fields}")
 
+    @staticmethod
+    def download_attachment(url, document, nature):
+        try:
+            file = download_source_file(url)
+            mime, _ = mimetypes.guess_type(url)
+            ext = mimetypes.guess_extension(mime)
+            (
+                file_nature,
+                _,
+            ) = AttachedFileNature.objects.get_or_create(name=nature)
+
+            AttachedFiles.objects.update_or_create(
+                document=document,
+                defaults={
+                    "file": File(
+                        file,
+                        name=f"{slugify(document.title[-250:])}{ext}",
+                    ),
+                    "nature": file_nature,
+                    "mimetype": mime,
+                },
+            )
+        except requests.exceptions.RequestException:
+            return
+
     def before_import_row(self, row, **kwargs):
         logger.info(f"Importing row: {row}")
 
@@ -192,15 +232,15 @@ class BaseDocumentResource(resources.ModelResource):
         return row["skip"]
 
     def after_save_instance(self, instance, using_transactions, dry_run):
+        # get the preferred source url using the widget logic
+        source_url = SourceFileWidget.get_source_url(instance.source_url)
+
         if not dry_run:
-            if instance.source_url:
-                source_file = download_source_file(instance.source_url)
+            if source_url:
+                logger.info(f"Downloading Source file => {source_url}")
+                source_file = download_source_file(source_url)
                 if source_file:
-                    mime = magic.from_file(source_file.name, mime=True)
-
-                    if mime == "application/zip":
-                        mime, _ = mimetypes.guess_type(instance.source_url)
-
+                    mime, _ = mimetypes.guess_type(source_url)
                     file_ext = mimetypes.guess_extension(mime)
                     SourceFile.objects.update_or_create(
                         document=instance,
@@ -212,11 +252,20 @@ class BaseDocumentResource(resources.ModelResource):
                             "mimetype": mime,
                         },
                     )
+                # check if there are other source urls after removing the one above
+                attachment_urls = instance.source_url.split("|")
+
+                for url in attachment_urls:
+                    if url == source_url:
+                        continue
+                    logger.info(f"Downloading Attachment => {url}")
+                    self.download_attachment(url, instance, "Other documents")
 
             # try to extract content from docx files
             if not instance.content_html:
                 instance.extract_content_from_source_file()
 
+            instance.source_url = source_url
             # extract citations
             instance.extract_citations()
             instance.save()
@@ -362,22 +411,6 @@ class JudgmentResource(BaseDocumentResource):
             judgment.save()
 
             if row.get("media_summary_file"):
-                summary_file = download_source_file(row["media_summary_file"])
-                mime, _ = mimetypes.guess_type(row["media_summary_file"])
-                ext = mimetypes.guess_extension(mime)
-                (
-                    media_summary_file_nature,
-                    _,
-                ) = AttachedFileNature.objects.get_or_create(name="Media summary")
-
-                AttachedFiles.objects.update_or_create(
-                    document=judgment,
-                    defaults={
-                        "file": File(
-                            summary_file,
-                            name=f"{slugify(judgment.title[-250:])}{ext}",
-                        ),
-                        "nature": media_summary_file_nature,
-                        "mimetype": mime,
-                    },
+                self.download_attachment(
+                    row["media_summary_file"], judgment, "Media summary"
                 )
