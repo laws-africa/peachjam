@@ -96,21 +96,35 @@ class SourceFileWidget(CharRequiredWidget):
 
     @staticmethod
     def get_source_url(value):
-        source_url = None
         source_files = [x.strip() for x in value.split("|")]
+
         docx = re.compile(r"\.docx?$")
+        rtf = re.compile(r"\.rtf$")
         pdf = re.compile(r"\.pdf$")
+
+        docx_urls = []
+        rtf_urls = []
+        pdf_urls = []
+
         for file in source_files:
             match_docx = docx.search(file)
+            match_rtf = rtf.search(file)
             match_pdf = pdf.search(file)
-            # prefer the .docx file if available, otherwise use .pdf, ignore .rtf
             if match_docx:
-                source_url = file
-                break
+                docx_urls.append(file)
+            elif match_rtf:
+                rtf_urls.append(file)
             elif match_pdf:
-                source_url = file
+                pdf_urls.append(file)
 
-        return source_url
+        if docx_urls:
+            return docx_urls[0]
+        if rtf_urls:
+            return rtf_urls[0]
+        if pdf_urls:
+            return pdf_urls[0]
+
+        return source_files[0]
 
 
 class SkipRowWidget(BooleanWidget):
