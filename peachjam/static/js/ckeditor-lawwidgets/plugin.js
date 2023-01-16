@@ -40,7 +40,7 @@
     onLoad: function () {
       CKEDITOR.addCss(
         'la-akoma-ntoso::before { content: "Law Widget: " attr(frbr-expression-uri) " "; } ' +
-        'la-akoma-ntoso { border: 1px solid purple; }'
+        'la-akoma-ntoso { border: 1px solid purple; background-color: ece2ff; padding: 5px; }'
       );
     }
   });
