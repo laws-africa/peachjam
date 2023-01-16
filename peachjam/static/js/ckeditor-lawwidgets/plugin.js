@@ -29,7 +29,7 @@
 
         editor.contextMenu.addListener(function(element) {
           if (element.getAscendant('la-akoma-ntoso', true)) {
-            return { abbrItem: CKEDITOR.TRISTATE_OFF };
+            return { laaknItem: CKEDITOR.TRISTATE_OFF };
           }
         });
       }
