@@ -52,3 +52,19 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
           git_remote_url: 'ssh://dokku@senlii.org:22/senlii'
           git_push_flags: '--force'
+
+  deploy-ulii:
+    name: Deploy to ulii
+    runs-on: ubuntu-latest
+    concurrency: ulii.org
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: git push to ulii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@ulii.org:22/ulii-peachjam'
+          git_push_flags: '--force'
