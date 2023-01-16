@@ -124,7 +124,7 @@ class BaseAttachmentFileInline(admin.TabularInline):
 class SourceFileInline(BaseAttachmentFileInline):
     model = SourceFile
     form = SourceFileForm
-    readonly_fields = ("source_url",)
+    readonly_fields = (*BaseAttachmentFileInline.readonly_fields, "source_url")
 
 
 class DocumentTopicInline(admin.TabularInline):
