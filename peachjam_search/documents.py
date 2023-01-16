@@ -1,3 +1,4 @@
+import copy
 from tempfile import NamedTemporaryFile
 
 from django.conf import settings
@@ -5,6 +6,7 @@ from django.utils.functional import classproperty
 from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
 from docpipe.pdf import pdf_to_text
+from elasticsearch_dsl.index import Index
 from lxml import etree
 
 from peachjam.models import CoreDocument
@@ -34,7 +36,7 @@ class SearchableDocument(Document):
     court = fields.KeywordField(attr="court.name")
     headnote_holding = fields.TextField()
     flynote = fields.TextField()
-    judges = fields.TextField()
+    judges = fields.KeywordField(attr="judge.name")
 
     # GenericDocument, LegalInstrument
     author = fields.KeywordField(attr="author.name")
@@ -119,3 +121,42 @@ class SearchableDocument(Document):
                     if page:
                         pages.append({"page_num": i, "body": page})
                 return pages
+
+    def _prepare_action(self, object_instance, action):
+        info = super()._prepare_action(object_instance, action)
+        # choose a language-specific index
+        lang = object_instance.language.iso_639_2T
+        if lang in ANALYZERS:
+            info["_index"] = f"{self._index._name}_{lang}"
+        return info
+
+
+# These are the language-specific indexes we create and their associated analyzers for text fields.
+# Documents in other languages are stored in a general index with the "standard" analyzer
+ANALYZERS = {
+    "ara": "arabic",
+    "eng": "english",
+    "fra": "french",
+    "por": "portuguese",
+}
+
+
+def setup_language_indexes():
+    """Setup multi-language indexes."""
+    main_index = SearchableDocument._index
+    mappings = main_index.to_dict()["mappings"]
+
+    def set_analyzer(fields, analyzer):
+        """Recursively set analyzer for text fields."""
+        for fld in fields:
+            if fld["type"] == "text":
+                fld["analyzer"] = analyzer
+            elif fld["type"] == "nested":
+                set_analyzer(fld["properties"].values(), analyzer)
+
+    for lang, analyzer in ANALYZERS.items():
+        new_mappings = copy.deepcopy(mappings)
+        set_analyzer(new_mappings["properties"].values(), analyzer)
+        index = Index(name=f"{main_index._name}_{lang}")
+        index.get_or_create_mapping()._update_from_dict(new_mappings)
+        registry.register(index, SearchableDocument)
