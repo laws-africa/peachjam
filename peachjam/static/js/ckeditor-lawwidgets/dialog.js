@@ -3,7 +3,7 @@ CKEDITOR.dialog.add('laaknDialog', function (editor) {
 
     // Basic properties of the dialog window: title, minimum size.
     title: 'Law Widget Properties',
-    minWidth: 400,
+    minWidth: 600,
     minHeight: 200,
 
     // Dialog window content definition.
