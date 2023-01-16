@@ -96,7 +96,9 @@ class SourceFileWidget(CharRequiredWidget):
             KeyError,
         ) as e:
             msg = getattr(e, "message", str(e))
-            raise ValidationError(f"Error processing source file: {msg}")
+            raise ValidationError(
+                f"Error processing source file: {source_url} -- {msg}"
+            )
 
     @staticmethod
     def get_source_url(value):
