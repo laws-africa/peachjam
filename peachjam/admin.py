@@ -178,7 +178,15 @@ class DateSelectorWidget(forms.MultiWidget):
 
 
 class DocumentForm(forms.ModelForm):
-    content_html = forms.CharField(widget=CKEditorWidget(), required=False)
+    content_html = forms.CharField(
+        widget=CKEditorWidget(
+            extra_plugins=["lawwidgets"],
+            external_plugin_resources=[
+                ("lawwidgets", "/static/js/ckeditor-lawwidgets/", "plugin.js")
+            ],
+        ),
+        required=False,
+    )
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
     headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
     date = forms.DateField(widget=DateSelectorWidget())
