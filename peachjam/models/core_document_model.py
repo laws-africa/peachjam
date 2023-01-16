@@ -527,3 +527,6 @@ class AlternativeName(models.Model):
     class Meta:
         verbose_name = _("alternative name")
         verbose_name_plural = _("alternative names")
+
+    def __str__(self):
+        return self.title

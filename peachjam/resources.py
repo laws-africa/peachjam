@@ -26,6 +26,7 @@ from import_export.widgets import (
 from languages_plus.models import Language
 
 from peachjam.models import (
+    AlternativeName,
     AttachedFileNature,
     AttachedFiles,
     Author,
@@ -409,6 +410,12 @@ class JudgmentResource(BaseDocumentResource):
                 case_number.save()
 
             judgment.save()
+
+            if row.get("alternative_names"):
+                for alt_citation in str(row["alternative_names"]).split("|"):
+                    obj, _ = AlternativeName.objects.get_or_create(
+                        document=judgment, title=alt_citation
+                    )
 
             if row.get("media_summary_file"):
                 self.download_attachment(
