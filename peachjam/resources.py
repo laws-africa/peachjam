@@ -15,7 +15,7 @@ from django.core.files.base import File
 from django.forms import ValidationError
 from django.utils.text import slugify
 from docpipe.pdf import pdf_to_text
-from docpipe.soffice import soffice_convert
+from docpipe.soffice import SOfficeError, soffice_convert
 from import_export import fields, resources
 from import_export.widgets import (
     BooleanWidget,
@@ -92,9 +92,11 @@ class SourceFileWidget(CharRequiredWidget):
         except (
             requests.exceptions.RequestException,
             CalledProcessError,
+            SOfficeError,
             KeyError,
         ) as e:
-            raise ValidationError(f"Error processing source file: {e}")
+            msg = getattr(e, "message", str(e))
+            raise ValidationError(f"Error processing source file: {msg}")
 
     @staticmethod
     def get_source_url(value):

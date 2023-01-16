@@ -8,6 +8,7 @@ DOC_MIMETYPES = [
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "application/msword",
     "application/rtf",
+    "text/rtf",
 ]
 
 
