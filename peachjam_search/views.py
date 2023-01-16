@@ -19,7 +19,7 @@ from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
 from rest_framework.permissions import AllowAny
 
-from peachjam_search.documents import SearchableDocument
+from peachjam_search.documents import ANALYZERS, SearchableDocument
 from peachjam_search.serializers import SearchableDocumentSerializer
 
 CACHE_SECS = 15 * 60
@@ -47,7 +47,7 @@ class MultiFieldSearchQueryBackend(SimpleQueryStringQueryBackend):
                 self.query_type,
                 query=search_term,
                 fields=[self.get_field(field, view_search_fields[field])],
-                **self.get_query_options(request, view, search_backend)
+                **self.get_query_options(request, view, search_backend),
             )
             for field, search_term in query_params.items()
         ]
@@ -254,6 +254,14 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     # TODO perhaps better to explicitly include specific fields
     source = {"excludes": ["pages", "content", "flynote", "headnote_holding"]}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # search multiple language indexes
+        self.index = [self.document._index._name] + [
+            f"{self.document._index._name}_{lang}" for lang in ANALYZERS.keys()
+        ]
+        self.search = self.search.index(self.index)
 
     @method_decorator(cache_page(CACHE_SECS))
     def dispatch(self, request, *args, **kwargs):
