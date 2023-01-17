@@ -1,1 +1,2 @@
-from .home import *  # noqa
+# flake8: noqa
+from .home import *
