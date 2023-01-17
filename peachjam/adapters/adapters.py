@@ -161,7 +161,13 @@ class IndigoAdapter(Adapter):
             raise Exception("FRBR URIs do not match.")
 
         if document["nature"] == "act":
-            if document["subtype"] in ["charter", "protocol", "convention", "treaty"]:
+            if document["subtype"] in [
+                "charter",
+                "protocol",
+                "convention",
+                "treaty",
+                "recommendation",
+            ]:
                 model = LegalInstrument
                 document_nature_name = " ".join(
                     [name for name in document["subtype"].split("-")]
