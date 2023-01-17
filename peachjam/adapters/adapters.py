@@ -6,11 +6,24 @@ from tempfile import NamedTemporaryFile
 import magic
 import requests
 from cobalt import FrbrUri
+from countries_plus.models import Country
 from dateutil import parser
 from django.core.files import File
 from django.utils.text import slugify
+from languages_plus.models import Language
 
-from peachjam.models import CoreDocument, Predicate, Relationship, Work
+from peachjam.models import (
+    Author,
+    CoreDocument,
+    DocumentNature,
+    GenericDocument,
+    LegalInstrument,
+    Legislation,
+    Locality,
+    Predicate,
+    Relationship,
+    Work,
+)
 from peachjam.plugins import plugins
 
 logger = logging.getLogger(__name__)
@@ -91,19 +104,6 @@ class IndigoAdapter(Adapter):
         return urls
 
     def update_document(self, url):
-        from countries_plus.models import Country
-        from languages_plus.models import Language
-
-        from peachjam.models import (
-            Author,
-            CoreDocument,
-            DocumentNature,
-            GenericDocument,
-            LegalInstrument,
-            Legislation,
-            Locality,
-        )
-
         logger.info(f"Updating document ... {url}")
 
         try:
@@ -136,22 +136,16 @@ class IndigoAdapter(Adapter):
 
         frbr_uri_data = {
             "jurisdiction": jurisdiction,
-            "frbr_uri_subtype": frbr_uri.subtype,
-            "frbr_uri_number": frbr_uri.number,
             "frbr_uri_doctype": frbr_uri.doctype,
+            "frbr_uri_subtype": frbr_uri.subtype,
+            "frbr_uri_actor": frbr_uri.actor,
+            "frbr_uri_number": frbr_uri.number,
             "frbr_uri_date": frbr_uri.date,
             "language": language,
             "date": datetime.strptime(document["expression_date"], "%Y-%m-%d").date(),
         }
         if document["locality"]:
             frbr_uri_data["locality"] = Locality.objects.get(code=document["locality"])
-
-        if frbr_uri.actor:
-            frbr_uri_data["frbr_uri_actor"] = frbr_uri.actor
-            author, _ = Author.objects.get_or_create(
-                code=frbr_uri.actor, defaults={"name": frbr_uri.actor}
-            )
-            field_data["author"] = author
 
         doc = CoreDocument(**frbr_uri_data)
         doc.work_frbr_uri = doc.generate_work_frbr_uri()
@@ -160,26 +154,10 @@ class IndigoAdapter(Adapter):
         if frbr_uri.work_uri() != doc.work_frbr_uri:
             raise Exception("FRBR URIs do not match.")
 
-        if document["nature"] == "act":
-            if document["subtype"] in [
-                "charter",
-                "protocol",
-                "convention",
-                "treaty",
-                "recommendation",
-            ]:
-                model = LegalInstrument
-                document_nature_name = " ".join(
-                    [name for name in document["subtype"].split("-")]
-                ).capitalize()
-                field_data["nature"] = DocumentNature.objects.update_or_create(
-                    code=document["subtype"], defaults={"name": document_nature_name}
-                )[0]
-            else:
-                model = Legislation
-                field_data["metadata_json"] = document
-        else:
-            model = GenericDocument
+        model = self.get_model(document)
+        logger.info(f"Importing as {model}")
+
+        if hasattr(model, "nature"):
             document_nature_name = " ".join(
                 [name for name in document["subtype"].split("-")]
             ).capitalize()
@@ -187,7 +165,16 @@ class IndigoAdapter(Adapter):
                 code=document["subtype"], defaults={"name": document_nature_name}
             )[0]
 
-        logger.info(model)
+        if hasattr(model, "author") and frbr_uri.actor:
+            field_data["author"] = Author.objects.get_or_create(
+                code=frbr_uri.actor, defaults={"name": frbr_uri.actor}
+            )[0]
+
+        if hasattr(model, "metadata_json"):
+            field_data["metadata_json"] = document
+
+        if hasattr(model, "repealed") and document["repeal"]:
+            field_data["repealed"] = True
 
         # the document may already be in the database, but not as the right document type.
         # It's unlikely, but does happen and is confusing to debug, so let's check for it explicitly.
@@ -208,10 +195,6 @@ class IndigoAdapter(Adapter):
             defaults={**field_data, **frbr_uri_data},
         )
 
-        if document["repeal"] and isinstance(created_doc, Legislation):
-            created_doc.repealed = True
-            created_doc.save()
-
         logger.info(f"New document: {new}")
 
         if document["stub"]:
@@ -225,6 +208,19 @@ class IndigoAdapter(Adapter):
 
         self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
+
+    def get_model(self, document):
+        if document["nature"] == "act":
+            if document["subtype"] in [
+                "charter",
+                "protocol",
+                "convention",
+                "treaty",
+                "recommendation",
+            ]:
+                return LegalInstrument
+            return Legislation
+        return GenericDocument
 
     def set_parent(self, imported_document, created_document):
         # handle parent as a special relationship
