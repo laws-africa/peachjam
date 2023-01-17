@@ -16,7 +16,7 @@ from peachjam.views.generic_views import (
 
 def group_years(years):
     # sort list of years
-    years.sort(key=lambda x: x["year"])
+    years.sort(key=lambda x: x["year"], reverse=True)
 
     results = []
     # group list of years dict by year
