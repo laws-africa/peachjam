@@ -6,6 +6,9 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 logger = logging.getLogger(__name__)
 
+# subprocess timeout (in seconds)
+TIMEOUT = 60 * 30
+
 
 def convert_docx_to_pdf(docx_file):
     f = docx_file.open()
@@ -33,6 +36,7 @@ def convert_docx_to_pdf(docx_file):
             stderr=subprocess.PIPE,
             check=True,
             encoding="utf-8",
+            timeout=TIMEOUT,
         )
         logger.info(
             f"soffice subprocess: {process.stdout} Exit Code: {process.returncode}"
