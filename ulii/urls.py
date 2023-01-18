@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from senlii import views
+from ulii import views
 
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),
