@@ -442,7 +442,30 @@ if DEBUG:
 
 GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
 
-CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}
+CKEDITOR_CONFIGS = {
+    # The rest of this config is defined in ckeditor.configs.DEFAULT_CONFIG
+    "default": {
+        "removePlugins": ["image"],
+        "toolbar_Full": [
+            [
+                "Styles",
+                "Format",
+                "Bold",
+                "Italic",
+                "Underline",
+                "Strike",
+                "SpellChecker",
+                "Undo",
+                "Redo",
+            ],
+            ["Link", "Unlink", "Anchor"],
+            ["Image", "Flash", "Table", "HorizontalRule"],
+            ["TextColor", "BGColor"],
+            ["Smiley", "SpecialChar", "LaAkn"],
+            ["Source"],
+        ],
+    }
+}
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 SESSION_COOKIE_SECURE = True

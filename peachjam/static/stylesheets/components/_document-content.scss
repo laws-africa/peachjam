@@ -4,6 +4,16 @@
     // reset line height so html documents use their default, rather than bootstrap's adjusted line height
     line-height: normal;
     font-size: 15px;
+
+    // style embedded la-akoma-ntoso content
+    la-akoma-ntoso {
+      max-height: 60vh;
+      overflow-y: auto;
+      border: 1px solid $gray-500;
+      background-color: $gray-100;
+      padding: $spacer;
+      margin-bottom: $spacer;
+    }
   }
 
   .document-content__toggle {
