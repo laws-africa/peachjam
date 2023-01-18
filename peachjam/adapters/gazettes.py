@@ -31,7 +31,7 @@ class GazetteAdapter(Adapter):
             .using("gazettes_africa")
         )
         if last_refreshed:
-            new_gazettes.filter(updated_at__gt=last_refreshed)
+            new_gazettes = new_gazettes.filter(updated_at__gt=last_refreshed)
 
         return list(new_gazettes.values_list("expression_frbr_uri", flat=True))
 
