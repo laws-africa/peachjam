@@ -1,0 +1,9 @@
+dl.faq {
+  dt {
+    @extend h5;
+  }
+
+  dd {
+    margin-bottom: $spacer * 1.5;
+  }
+}
