@@ -10,7 +10,7 @@ class RedirectCaseURLsView(RedirectView):
     if available
     """
 
-    def get_redirect_url(self, court, year, number, *args, **kwargs):
-        court_code = settings.COURT_CODE_MAPPINGS.get(court, '')
-        frbr_uri = f"/akn/ug/judgment/{court_code.lower()}/{year}/{number}"
+    def get_redirect_url(self, country, court, year, number, *args, **kwargs):
+        court_code = settings.COURT_CODE_MAPPINGS.get(court, "")
+        frbr_uri = f"/akn/{country}/judgment/{court_code.lower()}/{year}/{number}"
         return frbr_uri
