@@ -15,5 +15,10 @@ urlpatterns = [
         views.LegislationListView.as_view(variant="all"),
         name="legislation_list_all",
     ),
+    path(
+        "legislation/regulations",
+        views.LegislationListView.as_view(variant="subleg"),
+        name="legislation_list_regulations",
+    ),
     path("", include("peachjam.urls")),
 ]
