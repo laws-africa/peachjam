@@ -95,7 +95,7 @@ class SourceFileWidget(CharRequiredWidget):
             SOfficeError,
             KeyError,
         ) as e:
-            msg = getattr(e, "message", str(e))
+            msg = getattr(e, "message", repr(e))
             raise ValidationError(
                 f"Error processing source file: {source_url} -- {msg}"
             )
