@@ -1,4 +1,4 @@
 # flake8: noqa
-from .home import *
+from .general import *
 from .legislation import *
 from .redirect import *
