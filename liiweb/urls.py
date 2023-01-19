@@ -15,6 +15,11 @@ urlpatterns = [
         views.LegislationListView.as_view(variant="all"),
         name="legislation_list_all",
     ),
+    path(
+        "legislation/subsidiary",
+        views.LegislationListView.as_view(variant="subleg"),
+        name="legislation_list_subsidiary",
+    ),
     # This redirects old Ulii case laws to work with peachjam urls
     re_path(
         r"^(?P<country>[a-z]{2})/judgment/(?P<court>[-\w]+)/(?P<year>\d+)/(?P<number>\d+)$",

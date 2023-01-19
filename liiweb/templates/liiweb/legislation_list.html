@@ -29,6 +29,12 @@
               {% trans 'All legislation' %}
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link {% if view.variant == 'subleg' %}active{% endif %}" href="{% url 'legislation_list_subsidiary' %}">
+                {{ PEACHJAM_SETTINGS.subleg_label }}
+            </a>
+          </li>
+
         </nav>
       {% endblock %}
 
