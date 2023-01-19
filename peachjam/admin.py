@@ -57,9 +57,21 @@ from peachjam.models import (
 from peachjam.resources import GenericDocumentResource, JudgmentResource
 
 
+class EntityProfileForm(forms.ModelForm):
+    about_html = forms.CharField(
+        widget=CKEditorWidget(),
+        required=False,
+    )
+
+    class Meta:
+        model = EntityProfile
+        exclude = []
+
+
 class EntityProfileInline(GenericStackedInline):
     model = EntityProfile
     extra = 0
+    form = EntityProfileForm
 
 
 class PeachJamSettingsAdmin(admin.ModelAdmin):
