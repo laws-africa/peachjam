@@ -95,7 +95,10 @@ class SourceFileWidget(CharRequiredWidget):
             SOfficeError,
             KeyError,
         ) as e:
-            msg = getattr(e, "message", repr(e))
+            msg = getattr(e, "message", repr(e)) or repr(e)
+            logger.warning(
+                f"Error processing source file: {source_url} -- {msg}", exc_info=e
+            )
             raise ValidationError(
                 f"Error processing source file: {source_url} -- {msg}"
             )
@@ -198,12 +201,21 @@ class BaseDocumentResource(resources.ModelResource):
         import_id_fields = ("expression_frbr_uri",)
 
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
-
         dataset_headers = dataset.headers
         missing_fields = set(self.required_fields).difference(dataset_headers)
 
         if missing_fields:
             raise ValidationError(f"Missing Columns: {missing_fields}")
+
+        # clear out rows with 'skip' set; we don't remove them, so that the row numbers match the source, but
+        # instead set them to all None
+        try:
+            ix = dataset.headers.index("skip")
+            for i, skipped in enumerate(dataset.get_col(ix)):
+                if skipped:
+                    dataset[i] = [None] * len(dataset.headers)
+        except ValueError:
+            pass
 
     @staticmethod
     def download_attachment(url, document, nature):
