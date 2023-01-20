@@ -79,6 +79,8 @@ class SourceFileWidget(CharRequiredWidget):
                     response = requests.get(source_url)
                     response.raise_for_status()
                     file.write(response.content)
+                    # ensure contents is on disk, because the work below reads the file data from the file name
+                    file.flush()
                     file.seek(0)
 
                     mime = magic.from_file(file.name, mime=True)
