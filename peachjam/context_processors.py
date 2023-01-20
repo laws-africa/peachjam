@@ -1,6 +1,6 @@
 from django.conf import settings
 
-# from peachjam.models.settings import pj_settings
+from peachjam.models.settings import pj_settings
 
 
 def general(request):
@@ -14,5 +14,5 @@ def general(request):
         "SENTRY_DSN_KEY": settings.PEACHJAM["SENTRY_DSN_KEY"],
         "SENTRY_ENVIRONMENT": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
         "GOOGLE_ANALYTICS_ID": settings.GOOGLE_ANALYTICS_ID,
-        # "PEACHJAM_SETTINGS": pj_settings(),
+        "PEACHJAM_SETTINGS": pj_settings(),
     }
