@@ -33,12 +33,14 @@ from peachjam.models import (
     CaseNumber,
     Court,
     DocumentNature,
+    DocumentTopic,
     GenericDocument,
     Judge,
     Judgment,
     Locality,
     MatterType,
     SourceFile,
+    Taxonomy,
 )
 from peachjam.pipelines import DOC_MIMETYPES
 
@@ -163,6 +165,19 @@ class DateWidget(CharWidget):
             return parse(value)
 
 
+class TaxonomiesWidget(CharWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        for taxonomy in value.split("|"):
+            try:
+                Taxonomy.objects.get(slug=taxonomy)
+            except Taxonomy.DoesNotExist as e:
+                msg = getattr(e, "message", repr(e)) or repr(e)
+                raise ValidationError(
+                    f"Taxonomy {taxonomy} does not exist - {msg}",
+                )
+        return value
+
+
 class BaseDocumentResource(resources.ModelResource):
     date = fields.Field(attribute="date", widget=DateWidget(name="date"))
 
@@ -185,6 +200,7 @@ class BaseDocumentResource(resources.ModelResource):
     source_url = fields.Field(
         attribute="source_url", widget=SourceFileWidget(field="source_url")
     )
+    taxonomy = fields.Field(attribute="taxonomy", widget=TaxonomiesWidget())
     skip = fields.Field(attribute="skip", widget=SkipRowWidget())
 
     required_fields = []
@@ -247,6 +263,15 @@ class BaseDocumentResource(resources.ModelResource):
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
         return row["skip"]
+
+    def after_import_row(self, row, row_result, row_number=None, **kwargs):
+        if row.get("taxonomy"):
+            for taxonomy in row.get("taxonomy").split("|"):
+                taxonomy = Taxonomy.objects.get(slug=taxonomy)
+                topic = DocumentTopic.objects.get_or_create(
+                    topic=taxonomy, document_id=row_result.object_id
+                )
+                logger.info(f"Setting document topic - {topic}")
 
     def after_save_instance(self, instance, using_transactions, dry_run):
         # get the preferred source url using the widget logic
