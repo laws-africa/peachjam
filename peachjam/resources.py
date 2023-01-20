@@ -208,12 +208,14 @@ class BaseDocumentResource(resources.ModelResource):
             raise ValidationError(f"Missing Columns: {missing_fields}")
 
         # clear out rows with 'skip' set; we don't remove them, so that the row numbers match the source, but
-        # instead set them to all None
+        # instead set all the columns (except skipped) to None
         try:
             ix = dataset.headers.index("skip")
             for i, skipped in enumerate(dataset.get_col(ix)):
                 if skipped:
-                    dataset[i] = [None] * len(dataset.headers)
+                    row = [None] * dataset.width
+                    row[ix] = skipped
+                    dataset[i] = row
         except ValueError:
             pass
 
