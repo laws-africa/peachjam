@@ -72,6 +72,9 @@ class SourceFileWidget(CharRequiredWidget):
     def clean(self, value, row=None, **kwargs):
         super().clean(value)
 
+        if row and row["skip"]:
+            return None
+
         source_url = self.get_source_url(value)
         try:
             with TemporaryDirectory() as dir:
@@ -95,7 +98,10 @@ class SourceFileWidget(CharRequiredWidget):
             SOfficeError,
             KeyError,
         ) as e:
-            msg = getattr(e, "message", repr(e))
+            msg = getattr(e, "message", repr(e)) or repr(e)
+            logger.warning(
+                f"Error processing source file: {source_url} -- {msg}", exc_info=e
+            )
             raise ValidationError(
                 f"Error processing source file: {source_url} -- {msg}"
             )
