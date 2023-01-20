@@ -7,7 +7,7 @@
   {% if child_documents %}
     <li class="nav-item" role="presentation">
       <button class="nav-link" data-bs-toggle="tab" data-bs-target="#children-tab" type="button" role="tab" aria-controls="children-tab">
-        {% trans "Subsidiary legislation" %}
+        {{ PEACHJAM_SETTINGS.subleg_label }}
         <span class="badge bg-secondary">{{ child_documents|length }}</span>
       </button>
     </li>
