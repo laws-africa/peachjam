@@ -39,11 +39,6 @@ class PeachJamSettings(BaseModel):
         blank=True,
         verbose_name=_("document jurisdictions"),
     )
-    subleg_label = models.CharField(
-        verbose_name=_("subsidiary legislation label"),
-        max_length=1024,
-        default="Subsidiary legislation",
-    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
