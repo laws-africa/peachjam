@@ -4,7 +4,7 @@ from unittest import mock
 import tablib
 from django.test import TestCase
 
-from peachjam.models import Judgment
+from peachjam.models import Judgment, Taxonomy
 from peachjam.resources import JudgmentResource
 
 judgment_import_headers = [
@@ -94,3 +94,24 @@ class JudgmentBulkImportTestCase(TestCase):
         judgment = Judgment.objects.first()
         self.assertFalse(result.has_errors())
         self.assertEquals(judgment.case_numbers.first().year, 2021)
+
+    @mock.patch("peachjam.resources.requests.get", side_effect=mocked_response)
+    @mock.patch(
+        "peachjam.resources.download_source_file", return_value=NamedTemporaryFile()
+    )
+    def test_import_with_taxonomy(self, mock_request, download):
+        data = row[:]
+        headers = judgment_import_headers[:]
+
+        get = lambda node_id: Taxonomy.objects.get(pk=node_id)  # noqa
+        root = Taxonomy.add_root(name="Collections")
+        node = get(root.pk).add_child(name="Land Rights")
+        get(node.pk).add_sibling(name="Environment")
+
+        data.append("land-rights|environment")
+        headers.append("taxonomy")
+        dataset = tablib.Dataset(data, headers=headers, depth=0)
+        result = JudgmentResource().import_data(dataset=dataset, dry_run=False)
+        j = Judgment.objects.first()
+        self.assertEqual(len(j.taxonomies.all()), 2)
+        self.assertFalse(result.has_errors())
