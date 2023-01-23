@@ -32,6 +32,11 @@ urlpatterns = [
         name="provincial_legislation_list_repealed",
     ),
     path(
+        "legislation/<str:code>/subsidiary",
+        views.ProvincialLegislationListView.as_view(variant="subleg"),
+        name="provincial_legislation_list_subsidiary",
+    ),
+    path(
         "legislation/<str:code>/all",
         views.ProvincialLegislationListView.as_view(variant="all"),
         name="provincial_legislation_list_all",
