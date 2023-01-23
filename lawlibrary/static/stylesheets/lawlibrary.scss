@@ -10,3 +10,7 @@ footer {
 .btn.btn-outline-primary:hover {
   color: #fff;
 }
+
+.alert.bg-primary {
+  --bs-bg-opacity: 0.5;
+}
