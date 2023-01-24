@@ -39,6 +39,7 @@ from peachjam.views import (
     CourtYearView,
     DocumentDetailViewResolver,
     DocumentMediaView,
+    DocumentNatureListView,
     DocumentSourcePDFView,
     DocumentSourceView,
     FirstLevelTaxonomyDetailView,
@@ -182,6 +183,11 @@ urlpatterns = [
     ),
     path(
         "pocketlaw-resources", PocketLawResources.as_view(), name="pocketlaw_resources"
+    ),
+    re_path(
+        r"^doc/(?P<nature>\w+)$",
+        DocumentNatureListView.as_view(),
+        name="document_nature_list",
     ),
 ]
 
