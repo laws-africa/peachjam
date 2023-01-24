@@ -1,8 +1,35 @@
 import logging
 
 from background_task import background
+from background_task.tasks import DBTaskRunner, Task, logger, tasks
+from django.db.utils import OperationalError
 
 log = logging.getLogger(__name__)
+
+
+class PatchedDBTaskRunner(DBTaskRunner):
+    """Patch DBTaskRunner to be more efficient when pulling tasks from the database. This can be dropped once
+    https://github.com/arteria/django-background-tasks/pull/244/files is merged into django-background-task.
+    """
+
+    def get_task_to_run(self, tasks, queue=None):
+        try:
+            # This is the changed line
+            available_tasks = Task.objects.find_available(queue).filter(
+                task_name__in=tasks._tasks
+            )[:5]
+            for task in available_tasks:
+                # try to lock task
+                locked_task = task.lock(self.worker_name)
+                if locked_task:
+                    return locked_task
+            return None
+        except OperationalError:
+            logger.warning("Failed to retrieve tasks. Database unreachable.")
+
+
+# use the patched runner
+tasks._runner = PatchedDBTaskRunner()
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
