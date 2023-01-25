@@ -1,15 +1,10 @@
 from liiweb.views import HomePageView as BaseHomePageView
-from peachjam.models import Article, Judgment, Legislation
+from peachjam.models import Article
 
 
 class HomePageView(BaseHomePageView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        context["recent_judgments"] = Judgment.objects.order_by("-date")[:5]
-        context["recent_legislation"] = Legislation.objects.filter(
-            metadata_json__stub=False
-        ).order_by("-date")[:10]
         context["recent_articles"] = (
             Article.objects.prefetch_related("topics")
             .select_related("author")
