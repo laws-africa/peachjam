@@ -9,16 +9,17 @@ class DocumentNatureListView(FilteredDocumentListView):
     model = GenericDocument
     queryset = GenericDocument.objects.prefetch_related("author", "nature", "work")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context["nature"] = get_object_or_404(
+    def get(self, *args, **kwargs):
+        self.document_nature = get_object_or_404(
             DocumentNature, code=self.kwargs.get("nature")
         )
+        return super().get(*args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["nature"] = self.document_nature
         return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        nature = get_object_or_404(DocumentNature, code=self.kwargs.get("nature"))
-        return queryset.filter(nature=nature)
+        return queryset.filter(nature=self.document_nature)
