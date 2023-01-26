@@ -15,15 +15,45 @@ The following steps outline the procedure to deploy a new Peachjam based applica
       dokku config:set CONFIG1=value CONFIG2=value
 
 
-## Caveat
-- It is necessary to disable checks on the dokku application you've just created to prevent postdeploy checks from failing. This should be re-enabled once the deployment process is completed successfully.
 
-      dokku checks:disable <app_name>
 
 ### Generate Django Secret Key
 - To generate the secret key for your application, run:
 
       dokku config:set <app_name> DJANGO_SECRET_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 128 | head -n 1)
+
+
+
+
+#### Sentry Data Source Name (DSN)
+A `DSN_KEY` environment variable is required for Sentry to start monitoring events in the application you've just created. To get a dsn value:
+- Access your Laws.Africa Sentry account, click on **Projects** then **Create Project**:
+
+  ![Sentry Create Project](assets/img/sentry.png "Sentry Create Project")
+
+
+- Upon creating a new Sentry project, a dsn value will be generated automatically. Copy the value and set it as the `SENTRY_DSN_KEY` environment variable for your dokku application.
+
+  ![Sentry DSN Key](assets/img/sentry_dsn.png "Sentry DSN Key")
+
+
+
+    dokku config:set <app_name> SENTRY_DSN_KEY=<dsn_value>
+
+## Caveat
+- It is necessary to disable checks on the dokku application you've just created to prevent postdeploy checks from failing. This should be re-enabled once the deployment process is completed successfully.
+
+      dokku checks:disable <app_name>
+
+#### Build and Deploy
+- Dokku will build and deploy the application automatically on git push. First add the remote to the git
+
+      git remote add dokku-<app_name> dokku@<your_server_domain>:<app_name>
+
+- To trigger a build and deploy:
+
+      git push dokku-<app_name> <branch_name>:master
+
 
 #### SSL
 - Enable LetsEncrypt for SSL/TLS. Dokku allows easy setup of SSL using the letsencrypt plugin. On the server, install the letsencrypt dokku plugin:
@@ -46,37 +76,13 @@ The following steps outline the procedure to deploy a new Peachjam based applica
 
       dokku letsencrypt:auto-renew
 
-
-
-#### Sentry Data Source Name (DSN)
-A `DSN_KEY` environment variable is required for Sentry to start monitoring events in the application you've just created. To get a dsn value:
-- Access your Laws.Africa Sentry account, click on **Projects** then **Create Project**:
-
-![Sentry Create Project](assets/img/sentry.png "Sentry Create Project")
-
-
-- Upon creating a new Sentry project, a dsn value will be generated automatically. Copy the value and set it as the `DSN_KEY` environment variable for your dokku application.
-
-![Sentry DSN Key](assets/img/sentry_dsn.png "Sentry DSN Key")
-
-
-
-      dokku config:set <app_name> DSN_KEY=<dsn_value>
-
-
-
-#### Build and Deploy
-- Dokku will build and deploy the application automatically on git push. First add the remote to the git
-
-      git remote add dokku-<app_name> dokku@<your_server_domain>:<app_name>
-
-- To trigger a build and deploy:
-
-      git push dokku-<app_name> <branch_name>:master
-
 #### Background Tasks
 
 - Peachjam runs various background tasks as separate processes. They can be specified within the Procfile.
 - On the dokku server, scale up the processes to run these tasks:
 
-      dokku ps:scale <app_name> tasks=1 tasks2=1
+      dokku ps:scale <app_name> tasks=1
+
+### Languages
+### Elasticsearch Index
+### NGINX Proxy Read timeout
