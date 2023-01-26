@@ -4,7 +4,7 @@ Peachjam can be deployed to a server that has [Dokku](https://dokku.com/) instal
 The following steps outline the procedure to deploy a new Peachjam based application.
 
 #### Application Setup and Configuration
-- SSH into the server with dokku installed and create a new application using Dokku's `apps:create` command
+- SSH into the Dokku host and create the application as follows:
 
       dokku apps:create <app_name>
 - Setup the domain for the application
@@ -16,13 +16,10 @@ The following steps outline the procedure to deploy a new Peachjam based applica
 
 
 
-
 ### Generate Django Secret Key
 - To generate the secret key for your application, run:
 
       dokku config:set <app_name> DJANGO_SECRET_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 128 | head -n 1)
-
-
 
 
 #### Setup Sentry Data Source Name (DSN) Key
@@ -97,3 +94,9 @@ They should be re-enabled once the deployment process is completed successfully.
 - We need to increase the read timeout for NGINX to prevent timeout for long-running server tasks:
 
       dokku nginx:set <app_name> proxy-read-timeout 3600s
+
+
+#### Enable checks
+- Re-enable Zero Downtime Deploy Checks on your application by:
+
+      dokku checks:enable <app_name>
