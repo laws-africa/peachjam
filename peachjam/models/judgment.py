@@ -128,7 +128,7 @@ class Judgment(CoreDocument):
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
-        if self.date and hasattr(self, "court"):
+        if self.date and self.court:
             if (
                 self.mnc != self.generate_citation()
                 or self.serial_number_override
