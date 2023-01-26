@@ -40,6 +40,7 @@
     "lodash.debounce": "^4.0.8",
     "moment": "^2.29.4",
     "mark.js": "^8.11.1",
+    "pdfjs-dist": "^2.14.305",
     "sass": "^1.53.0",
     "sass-loader": "^12.6.0",
     "ts-loader": "^9.2.7",
@@ -53,6 +54,5 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "pdfjs-dist": "^2.14.305"
   }
 }
