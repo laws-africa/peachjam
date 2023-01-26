@@ -10,9 +10,17 @@ The following steps outline the procedure to deploy a new Peachjam based applica
 - Setup the domain for the application
 
       dokku domains:set <app_name> <domain_name>
+
+
+
+
+
 - Add the relevant environment variables using the dokku config:set command. The required configuration values can be found in the env.example file.
 
       dokku config:set CONFIG1=value CONFIG2=value
+
+    > **_NOTE:_** Set the DJANGO_DEBUG environment variable to true on the first instance to disable ingestors and for initial migrations to run. Set it to false after successfully deploying your application.
+
 
 
 
