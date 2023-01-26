@@ -432,6 +432,8 @@ LOGGING = {
         "": {"handlers": ["console"], "level": "ERROR"},
         "django": {"level": "INFO"},
         "peachjam": {"level": "DEBUG" if DEBUG else "INFO"},
+        "peachjam_search": {"level": "DEBUG" if DEBUG else "INFO"},
+        "peachjam_api": {"level": "DEBUG" if DEBUG else "INFO"},
         "background_task": {"level": "INFO"},
     },
 }

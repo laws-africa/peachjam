@@ -1,4 +1,5 @@
 import copy
+import logging
 from tempfile import NamedTemporaryFile
 
 from django.conf import settings
@@ -10,6 +11,8 @@ from elasticsearch_dsl.index import Index
 from lxml import etree
 
 from peachjam.models import CoreDocument
+
+log = logging.getLogger(__name__)
 
 
 @registry.register_document
@@ -56,6 +59,8 @@ class SearchableDocument(Document):
         # Because CoreDocument's default manager is a polymorphic manager, the actual instances
         # that will be prepared for searching will be subclasses of CoreDocument (eg. Judgment, etc.)
         model = CoreDocument
+        # indexing queryset.enumerate chunk size
+        queryset_pagination = 100
 
         @classproperty
         def related_models(cls):
@@ -124,11 +129,17 @@ class SearchableDocument(Document):
 
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
+        log.info(f"Prepared document #{object_instance.pk} for indexing")
+
         # choose a language-specific index
         lang = object_instance.language.iso_639_2T
         if lang in ANALYZERS:
             info["_index"] = f"{self._index._name}_{lang}"
         return info
+
+    def get_queryset(self):
+        # order by pk descending so that when we're indexing we can have an idea of progress
+        return super().get_queryset().order_by("-pk")
 
 
 # These are the language-specific indexes we create and their associated analyzers for text fields.
