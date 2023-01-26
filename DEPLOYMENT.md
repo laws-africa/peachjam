@@ -40,13 +40,11 @@ A `DSN_KEY` environment variable is required for Sentry to start monitoring even
 
     dokku config:set <app_name> SENTRY_DSN_KEY=<dsn_value>
 
-<<<<<<< HEAD
-## Caveat
-- It is necessary to disable checks on the dokku application you've just created to prevent postdeploy checks from failing. This should be re-enabled once the deployment process is completed successfully.
-=======
 #### Run Migrations and Disable Checks
 - It is necessary to disable checks on the dokku application you've just created before the first depoyment. This will allow migrations to run, which are setup as a post deployment task. They should be re-enabled once the deployment process is completed successfully.
->>>>>>> 62ba291f678da66ec55f7a306a52d269fdd678e9
+
+#### Run Migrations and Disable Checks
+- It is necessary to disable checks on the dokku application you've just created before the first depoyment. This will allow migrations to run, which are setup as a post deployment task. They should be re-enabled once the deployment process is completed successfully.
 
       dokku checks:disable <app_name>
 
@@ -98,7 +96,7 @@ A `DSN_KEY` environment variable is required for Sentry to start monitoring even
 
       dokku run <app_name> python manage.py search_index --create
 
-#### Configure NGINX Proxy Read timeout
+#### Set NGINX Proxy Read timeout
 - We need to increase the read timeout for NGINX to prevent timeout for long-running server tasks:
 
       dokku nginx:set <app_name> proxy-read-timeout 3600s
