@@ -25,8 +25,8 @@ The following steps outline the procedure to deploy a new Peachjam based applica
 
 
 
-#### Sentry Data Source Name (DSN)
-A `DSN_KEY` environment variable is required for Sentry to start monitoring events in the application you've just created. To get a dsn value:
+#### Setup Sentry Data Source Name (DSN) Key
+A `SENTRY_DSN_KEY` environment variable is required for Sentry to start monitoring events in the application you've just created. To get a dsn value:
 - Access your Laws.Africa Sentry account, click on **Projects** then **Create Project**:
 
   ![Sentry Create Project](assets/img/sentry.png "Sentry Create Project")
@@ -37,14 +37,11 @@ A `DSN_KEY` environment variable is required for Sentry to start monitoring even
   ![Sentry DSN Key](assets/img/sentry_dsn.png "Sentry DSN Key")
 
 
-
     dokku config:set <app_name> SENTRY_DSN_KEY=<dsn_value>
 
 #### Run Migrations and Disable Checks
-- It is necessary to disable checks on the dokku application you've just created before the first depoyment. This will allow migrations to run, which are setup as a post deployment task. They should be re-enabled once the deployment process is completed successfully.
-
-#### Run Migrations and Disable Checks
-- It is necessary to disable checks on the dokku application you've just created before the first depoyment. This will allow migrations to run, which are setup as a post deployment task. They should be re-enabled once the deployment process is completed successfully.
+- It is necessary to disable checks on the dokku application you've just created before the first deployment. This will allow migrations, which are set up as a post deployment task, to run.
+They should be re-enabled once the deployment process is completed successfully.
 
       dokku checks:disable <app_name>
 
@@ -87,7 +84,7 @@ A `DSN_KEY` environment variable is required for Sentry to start monitoring even
       dokku ps:scale <app_name> tasks=1
 
 #### Setup Languages and Countries
-- To populate countries and language data in the database you need to run
+- To populate countries and language data in the database you need to run:
 
       dokku run <app_name> python manage.py setup_countries_languages
 
