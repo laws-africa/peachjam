@@ -21,6 +21,3 @@ RUN pip install .
 
 # install sass for compiling assets before deploying
 RUN npm i -g sass
-
-# install runtime node dependencies
-RUN npm ci --no-audit --ignore-scripts --only=prod
