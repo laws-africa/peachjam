@@ -40,8 +40,13 @@ A `DSN_KEY` environment variable is required for Sentry to start monitoring even
 
     dokku config:set <app_name> SENTRY_DSN_KEY=<dsn_value>
 
+<<<<<<< HEAD
 ## Caveat
 - It is necessary to disable checks on the dokku application you've just created to prevent postdeploy checks from failing. This should be re-enabled once the deployment process is completed successfully.
+=======
+#### Run Migrations and Disable Checks
+- It is necessary to disable checks on the dokku application you've just created before the first depoyment. This will allow migrations to run, which are setup as a post deployment task. They should be re-enabled once the deployment process is completed successfully.
+>>>>>>> 62ba291f678da66ec55f7a306a52d269fdd678e9
 
       dokku checks:disable <app_name>
 
@@ -55,7 +60,7 @@ A `DSN_KEY` environment variable is required for Sentry to start monitoring even
       git push dokku-<app_name> <branch_name>:master
 
 
-#### SSL
+#### Setup SSL
 - Enable LetsEncrypt for SSL/TLS. Dokku allows easy setup of SSL using the letsencrypt plugin. On the server, install the letsencrypt dokku plugin:
 
       sudo dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
@@ -76,13 +81,24 @@ A `DSN_KEY` environment variable is required for Sentry to start monitoring even
 
       dokku letsencrypt:auto-renew
 
-#### Background Tasks
+#### Enable Background Tasks
 
 - Peachjam runs various background tasks as separate processes. They can be specified within the Procfile.
 - On the dokku server, scale up the processes to run these tasks:
 
       dokku ps:scale <app_name> tasks=1
 
-### Languages & Countries
-### Elasticsearch Index
-### NGINX Proxy Read timeout
+#### Setup Languages and Countries
+- To populate countries and language data in the database you need to run
+
+      dokku run <app_name> python manage.py setup_countries_languages
+
+#### Create Elasticsearch Index
+- To create new elasticsearch index run:
+
+      dokku run <app_name> python manage.py search_index --create
+
+#### Configure NGINX Proxy Read timeout
+- We need to increase the read timeout for NGINX to prevent timeout for long-running server tasks:
+
+      dokku nginx:set <app_name> proxy-read-timeout 3600s
