@@ -13,13 +13,12 @@ The following steps outline the procedure to deploy a new Peachjam based applica
 
 
 
-
-
 - Add the relevant environment variables using the dokku config:set command. The required configuration values can be found in the env.example file.
 
       dokku config:set CONFIG1=value CONFIG2=value
 
-    > **_NOTE:_** Set the DJANGO_DEBUG environment variable to true on the first instance to disable ingestors and for initial migrations to run. Set it to false after successfully deploying your application.
+### Important
+- Set the DJANGO_DEBUG environment variable to true on the first instance to disable ingestors and for initial migrations to run. Set it to false after successfully deploying your application.
 
 
 
@@ -50,7 +49,7 @@ They should be re-enabled once the deployment process is completed successfully.
 
       dokku checks:disable <app_name>
 
-#### Build and Deploy
+#### Build and Deploy (To be run on your local machine)
 - Dokku will build and deploy the application automatically on git push. First add the remote to the git
 
       git remote add dokku-<app_name> dokku@<your_server_domain>:<app_name>
@@ -73,7 +72,7 @@ They should be re-enabled once the deployment process is completed successfully.
 
       dokku letsencrypt <app_name>
 
-- Letsencrypt certificates expire every three months. Let's setup a cron job to renew certificates automatically:
+- Letsencrypt certificates expire every three months. Set up a cron job to renew certificates automatically:
 
       dokku letsencrypt:cron-job --add
 
