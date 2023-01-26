@@ -81,12 +81,6 @@ They should be re-enabled once the deployment process is completed successfully.
 
       dokku letsencrypt:auto-renew
 
-#### Enable Background Tasks
-
-- Peachjam runs various background tasks as separate processes. They can be specified within the Procfile.
-- On the dokku server, scale up the processes to run these tasks:
-
-      dokku ps:scale <app_name> tasks=1
 
 #### Setup Languages and Countries
 - To populate countries and language data in the database you need to run:
@@ -108,3 +102,10 @@ They should be re-enabled once the deployment process is completed successfully.
 - Re-enable Zero Downtime Deploy Checks on your application by:
 
       dokku checks:enable <app_name>
+
+#### Enable Background Tasks
+
+- Peachjam runs various background tasks as separate processes. They can be specified within the Procfile.
+- On the dokku server, scale up the processes to run these tasks:
+
+      dokku ps:scale <app_name> tasks=1
