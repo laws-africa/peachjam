@@ -136,17 +136,7 @@ LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home_page"
 
 # social logins
-SOCIALACCOUNT_PROVIDERS = {
-    "google": {
-        "SCOPE": [
-            "profile",
-            "email",
-        ],
-        "AUTH_PARAMS": {
-            "access_type": "offline",
-        },
-    },
-}
+SOCIALACCOUNT_PROVIDERS = {}
 
 SOCIALACCOUNT_ADAPTER = "peachjam.auth.SocialAccountAdapter"
 

@@ -16,7 +16,6 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.auth import views
 from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_page
 
@@ -50,6 +49,7 @@ from peachjam.views import (
     JudgmentListView,
     LegalInstrumentListView,
     LegislationListView,
+    PeachjamAdminLoginView,
     PlaceDetailView,
     PocketLawResources,
     RobotsView,
@@ -155,7 +155,7 @@ urlpatterns = [
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
     path(
         "admin/login/",
-        views.LoginView.as_view(template_name="admin/login.html"),
+        PeachjamAdminLoginView.as_view(),
         name="login",
     ),
     path("admin/", admin.site.urls),
