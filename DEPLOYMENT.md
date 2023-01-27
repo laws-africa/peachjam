@@ -41,7 +41,8 @@ A `SENTRY_DSN_KEY` environment variable is required for Sentry to start monitori
   ![Sentry DSN Key](assets/img/sentry_dsn.png "Sentry DSN Key")
 
 
-    dokku config:set <app_name> SENTRY_DSN_KEY=<dsn_value>
+
+      dokku config:set <app_name> SENTRY_DSN_KEY=<dsn_value>
 
 #### Run Migrations and Disable Checks
 - It is necessary to disable checks on the dokku application you've just created before the first deployment. This will allow migrations, which are set up as a post deployment task, to run.
