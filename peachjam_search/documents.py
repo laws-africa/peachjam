@@ -54,6 +54,7 @@ class SearchableDocument(Document):
 
     class Index:
         name = settings.PEACHJAM["ES_INDEX"]
+        settings = {"index.mapping.nested_objects.limit": 50000}
 
     class Django:
         # Because CoreDocument's default manager is a polymorphic manager, the actual instances
@@ -170,4 +171,5 @@ def setup_language_indexes():
         set_analyzer(new_mappings["properties"].values(), analyzer)
         index = Index(name=f"{main_index._name}_{lang}")
         index.get_or_create_mapping()._update_from_dict(new_mappings)
+        index._settings = main_index._settings
         registry.register(index, SearchableDocument)
