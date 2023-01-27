@@ -1,6 +1,6 @@
 from liiweb.settings import *  # noqa
 
-INSTALLED_APPS = ["namiblii.apps.ZanzibarLIIConfig"] + INSTALLED_APPS  # noqa
+INSTALLED_APPS = ["namiblii.apps.NamibLIIConfig"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "namiblii.urls"
 
