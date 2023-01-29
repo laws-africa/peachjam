@@ -8,10 +8,7 @@ from django.views.generic import TemplateView
 
 from peachjam.models import Gazette
 from peachjam.registry import registry
-from peachjam.views.generic_views import (
-    BaseDocumentDetailView,
-    FilteredDocumentListView,
-)
+from peachjam.views.generic_views import BaseDocumentDetailView, DocumentListView
 
 
 def group_years(years):
@@ -51,7 +48,7 @@ class GazetteListView(TemplateView):
         return group_years(years)
 
 
-class GazetteYearView(FilteredDocumentListView):
+class GazetteYearView(DocumentListView):
     model = Gazette
     queryset = Gazette.objects.prefetch_related("source_file")
     template_name = "peachjam/gazette_year.html"
@@ -92,6 +89,6 @@ class GazetteYearView(FilteredDocumentListView):
 
 
 @registry.register_doc_type("gazette")
-class GenericDocumentDetailView(BaseDocumentDetailView):
+class GazetteDetailView(BaseDocumentDetailView):
     model = Gazette
     template_name = "peachjam/gazette_detail.html"
