@@ -1,11 +1,11 @@
 <template>
   <form
-    ref="form"
-    method="get"
+      ref="form"
+      method="get"
   >
     <FilterFacets
-      v-model="facets"
-      :loading="loading"
+        v-model="facets"
+        :loading="loading"
     />
   </form>
   <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
@@ -13,6 +13,7 @@
     {{ $t('Regional Body') }}
     {{ $t('Court') }}
     {{ $t('Document type') }}
+    {{ $t('Document nature') }}
     {{ $t('Judges') }}
     {{ $t('Year') }}
     {{ $t('Alphabetical') }}
@@ -21,6 +22,7 @@
 
 <script>
 import FilterFacets from './FilterFacets/index.vue';
+
 export default {
   name: 'ListFacets',
   components: { FilterFacets },
@@ -48,7 +50,11 @@ export default {
     docTypes: {
       type: Array,
       default: () => []
-    }
+    },
+    documentNatures: {
+      type: Array,
+      default: () => []
+    },
   },
 
   data () {
@@ -67,11 +73,14 @@ export default {
   methods: {
     getDocTypeLabel (value) {
       return value
-        .split('_')
-        .map((word) => `${word[0].toUpperCase()}${word.slice(1, word.length)}`)
-        .join(' ');
+          .split('_')
+          .map((word) => `${word[0].toUpperCase()}${word.slice(1, word.length)}`)
+          .join(' ');
     },
+    getDocNatureLabel (value) {
+      return value.split();
 
+    },
     sortAlphabetically (items) {
       const sorted = [...items];
       return sorted.sort((a, b) => a.localeCompare(b));
@@ -95,12 +104,34 @@ export default {
 
     getFacets () {
       const facetTitles = [
-        { key: 'authors', value: this.$t('Regional Body') },
-        { key: 'courts', value: this.$t('Court') },
-        { key: 'docTypes', value: this.$t('Document type') },
-        { key: 'judges', value: this.$t('Judges') },
-        { key: 'years', value: this.$t('Year') },
-        { key: 'alphabet', value: this.$t('Alphabetical') }
+        {
+          key: 'authors',
+          value: this.$t('Regional Body')
+        },
+        {
+          key: 'courts',
+          value: this.$t('Court')
+        },
+        {
+          key: 'docTypes',
+          value: this.$t('Document type')
+        },
+        {
+          key: 'documentNatures',
+          value: this.$t('Document nature')
+        },
+        {
+          key: 'judges',
+          value: this.$t('Judges')
+        },
+        {
+          key: 'years',
+          value: this.$t('Year')
+        },
+        {
+          key: 'alphabet',
+          value: this.$t('Alphabetical')
+        }
       ];
 
       const formatOptions = (options, key) => {
@@ -125,9 +156,18 @@ export default {
             name: facet.key,
             type: 'letter-radio',
             value: this.getUrlParamValue(facet.key).length
-              ? this.getUrlParamValue(facet.key)[0]
-              : null,
+                ? this.getUrlParamValue(facet.key)[0]
+                : null,
             options: formatOptions(this.alphabet, facet.key)
+          };
+        } else if (facet.key == 'documentNatures') {
+          return {
+            title: facet.value,
+            name: facet.key,
+            type: 'checkboxes',
+            value: this.getUrlParamValue(facet.key),
+            options: formatOptions(this.sortAlphabetically(this.$props[facet.key]), facet.key)
+
           };
         } else if (facet.key === 'years') {
           return {
@@ -143,8 +183,8 @@ export default {
             name: facet.key,
             type: 'radio',
             value: this.getUrlParamValue(facet.key).length
-              ? this.getUrlParamValue(facet.key)[0]
-              : null,
+                ? this.getUrlParamValue(facet.key)[0]
+                : null,
             options: formatOptions(this.sortAlphabetically(this.$props[facet.key]), facet.key)
           };
         }

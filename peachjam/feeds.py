@@ -44,7 +44,7 @@ class JudgmentAtomSiteNewsFeed(JudgmentFeed, BaseAtomFeed):
 class GenericDocumentFeed(BaseFeed):
     model = GenericDocument
     title = "Generic Documents"
-    link = "/generic_documents/"
+    link = "/doc/"
     description = "Updates on changes and additions to Generic Documents"
 
 
