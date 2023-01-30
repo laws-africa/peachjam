@@ -1,6 +1,6 @@
 from liiweb.settings import *  # noqa
 
-INSTALLED_APPS = ["tcilii.apps.ZanzibarLIIConfig"] + INSTALLED_APPS  # noqa
+INSTALLED_APPS = ["tcilii.apps.TCILIIConfig"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "tcilii.urls"
 
