@@ -92,6 +92,7 @@ class BaseDocumentFilterForm(forms.Form):
     authors = forms.CharField(required=False)
     doc_type = forms.CharField(required=False)
     judges = forms.CharField(required=False)
+    natures = forms.CharField(required=False)
 
     def __init__(self, data, *args, **kwargs):
         self.params = QueryDict(mutable=True)
@@ -100,13 +101,13 @@ class BaseDocumentFilterForm(forms.Form):
         super().__init__(self.params, *args, **kwargs)
 
     def filter_queryset(self, queryset, exclude=None):
-
         years = self.params.getlist("years")
         alphabet = self.cleaned_data.get("alphabet")
         authors = self.params.getlist("authors")
         courts = self.params.getlist("courts")
         doc_type = self.params.getlist("doc_type")
         judges = self.params.getlist("judges")
+        natures = self.params.getlist("natures")
 
         # Order by date descending initially
         queryset = queryset.order_by("-date")
@@ -117,7 +118,7 @@ class BaseDocumentFilterForm(forms.Form):
         if alphabet and exclude != "alphabet":
             queryset = queryset.order_by("title").filter(title__istartswith=alphabet)
 
-        if authors and exclude != "author":
+        if authors and exclude != "authors":
             queryset = queryset.filter(author__name__in=authors)
 
         if courts and exclude != "courts":
@@ -128,6 +129,9 @@ class BaseDocumentFilterForm(forms.Form):
 
         if judges and exclude != "judges":
             queryset = queryset.filter(judges__name__in=judges)
+
+        if natures and exclude != "natures":
+            queryset = queryset.filter(nature__name__in=natures)
 
         return queryset
 

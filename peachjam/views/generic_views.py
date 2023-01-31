@@ -53,17 +53,29 @@ class FilteredDocumentListView(DocumentListView):
 
         authors = []
         courts = []
+        natures = []
         # Initialize facet data values
         if self.model in [GenericDocument, LegalInstrument]:
             authors = list(
                 {
                     a
                     for a in self.form.filter_queryset(
-                        self.get_base_queryset(), exclude="author"
+                        self.get_base_queryset(), exclude="authors"
                     ).values_list("author__name", flat=True)
                     if a
                 }
             )
+
+            natures = list(
+                {
+                    doc_n
+                    for doc_n in self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="natures"
+                    ).values_list("nature__name", flat=True)
+                    if doc_n
+                }
+            )
+
         # Legislation objects don't have an associated author, hence empty authors list
         elif self.model is Judgment:
             courts = list(
@@ -84,11 +96,15 @@ class FilteredDocumentListView(DocumentListView):
             )
         )
 
+        context["doc_table_show_author"] = bool(authors)
+        context["doc_table_show_doc_type"] = bool(natures)
+
         context["facet_data"] = {
             "years": years,
             "authors": authors,
             "courts": courts,
             "alphabet": lowercase_alphabet(),
+            "natures": natures,
         }
         return context
 

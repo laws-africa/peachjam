@@ -18,8 +18,9 @@ class DocumentNatureListView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["nature"] = self.document_nature
+        # disable nature facet
+        context["facet_data"]["natures"] = []
         return context
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(nature=self.document_nature)
+    def get_base_queryset(self):
+        return super().get_base_queryset().filter(nature=self.document_nature)

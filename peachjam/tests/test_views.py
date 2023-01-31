@@ -140,7 +140,7 @@ class PeachjamViewsTest(TestCase):
         self.assertTrue(hasattr(response.context["document"], "author"))
 
     def test_generic_document_listing(self):
-        response = self.client.get("/generic_documents/")
+        response = self.client.get("/doc/")
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]

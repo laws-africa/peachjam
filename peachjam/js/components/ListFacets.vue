@@ -1,26 +1,28 @@
 <template>
   <form
-    ref="form"
-    method="get"
+      ref="form"
+      method="get"
   >
     <FilterFacets
-      v-model="facets"
-      :loading="loading"
+        v-model="facets"
+        :loading="loading"
     />
   </form>
   <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
   <div v-if="false">
-    {{ $t('Regional Body') }}
+    {{ $t('Alphabetical') }}
     {{ $t('Court') }}
     {{ $t('Document type') }}
     {{ $t('Judges') }}
+    {{ $t('Nature') }}
+    {{ $t('Regional body') }}
     {{ $t('Year') }}
-    {{ $t('Alphabetical') }}
   </div>
 </template>
 
 <script>
 import FilterFacets from './FilterFacets/index.vue';
+
 export default {
   name: 'ListFacets',
   components: { FilterFacets },
@@ -48,7 +50,11 @@ export default {
     docTypes: {
       type: Array,
       default: () => []
-    }
+    },
+    natures: {
+      type: Array,
+      default: () => []
+    },
   },
 
   data () {
@@ -67,11 +73,14 @@ export default {
   methods: {
     getDocTypeLabel (value) {
       return value
-        .split('_')
-        .map((word) => `${word[0].toUpperCase()}${word.slice(1, word.length)}`)
-        .join(' ');
+          .split('_')
+          .map((word) => `${word[0].toUpperCase()}${word.slice(1, word.length)}`)
+          .join(' ');
     },
+    getDocNatureLabel (value) {
+      return value.split();
 
+    },
     sortAlphabetically (items) {
       const sorted = [...items];
       return sorted.sort((a, b) => a.localeCompare(b));
@@ -94,61 +103,70 @@ export default {
     },
 
     getFacets () {
-      const facetTitles = [
-        { key: 'authors', value: this.$t('Regional Body') },
-        { key: 'courts', value: this.$t('Court') },
-        { key: 'docTypes', value: this.$t('Document type') },
-        { key: 'judges', value: this.$t('Judges') },
-        { key: 'years', value: this.$t('Year') },
-        { key: 'alphabet', value: this.$t('Alphabetical') }
+      const facets = [
+        {
+          name: 'authors',
+          type: 'radio',
+          title: this.$t('Regional body')
+        },
+        {
+          name: 'courts',
+          type: 'radio',
+          title: this.$t('Court')
+        },
+        {
+          name: 'docTypes',
+          type: 'radio',
+          title: this.$t('Document type')
+        },
+        {
+          name: 'natures',
+          type: 'checkboxes',
+          title: this.$t('Nature')
+        },
+        {
+          name: 'judges',
+          type: 'radio',
+          title: this.$t('Judges')
+        },
+        {
+          name: 'years',
+          type: 'checkboxes',
+          title: this.$t('Year')
+        },
+        {
+          name: 'alphabet',
+          type: 'letter-radio',
+          title: this.$t('Alphabetical')
+        }
       ];
 
       const formatOptions = (options, key) => {
         return options.map((option) => {
-          if (key === 'docTypes') {
-            return {
-              label: this.getDocTypeLabel(option),
-              value: option
-            };
-          }
           return {
-            label: option,
+            label: key === 'docTypes' ? this.getDocTypeLabel(option) : option,
             value: option
           };
         });
       };
 
-      return facetTitles.map(facet => {
-        if (facet.key === 'alphabet') {
-          return {
-            title: facet.value,
-            name: facet.key,
-            type: 'letter-radio',
-            value: this.getUrlParamValue(facet.key).length
-              ? this.getUrlParamValue(facet.key)[0]
-              : null,
-            options: formatOptions(this.alphabet, facet.key)
-          };
-        } else if (facet.key === 'years') {
-          return {
-            title: facet.value,
-            name: facet.key,
-            type: 'checkboxes',
-            value: this.getUrlParamValue(facet.key),
-            options: formatOptions(this.sortDescending(this.years, facet.key))
-          };
+      for (const facet of facets) {
+        if (facet.type === 'checkboxes') {
+          facet.value = this.getUrlParamValue(facet.name);
         } else {
-          return {
-            title: facet.value,
-            name: facet.key,
-            type: 'radio',
-            value: this.getUrlParamValue(facet.key).length
-              ? this.getUrlParamValue(facet.key)[0]
-              : null,
-            options: formatOptions(this.sortAlphabetically(this.$props[facet.key]), facet.key)
-          };
+          facet.value = this.getUrlParamValue(facet.name).length ? this.getUrlParamValue(facet.name)[0] : null;
         }
-      });
+
+        if (facet.name === 'alphabet') {
+          facet.options = formatOptions(this.alphabet, facet.name);
+        } else if (facet.name === 'years') {
+          facet.options = formatOptions(this.sortDescending(this.years), facet.name);
+        } else {
+          facet.options = formatOptions(this.sortAlphabetically(this.$props[facet.name]), facet.name);
+        }
+      }
+
+      return facets;
     }
   }
 };

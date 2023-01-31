@@ -22,7 +22,7 @@
     <a class="nav-link {% if view.navbar_link == 'judgments' %}active{% endif%}" href="{% url 'judgment_list' %}">{% trans 'Decisions' %}</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'generic_documents' %}active{% endif%}" href="{% url 'generic_document_list' %}">{% trans 'AU Documents' %}</a>
+    <a class="nav-link {% if view.navbar_link == 'doc' %}active{% endif%}" href="{% url 'generic_document_list' %}">{% trans 'AU Documents' %}</a>
   </li>
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'legal_instruments' %}active{% endif%}" href="{% url 'legal_instrument_list' %}">{% trans 'Treaties and Protocols' %}</a>
