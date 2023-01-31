@@ -134,7 +134,7 @@ class CoreDocument(PolymorphicModel):
         blank=False,
     )
     title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
-    date = models.DateField(_("date"), null=False, blank=False)
+    date = models.DateField(_("date"), null=False, blank=False, db_index=True)
     source_url = models.URLField(
         _("source URL"), max_length=2048, null=True, blank=True
     )

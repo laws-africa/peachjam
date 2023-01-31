@@ -7,6 +7,8 @@
 // by mozilla's pdfjs.
 
 const fs = require("fs");
+// use a relative import so that we pull in the pdf.js that is incorporated into the build, rather than relying
+// which consumers of peachjam may not have used
 const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js");
 
 async function getText(data) {

@@ -4,6 +4,7 @@ from .article import *
 from .authors import *
 from .books import *
 from .courts import *
+from .document_nature import *
 from .documents import *
 from .gazette import *
 from .generic_document import *
@@ -11,6 +12,7 @@ from .home import *
 from .judgment import *
 from .legal_instrument import *
 from .legislation import *
+from .login import *
 from .place import *
 from .pocketlaw import *
 from .robots import *

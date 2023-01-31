@@ -20,26 +20,33 @@ from peachjam_api.serializers import (
 )
 
 
-class FilteredDocumentListView(ListView):
-    """Generic List View class for filtering documents."""
+class DocumentListView(ListView):
+    """Generic list view for document lists."""
 
     context_object_name = "documents"
     paginate_by = 50
     model = CoreDocument
+
+    def get_base_queryset(self):
+        qs = self.queryset if self.queryset is not None else self.model.objects
+        return qs.preferred_language(get_language(self.request))
+
+    def get_queryset(self):
+        return self.get_base_queryset()
+
+
+class FilteredDocumentListView(DocumentListView):
+    """Generic list view for filtered document lists."""
+
     form_class = BaseDocumentFilterForm
 
     def get(self, request, *args, **kwargs):
         self.form = self.form_class(request.GET)
         self.form.is_valid()
-
-        return super(FilteredDocumentListView, self).get(request, *args, **kwargs)
-
-    def get_base_queryset(self):
-        qs = self.queryset or self.model.objects
-        return qs.preferred_language(get_language(self.request))
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.form.filter_queryset(self.get_base_queryset())
+        return self.form.filter_queryset(super().get_queryset())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
