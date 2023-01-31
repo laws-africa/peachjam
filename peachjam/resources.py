@@ -262,9 +262,6 @@ class BaseDocumentResource(resources.ModelResource):
         except requests.exceptions.RequestException:
             return
 
-    def before_import_row(self, row, **kwargs):
-        logger.info(f"Importing row: {row}")
-
     def skip_row(self, instance, original, row, import_validation_errors=None):
         return row["skip"]
 
@@ -340,7 +337,6 @@ class GenericDocumentResource(BaseDocumentResource):
         "nature",
         "source_url",
         "title",
-        "work_frbr_uri",
     )
 
     class Meta(BaseDocumentResource.Meta):
@@ -348,18 +344,19 @@ class GenericDocumentResource(BaseDocumentResource):
 
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
-        frbr_uri = FrbrUri.parse(row["work_frbr_uri"])
-        row["language"] = frbr_uri.default_language
-        row["jurisdiction"] = str(frbr_uri.country).upper()
-        row["locality"] = frbr_uri.locality
-        row["frbr_uri_number"] = frbr_uri.number
-        row["frbr_uri_doctype"] = frbr_uri.doctype
-        row["frbr_uri_subtype"] = frbr_uri.subtype
-        row["frbr_uri_date"] = frbr_uri.date
+        if row.get("work_frbr_uri"):
+            frbr_uri = FrbrUri.parse(row["work_frbr_uri"])
+            row["language"] = frbr_uri.default_language
+            row["jurisdiction"] = str(frbr_uri.country).upper()
+            row["locality"] = frbr_uri.locality
+            row["frbr_uri_number"] = frbr_uri.number
+            row["frbr_uri_doctype"] = frbr_uri.doctype
+            row["frbr_uri_subtype"] = frbr_uri.subtype
+            row["frbr_uri_date"] = frbr_uri.date
 
-        if frbr_uri.actor:
-            row["frbr_uri_actor"] = frbr_uri.actor
-            row["author"] = frbr_uri.actor
+            if frbr_uri.actor:
+                row["frbr_uri_actor"] = frbr_uri.actor
+                row["author"] = frbr_uri.actor
 
 
 class JudgesWidget(ManyToManyWidget):
@@ -443,6 +440,25 @@ class JudgmentResource(BaseDocumentResource):
         case_numbers = [CaseNumber(**data) for data in case_numbers_data]
 
         return case_numbers
+
+    def before_import_row(self, row, **kwargs):
+        logger.info(f"Importing row: {row}")
+
+        frbr_uri_data = {
+            "court": Court.objects.filter(code=row["court"]).first(),
+            "date": parse(row["date"]),
+            "serial_number": int(row["serial_number_override"]),
+            "jurisdiction": Country.objects.filter(pk=row["jurisdiction"]).first(),
+            "locality": Locality.objects.filter(code=row["locality"]).first()
+            if row.get("locality")
+            else None,
+            "language": Language.objects.filter(iso_639_3=row["language"]).first(),
+        }
+
+        j = Judgment(**frbr_uri_data)
+        j.assign_frbr_uri()
+        expression_frbr_uri = j.generate_expression_frbr_uri()
+        row["expression_frbr_uri"] = expression_frbr_uri
 
     def after_import_row(self, row, instance, row_number=None, **kwargs):
         super().after_import_row(row, instance, row_number, **kwargs)
