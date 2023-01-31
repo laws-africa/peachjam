@@ -16,6 +16,11 @@ class JudgmentListView(FilteredDocumentListView):
         queryset = super(JudgmentListView, self).get_queryset()
         return queryset.order_by("-date")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["doc_table_show_court"] = True
+        return context
+
 
 @registry.register_doc_type("judgment")
 class JudgmentDetailView(BaseDocumentDetailView):

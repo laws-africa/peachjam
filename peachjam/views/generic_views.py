@@ -96,6 +96,9 @@ class FilteredDocumentListView(DocumentListView):
             )
         )
 
+        context["doc_table_show_author"] = bool(authors)
+        context["doc_table_show_doc_type"] = bool(natures)
+
         context["facet_data"] = {
             "years": years,
             "authors": authors,
