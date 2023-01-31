@@ -53,24 +53,24 @@ class FilteredDocumentListView(DocumentListView):
 
         authors = []
         courts = []
-        document_natures = []
+        natures = []
         # Initialize facet data values
         if self.model in [GenericDocument, LegalInstrument]:
             authors = list(
                 {
                     a
                     for a in self.form.filter_queryset(
-                        self.get_base_queryset(), exclude="author"
+                        self.get_base_queryset(), exclude="authors"
                     ).values_list("author__name", flat=True)
                     if a
                 }
             )
 
-            document_natures = list(
+            natures = list(
                 {
                     doc_n
                     for doc_n in self.form.filter_queryset(
-                        self.get_base_queryset(), exclude="document_nature"
+                        self.get_base_queryset(), exclude="natures"
                     ).values_list("nature__name", flat=True)
                     if doc_n
                 }
@@ -101,7 +101,7 @@ class FilteredDocumentListView(DocumentListView):
             "authors": authors,
             "courts": courts,
             "alphabet": lowercase_alphabet(),
-            "document_natures": document_natures,
+            "natures": natures,
         }
         return context
 
