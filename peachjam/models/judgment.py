@@ -128,7 +128,7 @@ class Judgment(CoreDocument):
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
-        if self.date and hasattr(self, "court"):
+        if self.date and self.court:
             if (
                 self.mnc != self.generate_citation()
                 or self.serial_number_override
@@ -161,9 +161,7 @@ class Judgment(CoreDocument):
     def generate_work_frbr_uri(self):
         # enforce certain defaults for judgment FRBR URIs
         self.frbr_uri_doctype = "judgment"
-        self.frbr_uri_actor = (
-            self.court.code.lower() if hasattr(self, "court") else None
-        )
+        self.frbr_uri_actor = self.court.code.lower() if self.court else None
         self.frbr_uri_date = str(self.date.year) if self.date else ""
         self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
         return super().generate_work_frbr_uri()
