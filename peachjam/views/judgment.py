@@ -9,7 +9,6 @@ class JudgmentListView(TemplateView):
     model = Judgment
     template_name = "peachjam/judgment_list.html"
     navbar_link = "judgments"
-    queryset = Judgment.objects.prefetch_related("work")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

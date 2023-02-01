@@ -5,7 +5,6 @@ from liiweb import views
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),
     path("pocketlaw", views.PocketlawView.as_view(), name="pocketlaw"),
-    path("judgments/", views.JudgmentListView.as_view(), name="judgment_list"),
     path("legislation/", views.LegislationListView.as_view(), name="legislation_list"),
     path(
         "legislation/repealed",
