@@ -1,8 +1,16 @@
 [
     {
+        "model": "peachjam.courtclass",
+        "pk": 2,
+        "fields": {
+            "name": "High Court",
+            "description": ""
+        }
+    },
+    {
         "fields": {
             "code": "ECOWASCJ",
-            "court_class": null,
+            "court_class": 2,
             "name": "ECOWAS Community Court of Justice"
         },
         "model": "peachjam.court",
