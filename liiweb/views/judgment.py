@@ -5,7 +5,7 @@ from peachjam.models import CourtClass, Judgment
 
 class JudgmentListView(TemplateView):
     model = Judgment
-    template_name = "liiweb/judgment_list.html"
+    template_name = "liiweb/../../peachjam/templates/peachjam/judgment_list.html"
     navbar_link = "judgments"
 
     def get_context_data(self, **kwargs):
