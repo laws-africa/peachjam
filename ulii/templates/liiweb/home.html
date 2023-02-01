@@ -1,11 +1,18 @@
 {% extends "liiweb/home.html" %}
-{% load i18n static %}
+{% load i18n static peachjam %}
 
 {% block title %} Home {% endblock %}
 
 
 {% block hero-img %}
-  <img class="hero__background-img" src="{% static 'images/ulii_banner.jpg' %}" alt="{{ APP_NAME }}" height="40" />
+{% static 'images/ulii_banner.jpg' as banner %}
+{% with banner_path=banner %}
+
+    <h1>{{'images/ulii_banner.jpg'|file_exists}}</h1>
+
+{% endwith %}
+
+  <img class="hero__background-img" src="" alt="{{ APP_NAME }}" height="40" />
 {% endblock %}
 
 {% block first-column-content %}

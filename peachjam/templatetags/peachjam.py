@@ -1,7 +1,9 @@
 import datetime
 import json
+import os
 
 from django import template
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.paginator import Paginator
 from django.http import QueryDict
 from django.urls import reverse
@@ -90,3 +92,12 @@ def build_taxonomy_url(item):
         item = item.get_parent()
 
     return "/taxonomy/" + "/".join(items)
+
+
+@register.filter(name="file_exists")
+def file_exists(path):
+    p = staticfiles_storage.path(path)
+    print(p)
+    if os.path.isfile(p):
+        print(True)
+    return path
