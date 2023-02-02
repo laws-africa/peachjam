@@ -135,38 +135,38 @@ jobs:
 
 
 
-#  deploy-namiblii:
-#    name: Deploy to namiblii
-#    runs-on: ubuntu-latest
-#    concurrency: namiblii.org
-#    steps:
-#      - uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#
-#      - name: git push to namiblii.org
-#        uses: dokku/github-action@master
-#        with:
-#          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-#          git_remote_url: 'ssh://dokku@namiblii.org:22/namiblii-peachjam'
-#          git_push_flags: '--force'
-#
-#
-#  deploy-seylii:
-#    name: Deploy to seylii
-#    runs-on: ubuntu-latest
-#    concurrency: seylii.org
-#    steps:
-#      - uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#
-#      - name: git push to seylii.org
-#        uses: dokku/github-action@master
-#        with:
-#          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-#          git_remote_url: 'ssh://dokku@seylii.org:22/seylii-peachjam'
-#          git_push_flags: '--force'
+  deploy-namiblii:
+    name: Deploy to namiblii
+    runs-on: ubuntu-latest
+    concurrency: namiblii.org
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: git push to namiblii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@namiblii.org:22/namiblii-peachjam'
+          git_push_flags: '--force'
+
+
+  deploy-seylii:
+    name: Deploy to seylii
+    runs-on: ubuntu-latest
+    concurrency: seylii.org
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: git push to seylii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@seylii.org:22/seylii-peachjam'
+          git_push_flags: '--force'
 
 
 #  deploy-lesotholii:
