@@ -4,8 +4,6 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["zanzibarlii.apps.ZanzibarLIIConfig"] + INSTALLED_APPS  # noqa
 
-ROOT_URLCONF = "zanzibarlii.urls"
-
 
 LANGUAGES = [
     ("sw", _("Swahili")),

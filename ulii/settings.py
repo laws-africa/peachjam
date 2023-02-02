@@ -4,8 +4,6 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["ulii.apps.ULIIConfig"] + INSTALLED_APPS  # noqa
 
-ROOT_URLCONF = "ulii.urls"
-
 
 LANGUAGES = [
     ("sw", _("Swahili")),
