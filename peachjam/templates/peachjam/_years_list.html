@@ -4,13 +4,15 @@
     <div class="d-none d-lg-flex align-items-center mb-3">
       <i class="bi bi-calendar me-2"></i>
       <div class="d-flex flex-wrap">
-        <a class="btn btn-link {% if not year %}disabled{% endif %}" href="{% url 'court' court.code %}">
+        {% if showallyears %}
+        <a class="btn btn-link {% if not year %}disabled{% endif %}" href="{{all_years_url}}">
           {% trans 'All years' %}
         </a>
+        {% endif %}
         {% for y in years %}
-          <a class="btn btn-link {% if y == year %}disabled{% endif %}"
-             href="{% url 'court_year' court.code y %}">
-            {{ y }}
+          <a class="btn btn-link {% if y.year == year %}disabled{% endif %}"
+             href="{{y.url}}">
+            {{ y.year }}
           </a>
         {% endfor %}
       </div>
@@ -19,13 +21,15 @@
 
   {% if years %}
     <select class="form-select d-block d-lg-none" data-component="NavigationSelect">
-      <option value="{% url 'court' court.code %}">{% trans 'All years' %}</option>
+      {% if showallyears %}
+      <option value="{{all_years_url}}">{% trans 'All years' %}</option>
+      {% endif %}
       {% for y in years %}
         <option
-          value="{% url 'court_year' court.code y %}"
-          {% if y == year %} selected {% endif %}
+          value="{{y.url}}"
+          {% if y.year == year %} selected {% endif %}
         >
-          {{ y }}
+          {{ y.year }}
         </option>
       {% endfor %}
     </select>
