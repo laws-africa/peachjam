@@ -1,12 +1,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.models.core_document_model import CoreDocument
-
 
 class CitationLink(models.Model):
     document = models.ForeignKey(
-        CoreDocument,
+        "peachjam.CoreDocument",
         related_name="citation_links",
         on_delete=models.CASCADE,
         verbose_name=_("document"),
@@ -47,3 +45,20 @@ class CitationLink(models.Model):
                 },
             ],
         )
+
+
+class ExtractedCitation(models.Model):
+    citing_work = models.ForeignKey(
+        "peachjam.Work",
+        null=False,
+        on_delete=models.CASCADE,
+        related_name="citing_work",
+        verbose_name=_("citing work"),
+    )
+    target_work = models.ForeignKey(
+        "peachjam.Work",
+        null=False,
+        on_delete=models.CASCADE,
+        related_name="target_work",
+        verbose_name=_("target work"),
+    )

@@ -156,6 +156,11 @@ class BaseDocumentDetailView(DetailView):
 
         context["notices"] = self.get_notices()
         context["taxonomies"] = doc.taxonomies.prefetch_related("topic")
+        context["cited_works"] = doc.work.cited_works()
+        context["works_citing_current_work"] = doc.work.works_citing_current_work()
+        context["number_of_extracted_citations"] = len(doc.work.cited_works()) + len(
+            doc.work.works_citing_current_work()
+        )
 
         return context
 

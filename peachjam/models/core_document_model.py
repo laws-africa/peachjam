@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
+from lxml import html
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from polymorphic.query import PolymorphicQuerySet
@@ -25,6 +26,7 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_component,
     validate_frbr_uri_date,
 )
+from peachjam.models import CitationLink, ExtractedCitation
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
 
@@ -78,6 +80,54 @@ class Work(models.Model):
         if langs != self.languages:
             self.languages = langs
             self.save()
+
+    def update_extracted_citations(self):
+        """Update the current work's ExtractedCitations."""
+        related_works = Work.objects.filter(
+            frbr_uri__in=self.fetch_related_works_frbr_uris()
+        )
+
+        # delete existing extracted citations
+        ExtractedCitation.objects.filter(citing_work=self).delete()
+
+        for related_work in related_works:
+            ExtractedCitation.objects.get_or_create(
+                citing_work=self, target_work=related_work
+            )
+
+    def fetch_related_works_frbr_uris(self):
+        """Returns a list of unique work_frbr_uris,
+        taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links."""
+        for document in self.documents.all():
+
+            work_frbr_uris = []
+
+            if document.content_html:
+                root = html.fromstring(document.content_html)
+                for a in root.xpath('//a[starts-with(@href, "/akn")]'):
+                    if a.attrib["href"] not in work_frbr_uris:
+                        work_frbr_uris.append(a.attrib["href"])
+            else:
+
+                for citation_link in CitationLink.objects.filter(
+                    document_id=document.pk
+                ):
+                    if citation_link.url not in work_frbr_uris:
+                        work_frbr_uris.append(citation_link.url)
+
+            # A work does not cite itself
+            if self.frbr_uri in work_frbr_uris:
+                work_frbr_uris.remove(self.frbr_uri)
+
+            return work_frbr_uris
+
+    def cited_works(self):
+        """Shows a list of works cited by the current work."""
+        return ExtractedCitation.objects.filter(citing_work=self)
+
+    def works_citing_current_work(self):
+        """Shows a list of works that cite the current work."""
+        return ExtractedCitation.objects.filter(target_work=self)
 
     def __str__(self):
         return f"{self.frbr_uri} - {self.title}"
@@ -409,6 +459,7 @@ class AttachmentAbstractModel(models.Model):
 
     def __str__(self):
         return f"{self.filename}"
+        return self.date.year
 
     class Meta:
         abstract = True

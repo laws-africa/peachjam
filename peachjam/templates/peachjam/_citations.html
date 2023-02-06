@@ -1,0 +1,27 @@
+{% load peachjam i18n %}
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm">
+      <h5>{% translate 'Cited documents' %}</h5>
+      <ul class="list-unstyled">
+        {% for work in cited_works %}
+          <li>
+            <a href="{% url 'document_detail' frbr_uri=work.target_work.frbr_uri|strip_first_character %}">{{ work.target_work.title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-sm">
+      <h5>{% translate 'Documents citing this one' %}</h5>
+      <ul class="list-unstyled">
+        {% for work in works_citing_current_work %}
+          <li>
+            <a href="{% url 'document_detail' frbr_uri=work.citing_work.frbr_uri|strip_first_character %}">{{ work.citing_work.title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
