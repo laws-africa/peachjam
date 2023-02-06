@@ -35,7 +35,7 @@
     {{ formatted_court_name }}
   </h1>
 
-  {% include 'peachjam/_years_list.html'%}
+  {% include 'peachjam/_years_list.html' with showallyears=True %}
 {% endblock %}
 
 {% block content %}
