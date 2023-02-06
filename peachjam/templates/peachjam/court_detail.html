@@ -35,36 +35,7 @@
     {{ formatted_court_name }}
   </h1>
 
-  {% if years %}
-    <div class="d-none d-lg-flex align-items-center mb-3">
-      <i class="bi bi-calendar me-2"></i>
-      <div class="d-flex flex-wrap">
-        <a class="btn btn-link {% if not year %}disabled{% endif %}" href="{% url 'court' court.code %}">
-          {% trans 'All years' %}
-        </a>
-        {% for y in years %}
-          <a class="btn btn-link {% if y == year %}disabled{% endif %}"
-             href="{% url 'court_year' court.code y %}">
-            {{ y }}
-          </a>
-        {% endfor %}
-      </div>
-    </div>
-  {% endif %}
-
-  {% if years %}
-    <select class="form-select d-block d-lg-none" data-component="NavigationSelect">
-      <option value="{% url 'court' court.code %}">{% trans 'All years' %}</option>
-      {% for y in years %}
-        <option
-          value="{% url 'court_year' court.code y %}"
-          {% if y == year %} selected {% endif %}
-        >
-          {{ y }}
-        </option>
-      {% endfor %}
-    </select>
-  {% endif %}
+  {% include 'peachjam/_years_list.html'%}
 {% endblock %}
 
 {% block content %}
