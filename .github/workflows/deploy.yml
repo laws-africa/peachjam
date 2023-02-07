@@ -182,7 +182,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@lesotholii.org:22/lesotholii-peachjam'
+          git_remote_url: 'ssh://dokku@liiweb.africanlii.org:22/lesotholii-peachjam'
           git_push_flags: '--force'
 
 
