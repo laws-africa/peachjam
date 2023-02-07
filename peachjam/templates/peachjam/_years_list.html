@@ -1,15 +1,15 @@
 {% load i18n %}
 
-{% if years %}
+  {% if years %}
     <div class="pl-0 mt-2 mb-3 d-flex align-items-center">
       <i class="bi bi-calendar me-2"></i>
       <ul class="year-nav mb-0 ms-2">
         {% if showallyears %}
-        <li>
-          <a class="{% if not year %} active {% endif %}" href="{{all_years_url}}">
-            {% trans 'All years' %}
-          </a>
-        </li>
+          <li>
+            <a class="{% if not year %} active {% endif %}" href="{{all_years_url}}">
+              {% trans 'All years' %}
+            </a>
+          </li>
         {% endif %}
         {% for y in years %}
           <li>
@@ -26,7 +26,7 @@
   {% if years %}
     <select class="form-select d-block d-lg-none" data-component="NavigationSelect">
       {% if showallyears %}
-      <option value="{{all_years_url}}">{% trans 'All years' %}</option>
+        <option value="{{all_years_url}}">{% trans 'All years' %}</option>
       {% endif %}
       {% for y in years %}
         <option
