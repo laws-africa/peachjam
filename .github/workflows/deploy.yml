@@ -154,6 +154,7 @@ jobs:
 
   deploy-seylii:
     name: Deploy to seylii
+    runs-on: ubuntu-latest
     concurrency: liiweb.africanlii.org-4
     steps:
       - uses: actions/checkout@v2
