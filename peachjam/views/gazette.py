@@ -24,7 +24,7 @@ def group_years(years, locality={}):
             "count": sum(int(x["count"]) for x in value),
             "url": reverse(
                 "gazettes_by_year",
-                args=[locality.code, key] if locality.code else [key],
+                args=[locality.code, key] if locality else [key],
             ),
         }
         results.append(year_dict)
