@@ -1,21 +1,25 @@
 {% load i18n %}
 
 {% if years %}
-    <div class="d-none d-lg-flex align-items-center mb-3">
+    <div class="pl-0 mt-2 mb-3 d-flex align-items-center">
       <i class="bi bi-calendar me-2"></i>
-      <div class="d-flex flex-wrap">
+      <ul class="year-nav mb-0 ms-2">
         {% if showallyears %}
-        <a class="btn btn-link {% if not year %}disabled{% endif %}" href="{{all_years_url}}">
-          {% trans 'All years' %}
-        </a>
+        <li>
+          <a class="{% if not year %} active {% endif %}" href="{{all_years_url}}">
+            {% trans 'All years' %}
+          </a>
+        </li>
         {% endif %}
         {% for y in years %}
-          <a class="btn btn-link {% if y.year == year %}disabled{% endif %}"
-             href="{{y.url}}">
-            {{ y.year }}
-          </a>
+          <li>
+            <a class="{% if y.year == year %} active {% endif %}"
+              href="{{y.url}}">
+              {{ y.year }}
+            </a>
+          </li>
         {% endfor %}
-      </div>
+      </ul>
     </div>
   {% endif %}
 
