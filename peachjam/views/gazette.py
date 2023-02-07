@@ -3,6 +3,7 @@ from operator import itemgetter
 
 from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
+from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.views.generic import TemplateView
 
@@ -11,14 +12,21 @@ from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView, DocumentListView
 
 
-def group_years(years):
+def group_years(years, locality={}):
     # sort list of years
     years.sort(key=lambda x: x["year"], reverse=True)
 
     results = []
     # group list of years dict by year
     for key, value in groupby(years, key=itemgetter("year")):
-        year_dict = {"year": key, "count": sum(int(x["count"]) for x in value)}
+        year_dict = {
+            "year": key,
+            "count": sum(int(x["count"]) for x in value),
+            "url": reverse(
+                "gazettes_by_year",
+                args=[locality.code, key] if locality else [key],
+            ),
+        }
         results.append(year_dict)
     return results
 
@@ -70,7 +78,8 @@ class GazetteYearView(DocumentListView):
             )
             .values("year", "count")
         )
-        context["years"] = group_years(years)
+        context["years"] = group_years(years, self.locality)
+
         context["gazettes"] = self.group_gazettes(list(self.get_queryset()))
         context["year"] = int(self.kwargs["year"])
 

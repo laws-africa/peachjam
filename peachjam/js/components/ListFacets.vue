@@ -1,11 +1,11 @@
 <template>
   <form
-      ref="form"
-      method="get"
+    ref="form"
+    method="get"
   >
     <FilterFacets
-        v-model="facets"
-        :loading="loading"
+      v-model="facets"
+      :loading="loading"
     />
   </form>
   <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
@@ -54,7 +54,7 @@ export default {
     natures: {
       type: Array,
       default: () => []
-    },
+    }
   },
 
   data () {
@@ -73,13 +73,12 @@ export default {
   methods: {
     getDocTypeLabel (value) {
       return value
-          .split('_')
-          .map((word) => `${word[0].toUpperCase()}${word.slice(1, word.length)}`)
-          .join(' ');
+        .split('_')
+        .map((word) => `${word[0].toUpperCase()}${word.slice(1, word.length)}`)
+        .join(' ');
     },
     getDocNatureLabel (value) {
       return value.split();
-
     },
     sortAlphabetically (items) {
       const sorted = [...items];
