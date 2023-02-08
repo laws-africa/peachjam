@@ -4,11 +4,13 @@ on:
   push:
     branches: [ main ]
 
+concurrency:
+  group: liiweb2.africanlii.org
+
 jobs:
   deploy-agp:
     name: Deploy to agp.africanlii.org
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-1
     steps:
     - uses: actions/checkout@v2
       with:
@@ -24,7 +26,6 @@ jobs:
   deploy-lawlibrary:
     name: Deploy to lawlibrary
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-1
     steps:
     - uses: actions/checkout@v2
       with:
@@ -40,7 +41,6 @@ jobs:
   deploy-senlii:
     name: Deploy to senlii
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-1
     steps:
       - uses: actions/checkout@v2
         with:
@@ -54,9 +54,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-ulii:
+    if: ${{ always() }}
+    needs: deploy-agp
     name: Deploy to ulii
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-2
     steps:
       - uses: actions/checkout@v2
         with:
@@ -70,9 +71,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-zanzibarlii:
+    if: ${{ always() }}
+    needs: deploy-lawlibrary
     name: Deploy to zanzibarlii
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-2
     steps:
       - uses: actions/checkout@v2
         with:
@@ -86,9 +88,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-malawilii:
+    if: ${{ always() }}
+    needs: deploy-senlii
     name: Deploy to malawilii
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-2
     steps:
       - uses: actions/checkout@v2
         with:
@@ -102,9 +105,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-ghalii:
+    if: ${{ always() }}
+    needs: deploy-ulii
     name: Deploy to ghalii
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-3
     steps:
       - uses: actions/checkout@v2
         with:
@@ -118,9 +122,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-zambialii:
+    if: ${{ always() }}
+    needs: deploy-zanzibarlii
     name: Deploy to zambialii
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-3
     steps:
       - uses: actions/checkout@v2
         with:
@@ -136,9 +141,10 @@ jobs:
 
 
   deploy-namiblii:
+    if: ${{ always() }}
+    needs: deploy-malawilii
     name: Deploy to namiblii
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-3
     steps:
       - uses: actions/checkout@v2
         with:
@@ -153,9 +159,10 @@ jobs:
 
 
   deploy-seylii:
+    if: ${{ always() }}
+    needs: deploy-ghalii
     name: Deploy to seylii
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-4
     steps:
       - uses: actions/checkout@v2
         with:
@@ -170,9 +177,10 @@ jobs:
 
 
   deploy-lesotholii:
+    if: ${{ always() }}
+    needs: deploy-zambialii
     name: Deploy to lesotholii
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-4
     steps:
       - uses: actions/checkout@v2
         with:
@@ -187,9 +195,10 @@ jobs:
 
 
   deploy-sierralii:
+    if: ${{ always() }}
+    needs: deploy-namiblii
     name: Deploy to sierralii
     runs-on: ubuntu-latest
-    concurrency: liiweb.africanlii.org-4
     steps:
       - uses: actions/checkout@v2
         with:
@@ -207,7 +216,6 @@ jobs:
 #  deploy-zimlii:
 #    name: Deploy to zimlii
 #    runs-on: ubuntu-latest
-#    concurrency: zimlii.org
 #    steps:
 #      - uses: actions/checkout@v2
 #        with:
@@ -224,7 +232,6 @@ jobs:
 #  deploy-tcilii:
 #    name: Deploy to tcilii
 #    runs-on: ubuntu-latest
-#    concurrency: tcilii.org
 #    steps:
 #      - uses: actions/checkout@v2
 #        with:
@@ -240,7 +247,6 @@ jobs:
 #  deploy-tanzlii:
 #    name: Deploy to tanzlii
 #    runs-on: ubuntu-latest
-#    concurrency: tanzlii.org
 #    steps:
 #      - uses: actions/checkout@v2
 #        with:
