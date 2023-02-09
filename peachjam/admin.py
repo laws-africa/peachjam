@@ -55,6 +55,7 @@ from peachjam.models import (
     pj_settings,
 )
 from peachjam.resources import GenericDocumentResource, JudgmentResource
+from peachjam.tasks import extract_citations as extract_citations_task
 
 
 class EntityProfileForm(forms.ModelForm):
@@ -383,14 +384,14 @@ class DocumentAdmin(admin.ModelAdmin):
         return FileResponse(source_file.file)
 
     def extract_citations(self, request, queryset):
-        count = 0
+        count = queryset.count()
         for doc in queryset:
-            count += 1
-            if doc.extract_citations():
-                doc.save()
-        self.message_user(request, f"Extracted citations from {count} documents.")
+            extract_citations_task(doc.pk)
+        self.message_user(
+            request, f"Queued tasks to extract citations from {count} documents."
+        )
 
-    extract_citations.short_description = "Extract citations"
+    extract_citations.short_description = "Extract citations (background)"
 
     def reextract_content(self, request, queryset):
         """Re-extract content from source files that are Word documents, overwriting content_html."""

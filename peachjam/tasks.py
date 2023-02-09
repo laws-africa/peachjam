@@ -4,6 +4,8 @@ from background_task import background
 from background_task.tasks import DBTaskRunner, Task, logger, tasks
 from django.db.utils import OperationalError
 
+from peachjam.models import CoreDocument
+
 log = logging.getLogger(__name__)
 
 
@@ -89,3 +91,24 @@ def run_ingestors():
             ingestor.check_for_updates()
 
     log.info("Running ingestors done")
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def extract_citations(document_id):
+    """Extract citations from a document in the background."""
+
+    log.info(f"Extracting citations for document {document_id}")
+
+    doc = CoreDocument.objects.filter(pk=document_id).first()
+    if not doc:
+        log.info(f"No document with id {document_id} exists, ignoring.")
+        return
+
+    try:
+        if doc.extract_citations():
+            doc.save()
+    except Exception as e:
+        log.error(f"Error extracting citations for {doc}", exc_info=e)
+        raise
+
+    log.info("Citations extracted")
