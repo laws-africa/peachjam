@@ -36,6 +36,12 @@
           <div class="d-md-flex justify-content-md-between py-4">
             <h1>{{ document.title }}</h1>
             <div class="d-flex align-items-center">
+              <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
+                 class="btn btn-link"
+                 target="_blank"
+              >
+                <i class="bi bi-whatsapp whatsapp-forecolor share-icon"></i>
+              </a>
               <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}"
                  class="btn btn-link"
                  target="_blank"
