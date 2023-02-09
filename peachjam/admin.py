@@ -56,6 +56,7 @@ from peachjam.models import (
 )
 from peachjam.resources import GenericDocumentResource, JudgmentResource
 from peachjam.tasks import extract_citations as extract_citations_task
+from peachjam_search.tasks import search_model_saved
 
 
 class EntityProfileForm(forms.ModelForm):
@@ -266,7 +267,7 @@ class DocumentAdmin(admin.ModelAdmin):
     exclude = ("doc_type",)
     date_hierarchy = "date"
     prepopulated_fields = {"frbr_uri_number": ("title",)}
-    actions = ["extract_citations", "reextract_content"]
+    actions = ["extract_citations", "reextract_content", "reindex_for_search"]
 
     fieldsets = [
         (
@@ -404,6 +405,15 @@ class DocumentAdmin(admin.ModelAdmin):
         self.message_user(request, f"Re-imported content from {count} documents.")
 
     reextract_content.short_description = "Re-extract content from DOCX files"
+
+    def reindex_for_search(self, request, queryset):
+        """Setup a background task to re-index documents for search."""
+        count = queryset.count()
+        for doc in queryset:
+            search_model_saved(doc._meta.label, doc.pk)
+        self.message_user(request, f"Queued tasks to re-index for {count} documents.")
+
+    reindex_for_search.short_description = "Re-index for search (background)"
 
 
 class TaxonomyAdmin(TreeAdmin):
