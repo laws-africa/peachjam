@@ -3,8 +3,8 @@ import os
 import re
 
 import magic
-from cobalt import FrbrUri
 from cobalt.akn import datestring
+from cobalt.uri import FrbrUri
 from countries_plus.models import Country
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
@@ -83,37 +83,40 @@ class Work(models.Model):
 
     def update_extracted_citations(self):
         """Update the current work's ExtractedCitations."""
-        related_works = Work.objects.filter(
-            frbr_uri__in=self.fetch_related_works_frbr_uris()
+        target_works = Work.objects.filter(
+            frbr_uri__in=self.fetch_cited_works_frbr_uris()
         )
 
         # delete existing extracted citations
         ExtractedCitation.objects.filter(citing_work=self).delete()
 
-        for related_work in related_works:
+        for target_work in target_works:
             ExtractedCitation.objects.get_or_create(
-                citing_work=self, target_work=related_work
+                citing_work=self, target_work=target_work
             )
 
-    def fetch_related_works_frbr_uris(self):
-        """Returns a list of unique work_frbr_uris,
+    def fetch_cited_works_frbr_uris(self):
+        """Returns a set of work_frbr_uris,
         taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links."""
-        for document in self.documents.all():
+        for doc in self.documents.all():
 
-            work_frbr_uris = []
+            work_frbr_uris = set()
 
-            if document.content_html:
-                root = html.fromstring(document.content_html)
+            if doc.content_html:
+                root = html.fromstring(doc.content_html)
                 for a in root.xpath('//a[starts-with(@href, "/akn")]'):
-                    if a.attrib["href"] not in work_frbr_uris:
-                        work_frbr_uris.append(a.attrib["href"])
+                    try:
+                        work_frbr_uris.add(FrbrUri.parse(a.attrib["href"]).work_uri())
+                    except ValueError:
+                        # ignore malformed FRBR URIs
+                        pass
             else:
-
-                for citation_link in CitationLink.objects.filter(
-                    document_id=document.pk
-                ):
-                    if citation_link.url not in work_frbr_uris:
-                        work_frbr_uris.append(citation_link.url)
+                for citation_link in CitationLink.objects.filter(document_id=doc.pk):
+                    try:
+                        work_frbr_uris.add(FrbrUri.parse(citation_link.url).work_uri())
+                    except ValueError:
+                        # ignore malformed FRBR URIs
+                        pass
 
             # A work does not cite itself
             if self.frbr_uri in work_frbr_uris:
@@ -123,11 +126,11 @@ class Work(models.Model):
 
     def cited_works(self):
         """Shows a list of works cited by the current work."""
-        return ExtractedCitation.objects.filter(citing_work=self)
+        return ExtractedCitation.for_citing_works(self)
 
     def works_citing_current_work(self):
         """Shows a list of works that cite the current work."""
-        return ExtractedCitation.objects.filter(target_work=self)
+        return ExtractedCitation.for_target_works(self)
 
     def __str__(self):
         return f"{self.frbr_uri} - {self.title}"
@@ -459,7 +462,6 @@ class AttachmentAbstractModel(models.Model):
 
     def __str__(self):
         return f"{self.filename}"
-        return self.date.year
 
     class Meta:
         abstract = True

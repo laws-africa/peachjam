@@ -62,3 +62,19 @@ class ExtractedCitation(models.Model):
         related_name="target_work",
         verbose_name=_("target work"),
     )
+
+    @classmethod
+    def for_citing_works(cls, work):
+        return (
+            cls.objects.prefetch_related("citing_work", "target_work")
+            .filter(citing_work=work)
+            .order_by("target_work__title")
+        )
+
+    @classmethod
+    def for_target_works(cls, work):
+        return (
+            cls.objects.prefetch_related("citing_work", "target_work")
+            .filter(target_work=work)
+            .order_by("citing_work__title")
+        )
