@@ -29,6 +29,21 @@ from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
 
 
+class DocumentNature(models.Model):
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
+    code = models.SlugField(_("code"), max_length=1024, null=False, unique=True)
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        verbose_name = _("document nature")
+        verbose_name_plural = _("document natures")
+
+    def __str__(self):
+        return self.name
+
+
 class Locality(models.Model):
     name = models.CharField(_("name"), max_length=255, null=False)
     jurisdiction = models.ForeignKey(
@@ -162,6 +177,13 @@ class CoreDocument(PolymorphicModel):
         null=True,
         blank=True,
         verbose_name=_("locality"),
+    )
+    nature = models.ForeignKey(
+        DocumentNature,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("nature"),
     )
 
     work_frbr_uri = models.CharField(
