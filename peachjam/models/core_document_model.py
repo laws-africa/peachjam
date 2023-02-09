@@ -325,6 +325,8 @@ class CoreDocument(PolymorphicModel):
         return frbr_uri.work_uri(work_component=False)
 
     def save(self, *args, **kwargs):
+        self.frbr_uri_subtype = self.nature.code if self.nature else None
+
         self.assign_frbr_uri()
         self.expression_frbr_uri = self.generate_expression_frbr_uri()
 

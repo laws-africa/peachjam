@@ -7,9 +7,9 @@ from django.db import migrations, models
 
 
 def move_doc_nature(apps, schema_editor):
-    Legislation = apps.get_model("peachjam", "LegalInstrument")
+    LegalInstrument = apps.get_model("peachjam", "LegalInstrument")
     GenericDocument = apps.get_model("peachjam", "GenericDocument")
-    for doc in Legislation.objects.all().iterator(chunk_size=100):
+    for doc in LegalInstrument.objects.all().iterator(chunk_size=100):
         doc.new_nature = doc.nature
         doc.save()
     for doc in GenericDocument.objects.all().iterator(chunk_size=100):
