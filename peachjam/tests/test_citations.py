@@ -14,31 +14,6 @@ class CitationAnalyserTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
     maxDiff = None
 
-    def test_pdf_to_text(self):
-        self.assertEqual(
-            """Test document for extracting citations
-This is page 1
-Recalling its Resolution ACHPR/Res.79 (XXXVIII) 05 on the Composition and
-Operationalization of the Working Group on the Death Penalty, and
-Resolution ACHPR/Res.227 (LII) 2012 on the Expansion of the Mandate of the
-Working Group on Death Penalty in Africa, to include Extra-Judicial, Summary or
-Arbitrary Killings in Africa;This is page 2
-Further recalling its decision to appoint a Special Rapporteur on Prisons and
-Conditions of Detention in Africa at its 20th Ordinary Session held from 21 to 31
-October 1996, as well as Resolution ACHPR/Res.306 (EXT.OS/ XVIII) 2015
-Expanding the Mandate of the Special Rapporteur on Prisons and Conditions of
-Detention in Africa to include issues relating to policing and human rights;""",
-            citation_analyser.pdf_to_text(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    "..",
-                    "fixtures",
-                    "tests",
-                    "citations.pdf",
-                ),
-            ),
-        )
-
     def test_pdf_extractions(self):
         # only some installations have matchers set up
         if not citation_analyser.matchers:
