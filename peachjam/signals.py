@@ -9,6 +9,7 @@ from django.db.models import signals
 from django.dispatch import receiver
 
 from peachjam.models import CoreDocument, Work
+from peachjam.tasks import update_extracted_citations_for_a_work
 
 
 # monitor background tasks with elastic-apm
@@ -59,3 +60,17 @@ def doc_deleted_update_language(sender, instance, **kwargs):
         work = Work.objects.filter(pk=instance.work_id).first()
         if work:
             work.update_languages()
+
+
+@receiver(signals.post_save)
+def doc_saved_update_extracted_citations(sender, instance, **kwargs):
+    """Update extracted citations when a subclass of CoreDocument is saved."""
+    if isinstance(instance, CoreDocument) and not kwargs["raw"]:
+        update_extracted_citations_for_a_work(instance.work_id)
+
+
+@receiver(signals.post_delete)
+def doc_deleted_update_extracted_citations(sender, instance, **kwargs):
+    """Update language list on related work after a subclass of CoreDocument is deleted."""
+    if isinstance(instance, CoreDocument):
+        update_extracted_citations_for_a_work(instance.work_id)

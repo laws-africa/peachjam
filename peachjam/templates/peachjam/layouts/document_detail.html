@@ -86,6 +86,15 @@
                 </button>
               </li>
             {% endif %}
+            {% if cited_works or works_citing_current_work %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#citations-tab" type="button" role="tab" aria-controls="citations-tab" aria-selected="false">
+                  {% trans "Citations" %}
+                  <span class="badge bg-secondary">{{ number_of_extracted_citations }}</span>
+                </button>
+              </li>
+            {% endif %}
+
           {% endblock %}
         </ul>
       </div>
@@ -296,6 +305,14 @@
           </div>
         {% endif %}
       {% endblock %}
+
+        {% if cited_works or works_citing_current_work %}
+          <div class="tab-pane fade" id="citations-tab" role="tabpanel" aria-labelledby="citations-tab">
+            <div class="container">
+              {% include 'peachjam/_citations.html' %}
+            </div>
+          </div>
+        {% endif %}
     </div>
 
     {% if perms.peachjam.add_relationship %}

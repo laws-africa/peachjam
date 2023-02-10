@@ -3,8 +3,8 @@ import os
 import re
 
 import magic
-from cobalt import FrbrUri
 from cobalt.akn import datestring
+from cobalt.uri import FrbrUri
 from countries_plus.models import Country
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
+from lxml import html
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from polymorphic.query import PolymorphicQuerySet
@@ -25,6 +26,7 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_component,
     validate_frbr_uri_date,
 )
+from peachjam.models import CitationLink, ExtractedCitation
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
 
@@ -93,6 +95,57 @@ class Work(models.Model):
         if langs != self.languages:
             self.languages = langs
             self.save()
+
+    def update_extracted_citations(self):
+        """Update the current work's ExtractedCitations."""
+        target_works = Work.objects.filter(
+            frbr_uri__in=self.fetch_cited_works_frbr_uris()
+        )
+
+        # delete existing extracted citations
+        ExtractedCitation.objects.filter(citing_work=self).delete()
+
+        for target_work in target_works:
+            ExtractedCitation.objects.get_or_create(
+                citing_work=self, target_work=target_work
+            )
+
+    def fetch_cited_works_frbr_uris(self):
+        """Returns a set of work_frbr_uris,
+        taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links."""
+        for doc in self.documents.all():
+
+            work_frbr_uris = set()
+
+            if doc.content_html:
+                root = html.fromstring(doc.content_html)
+                for a in root.xpath('//a[starts-with(@href, "/akn")]'):
+                    try:
+                        work_frbr_uris.add(FrbrUri.parse(a.attrib["href"]).work_uri())
+                    except ValueError:
+                        # ignore malformed FRBR URIs
+                        pass
+            else:
+                for citation_link in CitationLink.objects.filter(document_id=doc.pk):
+                    try:
+                        work_frbr_uris.add(FrbrUri.parse(citation_link.url).work_uri())
+                    except ValueError:
+                        # ignore malformed FRBR URIs
+                        pass
+
+            # A work does not cite itself
+            if self.frbr_uri in work_frbr_uris:
+                work_frbr_uris.remove(self.frbr_uri)
+
+            return work_frbr_uris
+
+    def cited_works(self):
+        """Shows a list of works cited by the current work."""
+        return ExtractedCitation.for_citing_works(self)
+
+    def works_citing_current_work(self):
+        """Shows a list of works that cite the current work."""
+        return ExtractedCitation.for_target_works(self)
 
     def __str__(self):
         return f"{self.frbr_uri} - {self.title}"
