@@ -20,3 +20,11 @@ class CoreDocumentTestCase(TestCase):
             "Activity Report of the Pan-African Parliament, July 2016 to June 2017",
             doc.document_content.content_text.strip()[:69],
         )
+
+        # change the source and update
+        doc.content_html = "<p>test</p>"
+        doc.update_text_content()
+        self.assertEqual("test", doc.get_content_as_text())
+
+        doc.refresh_from_db()
+        self.assertEqual("test", doc.get_content_as_text())

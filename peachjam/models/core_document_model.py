@@ -459,7 +459,7 @@ class CoreDocument(PolymorphicModel):
             result = True
 
         # always update document text
-        self.get_content_as_text()
+        self.update_text_content()
 
         return result
 
@@ -479,8 +479,12 @@ class CoreDocument(PolymorphicModel):
     def get_content_as_text(self):
         """Get the document content as plain text."""
         if not hasattr(self, "document_content"):
-            self.document_content = DocumentContent.update_or_create_for_document(self)
+            self.update_text_content()
         return self.document_content.content_text
+
+    def update_text_content(self):
+        """Update the extracted text content."""
+        self.document_content = DocumentContent.update_or_create_for_document(self)
 
 
 def file_location(instance, filename):

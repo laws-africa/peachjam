@@ -245,7 +245,7 @@ class DocumentForm(forms.ModelForm):
     def save(self, *args, **kwargs):
         obj = super().save(*args, **kwargs)
         # update document text
-        obj.get_content_as_text()
+        obj.update_text_content()
         return obj
 
 
