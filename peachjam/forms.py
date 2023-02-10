@@ -151,4 +151,6 @@ class SourceFileForm(forms.ModelForm):
         if "file" in self.changed_data:
             if obj.document.extract_content_from_source_file():
                 obj.document.save()
+            # update document text
+            obj.document.get_content_as_text()
         return obj

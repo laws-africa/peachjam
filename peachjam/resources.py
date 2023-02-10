@@ -308,9 +308,7 @@ class BaseDocumentResource(resources.ModelResource):
                     self.download_attachment(url, instance, "Other documents")
 
             # try to extract content from docx files
-            if not instance.content_html:
-                instance.extract_content_from_source_file()
-
+            instance.extract_content_from_source_file()
             instance.source_url = source_url
             # extract citations
             instance.extract_citations()

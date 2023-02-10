@@ -435,6 +435,7 @@ class CoreDocument(PolymorphicModel):
 
         This requires that the document has already been saved, in order to associate image attachments.
         """
+        result = False
         if (
             not self.content_html_is_akn
             and hasattr(self, "source_file")
@@ -455,7 +456,12 @@ class CoreDocument(PolymorphicModel):
                     img.save()
                     self.images.add(img)
 
-            return True
+            result = True
+
+        # always update document text
+        self.get_content_as_text()
+
+        return result
 
     def is_most_recent(self):
         """Is this the most recent document for this work?
@@ -473,7 +479,7 @@ class CoreDocument(PolymorphicModel):
     def get_content_as_text(self):
         """Get the document content as plain text."""
         if not hasattr(self, "document_content"):
-            self.document_content = DocumentContent.create_for_document(self)
+            self.document_content = DocumentContent.update_or_create_for_document(self)
         return self.document_content.content_text
 
 
@@ -640,7 +646,7 @@ class DocumentContent(models.Model):
         verbose_name_plural = _("document contents")
 
     @classmethod
-    def create_for_document(cls, document):
+    def update_or_create_for_document(cls, document):
         """Extract the content from a document, whatever its format is."""
         text = ""
         if document.content_html:
@@ -657,4 +663,8 @@ class DocumentContent(models.Model):
                 tmp.flush()
                 text = pdfjs_to_text(tmp.name)
 
-        return DocumentContent.objects.create(document=document, content_text=text)
+        doc_content = DocumentContent.objects.update_or_create(
+            document=document, defaults={"content_text": text}
+        )[0]
+        document.document_content = doc_content
+        return doc_content
