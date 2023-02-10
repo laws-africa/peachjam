@@ -445,6 +445,7 @@ class LegalInstrumentAdmin(ImportMixin, DocumentAdmin):
 
 class LegislationAdmin(ImportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["nature"])
     fieldsets[3][1]["fields"].extend(["metadata_json"])
     fieldsets[2][1]["classes"] = ("collapse",)
     fieldsets[4][1]["fields"].extend(["parent_work"])

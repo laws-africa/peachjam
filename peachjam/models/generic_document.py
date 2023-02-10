@@ -11,21 +11,6 @@ from peachjam.models import (
 from peachjam.models.author import Author
 
 
-class DocumentNature(models.Model):
-    name = models.CharField(
-        _("name"), max_length=1024, null=False, blank=False, unique=True
-    )
-    code = models.SlugField(_("code"), max_length=1024, null=False, unique=True)
-    description = models.TextField(_("description"), blank=True)
-
-    class Meta:
-        verbose_name = _("document nature")
-        verbose_name_plural = _("document natures")
-
-    def __str__(self):
-        return self.name
-
-
 class GenericDocument(CoreDocument):
     author = models.ForeignKey(
         Author,
@@ -33,13 +18,6 @@ class GenericDocument(CoreDocument):
         null=True,
         blank=True,
         verbose_name=_("author"),
-    )
-    nature = models.ForeignKey(
-        DocumentNature,
-        on_delete=models.PROTECT,
-        null=False,
-        blank=False,
-        verbose_name=_("nature"),
     )
 
     frbr_uri_doctypes = ["doc", "statement"]
@@ -66,13 +44,6 @@ class LegalInstrument(CoreDocument):
         null=True,
         blank=True,
         verbose_name=_("author"),
-    )
-    nature = models.ForeignKey(
-        DocumentNature,
-        on_delete=models.PROTECT,
-        null=False,
-        blank=False,
-        verbose_name=_("nature"),
     )
 
     frbr_uri_doctypes = [x for x in FRBR_URI_DOCTYPES if x != "judgment"]

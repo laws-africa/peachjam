@@ -157,7 +157,7 @@ class IndigoAdapter(Adapter):
         model = self.get_model(document)
         logger.info(f"Importing as {model}")
 
-        if hasattr(model, "nature"):
+        if document["subtype"]:
             document_nature_name = " ".join(
                 [name for name in document["subtype"].split("-")]
             ).capitalize()

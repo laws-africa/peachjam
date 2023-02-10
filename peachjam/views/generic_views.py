@@ -10,6 +10,7 @@ from peachjam.models import (
     GenericDocument,
     Judgment,
     LegalInstrument,
+    Legislation,
     Predicate,
     Relationship,
 )
@@ -65,6 +66,7 @@ class FilteredDocumentListView(DocumentListView):
                     if a
                 }
             )
+        elif self.model in [GenericDocument, LegalInstrument, Legislation]:
 
             natures = list(
                 {
