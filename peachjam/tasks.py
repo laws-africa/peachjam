@@ -4,7 +4,7 @@ from background_task import background
 from background_task.tasks import DBTaskRunner, Task, logger, tasks
 from django.db.utils import OperationalError
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, Work
 
 log = logging.getLogger(__name__)
 
@@ -93,21 +93,42 @@ def run_ingestors():
     log.info("Running ingestors done")
 
 
-@background(queue="peachjam", schedule=60, remove_existing_tasks=True)
-def update_extracted_citations_for_a_work(document_id):
-    """Update Extracted Citations for a work."""
+@background(queue="peachjam", remove_existing_tasks=True)
+def extract_citations(document_id):
+    """Extract citations from a document in the background."""
+
+    log.info(f"Extracting citations for document {document_id}")
 
     doc = CoreDocument.objects.filter(pk=document_id).first()
     if not doc:
         log.info(f"No document with id {document_id} exists, ignoring.")
         return
 
-    log.info(f"Updating extracted citations for work {doc.work.pk}")
+    try:
+        if doc.extract_citations():
+            doc.save()
+    except Exception as e:
+        log.error(f"Error extracting citations for {doc}", exc_info=e)
+        raise
+
+    log.info("Citations extracted")
+
+
+@background(queue="peachjam", schedule=60, remove_existing_tasks=True)
+def update_extracted_citations_for_a_work(work_id):
+    """Update Extracted Citations for a work."""
+
+    work = Work.objects.filter(pk=work_id).first()
+    if not work:
+        log.info(f"No work with id {work_id} exists, ignoring.")
+        return
+
+    log.info(f"Updating extracted citations for work {work_id}")
 
     try:
-        doc.work.update_extracted_citations()
-        log.info(f"Citations for work {doc.work} extracted")
+        work.update_extracted_citations()
+        log.info(f"Citations for work {work_id} extracted")
 
     except Exception as e:
-        log.error(f"Error extracting citations for {doc.work}", exc_info=e)
+        log.error(f"Error extracting citations for {work_id}", exc_info=e)
         raise e
