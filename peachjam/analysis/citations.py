@@ -96,21 +96,21 @@ class CitatorMatcher:
         self.citations = []
 
     def markup_html_matches(self, frbr_uri, html):
-        html_text = lxml.html.tostring(html)
+        html_text = lxml.html.tostring(html, encoding="unicode")
         resp = self.call_citator(
             {
-                "frbr_uri": frbr_uri.expression_frbr_uri(),
+                "frbr_uri": frbr_uri.expression_uri(),
                 "format": "html",
                 "body": html_text,
             }
         )
         # returned the new, marked up, html
-        return lxml.html.fromstring(resp["content"])
+        return lxml.html.fromstring(resp["body"])
 
     def extract_text_matches(self, frbr_uri, text):
         resp = self.call_citator(
             {
-                "frbr_uri": frbr_uri.expression_frbr_uri(),
+                "frbr_uri": frbr_uri.expression_uri(),
                 "format": "text",
                 "body": text,
             }
