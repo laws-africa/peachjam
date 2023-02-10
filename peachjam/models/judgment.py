@@ -199,9 +199,6 @@ class Judgment(CoreDocument):
         self.title = " ".join(parts)
         self.citation = self.title
 
-    def judges_string(self):
-        return ", ".join(j.name for j in self.judges.all())
-
     def save(self, *args, **kwargs):
         self.doc_type = "judgment"
         self.assign_mnc()

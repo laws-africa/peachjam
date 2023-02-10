@@ -1,6 +1,8 @@
 import datetime
 import os
 import re
+import shutil
+import tempfile
 
 import magic
 from cobalt.akn import datestring
@@ -26,6 +28,7 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_component,
     validate_frbr_uri_date,
 )
+from peachjam.helpers import pdfjs_to_text
 from peachjam.models import CitationLink, ExtractedCitation
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
@@ -467,6 +470,12 @@ class CoreDocument(PolymorphicModel):
             == self.pk
         )
 
+    def get_content_as_text(self):
+        """Get the document content as plain text."""
+        if not hasattr(self, "document_content"):
+            self.document_content = DocumentContent.create_for_document(self)
+        return self.document_content.content_text
+
 
 def file_location(instance, filename):
     if not instance.document.pk:
@@ -607,3 +616,45 @@ class AlternativeName(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class DocumentContent(models.Model):
+    """Support model for storing the actual content of the document. This means it is never loaded in listing views
+    which makes queries faster.
+    """
+
+    document = models.OneToOneField(
+        CoreDocument,
+        on_delete=models.CASCADE,
+        related_name="document_content",
+        verbose_name=_("document"),
+    )
+    # the raw text of the document, extracted either from the source file or the HTML
+    # this makes re-indexing for faster, because we don't need to re-extract the text from the source document
+    content_text = models.TextField(
+        blank=True, null=True, verbose_name=_("document text")
+    )
+
+    class Meta:
+        verbose_name = _("document content")
+        verbose_name_plural = _("document contents")
+
+    @classmethod
+    def create_for_document(cls, document):
+        """Extract the content from a document, whatever its format is."""
+        text = ""
+        if document.content_html:
+            # it's html, grab the text from the html tree
+            root = html.fromstring(document.content_html)
+            text = " ".join(root.itertext())
+
+        elif hasattr(document, "source_file"):
+            # get the text from the source file, via PDF if necessary
+            with tempfile.NamedTemporaryFile() as tmp:
+                # convert document to pdf and then extract the text
+                pdf = document.source_file.as_pdf()
+                shutil.copyfileobj(pdf, tmp)
+                tmp.flush()
+                text = pdfjs_to_text(tmp.name)
+
+        return DocumentContent.objects.create(document=document, content_text=text)
