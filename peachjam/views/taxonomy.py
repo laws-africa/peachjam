@@ -29,8 +29,8 @@ class TaxonomyDetailView(FilteredDocumentListView):
 
     def get(self, request, *args, **kwargs):
 
-        if "/" in self.kwargs["topics"]:
-            slug = self.kwargs["topics"].split("/")[-1]
+        if self.kwargs["topics"]:
+            slug = self.kwargs["topics"]
             self.taxonomy = get_object_or_404(Taxonomy, slug=slug)
         else:
             self.taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["topics"])

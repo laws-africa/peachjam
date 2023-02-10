@@ -15,8 +15,9 @@
           <a href="/taxonomy/">{% trans 'Taxonomies' %}</a>
         </li>
         {% for ancestor in ancestors %}
+
           <li class="breadcrumb-item">
-            <a href="{% build_taxonomy_url ancestor %}">
+            <a href={% url 'taxonomy_detail' 'collection' ancestor.slug  %}>
               {{ ancestor }}
             </a>
           </li>
