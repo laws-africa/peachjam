@@ -109,6 +109,10 @@ PEACHJAM = {
     "SUPPORT_EMAIL": os.environ.get("SUPPORT_EMAIL"),
     "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
     "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),
+    "CITATOR_API": os.environ.get(
+        "CITATOR_API", "https://api.laws.africa/citator/v1/extract-citations"
+    ),
+    "CITATOR_API_KEY": os.environ.get("CITATOR_API_KEY"),
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))

@@ -108,7 +108,7 @@ class JudgmentBulkImportTestCase(TestCase):
         node = get(root.pk).add_child(name="Land Rights")
         get(node.pk).add_sibling(name="Environment")
 
-        data.append("land-rights|environment")
+        data.append("collections-land-rights|collections-environment")
         headers.append("taxonomy")
         dataset = tablib.Dataset(data, headers=headers, depth=0)
         result = JudgmentResource().import_data(dataset=dataset, dry_run=False)

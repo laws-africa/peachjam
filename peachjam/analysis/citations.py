@@ -3,6 +3,9 @@ import tempfile
 from bisect import bisect_left
 
 import lxml.html
+import requests
+from django.conf import settings
+from docpipe.matchers import ExtractedCitation
 
 from peachjam.helpers import pdfjs_to_text
 from peachjam.models import CitationLink
@@ -27,7 +30,9 @@ class CitationAnalyser:
     def extract_citations_from_html(self, document):
         html = lxml.html.fromstring(document.content_html)
         for matcher in self.matchers:
-            matcher().markup_html_matches(document.expression_uri(), html)
+            # the matcher can either manipulate the html, or return a new tree
+            res = matcher().markup_html_matches(document.expression_uri(), html)
+            html = html if res is None else res
         document.content_html = lxml.html.tostring(html, encoding="unicode")
         return True
 
@@ -78,6 +83,57 @@ class CitationAnalyser:
 
     def pdf_to_text(self, fname):
         return pdfjs_to_text(fname)
+
+
+class CitatorMatcher:
+    """Matcher that delegates to the Citator service."""
+
+    citator_url = settings.PEACHJAM["CITATOR_API"]
+    citator_key = settings.PEACHJAM["CITATOR_API_KEY"]
+
+    def __init__(self):
+        # extracted citations
+        self.citations = []
+
+    def markup_html_matches(self, frbr_uri, html):
+        html_text = lxml.html.tostring(html, encoding="unicode")
+        resp = self.call_citator(
+            {
+                "frbr_uri": frbr_uri.expression_uri(),
+                "format": "html",
+                "body": html_text,
+            }
+        )
+        # returned the new, marked up, html
+        return lxml.html.fromstring(resp["body"])
+
+    def extract_text_matches(self, frbr_uri, text):
+        resp = self.call_citator(
+            {
+                "frbr_uri": frbr_uri.expression_uri(),
+                "format": "text",
+                "body": text,
+            }
+        )
+        # store the extracted citations
+        self.citations = [
+            ExtractedCitation(
+                c["text"],
+                c["start"],
+                c["end"],
+                c["href"],
+                c["target_id"],
+                c["prefix"],
+                c["suffix"],
+            )
+            for c in resp["citations"]
+        ]
+
+    def call_citator(self, body):
+        headers = {"Authorization": f"token {self.citator_key}"}
+        resp = requests.post(self.citator_url, json=body, headers=headers, timeout=30)
+        resp.raise_for_status()
+        return resp.json()
 
 
 citation_analyser = CitationAnalyser()

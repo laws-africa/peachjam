@@ -55,6 +55,8 @@ from peachjam.models import (
     pj_settings,
 )
 from peachjam.resources import GenericDocumentResource, JudgmentResource
+from peachjam.tasks import extract_citations as extract_citations_task
+from peachjam_search.tasks import search_model_saved
 
 
 class EntityProfileForm(forms.ModelForm):
@@ -265,7 +267,7 @@ class DocumentAdmin(admin.ModelAdmin):
     exclude = ("doc_type",)
     date_hierarchy = "date"
     prepopulated_fields = {"frbr_uri_number": ("title",)}
-    actions = ["extract_citations", "reextract_content"]
+    actions = ["extract_citations", "reextract_content", "reindex_for_search"]
 
     fieldsets = [
         (
@@ -383,14 +385,14 @@ class DocumentAdmin(admin.ModelAdmin):
         return FileResponse(source_file.file)
 
     def extract_citations(self, request, queryset):
-        count = 0
+        count = queryset.count()
         for doc in queryset:
-            count += 1
-            if doc.extract_citations():
-                doc.save()
-        self.message_user(request, f"Extracted citations from {count} documents.")
+            extract_citations_task(doc.pk)
+        self.message_user(
+            request, f"Queued tasks to extract citations from {count} documents."
+        )
 
-    extract_citations.short_description = "Extract citations"
+    extract_citations.short_description = "Extract citations (background)"
 
     def reextract_content(self, request, queryset):
         """Re-extract content from source files that are Word documents, overwriting content_html."""
@@ -403,6 +405,15 @@ class DocumentAdmin(admin.ModelAdmin):
         self.message_user(request, f"Re-imported content from {count} documents.")
 
     reextract_content.short_description = "Re-extract content from DOCX files"
+
+    def reindex_for_search(self, request, queryset):
+        """Setup a background task to re-index documents for search."""
+        count = queryset.count()
+        for doc in queryset:
+            search_model_saved(doc._meta.label, doc.pk)
+        self.message_user(request, f"Queued tasks to re-index for {count} documents.")
+
+    reindex_for_search.short_description = "Re-index for search (background)"
 
 
 class TaxonomyAdmin(TreeAdmin):
@@ -434,6 +445,7 @@ class LegalInstrumentAdmin(ImportMixin, DocumentAdmin):
 
 class LegislationAdmin(ImportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["nature"])
     fieldsets[3][1]["fields"].extend(["metadata_json"])
     fieldsets[2][1]["classes"] = ("collapse",)
     fieldsets[4][1]["fields"].extend(["parent_work"])

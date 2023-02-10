@@ -19,7 +19,8 @@ class Taxonomy(MP_Node):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        parent = self.get_parent()
+        self.slug = (f"{parent.slug}-" if parent else "") + slugify(self.name)
         super().save(*args, **kwargs)
 
 

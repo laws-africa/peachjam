@@ -3158,6 +3158,7 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
+            "nature": 8,
             "polymorphic_ctype": [
                 "peachjam",
                 "genericdocument"
@@ -3328,6 +3329,7 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
+            "nature": 8,
             "polymorphic_ctype": [
                 "peachjam",
                 "genericdocument"
@@ -3648,16 +3650,14 @@
     },
     {
         "fields": {
-            "author": null,
-            "nature": 8
+            "author": null
         },
         "model": "peachjam.genericdocument",
         "pk": 5389
     },
     {
         "fields": {
-            "author": null,
-            "nature": 8
+            "author": null
         },
         "model": "peachjam.genericdocument",
         "pk": 4124
@@ -3679,6 +3679,7 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
+            "nature": 3,
             "polymorphic_ctype": [
                 "peachjam",
                 "legalinstrument"
@@ -5911,6 +5912,7 @@
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
+            "nature": 3,
             "polymorphic_ctype": [
                 "peachjam",
                 "legalinstrument"
@@ -8119,16 +8121,14 @@
     },
     {
         "fields": {
-            "author": null,
-            "nature": 3
+            "author": null
         },
         "model": "peachjam.legalinstrument",
         "pk": 5519
     },
     {
         "fields": {
-            "author": null,
-            "nature": 3
+            "author": null
         },
         "model": "peachjam.legalinstrument",
         "pk": 2071
