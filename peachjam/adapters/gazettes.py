@@ -25,7 +25,7 @@ class GazetteAdapter(Adapter):
 
         new_gazettes = (
             CoreDocument.objects.filter(
-                doc_type="gazette", jurisdiction=self.jurisdiction
+                doc_type="gazette", jurisdiction=self.jurisdiction.split("-")[-1]
             )
             .non_polymorphic()
             .using("gazettes_africa")

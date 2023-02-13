@@ -63,6 +63,7 @@ class GazetteYearView(DocumentListView):
     template_name = "peachjam/gazette_year.html"
     paginate_by = 0
     navbar_link = "gazettes"
+    locality = None
 
     def get_queryset(self):
         return super().get_queryset().filter(date__year=self.kwargs["year"])
