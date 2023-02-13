@@ -82,7 +82,7 @@ class ChildLegislationSerializer(serializers.ModelSerializer):
 
 class LegislationSerializer(serializers.ModelSerializer):
     taxonomies = serializers.SerializerMethodField("get_taxonomies")
-    year = serializers.ReadOnlyField()
+    year = serializers.SerializerMethodField("get_year")
     children = ChildLegislationSerializer(many=True, read_only=True)
     languages = serializers.SerializerMethodField("get_languages")
 
@@ -104,6 +104,10 @@ class LegislationSerializer(serializers.ModelSerializer):
 
     def get_languages(self, instance):
         return instance.work.languages
+
+    def get_year(self, instance):
+        """Use the FRBR work uri, rather than the document year."""
+        return instance.frbr_uri_date.split("-")[0]
 
 
 class WebhookDataSerializer(serializers.Serializer):
