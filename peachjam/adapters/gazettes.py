@@ -30,20 +30,18 @@ class GazetteAdapter(Adapter):
         )
 
         if "-" not in self.jurisdiction:
-            # locality code not specified hence None
+            # locality code not specified hence None e.g "ZA"
             queryset = queryset.filter(jurisdiction=self.jurisdiction, locality=None)
         else:
-            self.jurisdiction.split("-")
-            jurisdiction = self.jurisdiction[0]
-            locality = self.jurisdiction[1]
+            queryset = queryset.filter(jurisdiction=self.jurisdiction.split("-")[0])
 
-            queryset = queryset.filter(jurisdiction=jurisdiction)
-
-            # locality code present
-            if locality != "*":
-                queryset = queryset.filter(locality__code=locality)
+            # locality code present e.g. "ZA-gp"
+            if self.jurisdiction.split("-")[1] != "*":
+                queryset = queryset.filter(
+                    locality__code=self.jurisdiction.split("-")[1]
+                )
             else:
-                # fetch all localities for this jurisdiction
+                # fetch all localities for this jurisdiction e.g. "ZA-*"
                 queryset = queryset.exclude(locality=None)
 
         if last_refreshed:
