@@ -23,15 +23,29 @@ class GazetteAdapter(Adapter):
             f"Checking for new gazettes from Gazettes.Africa since {last_refreshed}"
         )
 
-        new_gazettes = (
-            CoreDocument.objects.filter(
-                doc_type="gazette", jurisdiction=self.jurisdiction
-            )
+        queryset = (
+            CoreDocument.objects.filter(doc_type="gazette")
             .non_polymorphic()
             .using("gazettes_africa")
         )
+
+        if "-" not in self.jurisdiction:
+            # locality code not specified hence None e.g "ZA"
+            queryset = queryset.filter(jurisdiction=self.jurisdiction, locality=None)
+        else:
+            queryset = queryset.filter(jurisdiction=self.jurisdiction.split("-")[0])
+
+            # locality code present e.g. "ZA-gp"
+            if self.jurisdiction.split("-")[1] != "*":
+                queryset = queryset.filter(
+                    locality__code=self.jurisdiction.split("-")[1]
+                )
+            else:
+                # fetch all localities for this jurisdiction e.g. "ZA-*"
+                queryset = queryset.exclude(locality=None)
+
         if last_refreshed:
-            new_gazettes = new_gazettes.filter(updated_at__gt=last_refreshed)
+            new_gazettes = queryset.filter(updated_at__gt=last_refreshed)
 
         return list(new_gazettes.values_list("expression_frbr_uri", flat=True))
 
