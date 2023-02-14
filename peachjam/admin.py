@@ -242,11 +242,10 @@ class DocumentForm(forms.ModelForm):
             return self.instance.content_html
         return self.cleaned_data["content_html"]
 
-    def save(self, *args, **kwargs):
-        obj = super().save(*args, **kwargs)
+    def _save_m2m(self):
+        super()._save_m2m()
         # update document text
-        obj.update_text_content()
-        return obj
+        self.instance.update_text_content()
 
 
 class DocumentAdmin(admin.ModelAdmin):
