@@ -40,16 +40,14 @@ class NewDocumentFormMixin:
         super().__init__(*args, **kwargs)
         self.fields["upload_file"] = forms.FileField(required=False)
 
-    def save(self, commit=True):
-        obj = super().save(commit)
+    def _save_m2m(self):
+        super()._save_m2m()
         if self.cleaned_data.get("upload_file"):
             self.process_upload_file(self.cleaned_data["upload_file"])
             self.run_analysis()
-        return obj
 
     def process_upload_file(self, upload_file):
         # store the uploaded file
-        self.instance.save()
         upload_file.seek(0)
         file_ext = splitext(upload_file.name)[1]
         SourceFile(
@@ -151,9 +149,8 @@ class SourceFileForm(forms.ModelForm):
         self.cleaned_data["file"].name = clean_filename(self.cleaned_data["file"].name)
         return self.cleaned_data["file"]
 
-    def save(self, commit=True):
-        obj = super().save(commit=True)
+    def _save_m2m(self):
+        super()._save_m2m()
         if "file" in self.changed_data:
-            if obj.document.extract_content_from_source_file():
-                obj.document.save()
-        return obj
+            if self.instance.document.extract_content_from_source_file():
+                self.instance.document.save()

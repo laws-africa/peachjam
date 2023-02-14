@@ -1,14 +1,11 @@
 import copy
 import logging
-from tempfile import NamedTemporaryFile
 
 from django.conf import settings
 from django.utils.functional import classproperty
 from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
-from docpipe.pdf import pdf_to_text
 from elasticsearch_dsl.index import Index
-from lxml import etree
 
 from peachjam.models import CoreDocument
 
@@ -22,6 +19,7 @@ class SearchableDocument(Document):
     date = fields.DateField()
     year = fields.KeywordField(attr="date.year")
     citation = fields.TextField()
+    mnc = fields.TextField()
     content = fields.TextField()
     language = fields.KeywordField(attr="language.name_native")
     jurisdiction = fields.KeywordField(attr="jurisdiction.name")
@@ -35,7 +33,7 @@ class SearchableDocument(Document):
 
     # Judgment
     matter_type = fields.KeywordField(attr="matter_type.name")
-    case_number_string = fields.KeywordField()
+    case_number = fields.TextField()
     court = fields.KeywordField(attr="court.name")
     headnote_holding = fields.TextField()
     flynote = fields.TextField()
@@ -91,6 +89,10 @@ class SearchableDocument(Document):
         # if there is no citation, fall back to the title so as not to penalise documents that don't have a citation
         return instance.citation or instance.title
 
+    def prepare_case_number(self, instance):
+        if hasattr(instance, "case_numbers"):
+            return [c.get_case_number_string() for c in instance.case_numbers.all()]
+
     def prepare_alternative_names(self, instance):
         return [a.title for a in instance.alternative_names.all()]
 
@@ -99,26 +101,17 @@ class SearchableDocument(Document):
             return [j.name for j in instance.judges.all()]
 
     def prepare_content(self, instance):
+        """Text content of document body for non-PDFs."""
         if instance.content_html:
-            root = etree.HTML(instance.content_html)
-            return " ".join(root.itertext())
+            return instance.get_content_as_text()
 
     def prepare_pages(self, instance):
-        """Extract pages from PDF"""
+        """Text content of pages extracted from PDF."""
         if not instance.content_html:
             if hasattr(
                 instance, "source_file"
             ) and instance.source_file.filename.endswith(".pdf"):
-                # get the file
-                with NamedTemporaryFile(suffix=".pdf") as f:
-                    f.write(instance.source_file.file.read())
-                    f.flush()
-                    text = pdf_to_text(f.name)
-
-                if not text:
-                    raise ValueError(
-                        f"Couldn't index any text to search in the pdf for {instance}"
-                    )
+                text = instance.get_content_as_text()
                 page_texts = text.split("\x0c")
                 pages = []
                 for i, page in enumerate(page_texts):

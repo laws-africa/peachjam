@@ -1,6 +1,8 @@
 import datetime
 import os
 import re
+import shutil
+import tempfile
 
 import magic
 from cobalt.akn import datestring
@@ -26,6 +28,7 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_component,
     validate_frbr_uri_date,
 )
+from peachjam.helpers import pdfjs_to_text
 from peachjam.models import CitationLink, ExtractedCitation
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
@@ -432,6 +435,7 @@ class CoreDocument(PolymorphicModel):
 
         This requires that the document has already been saved, in order to associate image attachments.
         """
+        result = False
         if (
             not self.content_html_is_akn
             and hasattr(self, "source_file")
@@ -452,7 +456,12 @@ class CoreDocument(PolymorphicModel):
                     img.save()
                     self.images.add(img)
 
-            return True
+            result = True
+
+        # always update document text
+        self.update_text_content()
+
+        return result
 
     def is_most_recent(self):
         """Is this the most recent document for this work?
@@ -466,6 +475,16 @@ class CoreDocument(PolymorphicModel):
             .first()
             == self.pk
         )
+
+    def get_content_as_text(self):
+        """Get the document content as plain text."""
+        if not hasattr(self, "document_content"):
+            self.update_text_content()
+        return self.document_content.content_text
+
+    def update_text_content(self):
+        """Update the extracted text content."""
+        self.document_content = DocumentContent.update_or_create_for_document(self)
 
 
 def file_location(instance, filename):
@@ -493,9 +512,8 @@ class AttachmentAbstractModel(models.Model):
     def save(self, *args, **kwargs):
         self.size = self.file.size
         self.filename = self.file.name
-
-        if not self.mimetype:
-            self.mimetype = magic.from_buffer(self.file.read(), mime=True)
+        self.file.seek(0)
+        self.mimetype = magic.from_buffer(self.file.read(), mime=True)
         return super().save(*args, **kwargs)
 
 
@@ -607,3 +625,49 @@ class AlternativeName(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class DocumentContent(models.Model):
+    """Support model for storing the actual content of the document. This means it is never loaded in listing views
+    which makes queries faster.
+    """
+
+    document = models.OneToOneField(
+        CoreDocument,
+        on_delete=models.CASCADE,
+        related_name="document_content",
+        verbose_name=_("document"),
+    )
+    # the raw text of the document, extracted either from the source file or the HTML
+    # this makes re-indexing for faster, because we don't need to re-extract the text from the source document
+    content_text = models.TextField(
+        blank=True, null=True, verbose_name=_("document text")
+    )
+
+    class Meta:
+        verbose_name = _("document content")
+        verbose_name_plural = _("document contents")
+
+    @classmethod
+    def update_or_create_for_document(cls, document):
+        """Extract the content from a document, whatever its format is."""
+        text = ""
+        if document.content_html:
+            # it's html, grab the text from the html tree
+            root = html.fromstring(document.content_html)
+            text = " ".join(root.itertext())
+
+        elif hasattr(document, "source_file"):
+            # get the text from the source file, via PDF if necessary
+            with tempfile.NamedTemporaryFile() as tmp:
+                # convert document to pdf and then extract the text
+                pdf = document.source_file.as_pdf()
+                shutil.copyfileobj(pdf, tmp)
+                tmp.flush()
+                text = pdfjs_to_text(tmp.name)
+
+        doc_content = DocumentContent.objects.update_or_create(
+            document=document, defaults={"content_text": text}
+        )[0]
+        document.document_content = doc_content
+        return doc_content

@@ -1,5 +1,3 @@
-import shutil
-import tempfile
 from bisect import bisect_left
 
 import lxml.html
@@ -7,7 +5,6 @@ import requests
 from django.conf import settings
 from docpipe.matchers import ExtractedCitation
 
-from peachjam.helpers import pdfjs_to_text
 from peachjam.models import CitationLink
 
 
@@ -37,27 +34,18 @@ class CitationAnalyser:
         return True
 
     def extract_citations_from_source_file(self, document):
-        if not hasattr(document, "source_file"):
-            return False
-
-        with tempfile.NamedTemporaryFile() as tmp:
-            # convert document to pdf and then extract the text
-            pdf = document.source_file.as_pdf()
-            shutil.copyfileobj(pdf, tmp)
-            tmp.flush()
-            text = self.pdf_to_text(tmp.name)
-
-        for matcher in self.matchers:
-            matcher = matcher()
-            matcher.extract_text_matches(document.expression_uri(), text)
-            # get the indexes of all newlines in text, by page
-            newlines = [
-                [i for i, c in enumerate(page) if c == "\n"]
-                for page in text.split("\x0C")
-            ]
-            self.store_text_citation_links(document, matcher, newlines)
-
-        return True
+        text = document.get_content_as_text()
+        if text:
+            for matcher in self.matchers:
+                matcher = matcher()
+                matcher.extract_text_matches(document.expression_uri(), text)
+                # get the indexes of all newlines in text, by page
+                newlines = [
+                    [i for i, c in enumerate(page) if c == "\n"]
+                    for page in text.split("\x0C")
+                ]
+                self.store_text_citation_links(document, matcher, newlines)
+            return True
 
     def store_text_citation_links(self, document, matcher, newlines):
         """Transform extracted citations from text into CitationLink objects."""
@@ -80,9 +68,6 @@ class CitationAnalyser:
 
         citation = CitationLink.from_extracted_citation(citation)
         return citation
-
-    def pdf_to_text(self, fname):
-        return pdfjs_to_text(fname)
 
 
 class CitatorMatcher:

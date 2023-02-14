@@ -37,17 +37,14 @@ class GazetteAdapter(Adapter):
             jurisdiction = self.jurisdiction[0]
             locality = self.jurisdiction[1]
 
+            queryset = queryset.filter(jurisdiction=jurisdiction)
+
             # locality code present
             if locality != "*":
-                queryset = queryset.filter(
-                    jurisdiction=jurisdiction, locality__code=locality
-                )
-
-            # fetch all localities for this jurisdiction
-            if locality == "*":
-                queryset = queryset.filter(jurisdiction=jurisdiction).exclude(
-                    locality=None
-                )
+                queryset = queryset.filter(locality__code=locality)
+            else:
+                # fetch all localities for this jurisdiction
+                queryset = queryset.exclude(locality=None)
 
         if last_refreshed:
             new_gazettes = queryset.filter(updated_at__gt=last_refreshed)
