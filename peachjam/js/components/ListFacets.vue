@@ -15,6 +15,7 @@
     {{ $t('Document type') }}
     {{ $t('Judges') }}
     {{ $t('Nature') }}
+    {{ $t('Locality') }}
     {{ $t('Regional body') }}
     {{ $t('Year') }}
   </div>
@@ -52,6 +53,10 @@ export default {
       default: () => []
     },
     natures: {
+      type: Array,
+      default: () => []
+    },
+    localities: {
       type: Array,
       default: () => []
     }
@@ -132,6 +137,11 @@ export default {
           name: 'years',
           type: 'checkboxes',
           title: this.$t('Year')
+        },
+        {
+          name: 'localities',
+          type: 'checkboxes',
+          title: this.$t('Locality')
         },
         {
           name: 'alphabet',
