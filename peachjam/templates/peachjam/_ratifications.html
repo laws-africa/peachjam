@@ -1,0 +1,34 @@
+{% load i18n %}
+<div>
+  {% if ratification.source_url %}
+    <p>
+      <strong>{% trans 'Source' %}:</strong> <a href="{{ ratification.source_url }}">{{ ratification.source_url }}</a>
+    </p>
+  {% endif %}
+  {% if ratification.last_updated %}
+    <p>
+      <strong>{% trans 'Last updated' %}:</strong> {{ ratification.last_updated.isoformat }}
+    </p>
+  {% endif %}
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>{% trans 'Country' %} </th>
+      <th>{% trans 'Ratification Date' %} </th>
+      <th>{% trans 'Deposit Date' %} </th>
+      <th>{% trans 'Signature Date' %} </th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for ratification in ratification.countries.all %}
+    <tr>
+      <td>{{ ratification.country.name }}</td>
+      <td>{{ ratification.ratification_date.isoformat }}</td>
+      <td>{{ ratification.deposit_date.isoformat }}</td>
+      <td>{{ ratification.signature_date.isoformat }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
