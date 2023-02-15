@@ -1,29 +1,25 @@
 {% extends 'peachjam/layouts/base.html' %}
 {% load static %}
 {% load sass_tags %}
-
 {% block head-css %}
-    <link rel="stylesheet" href="{% sass_src 'stylesheets/peachjam.scss' %}" type="text/css">
+  <link rel="stylesheet"
+        href="{% sass_src 'stylesheets/peachjam.scss' %}"
+        type="text/css"/>
 {% endblock %}
-
 {% block head-js %}
   <script defer src="{% static 'bootstrap/dist/js/bootstrap.bundle.js' %}"></script>
   <script defer src="{% static 'js/app-prod.js' %}"></script>
-
   <!-- Small script to add the current user agent to the root HTML element -->
   <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function () {
       document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
     });
   </script>
-
   {% if not DEBUG %}
     <!-- sentry -->
-    <script
-        src="https://browser.sentry-cdn.com/7.19.0/bundle.min.js"
-        integrity="sha384-ztBHD5Kyf+YJqkbZijnUhyS5dYdQDCEfB2QjYao1rVJ1qBpQn+WMbafstDcVTHnB"
-        crossorigin="anonymous"
-    ></script>
+    <script src="https://browser.sentry-cdn.com/7.19.0/bundle.min.js"
+            integrity="sha384-ztBHD5Kyf+YJqkbZijnUhyS5dYdQDCEfB2QjYao1rVJ1qBpQn+WMbafstDcVTHnB"
+            crossorigin="anonymous"></script>
     <script>
     window.addEventListener('load', function() {
       Sentry.init({
@@ -40,7 +36,8 @@
     </script>
     {% if GOOGLE_ANALYTICS_ID %}
       <!-- Global site tag (gtag.js) - Google Analytics -->
-      <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
+      <script async
+              src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
       <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
@@ -51,7 +48,6 @@
     {% endif %}
   {% endif %}
 {% endblock %}
-
 {% block header %}
   {% include 'peachjam/_header.html' %}
 {% endblock %}

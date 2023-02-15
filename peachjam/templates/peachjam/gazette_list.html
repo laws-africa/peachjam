@@ -1,8 +1,8 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
-{% block title %} {{ locality.name }} {% trans 'Gazettes' %} {% endblock %}
-
-
+{% block title %}
+  {{ locality.name }} {% trans 'Gazettes' %}
+{% endblock %}
 {% block page-content %}
   <section class="pb-5">
     <div class="container">
@@ -10,23 +10,25 @@
         {% if locality %}
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-              <li class="breadcrumb-item"><a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a></li>
+              <li class="breadcrumb-item">
+                <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
+              </li>
             </ol>
           </nav>
         {% endif %}
       {% endblock %}
-
       {% block page-title %}
-        <h1 class="my-4">{% if locality %}{{ locality }}{% endif %} {% trans 'Gazettes'%}</h1>
+        <h1 class="my-4">
+          {% if locality %}{{ locality }}{% endif %}
+          {% trans 'Gazettes' %}
+        </h1>
       {% endblock %}
-
       <div class="row">
         {% block localities %}
           {% if not locality %}
             {% include 'peachjam/_gazette_localities.html' %}
           {% endif %}
         {% endblock %}
-
         {% if num_gazettes %}
           <h4 class="sans-serif text-muted mt-3 mb-0">
             {% blocktrans trimmed count num_gazettes=num_gazettes %}
@@ -35,7 +37,6 @@
               {{ num_gazettes }} gazettes
             {% endblocktrans %}
           </h4>
-
           {% block years-list %}
             <div class="col-md-10 mt-5 mb-5">
               <div class="row">
@@ -45,13 +46,16 @@
                       <h2>
                         {% block gazette-year-link %}
                           {% if locality %}
-                            <a class="text-decoration-none" href="{% url 'gazettes_by_year' locality.code year.year %}">{{ year.year }}</a>
+                            <a class="text-decoration-none"
+                               href="{% url 'gazettes_by_year' locality.code year.year %}">{{ year.year }}</a>
                           {% else %}
-                            <a class="text-decoration-none" href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
+                            <a class="text-decoration-none"
+                               href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
                           {% endif %}
                         {% endblock %}
                       </h2>
-                      <p class="status-up"><i class="fas fa-signal" aria-hidden="true"></i>
+                      <p class="status-up">
+                        <i class="fas fa-signal" aria-hidden="true"></i>
                         {% blocktrans trimmed count num_gazettes=year.count %}
                           {{ num_gazettes }} gazette
                         {% plural %}
@@ -66,7 +70,6 @@
             </div>
           {% endblock %}
         {% endif %}
-
       </div>
     </div>
   </section>

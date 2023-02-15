@@ -1,40 +1,48 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
 {% load i18n %}
-
 {% block document-metadata-content-citation %}
   {{ block.super }}
-
   {% if document.mnc %}
-    <dt>{% trans 'Media Neutral Citation' %}</dt>
+    <dt>
+      {% trans 'Media Neutral Citation' %}
+    </dt>
     <dd class="text-muted">
       {{ document.mnc }}
-      <button type="button" class="btn btn-secondary btn-xs ms-2"
-              title="{% trans "Copy to clipboard" %}" data-component="CopyToClipboard"
+      <button type="button"
+              class="btn btn-secondary btn-xs ms-2"
+              title="{% trans "Copy to clipboard" %}"
+              data-component="CopyToClipboard"
               data-value="{{ document.mnc }}"
-              data-confirmation="{% trans "Copied!" %}">{% trans "Copy" %}</button>
+              data-confirmation="{% trans "Copied!" %}">
+        {% trans "Copy" %}
+      </button>
     </dd>
   {% endif %}
-
   {% if document.hearing_date %}
-    <dt>{% trans 'Hearing date' %}</dt>
+    <dt>
+      {% trans 'Hearing date' %}
+    </dt>
     <dd class="text-muted">
       {{ document.hearing_date }}
     </dd>
   {% endif %}
-
   {% if document.registry %}
-    <dt>{% trans 'Court Registry' %}</dt>
+    <dt>
+      {% trans 'Court Registry' %}
+    </dt>
     <dd class="text-muted">
       {{ document.registry.name }}
     </dd>
   {% endif %}
-
   {% with document.case_numbers.all as case_numbers %}
     {% if case_numbers %}
-      <dt>{% trans 'Case number' %}</dt>
+      <dt>
+        {% trans 'Case number' %}
+      </dt>
       <dd class="text-muted">
         {% for cn in case_numbers %}
-          {{ cn.string }}{% if not forloop.last %}; {% endif %}
+          {{ cn.string }}
+          {% if not forloop.last %};{% endif %}
         {% endfor %}
       </dd>
     {% endif %}

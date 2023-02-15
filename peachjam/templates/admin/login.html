@@ -1,87 +1,80 @@
 {% extends "admin/base_site.html" %}
 {% load i18n static account socialaccount %}
-
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/login.css" %}">
-{{ form.media }}
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet"
+        type="text/css"
+        href="{% static "admin/css/login.css" %}"/>
+  {{ form.media }}
 {% endblock %}
-
 {% block bodyclass %}{{ block.super }} login{% endblock %}
-
 {% block usertools %}{% endblock %}
-
 {% block nav-global %}{% endblock %}
-
 {% block nav-sidebar %}{% endblock %}
-
 {% block content_title %}{% endblock %}
-
 {% block breadcrumbs %}{% endblock %}
-
 {% block content %}
-{% if form.errors and not form.non_field_errors %}
-<p class="errornote">
-{% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
-</p>
-{% endif %}
-
-{% if form.non_field_errors %}
-{% for error in form.non_field_errors %}
-<p class="errornote">
-    {{ error }}
-</p>
-{% endfor %}
-{% endif %}
-
-<div id="content-main">
-
-{% if user.is_authenticated %}
-<p class="errornote">
-{% blocktranslate trimmed %}
+  {% if form.errors and not form.non_field_errors %}
+    <p class="errornote">
+      {% if form.errors.items|length == 1 %}
+        {% translate "Please correct the error below." %}
+      {% else %}
+        {% translate "Please correct the errors below." %}
+      {% endif %}
+    </p>
+  {% endif %}
+  {% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}<p class="errornote">{{ error }}</p>{% endfor %}
+  {% endif %}
+  <div id="content-main">
+    {% if user.is_authenticated %}
+      <p class="errornote">
+        {% blocktranslate trimmed %}
     You are authenticated as {{ username }}, but are not authorized to
     access this page. Would you like to login to a different account?
 {% endblocktranslate %}
-</p>
-{% endif %}
-
-<form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
-  <div class="form-row">
-    {{ form.username.errors }}
-    {{ form.username.label_tag }} {{ form.username }}
+      </p>
+    {% endif %}
+    <form action="{{ app_path }}" method="post" id="login-form">
+      {% csrf_token %}
+      <div class="form-row">
+        {{ form.username.errors }}
+        {{ form.username.label_tag }} {{ form.username }}
+      </div>
+      <div class="form-row">
+        {{ form.password.errors }}
+        {{ form.password.label_tag }} {{ form.password }}
+        <input type="hidden" name="next" value="{{ next }}"/>
+      </div>
+      {% url 'admin_password_reset' as password_reset_url %}
+      {% if password_reset_url %}
+        <div class="password-reset-link">
+          <a href="{{ password_reset_url }}">{% translate 'Forgotten your password or username?' %}</a>
+        </div>
+      {% endif %}
+      <div class="submit-row">
+        <input type="submit" value="{% translate 'Log in' %}"/>
+      </div>
+    </form>
   </div>
-  <div class="form-row">
-    {{ form.password.errors }}
-    {{ form.password.label_tag }} {{ form.password }}
-    <input type="hidden" name="next" value="{{ next }}">
-  </div>
-  {% url 'admin_password_reset' as password_reset_url %}
-  {% if password_reset_url %}
-  <div class="password-reset-link">
-    <a href="{{ password_reset_url }}">{% translate 'Forgotten your password or username?' %}</a>
-  </div>
-  {% endif %}
-  <div class="submit-row">
-    <input type="submit" value="{% translate 'Log in' %}">
-  </div>
-</form>
-
-
-</div>
-
   <div style="margin-top:1rem;">
     <div style="margin-top:1rem;">
       <div class="col-lg-8 mx-auto">
         {% for app in social_apps %}
-          <a class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{app.name}}" href="{% provider_login_url app.provider process='login' %}">
+          <a class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{ app.name }}"
+             href="{% provider_login_url app.provider process='login' %}">
             {% if app.provider == "google" %}
-              <img src="{% static 'images/google-logo.png' %}" alt="Google logo" style="height: 20px; margin-right: 5px">
+              <img src="{% static 'images/google-logo.png' %}"
+                   alt="Google logo"
+                   style="height: 20px;
+                          margin-right: 5px"/>
             {% else %}
               <i class="fab fa-fw fa-{{ app.name }}"></i>
             {% endif %}
-              Log in with {{ app.provider|title }}
+            Log in with {{ app.provider|title }}
           </a>
         {% endfor %}
       </div>
     </div>
-
   </div>
 {% endblock %}

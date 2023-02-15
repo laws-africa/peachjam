@@ -1,33 +1,9 @@
 {% if messages %}
   {% for message in messages %}
-    {% if message.type == 10 %}
-      <div class="alert alert-secondary">
-        {{ message.html }}
-      </div>
-    {% endif %}
-
-    {% if message.type == 20 %}
-      <div class="alert alert-info">
-        {{ message.html }}
-      </div>
-    {% endif %}
-
-    {% if message.type == 25 %}
-      <div class="alert alert-success">
-        {{ message.html }}
-      </div>
-    {% endif %}
-
-    {% if message.type == 30 %}
-      <div class="alert alert-warning">
-        {{ message.html }}
-      </div>
-    {% endif %}
-
-    {% if message.type == 40 %}
-      <div class="alert alert-danger">
-        {{ message.html }}
-      </div>
-    {% endif %}
+    {% if message.type == 10 %}<div class="alert alert-secondary">{{ message.html }}</div>{% endif %}
+    {% if message.type == 20 %}<div class="alert alert-info">{{ message.html }}</div>{% endif %}
+    {% if message.type == 25 %}<div class="alert alert-success">{{ message.html }}</div>{% endif %}
+    {% if message.type == 30 %}<div class="alert alert-warning">{{ message.html }}</div>{% endif %}
+    {% if message.type == 40 %}<div class="alert alert-danger">{{ message.html }}</div>{% endif %}
   {% endfor %}
 {% endif %}

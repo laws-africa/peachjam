@@ -1,27 +1,20 @@
 {% extends 'peachjam/legislation_detail.html' %}
 {% load i18n %}
-
 {% block breadcrumbs %}
   <nav aria-label="breadcrumb">
     {% if document.locality %}
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
-          <a href="{% url 'provincial_legislation' %}">
-            {% trans 'Provincial Legislation' %}
-          </a>
+          <a href="{% url 'provincial_legislation' %}">{% trans 'Provincial Legislation' %}</a>
         </li>
         <li class="breadcrumb-item">
-          <a href="{% url 'provincial_legislation_list' document.locality.code %}">
-            {{ document.locality.name }}
-          </a>
+          <a href="{% url 'provincial_legislation_list' document.locality.code %}">{{ document.locality.name }}</a>
         </li>
       </ol>
     {% else %}
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
-          <a href="{% url 'legislation_list' %}">
-            {% trans 'National legislation' %}
-          </a>
+          <a href="{% url 'legislation_list' %}">{% trans 'National legislation' %}</a>
         </li>
       </ol>
     {% endif %}

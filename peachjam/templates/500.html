@@ -1,8 +1,8 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
-
-{% block title %} {% trans 'Something went wrong (Error 500)' %}{% endblock %}
-
+{% block title %}
+  {% trans 'Something went wrong (Error 500)' %}
+{% endblock %}
 {% block page-content %}
   <section class="py-5">
     <div class="container">
@@ -14,10 +14,10 @@
       </p>
       <ul>
         <li>
-          <a href="/">{% trans "Go to the homepage." %}</a>
+          <a href="{% url 'home_page' %}">{% trans "Go to the homepage." %}</a>
         </li>
         <li>
-          <a href="/search">{% trans "Try searching for what you're looking for." %}</a>
+          <a href="{% url 'search:search' %}">{% trans "Try searching for what you're looking for." %}</a>
         </li>
       </ul>
     </div>
