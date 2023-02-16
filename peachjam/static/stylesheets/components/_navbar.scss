@@ -9,3 +9,18 @@
     }
   }
 }
+
+.dropdown:hover .dropdown-menu {
+  @include media-breakpoint-up(lg) {
+    display: block;
+    margin-top: 0;
+  }
+}
+
+.main-nav .dropdown-menu {
+  min-width: 300px;
+}
+
+.dropdown-summary {
+  font-size: smaller;
+}
