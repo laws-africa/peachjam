@@ -9,6 +9,9 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a></li>
+            {% if locality %}
+              <li class="breadcrumb-item"><a href="{% url 'gazettes_by_locality' code=locality.code %}">{{ locality }}</a></li>
+            {% endif %}
           </ol>
         </nav>
       {% endblock %}
