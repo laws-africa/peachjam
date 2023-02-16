@@ -6,6 +6,7 @@ from .books import *
 from .courts import *
 from .document_nature import *
 from .documents import *
+from .external_document import *
 from .gazette import *
 from .generic_document import *
 from .home import *
