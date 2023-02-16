@@ -38,8 +38,8 @@
   >
     {% trans 'African Legal Information' %}
   </a>
-  <ul class="dropdown-menu px-2">
-    <li>
+  <ul class="dropdown-menu">
+    <li class="dropdown-item">
       <a
         class="
           nav-link
@@ -49,26 +49,27 @@
           {%endif%}
         "
         href="{% url 'legal_instrument_list' %}"
-        >{% trans 'Legal Instruments' %}</a
-      >
-      <div class="dropdown-summary text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+        >
+        {% trans 'Legal Instruments' %}
+
+        <div class="dropdown-summary text-muted">Charters, treaties, conventions and regulations.</div>
+      </a>
     </li>
-    <li><hr class="dropdown-divider"></li>
-    <li>
+    <li class="dropdown-item">
       <a class="nav-link px-0 {% if view.navbar_link == 'judgments' %}active{% endif%}" href="{% url 'judgment_list' %}"
-        >{% trans 'Judgments' %}</a
-      >
-      <div class="dropdown-summary text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+        >{% trans 'Judgments' %}
+
+        <div class="dropdown-summary text-muted">Judgments from regional African courts.</div>
+      </a>
     </li>
-    <li><hr class="dropdown-divider"></li>
-    <li>
+    <li class="dropdown-item">
       <a class="nav-link px-0 {% if view.navbar_link == 'legislation' %}active{% endif%}" href="{% url 'legislation_list' %}"
-        >{% trans 'Soft Law' %}</a
-      >
-      <div class="dropdown-summary text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+        >{% trans 'Soft Law' %}
+
+        <div class="dropdown-summary text-muted">Policies, decisions, recommendations and communiques.</div>
+      </a>
     </li>
-    <li><hr class="dropdown-divider"></li>
-    <li>
+    <li class="dropdown-item">
       <a
         class="
           nav-link
@@ -78,9 +79,10 @@
           {%endif%}
         "
         href="{% url 'gazettes' %}"
-        >{% trans 'Gazettes' %}</a
-      >
-      <div class="dropdown-summary text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+        >{% trans 'Gazettes' %}
+
+        <div class="dropdown-summary text-muted">Regional economic community official Gazettes.</div>
+      </a>
     </li>
   </ul>
 </li>
