@@ -1,3 +1,6 @@
+$enable-shadows: true;
+$dropdown-box-shadow: $box-shadow-lg;
+
 .navbar {
   .nav-item,
   .nav-link {
@@ -10,17 +13,22 @@
   }
 }
 
-.dropdown:hover .dropdown-menu {
-  @include media-breakpoint-up(lg) {
+.dropdown-summary {
+  font-size: smaller;
+}
+
+.dropdown-menu {
+  border: none;
+}
+
+@include media-breakpoint-up(lg) {
+  .dropdown-menu {
+    @include box-shadow($dropdown-box-shadow);
+  }
+
+  .dropdown:hover .dropdown-menu {
     display: block;
     margin-top: 0;
   }
-}
 
-.main-nav .dropdown-menu {
-  min-width: 300px;
-}
-
-.dropdown-summary {
-  font-size: smaller;
 }
