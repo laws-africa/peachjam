@@ -1,9 +1,0 @@
-<div class="col-lg">
-  <ul class="list-unstyled mb-0">
-    {% for locality in localities %}
-      <li>
-        <a href="{% url 'gazettes_by_locality' locality.code %}">{{ locality.name }}</a>
-      </li>
-    {% endfor %}
-  </ul>
-</div>

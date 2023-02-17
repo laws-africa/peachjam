@@ -52,6 +52,7 @@ class GazetteListView(TemplateView):
 
         queryset = self.get_queryset()
 
+        context["localities"] = []
         if self.locality is None:
             locality_ids = list(
                 queryset.order_by()
@@ -60,8 +61,11 @@ class GazetteListView(TemplateView):
             )
             context["localities"] = Locality.objects.filter(pk__in=locality_ids)
 
-        provinces = list(Locality.objects.all())
-        context["province_groups"] = provinces[:5], provinces[5:]
+        loc_group = max([len(context["localities"]) // 2, 1])
+        context["locality_groups"] = (
+            context["localities"][:loc_group],
+            context["localities"][loc_group:],
+        )
 
         context["num_gazettes"] = queryset.count()
         context["years"] = self.get_year_stats(queryset)
