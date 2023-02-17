@@ -67,6 +67,10 @@ class GazetteListView(TemplateView):
             context["localities"][loc_group:],
         )
 
+        if not self.locality:
+            # counts and years for gazettes at the top-level?
+            queryset = queryset.filter(locality=None)
+
         context["num_gazettes"] = queryset.count()
         context["years"] = self.get_year_stats(queryset)
 
@@ -92,6 +96,12 @@ class GazetteYearView(DocumentListView):
     def get(self, request, code=None, *args, **kwargs):
         self.locality = get_object_or_404(Locality, code=code) if code else None
         return super().get(request, *args, **kwargs)
+
+    def get_base_queryset(self):
+        qs = super().get_base_queryset()
+        if self.locality:
+            qs = qs.filter(locality=self.locality)
+        return qs
 
     def get_queryset(self):
         return super().get_queryset().filter(date__year=self.kwargs["year"])

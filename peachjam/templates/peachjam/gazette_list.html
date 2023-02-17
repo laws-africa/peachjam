@@ -27,45 +27,45 @@
           {% endif %}
         {% endblock %}
 
-        <h4 class="sans-serif text-muted mt-3 mb-0">
-          {% blocktrans trimmed count num_gazettes=num_gazettes %}
-            {{ num_gazettes }} gazette
-          {% plural %}
-            {{ num_gazettes }} gazettes
-          {% endblocktrans %}
-        </h4>
+        {% if num_gazettes %}
+          <h4 class="sans-serif text-muted mt-3 mb-0">
+            {% blocktrans trimmed count num_gazettes=num_gazettes %}
+              {{ num_gazettes }} gazette
+            {% plural %}
+              {{ num_gazettes }} gazettes
+            {% endblocktrans %}
+          </h4>
 
-        {% block years-list %}
-          {% if locality %}
-          <div class="col-md-10 mt-5 mb-5">
-            <div class="row">
-              {% for year in years %}
-                <div class="col-md-4 col-sm-6 col-xs-12 status-box">
-                  <div>
-                    <h2>
-                      {% block gazette-year-link %}
-                        {% if locality %}
-                          <a class="text-decoration-none" href="{% url 'gazettes_by_year' locality.code year.year %}">{{ year.year }}</a>
-                        {% else %}
-                          <a class="text-decoration-none" href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
-                        {% endif %}
-                      {% endblock %}
-                    </h2>
-                    <p class="status-up"><i class="fas fa-signal" aria-hidden="true"></i>
-                      {% blocktrans trimmed count num_gazettes=year.count %}
-                        {{ num_gazettes }} gazette
-                      {% plural %}
-                        {{ num_gazettes }} gazettes
-                      {% endblocktrans %}
-                    </p>
+          {% block years-list %}
+            <div class="col-md-10 mt-5 mb-5">
+              <div class="row">
+                {% for year in years %}
+                  <div class="col-md-4 col-sm-6 col-xs-12 status-box">
+                    <div>
+                      <h2>
+                        {% block gazette-year-link %}
+                          {% if locality %}
+                            <a class="text-decoration-none" href="{% url 'gazettes_by_year' locality.code year.year %}">{{ year.year }}</a>
+                          {% else %}
+                            <a class="text-decoration-none" href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
+                          {% endif %}
+                        {% endblock %}
+                      </h2>
+                      <p class="status-up"><i class="fas fa-signal" aria-hidden="true"></i>
+                        {% blocktrans trimmed count num_gazettes=year.count %}
+                          {{ num_gazettes }} gazette
+                        {% plural %}
+                          {{ num_gazettes }} gazettes
+                        {% endblocktrans %}
+                      </p>
+                    </div>
+                    <div data-year="{{ year.month }}" class="monthly-chart"></div>
                   </div>
-                  <div data-year="{{ year.month }}" class="monthly-chart"></div>
-                </div>
-              {% endfor %}
+                {% endfor %}
+              </div>
             </div>
-          </div>
-          {% endif %}
-        {% endblock %}
+          {% endblock %}
+        {% endif %}
 
       </div>
     </div>
