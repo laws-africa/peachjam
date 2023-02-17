@@ -1,52 +1,71 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
-{% block title %} {% trans 'Gazettes' %} {% endblock %}
+{% block title %} {{ locality.name }} {% trans 'Gazettes' %} {% endblock %}
+
 
 {% block page-content %}
   <section class="pb-5">
     <div class="container">
       {% block breadcrumbs %}
+        {% if locality %}
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a></li>
+            </ol>
+          </nav>
+        {% endif %}
       {% endblock %}
 
       {% block page-title %}
-        <h1 class="my-4">{% trans 'Gazettes'%}</h1>
+        <h1 class="my-4">{% if locality %}{{ locality }}{% endif %} {% trans 'Gazettes'%}</h1>
       {% endblock %}
 
       <div class="row">
         {% block localities %}
+          {% if not locality %}
+            {% include 'peachjam/_gazette_localities.html' %}
+          {% endif %}
         {% endblock %}
 
-        <h4 class="sans-serif text-muted mt-3 mb-0">
-          {% blocktrans trimmed count num_gazettes=num_gazettes %}
-            {{ num_gazettes }} gazette
-          {% plural %}
-            {{ num_gazettes }} gazettes
-          {% endblocktrans %}
-        </h4>
+        {% if num_gazettes %}
+          <h4 class="sans-serif text-muted mt-3 mb-0">
+            {% blocktrans trimmed count num_gazettes=num_gazettes %}
+              {{ num_gazettes }} gazette
+            {% plural %}
+              {{ num_gazettes }} gazettes
+            {% endblocktrans %}
+          </h4>
 
-        <div class="col-md-10 mt-5 mb-5">
-          <div class="row">
-            {% for year in years %}
-              <div class="col-md-4 col-sm-6 col-xs-12 status-box">
-                <div>
-                  <h2>
-                    {% block gazette-year-link %}
-                      <a class="text-decoration-none" href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
-                    {% endblock %}
-                  </h2>
-                  <p class="status-up"><i class="fas fa-signal" aria-hidden="true"></i>
-                    {% blocktrans trimmed count num_gazettes=year.count %}
-                      {{ num_gazettes }} gazette
-                    {% plural %}
-                      {{ num_gazettes }} gazettes
-                    {% endblocktrans %}
-                  </p>
-                </div>
-                <div data-year="{{ year.month }}" class="monthly-chart"></div>
+          {% block years-list %}
+            <div class="col-md-10 mt-5 mb-5">
+              <div class="row">
+                {% for year in years %}
+                  <div class="col-md-4 col-sm-6 col-xs-12 status-box">
+                    <div>
+                      <h2>
+                        {% block gazette-year-link %}
+                          {% if locality %}
+                            <a class="text-decoration-none" href="{% url 'gazettes_by_year' locality.code year.year %}">{{ year.year }}</a>
+                          {% else %}
+                            <a class="text-decoration-none" href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
+                          {% endif %}
+                        {% endblock %}
+                      </h2>
+                      <p class="status-up"><i class="fas fa-signal" aria-hidden="true"></i>
+                        {% blocktrans trimmed count num_gazettes=year.count %}
+                          {{ num_gazettes }} gazette
+                        {% plural %}
+                          {{ num_gazettes }} gazettes
+                        {% endblocktrans %}
+                      </p>
+                    </div>
+                    <div data-year="{{ year.month }}" class="monthly-chart"></div>
+                  </div>
+                {% endfor %}
               </div>
-            {% endfor %}
-          </div>
-        </div>
+            </div>
+          {% endblock %}
+        {% endif %}
 
       </div>
     </div>

@@ -93,7 +93,15 @@ urlpatterns = [
         name="legal_instrument_list",
     ),
     path("gazettes", GazetteListView.as_view(), name="gazettes"),
+    path(
+        "gazettes/<str:code>/", GazetteListView.as_view(), name="gazettes_by_locality"
+    ),
     path("gazettes/<int:year>", GazetteYearView.as_view(), name="gazettes_by_year"),
+    path(
+        "gazettes/<str:code>/<int:year>",
+        GazetteYearView.as_view(),
+        name="gazettes_by_year",
+    ),
     path(
         "doc/",
         DocumentListView.as_view(),
