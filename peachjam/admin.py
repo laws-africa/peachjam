@@ -9,12 +9,14 @@ from django.contrib.contenttypes.admin import GenericStackedInline
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.dates import MONTHS
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from import_export.admin import ImportMixin
+from languages_plus.models import Language
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
@@ -33,6 +35,7 @@ from peachjam.models import (
     DocumentNature,
     DocumentTopic,
     EntityProfile,
+    ExternalDocument,
     Gazette,
     GenericDocument,
     Image,
@@ -639,6 +642,20 @@ class BookAdmin(DocumentAdmin):
 @admin.register(Journal)
 class JournalAdmin(DocumentAdmin):
     pass
+
+
+@admin.register(ExternalDocument)
+class ExternalDocumentAdmin(DocumentAdmin):
+
+    prepopulated_fields = {"frbr_uri_number": ("title",)}
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields["source_url"].required = True
+        form.base_fields["date"].initial = timezone.now().date()
+        form.base_fields["language"].initial = Language.objects.get(iso_639_3="eng")
+
+        return form
 
 
 admin.site.register(
