@@ -17,10 +17,6 @@ $dropdown-box-shadow: $box-shadow-lg;
   font-size: smaller;
 }
 
-.dropdown-menu {
-  border: none;
-}
-
 @include media-breakpoint-up(lg) {
   .dropdown-menu {
     @include box-shadow($dropdown-box-shadow);
