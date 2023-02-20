@@ -52,21 +52,21 @@
         >
         {% trans 'Legal Instruments' %}
 
-        <div class="dropdown-summary text-muted">Charters, treaties, conventions and regulations.</div>
+        <div class="dropdown-summary text-muted">{% trans 'Charters, treaties, conventions and regulations.' %}</div>
       </a>
     </li>
     <li class="dropdown-item">
       <a class="nav-link px-0 {% if view.navbar_link == 'judgments' %}active{% endif%}" href="{% url 'judgment_list' %}"
         >{% trans 'Judgments' %}
 
-        <div class="dropdown-summary text-muted">Judgments from regional African courts.</div>
+        <div class="dropdown-summary text-muted">{% trans 'Judgments from regional African courts.' %}</div>
       </a>
     </li>
     <li class="dropdown-item">
       <a class="nav-link px-0 {% if view.navbar_link == 'legislation' %}active{% endif%}" href="{% url 'legislation_list' %}"
         >{% trans 'Soft Law' %}
 
-        <div class="dropdown-summary text-muted">Policies, decisions, recommendations and communiques.</div>
+        <div class="dropdown-summary text-muted">{% trans 'Policies, decisions, recommendations and communiques.' %}</div>
       </a>
     </li>
     <li class="dropdown-item">
@@ -81,7 +81,7 @@
         href="{% url 'gazettes' %}"
         >{% trans 'Gazettes' %}
 
-        <div class="dropdown-summary text-muted">Regional economic community official Gazettes.</div>
+        <div class="dropdown-summary text-muted">{% trans 'Regional economic community official Gazettes.' %}</div>
       </a>
     </li>
   </ul>
