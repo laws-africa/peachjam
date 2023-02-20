@@ -1,3 +1,6 @@
+$enable-shadows: true;
+$dropdown-box-shadow: $box-shadow-lg;
+
 .navbar {
   .nav-item,
   .nav-link {
@@ -8,4 +11,20 @@
       color: $primary;
     }
   }
+}
+
+.dropdown-summary {
+  font-size: smaller;
+}
+
+@include media-breakpoint-up(lg) {
+  .dropdown-menu {
+    @include box-shadow($dropdown-box-shadow);
+  }
+
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0;
+  }
+
 }
