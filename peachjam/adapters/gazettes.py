@@ -4,7 +4,14 @@ from countries_plus.models import Country
 from django.db import connection
 from languages_plus.models import Language
 
-from peachjam.models import CoreDocument, Gazette, Locality, SourceFile
+from peachjam.models import (
+    CoreDocument,
+    DocumentContent,
+    DocumentNature,
+    Gazette,
+    Locality,
+    SourceFile,
+)
 from peachjam.plugins import plugins
 
 from .adapters import Adapter
@@ -45,12 +52,12 @@ class GazetteAdapter(Adapter):
                 queryset = queryset.exclude(locality=None)
 
         if last_refreshed:
-            new_gazettes = queryset.filter(updated_at__gt=last_refreshed)
+            queryset = queryset.filter(updated_at__gt=last_refreshed)
 
-        return list(new_gazettes.values_list("expression_frbr_uri", flat=True))
+        return list(queryset.values_list("expression_frbr_uri", flat=True))
 
     def update_document(self, expression_frbr_uri):
-        log.info("Updating new gazettes...")
+        log.info(f"Updating new gazette {expression_frbr_uri}")
 
         ga_gazette = (
             CoreDocument.objects.filter(expression_frbr_uri=expression_frbr_uri)
@@ -78,6 +85,15 @@ class GazetteAdapter(Adapter):
 
             if ga_gazette.locality:
                 data["locality"] = Locality.objects.get(code=ga_gazette.locality.code)
+
+            if ga_gazette.nature:
+                document_nature_name = " ".join(
+                    [name for name in ga_gazette.nature.name.split("-")]
+                ).capitalize()
+                data["nature"] = DocumentNature.objects.get_or_create(
+                    code=ga_gazette.nature.code,
+                    defaults={"name": document_nature_name},
+                )[0]
 
             updated_gazette, new = Gazette.objects.update_or_create(
                 expression_frbr_uri=expression_frbr_uri, defaults={**data}
@@ -107,5 +123,11 @@ class GazetteAdapter(Adapter):
                         WHERE id  = {updated_source_file.pk}
                         """
                     cursor.execute(sql)
+
+            if hasattr(ga_gazette, "document_content"):
+                ga_content_text = ga_gazette.document_content.content_text
+                DocumentContent.objects.update_or_create(
+                    document=updated_gazette, content_text=ga_content_text
+                )
 
             log.info("Update Done.")
