@@ -665,6 +665,9 @@ class DocumentContent(models.Model):
                 shutil.copyfileobj(pdf, tmp)
                 tmp.flush()
                 text = pdfjs_to_text(tmp.name)
+                # some PDFs have nulls, which breaks SQL insertion
+                # replace rather than deleting to keep string length the same
+                text = text.replace("\0", " ")
 
         doc_content = DocumentContent.objects.update_or_create(
             document=document, defaults={"content_text": text}
