@@ -90,7 +90,6 @@ class GazetteAdapter(Adapter):
                 document_nature_name = " ".join(
                     [name for name in ga_gazette.nature.name.split("-")]
                 ).capitalize()
-                print(document_nature_name)
                 data["nature"] = DocumentNature.objects.get_or_create(
                     code=ga_gazette.nature.code,
                     defaults={"name": document_nature_name},
