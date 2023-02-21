@@ -250,16 +250,16 @@ class CaseNumber(models.Model):
         return super().save(*args, **kwargs)
 
 
-class Registry(models.Model):
+class CourtRegistry(models.Model):
     court = models.ForeignKey(
         Court, on_delete=models.CASCADE, null=True, verbose_name=_("court")
     )
     name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
 
     class Meta:
-        verbose_name = _("registry")
-        verbose_name_plural = _("registries")
+        verbose_name = _("court_registry")
+        verbose_name_plural = _("court_registries")
         unique_together = ("court", "name")
 
     def __str__(self):
-        return f"{self.name} registry of the {self.court}"
+        return f"{self.name} - {self.court}"
