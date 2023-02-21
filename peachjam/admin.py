@@ -50,6 +50,7 @@ from peachjam.models import (
     MatterType,
     PeachJamSettings,
     Predicate,
+    Registry,
     Relationship,
     SourceFile,
     Taxonomy,
@@ -667,6 +668,7 @@ admin.site.register(
         MatterType,
         CourtClass,
         AttachedFileNature,
+        Registry,
     ]
 )
 admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)
