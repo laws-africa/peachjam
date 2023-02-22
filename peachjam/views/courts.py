@@ -52,9 +52,16 @@ class CourtDetailView(FilteredDocumentListView):
             .order_by("judges__name")
             .values_list("judges__name", flat=True)
             .distinct()
+            .exclude(judges=None)
         )
-        if None in judges:
-            judges.remove(None)
+
+        registries = list(
+            self.get_base_queryset()
+            .order_by("registry__name")
+            .values_list("registry__name", flat=True)
+            .distinct()
+            .exclude(registry=None)
+        )
 
         context["court"] = self.court
         context["formatted_court_name"] = self.court.name
@@ -67,6 +74,7 @@ class CourtDetailView(FilteredDocumentListView):
         context["facet_data"] = {
             "judges": judges,
             "alphabet": lowercase_alphabet(),
+            "registries": registries,
         }
 
         return context

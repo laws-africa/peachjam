@@ -72,9 +72,30 @@ class Court(models.Model):
         return self.name
 
 
+class CourtRegistry(models.Model):
+    court = models.ForeignKey(
+        Court,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="court_registry",
+    )
+    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+
+    class Meta:
+        verbose_name = _("court registry")
+        verbose_name_plural = _("court registries")
+        unique_together = ("court", "name")
+
+    def __str__(self):
+        return f"{self.name} Registry - {self.court}"
+
+
 class Judgment(CoreDocument):
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
+    )
+    registry = models.ForeignKey(
+        CourtRegistry, on_delete=models.PROTECT, null=True, related_name="judgments"
     )
     judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
     headnote_holding = models.TextField(_("headnote holding"), null=True, blank=True)
@@ -248,18 +269,3 @@ class CaseNumber(models.Model):
     def save(self, *args, **kwargs):
         self.string = self.get_case_number_string()
         return super().save(*args, **kwargs)
-
-
-class CourtRegistry(models.Model):
-    court = models.ForeignKey(
-        Court, on_delete=models.CASCADE, null=True, verbose_name=_("court")
-    )
-    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
-
-    class Meta:
-        verbose_name = _("court_registry")
-        verbose_name_plural = _("court_registries")
-        unique_together = ("court", "name")
-
-    def __str__(self):
-        return f"{self.name} - {self.court}"

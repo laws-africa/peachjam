@@ -92,10 +92,13 @@ class BaseDocumentFilterForm(forms.Form):
     judges = forms.CharField(required=False)
     natures = forms.CharField(required=False)
     localities = forms.CharField(required=False)
+    registeries = forms.CharField(required=False)
 
     def __init__(self, data, *args, **kwargs):
         self.params = QueryDict(mutable=True)
         self.params.update(data)
+
+        print(self.params)
 
         super().__init__(self.params, *args, **kwargs)
 
@@ -108,6 +111,7 @@ class BaseDocumentFilterForm(forms.Form):
         judges = self.params.getlist("judges")
         natures = self.params.getlist("natures")
         localities = self.params.getlist("localities")
+        registries = self.params.getlist("registries")
 
         # Order by date descending initially
         queryset = queryset.order_by("-date")
@@ -135,6 +139,9 @@ class BaseDocumentFilterForm(forms.Form):
 
         if localities and exclude != "localities":
             queryset = queryset.filter(locality__name__in=localities)
+
+        if registries and exclude != "registries":
+            queryset = queryset.filter(registry__name__in=registries)
 
         return queryset
 

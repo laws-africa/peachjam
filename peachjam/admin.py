@@ -476,10 +476,13 @@ class AttachedFilesInline(BaseAttachmentFileInline):
 
 class JudgmentAdminForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
+    registry = forms.ModelChoiceField(
+        queryset=CourtRegistry.objects.all(), required=False
+    )
 
     class Meta:
         model = Judgment
-        fields = ("hearing_date",)
+        fields = ("hearing_date", "registry")
 
     def save(self, *args, **kwargs):
         if (
@@ -499,8 +502,10 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     filter_horizontal = ("judges",)
     list_filter = (*DocumentAdmin.list_filter, "court")
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+
     fieldsets[0][1]["fields"].insert(3, "court")
-    fieldsets[0][1]["fields"].insert(4, "case_name")
+    fieldsets[0][1]["fields"].insert(4, "registry")
+    fieldsets[0][1]["fields"].insert(5, "case_name")
     fieldsets[0][1]["fields"].insert(7, "mnc")
     fieldsets[0][1]["fields"].insert(8, "serial_number_override")
     fieldsets[0][1]["fields"].insert(9, "serial_number")
