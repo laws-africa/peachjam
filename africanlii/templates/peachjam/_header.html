@@ -48,7 +48,7 @@
           active
           {%endif%}
         "
-        href="{% url 'legal_instrument_list' %}"
+        href="{% url 'agp_legal_instrument_list' %}"
         >
         {% trans 'Legal Instruments' %}
 
@@ -63,7 +63,7 @@
       </a>
     </li>
     <li class="dropdown-item">
-      <a class="nav-link px-0 {% if view.navbar_link == 'legislation' %}active{% endif%}" href="{% url 'legislation_list' %}"
+      <a class="nav-link px-0 {% if view.navbar_link == 'legislation' %}active{% endif%}" href="{% url 'agp_soft_law_list' %}"
         >{% trans 'Soft Law' %}
 
         <div class="dropdown-summary text-muted">{% trans 'Policies, decisions, recommendations and communiques.' %}</div>
@@ -96,7 +96,7 @@
 <li class="nav-item">
   <a
     class="nav-link {% if view.navbar_link == 'doc' %}active{% endif%}"
-    href="{% url 'generic_document_list' %}"
+    href="{% url 'agp_reports_guides_list' %}"a
     >{% trans 'Reports & Guides' %}</a
   >
 </li>
