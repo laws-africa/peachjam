@@ -8,11 +8,9 @@
 
 {% block head-js %}
   <script defer src="{% static 'bootstrap/dist/js/bootstrap.bundle.js' %}"></script>
-  <script defer src="{% static 'lib/pdfjs/pdf.js' %}"></script>
-  <!--  app-prod.js depends on pdf.js to be loaded-->
   <script defer src="{% static 'js/app-prod.js' %}"></script>
 
- <!-- Small script to add the current user agent to the root HTML element -->
+  <!-- Small script to add the current user agent to the root HTML element -->
   <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function () {
       document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
@@ -33,6 +31,9 @@
         environment: '{{ SENTRY_ENVIRONMENT }}',
         allowUrls: [
           new RegExp(window.location.host.replace(".", "\\.") + "/static/")
+        ],
+        denyUrls: [
+          new RegExp(window.location.host.replace(".", "\\.") + "/static/lib/pdfjs/")
         ]
       });
     });

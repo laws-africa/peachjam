@@ -26,13 +26,13 @@
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="https://gazettes.africa/gazettes/za/" target="_blank">
+    <a class="nav-link {% if view.navbar_link == 'gazettes' %}active{% endif %}" href="{% url 'gazettes' %}">
       {% trans 'Gazettes' %}
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="{% url 'taxonomy_detail' first_level_topic="collections" topics="sexual-and-gender-based-violence" %}">
-      SGBV Library
+    <a class="nav-link" href="{% url 'first_level_taxonomy_list' "collections" %}">
+      Collections
     </a>
   </li>
 

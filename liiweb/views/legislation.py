@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from django.views.generic import TemplateView
 
+from peachjam.helpers import get_language
 from peachjam.models import Legislation
 from peachjam_api.serializers import LegislationSerializer
 
@@ -13,9 +14,12 @@ class LegislationListView(TemplateView):
     model = Legislation
 
     def get_queryset(self):
-        return self.model.objects.distinct("work_frbr_uri").order_by(
-            "work_frbr_uri", "-date"
+        qs = (
+            self.model.objects.distinct("work_frbr_uri")
+            .order_by("work_frbr_uri", "-date", "language__pk")
+            .preferred_language(get_language(self.request))
         )
+        return qs
 
     def filter_queryset(self, qs):
         if self.variant == "all":
@@ -24,13 +28,15 @@ class LegislationListView(TemplateView):
             qs = qs.filter(repealed=True)
         elif self.variant == "current":
             qs = qs.filter(repealed=False, metadata_json__stub=False, parent_work=None)
+        elif self.variant == "subleg":
+            qs = qs.exclude(parent_work=None).filter(repealed=False)
         return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         qs = self.filter_queryset(self.get_queryset())
-        qs = qs.prefetch_related("taxonomies", "taxonomies__topic")
+        qs = qs.prefetch_related("taxonomies", "taxonomies__topic", "work")
         qs = self.add_children(qs)
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data

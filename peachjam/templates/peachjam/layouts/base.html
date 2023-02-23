@@ -14,7 +14,7 @@
         <link rel="alternate" type="application/atom+xml" title="Judgments Atom RSS Feed" href="{% url 'judgment_feed' %}"/>
       {% endifequal%}
 
-      {% ifequal request.path '/generic_documents/'%}
+      {% ifequal request.path '/doc/'%}
         <link rel="alternate" type="application/atom+xml" title="AU Documents Atom RSS Feed" href="{% url 'generic_document_feed' %}"/>
       {% endifequal%}
 

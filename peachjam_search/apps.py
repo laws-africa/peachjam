@@ -7,3 +7,6 @@ class PeachjamSearchConfig(AppConfig):
 
     def ready(self):
         import peachjam_search.signals  # noqa
+        from peachjam_search.documents import setup_language_indexes
+
+        setup_language_indexes()

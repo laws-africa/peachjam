@@ -19,7 +19,7 @@ from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
 from rest_framework.permissions import AllowAny
 
-from peachjam_search.documents import SearchableDocument
+from peachjam_search.documents import ANALYZERS, SearchableDocument
 from peachjam_search.serializers import SearchableDocumentSerializer
 
 CACHE_SECS = 15 * 60
@@ -47,7 +47,7 @@ class MultiFieldSearchQueryBackend(SimpleQueryStringQueryBackend):
                 self.query_type,
                 query=search_term,
                 fields=[self.get_field(field, view_search_fields[field])],
-                **self.get_query_options(request, view, search_backend)
+                **self.get_query_options(request, view, search_backend),
             )
             for field, search_term in query_params.items()
         ]
@@ -93,12 +93,38 @@ class NestedPageQueryBackend(BaseSearchQueryBackend):
         ]
 
 
+class CrossFieldSimpleQueryStringBackend(SimpleQueryStringQueryBackend):
+    """This implements a simple_query_string query across multiple fields, using AND logic for the terms
+    in a field, but effectively OR (should) logic between the fields."""
+
+    @classmethod
+    def construct_search(cls, request, view, search_backend):
+        query_fields = [
+            cls.get_field(field, options)
+            for field, options in view.search_fields.items()
+        ]
+        query_terms = search_backend.get_search_query_params(request)
+        queries = []
+        for search_term in query_terms[:1]:
+            for field in query_fields:
+                queries.append(
+                    Q(
+                        cls.query_type,
+                        query=search_term,
+                        fields=[field],
+                        **cls.get_query_options(request, view, search_backend),
+                    )
+                )
+
+        return queries
+
+
 class SearchFilterBackend(CompoundSearchFilterBackend):
     """Custom search backend that builds our boolean query, based on two factors: an all-field search (simple),
     and a per-field (advanced) search. The two can also be combined.
 
     1. Simple: a SHOULD query (minimum_should_match=1), for:
-       a. all the fields
+       a. all the fields (individually)
        b. nested page content
 
     2. Advanced: a MUST query for the specified field(s).
@@ -109,8 +135,8 @@ class SearchFilterBackend(CompoundSearchFilterBackend):
     must_backends = [MultiFieldSearchQueryBackend()]
 
     should_backends = [
-        # Use ES's SimpleQueryString search support which allows quotes, +foo, -bar etc.
-        SimpleQueryStringQueryBackend(),
+        # Search each field individually using SimpleQueryString which allows quotes, +foo, -bar etc.
+        CrossFieldSimpleQueryStringBackend,
         # Customised search on PDF page content
         NestedPageQueryBackend,
     ]
@@ -174,6 +200,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     # allowed and default ordering
     ordering_fields = {"date": "date", "title": "title"}
     ordering = ("_score", "date")
+    # this means that ALL terms must appear in ANY of the searched fields
     simple_query_string_options = {"default_operator": "AND"}
 
     filter_fields = {
@@ -188,6 +215,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "matter_type": "matter_type",
         "nature": "nature",
         "year": "year",
+        "judges": "judges",
     }
 
     search_fields = {
@@ -236,6 +264,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             "options": {"size": 100},
         },
         "court": {"field": "court", "options": {"size": 100}},
+        "judges": {"field": "judges", "options": {"size": 100}},
     }
 
     highlight_fields = {
@@ -252,6 +281,14 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     # TODO perhaps better to explicitly include specific fields
     source = {"excludes": ["pages", "content", "flynote", "headnote_holding"]}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # search multiple language indexes
+        self.index = [self.document._index._name] + [
+            f"{self.document._index._name}_{lang}" for lang in ANALYZERS.keys()
+        ]
+        self.search = self.search.index(self.index)
 
     @method_decorator(cache_page(CACHE_SECS))
     def dispatch(self, request, *args, **kwargs):

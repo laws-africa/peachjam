@@ -4,7 +4,6 @@ from lawlibrary import views
 
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),
-    path("judgments/", views.JudgmentListView.as_view(), name="judgment_list"),
     path("legislation/", views.LegislationListView.as_view(), name="legislation_list"),
     path(
         "legislation/provincial",
@@ -32,25 +31,14 @@ urlpatterns = [
         name="provincial_legislation_list_repealed",
     ),
     path(
+        "legislation/<str:code>/subsidiary",
+        views.ProvincialLegislationListView.as_view(variant="subleg"),
+        name="provincial_legislation_list_subsidiary",
+    ),
+    path(
         "legislation/<str:code>/all",
         views.ProvincialLegislationListView.as_view(variant="all"),
         name="provincial_legislation_list_all",
-    ),
-    path("gazettes", views.LawLibraryGazetteListView.as_view(), name="gazettes"),
-    path(
-        "gazettes/<int:year>",
-        views.LawLibraryGazetteYearView.as_view(),
-        name="gazettes_by_year",
-    ),
-    path(
-        "gazettes/<str:code>/",
-        views.LawLibraryGazetteListView.as_view(),
-        name="provincial_gazette_list",
-    ),
-    path(
-        "gazettes/<str:code>/<int:year>",
-        views.LawLibraryGazetteYearView.as_view(),
-        name="gazettes_by_year",
     ),
     path("", include("liiweb.urls")),
 ]

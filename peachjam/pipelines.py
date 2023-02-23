@@ -7,6 +7,8 @@ from docpipe.xmlutils import unwrap_element
 DOC_MIMETYPES = [
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "application/msword",
+    "application/rtf",
+    "text/rtf",
 ]
 
 

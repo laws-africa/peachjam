@@ -5,7 +5,12 @@
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'gazettes_by_year' year=document.date.year %}">{{ document.date.year }}</a></li>
+      {% if document.locality %}
+        <li class="breadcrumb-item"><a href="{% url 'gazettes_by_locality' document.locality.code %}">{{ document.locality }}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'gazettes_by_year' document.locality.code document.date.year %}">{{ document.date.year }}</a></li>
+      {% else %}
+        <li class="breadcrumb-item"><a href="{% url 'gazettes_by_year' year=document.date.year %}">{{ document.date.year }}</a></li>
+      {% endif %}
     </ol>
   </nav>
 {% endblock %}

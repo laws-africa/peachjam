@@ -1,7 +1,13 @@
 {% extends 'peachjam/layouts/main.html' %}
-{% load peachjam i18n %}
+{% load peachjam i18n static %}
 
 {% block title %}{{ document.title }}{% endblock %}
+
+{% block head-js %}
+  <!--  app-prod.js depends on pdf.js to be loaded-->
+  <script defer src="{% static 'lib/pdfjs/pdf.js' %}"></script>
+  {{ block.super }}
+{% endblock %}
 
 {% block head-meta %}
   {{ block.super }}
@@ -10,6 +16,9 @@
   <meta property="book:release_date" content="{{ document.date|date:'Y-m-d' }}" />
   {% if document.author %}
     <meta property="book:author" content="{{ document.author }}" />
+  {% endif %}
+  {% if not document.allow_robots %}
+    <meta name="robots" content="noindex">
   {% endif %}
 
   <meta name="twitter:card" content="summary"/>
@@ -24,9 +33,15 @@
         {% endblock %}
 
         {% block document-title %}
-          <div class="d-flex justify-content-between py-4">
+          <div class="d-md-flex justify-content-md-between py-4">
             <h1>{{ document.title }}</h1>
             <div class="d-flex align-items-center">
+              <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
+                 class="btn btn-link"
+                 target="_blank"
+              >
+                <i class="bi bi-whatsapp whatsapp-forecolor share-icon"></i>
+              </a>
               <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}"
                  class="btn btn-link"
                  target="_blank"
@@ -68,6 +83,23 @@
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#related-tab" type="button" role="tab" aria-controls="related-tab" aria-selected="false">
                   {% trans "Related documents" %}
                   <span class="badge bg-secondary">{{ n_relationships }}</span>
+                </button>
+              </li>
+            {% endif %}
+            {% if cited_works or works_citing_current_work %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#citations-tab" type="button" role="tab" aria-controls="citations-tab" aria-selected="false">
+                  {% trans "Citations" %}
+                  <span class="badge bg-secondary">{{ number_of_extracted_citations }}</span>
+                </button>
+              </li>
+            {% endif %}
+
+            {% if document.work.ratification.countries.all|length %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#ratifications-tab" type="button" role="tab" aria-controls="ratifications-tab" aria-selected="false">
+                  {% trans "Ratifications" %}
+                  <span class="badge bg-secondary">{{ document.work.ratification.countries.all|length }}</span>
                 </button>
               </li>
             {% endif %}
@@ -179,7 +211,7 @@
                               <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
                                  target="_blank"
                               >{% trans "Download" %} {{ document.source_file.filename_extension|upper }}</a>
-                              ({{ document.source_file.file.size|filesizeformat }})
+                              ({{ document.source_file.size|filesizeformat }})
                             </div>
 
                             {% if document.source_file.filename_extension != "pdf" %}
@@ -281,6 +313,22 @@
           </div>
         {% endif %}
       {% endblock %}
+
+        {% if cited_works or works_citing_current_work %}
+          <div class="tab-pane fade" id="citations-tab" role="tabpanel" aria-labelledby="citations-tab">
+            <div class="container">
+              {% include 'peachjam/_citations.html' %}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if document.work.ratification.countries.all|length %}
+          <div class="tab-pane fade" id="ratifications-tab" role="tabpanel" aria-labelledby="ratifications-tab">
+            <div class="container">
+              {% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}
+            </div>
+          </div>
+        {% endif %}
     </div>
 
     {% if perms.peachjam.add_relationship %}

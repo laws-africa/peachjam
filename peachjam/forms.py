@@ -40,16 +40,14 @@ class NewDocumentFormMixin:
         super().__init__(*args, **kwargs)
         self.fields["upload_file"] = forms.FileField(required=False)
 
-    def save(self, commit=True):
-        obj = super().save(commit)
+    def _save_m2m(self):
+        super()._save_m2m()
         if self.cleaned_data.get("upload_file"):
             self.process_upload_file(self.cleaned_data["upload_file"])
             self.run_analysis()
-        return obj
 
     def process_upload_file(self, upload_file):
         # store the uploaded file
-        self.instance.save()
         upload_file.seek(0)
         file_ext = splitext(upload_file.name)[1]
         SourceFile(
@@ -92,6 +90,8 @@ class BaseDocumentFilterForm(forms.Form):
     authors = forms.CharField(required=False)
     doc_type = forms.CharField(required=False)
     judges = forms.CharField(required=False)
+    natures = forms.CharField(required=False)
+    localities = forms.CharField(required=False)
 
     def __init__(self, data, *args, **kwargs):
         self.params = QueryDict(mutable=True)
@@ -100,21 +100,25 @@ class BaseDocumentFilterForm(forms.Form):
         super().__init__(self.params, *args, **kwargs)
 
     def filter_queryset(self, queryset, exclude=None):
-
         years = self.params.getlist("years")
         alphabet = self.cleaned_data.get("alphabet")
         authors = self.params.getlist("authors")
         courts = self.params.getlist("courts")
         doc_type = self.params.getlist("doc_type")
         judges = self.params.getlist("judges")
+        natures = self.params.getlist("natures")
+        localities = self.params.getlist("localities")
+
+        # Order by date descending initially
+        queryset = queryset.order_by("-date")
 
         if years and exclude != "years":
             queryset = queryset.filter(date__year__in=years)
 
         if alphabet and exclude != "alphabet":
-            queryset = queryset.filter(title__istartswith=alphabet)
+            queryset = queryset.order_by("title").filter(title__istartswith=alphabet)
 
-        if authors and exclude != "author":
+        if authors and exclude != "authors":
             queryset = queryset.filter(author__name__in=authors)
 
         if courts and exclude != "courts":
@@ -125,6 +129,12 @@ class BaseDocumentFilterForm(forms.Form):
 
         if judges and exclude != "judges":
             queryset = queryset.filter(judges__name__in=judges)
+
+        if natures and exclude != "natures":
+            queryset = queryset.filter(nature__name__in=natures)
+
+        if localities and exclude != "localities":
+            queryset = queryset.filter(locality__name__in=localities)
 
         return queryset
 
@@ -139,9 +149,8 @@ class SourceFileForm(forms.ModelForm):
         self.cleaned_data["file"].name = clean_filename(self.cleaned_data["file"].name)
         return self.cleaned_data["file"]
 
-    def save(self, commit=True):
-        obj = super().save(commit=True)
+    def _save_m2m(self):
+        super()._save_m2m()
         if "file" in self.changed_data:
-            if obj.document.extract_content_from_source_file():
-                obj.document.save()
-        return obj
+            if self.instance.document.extract_content_from_source_file():
+                self.instance.document.save()

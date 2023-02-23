@@ -1,10 +1,12 @@
 import datetime
 import os
 import re
+import shutil
+import tempfile
 
 import magic
-from cobalt import FrbrUri
 from cobalt.akn import datestring
+from cobalt.uri import FrbrUri
 from countries_plus.models import Country
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
@@ -15,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
+from lxml import html
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from polymorphic.query import PolymorphicQuerySet
@@ -25,8 +28,25 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_component,
     validate_frbr_uri_date,
 )
+from peachjam.helpers import pdfjs_to_text
+from peachjam.models import CitationLink, ExtractedCitation
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
+
+
+class DocumentNature(models.Model):
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
+    code = models.SlugField(_("code"), max_length=1024, null=False, unique=True)
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        verbose_name = _("document nature")
+        verbose_name_plural = _("document natures")
+
+    def __str__(self):
+        return self.name
 
 
 class Locality(models.Model):
@@ -66,6 +86,68 @@ class Work(models.Model):
         verbose_name = _("work")
         verbose_name_plural = _("works")
         ordering = ["title"]
+
+    def update_languages(self):
+        """Update this work's languages to reflect the distinct languages of its related documents."""
+        langs = list(
+            CoreDocument.objects.filter(work=self)
+            .distinct("language__iso_639_3")
+            .values_list("language__iso_639_3", flat=True)
+            .order_by("language__iso_639_3")
+        )
+        if langs != self.languages:
+            self.languages = langs
+            self.save()
+
+    def update_extracted_citations(self):
+        """Update the current work's ExtractedCitations."""
+        target_works = Work.objects.filter(
+            frbr_uri__in=self.fetch_cited_works_frbr_uris()
+        )
+
+        # delete existing extracted citations
+        ExtractedCitation.objects.filter(citing_work=self).delete()
+
+        for target_work in target_works:
+            ExtractedCitation.objects.get_or_create(
+                citing_work=self, target_work=target_work
+            )
+
+    def fetch_cited_works_frbr_uris(self):
+        """Returns a set of work_frbr_uris,
+        taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links."""
+        work_frbr_uris = set()
+
+        for doc in self.documents.all():
+            if doc.content_html:
+                root = html.fromstring(doc.content_html)
+                for a in root.xpath('//a[starts-with(@href, "/akn")]'):
+                    try:
+                        work_frbr_uris.add(FrbrUri.parse(a.attrib["href"]).work_uri())
+                    except ValueError:
+                        # ignore malformed FRBR URIs
+                        pass
+            else:
+                for citation_link in CitationLink.objects.filter(document_id=doc.pk):
+                    try:
+                        work_frbr_uris.add(FrbrUri.parse(citation_link.url).work_uri())
+                    except ValueError:
+                        # ignore malformed FRBR URIs
+                        pass
+
+        # A work does not cite itself
+        if self.frbr_uri in work_frbr_uris:
+            work_frbr_uris.remove(self.frbr_uri)
+
+        return work_frbr_uris
+
+    def cited_works(self):
+        """Shows a list of works cited by the current work."""
+        return ExtractedCitation.for_citing_works(self)
+
+    def works_citing_current_work(self):
+        """Shows a list of works that cite the current work."""
+        return ExtractedCitation.for_target_works(self)
 
     def __str__(self):
         return f"{self.frbr_uri} - {self.title}"
@@ -122,7 +204,7 @@ class CoreDocument(PolymorphicModel):
         blank=False,
     )
     title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
-    date = models.DateField(_("date"), null=False, blank=False)
+    date = models.DateField(_("date"), null=False, blank=False, db_index=True)
     source_url = models.URLField(
         _("source URL"), max_length=2048, null=True, blank=True
     )
@@ -150,6 +232,13 @@ class CoreDocument(PolymorphicModel):
         null=True,
         blank=True,
         verbose_name=_("locality"),
+    )
+    nature = models.ForeignKey(
+        DocumentNature,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("nature"),
     )
 
     work_frbr_uri = models.CharField(
@@ -206,6 +295,12 @@ class CoreDocument(PolymorphicModel):
 
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
+    allow_robots = models.BooleanField(
+        _("allow robots"),
+        default=True,
+        db_index=True,
+        help_text=_("Allow this document to be indexed by search engine robots."),
+    )
 
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES
@@ -285,6 +380,8 @@ class CoreDocument(PolymorphicModel):
         return frbr_uri.work_uri(work_component=False)
 
     def save(self, *args, **kwargs):
+        self.frbr_uri_subtype = self.nature.code if self.nature else None
+
         self.assign_frbr_uri()
         self.expression_frbr_uri = self.generate_expression_frbr_uri()
 
@@ -337,6 +434,7 @@ class CoreDocument(PolymorphicModel):
 
         This requires that the document has already been saved, in order to associate image attachments.
         """
+        result = False
         if (
             not self.content_html_is_akn
             and hasattr(self, "source_file")
@@ -357,7 +455,12 @@ class CoreDocument(PolymorphicModel):
                     img.save()
                     self.images.add(img)
 
-            return True
+            result = True
+
+        # always update document text
+        self.update_text_content()
+
+        return result
 
     def is_most_recent(self):
         """Is this the most recent document for this work?
@@ -371,6 +474,16 @@ class CoreDocument(PolymorphicModel):
             .first()
             == self.pk
         )
+
+    def get_content_as_text(self):
+        """Get the document content as plain text."""
+        if not hasattr(self, "document_content"):
+            self.update_text_content()
+        return self.document_content.content_text
+
+    def update_text_content(self):
+        """Update the extracted text content."""
+        self.document_content = DocumentContent.update_or_create_for_document(self)
 
 
 def file_location(instance, filename):
@@ -398,9 +511,8 @@ class AttachmentAbstractModel(models.Model):
     def save(self, *args, **kwargs):
         self.size = self.file.size
         self.filename = self.file.name
-
-        if not self.mimetype:
-            self.mimetype = magic.from_buffer(self.file.read(), mime=True)
+        self.file.seek(0)
+        self.mimetype = magic.from_buffer(self.file.read(), mime=True)
         return super().save(*args, **kwargs)
 
 
@@ -438,6 +550,9 @@ class SourceFile(AttachmentAbstractModel):
         related_name="source_file",
         on_delete=models.CASCADE,
         verbose_name=_("document"),
+    )
+    source_url = models.URLField(
+        _("source URL"), max_length=2048, null=True, blank=True
     )
 
     class Meta:
@@ -506,3 +621,55 @@ class AlternativeName(models.Model):
     class Meta:
         verbose_name = _("alternative name")
         verbose_name_plural = _("alternative names")
+
+    def __str__(self):
+        return self.title
+
+
+class DocumentContent(models.Model):
+    """Support model for storing the actual content of the document. This means it is never loaded in listing views
+    which makes queries faster.
+    """
+
+    document = models.OneToOneField(
+        CoreDocument,
+        on_delete=models.CASCADE,
+        related_name="document_content",
+        verbose_name=_("document"),
+    )
+    # the raw text of the document, extracted either from the source file or the HTML
+    # this makes re-indexing for faster, because we don't need to re-extract the text from the source document
+    content_text = models.TextField(
+        blank=True, null=True, verbose_name=_("document text")
+    )
+
+    class Meta:
+        verbose_name = _("document content")
+        verbose_name_plural = _("document contents")
+
+    @classmethod
+    def update_or_create_for_document(cls, document):
+        """Extract the content from a document, whatever its format is."""
+        text = ""
+        if document.content_html:
+            # it's html, grab the text from the html tree
+            root = html.fromstring(document.content_html)
+            text = " ".join(root.itertext())
+
+        elif hasattr(document, "source_file"):
+            # get the text from the source file, via PDF if necessary
+            with tempfile.NamedTemporaryFile() as tmp:
+                # convert document to pdf and then extract the text
+                pdf = document.source_file.as_pdf()
+                shutil.copyfileobj(pdf, tmp)
+                tmp.flush()
+                text = pdfjs_to_text(tmp.name)
+                # some PDFs have nulls, which breaks SQL insertion
+                # replace rather than deleting to keep string length the same
+                text = text.replace("\0", " ")
+
+        doc_content = DocumentContent.objects.update_or_create(
+            document=document, defaults={"content_text": text}
+        )[0]
+        document.document_content = doc_content
+        return doc_content

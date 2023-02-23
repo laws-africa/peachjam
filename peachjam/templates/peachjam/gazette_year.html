@@ -9,6 +9,9 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a></li>
+            {% if locality %}
+              <li class="breadcrumb-item"><a href="{% url 'gazettes_by_locality' code=locality.code %}">{{ locality }}</a></li>
+            {% endif %}
           </ol>
         </nav>
       {% endblock %}
@@ -17,7 +20,7 @@
         <h1 class="my-4">{% trans 'Gazettes' %} - {{ year }}</h1>
       {% endblock %}
 
-      {% include "peachjam/_gazettes_year_nav.html" %}
+      {% include "peachjam/_years_list.html" %}
     </header>
 
     <div class="my-4">
@@ -42,6 +45,6 @@
       {% endblock %}
     </div>
 
-    {% include "peachjam/_gazettes_year_nav.html" %}
+    {% include "peachjam/_years_list.html" %}
   </div>
 {% endblock %}

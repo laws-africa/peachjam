@@ -3,25 +3,31 @@ from operator import itemgetter
 
 from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.views.generic import TemplateView
 
-from peachjam.models import Gazette
+from peachjam.models import Gazette, Locality
 from peachjam.registry import registry
-from peachjam.views.generic_views import (
-    BaseDocumentDetailView,
-    FilteredDocumentListView,
-)
+from peachjam.views.generic_views import BaseDocumentDetailView, DocumentListView
 
 
-def group_years(years):
+def group_years(years, locality={}):
     # sort list of years
-    years.sort(key=lambda x: x["year"])
+    years.sort(key=lambda x: x["year"], reverse=True)
 
     results = []
     # group list of years dict by year
     for key, value in groupby(years, key=itemgetter("year")):
-        year_dict = {"year": key, "count": sum(int(x["count"]) for x in value)}
+        year_dict = {
+            "year": key,
+            "count": sum(int(x["count"]) for x in value),
+            "url": reverse(
+                "gazettes_by_year",
+                args=[locality.code, key] if locality else [key],
+            ),
+        }
         results.append(year_dict)
     return results
 
@@ -29,14 +35,42 @@ def group_years(years):
 class GazetteListView(TemplateView):
     queryset = Gazette.objects.prefetch_related("source_file")
     template_name = "peachjam/gazette_list.html"
+    navbar_link = "gazettes"
+
+    def get(self, request, code=None, *args, **kwargs):
+        self.locality = get_object_or_404(Locality, code=code) if code else None
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.queryset
+        qs = self.queryset
+        if self.locality:
+            qs = qs.filter(locality=self.locality)
+        return qs
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(locality=self.locality, **kwargs)
 
         queryset = self.get_queryset()
+
+        context["localities"] = []
+        if self.locality is None:
+            locality_ids = list(
+                queryset.order_by()
+                .distinct("locality")
+                .values_list("locality", flat=True)
+            )
+            context["localities"] = Locality.objects.filter(pk__in=locality_ids)
+
+        loc_group = max([len(context["localities"]) // 2, 1])
+        context["locality_groups"] = (
+            context["localities"][:loc_group],
+            context["localities"][loc_group:],
+        )
+
+        if not self.locality:
+            # counts and years for gazettes at the top-level?
+            queryset = queryset.filter(locality=None)
+
         context["num_gazettes"] = queryset.count()
         context["years"] = self.get_year_stats(queryset)
 
@@ -51,11 +85,23 @@ class GazetteListView(TemplateView):
         return group_years(years)
 
 
-class GazetteYearView(FilteredDocumentListView):
+class GazetteYearView(DocumentListView):
     model = Gazette
     queryset = Gazette.objects.prefetch_related("source_file")
     template_name = "peachjam/gazette_year.html"
     paginate_by = 0
+    navbar_link = "gazettes"
+    locality = None
+
+    def get(self, request, code=None, *args, **kwargs):
+        self.locality = get_object_or_404(Locality, code=code) if code else None
+        return super().get(request, *args, **kwargs)
+
+    def get_base_queryset(self):
+        qs = super().get_base_queryset()
+        if self.locality:
+            qs = qs.filter(locality=self.locality)
+        return qs
 
     def get_queryset(self):
         return super().get_queryset().filter(date__year=self.kwargs["year"])
@@ -71,7 +117,9 @@ class GazetteYearView(FilteredDocumentListView):
             )
             .values("year", "count")
         )
-        context["years"] = group_years(years)
+        context["years"] = group_years(years, self.locality)
+        context["locality"] = self.locality
+
         context["gazettes"] = self.group_gazettes(list(self.get_queryset()))
         context["year"] = int(self.kwargs["year"])
 
@@ -92,6 +140,7 @@ class GazetteYearView(FilteredDocumentListView):
 
 
 @registry.register_doc_type("gazette")
-class GenericDocumentDetailView(BaseDocumentDetailView):
+class GazetteDetailView(BaseDocumentDetailView):
     model = Gazette
     template_name = "peachjam/gazette_detail.html"
+    navbar_link = "gazettes"

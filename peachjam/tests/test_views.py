@@ -39,15 +39,12 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]
+        grouped_courts = response.context.get("grouped_courts")
         self.assertIn(
             "Ababacar and Ors vs Senegal [2018] ECOWASCJ 17 (29 June 2018)",
             documents,
         )
-        self.assertIn(
-            "ECOWAS Community Court of Justice",
-            response.context["facet_data"]["courts"],
-        )
-        self.assertEqual(response.context["facet_data"]["years"], [2016, 2018])
+        self.assertIn("High Court", grouped_courts)
 
     def test_court_listing(self):
         response = self.client.get("/judgments/ECOWASCJ/")
@@ -58,7 +55,13 @@ class PeachjamViewsTest(TestCase):
             "Ababacar and Ors vs Senegal [2018] ECOWASCJ 17 (29 June 2018)",
             documents,
         )
-        self.assertEqual(response.context["years"], [2018, 2016])
+        self.assertEqual(
+            response.context["years"],
+            [
+                {"url": "/judgments/ECOWASCJ/2018/", "year": 2018},
+                {"url": "/judgments/ECOWASCJ/2016/", "year": 2016},
+            ],
+        )
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
 
     def test_court_year_listing(self):
@@ -75,7 +78,13 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertEqual(response.context["year"], 2016)
-        self.assertEqual(response.context["years"], [2018, 2016])
+        self.assertEqual(
+            response.context["years"],
+            [
+                {"url": "/judgments/ECOWASCJ/2018/", "year": 2018},
+                {"url": "/judgments/ECOWASCJ/2016/", "year": 2016},
+            ],
+        )
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
 
     def test_judgment_detail(self):
@@ -140,7 +149,7 @@ class PeachjamViewsTest(TestCase):
         self.assertTrue(hasattr(response.context["document"], "author"))
 
     def test_generic_document_listing(self):
-        response = self.client.get("/generic_documents/")
+        response = self.client.get("/doc/")
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]

@@ -16,10 +16,8 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.auth import views
 from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_page
-from django.views.generic import TemplateView
 
 from peachjam.feeds import (
     ArticleAtomSiteNewsFeed,
@@ -39,19 +37,23 @@ from peachjam.views import (
     CourtDetailView,
     CourtYearView,
     DocumentDetailViewResolver,
+    DocumentListView,
     DocumentMediaView,
+    DocumentNatureListView,
     DocumentSourcePDFView,
     DocumentSourceView,
     FirstLevelTaxonomyDetailView,
     GazetteListView,
     GazetteYearView,
-    GenericDocumentListView,
     HomePageView,
     JournalListView,
     JudgmentListView,
     LegalInstrumentListView,
     LegislationListView,
+    PeachjamAdminLoginView,
     PlaceDetailView,
+    PocketLawResources,
+    RobotsView,
     TaxonomyDetailView,
     TermsOfUsePageView,
     TopLevelTaxonomyListView,
@@ -91,10 +93,18 @@ urlpatterns = [
         name="legal_instrument_list",
     ),
     path("gazettes", GazetteListView.as_view(), name="gazettes"),
+    path(
+        "gazettes/<str:code>/", GazetteListView.as_view(), name="gazettes_by_locality"
+    ),
     path("gazettes/<int:year>", GazetteYearView.as_view(), name="gazettes_by_year"),
     path(
-        "generic_documents/",
-        GenericDocumentListView.as_view(),
+        "gazettes/<str:code>/<int:year>",
+        GazetteYearView.as_view(),
+        name="gazettes_by_year",
+    ),
+    path(
+        "doc/",
+        DocumentListView.as_view(),
         name="generic_document_list",
     ),
     path("books/", BookListView.as_view(), name="book_list"),
@@ -154,7 +164,7 @@ urlpatterns = [
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
     path(
         "admin/login/",
-        views.LoginView.as_view(template_name="admin/login.html"),
+        PeachjamAdminLoginView.as_view(),
         name="login",
     ),
     path("admin/", admin.site.urls),
@@ -175,9 +185,17 @@ urlpatterns = [
     path("users/<username>", UserProfileDetailView.as_view(), name="user_profile"),
     path(
         "robots.txt",
-        TemplateView.as_view(
+        RobotsView.as_view(
             template_name="peachjam/robots.txt", content_type="text/plain"
         ),
+    ),
+    path(
+        "pocketlaw-resources", PocketLawResources.as_view(), name="pocketlaw_resources"
+    ),
+    re_path(
+        r"^doc/(?P<nature>\w+)$",
+        DocumentNatureListView.as_view(),
+        name="document_nature_list",
     ),
 ]
 

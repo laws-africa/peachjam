@@ -9,12 +9,14 @@ from django.contrib.contenttypes.admin import GenericStackedInline
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.dates import MONTHS
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from import_export.admin import ImportMixin
+from languages_plus.models import Language
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
@@ -33,6 +35,7 @@ from peachjam.models import (
     DocumentNature,
     DocumentTopic,
     EntityProfile,
+    ExternalDocument,
     Gazette,
     GenericDocument,
     Image,
@@ -55,11 +58,25 @@ from peachjam.models import (
     pj_settings,
 )
 from peachjam.resources import GenericDocumentResource, JudgmentResource
+from peachjam.tasks import extract_citations as extract_citations_task
+from peachjam_search.tasks import search_model_saved
+
+
+class EntityProfileForm(forms.ModelForm):
+    about_html = forms.CharField(
+        widget=CKEditorWidget(),
+        required=False,
+    )
+
+    class Meta:
+        model = EntityProfile
+        exclude = []
 
 
 class EntityProfileInline(GenericStackedInline):
     model = EntityProfile
     extra = 0
+    form = EntityProfileForm
 
 
 class PeachJamSettingsAdmin(admin.ModelAdmin):
@@ -124,6 +141,7 @@ class BaseAttachmentFileInline(admin.TabularInline):
 class SourceFileInline(BaseAttachmentFileInline):
     model = SourceFile
     form = SourceFileForm
+    readonly_fields = (*BaseAttachmentFileInline.readonly_fields, "source_url")
 
 
 class DocumentTopicInline(admin.TabularInline):
@@ -177,7 +195,15 @@ class DateSelectorWidget(forms.MultiWidget):
 
 
 class DocumentForm(forms.ModelForm):
-    content_html = forms.CharField(widget=CKEditorWidget(), required=False)
+    content_html = forms.CharField(
+        widget=CKEditorWidget(
+            extra_plugins=["lawwidgets"],
+            external_plugin_resources=[
+                ("lawwidgets", "/static/js/ckeditor-lawwidgets/", "plugin.js")
+            ],
+        ),
+        required=False,
+    )
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
     headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
     date = forms.DateField(widget=DateSelectorWidget())
@@ -213,11 +239,28 @@ class DocumentForm(forms.ModelForm):
         if self.instance and self.instance.content_html_is_akn:
             self.fields["content_html"].widget.attrs["readonly"] = True
 
+    def clean_content_html(self):
+        # prevent CKEditor-based editing of AKN HTML
+        if self.instance.content_html_is_akn:
+            return self.instance.content_html
+        return self.cleaned_data["content_html"]
+
+    def _save_m2m(self):
+        super()._save_m2m()
+        # update document text
+        self.instance.update_text_content()
+
 
 class DocumentAdmin(admin.ModelAdmin):
     form = DocumentForm
     inlines = [DocumentTopicInline, SourceFileInline, AlternativeNameInline]
-    list_display = ("title", "jurisdiction", "locality", "language", "date")
+    list_display = (
+        "title",
+        "jurisdiction",
+        "locality",
+        "language",
+        "date",
+    )
     list_filter = ("jurisdiction", "locality", "language")
     search_fields = ("title", "date")
     readonly_fields = (
@@ -232,7 +275,7 @@ class DocumentAdmin(admin.ModelAdmin):
     exclude = ("doc_type",)
     date_hierarchy = "date"
     prepopulated_fields = {"frbr_uri_number": ("title",)}
-    actions = ["extract_citations", "reextract_content"]
+    actions = ["extract_citations", "reextract_content", "reindex_for_search"]
 
     fieldsets = [
         (
@@ -288,6 +331,7 @@ class DocumentAdmin(admin.ModelAdmin):
                 "fields": [
                     "toc_json",
                     "content_html_is_akn",
+                    "allow_robots",
                 ],
             },
         ),
@@ -349,14 +393,14 @@ class DocumentAdmin(admin.ModelAdmin):
         return FileResponse(source_file.file)
 
     def extract_citations(self, request, queryset):
-        count = 0
+        count = queryset.count()
         for doc in queryset:
-            count += 1
-            if doc.extract_citations():
-                doc.save()
-        self.message_user(request, f"Extracted citations from {count} documents.")
+            extract_citations_task(doc.pk)
+        self.message_user(
+            request, f"Queued tasks to extract citations from {count} documents."
+        )
 
-    extract_citations.short_description = "Extract citations"
+    extract_citations.short_description = "Extract citations (background)"
 
     def reextract_content(self, request, queryset):
         """Re-extract content from source files that are Word documents, overwriting content_html."""
@@ -369,6 +413,15 @@ class DocumentAdmin(admin.ModelAdmin):
         self.message_user(request, f"Re-imported content from {count} documents.")
 
     reextract_content.short_description = "Re-extract content from DOCX files"
+
+    def reindex_for_search(self, request, queryset):
+        """Setup a background task to re-index documents for search."""
+        count = queryset.count()
+        for doc in queryset:
+            search_model_saved(doc._meta.label, doc.pk)
+        self.message_user(request, f"Queued tasks to re-index for {count} documents.")
+
+    reindex_for_search.short_description = "Re-index for search (background)"
 
 
 class TaxonomyAdmin(TreeAdmin):
@@ -400,6 +453,7 @@ class LegalInstrumentAdmin(ImportMixin, DocumentAdmin):
 
 class LegislationAdmin(ImportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["nature"])
     fieldsets[3][1]["fields"].extend(["metadata_json"])
     fieldsets[2][1]["classes"] = ("collapse",)
     fieldsets[4][1]["fields"].extend(["parent_work"])
@@ -588,6 +642,20 @@ class BookAdmin(DocumentAdmin):
 @admin.register(Journal)
 class JournalAdmin(DocumentAdmin):
     pass
+
+
+@admin.register(ExternalDocument)
+class ExternalDocumentAdmin(DocumentAdmin):
+
+    prepopulated_fields = {"frbr_uri_number": ("title",)}
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields["source_url"].required = True
+        form.base_fields["date"].initial = timezone.now().date()
+        form.base_fields["language"].initial = Language.objects.get(iso_639_3="eng")
+
+        return form
 
 
 admin.site.register(

@@ -1,10 +1,9 @@
 from django.shortcuts import get_object_or_404
-from django.utils.translation import get_language_from_request
 from django.views.generic import DetailView, ListView
-from languages_plus.models import Language
 from lxml import html
 
 from peachjam.forms import BaseDocumentFilterForm
+from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
     CitationLink,
     CoreDocument,
@@ -14,7 +13,6 @@ from peachjam.models import (
     Predicate,
     Relationship,
 )
-from peachjam.utils import add_slash, lowercase_alphabet
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,
@@ -22,49 +20,63 @@ from peachjam_api.serializers import (
 )
 
 
-class FilteredDocumentListView(ListView):
-    """Generic List View class for filtering documents."""
+class DocumentListView(ListView):
+    """Generic list view for document lists."""
 
     context_object_name = "documents"
     paginate_by = 50
     model = CoreDocument
+
+    def get_base_queryset(self):
+        qs = self.queryset if self.queryset is not None else self.model.objects
+        return qs.preferred_language(get_language(self.request))
+
+    def get_queryset(self):
+        return self.get_base_queryset()
+
+
+class FilteredDocumentListView(DocumentListView):
+    """Generic list view for filtered document lists."""
+
     form_class = BaseDocumentFilterForm
 
     def get(self, request, *args, **kwargs):
         self.form = self.form_class(request.GET)
         self.form.is_valid()
-
-        return super(FilteredDocumentListView, self).get(request, *args, **kwargs)
-
-    def get_language(self):
-        language = get_language_from_request(self.request)
-        return Language.objects.get(iso_639_1__iexact=language).iso_639_3
-
-    def get_base_queryset(self):
-        qs = self.queryset or self.model.objects
-        return qs.preferred_language(self.get_language())
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.form.filter_queryset(self.get_base_queryset()).order_by("-date")
+        return self.form.filter_queryset(super().get_queryset())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         authors = []
         courts = []
+        natures = []
         # Initialize facet data values
+        natures = list(
+            {
+                doc_n
+                for doc_n in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="natures"
+                ).values_list("nature__name", flat=True)
+                if doc_n
+            }
+        )
         if self.model in [GenericDocument, LegalInstrument]:
             authors = list(
                 {
                     a
                     for a in self.form.filter_queryset(
-                        self.get_base_queryset(), exclude="author"
+                        self.get_base_queryset(), exclude="authors"
                     ).values_list("author__name", flat=True)
                     if a
                 }
             )
+
         # Legislation objects don't have an associated author, hence empty authors list
-        elif self.model is Judgment:
+        if self.model is Judgment:
             courts = list(
                 {
                     a
@@ -83,11 +95,15 @@ class FilteredDocumentListView(ListView):
             )
         )
 
+        context["doc_table_show_author"] = bool(authors)
+        context["doc_table_show_doc_type"] = bool(natures)
+
         context["facet_data"] = {
             "years": years,
             "authors": authors,
             "courts": courts,
             "alphabet": lowercase_alphabet(),
+            "natures": natures,
         }
         return context
 
@@ -139,6 +155,13 @@ class BaseDocumentDetailView(DetailView):
 
         context["notices"] = self.get_notices()
         context["taxonomies"] = doc.taxonomies.prefetch_related("topic")
+        context["cited_works"] = list(doc.work.cited_works())
+        context["works_citing_current_work"] = list(
+            doc.work.works_citing_current_work()
+        )
+        context["number_of_extracted_citations"] = len(context["cited_works"]) + len(
+            context["works_citing_current_work"]
+        )
 
         return context
 

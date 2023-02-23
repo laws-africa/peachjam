@@ -1,8 +1,37 @@
 import logging
 
 from background_task import background
+from background_task.tasks import DBTaskRunner, Task, logger, tasks
+from django.db.utils import OperationalError
+
+from peachjam.models import CoreDocument, Work
 
 log = logging.getLogger(__name__)
+
+
+class PatchedDBTaskRunner(DBTaskRunner):
+    """Patch DBTaskRunner to be more efficient when pulling tasks from the database. This can be dropped once
+    https://github.com/arteria/django-background-tasks/pull/244/files is merged into django-background-task.
+    """
+
+    def get_task_to_run(self, tasks, queue=None):
+        try:
+            # This is the changed line
+            available_tasks = Task.objects.find_available(queue).filter(
+                task_name__in=tasks._tasks
+            )[:5]
+            for task in available_tasks:
+                # try to lock task
+                locked_task = task.lock(self.worker_name)
+                if locked_task:
+                    return locked_task
+            return None
+        except OperationalError:
+            logger.warning("Failed to retrieve tasks. Database unreachable.")
+
+
+# use the patched runner
+tasks._runner = PatchedDBTaskRunner()
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
@@ -62,3 +91,44 @@ def run_ingestors():
             ingestor.check_for_updates()
 
     log.info("Running ingestors done")
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def extract_citations(document_id):
+    """Extract citations from a document in the background."""
+
+    log.info(f"Extracting citations for document {document_id}")
+
+    doc = CoreDocument.objects.filter(pk=document_id).first()
+    if not doc:
+        log.info(f"No document with id {document_id} exists, ignoring.")
+        return
+
+    try:
+        if doc.extract_citations():
+            doc.save()
+    except Exception as e:
+        log.error(f"Error extracting citations for {doc}", exc_info=e)
+        raise
+
+    log.info("Citations extracted")
+
+
+@background(queue="peachjam", schedule=60, remove_existing_tasks=True)
+def update_extracted_citations_for_a_work(work_id):
+    """Update Extracted Citations for a work."""
+
+    work = Work.objects.filter(pk=work_id).first()
+    if not work:
+        log.info(f"No work with id {work_id} exists, ignoring.")
+        return
+
+    log.info(f"Updating extracted citations for work {work_id}")
+
+    try:
+        work.update_extracted_citations()
+        log.info(f"Citations for work {work_id} extracted")
+
+    except Exception as e:
+        log.error(f"Error extracting citations for {work_id}", exc_info=e)
+        raise e

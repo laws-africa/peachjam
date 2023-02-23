@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 
+from peachjam.helpers import lowercase_alphabet
 from peachjam.models import Court, Judgment
-from peachjam.utils import lowercase_alphabet
 from peachjam.views.generic_views import FilteredDocumentListView
 
 
@@ -29,7 +30,7 @@ class CourtDetailView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["years"] = sorted(
+        years = sorted(
             list(
                 self.model.objects.filter(court=self.court)
                 .order_by()
@@ -38,6 +39,13 @@ class CourtDetailView(FilteredDocumentListView):
             ),
             reverse=True,
         )
+
+        context["years"] = [
+            {"url": reverse("court_year", args=[self.court.code, y]), "year": y}
+            for y in years
+        ]
+
+        context["all_years_url"] = reverse("court", args=[self.court.code])
 
         judges = list(
             self.get_base_queryset()

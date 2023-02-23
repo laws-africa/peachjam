@@ -4,7 +4,14 @@ from countries_plus.models import Country
 from django.db import connection
 from languages_plus.models import Language
 
-from peachjam.models import CoreDocument, Gazette, Locality, SourceFile
+from peachjam.models import (
+    CoreDocument,
+    DocumentContent,
+    DocumentNature,
+    Gazette,
+    Locality,
+    SourceFile,
+)
 from peachjam.plugins import plugins
 
 from .adapters import Adapter
@@ -23,20 +30,34 @@ class GazetteAdapter(Adapter):
             f"Checking for new gazettes from Gazettes.Africa since {last_refreshed}"
         )
 
-        new_gazettes = (
-            CoreDocument.objects.filter(
-                doc_type="gazette", jurisdiction=self.jurisdiction
-            )
+        queryset = (
+            CoreDocument.objects.filter(doc_type="gazette")
             .non_polymorphic()
             .using("gazettes_africa")
         )
-        if last_refreshed:
-            new_gazettes.filter(updated_at__gt=last_refreshed)
 
-        return list(new_gazettes.values_list("expression_frbr_uri", flat=True))
+        if "-" not in self.jurisdiction:
+            # locality code not specified hence None e.g "ZA"
+            queryset = queryset.filter(jurisdiction=self.jurisdiction, locality=None)
+        else:
+            queryset = queryset.filter(jurisdiction=self.jurisdiction.split("-")[0])
+
+            # locality code present e.g. "ZA-gp"
+            if self.jurisdiction.split("-")[1] != "*":
+                queryset = queryset.filter(
+                    locality__code=self.jurisdiction.split("-")[1]
+                )
+            else:
+                # fetch all localities for this jurisdiction e.g. "ZA-*"
+                queryset = queryset.exclude(locality=None)
+
+        if last_refreshed:
+            queryset = queryset.filter(updated_at__gt=last_refreshed)
+
+        return list(queryset.values_list("expression_frbr_uri", flat=True))
 
     def update_document(self, expression_frbr_uri):
-        log.info("Updating new gazettes...")
+        log.info(f"Updating new gazette {expression_frbr_uri}")
 
         ga_gazette = (
             CoreDocument.objects.filter(expression_frbr_uri=expression_frbr_uri)
@@ -65,6 +86,15 @@ class GazetteAdapter(Adapter):
             if ga_gazette.locality:
                 data["locality"] = Locality.objects.get(code=ga_gazette.locality.code)
 
+            if ga_gazette.nature:
+                document_nature_name = " ".join(
+                    [name for name in ga_gazette.nature.name.split("-")]
+                ).capitalize()
+                data["nature"] = DocumentNature.objects.get_or_create(
+                    code=ga_gazette.nature.code,
+                    defaults={"name": document_nature_name},
+                )[0]
+
             updated_gazette, new = Gazette.objects.update_or_create(
                 expression_frbr_uri=expression_frbr_uri, defaults={**data}
             )
@@ -78,8 +108,10 @@ class GazetteAdapter(Adapter):
             file_path = ga_source_file[0].pop("file")
 
             if ga_source_file:
+                source_url = f"https://gazettes.africa{expression_frbr_uri}/source"
                 updated_source_file, _ = SourceFile.objects.update_or_create(
-                    document=updated_gazette, defaults={"file": f"{file_path}"}
+                    document=updated_gazette,
+                    defaults={"file": f"{file_path}", "source_url": source_url},
                 )
 
                 # update the source file to include the bucket name
@@ -91,5 +123,11 @@ class GazetteAdapter(Adapter):
                         WHERE id  = {updated_source_file.pk}
                         """
                     cursor.execute(sql)
+
+            if hasattr(ga_gazette, "document_content"):
+                ga_content_text = ga_gazette.document_content.content_text
+                DocumentContent.objects.update_or_create(
+                    document=updated_gazette, content_text=ga_content_text
+                )
 
             log.info("Update Done.")

@@ -73,6 +73,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "log_request_id.middleware.RequestIDMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -108,6 +109,10 @@ PEACHJAM = {
     "SUPPORT_EMAIL": os.environ.get("SUPPORT_EMAIL"),
     "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
     "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),
+    "CITATOR_API": os.environ.get(
+        "CITATOR_API", "https://api.laws.africa/citator/v1/extract-citations"
+    ),
+    "CITATOR_API_KEY": os.environ.get("CITATOR_API_KEY"),
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -431,6 +436,8 @@ LOGGING = {
         "": {"handlers": ["console"], "level": "ERROR"},
         "django": {"level": "INFO"},
         "peachjam": {"level": "DEBUG" if DEBUG else "INFO"},
+        "peachjam_search": {"level": "DEBUG" if DEBUG else "INFO"},
+        "peachjam_api": {"level": "DEBUG" if DEBUG else "INFO"},
         "background_task": {"level": "INFO"},
     },
 }
@@ -441,7 +448,30 @@ if DEBUG:
 
 GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
 
-CKEDITOR_CONFIGS = {"default": {"removePlugins": ["image"]}}
+CKEDITOR_CONFIGS = {
+    # The rest of this config is defined in ckeditor.configs.DEFAULT_CONFIG
+    "default": {
+        "removePlugins": ["image"],
+        "toolbar_Full": [
+            [
+                "Styles",
+                "Format",
+                "Bold",
+                "Italic",
+                "Underline",
+                "Strike",
+                "SpellChecker",
+                "Undo",
+                "Redo",
+            ],
+            ["Link", "Unlink", "Anchor"],
+            ["Image", "Flash", "Table", "HorizontalRule"],
+            ["TextColor", "BGColor"],
+            ["Smiley", "SpecialChar", "LaAkn"],
+            ["Source"],
+        ],
+    }
+}
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 SESSION_COOKIE_SECURE = True
