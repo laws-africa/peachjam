@@ -476,13 +476,10 @@ class AttachedFilesInline(BaseAttachmentFileInline):
 
 class JudgmentAdminForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
-    registry = forms.ModelChoiceField(
-        queryset=CourtRegistry.objects.all(), required=False
-    )
 
     class Meta:
         model = Judgment
-        fields = ("hearing_date", "registry")
+        fields = ("hearing_date",)
 
     def save(self, *args, **kwargs):
         if (
