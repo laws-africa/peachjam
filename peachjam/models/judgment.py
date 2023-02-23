@@ -77,7 +77,7 @@ class CourtRegistry(models.Model):
         Court,
         on_delete=models.CASCADE,
         null=True,
-        related_name="court_registry",
+        related_name="registries",
     )
     name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
 
@@ -221,6 +221,10 @@ class Judgment(CoreDocument):
         self.citation = self.title
 
     def save(self, *args, **kwargs):
+        # ensure registry aligns to the court
+        if self.registry:
+            self.court = self.registry.court
+
         self.doc_type = "judgment"
         self.assign_mnc()
         self.assign_title()
