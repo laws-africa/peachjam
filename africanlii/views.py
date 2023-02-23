@@ -33,6 +33,7 @@ class AGPLegalInstrumentListView(FilteredDocumentListView):
 
 class AGPSoftLawListView(DocumentListView):
     template_name = "peachjam/soft_law_list.html"
+    navbar_link = "soft-law"
 
     def get_base_queryset(self):
         qs = super().get_base_queryset()
