@@ -87,7 +87,7 @@ class CourtRegistry(models.Model):
         unique_together = ("court", "name")
 
     def __str__(self):
-        return f"{self.name} Registry - {self.court}"
+        return f"{self.name} - {self.court}"
 
 
 class Judgment(CoreDocument):
