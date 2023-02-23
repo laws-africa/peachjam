@@ -3,7 +3,7 @@ import PdfRenderer from '../pdf-renderer';
 import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { vueI18n } from '../../i18n';
-import { createTocController, generateHtmlTocItems } from '../../utils/function';
+import { createTocController, generateHtmlTocItems, wrapTocItems } from '../../utils/function';
 import EnrichmentsManager from './enrichments-manager';
 import i18next from 'i18next';
 
@@ -30,12 +30,13 @@ class DocumentContent {
   private searchApp: any;
   private navOffCanvas: OffCanvas | undefined;
   private enchrichmentsManager: EnrichmentsManager | null = null;
-  private originalDocCloned: Node | undefined;
+  private originalDocument: HTMLElement | undefined;
   private tocController: HTMLElement| null = null;
-  private documentElement: Element | null = null;
+  private documentElement: Element | null;
 
   constructor (root: HTMLElement) {
     this.root = root;
+    this.documentElement = this.root.querySelector('[data-document-element]');
 
     this.setupTabs();
     this.setupNav();
@@ -121,13 +122,12 @@ class DocumentContent {
   }
 
   setupSearch () {
-    const documentElement: HTMLElement | null = this.root.querySelector('[data-document-element]');
     const targetMountElement = this.root.querySelector('[data-doc-search]');
     if (targetMountElement) {
       this.searchApp = createAndMountApp({
         component: DocumentSearch,
         props: {
-          document: documentElement,
+          document: this.documentElement,
           docType: this.root.getAttribute('data-display-type'),
           mountElement: targetMountElement
         },
@@ -168,26 +168,29 @@ class DocumentContent {
     , 200));
   }
 
+  /**
+   * Setup the TOC so that when an item is activated, only the content for that item is shown in the document view.
+   */
   setupTocShowActiveItemOnly () {
-    // TODO
-    this.documentElement = this.root.querySelector('[data-document-element]');
-    this.originalDocCloned = this.documentElement?.cloneNode(true);
+    if (this.documentElement) {
+      this.originalDocument = this.documentElement.cloneNode(true) as HTMLElement;
 
-    this.tocController?.addEventListener('itemTitleClicked', (e) => {
-      const customEvt = e as CustomEvent;
-      const id = customEvt.detail.target.getAttribute('href').replace('#', '');
-      if (!this.documentElement) return;
-      if (!(this.originalDocCloned && this.originalDocCloned instanceof HTMLElement)) return;
-      if (id) {
-        const sectionOfFocus = this.originalDocCloned.querySelector(`#${id}`)?.cloneNode(true) as HTMLElement | undefined;
-        if (!sectionOfFocus) return;
-        // Delete content within document element and then append section of focus
-        this.documentElement.replaceChildren(sectionOfFocus);
-      } else {
-        // @ts-ignore
-        this.documentElement.replaceChildren(...Array.from(this.originalDocCloned.children).map(node => node.cloneNode(true)));
-      }
-    });
+      this.tocController?.addEventListener('itemTitleClicked', (e) => {
+        if (this.originalDocument && this.documentElement) {
+          const id = (e as CustomEvent).detail.target.getAttribute('href');
+          if (id) {
+            const sectionOfFocus = this.originalDocument.querySelector(id)?.cloneNode(true) as HTMLElement;
+            if (sectionOfFocus) {
+              // Delete content within document element and then append section of focus
+              this.documentElement.replaceChildren(sectionOfFocus);
+            }
+          } else {
+            // @ts-ignore
+            this.documentElement.replaceChildren(...Array.from(this.originalDocument.children).map(node => node.cloneNode(true)));
+          }
+        }
+      });
+    }
   }
 
   setupTocForTab () {
@@ -212,14 +215,20 @@ class DocumentContent {
 
   getTocItems = () => {
     let items = [];
+
     if (this.root.getAttribute('data-display-type') === 'akn') {
-      const aknTocJsonElement: HTMLElement | null = this.root.querySelector('#akn_toc_json');
-      items = aknTocJsonElement && JSON.parse(aknTocJsonElement.textContent as string)
-        ? JSON.parse(aknTocJsonElement.textContent as string) : [];
+      const tocElement: HTMLElement | null = this.root.querySelector('#akn_toc_json');
+      if (tocElement) {
+        items = JSON.parse(tocElement.textContent as string) || [];
+      }
     } else if (this.root.getAttribute('data-display-type') === 'html') {
       const content: HTMLElement | null = this.root.querySelector('.content__html');
-      items = content ? generateHtmlTocItems(content) : [];
+      if (content) {
+        items = generateHtmlTocItems(content);
+        wrapTocItems(content, items);
+      }
     }
+
     return items;
   }
 
