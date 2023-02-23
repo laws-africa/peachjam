@@ -98,8 +98,6 @@ class BaseDocumentFilterForm(forms.Form):
         self.params = QueryDict(mutable=True)
         self.params.update(data)
 
-        print(self.params)
-
         super().__init__(self.params, *args, **kwargs)
 
     def filter_queryset(self, queryset, exclude=None):
