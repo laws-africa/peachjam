@@ -2,6 +2,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models import Max
 from django.template.defaultfilters import date as format_date
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
@@ -78,8 +79,10 @@ class CourtRegistry(models.Model):
         on_delete=models.CASCADE,
         null=True,
         related_name="registries",
+        verbose_name=_("court"),
     )
     name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
 
     class Meta:
         verbose_name = _("court registry")
@@ -89,13 +92,22 @@ class CourtRegistry(models.Model):
     def __str__(self):
         return f"{self.name} - {self.court}"
 
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = f"{self.court.code}-{slugify(self.name)}"
+        return super().save(*args, **kwargs)
+
 
 class Judgment(CoreDocument):
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
     )
     registry = models.ForeignKey(
-        CourtRegistry, on_delete=models.PROTECT, null=True, related_name="judgments"
+        CourtRegistry,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="judgments",
+        blank=True,
     )
     judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
     headnote_holding = models.TextField(_("headnote holding"), null=True, blank=True)

@@ -32,6 +32,7 @@ from peachjam.models import (
     Author,
     CaseNumber,
     Court,
+    CourtRegistry,
     DocumentNature,
     DocumentTopic,
     GenericDocument,
@@ -441,6 +442,20 @@ class JudgmentResource(BaseDocumentResource):
         case_numbers = [CaseNumber(**data) for data in case_numbers_data]
 
         return case_numbers
+
+    def before_import_row(self, row, **kwargs):
+        super().before_import_row(row, **kwargs)
+
+        if row.get("registry"):
+            court = Court.objects.get(code=row["court"])
+
+            registry, _ = CourtRegistry.objects.get_or_create(
+                name=row["registry"],
+                court=court,
+                code=f"{court.code}-{row['registry']}",
+            )
+
+            row["registry"] = registry.pk
 
     def after_import_row(self, row, instance, row_number=None, **kwargs):
         super().after_import_row(row, instance, row_number, **kwargs)
