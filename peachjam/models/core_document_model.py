@@ -116,10 +116,9 @@ class Work(models.Model):
     def fetch_cited_works_frbr_uris(self):
         """Returns a set of work_frbr_uris,
         taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links."""
+        work_frbr_uris = set()
+
         for doc in self.documents.all():
-
-            work_frbr_uris = set()
-
             if doc.content_html:
                 root = html.fromstring(doc.content_html)
                 for a in root.xpath('//a[starts-with(@href, "/akn")]'):
@@ -136,11 +135,11 @@ class Work(models.Model):
                         # ignore malformed FRBR URIs
                         pass
 
-            # A work does not cite itself
-            if self.frbr_uri in work_frbr_uris:
-                work_frbr_uris.remove(self.frbr_uri)
+        # A work does not cite itself
+        if self.frbr_uri in work_frbr_uris:
+            work_frbr_uris.remove(self.frbr_uri)
 
-            return work_frbr_uris
+        return work_frbr_uris
 
     def cited_works(self):
         """Shows a list of works cited by the current work."""

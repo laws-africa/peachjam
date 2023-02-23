@@ -213,48 +213,54 @@ jobs:
 
 
 
-#  deploy-zimlii:
-#    name: Deploy to zimlii
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#
-#      - name: git push to zimlii.org
-#        uses: dokku/github-action@master
-#        with:
-#          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-#          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/zimlii-peachjam'
-#          git_push_flags: '--force'
+  deploy-zimlii:
+    if: ${{ always() }}
+    needs: deploy-seylii
+    name: Deploy to zimlii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: git push to zimlii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/zimlii-peachjam'
+          git_push_flags: '--force'
 
 
-#  deploy-tcilii:
-#    name: Deploy to tcilii
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#
-#      - name: git push to tcilii.org
-#        uses: dokku/github-action@master
-#        with:
-#          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-#          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/tcilii-peachjam'
-#          git_push_flags: '--force'
+  deploy-tcilii:
+    if: ${{ always() }}
+    needs: deploy-lesotholii
+    name: Deploy to tcilii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-#  deploy-tanzlii:
-#    name: Deploy to tanzlii
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#
-#      - name: git push to tanzlii.org
-#        uses: dokku/github-action@master
-#        with:
-#          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-#          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/tanzlii-peachjam'
-#          git_push_flags: '--force'
+      - name: git push to tcilii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/tcilii-peachjam'
+          git_push_flags: '--force'
+
+  deploy-tanzlii:
+    if: ${{ always() }}
+    needs: deploy-sierralii
+    name: Deploy to tanzlii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: git push to tanzlii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/tanzlii-peachjam'
+          git_push_flags: '--force'
