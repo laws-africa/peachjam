@@ -227,6 +227,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "content": None,
         "court": None,
         "alternative_names": {"boost": 4},
+        "registry": None,
     }
 
     faceted_search_fields = {
@@ -266,6 +267,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         },
         "court": {"field": "court", "options": {"size": 100}},
         "judges": {"field": "judges", "options": {"size": 100}},
+        "registry": {"field": "registry", "options": {"size": 100}},
     }
 
     highlight_fields = {
