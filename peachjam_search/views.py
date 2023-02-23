@@ -216,6 +216,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "nature": "nature",
         "year": "year",
         "judges": "judges",
+        "registry": "registry",
     }
 
     search_fields = {
