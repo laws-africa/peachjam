@@ -92,7 +92,7 @@ class BaseDocumentFilterForm(forms.Form):
     judges = forms.CharField(required=False)
     natures = forms.CharField(required=False)
     localities = forms.CharField(required=False)
-    registeries = forms.CharField(required=False)
+    registries = forms.CharField(required=False)
 
     def __init__(self, data, *args, **kwargs):
         self.params = QueryDict(mutable=True)
