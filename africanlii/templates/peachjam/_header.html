@@ -30,7 +30,13 @@
 {% block nav-items %}
 <li class="nav-item dropdown main-nav">
   <a
-    class="nav-link {% if view.navbar_link == 'legislation' %}active{% endif%} dropdown-toggle"
+    class="nav-link
+    {% with 'legislation soft_law legal_instruments judgments gazettes' as list %}
+    {% if view.navbar_link in list.split %}
+    active
+    {% endif %}
+    {% endwith %}
+    dropdown-toggle"
     href="#"
     role="button"
     data-bs-toggle="dropdown"
@@ -63,7 +69,7 @@
       </a>
     </li>
     <li class="dropdown-item">
-      <a class="nav-link px-0 {% if view.navbar_link == 'legislation' %}active{% endif%}" href="{% url 'agp_soft_law_list' %}"
+      <a class="nav-link px-0 {% if view.navbar_link == 'soft_law' %}active{% endif%}" href="{% url 'agp_soft_law_list' %}"
         >{% trans 'Soft Law' %}
 
         <div class="dropdown-summary text-muted">{% trans 'Policies, decisions, recommendations and communiques.' %}</div>
@@ -95,7 +101,7 @@
 </li>
 <li class="nav-item">
   <a
-    class="nav-link {% if view.navbar_link == 'doc' %}active{% endif%}"
+    class="nav-link {% if view.navbar_link == 'reports_guides' %}active{% endif%}"
     href="{% url 'agp_reports_guides_list' %}"a
     >{% trans 'Reports & Guides' %}</a
   >
