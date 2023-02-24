@@ -6,7 +6,7 @@ from django.core.files import File
 from django.http import QueryDict
 from django.utils.text import slugify
 
-from peachjam.models import CoreDocument, Ingestor, SourceFile
+from peachjam.models import AttachedFiles, CoreDocument, Ingestor, SourceFile
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
 
@@ -144,18 +144,35 @@ class BaseDocumentFilterForm(forms.Form):
         return queryset
 
 
-class SourceFileForm(forms.ModelForm):
-    class Meta:
-        model = SourceFile
-        fields = "__all__"
+class AttachmentFormMixin:
+    """Admin form for editing models that extend from AbstractAttachmentModel."""
 
     def clean_file(self):
         # dynamic storage files don't like colons in filenames
         self.cleaned_data["file"].name = clean_filename(self.cleaned_data["file"].name)
         return self.cleaned_data["file"]
 
+    def save(self, commit=True):
+        # clear these for changed files so they get updated
+        if "file" in self.changed_data:
+            self.instance.size = None
+            self.instance.mimetype = None
+        return super().save(commit)
+
+
+class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
+    class Meta:
+        model = SourceFile
+        fields = "__all__"
+
     def _save_m2m(self):
         super()._save_m2m()
         if "file" in self.changed_data:
             if self.instance.document.extract_content_from_source_file():
                 self.instance.document.save()
+
+
+class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):
+    class Meta:
+        model = AttachedFiles
+        fields = "__all__"
