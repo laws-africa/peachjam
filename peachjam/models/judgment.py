@@ -93,8 +93,7 @@ class CourtRegistry(models.Model):
         return f"{self.name} - {self.court}"
 
     def save(self, *args, **kwargs):
-        if not self.code:
-            self.code = f"{self.court.code}-{slugify(self.name)}"
+        self.code = f"{self.court.code}-{slugify(self.name)}"
         return super().save(*args, **kwargs)
 
 

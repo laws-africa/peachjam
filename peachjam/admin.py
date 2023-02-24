@@ -661,6 +661,11 @@ class ExternalDocumentAdmin(DocumentAdmin):
         return form
 
 
+@admin.register(CourtRegistry)
+class CourtRegistryAdmin(admin.ModelAdmin):
+    readonly_fields = ("code",)
+
+
 admin.site.register(
     [
         Image,
@@ -670,7 +675,6 @@ admin.site.register(
         MatterType,
         CourtClass,
         AttachedFileNature,
-        CourtRegistry,
     ]
 )
 admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)
