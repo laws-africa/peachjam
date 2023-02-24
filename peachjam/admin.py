@@ -32,6 +32,7 @@ from peachjam.models import (
     CitationLink,
     Court,
     CourtClass,
+    CourtRegistry,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -498,8 +499,10 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     filter_horizontal = ("judges",)
     list_filter = (*DocumentAdmin.list_filter, "court")
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+
     fieldsets[0][1]["fields"].insert(3, "court")
-    fieldsets[0][1]["fields"].insert(4, "case_name")
+    fieldsets[0][1]["fields"].insert(4, "registry")
+    fieldsets[0][1]["fields"].insert(5, "case_name")
     fieldsets[0][1]["fields"].insert(7, "mnc")
     fieldsets[0][1]["fields"].insert(8, "serial_number_override")
     fieldsets[0][1]["fields"].insert(9, "serial_number")
@@ -656,6 +659,11 @@ class ExternalDocumentAdmin(DocumentAdmin):
         form.base_fields["language"].initial = Language.objects.get(iso_639_3="eng")
 
         return form
+
+
+@admin.register(CourtRegistry)
+class CourtRegistryAdmin(admin.ModelAdmin):
+    readonly_fields = ("code",)
 
 
 admin.site.register(

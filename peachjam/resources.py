@@ -32,6 +32,7 @@ from peachjam.models import (
     Author,
     CaseNumber,
     Court,
+    CourtRegistry,
     DocumentNature,
     DocumentTopic,
     GenericDocument,
@@ -386,6 +387,11 @@ class JudgmentResource(BaseDocumentResource):
         column_name="court",
         attribute="court",
         widget=ForeignKeyWidget(Court, field="code"),
+    )
+    registry = fields.Field(
+        column_name="registry",
+        attribute="registry",
+        widget=ForeignKeyWidget(CourtRegistry, field="code"),
     )
     case_numbers = fields.Field(column_name="case_numbers", widget=CharWidget)
 

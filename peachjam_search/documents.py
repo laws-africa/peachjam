@@ -38,6 +38,7 @@ class SearchableDocument(Document):
     headnote_holding = fields.TextField()
     flynote = fields.TextField()
     judges = fields.KeywordField(attr="judge.name")
+    registry = fields.KeywordField(attr="registry.name")
 
     # GenericDocument, LegalInstrument
     author = fields.KeywordField(attr="author.name")
