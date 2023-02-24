@@ -48,19 +48,23 @@ class CourtDetailView(FilteredDocumentListView):
         context["all_years_url"] = reverse("court", args=[self.court.code])
 
         judges = list(
-            self.get_base_queryset()
-            .order_by("judges__name")
-            .values_list("judges__name", flat=True)
-            .distinct()
-            .exclude(judges=None)
+            {
+                judge
+                for judge in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="judges"
+                ).values_list("judges__name", flat=True)
+                if judge
+            }
         )
 
         registries = list(
-            self.get_base_queryset()
-            .order_by("registry__name")
-            .values_list("registry__name", flat=True)
-            .distinct()
-            .exclude(registry=None)
+            {
+                registry
+                for registry in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="registries"
+                ).values_list("registry__name", flat=True)
+                if registry
+            }
         )
 
         context["court"] = self.court
