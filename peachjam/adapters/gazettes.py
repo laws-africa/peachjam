@@ -129,5 +129,6 @@ class GazetteAdapter(Adapter):
                 DocumentContent.objects.update_or_create(
                     document=updated_gazette, content_text=ga_content_text
                 )
+            updated_gazette.extract_citations()
 
             log.info("Update Done.")
