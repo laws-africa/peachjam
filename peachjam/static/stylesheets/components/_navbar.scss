@@ -18,13 +18,15 @@ $dropdown-box-shadow: $box-shadow-lg;
 }
 
 @include media-breakpoint-up(lg) {
-  .dropdown-menu {
-    @include box-shadow($dropdown-box-shadow);
-  }
+  .navbar {
+    .dropdown-menu {
+      @include box-shadow($dropdown-box-shadow);
+    }
 
-  .dropdown:hover .dropdown-menu {
-    display: block;
-    margin-top: 0;
+    .dropdown:hover .dropdown-menu {
+      display: block;
+      margin-top: 0;
+    }
   }
 
 }
