@@ -19,6 +19,7 @@ class HomePageView(BaseHomePageView):
 class AGPLegalInstrumentListView(FilteredDocumentListView):
     model = CoreDocument
     template_name = "peachjam/legal_instrument_list.html"
+    navbar_link = "legal_instruments"
 
     def get_base_queryset(self):
         qs = super().get_base_queryset()
@@ -32,6 +33,7 @@ class AGPLegalInstrumentListView(FilteredDocumentListView):
 
 class AGPSoftLawListView(DocumentListView):
     template_name = "peachjam/soft_law_list.html"
+    navbar_link = "soft_law"
 
     def get_base_queryset(self):
         qs = super().get_base_queryset()
@@ -41,6 +43,7 @@ class AGPSoftLawListView(DocumentListView):
 
 class AGPReportsGuidesListView(DocumentListView):
     template_name = "peachjam/reports_guides_list.html"
+    navbar_link = "reports_guides"
 
     def get_base_queryset(self):
         qs = super().get_base_queryset()
