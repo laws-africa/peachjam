@@ -99,8 +99,7 @@ class GazetteYearView(DocumentListView):
 
     def get_base_queryset(self):
         qs = super().get_base_queryset()
-        if self.locality:
-            qs = qs.filter(locality=self.locality)
+        qs = qs.filter(locality=self.locality)
         return qs
 
     def get_queryset(self):
