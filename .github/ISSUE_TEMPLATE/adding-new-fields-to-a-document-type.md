@@ -2,9 +2,6 @@
 name: Adding new fields to a document type
 about: This template seeks to cover questions that we need to ask to understand implementation
   and a checklist for the actual implementation.
-title: ''
-labels: ''
-assignees: ''
 
 ---
 
