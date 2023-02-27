@@ -20,7 +20,12 @@ from languages_plus.models import Language
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from peachjam.forms import IngestorForm, NewDocumentFormMixin, SourceFileForm
+from peachjam.forms import (
+    AttachedFilesForm,
+    IngestorForm,
+    NewDocumentFormMixin,
+    SourceFileForm,
+)
 from peachjam.models import (
     AlternativeName,
     Article,
@@ -39,7 +44,6 @@ from peachjam.models import (
     ExternalDocument,
     Gazette,
     GenericDocument,
-    Image,
     Ingestor,
     IngestorSetting,
     Journal,
@@ -110,15 +114,6 @@ class SourceFileFilter(admin.SimpleListFilter):
             return queryset.filter(document__doc_type="legal_instrument")
         else:
             return queryset
-
-
-class SourceFileAdmin(admin.ModelAdmin):
-    list_display = ("filename",)
-    list_filter = (SourceFileFilter,)
-    search_fields = ("filename",)
-
-
-admin.site.register(SourceFile, SourceFileAdmin)
 
 
 class BaseAttachmentFileInline(admin.TabularInline):
@@ -472,6 +467,7 @@ class CaseNumberAdmin(admin.TabularInline):
 
 class AttachedFilesInline(BaseAttachmentFileInline):
     model = AttachedFiles
+    form = AttachedFilesForm
 
 
 class JudgmentAdminForm(DocumentForm):
@@ -668,7 +664,6 @@ class CourtRegistryAdmin(admin.ModelAdmin):
 
 admin.site.register(
     [
-        Image,
         Locality,
         CitationLink,
         Judge,

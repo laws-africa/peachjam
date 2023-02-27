@@ -509,10 +509,12 @@ class AttachmentAbstractModel(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        self.size = self.file.size
         self.filename = self.file.name
-        self.file.seek(0)
-        self.mimetype = magic.from_buffer(self.file.read(), mime=True)
+        if self.size is None:
+            self.size = self.file.size
+        if not self.mimetype:
+            self.file.seek(0)
+            self.mimetype = magic.from_buffer(self.file.read(), mime=True)
         return super().save(*args, **kwargs)
 
 
