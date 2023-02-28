@@ -77,25 +77,25 @@
       {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
     </div>
   </section>
-  <section class="pb-5 pt-5">
-    <div class="container">
-      <h2 class="mb-4 heading-underlined">{% trans 'Recent AU Documents' %}</h2>
-      {% trans 'View more AU documents' as text %}
-      {% include 'peachjam/_recent_document_list.html' with documents=recent_documents view_more_text=text view_more_url_name='generic_document_list' %}
-    </div>
-  </section>
   <section class="pb-5 pt-5 bg-light">
     <div class="container">
       <h2 class="mb-4 heading-underlined">{% trans 'Recent Legal Instruments' %}</h2>
       {% trans 'View more legal instruments' as text %}
-      {% include 'peachjam/_recent_document_list.html' with documents=recent_instruments view_more_text=text view_more_url_name='legal_instrument_list' %}
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_legal_instruments view_more_text=text view_more_url_name='agp_legal_instrument_list' %}
     </div>
   </section>
   <section class="pb-5 pt-5">
     <div class="container">
-      <h2 class="mb-4 heading-underlined">{% trans 'Recent Treaties and Protocols ' %}</h2>
-      {% trans 'View more treaties and protocols' as text %}
-      {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
+      <h2 class="mb-4 heading-underlined">{% trans 'Recent Soft Law' %}</h2>
+      {% trans 'View more Soft Law' as text %}
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_soft_law view_more_text=text view_more_url_name='agp_soft_law_list' %}
+    </div>
+  </section>
+  <section class="pb-5 pt-5">
+    <div class="container">
+      <h2 class="mb-4 heading-underlined">{% trans 'Recent Reports and Guides' %}</h2>
+      {% trans 'View more Reports and Guides' as text %}
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_reports_guides view_more_text=text view_more_url_name='agp_reports_guides_list' %}
     </div>
   </section>
   <section class="pb-5 pt-5 bg-light">
