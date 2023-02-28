@@ -9,6 +9,19 @@ from django.utils.translation import override as lang_override
 from peachjam.models import CoreDocument
 
 
+class Attorney(models.Model):
+    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("attorney")
+        verbose_name_plural = _("attorneys")
+
+    def __str__(self):
+        return self.name
+
+
 class Judge(models.Model):
     name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
     description = models.TextField(_("description"), blank=True)
@@ -109,6 +122,9 @@ class Judgment(CoreDocument):
         blank=True,
     )
     judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
+    attorneys = models.ManyToManyField(
+        Attorney, blank=True, verbose_name=_("attorneys")
+    )
     headnote_holding = models.TextField(_("headnote holding"), null=True, blank=True)
     additional_citations = models.TextField(
         _("additional citations"), null=True, blank=True
