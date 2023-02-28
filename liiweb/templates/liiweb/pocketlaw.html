@@ -1,27 +1,23 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load static i18n %}
-
 {% block title %}Pocket Law{% endblock %}
-
 {% block page-content %}
   <section class="py-5">
     <div class="container">
       <h1 class="mb-4">{% trans 'Pocket Law' %}</h1>
-
       <div class="mb-5 text-center">
-        <img src="{% static 'images/pocketlaw-logo.png' %}" alt="Pocket Law" class="img-fluid">
+        <img src="{% static 'images/pocketlaw-logo.png' %}"
+             alt="Pocket Law"
+             class="img-fluid"/>
       </div>
-
       <div class="text-center mb-5">
         <h2 class="display-5">Your offline {{ APP_NAME }} companion.</h2>
       </div>
-
       <div class="text-center mb-5">
         <p class="display-6">
           When your internet is down or load-shedding strikes, Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.
         </p>
       </div>
-
       <div class="row">
         <div class="col-md-8 mb-3">
           <h3>Get started with Pocket Law</h3>
@@ -33,37 +29,41 @@
             <li>Click the Updates link in the top right corner to download the latest content.</li>
           </ol>
         </div>
-
         <div class="col-md-4 mb-5">
           <h3>Download now</h3>
-
           <div class="mb-3">
-            <a href="https://github.com/laws-africa/pocketlaw-releases/releases/download/v{{ pocketlaw_version }}/Pocket-Law-LawLibrary-Setup-{{ pocketlaw_version }}.exe" class="btn btn-lg btn-outline-primary">Pocket Law for Windows</a>
+            <a href="https://github.com/laws-africa/pocketlaw-releases/releases/download/v{{ pocketlaw_version }}/Pocket-Law-LawLibrary-Setup-{{ pocketlaw_version }}.exe"
+               class="btn btn-lg btn-outline-primary">Pocket Law for Windows</a>
           </div>
-
           <div class="mb-3">
-            <a href="https://github.com/laws-africa/pocketlaw-releases/releases/download/v{{ pocketlaw_version }}/Pocket-Law-LawLibrary-{{ pocketlaw_version }}.dmg" class="btn btn-lg btn-outline-primary">Pocket Law for Mac OS</a>
+            <a href="https://github.com/laws-africa/pocketlaw-releases/releases/download/v{{ pocketlaw_version }}/Pocket-Law-LawLibrary-{{ pocketlaw_version }}.dmg"
+               class="btn btn-lg btn-outline-primary">Pocket Law for Mac OS</a>
           </div>
-
           Version: {{ pocketlaw_version }}
         </div>
       </div>
-
       <h3>Frequently Asked Questions</h3>
-
       <dl class="faq mb-5">
-        <dt>What content does Pocket Law contain?</dt>
-        <dd>Pocket Law is an offline copy of legislation, case law and other legal materials on LawLibrary.org.za.</dd>
-
-        <dt>Do I need to be connected to the internet to use Pocket Law?</dt>
-        <dd>No. Pocket Law works offline. Internet is only required to download updated content.</dd>
-
-        <dt>How much free space do I need?</dt>
-        <dd>Pocket Law contains a lot of information and needs about 2GB of free disk space.</dd>
+        <dt>
+          What content does Pocket Law contain?
+        </dt>
+        <dd>
+          Pocket Law is an offline copy of legislation, case law and other legal materials on LawLibrary.org.za.
+        </dd>
+        <dt>
+          Do I need to be connected to the internet to use Pocket Law?
+        </dt>
+        <dd>
+          No. Pocket Law works offline. Internet is only required to download updated content.
+        </dd>
+        <dt>
+          How much free space do I need?
+        </dt>
+        <dd>
+          Pocket Law contains a lot of information and needs about 2GB of free disk space.
+        </dd>
       </dl>
-
       <h3>Questions or feedback?</h3>
-
       <p>
         Email us at <a href="mailto:info@africanlii.org">info@africanlii.org</a> with questions or feedback.
       </p>

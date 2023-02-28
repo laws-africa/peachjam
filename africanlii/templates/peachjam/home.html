@@ -1,124 +1,108 @@
 {% extends "peachjam/home.html" %}
 {% load i18n %}
-
-{% block title %} {% trans 'Home' %} {% endblock %}
-
+{% block title %}
+  {% trans 'Home' %}
+{% endblock %}
 {% block page-content %}
-<section class="pb-5 pt-5">
-  <div class="container">
-    <p class="display-6 text-center">
-      {% blocktrans trimmed %}
+  <section class="pb-5 pt-5">
+    <div class="container">
+      <p class="display-6 text-center">
+        {% blocktrans trimmed %}
         We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
         with and understand the African Union agenda.
       {% endblocktrans %}
-    </p>
-    <p class="display-6 text-center">
-      {% blocktrans trimmed %}
+      </p>
+      <p class="display-6 text-center">
+        {% blocktrans trimmed %}
         Search through {{ documents_count }} AU documents on the AfricanLII platform.
       {% endblocktrans %}
-    </p>
-
-    <div class="row mt-5">
+      </p>
+      <div class="row mt-5">
         <div class="col-md-9 mx-auto">
-          <form method="get" action="/search/" class="d-flex mb-2">
-              <input type="text" class="form-control form-control-lg flex-grow-1"
-                    placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                    aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                    aria-describedby="button-addon2"
-                    autofocus
-                    name="q"
-              >
-            <button type="submit" class="btn btn-primary ms-2">
-              {% trans "Search" %}
-            </button>
+          <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
+            <input type="text"
+                   class="form-control form-control-lg flex-grow-1"
+                   placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                   aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                   aria-describedby="button-addon2"
+                   autofocus
+                   name="q"/>
+            <button type="submit" class="btn btn-primary ms-2">{% trans "Search" %}</button>
           </form>
           <div>
-            <a href="/search/?show-advanced-tab=1">
-              {% trans 'Advanced search' %}
-            </a>
+            <a href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
           </div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="pb-5 pt-5">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-6 mb-4">
-        <h2 class="mb-4 heading-underlined">{% trans 'Regional Bodies' %}</h2>
-        <ul class="list-unstyled">
-          {% for author in authors %}
-          <li>
-            <a href="{% url 'author' author.id %}">{{ author.name }}</a>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-
-      <div class="col-lg-6">
-        <h2 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h2>
-        <ul class="list-unstyled">
-          {% for locality in localities %}
-            <li>
-              <a href="{% url 'place' locality.place_code %}">{{ locality.name }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-
-        <h2 class="mb-4 heading-underlined">{% trans 'Regional Courts' %}</h2>
-        <ul class="list-unstyled">
-          {% for court in courts %}
-            <li>
-              <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-            </li>
-          {% endfor %}
-        </ul>
+  </section>
+  <section class="pb-5 pt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 mb-4">
+          <h2 class="mb-4 heading-underlined">{% trans 'Regional Bodies' %}</h2>
+          <ul class="list-unstyled">
+            {% for author in authors %}
+              <li>
+                <a href="{% url 'author' author.id %}">{{ author.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-lg-6">
+          <h2 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h2>
+          <ul class="list-unstyled">
+            {% for locality in localities %}
+              <li>
+                <a href="{% url 'place' locality.place_code %}">{{ locality.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+          <h2 class="mb-4 heading-underlined">{% trans 'Regional Courts' %}</h2>
+          <ul class="list-unstyled">
+            {% for court in courts %}
+              <li>
+                <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="pb-5 pt-5 bg-light">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
-    {% trans 'View more judgments' as text %}
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
-  </div>
-</section>
-
-<section class="pb-5 pt-5">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent AU Documents' %}</h2>
-    {% trans 'View more AU documents' as text %}
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_documents  view_more_text=text view_more_url_name='generic_document_list' %}
-  </div>
-</section>
-
-<section class="pb-5 pt-5 bg-light">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Legal Instruments' %}</h2>
-    {% trans 'View more legal instruments' as text %}
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_instruments view_more_text=text view_more_url_name='legal_instrument_list' %}
-  </div>
-</section>
-
-<section class="pb-5 pt-5">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Treaties and Protocols ' %}</h2>
-    {% trans 'View more treaties and protocols' as text %}
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
-  </div>
-</section>
-
-<section class="pb-5 pt-5 bg-light">
-  <div class="container">
-    <h2 class="mb-4 heading-underlined">{% trans 'Latest Commentary' %}</h2>
-    {% include 'peachjam/_article_list.html' with articles=recent_articles %}
-
-    <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">
-      {% trans "View more commentary" %}
-    </a>
-  </div>
-</section>
+  </section>
+  <section class="pb-5 pt-5 bg-light">
+    <div class="container">
+      <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
+      {% trans 'View more judgments' as text %}
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
+    </div>
+  </section>
+  <section class="pb-5 pt-5">
+    <div class="container">
+      <h2 class="mb-4 heading-underlined">{% trans 'Recent AU Documents' %}</h2>
+      {% trans 'View more AU documents' as text %}
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_documents view_more_text=text view_more_url_name='generic_document_list' %}
+    </div>
+  </section>
+  <section class="pb-5 pt-5 bg-light">
+    <div class="container">
+      <h2 class="mb-4 heading-underlined">{% trans 'Recent Legal Instruments' %}</h2>
+      {% trans 'View more legal instruments' as text %}
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_instruments view_more_text=text view_more_url_name='legal_instrument_list' %}
+    </div>
+  </section>
+  <section class="pb-5 pt-5">
+    <div class="container">
+      <h2 class="mb-4 heading-underlined">{% trans 'Recent Treaties and Protocols ' %}</h2>
+      {% trans 'View more treaties and protocols' as text %}
+      {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
+    </div>
+  </section>
+  <section class="pb-5 pt-5 bg-light">
+    <div class="container">
+      <h2 class="mb-4 heading-underlined">{% trans 'Latest Commentary' %}</h2>
+      {% include 'peachjam/_article_list.html' with articles=recent_articles %}
+      <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">{% trans "View more commentary" %}</a>
+    </div>
+  </section>
 {% endblock %}

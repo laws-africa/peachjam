@@ -1,8 +1,8 @@
 {% extends "peachjam/layouts/main.html" %}
-{% load i18n %}
-
-{% block title %} {% trans 'About' %}{% endblock %}
-
+{% load i18n static %}
+{% block title %}
+  {% trans 'About' %}
+{% endblock %}
 {% block page-content %}
   <section class="py-5">
     <div class="container">
@@ -48,10 +48,7 @@
           the Indigo Trust and the Sigrid Rausing Trust. The initial phase of the project runs from 2021 to 2024.
         {% endblocktrans %}
       </p>
-
-      <h2 class="mb-4">
-        {% trans 'Platform developers' %}
-      </h2>
+      <h2 class="mb-4">{% trans 'Platform developers' %}</h2>
       <p>
         {% blocktrans trimmed %}
           <a href="https://africanlii.org/" target="_blank">AfricanLII</a> is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University
@@ -80,7 +77,6 @@
           of the rule of law, access to justice, and innovation.
         {% endblocktrans %}
       </p>
-
       <h2 class="mb-4">{% trans 'Find out more' %}</h2>
       <p class="mb-4">
         {% blocktrans trimmed %}
@@ -88,28 +84,27 @@
           or contact us on <a href="mailto:info@laws.africa">info@laws.africa</a> for more information.
         {% endblocktrans %}
       </p>
-
       <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeyDTLlFMnkeVPtFQN4hkBTJ-azlGbwhgmbKCGseiCNnEFYLw/viewform"
               class="mb-4"
               width="100%"
               height="1000px"
               style="border: 0px"></iframe>
-
       <h2 class="mb-4">{% trans 'Our partners' %}</h2>
       <div class="row mt-5">
-          <div class="offset-md-3 col-md-3 mt-3 text-center align-self-center">
-            <a href="https://laws.africa"
-               target="_blank"
-            >
-              <img src="/static/images/laws-africa-logo.png" height="140px" alt="Laws.Africa logo">
-            </a>
-          </div>
-          <div class="col-md-3 mt-3 text-center">
-            <a href="https://africanlii.org"
-               target="_blank"
-            >
-              <img src="/static/images/africanlii-logo.svg" height="140px" alt="AfricanLII logo"></a>
-          </div>
+        <div class="offset-md-3 col-md-3 mt-3 text-center align-self-center">
+          <a href="https://laws.africa" target="_blank">
+            <img src="{% static 'images/laws-africa-logo.png' %}"
+                 height="140px"
+                 alt="Laws.Africa logo"/>
+          </a>
+        </div>
+        <div class="col-md-3 mt-3 text-center">
+          <a href="https://africanlii.africaorg" target="_blank">
+            <img src="{% static 'images/africanlii-logo.svg' %}"
+                 height="140px"
+                 alt="AfricanLII logo"/>
+          </a>
+        </div>
       </div>
     </div>
   </section>

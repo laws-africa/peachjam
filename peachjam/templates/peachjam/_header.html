@@ -1,15 +1,11 @@
 {% load static i18n %}
-
 <header>
-  {% block top-bar %}
-    <div>Top bar content</div>
-  {% endblock %}
+  {% block top-bar %}<div>Top bar content</div>{% endblock %}
   <nav class="navbar navbar-expand-lg shadow-sm">
     <div class="container">
-      <a class="navbar-brand" href="/">
-        {% block navbar-logo %} Logo image{% endblock %}
+      <a class="navbar-brand" href="{% url 'home_page' %}">
+        {% block navbar-logo %}Logo image{% endblock %}
       </a>
-
       <button class="navbar-toggler"
               type="button"
               data-bs-toggle="collapse"
@@ -19,42 +15,39 @@
               aria-label="Toggle navigation">
         <i class="bi bi-list" style="font-size: 35px"></i>
       </button>
-
       <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           {% block nav-items %}
             <li class="nav-item">
-              <a class="nav-link" href="#">
-                Nav item
-              </a>
+              <a class="nav-link" href="#">Nav item</a>
             </li>
           {% endblock %}
         </ul>
-
         {% if request.path == '/' %}
         {% else %}
-          <form method="get" action="/search/">
+          <form method="get" action="{% url 'search:search' %}">
             <div class="input-group">
-              <input
-                type="text"
-                class="form-control"
-                placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                aria-describedby="button-addon2"
-                name="q"
-              >
+              <input type="text"
+                     class="form-control"
+                     placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                     aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                     aria-describedby="button-addon2"
+                     name="q"/>
               <button class="btn btn-dark" type="submit" id="button-addon2">
                 <i class="bi bi-search text-white"></i>
               </button>
             </div>
           </form>
         {% endif %}
-
         {% if user.is_authenticated %}
           <ul class="navbar-nav">
             {% block navbar-user-menu %}
               <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link dropdown-toggle"
+                   href="#"
+                   role="button"
+                   data-bs-toggle="dropdown"
+                   aria-expanded="false">
                   {{ user }}
                 </a>
                 <ul class="dropdown-menu">
@@ -67,7 +60,6 @@
             {% endblock %}
           </ul>
         {% endif %}
-
         {% include 'peachjam/_set_language.html' %}
       </div>
     </div>

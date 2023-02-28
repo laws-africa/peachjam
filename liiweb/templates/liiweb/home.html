@@ -1,49 +1,49 @@
 {% extends "peachjam/home.html" %}
 {% load i18n static %}
-
-{% block title %} {% trans 'Home' %} {% endblock %}
-
+{% block title %}
+  {% trans 'Home' %}
+{% endblock %}
 {% block page-content %}
   <section class="hero">
     {% block hero-img %}
-      <img class="hero__background-img" src="{% static 'images/banner.jpg' %}" alt="{{ APP_NAME }}" height="40" />
+      <img class="hero__background-img"
+           src="{% static 'images/banner.jpg' %}"
+           alt="{{ APP_NAME }}"
+           height="40"/>
     {% endblock %}
     <div class="hero__content">
       <div class="row">
         <div class="col-lg-8 col-12">
           {% block hero-content %}
-            {% block hero-headings %}
-              <h1 class="mb-4">{{ APP_NAME }}</h1>
-            {% endblock %}
-
+            {% block hero-headings %}<h1 class="mb-4">{{ APP_NAME }}</h1>{% endblock %}
             <div class="row">
               <div class="col-12 col-lg-10">
                 {% block hero-search %}
-                  <form method="get" action="/search/" class="d-flex mb-2">
-                    <input type="text" class="form-control form-control-lg flex-grow-1"
+                  <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
+                    <input type="text"
+                           class="form-control form-control-lg flex-grow-1"
                            placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                            aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                            aria-describedby="button-addon2"
-                           autofocus="" name="q">
-                    <input type="submit" class="btn btn-primary ms-2" value="{% trans 'Search' %}">
+                           autofocus=""
+                           name="q"/>
+                    <input type="submit"
+                           class="btn btn-primary ms-2"
+                           value="{% trans 'Search' %}"/>
                   </form>
                   <div class="mb-4">
-                    <a href="/search/?show-advanced-tab=1">
-                      {% trans 'Advanced search' %}
-                    </a>
+                    <a href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
                   </div>
                 {% endblock %}
-
                 {% block hero-logos %}
                   <div class="d-flex justify-content-between">
                     <img height="26"
                          class="me-4"
                          src="{% static 'images/africanlii-logo.svg' %}"
-                         alt="africanlii-logo">
+                         alt="africanlii-logo"/>
                     <img height="26"
                          src="{% static 'images/laws-africa-logo.png' %}"
-                         alt="laws-logo"
-                    >
+                         alt="laws-logo"/>
                   </div>
                 {% endblock %}
               </div>
@@ -53,7 +53,6 @@
       </div>
     </div>
   </section>
-
   <section class="pb-5 pt-5">
     <div class="container">
       <div class="row">
@@ -64,21 +63,16 @@
               {% trans 'View more judgments' as text %}
               {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
             </section>
-
             <section class="pb-3 pt-3">
               <h2 class="mb-4 heading-underlined">{% trans 'Recent Legislation' %}</h2>
               {% trans 'View more legislation' as text %}
               {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
             </section>
-
           {% endblock %}
         </div>
-
         <div class="col-12 col-lg-3">
-          {% block second-column-content %}
-          {% endblock %}
+          {% block second-column-content %}{% endblock %}
         </div>
-
       </div>
     </div>
   </section>

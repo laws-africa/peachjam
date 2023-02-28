@@ -1,11 +1,9 @@
 {% load static %}
 {% load i18n %}
-
 <footer class="pt-4 pb-4">
   <div class="container">
     <a href="{% url 'pocketlaw_resources' %}" style="display: none"></a>
-    {% block newsletter-form %}
-    {% endblock %}
+    {% block newsletter-form %}{% endblock %}
     <div class="row">
       <div class="col-lg-4">
         {% block first-content-column %}
@@ -35,15 +33,9 @@
     <hr/>
     {% block footer-logos %}
       <div class="footer-logos">
-        <div class="footer-logos__item">
-          Footer logo item
-        </div>
-        <div class="footer-logos__item">
-          Footer logo item
-        </div>
-        <div class="footer-logos__item">
-          Footer logo item
-        </div>
+        <div class="footer-logos__item">Footer logo item</div>
+        <div class="footer-logos__item">Footer logo item</div>
+        <div class="footer-logos__item">Footer logo item</div>
       </div>
     {% endblock %}
   </div>

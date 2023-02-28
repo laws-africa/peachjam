@@ -1,86 +1,86 @@
 {% extends 'peachjam/layouts/main.html' %}
 {% load peachjam i18n static %}
-
 {% block title %}{{ document.title }}{% endblock %}
-
 {% block head-js %}
   <!--  app-prod.js depends on pdf.js to be loaded-->
   <script defer src="{% static 'lib/pdfjs/pdf.js' %}"></script>
   {{ block.super }}
 {% endblock %}
-
 {% block head-meta %}
   {{ block.super }}
   <meta property="og:title" content="{{ document.title }}" />
   <meta property="og:type" content="book" />
-  <meta property="book:release_date" content="{{ document.date|date:'Y-m-d' }}" />
-  {% if document.author %}
-    <meta property="book:author" content="{{ document.author }}" />
-  {% endif %}
-  {% if not document.allow_robots %}
-    <meta name="robots" content="noindex">
-  {% endif %}
-
+  <meta property="book:release_date"
+        content="{{ document.date|date:'Y-m-d' }}"/>
+  {% if document.author %}<meta property="book:author" content="{{ document.author }}" />{% endif %}
+  {% if not document.allow_robots %}<meta name="robots" content="noindex" />{% endif %}
   <meta name="twitter:card" content="summary"/>
   <meta name="twitter:title" content="{{ document.title }}"/>
 {% endblock %}
-
 {% block page-content %}
   <div class="pb-5">
     <div class="bg-light">
       <div class="container">
-        {% block breadcrumbs %}
-        {% endblock %}
-
+        {% block breadcrumbs %}{% endblock %}
         {% block document-title %}
           <div class="d-md-flex justify-content-md-between py-4">
             <h1>{{ document.title }}</h1>
             <div class="d-flex align-items-center">
               <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
                  class="btn btn-link"
-                 target="_blank"
-              >
+                 target="_blank">
                 <i class="bi bi-whatsapp whatsapp-forecolor share-icon"></i>
               </a>
               <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}"
                  class="btn btn-link"
-                 target="_blank"
-              >
+                 target="_blank">
                 <i class="bi bi-twitter twitter-forecolor share-icon"></i>
               </a>
               <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
                  class="btn btn-link"
-                 target="_blank"
-              >
+                 target="_blank">
                 <i class="bi bi-facebook facebook-forecolor share-icon"></i>
               </a>
             </div>
           </div>
         {% endblock %}
-
         {% include 'peachjam/_notices.html' with messages=notices %}
-
-        {% if perms.peachjam.change_coredocument %}
-          <a href="{{ document|admin_url:'change' }}">Edit</a>
-        {% endif %}
-
+        {% if perms.peachjam.change_coredocument %}<a href="{{ document|admin_url:'change' }}">Edit</a>{% endif %}
         <ul class="nav nav-tabs border-bottom" role="tablist">
           {% block document-tabs %}
             <li class="nav-item" role="presentation">
-              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#document-detail-tab" type="button" role="tab" aria-controls="document-detail-tab" aria-selected="true">
+              <button class="nav-link active"
+                      data-bs-toggle="tab"
+                      data-bs-target="#document-detail-tab"
+                      type="button"
+                      role="tab"
+                      aria-controls="document-detail-tab"
+                      aria-selected="true">
                 {% trans "Document detail" %}
               </button>
             </li>
             {% if timeline_events %}
               <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history-tab" type="button" role="tab" aria-controls="history-tab" aria-selected="false">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#history-tab"
+                        type="button"
+                        role="tab"
+                        aria-controls="history-tab"
+                        aria-selected="false">
                   {% trans "History" %}
                 </button>
               </li>
             {% endif %}
             {% if n_relationships %}
               <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#related-tab" type="button" role="tab" aria-controls="related-tab" aria-selected="false">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#related-tab"
+                        type="button"
+                        role="tab"
+                        aria-controls="related-tab"
+                        aria-selected="false">
                   {% trans "Related documents" %}
                   <span class="badge bg-secondary">{{ n_relationships }}</span>
                 </button>
@@ -88,16 +88,27 @@
             {% endif %}
             {% if cited_works or works_citing_current_work %}
               <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#citations-tab" type="button" role="tab" aria-controls="citations-tab" aria-selected="false">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#citations-tab"
+                        type="button"
+                        role="tab"
+                        aria-controls="citations-tab"
+                        aria-selected="false">
                   {% trans "Citations" %}
                   <span class="badge bg-secondary">{{ number_of_extracted_citations }}</span>
                 </button>
               </li>
             {% endif %}
-
             {% if document.work.ratification.countries.all|length %}
               <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#ratifications-tab" type="button" role="tab" aria-controls="ratifications-tab" aria-selected="false">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#ratifications-tab"
+                        type="button"
+                        role="tab"
+                        aria-controls="ratifications-tab"
+                        aria-selected="false">
                   {% trans "Ratifications" %}
                   <span class="badge bg-secondary">{{ document.work.ratification.countries.all|length }}</span>
                 </button>
@@ -107,132 +118,169 @@
         </ul>
       </div>
     </div>
-
     <div class="tab-content mt-3">
       {% block document-tab-panes %}
-        <div class="tab-pane fade show active" id="document-detail-tab" role="tabpanel" aria-labelledby="document-detail-tab">
+        <div class="tab-pane fade show active"
+             id="document-detail-tab"
+             role="tabpanel"
+             aria-labelledby="document-detail-tab">
           <div class="container">
             {% block document-metadata %}
               <div class="row">
                 <div class="col-md mb-3">
                   {% block document-metadata-content %}
                     <dl class="document-metadata-list">
-
                       {% block document-metadata-content-jurisdiction %}
                         {% if document.jurisdiction %}
-                          <dt>{% trans 'Jurisdiction' %}</dt>
-                          <dd class="text-muted">{{ document.jurisdiction }} {% if document.locality %} · {{ document.locality }}</dd>{% endif %}
+                          <dt>
+                            {% trans 'Jurisdiction' %}
+                          </dt>
+                          <dd class="text-muted">
+                            {{ document.jurisdiction }}
+                            {% if document.locality %}
+                              · {{ document.locality }}
+                            </dd>
+                          {% endif %}
                         {% endif %}
                       {% endblock %}
-
                       {% block document-metadata-content-citation %}
                         {% if document.citation %}
-                          <dt>{% trans 'Citation' %}</dt>
+                          <dt>
+                            {% trans 'Citation' %}
+                          </dt>
                           <dd class="text-muted">
                             {{ document.citation }}
-                            <button type="button" class="btn btn-secondary btn-xs ms-2"
-                                    title="{% trans "Copy to clipboard" %}" data-component="CopyToClipboard"
+                            <button type="button"
+                                    class="btn btn-secondary btn-xs ms-2"
+                                    title="{% trans "Copy to clipboard" %}"
+                                    data-component="CopyToClipboard"
                                     data-value="{{ document.citation }}"
-                                    data-confirmation="{% trans "Copied!" %}">{% trans "Copy" %}</button>
+                                    data-confirmation="{% trans "Copied!" %}">
+                              {% trans "Copy" %}
+                            </button>
                           </dd>
                         {% endif %}
                       {% endblock %}
-
                       {% block document-metadata-content-alternative-names %}
                         {% with document.alternative_names.all as alternative_names %}
                           {% if alternative_names %}
-                            <dt>{% trans 'Alternative names' %}</dt>
+                            <dt>
+                              {% trans 'Alternative names' %}
+                            </dt>
                             <dd class="text-muted">
-                              {% for alternative_name in alternative_names %}
-                                <div>{{ alternative_name.title }}</div>
-                              {% endfor %}
+                              {% for alternative_name in alternative_names %}<div>{{ alternative_name.title }}</div>{% endfor %}
                             </dd>
                           {% endif %}
                         {% endwith %}
                       {% endblock %}
-
                       {% block document-metadata-content-author %}
                         {% if document.author %}
-                          <dt>{{ document.author.model_label }}</dt>
-                          <dd class="text-muted"><a href="{% url 'author' document.author.pk %}">{{ document.author }}</a></dd>
+                          <dt>
+                            {{ document.author.model_label }}
+                          </dt>
+                          <dd class="text-muted">
+                            <a href="{% url 'author' document.author.pk %}">{{ document.author }}</a>
+                          </dd>
                         {% endif %}
                       {% endblock %}
-
                       {% block document-metadata-content-date %}
-                        <dt>{% trans 'Date' %}</dt>
+                        <dt>
+                          {% trans 'Date' %}
+                        </dt>
                         {% if date_versions|length > 1 %}
                           <dd>
                             <div class="dropdown">
-                              <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                              <a class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                 href="#"
+                                 role="button"
+                                 id="dropdownMenuLink"
+                                 data-bs-toggle="dropdown"
+                                 aria-expanded="false">
                                 {{ document.date }}
                               </a>
                               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                 {% for version in date_versions %}
-                                  <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{{ version.date }}</a></li>
+                                  <li>
+                                    <a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}"
+                                       href="{{ version.get_absolute_url }}">{{ version.date }}</a>
+                                  </li>
                                 {% endfor %}
                               </ul>
                             </div>
                           </dd>
                         {% else %}
-                          <dd class="text-muted">{{ document.date }}</dd>
+                          <dd class="text-muted">
+                            {{ document.date }}
+                          </dd>
                         {% endif %}
                       {% endblock %}
-
                       {% block document-metadata-content-language %}
-                        <dt>{% translate 'Language' %}</dt>
+                        <dt>
+                          {% translate 'Language' %}
+                        </dt>
                         {% if language_versions|length > 1 %}
                           <dd>
                             <div class="dropdown">
-                              <a class="btn btn-outline-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                              <a class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                 href="#"
+                                 role="button"
+                                 id="dropdownMenuLink"
+                                 data-bs-toggle="dropdown"
+                                 aria-expanded="false">
                                 {% trans document.language.name %}
                               </a>
                               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                 {% for version in language_versions %}
-                                  <li><a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}" href="{{ version.get_absolute_url }}">{% trans version.language.name %}</a></li>
+                                  <li>
+                                    <a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}"
+                                       href="{{ version.get_absolute_url }}">{% trans version.language.name %}</a>
+                                  </li>
                                 {% endfor %}
                               </ul>
                             </div>
                           </dd>
                         {% else %}
-                          <dd class="text-muted">{% trans document.language.name %}</dd>
+                          <dd class="text-muted">
+                            {% trans document.language.name %}
+                          </dd>
                         {% endif %}
                       {% endblock %}
-
                       {% block document-metadata-content-doctype %}
-                        <dt>{% trans 'Type' %}</dt>
-                        <dd class="text-muted">{% trans document.get_doc_type_display %}</dd>
+                        <dt>
+                          {% trans 'Type' %}
+                        </dt>
+                        <dd class="text-muted">
+                          {% trans document.get_doc_type_display %}
+                        </dd>
                       {% endblock %}
-
                       {% block document-metadata-content-download %}
                         {% if document.source_file %}
-                          <dt>{% translate 'Download' %}</dt>
+                          <dt>
+                            {% translate 'Download' %}
+                          </dt>
                           <dd>
                             <div>
                               <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
-                                 target="_blank"
-                              >{% trans "Download" %} {{ document.source_file.filename_extension|upper }}</a>
+                                 target="_blank">{% trans "Download" %} {{ document.source_file.filename_extension|upper }}</a>
                               ({{ document.source_file.size|filesizeformat }})
                             </div>
-
                             {% if document.source_file.filename_extension != "pdf" %}
                               <div>
                                 <a href="{% url 'document_source_pdf' document.expression_frbr_uri|strip_first_character %}"
-                                   target="_blank"
-                                >{% trans "Download" %} PDF</a>
+                                   target="_blank">{% trans "Download" %} PDF</a>
                               </div>
                             {% endif %}
                           </dd>
                         {% endif %}
                       {% endblock %}
-
                       {% block document-metadata-media-summary-download %}
                         {% if document.attachedfiles_set %}
                           {% for attachedfile in document.attachedfiles_set.all %}
-                            <dt>{{ attachedfile.nature.name }}</dt>
+                            <dt>
+                              {{ attachedfile.nature.name }}
+                            </dt>
                             <dd>
-                              <a href="{{ attachedfile.file.url }}" target="_blank">
-                                {% trans "Download" %} {{ attachedfile.extension|upper }}
-                              </a>
+                              <a href="{{ attachedfile.file.url }}" target="_blank">{% trans "Download" %} {{ attachedfile.extension|upper }}</a>
                               ({{ attachedfile.size|filesizeformat }})
                             </dd>
                           {% endfor %}
@@ -241,7 +289,6 @@
                     </dl>
                   {% endblock %}
                 </div>
-
                 {% if n_relationships or taxonomies %}
                   <div class="col-md">
                     {% block document-taxonomies %}
@@ -249,7 +296,6 @@
                         {% include "peachjam/_taxonomies.html" %}
                       {% endif %}
                     {% endblock %}
-
                     {% block document-relationships-content %}
                       {% if n_relationships %}
                         <h5>{% translate 'Related documents' %}</h5>
@@ -268,7 +314,6 @@
                                 </li>
                               {% endif %}
                             {% endfor %}
-
                             {% for rel in document.relationships_as_object %}
                               {% if rel.subject_work %}
                                 <li>
@@ -286,55 +331,49 @@
                 {% endif %}
               </div>
             {% endblock %}
-
-            <hr class="mb-5">
+            <hr class="mb-5" />
           </div>
-
           <div class="container-fluid">
             {% block content %}
               {% include 'peachjam/_document_content.html' with document=document %}
             {% endblock %}
           </div>
         </div>
-
         {% if timeline_events %}
-          <div class="tab-pane fade" id="history-tab" role="tabpanel" aria-labelledby="history-tab">
-            <div class="container">
-              {% include 'peachjam/_timeline_events.html' %}
-            </div>
+          <div class="tab-pane fade"
+               id="history-tab"
+               role="tabpanel"
+               aria-labelledby="history-tab">
+            <div class="container">{% include 'peachjam/_timeline_events.html' %}</div>
           </div>
         {% endif %}
-
         {% if n_relationships %}
-          <div class="tab-pane fade" id="related-tab" role="tabpanel" aria-labelledby="related-tab">
-            <div class="container">
-              {% include 'peachjam/_related_documents.html' %}
-            </div>
+          <div class="tab-pane fade"
+               id="related-tab"
+               role="tabpanel"
+               aria-labelledby="related-tab">
+            <div class="container">{% include 'peachjam/_related_documents.html' %}</div>
           </div>
         {% endif %}
       {% endblock %}
-
-        {% if cited_works or works_citing_current_work %}
-          <div class="tab-pane fade" id="citations-tab" role="tabpanel" aria-labelledby="citations-tab">
-            <div class="container">
-              {% include 'peachjam/_citations.html' %}
-            </div>
-          </div>
-        {% endif %}
-
-        {% if document.work.ratification.countries.all|length %}
-          <div class="tab-pane fade" id="ratifications-tab" role="tabpanel" aria-labelledby="ratifications-tab">
-            <div class="container">
-              {% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}
-            </div>
-          </div>
-        {% endif %}
+      {% if cited_works or works_citing_current_work %}
+        <div class="tab-pane fade"
+             id="citations-tab"
+             role="tabpanel"
+             aria-labelledby="citations-tab">
+          <div class="container">{% include 'peachjam/_citations.html' %}</div>
+        </div>
+      {% endif %}
+      {% if document.work.ratification.countries.all|length %}
+        <div class="tab-pane fade"
+             id="ratifications-tab"
+             role="tabpanel"
+             aria-labelledby="ratifications-tab">
+          <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
+        </div>
+      {% endif %}
     </div>
-
-    {% if perms.peachjam.add_relationship %}
-      {{ predicates_json|json_script:"predicates" }}
-    {% endif %}
-
+    {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
   </div>
