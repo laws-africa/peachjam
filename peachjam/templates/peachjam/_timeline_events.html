@@ -1,7 +1,5 @@
 {% load peachjam i18n %}
-
 <h4>{% trans 'History of this document' %}</h4>
-
 <div class="vertical-timeline ms-5 mt-4">
   {% for history_item in timeline_events %}
     <div class="vertical-timeline__item">
@@ -12,7 +10,6 @@
             {% if history_item.date == current_object_date %}
               <span class="badge rounded-pill bg-primary">{% trans 'this version' %}</span>
             {% endif %}
-
             {% for event in history_item.events %}
               {% if event.unapplied_amendment %}
                 <span class="badge rounded-pill bg-secondary">{% trans 'amendment not yet applied' %}</span>
@@ -26,31 +23,27 @@
               {% if event.event == "amendment" %}
                 {% trans 'Amended by' %}
                 <a href="{{ event.amending_uri }}"><i>{{ event.amending_title }}</i></a>
-
               {% elif event.event == "assent" %}
                 {% trans 'Assented to' %}.
-
               {% elif event.event == "commencement" %}
                 {% trans 'Commences' %}.
-
               {% elif event.event == "publication" %}
                 {% trans 'Published in' %}
                 <a href="{{ event.publication_url }}">{{ event.publication_name }} {% trans 'number' %} {{ event.publication_number }}</a>
-
               {% elif event.event == "repeal" %}
                 {% trans 'Repealed by' %}
                 <a href="{{ event.repealing_uri }}"><i>{{ event.repealing_title }}</i></a>
               {% endif %}
             </div>
           {% endfor %}
-
           {% if history_item.date != current_object_date %}
             {% if history_item.expression_frbr_uri %}
-              <a class="btn btn-outline-primary mt-2" href="{{ history_item.expression_frbr_uri }}">{% trans 'Read this version' %}</a>
+              <a class="btn btn-outline-primary mt-2"
+                 href="{{ history_item.expression_frbr_uri }}">{% trans 'Read this version' %}</a>
             {% endif %}
           {% endif %}
         </div>
+      </div>
     </div>
-  </div>
   {% endfor %}
 </div>

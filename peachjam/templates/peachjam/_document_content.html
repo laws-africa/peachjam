@@ -1,14 +1,10 @@
 {% load peachjam %}
 {% load i18n %}
-
 <div class="document-content"
      data-component="DocumentContent"
      data-display-type="{{ display_type }}"
-     {% if document.frbr_uri_subtype == 'book' %}
-        data-toc-show-active-item-only
-     {% endif %}
->
-<!--
+     {% if document.frbr_uri_subtype == 'book' %} data-toc-show-active-item-only{% endif %}>
+  <!--
   contents of #navigation-content will be placed in [data-offcanvas-body] for tablet/mobile screensize
   and #navigation-column for desktop screensize.
 -->
@@ -52,42 +48,40 @@
           </button>
         </div>
       </nav>
-      <div class="tab-content" id="navigation-tab-content" data-preview-scroll-container>
+      <div class="tab-content"
+           id="navigation-tab-content"
+           data-preview-scroll-container>
         <div class="tab-pane fade h-100"
              id="navigation-search"
              role="tabpanel"
-             aria-labelledby="nav-search-tab"
-        >
+             aria-labelledby="nav-search-tab">
           <div data-doc-search class="h-100"></div>
         </div>
         {% if display_type == 'akn' or display_type == 'html' %}
-        <div class="tab-pane fade h-100"
-             id="toc"
-             role="tabpanel"
-             aria-labelledby="toc-tab">
-          <aside class="toc"></aside>
-        </div>
+          <div class="tab-pane fade h-100"
+               id="toc"
+               role="tabpanel"
+               aria-labelledby="toc-tab">
+            <aside class="toc">
+            </aside>
+          </div>
         {% endif %}
         {% if display_type == 'pdf' %}
-        <div class="tab-pane fade pdf-previews-pane"
-             id="pdf-previews"
-             role="tabpanel"
-             aria-labelledby="pdf-previews">
-          <div class="pdf-previews"></div>
-        </div>
+          <div class="tab-pane fade pdf-previews-pane"
+               id="pdf-previews"
+               role="tabpanel"
+               aria-labelledby="pdf-previews">
+            <div class="pdf-previews"></div>
+          </div>
         {% endif %}
       </div>
     </div>
   </div>
-
   {{ document.toc_json|json_script:"akn_toc_json" }}
-
   {% if display_type == 'pdf' %}
     <div data-pdf="{% url 'document_source_pdf' document.expression_frbr_uri|strip_first_character %}"
          data-pdf-size="{{ document.source_file.size }}"
-         {% if document.source_file.size > 5242880 %}
-            data-large-pdf
-         {% endif %}
+         {% if document.source_file.size > 5242880 %} data-large-pdf{% endif %}
          data-pdf-standby>
     </div>
   {% endif %}
@@ -100,62 +94,50 @@
       Navigate document
     </button>
   </div>
-
   <div class="offcanvas offcanvas-start document-content__offcanvas"
        tabindex="-1"
        id="navigation-offcanvas"
-       aria-labelledby="navigation-offcanvasLabel"
-  >
+       aria-labelledby="navigation-offcanvasLabel">
     <div class="offcanvas-header justify-content-end">
       <button type="button"
-              class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+              class="btn-close text-reset"
+              data-bs-dismiss="offcanvas"
+              aria-label="Close"></button>
     </div>
-    <div class="navigation" data-offcanvas-body>
-    </div>
+    <div class="navigation" data-offcanvas-body></div>
   </div>
-
-
   <div class="document-content__inner">
-    <div class="navigation" id="navigation-column">
-    </div>
+    <div class="navigation" id="navigation-column"></div>
     <div class="content-and-enrichments"
          data-work-id="{{ document.work_id }}"
          data-work-frbr-uri="{{ document.work_frbr_uri }}"
-         {% if not perms.peachjam.add_relationship %}
-            data-readonly="true"
-         {% endif %}
-    >
-      <div class="content-and-enrichments__inner la-akoma-ntoso-with-gutter"
-      >
+         {% if not perms.peachjam.add_relationship %} data-readonly="true"{% endif %}>
+      <div class="content-and-enrichments__inner la-akoma-ntoso-with-gutter">
         {% if display_type == 'akn' %}
           <la-akoma-ntoso
-            data-document-element
-            expression-frbr-uri="{{ document.expression_frbr_uri }}"
-            class="flash-target"
+          data-document-element
+          expression-frbr-uri="{{ document.expression_frbr_uri }}"
+          class="flash-target"
           >
-            <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
-            <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
-
-            {{ document.content_html|safe }}
+          <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
+          <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
+          {{ document.content_html|safe }}
           </la-akoma-ntoso>
         {% endif %}
         {% if display_type == 'html' %}
-          <div class="content content__html" data-document-element>
-            {{ document.content_html|safe }}
-          </div>
+          <div class="content content__html" data-document-element>{{ document.content_html|safe }}</div>
         {% endif %}
-
         {% if display_type == 'pdf' %}
           <div class="content" data-document-element>
             <div class="pdf-loading">
-              <div class="text-center mb-2"><strong>{% trans 'Loading PDF...' %}</strong></div>
+              <div class="text-center mb-2">
+                <strong>{% trans 'Loading PDF...' %}</strong>
+              </div>
               <div class="progress">
                 <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
-                     role="progressbar">
-                </div>
+                     role="progressbar"></div>
               </div>
             </div>
-
             <div class="pdf-content"></div>
             <div class="pdf-large-prompt">
               <p>
@@ -163,9 +145,7 @@
                   This document is {{ filesize }}. Do you want to load it?
                 {% endblocktrans %}
               </p>
-              <button class="btn btn-primary" type="button" data-load-doc-button>
-                {% trans 'Load document' %}
-              </button>
+              <button class="btn btn-primary" type="button" data-load-doc-button>{% trans 'Load document' %}</button>
             </div>
           </div>
         {% endif %}
@@ -174,5 +154,4 @@
     </div>
   </div>
 </div>
-
 <a href="#top" class="btn btn-sm btn-secondary to-the-top">▲ {% trans "To the top" %}</a>

@@ -1,53 +1,40 @@
 {% load i18n %}
-
 <div class="table-responsive">
   <table class="table">
-      <thead>
+    <thead>
       <tr>
         <th scope="col" style="width: 70%">{% trans 'Title' %}</th>
-        {% if doc_table_show_author %}
-          <th scope="col"></th>
-        {% endif %}
-        {% if doc_table_show_court %}
-          <th scope="col"></th>
-        {% endif %}
-        {% if doc_table_show_doc_type %}
-          <th scope="col"></th>
-        {% endif %}
+        {% if doc_table_show_author %}<th scope="col"></th>{% endif %}
+        {% if doc_table_show_court %}<th scope="col"></th>{% endif %}
+        {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
         <th scope="col">{% trans 'Date' %}</th>
       </tr>
-      </thead>
-
-      <tbody>
-        {% for document in documents %}
-          <tr>
-            <td>
-              <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-            </td>
-            {% if doc_table_show_author %}
-              <td >{{ document.author|default_if_none:'' }}</td>
+    </thead>
+    <tbody>
+      {% for document in documents %}
+        <tr>
+          <td>
+            <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+          </td>
+          {% if doc_table_show_author %}<td >{{ document.author|default_if_none:'' }}</td>{% endif %}
+          {% if doc_table_show_court %}<td >{{ document.court|default_if_none:'' }}</td>{% endif %}
+          {% if doc_table_show_doc_type %}<td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>{% endif %}
+          <td style="white-space: nowrap;">{{ document.date }}</td>
+          <td style="white-space: nowrap;">
+            {% if document.work.languages|length > 1 %}
+              <span class="d-inline-block"
+                    tabindex="0"
+                    data-toggle="tooltip"
+                    title="{% trans 'Multiple languages available' %}">
+                <i class="bi bi-translate"></i>
+              </span>
             {% endif %}
-            {% if doc_table_show_court %}
-              <td >{{ document.court|default_if_none:'' }}</td>
-            {% endif %}
-            {% if doc_table_show_doc_type %}
-              <td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>
-            {% endif %}
-            <td style="white-space: nowrap;">{{ document.date }}</td>
-
-            <td style="white-space: nowrap;">
-              {% if document.work.languages|length > 1 %}
-                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="{%  trans 'Multiple languages available' %}">
-                  <i class="bi bi-translate"></i>
-                </span>
-              {% endif %}
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
   </table>
 </div>
-
 {% if not hide_pagination %}
   {% include 'peachjam/_pagination.html' %}
 {% endif %}

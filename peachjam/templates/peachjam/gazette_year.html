@@ -1,41 +1,43 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n peachjam %}
-{% block title %} {% trans 'Gazettes' %} {{ year }} {% endblock %}
-
+{% block title %}
+  {% trans 'Gazettes' %} {{ year }}
+{% endblock %}
 {% block page-content %}
   <div class="container">
     <header>
       {% block breadcrumbs %}
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a></li>
+            <li class="breadcrumb-item">
+              <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
+            </li>
             {% if locality %}
-              <li class="breadcrumb-item"><a href="{% url 'gazettes_by_locality' code=locality.code %}">{{ locality }}</a></li>
+              <li class="breadcrumb-item">
+                <a href="{% url 'gazettes_by_locality' code=locality.code %}">{{ locality }}</a>
+              </li>
             {% endif %}
           </ol>
         </nav>
       {% endblock %}
-
       {% block page-title %}
         <h1 class="my-4">{% trans 'Gazettes' %} - {{ year }}</h1>
       {% endblock %}
-
       {% include "peachjam/_years_list.html" %}
     </header>
-
     <div class="my-4">
       {% block content %}
         {% for month, items in gazettes %}
           {% if items %}
             <h2 class="sans-serif" id="{{ forloop.counter }}">{{ month }} {{ year }}</h2>
-
             <ul>
               {% for gazette in items %}
                 <li>
                   <a href="{{ gazette.get_absolute_url }}">{{ gazette.title }}</a>
                   <span class="text-muted m-0">
                     &nbsp;({{ gazette.source_file.size|filesizeformat }},
-                    <a href="{% url 'document_source_pdf' frbr_uri=gazette.expression_frbr_uri|strip_first_character %}" target="_blank">PDF</a>)
+                    <a href="{% url 'document_source_pdf' frbr_uri=gazette.expression_frbr_uri|strip_first_character %}"
+                       target="_blank">PDF</a>)
                   </span>
                 </li>
               {% endfor %}
@@ -44,7 +46,6 @@
         {% endfor %}
       {% endblock %}
     </div>
-
     {% include "peachjam/_years_list.html" %}
   </div>
 {% endblock %}
