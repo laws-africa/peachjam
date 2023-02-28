@@ -1,16 +1,13 @@
 {% load peachjam i18n %}
-
 {% if grouped_courts %}
   <div class="courts__column-wrapper mb-3">
     {% for court_class, courts in grouped_courts.items %}
       <div class="courts__item mb-3">
-        <h4 class="heading-underlined">
-          {{ court_class }}
-        </h4>
+        <h4 class="heading-underlined">{{ court_class }}</h4>
         {% if courts|length > 0 %}
           {% for item in courts %}
             <div>
-              <a href="{% url 'court' item.code  %}">{{ item.title }}</a>
+              <a href="{% url 'court' item.code %}">{{ item.title }}</a>
             </div>
           {% endfor %}
         {% else %}
