@@ -664,6 +664,7 @@ class ExternalDocumentAdmin(DocumentAdmin):
 @admin.register(CourtRegistry)
 class CourtRegistryAdmin(admin.ModelAdmin):
     readonly_fields = ("code",)
+    list_display = ("name", "code")
 
 
 admin.site.register(
