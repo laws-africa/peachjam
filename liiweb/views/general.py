@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 
-from peachjam.models import CourtClass, Judgment, Legislation
+from peachjam.models import CourtClass, Judgment, Legislation, Taxonomy
 
 
 class HomePageView(TemplateView):
@@ -29,6 +29,7 @@ class HomePageView(TemplateView):
         context["recent_legislation"] = Legislation.objects.filter(
             metadata_json__stub=False
         ).order_by("-date")[:10]
+        context["taxonomies"] = Taxonomy.get_tree()
         return context
 
 
