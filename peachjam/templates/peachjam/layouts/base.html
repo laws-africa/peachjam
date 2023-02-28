@@ -1,41 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>{% block title %}{% endblock %} - {{ APP_NAME }}</title>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <title>
+      {% block title %}{% endblock %}
+    - {{ APP_NAME }}</title>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     {% block head-meta %}
-      <meta name="csrfmiddlewaretoken" content="{{ csrf_token }}">
-      <link rel="alternate" type="application/atom+xml" title="Atom RSS Feed" href="{% url 'atom_feed' %}"/>
-
-      {% ifequal request.path '/judgments/'%}
-        <link rel="alternate" type="application/atom+xml" title="Judgments Atom RSS Feed" href="{% url 'judgment_feed' %}"/>
-      {% endifequal%}
-
-      {% ifequal request.path '/doc/'%}
-        <link rel="alternate" type="application/atom+xml" title="AU Documents Atom RSS Feed" href="{% url 'generic_document_feed' %}"/>
-      {% endifequal%}
-
-      {% ifequal request.path '/legal_instruments/'%}
-        <link rel="alternate" type="application/atom+xml" title="Legal Instruments Atom RSS Feed" href="{% url 'legal_instrument_feed' %}"/>
-      {% endifequal%}
-
-      {% ifequal request.path '/legislation/'%}
-        <link rel="alternate" type="application/atom+xml" title="Treaties & Protocols Atom RSS Feed" href="{% url 'legislation_feed' %}"/>
-      {% endifequal%}
-
-      {% ifequal request.path '/articles/'%}
-        <link rel="alternate" type="application/atom+xml" title="Articles RSS Feed" href="{% url 'article_feed' %}"/>
-      {% endifequal%}
+      <meta name="csrfmiddlewaretoken" content="{{ csrf_token }}"/>
+      <link rel="alternate"
+            type="application/atom+xml"
+            title="Atom RSS Feed"
+            href="{% url 'atom_feed' %}"/>
+      {% ifequal request.path '/judgments/' %}
+        <link rel="alternate"
+              type="application/atom+xml"
+              title="Judgments Atom RSS Feed"
+              href="{% url 'judgment_feed' %}"/>
+      {% endifequal %}
+      {% ifequal request.path '/doc/' %}
+        <link rel="alternate"
+              type="application/atom+xml"
+              title="AU Documents Atom RSS Feed"
+              href="{% url 'generic_document_feed' %}"/>
+      {% endifequal %}
+      {% ifequal request.path '/legal_instruments/' %}
+        <link rel="alternate"
+              type="application/atom+xml"
+              title="Legal Instruments Atom RSS Feed"
+              href="{% url 'legal_instrument_feed' %}"/>
+      {% endifequal %}
+      {% ifequal request.path '/legislation/' %}
+        <link rel="alternate"
+              type="application/atom+xml"
+              title="Treaties & Protocols Atom RSS Feed"
+              href="{% url 'legislation_feed' %}"/>
+      {% endifequal %}
+      {% ifequal request.path '/articles/' %}
+        <link rel="alternate"
+              type="application/atom+xml"
+              title="Articles RSS Feed"
+              href="{% url 'article_feed' %}"/>
+      {% endifequal %}
     {% endblock %}
-
     {% block head-css %}{% endblock %}
     {% block head-js %}{% endblock %}
   </head>
   <body class="{% block body-class %}{% endblock %}">
-
     {% block header %}{% endblock %}
     {% block body-content %}{% endblock %}
     {% block footer %}{% endblock %}

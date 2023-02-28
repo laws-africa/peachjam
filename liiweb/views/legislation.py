@@ -27,7 +27,9 @@ class LegislationListView(TemplateView):
         elif self.variant == "repealed":
             qs = qs.filter(repealed=True)
         elif self.variant == "current":
-            qs = qs.filter(repealed=False, metadata_json__stub=False, parent_work=None)
+            qs = qs.filter(
+                repealed=False, metadata_json__principal=True, parent_work=None
+            )
         elif self.variant == "subleg":
             qs = qs.exclude(parent_work=None).filter(repealed=False)
         return qs

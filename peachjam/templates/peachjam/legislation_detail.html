@@ -1,37 +1,38 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
 {% load i18n peachjam %}
-
 {% block document-tabs %}
   {{ block.super }}
-
   {% if child_documents %}
     <li class="nav-item" role="presentation">
-      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#children-tab" type="button" role="tab" aria-controls="children-tab">
+      <button class="nav-link"
+              data-bs-toggle="tab"
+              data-bs-target="#children-tab"
+              type="button"
+              role="tab"
+              aria-controls="children-tab">
         {{ PEACHJAM_SETTINGS.subleg_label }}
         <span class="badge bg-secondary">{{ child_documents|length }}</span>
       </button>
     </li>
   {% endif %}
 {% endblock %}
-
 {% block document-tab-panes %}
   {{ block.super }}
-
   {% if child_documents %}
-    <div class="tab-pane fade" id="children-tab" role="tabpanel" aria-labelledby="children-tab">
-      <div class="container">
-        {% include 'peachjam/_child_documents.html' %}
-      </div>
+    <div class="tab-pane fade"
+         id="children-tab"
+         role="tabpanel"
+         aria-labelledby="children-tab">
+      <div class="container">{% include 'peachjam/_child_documents.html' %}</div>
     </div>
   {% endif %}
 {% endblock %}
-
-{% block document-metadata-content-author %}
-{% endblock %}
-
+{% block document-metadata-content-author %}{% endblock %}
 {% block document-metadata-content-date %}
   {% if document.parent_work %}
-    <dt>{% trans 'Primary work' %}</dt>
+    <dt>
+      {% trans 'Primary work' %}
+    </dt>
     <dd class="text-muted">
       <a href="{% url 'document_detail' document.parent_work.frbr_uri|strip_first_character %}">{{ document.parent_work.title }}</a>
     </dd>

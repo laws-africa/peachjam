@@ -1,25 +1,27 @@
 {% extends 'peachjam/layouts/main.html' %}
 {% load i18n %}
-
 {% block title %}{{ document.title }}{% endblock %}
-
 {% block page-content %}
   {% block breadcrumbs %}{% endblock %}
-
   {% block entity-profile %}{% endblock %}
-
   <div class="container pb-5" data-component="DocumentList">
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="list-facets-offcanvas"
+    <div class="offcanvas offcanvas-start"
+         tabindex="-1"
+         id="list-facets-offcanvas"
          aria-labelledby="offcanvasLastFacetLabel">
       <div class="offcanvas-header justify-content-end">
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
-        <div>{% block mobile-taxonomy-list %}{% endblock %}</div>
+        <div>
+          {% block mobile-taxonomy-list %}{% endblock %}
+        </div>
         <div data-list-facets></div>
       </div>
     </div>
-
     {% block page-header %}
       <div class="row">
         <div class="col-lg-3 d-none d-lg-block"></div>
@@ -30,37 +32,35 @@
         </div>
       </div>
     {% endblock %}
-
     <div class="d-block d-lg-none my-2">
       <button class="btn btn-primary"
-                type="button"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#list-facets-offcanvas"
-                aria-controls="list-facets-offcanvas">
-          {% trans 'Filters' %}
-        </button>
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#list-facets-offcanvas"
+              aria-controls="list-facets-offcanvas">
+        {% trans 'Filters' %}
+      </button>
     </div>
-
     <div class="row">
       <div class="col-lg-3 d-none d-lg-block">
-        <div>{% block desktop-taxonomy-list %}{% endblock %}</div>
+        <div>
+          {% block desktop-taxonomy-list %}{% endblock %}
+        </div>
         <div class="pocketlaw-hidden" data-list-facets></div>
       </div>
       <div class="col-lg-9">
         <div class="position-relative">
           {% block content %}
             {% if documents %}
-              {% include 'peachjam/_document_table.html'%}
+              {% include 'peachjam/_document_table.html' %}
             {% else %}
               <p>{% trans 'No documents found.' %}</p>
             {% endif %}
-          {% endblock%}
+          {% endblock %}
         </div>
       </div>
     </div>
-
     {{ facet_data|json_script:"facet-data" }}
-
     {% block taxonomy-json %}{% endblock %}
   </div>
 {% endblock %}

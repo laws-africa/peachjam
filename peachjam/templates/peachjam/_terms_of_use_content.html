@@ -1,24 +1,19 @@
 {% load i18n %}
-
 <h2 class="mb-4">{% trans 'What do these terms relate to?' %}</h2>
 <p class="mb-4">
   {% blocktrans trimmed %}
-    These terms of use describe the permitted use for the {{ organisation_name }} service available at <a
-      href="/">{{ org_link_text }}</a> and its subdomains.
+    These terms of use describe the permitted use for the {{ organisation_name }} service available at <a href="/">{{ org_link_text }}</a> and its subdomains.
   {% endblocktrans %}
 </p>
-
 <h2 class="mb-4">{% trans 'Who are we, and how to contact us?' %}</h2>
-
 <p class="mb-4">
-{% blocktrans trimmed %}
+  {% blocktrans trimmed %}
   The {{ organisation_name }} service is provided by the {{ organisation_name }} programme of the Department of Public
   Law at the University of
   Cape Town and Laws.Africa NPO. You can contact us by email at <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> or
   by filling out <a href="/about/">this form</a>.
 {% endblocktrans %}
 </p>
-
 <h2 class="mb-4">
   {% blocktrans trimmed %}
     By using the {{ organisation_name }} service you accept these terms
@@ -29,9 +24,7 @@
     By using the {{ organisation_name }} service, you confirm that you accept these terms of use and agree to comply with them.
   {% endblocktrans %}
 </p>
-
 <h2 class="mb-4">{% trans 'Fair and reasonable use' %}</h2>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     You must use the service responsibly by not making too many requests. In order to maintain the integrity of the
@@ -46,7 +39,6 @@
     like to access our data in bulk.
   {% endblocktrans %}
 </p>
-
 <h2 class="mb-4">{% trans 'Crawling and indexing' %}</h2>
 <p class="mb-4">
   {% blocktrans trimmed %}
@@ -59,31 +51,25 @@
     in the robots.txt file at: <a href="/robots.txt" target="_blank">{{ robots_link_text }}</a>
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     We may block or disable use of the service from certain IP addresses, if they appear to be compiling a search engine index.
   {% endblocktrans %}
 </p>
-
 <h2 class="mb-4">{% trans 'Coverage' %}</h2>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     {{ organisation_name }} collects caselaw, legislation, African Union documents, journals, books and other materials through cooperation
     with regional, governmental, academic and non-profit organisations and sometimes individuals.
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     We strive to ensure high quality standards on all documents published on the platform. Where verification was not
     possible, this will be indicated on the document concerned.
   {% endblocktrans %}
 </p>
-
 <h2 class="mb-4">{% trans 'Errors and omissions' %}</h2>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     We scan and digitize most of the documents made available on the {{ organisation_name }} and affiliate LII websites. We use
@@ -91,13 +77,11 @@
     may be errors introduced by this process.
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     Please contact us should you encounter errors in any of the documents published and we shall rectify them within a reasonable time.
   {% endblocktrans %}
 </p>
-
 <h2 class="mb-4">{% trans 'Disclaimer' %}</h2>
 <p class="mb-4">
   {% blocktrans trimmed %}
@@ -105,7 +89,6 @@
     this service, you should note that information on {{ organisation_name }} is:
   {% endblocktrans %}
 </p>
-
 <ul>
   <li>{% trans 'not necessarily comprehensive, complete, accurate or up-to-date;' %}</li>
   <li>
@@ -120,7 +103,6 @@
     {% endblocktrans %}
   </li>
 </ul>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     {{ organisation_name }} and Laws.Africa, members of its staff, and its contractors shall not be liable for any financial or
@@ -128,7 +110,6 @@
     improper or fraudulent use of such information or data.
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     {{ organisation_name }} does not invite reliance upon, nor accept responsibility for, the information it provides. {{ organisation_name }}
@@ -138,15 +119,13 @@
     for them to do so.
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     Hypertext links on {{ organisation_name }} are (in most cases) inserted by {{ organisation_name }}, not by the data providers. Automated
     insertion of hypertext links on {{ organisation_name }} means that links will not be comprehensive or accurate in all cases.
     Neither {{ organisation_name }} nor its providers of data, give any guarantees, undertakings or warranties concerning hypertext
     linking.
-  {% endblocktrans %}
-
+{% endblocktrans %}
 </p>
 <h2 class="mb-4">{% trans 'Copyright and Licensing' %}</h2>
 <p class="mb-4">
@@ -157,7 +136,6 @@
     works from {{ organisation_name }} provided you credit {{ organisation_name }} as your source and your use is not for commercial gain.
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     Specific collections on {{ organisation_name }} may be licensed under more permissive licenses. Examples of these collections are
@@ -178,8 +156,6 @@
     {{ organisation_name }} reserves the intellectual property rights on the {{ organisation_name }} name, website’s graphics and website design.
   {% endblocktrans %}
 </p>
-
-
 <h2 class="mb-4">{% trans 'Privacy' %}</h2>
 <h4 class="mb-4">
   {% blocktrans trimmed %}
@@ -192,7 +168,6 @@
     machine which has accessed it. We use Google Analytics and in-house software to perform this function.
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     {{ organisation_name }} retains this usage information for purposes of network analysis, usage analysis, and research into usage
@@ -201,7 +176,6 @@
     adhere to these Terms of Use.
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     {{ organisation_name }} reserves the right to gather more extensive information than stated above (i) about any attempted access to
@@ -209,14 +183,12 @@
     for network analyses on an occasional basis.
   {% endblocktrans %}
 </p>
-
 <h2 class="mb-4">
   {% blocktrans trimmed %}
     Personal information contained in {{ organisation_name }} databases
   {% endblocktrans %}
 </h2>
 <h4 class="mb-4">{% trans 'Personal information in court cases' %}</h4>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     {{ organisation_name }} publishes comprehensive collections of court decisions with the consent of the public bodies concerned. The
@@ -226,7 +198,6 @@
     be provided with free, unconditional and unrestricted access to basic legal materials.
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     {{ organisation_name }} undertakes to monitor and delete from published judgments personal information as directed by law or
@@ -234,11 +205,7 @@
     where this is possible without distorting the meaning and context of the document.
   {% endblocktrans %}
 </p>
-
-<h4 class="mb-4">
-  {% trans 'Personal information in government gazettes' %}
-</h4>
-
+<h4 class="mb-4">{% trans 'Personal information in government gazettes' %}</h4>
 <p class="mb-4">
   {% blocktrans trimmed %}
     Government gazettes and official journals are official publications of the states that publish them. The law mandates
@@ -246,13 +213,11 @@
     these public notices in the government gazette with the intent of the contents being made accessible to the public.
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans %}
     {{ organisation_name }} cannot withdraw from circulation, redact or amend the government gazette.
   {% endblocktrans %}
 </p>
-
 <h4 class="mb-4">{% trans 'Automated monitoring' %}</h4>
 <p class="mb-4">
   {% blocktrans trimmed %}
@@ -260,13 +225,11 @@
     does not guarantee that all sensitive material has been correctly de-identified.
   {% endblocktrans %}
 </p>
-
 <p class="mb-4">
   {% blocktrans trimmed %}
     Should you have concerns over personal information published on the {{ organisation_name }} website, please contact us.
   {% endblocktrans %}
 </p>
-
 <h4 class="mb-4">{% trans 'Your responsible use of personal information' %}</h4>
 <p class="mb-4">
   {% blocktrans %}
@@ -275,7 +238,6 @@
     the land.
   {% endblocktrans %}
 </p>
-
 <h2 class="mb-4">{% trans 'Right to amend these Terms of Use, Copyright and Privacy statements' %}</h2>
 <p class="mb-4">
   {% blocktrans %}
@@ -284,11 +246,5 @@
     all previous versions of this document.
   {% endblocktrans %}
 </p>
-
-<p class="mb-4">
-  {% trans 'If you have any comments or suggestions about this policy, please contact us.' %}
-</p>
-
-<p class="mb-4">
-  {% trans 'Date of notice: 14 November 2022' %}
-</p>
+<p class="mb-4">{% trans 'If you have any comments or suggestions about this policy, please contact us.' %}</p>
+<p class="mb-4">{% trans 'Date of notice: 14 November 2022' %}</p>

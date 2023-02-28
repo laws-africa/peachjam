@@ -1,8 +1,8 @@
 {% extends "liiweb/home.html" %}
 {% load static i18n %}
-
-{% block title %} {% trans 'Home' %} {% endblock %}
-
+{% block title %}
+  {% trans 'Home' %}
+{% endblock %}
 {% block hero-headings %}
   <h1 class="mb-4">{% trans 'Welcome to the digital Law Library of South Africa' %}</h1>
   <h4 class="mb-4">
@@ -12,41 +12,33 @@
     {% endblocktrans %}
   </h4>
 {% endblock %}
-
 {% block hero-logos %}
   <div class="d-flex justify-content-between">
     <img height="26"
          class="me-4"
          src="{% static 'images/africanlii-logo.svg' %}"
-         alt="africanlii-logo" />
+         alt="africanlii-logo"/>
     <img height="26"
          class="me-4"
          src="{% static 'images/jifa.png' %}"
-         alt="jifa-logo"
-    />
+         alt="jifa-logo"/>
     <img height="26"
          src="{% static 'images/laws-africa-logo.png' %}"
-         alt="laws-logo"
-    />
+         alt="laws-logo"/>
   </div>
 {% endblock %}
-
 {% block first-column-content %}
-
   <section class="pb-3 pt-3">
     <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
     {% trans 'View more judgments' as text %}
     {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
   </section>
-
   <section class="pb-3 pt-3">
     <h2 class="mb-4 heading-underlined">{% trans 'Recent Legislation' %}</h2>
     {% trans 'View more legislation' as text %}
     {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
   </section>
-
 {% endblock %}
-
 {% block second-column-content %}
   <div>
     <strong>{% trans 'About' %}</strong>
@@ -61,20 +53,17 @@
     <img height="26"
          class="me-4"
          src="{% static 'images/africanlii-logo.svg' %}"
-         alt="africanlii-logo" />
+         alt="africanlii-logo"/>
     <img height="26"
          class="me-4"
          src="{% static 'images/jifa.png' %}"
-         alt="jifa-logo"
-    />
+         alt="jifa-logo"/>
     <img height="26"
          src="{% static 'images/laws-africa-logo.png' %}"
-         alt="laws-logo"
-    />
+         alt="laws-logo"/>
   </div>
-
-
-  <ul class="nav nav-tabs about-tabs d-flex justify-content-center justify-content-lg-start" role="tablist">
+  <ul class="nav nav-tabs about-tabs d-flex justify-content-center justify-content-lg-start"
+      role="tablist">
     <li class="nav-item" role="presentation">
       <button class="nav-link fb-nav-link active"
               id="facebook-tab"
@@ -109,27 +98,32 @@
          aria-labelledby="facebook-tab-content">
       <div class="d-flex justify-content-center justify-content-lg-start">
         <iframe width="248px"
-              height="400px"
-              frameborder="0"
-              allowtransparency="true"
-              allowfullscreen="true"
-              scrolling="no"
-              allow="encrypted-media"
-              src="https://www.facebook.com/v7.0/plugins/page.php?adapt_container_width=true&amp;app_id=323754998056442&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fx%2Fconnect%2Fxd_arbiter%2F%3Fversion%3D46%23cb%3Dfff64532b89928%26domain%3Dlawlibrary.org.za%26is_canvas%3Dfalse%26origin%3Dhttps%253A%252F%252Flawlibrary.org.za%252Ff3480a77dff53bc%26relation%3Dparent.parent&amp;container_width=248&amp;height=400&amp;hide_cover=false&amp;href=https%3A%2F%2Fwww.facebook.com%2Fafricanlii%2F&amp;locale=en_US&amp;sdk=joey&amp;show_facepile=false&amp;small_header=true&amp;tabs=timeline&amp;width=248"
-              style="border: none; visibility: visible; width: 248px; height: 400px;">
-      </iframe>
+                height="400px"
+                frameborder="0"
+                allowtransparency="true"
+                allowfullscreen="true"
+                scrolling="no"
+                allow="encrypted-media"
+                src="https://www.facebook.com/v7.0/plugins/page.php?adapt_container_width=true&amp;app_id=323754998056442&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fx%2Fconnect%2Fxd_arbiter%2F%3Fversion%3D46%23cb%3Dfff64532b89928%26domain%3Dlawlibrary.org.za%26is_canvas%3Dfalse%26origin%3Dhttps%253A%252F%252Flawlibrary.org.za%252Ff3480a77dff53bc%26relation%3Dparent.parent&amp;container_width=248&amp;height=400&amp;hide_cover=false&amp;href=https%3A%2F%2Fwww.facebook.com%2Fafricanlii%2F&amp;locale=en_US&amp;sdk=joey&amp;show_facepile=false&amp;small_header=true&amp;tabs=timeline&amp;width=248"
+                style="border: none;
+                       visibility: visible;
+                       width: 248px;
+                       height: 400px">
+        </iframe>
       </div>
     </div>
-    <div class="tab-pane fade" id="twitter-tab-content" role="tabpanel" aria-labelledby="twitter-tab">
+    <div class="tab-pane fade"
+         id="twitter-tab-content"
+         role="tabpanel"
+         aria-labelledby="twitter-tab">
       <div class="d-flex justify-content-center justify-content-lg-start">
         <a class="twitter-timeline"
-         data-width="248"
-         data-height="400"
-         href="https://twitter.com/AfricanLII?ref_src=twsrc%5Etfw">
-        {% trans 'Tweets by AfricanLII' %}
-      </a>
-      <script async src="https://platform.twitter.com/widgets.js" charset="utf-8">
-      </script>
+           data-width="248"
+           data-height="400"
+           href="https://twitter.com/AfricanLII?ref_src=twsrc%5Etfw">
+          {% trans 'Tweets by AfricanLII' %}
+        </a>
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
       </div>
     </div>
   </div>
