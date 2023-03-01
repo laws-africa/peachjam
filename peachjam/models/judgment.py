@@ -10,7 +10,9 @@ from peachjam.models import CoreDocument
 
 
 class Attorney(models.Model):
-    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
     description = models.TextField(_("description"), blank=True)
 
     class Meta:

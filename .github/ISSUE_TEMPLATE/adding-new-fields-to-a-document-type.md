@@ -22,6 +22,8 @@ about: This template seeks to cover questions that we need to ask to understand 
     -
 8. Does it impact the MNC for judgments?
    -
+9. Must the field be included in the import/export functionality?
+   -
 
 ## Implementation aspects:
 [] Added to modelling?

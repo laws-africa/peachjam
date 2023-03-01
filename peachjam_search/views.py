@@ -217,6 +217,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "year": "year",
         "judges": "judges",
         "registry": "registry",
+        "attorneys": "attorneys",
     }
 
     search_fields = {
@@ -228,6 +229,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "court": None,
         "alternative_names": {"boost": 4},
         "registry": None,
+        "attorneys": None,
     }
 
     faceted_search_fields = {
@@ -268,6 +270,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "court": {"field": "court", "options": {"size": 100}},
         "judges": {"field": "judges", "options": {"size": 100}},
         "registry": {"field": "registry", "options": {"size": 100}},
+        "attorneys": {"field": "attorneys", "options": {"size": 100}},
     }
 
     highlight_fields = {
