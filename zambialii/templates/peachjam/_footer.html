@@ -1,0 +1,65 @@
+{% extends 'peachjam/_footer.html' %}
+{% load static i18n %}
+{% block newsletter-blurb %}
+  {% trans 'Subscribe to our newsletter for updates and news.' %}
+{% endblock %}
+{% block about %}
+  <p>
+    {% blocktrans trimmed %}
+      ZambiaLII is a pioneer in the free access to law movement and serves as a reliable and timely source of judicial decisions, legislation and statutory instruments.
+      Since 2012, ZambiaLII has been hosted by the <a href="https://saipar.org/" target="_blank" rel="noreferrer">Southern African Institute for Policy and Research</a>(SAIPAR), an independent, educational and development-oriented research centre.
+      AfricanLII provides technical support to ZambiaLII.
+    {% endblocktrans %}
+  </p>
+{% endblock %}
+{% block second-content-column %}
+  <h5>{% trans 'Our partners' %}</h5>
+  <div>
+    <a href="https://agp.africanlii.org/" target="_blank" rel="noreferrer">AfricanLII</a>
+  </div>
+  <div>
+    <a href="http://www.jifa.uct.ac.za/" target="_blank" rel="noreferrer">JIFA</a>
+  </div>
+  <div>
+    <a href="https://laws.africa/" target="_blank" rel="noreferrer">Laws.Africa</a>
+  </div>
+  <h6 class="mt-4">{% trans 'With support from' %}</h6>
+  <div>
+    <a href="https://www.ned.org/" target="_blank" rel="noreferrer">{% trans 'National Endowment for Democracy' %}</a>
+  </div>
+  <div>
+    <a href="https://www.indigotrust.org.uk/"
+       target="_blank"
+       rel="noreferrer">{% trans 'The Indigo Trust' %}</a>
+  </div>
+{% endblock %}
+{% block footer-logos %}
+  <div class="footer-logos">
+    <a href="https://www.ned.org/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/' %}" alt="NED logo" />
+    </a>
+    <a href="https://laws.africa/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/laws-africa-logo-horizontal.png' %}"
+           alt="Laws.Africa"/>
+    </a>
+    <a class="footer-logos__item"
+       href="https://agp.africanlii.org/"
+       target="_blank"
+       rel="noreferrer">
+      <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII" />
+    </a>
+    <a href="https://saipar.org/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/' %}"
+           alt="Southern African Institute for Policy and Research (SAIPAR)"/>
+    </a>
+  </div>
+{% endblock %}
