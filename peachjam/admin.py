@@ -35,6 +35,7 @@ from peachjam.models import (
     Book,
     CaseNumber,
     CitationLink,
+    CoreDocument,
     Court,
     CourtClass,
     CourtRegistry,
@@ -426,6 +427,10 @@ class TaxonomyAdmin(TreeAdmin):
     inlines = [EntityProfileInline]
 
 
+class CoreDocumentAdmin(DocumentAdmin):
+    pass
+
+
 class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
     resource_class = GenericDocumentResource
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
@@ -675,6 +680,7 @@ admin.site.register(
 )
 admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)
 admin.site.register(Taxonomy, TaxonomyAdmin)
+admin.site.register(CoreDocument, CoreDocumentAdmin)
 admin.site.register(GenericDocument, GenericDocumentAdmin)
 admin.site.register(Legislation, LegislationAdmin)
 admin.site.register(LegalInstrument, LegalInstrumentAdmin)
