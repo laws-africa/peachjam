@@ -24,6 +24,22 @@ main {
   padding-bottom: 5px;
 }
 
+.courts__column-wrapper {
+  columns: 3 auto;
+
+  @include media-breakpoint-down(lg) {
+    columns: 2 auto;
+  }
+
+  @include media-breakpoint-down(sm) {
+    columns: 1;
+  }
+}
+
+.courts__item {
+  break-inside: avoid;
+}
+
 .nav-tabs {
   border: none;
 

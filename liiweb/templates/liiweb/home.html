@@ -74,6 +74,18 @@
           {% block second-column-content %}{% endblock %}
         </div>
       </div>
+      <div>
+        {% block lower-row-content %}
+          <section class="pb-3 pt-3">
+            <h2 class="mb-4 heading-underlined">{% trans 'Courts' %}</h2>
+            {% include 'peachjam/_court_list.html' %}
+          </section>
+          <section class="pb-3 pt-3">
+            <h2 class="mb-4 heading-underlined">{% trans 'Collections' %}</h2>
+            {% include 'peachjam/_taxonomy_list.html' %}
+          </section>
+        {% endblock %}
+      </div>
     </div>
   </section>
 {% endblock %}
