@@ -74,6 +74,20 @@ class DynamicStorageFieldFile(FieldFile):
                 # the storage has extracted all that it needs, we can strip the metadata
                 self.name = self.storage.unformat_name(name)
 
+    def get_raw_value(self):
+        """Get the raw value of this file's path in the database."""
+        assert self.instance.pk
+        return self.instance.__class__.objects.filter(pk=self.instance.pk).values_list(
+            self.field.name, flat=True
+        )[0]
+
+    def set_raw_value(self, value):
+        """Set the raw value of this file's path in the database."""
+        assert self.instance.pk
+        self.instance.__class__.objects.filter(pk=self.instance.pk).update(
+            **{self.field.name: value}
+        )
+
 
 class DynamicStorageFileField(models.FileField):
     """File field for models that dynamically looks up the storage to use for the field."""

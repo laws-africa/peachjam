@@ -1,7 +1,6 @@
 import logging
 
 from countries_plus.models import Country
-from django.db import connection
 from languages_plus.models import Language
 
 from peachjam.models import (
@@ -113,16 +112,8 @@ class GazetteAdapter(Adapter):
                     document=updated_gazette,
                     defaults={"file": f"{file_path}", "source_url": source_url},
                 )
-
                 # update the source file to include the bucket name
-                with connection.cursor() as cursor:
-                    source_file_table = updated_source_file._meta.db_table
-                    sql = f"""
-                        UPDATE  {source_file_table}
-                        SET file = '{file_path}'
-                        WHERE id  = {updated_source_file.pk}
-                        """
-                    cursor.execute(sql)
+                updated_source_file.file.set_raw_value(file_path)
 
             if hasattr(ga_gazette, "document_content"):
                 ga_content_text = ga_gazette.document_content.content_text
