@@ -47,17 +47,14 @@
       </dd>
     {% endif %}
   {% endwith %}
-  {% with document.attorneys.all as attorneys %}
-    {% if document.attorneys %}
-      <dt>
-        {% trans 'Attorneys' %}
-      </dt>
-      <dd class="text-muted">
-        {% for attorney in attorneys %}
-          {{ attorney.name }}
-          {% if not forloop.last %},{% endif %}
-        {% endfor %}
-      </dd>
-    {% endif %}
-  {% endwith %}
+  {% if document.attorneys.all %}
+    <dt>
+      {% trans 'Attorneys' %}
+    </dt>
+    <dd class="text-muted">
+      {% for attorney in document.attorneys.all %}
+        {% if not forloop.last %}{{ attorney.name }},{% endif %}
+      {% endfor %}
+    </dd>
+  {% endif %}
 {% endblock %}
