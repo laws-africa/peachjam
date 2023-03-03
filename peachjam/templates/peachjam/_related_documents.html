@@ -1,9 +1,6 @@
 {% load peachjam i18n %}
-
 <h4>{% trans "Related documents" %}</h4>
-
 <div class="row">
-
   {% if relationships_as_subject %}
     <div class="col-md">
       <ul class="list-unstyled">
@@ -19,7 +16,6 @@
       </ul>
     </div>
   {% endif %}
-
   {% if relationships_as_object %}
     <div class="col-md">
       <ul class="list-unstyled">
@@ -35,5 +31,4 @@
       </ul>
     </div>
   {% endif %}
-
 </div>

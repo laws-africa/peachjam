@@ -1,10 +1,10 @@
 {% load peachjam i18n %}
-
-
 <div class="container">
   <div class="row">
     <div class="col-sm">
-      <h5>{% translate 'Cited documents' %} <span class="badge bg-secondary">{{ cited_works|length }}</span></h5>
+      <h5>
+        {% translate 'Cited documents' %} <span class="badge bg-secondary">{{ cited_works|length }}</span>
+      </h5>
       <ol>
         {% for work in cited_works %}
           <li>
@@ -14,7 +14,9 @@
       </ol>
     </div>
     <div class="col-sm">
-      <h5>{% translate 'Documents citing this one' %} <span class="badge bg-secondary">{{ works_citing_current_work|length }}</span></h5>
+      <h5>
+        {% translate 'Documents citing this one' %} <span class="badge bg-secondary">{{ works_citing_current_work|length }}</span>
+      </h5>
       <ol>
         {% for work in works_citing_current_work %}
           <li>

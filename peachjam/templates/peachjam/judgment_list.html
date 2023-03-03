@@ -1,34 +1,13 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
-
-{% block title %}{% trans 'Judgments' %}{% endblock %}
-
+{% block title %}
+  {% trans 'Judgments' %}
+{% endblock %}
 {% block page-content %}
   <section class="pb-5">
     <div class="container">
       <h1 class="my-4">{% trans 'Judgments' %}</h1>
-
-      {% if grouped_courts %}
-        <div class="row mb-3">
-          {% for court_class, courts in grouped_courts.items %}
-            <div class="col-md-4 col-12 mb-3">
-              <h4 class="heading-underlined">
-              {{ court_class }}
-              </h4>
-              {% if courts|length > 0 %}
-                {% for item in courts %}
-                    <div>
-                      <a href="{% url 'court' item.code  %}">{{ item.title }}</a>
-                    </div>
-                  {% endfor %}
-              {% else %}
-                <div>No courts found</div>
-              {% endif %}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
+      {% include 'peachjam/_court_list.html' %}
       <h4 class="heading-underlined">
         {% if title %}
           {{ title }}
