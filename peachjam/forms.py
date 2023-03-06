@@ -112,7 +112,7 @@ class BaseDocumentFilterForm(forms.Form):
         registries = self.params.getlist("registries")
 
         # Order by date descending initially
-        queryset = queryset.order_by("-date")
+        queryset = queryset.order_by("-date", "title")
 
         if years and exclude != "years":
             queryset = queryset.filter(date__year__in=years)
