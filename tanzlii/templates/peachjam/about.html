@@ -1,0 +1,38 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'About' %}
+{% endblock %}
+{% block page-content %}
+  <section class="py-5">
+    <div class="container">
+      <h1 class="mb-4">{% trans 'About TanzLII' %}</h1>
+    </div>
+  </section>
+{% endblock %}
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'About' %}
+{% endblock %}
+{% block page-content %}
+  <section class="py-5">
+    <div class="container">
+      <h1 class="mb-4">{% trans 'About TanzLII' %}</h1>
+      <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
+      <p class="mb-4">
+        {% blocktrans trimmed %}
+          <div>
+            <a href="mailto:info@tanzlii.org"><span style="margin-right: .2rem"><i class="bi bi-envelope mr-2"></i></span>info@tanzlii.org</a>
+          </div>
+          <div>
+            <a href="https://facebook.com/africanlii/"><span style="margin-right: .2rem"><i class="bi bi-facebook mr-2"></i></span>facebook.com/africanlii</a>
+          </div>
+          <div>
+            <a href="https://twitter.com/AfricanLII/"><span style="margin-right: .2rem"><i class="bi bi-twitter mr-2"></i></span>twitter.com/AfricanLII</a>
+          </div>
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+{% endblock %}
