@@ -18,15 +18,9 @@
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'taxonomy' %}active{% endif %}"
-       href="{% url 'top_level_taxonomy_list' %}">
-      {% trans 'Taxonomy' %}
-    </a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'articles' %}active{% endif %}"
-       href="{% url 'article_list' %}">
-      {% trans 'Articles' %}
+    <a class="nav-link {% if view.navbar_link == 'gazettes' %}active{% endif %}"
+       href="{% url 'gazettes' %}">
+      {% trans 'Gazettes' %}
     </a>
   </li>
   <li class="nav-item">
