@@ -15,6 +15,7 @@
     {{ $t('Court registry') }}
     {{ $t('Document type') }}
     {{ $t('Judges') }}
+    {{ $t('Attorneys') }}
     {{ $t('Nature') }}
     {{ $t('Locality') }}
     {{ $t('Regional body') }}
@@ -62,6 +63,10 @@ export default {
       default: () => []
     },
     registries: {
+      type: Array,
+      default: () => []
+    },
+    attorneys: {
       type: Array,
       default: () => []
     }
@@ -127,6 +132,11 @@ export default {
           name: 'registries',
           type: 'checkboxes',
           title: this.$t('Court registry')
+        },
+        {
+          name: 'attorneys',
+          type: 'checkboxes',
+          title: this.$t('Attorneys')
         },
         {
           name: 'docTypes',
