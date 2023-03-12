@@ -10,7 +10,7 @@ class MncMatcher(CitationMatcher):
     """
 
     pattern_re = re.compile(
-        r"\[(?P<year>\d{4})\]\s+(?P<court>(ZA|KE)[A-Z]{1,5})\s+(?P<num>\d+)\b"
+        r"\[(?P<year>\d{4})\]\s+(?P<court>(KE|NA|ZA)[A-Z]{1,8})\s+(?P<num>\d+)\b"
     )
     href_pattern = "/akn/{place}/judgment/{court}/{year}/{num}"
     html_candidate_xpath = ".//text()[contains(., '[') and not(ancestor::a)]"
