@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2022-11-30 14:17\n"
+"PO-Revision-Date: 2023-03-13 07:26\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -98,26 +98,20 @@ msgid "University of Cape Town"
 msgstr ""
 
 #: templates/peachjam/_header.html:30
-#, fuzzy
-#| msgid "Other African Legal Information Institutions"
 msgid "African Legal Information"
-msgstr "Taasisi Nyingine za Kisheria za Kiafrika"
+msgstr ""
 
 #: templates/peachjam/_header.html:36
-#, fuzzy
-#| msgid "Recent Legal Instruments"
 msgid "Legal Instruments"
-msgstr "Vyombo vya Kisheria vya Hivi Karibuni"
+msgstr "Vyombo vya Kisheria"
 
 #: templates/peachjam/_header.html:37
 msgid "Charters, treaties, conventions and regulations."
 msgstr ""
 
 #: templates/peachjam/_header.html:42
-#, fuzzy
-#| msgid "Recent Judgments"
 msgid "Judgments"
-msgstr "Hukumu za Hivi Karibuni"
+msgstr "Hukumu"
 
 #: templates/peachjam/_header.html:43
 msgid "Judgments from regional African courts."
@@ -303,8 +297,3 @@ msgstr ""
 msgid "Reports and Guides"
 msgstr ""
 
-#~ msgid "AU Documents"
-#~ msgstr "Nyaraka za AU"
-
-#~ msgid "Treaties and Protocols"
-#~ msgstr "Mikataba na Itifaki"
