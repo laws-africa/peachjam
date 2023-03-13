@@ -84,7 +84,13 @@ class IndigoAdapter(Adapter):
         return self.get_updated_documents(last_refreshed)
 
     def get_doc_list(self):
-        return self.client_get(self.url).json()["results"]
+        url = self.url
+        results = []
+        while url:
+            res = self.client_get(url).json()
+            results.extend(res["results"])
+            url = res["next"]
+        return results
 
     def get_updated_documents(self, last_refreshed):
         docs = [
