@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2022-12-05 13:54\n"
+"PO-Revision-Date: 2023-03-13 07:26\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -32,35 +32,31 @@ msgstr "Pesquisa"
 
 #: templates/liiweb/home.html:35
 msgid "Advanced search"
-msgstr ""
+msgstr "Pesquisa avançada"
 
 #: templates/liiweb/home.html:62
 msgid "Recent Judgments"
-msgstr ""
+msgstr "Julgamentos Recentes"
 
 #: templates/liiweb/home.html:63
 msgid "View more judgments"
-msgstr ""
+msgstr "Ver mais julgamentos"
 
 #: templates/liiweb/home.html:67
-#, fuzzy
-#| msgid "Legislation"
 msgid "Recent Legislation"
-msgstr "Legislação"
+msgstr "Legislação recente"
 
 #: templates/liiweb/home.html:68
-#, fuzzy
-#| msgid "Current legislation"
 msgid "View more legislation"
-msgstr "Legislação atual"
+msgstr "Ver mais legislação"
 
 #: templates/liiweb/home.html:80
 msgid "Courts"
-msgstr ""
+msgstr "Tribunais"
 
 #: templates/liiweb/home.html:84
 msgid "Collections"
-msgstr ""
+msgstr "Coleções"
 
 #: templates/liiweb/legislation_list.html:4
 #: templates/liiweb/legislation_list.html:11 templates/peachjam/_header.html:17
@@ -85,7 +81,7 @@ msgstr "Estão a ver legislação revogada, que já não está em vigor."
 
 #: templates/liiweb/pocketlaw.html:7
 msgid "Pocket Law"
-msgstr ""
+msgstr "Lei de Bolso"
 
 #: templates/peachjam/_footer.html:4
 msgid "Subscribe"
@@ -109,4 +105,5 @@ msgstr "Outras Instituições Jurídicas Africanas"
 
 #: templates/peachjam/_header.html:11
 msgid "Judgments"
-msgstr ""
+msgstr "Julgamentos"
+
