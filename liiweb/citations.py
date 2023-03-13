@@ -9,8 +9,12 @@ class MncMatcher(CitationMatcher):
     example: [2022] ZASCA 126
     """
 
+    country_codes = "|".join("BW GH KE LS MW MU MZ NA SN SC ZA SZ TZ UG ZM ZW".split())
+
     pattern_re = re.compile(
-        r"\[(?P<year>\d{4})\]\s+(?P<court>(KE|NA|ZA)[A-Z]{1,8})\s+(?P<num>\d+)\b"
+        r"\[(?P<year>\d{4})\]\s+(?P<court>("
+        + country_codes
+        + r")[A-Z]{1,8})\s+(?P<num>\d+)\b"
     )
     href_pattern = "/akn/{place}/judgment/{court}/{year}/{num}"
     html_candidate_xpath = ".//text()[contains(., '[') and not(ancestor::a)]"
