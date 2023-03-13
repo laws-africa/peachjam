@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2022-12-05 19:13\n"
+"PO-Revision-Date: 2023-03-13 07:26\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -179,16 +179,12 @@ msgid "citation links"
 msgstr "liens de citation"
 
 #: models/citations.py:56
-#, fuzzy
-#| msgid "object work"
 msgid "citing work"
-msgstr "travail d'objet"
+msgstr "citant un travail"
 
 #: models/citations.py:63
-#, fuzzy
-#| msgid "parent work"
 msgid "target work"
-msgstr "œuvre supérieur"
+msgstr "travail ciblé"
 
 #: models/core_document_model.py:42 models/core_document_model.py:586
 #: models/judgment.py:16 models/judgment.py:29 models/judgment.py:44
@@ -318,11 +314,11 @@ msgstr "mis à jour le"
 
 #: models/core_document_model.py:299
 msgid "allow robots"
-msgstr ""
+msgstr "allow robots"
 
 #: models/core_document_model.py:302
 msgid "Allow this document to be indexed by search engine robots."
-msgstr ""
+msgstr "Autoriser l'indexation de ce document par les robots des moteurs de recherche."
 
 #: models/core_document_model.py:328
 msgid "Invalid Date"
@@ -390,22 +386,16 @@ msgid "alternative names"
 msgstr "noms alternatifs"
 
 #: models/core_document_model.py:645
-#, fuzzy
-#| msgid "document type"
 msgid "document text"
-msgstr "type de document"
+msgstr "texte du document"
 
 #: models/core_document_model.py:649
-#, fuzzy
-#| msgid "document nature"
 msgid "document content"
-msgstr "nature du document"
+msgstr "contenu du document"
 
 #: models/core_document_model.py:650
-#, fuzzy
-#| msgid "document natures"
 msgid "document contents"
-msgstr "types de document"
+msgstr "contenu du document"
 
 #: models/gazette.py:8
 msgid "gazette"
@@ -477,11 +467,11 @@ msgstr "activé"
 
 #: models/judgment.py:20
 msgid "attorney"
-msgstr ""
+msgstr "avocat"
 
 #: models/judgment.py:21 models/judgment.py:128
 msgid "attorneys"
-msgstr ""
+msgstr "Avocats"
 
 #: models/judgment.py:33
 msgid "judge"
@@ -516,16 +506,12 @@ msgid "courts"
 msgstr "cours"
 
 #: models/judgment.py:103
-#, fuzzy
-#| msgid "courts"
 msgid "court registry"
-msgstr "cours"
+msgstr "greffe de la cour"
 
 #: models/judgment.py:104
-#, fuzzy
-#| msgid "court classes"
 msgid "court registries"
-msgstr "cours de cour"
+msgstr "registres judiciaires"
 
 #: models/judgment.py:130
 msgid "headnote holding"
@@ -669,10 +655,8 @@ msgid "document jurisdictions"
 msgstr "juridictions du document"
 
 #: models/settings.py:43
-#, fuzzy
-#| msgid "Subsidiary legislation"
 msgid "subsidiary legislation label"
-msgstr "Législation subsidiaire"
+msgstr "étiquette législative subsidiaire"
 
 #: models/settings.py:49
 msgid "site settings"
@@ -759,12 +743,10 @@ msgstr "Mot de passe oublié ?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Connectez-vous à %(provider.name)s\n"
 "          "
 
@@ -860,23 +842,17 @@ msgid "Numbered title"
 msgstr "Titre numéroté"
 
 #: templates/peachjam/_citations.html:6
-#, fuzzy
-#| msgid "Related documents"
 msgid "Cited documents"
-msgstr "Documents connexes"
+msgstr "Documents cités"
 
 #: templates/peachjam/_citations.html:18
-#, fuzzy
-#| msgid " Documents by %(author)s "
 msgid "Documents citing this one"
-msgstr " Documents par %(author)s "
+msgstr "Documents citant celui-ci"
 
 #: templates/peachjam/_court_list.html:14
 #: templates/peachjam/_court_list.html:20
-#, fuzzy
-#| msgid "No documents found."
 msgid "No courts found."
-msgstr "Aucun document trouvé."
+msgstr "Aucun tribunal trouvé."
 
 #: templates/peachjam/_document_content.html:24
 msgid "Table of contents"
@@ -951,34 +927,28 @@ msgid "Next"
 msgstr "Suivant"
 
 #: templates/peachjam/_ratifications.html:5
-#, fuzzy
-#| msgid "source URL"
 msgid "Source"
-msgstr "URL source"
+msgstr "Source"
 
 #: templates/peachjam/_ratifications.html:10
-#, fuzzy
-#| msgid "updated at"
 msgid "Last updated"
-msgstr "mis à jour le"
+msgstr "Dernière mise à jour"
 
 #: templates/peachjam/_ratifications.html:17
 msgid "Country"
-msgstr ""
+msgstr "Pays"
 
 #: templates/peachjam/_ratifications.html:18
 msgid "Ratification Date"
-msgstr ""
+msgstr "Date de ratification"
 
 #: templates/peachjam/_ratifications.html:19
 msgid "Deposit Date"
-msgstr ""
+msgstr "Date de dépôt"
 
 #: templates/peachjam/_ratifications.html:20
-#, fuzzy
-#| msgid "nature"
 msgid "Signature Date"
-msgstr "nature"
+msgstr "Date de signature"
 
 #: templates/peachjam/_recent_document_list.html:14
 #: templates/peachjam/court_detail.html:34
@@ -1202,12 +1172,10 @@ msgstr "Les journaux officielles et les revues gouvernementaux sont des publicat
 
 #: templates/peachjam/_terms_of_use_content.html:217
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
 "  "
-msgstr ""
-"\n"
+msgstr "\n"
 "    %(organisation_name)s ne peut pas se retirer de la circulation, reproduire ou modifier le journal officiel.\n"
 "  "
 
@@ -1231,14 +1199,12 @@ msgstr "Votre utilisation responsable des informations personnelles"
 
 #: templates/peachjam/_terms_of_use_content.html:235
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some\n"
 "    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
 "    the land.\n"
 "  "
-msgstr ""
-"\n"
+msgstr "\n"
 "    %(organisation_name)s utilisateurs doivent noter qu'il y a des limitations légales sur l'utilisation, la publication et la diffusion de certaines\n"
 "    informations personnelles dans les bases de données %(organisation_name)s . Il est de la responsabilité de %(organisation_name)s utilisateurs de se conformer aux lois applicables.\n"
 "  "
@@ -1248,14 +1214,12 @@ msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
 msgstr "Droit de modifier les présentes conditions d'utilisation, les déclarations sur le droit d'auteur et les déclarations de confidentialité"
 
 #: templates/peachjam/_terms_of_use_content.html:243
-msgid ""
-"\n"
+msgid "\n"
 "    We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All\n"
 "    amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace\n"
 "    all previous versions of this document.\n"
 "  "
-msgstr ""
-"\n"
+msgstr "\n"
 "    Nous nous réservons le droit de modifier à tout moment les présentes conditions d'utilisation, les droits d'auteur et les déclarations de confidentialité et de sécurité. Toutes les\n"
 "    modifications seront affichées sur ce site Web. Sauf indication contraire, la version actuelle remplacera  \n"
 "    toutes les versions précédentes du présent document.\n"
@@ -1279,7 +1243,7 @@ msgstr "cette version"
 
 #: templates/peachjam/_timeline_events.html:15
 msgid "amendment not yet applied"
-msgstr ""
+msgstr "amendement non encore appliqué"
 
 #: templates/peachjam/_timeline_events.html:24
 msgid "Amended by"
@@ -1367,10 +1331,8 @@ msgstr[1] "%(num_gazettes)s Journal Officiel"
 
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
-#, fuzzy
-#| msgid "generic documents"
 msgid "Generic Documents"
-msgstr "documents génériques"
+msgstr "Documents génériques"
 
 #: templates/peachjam/home.html:4
 msgid "Home"
@@ -1406,7 +1368,7 @@ msgstr "Date de l'audience"
 
 #: templates/peachjam/judgment_detail.html:31
 msgid "Court Registry"
-msgstr ""
+msgstr "Registre des tribunaux"
 
 #: templates/peachjam/judgment_detail.html:40
 msgid "Case number"
@@ -1414,13 +1376,11 @@ msgstr "Numéro de cas"
 
 #: templates/peachjam/judgment_detail.html:53
 msgid "Attorneys"
-msgstr ""
+msgstr "Avocats"
 
 #: templates/peachjam/judgment_list.html:15
-#, fuzzy
-#| msgid "judgments"
 msgid "Recent judgments"
-msgstr "jugements"
+msgstr "Jugements récents"
 
 #: templates/peachjam/layouts/document_detail.html:59
 msgid "Document detail"
@@ -1431,16 +1391,12 @@ msgid "History"
 msgstr "Historique"
 
 #: templates/peachjam/layouts/document_detail.html:98
-#, fuzzy
-#| msgid "Citation"
 msgid "Citations"
-msgstr "Référence"
+msgstr "Citation"
 
 #: templates/peachjam/layouts/document_detail.html:112
-#, fuzzy
-#| msgid "Work identification"
 msgid "Ratifications"
-msgstr "Identification de travail"
+msgstr "Ratifications"
 
 #: templates/peachjam/layouts/document_detail.html:136
 msgid "Jurisdiction"
@@ -1484,10 +1440,8 @@ msgstr "Filtres"
 
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
-#, fuzzy
-#| msgid "legal instruments"
 msgid "Legal Instruments"
-msgstr "actes juridiques"
+msgstr "Instruments légaux"
 
 #: templates/peachjam/legislation_detail.html:34
 msgid "Primary work"
@@ -1536,8 +1490,3 @@ msgstr "Il s'agit de la version de cette loi telle qu'elle était de %(date_from
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr "Il s'agit de la version de cette loi telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lire la version actuellement en vigueur</a>."
 
-#~ msgid "AU Documents"
-#~ msgstr "Documents de l'UA"
-
-#~ msgid "Treaties and Protocols"
-#~ msgstr "Traités et Protocoles"
