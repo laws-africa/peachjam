@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2022-12-05 16:20\n"
+"PO-Revision-Date: 2023-03-13 07:26\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -386,22 +386,16 @@ msgid "alternative names"
 msgstr ""
 
 #: models/core_document_model.py:645
-#, fuzzy
-#| msgid "Documents"
 msgid "document text"
-msgstr "Nyaraka"
+msgstr ""
 
 #: models/core_document_model.py:649
-#, fuzzy
-#| msgid "No documents found."
 msgid "document content"
-msgstr "Hakuna hati zilizopatikana."
+msgstr ""
 
 #: models/core_document_model.py:650
-#, fuzzy
-#| msgid "Documents"
 msgid "document contents"
-msgstr "Nyaraka"
+msgstr ""
 
 #: models/gazette.py:8
 msgid "gazette"
@@ -512,10 +506,8 @@ msgid "courts"
 msgstr "mahakama"
 
 #: models/judgment.py:103
-#, fuzzy
-#| msgid "courts"
 msgid "court registry"
-msgstr "mahakama"
+msgstr ""
 
 #: models/judgment.py:104
 msgid "court registries"
@@ -751,8 +743,7 @@ msgstr ""
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
 msgstr ""
@@ -849,23 +840,17 @@ msgid "Numbered title"
 msgstr ""
 
 #: templates/peachjam/_citations.html:6
-#, fuzzy
-#| msgid "AU Documents"
 msgid "Cited documents"
-msgstr "Nyaraka za AU"
+msgstr ""
 
 #: templates/peachjam/_citations.html:18
-#, fuzzy
-#| msgid " Documents by %(author)s "
 msgid "Documents citing this one"
-msgstr " Nyaraka za %(author)s "
+msgstr ""
 
 #: templates/peachjam/_court_list.html:14
 #: templates/peachjam/_court_list.html:20
-#, fuzzy
-#| msgid "No documents found."
 msgid "No courts found."
-msgstr "Hakuna hati zilizopatikana."
+msgstr ""
 
 #: templates/peachjam/_document_content.html:24
 msgid "Table of contents"
@@ -1185,8 +1170,7 @@ msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:217
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
 "  "
 msgstr ""
@@ -1211,8 +1195,7 @@ msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:235
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "    %(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some\n"
 "    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
 "    the land.\n"
@@ -1224,8 +1207,7 @@ msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
 msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:243
-msgid ""
-"\n"
+msgid "\n"
 "    We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All\n"
 "    amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace\n"
 "    all previous versions of this document.\n"
@@ -1338,10 +1320,8 @@ msgstr[1] ""
 
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
-#, fuzzy
-#| msgid "Documents"
 msgid "Generic Documents"
-msgstr "Nyaraka"
+msgstr ""
 
 #: templates/peachjam/home.html:4
 msgid "Home"
@@ -1388,10 +1368,8 @@ msgid "Attorneys"
 msgstr ""
 
 #: templates/peachjam/judgment_list.html:15
-#, fuzzy
-#| msgid "judgments"
 msgid "Recent judgments"
-msgstr "hukumu"
+msgstr ""
 
 #: templates/peachjam/layouts/document_detail.html:59
 msgid "Document detail"
@@ -1452,7 +1430,7 @@ msgstr ""
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
 msgid "Legal Instruments"
-msgstr ""
+msgstr "Vyombo vya Kisheria"
 
 #: templates/peachjam/legislation_detail.html:34
 msgid "Primary work"
@@ -1501,5 +1479,3 @@ msgstr ""
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr ""
 
-#~ msgid "Treaties and Protocols"
-#~ msgstr "Mikataba na Itifaki"
