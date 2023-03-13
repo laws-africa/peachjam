@@ -66,11 +66,24 @@
 {% endblock %}
 {% block footer-logos %}
   <div class="footer-logos">
+    <a class="footer-logos__item"
+       href="https://agp.africanlii.org/"
+       target="_blank"
+       rel="noreferrer">
+      <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII" />
+    </a>
     <a href="https://www.ned.org/"
        target="_blank"
        rel="noreferrer"
        class="footer-logos__item">
       <img src="{% static 'images/ned-logo.png' %}" alt="NED logo" />
+    </a>
+    <a href="https://saipar.org/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/saipar-logo.jpg' %}"
+           alt="Southern African Institute for Policy and Research (SAIPAR)"/>
     </a>
     <a href="https://laws.africa/"
        target="_blank"
@@ -79,18 +92,11 @@
       <img src="{% static 'images/laws-africa-logo-horizontal.png' %}"
            alt="Laws.Africa"/>
     </a>
-    <a class="footer-logos__item"
-       href="https://agp.africanlii.org/"
-       target="_blank"
-       rel="noreferrer">
-      <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII" />
-    </a>
-    <a href="https://saipar.org/"
+    <a href="https://www.indigotrust.org.uk/"
        target="_blank"
        rel="noreferrer"
        class="footer-logos__item">
-      <img src="{% static 'images/saipar-logo.jpg' %}"
-           alt="Southern African Institute for Policy and Research (SAIPAR)"/>
+      <img src="{% static 'images/indigo-logo.jpg' %}" alt="Laws.Africa"/>
     </a>
   </div>
 {% endblock %}
