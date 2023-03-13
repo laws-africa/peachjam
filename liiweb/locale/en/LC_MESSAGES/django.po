@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-03 14:55+0000\n"
+"POT-Creation-Date: 2023-03-13 09:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,21 +22,49 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: templates/liiweb/home.html:24 templates/liiweb/home.html:25
+#: templates/liiweb/home.html:25 templates/liiweb/home.html:26
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr ""
 
-#: templates/liiweb/home.html:28
+#: templates/liiweb/home.html:32
 msgid "Search"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:3
-#: templates/liiweb/legislation_list.html:12
+#: templates/liiweb/home.html:35
+msgid "Advanced search"
+msgstr ""
+
+#: templates/liiweb/home.html:62
+msgid "Recent Judgments"
+msgstr ""
+
+#: templates/liiweb/home.html:63
+msgid "View more judgments"
+msgstr ""
+
+#: templates/liiweb/home.html:67
+msgid "Recent Legislation"
+msgstr ""
+
+#: templates/liiweb/home.html:68
+msgid "View more legislation"
+msgstr ""
+
+#: templates/liiweb/home.html:80
+msgid "Courts"
+msgstr ""
+
+#: templates/liiweb/home.html:84
+msgid "Collections"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:4
+#: templates/liiweb/legislation_list.html:11 templates/peachjam/_header.html:17
 msgid "Legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:19
+#: templates/liiweb/legislation_list.html:18
 msgid "Current legislation"
 msgstr ""
 
@@ -44,30 +72,38 @@ msgstr ""
 msgid "Repealed legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:29
+#: templates/liiweb/legislation_list.html:36
 msgid "All legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:37
+#: templates/liiweb/legislation_list.html:42
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr ""
 
-#: templates/peachjam/_footer.html:5
+#: templates/liiweb/pocketlaw.html:7
+msgid "Pocket Law"
+msgstr ""
+
+#: templates/peachjam/_footer.html:4
 msgid "Subscribe"
 msgstr ""
 
-#: templates/peachjam/_footer.html:10
+#: templates/peachjam/_footer.html:9
 msgid "Subscribe to the our newsletter for updates and news."
 msgstr ""
 
-#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:9
+#: templates/peachjam/_footer.html:20 templates/peachjam/_header.html:23
 msgid "About"
 msgstr ""
 
-#: templates/peachjam/_footer.html:29
+#: templates/peachjam/_footer.html:24
 msgid "Our partners"
 msgstr ""
 
-#: templates/peachjam/_footer.html:36
+#: templates/peachjam/_footer.html:33
 msgid "Other African Legal Information Institutions"
+msgstr ""
+
+#: templates/peachjam/_header.html:11
+msgid "Judgments"
 msgstr ""

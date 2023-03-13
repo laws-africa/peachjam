@@ -22,7 +22,7 @@ class MncMatcherTest(TestCase):
   <p>Some string that has [2021] code 65</p>
   <p>Some string that has [2021] code 6-5a</p>
   <p>Some string that has [2021] ZA SC 6</p>
-  <p>A place that isn't trusted [1988] NACC 12.</p>
+  <p>A place that isn't trusted [1988] XXCC 12.</p>
 </div>
 """  # noqa
         )
@@ -35,7 +35,7 @@ class MncMatcherTest(TestCase):
   <p>Some string that has [2021] code 65</p>
   <p>Some string that has [2021] code 6-5a</p>
   <p>Some string that has [2021] ZA SC 6</p>
-  <p>A place that isn't trusted [1988] NACC 12.</p>
+  <p>A place that isn't trusted [1988] XXCC 12.</p>
 </div>""",  # noqa
             lxml.html.tostring(html, encoding="unicode", pretty_print=True).strip(),
         )

@@ -1,14 +1,45 @@
 {% extends 'peachjam/_footer.html' %}
 {% load static i18n %}
 {% block newsletter-blurb %}
-  {% trans 'Subscribe to our newsletter for updates and news.' %}
+  {% trans 'Subscribe to the ZambiaLII newsletter for updates and news.' %}
+{% endblock %}
+{% block newsletter-form-code %}
+  <form action="https://lawlibrary.us10.list-manage.com/subscribe/post?u=4f4bdccc4d82422fd556af74f&amp;id=da4493f83c&amp;f_id=00a23be2f0"
+        method="post"
+        name="mc-embedded-subscribe-form"
+        target="_blank">
+    <div style="position: absolute; left: -5000px;" aria-hidden="true">
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <input type="text"
+             name="b_4f4bdccc4d82422fd556af74f_da4493f83c"
+             tabindex="-1"
+             value=""/>
+    </div>
+    <div class="input-group">
+      <input type="email"
+             value=""
+             name="EMAIL"
+             class="form-control"
+             placeholder="email address"
+             required=""/>
+      <input type="submit"
+             value="Subscribe"
+             name="subscribe"
+             class="btn btn-secondary"/>
+    </div>
+  </form>
 {% endblock %}
 {% block about %}
   <p>
     {% blocktrans trimmed %}
       ZambiaLII is a pioneer in the free access to law movement and serves as a reliable and timely source of judicial decisions, legislation and statutory instruments.
-      Since 2012, ZambiaLII has been hosted by the <a href="https://saipar.org/" target="_blank" rel="noreferrer">Southern African Institute for Policy and Research</a>(SAIPAR), an independent, educational and development-oriented research centre.
+      Since 2012, ZambiaLII has been hosted by the <a href="https://saipar.org/" target="_blank" rel="noreferrer">Southern African Institute for Policy and Research (SAIPAR)</a>, an independent, educational and development-oriented research centre.
       AfricanLII provides technical support to ZambiaLII.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      <a href="https://drive.google.com/file/d/1FRH3SqmlgeJAtTNPv0wemSGmltM5pwYy/view" target="_blank" rel="noreferrer">View the ZambiaLII Brochure</a>
     {% endblocktrans %}
   </p>
 {% endblock %}
@@ -18,10 +49,10 @@
     <a href="https://agp.africanlii.org/" target="_blank" rel="noreferrer">AfricanLII</a>
   </div>
   <div>
-    <a href="http://www.jifa.uct.ac.za/" target="_blank" rel="noreferrer">JIFA</a>
+    <a href="https://laws.africa/" target="_blank" rel="noreferrer">Laws.Africa</a>
   </div>
   <div>
-    <a href="https://laws.africa/" target="_blank" rel="noreferrer">Laws.Africa</a>
+    <a href="https://saipar.org/" target="_blank" rel="noreferrer">Southern African Institute for Policy and Research</a>
   </div>
   <h6 class="mt-4">{% trans 'With support from' %}</h6>
   <div>
@@ -39,7 +70,7 @@
        target="_blank"
        rel="noreferrer"
        class="footer-logos__item">
-      <img src="{% static 'images/' %}" alt="NED logo" />
+      <img src="{% static 'images/ned-logo.png' %}" alt="NED logo" />
     </a>
     <a href="https://laws.africa/"
        target="_blank"
@@ -58,7 +89,7 @@
        target="_blank"
        rel="noreferrer"
        class="footer-logos__item">
-      <img src="{% static 'images/' %}"
+      <img src="{% static 'images/saipar-logo.jpg' %}"
            alt="Southern African Institute for Policy and Research (SAIPAR)"/>
     </a>
   </div>
