@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-03 14:55+0000\n"
+"POT-Creation-Date: 2023-03-13 09:05+0200\n"
 "PO-Revision-Date: 2022-12-05 13:54\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -21,21 +21,53 @@ msgstr ""
 msgid "Home"
 msgstr "Página inicial"
 
-#: templates/liiweb/home.html:24 templates/liiweb/home.html:25
+#: templates/liiweb/home.html:25 templates/liiweb/home.html:26
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr "Pesquisar %(APP_NAME)s"
 
-#: templates/liiweb/home.html:28
+#: templates/liiweb/home.html:32
 msgid "Search"
 msgstr "Pesquisa"
 
-#: templates/liiweb/legislation_list.html:3
-#: templates/liiweb/legislation_list.html:12
+#: templates/liiweb/home.html:35
+msgid "Advanced search"
+msgstr ""
+
+#: templates/liiweb/home.html:62
+msgid "Recent Judgments"
+msgstr ""
+
+#: templates/liiweb/home.html:63
+msgid "View more judgments"
+msgstr ""
+
+#: templates/liiweb/home.html:67
+#, fuzzy
+#| msgid "Legislation"
+msgid "Recent Legislation"
+msgstr "Legislação"
+
+#: templates/liiweb/home.html:68
+#, fuzzy
+#| msgid "Current legislation"
+msgid "View more legislation"
+msgstr "Legislação atual"
+
+#: templates/liiweb/home.html:80
+msgid "Courts"
+msgstr ""
+
+#: templates/liiweb/home.html:84
+msgid "Collections"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:4
+#: templates/liiweb/legislation_list.html:11 templates/peachjam/_header.html:17
 msgid "Legislation"
 msgstr "Legislação"
 
-#: templates/liiweb/legislation_list.html:19
+#: templates/liiweb/legislation_list.html:18
 msgid "Current legislation"
 msgstr "Legislação atual"
 
@@ -43,31 +75,38 @@ msgstr "Legislação atual"
 msgid "Repealed legislation"
 msgstr "Legislação repetida"
 
-#: templates/liiweb/legislation_list.html:29
+#: templates/liiweb/legislation_list.html:36
 msgid "All legislation"
 msgstr "Toda a legislação"
 
-#: templates/liiweb/legislation_list.html:37
+#: templates/liiweb/legislation_list.html:42
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr "Estão a ver legislação revogada, que já não está em vigor."
 
-#: templates/peachjam/_footer.html:5
+#: templates/liiweb/pocketlaw.html:7
+msgid "Pocket Law"
+msgstr ""
+
+#: templates/peachjam/_footer.html:4
 msgid "Subscribe"
 msgstr "Inscrever-se"
 
-#: templates/peachjam/_footer.html:10
+#: templates/peachjam/_footer.html:9
 msgid "Subscribe to the our newsletter for updates and news."
 msgstr "Inscreva-se no nosso boletim informativo para atualizações e notícias."
 
-#: templates/peachjam/_footer.html:24 templates/peachjam/_header.html:9
+#: templates/peachjam/_footer.html:20 templates/peachjam/_header.html:23
 msgid "About"
 msgstr "Sobre"
 
-#: templates/peachjam/_footer.html:29
+#: templates/peachjam/_footer.html:24
 msgid "Our partners"
 msgstr "Nossos parceiros"
 
-#: templates/peachjam/_footer.html:36
+#: templates/peachjam/_footer.html:33
 msgid "Other African Legal Information Institutions"
 msgstr "Outras Instituições Jurídicas Africanas"
 
+#: templates/peachjam/_header.html:11
+msgid "Judgments"
+msgstr ""

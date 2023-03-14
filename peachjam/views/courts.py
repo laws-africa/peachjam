@@ -57,6 +57,16 @@ class CourtDetailView(FilteredDocumentListView):
             }
         )
 
+        attorneys = list(
+            {
+                attorney
+                for attorney in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="attorneys"
+                ).values_list("attorneys__name", flat=True)
+                if attorney
+            }
+        )
+
         registries = list(
             {
                 registry
@@ -79,6 +89,7 @@ class CourtDetailView(FilteredDocumentListView):
             "judges": judges,
             "alphabet": lowercase_alphabet(),
             "registries": registries,
+            "attorneys": attorneys,
         }
 
         return context

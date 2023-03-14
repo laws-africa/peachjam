@@ -39,6 +39,7 @@ class SearchableDocument(Document):
     flynote = fields.TextField()
     judges = fields.KeywordField(attr="judge.name")
     registry = fields.KeywordField(attr="registry.name")
+    attorneys = fields.KeywordField(attr="attorney.name")
 
     # GenericDocument, LegalInstrument
     author = fields.KeywordField(attr="author.name")
@@ -105,6 +106,10 @@ class SearchableDocument(Document):
     def prepare_judges(self, instance):
         if instance.doc_type == "judgment":
             return [j.name for j in instance.judges.all()]
+
+    def prepare_attorneys(self, instance):
+        if instance.doc_type == "judgment":
+            return [a.name for a in instance.attorneys.all()]
 
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""
