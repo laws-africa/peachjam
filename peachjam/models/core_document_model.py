@@ -510,7 +510,7 @@ class AttachmentAbstractModel(models.Model):
 
     def save(self, *args, **kwargs):
         self.filename = self.file.name
-        if self.size is None:
+        if not self.size:
             self.size = self.file.size
         if not self.mimetype:
             self.file.seek(0)
