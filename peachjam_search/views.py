@@ -216,7 +216,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "nature": "nature",
         "year": "year",
         "judges": "judges",
-        # "registry": "registry",
+        "registry": "registry",
         "attorneys": "attorneys",
     }
 
@@ -228,7 +228,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "content": None,
         "court": None,
         "alternative_names": {"boost": 4},
-        # "registry": None,
+        "registry": None,
         "attorneys": None,
     }
 
@@ -269,7 +269,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         },
         "court": {"field": "court", "options": {"size": 100}},
         "judges": {"field": "judges", "options": {"size": 100}},
-        # "registry": {"field": "registry", "options": {"size": 100}},
+        "registry": {"field": "registry", "options": {"size": 100}},
         "attorneys": {"field": "attorneys", "options": {"size": 100}},
     }
 
