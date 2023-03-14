@@ -29,6 +29,7 @@ from peachjam.models import (
     AlternativeName,
     AttachedFileNature,
     AttachedFiles,
+    Attorney,
     Author,
     CaseNumber,
     Court,
@@ -361,16 +362,16 @@ class GenericDocumentResource(BaseDocumentResource):
             row["author"] = frbr_uri.actor
 
 
-class JudgesWidget(ManyToManyWidget):
+class ManyToManyFieldWidget(ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
 
-        # Remove extra white space around and in between the judges names
+        # Remove extra white space around and in between the judges' or attorneys' names
         if value:
-            judges = [" ".join(j.split()) for j in value.split(self.separator)]
+            items = [" ".join(j.split()) for j in value.split(self.separator)]
 
-            for j in judges:
-                judge, _ = self.model.objects.get_or_create(name=j)
-            return self.model.objects.filter(name__in=judges)
+            for item in items:
+                obj, _ = self.model.objects.get_or_create(name=item)
+            return self.model.objects.filter(name__in=items)
         return []
 
 
@@ -381,7 +382,12 @@ class JudgmentResource(BaseDocumentResource):
     judges = fields.Field(
         column_name="judges",
         attribute="judges",
-        widget=JudgesWidget(Judge, separator="|", field="name"),
+        widget=ManyToManyFieldWidget(Judge, separator="|", field="name"),
+    )
+    attorneys = fields.Field(
+        column_name="attorneys",
+        attribute="attorneys",
+        widget=ManyToManyFieldWidget(Attorney, separator="|", field="name"),
     )
     court = fields.Field(
         column_name="court",
