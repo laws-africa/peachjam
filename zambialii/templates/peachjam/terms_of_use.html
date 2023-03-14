@@ -1,0 +1,6 @@
+{% extends "peachjam/terms_of_use.html" %}
+{% block terms-of-use-content %}
+  {% with organisation_name="ZambiaLII" org_link_text="https://new.zambialii.org/" robots_link_text="https://new.zambialii.org/robots.txt" contact_email="info@zambialii.org" %}
+    {% include "peachjam/_terms_of_use_content.html" %}
+  {% endwith %}
+{% endblock %}
