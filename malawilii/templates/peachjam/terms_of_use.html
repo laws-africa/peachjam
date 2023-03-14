@@ -1,0 +1,6 @@
+{% extends "peachjam/terms_of_use.html" %}
+{% block terms-of-use-content %}
+  {% with organisation_name="MalawiLII" org_link_text="https://new.malawilii.org/" robots_link_text="https://new.malawilii.org/robots.txt" contact_email="info@malawilii.org" %}
+    {% include "peachjam/_terms_of_use_content.html" %}
+  {% endwith %}
+{% endblock %}
