@@ -104,29 +104,10 @@ export default {
       this.searchDoc(newValue);
     }
   },
-  mounted () {
-    this.preserveSearchQuery();
-  },
   methods: {
     clear () {
       this.$refs.q.value = '';
       this.q = '';
-    },
-    preserveSearchQuery () {
-      const params = new URLSearchParams(window.location.search);
-      const queryString = params.get('q');
-      if (!queryString) return;
-      this.$refs.q.value = queryString;
-      const searchTab = document.querySelector('#navigation-search-tab');
-      searchTab.click();
-      if (this.docType !== 'pdf') {
-        /*
-        * If document is pdf and queryString is truthy, an in-document search will happen when the pdf is loaded via form
-        * submission triggered by document-content.ts (See this.pdfRenderer.onPdfLoaded).
-        * Else if other document type, just perform a search.
-        * */
-        this.q = queryString;
-      }
     },
     searchDoc (q) {
       if (!this.markInstance) {

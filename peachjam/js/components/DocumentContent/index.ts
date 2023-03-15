@@ -108,12 +108,6 @@ class DocumentContent {
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        const search = urlParams.get('q');
-        const searchForm: HTMLFormElement | null = this.root.querySelector('.doc-search__form');
-        if (search) {
-          searchForm?.dispatchEvent(new Event('submit'));
-        }
-
         const targetPage = urlParams.get('page');
         if (!targetPage) return;
         this.pdfRenderer?.triggerScrollToPage(targetPage);
