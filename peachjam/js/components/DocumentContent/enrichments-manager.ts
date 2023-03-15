@@ -31,7 +31,7 @@ class EnrichmentsManager {
 
   setDocDiffs () {
     if (!this.akn || !this.gutter) return null;
-    const frbrExpressionUri = this.akn.getAttribute('expression-frbr-uri');
+    const frbrExpressionUri = this.akn.getAttribute('frbr-expression-uri');
     if (!frbrExpressionUri) return null;
     return new DocDiffsManager(frbrExpressionUri, this.gutter);
   }
