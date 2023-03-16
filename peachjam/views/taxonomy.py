@@ -56,4 +56,6 @@ class TaxonomyDetailView(FilteredDocumentListView):
         context["taxonomy_tree"] = list(context["root"].dump_bulk(context["root"]))
         context["first_level_taxonomy"] = context["taxonomy_tree"][0]["data"]["name"]
         context["is_leaf_node"] = not (context["taxonomy_tree"][0].get("children"))
+        context["doc_count"] = self.get_base_queryset().count()
+        print(context["doc_count"])
         return context
