@@ -98,9 +98,9 @@ They should be re-enabled once the deployment process is completed successfully.
       dokku nginx:set <app_name> proxy-read-timeout 3600s
 
 #### Set File Size Upload Limit
-- It is necessary for upload of large files and this is done by copying [this file](agp.conf) into the dokku app's `nginx.conf.d` directory:
+- It is necessary for upload of large files and this is done by copying [this file](peachjam.conf) into the dokku app's `nginx.conf.d` directory:
 
-      sudo cp /home/dokku/agp/nginx.conf.d/agp.conf /home/dokku/<app_name>/nginx.conf.d/
+      sudo cp /home/dokku/agp/nginx.conf.d/peachjam.conf /home/dokku/<app_name>/nginx.conf.d/
 
 #### Enable checks
 - Re-enable Zero Downtime Deploy Checks on your application by:
