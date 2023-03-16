@@ -47,25 +47,35 @@
   </p>
 {% endblock %}
 {% block second-col-logos %}
-  <div class="d-flex justify-content-between mb-4 mb-lg-4">
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/africanlii-logo.svg' %}"
-         alt="africanlii-logo"/>
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/ned-logo.png' %}"
-         alt="ned-logo"/>
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/saipar-logo.jpg' %}"
-         alt="saipar-logo"/>
-    <img height="26"
-         src="{% static 'images/laws-africa-logo.png' %}"
-         alt="laws-logo"/>
-    <img height="26"
-         src="{% static 'images/indigo-logo.jpg' %}"
-         alt="indigo-logo"/>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <img class="img-fluid"
+           height="26"
+           src="{% static 'images/africanlii-logo.svg' %}"
+           alt="africanlii-logo"/>
+    </div>
+    <div class="col-md-4 mb-3">
+      <img class="img-fluid"
+           height="26"
+           src="{% static 'images/ned-logo.png' %}"
+           alt="ned-logo"/>
+    </div>
+    <div class="col-md-4 mb-3">
+      <img class="img-fluid"
+           height="26"
+           src="{% static 'images/saipar-logo.jpg' %}"
+           alt="saipar-logo"/>
+    </div>
+    <div class="col-md-6 mb-3">
+      <img height="26"
+           src="{% static 'images/laws-africa-logo.png' %}"
+           alt="laws-logo"/>
+    </div>
+    <div class="col-md-6 mb-3">
+      <img height="26"
+           src="{% static 'images/indigo-logo.jpg' %}"
+           alt="indigo-logo"/>
+    </div>
   </div>
 {% endblock %}
 {% block social-media %}
