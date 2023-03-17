@@ -98,9 +98,13 @@ They should be re-enabled once the deployment process is completed successfully.
       dokku nginx:set <app_name> proxy-read-timeout 3600s
 
 #### Set File Size Upload Limit
-- It is necessary for upload of large files and this is done by copying [this file](peachjam.conf) into the dokku app's `nginx.conf.d` directory:
+- It is necessary for upload of large files and is done by:
 
-      cat peachjam.conf | ssh ubuntu@liiweb2.africanlii.org "sudo tee -a /home/dokku/<app_name>/nginx.conf.d/peachjam.conf"
+      dokku nginx:set <app_name> client-max-body-size 500m
+
+- Regenerate the dokku app's ngiinx config:
+
+      dokku proxy:build-config <app_name>
 
 
 #### Enable checks
