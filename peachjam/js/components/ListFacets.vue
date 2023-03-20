@@ -12,7 +12,6 @@
   <div v-if="false">
     {{ $t('Alphabetical') }}
     {{ $t('Court') }}
-    {{ $t('Court registry') }}
     {{ $t('Document type') }}
     {{ $t('Judges') }}
     {{ $t('Attorneys') }}
@@ -62,10 +61,10 @@ export default {
       type: Array,
       default: () => []
     },
-    registries: {
-      type: Array,
-      default: () => []
-    },
+    // registries: {
+    //   type: Array,
+    //   default: () => []
+    // },
     attorneys: {
       type: Array,
       default: () => []
@@ -128,11 +127,11 @@ export default {
           type: 'radio',
           title: this.$t('Court')
         },
-        {
-          name: 'registries',
-          type: 'checkboxes',
-          title: this.$t('Court registry')
-        },
+        // {
+        //   name: 'registries',
+        //   type: 'checkboxes',
+        //   title: this.$t('Court registry')
+        // },
         {
           name: 'attorneys',
           type: 'checkboxes',

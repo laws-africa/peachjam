@@ -1,0 +1,105 @@
+{% extends 'peachjam/_footer.html' %}
+{% load static i18n %}
+{% block newsletter-blurb %}
+  {% trans 'Subscribe to the ZambiaLII newsletter for updates and news.' %}
+{% endblock %}
+{% block newsletter-form-code %}
+  <form action="https://zambialii.us12.list-manage.com/subscribe/post?u=40b77e885333e76934c64f0d5&id=dcace43d9b&f_id=00fdbde0f0"
+        method="post"
+        name="mc-embedded-subscribe-form"
+        target="_blank">
+    <div style="position: absolute; left: -5000px;" aria-hidden="true">
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <input type="text"
+             name="b_40b77e885333e76934c64f0d5_00fdbde0f0"
+             tabindex="-1"
+             value=""/>
+    </div>
+    <div class="input-group">
+      <input type="email"
+             value=""
+             name="EMAIL"
+             class="form-control"
+             placeholder="email address"
+             required=""/>
+      <input type="submit"
+             value="Subscribe"
+             name="subscribe"
+             class="btn btn-secondary"/>
+    </div>
+  </form>
+{% endblock %}
+{% block about %}
+  <p>
+    {% blocktrans trimmed %}
+      ZambiaLII is a pioneer in the free access to law movement and serves as a reliable and timely source of judicial decisions, legislation and statutory instruments.
+      Since 2012, ZambiaLII has been hosted by the <a href="https://saipar.org/" target="_blank" rel="noreferrer">Southern African Institute for Policy and Research (SAIPAR)</a>, an independent, educational and development-oriented research centre.
+      AfricanLII provides technical support to ZambiaLII.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      <a href="https://drive.google.com/file/d/1FRH3SqmlgeJAtTNPv0wemSGmltM5pwYy/view" target="_blank" rel="noreferrer">View the ZambiaLII Brochure</a>
+    {% endblocktrans %}
+  </p>
+  <div>
+    <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
+  </div>
+{% endblock %}
+{% block second-content-column %}
+  <h5>{% trans 'Our partners' %}</h5>
+  <div>
+    <a href="https://agp.africanlii.org/" target="_blank" rel="noreferrer">AfricanLII</a>
+  </div>
+  <div>
+    <a href="https://laws.africa/" target="_blank" rel="noreferrer">Laws.Africa</a>
+  </div>
+  <div>
+    <a href="https://saipar.org/" target="_blank" rel="noreferrer">Southern African Institute for Policy and Research</a>
+  </div>
+  <h6 class="mt-4">{% trans 'With support from' %}</h6>
+  <div>
+    <a href="https://www.ned.org/" target="_blank" rel="noreferrer">{% trans 'National Endowment for Democracy' %}</a>
+  </div>
+  <div>
+    <a href="https://www.indigotrust.org.uk/"
+       target="_blank"
+       rel="noreferrer">{% trans 'The Indigo Trust' %}</a>
+  </div>
+{% endblock %}
+{% block footer-logos %}
+  <div class="footer-logos">
+    <a class="footer-logos__item"
+       href="https://agp.africanlii.org/"
+       target="_blank"
+       rel="noreferrer">
+      <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII" />
+    </a>
+    <a href="https://www.ned.org/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/ned-logo.png' %}" alt="NED logo" />
+    </a>
+    <a href="https://saipar.org/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/saipar-logo.jpg' %}"
+           alt="Southern African Institute for Policy and Research (SAIPAR)"/>
+    </a>
+    <a href="https://laws.africa/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/laws-africa-logo-horizontal.png' %}"
+           alt="Laws.Africa"/>
+    </a>
+    <a href="https://www.indigotrust.org.uk/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/indigo-logo.jpg' %}" alt="Laws.Africa"/>
+    </a>
+  </div>
+{% endblock %}
