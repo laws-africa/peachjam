@@ -193,7 +193,7 @@ urlpatterns = [
         "pocketlaw-resources", PocketLawResources.as_view(), name="pocketlaw_resources"
     ),
     re_path(
-        r"^doc/(?P<nature>\w+)$",
+        r"^doc/(?P<nature>[\w-]+)$",
         DocumentNatureListView.as_view(),
         name="document_nature_list",
     ),

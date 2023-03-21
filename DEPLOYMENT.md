@@ -97,6 +97,15 @@ They should be re-enabled once the deployment process is completed successfully.
 
       dokku nginx:set <app_name> proxy-read-timeout 3600s
 
+#### Set File Size Upload Limit
+- It is necessary for upload of large files and is done by:
+
+      dokku nginx:set <app_name> client-max-body-size 500m
+
+- Regenerate the dokku app's ngiinx config:
+
+      dokku proxy:build-config <app_name>
+
 
 #### Enable checks
 - Re-enable Zero Downtime Deploy Checks on your application by:
