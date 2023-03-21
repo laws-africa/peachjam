@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-21 13:24\n"
+"PO-Revision-Date: 2023-03-21 14:31\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -184,7 +184,7 @@ msgstr "Citant un travail"
 
 #: models/citations.py:63
 msgid "target work"
-msgstr "travail ciblé"
+msgstr "Travail ciblé"
 
 #: models/core_document_model.py:42 models/core_document_model.py:586
 #: models/judgment.py:16 models/judgment.py:29 models/judgment.py:44
@@ -314,7 +314,7 @@ msgstr "mis à jour le"
 
 #: models/core_document_model.py:299
 msgid "allow robots"
-msgstr "allow robots"
+msgstr "Autoriser les robots"
 
 #: models/core_document_model.py:302
 msgid "Allow this document to be indexed by search engine robots."
@@ -387,15 +387,15 @@ msgstr "noms alternatifs"
 
 #: models/core_document_model.py:645
 msgid "document text"
-msgstr "texte du document"
+msgstr "Texte du document"
 
 #: models/core_document_model.py:649
 msgid "document content"
-msgstr "contenu du document"
+msgstr "Contenu du document"
 
 #: models/core_document_model.py:650
 msgid "document contents"
-msgstr "contenu du document"
+msgstr "Contenu du document"
 
 #: models/gazette.py:8
 msgid "gazette"
@@ -507,11 +507,11 @@ msgstr "cours"
 
 #: models/judgment.py:103
 msgid "court registry"
-msgstr "greffe de la cour"
+msgstr "Greffe de la cour"
 
 #: models/judgment.py:104
 msgid "court registries"
-msgstr "registres judiciaires"
+msgstr "Registres judiciaires"
 
 #: models/judgment.py:130
 msgid "headnote holding"
@@ -656,7 +656,7 @@ msgstr "juridictions du document"
 
 #: models/settings.py:43
 msgid "subsidiary legislation label"
-msgstr "étiquette législative subsidiaire"
+msgstr "Étiquette législative subsidiaire"
 
 #: models/settings.py:49
 msgid "site settings"
@@ -1243,7 +1243,7 @@ msgstr "cette version"
 
 #: templates/peachjam/_timeline_events.html:15
 msgid "amendment not yet applied"
-msgstr "amendement non encore appliqué"
+msgstr "Amendement non encore appliqué"
 
 #: templates/peachjam/_timeline_events.html:24
 msgid "Amended by"
