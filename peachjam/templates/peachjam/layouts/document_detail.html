@@ -184,9 +184,15 @@
                         {% endif %}
                       {% endblock %}
                       {% block document-metadata-content-date %}
-                        <dt>
-                          {% trans 'Date' %}
-                        </dt>
+                        {% if document.doc_type == "judgment" %}
+                          <dt>
+                            {% trans 'Judgment date' %}
+                          </dt>
+                        {% else %}
+                          <dt>
+                            {% trans 'Date' %}
+                          </dt>
+                        {% endif %}
                         {% if date_versions|length > 1 %}
                           <dd>
                             <div class="dropdown">
