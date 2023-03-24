@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-24 10:51\n"
+"PO-Revision-Date: 2023-03-24 12:23\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -35,7 +35,7 @@ msgstr "Maudhui"
 
 #: admin.py:325
 msgid "Advanced"
-msgstr "Advanced"
+msgstr "Ya hali ya juu"
 
 #: admin.py:463 models/judgment.py:291
 msgid "case number"
@@ -43,11 +43,11 @@ msgstr "nambari ya kesi"
 
 #: admin.py:464 models/judgment.py:292
 msgid "case numbers"
-msgstr "nambari za kesi"
+msgstr "namba za kesi"
 
 #: admin.py:555
 msgid "Refreshing content in the background."
-msgstr "Inaonyesha upya maudhui chinichini."
+msgstr "Inaonyesha upya maudhui kwa nyuma."
 
 #: admin.py:557
 msgid "Refresh all content"
@@ -60,11 +60,11 @@ msgstr "tarehe"
 #: models/article.py:21 models/core_document_model.py:76
 #: models/core_document_model.py:206 models/core_document_model.py:621
 msgid "title"
-msgstr "mada"
+msgstr "mada/kichwa cha habari"
 
 #: models/article.py:22
 msgid "body"
-msgstr "mwili"
+msgstr "sehemu"
 
 #: models/article.py:27 models/author.py:20 models/generic_document.py:20
 #: models/generic_document.py:46
@@ -81,7 +81,7 @@ msgstr "muhtasari"
 
 #: models/article.py:33 models/relationships.py:7 models/taxonomies.py:11
 msgid "slug"
-msgstr "konokono"
+msgstr "konokono/risasi ndogo/piga"
 
 #: models/article.py:34
 msgid "published"
@@ -168,7 +168,7 @@ msgstr "kitambulisho cha lengo"
 
 #: models/citations.py:17
 msgid "target selectors"
-msgstr "wateuzi walengwa"
+msgstr "wateuzi lengwa"
 
 #: models/citations.py:20
 msgid "citation link"
@@ -180,11 +180,11 @@ msgstr "viungo vya dondoo"
 
 #: models/citations.py:56
 msgid "citing work"
-msgstr "akitaja kazi"
+msgstr "kubainisha kazi"
 
 #: models/citations.py:63
 msgid "target work"
-msgstr "kazi lengo"
+msgstr "kazi lengwa"
 
 #: models/core_document_model.py:42 models/core_document_model.py:586
 #: models/judgment.py:16 models/judgment.py:29 models/judgment.py:44
@@ -202,7 +202,7 @@ msgstr "asili za hati"
 
 #: models/core_document_model.py:55 models/core_document_model.py:227
 msgid "jurisdiction"
-msgstr "mamlaka"
+msgstr "mamlaka ya kisheria"
 
 #: models/core_document_model.py:60 models/core_document_model.py:234
 msgid "locality"
@@ -234,7 +234,7 @@ msgstr "aina ya hati"
 
 #: models/core_document_model.py:209 models/core_document_model.py:557
 msgid "source URL"
-msgstr "URL ya chanzo"
+msgstr "chanzo cha URL"
 
 #: models/core_document_model.py:211
 msgid "citation"
@@ -266,7 +266,7 @@ msgstr "fanya kazi FRBR URI"
 
 #: models/core_document_model.py:250
 msgid "FRBR URI doctype"
-msgstr "FRBR URI doctype"
+msgstr "aina ya hati ya FRBR URI "
 
 #: models/core_document_model.py:257
 msgid "FRBR URI subtype"
@@ -274,15 +274,15 @@ msgstr "Aina ndogo ya FRBR URI"
 
 #: models/core_document_model.py:262
 msgid "Document subtype. Lowercase letters, numbers _ and - only."
-msgstr "Aina ndogo ya hati. Herufi ndogo, nambari _ na - pekee."
+msgstr "Aina ndogo ya hati. Herufi ndogo, namba _ na - pekee."
 
 #: models/core_document_model.py:265
 msgid "FRBR URI actor"
-msgstr "FRBR URI muigizaji"
+msgstr "Mwigizaji wa FRBR URI "
 
 #: models/core_document_model.py:270
 msgid "Originating actor. Lowercase letters, numbers _ and - only."
-msgstr "Muigizaji wa asili. Herufi ndogo, nambari _ na - pekee."
+msgstr "Mwigizaji wa asili. Herufi ndogo, namba _ na - pekee."
 
 #: models/core_document_model.py:273
 msgid "FRBR URI date"
@@ -294,15 +294,15 @@ msgstr "YYYY, YYYY-MM, au YYYY-MM-DD"
 
 #: models/core_document_model.py:281
 msgid "FRBR URI number"
-msgstr "Nambari ya URI ya FRBR"
+msgstr "Namba ya URI FRBR"
 
 #: models/core_document_model.py:287
 msgid "Unique number or short title identifying this work. Lowercase letters, numbers _ and - only."
-msgstr "Nambari ya kipekee au jina fupi linalotambulisha kazi hii. Herufi ndogo, nambari _ na - pekee."
+msgstr "Namba ya kipekee au jina fupi linalotambulisha kazi hii. Herufi ndogo, namba _ na - pekee."
 
 #: models/core_document_model.py:292
 msgid "expression FRBR URI"
-msgstr "kujieleza FRBR URI"
+msgstr "maelezo FRBR URI"
 
 #: models/core_document_model.py:296
 msgid "created at"
@@ -310,7 +310,7 @@ msgstr "imeundwa saa"
 
 #: models/core_document_model.py:297
 msgid "updated at"
-msgstr "imesasishwa saa"
+msgstr "imeundwa "
 
 #: models/core_document_model.py:299
 msgid "allow robots"
@@ -322,16 +322,16 @@ msgstr "Ruhusu hati hii kuorodheshwa na roboti za injini tafuti."
 
 #: models/core_document_model.py:328
 msgid "Invalid Date"
-msgstr "Tarehe Batili"
+msgstr "Tarehe sio sahihi"
 
 #: models/core_document_model.py:331
 msgid "You cannot set a future date for the document"
-msgstr "Huwezi kuweka tarehe ya baadaye ya hati"
+msgstr "Huwezi kuweka tarehe ya baadaye kwa ajili ya hati"
 
 #: models/core_document_model.py:337
 #, python-format
 msgid "Invalid FRBR URI: %(uri)s"
-msgstr "URI ya FRBR si sahihi: %(uri)s"
+msgstr "URI FRBR sio sahihi: %(uri)s"
 
 #: models/core_document_model.py:500
 msgid "filename"
@@ -339,7 +339,7 @@ msgstr "jina la faili"
 
 #: models/core_document_model.py:501
 msgid "mimetype"
-msgstr "aina ya mime"
+msgstr "aina ya maudhui"
 
 #: models/core_document_model.py:502
 msgid "size"
@@ -355,27 +355,27 @@ msgstr "Picha"
 
 #: models/core_document_model.py:561
 msgid "source file"
-msgstr "faili ya chanzo"
+msgstr "faili la chanzo"
 
 #: models/core_document_model.py:562
 msgid "source files"
-msgstr "faili za chanzo"
+msgstr "mafaili ya chanzo"
 
 #: models/core_document_model.py:589
 msgid "attached file nature"
-msgstr "asili ya faili iliyoambatanishwa"
+msgstr "aina ya faili lililoambatishwa"
 
 #: models/core_document_model.py:590
 msgid "attached file natures"
-msgstr "asili ya faili iliyoambatanishwa"
+msgstr "aina ya faili lililoambatishwa"
 
 #: models/core_document_model.py:607
 msgid "attached file"
-msgstr "faili iliyoambatishwa"
+msgstr "faili lililoambatishwa"
 
 #: models/core_document_model.py:608
 msgid "attached files"
-msgstr "faili zilizoambatishwa"
+msgstr "mafaili yaliyoambatishwa"
 
 #: models/core_document_model.py:624
 msgid "alternative name"
@@ -403,7 +403,7 @@ msgstr "gazeti la serikali"
 
 #: models/gazette.py:9
 msgid "gazettes"
-msgstr "magazeti"
+msgstr "magazeti ya serikali"
 
 #: models/generic_document.py:26
 msgid "generic document"
@@ -415,15 +415,15 @@ msgstr "hati za jumla"
 
 #: models/generic_document.py:52
 msgid "legal instrument"
-msgstr "chombo cha kisheria"
+msgstr "hati za kisheria"
 
 #: models/generic_document.py:53
 msgid "legal instruments"
-msgstr "vyombo vya kisheria"
+msgstr "hati za kisheria"
 
 #: models/generic_document.py:75
 msgid "metadata JSON"
-msgstr "metadata JSON"
+msgstr "mkusanyiko wa data za JSON"
 
 #: models/generic_document.py:76
 msgid "repealed"
@@ -443,15 +443,15 @@ msgstr "thamani"
 
 #: models/ingestors.py:17 models/ingestors.py:37 models/ingestors.py:38
 msgid "ingestor"
-msgstr "kuingiza"
+msgstr "kisomadata"
 
 #: models/ingestors.py:21
 msgid "ingestor setting"
-msgstr "mpangilio wa kuingiza"
+msgstr "mpangilio wa kisomadata"
 
 #: models/ingestors.py:22
 msgid "ingestor settings"
-msgstr "mipangilio ya kuingiza"
+msgstr "mipangilio ya kisomadata"
 
 #: models/ingestors.py:29
 msgid "adapter"
@@ -459,11 +459,11 @@ msgstr "adapta"
 
 #: models/ingestors.py:31
 msgid "last refreshed at"
-msgstr "iliburudishwa mara ya mwisho saa"
+msgstr "ilibadilishwa upya mara ya mwisho saa"
 
 #: models/ingestors.py:34
 msgid "enabled"
-msgstr "kuwezeshwa"
+msgstr "wezeshwa"
 
 #: models/judgment.py:20
 msgid "attorney"
@@ -475,11 +475,11 @@ msgstr "mawakili"
 
 #: models/judgment.py:33
 msgid "judge"
-msgstr "Hakimu"
+msgstr "jaji"
 
 #: models/judgment.py:34 models/judgment.py:126
 msgid "judges"
-msgstr "waamuzi"
+msgstr "majaji"
 
 #: models/judgment.py:48 models/judgment.py:279
 msgid "matter type"
@@ -515,7 +515,7 @@ msgstr "masijala za mahakama"
 
 #: models/judgment.py:130
 msgid "headnote holding"
-msgstr "kushikilia kichwa"
+msgstr "kushikilia muhtasari"
 
 #: models/judgment.py:132
 msgid "additional citations"
@@ -531,15 +531,15 @@ msgstr "jina la kesi"
 
 #: models/judgment.py:138
 msgid "Party names for use in title"
-msgstr "Majina ya chama kwa ajili ya matumizi katika kichwa"
+msgstr "Majina ya Upande mmoja kwa ajili ya matumizi katika cheo"
 
 #: models/judgment.py:144
 msgid "serial number"
-msgstr "nambari ya serial"
+msgstr "mfuatano wa namba"
 
 #: models/judgment.py:146
 msgid "Serial number for MNC, unique for a year and an author."
-msgstr "Nambari ya serial ya MNC, ya kipekee kwa mwaka mmoja na mwandishi."
+msgstr "Mfuatano wa ambari kwa MNC, ya kipekee kwa mwaka mmoja na mwandishi."
 
 #: models/judgment.py:149
 msgid "serial number override"
