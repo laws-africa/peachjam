@@ -1,0 +1,57 @@
+{% extends "liiweb/home.html" %}
+{% load i18n static %}
+{% block hero-headings %}
+  <h1 class="mb-4">{% trans 'Welcome to the Seychelles Legal Information Institute' %}</h1>
+{% endblock %}
+{% block hero-logos %}
+  <div class="d-flex justify-content-between">
+    <img height="26"
+         class="me-4"
+         src="{% static 'images/africanlii-logo.svg' %}"
+         alt="africanlii-logo"/>
+    <img height="26"
+         src="{% static 'images/laws-africa-logo.png' %}"
+         alt="laws-logo"/>
+    <img height="26"
+         src="{% static 'images/judiciary-of-the-seychelles-logo.jpg' %}"
+         alt="judiciary-of-the-seychelles-logo"/>
+    <img height="26"
+         src="{% static 'images/indigo-logo.jpg' %}"
+         alt="indigo-logo"/>
+  </div>
+{% endblock %}
+{% block second-col-about %}
+  <div>
+    <strong>{% trans 'About' %}</strong>
+  </div>
+  <p>
+    {% blocktrans trimmed %}
+     The Seychelles Legal Information Institute (SeyLII) is an independent association offering free access to case law, legislation, and secondary legal materials from Seychelles.
+      Access to the letter of the law supports the rule of law, access to justice, and economic development.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      View the <a href="https://seylii.org/egrey-book-seychelles">SeyLII eGrey Book</a>.
+    {% endblocktrans %}
+  </p>
+{% endblock %}
+{% block second-col-logos %}
+  <div class="d-flex justify-content-between mb-4 mb-lg-4">
+    <img height="26"
+         class="me-4"
+         src="{% static 'images/africanlii-logo.svg' %}"
+         alt="africanlii-logo"/>
+    <img height="26"
+         src="{% static 'images/laws-africa-logo.png' %}"
+         alt="laws-logo"/>
+    <img height="26"
+         class="me-4"
+         src="{% static 'images/judiciary-of-the-seychelles-logo.jpg' %}"
+         alt="judiciary-of-the-seychelles-logo"/>
+    <img height="26"
+         class="me-4"
+         src="{% static 'images/indigo-logo.jpg' %}"
+         alt="indigo-logo"/>
+  </div>
+{% endblock %}

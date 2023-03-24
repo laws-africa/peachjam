@@ -100,12 +100,12 @@ class IndigoAdapter(Adapter):
             or parser.parse(document["updated_at"]) > last_refreshed
         ]
 
-        urls = []
+        urls = {d["url"] for d in docs}
         for doc in docs:
             # if a document is out of date, also ensure we update its other expressions
             for pit in doc["points_in_time"]:
                 for expr in pit["expressions"]:
-                    urls.append(expr["url"])
+                    urls.add(expr["url"])
 
         return urls
 
