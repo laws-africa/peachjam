@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-24 12:23\n"
+"PO-Revision-Date: 2023-03-24 13:51\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -543,11 +543,11 @@ msgstr "Mfuatano wa ambari kwa MNC, ya kipekee kwa mwaka mmoja na mwandishi."
 
 #: models/judgment.py:149
 msgid "serial number override"
-msgstr "kubatilisha nambari ya serial"
+msgstr "kubadilisha mfuatano wa namba"
 
 #: models/judgment.py:152
 msgid "Specific MNC serial number assigned by the court."
-msgstr "Nambari maalum ya serial ya MNC iliyotolewa na mahakama."
+msgstr "Mfuatano wa namba maalumu ya MNC iliyotolewa na mahakama."
 
 #: models/judgment.py:156
 msgid "MNC"
@@ -555,7 +555,7 @@ msgstr "MNC"
 
 #: models/judgment.py:158
 msgid "Media neutral citation"
-msgstr "Manukuu yasiyoegemea ya media"
+msgstr "Nukuu isiyoegemea upande wowote"
 
 #: models/judgment.py:173
 msgid "judgment"
@@ -567,19 +567,19 @@ msgstr "hukumu"
 
 #: models/judgment.py:265
 msgid "string override"
-msgstr "kubatilisha kamba"
+msgstr "kuunganisha nukuu"
 
 #: models/judgment.py:269
 msgid "Override for full case number string"
-msgstr "Batilisha kwa mfuatano wa nambari ya kesi kamili"
+msgstr "Batilisha kwa mfuatano wa nukuu ya kesi kamili"
 
 #: models/judgment.py:271
 msgid "string"
-msgstr "kamba"
+msgstr "nukuu nyingi"
 
 #: models/judgment.py:272 templates/peachjam/_timeline_events.html:32
 msgid "number"
-msgstr "nambari"
+msgstr "namba"
 
 #: models/judgment.py:273
 msgid "year"
@@ -599,7 +599,7 @@ msgstr "anwani"
 
 #: models/profile.py:19
 msgid "profile photo"
-msgstr "picha ya wasifu"
+msgstr "picha ya akaunti ya mtandaoni"
 
 #: models/profile.py:25
 msgid "background photo"
@@ -615,12 +615,12 @@ msgstr "kitenzi kinyume"
 
 #: models/relationships.py:12
 msgid "Reversed verbal form of the relationship"
-msgstr "Njia ya maneno iliyogeuzwa ya uhusiano"
+msgstr "Aina ya maneno yaliyogeuzwa ya uhusiano"
 
 #: models/relationships.py:17 models/relationships.py:48
 #: models/relationships.py:59
 msgid "predicate"
-msgstr "kiashirio"
+msgstr "kiarifu"
 
 #: models/relationships.py:18 models/relationships.py:60
 msgid "predicates"
