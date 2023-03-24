@@ -446,7 +446,6 @@ LOGGING = {
 if DEBUG:
     ELASTICSEARCH_DSL_AUTOSYNC = False
 
-GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
 
 CKEDITOR_CONFIGS = {
     # The rest of this config is defined in ckeditor.configs.DEFAULT_CONFIG
