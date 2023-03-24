@@ -12,6 +12,8 @@ LANGUAGES = [
     ("en", _("English")),
 ]
 
+COURT_CODE_MAPPINGS = {}
+
 
 JAZZMIN_SETTINGS["site_title"] = "SenLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "SenLII"  # noqa
