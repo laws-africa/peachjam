@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-23 08:28\n"
+"PO-Revision-Date: 2023-03-24 12:23\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -27,7 +27,7 @@ msgstr "kazi"
 
 #: models/ratification.py:17
 msgid "source URL"
-msgstr "URL ya chanzo"
+msgstr "chanzo cha URL"
 
 #: models/ratification.py:18
 msgid "last updated"
