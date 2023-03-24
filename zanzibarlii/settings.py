@@ -10,9 +10,9 @@ LANGUAGES = [
     ("en", _("English")),
 ]
 
-COURT_CODE_MAPPINGS = {}
-
 
 JAZZMIN_SETTINGS["site_title"] = "ZanzibarLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "ZanzibarLII"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "zanzibarlii.org"  # noqa
+
+COURT_CODE_MAPPINGS = {}
