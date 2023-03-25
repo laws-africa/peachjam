@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-25 06:59\n"
+"PO-Revision-Date: 2023-03-25 08:16\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -664,7 +664,7 @@ msgstr "mipangilio ya tovuti"
 
 #: models/taxonomies.py:15 models/taxonomies.py:16
 msgid "taxonomies"
-msgstr "kodi"
+msgstr "taksonomia"
 
 #: models/taxonomies.py:35
 msgid "topic"
@@ -676,7 +676,7 @@ msgstr "mada ya hati"
 
 #: models/taxonomies.py:41
 msgid "document topics"
-msgstr "mada ya hati"
+msgstr "mada za hati"
 
 #: settings.py:205
 msgid "English"
@@ -708,19 +708,19 @@ msgstr "Nenda kwenye ukurasa wa nyumbani."
 
 #: templates/404.html:20 templates/500.html:20
 msgid "Try searching for what you're looking for."
-msgstr "Jaribu kutafuta unachotafuta."
+msgstr "Jaribu kutafuta kile unachokihitaji."
 
 #: templates/500.html:4 templates/500.html:9
 msgid "Something went wrong (Error 500)"
-msgstr "Hitilafu fulani imetokea (Hitilafu 500)"
+msgstr "Hitilafu imetokea (Hitilafu 500)"
 
 #: templates/500.html:11
 msgid "Something went wrong. Please try again in a short while."
-msgstr "Hitilafu fulani imetokea. Tafadhali jaribu tena baada ya muda mfupi."
+msgstr "Hitilafu imetokea. Tafadhali jaribu tena baada ya muda mfupi."
 
 #: templates/account/base.html:13
 msgid "Need help? Please email <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
-msgstr "Je, unahitaji usaidizi? Tafadhali tuma barua pepe <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
+msgstr "Je, unahitaji msaada? Tafadhali tuma barua pepe <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
 
 #: templates/account/login.html:5
 msgid "Log In"
@@ -739,7 +739,7 @@ msgstr "Nenosiri"
 
 #: templates/account/login.html:49
 msgid "Forgot your password?"
-msgstr "Umesahau nenosiri yako?"
+msgstr "Umesahau nenosiri lako?"
 
 #: templates/account/login.html:76
 #, python-format
@@ -753,11 +753,11 @@ msgstr "\n"
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:16
 msgid "Log Out"
-msgstr "Ondoka"
+msgstr "Toka"
 
 #: templates/account/logout.html:8
 msgid "Are you sure you want to log out?"
-msgstr "Je, una uhakika unataka kuondoka?"
+msgstr "Je, una hakika unataka kutoka?"
 
 #: templates/account/password_reset.html:5
 msgid "Reset Your Password"
@@ -778,7 +778,7 @@ msgstr "Weka upya nenosiri"
 
 #: templates/account/password_reset_from_key.html:7
 msgid "Bad Token"
-msgstr "Ishara mbaya"
+msgstr "Kuna Kosa"
 
 #: templates/account/password_reset_from_key.html:9
 #: templates/account/password_reset_from_key_done.html:7
@@ -788,11 +788,11 @@ msgstr "Weka upya nenosiri"
 #: templates/account/password_reset_from_key.html:15
 #, python-format
 msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
-msgstr "Kiungo cha kuweka upya nenosiri kilikuwa batili, pengine kwa sababu tayari kimetumika. Tafadhali omba <a href=\"%(passwd_reset_url)s\">uwekaji upya wa nenosiri</a>."
+msgstr "Kiungo cha kuweka upya nenosiri kilikuwa batili, pengine kwa sababu kimeshatumika. Tafadhali omba <a href=\"%(passwd_reset_url)s\">uwekaji  nenosiri jipya</a>."
 
 #: templates/account/password_reset_from_key.html:27
 msgid "New Password"
-msgstr "Nenosiri Mpya"
+msgstr "Nenosiri Jipya"
 
 #: templates/account/password_reset_from_key.html:40
 msgid "New Password (again)"
@@ -804,7 +804,7 @@ msgstr "Nenosiri lako sasa limewekwa upya."
 
 #: templates/account/password_reset_from_key_done.html:4
 msgid "Change Password"
-msgstr "Badilisha neno la siri"
+msgstr "Badilisha Nenosiri"
 
 #: templates/account/password_reset_from_key_done.html:8
 msgid "Your password has been reset."
@@ -812,16 +812,16 @@ msgstr "Nenosiri lako limewekwa upya."
 
 #: templates/admin/login.html:20
 msgid "Please correct the error below."
-msgstr "Tafadhali sahihisha hitilafu iliyo hapa chini."
+msgstr "Tafadhali sahihisha kosa hapo chini."
 
 #: templates/admin/login.html:22
 msgid "Please correct the errors below."
-msgstr "Tafadhali sahihisha makosa yaliyo hapa chini."
+msgstr "Tafadhali sahihisha makosa hapo chini."
 
 #: templates/admin/login.html:32
 #, python-format
 msgid "You are authenticated as %(username)s, but are not authorized to access this page. Would you like to login to a different account?"
-msgstr "Umethibitishwa kama %(username)s, lakini hujaidhinishwa kufikia ukurasa huu. Je, ungependa kuingia kwenye akaunti tofauti?"
+msgstr "Umethibitishwa kama %(username)s, lakini hujaidhinishwa kutumia ukurasa huu. Je, ungependa kuingia kwenye akaunti tofauti?"
 
 #: templates/admin/login.html:52
 msgid "Forgotten your password or username?"
@@ -829,7 +829,7 @@ msgstr "Je, umesahau nenosiri lako au jina la mtumiaji?"
 
 #: templates/peachjam/_child_documents.html:2
 msgid "Subsidiary legislation"
-msgstr "Sheria tanzu"
+msgstr "Sheria za nyongeza"
 
 #: templates/peachjam/_child_documents.html:7
 #: templates/peachjam/_document_table.html:6
@@ -839,15 +839,15 @@ msgstr "Mada"
 
 #: templates/peachjam/_child_documents.html:8
 msgid "Numbered title"
-msgstr "Jina la nambari"
+msgstr "Jina lenye namba"
 
 #: templates/peachjam/_citations.html:6
 msgid "Cited documents"
-msgstr "Hati zilizotajwa"
+msgstr "Nyaraka zilizonukuliwa"
 
 #: templates/peachjam/_citations.html:18
 msgid "Documents citing this one"
-msgstr "Nyaraka zinazotaja hii"
+msgstr "Nyaraka zinazonukuu hii"
 
 #: templates/peachjam/_court_list.html:14
 #: templates/peachjam/_court_list.html:20
@@ -895,11 +895,11 @@ msgstr "Lugha nyingi zinapatikana"
 
 #: templates/peachjam/_entity_profile.html:24
 msgid "Physical address"
-msgstr "Anwani ya mahali ulipo"
+msgstr "Anwani ya makazi"
 
 #: templates/peachjam/_entity_profile.html:32
 msgid "Visit website"
-msgstr "Tembelea tovuti"
+msgstr "Fungua tovuti"
 
 #: templates/peachjam/_header.html:32 templates/peachjam/_header.html:33
 #, python-format
@@ -912,7 +912,7 @@ msgstr "Msimamizi"
 
 #: templates/peachjam/_header.html:56
 msgid "Logout"
-msgstr "Ondoka"
+msgstr "Toka"
 
 #: templates/peachjam/_judgment_table.html:7
 msgid "Judges"
@@ -940,21 +940,21 @@ msgstr "Nchi"
 
 #: templates/peachjam/_ratifications.html:18
 msgid "Ratification Date"
-msgstr "Tarehe ya Kuidhinishwa"
+msgstr "Tarehe ya Kuridhiwa"
 
 #: templates/peachjam/_ratifications.html:19
 msgid "Deposit Date"
-msgstr "Tarehe ya Amana"
+msgstr "Tarehe ya Kuweka"
 
 #: templates/peachjam/_ratifications.html:20
 msgid "Signature Date"
-msgstr "Tarehe ya Sahihi"
+msgstr "Tarehe ya Saini"
 
 #: templates/peachjam/_recent_document_list.html:14
 #: templates/peachjam/court_detail.html:34
 #: templates/peachjam/layouts/document_list.html:57
 msgid "No documents found."
-msgstr "Hakuna hati zilizopatikana."
+msgstr "Hakuna nyaraka zilizopatikana."
 
 #: templates/peachjam/_related_documents.html:2
 #: templates/peachjam/layouts/document_detail.html:84
@@ -967,7 +967,7 @@ msgstr "Nyaraka zinazohusiana"
 #: templates/peachjam/taxonomy_detail.html:10
 #: templates/peachjam/top_level_taxonomy_list.html:8
 msgid "Taxonomies"
-msgstr "Taxonomia"
+msgstr "Taksonomia"
 
 #: templates/peachjam/_taxonomy_list.html:23
 #: templates/peachjam/first_level_taxonomy_detail.html:25
