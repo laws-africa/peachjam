@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-25 08:16\n"
+"PO-Revision-Date: 2023-03-25 16:15\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -990,12 +990,12 @@ msgstr "Sisi ni nani, na jinsi ya kuwasiliana nasi?"
 #: templates/peachjam/_terms_of_use_content.html:10
 #, python-format
 msgid "The %(organisation_name)s service is provided by the %(organisation_name)s programme of the Department of Public Law at the University of Cape Town and Laws.Africa NPO. You can contact us by email at <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> or by filling out <a href=\"/about/\">this form</a>."
-msgstr "Huduma %(organisation_name)s inatolewa na mpango %(organisation_name)s wa Idara ya Sheria ya Umma katika Chuo Kikuu cha Cape Town na Sheria.Africa NPO. Unaweza kuwasiliana nasi kwa barua pepe kwa <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> au kwa kujaza <a href=\"/about/\">fomu hii</a>."
+msgstr "Huduma %(organisation_name)s inatolewa na programu ya %(organisation_name)s ya Idara ya Sheria ya Umma katika Chuo Kikuu cha Cape Town na Sheria.Africa NPO. Unaweza kuwasiliana nasi kwa baruapepe kupitia <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> au kwa kujaza <a href=\"/about/\">fomu hii</a>."
 
 #: templates/peachjam/_terms_of_use_content.html:18
 #, python-format
 msgid "By using the %(organisation_name)s service you accept these terms"
-msgstr "Kwa kutumia huduma %(organisation_name)s unakubali sheria na masharti haya"
+msgstr "Kwa kutumia huduma ya %(organisation_name)s unakubaliana na masharti haya"
 
 #: templates/peachjam/_terms_of_use_content.html:23
 #, python-format
@@ -1004,29 +1004,29 @@ msgstr "Kwa kutumia huduma ya %(organisation_name)s , unathibitisha kuwa unakuba
 
 #: templates/peachjam/_terms_of_use_content.html:27
 msgid "Fair and reasonable use"
-msgstr "Matumizi ya haki na ya kuridhisha"
+msgstr "Matumizi mazuri na ya kuridhisha"
 
 #: templates/peachjam/_terms_of_use_content.html:29
 msgid "You must use the service responsibly by not making too many requests. In order to maintain the integrity of the service for everyone, we may block or disable use of the service from certain IP addresses, for making too many requests."
-msgstr "Ni lazima utumie huduma kwa kuwajibika kwa kutofanya maombi mengi. Ili kudumisha uadilifu wa huduma kwa kila mtu, tunaweza kuzuia au kuzima matumizi ya huduma kutoka kwa anwani fulani za IP, kwa kufanya maombi mengi sana."
+msgstr "Ni lazima utumie huduma kwa kuwajibika kwa kutofanya maombi mengi. Ili kudumisha uadilifu wa huduma kwa kila mtu, tunaweza kuzuia au kuzima matumizi ya huduma kutoka katika baadhi ya anwani za IP, kwa kufanya maombi mengi sana."
 
 #: templates/peachjam/_terms_of_use_content.html:36
 msgid "We are a donor-funded organisation and bulk and frequent scraping affects our costs, endangering the sustainability of the service. There are more efficient ways of obtaining access to our data in bulk. Please email us if you would like to access our data in bulk."
-msgstr "Sisi ni shirika linalofadhiliwa na wafadhili na uchakachuaji mara kwa mara huathiri gharama zetu, na kuhatarisha uendelevu wa huduma. Kuna njia bora zaidi za kupata ufikiaji wa data zetu kwa wingi. Tafadhali tutumie barua pepe ikiwa ungependa kufikia data yetu kwa wingi."
+msgstr "Sisi ni shirika linalofadhiliwa na uhamishaji wa mkubwa na wa mara kwa mara unaathiri gharama zetu na kuhatarisha uendelevu wa huduma. Kuna njia bora zaidi za kuweza kupata data zetu kwa wingi. Tafadhali tutumie baruapepe kama ungependa kukupata data zetu kwa wingi."
 
 #: templates/peachjam/_terms_of_use_content.html:42
 msgid "Crawling and indexing"
-msgstr "Kutambaa na indexing"
+msgstr "Kutafuta na kupanga"
 
 #: templates/peachjam/_terms_of_use_content.html:44
 #, python-format
 msgid "You may access the %(organisation_name)s service through the website, or access the data through our APIs."
-msgstr "Unaweza kufikia huduma ya %(organisation_name)s kupitia tovuti, au kufikia data kupitia API zetu."
+msgstr "Unaweza kupata huduma ya %(organisation_name)s kupitia tovuti, au kupta data kupitia API zetu."
 
 #: templates/peachjam/_terms_of_use_content.html:49
 #, python-format
 msgid "We restrict external indexing of documents by search engine robots or spiders. You must adhere to the instructions in the robots.txt file at: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
-msgstr "Tunazuia uwekaji faharasa wa nje wa hati kwa roboti za injini tafuti au buibui. Lazima ufuate maagizo katika faili ya robots.txt kwa: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
+msgstr "Tunazuia upangaji kutoka nje wa nyaraka kwa roboti za injini tafuti au buibui. Lazima ufuate maelekezo katika mafaili ya robots.txt katika: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
 
 #: templates/peachjam/_terms_of_use_content.html:55
 msgid "We may block or disable use of the service from certain IP addresses, if they appear to be compiling a search engine index."
@@ -1034,51 +1034,51 @@ msgstr "Tunaweza kuzuia au kuzima matumizi ya huduma kutoka kwa anwani fulani za
 
 #: templates/peachjam/_terms_of_use_content.html:59
 msgid "Coverage"
-msgstr "Chanjo"
+msgstr "Eneo"
 
 #: templates/peachjam/_terms_of_use_content.html:61
 #, python-format
 msgid "%(organisation_name)s collects caselaw, legislation, African Union documents, journals, books and other materials through cooperation with regional, governmental, academic and non-profit organisations and sometimes individuals."
-msgstr "%(organisation_name)s hukusanya sheria, sheria, hati za Umoja wa Afrika, majarida, vitabu na nyenzo zingine kupitia ushirikiano na mashirika ya kikanda, ya kiserikali, ya kitaaluma na yasiyo ya faida na wakati mwingine watu binafsi."
+msgstr "%(organisation_name)s hukusanya kesi za mahakama, sheria, hati za Umoja wa Afrika, majarida, vitabu na nyenzo zingine kupitia ushirikiano na mashirika ya kikanda, kiserikali, kitaaluma na yasiyo ya kibiashara na wakati mwingine watu binafsi."
 
 #: templates/peachjam/_terms_of_use_content.html:67
 msgid "We strive to ensure high quality standards on all documents published on the platform. Where verification was not possible, this will be indicated on the document concerned."
-msgstr "Tunajitahidi kuhakikisha viwango vya ubora wa juu kwenye hati zote zilizochapishwa kwenye jukwaa. Ambapo uthibitishaji haukuwezekana, hii itaonyeshwa kwenye hati inayohusika."
+msgstr "Tunajitahidi kuhakikisha viwango vya ubora wa juu kwenye nyaraka zote zilizochapishwa kwenye jukwaa. Ambapo uthibitishaji haukuwezekana, hii itaonyeshwa kwenye hati inayohusika."
 
 #: templates/peachjam/_terms_of_use_content.html:72
 msgid "Errors and omissions"
-msgstr "Makosa na kuachwa"
+msgstr "Makosa na uondoaji"
 
 #: templates/peachjam/_terms_of_use_content.html:74
 #, python-format
 msgid "We scan and digitize most of the documents made available on the %(organisation_name)s and affiliate LII websites. We use industry-standard Optical Character Recognition (OCR) software to convert these documents to readable text and there may be errors introduced by this process."
-msgstr "Tunachanganua na kuweka kidijitali hati nyingi zinazopatikana kwenye tovuti za %(organisation_name)s na washirika wa LII. Tunatumia programu ya kiwango cha sekta ya Utambuzi wa Tabia za Macho (OCR) kubadilisha hati hizi hadi maandishi yanayosomeka na kunaweza kuwa na hitilafu zinazoletwa na mchakato huu."
+msgstr "Tunaskani na kuweka kidijiti nyaraka zilizo nyingi zinazopatikana kwenye tovuti za %(organisation_name)s na washirika wa LII. Tunatumia programu ya Inayobadili Picha iweze kusomeka (OCR) ili kubadilisha nyaraka hizi kuwa maandishi yanayosomeka na kunaweza kuwa na makosa yanayoletwa na mchakato huu."
 
 #: templates/peachjam/_terms_of_use_content.html:81
 msgid "Please contact us should you encounter errors in any of the documents published and we shall rectify them within a reasonable time."
-msgstr "Tafadhali wasiliana nasi iwapo utapata hitilafu katika hati yoyote iliyochapishwa na tutazirekebisha ndani ya muda ufaao."
+msgstr "Tafadhali wasiliana nasi iwapo utapata hitilafu katika nyaraka zozote zilizochapishwa na tutazirekebisha ndani ya muda muafaka."
 
 #: templates/peachjam/_terms_of_use_content.html:85
 msgid "Disclaimer"
-msgstr "Kanusho"
+msgstr "Zuio"
 
 #: templates/peachjam/_terms_of_use_content.html:87
 #, python-format
 msgid "Although we make every effort to authenticate information and include the source and history of documents published on this service, you should note that information on %(organisation_name)s is:"
-msgstr "Ingawa tunafanya kila juhudi kuthibitisha maelezo na kujumuisha chanzo na historia ya hati zilizochapishwa kwenye huduma hii, unapaswa kukumbuka kuwa taarifa kwenye %(organisation_name)s ni:"
+msgstr "Ingawa tunafanya kila jitihada kuthibitisha taarifa na kujumuisha chanzo na historia ya nyaraka zilizochapishwa kwenye huduma hii, unapaswa kutambua kuwa taarifa kwenye %(organisation_name)s ni:"
 
 #: templates/peachjam/_terms_of_use_content.html:93
 msgid "not necessarily comprehensive, complete, accurate or up-to-date;"
-msgstr "si lazima ya kina, kamili, sahihi au ya kisasa;"
+msgstr "si lazima kuwa ya kina, kamili, sahihi au ya kisasa;"
 
 #: templates/peachjam/_terms_of_use_content.html:95
 #, python-format
 msgid "sometimes linked to external sites over which %(organisation_name)s has no control and for which %(organisation_name)s assumes no responsibility;"
-msgstr "wakati mwingine huhusishwa na tovuti za nje ambazo %(organisation_name)s haina udhibiti na ambayo %(organisation_name)s haichukui jukumu lolote;"
+msgstr "wakati mwingine inahusishwa na tovuti za nje ambazo %(organisation_name)s haina udhibiti na ambapo %(organisation_name)s haiwajibiki;"
 
 #: templates/peachjam/_terms_of_use_content.html:101
 msgid "not professional or legal advice (if you need specific advice, you should always consult a suitably qualified professional)."
-msgstr "si ushauri wa kitaalamu au wa kisheria (ikiwa unahitaji ushauri maalum, unapaswa kushauriana na mtaalamu aliyehitimu kila wakati)."
+msgstr "si ushauri wa kitaalamu au wa kisheria (ikiwa unahitaji ushauri maalumu, unapaswa wakati wote kushauriana na mtaalamu amwenye sifa anayefaa)."
 
 #: templates/peachjam/_terms_of_use_content.html:107
 #, python-format
