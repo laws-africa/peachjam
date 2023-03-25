@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-25 16:15\n"
+"PO-Revision-Date: 2023-03-25 17:41\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -1083,41 +1083,41 @@ msgstr "si ushauri wa kitaalamu au wa kisheria (ikiwa unahitaji ushauri maalumu,
 #: templates/peachjam/_terms_of_use_content.html:107
 #, python-format
 msgid "%(organisation_name)s and Laws.Africa, members of its staff, and its contractors shall not be liable for any financial or other consequences arising from the use of information or data contained on this site, including the inappropriate, improper or fraudulent use of such information or data."
-msgstr "%(organisation_name)s na Sheria.Afrika, wafanyakazi wake, na wakandarasi wake hawatawajibika kwa matokeo yoyote ya kifedha au mengine yanayotokana na matumizi ya taarifa au data iliyomo kwenye tovuti hii, ikiwa ni pamoja na matumizi yasiyofaa, yasiyofaa au ya ulaghai ya taarifa au data hizo. ."
+msgstr "%(organisation_name)s na Sheria.Afrika, wafanyakazi wake, na wakandarasi wake hawatawajibika kwa madhara yoyote ya kifedha au mengine yanayotokana na matumizi ya taarifa au data iliyomo kwenye tovuti hii, ikiwa ni pamoja na matumizi yasiyofaa, yasiyo sahihi au ya udanganyifu wa taarifa au data hizo.."
 
 #: templates/peachjam/_terms_of_use_content.html:114
 #, python-format
 msgid "%(organisation_name)s does not invite reliance upon, nor accept responsibility for, the information it provides. %(organisation_name)s makes every effort to provide a high-quality service. However, neither %(organisation_name)s nor the providers of data on %(organisation_name)s, give any guarantees, undertakings or warranties concerning the accuracy, completeness or up-to-date nature of the information provided. Users should confirm information from another source if it is of sufficient importance for them to do so."
-msgstr "%(organisation_name)s haialikei kutegemea, wala kukubali kuwajibika kwa habari inayotoa. %(organisation_name)s hufanya kila juhudi kutoa huduma ya ubora wa juu. Hata hivyo, si %(organisation_name)s wala watoa huduma wa data kwenye %(organisation_name)s, wanaotoa hakikisho, ahadi au dhamana yoyote kuhusu usahihi, ukamilifu au hali ya kisasa ya taarifa iliyotolewa. Watumiaji wanapaswa kuthibitisha habari kutoka kwa chanzo kingine ikiwa ni ya umuhimu wa kutosha kwao kufanya hivyo."
+msgstr "%(organisation_name)s hairuhusu utegemezi, wala kukubali kuwajibika kwa taarifa inayoitoa. %(organisation_name)s inafanya kila jitihada kutoa huduma ya ubora wa hali ya juu. Hata hivyo, si %(organisation_name)s wala watoa data kwenye %(organisation_name)s, wanaotoa uhakika, ahadi au dhamana yoyote kuhusu usahihi, ukamilifu au hali ya upya wa taarifa iliyotolewa. Watumiaji wanapaswa kuthibitisha taarifa kutoka katika chanzo kingine ikiwa ni ya umuhimu wa kutosha kwao kufanya hivyo."
 
 #: templates/peachjam/_terms_of_use_content.html:123
 #, python-format
 msgid "Hypertext links on %(organisation_name)s are (in most cases) inserted by %(organisation_name)s, not by the data providers. Automated insertion of hypertext links on %(organisation_name)s means that links will not be comprehensive or accurate in all cases. Neither %(organisation_name)s nor its providers of data, give any guarantees, undertakings or warranties concerning hypertext linking."
-msgstr "Viungo vya Hypertext kwenye %(organisation_name)s (mara nyingi) huingizwa na %(organisation_name)s, sio watoa huduma wa data. Uingizaji otomatiki wa viungo vya hypertext kwenye %(organisation_name)s inamaanisha kuwa viungo havitakuwa vya kina au sahihi katika visa vyote. Wala %(organisation_name)s wala watoa huduma wake wa data, hawatoi hakikisho, ahadi au udhamini wowote kuhusu kuunganisha maandishi makubwa."
+msgstr "Viungo vya Hypertext kwenye %(organisation_name)s (mara nyingi) huingizwa na %(organisation_name)s, sio watoa Zdata. Uingizaji kiotomati wa viungo vya hypertext kwenye %(organisation_name)s inamaanisha kuwa viungo havitakuwa vya kina au sahihi kwa namna zote. Si %(organisation_name)s wala watoa data wake, wanatoa uhakika, ahadi au udhamini wowote kuhusu viungo vya hypertext."
 
 #: templates/peachjam/_terms_of_use_content.html:130
 msgid "Copyright and Licensing"
-msgstr "Hakimiliki na Leseni"
+msgstr "Hakimiliki na Utoaji leseni"
 
 #: templates/peachjam/_terms_of_use_content.html:132
 #, python-format
 msgid "You may use and re-use primary and secondary law content on %(organisation_name)s under the terms of the Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Attribution-NonCommercial 4.0 International</a> license. Under this license, you may freely use, re-use and redistribute works from %(organisation_name)s provided you credit %(organisation_name)s as your source and your use is not for commercial gain."
-msgstr "Unaweza kutumia na kutumia tena maudhui ya sheria ya msingi na ya upili kwenye %(organisation_name)s chini ya masharti ya leseni ya Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Attribution-NonCommercial 4.0 International</a> . Chini ya leseni hii, unaweza kutumia, kutumia upya na kusambaza upya kazi kutoka %(organisation_name)s bila malipo bila malipo, mradi umetoa %(organisation_name)s kama chanzo chako na matumizi yako si kwa manufaa ya kibiashara."
+msgstr "Unaweza kutumia na kutumia tena maudhui ya sheria ya msingi naufafanuzi wake kwenye %(organisation_name)s chini ya masharti ya leseni ya Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Attribution-NonCommercial 4.0 International</a>. Chini ya leseni hii, unaweza kutumia, kutumia upya na kusambaza upya kazi kutoka %(organisation_name)s bila malipo, ili mradi umetoa kwa %(organisation_name)s kama chanzo chako na matumizi yako si kwa manufaa ya kibiashara."
 
 #: templates/peachjam/_terms_of_use_content.html:140
 #, python-format
 msgid "Specific collections on %(organisation_name)s may be licensed under more permissive licenses. Examples of these collections are unedited African Union documentation, national and regional caselaw and government gazettes. Check the landing page of each collection for specific licensing information."
-msgstr "Makusanyo mahususi kwenye %(organisation_name)s yanaweza kupewa leseni chini ya leseni zinazoruhusiwa zaidi. Mifano ya makusanyo haya ni hati za Umoja wa Afrika ambazo hazijahaririwa, sheria za kitaifa na kikanda na gazeti la serikali. Angalia ukurasa wa kutua wa kila mkusanyiko kwa maelezo mahususi ya utoaji leseni."
+msgstr "Makusanyo maalumu kwenye %(organisation_name)s yanaweza kupewa leseni chini ya leseni zinazoruhusiwa zaidi. Mifano ya makusanyo hayo ni hati za Umoja wa Afrika ambazo hazijahaririwa, sheria za kitaifa na kikanda na magazeti ya serikali. Angalia ukurasa wa kwanza wa kila mkusanyiko kwa maelezo maalumu ya utoaji leseni."
 
 #: templates/peachjam/_terms_of_use_content.html:147
 #, python-format
 msgid "Use of legal materials published by %(organisation_name)s can be subject to additional conditions set by courts, regional and government bodies, and publishers claiming intellectual property rights relating to the documents. %(organisation_name)s makes an effort to indicate the existence of additional conditions on the pages of the relevant databases. Still, Users remain responsible for checking whether their use of the documents is authorised."
-msgstr "Matumizi ya nyenzo za kisheria zilizochapishwa na %(organisation_name)s inaweza kuwa chini ya masharti ya ziada yaliyowekwa na mahakama, mashirika ya kikanda na ya serikali, na wachapishaji wanaodai haki miliki zinazohusiana na hati. %(organisation_name)s hufanya jitihada za kuonyesha kuwepo kwa masharti ya ziada kwenye kurasa za hifadhidata husika. Bado, Watumiaji wanabaki na jukumu la kuangalia ikiwa matumizi yao ya hati yameidhinishwa."
+msgstr "Matumizi ya maandiko ya kisheria yaliyochapishwa na %(organisation_name)s yanaweza kuwa chini ya masharti ya ziada yaliyowekwa na mahakama, vyombo vya kanda na vya serikali, na wachapishaji wanaodai haki za milki ya ubunifu zinazohusiana na nyaraka. %(organisation_name)s inafanya jitihada za kuonyesha kuwepo kwa masharti ya ziada kwenye kurasa za hifadhidata husika. Bado, Watumiaji wanabaki na jukumu la kuangalia kama matumizi yao ya nyaraka yameidhinishwa."
 
 #: templates/peachjam/_terms_of_use_content.html:155
 #, python-format
 msgid "%(organisation_name)s reserves the intellectual property rights on the %(organisation_name)s name, website’s graphics and website design."
-msgstr "%(organisation_name)s inahifadhi haki miliki kwenye jina %(organisation_name)s , michoro ya tovuti na muundo wa tovuti."
+msgstr "%(organisation_name)s inahifadhi haki za milki ya ubunifu kwenye jina, michoro ya tovuti na usanifu wa tovuti ya %(organisation_name)s."
 
 #: templates/peachjam/_terms_of_use_content.html:159
 msgid "Privacy"
@@ -1131,31 +1131,31 @@ msgstr "Taarifa kuhusu matumizi ya %(organisation_name)s"
 #: templates/peachjam/_terms_of_use_content.html:166
 #, python-format
 msgid "%(organisation_name)s collects information which identifies, for each page accessed on %(organisation_name)s, the network identity of the machine which has accessed it. We use Google Analytics and in-house software to perform this function."
-msgstr "%(organisation_name)s hukusanya maelezo ambayo yanabainisha, kwa kila ukurasa unaofikiwa kwenye %(organisation_name)s, utambulisho wa mtandao wa mashine ambayo imeifikia. Tunatumia Google Analytics na programu ya ndani kutekeleza utendakazi huu."
+msgstr "%(organisation_name)s inakusanya taarifa ambazo zinabainisha, kwa kila ukurasa unaofunguliwa kwenye %(organisation_name)s, utambulisho wa mtandao wa mashine ambayo imefunguliwa. Tunatumia Google Analytics na programu ya ndani kutekeleza utendaji huo."
 
 #: templates/peachjam/_terms_of_use_content.html:172
 #, python-format
 msgid "%(organisation_name)s retains this usage information for purposes of network analysis, usage analysis, and research into usage patterns to improve the %(organisation_name)s services. Access to and use of this information is restricted to Google Analytics, %(organisation_name)s management and staff, and to researchers working on %(organisation_name)s projects and subject to an agreement to adhere to these Terms of Use."
-msgstr "%(organisation_name)s huhifadhi maelezo haya ya utumiaji kwa madhumuni ya uchanganuzi wa mtandao, uchanganuzi wa matumizi na utafiti katika mifumo ya utumiaji ili kuboresha huduma %(organisation_name)s . Ufikiaji na utumiaji wa maelezo haya unapatikana tu kwa Google Analytics, wasimamizi %(organisation_name)s na wafanyikazi, na kwa watafiti wanaofanya kazi kwenye miradi %(organisation_name)s na chini ya makubaliano ya kuzingatia Sheria na Masharti haya."
+msgstr "%(organisation_name)s inahifadhi taarifa hizi za matumizi kwa madhumuni ya uchanganuzi wa mtandao, uchanganuzi wa matumizi na utafiti katika mifumo ya utumiaji ili kuboresha huduma za %(organisation_name)s. Upatikanaji na utumiaji wa taarifa hizi unapatikana kwa Google Analytics tu, menejimenti na wafanyakazi wa %(organisation_name)s, na kwa watafiti wanaofanya kazi kwenye miradi ya %(organisation_name)s na kulingana na makubaliano ya kufuata Masharti haya."
 
 #: templates/peachjam/_terms_of_use_content.html:180
 #, python-format
 msgid "%(organisation_name)s reserves the right to gather more extensive information than stated above (i) about any attempted access to %(organisation_name)s which raise security issues (and, where necessary, to make disclosures to relevant authorities); and (ii) for network analyses on an occasional basis."
-msgstr "%(organisation_name)s inahifadhi haki ya kukusanya taarifa nyingi zaidi kuliko ilivyoelezwa hapo juu (i) kuhusu jaribio lolote la kufikia %(organisation_name)s ambalo linazua masuala ya usalama (na, inapobidi, kutoa ufichuzi kwa mamlaka husika); na (ii) kwa uchanganuzi wa mtandao mara kwa mara."
+msgstr "%(organisation_name)s ina haki ya kukusanya taarifa nyingi zaidi kuliko ilivyoelezwa hapo juu (i) kuhusu jaribio lolote la kufikia %(organisation_name)s ambalo linazua masuala ya usalama (na, pale inapobidi, kufichua kwa mamlaka husika); na (ii) kwa uchanganuzi wa mtandao mara kwa mara."
 
 #: templates/peachjam/_terms_of_use_content.html:187
 #, python-format
 msgid "Personal information contained in %(organisation_name)s databases"
-msgstr "Taarifa za kibinafsi zilizomo katika hifadhidata %(organisation_name)s"
+msgstr "Taarifa binafsi zilizomo katika hifadhidata ya %(organisation_name)s"
 
 #: templates/peachjam/_terms_of_use_content.html:191
 msgid "Personal information in court cases"
-msgstr "Taarifa za kibinafsi katika kesi za mahakama"
+msgstr "Taarifa binafsi katika kesi za mahakama"
 
 #: templates/peachjam/_terms_of_use_content.html:193
 #, python-format
 msgid "%(organisation_name)s publishes comprehensive collections of court decisions with the consent of the public bodies concerned. The electronic dissemination of judgments is in concordance with the open court principle, instituted to ensure the impartiality and transparency of the judicial process by allowing access to the record of judicial proceedings, including judgments. Therefore, %(organisation_name)s operates on the core principle that all citizens and organisations should be provided with free, unconditional and unrestricted access to basic legal materials."
-msgstr "%(organisation_name)s huchapisha makusanyo ya kina ya maamuzi ya mahakama kwa idhini ya mashirika ya umma yanayohusika. Usambazaji wa hukumu za kielektroniki unapatana na kanuni ya mahakama ya wazi, iliyoanzishwa ili kuhakikisha kutopendelea na uwazi wa mchakato wa mahakama kwa kuruhusu ufikiaji wa rekodi ya kesi za mahakama, ikiwa ni pamoja na hukumu. Kwa hiyo, %(organisation_name)s inafanya kazi kwa kanuni ya msingi kwamba wananchi wote na mashirika wanapaswa kutolewa kwa upatikanaji wa bure, usio na masharti na usio na vikwazo kwa nyenzo za msingi za kisheria."
+msgstr "%(organisation_name)s inachapisha makusanyo ya kina ya maamuzi ya mahakama kwa idhini ya vyombo vya umma vinavyohusika. Usambazaji wa hukumu za kielektroni unaendana na kanuni ya mahakama ya wazi, iliyoanzishwa ili kuhakikisha kutopendelea na uwazi wa mchakato wa mahakama kwa kuruhusu upatikanaji wa rekodi za mashtaka ya mahakama, ikiwa ni pamoja na hukumu. Kwa hiyo, %(organisation_name)s inafanya kazi kwa kufuata kanuni ya msingi kwamba wananchi wote na mashirika wanapaswa kupewa bure, bila masharti na kupata bila vikwazo maandiko ya msingi ya kisheria."
 
 #: templates/peachjam/_terms_of_use_content.html:202
 #, python-format
