@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-24 13:51\n"
+"PO-Revision-Date: 2023-03-25 06:59\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -632,19 +632,19 @@ msgstr "somo la kazi"
 
 #: models/relationships.py:33
 msgid "subject target ID"
-msgstr "kitambulisho cha lengo"
+msgstr "utambulisho wa  jambo lengwa "
 
 #: models/relationships.py:41
 msgid "object work"
-msgstr "kazi ya kitu"
+msgstr "kipengele cha kazi"
 
 #: models/relationships.py:44
 msgid "object target ID"
-msgstr "kitambulisho cha lengo la kitu"
+msgstr "utambulisho wa kipengele lengwa"
 
 #: models/settings.py:28
 msgid "default document language"
-msgstr "lugha ya hati chaguo-msingi"
+msgstr "kutokuwa na lugha ya hati"
 
 #: models/settings.py:34
 msgid "document languages"
@@ -652,7 +652,7 @@ msgstr "lugha za hati"
 
 #: models/settings.py:40
 msgid "document jurisdictions"
-msgstr "mamlaka ya hati"
+msgstr "mamlaka ya kisheria ya hati"
 
 #: models/settings.py:43
 msgid "subsidiary legislation label"
