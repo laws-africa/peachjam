@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-23 08:28\n"
+"PO-Revision-Date: 2023-03-26 19:22\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -85,11 +85,11 @@ msgstr "Sheria ya Mfukoni"
 
 #: templates/peachjam/_footer.html:4
 msgid "Subscribe"
-msgstr "Jisajili"
+msgstr "Jiandikishe"
 
 #: templates/peachjam/_footer.html:9
 msgid "Subscribe to the our newsletter for updates and news."
-msgstr "Jiandikishe kwa jarida letu kwa sasisho na habari."
+msgstr "Jiandikishe kwa jarida letu kwa ajili ya taarifa mpya na habari."
 
 #: templates/peachjam/_footer.html:20 templates/peachjam/_header.html:23
 msgid "About"
