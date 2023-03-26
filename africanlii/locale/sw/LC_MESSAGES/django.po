@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-26 17:53\n"
+"PO-Revision-Date: 2023-03-26 19:22\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -188,19 +188,19 @@ msgstr "Watengenezaji jukwaa"
 
 #: templates/peachjam/about.html:53
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University of Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> helps governments, academia and non-profit organisations publish the law of African countries for sustainable open access. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> hosts curated collections on various subjects of African law, such as human rights, the environment, commercial law and finance."
-msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> ni programu ya Kitengo cha Utawala na Haki za Kidemokrasia katika Idara ya Sheria ya Umma, Chuo Kikuu cha Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> husaidia serikali, wasomi na mashirika yasiyo ya faida kuchapisha sheria ya nchi za Kiafrika kwa ufikiaji wa wazi endelevu. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> huandaa makusanyo ya masuala mbalimbali ya sheria za Afrika, kama vile haki za binadamu, mazingira, sheria za kibiashara na fedha."
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> ni programu ya Kitengo cha Utawala na Haki za Kidemokrasia katika Idara ya Sheria ya Umma, Chuo Kikuu cha Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> husaidia serikali, wasomi na mashirika yasiyo ya kibiashara kuchapisha sheria ya nchi za Afrika kwa ajili ya uendelevu wa kupatikana kwa uwazi. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> huandaa makusanyo ya masuala mbalimbali ya sheria za Afrika, kama vile haki za binadamu, mazingira, sheria za biashara na fedha."
 
 #: templates/peachjam/about.html:61
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> convenes a network of 16 African LIIs - a collaborative group of governments, organizations, and individuals in Africa, dedicated to free access to law on our continent."
-msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> inakusanya mtandao wa LII 16 za Kiafrika - kikundi shirikishi cha serikali, mashirika, na watu binafsi barani Afrika, wanaojitolea kupata sheria bila malipo katika bara letu."
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> inakusanya mtandao wa LII 16 za Afrika - kikundi shirikishi cha serikali, mashirika, na watu binafsi barani Afrika, wanaojitolea kutoa sheria bila malipo katika bara letu."
 
 #: templates/peachjam/about.html:67
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> helps African governments to sustainably digitise their legal information for public use, through open law software, capacity-building, training, partnerships and support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions lower the cost of digitisation, archival and publication of primary legal information, and create opportunities for rich interactivity, advanced research and justice sector innovation."
-msgstr "<a href=\"https://laws.africa/\" target=\"_blank\">Sheria.Afrika</a> husaidia serikali za Kiafrika kuweka taarifa zao za kisheria kwa njia endelevu kwa matumizi ya umma, kupitia programu za sheria huria, kujenga uwezo, mafunzo, ubia na usaidizi. <a href=\"https://laws.africa/\" target=\"_blank\">Sheria.Suluhu</a> za Teknolojia ya Sheria Huria barani Afrika hupunguza gharama ya kuweka kidijitali, kuhifadhi kumbukumbu na uchapishaji wa taarifa za msingi za kisheria, na kuunda fursa za mwingiliano mzuri, utafiti wa hali ya juu na uvumbuzi wa sekta ya haki."
+msgstr "<a href=\"https://laws.africa/\" target=\"_blank\">Sheria.Afrika</a> husaidia serikali za Afrika kuweka taarifa zao za sheria kwa njia endelevu kwa ajili ya matumizi ya umma, kupitia programu za kompyuta za sheria huria, kujenga uwezo, mafunzo, ubia na msaada. <a href=\"https://laws.africa/\" target=\"_blank\">Masuluhisho ya </a> Teknolojia ya Sheria Huria ya Sheria.Afrika yanapunguza gharama ya kuweka kidijiti, kuhifadhi kumbukumbu na uchapishaji wa taarifa za msingi za sheria, na kutoa fursa za uchangamani mkubwa, utafiti wa hali ya juu na uvumbuzi wa sekta ya haki."
 
 #: templates/peachjam/about.html:75
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborate in unlocking the value of African digital legal information in support of the rule of law, access to justice, and innovation."
-msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> na <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> hushirikiana katika kufungua thamani ya taarifa za kisheria za kidijitali za Kiafrika katika kuunga mkono utawala wa sheria, upatikanaji wa haki, na uvumbuzi."
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> na <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> hushirikiana katika kufungua thamani ya taarifa za kisheria za kidijiti za Afrika katika kuunga mkono utawala wa sheria, upatikanaji wa haki, na uvumbuzi."
 
 #: templates/peachjam/about.html:80
 msgid "Find out more"
@@ -220,7 +220,7 @@ msgstr "Sebule"
 
 #: templates/peachjam/home.html:10
 msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
-msgstr "Tunaweka kidigitali sheria na sera ya Usanifu wa Utawala wa Kiafrika na kuwasaidia Waafrika na ulimwengu kuungana na kuelewa ajenda ya Umoja wa Afrika."
+msgstr "Tunaweka kidigiti sheria na sera ya Muundo wa Utawala wa Afrika na kuwasaidia Waafrika na ulimwengu kuungana na kuelewa ajenda ya Umoja wa Afrika."
 
 #: templates/peachjam/home.html:16
 #, python-format
