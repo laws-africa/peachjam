@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-25 17:41\n"
+"PO-Revision-Date: 2023-03-26 16:44\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -39,7 +39,7 @@ msgstr "Ya hali ya juu"
 
 #: admin.py:463 models/judgment.py:291
 msgid "case number"
-msgstr "nambari ya kesi"
+msgstr "namba ya kesi"
 
 #: admin.py:464 models/judgment.py:292
 msgid "case numbers"
@@ -60,7 +60,7 @@ msgstr "tarehe"
 #: models/article.py:21 models/core_document_model.py:76
 #: models/core_document_model.py:206 models/core_document_model.py:621
 msgid "title"
-msgstr "mada/kichwa cha habari"
+msgstr "mada"
 
 #: models/article.py:22
 msgid "body"
@@ -266,7 +266,7 @@ msgstr "fanya kazi FRBR URI"
 
 #: models/core_document_model.py:250
 msgid "FRBR URI doctype"
-msgstr "aina ya hati ya FRBR URI "
+msgstr "Aina ya hati ya FRBR URI"
 
 #: models/core_document_model.py:257
 msgid "FRBR URI subtype"
@@ -310,15 +310,15 @@ msgstr "imeundwa saa"
 
 #: models/core_document_model.py:297
 msgid "updated at"
-msgstr "imeundwa "
+msgstr "imesasishwa saa"
 
 #: models/core_document_model.py:299
 msgid "allow robots"
-msgstr "kuruhusu roboti"
+msgstr "ruhusu roboti"
 
 #: models/core_document_model.py:302
 msgid "Allow this document to be indexed by search engine robots."
-msgstr "Ruhusu hati hii kuorodheshwa na roboti za injini tafuti."
+msgstr "Ruhusu hati hii kuorodheshwa na roboti za injini ya utafutaji."
 
 #: models/core_document_model.py:328
 msgid "Invalid Date"
@@ -835,7 +835,7 @@ msgstr "Sheria za nyongeza"
 #: templates/peachjam/_document_table.html:6
 #: templates/peachjam/_judgment_table.html:6
 msgid "Title"
-msgstr "Mada"
+msgstr ""
 
 #: templates/peachjam/_child_documents.html:8
 msgid "Numbered title"
@@ -881,7 +881,7 @@ msgstr "Pakia hati"
 
 #: templates/peachjam/_document_content.html:157
 msgid "To the top"
-msgstr "Hadi juu"
+msgstr ""
 
 #: templates/peachjam/_document_table.html:10
 #: templates/peachjam/_judgment_table.html:8
@@ -1160,7 +1160,7 @@ msgstr "%(organisation_name)s inachapisha makusanyo ya kina ya maamuzi ya mahaka
 #: templates/peachjam/_terms_of_use_content.html:202
 #, python-format
 msgid "%(organisation_name)s undertakes to monitor and delete from published judgments personal information as directed by law or specific court order. %(organisation_name)s retains the right to remove personal information from judgments at its discretion where this is possible without distorting the meaning and context of the document."
-msgstr "%(organisation_name)s inajitolea kufuatilia na kufuta kutoka kwa hukumu zilizochapishwa taarifa za kibinafsi kama inavyoelekezwa na sheria au amri maalum ya mahakama. %(organisation_name)s inabaki na haki ya kuondoa maelezo ya kibinafsi kutoka kwa hukumu kwa hiari yake inapowezekana bila kupotosha maana na muktadha wa hati."
+msgstr "%(organisation_name)s inajitolea kufuatilia na kufuta kutoka katika taarifa binafsi za hukumu zilizochapishwa kama inavyoelekezwa na sheria au amri maalumu ya mahakama. %(organisation_name)s inabaki na haki ya kuondoa maelezo ya binafsi kutoka katika hukumu kwa hiari yake inapowezekana bila kupotosha maana na muktadha wa waraka."
 
 #: templates/peachjam/_terms_of_use_content.html:208
 msgid "Personal information in government gazettes"
