@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-26 16:44\n"
+"PO-Revision-Date: 2023-03-26 17:53\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -351,7 +351,7 @@ msgstr "faili"
 
 #: models/core_document_model.py:534
 msgid "images"
-msgstr "Picha"
+msgstr "picha"
 
 #: models/core_document_model.py:561
 msgid "source file"
@@ -391,11 +391,11 @@ msgstr "maandishi ya hati"
 
 #: models/core_document_model.py:649
 msgid "document content"
-msgstr "yaliyomo kwenye hati"
+msgstr "maudhui ya hati"
 
 #: models/core_document_model.py:650
 msgid "document contents"
-msgstr "yaliyomo kwenye hati"
+msgstr "maudhui ya hati"
 
 #: models/gazette.py:8
 msgid "gazette"
@@ -415,7 +415,7 @@ msgstr "hati za jumla"
 
 #: models/generic_document.py:52
 msgid "legal instrument"
-msgstr "hati za kisheria"
+msgstr "hati ya kisheria"
 
 #: models/generic_document.py:53
 msgid "legal instruments"
@@ -491,11 +491,11 @@ msgstr "aina za mambo"
 
 #: models/judgment.py:61 models/judgment.py:76
 msgid "court class"
-msgstr "darasa la mahakama"
+msgstr "daraja la mahakama"
 
 #: models/judgment.py:62
 msgid "court classes"
-msgstr "madarasa ya mahakama"
+msgstr "madaraja ya mahakama"
 
 #: models/judgment.py:84 models/judgment.py:97 models/judgment.py:117
 msgid "court"
@@ -769,7 +769,7 @@ msgstr "Umesahau nenosiri lako? Ingiza anwani yako ya barua pepe hapa chini, na 
 
 #: templates/account/password_reset.html:15
 msgid "Email address"
-msgstr "Barua pepe"
+msgstr "Anwani ya baruapepe"
 
 #: templates/account/password_reset.html:28
 #: templates/account/password_reset_from_key.html:53
@@ -856,7 +856,7 @@ msgstr "Hakuna mahakama zilizopatikana."
 
 #: templates/peachjam/_document_content.html:24
 msgid "Table of contents"
-msgstr "Jedwali la yaliyomo"
+msgstr "Yaliyomo"
 
 #: templates/peachjam/_document_content.html:36
 msgid "Pages"
@@ -932,7 +932,7 @@ msgstr "Chanzo"
 
 #: templates/peachjam/_ratifications.html:10
 msgid "Last updated"
-msgstr "Ilisasishwa mwisho"
+msgstr "Ilisasishwa mara ya mwisho mwisho"
 
 #: templates/peachjam/_ratifications.html:17
 msgid "Country"
@@ -981,7 +981,7 @@ msgstr "Masharti haya yanahusiana na nini?"
 #: templates/peachjam/_terms_of_use_content.html:4
 #, python-format
 msgid "These terms of use describe the permitted use for the %(organisation_name)s service available at <a href=\"/\">%(org_link_text)s</a> and its subdomains."
-msgstr "Masharti haya ya matumizi yanaelezea matumizi yanayoruhusiwa kwa huduma %(organisation_name)s inayopatikana kwa <a href=\"/\">%(org_link_text)s</a> na vikoa vyake vidogo."
+msgstr "Masharti haya ya matumizi yanaelezea matumizi yanayoruhusiwa kwa ajili ya huduma ya %(organisation_name)s inayopatikana kwa <a href=\"/\">%(org_link_text)s</a> na maeneo yake madogo."
 
 #: templates/peachjam/_terms_of_use_content.html:8
 msgid "Who are we, and how to contact us?"
@@ -1000,7 +1000,7 @@ msgstr "Kwa kutumia huduma ya %(organisation_name)s unakubaliana na masharti hay
 #: templates/peachjam/_terms_of_use_content.html:23
 #, python-format
 msgid "By using the %(organisation_name)s service, you confirm that you accept these terms of use and agree to comply with them."
-msgstr "Kwa kutumia huduma ya %(organisation_name)s , unathibitisha kuwa unakubali sheria na masharti haya na unakubali kuyatii."
+msgstr "Kwa kutumia huduma ya %(organisation_name)s, unathibitisha kuwa unakubali sheria na masharti haya na unakubali kuyafuata."
 
 #: templates/peachjam/_terms_of_use_content.html:27
 msgid "Fair and reasonable use"
@@ -1012,7 +1012,7 @@ msgstr "Ni lazima utumie huduma kwa kuwajibika kwa kutofanya maombi mengi. Ili k
 
 #: templates/peachjam/_terms_of_use_content.html:36
 msgid "We are a donor-funded organisation and bulk and frequent scraping affects our costs, endangering the sustainability of the service. There are more efficient ways of obtaining access to our data in bulk. Please email us if you would like to access our data in bulk."
-msgstr "Sisi ni shirika linalofadhiliwa na uhamishaji wa mkubwa na wa mara kwa mara unaathiri gharama zetu na kuhatarisha uendelevu wa huduma. Kuna njia bora zaidi za kuweza kupata data zetu kwa wingi. Tafadhali tutumie baruapepe kama ungependa kukupata data zetu kwa wingi."
+msgstr "Sisi ni shirika linalofadhiliwa na uhamishaji mkubwa na wa mara kwa mara unaathiri gharama zetu na kuhatarisha uendelevu wa huduma. Kuna njia bora zaidi za kuweza kupata data zetu kwa wingi. Tafadhali tutumie baruapepe kama ungependa kukupata data zetu kwa wingi."
 
 #: templates/peachjam/_terms_of_use_content.html:42
 msgid "Crawling and indexing"
@@ -1021,12 +1021,12 @@ msgstr "Kutafuta na kupanga"
 #: templates/peachjam/_terms_of_use_content.html:44
 #, python-format
 msgid "You may access the %(organisation_name)s service through the website, or access the data through our APIs."
-msgstr "Unaweza kupata huduma ya %(organisation_name)s kupitia tovuti, au kupta data kupitia API zetu."
+msgstr "Unaweza kupata huduma ya %(organisation_name)s kupitia tovuti, au kupata data kupitia API zetu."
 
 #: templates/peachjam/_terms_of_use_content.html:49
 #, python-format
 msgid "We restrict external indexing of documents by search engine robots or spiders. You must adhere to the instructions in the robots.txt file at: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
-msgstr "Tunazuia upangaji kutoka nje wa nyaraka kwa roboti za injini tafuti au buibui. Lazima ufuate maelekezo katika mafaili ya robots.txt katika: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
+msgstr "Tunazuia upangaji kutoka nje wa nyaraka kwa roboti za injini tafuti au buibui. Lazima ufuate maelekezo katika mafaili ya roboti.txt katika: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
 
 #: templates/peachjam/_terms_of_use_content.html:55
 msgid "We may block or disable use of the service from certain IP addresses, if they appear to be compiling a search engine index."
@@ -1052,7 +1052,7 @@ msgstr "Makosa na uondoaji"
 #: templates/peachjam/_terms_of_use_content.html:74
 #, python-format
 msgid "We scan and digitize most of the documents made available on the %(organisation_name)s and affiliate LII websites. We use industry-standard Optical Character Recognition (OCR) software to convert these documents to readable text and there may be errors introduced by this process."
-msgstr "Tunaskani na kuweka kidijiti nyaraka zilizo nyingi zinazopatikana kwenye tovuti za %(organisation_name)s na washirika wa LII. Tunatumia programu ya Inayobadili Picha iweze kusomeka (OCR) ili kubadilisha nyaraka hizi kuwa maandishi yanayosomeka na kunaweza kuwa na makosa yanayoletwa na mchakato huu."
+msgstr "Tunaskani na kuweka kidijiti nyaraka zilizo nyingi zinazopatikana kwenye tovuti za %(organisation_name)s na washirika wa LII. Tunatumia programu Inayobadili Picha iweze kusomeka (OCR) ili kubadilisha nyaraka hizi kuwa maandishi yanayosomeka na kunaweza kuwa na makosa yanayoletwa na mchakato huu."
 
 #: templates/peachjam/_terms_of_use_content.html:81
 msgid "Please contact us should you encounter errors in any of the documents published and we shall rectify them within a reasonable time."
@@ -1078,7 +1078,7 @@ msgstr "wakati mwingine inahusishwa na tovuti za nje ambazo %(organisation_name)
 
 #: templates/peachjam/_terms_of_use_content.html:101
 msgid "not professional or legal advice (if you need specific advice, you should always consult a suitably qualified professional)."
-msgstr "si ushauri wa kitaalamu au wa kisheria (ikiwa unahitaji ushauri maalumu, unapaswa wakati wote kushauriana na mtaalamu amwenye sifa anayefaa)."
+msgstr "si ushauri wa kitaalamu au wa kisheria (ikiwa unahitaji ushauri maalumu, unapaswa wakati wote kushauriana na mtaalamu mwenye sifa anayefaa)."
 
 #: templates/peachjam/_terms_of_use_content.html:107
 #, python-format
@@ -1093,7 +1093,7 @@ msgstr "%(organisation_name)s hairuhusu utegemezi, wala kukubali kuwajibika kwa 
 #: templates/peachjam/_terms_of_use_content.html:123
 #, python-format
 msgid "Hypertext links on %(organisation_name)s are (in most cases) inserted by %(organisation_name)s, not by the data providers. Automated insertion of hypertext links on %(organisation_name)s means that links will not be comprehensive or accurate in all cases. Neither %(organisation_name)s nor its providers of data, give any guarantees, undertakings or warranties concerning hypertext linking."
-msgstr "Viungo vya Hypertext kwenye %(organisation_name)s (mara nyingi) huingizwa na %(organisation_name)s, sio watoa Zdata. Uingizaji kiotomati wa viungo vya hypertext kwenye %(organisation_name)s inamaanisha kuwa viungo havitakuwa vya kina au sahihi kwa namna zote. Si %(organisation_name)s wala watoa data wake, wanatoa uhakika, ahadi au udhamini wowote kuhusu viungo vya hypertext."
+msgstr "Viungo vya Hypertext kwenye %(organisation_name)s (mara nyingi) huingizwa na %(organisation_name)s, sio watoa data. Uingizaji kiotomati wa viungo vya hypertext kwenye %(organisation_name)s inamaanisha kuwa viungo havitakuwa vya kina au sahihi kwa namna zote. Si %(organisation_name)s wala watoa data wake, wanatoa uhakika, ahadi au udhamini wowote kuhusu viungo vya hypertext."
 
 #: templates/peachjam/_terms_of_use_content.html:130
 msgid "Copyright and Licensing"
@@ -1102,7 +1102,7 @@ msgstr "Hakimiliki na Utoaji leseni"
 #: templates/peachjam/_terms_of_use_content.html:132
 #, python-format
 msgid "You may use and re-use primary and secondary law content on %(organisation_name)s under the terms of the Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Attribution-NonCommercial 4.0 International</a> license. Under this license, you may freely use, re-use and redistribute works from %(organisation_name)s provided you credit %(organisation_name)s as your source and your use is not for commercial gain."
-msgstr "Unaweza kutumia na kutumia tena maudhui ya sheria ya msingi naufafanuzi wake kwenye %(organisation_name)s chini ya masharti ya leseni ya Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Attribution-NonCommercial 4.0 International</a>. Chini ya leseni hii, unaweza kutumia, kutumia upya na kusambaza upya kazi kutoka %(organisation_name)s bila malipo, ili mradi umetoa kwa %(organisation_name)s kama chanzo chako na matumizi yako si kwa manufaa ya kibiashara."
+msgstr "Unaweza kutumia na kutumia tena maudhui ya sheria ya msingi na ufafanuzi wake kwenye %(organisation_name)s chini ya masharti ya leseni ya Creative Commons <a href=\"http://creativecommons.org/licenses/by-nc/4.0/\">Attribution-NonCommercial 4.0 International</a>. Chini ya leseni hii, unaweza kutumia, kutumia upya na kusambaza upya kazi kutoka %(organisation_name)s bila malipo, ili mradi umetoa kwa %(organisation_name)s kama chanzo chako na matumizi yako si kwa manufaa ya kibiashara."
 
 #: templates/peachjam/_terms_of_use_content.html:140
 #, python-format
