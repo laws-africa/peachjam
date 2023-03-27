@@ -27,6 +27,7 @@ from languages_plus.models import Language
 
 from peachjam.models import (
     AlternativeName,
+    Article,
     AttachedFileNature,
     AttachedFiles,
     Attorney,
@@ -476,3 +477,8 @@ class JudgmentResource(BaseDocumentResource):
                 self.download_attachment(
                     row["media_summary_file"], judgment, "Media summary"
                 )
+
+
+class ArticleResource(resources.ModelResource):
+    class Meta:
+        model = Article

@@ -64,7 +64,11 @@ from peachjam.models import (
     Work,
     pj_settings,
 )
-from peachjam.resources import GenericDocumentResource, JudgmentResource
+from peachjam.resources import (
+    ArticleResource,
+    GenericDocumentResource,
+    JudgmentResource,
+)
 from peachjam.tasks import extract_citations as extract_citations_task
 from peachjam_search.tasks import search_model_saved
 
@@ -567,7 +571,8 @@ class ArticleForm(forms.ModelForm):
 
 
 @admin.register(Article)
-class ArticleAdmin(admin.ModelAdmin):
+class ArticleAdmin(ImportMixin, admin.ModelAdmin):
+    resource_class = ArticleResource
     form = ArticleForm
     list_display = ("title", "date", "published")
     list_display_links = ("title",)
