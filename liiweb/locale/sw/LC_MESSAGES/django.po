@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-26 19:22\n"
+"PO-Revision-Date: 2023-03-27 15:17\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: templates/liiweb/home.html:4
 msgid "Home"
-msgstr "Sebule"
+msgstr "Nyumbani"
 
 #: templates/liiweb/home.html:25 templates/liiweb/home.html:26
 #, python-format
@@ -56,7 +56,7 @@ msgstr "Mahakama"
 
 #: templates/liiweb/home.html:84
 msgid "Collections"
-msgstr "Mikusanyiko"
+msgstr "Makusanyo"
 
 #: templates/liiweb/legislation_list.html:4
 #: templates/liiweb/legislation_list.html:11 templates/peachjam/_header.html:17
@@ -65,7 +65,7 @@ msgstr "Sheria"
 
 #: templates/liiweb/legislation_list.html:18
 msgid "Current legislation"
-msgstr "Sheria ya sasa"
+msgstr "Sheria za sasa"
 
 #: templates/liiweb/legislation_list.html:24
 msgid "Repealed legislation"
@@ -81,7 +81,7 @@ msgstr "Unatazama sheria iliyobatilishwa ambayo haitumiki tena."
 
 #: templates/liiweb/pocketlaw.html:7
 msgid "Pocket Law"
-msgstr "Sheria ya Mfukoni"
+msgstr "Sheria zisizo mtandaoni"
 
 #: templates/peachjam/_footer.html:4
 msgid "Subscribe"
@@ -101,7 +101,7 @@ msgstr "Washirika wetu"
 
 #: templates/peachjam/_footer.html:33
 msgid "Other African Legal Information Institutions"
-msgstr "Taasisi Nyingine za Kisheria za Kiafrika"
+msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 
 #: templates/peachjam/_header.html:11
 msgid "Judgments"
