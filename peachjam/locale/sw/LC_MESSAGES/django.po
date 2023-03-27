@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-27 07:17\n"
+"PO-Revision-Date: 2023-03-27 15:17\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -1164,7 +1164,7 @@ msgstr "%(organisation_name)s inajitolea kufuatilia na kufuta kutoka katika taar
 
 #: templates/peachjam/_terms_of_use_content.html:208
 msgid "Personal information in government gazettes"
-msgstr "Taarifa za kibinafsi kwenye gazeti la serikali"
+msgstr "Taarifa binafsi kwenye magazeti ya serikali"
 
 #: templates/peachjam/_terms_of_use_content.html:210
 msgid "Government gazettes and official journals are official publications of the states that publish them. The law mandates that certain personal information should be made public via the government gazette and government departments place these public notices in the government gazette with the intent of the contents being made accessible to the public."
@@ -1195,7 +1195,7 @@ msgstr "Iwapo una wasiwasi juu ya taarifa binafsi zilizoochapishwa kwenye tovuti
 
 #: templates/peachjam/_terms_of_use_content.html:233
 msgid "Your responsible use of personal information"
-msgstr "Matumizi yako ya kuwajibika ya taarifa za kibinafsi"
+msgstr "Matumizi salama ya taarifa binafsi"
 
 #: templates/peachjam/_terms_of_use_content.html:235
 #, python-format
@@ -1256,7 +1256,7 @@ msgstr "Imeidhinishwa"
 
 #: templates/peachjam/_timeline_events.html:29
 msgid "Commences"
-msgstr "Huanza"
+msgstr "Kuanza"
 
 #: templates/peachjam/_timeline_events.html:31
 msgid "Published in"
@@ -1291,11 +1291,11 @@ msgstr "Kuhusu mwandishi"
 #: templates/peachjam/article_detail.html:61
 #, python-format
 msgid "Recent articles by %(username)s"
-msgstr "Nakala za hivi majuzi na %(username)s"
+msgstr "Nakala za hivi karibuni na %(username)s"
 
 #: templates/peachjam/article_list.html:9
 msgid "Latest Articles"
-msgstr "Makala za Hivi Punde"
+msgstr "Makala za Hivi Karibuni"
 
 #: templates/peachjam/author_detail.html:5
 #, python-format
@@ -1320,24 +1320,24 @@ msgstr "Hukumu"
 #: templates/peachjam/gazette_year.html:13
 #: templates/peachjam/gazette_year.html:24
 msgid "Gazettes"
-msgstr "Magazeti"
+msgstr "Magazeti ya serikali"
 
 #: templates/peachjam/gazette_list.html:34
 #: templates/peachjam/gazette_list.html:59
 #, python-format
 msgid "%(num_gazettes)s gazette"
 msgid_plural "%(num_gazettes)s gazettes"
-msgstr[0] "%(num_gazettes)s gazeti"
-msgstr[1] "%(num_gazettes)s gazeti"
+msgstr[0] "%(num_gazettes)s gazeti la serikali"
+msgstr[1] "%(num_gazettes)s magazeti ya serikali"
 
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
 msgid "Generic Documents"
-msgstr "Nyaraka za Jumla"
+msgstr "%(num_gazettes) s Nyaraka za Jumla"
 
 #: templates/peachjam/home.html:4
 msgid "Home"
-msgstr "Sebule"
+msgstr "Nyumbani"
 
 #: templates/peachjam/journal_list.html:4
 #: templates/peachjam/journal_list.html:7
@@ -1346,7 +1346,7 @@ msgstr "Majarida"
 
 #: templates/peachjam/judgment_detail.html:7
 msgid "Media Neutral Citation"
-msgstr "Manukuu ya Vyombo vya Habari Isiyo na Upande wowote"
+msgstr "Nukuu ya Vyombo vya Habari Isiyo na Upande wowote"
 
 #: templates/peachjam/judgment_detail.html:13
 #: templates/peachjam/layouts/document_detail.html:155
@@ -1373,7 +1373,7 @@ msgstr "Usajili wa Mahakama"
 
 #: templates/peachjam/judgment_detail.html:40
 msgid "Case number"
-msgstr "Nambari ya kesi"
+msgstr "Namba ya kesi"
 
 #: templates/peachjam/judgment_detail.html:53
 msgid "Attorneys"
@@ -1381,7 +1381,7 @@ msgstr "Wanasheria"
 
 #: templates/peachjam/judgment_list.html:15
 msgid "Recent judgments"
-msgstr "Hukumu za hivi majuzi"
+msgstr "Hukumu za hivi karibuni"
 
 #: templates/peachjam/layouts/document_detail.html:59
 msgid "Document detail"
@@ -1393,7 +1393,7 @@ msgstr "Historia"
 
 #: templates/peachjam/layouts/document_detail.html:98
 msgid "Citations"
-msgstr "Manukuu"
+msgstr "Nukuu"
 
 #: templates/peachjam/layouts/document_detail.html:112
 msgid "Ratifications"
@@ -1401,7 +1401,7 @@ msgstr "Uridhiaji"
 
 #: templates/peachjam/layouts/document_detail.html:136
 msgid "Jurisdiction"
-msgstr "Mamlaka"
+msgstr "Mamlaka ya kisheria"
 
 #: templates/peachjam/layouts/document_detail.html:149
 msgid "Citation"
@@ -1429,7 +1429,7 @@ msgstr "Pakua"
 #: templates/peachjam/layouts/document_detail.html:305
 #, python-format
 msgid "%(n_relationships)s related documents"
-msgstr "%(n_relationships)s hati zinazohusiana"
+msgstr "%(n_relationships)s nyaraka zinazohusiana"
 
 #: templates/peachjam/layouts/document_list.html:30
 msgid "Documents"
@@ -1442,7 +1442,7 @@ msgstr "Vichujio"
 #: templates/peachjam/legal_instrument_list.html:4
 #: templates/peachjam/legal_instrument_list.html:7
 msgid "Legal Instruments"
-msgstr "Vyombo vya Kisheria"
+msgstr "Hati za Kisheria"
 
 #: templates/peachjam/legislation_detail.html:34
 msgid "Primary work"
@@ -1474,7 +1474,7 @@ msgstr "Hili ni toleo la Sheria hii kama ilivyokuwa wakati inafutwa."
 
 #: views/legislation.py:255
 msgid "This is the latest version of this Act."
-msgstr "Hili ndilo toleo la hivi punde la Sheria hii."
+msgstr "Hili ni toleo la hivi karibuni la Sheria hii."
 
 #: views/legislation.py:257
 #, python-format
