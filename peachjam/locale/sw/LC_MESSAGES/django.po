@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-26 17:53\n"
+"PO-Revision-Date: 2023-03-27 05:05\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -1176,22 +1176,22 @@ msgid "\n"
 "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
 "  "
 msgstr "\n"
-"    %(organisation_name)s haiwezi kujiondoa kutoka kwa usambazaji, kurekebisha au kurekebisha gazeti la serikali.\n"
+"    %(organisation_name)s haiwezi kujiondoa kutoka katika usambazaji, kuhaririwa au kurekebisha gazeti la serikali.\n"
 "  "
 
 #: templates/peachjam/_terms_of_use_content.html:221
 msgid "Automated monitoring"
-msgstr "Ufuatiliaji wa kiotomatiki"
+msgstr "Ufuatiliaji wa kiotomati"
 
 #: templates/peachjam/_terms_of_use_content.html:223
 #, python-format
 msgid "%(organisation_name)s performs automated monitoring and, where necessary, de-identification of judgments before publication and does not guarantee that all sensitive material has been correctly de-identified."
-msgstr "%(organisation_name)s hufanya ufuatiliaji wa kiotomatiki na, inapohitajika, kuondoa utambulisho wa hukumu kabla ya kuchapishwa na haihakikishi kuwa nyenzo zote nyeti zimeondolewa kwa njia sahihi."
+msgstr "%(organisation_name)s hufanya ufuatiliaji wa kiotomati na, inapohitajika, kuondoa utambulisho wa hukumu kabla ya kuchapishwa na haihakikishi kuwa maandiko yote nyeti yameondolewa kwa njia sahihi."
 
 #: templates/peachjam/_terms_of_use_content.html:229
 #, python-format
 msgid "Should you have concerns over personal information published on the %(organisation_name)s website, please contact us."
-msgstr "Iwapo una wasiwasi juu ya maelezo ya kibinafsi yaliyochapishwa kwenye tovuti ya %(organisation_name)s , tafadhali wasiliana nasi."
+msgstr "Iwapo una wasiwasi juu ya taarifa binafsi zilizoochapishwa kwenye tovuti ya %(organisation_name)s, tafadhali wasiliana nasi."
 
 #: templates/peachjam/_terms_of_use_content.html:233
 msgid "Your responsible use of personal information"
