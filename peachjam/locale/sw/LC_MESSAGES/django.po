@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-27 06:13\n"
+"PO-Revision-Date: 2023-03-27 07:17\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -407,11 +407,11 @@ msgstr "magazeti ya serikali"
 
 #: models/generic_document.py:26
 msgid "generic document"
-msgstr "hati ya jumla"
+msgstr "waraka wa jumla"
 
 #: models/generic_document.py:27
 msgid "generic documents"
-msgstr "hati za jumla"
+msgstr "nyaraka za jumla"
 
 #: models/generic_document.py:52
 msgid "legal instrument"
