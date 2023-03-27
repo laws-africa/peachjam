@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-27 15:17\n"
+"PO-Revision-Date: 2023-03-27 18:45\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -91,7 +91,7 @@ msgstr "Umoja wa Ulaya"
 
 #: templates/peachjam/_footer.html:44
 msgid "Other African Legal Information Institutions"
-msgstr "Taasisi Nyingine za Kisheria za Kiafrika"
+msgstr "Taasisi Nyingine za Kisheria za Afrika"
 
 #: templates/peachjam/_footer.html:105
 msgid "University of Cape Town"
@@ -99,7 +99,7 @@ msgstr "Chuo Kikuu cha Cape Town"
 
 #: templates/peachjam/_header.html:30
 msgid "African Legal Information"
-msgstr "Habari za Kisheria za Kiafrika"
+msgstr "Taarifa za Kisheria za Afrika"
 
 #: templates/peachjam/_header.html:36
 msgid "Legal Instruments"
@@ -107,7 +107,7 @@ msgstr "Vyombo vya Kisheria"
 
 #: templates/peachjam/_header.html:37
 msgid "Charters, treaties, conventions and regulations."
-msgstr "Mikataba, mikataba, mikataba na kanuni."
+msgstr "Mikataba mbalimbali na kanuni."
 
 #: templates/peachjam/_header.html:42
 msgid "Judgments"
@@ -115,12 +115,12 @@ msgstr "Hukumu"
 
 #: templates/peachjam/_header.html:43
 msgid "Judgments from regional African courts."
-msgstr "Hukumu kutoka kwa mahakama za kikanda za Afrika."
+msgstr "Hukumu kutoka kwa mahakama za kanda ya Afrika."
 
 #: templates/peachjam/_header.html:48 templates/peachjam/soft_law_list.html:4
 #: templates/peachjam/soft_law_list.html:7
 msgid "Soft Law"
-msgstr "Sheria laini"
+msgstr "Hati zisizofunga kisheria"
 
 #: templates/peachjam/_header.html:49
 msgid "Policies, decisions, recommendations and communiques."
@@ -132,7 +132,7 @@ msgstr "Magazeti ya serikali"
 
 #: templates/peachjam/_header.html:55
 msgid "Regional economic community official Gazettes."
-msgstr "Magazeti rasmi ya jumuiya ya kiuchumi ya kikanda."
+msgstr "Magazeti rasmi ya serikali ya jumuiya ya kiuchumi ya kanda."
 
 #: templates/peachjam/_header.html:63
 msgid "Topics"
@@ -184,7 +184,7 @@ msgstr "Jukwaa hili linaandaliwa na kudumishwa kwa pamoja na <a href=\"https://a
 
 #: templates/peachjam/about.html:51
 msgid "Platform developers"
-msgstr "Watengenezaji jukwaa"
+msgstr "Waandaaji wa jukwaa"
 
 #: templates/peachjam/about.html:53
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University of Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> helps governments, academia and non-profit organisations publish the law of African countries for sustainable open access. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> hosts curated collections on various subjects of African law, such as human rights, the environment, commercial law and finance."
@@ -200,7 +200,7 @@ msgstr "<a href=\"https://laws.africa/\" target=\"_blank\">Sheria.Afrika</a> hus
 
 #: templates/peachjam/about.html:75
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborate in unlocking the value of African digital legal information in support of the rule of law, access to justice, and innovation."
-msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> na <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> hushirikiana katika kufungua thamani ya taarifa za kisheria za kidijiti za Afrika katika kuunga mkono utawala wa sheria, upatikanaji wa haki, na uvumbuzi."
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> na <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> inashirikiana katika kufungua thamani ya taarifa za kisheria za kidijiti za Afrika katika kuunga mkono utawala wa sheria, upatikanaji wa haki, na uvumbuzi."
 
 #: templates/peachjam/about.html:80
 msgid "Find out more"
@@ -216,7 +216,7 @@ msgstr "Washirika wetu"
 
 #: templates/peachjam/home.html:4
 msgid "Home"
-msgstr "Sebule"
+msgstr "Nyumbani"
 
 #: templates/peachjam/home.html:10
 msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
@@ -225,7 +225,7 @@ msgstr "Tunaweka kidigiti sheria na sera ya Muundo wa Utawala wa Afrika na kuwas
 #: templates/peachjam/home.html:16
 #, python-format
 msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
-msgstr "Tafuta kupitia hati %(documents_count)s za AU kwenye jukwaa la AfricanLII."
+msgstr "Tafuta kupitia nyaraka %(documents_count)s za UA kwenye jukwaa la AfricanLII."
 
 #: templates/peachjam/home.html:25 templates/peachjam/home.html:26
 #, python-format
@@ -242,15 +242,15 @@ msgstr "Utafutaji wa kina"
 
 #: templates/peachjam/home.html:43
 msgid "Regional Bodies"
-msgstr "Miili ya Mikoa"
+msgstr "Vyombo vya kanda"
 
 #: templates/peachjam/home.html:53
 msgid "Regional Economic Communities"
-msgstr "Jumuiya za Kiuchumi za Kikanda"
+msgstr "Jumuiya za Kiuchumi za Kanda"
 
 #: templates/peachjam/home.html:61
 msgid "Regional Courts"
-msgstr "Mahakama za Mikoa"
+msgstr "Mahakama za Kanda"
 
 #: templates/peachjam/home.html:75
 msgid "Recent Judgments"
@@ -262,19 +262,19 @@ msgstr "Tazama hukumu zaidi"
 
 #: templates/peachjam/home.html:82
 msgid "Recent AU Documents"
-msgstr "Nyaraka za AU za Hivi Karibuni"
+msgstr "Nyaraka za UA za hivi Karibuni"
 
 #: templates/peachjam/home.html:83
 msgid "View more AU documents"
-msgstr "Tazama hati zaidi za AU"
+msgstr "Tazama nyaraka zaidi za UA"
 
 #: templates/peachjam/home.html:89
 msgid "Recent Legal Instruments"
-msgstr "Vyombo vya Kisheria vya Hivi Karibuni"
+msgstr "Hati za Kisheria za Hivi Karibuni"
 
 #: templates/peachjam/home.html:90
 msgid "View more legal instruments"
-msgstr "Tazama vyombo zaidi vya kisheria"
+msgstr "Tazama hati zaidi za kisheria"
 
 #: templates/peachjam/home.html:96
 msgid "Recent Treaties and Protocols "
@@ -286,7 +286,7 @@ msgstr "Tazama mikataba na itifaki zaidi"
 
 #: templates/peachjam/home.html:103
 msgid "Latest Commentary"
-msgstr "Maoni ya Hivi Punde"
+msgstr "Maoni ya Hivi Karibuni"
 
 #: templates/peachjam/home.html:105
 msgid "View more commentary"
