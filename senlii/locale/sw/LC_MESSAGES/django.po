@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-27 06:13\n"
+"PO-Revision-Date: 2023-03-27 15:17\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -43,7 +43,7 @@ msgstr "Tazama sheria zaidi"
 
 #: templates/liiweb/home.html:16
 msgid "Recent Articles"
-msgstr "Makala ya Hivi Punde"
+msgstr "Makala za Hivi Karibuni"
 
 #: templates/liiweb/home.html:18
 msgid "View more articles"
@@ -71,5 +71,5 @@ msgstr "Kuhusu"
 
 #: templates/senlii/home.html:4
 msgid "Home"
-msgstr "Sebule"
+msgstr "Nyumbani"
 
