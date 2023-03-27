@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-27 05:05\n"
+"PO-Revision-Date: 2023-03-27 06:13\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -1204,15 +1204,15 @@ msgid "\n"
 "    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
 "    the land.\n"
 "  "
-msgstr "Watumiaji \n"
-"    %(organisation_name)s wanapaswa kutambua kwamba kuna vikwazo vya kisheria juu ya matumizi, uchapishaji na usambazaji wa baadhi ya taarifa\n"
-"    za kibinafsi katika hifadhidata %(organisation_name)s . Ni wajibu wa watumiaji %(organisation_name)s kuzingatia sheria za\n"
+msgstr "watumiaji wa\n"
+"    %(organisation_name)s wanapaswa kutambua kwamba kuna vikwazo vya kisheria katika matumizi, uchapishaji na usambazaji wa baadhi ya taarifa\n"
+"    binafsi katika hifadhidata %(organisation_name)s  Ni jukumu la watumiaji %(organisation_name)s kuzingatia sheria za\n"
 "    za nchi.\n"
 "  "
 
 #: templates/peachjam/_terms_of_use_content.html:241
 msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
-msgstr "Haki ya kurekebisha Taarifa hizi za Sheria na Masharti, Hakimiliki na Faragha"
+msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:243
 msgid "\n"
@@ -1221,14 +1221,14 @@ msgid "\n"
 "    all previous versions of this document.\n"
 "  "
 msgstr "\n"
-"    Tunahifadhi haki ya kurekebisha masharti haya ya matumizi, hakimiliki, na taarifa za faragha na usalama wakati wowote. Marekebisho yote\n"
-"    yatachapishwa kwenye tovuti hii. Isipokuwa ikiwa imeelezwa vinginevyo, toleo la sasa litachukua nafasi na kubadilisha matoleo\n"
+"    Tuna haki ya kurekebisha masharti haya ya matumizi, hakimiliki, na taarifa za faragha na usalama wakati wowote. marekebisho yote\n"
+"    yatachapishwa kwenye tovuti hii. Isipokuwa kama imeelezwa vinginevyo, toleo la sasa litachukua nafasi na kubadilisha matoleo\n"
 "    yote ya awali ya hati hii.\n"
 "  "
 
 #: templates/peachjam/_terms_of_use_content.html:249
 msgid "If you have any comments or suggestions about this policy, please contact us."
-msgstr "Ikiwa una maoni au mapendekezo kuhusu sera hii, tafadhali wasiliana nasi."
+msgstr "Ikiwa una maoni au mapendekezo yoyote kuhusu sera hii, tafadhali wasiliana nasi."
 
 #: templates/peachjam/_terms_of_use_content.html:250
 msgid "Date of notice: 14 November 2022"
@@ -1248,7 +1248,7 @@ msgstr "marekebisho bado hayajatumika"
 
 #: templates/peachjam/_timeline_events.html:24
 msgid "Amended by"
-msgstr "Imebadilishwa na"
+msgstr "Imerekebishwa na"
 
 #: templates/peachjam/_timeline_events.html:27
 msgid "Assented to"
@@ -1260,7 +1260,7 @@ msgstr "Huanza"
 
 #: templates/peachjam/_timeline_events.html:31
 msgid "Published in"
-msgstr "Imechapishwa"
+msgstr "Imechapishwa katika"
 
 #: templates/peachjam/_timeline_events.html:34
 msgid "Repealed by"
@@ -1351,7 +1351,7 @@ msgstr "Manukuu ya Vyombo vya Habari Isiyo na Upande wowote"
 #: templates/peachjam/judgment_detail.html:13
 #: templates/peachjam/layouts/document_detail.html:155
 msgid "Copy to clipboard"
-msgstr "Nakili kwenye ubao wa kunakili"
+msgstr "Nakili kwenye ubao"
 
 #: templates/peachjam/judgment_detail.html:16
 #: templates/peachjam/layouts/document_detail.html:158
@@ -1397,7 +1397,7 @@ msgstr "Manukuu"
 
 #: templates/peachjam/layouts/document_detail.html:112
 msgid "Ratifications"
-msgstr "Uidhinishaji"
+msgstr "Uridhiaji"
 
 #: templates/peachjam/layouts/document_detail.html:136
 msgid "Jurisdiction"
@@ -1466,7 +1466,7 @@ msgstr "Urambazaji"
 
 #: templates/peachjam/top_level_taxonomy_list.html:4
 msgid "Taxonomy"
-msgstr "Taxonomia"
+msgstr "Taksonomia"
 
 #: views/legislation.py:254
 msgid "This is the version of this Act as it was when it was repealed."
