@@ -460,6 +460,7 @@ class JudgmentResource(BaseDocumentResource):
         judgment = Judgment.objects.filter(pk=instance.object_id).first()
 
         if judgment:
+            CaseNumber.objects.filter(document=judgment).delete()
             for case_number in self.get_case_numbers(row):
                 case_number.document = judgment
                 case_number.save()

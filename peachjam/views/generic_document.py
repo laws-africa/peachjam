@@ -15,6 +15,7 @@ class DocumentListView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["doc_table_show_doc_type"] = True
+        context["doc_count"] = self.get_queryset().count()
         return context
 
     def get_queryset(self):
