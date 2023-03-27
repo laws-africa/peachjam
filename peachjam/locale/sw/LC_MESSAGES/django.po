@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-27 15:17\n"
+"PO-Revision-Date: 2023-03-27 18:45\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -932,7 +932,7 @@ msgstr "Chanzo"
 
 #: templates/peachjam/_ratifications.html:10
 msgid "Last updated"
-msgstr "Ilisasishwa mara ya mwisho mwisho"
+msgstr "Ilisasishwa mara ya mwisho"
 
 #: templates/peachjam/_ratifications.html:17
 msgid "Country"
@@ -990,7 +990,7 @@ msgstr "Sisi ni nani, na jinsi ya kuwasiliana nasi?"
 #: templates/peachjam/_terms_of_use_content.html:10
 #, python-format
 msgid "The %(organisation_name)s service is provided by the %(organisation_name)s programme of the Department of Public Law at the University of Cape Town and Laws.Africa NPO. You can contact us by email at <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> or by filling out <a href=\"/about/\">this form</a>."
-msgstr "Huduma %(organisation_name)s inatolewa na programu ya %(organisation_name)s ya Idara ya Sheria ya Umma katika Chuo Kikuu cha Cape Town na Sheria.Africa NPO. Unaweza kuwasiliana nasi kwa baruapepe kupitia <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> au kwa kujaza <a href=\"/about/\">fomu hii</a>."
+msgstr "Huduma ya %(organisation_name)s inatolewa na programu ya %(organisation_name)s ya Idara ya Sheria ya Umma katika Chuo Kikuu cha Cape Town na Sheria.Africa NPO. Unaweza kuwasiliana nasi kwa baruapepe kupitia <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> au kwa kujaza <a href=\"/about/\">fomu hii</a>."
 
 #: templates/peachjam/_terms_of_use_content.html:18
 #, python-format
