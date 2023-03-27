@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-26 19:22\n"
+"PO-Revision-Date: 2023-03-27 06:13\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -31,7 +31,7 @@ msgstr "chanzo cha URL"
 
 #: models/ratification.py:18
 msgid "last updated"
-msgstr "ilisasishwa mwisho"
+msgstr "ilisasishwa mara ya mwisho"
 
 #: models/ratification.py:21 models/ratification.py:35
 msgid "ratification"
@@ -39,7 +39,7 @@ msgstr "uthibitisho"
 
 #: models/ratification.py:22
 msgid "ratifications"
-msgstr "uidhinishaji"
+msgstr "uridhiaji"
 
 #: models/ratification.py:42
 msgid "country"
@@ -47,7 +47,7 @@ msgstr "nchi"
 
 #: models/ratification.py:44
 msgid "ratification date"
-msgstr "tarehe ya uidhinishaji"
+msgstr "tarehe ya uridhiaji"
 
 #: models/ratification.py:45
 msgid "deposit date"
