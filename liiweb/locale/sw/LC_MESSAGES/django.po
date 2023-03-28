@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-27 15:17\n"
+"PO-Revision-Date: 2023-03-28 08:34\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -52,15 +52,15 @@ msgstr "Tazama sheria zaidi"
 
 #: templates/liiweb/home.html:89
 msgid "Twitter"
-msgstr ""
+msgstr "Twitter"
 
 #: templates/liiweb/home.html:102
 msgid "Facebook"
-msgstr ""
+msgstr "Facebook"
 
 #: templates/liiweb/home.html:117
 msgid "Tweets by AfricanLII"
-msgstr ""
+msgstr "Tweets by AfricanLII"
 
 #: templates/liiweb/home.html:150
 msgid "Courts"
@@ -100,10 +100,8 @@ msgid "Subscribe"
 msgstr "Jiandikishe"
 
 #: templates/peachjam/_footer.html:9
-#, fuzzy
-#| msgid "Subscribe to the our newsletter for updates and news."
 msgid "Subscribe to our newsletter for updates and news."
-msgstr "Jiandikishe kwa jarida letu kwa ajili ya taarifa mpya na habari."
+msgstr "Jiandikishe kwa jarida letu kwa sasisho na habari."
 
 #: templates/peachjam/_footer.html:20 templates/peachjam/_header.html:23
 msgid "About"
@@ -120,3 +118,4 @@ msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 #: templates/peachjam/_header.html:11
 msgid "Judgments"
 msgstr "Hukumu"
+
