@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-28 08:34\n"
+"PO-Revision-Date: 2023-03-28 15:29\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -81,7 +81,7 @@ msgstr "muhtasari"
 
 #: models/article.py:33 models/relationships.py:7 models/taxonomies.py:11
 msgid "slug"
-msgstr "konokono/risasi ndogo/piga"
+msgstr "namna rahisi"
 
 #: models/article.py:34
 msgid "published"
@@ -136,7 +136,7 @@ msgstr "jina"
 #: models/core_document_model.py:57 models/judgment.py:70
 #: models/judgment.py:100
 msgid "code"
-msgstr "kanuni"
+msgstr "mfumo"
 
 #: models/author.py:13 models/judgment.py:79 models/profile.py:35
 #: models/profile.py:36
@@ -180,7 +180,7 @@ msgstr "viungo vya dondoo"
 
 #: models/citations.py:56
 msgid "citing work"
-msgstr "kubainisha kazi"
+msgstr "kukunukuu kazi"
 
 #: models/citations.py:63
 msgid "target work"
@@ -495,7 +495,7 @@ msgstr "daraja la mahakama"
 
 #: models/judgment.py:62
 msgid "court classes"
-msgstr "madaraja ya mahakama"
+msgstr "makundi ya mahakama"
 
 #: models/judgment.py:84 models/judgment.py:97 models/judgment.py:117
 msgid "court"
@@ -523,7 +523,7 @@ msgstr "nukuu za ziada"
 
 #: models/judgment.py:134
 msgid "flynote"
-msgstr "flynote"
+msgstr "mada"
 
 #: models/judgment.py:136
 msgid "case name"
@@ -539,7 +539,7 @@ msgstr "mfuatano wa namba"
 
 #: models/judgment.py:146
 msgid "Serial number for MNC, unique for a year and an author."
-msgstr "Mfuatano wa ambari kwa MNC, ya kipekee kwa mwaka mmoja na mwandishi."
+msgstr "Mfuatano wa namba kwa MNC, ya kipekee kwa mwaka mmoja na mwandishi."
 
 #: models/judgment.py:149
 msgid "serial number override"
@@ -624,11 +624,11 @@ msgstr "kiarifu"
 
 #: models/relationships.py:18 models/relationships.py:60
 msgid "predicates"
-msgstr "vihusishi"
+msgstr "viarifu"
 
 #: models/relationships.py:30
 msgid "subject work"
-msgstr "somo la kazi"
+msgstr "kazi za msingi"
 
 #: models/relationships.py:33
 msgid "subject target ID"
@@ -660,7 +660,7 @@ msgstr "lebo ya sheria ndogo"
 
 #: models/settings.py:48
 msgid "google analytics id"
-msgstr "kitambulisho cha uchanganuzi wa google"
+msgstr "utambulisho wa kichanganuzi cha google"
 
 #: models/settings.py:52
 msgid "site settings"
@@ -839,7 +839,7 @@ msgstr "Sheria za nyongeza"
 #: templates/peachjam/_document_table.html:6
 #: templates/peachjam/_judgment_table.html:6
 msgid "Title"
-msgstr ""
+msgstr "Mada"
 
 #: templates/peachjam/_child_documents.html:8
 msgid "Numbered title"
@@ -885,7 +885,7 @@ msgstr "Pakia hati"
 
 #: templates/peachjam/_document_content.html:157
 msgid "To the top"
-msgstr ""
+msgstr "Hadi juu"
 
 #: templates/peachjam/_document_count.html:4
 #, python-format
@@ -1041,7 +1041,7 @@ msgstr "Tunazuia upangaji kutoka nje wa nyaraka kwa roboti za injini tafuti au b
 
 #: templates/peachjam/_terms_of_use_content.html:53
 msgid "We may block or disable use of the service from certain IP addresses, if they appear to be compiling a search engine index."
-msgstr "Tunaweza kuzuia au kuzima matumizi ya huduma kutoka kwa anwani fulani za IP, ikiwa zinaonekana kuwa zinaunda faharasa ya injini ya utafutaji."
+msgstr "Tunaweza kuzuia au kuzima matumizi ya huduma kutoka kwa anwani fulani za IP, ikiwa zinaonekana kuwa zinaunda faharasa ya injini tafutizi."
 
 #: templates/peachjam/_terms_of_use_content.html:57
 msgid "Coverage"
@@ -1094,7 +1094,7 @@ msgstr "si ushauri wa kitaalamu au wa kisheria (ikiwa unahitaji ushauri maalumu,
 #: templates/peachjam/_terms_of_use_content.html:105
 #, python-format
 msgid "%(organisation_name)s and Laws.Africa, members of its staff, and its contractors shall not be liable for any financial or other consequences arising from the use of information or data contained on this site, including the inappropriate, improper or fraudulent use of such information or data."
-msgstr "%(organisation_name)s na Sheria.Afrika, wafanyakazi wake, na wakandarasi wake hawatawajibika kwa madhara yoyote ya kifedha au mengine yanayotokana na matumizi ya taarifa au data iliyomo kwenye tovuti hii, ikiwa ni pamoja na matumizi yasiyofaa, yasiyo sahihi au ya udanganyifu wa taarifa au data hizo.."
+msgstr "%(organisation_name)s na Laws.Africa, wafanyakazi wake, na wakandarasi wake hawatawajibika kwa madhara yoyote ya kifedha au mengine yanayotokana na matumizi ya taarifa au data iliyomo kwenye tovuti hii, ikiwa ni pamoja na matumizi yasiyofaa, yasiyo sahihi au ya udanganyifu wa taarifa au data hizo."
 
 #: templates/peachjam/_terms_of_use_content.html:112
 #, python-format
@@ -1142,12 +1142,12 @@ msgstr "Taarifa kuhusu matumizi ya %(organisation_name)s"
 #: templates/peachjam/_terms_of_use_content.html:164
 #, python-format
 msgid "%(organisation_name)s collects information which identifies, for each page accessed on %(organisation_name)s, the network identity of the machine which has accessed it. We use Google Analytics and in-house software to perform this function."
-msgstr "%(organisation_name)s inakusanya taarifa ambazo zinabainisha, kwa kila ukurasa unaofunguliwa kwenye %(organisation_name)s, utambulisho wa mtandao wa mashine ambayo imefunguliwa. Tunatumia Google Analytics na programu ya ndani kutekeleza utendaji huo."
+msgstr "%(organisation_name)s inakusanya taarifa ambazo zinabainisha, kwa kila ukurasa unaofunguliwa kwenye %(organisation_name)s, utambulisho wa mtandao wa mashine ambayo imefunguliwa. Tunatumia Google Changanuzi na programu ya ndani kutekeleza utendaji huo."
 
 #: templates/peachjam/_terms_of_use_content.html:170
 #, python-format
 msgid "%(organisation_name)s retains this usage information for purposes of network analysis, usage analysis, and research into usage patterns to improve the %(organisation_name)s services. Access to and use of this information is restricted to Google Analytics, %(organisation_name)s management and staff, and to researchers working on %(organisation_name)s projects and subject to an agreement to adhere to these Terms of Use."
-msgstr "%(organisation_name)s inahifadhi taarifa hizi za matumizi kwa madhumuni ya uchanganuzi wa mtandao, uchanganuzi wa matumizi na utafiti katika mifumo ya utumiaji ili kuboresha huduma za %(organisation_name)s. Upatikanaji na utumiaji wa taarifa hizi unapatikana kwa Google Analytics tu, menejimenti na wafanyakazi wa %(organisation_name)s, na kwa watafiti wanaofanya kazi kwenye miradi ya %(organisation_name)s na kulingana na makubaliano ya kufuata Masharti haya."
+msgstr "%(organisation_name)s inahifadhi taarifa hizi za matumizi kwa madhumuni ya uchanganuzi wa mtandao, uchanganuzi wa matumizi na utafiti katika mifumo ya utumiaji ili kuboresha huduma za %(organisation_name)s. Upatikanaji na utumiaji wa taarifa hizi unapatikana kwa Google Changanuzi tu, menejimenti na wafanyakazi wa %(organisation_name)s, na kwa watafiti wanaofanya kazi kwenye miradi ya %(organisation_name)s na kulingana na makubaliano ya kufuata Masharti haya."
 
 #: templates/peachjam/_terms_of_use_content.html:178
 #, python-format
