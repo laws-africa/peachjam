@@ -7,4 +7,13 @@ JAZZMIN_SETTINGS["site_title"] = "NamibLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "NamibLII"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "namiblii.org"  # noqa
 
-COURT_CODE_MAPPINGS = {}
+COURT_CODE_MAPPINGS = {
+    "supreme-court": "NASC",
+    "high-court-prison-division": "",
+    "labour-court-northern-local-division": "",
+    "high-court-main-division": "NAHCMD",
+    "northern-local-division": "NAHCNLD",
+    "high-court": "NAHC",
+    "labour-court-main-division": "NALCMD",
+    "labour-cour": "NALC",
+}
