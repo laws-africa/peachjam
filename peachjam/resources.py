@@ -11,6 +11,7 @@ import requests.exceptions
 from cobalt import FrbrUri
 from countries_plus.models import Country
 from dateutil.parser import parse
+from django.contrib.auth import get_user_model
 from django.core.files.base import File
 from django.forms import ValidationError
 from django.utils.text import slugify
@@ -27,6 +28,7 @@ from languages_plus.models import Language
 
 from peachjam.models import (
     AlternativeName,
+    Article,
     AttachedFileNature,
     AttachedFiles,
     Attorney,
@@ -49,6 +51,7 @@ from peachjam.pipelines import DOC_MIMETYPES
 from .download import download_source_file
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 class CharRequiredWidget(CharWidget):
@@ -477,3 +480,89 @@ class JudgmentResource(BaseDocumentResource):
                 self.download_attachment(
                     row["media_summary_file"], judgment, "Media summary"
                 )
+
+
+class ArticleAuthorWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            raise ValidationError("author is required")
+        author = value
+        first_name, *last_name = value.split()
+        author, _ = self.model.objects.get_or_create(
+            username=slugify(value),
+            defaults={
+                "first_name": first_name,
+                "last_name": last_name[0],
+            },
+        )
+
+        return author
+
+
+class ImageWidget(CharWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        try:
+            file_url = value
+            file = download_source_file(file_url)
+            mime, _ = mimetypes.guess_type(file_url)
+            file_ext = mimetypes.guess_extension(mime)
+            return File(file, name=f"{slugify(value[:20])}{file_ext}")
+        except requests.exceptions.RequestException as e:
+            msg = getattr(e, "message", repr(e)) or repr(e)
+            logger.warning(f"Error downloading image: {value} - {msg}")
+            raise ValidationError(f"Error downloading image: {value} - {msg}")
+
+
+class PublishedWidget(BooleanWidget):
+    def clean(self, value, row=None, **kwargs):
+        return bool(value)
+
+
+class TopicsWidget(ManyToManyWidget):
+    def clean(self, value, row=None, **kwargs):
+        if value:
+            article_tag_root = Taxonomy.objects.filter(
+                name__iexact="Article tags"
+            ).first()
+            if not article_tag_root:
+                article_tag_root = Taxonomy.add_root(name="Article tags")
+
+            taxonomies = [
+                " ".join(t.split()).capitalize() for t in value.split(self.separator)
+            ]
+            for taxonomy in taxonomies:
+                topic = Taxonomy.objects.filter(name__iexact=taxonomy).first()
+                if not topic:
+                    article_tag_root.add_child(name=taxonomy)
+            return Taxonomy.objects.filter(name__in=taxonomies)
+        return []
+
+
+class ArticleResource(resources.ModelResource):
+    author = fields.Field(
+        column_name="author",
+        attribute="author",
+        widget=ArticleAuthorWidget(User, field="username"),
+    )
+    image = fields.Field(attribute="image", column_name="image", widget=ImageWidget())
+    published = fields.Field(
+        attribute="published", column_name="published", widget=PublishedWidget()
+    )
+    topics = fields.Field(
+        column_name="topics",
+        attribute="topics",
+        widget=TopicsWidget(Taxonomy, separator=","),
+    )
+
+    class Meta:
+        model = Article
+        required_fields = (
+            "date",
+            "title",
+            "body",
+            "author",
+            "image_url",
+            "summary",
+            "topics",
+            "published",
+        )
