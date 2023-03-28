@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-28 06:27\n"
+"PO-Revision-Date: 2023-03-28 08:34\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -660,7 +660,7 @@ msgstr "lebo ya sheria ndogo"
 
 #: models/settings.py:48
 msgid "google analytics id"
-msgstr ""
+msgstr "kitambulisho cha uchanganuzi wa google"
 
 #: models/settings.py:52
 msgid "site settings"
@@ -747,12 +747,10 @@ msgstr "Umesahau nenosiri lako?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Ingia na %(provider.name)s\n"
 "          "
 
@@ -893,8 +891,8 @@ msgstr ""
 #, python-format
 msgid "%(doc_count)s document"
 msgid_plural "%(doc_count)s documents"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(doc_count)s hati"
+msgstr[1] "%(doc_count)s hati"
 
 #: templates/peachjam/_document_table.html:10
 #: templates/peachjam/_judgment_table.html:8
@@ -1001,10 +999,9 @@ msgid "Who are we, and how to contact us?"
 msgstr "Sisi ni nani, na jinsi ya kuwasiliana nasi?"
 
 #: templates/peachjam/_terms_of_use_content.html:10
-#, fuzzy, python-format
-#| msgid "The %(organisation_name)s service is provided by the %(organisation_name)s programme of the Department of Public Law at the University of Cape Town and Laws.Africa NPO. You can contact us by email at <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> or by filling out <a href=\"/about/\">this form</a>."
+#, python-format
 msgid "%(who_are_we)s You can contact us by email at <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> or by filling out <a href=\"/about/\">this form</a>."
-msgstr "Huduma ya %(organisation_name)s inatolewa na programu ya %(organisation_name)s ya Idara ya Sheria ya Umma katika Chuo Kikuu cha Cape Town na Sheria.Africa NPO. Unaweza kuwasiliana nasi kwa baruapepe kupitia <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> au kwa kujaza <a href=\"/about/\">fomu hii</a>."
+msgstr "%(who_are_we)s Unaweza kuwasiliana nasi kwa barua pepe kwa <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> au kwa kujaza <a href=\"/about/\">fomu hii</a>."
 
 #: templates/peachjam/_terms_of_use_content.html:16
 #, python-format
@@ -1185,16 +1182,9 @@ msgid "Government gazettes and official journals are official publications of th
 msgstr "Majarida ya serikali na majarida rasmi ni machapisho rasmi ya majimbo yanayochapisha. Sheria inaamuru kwamba taarifa fulani za kibinafsi zinapaswa kutangazwa kwa umma kupitia gazeti la serikali na idara za serikali zinaweka matangazo haya ya umma kwenye gazeti la serikali kwa nia ya yaliyomo kupatikana kwa umma."
 
 #: templates/peachjam/_terms_of_use_content.html:215
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
-#| "  "
+#, python-format
 msgid "%(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette."
-msgstr ""
-"\n"
-"    %(organisation_name)s haiwezi kujiondoa kutoka katika usambazaji, kuhaririwa au kurekebisha gazeti la serikali.\n"
-"  "
+msgstr "%(organisation_name)s haiwezi kujiondoa kutoka katika usambazaji, kuhaririwa au kurekebisha gazeti la serikali."
 
 #: templates/peachjam/_terms_of_use_content.html:219
 msgid "Automated monitoring"
@@ -1215,40 +1205,17 @@ msgid "Your responsible use of personal information"
 msgstr "Matumizi salama ya taarifa binafsi"
 
 #: templates/peachjam/_terms_of_use_content.html:233
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "    %(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some\n"
-#| "    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
-#| "    the land.\n"
-#| "  "
+#, python-format
 msgid "%(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of the land."
-msgstr ""
-"watumiaji wa\n"
-"    %(organisation_name)s wanapaswa kutambua kwamba kuna vikwazo vya kisheria katika matumizi, uchapishaji na usambazaji wa baadhi ya taarifa\n"
-"    binafsi katika hifadhidata %(organisation_name)s  Ni jukumu la watumiaji %(organisation_name)s kuzingatia sheria za\n"
-"    za nchi.\n"
-"  "
+msgstr "%(organisation_name)s watumiaji wanapaswa kutambua kwamba kuna vikwazo vya kisheria juu ya matumizi, uchapishaji na usambazaji wa baadhi ya taarifa za kibinafsi katika hifadhidata %(organisation_name)s . Ni wajibu wa watumiaji %(organisation_name)s kuzingatia sheria za nchi."
 
 #: templates/peachjam/_terms_of_use_content.html:239
 msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
 msgstr ""
 
 #: templates/peachjam/_terms_of_use_content.html:241
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "    We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All\n"
-#| "    amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace\n"
-#| "    all previous versions of this document.\n"
-#| "  "
 msgid "We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace all previous versions of this document."
-msgstr ""
-"\n"
-"    Tuna haki ya kurekebisha masharti haya ya matumizi, hakimiliki, na taarifa za faragha na usalama wakati wowote. marekebisho yote\n"
-"    yatachapishwa kwenye tovuti hii. Isipokuwa kama imeelezwa vinginevyo, toleo la sasa litachukua nafasi na kubadilisha matoleo\n"
-"    yote ya awali ya hati hii.\n"
-"  "
+msgstr "Tuna haki ya kurekebisha masharti haya ya matumizi, hakimiliki, na taarifa za faragha na usalama wakati wowote. Marekebisho yote yatawekwa kwenye tovuti hii. Isipokuwa imeelezwa vinginevyo, toleo la sasa litachukua nafasi na kubadilisha matoleo yote ya awali ya hati hii."
 
 #: templates/peachjam/_terms_of_use_content.html:247
 msgid "If you have any comments or suggestions about this policy, please contact us."
@@ -1436,10 +1403,8 @@ msgid "Alternative names"
 msgstr "Majina mbadala"
 
 #: templates/peachjam/layouts/document_detail.html:189
-#, fuzzy
-#| msgid "Judgments"
 msgid "Judgment date"
-msgstr "Hukumu"
+msgstr "Tarehe ya hukumu"
 
 #: templates/peachjam/layouts/document_detail.html:225
 msgid "Language"
@@ -1520,3 +1485,4 @@ msgstr "Hili ni toleo la Sheria hii kama ilivyokuwa kutoka %(date_from)s hadi %(
 #, python-format
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr "Hili ni toleo la Sheria hii kama ilivyokuwa kutoka %(date_from)s hadi %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Soma toleo linalotumika sasa</a>."
+
