@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-27 18:45\n"
+"PO-Revision-Date: 2023-03-28 08:34\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -269,28 +269,20 @@ msgid "View more legal instruments"
 msgstr "Tazama hati zaidi za kisheria"
 
 #: templates/peachjam/home.html:89
-#, fuzzy
-#| msgid "Soft Law"
 msgid "Recent Soft Law"
-msgstr "Hati zisizofunga kisheria"
+msgstr "Sheria Laini ya Hivi Karibuni"
 
 #: templates/peachjam/home.html:90
-#, fuzzy
-#| msgid "View more commentary"
 msgid "View more Soft Law"
-msgstr "Tazama maoni zaidi"
+msgstr "Tazama Sheria Nyepesi zaidi"
 
 #: templates/peachjam/home.html:96
-#, fuzzy
-#| msgid "Reports and Guides"
 msgid "Recent Reports and Guides"
-msgstr "Ripoti na Miongozo"
+msgstr "Ripoti na Miongozo ya Hivi Punde"
 
 #: templates/peachjam/home.html:97
-#, fuzzy
-#| msgid "Reports and Guides"
 msgid "View more Reports and Guides"
-msgstr "Ripoti na Miongozo"
+msgstr "Tazama Ripoti na Miongozo zaidi"
 
 #: templates/peachjam/home.html:103
 msgid "Latest Commentary"
@@ -305,14 +297,3 @@ msgstr "Tazama maoni zaidi"
 msgid "Reports and Guides"
 msgstr "Ripoti na Miongozo"
 
-#~ msgid "Recent AU Documents"
-#~ msgstr "Nyaraka za UA za hivi Karibuni"
-
-#~ msgid "View more AU documents"
-#~ msgstr "Tazama nyaraka zaidi za UA"
-
-#~ msgid "Recent Treaties and Protocols "
-#~ msgstr "Mikataba na Itifaki za Hivi Karibuni "
-
-#~ msgid "View more treaties and protocols"
-#~ msgstr "Tazama mikataba na itifaki zaidi"
