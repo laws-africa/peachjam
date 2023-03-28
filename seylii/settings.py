@@ -7,4 +7,8 @@ JAZZMIN_SETTINGS["site_title"] = "SeyLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "SeyLII"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "seylii.org"  # noqa
 
-COURT_CODE_MAPPINGS = {}
+COURT_CODE_MAPPINGS = {
+    "constitutional-court": "SCCC",
+    "court-of-appeal": "SCCA",
+    "supreme-court": "SCSC",
+}
