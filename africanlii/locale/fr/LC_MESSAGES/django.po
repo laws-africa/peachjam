@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2022-12-05 18:17\n"
+"PO-Revision-Date: 2023-03-22 13:47\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -23,47 +23,47 @@ msgstr "Corps régional"
 
 #: models/ratification.py:15
 msgid "work"
-msgstr ""
+msgstr "travail"
 
 #: models/ratification.py:17
 msgid "source URL"
-msgstr ""
+msgstr "URL source"
 
 #: models/ratification.py:18
 msgid "last updated"
-msgstr ""
+msgstr "Dernière mise à jour"
 
 #: models/ratification.py:21 models/ratification.py:35
 msgid "ratification"
-msgstr ""
+msgstr "ratification"
 
 #: models/ratification.py:22
 msgid "ratifications"
-msgstr ""
+msgstr "ratifications"
 
 #: models/ratification.py:42
 msgid "country"
-msgstr ""
+msgstr "Pays"
 
 #: models/ratification.py:44
 msgid "ratification date"
-msgstr ""
+msgstr "Date de ratification"
 
 #: models/ratification.py:45
 msgid "deposit date"
-msgstr ""
+msgstr "Date de dépôt"
 
 #: models/ratification.py:46
 msgid "signature date"
-msgstr ""
+msgstr "Date de signature"
 
 #: models/ratification.py:49
 msgid "ratification country"
-msgstr ""
+msgstr "Pays de ratification"
 
 #: models/ratification.py:50
 msgid "ratification countries"
-msgstr ""
+msgstr "Pays de ratification"
 
 #: templates/peachjam/_footer.html:6
 msgid "About AfricanLII"
@@ -98,61 +98,53 @@ msgid "University of Cape Town"
 msgstr "Université du Cap"
 
 #: templates/peachjam/_header.html:30
-#, fuzzy
-#| msgid "Other African Legal Information Institutions"
 msgid "African Legal Information"
-msgstr "Autres Institutions Africaines d'information Juridique"
+msgstr "Informations juridiques africaines"
 
 #: templates/peachjam/_header.html:36
-#, fuzzy
-#| msgid "Recent Legal Instruments"
 msgid "Legal Instruments"
-msgstr "Derniers instruments juridiques"
+msgstr "Instruments légaux"
 
 #: templates/peachjam/_header.html:37
 msgid "Charters, treaties, conventions and regulations."
-msgstr ""
+msgstr "Chartes, traités, conventions et règlements."
 
 #: templates/peachjam/_header.html:42
-#, fuzzy
-#| msgid "Recent Judgments"
 msgid "Judgments"
-msgstr "Jugements récents"
+msgstr "Jugements"
 
 #: templates/peachjam/_header.html:43
 msgid "Judgments from regional African courts."
-msgstr ""
+msgstr "Les jugements des tribunaux régionaux africains."
 
 #: templates/peachjam/_header.html:48 templates/peachjam/soft_law_list.html:4
 #: templates/peachjam/soft_law_list.html:7
 msgid "Soft Law"
-msgstr ""
+msgstr "Loi non contraignante"
 
 #: templates/peachjam/_header.html:49
 msgid "Policies, decisions, recommendations and communiques."
-msgstr ""
+msgstr "Politiques, décisions, recommandations et communiques."
 
 #: templates/peachjam/_header.html:54
 msgid "Gazettes"
-msgstr ""
+msgstr "Journaux officiels"
 
 #: templates/peachjam/_header.html:55
-#, fuzzy
-#| msgid "Regional Economic Communities"
 msgid "Regional economic community official Gazettes."
-msgstr "Communautés économiques régionales"
+msgstr "Gazettes officielles de la communauté économique régionale."
 
 #: templates/peachjam/_header.html:63
 msgid "Topics"
-msgstr ""
+msgstr "Sujets"
 
 #: templates/peachjam/_header.html:68
 msgid "Reports & Guides"
-msgstr ""
+msgstr "Rapports et tutoriels"
 
 #: templates/peachjam/_header.html:74
 msgid "Articles"
-msgstr ""
+msgstr "Articles"
 
 #: templates/peachjam/_header.html:80 templates/peachjam/about.html:4
 msgid "About"
@@ -160,7 +152,7 @@ msgstr "À propos"
 
 #: templates/peachjam/_header.html:86
 msgid "Help"
-msgstr ""
+msgstr "Aide"
 
 #: templates/peachjam/about.html:9
 msgid "About the platform"
@@ -246,7 +238,7 @@ msgstr "Recherche"
 
 #: templates/peachjam/home.html:33
 msgid "Advanced search"
-msgstr ""
+msgstr "Recherche avancée"
 
 #: templates/peachjam/home.html:43
 msgid "Regional Bodies"
@@ -303,19 +295,5 @@ msgstr "Voir plus de commentaires"
 #: templates/peachjam/reports_guides_list.html:4
 #: templates/peachjam/reports_guides_list.html:7
 msgid "Reports and Guides"
-msgstr ""
+msgstr "Rapports et tutoriels"
 
-#~ msgid "Decisions"
-#~ msgstr "Décisions"
-
-#~ msgid "AU Documents"
-#~ msgstr "Documents de l'UA"
-
-#~ msgid "Treaties and Protocols"
-#~ msgstr "Traités et Protocoles"
-
-#~ msgid "Legislation"
-#~ msgstr "Législation"
-
-#~ msgid "Commentary"
-#~ msgstr "Commentaire"
