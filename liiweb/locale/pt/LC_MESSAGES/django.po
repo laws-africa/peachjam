@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 09:05+0200\n"
+"POT-Creation-Date: 2023-03-28 10:30+0200\n"
 "PO-Revision-Date: 2023-03-13 07:26\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -50,11 +50,23 @@ msgstr "Legislação recente"
 msgid "View more legislation"
 msgstr "Ver mais legislação"
 
-#: templates/liiweb/home.html:80
+#: templates/liiweb/home.html:89
+msgid "Twitter"
+msgstr ""
+
+#: templates/liiweb/home.html:102
+msgid "Facebook"
+msgstr ""
+
+#: templates/liiweb/home.html:117
+msgid "Tweets by AfricanLII"
+msgstr ""
+
+#: templates/liiweb/home.html:150
 msgid "Courts"
 msgstr "Tribunais"
 
-#: templates/liiweb/home.html:84
+#: templates/liiweb/home.html:154
 msgid "Collections"
 msgstr "Coleções"
 
@@ -88,7 +100,9 @@ msgid "Subscribe"
 msgstr "Inscrever-se"
 
 #: templates/peachjam/_footer.html:9
-msgid "Subscribe to the our newsletter for updates and news."
+#, fuzzy
+#| msgid "Subscribe to the our newsletter for updates and news."
+msgid "Subscribe to our newsletter for updates and news."
 msgstr "Inscreva-se no nosso boletim informativo para atualizações e notícias."
 
 #: templates/peachjam/_footer.html:20 templates/peachjam/_header.html:23
@@ -106,4 +120,3 @@ msgstr "Outras Instituições Jurídicas Africanas"
 #: templates/peachjam/_header.html:11
 msgid "Judgments"
 msgstr "Julgamentos"
-

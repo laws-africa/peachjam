@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 09:05+0200\n"
+"POT-Creation-Date: 2023-03-28 10:30+0200\n"
 "PO-Revision-Date: 2023-03-22 13:47\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -261,28 +261,36 @@ msgid "View more judgments"
 msgstr "Voir plus de jugements"
 
 #: templates/peachjam/home.html:82
-msgid "Recent AU Documents"
-msgstr "Documents récents de l'UA"
-
-#: templates/peachjam/home.html:83
-msgid "View more AU documents"
-msgstr "Voir plus de documents de l'UA"
-
-#: templates/peachjam/home.html:89
 msgid "Recent Legal Instruments"
 msgstr "Derniers instruments juridiques"
 
-#: templates/peachjam/home.html:90
+#: templates/peachjam/home.html:83
 msgid "View more legal instruments"
 msgstr "Voir plus d'instruments juridiques"
 
+#: templates/peachjam/home.html:89
+#, fuzzy
+#| msgid "Soft Law"
+msgid "Recent Soft Law"
+msgstr "Loi non contraignante"
+
+#: templates/peachjam/home.html:90
+#, fuzzy
+#| msgid "View more commentary"
+msgid "View more Soft Law"
+msgstr "Voir plus de commentaires"
+
 #: templates/peachjam/home.html:96
-msgid "Recent Treaties and Protocols "
-msgstr "Traités et protocoles récents "
+#, fuzzy
+#| msgid "Reports and Guides"
+msgid "Recent Reports and Guides"
+msgstr "Rapports et tutoriels"
 
 #: templates/peachjam/home.html:97
-msgid "View more treaties and protocols"
-msgstr "Voir plus de traités et de protocoles"
+#, fuzzy
+#| msgid "Reports and Guides"
+msgid "View more Reports and Guides"
+msgstr "Rapports et tutoriels"
 
 #: templates/peachjam/home.html:103
 msgid "Latest Commentary"
@@ -297,3 +305,14 @@ msgstr "Voir plus de commentaires"
 msgid "Reports and Guides"
 msgstr "Rapports et tutoriels"
 
+#~ msgid "Recent AU Documents"
+#~ msgstr "Documents récents de l'UA"
+
+#~ msgid "View more AU documents"
+#~ msgstr "Voir plus de documents de l'UA"
+
+#~ msgid "Recent Treaties and Protocols "
+#~ msgstr "Traités et protocoles récents "
+
+#~ msgid "View more treaties and protocols"
+#~ msgstr "Voir plus de traités et de protocoles"
