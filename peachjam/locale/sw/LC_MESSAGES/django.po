@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-28 15:29\n"
+"PO-Revision-Date: 2023-03-28 18:15\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -1198,11 +1198,11 @@ msgstr "%(organisation_name)s hufanya ufuatiliaji wa kiotomati na, inapohitajika
 #: templates/peachjam/_terms_of_use_content.html:227
 #, python-format
 msgid "Should you have concerns over personal information published on the %(organisation_name)s website, please contact us."
-msgstr "Iwapo una wasiwasi juu ya taarifa binafsi zilizoochapishwa kwenye tovuti ya %(organisation_name)s, tafadhali wasiliana nasi."
+msgstr "Iwapo una wasiwasi juu ya taarifa binafsi zilizochapishwa kwenye tovuti ya %(organisation_name)s, tafadhali wasiliana nasi."
 
 #: templates/peachjam/_terms_of_use_content.html:231
 msgid "Your responsible use of personal information"
-msgstr "Matumizi salama ya taarifa binafsi"
+msgstr "Matumizi yako salama ya taarifa binafsi"
 
 #: templates/peachjam/_terms_of_use_content.html:233
 #, python-format
@@ -1211,7 +1211,7 @@ msgstr "%(organisation_name)s watumiaji wanapaswa kutambua kwamba kuna vikwazo v
 
 #: templates/peachjam/_terms_of_use_content.html:239
 msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
-msgstr ""
+msgstr "Haki ya kurekebisha Masharti haya ya Matumizi, Hakimiliki na Faragha"
 
 #: templates/peachjam/_terms_of_use_content.html:241
 msgid "We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace all previous versions of this document."
