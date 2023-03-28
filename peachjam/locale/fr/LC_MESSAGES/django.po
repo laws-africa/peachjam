@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-28 08:34\n"
+"PO-Revision-Date: 2023-03-28 09:53\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -1207,7 +1207,7 @@ msgstr "Votre utilisation responsable des informations personnelles"
 #: templates/peachjam/_terms_of_use_content.html:233
 #, python-format
 msgid "%(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of the land."
-msgstr ""
+msgstr "Les utilisateurs %(organisation_name)s doivent noter qu'il existe des limitations légales à l'utilisation, la publication et la diffusion de certaines informations personnelles dans les bases de données %(organisation_name)s . Il est de la responsabilité de %(organisation_name)s utilisateurs de se conformer aux lois du pays."
 
 #: templates/peachjam/_terms_of_use_content.html:239
 msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
@@ -1215,7 +1215,7 @@ msgstr "Droit de modifier les présentes conditions d'utilisation, les déclarat
 
 #: templates/peachjam/_terms_of_use_content.html:241
 msgid "We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace all previous versions of this document."
-msgstr ""
+msgstr "Nous nous réservons le droit de modifier ces conditions d'utilisation, les droits d'auteur et les déclarations de confidentialité et de sécurité à tout moment. Toutes les modifications seront affichées sur ce site Web. Sauf indication contraire, la version actuelle annule et remplace toutes les versions précédentes de ce document."
 
 #: templates/peachjam/_terms_of_use_content.html:247
 msgid "If you have any comments or suggestions about this policy, please contact us."
@@ -1404,7 +1404,7 @@ msgstr "Noms alternatifs"
 
 #: templates/peachjam/layouts/document_detail.html:189
 msgid "Judgment date"
-msgstr ""
+msgstr "Date du jugement"
 
 #: templates/peachjam/layouts/document_detail.html:225
 msgid "Language"
