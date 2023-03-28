@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2023-03-27 18:45\n"
+"PO-Revision-Date: 2023-03-28 06:27\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -64,7 +64,7 @@ msgstr "mada"
 
 #: models/article.py:22
 msgid "body"
-msgstr "sehemu"
+msgstr "matini"
 
 #: models/article.py:27 models/author.py:20 models/generic_document.py:20
 #: models/generic_document.py:46
@@ -318,7 +318,7 @@ msgstr "ruhusu roboti"
 
 #: models/core_document_model.py:302
 msgid "Allow this document to be indexed by search engine robots."
-msgstr "Ruhusu hati hii kuorodheshwa na roboti za injini ya utafutaji."
+msgstr "Ruhusu hati hii kuorodheshwa na roboti za mtambo tafutizi."
 
 #: models/core_document_model.py:328
 msgid "Invalid Date"
