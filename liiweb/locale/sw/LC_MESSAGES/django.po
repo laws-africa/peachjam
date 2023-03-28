@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-28 08:34\n"
+"PO-Revision-Date: 2023-03-28 18:15\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -60,7 +60,7 @@ msgstr "Facebook"
 
 #: templates/liiweb/home.html:117
 msgid "Tweets by AfricanLII"
-msgstr "Tweets by AfricanLII"
+msgstr "Tweets na AfricanLII"
 
 #: templates/liiweb/home.html:150
 msgid "Courts"
@@ -101,7 +101,7 @@ msgstr "Jiandikishe"
 
 #: templates/peachjam/_footer.html:9
 msgid "Subscribe to our newsletter for updates and news."
-msgstr "Jiandikishe kwa jarida letu kwa sasisho na habari."
+msgstr "Jiandikishe kwenye jarida letu kwa usasishaji na habari."
 
 #: templates/peachjam/_footer.html:20 templates/peachjam/_header.html:23
 msgid "About"
