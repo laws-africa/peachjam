@@ -33,7 +33,16 @@ class LegislationDetailView(BaseDocumentDetailView):
         context["friendly_type"] = self.get_friendly_type()
         context["notices"] = self.get_notices()
         context["child_documents"] = self.get_child_documents()
+        context["latest_amendment_date"] = self.get_latest_amendment_date()
         return context
+
+    def get_latest_amendment_date(self):
+        work_amendments = self.get_work_amendments()
+        if work_amendments:
+            work_amendments_dates = [
+                work_amendment["date"] for work_amendment in work_amendments
+            ]
+            return work_amendments_dates[-1]
 
     def get_notices(self):
         notices = super().get_notices()
@@ -60,10 +69,7 @@ class LegislationDetailView(BaseDocumentDetailView):
             point_in_time_dates = [
                 point_in_time["date"] for point_in_time in points_in_time
             ]
-            work_amendments_dates = [
-                work_amendment["date"] for work_amendment in work_amendments
-            ]
-            latest_amendment_date = work_amendments_dates[-1]
+            latest_amendment_date = self.get_latest_amendment_date()
             index = point_in_time_dates.index(current_object_date)
 
             if index == len(point_in_time_dates) - 1:
