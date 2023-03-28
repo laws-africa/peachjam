@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-28 08:34\n"
+"PO-Revision-Date: 2023-03-28 18:15\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -103,7 +103,7 @@ msgstr "Taarifa za Kisheria za Afrika"
 
 #: templates/peachjam/_header.html:36
 msgid "Legal Instruments"
-msgstr "Vyombo vya Kisheria"
+msgstr "Hati za Kisheria"
 
 #: templates/peachjam/_header.html:37
 msgid "Charters, treaties, conventions and regulations."
@@ -270,15 +270,15 @@ msgstr "Tazama hati zaidi za kisheria"
 
 #: templates/peachjam/home.html:89
 msgid "Recent Soft Law"
-msgstr "Sheria Laini ya Hivi Karibuni"
+msgstr "Sheria Zisizofunga za Hivi Karibuni"
 
 #: templates/peachjam/home.html:90
 msgid "View more Soft Law"
-msgstr "Tazama Sheria Nyepesi zaidi"
+msgstr "Tazama zaidi Sheria Zisizofunga"
 
 #: templates/peachjam/home.html:96
 msgid "Recent Reports and Guides"
-msgstr "Ripoti na Miongozo ya Hivi Punde"
+msgstr "Ripoti na Miongozo ya Hivi Karibuni"
 
 #: templates/peachjam/home.html:97
 msgid "View more Reports and Guides"
