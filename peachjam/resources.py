@@ -515,9 +515,7 @@ class ImageWidget(CharWidget):
 
 class PublishedWidget(BooleanWidget):
     def clean(self, value, row=None, **kwargs):
-        if value:
-            return True
-        return False
+        return bool(value)
 
 
 class TopicsWidget(ManyToManyWidget):
