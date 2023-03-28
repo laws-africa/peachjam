@@ -182,6 +182,26 @@
                             <a href="{% url 'author' document.author.pk %}">{{ document.author }}</a>
                           </dd>
                         {% endif %}
+                        {% if document.court %}
+                          <dt>
+                            {% trans 'Court' %}
+                          </dt>
+                          <dd class="text-muted">
+                            <a href="{% url 'court' document.court.code %}">{{ document.court.name }}</a>
+                          </dd>
+                        {% endif %}
+                        {% with document.judges.all as judges %}
+                          {% if judges %}
+                            <dt>
+                              {% trans 'Judges' %}
+                            </dt>
+                            <dd class="text-muted">
+                              {% for judge in judges %}
+                                {% if not forloop.last %}{{ judge.name }},{% endif %}
+                              {% endfor %}
+                            </dd>
+                          {% endif %}
+                        {% endwith %}
                       {% endblock %}
                       {% block document-metadata-content-date %}
                         {% if document.doc_type == "judgment" %}
@@ -375,7 +395,9 @@
              id="ratifications-tab"
              role="tabpanel"
              aria-labelledby="ratifications-tab">
-          <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
+          <div class="container">
+            {% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}
+          </div>
         </div>
       {% endif %}
     </div>
