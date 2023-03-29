@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["sierralii.apps.SierraLIIConfig"] + INSTALLED_APPS  # noqa
@@ -21,3 +23,6 @@ COURT_CODE_MAPPINGS = {
     "hc%3a-sexual-offenses-division": "SLHCSOD",
     "special-court-for-sierra-leone": "SCSL",
 }
+LANGUAGES = [
+    ("en", _("English")),
+]

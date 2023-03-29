@@ -4,6 +4,7 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["zanzibarlii.apps.ZanzibarLIIConfig"] + INSTALLED_APPS  # noqa
 
+LANGUAGE_CODE = "sw"
 
 LANGUAGES = [
     ("sw", _("Swahili")),

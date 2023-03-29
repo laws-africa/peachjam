@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["seylii.apps.SeyLIIConfig"] + INSTALLED_APPS  # noqa
@@ -12,3 +14,6 @@ COURT_CODE_MAPPINGS = {
     "court-of-appeal": "SCCA",
     "supreme-court": "SCSC",
 }
+LANGUAGES = [
+    ("en", _("English")),
+]

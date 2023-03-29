@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["lesotholii.apps.LesothoLIIConfig"] + INSTALLED_APPS  # noqa
@@ -16,3 +18,6 @@ COURT_CODE_MAPPINGS = {
     "labour-appeal-court": "",
     "labour-court": "",
 }
+LANGUAGES = [
+    ("en", _("English")),
+]
