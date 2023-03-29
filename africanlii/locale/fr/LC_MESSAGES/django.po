@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-22 13:47\n"
+"PO-Revision-Date: 2023-03-29 12:01\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -269,28 +269,20 @@ msgid "View more legal instruments"
 msgstr "Voir plus d'instruments juridiques"
 
 #: templates/peachjam/home.html:89
-#, fuzzy
-#| msgid "Soft Law"
 msgid "Recent Soft Law"
-msgstr "Loi non contraignante"
+msgstr "Récente norme non contraignantes"
 
 #: templates/peachjam/home.html:90
-#, fuzzy
-#| msgid "View more commentary"
 msgid "View more Soft Law"
-msgstr "Voir plus de commentaires"
+msgstr "Voir plus de droit non contraignant"
 
 #: templates/peachjam/home.html:96
-#, fuzzy
-#| msgid "Reports and Guides"
 msgid "Recent Reports and Guides"
-msgstr "Rapports et tutoriels"
+msgstr "Rapports et guides récents"
 
 #: templates/peachjam/home.html:97
-#, fuzzy
-#| msgid "Reports and Guides"
 msgid "View more Reports and Guides"
-msgstr "Rapports et tutoriels"
+msgstr "Afficher plus de rapports et de guides"
 
 #: templates/peachjam/home.html:103
 msgid "Latest Commentary"
@@ -305,14 +297,3 @@ msgstr "Voir plus de commentaires"
 msgid "Reports and Guides"
 msgstr "Rapports et tutoriels"
 
-#~ msgid "Recent AU Documents"
-#~ msgstr "Documents récents de l'UA"
-
-#~ msgid "View more AU documents"
-#~ msgstr "Voir plus de documents de l'UA"
-
-#~ msgid "Recent Treaties and Protocols "
-#~ msgstr "Traités et protocoles récents "
-
-#~ msgid "View more treaties and protocols"
-#~ msgstr "Voir plus de traités et de protocoles"

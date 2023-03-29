@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-21 14:31\n"
+"PO-Revision-Date: 2023-03-29 12:01\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -660,7 +660,7 @@ msgstr "Étiquette législative subsidiaire"
 
 #: models/settings.py:48
 msgid "google analytics id"
-msgstr ""
+msgstr "Identifiant google analytiques"
 
 #: models/settings.py:52
 msgid "site settings"
@@ -747,12 +747,10 @@ msgstr "Mot de passe oublié ?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Connectez-vous à %(provider.name)s\n"
 "          "
 
@@ -893,8 +891,8 @@ msgstr "En haut"
 #, python-format
 msgid "%(doc_count)s document"
 msgid_plural "%(doc_count)s documents"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(doc_count)s Document"
+msgstr[1] "%(doc_count)s Documents"
 
 #: templates/peachjam/_document_table.html:10
 #: templates/peachjam/_judgment_table.html:8
@@ -1001,10 +999,9 @@ msgid "Who are we, and how to contact us?"
 msgstr "Qui sommes-nous et comment nous contacter?"
 
 #: templates/peachjam/_terms_of_use_content.html:10
-#, fuzzy, python-format
-#| msgid "The %(organisation_name)s service is provided by the %(organisation_name)s programme of the Department of Public Law at the University of Cape Town and Laws.Africa NPO. You can contact us by email at <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> or by filling out <a href=\"/about/\">this form</a>."
+#, python-format
 msgid "%(who_are_we)s You can contact us by email at <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> or by filling out <a href=\"/about/\">this form</a>."
-msgstr "Le service %(organisation_name)s est fourni par le programme %(organisation_name)s du Département de droit public de l'Université du Cap et Laws.Africa NPO. Vous pouvez nous contacter par courriel sur<a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> ou en remplissant <a href=\"/about/\">ce formulaire</a>."
+msgstr "%(who_are_we)s Vous pouvez nous contacter par email au <a href=\"mailto:%(contact_email)s\">%(contact_email)s</a> ou en remplissant <a href=\"/about/\">ce formulaire</a>."
 
 #: templates/peachjam/_terms_of_use_content.html:16
 #, python-format
@@ -1185,16 +1182,9 @@ msgid "Government gazettes and official journals are official publications of th
 msgstr "Les journaux officielles et les revues gouvernementaux sont des publications officielles des États qui les publient. La loi évoque que certains renseignements personnels doivent être rendus publics par l'intermédiaire du journal gouvernemental et des ministères placent ces avis publics dans le journal officiel dans l'intention de les rendre accessibles au public."
 
 #: templates/peachjam/_terms_of_use_content.html:215
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "    %(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette.\n"
-#| "  "
+#, python-format
 msgid "%(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette."
-msgstr ""
-"\n"
-"    %(organisation_name)s ne peut pas se retirer de la circulation, reproduire ou modifier le journal officiel.\n"
-"  "
+msgstr "%(organisation_name)s Ne peut pas se retirer de la circulation, reproduire ou modifier le journal officiel."
 
 #: templates/peachjam/_terms_of_use_content.html:219
 msgid "Automated monitoring"
@@ -1215,39 +1205,17 @@ msgid "Your responsible use of personal information"
 msgstr "Votre utilisation responsable des informations personnelles"
 
 #: templates/peachjam/_terms_of_use_content.html:233
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "    %(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some\n"
-#| "    personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of\n"
-#| "    the land.\n"
-#| "  "
+#, python-format
 msgid "%(organisation_name)s users should note that there are legal limitations on the use, publication and dissemination of some personal information in %(organisation_name)s databases. It is the responsibility of %(organisation_name)s users to comply with the laws of the land."
-msgstr ""
-"\n"
-"    %(organisation_name)s utilisateurs doivent noter qu'il y a des limitations légales sur l'utilisation, la publication et la diffusion de certaines\n"
-"    informations personnelles dans les bases de données %(organisation_name)s . Il est de la responsabilité de %(organisation_name)s utilisateurs de se conformer aux lois applicables.\n"
-"  "
+msgstr "Les utilisateurs %(organisation_name)s doivent noter qu'il existe des limitations légales à l'utilisation, la publication et la diffusion de certaines informations personnelles dans les bases de données %(organisation_name)s . Il est de la responsabilité de %(organisation_name)s utilisateurs de se conformer aux lois du pays."
 
 #: templates/peachjam/_terms_of_use_content.html:239
 msgid "Right to amend these Terms of Use, Copyright and Privacy statements"
 msgstr "Droit de modifier les présentes conditions d'utilisation, les déclarations sur le droit d'auteur et les déclarations de confidentialité"
 
 #: templates/peachjam/_terms_of_use_content.html:241
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "    We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All\n"
-#| "    amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace\n"
-#| "    all previous versions of this document.\n"
-#| "  "
 msgid "We reserve the right to amend these terms of use, copyright, and privacy and security statements at any time. All amendments will be posted on this website. Unless otherwise stated, the current version shall supersede and replace all previous versions of this document."
-msgstr ""
-"\n"
-"    Nous nous réservons le droit de modifier à tout moment les présentes conditions d'utilisation, les droits d'auteur et les déclarations de confidentialité et de sécurité. Toutes les\n"
-"    modifications seront affichées sur ce site Web. Sauf indication contraire, la version actuelle remplacera  \n"
-"    toutes les versions précédentes du présent document.\n"
-"  "
+msgstr "Nous nous réservons le droit de modifier ces conditions d'utilisation, les droits d'auteur et les déclarations de confidentialité et de sécurité à tout moment. Toutes les modifications seront affichées sur ce site Web. Sauf indication contraire, la version actuelle annule et remplace toutes les versions précédentes de ce document."
 
 #: templates/peachjam/_terms_of_use_content.html:247
 msgid "If you have any comments or suggestions about this policy, please contact us."
@@ -1435,10 +1403,8 @@ msgid "Alternative names"
 msgstr "Noms alternatifs"
 
 #: templates/peachjam/layouts/document_detail.html:189
-#, fuzzy
-#| msgid "Judgments"
 msgid "Judgment date"
-msgstr "Jugements"
+msgstr "Date du jugement"
 
 #: templates/peachjam/layouts/document_detail.html:225
 msgid "Language"
@@ -1519,3 +1485,4 @@ msgstr "Il s'agit de la version de cette loi telle qu'elle était de %(date_from
 #, python-format
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr "Il s'agit de la version de cette loi telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lire la version actuellement en vigueur</a>."
+

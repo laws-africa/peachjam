@@ -341,6 +341,14 @@ class DocumentAdmin(admin.ModelAdmin):
 
     new_document_form_mixin = NewDocumentFormMixin
 
+    def get_inlines(self, request, obj):
+        inlines = self.inlines
+        if obj is None and SourceFileInline in inlines:
+            inlines.remove(SourceFileInline)
+        elif obj is not None and SourceFileInline not in inlines:
+            inlines.append(SourceFileInline)
+        return inlines
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         qs = qs.prefetch_related("locality", "jurisdiction")
