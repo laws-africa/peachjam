@@ -33,16 +33,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         context["friendly_type"] = self.get_friendly_type()
         context["notices"] = self.get_notices()
         context["child_documents"] = self.get_child_documents()
-        context["latest_amendment_date"] = self.get_latest_amendment_date()
         return context
-
-    def get_latest_amendment_date(self):
-        work_amendments = self.get_work_amendments()
-        if work_amendments:
-            work_amendments_dates = [
-                work_amendment["date"] for work_amendment in work_amendments
-            ]
-            return work_amendments_dates[-1]
 
     def get_notices(self):
         notices = super().get_notices()
@@ -69,7 +60,10 @@ class LegislationDetailView(BaseDocumentDetailView):
             point_in_time_dates = [
                 point_in_time["date"] for point_in_time in points_in_time
             ]
-            latest_amendment_date = self.get_latest_amendment_date()
+            work_amendments_dates = [
+                work_amendment["date"] for work_amendment in work_amendments
+            ]
+            latest_amendment_date = work_amendments_dates[-1]
             index = point_in_time_dates.index(current_object_date)
 
             if index == len(point_in_time_dates) - 1:
@@ -198,18 +192,22 @@ class LegislationDetailView(BaseDocumentDetailView):
             point_in_time_dates = [
                 point_in_time["date"] for point_in_time in points_in_time
             ]
-            event = [
-                {
-                    "date": amendment.get("date"),
+            latest_expression_date = max(point_in_time_dates)
+
+            event = []
+            for amendment in amendments:
+                event_date = amendment.get("date")
+                converted_event_date = datetime.strptime(event_date, "%Y-%m-%d")
+                converted_latest_expression_date = datetime.strptime(latest_expression_date, "%Y-%m-%d")
+
+                event.append({
+                    "date": event_date,
                     "event": "amendment",
                     "amending_title": amendment.get("amending_title"),
                     "amending_uri": amendment.get("amending_uri"),
                     "unapplied_amendment": bool(
-                        amendment.get("date") not in point_in_time_dates
-                    ),
-                }
-                for amendment in amendments
-            ]
+                        amendment.get("date") not in point_in_time_dates and  converted_event_date < converted_latest_expression_date)
+                })
 
             events.extend(event)
 

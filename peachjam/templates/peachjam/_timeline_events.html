@@ -11,7 +11,7 @@
               <span class="badge rounded-pill bg-primary">{% trans 'this version' %}</span>
             {% endif %}
             {% for event in history_item.events %}
-              {% if event.unapplied_amendment and history_item.date > latest_amendment_date %}
+              {% if event.unapplied_amendment %}
                 <span class="badge rounded-pill bg-secondary">{% trans 'amendment not yet applied' %}</span>
               {% endif %}
             {% endfor %}
