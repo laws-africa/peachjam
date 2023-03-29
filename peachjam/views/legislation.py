@@ -194,28 +194,19 @@ class LegislationDetailView(BaseDocumentDetailView):
             ]
             latest_expression_date = max(point_in_time_dates)
 
-            event = []
-            for amendment in amendments:
-                event_date = amendment.get("date")
-
-                # convert string dates for comparison
-                converted_event_date = datetime.strptime(event_date, "%Y-%m-%d")
-                converted_latest_expression_date = datetime.strptime(
-                    latest_expression_date, "%Y-%m-%d"
-                )
-
-                event.append(
-                    {
-                        "date": event_date,
-                        "event": "amendment",
-                        "amending_title": amendment.get("amending_title"),
-                        "amending_uri": amendment.get("amending_uri"),
-                        "unapplied_amendment": bool(
-                            amendment.get("date") not in point_in_time_dates
-                            and converted_event_date > converted_latest_expression_date
-                        ),
-                    }
-                )
+            event = [
+                {
+                    "date": amendment.get("date"),
+                    "event": "amendment",
+                    "amending_title": amendment.get("amending_title"),
+                    "amending_uri": amendment.get("amending_uri"),
+                    "unapplied_amendment": bool(
+                        amendment.get("date") not in point_in_time_dates
+                        and amendment.get("date") > latest_expression_date
+                    ),
+                }
+                for amendment in amendments
+            ]
 
             events.extend(event)
 
