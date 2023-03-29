@@ -7,7 +7,4 @@ JAZZMIN_SETTINGS["site_title"] = "TanzLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "TanzLII"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "tanzlii.org"  # noqa
 
-COURT_CODE_MAPPINGS = {
-    "court-appeal-tanzania": "TZCA",
-    "high-court-tanzania": "TZHC"
-}
+COURT_CODE_MAPPINGS = {"court-appeal-tanzania": "TZCA", "high-court-tanzania": "TZHC"}
