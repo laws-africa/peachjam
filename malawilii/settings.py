@@ -7,7 +7,7 @@ JAZZMIN_SETTINGS["site_title"] = "MalawiLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "MalawiLII"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "malawilii.org"  # noqa
 
-court_CODE_MAPPINGS = {
+COURT_CODE_MAPPINGS = {
     "supreme-court-of-appeal": "MWSC",
     "magistrate-court-blantyre": "MWMCB",
     "high-court-criminal-division": "MWHCCrim",
