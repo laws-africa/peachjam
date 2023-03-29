@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2022-12-05 13:54\n"
+"POT-Creation-Date: 2023-03-28 10:30+0200\n"
+"PO-Revision-Date: 2023-03-28 08:34\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -32,35 +32,43 @@ msgstr "Recherche"
 
 #: templates/liiweb/home.html:35
 msgid "Advanced search"
-msgstr ""
+msgstr "Recherche avancée"
 
 #: templates/liiweb/home.html:62
 msgid "Recent Judgments"
-msgstr ""
+msgstr "Jugements récents"
 
 #: templates/liiweb/home.html:63
 msgid "View more judgments"
-msgstr ""
+msgstr "Voir plus de jugements"
 
 #: templates/liiweb/home.html:67
-#, fuzzy
-#| msgid "Legislation"
 msgid "Recent Legislation"
-msgstr "Législation"
+msgstr "Législation récente"
 
 #: templates/liiweb/home.html:68
-#, fuzzy
-#| msgid "Current legislation"
 msgid "View more legislation"
-msgstr "Législation en vigueur"
+msgstr "Voir plus de législation"
 
-#: templates/liiweb/home.html:80
+#: templates/liiweb/home.html:89
+msgid "Twitter"
+msgstr "Twitter"
+
+#: templates/liiweb/home.html:102
+msgid "Facebook"
+msgstr "Facebook"
+
+#: templates/liiweb/home.html:117
+msgid "Tweets by AfricanLII"
+msgstr "Tweets par AfricanLII"
+
+#: templates/liiweb/home.html:150
 msgid "Courts"
-msgstr ""
+msgstr "Cours"
 
-#: templates/liiweb/home.html:84
+#: templates/liiweb/home.html:154
 msgid "Collections"
-msgstr ""
+msgstr "Collections"
 
 #: templates/liiweb/legislation_list.html:4
 #: templates/liiweb/legislation_list.html:11 templates/peachjam/_header.html:17
@@ -85,15 +93,15 @@ msgstr "Vous consultez une législation abrogée qui n'est plus en vigueur."
 
 #: templates/liiweb/pocketlaw.html:7
 msgid "Pocket Law"
-msgstr ""
+msgstr "Loi de poche"
 
 #: templates/peachjam/_footer.html:4
 msgid "Subscribe"
 msgstr "S'abonner"
 
 #: templates/peachjam/_footer.html:9
-msgid "Subscribe to the our newsletter for updates and news."
-msgstr "Abonnez-vous à notre newsletter pour les mises à jour et les nouveautés."
+msgid "Subscribe to our newsletter for updates and news."
+msgstr "Abonnez-vous à notre newsletter pour les mises à jour et les nouvelles."
 
 #: templates/peachjam/_footer.html:20 templates/peachjam/_header.html:23
 msgid "About"
@@ -109,4 +117,5 @@ msgstr "Autres Institutions Africaines d'information Juridique"
 
 #: templates/peachjam/_header.html:11
 msgid "Judgments"
-msgstr ""
+msgstr "Jugements"
+

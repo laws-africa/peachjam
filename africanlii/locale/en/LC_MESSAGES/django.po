@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 09:05+0200\n"
+"POT-Creation-Date: 2023-03-28 10:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -262,27 +262,27 @@ msgid "View more judgments"
 msgstr ""
 
 #: templates/peachjam/home.html:82
-msgid "Recent AU Documents"
-msgstr ""
-
-#: templates/peachjam/home.html:83
-msgid "View more AU documents"
-msgstr ""
-
-#: templates/peachjam/home.html:89
 msgid "Recent Legal Instruments"
 msgstr ""
 
-#: templates/peachjam/home.html:90
+#: templates/peachjam/home.html:83
 msgid "View more legal instruments"
 msgstr ""
 
+#: templates/peachjam/home.html:89
+msgid "Recent Soft Law"
+msgstr ""
+
+#: templates/peachjam/home.html:90
+msgid "View more Soft Law"
+msgstr ""
+
 #: templates/peachjam/home.html:96
-msgid "Recent Treaties and Protocols "
+msgid "Recent Reports and Guides"
 msgstr ""
 
 #: templates/peachjam/home.html:97
-msgid "View more treaties and protocols"
+msgid "View more Reports and Guides"
 msgstr ""
 
 #: templates/peachjam/home.html:103

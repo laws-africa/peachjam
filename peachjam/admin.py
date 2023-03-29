@@ -64,7 +64,11 @@ from peachjam.models import (
     Work,
     pj_settings,
 )
-from peachjam.resources import GenericDocumentResource, JudgmentResource
+from peachjam.resources import (
+    ArticleResource,
+    GenericDocumentResource,
+    JudgmentResource,
+)
 from peachjam.tasks import extract_citations as extract_citations_task
 from peachjam_search.tasks import search_model_saved
 
@@ -337,6 +341,14 @@ class DocumentAdmin(admin.ModelAdmin):
 
     new_document_form_mixin = NewDocumentFormMixin
 
+    def get_inlines(self, request, obj):
+        inlines = self.inlines
+        if obj is None and SourceFileInline in inlines:
+            inlines.remove(SourceFileInline)
+        elif obj is not None and SourceFileInline not in inlines:
+            inlines.append(SourceFileInline)
+        return inlines
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         qs = qs.prefetch_related("locality", "jurisdiction")
@@ -567,7 +579,8 @@ class ArticleForm(forms.ModelForm):
 
 
 @admin.register(Article)
-class ArticleAdmin(admin.ModelAdmin):
+class ArticleAdmin(ImportMixin, admin.ModelAdmin):
+    resource_class = ArticleResource
     form = ArticleForm
     list_display = ("title", "date", "published")
     list_display_links = ("title",)
