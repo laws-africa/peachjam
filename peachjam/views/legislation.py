@@ -134,21 +134,14 @@ class LegislationDetailView(BaseDocumentDetailView):
         return self.object.metadata_json.get("type_name", None)
 
     def get_points_in_time(self):
-        return self.object.metadata_json.get("points_in_time", None)
+        return self.object.metadata_json.get("points_in_time", [])
 
     def get_work_amendments(self):
         return self.object.metadata_json.get("work_amendments", None)
 
     def get_timeline_events(self):
         events = []
-
         work = self.object.metadata_json
-
-        points_in_time = self.get_points_in_time()
-        expressions = {
-            point_in_time["date"]: point_in_time["expressions"][0]
-            for point_in_time in points_in_time or []
-        }
 
         assent_date = self.object.metadata_json.get("assent_date", None)
         if assent_date:
@@ -187,25 +180,34 @@ class LegislationDetailView(BaseDocumentDetailView):
                 }
             )
 
+        points_in_time = self.get_points_in_time()
+
         amendments = self.get_work_amendments()
-        if points_in_time and amendments:
+        if amendments:
             point_in_time_dates = [
                 point_in_time["date"] for point_in_time in points_in_time
             ]
-            event = [
-                {
-                    "date": amendment.get("date"),
-                    "event": "amendment",
-                    "amending_title": amendment.get("amending_title"),
-                    "amending_uri": amendment.get("amending_uri"),
-                    "unapplied_amendment": bool(
-                        amendment.get("date") not in point_in_time_dates
-                    ),
-                }
-                for amendment in amendments
-            ]
+            latest_expression_date = (
+                max(point_in_time_dates)
+                if point_in_time_dates
+                else self.object.date.strftime("%Y-%m-%d")
+            )
 
-            events.extend(event)
+            events.extend(
+                [
+                    {
+                        "date": amendment.get("date"),
+                        "event": "amendment",
+                        "amending_title": amendment.get("amending_title"),
+                        "amending_uri": amendment.get("amending_uri"),
+                        "unapplied_amendment": bool(
+                            amendment.get("date") not in point_in_time_dates
+                            and amendment.get("date") > latest_expression_date
+                        ),
+                    }
+                    for amendment in amendments
+                ]
+            )
 
         repeal = self.get_repeal_info()
         if repeal:
@@ -227,6 +229,11 @@ class LegislationDetailView(BaseDocumentDetailView):
             for date, group in groupby(events, lambda event: event["date"])
         ]
 
+        # fold in links to expressions corresponding to each event date (if any)
+        expressions = {
+            point_in_time["date"]: point_in_time["expressions"][0]
+            for point_in_time in points_in_time
+        }
         for event in events:
             for e in event["events"]:
                 del e["date"]
