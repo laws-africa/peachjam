@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-28 10:30+0200\n"
-"PO-Revision-Date: 2023-03-28 09:53\n"
+"PO-Revision-Date: 2023-03-29 12:01\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -660,7 +660,7 @@ msgstr "Étiquette législative subsidiaire"
 
 #: models/settings.py:48
 msgid "google analytics id"
-msgstr "identifiant google analytics"
+msgstr "Identifiant google analytiques"
 
 #: models/settings.py:52
 msgid "site settings"
@@ -891,8 +891,8 @@ msgstr "En haut"
 #, python-format
 msgid "%(doc_count)s document"
 msgid_plural "%(doc_count)s documents"
-msgstr[0] "%(doc_count)s document"
-msgstr[1] "%(doc_count)s documents"
+msgstr[0] "%(doc_count)s Document"
+msgstr[1] "%(doc_count)s Documents"
 
 #: templates/peachjam/_document_table.html:10
 #: templates/peachjam/_judgment_table.html:8
@@ -1184,7 +1184,7 @@ msgstr "Les journaux officielles et les revues gouvernementaux sont des publicat
 #: templates/peachjam/_terms_of_use_content.html:215
 #, python-format
 msgid "%(organisation_name)s cannot withdraw from circulation, redact or amend the government gazette."
-msgstr "%(organisation_name)s ne peut pas se retirer de la circulation, reproduire ou modifier le journal officiel."
+msgstr "%(organisation_name)s Ne peut pas se retirer de la circulation, reproduire ou modifier le journal officiel."
 
 #: templates/peachjam/_terms_of_use_content.html:219
 msgid "Automated monitoring"
