@@ -204,6 +204,7 @@
       {{ $t('Document type') }}
       {{ $t('Author') }}
       {{ $t('Court') }}
+      {{ $t('Court registry') }}
       {{ $t('Judges') }}
       {{ $t('Attorneys') }}
       {{ $t('Jurisdiction') }}
@@ -271,13 +272,13 @@ export default {
           value: [],
           options: []
         },
-        // {
-        //   title: this.$t('Court registry'),
-        //   name: 'registry',
-        //   type: 'checkboxes',
-        //   value: [],
-        //   options: []
-        // },
+        {
+          title: this.$t('Court registry'),
+          name: 'registry',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
         {
           title: this.$t('Judges'),
           name: 'judges',

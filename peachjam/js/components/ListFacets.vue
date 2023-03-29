@@ -12,6 +12,7 @@
   <div v-if="false">
     {{ $t('Alphabetical') }}
     {{ $t('Court') }}
+    {{ $t('Court registry') }}
     {{ $t('Document type') }}
     {{ $t('Judges') }}
     {{ $t('Attorneys') }}
@@ -61,10 +62,10 @@ export default {
       type: Array,
       default: () => []
     },
-    // registries: {
-    //   type: Array,
-    //   default: () => []
-    // },
+    registries: {
+      type: Array,
+      default: () => []
+    },
     attorneys: {
       type: Array,
       default: () => []
