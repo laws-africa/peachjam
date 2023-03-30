@@ -121,7 +121,7 @@ export default {
         {
           name: 'authors',
           type: 'radio',
-          title: this.$t('Regional body')
+          title: JSON.parse(document.querySelector('#data-labels').textContent).author
         },
         {
           name: 'courts',

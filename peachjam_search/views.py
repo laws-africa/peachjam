@@ -19,6 +19,7 @@ from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
 from rest_framework.permissions import AllowAny
 
+from peachjam.models import Author
 from peachjam_search.documents import ANALYZERS, SearchableDocument
 from peachjam_search.serializers import SearchableDocumentSerializer
 
@@ -173,7 +174,7 @@ class SearchView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["labels"] = {"author": "Regional body"}
+        context["labels"] = {"author": Author.model_label}
         return context
 
 
