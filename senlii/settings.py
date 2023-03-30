@@ -6,6 +6,7 @@ INSTALLED_APPS = ["senlii.apps.SenLIIConfig"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "senlii.urls"
 
+LANGUAGE_CODE = "fr"
 
 LANGUAGES = [
     ("fr", _("French")),

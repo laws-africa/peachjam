@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["zimlii.apps.ZimLIIConfig"] + INSTALLED_APPS  # noqa
@@ -17,3 +19,6 @@ COURT_CODE_MAPPINGS = {
     "mutare-high-court": "",
     "labour-court": "",
 }
+LANGUAGES = [
+    ("en", _("English")),
+]
