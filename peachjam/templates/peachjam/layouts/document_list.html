@@ -61,6 +61,7 @@
       </div>
     </div>
     {{ facet_data|json_script:"facet-data" }}
+    {{ labels|json_script:"data-labels" }}
     {% block taxonomy-json %}{% endblock %}
   </div>
 {% endblock %}
