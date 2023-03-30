@@ -14,3 +14,10 @@ LANGUAGES = [
 JAZZMIN_SETTINGS["site_title"] = "ZanzibarLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "ZanzibarLII"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "zanzibarlii.org"  # noqa
+
+COURT_CODE_MAPPINGS = {
+    "high-court-main-registry": "TZZNZHC",
+    "industrial-court": "ZIC",
+    "commercial-court": "ZCC",
+    "kadhi's-court": "ZKC",
+}
