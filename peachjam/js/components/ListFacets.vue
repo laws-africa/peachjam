@@ -128,11 +128,11 @@ export default {
           type: 'radio',
           title: this.$t('Court')
         },
-        // {
-        //   name: 'registries',
-        //   type: 'checkboxes',
-        //   title: this.$t('Court registry')
-        // },
+        {
+          name: 'registries',
+          type: 'checkboxes',
+          title: this.$t('Court registry')
+        },
         {
           name: 'attorneys',
           type: 'checkboxes',
