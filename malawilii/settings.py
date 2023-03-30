@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["malawilii.apps.MalawiLIIConfig"] + INSTALLED_APPS  # noqa
@@ -21,3 +23,7 @@ COURT_CODE_MAPPINGS = {
     "magistrate-court-mangochi": "MWMCM",
     "magistrate-court-zomba": "MWMCZ",
 }
+
+LANGUAGES = [
+    ("en", _("English")),
+]

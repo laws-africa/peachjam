@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["ghalii.apps.GhaLIIConfig"] + INSTALLED_APPS  # noqa
@@ -16,3 +18,7 @@ COURT_CODE_MAPPINGS = {
     "High-Court---General-Jurisdiction-": "",
     "High-Court---Land": "",
 }
+
+LANGUAGES = [
+    ("en", _("English")),
+]

@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["namiblii.apps.NamibLIIConfig"] + INSTALLED_APPS  # noqa
@@ -17,3 +19,6 @@ COURT_CODE_MAPPINGS = {
     "labour-court-main-division": "NALCMD",
     "labour-cour": "NALC",
 }
+LANGUAGES = [
+    ("en", _("English")),
+]
