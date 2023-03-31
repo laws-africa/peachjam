@@ -37,6 +37,10 @@ class Judge(models.Model):
         return self.name
 
 
+class Outcome(models.Model):
+    pass
+
+
 class MatterType(models.Model):
     name = models.CharField(
         _("name"), max_length=1024, null=False, blank=False, unique=True
