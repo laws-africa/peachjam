@@ -4,7 +4,7 @@
       <nav>
         <div
           id="nav-tab"
-          class="nav nav-tabs mb-2"
+          class="nav nav-tabs mb-3"
           role="tablist"
         >
           <button
@@ -539,6 +539,7 @@ export default {
           this.facets.forEach((facet) => {
             params.append('facet', facet.name);
           });
+          console.log(this.advancedFields);
           Object.keys(this.advancedFields).forEach(key => {
             const value = this.advancedFields[key];
             if (!value) return;
@@ -599,7 +600,7 @@ export default {
 <style scoped>
 .search-input-container {
   background-color: white;
-  width: 66%;
+  /* width: 66%; */
   margin-left: auto;
   margin-right: auto;
   padding-bottom: 1rem;
