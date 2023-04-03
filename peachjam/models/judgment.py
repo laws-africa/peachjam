@@ -144,7 +144,7 @@ class Judgment(CoreDocument):
         OrderOutcome,
         on_delete=models.PROTECT,
         null=True,
-        related_name="order_outcome",
+        related_name="judgments",
         blank=True,
     )
     headnote_holding = models.TextField(_("headnote holding"), null=True, blank=True)
