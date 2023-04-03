@@ -160,7 +160,7 @@ export default {
         {
           name: 'order_outcomes',
           type: 'checkboxes',
-          title: this.$t('Order outcome')
+          title: this.$t('Order')
         },
         {
           name: 'years',
