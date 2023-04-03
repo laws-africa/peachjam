@@ -40,6 +40,7 @@ class SearchableDocument(Document):
     judges = fields.KeywordField(attr="judge.name")
     registry = fields.KeywordField(attr="registry.name")
     attorneys = fields.KeywordField(attr="attorney.name")
+    order_outcome = fields.KeywordField(attr="order_outcome.name")
 
     # GenericDocument, LegalInstrument
     author = fields.KeywordField(attr="author.name")

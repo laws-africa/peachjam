@@ -34,6 +34,14 @@
       {{ document.registry.name }}
     </dd>
   {% endif %}
+  {% if document.order_outcome %}
+    <dt>
+      {% trans 'Outcome' %}
+    </dt>
+    <dd class="text-muted">
+      {{ document.order_outcome.name }}
+    </dd>
+  {% endif %}
   {% with document.case_numbers.all as case_numbers %}
     {% if case_numbers %}
       <dt>

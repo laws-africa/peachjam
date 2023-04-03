@@ -37,8 +37,17 @@ class Judge(models.Model):
         return self.name
 
 
-class Outcome(models.Model):
-    pass
+class OrderOutcome(models.Model):
+    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("order outcome")
+        verbose_name_plural = _("order outcomes")
+
+    def __str__(self):
+        return self.name
 
 
 class MatterType(models.Model):
@@ -130,6 +139,13 @@ class Judgment(CoreDocument):
     judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
     attorneys = models.ManyToManyField(
         Attorney, blank=True, verbose_name=_("attorneys")
+    )
+    order_outcome = models.ForeignKey(
+        OrderOutcome,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="order_outcome",
+        blank=True,
     )
     headnote_holding = models.TextField(_("headnote holding"), null=True, blank=True)
     additional_citations = models.TextField(

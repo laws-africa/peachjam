@@ -43,6 +43,7 @@ from peachjam.models import (
     Judgment,
     Locality,
     MatterType,
+    OrderOutcome,
     SourceFile,
     Taxonomy,
 )
@@ -403,6 +404,11 @@ class JudgmentResource(BaseDocumentResource):
         widget=ForeignKeyWidget(CourtRegistry, field="code"),
     )
     case_numbers = fields.Field(column_name="case_numbers", widget=CharWidget)
+    order_outcome = fields.Field(
+        column_name="order_outcome",
+        attribute="order_outcome",
+        widget=ForeignKeyWidget(OrderOutcome, field="name"),
+    )
 
     required_fields = (
         "case_name",

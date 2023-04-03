@@ -55,6 +55,7 @@ from peachjam.models import (
     Legislation,
     Locality,
     MatterType,
+    OrderOutcome,
     PeachJamSettings,
     Predicate,
     Relationship,
@@ -517,6 +518,7 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "registry")
     fieldsets[0][1]["fields"].insert(5, "case_name")
+    fieldsets[0][1]["fields"].insert(6, "order_outcome")
     fieldsets[0][1]["fields"].insert(7, "mnc")
     fieldsets[0][1]["fields"].insert(8, "serial_number_override")
     fieldsets[0][1]["fields"].insert(9, "serial_number")
@@ -682,6 +684,11 @@ class ExternalDocumentAdmin(DocumentAdmin):
 class CourtRegistryAdmin(admin.ModelAdmin):
     readonly_fields = ("code",)
     list_display = ("name", "code")
+
+
+@admin.register(OrderOutcome)
+class OutcomeAdmin(admin.ModelAdmin):
+    list_display = ("name",)
 
 
 admin.site.register(

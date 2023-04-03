@@ -77,6 +77,16 @@ class CourtDetailView(FilteredDocumentListView):
             }
         )
 
+        order_outcomes = list(
+            {
+                order_outcome
+                for order_outcome in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="order_outcomes"
+                ).values_list("order_outcome__name", flat=True)
+                if order_outcome
+            }
+        )
+
         context["court"] = self.court
         context["formatted_court_name"] = self.court.name
         if "year" in self.kwargs:
@@ -90,6 +100,7 @@ class CourtDetailView(FilteredDocumentListView):
             "alphabet": lowercase_alphabet(),
             "registries": registries,
             "attorneys": attorneys,
+            "order_outcomes": order_outcomes,
         }
 
         return context
