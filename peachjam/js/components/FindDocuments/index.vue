@@ -212,7 +212,6 @@
       {{ $t('Document nature') }}
       {{ $t('Language') }}
       {{ $t('Year') }}
-
     </div>
   </div>
 </template>
@@ -239,11 +238,36 @@ export default {
       q: '',
       drawerOpen: false,
       advancedFields: {
-        title: '',
-        judges: '',
-        headnote_holding: '',
-        flynote: '',
-        content: '',
+        title: {
+          all: '',
+          exact: '',
+          any: '',
+          none: ''
+        },
+        judges: {
+          all: '',
+          exact: '',
+          any: '',
+          none: ''
+        },
+        headnote_holding: {
+          all: '',
+          exact: '',
+          any: '',
+          none: ''
+        },
+        flynote: {
+          all: '',
+          exact: '',
+          any: '',
+          none: ''
+        },
+        content: {
+          all: '',
+          exact: '',
+          any: '',
+          none: ''
+        },
         date: {
           date_from: null,
           date_to: null
@@ -433,7 +457,6 @@ export default {
       // Set advanced fields to url
       Object.keys(this.advancedFields).forEach(key => {
         const value = this.advancedFields[key];
-        if (!value) return;
         if (key === 'date') {
           if (value.date_from && value.date_to) {
             params.append('date_from', this.advancedFields.date.date_from);
@@ -443,8 +466,8 @@ export default {
           } else if (value.date_to) {
             params.append('date_to', this.advancedFields.date.date_to);
           }
-        } else if (key !== 'date') {
-          params.append(key, value);
+        } else if (key !== 'date' && this.formatFieldValues(key)) {
+          params.append(key, this.formatFieldValues(key));
         }
       });
 
@@ -475,7 +498,20 @@ export default {
         if (params.has('date_to')) this.advancedFields.date.date_to = params.get('date_to');
         advancedSearchFields.forEach(key => {
           if (!params.has(key)) return;
-          this.advancedFields[key] = params.get(key);
+          const fieldValue = params.get(key);
+          const splitValue = fieldValue.match(/[^\s"']+|['"][^'"]*["']+/g);
+
+          splitValue.forEach((value, index) => {
+            if (value.startsWith('-')) {
+              this.advancedFields[key].none = (this.advancedFields[key].none + ' ' + value).trim();
+            } else if (value.startsWith('"') || value.startsWith("'")) {
+              this.advancedFields[key].exact = (this.advancedFields[key].exact + ' ' + value).trim();
+            } else if (value === '|') {
+              this.advancedFields[key].any = this.advancedFields[key].any || splitValue[index - 1] + ' OR ' + splitValue[index + 1];
+            } else if (splitValue[index - 1] !== '|' && splitValue[index + 1] !== '|') {
+              this.advancedFields[key].all = (this.advancedFields[key].all + ' ' + value).trim();
+            }
+          });
         });
         const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#advanced-search-tab'));
         tabTrigger.show();
@@ -518,9 +554,24 @@ export default {
       });
     },
 
+    formatFieldValues (key) {
+      let formattedSearchString = '';
+      Object.keys(this.advancedFields[key]).forEach(fieldKey => {
+        let formattedFieldValue = this.advancedFields[key][fieldKey];
+        if (!formattedFieldValue) return;
+
+        if (fieldKey === 'any') {
+          formattedFieldValue = formattedFieldValue.replace('OR', '|');
+        }
+
+        formattedSearchString = formattedSearchString + ' ' + formattedFieldValue;
+      });
+      return formattedSearchString.trim();
+    },
+
     async search () {
       // if one of the search fields is true perform search
-      if (this.q || ['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.advancedFields[key])) {
+      if (this.q || ['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.formatFieldValues(key))) {
         const generateUrl = () => {
           const params = new URLSearchParams();
           if (this.q) params.append('search', this.q);
@@ -539,10 +590,9 @@ export default {
           this.facets.forEach((facet) => {
             params.append('facet', facet.name);
           });
-          console.log(this.advancedFields);
+
           Object.keys(this.advancedFields).forEach(key => {
             const value = this.advancedFields[key];
-            if (!value) return;
 
             if (key === 'date') {
               if (value.date_from && value.date_to) {
@@ -554,8 +604,8 @@ export default {
               } else if (value.date_to) {
                 params.append('date__lte', moment(value.date_to).format('YYYY-MM-DD'));
               }
-            } else if (key !== 'date') {
-              params.append(`search__${key}`, value);
+            } else if (key !== 'date' && this.formatFieldValues(key)) {
+              params.append(`search__${key}`, this.formatFieldValues(key));
             }
           });
           return `${
