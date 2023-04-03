@@ -1,53 +1,42 @@
 <template>
   <div class="">
     <div class="">
-      <form @submit.prevent="formatFieldValues">
+      <form @submit.prevent="$emit('submit')">
         <div class="">
           <!-- <AdvancedSearchFields
             form-title="Search all fields"
             input-name="global"
           /> -->
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            :field-value="modelValue.title"
             form-title="Title"
             input-name="title"
+            @update-field-values="updateFieldValues"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            :field-value="modelValue.judges"
             form-title="Judges"
             input-name="judges"
+            @update-field-values="updateFieldValues"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            :field-value="modelValue.headnote_holding"
             form-title="Headnote holding"
             input-name="headnote_holding"
+            @update-field-values="updateFieldValues"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            :field-value="modelValue.flynote"
             form-title="Flynote"
             input-name="flynote"
+            @update-field-values="updateFieldValues"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            :field-value="modelValue.content"
             form-title="Content"
             input-name="content"
+            @update-field-values="updateFieldValues"
           />
-
-          <!-- <div class="col-12 mb-3">
-            <div class="form-group">
-              <label for="content">{{ $t('Content') }}:</label>
-              <input
-                id="content"
-                type="text"
-                name="content"
-                class="form-control"
-                :aria-describedby="$t('Content')"
-                :placeholder="$t('Search documents by content')"
-                :value="modelValue.content"
-                @input="onChange"
-              >
-            </div>
-          </div> -->
 
           <div class="row mb-3">
             <div class="col-lg-6 form-group">
@@ -116,42 +105,6 @@ export default {
     }
   },
   emits: ['submit', 'update:modelValue', 'global-search-change'],
-  data: function () {
-    return {
-      fieldValues: {
-        title: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        judges: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        headnote_holding: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        flynote: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        content: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        }
-      }
-    };
-  },
   computed: {
     invalidDates () {
       const datesStrings = [this.modelValue.date.date_from, this.modelValue.date.date_to];
@@ -182,16 +135,13 @@ export default {
           });
         }
       }
-    },
-    modelValue () {
-      this.$nextTick(this.loadFieldValues());
     }
   },
   methods: {
-    onChange (e) {
+    updateFieldValues (inputName, key, value) {
       this.$emit('update:modelValue', {
         ...this.modelValue,
-        [e.target.name]: e.target.value
+        [inputName]: { ...this.modelValue[inputName], [key]: value }
       });
     },
     onDateChange (e) {
@@ -205,50 +155,6 @@ export default {
     },
     onGlobalSearch (e) {
       this.$emit('global-search-change', e.target.value);
-    },
-    formatFieldValues () {
-      Object.keys(this.fieldValues).forEach(key => {
-        let formattedSearchString = '';
-        Object.keys(this.fieldValues[key]).forEach(fieldKey => {
-          let formattedFieldValue = this.fieldValues[key][fieldKey];
-          if (formattedFieldValue) {
-            if (fieldKey === 'any') {
-              formattedFieldValue = formattedFieldValue.replace('OR', '|');
-            }
-
-            formattedSearchString = formattedSearchString + ' ' + formattedFieldValue;
-          }
-        });
-        if (formattedSearchString) {
-          this.$emit('update:modelValue', {
-            ...this.modelValue,
-            [key]: formattedSearchString.trim()
-          });
-        }
-      });
-      this.$emit('submit');
-    },
-    loadFieldValues () {
-      Object.keys(this.modelValue).forEach(key => {
-        if (key === 'date') return;
-        const fieldValue = this.modelValue[key];
-        if (fieldValue) {
-          console.log(fieldValue, this.modelValue);
-          const splitValue = fieldValue.match(/[^\s"']+|['"][^'"]*["']+/g);
-
-          splitValue.forEach((value, index) => {
-            if (value.startsWith('-')) {
-              this.fieldValues[key].none = (this.fieldValues[key].none + ' ' + value).trim();
-            } else if (value.startsWith('"') || value.startsWith("'")) {
-              this.fieldValues[key].exact = (this.fieldValues[key].exact + ' ' + value).trim();
-            } else if (value === '|') {
-              this.fieldValues[key].any = this.fieldValues[key].any || splitValue[index - 1] + ' OR ' + splitValue[index + 1];
-            } else if (splitValue[index + 1] !== '|' && splitValue[index + 1] !== '|') {
-              this.fieldValues[key].all = (this.fieldValues[key].all + ' ' + value).trim();
-            }
-          });
-        }
-      });
     }
   }
 };
