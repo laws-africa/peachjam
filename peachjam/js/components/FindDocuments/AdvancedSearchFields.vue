@@ -13,12 +13,12 @@
       <div class="col-sm-10">
         <input
           :id="`${inputName}-all`"
-          v-model="subFields.all"
+          :value="fieldValue.all"
           :name="`${inputName}-all`"
           type="text"
           class="form-control"
           :aria-describedby="$t(formTitle)"
-          @input="updateSubfields"
+          @input="e => updateSubfields(e, 'all')"
         >
       </div>
     </div>
@@ -29,12 +29,12 @@
       <div class="col-sm-10">
         <input
           :id="`${inputName}-exact`"
-          v-model="subFields.exact"
+          :value="fieldValue.exact"
           :name="`${inputName}-exact`"
           type="text"
           class="form-control"
           :aria-describedby="$t(formTitle)"
-          @input="updateSubfields"
+          @input="e => updateSubfields(e, 'exact')"
         >
       </div>
     </div>
@@ -45,12 +45,12 @@
       <div class="col-sm-10">
         <input
           :id="`${inputName}-any`"
-          v-model="subFields.any"
+          :value="fieldValue.any"
           :name="`${inputName}-any`"
           type="text"
           class="form-control"
           :aria-describedby="$t(formTitle)"
-          @input="updateSubfields"
+          @input="e => updateSubfields(e, 'any')"
         >
       </div>
     </div>
@@ -61,12 +61,12 @@
       <div class="col-sm-10">
         <input
           :id="`${inputName}-none`"
-          v-model="subFields.none"
+          :value="fieldValue.none"
           :name="`${inputName}-none`"
           type="text"
           class="form-control"
           :aria-describedby="$t(formTitle)"
-          @input="updateSubfields"
+          @input="e => updateSubfields(e, 'none')"
         >
       </div>
     </div>
@@ -86,29 +86,15 @@ export default {
       type: String,
       default: ''
     },
-    fieldValues: {
+    fieldValue: {
       type: Object,
       default: () => ({})
     }
   },
-  emits: ['update:fieldValues', 'update:modelValue', 'global-search-change'],
-  data: function () {
-    return {
-      subFields: {
-        all: '',
-        exact: '',
-        any: '',
-        none: ''
-      }
-    };
-  },
+  emits: ['update-field-values', 'update:modelValue', 'global-search-change'],
   methods: {
-    updateSubfields () {
-      this.$emit('update:fieldValues', {
-        ...this.fieldValues,
-        [this.inputName]: this.subFields
-      });
-      console.log(this.fieldValues);
+    updateSubfields (e, subfield) {
+      this.$emit('update-field-values', this.inputName, subfield, e.target.value);
     }
   }
 };
