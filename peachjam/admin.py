@@ -15,7 +15,7 @@ from django.utils.dates import MONTHS
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
-from import_export.admin import ImportMixin
+from import_export.admin import ImportExportMixin
 from languages_plus.models import Language
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
@@ -445,7 +445,7 @@ class CoreDocumentAdmin(DocumentAdmin):
     pass
 
 
-class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
+class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
     resource_class = GenericDocumentResource
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["author", "nature"])
@@ -456,7 +456,7 @@ class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
         return qs
 
 
-class LegalInstrumentAdmin(ImportMixin, DocumentAdmin):
+class LegalInstrumentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["author", "nature"])
 
@@ -466,7 +466,7 @@ class LegalInstrumentAdmin(ImportMixin, DocumentAdmin):
         return qs
 
 
-class LegislationAdmin(ImportMixin, DocumentAdmin):
+class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["nature"])
     fieldsets[3][1]["fields"].extend(["metadata_json"])
@@ -507,7 +507,7 @@ class JudgmentAdminForm(DocumentForm):
         return super().save(*args, **kwargs)
 
 
-class JudgmentAdmin(ImportMixin, DocumentAdmin):
+class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     form = JudgmentAdminForm
     resource_class = JudgmentResource
     inlines = [CaseNumberAdmin, AttachedFilesInline] + DocumentAdmin.inlines
@@ -581,7 +581,7 @@ class ArticleForm(forms.ModelForm):
 
 
 @admin.register(Article)
-class ArticleAdmin(ImportMixin, admin.ModelAdmin):
+class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_class = ArticleResource
     form = ArticleForm
     list_display = ("title", "date", "published")
