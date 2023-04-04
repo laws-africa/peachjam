@@ -69,6 +69,10 @@ export default {
     attorneys: {
       type: Array,
       default: () => []
+    },
+    order_outcomes: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -152,6 +156,11 @@ export default {
           name: 'judges',
           type: 'radio',
           title: this.$t('Judges')
+        },
+        {
+          name: 'order_outcomes',
+          type: 'checkboxes',
+          title: this.$t('Order')
         },
         {
           name: 'years',
