@@ -207,6 +207,7 @@
       {{ $t('Court registry') }}
       {{ $t('Judges') }}
       {{ $t('Attorneys') }}
+      {{ $t('Order') }}
       {{ $t('Jurisdiction') }}
       {{ $t('Locality') }}
       {{ $t('Matter type') }}
@@ -289,6 +290,13 @@ export default {
         {
           title: this.$t('Attorneys'),
           name: 'attorneys',
+          type: 'checkboxes',
+          value: [],
+          options: []
+        },
+        {
+          title: this.$t('Order'),
+          name: 'order_outcome',
           type: 'checkboxes',
           value: [],
           options: []
