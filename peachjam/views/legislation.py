@@ -55,15 +55,25 @@ class LegislationDetailView(BaseDocumentDetailView):
         points_in_time = self.get_points_in_time()
         work_amendments = self.get_work_amendments()
 
+        current_object_date = self.object.date.strftime("%Y-%m-%d")
+        work_amendments_dates = [
+            work_amendment["date"] for work_amendment in work_amendments
+        ]
+
+        latest_amendment_date = max(work_amendments_dates)
+
+        if (
+            not points_in_time
+            and work_amendments
+            and latest_amendment_date > current_object_date
+        ):
+            self.set_unapplied_amendment_notice(notices, friendly_type)
+
         if points_in_time and work_amendments:
-            current_object_date = self.object.date.strftime("%Y-%m-%d")
             point_in_time_dates = [
                 point_in_time["date"] for point_in_time in points_in_time
             ]
-            work_amendments_dates = [
-                work_amendment["date"] for work_amendment in work_amendments
-            ]
-            latest_amendment_date = work_amendments_dates[-1]
+
             index = point_in_time_dates.index(current_object_date)
 
             if index == len(point_in_time_dates) - 1:
@@ -77,17 +87,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                     )
 
                 elif work_amendments and latest_amendment_date > current_object_date:
-                    msg = (
-                        f"This is the latest available version of this {friendly_type}. "
-                        f"There are outstanding amendments that have not yet been applied. "
-                        f"See the History tab for more information."
-                    )
-                    notices.append(
-                        {
-                            "type": messages.WARNING,
-                            "html": _(msg),
-                        }
-                    )
+                    self.set_unapplied_amendment_notice(notices, friendly_type)
 
                 else:
                     msg = f"This is the latest version of this {friendly_type}."
@@ -138,6 +138,19 @@ class LegislationDetailView(BaseDocumentDetailView):
 
     def get_work_amendments(self):
         return self.object.metadata_json.get("work_amendments", None)
+
+    def set_unapplied_amendment_notice(self, notices, friendly_type):
+        unapplied_amendment_msg = (
+            f"This is the latest available version of this {friendly_type}. "
+            f"There are outstanding amendments that have not yet been applied. "
+            f"See the History tab for more information."
+        )
+        notices.append(
+            {
+                "type": messages.WARNING,
+                "html": _(unapplied_amendment_msg),
+            }
+        )
 
     def get_timeline_events(self):
         events = []
