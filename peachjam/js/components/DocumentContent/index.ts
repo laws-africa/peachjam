@@ -43,6 +43,10 @@ class DocumentContent {
     this.setupPdf();
     this.setupSearch();
     this.setupEnrichments();
+    if (this.root.getAttribute('data-display-type') !== 'pdf') {
+      // for PDFs, this will be done once the pages are rendered
+      this.setupPopups();
+    }
   }
 
   setupTabs () {
@@ -106,6 +110,7 @@ class DocumentContent {
         if (this.enchrichmentsManager) {
           this.enchrichmentsManager.setupPdfCitationLinks();
         }
+        this.setupPopups();
 
         const urlParams = new URLSearchParams(window.location.search);
         const targetPage = urlParams.get('page');
@@ -230,6 +235,26 @@ class DocumentContent {
     const contentAndEnrichmentsElement = this.root.querySelector('.content-and-enrichments');
     if (!contentAndEnrichmentsElement) return;
     this.enchrichmentsManager = new EnrichmentsManager(contentAndEnrichmentsElement as HTMLElement);
+  }
+
+  setupPopups () {
+    if (!this.documentElement) return;
+
+    // if the document isn't using la-akoma-ntoso, then fiddle existing <a> elements to ensure that the external popups
+    // functionality finds them (it expects AKN-style a tags)
+    if (this.documentElement.tagName !== 'LA-AKOMA-NTOSO') {
+      for (const a of Array.from(this.documentElement.querySelectorAll('a[href^="/akn/"]'))) {
+        a.classList.add('akn-ref');
+        // @ts-ignore
+        a.setAttribute('data-href', a.getAttribute('href'));
+      }
+    }
+
+    const el = document.createElement('la-decorate-external-refs');
+    el.akomaNtoso = (this.documentElement as HTMLElement);
+    el.popups = true;
+    el.provider = '//' + window.location.host;
+    this.documentElement.appendChild(el);
   }
 }
 

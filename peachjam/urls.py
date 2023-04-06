@@ -40,6 +40,7 @@ from peachjam.views import (
     DocumentListView,
     DocumentMediaView,
     DocumentNatureListView,
+    DocumentPopupView,
     DocumentSourcePDFView,
     DocumentSourceView,
     FirstLevelTaxonomyDetailView,
@@ -59,6 +60,9 @@ from peachjam.views import (
     TopLevelTaxonomyListView,
     UserProfileDetailView,
 )
+
+# cache duration for most cached pages
+CACHE_DURATION = 60 * 60 * 24
 
 urlpatterns = [
     path("", HomePageView.as_view(), name="home_page"),
@@ -125,17 +129,17 @@ urlpatterns = [
     # document detail views
     re_path(
         r"^(?P<frbr_uri>akn/.*)/source$",
-        cache_page(60 * 60 * 24)(DocumentSourceView.as_view()),
+        cache_page(CACHE_DURATION)(DocumentSourceView.as_view()),
         name="document_source",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/source.pdf$",
-        cache_page(60 * 60 * 24)(DocumentSourcePDFView.as_view()),
+        cache_page(CACHE_DURATION)(DocumentSourcePDFView.as_view()),
         name="document_source_pdf",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/media/(?P<filename>.+)$",
-        cache_page(60 * 60 * 24)(DocumentMediaView.as_view()),
+        cache_page(CACHE_DURATION)(DocumentMediaView.as_view()),
         name="document_media",
     ),
     re_path(
@@ -196,6 +200,11 @@ urlpatterns = [
         r"^doc/(?P<nature>[\w-]+)$",
         DocumentNatureListView.as_view(),
         name="document_nature_list",
+    ),
+    # law-widget support services
+    path(
+        "p/<str:partner>/e/popup/<path:frbr_uri>",
+        cache_page(CACHE_DURATION)(DocumentPopupView.as_view()),
     ),
 ]
 

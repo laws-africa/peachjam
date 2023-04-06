@@ -1,0 +1,23 @@
+{% load i18n %}
+<div class="document-popup-content">
+  <div class="mb-2">
+    <div>
+      {% block title %}
+        <b>{{ document.title }}</b>
+        {% block title-badges %}
+          {% if document.metadata_json.repealed %}
+            <span class="badge bg-danger">{% trans 'repealed' %}</span>
+          {% endif %}
+        {% endblock %}
+      {% endblock %}
+    </div>
+    {% block citation %}
+      {% if document.citation %}
+        <div>
+          <i>{{ document.citation }}</i>
+        </div>
+      {% endif %}
+    {% endblock %}
+  </div>
+  {% block date %}<div>{{ document.date }}</div>{% endblock %}
+</div>
