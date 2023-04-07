@@ -12,10 +12,11 @@ from peachjam.models import CoreDocument, Work
 from peachjam.tasks import update_extracted_citations_for_a_work
 
 
-# monitor background tasks with elastic-apm
+# monitor background tasks with sentry
 @receiver(task_started)
 def bg_task_started(sender, **kwargs):
-    transaction = sentry_sdk.start_transaction(op="task")
+    transaction = sentry_sdk.start_transaction(op="queue.task.bg")
+    transaction.set_tag("transaction_type", "task")
     # fake an entry into the context
     transaction.__enter__()
 
