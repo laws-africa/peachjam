@@ -94,9 +94,8 @@
         >
           <AdvancedSearch
             v-model="advancedFields"
-            :global-search-value="q"
-            @global-search-change="value => q = value"
-            @submit="submit"
+            :format-field-values="formatFieldValues"
+            @submit="advancedSearch"
           />
         </div>
       </div>
@@ -238,6 +237,12 @@ export default {
       q: '',
       drawerOpen: false,
       advancedFields: {
+        global: {
+          all: '',
+          exact: '',
+          any: '',
+          none: ''
+        },
         title: {
           all: '',
           exact: '',
@@ -410,17 +415,20 @@ export default {
     },
 
     clearAdvancedFields () {
-      this.advancedFields.title = '';
-      this.advancedFields.judges = '';
-      this.advancedFields.headnote_holding = '';
-      this.advancedFields.flynote = '';
-      this.advancedFields.content = '';
-      this.advancedFields.date.date_to = null;
-      this.advancedFields.date.date_from = null;
+      Object.keys(this.advancedFields).forEach(key => {
+        Object.keys(this.advancedFields[key]).forEach(fieldKey => {
+          this.advancedFields[key][fieldKey] = '';
+        });
+      });
     },
 
     simpleSearch () {
       this.clearAdvancedFields();
+      this.submit();
+    },
+
+    advancedSearch () {
+      this.q = '';
       this.submit();
     },
 
@@ -555,6 +563,7 @@ export default {
     },
 
     formatFieldValues (key) {
+      if (key === 'date') return;
       let formattedSearchString = '';
       Object.keys(this.advancedFields[key]).forEach(fieldKey => {
         let formattedFieldValue = this.advancedFields[key][fieldKey];
@@ -571,7 +580,7 @@ export default {
 
     async search () {
       // if one of the search fields is true perform search
-      if (this.q || ['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.formatFieldValues(key))) {
+      if (this.q || ['global', 'title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.formatFieldValues(key))) {
         const generateUrl = () => {
           const params = new URLSearchParams();
           if (this.q) params.append('search', this.q);
@@ -604,8 +613,9 @@ export default {
               } else if (value.date_to) {
                 params.append('date__lte', moment(value.date_to).format('YYYY-MM-DD'));
               }
-            } else if (key !== 'date' && this.formatFieldValues(key)) {
-              params.append(`search__${key}`, this.formatFieldValues(key));
+            } else if (this.formatFieldValues(key)) {
+              if (key === 'global') params.set('search', this.formatFieldValues(key));
+              else params.append(`search__${key}`, this.formatFieldValues(key));
             }
           });
           return `${
