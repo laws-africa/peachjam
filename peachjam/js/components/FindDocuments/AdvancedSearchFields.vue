@@ -1,8 +1,8 @@
 <template>
   <div class="">
-    <div class="form-title">
+    <h4>
       {{ $t(formTitle) }}...
-    </div>
+    </h4>
     <div class="row mt-3">
       <div class="col-sm-2">
         <label
@@ -16,6 +16,7 @@
           :value="fieldValue.all"
           :name="`${inputName}-all`"
           type="text"
+          placeholder="Type the important words: cross-examination law refugee"
           class="form-control"
           :aria-describedby="$t(formTitle)"
           @input="e => updateSubfields(e, 'all')"
@@ -32,6 +33,7 @@
           :value="fieldValue.exact"
           :name="`${inputName}-exact`"
           type="text"
+          placeholder="Put exact words in quotes: 'law refugee'"
           class="form-control"
           :aria-describedby="$t(formTitle)"
           @input="e => updateSubfields(e, 'exact')"
@@ -48,6 +50,7 @@
           :value="fieldValue.any"
           :name="`${inputName}-any`"
           type="text"
+          placeholder="Type OR between all the words you want: law OR refugee"
           class="form-control"
           :aria-describedby="$t(formTitle)"
           @input="e => updateSubfields(e, 'any')"
@@ -64,6 +67,7 @@
           :value="fieldValue.none"
           :name="`${inputName}-none`"
           type="text"
+          placeholder="Put a minus sign just before words that you don't want: -Myanmar -'Kibo Potts'"
           class="form-control"
           :aria-describedby="$t(formTitle)"
           @input="e => updateSubfields(e, 'none')"
@@ -91,7 +95,7 @@ export default {
       default: () => ({})
     }
   },
-  emits: ['update-field-values', 'update:modelValue', 'global-search-change'],
+  emits: ['update-field-values'],
   methods: {
     updateSubfields (e, subfield) {
       this.$emit('update-field-values', this.inputName, subfield, e.target.value);
@@ -101,11 +105,6 @@ export default {
 </script>
 
 <style scoped>
-.form-title {
-    font-size: larger;
-    font-weight: bolder;
-}
-
 hr {
     margin-top: 2rem;
 }
