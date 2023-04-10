@@ -59,7 +59,7 @@
     </div>
     <div class="row mt-3">
       <div class="col-sm-2">
-        <label :for="`${inputName}-none`">{{ $t("None of these words:") }}:</label>
+        <label :for="`${inputName}-none`">{{ $t("None of these words") }}:</label>
       </div>
       <div class="col-sm-10">
         <input
