@@ -94,7 +94,6 @@
         >
           <AdvancedSearch
             v-model="advancedFields"
-            :format-field-values="formatFieldValues"
             @submit="advancedSearch"
           />
         </div>
@@ -237,7 +236,7 @@ export default {
       q: '',
       drawerOpen: false,
       advancedFields: {
-        global: {
+        q: {
           all: '',
           exact: '',
           any: '',
@@ -465,18 +464,11 @@ export default {
       // Set advanced fields to url
       Object.keys(this.advancedFields).forEach(key => {
         const value = this.advancedFields[key];
-        if (key === 'date') {
-          if (value.date_from && value.date_to) {
-            params.append('date_from', this.advancedFields.date.date_from);
-            params.append('date_to', this.advancedFields.date.date_to);
-          } else if (value.date_from) {
-            params.append('date_from', this.advancedFields.date.date_from);
-          } else if (value.date_to) {
-            params.append('date_to', this.advancedFields.date.date_to);
+        Object.keys(value).forEach(keyValue => {
+          if (value[keyValue]) {
+            params.append(`${key}_${keyValue}`, value[keyValue]);
           }
-        } else if (key !== 'date' && this.formatFieldValues(key)) {
-          params.append(key, this.formatFieldValues(key));
-        }
+        });
       });
 
       return params.toString();
@@ -496,31 +488,22 @@ export default {
         }
       });
 
-      const advancedSearchFields = Object.keys(this.advancedFields).filter(key => key !== 'date');
       /**
       * if there are advance search fields url params (title, judges, flynote) or show-advanced-tab param, prefill
        * fields and activate advanced tab
       * */
-      if (advancedSearchFields.some(key => params.has(key)) || params.get('show-advanced-tab')) {
-        if (params.has('date_from')) this.advancedFields.date.date_from = params.get('date_from');
-        if (params.has('date_to')) this.advancedFields.date.date_to = params.get('date_to');
-        advancedSearchFields.forEach(key => {
-          if (!params.has(key)) return;
-          const fieldValue = params.get(key);
-          const splitValue = fieldValue.match(/[^\s"']+|['"][^'"]*["']+/g);
-
-          splitValue.forEach((value, index) => {
-            if (value.startsWith('-')) {
-              this.advancedFields[key].none = (this.advancedFields[key].none + ' ' + value).trim();
-            } else if (value.startsWith('"') || value.startsWith("'")) {
-              this.advancedFields[key].exact = (this.advancedFields[key].exact + ' ' + value).trim();
-            } else if (value === '|') {
-              this.advancedFields[key].any = this.advancedFields[key].any || splitValue[index - 1] + ' OR ' + splitValue[index + 1];
-            } else if (splitValue[index - 1] !== '|' && splitValue[index + 1] !== '|') {
-              this.advancedFields[key].all = (this.advancedFields[key].all + ' ' + value).trim();
-            }
-          });
+      let showAdvancedTab = false;
+      Object.keys(this.advancedFields).forEach(key => {
+        const value = this.advancedFields[key];
+        Object.keys(value).forEach(keyValue => {
+          if (params.get(`${key}_${keyValue}`)) {
+            this.advancedFields[key][keyValue] = params.get(`${key}_${keyValue}`);
+            showAdvancedTab = true;
+          }
         });
+      });
+
+      if (showAdvancedTab || params.get('show-advanced-tab')) {
         const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#advanced-search-tab'));
         tabTrigger.show();
       }
@@ -566,21 +549,34 @@ export default {
       if (key === 'date') return;
       let formattedSearchString = '';
       Object.keys(this.advancedFields[key]).forEach(fieldKey => {
-        let formattedFieldValue = this.advancedFields[key][fieldKey];
+        const formattedFieldValue = this.advancedFields[key][fieldKey];
         if (!formattedFieldValue) return;
-
-        if (fieldKey === 'any') {
-          formattedFieldValue = formattedFieldValue.replace('OR', '|');
+        let splitValue = formattedFieldValue.match(/[^\s"',]+|['"][^'"]*["']+/g);
+        if (fieldKey === 'all') {
+          splitValue = splitValue.join(' ');
+        } else if (fieldKey === 'exact') {
+          splitValue = splitValue.map(value => {
+            if (value.startsWith('"') || value.startsWith("'")) return value;
+            else return `"${value}"`;
+          });
+          splitValue = splitValue.join(' ');
+        } else if (fieldKey === 'any') {
+          splitValue = splitValue.join('|');
+        } else if (fieldKey === 'none') {
+          splitValue = splitValue.map(value => {
+            return `-${value}`;
+          });
+          splitValue = splitValue.join(' ');
         }
 
-        formattedSearchString = formattedSearchString + ' ' + formattedFieldValue;
+        formattedSearchString = formattedSearchString + ' ' + splitValue;
       });
       return formattedSearchString.trim();
     },
 
     async search () {
       // if one of the search fields is true perform search
-      if (this.q || ['global', 'title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.formatFieldValues(key))) {
+      if (this.q || ['q', 'title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.formatFieldValues(key))) {
         const generateUrl = () => {
           const params = new URLSearchParams();
           if (this.q) params.append('search', this.q);
@@ -614,7 +610,7 @@ export default {
                 params.append('date__lte', moment(value.date_to).format('YYYY-MM-DD'));
               }
             } else if (this.formatFieldValues(key)) {
-              if (key === 'global') params.set('search', this.formatFieldValues(key));
+              if (key === 'q') params.set('search', this.formatFieldValues(key));
               else params.append(`search__${key}`, this.formatFieldValues(key));
             }
           });
