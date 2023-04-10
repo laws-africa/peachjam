@@ -4,9 +4,9 @@
       <form @submit.prevent="$emit('submit')">
         <div class="">
           <AdvancedSearchFields
-            :field-value="modelValue.global"
+            :field-value="modelValue.q"
             form-title="Search all fields"
-            input-name="global"
+            input-name="q"
             @update-field-values="updateFieldValues"
           />
           <AdvancedSearchFields
@@ -100,10 +100,6 @@ export default {
     modelValue: {
       type: Object,
       default: () => ({})
-    },
-    formatFieldValues: {
-      type: Function,
-      default: () => ''
     }
   },
   emits: ['submit', 'update:modelValue'],
@@ -120,7 +116,7 @@ export default {
     },
     disableDate () {
       // Disable dates if there are no search values
-      return !(['global', 'title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.formatFieldValues(key)));
+      return !(['q', 'title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => Object.values(this.modelValue[key]).join('')));
     }
   },
   watch: {
