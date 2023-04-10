@@ -3,10 +3,12 @@
     <div class="">
       <form @submit.prevent="$emit('submit')">
         <div class="">
-          <!-- <AdvancedSearchFields
+          <AdvancedSearchFields
+            :field-value="modelValue.global"
             form-title="Search all fields"
             input-name="global"
-          /> -->
+            @update-field-values="updateFieldValues"
+          />
           <AdvancedSearchFields
             :field-value="modelValue.title"
             form-title="Title"
@@ -99,12 +101,12 @@ export default {
       type: Object,
       default: () => ({})
     },
-    globalSearchValue: {
-      type: String,
-      default: ''
+    formatFieldValues: {
+      type: Function,
+      default: () => ''
     }
   },
-  emits: ['submit', 'update:modelValue', 'global-search-change'],
+  emits: ['submit', 'update:modelValue'],
   computed: {
     invalidDates () {
       const datesStrings = [this.modelValue.date.date_from, this.modelValue.date.date_to];
@@ -118,7 +120,7 @@ export default {
     },
     disableDate () {
       // Disable dates if there are no search values
-      return !(['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.modelValue[key]) || this.globalSearchValue);
+      return !(['global', 'title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.formatFieldValues(key)));
     }
   },
   watch: {
@@ -152,16 +154,7 @@ export default {
           [e.target.name]: e.target.value
         }
       });
-    },
-    onGlobalSearch (e) {
-      this.$emit('global-search-change', e.target.value);
     }
   }
 };
 </script>
-
-<style scoped>
-.form-title {
-  font-weight: bold;
-}
-</style>
