@@ -29,31 +29,43 @@ class GazetteAdapter(Adapter):
             f"Checking for new gazettes from Gazettes.Africa since {last_refreshed}"
         )
 
-        queryset = (
+        # start building queryset for updated gazettes
+        updated_qs = (
             CoreDocument.objects.filter(doc_type="gazette")
             .non_polymorphic()
             .using("gazettes_africa")
         )
+        # start building queryset for deleted gazettes
+        deleted_qs = Gazette.objects.filter(jurisdiction=self.jurisdiction)
 
         if "-" not in self.jurisdiction:
             # locality code not specified hence None e.g "ZA"
-            queryset = queryset.filter(jurisdiction=self.jurisdiction, locality=None)
+            updated_qs = updated_qs.filter(
+                jurisdiction=self.jurisdiction, locality=None
+            )
         else:
-            queryset = queryset.filter(jurisdiction=self.jurisdiction.split("-")[0])
+            updated_qs = updated_qs.filter(jurisdiction=self.jurisdiction.split("-")[0])
 
             # locality code present e.g. "ZA-gp"
             if self.jurisdiction.split("-")[1] != "*":
-                queryset = queryset.filter(
-                    locality__code=self.jurisdiction.split("-")[1]
-                )
+                locality_code = self.jurisdiction.split("-")[1]
+                updated_qs = updated_qs.filter(locality__code=locality_code)
+                deleted_qs = deleted_qs.filter(locality__code=locality_code)
             else:
                 # fetch all localities for this jurisdiction e.g. "ZA-*"
-                queryset = queryset.exclude(locality=None)
+                updated_qs = updated_qs.exclude(locality=None)
+                deleted_qs = deleted_qs.exclude(locality=None)
+
+        updated_qs = updated_qs.values_list("expression_frbr_uri", flat=True)
+
+        deleted_qs = deleted_qs.exclude(
+            expression_frbr_uri__in=list(updated_qs)
+        ).values_list("expression_frbr_uri", flat=True)
 
         if last_refreshed:
-            queryset = queryset.filter(updated_at__gt=last_refreshed)
+            updated_qs = updated_qs.filter(updated_at__gt=last_refreshed)
 
-        return list(queryset.values_list("expression_frbr_uri", flat=True))
+        return updated_qs, deleted_qs
 
     def update_document(self, expression_frbr_uri):
         log.info(f"Updating new gazette {expression_frbr_uri}")
@@ -123,3 +135,18 @@ class GazetteAdapter(Adapter):
             updated_gazette.extract_citations()
 
             log.info("Update Done.")
+
+    def delete_document(self, expression_frbr_uri):
+        ga_gazette = (
+            CoreDocument.objects.filter(
+                doc_type="gazette", expression_frbr_uri=expression_frbr_uri
+            )
+            .non_polymorphic()
+            .using("gazettes_africa")
+            .first()
+        )
+        local_gazette = Gazette.objects.filter(
+            expression_frbr_uri=expression_frbr_uri
+        ).first()
+        if not ga_gazette and local_gazette:
+            local_gazette.delete()
