@@ -10,7 +10,7 @@ class RedirectWWWMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
 
-        host = request.META.get("HTTP_HOST")
+        host = request.get_host()
         if host and host.startswith("www."):
             non_www = host[4:]
             return redirect(
