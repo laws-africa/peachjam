@@ -39,6 +39,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         notices = super().get_notices()
         repeal = self.get_repeal_info()
         friendly_type = self.get_friendly_type()
+        commenced = self.get_commencement_info()
 
         if self.object.repealed and repeal:
             msg = (
@@ -51,6 +52,10 @@ class LegislationDetailView(BaseDocumentDetailView):
                     "html": mark_safe(_(msg) % repeal),
                 }
             )
+
+        if not commenced:
+            msg = f"This {friendly_type} has not yet commenced and is not yet law."
+            notices.append({"type": messages.WARNING, "html": _(msg)})
 
         points_in_time = self.get_points_in_time()
         work_amendments = self.get_work_amendments()
@@ -136,6 +141,9 @@ class LegislationDetailView(BaseDocumentDetailView):
 
     def get_work_amendments(self):
         return self.object.metadata_json.get("work_amendments", None)
+
+    def get_commencement_info(self):
+        return self.object.metadata_json.get("commenced", None)
 
     def set_unapplied_amendment_notice(self, notices, friendly_type):
         unapplied_amendment_msg = (
