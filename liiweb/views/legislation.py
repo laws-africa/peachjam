@@ -31,7 +31,9 @@ class LegislationListView(TemplateView):
                 repealed=False, metadata_json__principal=True, parent_work=None
             )
         elif self.variant == "subleg":
-            qs = qs.exclude(parent_work=None).filter(repealed=False)
+            qs = qs.exclude(parent_work=None).filter(
+                repealed=False, metadata_json__principal=True
+            )
         return qs
 
     def get_context_data(self, **kwargs):
