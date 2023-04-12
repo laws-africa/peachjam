@@ -335,6 +335,11 @@ class GenericDocumentResource(BaseDocumentResource):
         attribute="nature",
         widget=DocumentNatureWidget(DocumentNature, field="code"),
     )
+    work_frbr_uri = fields.Field(
+        column_name="work_frbr_uri",
+        attribute="work_fbr_uri",
+        widget=CharRequiredWidget(field="work_frbr_uri"),
+    )
 
     required_fields = (
         "author",
@@ -352,18 +357,19 @@ class GenericDocumentResource(BaseDocumentResource):
 
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
-        frbr_uri = FrbrUri.parse(row["work_frbr_uri"])
-        row["language"] = frbr_uri.default_language
-        row["jurisdiction"] = str(frbr_uri.country).upper()
-        row["locality"] = frbr_uri.locality
-        row["frbr_uri_number"] = frbr_uri.number
-        row["frbr_uri_doctype"] = frbr_uri.doctype
-        row["frbr_uri_subtype"] = frbr_uri.subtype
-        row["frbr_uri_date"] = frbr_uri.date
+        if row.get("work_frbr_uri"):
+            frbr_uri = FrbrUri.parse(row["work_frbr_uri"])
+            row["language"] = frbr_uri.default_language
+            row["jurisdiction"] = str(frbr_uri.country).upper()
+            row["locality"] = frbr_uri.locality
+            row["frbr_uri_number"] = frbr_uri.number
+            row["frbr_uri_doctype"] = frbr_uri.doctype
+            row["frbr_uri_subtype"] = frbr_uri.subtype
+            row["frbr_uri_date"] = frbr_uri.date
 
-        if frbr_uri.actor:
-            row["frbr_uri_actor"] = frbr_uri.actor
-            row["author"] = frbr_uri.actor
+            if frbr_uri.actor:
+                row["frbr_uri_actor"] = frbr_uri.actor
+                row["author"] = frbr_uri.actor
 
 
 class ManyToManyFieldWidget(ManyToManyWidget):
