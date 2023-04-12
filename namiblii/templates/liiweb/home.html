@@ -14,6 +14,14 @@
          alt="lac-logo"/>
   </div>
 {% endblock %}
+{% block hero-headings %}
+  <h1 class="mb-4">{% trans 'Welcome to the Namibia Legal Information Institute' %}</h1>
+  <h4 class="mb-4">
+    {% blocktrans trimmed %}
+      NamibLII publishes the law of Namibia for free access to all. We are a member of the international free access to law movement. Read, use, and share the law freely.
+    {% endblocktrans %}
+  </h4>
+{% endblock %}
 {% block second-col-about %}
   <div>
     <strong>{% trans 'About' %}</strong>
