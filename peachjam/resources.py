@@ -97,7 +97,23 @@ class SourceFileWidget(CharRequiredWidget):
 
                     elif mime in DOC_MIMETYPES:
                         suffix = splitext(file.name)[1].lstrip(".")
-                        soffice_convert(file, suffix, "html")
+                        # retry when conversion fails
+                        attempt = 0
+                        while attempt <= 3:
+                            attempt += 1
+                            try:
+                                soffice_convert(file, suffix, "html")
+                                if attempt > 1:
+                                    logger.info(f"soffice success on attempt {attempt}")
+                                break
+                            except SOfficeError as e:
+                                logger.warning(
+                                    f"soffice error on attempt {attempt} of 3",
+                                    exc_info=e,
+                                )
+                                if attempt >= 3:
+                                    raise
+
             return value
         except (
             requests.exceptions.RequestException,
