@@ -100,6 +100,7 @@ class SourceFileWidget(CharRequiredWidget):
                         # retry when conversion fails
                         attempt = 0
                         while attempt <= 3:
+                            file.seek(0)
                             attempt += 1
                             try:
                                 soffice_convert(file, suffix, "html")
