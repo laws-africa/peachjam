@@ -12,6 +12,8 @@ from cobalt import FrbrUri
 from countries_plus.models import Country
 from dateutil.parser import parse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import Group
 from django.core.files.base import File
 from django.forms import ValidationError
 from django.utils.text import slugify
@@ -578,3 +580,24 @@ class ArticleResource(resources.ModelResource):
             "topics",
             "published",
         )
+
+
+class UserResource(resources.ModelResource):
+    groups = fields.Field(
+        column_name="groups",
+        attribute="groups",
+        widget=ManyToManyFieldWidget(Group, separator="|", field="name"),
+    )
+
+    class Meta:
+        model = User
+        exclude = ("id",)
+        import_id_fields = ("email", "username")
+        # export_order = ("first_name", "last_name", "email", "groups")
+
+    def before_save_instance(self, instance, using_transactions, dry_run):
+        if not instance.pk:
+            instance.username = instance.email
+            instance.password = make_password(instance.password)
+            instance.is_staff = True
+            instance.save()
