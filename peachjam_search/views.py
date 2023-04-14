@@ -292,9 +292,15 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # search multiple language indexes
-        self.index = [self.document._index._name] + [
-            f"{self.document._index._name}_{lang}" for lang in ANALYZERS.keys()
-        ]
+        self.index = (
+            [self.document._index._name]
+            + [f"{self.document._index._name}_{lang}" for lang in ANALYZERS.keys()]
+            + [
+                f"{i}_{lang}"
+                for i in settings.EXTRA_SEARCH_INDEXES
+                for lang in ANALYZERS.keys()
+            ]
+        )
         self.search = self.search.index(self.index)
 
     @method_decorator(cache_page(CACHE_SECS))
