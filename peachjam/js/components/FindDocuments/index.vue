@@ -551,25 +551,29 @@ export default {
       Object.keys(this.advancedFields[key]).forEach(fieldKey => {
         const formattedFieldValue = this.advancedFields[key][fieldKey];
         if (!formattedFieldValue) return;
-        let splitValue = formattedFieldValue.match(/[^\s"',]+|['"][^'"]*["']+/g);
+        let splitValue = formattedFieldValue.match(/\w+|"[^"]+"/g);
         if (fieldKey === 'all') {
           splitValue = splitValue.join(' ');
         } else if (fieldKey === 'exact') {
-          splitValue = splitValue.map(value => {
-            if (value.startsWith('"') || value.startsWith("'")) return value;
-            else return `"${value}"`;
+          let exactPhrase = '';
+          let splitPhrase = '';
+          splitValue.forEach(value => {
+            if (value.startsWith('"')) {
+              splitPhrase = splitPhrase + ' ' + `"${exactPhrase.trim()}"` + ' ' + value;
+              exactPhrase = '';
+            } else exactPhrase = exactPhrase + ' ' + value;
           });
-          splitValue = splitValue.join(' ');
+          splitValue = exactPhrase ? splitPhrase + ' ' + `"${exactPhrase.trim()}"` : splitPhrase;
         } else if (fieldKey === 'any') {
-          splitValue = splitValue.join('|');
+          splitValue = `(${splitValue.join('|')})`;
         } else if (fieldKey === 'none') {
           splitValue = splitValue.map(value => {
             return `-${value}`;
           });
-          splitValue = splitValue.join(' ');
+          splitValue = splitValue.join('');
         }
 
-        formattedSearchString = formattedSearchString + ' ' + splitValue;
+        formattedSearchString = formattedSearchString + ' ' + splitValue.trim();
       });
       return formattedSearchString.trim();
     },
@@ -614,6 +618,7 @@ export default {
               else params.append(`search__${key}`, this.formatFieldValues(key));
             }
           });
+          console.log(params.toString().toString());
           return `${
               window.location.origin
           }/search/api/documents/?${params.toString()}`;
