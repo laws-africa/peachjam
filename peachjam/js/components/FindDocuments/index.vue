@@ -618,7 +618,6 @@ export default {
               else params.append(`search__${key}`, this.formatFieldValues(key));
             }
           });
-          console.log(params.toString().toString());
           return `${
               window.location.origin
           }/search/api/documents/?${params.toString()}`;
@@ -661,7 +660,7 @@ export default {
 <style scoped>
 .search-input-container {
   background-color: white;
-  /* width: 66%; */
+  width: 66%;
   margin-left: auto;
   margin-right: auto;
   padding-bottom: 1rem;
