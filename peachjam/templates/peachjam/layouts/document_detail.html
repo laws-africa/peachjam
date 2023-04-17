@@ -197,7 +197,8 @@
                             </dt>
                             <dd class="text-muted">
                               {% for judge in judges %}
-                                {% if not forloop.last %}{{ judge.name }},{% endif %}
+                                {{ judge.name }}
+                                {% if not forloop.last %},{% endif %}
                               {% endfor %}
                             </dd>
                           {% endif %}
