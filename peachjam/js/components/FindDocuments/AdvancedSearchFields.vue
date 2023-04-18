@@ -1,19 +1,18 @@
 <template>
   <div class="">
+    <hr>
     <h4>
       {{ $t(formTitle) }}...
     </h4>
     <div class="row mt-3">
       <div class="col-sm-2">
         <label
-          class="col-form-label"
           :for="`${inputName}-all`"
         >{{ $t("All these words") }}:</label>
       </div>
       <div class="col-sm-10">
         <input
           :id="`${inputName}-all`"
-          :value="fieldValue.all"
           :name="`${inputName}-all`"
           type="text"
           class="form-control"
@@ -29,7 +28,6 @@
       <div class="col-sm-10">
         <input
           :id="`${inputName}-exact`"
-          :value="fieldValue.exact"
           :name="`${inputName}-exact`"
           type="text"
           class="form-control"
@@ -45,7 +43,6 @@
       <div class="col-sm-10">
         <input
           :id="`${inputName}-any`"
-          :value="fieldValue.any"
           :name="`${inputName}-any`"
           type="text"
           class="form-control"
@@ -61,7 +58,6 @@
       <div class="col-sm-10">
         <input
           :id="`${inputName}-none`"
-          :value="fieldValue.none"
           :name="`${inputName}-none`"
           type="text"
           class="form-control"
@@ -70,7 +66,6 @@
         >
       </div>
     </div>
-    <hr>
   </div>
 </template>
 
@@ -86,15 +81,18 @@ export default {
       type: String,
       default: ''
     },
-    fieldValue: {
+    fieldValues: {
       type: Object,
       default: () => ({})
     }
   },
-  emits: ['update-field-values'],
+  emits: ['update-field-values', 'update:fieldValues'],
   methods: {
     updateSubfields (e, subfield) {
-      this.$emit('update-field-values', this.inputName, subfield, e.target.value);
+      this.$emit('update:fieldValues', {
+        ...this.fieldValues, [this.inputName]: { ...this.fieldValues[this.inputName], [subfield]: e.target.value }
+      });
+    //   this.$emit('update-field-values', this.inputName, subfield, e.target.value);
     }
   }
 };
