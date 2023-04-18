@@ -5,6 +5,8 @@ from ckeditor.widgets import CKEditorWidget
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericStackedInline
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
@@ -69,9 +71,12 @@ from peachjam.resources import (
     ArticleResource,
     GenericDocumentResource,
     JudgmentResource,
+    UserResource,
 )
 from peachjam.tasks import extract_citations as extract_citations_task
 from peachjam_search.tasks import search_model_saved
+
+User = get_user_model()
 
 
 class EntityProfileForm(forms.ModelForm):
@@ -668,7 +673,6 @@ class JournalAdmin(DocumentAdmin):
 
 @admin.register(ExternalDocument)
 class ExternalDocumentAdmin(DocumentAdmin):
-
     prepopulated_fields = {"frbr_uri_number": ("title",)}
 
     def get_form(self, request, obj=None, **kwargs):
@@ -691,6 +695,10 @@ class OutcomeAdmin(admin.ModelAdmin):
     list_display = ("name",)
 
 
+class UserAdminCustom(ImportExportMixin, UserAdmin):
+    resource_class = UserResource
+
+
 admin.site.register(
     [
         Locality,
@@ -709,5 +717,8 @@ admin.site.register(GenericDocument, GenericDocumentAdmin)
 admin.site.register(Legislation, LegislationAdmin)
 admin.site.register(LegalInstrument, LegalInstrumentAdmin)
 admin.site.register(Judgment, JudgmentAdmin)
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdminCustom)
 
 admin.site.site_header = settings.PEACHJAM["APP_NAME"]
