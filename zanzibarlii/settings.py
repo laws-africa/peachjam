@@ -4,6 +4,11 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["zanzibarlii.apps.ZanzibarLIIConfig"] + INSTALLED_APPS  # noqa
 
+
+# Custom middleware to force the I18N machinery to always choose settings.LANGUAGE_CODE
+# as the default initial language, unless another one is set via sessions or cookies
+MIDDLEWARE = ["peachjam.middleware.ForceDefaultLanguageMiddleware"] + MIDDLEWARE  # noqa
+
 LANGUAGE_CODE = "sw"
 
 LANGUAGES = [
