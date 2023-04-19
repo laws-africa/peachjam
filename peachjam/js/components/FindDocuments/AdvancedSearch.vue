@@ -361,26 +361,26 @@ export default {
       this.formatFieldValues();
       this.showAdditionalOptions = false;
       this.$emit('submit');
-    },
-    loadFieldValues () {
-      Object.keys(this.modelValue).forEach(key => {
-        if (this.modelValue[key]) {
-          const splitValue = this.modelValue[key].match(/[^\s"']+|['"][^'"]*["']+/g);
-
-          splitValue.forEach((value, index) => {
-            if (value.startsWith('-')) {
-              this.fieldValues[key].none = (this.fieldValues[key].none + ' ' + value).trim();
-            } else if (value.startsWith('"') || value.startsWith("'")) {
-              this.fieldValues[key].exact = (this.fieldValues[key].exact + ' ' + value).trim();
-            } else if (value === '|') {
-              this.fieldValues[key].any = this.fieldValues[key].any || splitValue[index - 1] + ' OR ' + splitValue[index + 1];
-            } else if (splitValue[index + 1] !== '|' && splitValue[index + 1] !== '|') {
-              this.fieldValues[key].all = (this.fieldValues[key].all + ' ' + value).trim();
-            }
-          });
-        }
-      });
     }
+    // loadFieldValues () {
+    //   Object.keys(this.modelValue).forEach(key => {
+    //     if (this.modelValue[key]) {
+    //       const splitValue = this.modelValue[key].match(/[^\s"']+|['"][^'"]*["']+/g);
+
+    //       splitValue.forEach((value, index) => {
+    //         if (value.startsWith('-')) {
+    //           this.fieldValues[key].none = (this.fieldValues[key].none + ' ' + value).trim();
+    //         } else if (value.startsWith('"') || value.startsWith("'")) {
+    //           this.fieldValues[key].exact = (this.fieldValues[key].exact + ' ' + value).trim();
+    //         } else if (value === '|') {
+    //           this.fieldValues[key].any = this.fieldValues[key].any || splitValue[index - 1] + ' OR ' + splitValue[index + 1];
+    //         } else if (splitValue[index + 1] !== '|' && splitValue[index + 1] !== '|') {
+    //           this.fieldValues[key].all = (this.fieldValues[key].all + ' ' + value).trim();
+    //         }
+    //       });
+    //     }
+    //   });
+    // }
   }
 };
 </script>
