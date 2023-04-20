@@ -257,6 +257,8 @@ ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
     "peachjam_search.tasks.BackgroundTaskSearchProcessor"
 )
 
+EXTRA_SEARCH_INDEXES = []
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
