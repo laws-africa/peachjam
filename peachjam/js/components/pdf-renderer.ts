@@ -209,6 +209,12 @@ class PdfRenderer {
         });
         elementRendered.appendChild(textLayer);
 
+        // annotations
+        const annotationData = await page.getAnnotations();
+        if (annotationData.length) {
+          elementRendered.appendChild(await this.addPdfAnnotations(pdfjsLib, page, viewport, annotationData));
+        }
+
         // Image previews
         const panelPreview = document.createElement('button');
         panelPreview.dataset.page = String(index + 1);
@@ -226,6 +232,44 @@ class PdfRenderer {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  /** Add PDF-sourced annotations, such as links
+   */
+  async addPdfAnnotations (pdfjsLib: iPdfLib, page: any, viewport: any, annotationData: any) {
+    const annotationLayer = document.createElement('div');
+    annotationLayer.classList.add('annotationLayer');
+    pdfjsLib.AnnotationLayer.render({
+      viewport: viewport.clone({ dontFlip: true }),
+      div: annotationLayer,
+      annotations: annotationData,
+      page: page,
+      linkService: {
+        addLinkAttributes (a: HTMLAnchorElement, url: string, newWindow: boolean) {
+          a.setAttribute('href', url);
+          a.setAttribute('target', '_blank');
+        },
+        getDestinationHash (dst: any) {
+          return '#' + dst;
+        }
+      }
+    });
+
+    // handle link clicks
+    annotationLayer.querySelectorAll('.linkAnnotation').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        const a = el.querySelector('a');
+        if (a) {
+          const url = a.getAttribute('href') || '';
+          if (url.startsWith('#')) {
+            document.location = url;
+          } else {
+            window.open(url, '_blank');
+          }
+        }
+      });
+    });
+    return annotationLayer;
   }
 
   decoratePdf () {
