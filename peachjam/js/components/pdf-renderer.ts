@@ -14,77 +14,76 @@ interface iPdfLib {
   GlobalWorkerOptions: GlobalWorkerOptionsType,
 }
 
+async function asyncForEach (array: any[], callback: (arg0: any, arg1: number, arg2: any[]) => any) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
 class PdfRenderer {
-  protected pdf: any;
+  protected pdfUrl: any;
   protected pdfContentWrapper: HTMLElement | null;
   protected root: HTMLElement;
-  protected scrollListenerActive: boolean;
-  protected pdfContentMarks: any[];
-  public onPreviewPanelClick: () => void;
-  public onPdfLoaded: () => void;
+  protected scrollListenerActive: boolean = true;
+  protected pdfContentMarks: any[] = [];
+  protected progressBarElement: HTMLElement | null;
+  public onPreviewPanelClick: () => void = () => {};
+  public onPdfLoaded: () => void = () => {};
 
   constructor (root: HTMLElement) {
     this.root = root;
-    this.pdf = root.dataset.pdf;
+    this.pdfUrl = root.dataset.pdf;
     this.pdfContentWrapper = root.querySelector('.pdf-content');
-    this.scrollListenerActive = true;
-    this.pdfContentMarks = [];
-    this.onPreviewPanelClick = () => {};
-    this.root.addEventListener('preview-panel-clicked', () => {
-      this.onPreviewPanelClick();
-    });
-    this.onPdfLoaded = () => {};
-    this.root.addEventListener('pdf-loaded', () => this.onPdfLoaded());
-
-    const observer = new MutationObserver(() => {
-      const progressBarElement: HTMLElement | null = root.querySelector('.progress-bar');
-      const loadingProgress = root.getAttribute('data-loading-progress');
-      if (progressBarElement && loadingProgress) {
-        progressBarElement.style.width = `${parseFloat(loadingProgress) * 100}%`;
-        progressBarElement.innerText = `${Math.ceil(parseFloat(loadingProgress) * 100)}%`;
-      }
-    });
-    observer.observe(this.root, {
-      attributeFilter: ['data-loading-progress']
-    });
-
+    this.progressBarElement = root.querySelector('.progress-bar');
     this.root.querySelector('button[data-load-doc-button]')?.addEventListener('click', () => {
       this.loadPdf();
     });
+    if (!Object.keys(this.root.dataset).includes('largePdf')) {
+      this.loadPdf();
+    }
+  }
 
-    if (Object.keys(this.root.dataset).includes('largePdf')) return;
-    this.loadPdf();
+  /**
+   * Update loading progress bar
+   * @param progress a percentage value between 0 and 100
+   */
+  setLoadingProgress (progress: number) {
   }
 
   loadPdf () {
     this.root.removeAttribute('data-large-pdf');
     this.setupPdfAndPreviewPanels().then(() => {
-      this.root.removeAttribute('data-loading-progress');
-      this.root.removeAttribute('data-pdf-loading');
-      this.root.dispatchEvent(new CustomEvent('pdf-loaded'));
-
-      const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-content__page'));
-      const previewPanels = Array.from(this.root.querySelectorAll('.preview-panel'));
-      for (const previewPanel of previewPanels) {
-        previewPanel.addEventListener('click', (e) => this.handlePreviewPanelClick(e));
-      }
-
-      window.addEventListener('scroll', debounce(() => {
-        if (!this.scrollListenerActive) return;
-        let current: HTMLElement | null;
-        for (const page of pages) {
-          if (!(window.scrollY >= page.offsetTop)) return;
-          current = this.root.querySelector(`.preview-panel[data-page="${page.dataset.page}"]`);
-          if (!current) return;
-          this.activatePreviewPanel(current);
-          const scrollableContainer = this.root.querySelector('[data-preview-scroll-container]');
-          if (!scrollableContainer) return;
-          scrollableContainer.scrollTop = (current.offsetTop + current.clientHeight) - (current.offsetHeight * 2);
-        }
-      }, 20));
+      this.setupPreviewPanels();
+      this.onPdfLoaded();
     }).catch((e:ErrorEvent) => {
       this.root.innerText = e.message;
     });
+  }
+
+  setupPreviewPanels () {
+    const pages: Array<HTMLElement> = Array.from(this.root.querySelectorAll('.pdf-content__page'));
+    const previewPanels = Array.from(this.root.querySelectorAll('.preview-panel'));
+    for (const previewPanel of previewPanels) {
+      previewPanel.addEventListener('click', (e) => this.handlePreviewPanelClick(e));
+    }
+
+    window.addEventListener('scroll', debounce(() => {
+      if (!this.scrollListenerActive) return;
+
+      let current: HTMLElement | null;
+      for (const page of pages) {
+        if (!(window.scrollY >= page.offsetTop)) return;
+
+        current = this.root.querySelector(`.preview-panel[data-page="${page.dataset.page}"]`);
+        if (current) {
+          this.activatePreviewPanel(current);
+          const scrollableContainer = this.root.querySelector('[data-preview-scroll-container]');
+          if (scrollableContainer) {
+            scrollableContainer.scrollTop = (current.offsetTop + current.clientHeight) - (current.offsetHeight * 2);
+          }
+        }
+      }
+    }, 20));
   }
 
   activatePreviewPanel (nextActivePreviewPanel: HTMLElement | EventTarget) {
@@ -99,7 +98,7 @@ class PdfRenderer {
   }
 
   handlePreviewPanelClick (e: Event) {
-    this.root.dispatchEvent(new CustomEvent('preview-panel-clicked'));
+    this.onPreviewPanelClick();
     if (!e.currentTarget) return;
     this.activatePreviewPanel(e.currentTarget);
     if (!(e.currentTarget instanceof HTMLElement)) return;
@@ -127,38 +126,35 @@ class PdfRenderer {
     if (!pdfjsLib) {
       throw new Error('Failed to load pdf.js');
     }
-    const asyncForEach = async (array: any[], callback: (arg0: any, arg1: number, arg2: any[]) => any) => {
-      for (let index = 0; index < array.length; index++) {
-        await callback(array[index], index, array);
-      }
-    };
     pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/lib/pdfjs/pdf.worker.js';
-
-    const loadingTask = pdfjsLib.getDocument(this.pdf);
 
     this.root.removeAttribute('data-pdf-standby');
     this.root.setAttribute('data-pdf-loading', '');
-    loadingTask.onProgress = (data: { loaded: number }) => {
-      if (this.root.dataset.pdfSize) {
-        /*
-        * The progress bar represents the progress of two processes
-        *  1) loading the pdf data (first 50%)
-        *  2) creating the pdf associating html and inserting it into the DOM (last 50%)
-        * */
-        this.root.setAttribute('data-loading-progress', `${data.loaded / parseInt(this.root.dataset.pdfSize) / 2}`);
+
+    // load the PDF asynchronously
+    const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
+    loadingTask.onProgress = (data: { loaded: number, total: number }) => {
+      if (data.total && this.progressBarElement) {
+        const progress = data.loaded / data.total * 100;
+        this.progressBarElement.style.width = `${progress}%`;
+        this.progressBarElement.innerText = `${Math.ceil(progress)}%`;
       }
     };
 
     try {
       const pdf = await loadingTask.promise;
+      this.root.removeAttribute('data-pdf-loading');
+
       const numPages = pdf.numPages;
       const listOfGetPages = Array.from(Array(numPages), (_, index) => pdf.getPage(index + 1));
       const pages = await Promise.all(listOfGetPages);
+      const previewPanelsContainer = this.root.querySelector('.pdf-previews');
+      const docElement = document.querySelector('[data-document-element]');
+      if (!docElement) return;
+      const docElementWidth = docElement.clientWidth || 0;
+      const scale = 2;
+
       await asyncForEach(pages, async (page, index) => {
-        const docElement = document.querySelector('[data-document-element]');
-        if (!docElement) return;
-        const docElementWidth = docElement.clientWidth || 0;
-        const scale = 2;
         let viewport = page.getViewport({ scale });
 
         const canvas = document.createElement('canvas');
@@ -180,17 +176,15 @@ class PdfRenderer {
         elementRendered.dataset.page = String(index + 1);
         elementRendered.classList.add('pdf-content__page');
         elementRendered.style.position = 'relative';
-
-        const renderTask = page.render(renderContext);
         elementRendered.appendChild(canvas);
         // Canvas must be mounted first so textLayer can get offset values
         if (this.pdfContentWrapper) {
           this.pdfContentWrapper.appendChild(elementRendered);
         }
 
-        await renderTask.promise;
+        // render the page
+        await page.render(renderContext).promise;
 
-        const textContent = await page.getTextContent();
         const textLayer = document.createElement('div');
         textLayer.classList.add('textLayer');
 
@@ -208,12 +202,18 @@ class PdfRenderer {
         textLayer.style.width = `${viewport.width}px`;
 
         pdfjsLib.renderTextLayer({
-          textContent,
+          textContent: await page.getTextContent(),
           container: textLayer,
           viewport,
           textDivs: []
         });
         elementRendered.appendChild(textLayer);
+
+        // annotations
+        const annotationData = await page.getAnnotations();
+        if (annotationData.length) {
+          elementRendered.appendChild(await this.addPdfAnnotations(pdfjsLib, page, viewport, annotationData));
+        }
 
         // Image previews
         const panelPreview = document.createElement('button');
@@ -225,14 +225,8 @@ class PdfRenderer {
         pageNumber.classList.add('preview-panel__page-number');
         pageNumber.innerText = String(index + 1);
         panelPreview.append(target, pageNumber);
-        const previewPanelsContainer = this.root.querySelector('.pdf-previews');
         if (previewPanelsContainer) {
           previewPanelsContainer.appendChild(panelPreview);
-        }
-        const currentLoadingProgress = this.root.getAttribute('data-loading-progress');
-        if (currentLoadingProgress) {
-          const progressIncrement = 0.5 / pages.length;
-          this.root.setAttribute('data-loading-progress', `${parseFloat(currentLoadingProgress) + progressIncrement}`);
         }
       });
     } catch (e) {
@@ -240,9 +234,48 @@ class PdfRenderer {
     }
   }
 
+  /** Add PDF-sourced annotations, such as links
+   */
+  async addPdfAnnotations (pdfjsLib: iPdfLib, page: any, viewport: any, annotationData: any) {
+    const annotationLayer = document.createElement('div');
+    annotationLayer.classList.add('annotationLayer');
+    pdfjsLib.AnnotationLayer.render({
+      viewport: viewport.clone({ dontFlip: true }),
+      div: annotationLayer,
+      annotations: annotationData,
+      page: page,
+      linkService: {
+        addLinkAttributes (a: HTMLAnchorElement, url: string, newWindow: boolean) {
+          a.setAttribute('href', url);
+          a.setAttribute('target', '_blank');
+        },
+        getDestinationHash (dst: any) {
+          return '#' + dst;
+        }
+      }
+    });
+
+    // handle link clicks
+    annotationLayer.querySelectorAll('.linkAnnotation').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        const a = el.querySelector('a');
+        if (a) {
+          const url = a.getAttribute('href') || '';
+          if (url.startsWith('#')) {
+            document.location = url;
+          } else {
+            window.open(url, '_blank');
+          }
+        }
+      });
+    });
+    return annotationLayer;
+  }
+
   decoratePdf () {
     const marks: { style: { backgroundColor: string; }; setAttribute: (arg0: string, arg1: string) => void; }[] = [];
-    items.forEach(item => {
+
+    for (const item of items) {
       const range = targetToRange(item.target, this.pdfContentWrapper);
       markRange(range, 'a', (element: { style: { backgroundColor: string; }; setAttribute: (arg0: string, arg1: string) => void; }) => {
         element.style.backgroundColor = 'red';
@@ -254,7 +287,7 @@ class PdfRenderer {
         ...item,
         marks
       });
-    });
+    }
   }
 }
 
