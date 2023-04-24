@@ -14,6 +14,12 @@ interface iPdfLib {
   GlobalWorkerOptions: GlobalWorkerOptionsType,
 }
 
+async function asyncForEach (array: any[], callback: (arg0: any, arg1: number, arg2: any[]) => any) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
 class PdfRenderer {
   protected pdfUrl: any;
   protected pdfContentWrapper: HTMLElement | null;
@@ -26,7 +32,7 @@ class PdfRenderer {
 
   constructor (root: HTMLElement) {
     this.root = root;
-    this.pdfUrl = 'https://archive.gazettes.africa/archive/za/2023/za-government-gazette-regulation-gazette-dated-2023-01-31-no-47970.pdf'; // root.dataset.pdf;
+    this.pdfUrl = root.dataset.pdf;
     this.pdfContentWrapper = root.querySelector('.pdf-content');
     this.progressBarElement = root.querySelector('.progress-bar');
     this.root.querySelector('button[data-load-doc-button]')?.addEventListener('click', () => {
@@ -42,16 +48,11 @@ class PdfRenderer {
    * @param progress a percentage value between 0 and 100
    */
   setLoadingProgress (progress: number) {
-    if (this.progressBarElement) {
-      this.progressBarElement.style.width = `${progress}%`;
-      this.progressBarElement.innerText = `${Math.ceil(progress)}%`;
-    }
   }
 
   loadPdf () {
     this.root.removeAttribute('data-large-pdf');
     this.setupPdfAndPreviewPanels().then(() => {
-      this.root.removeAttribute('data-pdf-loading');
       this.setupPreviewPanels();
       this.onPdfLoaded();
     }).catch((e:ErrorEvent) => {
@@ -127,39 +128,33 @@ class PdfRenderer {
     }
     pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/lib/pdfjs/pdf.worker.js';
 
-    const asyncForEach = async (array: any[], callback: (arg0: any, arg1: number, arg2: any[]) => any) => {
-      for (let index = 0; index < array.length; index++) {
-        await callback(array[index], index, array);
-      }
-    };
+    this.root.removeAttribute('data-pdf-standby');
+    this.root.setAttribute('data-pdf-loading', '');
 
     // load the PDF asynchronously
     const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
-
-    this.root.removeAttribute('data-pdf-standby');
-    this.root.setAttribute('data-pdf-loading', '');
     loadingTask.onProgress = (data: { loaded: number, total: number }) => {
-      if (data.total) {
-        /*
-        * The progress bar represents the progress of two processes
-        *  1) loading the pdf data (first 50%)
-        *  2) creating the pdf associating html and inserting it into the DOM (last 50%)
-        * */
-        this.setLoadingProgress(data.loaded / data.total / 2 * 100);
+      if (data.total && this.progressBarElement) {
+        const progress = data.loaded / data.total * 100;
+        this.progressBarElement.style.width = `${progress}%`;
+        this.progressBarElement.innerText = `${Math.ceil(progress)}%`;
       }
     };
 
     try {
       const pdf = await loadingTask.promise;
+      this.root.removeAttribute('data-pdf-loading');
+
       const numPages = pdf.numPages;
       const listOfGetPages = Array.from(Array(numPages), (_, index) => pdf.getPage(index + 1));
       const pages = await Promise.all(listOfGetPages);
+      const previewPanelsContainer = this.root.querySelector('.pdf-previews');
+      const docElement = document.querySelector('[data-document-element]');
+      if (!docElement) return;
+      const docElementWidth = docElement.clientWidth || 0;
+      const scale = 2;
 
       await asyncForEach(pages, async (page, index) => {
-        const docElement = document.querySelector('[data-document-element]');
-        if (!docElement) return;
-        const docElementWidth = docElement.clientWidth || 0;
-        const scale = 2;
         let viewport = page.getViewport({ scale });
 
         const canvas = document.createElement('canvas');
@@ -181,17 +176,15 @@ class PdfRenderer {
         elementRendered.dataset.page = String(index + 1);
         elementRendered.classList.add('pdf-content__page');
         elementRendered.style.position = 'relative';
-
-        const renderTask = page.render(renderContext);
         elementRendered.appendChild(canvas);
         // Canvas must be mounted first so textLayer can get offset values
         if (this.pdfContentWrapper) {
           this.pdfContentWrapper.appendChild(elementRendered);
         }
 
-        await renderTask.promise;
+        // render the page
+        await page.render(renderContext).promise;
 
-        const textContent = await page.getTextContent();
         const textLayer = document.createElement('div');
         textLayer.classList.add('textLayer');
 
@@ -209,7 +202,7 @@ class PdfRenderer {
         textLayer.style.width = `${viewport.width}px`;
 
         pdfjsLib.renderTextLayer({
-          textContent,
+          textContent: await page.getTextContent(),
           container: textLayer,
           viewport,
           textDivs: []
@@ -226,12 +219,9 @@ class PdfRenderer {
         pageNumber.classList.add('preview-panel__page-number');
         pageNumber.innerText = String(index + 1);
         panelPreview.append(target, pageNumber);
-        const previewPanelsContainer = this.root.querySelector('.pdf-previews');
         if (previewPanelsContainer) {
           previewPanelsContainer.appendChild(panelPreview);
         }
-        // first 50% is loading the file
-        this.setLoadingProgress(50 + (index + 1) / numPages * 100 / 2);
       });
     } catch (e) {
       console.log(e);
