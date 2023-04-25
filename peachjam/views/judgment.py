@@ -15,7 +15,6 @@ class JudgmentListView(TemplateView):
 
         court_classes = (
             CourtClass.objects.select_related("courts")
-            .order_by("name", "courts__name")
             .values("name", "courts__name", "courts__code")
             .all()
         )
