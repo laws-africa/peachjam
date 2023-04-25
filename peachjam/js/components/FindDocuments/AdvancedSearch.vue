@@ -25,7 +25,7 @@
               class="form-control"
               :aria-describedby="$t('Title')"
               :placeholder="$t('Search documents by title')"
-              :value="modelValue.title"
+              :value="modelValue.title.q"
               @input="onChange"
             >
           </div>
@@ -38,7 +38,7 @@
               class="form-control"
               :aria-describedby="$t('Judges')"
               :placeholder="$t('Search documents by judges')"
-              :value="modelValue.judges"
+              :value="modelValue.judges.q"
               @input="onChange"
             >
           </div>
@@ -52,7 +52,7 @@
               class="form-control"
               :aria-describedby="$t('Headnote holding')"
               :placeholder="$t('Search documents by headnote holding')"
-              :value="modelValue.headnote_holding"
+              :value="modelValue.headnote_holding.q"
               @input="onChange"
             >
           </div>
@@ -66,7 +66,7 @@
               class="form-control"
               :aria-describedby="$t('Flynote')"
               :placeholder="$t('Search documents by flynote')"
-              :value="modelValue.flynote"
+              :value="modelValue.flynote.q"
               @input="onChange"
             >
           </div>
@@ -80,7 +80,7 @@
               class="form-control"
               :aria-describedby="$t('Content')"
               :placeholder="$t('Search documents by content')"
-              :value="modelValue.content"
+              :value="modelValue.content.q"
               @input="onChange"
             >
           </div>
@@ -94,7 +94,7 @@
               class="form-control"
               :aria-describedby="$t('Content')"
               :placeholder="$t('Search documents by content')"
-              :value="modelValue.content"
+              :value="modelValue.content.q"
               @input="onChange"
             >
           </div> -->
@@ -137,44 +137,42 @@
           </div>
         </div>
 
-        <div class="col-6">
-          <label>
-            <input
-              v-model="showAdditionalOptions"
-              type="checkbox"
-            >
-            {{ $t('Show additional options') }}
-          </label>
-        </div>
+        <label>
+          <input
+            v-model="showAdditionalOptions"
+            type="checkbox"
+          >
+          {{ $t('Show additional options') }}
+        </label>
 
         <div v-if="showAdditionalOptions">
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.all"
             form-title="Search all fields"
-            input-name="q"
+            input-name="all"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.title"
             form-title="Title"
             input-name="title"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.judges"
             form-title="Judges"
             input-name="judges"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.headnote_holding"
             form-title="Headnote holding"
             input-name="headnote_holding"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.flynote"
             form-title="Flynote"
             input-name="flynote"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.content"
             form-title="Content"
             input-name="content"
           />
@@ -211,44 +209,6 @@ export default {
   emits: ['submit', 'update:modelValue', 'global-search-change'],
   data: function () {
     return {
-      fieldValues: {
-        q: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        title: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        judges: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        headnote_holding: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        flynote: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        content: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        }
-      },
       showAdditionalOptions: false
     };
   },
@@ -286,10 +246,9 @@ export default {
   },
   methods: {
     onChange (e) {
-      this.$emit('update:modelValue', {
-        ...this.modelValue,
-        [e.target.name]: e.target.value
-      });
+      const data = { ...this.modelValue };
+      data[e.target.name].q = e.target.value;
+      this.$emit('update:modelValue', data);
     },
     onDateChange (e) {
       this.$emit('update:modelValue', {
@@ -304,16 +263,15 @@ export default {
       this.$emit('global-search-change', e.target.value);
     },
     formatFieldValues () {
-      Object.keys(this.fieldValues).forEach(field => {
-        const fieldQuery = this.formatFieldQuery(field, this.fieldValues[field]);
+      Object.keys(this.modelValue).forEach(field => {
+        const fieldQuery = this.formatFieldQuery(field, this.modelValue[field]);
         if (fieldQuery) {
-          if (field === 'q') {
+          if (field === 'all') {
             this.$emit('global-search-change', fieldQuery.trim());
           } else {
-            this.$emit('update:modelValue', {
-              ...this.modelValue,
-              [field]: fieldQuery.trim()
-            });
+            const newValue = { ...this.modelValue };
+            newValue[field].q = fieldQuery.trim();
+            this.$emit('update:modelValue', newValue);
           }
         }
       });
@@ -327,10 +285,11 @@ export default {
     formatFieldQuery (field, modifiers) {
       let formattedSearchString = '';
 
-      Object.keys(modifiers).forEach(mod => {
+      for (const mod of Object.keys(modifiers)) {
         // mod is "all", "exact", "none" etc.
+        if (mod === 'q') continue;
         const value = modifiers[mod];
-        if (!value) return;
+        if (!value) continue;
 
         // split into components; either single words or "phrases"
         let splitValue = value.match(/\w+|"[^"]+"/g);
@@ -367,7 +326,7 @@ export default {
         }
 
         formattedSearchString = formattedSearchString + ' ' + splitValue.trim();
-      });
+      }
 
       return formattedSearchString;
     },

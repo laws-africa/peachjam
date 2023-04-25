@@ -229,7 +229,7 @@ export default {
   name: 'FindDocuments',
   components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
   data () {
-    return {
+    const data = {
       loadingCount: 0,
       error: null,
       searchInfo: {},
@@ -238,11 +238,6 @@ export default {
       q: '',
       drawerOpen: false,
       advancedFields: {
-        title: '',
-        judges: '',
-        headnote_holding: '',
-        flynote: '',
-        content: '',
         date: {
           date_from: null,
           date_to: null
@@ -335,6 +330,19 @@ export default {
         }
       ]
     };
+
+    const advanced = ['all', 'title', 'judges', 'headnote_holding', 'flynote', 'content'];
+    for (const a of advanced) {
+      data.advancedFields[a] = {
+        q: '',
+        all: '',
+        exact: '',
+        any: '',
+        none: ''
+      };
+    }
+
+    return data;
   },
 
   computed: {
@@ -385,6 +393,7 @@ export default {
     },
 
     clearAdvancedFields () {
+      // TODO
       this.advancedFields.title = '';
       this.advancedFields.judges = '';
       this.advancedFields.headnote_holding = '';
@@ -430,6 +439,7 @@ export default {
       });
 
       // Set advanced fields to url
+      // TODO
       Object.keys(this.advancedFields).forEach(key => {
         const value = this.advancedFields[key];
         if (!value) return;
@@ -464,6 +474,7 @@ export default {
         }
       });
 
+      // TODO
       const advancedSearchFields = Object.keys(this.advancedFields).filter(key => key !== 'date');
       /**
       * if there are advance search fields url params (title, judges, flynote) or show-advanced-tab param, prefill
@@ -519,6 +530,7 @@ export default {
 
     async search () {
       // if one of the search fields is true perform search
+      // TODO
       if (this.q || ['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.advancedFields[key])) {
         const generateUrl = () => {
           const params = new URLSearchParams();
