@@ -68,9 +68,13 @@ class MatterType(models.Model):
 class CourtClass(models.Model):
     name = models.CharField(_("name"), max_length=100, null=False, unique=True)
     description = models.TextField(_("description"), null=True, blank=True)
+    order = models.IntegerField(_("order"), null=True, blank=True)
 
     class Meta:
-        ordering = ("name",)
+        ordering = (
+            "order",
+            "name",
+        )
         verbose_name = _("court class")
         verbose_name_plural = _("court classes")
 
@@ -91,9 +95,13 @@ class Court(models.Model):
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
+    order = models.IntegerField(_("order"), null=True, blank=True)
 
     class Meta:
-        ordering = ("name",)
+        ordering = (
+            "order",
+            "name",
+        )
         verbose_name = _("court")
         verbose_name_plural = _("courts")
 
