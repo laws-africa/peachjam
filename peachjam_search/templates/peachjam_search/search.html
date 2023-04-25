@@ -6,6 +6,7 @@
 {% block page-content %}
   <div>
     <div class="container pt-lg-5 pt-2 pb-5">
+      {% block lead-text %}{% endblock %}
       <div data-vue-component="FindDocuments"></div>
       {{ labels|json_script:"data-labels" }}
     </div>

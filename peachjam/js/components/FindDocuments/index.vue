@@ -52,7 +52,7 @@
                 v-model="q"
                 type="text"
                 class="form-control"
-                :placeholder="$t('Search documents')"
+                :placeholder="searchPlaceholder"
                 :aria-label="$t('Search documents')"
                 aria-describedby="basic-addon2"
                 required
@@ -233,6 +233,7 @@ export default {
   components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
   data () {
     return {
+      searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
       loadingCount: 0,
       error: null,
       searchInfo: {},
