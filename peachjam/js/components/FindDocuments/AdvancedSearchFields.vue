@@ -5,13 +5,11 @@
       {{ $t(formTitle) }}...
     </h4>
     <div class="row mt-3">
-      <div class="col-sm-2">
-        <label
-          class="form-label"
-          :for="`${inputName}-all`"
-        >{{ $t("All these words") }}</label>
-      </div>
-      <div class="col-sm-10">
+      <label
+        class="form-label col-sm-3"
+        :for="`${inputName}-all`"
+      >{{ $t("All these words") }}</label>
+      <div class="col-sm-9">
         <input
           :id="`${inputName}-all`"
           :name="`${inputName}-all`"
@@ -24,13 +22,11 @@
       </div>
     </div>
     <div class="row mt-3">
-      <div class="col-sm-2">
-        <label
-          class="form-label"
-          :for="`${inputName}-exact`"
-        >{{ $t("This exact word or phrase") }}</label>
-      </div>
-      <div class="col-sm-10">
+      <label
+        class="form-label col-sm-3"
+        :for="`${inputName}-exact`"
+      >{{ $t("This exact word or phrase") }}</label>
+      <div class="col-sm-9">
         <input
           :id="`${inputName}-exact`"
           :name="`${inputName}-exact`"
@@ -43,13 +39,11 @@
       </div>
     </div>
     <div class="row mt-3">
-      <div class="col-sm-2">
-        <label
-          class="form-label"
-          :for="`${inputName}-any`"
-        >{{ $t("Any of these words") }}</label>
-      </div>
-      <div class="col-sm-10">
+      <label
+        class="form-label col-sm-3"
+        :for="`${inputName}-any`"
+      >{{ $t("Any of these words") }}</label>
+      <div class="col-sm-9">
         <input
           :id="`${inputName}-any`"
           :name="`${inputName}-any`"
@@ -62,13 +56,11 @@
       </div>
     </div>
     <div class="row mt-3">
-      <div class="col-sm-2">
-        <label
-          class="form-label"
-          :for="`${inputName}-none`"
-        >{{ $t("None of these words") }}</label>
-      </div>
-      <div class="col-sm-10">
+      <label
+        class="form-label col-sm-3"
+        :for="`${inputName}-none`"
+      >{{ $t("None of these words") }}</label>
+      <div class="col-sm-9">
         <input
           :id="`${inputName}-none`"
           :name="`${inputName}-none`"
