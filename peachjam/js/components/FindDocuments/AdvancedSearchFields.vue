@@ -7,8 +7,9 @@
     <div class="row mt-3">
       <div class="col-sm-2">
         <label
+          class="form-label"
           :for="`${inputName}-all`"
-        >{{ $t("All these words") }}:</label>
+        >{{ $t("All these words") }}</label>
       </div>
       <div class="col-sm-10">
         <input
@@ -24,7 +25,10 @@
     </div>
     <div class="row mt-3">
       <div class="col-sm-2">
-        <label :for="`${inputName}-exact`">{{ $t("This exact word or phrase") }}:</label>
+        <label
+          class="form-label"
+          :for="`${inputName}-exact`"
+        >{{ $t("This exact word or phrase") }}</label>
       </div>
       <div class="col-sm-10">
         <input
@@ -40,7 +44,10 @@
     </div>
     <div class="row mt-3">
       <div class="col-sm-2">
-        <label :for="`${inputName}-any`">{{ $t("Any of these words") }}:</label>
+        <label
+          class="form-label"
+          :for="`${inputName}-any`"
+        >{{ $t("Any of these words") }}</label>
       </div>
       <div class="col-sm-10">
         <input
@@ -56,7 +63,10 @@
     </div>
     <div class="row mt-3">
       <div class="col-sm-2">
-        <label :for="`${inputName}-none`">{{ $t("None of these words") }}:</label>
+        <label
+          class="form-label"
+          :for="`${inputName}-none`"
+        >{{ $t("None of these words") }}</label>
       </div>
       <div class="col-sm-10">
         <input
