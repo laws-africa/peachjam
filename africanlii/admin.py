@@ -1,7 +1,12 @@
 from countries_plus.models import Country
 from django.contrib import admin
 
-from africanlii.models import Ratification, RatificationCountry
+from africanlii.models import (
+    AfricanUnionOrgan,
+    Ratification,
+    RatificationCountry,
+    RegionalEconomicCommunity,
+)
 
 
 class RatificationCountryAdmin(admin.TabularInline):
@@ -17,3 +22,13 @@ class RatificationCountryAdmin(admin.TabularInline):
 @admin.register(Ratification)
 class RatificationAdmin(admin.ModelAdmin):
     inlines = (RatificationCountryAdmin,)
+
+
+@admin.register(AfricanUnionOrgan)
+class AfricanUnionOrganAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(RegionalEconomicCommunity)
+class RegionalEconomicCommunityAdmin(admin.ModelAdmin):
+    pass

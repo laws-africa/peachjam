@@ -36,6 +36,41 @@
       </div>
     </div>
   </section>
+  <section class="container">
+    <h2 class="mb-4 heading-underlined text-center">{% trans 'African Union' %}</h2>
+    <div class="row">
+      <div class="col-sm-4">
+        <h3 class="mb-4 heading-underlined">{% trans 'African Union Organs' %}</h3>
+        <ul class="list-unstyled">
+          {% for au_organ in au_organs %}
+            <li>
+              <a href="#">{{ au_organ }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-sm-4">
+        <h3 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h3>
+        <ul class="list-unstyled">
+          {% for locality in localities %}
+            <li>
+              <a href="{% url 'place' locality.place_code %}">{{ locality.name }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-sm-4">
+        <h3 class="mb-4 heading-underlined">{% trans 'Member States' %}</h3>
+        <ul class="list-unstyled">
+          {% for locality in localities %}
+            <li>
+              <a href="{% url 'place' locality.place_code %}">{{ locality.name }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
   <section class="pb-5 pt-5">
     <div class="container">
       <div class="row">

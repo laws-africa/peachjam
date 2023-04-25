@@ -1,0 +1,76 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'African Union (AU)' %}
+{% endblock %}
+{% block page-content %}
+  <section class="pb-5">
+    <div class="container">
+      {% block breadcrumbs %}{% endblock %}
+      {% block page-heading %}
+        <h1 class="my-4 heading-underlined">{% trans 'African Union (AU)' %}</h1>
+      {% endblock %}
+      <p>
+        {% blocktrans trimmed %}
+          Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
+        {% endblocktrans %}
+      </p>
+      <ul>
+        <li>
+          {% blocktrans trimmed %}
+           Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          {% endblocktrans %}
+        </li>
+        <li>
+          {% blocktrans trimmed %}
+            Nam sed augue in diam laoreet mollis in eu lorem.
+          {% endblocktrans %}
+        </li>
+        <li>
+          {%blocktrans trimmed %}
+            Integer bibendum nibh viverra massa placerat maximus.
+          {% endblocktrans %}
+        </li>
+        <li>
+          {% blocktrans trimmed %}
+            Ut luctus leo et nibh accumsan, vel varius neque efficitur.
+          {% endblocktrans %}
+        </li>
+      </ul>
+      <p>
+        {% blocktrans trimmed %}
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eleifend eleifend ipsum vel luctus.
+        Donec ut enim eu lacus gravida faucibus in posuere libero.
+        Duis ullamcorper ut mauris et pellentesque. Proin quis faucibus mi, sed malesuada metus. Donec interdum mollis convallis. Sed lobortis blandit tellus non mollis.
+        Donec dignissim luctus orci, ut tristique nunc scelerisque sed. Integer eleifend arcu vitae dignissim tempor.
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+  <section class="container">
+    <div class="row">
+      <div class="col-sm-6">
+        <h3 class="mb-4 heading-underlined">{% trans 'African Union Organs' %}</h3>
+        <ul class="list-unstyled">
+          {% for au_organ in au_organs %}
+            <li>
+              <a href="#">{{ au_organ }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-sm-6">
+        <h3 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h3>
+        <ul class="list-unstyled">
+          {% for rec in recs %}
+            <li>
+              <a href="#">{{ rec }}</a>
+            </li>
+          {% endfor %}
+          t
+        </ul>
+      </div>
+    </div>
+  </section>
+  {{ legislation_table|json_script:"legislation-table" }}
+{% endblock %}
