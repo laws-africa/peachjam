@@ -57,6 +57,36 @@
       </li>
     </ul>
   </li>
+  <li class="nav-item dropdown main-nav">
+    <a class="nav-link {% with '' as list %} {% if view.navbar_link in list.split %} active{% endif %} {% endwith %} dropdown-toggle"
+       href="#"
+       role="button"
+       data-bs-toggle="dropdown"
+       aria-expanded="false">
+      {% trans 'African Union (AU)' %}
+    </a>
+    <ul class="dropdown-menu">
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if view.navbar_link == 'legal_instruments' %} active{% endif %} "
+           href="#">
+          {% trans 'AU Organs' %}
+          <div class="dropdown-summary text-muted">{% trans 'AU Organs' %}</div>
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link px-0 {% if view.navbar_link == 'judgments' %}active{% endif %}"
+           href="#">{% trans 'Regional Economic Communities (RECs)' %}
+          <div class="dropdown-summary text-muted">{% trans 'Regional Economic Communities (RECs)' %}</div>
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link px-0 {% if view.navbar_link == 'soft_law' %}active{% endif %}"
+           href="#">{% trans 'Member states' %}
+          <div class="dropdown-summary text-muted">{% trans 'Member states' %}</div>
+        </a>
+      </li>
+    </ul>
+  </li>
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'taxonomy' %}active{% endif %}"
        href="{% url 'top_level_taxonomy_list' %}">
