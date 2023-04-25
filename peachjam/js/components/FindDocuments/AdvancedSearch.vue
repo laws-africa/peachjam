@@ -316,46 +316,59 @@ export default {
       this.$emit('global-search-change', e.target.value);
     },
     formatFieldValues () {
-      Object.keys(this.fieldValues).forEach(key => {
-        let formattedSearchString = '';
-        Object.keys(this.fieldValues[key]).forEach(fieldKey => {
-          const formattedFieldValue = this.fieldValues[key][fieldKey];
-          if (!formattedFieldValue) return;
-          let splitValue = formattedFieldValue.match(/\w+|"[^"]+"/g);
-          if (fieldKey === 'all') {
-            splitValue = splitValue.join(' ');
-          } else if (fieldKey === 'exact') {
-            let exactPhrase = '';
-            let splitPhrase = '';
-            splitValue.forEach(value => {
-              if (value.startsWith('"')) {
-                splitPhrase = splitPhrase + ' ' + `"${exactPhrase.trim()}"` + ' ' + value;
-                exactPhrase = '';
-              } else exactPhrase = exactPhrase + ' ' + value;
-            });
-            splitValue = exactPhrase ? splitPhrase + ' ' + `"${exactPhrase.trim()}"` : splitPhrase;
-          } else if (fieldKey === 'any') {
-            splitValue = `(${splitValue.join('|')})`;
-          } else if (fieldKey === 'none') {
-            splitValue = splitValue.map(value => {
-              return `-${value}`;
-            });
-            splitValue = splitValue.join('');
-          }
-
-          formattedSearchString = formattedSearchString + ' ' + splitValue.trim();
-        });
-        if (formattedSearchString) {
-          if (key === 'q') {
-            this.$emit('global-search-change', formattedSearchString.trim());
+      Object.keys(this.fieldValues).forEach(field => {
+        const fieldQuery = this.formatFieldQuery(field, this.fieldValues[field]);
+        if (fieldQuery) {
+          if (field === 'q') {
+            this.$emit('global-search-change', fieldQuery.trim());
           } else {
             this.$emit('update:modelValue', {
               ...this.modelValue,
-              [key]: formattedSearchString.trim()
+              [field]: fieldQuery.trim()
             });
           }
         }
       });
+    },
+    /**
+     * Build a single query string from the advanced values for a field.
+     * @param field the name of the field
+     * @param modifiers the advanced search modifiers object
+     * @returns {string} a fully formatted search string
+     */
+    formatFieldQuery (field, modifiers) {
+      let formattedSearchString = '';
+
+      Object.keys(modifiers).forEach(mod => {
+        // mod is "all", "exact", "none" etc.
+        const value = modifiers[mod];
+        if (!value) return;
+
+        // split into components; either single words or "phrases"
+        let splitValue = value.match(/\w+|"[^"]+"/g);
+        if (mod === 'all') {
+          splitValue = splitValue.join(' ');
+        } else if (mod === 'exact') {
+          let exactPhrase = '';
+          let splitPhrase = '';
+
+          splitValue.forEach(value => {
+            if (value.startsWith('"')) {
+              splitPhrase = splitPhrase + ' ' + `"${exactPhrase.trim()}"` + ' ' + value;
+              exactPhrase = '';
+            } else exactPhrase = exactPhrase + ' ' + value;
+          });
+          splitValue = exactPhrase ? splitPhrase + ' ' + `"${exactPhrase.trim()}"` : splitPhrase;
+        } else if (mod === 'any') {
+          splitValue = `(${splitValue.join('|')})`;
+        } else if (mod === 'none') {
+          splitValue = splitValue.map(value => `-${value}`).join(' ');
+        }
+
+        formattedSearchString = formattedSearchString + ' ' + splitValue.trim();
+      });
+
+      return formattedSearchString;
     },
     submitAdvancedForm () {
       this.formatFieldValues();
