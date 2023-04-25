@@ -85,20 +85,6 @@
             >
           </div>
 
-          <!-- <div class="col-12 mb-3">
-            <label class="form-label" for="content">{{ $t('Content') }}</label>
-            <input
-              id="content"
-              type="text"
-              name="content"
-              class="form-control"
-              :aria-describedby="$t('Content')"
-              :placeholder="$t('Search documents by content')"
-              :value="modelValue.content.q"
-              @input="onChange"
-            >
-          </div> -->
-
           <div class="row mb-3">
             <div class="col-lg-6">
               <label class="form-label" for="date_from">{{ $t("Date from") }}</label>
@@ -195,7 +181,9 @@ import AdvancedSearchFields from './AdvancedSearchFields.vue';
 
 export default {
   name: 'AdvancedSearch',
+
   components: { AdvancedSearchFields },
+
   props: {
     modelValue: {
       type: Object,
@@ -206,15 +194,19 @@ export default {
       default: ''
     }
   },
+
   emits: ['submit', 'update:modelValue', 'global-search-change'],
+
   data: function () {
     return {
       showAdditionalOptions: false
     };
   },
+
   computed: {
     invalidDates () {
       const datesStrings = [this.modelValue.date.date_from, this.modelValue.date.date_to];
+
       if (datesStrings.every(date => !date)) {
         return false;
       } else if (datesStrings.every(date => date)) {
@@ -223,11 +215,13 @@ export default {
         return from > to;
       } else { return !datesStrings.some(string => string); }
     },
+
     disableDate () {
       // Disable dates if there are no search values
       return !(['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.modelValue[key]) || this.globalSearchValue);
     }
   },
+
   watch: {
     disableDate: {
       handler (newValue) {
@@ -244,12 +238,14 @@ export default {
       }
     }
   },
+
   methods: {
     onChange (e) {
       const data = { ...this.modelValue };
       data[e.target.name].q = e.target.value;
       this.$emit('update:modelValue', data);
     },
+
     onDateChange (e) {
       this.$emit('update:modelValue', {
         ...this.modelValue,
@@ -259,23 +255,28 @@ export default {
         }
       });
     },
+
     onGlobalSearch (e) {
       this.$emit('global-search-change', e.target.value);
     },
+
     formatFieldValues () {
       Object.keys(this.modelValue).forEach(field => {
-        const fieldQuery = this.formatFieldQuery(field, this.modelValue[field]);
-        if (fieldQuery) {
-          if (field === 'all') {
-            this.$emit('global-search-change', fieldQuery.trim());
-          } else {
-            const newValue = { ...this.modelValue };
-            newValue[field].q = fieldQuery.trim();
-            this.$emit('update:modelValue', newValue);
+        if (field !== 'date') {
+          const fieldQuery = this.formatFieldQuery(field, this.modelValue[field]);
+          if (fieldQuery) {
+            if (field === 'all') {
+              this.$emit('global-search-change', fieldQuery.trim());
+            } else {
+              const newValue = { ...this.modelValue };
+              newValue[field].q = fieldQuery.trim();
+              this.$emit('update:modelValue', newValue);
+            }
           }
         }
       });
     },
+
     /**
      * Build a single query string from the advanced values for a field.
      * @param field the name of the field
@@ -283,7 +284,7 @@ export default {
      * @returns {string} a fully formatted search string
      */
     formatFieldQuery (field, modifiers) {
-      let formattedSearchString = '';
+      let q = '';
 
       for (const mod of Object.keys(modifiers)) {
         // mod is "all", "exact", "none" etc.
@@ -325,35 +326,17 @@ export default {
           splitValue = splitValue.map(value => `-${value}`).join(' ');
         }
 
-        formattedSearchString = formattedSearchString + ' ' + splitValue.trim();
+        q = q + ' ' + splitValue.trim();
       }
 
-      return formattedSearchString;
+      return q;
     },
+
     submitAdvancedForm () {
       this.formatFieldValues();
       this.showAdditionalOptions = false;
       this.$emit('submit');
     }
-    // loadFieldValues () {
-    //   Object.keys(this.modelValue).forEach(key => {
-    //     if (this.modelValue[key]) {
-    //       const splitValue = this.modelValue[key].match(/[^\s"']+|['"][^'"]*["']+/g);
-
-    //       splitValue.forEach((value, index) => {
-    //         if (value.startsWith('-')) {
-    //           this.fieldValues[key].none = (this.fieldValues[key].none + ' ' + value).trim();
-    //         } else if (value.startsWith('"') || value.startsWith("'")) {
-    //           this.fieldValues[key].exact = (this.fieldValues[key].exact + ' ' + value).trim();
-    //         } else if (value === '|') {
-    //           this.fieldValues[key].any = this.fieldValues[key].any || splitValue[index - 1] + ' OR ' + splitValue[index + 1];
-    //         } else if (splitValue[index + 1] !== '|' && splitValue[index + 1] !== '|') {
-    //           this.fieldValues[key].all = (this.fieldValues[key].all + ' ' + value).trim();
-    //         }
-    //       });
-    //     }
-    //   });
-    // }
   }
 };
 </script>

@@ -225,7 +225,7 @@ import AdvancedSearch from './AdvancedSearch.vue';
 import moment from 'moment';
 import { scrollToElement } from '../../utils/function';
 
-function addAdvancedFields (fields) {
+function resetAdvancedFields (fields) {
   const advanced = ['all', 'title', 'judges', 'headnote_holding', 'flynote', 'content'];
   for (const a of advanced) {
     fields[a] = {
@@ -343,7 +343,7 @@ export default {
         }
       ]
     };
-    addAdvancedFields(data.advancedFields);
+    resetAdvancedFields(data.advancedFields);
     return data;
   },
 
@@ -395,7 +395,7 @@ export default {
     },
 
     simpleSearch () {
-      addAdvancedFields(this.advancedFields);
+      resetAdvancedFields(this.advancedFields);
       this.submit();
     },
 
@@ -415,6 +415,7 @@ export default {
     serialiseState () {
       // save state to URL string
       const params = new URLSearchParams();
+
       if (this.q) params.set('q', this.q);
       if (this.page > 1) {
         params.set('page', this.page);
@@ -430,10 +431,10 @@ export default {
       });
 
       // Set advanced fields to url
-      // TODO
       Object.keys(this.advancedFields).forEach(key => {
         const value = this.advancedFields[key];
         if (!value) return;
+
         if (key === 'date') {
           if (value.date_from && value.date_to) {
             params.append('date_from', this.advancedFields.date.date_from);
@@ -443,8 +444,8 @@ export default {
           } else if (value.date_to) {
             params.append('date_to', this.advancedFields.date.date_to);
           }
-        } else if (key !== 'date') {
-          params.append(key, value);
+        } else if (value.q) {
+          params.append(key, value.q);
         }
       });
 
@@ -465,22 +466,21 @@ export default {
         }
       });
 
-      // TODO
-      const advancedSearchFields = Object.keys(this.advancedFields).filter(key => key !== 'date');
-      /**
-      * if there are advance search fields url params (title, judges, flynote) or show-advanced-tab param, prefill
-       * fields and activate advanced tab
-      * */
-      if (advancedSearchFields.some(key => params.has(key)) || params.get('show-advanced-tab')) {
-        if (params.has('date_from')) this.advancedFields.date.date_from = params.get('date_from');
-        if (params.has('date_to')) this.advancedFields.date.date_to = params.get('date_to');
-        advancedSearchFields.forEach(key => {
-          if (!params.has(key)) return;
-          this.advancedFields[key] = params.get(key);
-        });
+      if (params.has('date_from')) this.advancedFields.date.date_from = params.get('date_from');
+      if (params.has('date_to')) this.advancedFields.date.date_to = params.get('date_to');
+
+      for (const field of Object.keys(this.advancedFields)) {
+        if (field !== 'date' && params.get(field)) {
+          this.advancedFields[field].q = params.get(field);
+        }
+      }
+
+      // if there are advance search fields or show-advanced-tab param, activate tab
+      if (Object.values(this.advancedFields).some(f => f.q) || params.get('show-advanced-tab')) {
         const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#advanced-search-tab'));
         tabTrigger.show();
       }
+
       this.search();
     },
 
@@ -567,6 +567,11 @@ export default {
 
         try {
           const url = this.generateSearchUrl();
+          window.history.pushState(
+            null,
+            '',
+            document.location.pathname + '?' + this.serialiseState()
+          );
           const response = await fetch(url);
 
           // check that the search state hasn't changed since we sent the request
@@ -577,11 +582,6 @@ export default {
               if (this.searchInfo.count === 0) {
                 this.clearAllFilters();
               }
-              window.history.replaceState(
-                null,
-                '',
-                document.location.pathname + '?' + this.serialiseState()
-              );
               this.formatFacets();
             } else {
               this.error = response.statusText;
