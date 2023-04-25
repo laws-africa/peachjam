@@ -349,16 +349,29 @@ export default {
         if (mod === 'all') {
           splitValue = splitValue.join(' ');
         } else if (mod === 'exact') {
-          let exactPhrase = '';
-          let splitPhrase = '';
+          // add quotes around runs of non-quoted tokens
+          const tokens = [];
+          let unquoted = [];
 
           splitValue.forEach(value => {
             if (value.startsWith('"')) {
-              splitPhrase = splitPhrase + ' ' + `"${exactPhrase.trim()}"` + ' ' + value;
-              exactPhrase = '';
-            } else exactPhrase = exactPhrase + ' ' + value;
+              if (unquoted.length) {
+                tokens.push('"' + unquoted.join(' ') + '"');
+                unquoted = [];
+              }
+              tokens.push(value);
+            } else {
+              unquoted.push(value);
+            }
           });
-          splitValue = exactPhrase ? splitPhrase + ' ' + `"${exactPhrase.trim()}"` : splitPhrase;
+
+          if (unquoted.length) {
+            tokens.push('"' + unquoted.join(' ') + '"');
+          }
+          splitValue = tokens.join(' ');
+
+          // special case for the "exact" modifier - we want to update the input box to reflect the quoted string
+          modifiers[mod] = splitValue;
         } else if (mod === 'any') {
           splitValue = `(${splitValue.join('|')})`;
         } else if (mod === 'none') {
