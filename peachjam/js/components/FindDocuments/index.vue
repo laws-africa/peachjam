@@ -225,6 +225,24 @@ import AdvancedSearch from './AdvancedSearch.vue';
 import moment from 'moment';
 import { scrollToElement } from '../../utils/function';
 
+function addAdvancedFields (fields) {
+  const advanced = ['all', 'title', 'judges', 'headnote_holding', 'flynote', 'content'];
+  for (const a of advanced) {
+    fields[a] = {
+      q: '',
+      all: '',
+      exact: '',
+      any: '',
+      none: ''
+    };
+  }
+
+  fields.date = {
+    date_to: null,
+    date_from: null,
+  };
+}
+
 export default {
   name: 'FindDocuments',
   components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
@@ -237,12 +255,7 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
-      advancedFields: {
-        date: {
-          date_from: null,
-          date_to: null
-        }
-      },
+      advancedFields: {},
       facets: [
         {
           title: this.$t('Document type'),
@@ -330,18 +343,7 @@ export default {
         }
       ]
     };
-
-    const advanced = ['all', 'title', 'judges', 'headnote_holding', 'flynote', 'content'];
-    for (const a of advanced) {
-      data.advancedFields[a] = {
-        q: '',
-        all: '',
-        exact: '',
-        any: '',
-        none: ''
-      };
-    }
-
+    addAdvancedFields(data.advancedFields);
     return data;
   },
 
@@ -392,19 +394,8 @@ export default {
       this.search();
     },
 
-    clearAdvancedFields () {
-      // TODO
-      this.advancedFields.title = '';
-      this.advancedFields.judges = '';
-      this.advancedFields.headnote_holding = '';
-      this.advancedFields.flynote = '';
-      this.advancedFields.content = '';
-      this.advancedFields.date.date_to = null;
-      this.advancedFields.date.date_from = null;
-    },
-
     simpleSearch () {
-      this.clearAdvancedFields();
+      addAdvancedFields(this.advancedFields);
       this.submit();
     },
 
@@ -528,56 +519,58 @@ export default {
       });
     },
 
+    generateSearchUrl () {
+      const params = new URLSearchParams();
+      if (this.q) params.append('search', this.q);
+      params.append('page', this.page);
+      params.append('ordering', this.ordering);
+      params.append('highlight', 'content');
+      params.append('is_most_recent', 'true');
+
+      this.facets.forEach((facet) => {
+        facet.value.forEach((value) => {
+          params.append(facet.name, value);
+        });
+      });
+
+      // facets that we want the API to return
+      this.facets.forEach((facet) => {
+        params.append('facet', facet.name);
+      });
+
+      // advanced search fields, if any
+      Object.keys(this.advancedFields).forEach(key => {
+        const value = this.advancedFields[key];
+
+        if (key === 'date') {
+          if (value.date_from && value.date_to) {
+            const dateFrom = moment(value.date_from).format('YYYY-MM-DD');
+            const dateTo = moment(value.date_to).format('YYYY-MM-DD');
+            params.append('date__range', `${dateFrom}__${dateTo}`);
+          } else if (value.date_from) {
+            params.append('date__gte', moment(value.date_from).format('YYYY-MM-DD'));
+          } else if (value.date_to) {
+            params.append('date__lte', moment(value.date_to).format('YYYY-MM-DD'));
+          }
+        } else if (value.q) {
+          params.append(`search__${key}`, value.q);
+        }
+      });
+
+      return `/search/api/documents/?${params.toString()}`;
+    },
+
     async search () {
       // if one of the search fields is true perform search
-      // TODO
-      if (this.q || ['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.advancedFields[key])) {
-        const generateUrl = () => {
-          const params = new URLSearchParams();
-          if (this.q) params.append('search', this.q);
-          params.append('page', this.page);
-          params.append('ordering', this.ordering);
-          params.append('highlight', 'content');
-          params.append('is_most_recent', 'true');
-
-          this.facets.forEach((facet) => {
-            facet.value.forEach((value) => {
-              params.append(facet.name, value);
-            });
-          });
-
-          // facets that we want the API to return
-          this.facets.forEach((facet) => {
-            params.append('facet', facet.name);
-          });
-          Object.keys(this.advancedFields).forEach(key => {
-            const value = this.advancedFields[key];
-            if (!value) return;
-
-            if (key === 'date') {
-              if (value.date_from && value.date_to) {
-                const dateFrom = moment(value.date_from).format('YYYY-MM-DD');
-                const dateTo = moment(value.date_to).format('YYYY-MM-DD');
-                params.append('date__range', `${dateFrom}__${dateTo}`);
-              } else if (value.date_from) {
-                params.append('date__gte', moment(value.date_from).format('YYYY-MM-DD'));
-              } else if (value.date_to) {
-                params.append('date__lte', moment(value.date_to).format('YYYY-MM-DD'));
-              }
-            } else if (key !== 'date') {
-              params.append(`search__${key}`, value);
-            }
-          });
-          return `${
-              window.location.origin
-          }/search/api/documents/?${params.toString()}`;
-        };
-
+      if (this.q || Object.values(this.advancedFields).some(f => f.q)) {
         this.loadingCount = this.loadingCount + 1;
+
         try {
-          const url = generateUrl();
-          const response = await fetch(generateUrl());
-          if (url === generateUrl()) {
+          const url = this.generateSearchUrl();
+          const response = await fetch(url);
+
+          // check that the search state hasn't changed since we sent the request
+          if (url === this.generateSearchUrl()) {
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
