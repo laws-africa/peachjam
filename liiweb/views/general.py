@@ -10,8 +10,7 @@ class HomePageView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         court_classes = (
-            CourtClass.objects.select_related("courts")
-            .order_by("name", "courts__name")
+            CourtClass.objects.order_by("order", "courts__order")
             .values("name", "courts__name", "courts__code")
             .all()
         )

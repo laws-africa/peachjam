@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2022-11-30 14:17\n"
+"POT-Creation-Date: 2023-03-28 10:30+0200\n"
+"PO-Revision-Date: 2023-03-28 18:15\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -19,51 +19,51 @@ msgstr ""
 
 #: apps.py:20
 msgid "Regional Body"
-msgstr ""
+msgstr "Bodi ya Kanda"
 
 #: models/ratification.py:15
 msgid "work"
-msgstr ""
+msgstr "kazi"
 
 #: models/ratification.py:17
 msgid "source URL"
-msgstr ""
+msgstr "chanzo cha URL"
 
 #: models/ratification.py:18
 msgid "last updated"
-msgstr ""
+msgstr "ilisasishwa mara ya mwisho"
 
 #: models/ratification.py:21 models/ratification.py:35
 msgid "ratification"
-msgstr ""
+msgstr "uridhiaji"
 
 #: models/ratification.py:22
 msgid "ratifications"
-msgstr ""
+msgstr "uridhiaji"
 
 #: models/ratification.py:42
 msgid "country"
-msgstr ""
+msgstr "nchi"
 
 #: models/ratification.py:44
 msgid "ratification date"
-msgstr ""
+msgstr "tarehe ya uridhiaji"
 
 #: models/ratification.py:45
 msgid "deposit date"
-msgstr ""
+msgstr "tarehe ya kuweka"
 
 #: models/ratification.py:46
 msgid "signature date"
-msgstr ""
+msgstr "tarehe ya saini"
 
 #: models/ratification.py:49
 msgid "ratification country"
-msgstr ""
+msgstr "nchi iliyoridhia"
 
 #: models/ratification.py:50
 msgid "ratification countries"
-msgstr ""
+msgstr "nchi zilizoridhia"
 
 #: templates/peachjam/_footer.html:6
 msgid "About AfricanLII"
@@ -71,15 +71,15 @@ msgstr "Kuhusu AfricanLII"
 
 #: templates/peachjam/_footer.html:9
 msgid "AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and federates search across all open access African national law available through the <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of LIIs."
-msgstr ""
+msgstr "AfricanLII ni jukwaa la huru la kupata utafiti wa sheria za Afrika linaloendeshwa kwa pamoja na programu ya AfricanLII ya Chuo Kikuu cha Cape Town na Laws.Africa. AfricanLII huchapisha sheria na sera ya Umoja wa Afrika na hushiriki utafutaji katika upatikanaji wa wazi wa sheria zote za taifa za Afrika zinazopatikana kupitia jumuiya ya <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> ya LII."
 
 #: templates/peachjam/_footer.html:17
 msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
-msgstr ""
+msgstr "Uchapishaji wa maandiko ya Umoja wa Afrika unafadhiliwa kwa pamoja na Umoja wa Ulaya na ni sehemu ya mradi wa <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">wa Muungano wa Data kwa Utawala</a>."
 
 #: templates/peachjam/_footer.html:23
 msgid "Terms of Use"
-msgstr ""
+msgstr "Masharti ya matumizi"
 
 #: templates/peachjam/_footer.html:28
 msgid "With support from"
@@ -87,70 +87,64 @@ msgstr "Kwa msaada kutoka"
 
 #: templates/peachjam/_footer.html:39 templates/peachjam/_footer.html:125
 msgid "European Union"
-msgstr ""
+msgstr "Umoja wa Ulaya"
 
 #: templates/peachjam/_footer.html:44
 msgid "Other African Legal Information Institutions"
-msgstr "Taasisi Nyingine za Kisheria za Kiafrika"
+msgstr "Taasisi Nyingine za Kisheria za Afrika"
 
 #: templates/peachjam/_footer.html:105
 msgid "University of Cape Town"
-msgstr ""
+msgstr "Chuo Kikuu cha Cape Town"
 
 #: templates/peachjam/_header.html:30
-#, fuzzy
-#| msgid "Other African Legal Information Institutions"
 msgid "African Legal Information"
-msgstr "Taasisi Nyingine za Kisheria za Kiafrika"
+msgstr "Taarifa za Kisheria za Afrika"
 
 #: templates/peachjam/_header.html:36
-#, fuzzy
-#| msgid "Recent Legal Instruments"
 msgid "Legal Instruments"
-msgstr "Vyombo vya Kisheria vya Hivi Karibuni"
+msgstr "Hati za Kisheria"
 
 #: templates/peachjam/_header.html:37
 msgid "Charters, treaties, conventions and regulations."
-msgstr ""
+msgstr "Mikataba mbalimbali na kanuni."
 
 #: templates/peachjam/_header.html:42
-#, fuzzy
-#| msgid "Recent Judgments"
 msgid "Judgments"
-msgstr "Hukumu za Hivi Karibuni"
+msgstr "Hukumu"
 
 #: templates/peachjam/_header.html:43
 msgid "Judgments from regional African courts."
-msgstr ""
+msgstr "Hukumu kutoka kwa mahakama za kanda ya Afrika."
 
 #: templates/peachjam/_header.html:48 templates/peachjam/soft_law_list.html:4
 #: templates/peachjam/soft_law_list.html:7
 msgid "Soft Law"
-msgstr ""
+msgstr "Hati zisizofunga kisheria"
 
 #: templates/peachjam/_header.html:49
 msgid "Policies, decisions, recommendations and communiques."
-msgstr ""
+msgstr "Sera, maamuzi, mapendekezo na taarifa rasmi."
 
 #: templates/peachjam/_header.html:54
 msgid "Gazettes"
-msgstr ""
+msgstr "Magazeti ya serikali"
 
 #: templates/peachjam/_header.html:55
 msgid "Regional economic community official Gazettes."
-msgstr ""
+msgstr "Magazeti rasmi ya serikali ya jumuiya ya kiuchumi ya kanda."
 
 #: templates/peachjam/_header.html:63
 msgid "Topics"
-msgstr ""
+msgstr "Mada"
 
 #: templates/peachjam/_header.html:68
 msgid "Reports & Guides"
-msgstr ""
+msgstr "Ripoti na Miongozo"
 
 #: templates/peachjam/_header.html:74
 msgid "Articles"
-msgstr ""
+msgstr "Makala"
 
 #: templates/peachjam/_header.html:80 templates/peachjam/about.html:4
 msgid "About"
@@ -158,7 +152,7 @@ msgstr "Kuhusu"
 
 #: templates/peachjam/_header.html:86
 msgid "Help"
-msgstr ""
+msgstr "Msaada"
 
 #: templates/peachjam/about.html:9
 msgid "About the platform"
@@ -166,47 +160,47 @@ msgstr "Kuhusu jukwaa"
 
 #: templates/peachjam/about.html:11
 msgid "This Pan-African platform serves as an information clearinghouse on all aspects of the African Governance Architecture (AGA) agenda, including charters, protocols, communications, relevant legal decisions, policy, implementation, monitoring, and related material. The overall objective is to build effective collaboration between African citizens and civil society organisations on the one hand, and AGA members on the other, to strengthen implementation of the AGA platform’s agenda with respect to democracy, governance, and human rights. Our specific goals are to:"
-msgstr ""
+msgstr "Jukwaa hili la Pan-African hutumika kama sehemu ya taarifa kuhusu vipengele vyote vya ajenda ya Muundo wa Utawala Kiafrika (AGA), ikijumuisha mikataba, itifaki, mawasiliano, maamuzi muhimu ya kisheria, sera, utekelezaji, ufuatiliaji na maandiko yanayohusiana. Lengo la jumla ni kujenga ushirikiano mzuri kati ya raia wa Afrika na vyama vya kiraia kwa upande mmoja, na wanachama wa AGA kwa upande mwingine, ili kuimarisha utekelezaji wa ajenda ya jukwaa la AGA kwa kuheshimu demokrasia, utawala na haki za binadamu. Malengo yetu mahususi ni:"
 
 #: templates/peachjam/about.html:22
 msgid "Increase overall awareness of the AGA agenda and popular perceptions about democracy, governance and human rights among civil society organisations (CSOs) and AGA members"
-msgstr ""
+msgstr "Kuongeza uelewa wa jumla wa ajenda ya AGA na mitazamo maarufu kuhusu demokrasia, utawala na haki za binadamu miongoni mwa vyama vya kiraia (CSOs) na wanachama wa AGA"
 
 #: templates/peachjam/about.html:28
 msgid "Supply complete, accurate and re-usable AGA information to allow AGA and CSOs to work towards shared goals"
-msgstr ""
+msgstr "Kutoa taarifa ya AGA iliyo kamili, sahihi na inayoweza kutumika tena ili kuruhusu AGA na AZAKI kufanyia kazi malengo ya pamoja"
 
 #: templates/peachjam/about.html:33
 msgid "Capacitate civil society on all levels to access, interpret and effectively use AGA information"
-msgstr ""
+msgstr "Kuwezesha vyama vya kiraia katika ngazi zote kupata, kutafsiri na kutumia ipasavyo taarifa za AGA"
 
 #: templates/peachjam/about.html:38
 msgid "Strengthen monitoring, develop insights, and improve national-level implementation by developing linkages between regional and member-states’ law and policy."
-msgstr ""
+msgstr "Kuimarisha ufuatiliaji, kuendeleza maarifa, na kuboresha utekelezaji wa ngazi ya kitaifa kwa kuendeleza uhusiano kati ya sheria na sera za kanda na nchi wanachama."
 
 #: templates/peachjam/about.html:45
 msgid "This platform is developed and maintained jointly by <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> with funds from the European Union, the Indigo Trust and the Sigrid Rausing Trust. The initial phase of the project runs from 2021 to 2024."
-msgstr ""
+msgstr "Jukwaa hili linaandaliwa na kudumishwa kwa pamoja na <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> na <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> kwa fedha kutoka Umoja wa Ulaya, Indigo Trust na Sigrid Rausing Trust. Awamu ya awali ya mradi inaanza 2021 hadi 2024."
 
 #: templates/peachjam/about.html:51
 msgid "Platform developers"
-msgstr "Watengenezaji jukwaa"
+msgstr "Waandaaji wa jukwaa"
 
 #: templates/peachjam/about.html:53
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University of Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> helps governments, academia and non-profit organisations publish the law of African countries for sustainable open access. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> hosts curated collections on various subjects of African law, such as human rights, the environment, commercial law and finance."
-msgstr ""
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> ni programu ya Kitengo cha Utawala na Haki za Kidemokrasia katika Idara ya Sheria ya Umma, Chuo Kikuu cha Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> husaidia serikali, wasomi na mashirika yasiyo ya kibiashara kuchapisha sheria ya nchi za Afrika kwa ajili ya uendelevu wa kupatikana kwa uwazi. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> huandaa makusanyo ya masuala mbalimbali ya sheria za Afrika, kama vile haki za binadamu, mazingira, sheria za biashara na fedha."
 
 #: templates/peachjam/about.html:61
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> convenes a network of 16 African LIIs - a collaborative group of governments, organizations, and individuals in Africa, dedicated to free access to law on our continent."
-msgstr ""
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> inakusanya mtandao wa LII 16 za Afrika - kikundi shirikishi cha serikali, mashirika, na watu binafsi barani Afrika, wanaojitolea kutoa sheria bila malipo katika bara letu."
 
 #: templates/peachjam/about.html:67
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> helps African governments to sustainably digitise their legal information for public use, through open law software, capacity-building, training, partnerships and support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions lower the cost of digitisation, archival and publication of primary legal information, and create opportunities for rich interactivity, advanced research and justice sector innovation."
-msgstr ""
+msgstr "<a href=\"https://laws.africa/\" target=\"_blank\">Sheria.Afrika</a> husaidia serikali za Afrika kuweka taarifa zao za sheria kwa njia endelevu kwa ajili ya matumizi ya umma, kupitia programu za kompyuta za sheria huria, kujenga uwezo, mafunzo, ubia na msaada. <a href=\"https://laws.africa/\" target=\"_blank\">Masuluhisho ya </a> Teknolojia ya Sheria Huria ya Sheria.Afrika yanapunguza gharama ya kuweka kidijiti, kuhifadhi kumbukumbu na uchapishaji wa taarifa za msingi za sheria, na kutoa fursa za uchangamani mkubwa, utafiti wa hali ya juu na uvumbuzi wa sekta ya haki."
 
 #: templates/peachjam/about.html:75
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborate in unlocking the value of African digital legal information in support of the rule of law, access to justice, and innovation."
-msgstr ""
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> na <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> inashirikiana katika kufungua thamani ya taarifa za kisheria za kidijiti za Afrika katika kuunga mkono utawala wa sheria, upatikanaji wa haki, na uvumbuzi."
 
 #: templates/peachjam/about.html:80
 msgid "Find out more"
@@ -214,7 +208,7 @@ msgstr "Pata maelezo zaidi"
 
 #: templates/peachjam/about.html:82
 msgid "Visit <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a> or contact us on <a href=\"mailto:info@laws.africa\">info@laws.africa</a> for more information."
-msgstr ""
+msgstr "Tembelea <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a> au wasiliana nasi kwa <a href=\"mailto:info@laws.africa\">info@laws.africa</a> kwa maelezo zaidi."
 
 #: templates/peachjam/about.html:92
 msgid "Our partners"
@@ -222,41 +216,41 @@ msgstr "Washirika wetu"
 
 #: templates/peachjam/home.html:4
 msgid "Home"
-msgstr "Sebule"
+msgstr "Nyumbani"
 
 #: templates/peachjam/home.html:10
 msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
-msgstr ""
+msgstr "Tunaweka kidigiti sheria na sera ya Muundo wa Utawala wa Afrika na kuwasaidia Waafrika na ulimwengu kuungana na kuelewa ajenda ya Umoja wa Afrika."
 
 #: templates/peachjam/home.html:16
 #, python-format
 msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
-msgstr ""
+msgstr "Tafuta kupitia nyaraka %(documents_count)s za UA kwenye jukwaa la AfricanLII."
 
 #: templates/peachjam/home.html:25 templates/peachjam/home.html:26
 #, python-format
 msgid "Search %(APP_NAME)s"
-msgstr ""
+msgstr "Tafuta %(APP_NAME)s"
 
 #: templates/peachjam/home.html:30
 msgid "Search"
-msgstr ""
+msgstr "Tafuta"
 
 #: templates/peachjam/home.html:33
 msgid "Advanced search"
-msgstr ""
+msgstr "Utafutaji wa kina"
 
 #: templates/peachjam/home.html:43
 msgid "Regional Bodies"
-msgstr ""
+msgstr "Vyombo vya kanda"
 
 #: templates/peachjam/home.html:53
 msgid "Regional Economic Communities"
-msgstr ""
+msgstr "Jumuiya za Kiuchumi za Kanda"
 
 #: templates/peachjam/home.html:61
 msgid "Regional Courts"
-msgstr ""
+msgstr "Mahakama za Kanda"
 
 #: templates/peachjam/home.html:75
 msgid "Recent Judgments"
@@ -264,47 +258,42 @@ msgstr "Hukumu za Hivi Karibuni"
 
 #: templates/peachjam/home.html:76
 msgid "View more judgments"
-msgstr ""
+msgstr "Tazama hukumu zaidi"
 
 #: templates/peachjam/home.html:82
-msgid "Recent AU Documents"
-msgstr "Nyaraka za AU za Hivi Karibuni"
+msgid "Recent Legal Instruments"
+msgstr "Hati za Kisheria za Hivi Karibuni"
 
 #: templates/peachjam/home.html:83
-msgid "View more AU documents"
-msgstr ""
+msgid "View more legal instruments"
+msgstr "Tazama hati zaidi za kisheria"
 
 #: templates/peachjam/home.html:89
-msgid "Recent Legal Instruments"
-msgstr "Vyombo vya Kisheria vya Hivi Karibuni"
+msgid "Recent Soft Law"
+msgstr "Sheria Zisizofunga za Hivi Karibuni"
 
 #: templates/peachjam/home.html:90
-msgid "View more legal instruments"
-msgstr ""
+msgid "View more Soft Law"
+msgstr "Tazama zaidi Sheria Zisizofunga"
 
 #: templates/peachjam/home.html:96
-msgid "Recent Treaties and Protocols "
-msgstr "Mikataba na Itifaki za Hivi Karibuni "
+msgid "Recent Reports and Guides"
+msgstr "Ripoti na Miongozo ya Hivi Karibuni"
 
 #: templates/peachjam/home.html:97
-msgid "View more treaties and protocols"
-msgstr ""
+msgid "View more Reports and Guides"
+msgstr "Tazama Ripoti na Miongozo zaidi"
 
 #: templates/peachjam/home.html:103
 msgid "Latest Commentary"
-msgstr ""
+msgstr "Maoni ya Hivi Karibuni"
 
 #: templates/peachjam/home.html:105
 msgid "View more commentary"
-msgstr ""
+msgstr "Tazama maoni zaidi"
 
 #: templates/peachjam/reports_guides_list.html:4
 #: templates/peachjam/reports_guides_list.html:7
 msgid "Reports and Guides"
-msgstr ""
+msgstr "Ripoti na Miongozo"
 
-#~ msgid "AU Documents"
-#~ msgstr "Nyaraka za AU"
-
-#~ msgid "Treaties and Protocols"
-#~ msgstr "Mikataba na Itifaki"

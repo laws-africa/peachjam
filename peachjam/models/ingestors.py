@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from peachjam.plugins import plugins
-from peachjam.tasks import update_document
+from peachjam.tasks import delete_document, update_document
 
 log = logging.getLogger(__name__)
 
@@ -45,10 +45,13 @@ class Ingestor(models.Model):
         log.info(
             f"Checking for ingestor updates for {self}, last_refresh_at {self.last_refreshed_at}"
         )
-        docs = adapter.check_for_updates(self.last_refreshed_at)
-        log.info(f"{len(docs)} documents to update")
-        for doc in docs:
+        updated, deleted = adapter.check_for_updates(self.last_refreshed_at)
+        log.info(f"{len(updated)} documents to update")
+        for doc in updated:
             update_document(self.id, doc)
+        log.info(f"{len(deleted)} documents to delete")
+        for doc in deleted:
+            delete_document(self.id, doc)
 
         self.last_refreshed_at = timezone.now()
         self.save()

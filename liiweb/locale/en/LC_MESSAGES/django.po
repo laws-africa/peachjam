@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 09:05+0200\n"
+"POT-Creation-Date: 2023-03-28 10:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,11 +51,23 @@ msgstr ""
 msgid "View more legislation"
 msgstr ""
 
-#: templates/liiweb/home.html:80
+#: templates/liiweb/home.html:89
+msgid "Twitter"
+msgstr ""
+
+#: templates/liiweb/home.html:102
+msgid "Facebook"
+msgstr ""
+
+#: templates/liiweb/home.html:117
+msgid "Tweets by AfricanLII"
+msgstr ""
+
+#: templates/liiweb/home.html:150
 msgid "Courts"
 msgstr ""
 
-#: templates/liiweb/home.html:84
+#: templates/liiweb/home.html:154
 msgid "Collections"
 msgstr ""
 
@@ -89,7 +101,7 @@ msgid "Subscribe"
 msgstr ""
 
 #: templates/peachjam/_footer.html:9
-msgid "Subscribe to the our newsletter for updates and news."
+msgid "Subscribe to our newsletter for updates and news."
 msgstr ""
 
 #: templates/peachjam/_footer.html:20 templates/peachjam/_header.html:23

@@ -14,6 +14,18 @@
     </a>
   </li>
   <li class="nav-item">
+    <a class="nav-link {% if view.document_nature.code == 'speech' %}active{% endif %}"
+       href="{% url 'document_nature_list' 'speech' %}">
+      {% trans 'Speeches' %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if view.document_nature.code == 'law-reform-report' %}active{% endif %}"
+       href="{% url 'document_nature_list' 'law-reform-report' %}">
+      {% trans 'Law Reform Reports' %}
+    </a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'gazettes' %}active{% endif %}"
        href="{% url 'gazettes' %}">
       {% trans 'Gazettes' %}

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 from django_elasticsearch_dsl_drf.filter_backends import (
@@ -19,6 +20,7 @@ from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
 from rest_framework.permissions import AllowAny
 
+from peachjam.models import Author
 from peachjam_search.documents import ANALYZERS, SearchableDocument
 from peachjam_search.serializers import SearchableDocumentSerializer
 
@@ -173,7 +175,14 @@ class SearchView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["labels"] = {"author": "Regional body"}
+        search_placeholder_text = _("Search %(app_name)s") % {
+            "app_name": settings.PEACHJAM["APP_NAME"]
+        }
+        context["labels"] = {
+            "author": Author.model_label,
+            "searchPlaceholder": search_placeholder_text,
+        }
+        context["show_jurisdiction"] = bool(settings.EXTRA_SEARCH_INDEXES)
         return context
 
 
@@ -218,6 +227,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "judges": "judges",
         "registry": "registry",
         "attorneys": "attorneys",
+        "order_outcome": "order_outcome",
     }
 
     search_fields = {
@@ -228,8 +238,6 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "content": None,
         "court": None,
         "alternative_names": {"boost": 4},
-        "registry": None,
-        "attorneys": None,
     }
 
     faceted_search_fields = {
@@ -271,6 +279,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "judges": {"field": "judges", "options": {"size": 100}},
         "registry": {"field": "registry", "options": {"size": 100}},
         "attorneys": {"field": "attorneys", "options": {"size": 100}},
+        "order_outcome": {"field": "order_outcome", "options": {"size": 100}},
     }
 
     highlight_fields = {
@@ -291,9 +300,15 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # search multiple language indexes
-        self.index = [self.document._index._name] + [
-            f"{self.document._index._name}_{lang}" for lang in ANALYZERS.keys()
-        ]
+        self.index = (
+            [self.document._index._name]
+            + [f"{self.document._index._name}_{lang}" for lang in ANALYZERS.keys()]
+            + [
+                f"{i}_{lang}"
+                for i in settings.EXTRA_SEARCH_INDEXES
+                for lang in ANALYZERS.keys()
+            ]
+        )
         self.search = self.search.index(self.index)
 
     @method_decorator(cache_page(CACHE_SECS))

@@ -12,6 +12,7 @@
   <div v-if="false">
     {{ $t('Alphabetical') }}
     {{ $t('Court') }}
+    {{ $t('Court registry') }}
     {{ $t('Document type') }}
     {{ $t('Judges') }}
     {{ $t('Attorneys') }}
@@ -61,11 +62,15 @@ export default {
       type: Array,
       default: () => []
     },
-    // registries: {
-    //   type: Array,
-    //   default: () => []
-    // },
+    registries: {
+      type: Array,
+      default: () => []
+    },
     attorneys: {
+      type: Array,
+      default: () => []
+    },
+    order_outcomes: {
       type: Array,
       default: () => []
     }
@@ -120,18 +125,18 @@ export default {
         {
           name: 'authors',
           type: 'radio',
-          title: this.$t('Regional body')
+          title: JSON.parse(document.querySelector('#data-labels').textContent).author
         },
         {
           name: 'courts',
           type: 'radio',
           title: this.$t('Court')
         },
-        // {
-        //   name: 'registries',
-        //   type: 'checkboxes',
-        //   title: this.$t('Court registry')
-        // },
+        {
+          name: 'registries',
+          type: 'checkboxes',
+          title: this.$t('Court registry')
+        },
         {
           name: 'attorneys',
           type: 'checkboxes',
@@ -151,6 +156,11 @@ export default {
           name: 'judges',
           type: 'radio',
           title: this.$t('Judges')
+        },
+        {
+          name: 'order_outcomes',
+          type: 'checkboxes',
+          title: this.$t('Order')
         },
         {
           name: 'years',

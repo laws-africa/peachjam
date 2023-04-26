@@ -52,7 +52,7 @@
                 v-model="q"
                 type="text"
                 class="form-control"
-                :placeholder="$t('Search documents')"
+                :placeholder="searchPlaceholder"
                 :aria-label="$t('Search documents')"
                 aria-describedby="basic-addon2"
                 required
@@ -174,6 +174,7 @@
                   :key="item.key"
                   :item="item"
                   :query="q"
+                  :showJurisdiction="showJurisdiction"
                 />
               </ul>
 
@@ -204,8 +205,10 @@
       {{ $t('Document type') }}
       {{ $t('Author') }}
       {{ $t('Court') }}
+      {{ $t('Court registry') }}
       {{ $t('Judges') }}
       {{ $t('Attorneys') }}
+      {{ $t('Order') }}
       {{ $t('Jurisdiction') }}
       {{ $t('Locality') }}
       {{ $t('Matter type') }}
@@ -239,15 +242,17 @@ function resetAdvancedFields (fields) {
 
   fields.date = {
     date_to: null,
-    date_from: null,
+    date_from: null
   };
 }
 
 export default {
   name: 'FindDocuments',
   components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
+  props: ['showJurisdiction'],
   data () {
     const data = {
+      searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
       loadingCount: 0,
       error: null,
       searchInfo: {},
@@ -255,94 +260,105 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
-      advancedFields: {},
-      facets: [
-        {
-          title: this.$t('Document type'),
-          name: 'doc_type',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: JSON.parse(document.querySelector('#data-labels').textContent).author,
-          name: 'author',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Court'),
-          name: 'court',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        // {
-        //   title: this.$t('Court registry'),
-        //   name: 'registry',
-        //   type: 'checkboxes',
-        //   value: [],
-        //   options: []
-        // },
-        {
-          title: this.$t('Judges'),
-          name: 'judges',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Attorneys'),
-          name: 'attorneys',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Jurisdiction'),
-          name: 'jurisdiction',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Locality'),
-          name: 'locality',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Matter type'),
-          name: 'matter_type',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Document nature'),
-          name: 'nature',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Language'),
-          name: 'language',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Year'),
-          name: 'year',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        }
-      ]
+      advancedFields: {}
     };
+    const facets = [
+      {
+        title: this.$t('Document type'),
+        name: 'doc_type',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: JSON.parse(document.querySelector('#data-labels').textContent).author,
+        name: 'author',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Court'),
+        name: 'court',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Court registry'),
+        name: 'registry',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Judges'),
+        name: 'judges',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Attorneys'),
+        name: 'attorneys',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Order'),
+        name: 'order_outcome',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Locality'),
+        name: 'locality',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Matter type'),
+        name: 'matter_type',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Document nature'),
+        name: 'nature',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Language'),
+        name: 'language',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Year'),
+        name: 'year',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      }
+    ];
+
+    if (this.showJurisdiction) {
+      facets.splice(0, 0, {
+        title: this.$t('Jurisdiction'),
+        name: 'jurisdiction',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      });
+    }
+    data.facets = facets;
     resetAdvancedFields(data.advancedFields);
     return data;
   },

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 09:05+0200\n"
-"PO-Revision-Date: 2022-12-05 19:16\n"
+"PO-Revision-Date: 2023-03-28 08:27\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -31,23 +31,23 @@ msgstr "Hukumu za Hivi Karibuni"
 
 #: templates/liiweb/home.html:7
 msgid "View more judgments"
-msgstr ""
+msgstr "Tazama hukumu zaidi"
 
 #: templates/liiweb/home.html:11
 msgid "Recent Legislation"
-msgstr ""
+msgstr "Sheria ya Hivi Karibuni"
 
 #: templates/liiweb/home.html:12
 msgid "View more legislation"
-msgstr ""
+msgstr "Tazama sheria zaidi"
 
 #: templates/liiweb/home.html:16
 msgid "Recent Articles"
-msgstr ""
+msgstr "Makala za Hivi Karibuni"
 
 #: templates/liiweb/home.html:18
 msgid "View more articles"
-msgstr ""
+msgstr "Tazama makala zaidi"
 
 #: templates/peachjam/_header.html:9
 msgid "Judgments"
@@ -55,15 +55,15 @@ msgstr "Hukumu"
 
 #: templates/peachjam/_header.html:15
 msgid "Legislation"
-msgstr ""
+msgstr "Sheria"
 
 #: templates/peachjam/_header.html:21
 msgid "Taxonomy"
-msgstr ""
+msgstr "Taksonomia"
 
 #: templates/peachjam/_header.html:27
 msgid "Articles"
-msgstr ""
+msgstr "Makala"
 
 #: templates/peachjam/_header.html:33
 msgid "About"
@@ -71,4 +71,5 @@ msgstr "Kuhusu"
 
 #: templates/senlii/home.html:4
 msgid "Home"
-msgstr "Sebule"
+msgstr "Nyumbani"
+

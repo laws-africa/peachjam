@@ -74,6 +74,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "log_request_id.middleware.RequestIDMiddleware",
+    "peachjam.middleware.RedirectWWWMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -255,6 +256,8 @@ ELASTICSEARCH_MAX_ANALYZED_OFFSET = os.environ.get(
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
     "peachjam_search.tasks.BackgroundTaskSearchProcessor"
 )
+
+EXTRA_SEARCH_INDEXES = []
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -439,6 +442,7 @@ LOGGING = {
         "peachjam_search": {"level": "DEBUG" if DEBUG else "INFO"},
         "peachjam_api": {"level": "DEBUG" if DEBUG else "INFO"},
         "background_task": {"level": "INFO"},
+        "import_export": {"level": "DEBUG"},
     },
 }
 
@@ -446,7 +450,6 @@ LOGGING = {
 if DEBUG:
     ELASTICSEARCH_DSL_AUTOSYNC = False
 
-GOOGLE_ANALYTICS_ID = os.environ.get("GOOGLE_ANALYTICS_ID")
 
 CKEDITOR_CONFIGS = {
     # The rest of this config is defined in ckeditor.configs.DEFAULT_CONFIG
@@ -502,3 +505,14 @@ LOGGING["formatters"]["simple"][
     "format"
 ] = "%(asctime)s %(levelname)s %(module)s %(request_id)s %(process)d %(thread)d %(message)s"
 LOGGING["handlers"]["console"]["filters"] = ["request_id"]
+
+
+# E-mail configuration
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST")
+EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD")
+EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", 25))
+EMAIL_USE_TLS = os.environ.get("DJANGO_EMAIL_USE_TLS", "false") == "true"
+EMAIL_USE_SSL = os.environ.get("DJANGO_EMAIL_USE_SSL", "false") == "true"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")

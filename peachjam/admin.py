@@ -5,6 +5,8 @@ from ckeditor.widgets import CKEditorWidget
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericStackedInline
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
@@ -15,7 +17,7 @@ from django.utils.dates import MONTHS
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
-from import_export.admin import ImportMixin
+from import_export.admin import ImportExportMixin
 from languages_plus.models import Language
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
@@ -55,6 +57,7 @@ from peachjam.models import (
     Legislation,
     Locality,
     MatterType,
+    OrderOutcome,
     PeachJamSettings,
     Predicate,
     Relationship,
@@ -64,9 +67,16 @@ from peachjam.models import (
     Work,
     pj_settings,
 )
-from peachjam.resources import GenericDocumentResource, JudgmentResource
+from peachjam.resources import (
+    ArticleResource,
+    GenericDocumentResource,
+    JudgmentResource,
+    UserResource,
+)
 from peachjam.tasks import extract_citations as extract_citations_task
 from peachjam_search.tasks import search_model_saved
+
+User = get_user_model()
 
 
 class EntityProfileForm(forms.ModelForm):
@@ -337,6 +347,14 @@ class DocumentAdmin(admin.ModelAdmin):
 
     new_document_form_mixin = NewDocumentFormMixin
 
+    def get_inlines(self, request, obj):
+        inlines = self.inlines
+        if obj is None and SourceFileInline in inlines:
+            inlines.remove(SourceFileInline)
+        elif obj is not None and SourceFileInline not in inlines:
+            inlines.append(SourceFileInline)
+        return inlines
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         qs = qs.prefetch_related("locality", "jurisdiction")
@@ -432,7 +450,7 @@ class CoreDocumentAdmin(DocumentAdmin):
     pass
 
 
-class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
+class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
     resource_class = GenericDocumentResource
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["author", "nature"])
@@ -443,7 +461,7 @@ class GenericDocumentAdmin(ImportMixin, DocumentAdmin):
         return qs
 
 
-class LegalInstrumentAdmin(ImportMixin, DocumentAdmin):
+class LegalInstrumentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["author", "nature"])
 
@@ -453,7 +471,7 @@ class LegalInstrumentAdmin(ImportMixin, DocumentAdmin):
         return qs
 
 
-class LegislationAdmin(ImportMixin, DocumentAdmin):
+class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["nature"])
     fieldsets[3][1]["fields"].extend(["metadata_json"])
@@ -494,7 +512,7 @@ class JudgmentAdminForm(DocumentForm):
         return super().save(*args, **kwargs)
 
 
-class JudgmentAdmin(ImportMixin, DocumentAdmin):
+class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     form = JudgmentAdminForm
     resource_class = JudgmentResource
     inlines = [CaseNumberAdmin, AttachedFilesInline] + DocumentAdmin.inlines
@@ -505,6 +523,7 @@ class JudgmentAdmin(ImportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "registry")
     fieldsets[0][1]["fields"].insert(5, "case_name")
+    fieldsets[0][1]["fields"].insert(6, "order_outcome")
     fieldsets[0][1]["fields"].insert(7, "mnc")
     fieldsets[0][1]["fields"].insert(8, "serial_number_override")
     fieldsets[0][1]["fields"].insert(9, "serial_number")
@@ -567,7 +586,8 @@ class ArticleForm(forms.ModelForm):
 
 
 @admin.register(Article)
-class ArticleAdmin(admin.ModelAdmin):
+class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
+    resource_class = ArticleResource
     form = ArticleForm
     list_display = ("title", "date", "published")
     list_display_links = ("title",)
@@ -653,7 +673,6 @@ class JournalAdmin(DocumentAdmin):
 
 @admin.register(ExternalDocument)
 class ExternalDocumentAdmin(DocumentAdmin):
-
     prepopulated_fields = {"frbr_uri_number": ("title",)}
 
     def get_form(self, request, obj=None, **kwargs):
@@ -669,6 +688,15 @@ class ExternalDocumentAdmin(DocumentAdmin):
 class CourtRegistryAdmin(admin.ModelAdmin):
     readonly_fields = ("code",)
     list_display = ("name", "code")
+
+
+@admin.register(OrderOutcome)
+class OutcomeAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+
+
+class UserAdminCustom(ImportExportMixin, UserAdmin):
+    resource_class = UserResource
 
 
 admin.site.register(
@@ -689,5 +717,8 @@ admin.site.register(GenericDocument, GenericDocumentAdmin)
 admin.site.register(Legislation, LegislationAdmin)
 admin.site.register(LegalInstrument, LegalInstrumentAdmin)
 admin.site.register(Judgment, JudgmentAdmin)
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdminCustom)
 
 admin.site.site_header = settings.PEACHJAM["APP_NAME"]

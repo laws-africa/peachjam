@@ -76,15 +76,25 @@ class IndigoAdapter(Adapter):
             }
         )
         self.url = self.settings["url"]
+        self.api_url = self.settings["api_url"]
+        self.locality = self.settings.get(
+            "locality"
+        )  # using .get to avoid KeyError since locality is not required
+        self.jurisdiction = self.settings["jurisdiction"]
+        self.place_code = f"{self.jurisdiction}{'-' if self.locality else ''}{self.locality if self.locality else ''}"
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
         of document identifiers (expression FRBR URIs) which must be updated.
         """
-        return self.get_updated_documents(last_refreshed)
+        docs = self.get_doc_list()
+        updated_docs = self.check_for_updated(docs, last_refreshed)
+        deleted_docs = self.check_for_deleted(docs)
+
+        return updated_docs, deleted_docs
 
     def get_doc_list(self):
-        url = self.url
+        url = f"{self.api_url}/akn/{self.place_code}/.json"
         results = []
         while url:
             res = self.client_get(url).json()
@@ -92,20 +102,38 @@ class IndigoAdapter(Adapter):
             url = res["next"]
         return results
 
-    def get_updated_documents(self, last_refreshed):
+    def check_for_deleted(self, docs):
+        uris = {d["expression_frbr_uri"] for d in docs}
+        for doc in docs:
+            for pit in doc["points_in_time"]:
+                for expr in pit["expressions"]:
+                    uris.add(expr["expression_frbr_uri"])
+
+        qs = Legislation.objects.filter(jurisdiction__iso=self.jurisdiction.upper())
+        if self.locality:
+            qs = qs.filter(locality__code=self.locality)
+        else:
+            qs = qs.filter(locality=None)
+        deleted = qs.exclude(expression_frbr_uri__in=list(uris)).values_list(
+            "expression_frbr_uri", flat=True
+        )
+
+        return deleted
+
+    def check_for_updated(self, docs, last_refreshed):
         docs = [
             document
-            for document in self.get_doc_list()
+            for document in docs
             if last_refreshed is None
             or parser.parse(document["updated_at"]) > last_refreshed
         ]
 
-        urls = []
+        urls = {d["url"] for d in docs}
         for doc in docs:
             # if a document is out of date, also ensure we update its other expressions
             for pit in doc["points_in_time"]:
                 for expr in pit["expressions"]:
-                    urls.append(expr["url"])
+                    urls.add(expr["url"])
 
         return urls
 
@@ -350,12 +378,12 @@ class IndigoAdapter(Adapter):
             )
 
     def delete_document(self, expression_frbr_uri):
-        url = re.sub(r"/akn.*", expression_frbr_uri, self.url)
+        url = f"{self.api_url}{expression_frbr_uri}"
+
         try:
             document = self.client_get(url)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
-
                 document = CoreDocument.objects.filter(
                     expression_frbr_uri=expression_frbr_uri
                 ).first()

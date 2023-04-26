@@ -44,8 +44,7 @@ class DynamicS3StorageTestCase(TestCase):
         sf = SourceFile(document=self.doc)
         sf.filename = "test.txt"
         sf.mimetype = "text/plain"
-        cf = ContentFile(b"test data", "test.txt")
-        sf.file = cf
+        sf.file = cf = ContentFile(b"test data", "test.txt")
         sf.save()
         self.assertEqual(
             [
@@ -61,6 +60,10 @@ class DynamicS3StorageTestCase(TestCase):
         self.assertEqual(
             [f"s3:fake-bucket:media/core_document/{self.doc.pk}/source_file/test.txt"],
             list(SourceFile.objects.filter(pk=sf.pk).values_list("file", flat=True)),
+        )
+        self.assertEqual(
+            f"s3:fake-bucket:media/core_document/{self.doc.pk}/source_file/test.txt",
+            sf.file.get_raw_value(),
         )
 
         self.mock.reset_mock()
@@ -134,8 +137,7 @@ class DynamicFileSystemStorageTestCase(TestCase):
         sf = SourceFile(document=self.doc)
         sf.filename = "test.txt"
         sf.mimetype = "text/plain"
-        cf = ContentFile(b"test data", "test.txt")
-        sf.file = cf
+        sf.file = ContentFile(b"test data", "test.txt")
         sf.save()
 
         self.assertEqual([b"test data"], sf.file.readlines())
@@ -143,3 +145,18 @@ class DynamicFileSystemStorageTestCase(TestCase):
         sf.refresh_from_db()
         self.assertEqual([b"test data"], sf.file.readlines())
         self.assertEqual(9, sf.file.size)
+        self.assertEqual(f"file:{sf.file.name}", sf.file.get_raw_value())
+
+    def test_get_set_raw(self):
+        sf = SourceFile(document=self.doc)
+        sf.filename = "test.txt"
+        sf.mimetype = "text/plain"
+        sf.file = ContentFile(b"test data", "test.txt")
+        sf.save()
+        sf.refresh_from_db()
+        self.assertEqual(f"file:{sf.file.name}", sf.file.get_raw_value())
+
+        sf.file.set_raw_value("file:foo/bar.txt")
+        self.assertEqual("file:foo/bar.txt", sf.file.get_raw_value())
+        sf.refresh_from_db()
+        self.assertEqual("file:foo/bar.txt", sf.file.get_raw_value())

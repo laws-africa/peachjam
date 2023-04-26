@@ -6,6 +6,7 @@ INSTALLED_APPS = ["senlii.apps.SenLIIConfig"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "senlii.urls"
 
+LANGUAGE_CODE = "fr"
 
 LANGUAGES = [
     ("fr", _("French")),
@@ -16,3 +17,5 @@ LANGUAGES = [
 JAZZMIN_SETTINGS["site_title"] = "SenLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "SenLII"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "senlii.org"  # noqa
+
+COURT_CODE_MAPPINGS = {}

@@ -30,6 +30,8 @@ class GenericDocument(CoreDocument):
         return self.title
 
     def get_doc_type_display(self):
+        if not self.nature:
+            return super().get_doc_type_display()
         return self.nature.name
 
     def save(self, *args, **kwargs):

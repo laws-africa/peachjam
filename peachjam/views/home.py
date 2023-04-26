@@ -15,8 +15,8 @@ from peachjam.models import (
 class HomePageView(TemplateView):
     template_name = "peachjam/home.html"
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         recent_judgments = Judgment.objects.order_by("-date")[:5]
         recent_documents = GenericDocument.objects.order_by("-date")[:5]
         recent_instruments = LegalInstrument.objects.order_by("-date")[:5]
@@ -38,4 +38,4 @@ class HomePageView(TemplateView):
         context["authors"] = authors
         context["courts"] = courts
 
-        return self.render_to_response(context)
+        return context

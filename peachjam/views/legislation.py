@@ -39,6 +39,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         notices = super().get_notices()
         repeal = self.get_repeal_info()
         friendly_type = self.get_friendly_type()
+        commenced = self.get_commencement_info()
 
         if self.object.repealed and repeal:
             msg = (
@@ -52,18 +53,30 @@ class LegislationDetailView(BaseDocumentDetailView):
                 }
             )
 
+        if not commenced:
+            msg = f"This {friendly_type} has not yet commenced and is not yet law."
+            notices.append({"type": messages.WARNING, "html": _(msg)})
+
         points_in_time = self.get_points_in_time()
         work_amendments = self.get_work_amendments()
+        current_object_date = self.object.date.strftime("%Y-%m-%d")
 
-        if points_in_time and work_amendments:
-            current_object_date = self.object.date.strftime("%Y-%m-%d")
-            point_in_time_dates = [
-                point_in_time["date"] for point_in_time in points_in_time
-            ]
+        if not work_amendments:
+            latest_amendment_date = None
+        else:
             work_amendments_dates = [
                 work_amendment["date"] for work_amendment in work_amendments
             ]
-            latest_amendment_date = work_amendments_dates[-1]
+            latest_amendment_date = max(work_amendments_dates)
+
+            if not points_in_time and latest_amendment_date > current_object_date:
+                self.set_unapplied_amendment_notice(notices, friendly_type)
+
+        if points_in_time and work_amendments:
+            point_in_time_dates = [
+                point_in_time["date"] for point_in_time in points_in_time
+            ]
+
             index = point_in_time_dates.index(current_object_date)
 
             if index == len(point_in_time_dates) - 1:
@@ -77,17 +90,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                     )
 
                 elif work_amendments and latest_amendment_date > current_object_date:
-                    msg = (
-                        f"This is the latest available version of this {friendly_type}. "
-                        f"There are outstanding amendments that have not yet been applied. "
-                        f"See the History tab for more information."
-                    )
-                    notices.append(
-                        {
-                            "type": messages.WARNING,
-                            "html": _(msg),
-                        }
-                    )
+                    self.set_unapplied_amendment_notice(notices, friendly_type)
 
                 else:
                     msg = f"This is the latest version of this {friendly_type}."
@@ -134,21 +137,30 @@ class LegislationDetailView(BaseDocumentDetailView):
         return self.object.metadata_json.get("type_name", None)
 
     def get_points_in_time(self):
-        return self.object.metadata_json.get("points_in_time", None)
+        return self.object.metadata_json.get("points_in_time", [])
 
     def get_work_amendments(self):
         return self.object.metadata_json.get("work_amendments", None)
 
+    def get_commencement_info(self):
+        return self.object.metadata_json.get("commenced", None)
+
+    def set_unapplied_amendment_notice(self, notices, friendly_type):
+        unapplied_amendment_msg = (
+            f"This is the latest available version of this {friendly_type}. "
+            f"There are outstanding amendments that have not yet been applied. "
+            f"See the History tab for more information."
+        )
+        notices.append(
+            {
+                "type": messages.WARNING,
+                "html": _(unapplied_amendment_msg),
+            }
+        )
+
     def get_timeline_events(self):
         events = []
-
         work = self.object.metadata_json
-
-        points_in_time = self.get_points_in_time()
-        expressions = {
-            point_in_time["date"]: point_in_time["expressions"][0]
-            for point_in_time in points_in_time or []
-        }
 
         assent_date = self.object.metadata_json.get("assent_date", None)
         if assent_date:
@@ -187,25 +199,34 @@ class LegislationDetailView(BaseDocumentDetailView):
                 }
             )
 
+        points_in_time = self.get_points_in_time()
+
         amendments = self.get_work_amendments()
-        if points_in_time and amendments:
+        if amendments:
             point_in_time_dates = [
                 point_in_time["date"] for point_in_time in points_in_time
             ]
-            event = [
-                {
-                    "date": amendment.get("date"),
-                    "event": "amendment",
-                    "amending_title": amendment.get("amending_title"),
-                    "amending_uri": amendment.get("amending_uri"),
-                    "unapplied_amendment": bool(
-                        amendment.get("date") not in point_in_time_dates
-                    ),
-                }
-                for amendment in amendments
-            ]
+            latest_expression_date = (
+                max(point_in_time_dates)
+                if point_in_time_dates
+                else self.object.date.strftime("%Y-%m-%d")
+            )
 
-            events.extend(event)
+            events.extend(
+                [
+                    {
+                        "date": amendment.get("date"),
+                        "event": "amendment",
+                        "amending_title": amendment.get("amending_title"),
+                        "amending_uri": amendment.get("amending_uri"),
+                        "unapplied_amendment": bool(
+                            amendment.get("date") not in point_in_time_dates
+                            and amendment.get("date") > latest_expression_date
+                        ),
+                    }
+                    for amendment in amendments
+                ]
+            )
 
         repeal = self.get_repeal_info()
         if repeal:
@@ -227,6 +248,11 @@ class LegislationDetailView(BaseDocumentDetailView):
             for date, group in groupby(events, lambda event: event["date"])
         ]
 
+        # fold in links to expressions corresponding to each event date (if any)
+        expressions = {
+            point_in_time["date"]: point_in_time["expressions"][0]
+            for point_in_time in points_in_time
+        }
         for event in events:
             for e in event["events"]:
                 del e["date"]

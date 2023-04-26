@@ -12,6 +12,7 @@ import {
   LaTableOfContents,
   LaTocItem,
   LaDecorateInternalRefs,
+  LaDecorateExternalRefs,
   LaDecorateTerms
 } from '@lawsafrica/law-widgets/dist/components';
 
@@ -19,6 +20,7 @@ customElements.define('la-akoma-ntoso', LaAkomaNtoso as any);
 customElements.define('la-gutter', LaGutter as any);
 customElements.define('la-gutter-item', LaGutterItem as any);
 customElements.define('la-decorate-internal-refs', LaDecorateInternalRefs as any);
+customElements.define('la-decorate-external-refs', LaDecorateExternalRefs as any);
 customElements.define('la-decorate-terms', LaDecorateTerms as any);
 customElements.define('la-table-of-contents-controller', LaTableOfContentsController as any);
 customElements.define('la-table-of-contents', LaTableOfContents as any);
@@ -51,6 +53,8 @@ class PeachJam {
         const vueComp = components[name];
         createAndMountApp({
           component: vueComp,
+          // pass in the element's data attributes as props
+          props: { ...(el as HTMLElement).dataset },
           use: [vueI18n],
           mountTarget: el as HTMLElement
         });

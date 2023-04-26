@@ -5,6 +5,7 @@ from lxml import html
 from peachjam.forms import BaseDocumentFilterForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
+    Author,
     CitationLink,
     CoreDocument,
     GenericDocument,
@@ -97,6 +98,9 @@ class FilteredDocumentListView(DocumentListView):
 
         context["doc_table_show_author"] = bool(authors)
         context["doc_table_show_doc_type"] = bool(natures)
+
+        context["doc_count"] = self.get_queryset().count()
+        context["labels"] = {"author": Author.model_label}
 
         context["facet_data"] = {
             "years": years,

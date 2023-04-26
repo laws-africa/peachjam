@@ -30,6 +30,7 @@ from peachjam.frbr_uri import (
 )
 from peachjam.helpers import pdfjs_to_text
 from peachjam.models import CitationLink, ExtractedCitation
+from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
 
@@ -172,6 +173,36 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
             models.Q(language_id__iso_639_3=language)
             | ~models.Q(work__languages__contains=[language])
         )
+
+    def best_for_frbr_uri(self, frbr_uri, lang):
+        """Get the best object for this FRBR URI, which could be an expression or a work URI.
+        Returns an (object, exact) tuple, where exact is a boolean indicating if the match was an exact one,
+        or a guess."""
+        obj = self.filter(expression_frbr_uri=frbr_uri).first()
+        if obj:
+            return obj, True
+
+        # try looking based on the work URI instead, and use the latest expression
+        qs = CoreDocument.objects.filter(work_frbr_uri=frbr_uri)
+
+        # first, look for one in the user's preferred language
+        if lang:
+            lang = Language.objects.filter(pk=lang).first()
+            if lang:
+                obj = qs.filter(language=lang).latest_expression().first()
+                if obj:
+                    return obj, False
+
+        # try the default site language
+        lang = pj_settings().default_document_language
+        if lang:
+            obj = qs.filter(language=lang).latest_expression().first()
+            if obj:
+                return obj, False
+
+        # just get any one
+        obj = qs.latest_expression().first()
+        return obj, False
 
 
 class CoreDocument(PolymorphicModel):

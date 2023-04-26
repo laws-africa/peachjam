@@ -11,6 +11,9 @@ import requests.exceptions
 from cobalt import FrbrUri
 from countries_plus.models import Country
 from dateutil.parser import parse
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import Group
 from django.core.files.base import File
 from django.forms import ValidationError
 from django.utils.text import slugify
@@ -27,6 +30,7 @@ from languages_plus.models import Language
 
 from peachjam.models import (
     AlternativeName,
+    Article,
     AttachedFileNature,
     AttachedFiles,
     Attorney,
@@ -41,6 +45,7 @@ from peachjam.models import (
     Judgment,
     Locality,
     MatterType,
+    OrderOutcome,
     SourceFile,
     Taxonomy,
 )
@@ -49,6 +54,7 @@ from peachjam.pipelines import DOC_MIMETYPES
 from .download import download_source_file
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 class CharRequiredWidget(CharWidget):
@@ -93,7 +99,24 @@ class SourceFileWidget(CharRequiredWidget):
 
                     elif mime in DOC_MIMETYPES:
                         suffix = splitext(file.name)[1].lstrip(".")
-                        soffice_convert(file, suffix, "html")
+                        # retry when conversion fails
+                        attempt = 0
+                        while attempt <= 3:
+                            file.seek(0)
+                            attempt += 1
+                            try:
+                                soffice_convert(file, suffix, "html")
+                                if attempt > 1:
+                                    logger.info(f"soffice success on attempt {attempt}")
+                                break
+                            except SOfficeError as e:
+                                logger.warning(
+                                    f"soffice error on attempt {attempt} of 3",
+                                    exc_info=e,
+                                )
+                                if attempt >= 3:
+                                    raise
+
             return value
         except (
             requests.exceptions.RequestException,
@@ -331,6 +354,11 @@ class GenericDocumentResource(BaseDocumentResource):
         attribute="nature",
         widget=DocumentNatureWidget(DocumentNature, field="code"),
     )
+    work_frbr_uri = fields.Field(
+        column_name="work_frbr_uri",
+        attribute="work_fbr_uri",
+        widget=CharRequiredWidget(field="work_frbr_uri"),
+    )
 
     required_fields = (
         "author",
@@ -348,18 +376,19 @@ class GenericDocumentResource(BaseDocumentResource):
 
     def before_import_row(self, row, **kwargs):
         super().before_import_row(row, **kwargs)
-        frbr_uri = FrbrUri.parse(row["work_frbr_uri"])
-        row["language"] = frbr_uri.default_language
-        row["jurisdiction"] = str(frbr_uri.country).upper()
-        row["locality"] = frbr_uri.locality
-        row["frbr_uri_number"] = frbr_uri.number
-        row["frbr_uri_doctype"] = frbr_uri.doctype
-        row["frbr_uri_subtype"] = frbr_uri.subtype
-        row["frbr_uri_date"] = frbr_uri.date
+        if row.get("work_frbr_uri"):
+            frbr_uri = FrbrUri.parse(row["work_frbr_uri"])
+            row["language"] = frbr_uri.default_language
+            row["jurisdiction"] = str(frbr_uri.country).upper()
+            row["locality"] = frbr_uri.locality
+            row["frbr_uri_number"] = frbr_uri.number
+            row["frbr_uri_doctype"] = frbr_uri.doctype
+            row["frbr_uri_subtype"] = frbr_uri.subtype
+            row["frbr_uri_date"] = frbr_uri.date
 
-        if frbr_uri.actor:
-            row["frbr_uri_actor"] = frbr_uri.actor
-            row["author"] = frbr_uri.actor
+            if frbr_uri.actor:
+                row["frbr_uri_actor"] = frbr_uri.actor
+                row["author"] = frbr_uri.actor
 
 
 class ManyToManyFieldWidget(ManyToManyWidget):
@@ -400,6 +429,11 @@ class JudgmentResource(BaseDocumentResource):
         widget=ForeignKeyWidget(CourtRegistry, field="code"),
     )
     case_numbers = fields.Field(column_name="case_numbers", widget=CharWidget)
+    order_outcome = fields.Field(
+        column_name="order_outcome",
+        attribute="order_outcome",
+        widget=ForeignKeyWidget(OrderOutcome, field="name"),
+    )
 
     required_fields = (
         "case_name",
@@ -460,6 +494,7 @@ class JudgmentResource(BaseDocumentResource):
         judgment = Judgment.objects.filter(pk=instance.object_id).first()
 
         if judgment:
+            CaseNumber.objects.filter(document=judgment).delete()
             for case_number in self.get_case_numbers(row):
                 case_number.document = judgment
                 case_number.save()
@@ -476,3 +511,110 @@ class JudgmentResource(BaseDocumentResource):
                 self.download_attachment(
                     row["media_summary_file"], judgment, "Media summary"
                 )
+
+
+class ArticleAuthorWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            raise ValidationError("author is required")
+        author = value
+        first_name, *last_name = value.split()
+        author, _ = self.model.objects.get_or_create(
+            username=slugify(value),
+            defaults={
+                "first_name": first_name,
+                "last_name": last_name[0],
+            },
+        )
+
+        return author
+
+
+class ImageWidget(CharWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        try:
+            file_url = value
+            file = download_source_file(file_url)
+            mime, _ = mimetypes.guess_type(file_url)
+            file_ext = mimetypes.guess_extension(mime)
+            return File(file, name=f"{slugify(value[:20])}{file_ext}")
+        except requests.exceptions.RequestException as e:
+            msg = getattr(e, "message", repr(e)) or repr(e)
+            logger.warning(f"Error downloading image: {value} - {msg}")
+            raise ValidationError(f"Error downloading image: {value} - {msg}")
+
+
+class PublishedWidget(BooleanWidget):
+    def clean(self, value, row=None, **kwargs):
+        return bool(value)
+
+
+class TopicsWidget(ManyToManyWidget):
+    def clean(self, value, row=None, **kwargs):
+        if value:
+            article_tag_root = Taxonomy.objects.filter(
+                name__iexact="Article tags"
+            ).first()
+            if not article_tag_root:
+                article_tag_root = Taxonomy.add_root(name="Article tags")
+
+            taxonomies = [
+                " ".join(t.split()).capitalize() for t in value.split(self.separator)
+            ]
+            for taxonomy in taxonomies:
+                topic = Taxonomy.objects.filter(name__iexact=taxonomy).first()
+                if not topic:
+                    article_tag_root.add_child(name=taxonomy)
+            return Taxonomy.objects.filter(name__in=taxonomies)
+        return []
+
+
+class ArticleResource(resources.ModelResource):
+    author = fields.Field(
+        column_name="author",
+        attribute="author",
+        widget=ArticleAuthorWidget(User, field="username"),
+    )
+    image = fields.Field(attribute="image", column_name="image", widget=ImageWidget())
+    published = fields.Field(
+        attribute="published", column_name="published", widget=PublishedWidget()
+    )
+    topics = fields.Field(
+        column_name="topics",
+        attribute="topics",
+        widget=TopicsWidget(Taxonomy, separator=","),
+    )
+
+    class Meta:
+        model = Article
+        required_fields = (
+            "date",
+            "title",
+            "body",
+            "author",
+            "image_url",
+            "summary",
+            "topics",
+            "published",
+        )
+
+
+class UserResource(resources.ModelResource):
+    groups = fields.Field(
+        column_name="groups",
+        attribute="groups",
+        widget=ManyToManyFieldWidget(Group, separator="|", field="name"),
+    )
+
+    class Meta:
+        model = User
+        exclude = ("id",)
+        import_id_fields = ("email", "username")
+        # export_order = ("first_name", "last_name", "email", "groups")
+
+    def before_save_instance(self, instance, using_transactions, dry_run):
+        if not instance.pk:
+            instance.username = instance.email
+            instance.password = make_password(instance.password)
+            instance.is_staff = True
+            instance.save()
