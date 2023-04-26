@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 from django_elasticsearch_dsl_drf.filter_backends import (
@@ -174,7 +175,14 @@ class SearchView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["labels"] = {"author": Author.model_label}
+        search_placeholder_text = _("Search %(app_name)s") % {
+            "app_name": settings.PEACHJAM["APP_NAME"]
+        }
+        context["labels"] = {
+            "author": Author.model_label,
+            "searchPlaceholder": search_placeholder_text,
+        }
+        context["show_jurisdiction"] = bool(settings.EXTRA_SEARCH_INDEXES)
         return context
 
 
