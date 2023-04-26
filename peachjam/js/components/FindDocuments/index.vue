@@ -624,48 +624,8 @@ export default {
 </script>
 
 <style scoped>
-.search-input-container {
-  padding-bottom: 1rem;
-}
-
-@media screen and (max-width: 992px) {
-  .search-input-container {
-    width: 100%;
-  }
-}
-
-.search-input-container button[type="submit"] {
-  height: 100%;
-}
-
-.search-facets {
-  position: sticky;
-  top: 0px;
-  padding-top: 0;
-  max-height: 100vh;
-  height: 100%;
-  overflow-y: auto;
-  z-index: 99;
-}
-
-.search-facets .list-group-item {
-  border-radius: 0px;
-}
-
-.search-facets__header {
-  position: sticky;
-  top: 0;
-  left: 0;
-  z-index: 99;
-}
-
 .search-pane {
   padding-top: 10px;
-}
-
-.search-facets .card-body {
-  max-height: 25vh;
-  overflow-y: auto;
 }
 
 .overlay {
@@ -693,12 +653,12 @@ export default {
 }
 
 @media screen and (max-width: 992px) {
- .filter-facet-title {
-  position: absolute;
-  margin: auto;
-  left: 0;
-  right: 0;
-  width: 40px;
-}
+   .filter-facet-title {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    right: 0;
+    width: 40px;
+  }
 }
 </style>
