@@ -7,7 +7,8 @@
   <div>
     <div class="container pt-lg-5 pt-2 pb-5">
       {% block lead-text %}{% endblock %}
-      <div data-vue-component="FindDocuments"></div>
+      <div data-vue-component="FindDocuments"
+           {% if show_jurisdiction %}data-show-jurisdiction="true"{% endif %}></div>
       {{ labels|json_script:"data-labels" }}
     </div>
   </div>

@@ -9,31 +9,33 @@
       {{ item.title }}
     </a>
     <div>
-      {{ item.matter_type }}
+      <span v-if="showJurisdiction || item.locality" class="me-3">
+        <span v-if="showJurisdiction" v-html="getFlag(item.jurisdiction)" class="me-1" />
+        <span v-if="showJurisdiction">
+          {{ item.jurisdiction }}
+          <span v-if="item.locality">· </span>
+        </span>
+        <span v-if="item.locality">{{ item.locality }}</span>
+      </span>
+      <span class="me-3">{{ item.date }}</span>
+      <span class="me-3">{{ item.doc_type }}</span>
+      <span
+        v-if="item.court"
+        class="me-3"
+      >{{ item.court }}</span>
+      <span
+        v-if="item.author"
+        class="me-3"
+      >{{ item.author }}</span>
     </div>
     <div v-if="item.citation && item.citation !== item.title">
       <i>{{ item.citation }}</i>
     </div>
-    <div class="text-muted">
-      {{ item.date }} <span class="ms-3">{{ item.doc_type }}</span>
-      <span
-        v-if="item.court"
-        class="ms-3"
-      >{{ item.court }}</span>
-      <span
-        v-if="item.author"
-        class="ms-3"
-      >{{ item.author }}</span>
-    </div>
-    <div class="text-muted">
-      <span v-html="getFlag(item.jurisdiction)"></span>
-      {{ item.jurisdiction }}
-      <span v-if="item.locality">· {{ item.locality }}</span>
+    <div>
+      {{ item.matter_type }}
     </div>
 
-
-
-    <div v-if="item.pages.length">
+    <div v-if="item.pages.length" class="ms-3">
       <div
         v-for="(page, index) in item.pages"
         :key="index"
@@ -44,7 +46,7 @@
         <span v-if="page.highlight['pages.body']" v-html="page.highlight['pages.body'].join(' ... ')" />
       </div>
     </div>
-    <div v-else>
+    <div v-else class="ms-3">
       <span
         class="snippet"
         v-html="highlights(item)"
@@ -66,6 +68,10 @@ export default {
     query: {
       type: String,
       default: () => ''
+    },
+    showJurisdiction: {
+      type: Boolean,
+      default: false,
     }
   },
   methods: {

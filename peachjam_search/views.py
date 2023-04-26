@@ -182,6 +182,7 @@ class SearchView(TemplateView):
             "author": Author.model_label,
             "searchPlaceholder": search_placeholder_text,
         }
+        context["show_jurisdiction"] = bool(settings.EXTRA_SEARCH_INDEXES)
         return context
 
 

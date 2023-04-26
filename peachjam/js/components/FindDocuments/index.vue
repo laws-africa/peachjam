@@ -174,6 +174,7 @@
                   :key="item.key"
                   :item="item"
                   :query="q"
+                  :showJurisdiction="showJurisdiction"
                 />
               </ul>
 
@@ -214,7 +215,6 @@
       {{ $t('Document nature') }}
       {{ $t('Language') }}
       {{ $t('Year') }}
-
     </div>
   </div>
 </template>
@@ -231,7 +231,105 @@ import { scrollToElement } from '../../utils/function';
 export default {
   name: 'FindDocuments',
   components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
+  props: ['showJurisdiction'],
   data () {
+    const facets = [
+      {
+        title: this.$t('Document type'),
+        name: 'doc_type',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: JSON.parse(document.querySelector('#data-labels').textContent).author,
+        name: 'author',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Court'),
+        name: 'court',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Court registry'),
+        name: 'registry',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Judges'),
+        name: 'judges',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Attorneys'),
+        name: 'attorneys',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Order'),
+        name: 'order_outcome',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Locality'),
+        name: 'locality',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Matter type'),
+        name: 'matter_type',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Document nature'),
+        name: 'nature',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Language'),
+        name: 'language',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Year'),
+        name: 'year',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      }
+    ];
+
+    if (this.showJurisdiction) {
+      facets.splice(0, 0, {
+        title: this.$t('Jurisdiction'),
+        name: 'jurisdiction',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      });
+    }
+
     return {
       searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
       loadingCount: 0,
@@ -252,99 +350,7 @@ export default {
           date_to: null
         }
       },
-      facets: [
-        {
-          title: this.$t('Document type'),
-          name: 'doc_type',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: JSON.parse(document.querySelector('#data-labels').textContent).author,
-          name: 'author',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Court'),
-          name: 'court',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Court registry'),
-          name: 'registry',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Judges'),
-          name: 'judges',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Attorneys'),
-          name: 'attorneys',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Order'),
-          name: 'order_outcome',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Jurisdiction'),
-          name: 'jurisdiction',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Locality'),
-          name: 'locality',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Matter type'),
-          name: 'matter_type',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Document nature'),
-          name: 'nature',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Language'),
-          name: 'language',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        },
-        {
-          title: this.$t('Year'),
-          name: 'year',
-          type: 'checkboxes',
-          value: [],
-          options: []
-        }
-      ]
+      facets
     };
   },
 
