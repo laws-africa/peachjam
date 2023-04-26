@@ -7,6 +7,7 @@ from peachjam.views.generic_views import FilteredDocumentListView
 
 class AuthorDetailView(FilteredDocumentListView):
     template_name = "peachjam/author_detail.html"
+    navbar_link = "author_detail"
 
     def get_base_queryset(self):
         return CoreDocument.objects.prefetch_related("nature", "work").filter(
@@ -15,7 +16,7 @@ class AuthorDetailView(FilteredDocumentListView):
         )
 
     def get_queryset(self):
-        self.author = get_object_or_404(Author, pk=self.kwargs["pk"])
+        self.author = get_object_or_404(Author, code=self.kwargs["code"])
         return super().get_queryset()
 
     def get_context_data(self, **kwargs):

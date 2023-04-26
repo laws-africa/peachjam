@@ -1,5 +1,5 @@
 {% extends 'peachjam/_header.html' %}
-{% load i18n %}
+{% load namiblii i18n %}
 {% block nav-items %}
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'judgments' %}active{% endif %}"
@@ -11,6 +11,12 @@
     <a class="nav-link {% if view.navbar_link == 'legislation' %}active{% endif %}"
        href="{% url 'legislation_list' %}">
       {% trans 'Legislation' %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if view.navbar_link == 'author_detail' %}active{% endif %}"
+       href="{% 'author' 'NALRDC' %}">
+      {% trans 'Law Reform' %}
     </a>
   </li>
   <li class="nav-item">

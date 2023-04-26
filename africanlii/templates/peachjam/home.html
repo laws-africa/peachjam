@@ -44,7 +44,7 @@
           <ul class="list-unstyled">
             {% for author in authors %}
               <li>
-                <a href="{% url 'author' author.id %}">{{ author.name }}</a>
+                <a href="{% url 'author' author.code %}">{{ author.name }}</a>
               </li>
             {% endfor %}
           </ul>
