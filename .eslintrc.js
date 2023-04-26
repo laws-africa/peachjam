@@ -25,6 +25,16 @@ module.exports = {
       // does not work with type definitions
       'no-unused-vars': 'off'
     }
+  }, {
+    files: ['*.vue'],
+    rules: {
+      'vue/max-attributes-per-line': ['error', {
+        // allow up to thre attributes on a line
+        singleline: {
+          max: 3
+        }
+      }]
+    }
   }],
   rules: {
     semi: ['error', 'always']

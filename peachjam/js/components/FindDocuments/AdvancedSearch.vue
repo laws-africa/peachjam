@@ -1,179 +1,83 @@
 <template>
-  <div class="card">
-    <div class="card-body">
-      <form @submit.prevent="submitAdvancedForm">
-        <div class="row">
-          <div class="col-12 mb-3">
-            <label class="form-label" for="global">{{ $t("Search all fields") }}</label>
-            <input
-              id="global"
-              name="global"
-              type="text"
-              class="form-control"
-              :value="globalSearchValue"
-              :aria-describedby="$t('Search all fields')"
-              :placeholder="$t('Search documents by all fields')"
-              @input="onGlobalSearch"
-            >
+  <form @submit.prevent="submitAdvancedForm">
+    <div class="row">
+      <div class="col-lg">
+        <div class="card mb-3">
+          <h5 class="card-header">{{ $t("Anywhere") }}</h5>
+          <div class="card-body">
+            <AdvancedSearchFields v-model:fieldValues="modelValue.all" input-name="all" />
           </div>
-          <div class="col-12 col-lg-6 mb-3">
-            <label class="form-label" for="title">{{ $t("Title") }}</label>
-            <input
-              id="title"
-              name="title"
-              type="text"
-              class="form-control"
-              :aria-describedby="$t('Title')"
-              :placeholder="$t('Search documents by title')"
-              :value="modelValue.title.q"
-              @input="onChange"
-            >
-          </div>
-          <div class="col-12 col-lg-6 mb-3">
-            <label class="form-label" for="judges">{{ $t("Judges") }}</label>
-            <input
-              id="judges"
-              name="judges"
-              type="text"
-              class="form-control"
-              :aria-describedby="$t('Judges')"
-              :placeholder="$t('Search documents by judges')"
-              :value="modelValue.judges.q"
-              @input="onChange"
-            >
-          </div>
+        </div>
+      </div>
 
-          <div class="col-12 col-lg-6 mb-3">
-            <label class="form-label" for="headnote_holding">{{ $t("Headnote holding") }}</label>
-            <input
-              id="headnote_holding"
-              type="text"
-              name="headnote_holding"
-              class="form-control"
-              :aria-describedby="$t('Headnote holding')"
-              :placeholder="$t('Search documents by headnote holding')"
-              :value="modelValue.headnote_holding.q"
-              @input="onChange"
-            >
-          </div>
-
-          <div class="col-12 col-lg-6 mb-3">
-            <label class="form-label" for="flynote">{{ $t("Flynote") }}</label>
-            <input
-              id="flynote"
-              name="flynote"
-              type="text"
-              class="form-control"
-              :aria-describedby="$t('Flynote')"
-              :placeholder="$t('Search documents by flynote')"
-              :value="modelValue.flynote.q"
-              @input="onChange"
-            >
-          </div>
-
-          <div class="col-12 mb-3">
-            <label class="form-label" for="content">{{ $t('Content') }}</label>
-            <input
-              id="content"
-              type="text"
-              name="content"
-              class="form-control"
-              :aria-describedby="$t('Content')"
-              :placeholder="$t('Search documents by content')"
-              :value="modelValue.content.q"
-              @input="onChange"
-            >
-          </div>
-
-          <div class="row mb-3">
-            <div class="col-lg-6">
-              <label class="form-label" for="date_from">{{ $t("Date from") }}</label>
-              <input
-                id="date_from"
-                name="date_from"
-                type="date"
-                class="form-control"
-                :aria-describedby="$t('Date from')"
-                :placeholder="$t('Enter start date')"
-                :value="modelValue.date.date_from"
-                :disabled="disableDate"
-                @change="onDateChange"
-              >
+      <div class="col-lg">
+        <div class="card mb-3">
+          <h5 class="card-header">{{ $t("Date") }}</h5>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-6">
+                <label class="form-label" for="date_from">{{ $t("Date from") }}</label>
+                <input
+                  id="date_from"
+                  name="date_from"
+                  type="date"
+                  class="form-control"
+                  :aria-describedby="$t('Date from')"
+                  :placeholder="$t('Enter start date')"
+                  :value="modelValue.date.date_from"
+                  :disabled="disableDate"
+                  @change="onDateChange"
+                >
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="date_to">{{ $t("Date to") }}</label>
+                <input
+                  id="date_to"
+                  name="date_to"
+                  type="date"
+                  class="form-control"
+                  :aria-describedby="$t('Date to')"
+                  :placeholder="$t('Enter end date')"
+                  :value="modelValue.date.date_to"
+                  :disabled="disableDate"
+                  @change="onDateChange"
+                >
+              </div>
             </div>
-            <div class="col-lg-6">
-              <label class="form-label" for="date_to">{{ $t("Date to") }}</label>
-              <input
-                id="date_to"
-                name="date_to"
-                type="date"
-                class="form-control"
-                :aria-describedby="$t('Date to')"
-                :placeholder="$t('Enter end date')"
-                :value="modelValue.date.date_to"
-                :disabled="disableDate"
-                @change="onDateChange"
-              >
+            <div v-if="invalidDates" class="text-danger">
+              {{ $t('The date range is invalid') }}.
             </div>
           </div>
-          <div
-            v-if="invalidDates"
-            class="col-12 mb-3 text-danger"
-          >
-            {{ $t('The date range you have selected is invalid') }}. {{ $t('Please choose a correct date range') }}.
-          </div>
         </div>
-
-        <label>
-          <input
-            v-model="showAdditionalOptions"
-            type="checkbox"
-          >
-          {{ $t('Show additional options') }}
-        </label>
-
-        <div v-if="showAdditionalOptions">
-          <AdvancedSearchFields
-            v-model:fieldValues="modelValue.all"
-            form-title="Search all fields"
-            input-name="all"
-          />
-          <AdvancedSearchFields
-            v-model:fieldValues="modelValue.title"
-            form-title="Title"
-            input-name="title"
-          />
-          <AdvancedSearchFields
-            v-model:fieldValues="modelValue.judges"
-            form-title="Judges"
-            input-name="judges"
-          />
-          <AdvancedSearchFields
-            v-model:fieldValues="modelValue.headnote_holding"
-            form-title="Headnote holding"
-            input-name="headnote_holding"
-          />
-          <AdvancedSearchFields
-            v-model:fieldValues="modelValue.flynote"
-            form-title="Flynote"
-            input-name="flynote"
-          />
-          <AdvancedSearchFields
-            v-model:fieldValues="modelValue.content"
-            form-title="Content"
-            input-name="content"
-          />
-        </div>
-        <div class="text-end">
-          <button
-            type="submit"
-            class="btn btn-primary"
-          >
-            {{ $t('Search') }}
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
-  </div>
+
+    <div class="row">
+      <div class="col-lg">
+        <div class="card mb-3">
+          <h5 class="card-header">{{ $t("Title") }}</h5>
+          <div class="card-body">
+            <AdvancedSearchFields v-model:fieldValues="modelValue.title" input-name="title" />
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg">
+        <div class="card mb-3">
+          <h5 class="card-header">{{ $t("Content") }}</h5>
+          <div class="card-body">
+            <AdvancedSearchFields v-model:fieldValues="modelValue.content" input-name="content" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-end">
+      <button type="submit" class="btn btn-primary">
+        {{ $t('Search') }}
+      </button>
+    </div>
+  </form>
 </template>
 
 <script>
@@ -218,7 +122,7 @@ export default {
 
     disableDate () {
       // Disable dates if there are no search values
-      return !(['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.modelValue[key]) || this.globalSearchValue);
+      return !(['title', 'headnote_holding', 'flynote', 'content'].some(key => this.modelValue[key]) || this.globalSearchValue);
     }
   },
 
@@ -340,9 +244,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.form-title {
-  font-weight: bold;
-}
-</style>
