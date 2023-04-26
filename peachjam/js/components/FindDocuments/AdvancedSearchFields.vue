@@ -14,7 +14,7 @@
           :id="`${inputName}-all`"
           :name="`${inputName}-all`"
           type="text"
-          :value="fieldValues[inputName].all"
+          :value="fieldValues.all"
           class="form-control"
           :aria-describedby="$t(formTitle)"
           @input="e => updateSubfields(e, 'all')"
@@ -31,7 +31,7 @@
           :id="`${inputName}-exact`"
           :name="`${inputName}-exact`"
           type="text"
-          :value="fieldValues[inputName].exact"
+          :value="fieldValues.exact"
           class="form-control"
           :aria-describedby="$t(formTitle)"
           @input="e => updateSubfields(e, 'exact')"
@@ -48,7 +48,7 @@
           :id="`${inputName}-any`"
           :name="`${inputName}-any`"
           type="text"
-          :value="fieldValues[inputName].any"
+          :value="fieldValues.any"
           class="form-control"
           :aria-describedby="$t(formTitle)"
           @input="e => updateSubfields(e, 'any')"
@@ -65,7 +65,7 @@
           :id="`${inputName}-none`"
           :name="`${inputName}-none`"
           type="text"
-          :value="fieldValues[inputName].none"
+          :value="fieldValues.none"
           class="form-control"
           :aria-describedby="$t(formTitle)"
           @input="e => updateSubfields(e, 'none')"
@@ -96,7 +96,8 @@ export default {
   methods: {
     updateSubfields (e, subfield) {
       this.$emit('update:fieldValues', {
-        ...this.fieldValues, [this.inputName]: { ...this.fieldValues[this.inputName], [subfield]: e.target.value }
+        ...this.fieldValues,
+        [subfield]: e.target.value
       });
     //   this.$emit('update-field-values', this.inputName, subfield, e.target.value);
     }

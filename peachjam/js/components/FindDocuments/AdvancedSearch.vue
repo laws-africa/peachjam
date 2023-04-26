@@ -25,7 +25,7 @@
               class="form-control"
               :aria-describedby="$t('Title')"
               :placeholder="$t('Search documents by title')"
-              :value="modelValue.title"
+              :value="modelValue.title.q"
               @input="onChange"
             >
           </div>
@@ -38,7 +38,7 @@
               class="form-control"
               :aria-describedby="$t('Judges')"
               :placeholder="$t('Search documents by judges')"
-              :value="modelValue.judges"
+              :value="modelValue.judges.q"
               @input="onChange"
             >
           </div>
@@ -52,7 +52,7 @@
               class="form-control"
               :aria-describedby="$t('Headnote holding')"
               :placeholder="$t('Search documents by headnote holding')"
-              :value="modelValue.headnote_holding"
+              :value="modelValue.headnote_holding.q"
               @input="onChange"
             >
           </div>
@@ -66,7 +66,7 @@
               class="form-control"
               :aria-describedby="$t('Flynote')"
               :placeholder="$t('Search documents by flynote')"
-              :value="modelValue.flynote"
+              :value="modelValue.flynote.q"
               @input="onChange"
             >
           </div>
@@ -80,24 +80,10 @@
               class="form-control"
               :aria-describedby="$t('Content')"
               :placeholder="$t('Search documents by content')"
-              :value="modelValue.content"
+              :value="modelValue.content.q"
               @input="onChange"
             >
           </div>
-
-          <!-- <div class="col-12 mb-3">
-            <label class="form-label" for="content">{{ $t('Content') }}</label>
-            <input
-              id="content"
-              type="text"
-              name="content"
-              class="form-control"
-              :aria-describedby="$t('Content')"
-              :placeholder="$t('Search documents by content')"
-              :value="modelValue.content"
-              @input="onChange"
-            >
-          </div> -->
 
           <div class="row mb-3">
             <div class="col-lg-6">
@@ -137,44 +123,42 @@
           </div>
         </div>
 
-        <div class="col-6">
-          <label>
-            <input
-              v-model="showAdditionalOptions"
-              type="checkbox"
-            >
-            {{ $t('Show additional options') }}
-          </label>
-        </div>
+        <label>
+          <input
+            v-model="showAdditionalOptions"
+            type="checkbox"
+          >
+          {{ $t('Show additional options') }}
+        </label>
 
         <div v-if="showAdditionalOptions">
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.all"
             form-title="Search all fields"
-            input-name="q"
+            input-name="all"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.title"
             form-title="Title"
             input-name="title"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.judges"
             form-title="Judges"
             input-name="judges"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.headnote_holding"
             form-title="Headnote holding"
             input-name="headnote_holding"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.flynote"
             form-title="Flynote"
             input-name="flynote"
           />
           <AdvancedSearchFields
-            v-model:fieldValues="fieldValues"
+            v-model:fieldValues="modelValue.content"
             form-title="Content"
             input-name="content"
           />
@@ -197,7 +181,9 @@ import AdvancedSearchFields from './AdvancedSearchFields.vue';
 
 export default {
   name: 'AdvancedSearch',
+
   components: { AdvancedSearchFields },
+
   props: {
     modelValue: {
       type: Object,
@@ -208,53 +194,19 @@ export default {
       default: ''
     }
   },
+
   emits: ['submit', 'update:modelValue', 'global-search-change'],
+
   data: function () {
     return {
-      fieldValues: {
-        q: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        title: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        judges: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        headnote_holding: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        flynote: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        },
-        content: {
-          all: '',
-          exact: '',
-          any: '',
-          none: ''
-        }
-      },
       showAdditionalOptions: false
     };
   },
+
   computed: {
     invalidDates () {
       const datesStrings = [this.modelValue.date.date_from, this.modelValue.date.date_to];
+
       if (datesStrings.every(date => !date)) {
         return false;
       } else if (datesStrings.every(date => date)) {
@@ -263,11 +215,13 @@ export default {
         return from > to;
       } else { return !datesStrings.some(string => string); }
     },
+
     disableDate () {
       // Disable dates if there are no search values
       return !(['title', 'judges', 'headnote_holding', 'flynote', 'content'].some(key => this.modelValue[key]) || this.globalSearchValue);
     }
   },
+
   watch: {
     disableDate: {
       handler (newValue) {
@@ -284,13 +238,14 @@ export default {
       }
     }
   },
+
   methods: {
     onChange (e) {
-      this.$emit('update:modelValue', {
-        ...this.modelValue,
-        [e.target.name]: e.target.value
-      });
+      const data = { ...this.modelValue };
+      data[e.target.name].q = e.target.value;
+      this.$emit('update:modelValue', data);
     },
+
     onDateChange (e) {
       this.$emit('update:modelValue', {
         ...this.modelValue,
@@ -300,24 +255,28 @@ export default {
         }
       });
     },
+
     onGlobalSearch (e) {
       this.$emit('global-search-change', e.target.value);
     },
+
     formatFieldValues () {
-      Object.keys(this.fieldValues).forEach(field => {
-        const fieldQuery = this.formatFieldQuery(field, this.fieldValues[field]);
-        if (fieldQuery) {
-          if (field === 'q') {
-            this.$emit('global-search-change', fieldQuery.trim());
-          } else {
-            this.$emit('update:modelValue', {
-              ...this.modelValue,
-              [field]: fieldQuery.trim()
-            });
+      Object.keys(this.modelValue).forEach(field => {
+        if (field !== 'date') {
+          const fieldQuery = this.formatFieldQuery(field, this.modelValue[field]);
+          if (fieldQuery) {
+            if (field === 'all') {
+              this.$emit('global-search-change', fieldQuery.trim());
+            } else {
+              const newValue = { ...this.modelValue };
+              newValue[field].q = fieldQuery.trim();
+              this.$emit('update:modelValue', newValue);
+            }
           }
         }
       });
     },
+
     /**
      * Build a single query string from the advanced values for a field.
      * @param field the name of the field
@@ -325,12 +284,13 @@ export default {
      * @returns {string} a fully formatted search string
      */
     formatFieldQuery (field, modifiers) {
-      let formattedSearchString = '';
+      let q = '';
 
-      Object.keys(modifiers).forEach(mod => {
+      for (const mod of Object.keys(modifiers)) {
         // mod is "all", "exact", "none" etc.
+        if (mod === 'q') continue;
         const value = modifiers[mod];
-        if (!value) return;
+        if (!value) continue;
 
         // split into components; either single words or "phrases"
         let splitValue = value.match(/\w+|"[^"]+"/g);
@@ -366,35 +326,17 @@ export default {
           splitValue = splitValue.map(value => `-${value}`).join(' ');
         }
 
-        formattedSearchString = formattedSearchString + ' ' + splitValue.trim();
-      });
+        q = q + ' ' + splitValue.trim();
+      }
 
-      return formattedSearchString;
+      return q;
     },
+
     submitAdvancedForm () {
       this.formatFieldValues();
       this.showAdditionalOptions = false;
       this.$emit('submit');
     }
-    // loadFieldValues () {
-    //   Object.keys(this.modelValue).forEach(key => {
-    //     if (this.modelValue[key]) {
-    //       const splitValue = this.modelValue[key].match(/[^\s"']+|['"][^'"]*["']+/g);
-
-    //       splitValue.forEach((value, index) => {
-    //         if (value.startsWith('-')) {
-    //           this.fieldValues[key].none = (this.fieldValues[key].none + ' ' + value).trim();
-    //         } else if (value.startsWith('"') || value.startsWith("'")) {
-    //           this.fieldValues[key].exact = (this.fieldValues[key].exact + ' ' + value).trim();
-    //         } else if (value === '|') {
-    //           this.fieldValues[key].any = this.fieldValues[key].any || splitValue[index - 1] + ' OR ' + splitValue[index + 1];
-    //         } else if (splitValue[index + 1] !== '|' && splitValue[index + 1] !== '|') {
-    //           this.fieldValues[key].all = (this.fieldValues[key].all + ' ' + value).trim();
-    //         }
-    //       });
-    //     }
-    //   });
-    // }
   }
 };
 </script>
