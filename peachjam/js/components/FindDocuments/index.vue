@@ -376,6 +376,7 @@ export default {
 
   mounted () {
     this.loadState();
+    window.addEventListener('popstate', () => this.loadState());
   },
 
   methods: {
@@ -462,6 +463,8 @@ export default {
     },
 
     loadState () {
+      resetAdvancedFields(this.advancedFields);
+
       // load state from URL
       const params = new URLSearchParams(window.location.search);
       // skip the first event if there's a query, because the page load will already have sent it
@@ -499,7 +502,7 @@ export default {
         tabTrigger.show();
       }
 
-      this.search();
+      this.search(false);
     },
 
     suggest (q) {
@@ -578,18 +581,20 @@ export default {
       return `/search/api/documents/?${params.toString()}`;
     },
 
-    async search () {
+    async search (pushState = true) {
       // if one of the search fields is true perform search
       if (this.q || Object.values(this.advancedFields).some(f => f.q)) {
         this.loadingCount = this.loadingCount + 1;
 
         try {
           const url = this.generateSearchUrl();
-          window.history.pushState(
-            null,
-            '',
-            document.location.pathname + '?' + this.serialiseState()
-          );
+          if (pushState) {
+            window.history.pushState(
+              null,
+              '',
+              document.location.pathname + '?' + this.serialiseState()
+            );
+          }
           const response = await fetch(url);
 
           // check that the search state hasn't changed since we sent the request
