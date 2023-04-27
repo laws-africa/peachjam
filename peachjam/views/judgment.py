@@ -13,8 +13,7 @@ class JudgmentListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        court_classes = CourtClass.objects.prefetch_related("courts")
-        context["court_classes"] = court_classes
+        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["recent_judgments"] = Judgment.objects.order_by("-date")[:30]
         return context
 
