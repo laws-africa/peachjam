@@ -74,7 +74,7 @@ urlpatterns = [
     ),
     # listing views
     path(
-        "authors/<str:code>/",
+        "authors/<slug:code>/",
         AuthorDetailView.as_view(),
         name="author",
     ),
