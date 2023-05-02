@@ -51,7 +51,7 @@ class SearchableDocument(Document):
     author = fields.KeywordField(attr="author.name")
     nature = fields.KeywordField(attr="nature.name")
 
-    rank = RankField(attr="work.rank")
+    ranking = RankField(attr="work.ranking")
 
     pages = fields.NestedField(
         properties={
@@ -124,9 +124,9 @@ class SearchableDocument(Document):
         if instance.content_html:
             return instance.get_content_as_text()
 
-    def prepare_rank(self, instance):
-        if instance.work.rank > 0:
-            return instance.work.rank
+    def prepare_ranking(self, instance):
+        if instance.work.ranking > 0:
+            return instance.work.ranking
 
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""
