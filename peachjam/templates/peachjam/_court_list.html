@@ -7,7 +7,7 @@
         {% if court_class.courts.all %}
           {% for court in court_class.courts.all %}
             <div>
-              <a href="{% url 'court' court.code %}">{{ court }}</a>
+              <a href="{% url 'court' court.code %}">{{ court.title }}</a>
             </div>
           {% endfor %}
         {% else %}
