@@ -628,7 +628,7 @@ class RelationshipInline(admin.TabularInline):
 
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):
-    fields = ("title", "frbr_uri", "languages", "rank")
+    fields = ("title", "frbr_uri", "languages", "ranking")
     search_fields = (
         "title",
         "frbr_uri",
