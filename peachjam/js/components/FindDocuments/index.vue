@@ -1,6 +1,6 @@
 <template>
   <div id="search">
-    <div class="search-input-container">
+    <div class="mb-4">
       <nav>
         <div
           id="nav-tab"
@@ -47,43 +47,34 @@
             class="d-flex align-items-center mb-2"
             @submit.prevent="simpleSearch"
           >
-            <div class="input-group">
-              <input
-                v-model="q"
-                type="text"
-                class="form-control"
-                :placeholder="searchPlaceholder"
-                :aria-label="$t('Search documents')"
-                aria-describedby="basic-addon2"
-                required
-              >
-              <div class="input-group-append">
-                <button
-                  type="submit"
-                  class="btn btn-sm btn-primary"
-                  style="
-                border-top-right-radius: 0.2rem;
-                border-bottom-right-radius: 0.2rem;
-              "
-                  :disabled="loading"
-                >
-                  <span
-                    v-if="loading"
-                    class="circle-loader--lt"
-                  />
-                  <span v-else>{{ $t("Search") }}</span>
-                </button>
-              </div>
-              <button
-                v-if="searchInfo.count"
-                type="button"
-                style="border-radius: 0.2rem"
-                class="btn btn-sm btn-secondary ms-1 d-lg-none"
-                @click="() => drawerOpen = true"
-              >
-                Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
-              </button>
-            </div>
+            <input
+              v-model="q"
+              type="text"
+              class="form-control"
+              :placeholder="searchPlaceholder"
+              :aria-label="$t('Search documents')"
+              aria-describedby="basic-addon2"
+              required
+            >
+            <button
+              type="submit"
+              class="btn btn-primary ms-1"
+              :disabled="loading"
+            >
+              <span
+                v-if="loading"
+                class="circle-loader--lt"
+              />
+              <span v-else>{{ $t("Search") }}</span>
+            </button>
+            <button
+              v-if="searchInfo.count"
+              type="button"
+              class="btn btn-secondary ms-1 d-lg-none text-nowrap"
+              @click="() => drawerOpen = true"
+            >
+              Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
+            </button>
           </form>
         </div>
         <div
@@ -114,10 +105,8 @@
         {{ $t("No documents match your search.") }}
       </div>
     </div>
-    <div
-      ref="filters-results-container"
-      class="container-fluid"
-    >
+
+    <div ref="filters-results-container">
       <div class="row">
         <div class="col col-lg-3">
           <MobileFacetsDrawer
@@ -387,6 +376,7 @@ export default {
 
   mounted () {
     this.loadState();
+    window.addEventListener('popstate', () => this.loadState());
   },
 
   methods: {
@@ -460,8 +450,12 @@ export default {
           } else if (value.date_to) {
             params.append('date_to', this.advancedFields.date.date_to);
           }
-        } else if (value.q) {
-          params.append(key, value.q);
+        } else {
+          for (const mod of Object.keys(value)) {
+            if (value[mod]) {
+              params.append(`${key}_${mod}`, value[mod]);
+            }
+          }
         }
       });
 
@@ -469,6 +463,8 @@ export default {
     },
 
     loadState () {
+      resetAdvancedFields(this.advancedFields);
+
       // load state from URL
       const params = new URLSearchParams(window.location.search);
       // skip the first event if there's a query, because the page load will already have sent it
@@ -485,19 +481,28 @@ export default {
       if (params.has('date_from')) this.advancedFields.date.date_from = params.get('date_from');
       if (params.has('date_to')) this.advancedFields.date.date_to = params.get('date_to');
 
+      let showAdvanced = params.get('show-advanced-tab');
       for (const field of Object.keys(this.advancedFields)) {
-        if (field !== 'date' && params.get(field)) {
-          this.advancedFields[field].q = params.get(field);
+        if (field !== 'date') {
+          const values = this.advancedFields[field];
+
+          for (const mod of Object.keys(values)) {
+            const key = `${field}_${mod}`;
+            if (params.get(key)) {
+              values[mod] = params.get(key);
+              showAdvanced = true;
+            }
+          }
         }
       }
 
       // if there are advance search fields or show-advanced-tab param, activate tab
-      if (Object.values(this.advancedFields).some(f => f.q) || params.get('show-advanced-tab')) {
+      if (showAdvanced) {
         const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#advanced-search-tab'));
         tabTrigger.show();
       }
 
-      this.search();
+      this.search(false);
     },
 
     suggest (q) {
@@ -576,18 +581,20 @@ export default {
       return `/search/api/documents/?${params.toString()}`;
     },
 
-    async search () {
+    async search (pushState = true) {
       // if one of the search fields is true perform search
       if (this.q || Object.values(this.advancedFields).some(f => f.q)) {
         this.loadingCount = this.loadingCount + 1;
 
         try {
           const url = this.generateSearchUrl();
-          window.history.pushState(
-            null,
-            '',
-            document.location.pathname + '?' + this.serialiseState()
-          );
+          if (pushState) {
+            window.history.pushState(
+              null,
+              '',
+              document.location.pathname + '?' + this.serialiseState()
+            );
+          }
           const response = await fetch(url);
 
           // check that the search state hasn't changed since we sent the request
@@ -617,52 +624,8 @@ export default {
 </script>
 
 <style scoped>
-.search-input-container {
-  background-color: white;
-  width: 66%;
-  margin-left: auto;
-  margin-right: auto;
-  padding-bottom: 1rem;
-}
-
-@media screen and (max-width: 992px) {
-  .search-input-container {
-    width: 100%;
-  }
-}
-
-.search-input-container button[type="submit"] {
-  height: 100%;
-}
-
-.search-facets {
-  position: sticky;
-  top: 0px;
-  padding-top: 0;
-  max-height: 100vh;
-  height: 100%;
-  overflow-y: auto;
-  z-index: 99;
-}
-
-.search-facets .list-group-item {
-  border-radius: 0px;
-}
-
-.search-facets__header {
-  position: sticky;
-  top: 0;
-  left: 0;
-  z-index: 99;
-}
-
 .search-pane {
   padding-top: 10px;
-}
-
-.search-facets .card-body {
-  max-height: 25vh;
-  overflow-y: auto;
 }
 
 .overlay {
@@ -690,12 +653,12 @@ export default {
 }
 
 @media screen and (max-width: 992px) {
- .filter-facet-title {
-  position: absolute;
-  margin: auto;
-  left: 0;
-  right: 0;
-  width: 40px;
-}
+   .filter-facet-title {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    right: 0;
+    width: 40px;
+  }
 }
 </style>
