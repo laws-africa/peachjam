@@ -40,7 +40,7 @@ class GraphRanker:
         works = {c.citing_work for c in citations} | {c.target_work for c in citations}
         neo_works = NeoWork.create_or_update(*[{"frbr_uri": w.frbr_uri} for w in works])
 
-        # setup constraints and indexes -- disabled because v 4 of the library doesn't suppor the new 5.x server syntax
+        # setup constraints and indexes -- disabled because v 4 of the library doesn't support the new 5.x server syntax
         # install_labels(NeoWork)
 
         # index the nodes
