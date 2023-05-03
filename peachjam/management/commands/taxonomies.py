@@ -49,7 +49,9 @@ class Command(BaseCommand):
         root_node = None
         root = kwargs.get("root")
         if root:
-            root_node = Taxonomy.add_root(name=root)
+            root_node = Taxonomy.get_root_nodes().filter(name=root).first()
+            if not root_node:
+                root_node = Taxonomy.add_root(name=root)
         data = json.load(kwargs["infile"])
         Taxonomy.load_bulk(data, parent=root_node)
 

@@ -118,3 +118,14 @@ They should be re-enabled once the deployment process is completed successfully.
 - On the dokku server, scale up the processes to run these tasks:
 
       dokku ps:scale <app_name> tasks=1
+
+#### Setup common taxonomies
+
+Most LII websites use a standard taxonomy which helps categorised documents to be made available on AfricanLII's
+continent-wide taxonomy collections.
+
+To load these taxonomies, use the following command:
+
+    dokku run <app_name> python manage.py taxonomies --import --root Collections peachjam/fixtures/taxonomies/environmental.json
+
+    dokku run <app_name> python manage.py taxonomies --import --root Collections peachjam/fixtures/taxonomies/commercial.json
