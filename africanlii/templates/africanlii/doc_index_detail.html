@@ -5,11 +5,11 @@
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
-          <a href="{% url 'case_index_list' %}">{% trans 'Case Indexes' %}</a>
+          <a href="{% url 'doc_index_list' %}">{% trans 'Indexes' %}</a>
         </li>
         {% for ancestor in ancestors %}
           <li class="breadcrumb-item">
-            <a href="{% build_taxonomy_url ancestor %}">{{ ancestor }}</a>
+            <a href="{% build_taxonomy_url ancestor base="/indexes" %}">{{ ancestor }}</a>
           </li>
         {% endfor %}
       </ol>

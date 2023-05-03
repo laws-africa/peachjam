@@ -14,14 +14,14 @@ urlpatterns = [
         name="agp_legal_instrument_list",
     ),
     path(
-        "case-indexes/",
-        views.CaseIndexesListView.as_view(),
-        name="case_index_list",
+        "indexes/",
+        views.DocIndexesListView.as_view(),
+        name="doc_index_list",
     ),
     path(
-        "case-indexes/<path:topics>",
-        views.CaseIndexChildDetailView.as_view(),
-        name="case_index_detail",
+        "indexes/<slug:first_level_topic>/<path:topics>",
+        views.DocIndexDetailView.as_view(),
+        name="doc_index_detail",
     ),
     path("", include("peachjam.urls")),
 ]

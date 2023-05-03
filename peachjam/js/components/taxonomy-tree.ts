@@ -11,6 +11,7 @@ class TaxonomyTree {
     const currentTaxonomy = urlParts[urlParts.length - 1];
 
     const slugRoot: string = root.dataset.rootSlug || '';
+    const prefix: string = root.dataset.prefix || 'taxonomy';
 
     tocController.items = data[0].children.map((item: TOCItemType) => {
       const formatItem = (x: TOCItemType, ancestors: string[]) => {
@@ -26,7 +27,7 @@ class TaxonomyTree {
         return formatted;
       };
       // data-slug-root should always have a value. Contractual dom agreement.
-      return formatItem(item, ['taxonomy', slugRoot]);
+      return formatItem(item, [prefix, slugRoot]);
     });
 
     tocController.expandAllBtnText = i18next.t('Expand all');

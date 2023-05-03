@@ -75,8 +75,8 @@ class AGPReportsGuidesListView(DocumentListView):
         return qs
 
 
-class CaseIndexesListView(TemplateView):
-    template_name = "africanlii/case_indexes.html"
+class DocIndexesListView(TemplateView):
+    template_name = "africanlii/doc_indexes.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -85,12 +85,12 @@ class CaseIndexesListView(TemplateView):
         return context
 
 
-class CaseIndexChildDetailView(DocumentListView):
+class DocIndexDetailView(DocumentListView):
     """Similar to the normal TaxonomyDetailView, except the document list is pulled from Elasticsearch."""
 
     # TODO: case-index-specific URLs in the taxonomy tree component
 
-    template_name = "africanlii/case_index_detail.html"
+    template_name = "africanlii/doc_index_detail.html"
     navbar_link = "taxonomy"
     context_object_name = "documents"
 
@@ -120,6 +120,7 @@ class CaseIndexChildDetailView(DocumentListView):
         context["is_leaf_node"] = not (context["taxonomy_tree"][0].get("children"))
 
         context["documents"] = self.decorate_documents(context["documents"])
+        context["taxonomy_link_prefix"] = "indexes"
 
         return context
 
