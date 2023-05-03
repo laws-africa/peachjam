@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && apt-get install -y libreoffice poppler-utils
 
 # Production-only dependencies
-RUN pip install psycopg2==2.9.3 gevent==21.12.0 gunicorn==20.1.0
+RUN pip install psycopg2==2.9.3 gunicorn==20.1.0
 
 # node
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
