@@ -3,5 +3,5 @@ from neomodel import FloatProperty, RelationshipTo, StringProperty, StructuredNo
 
 class Work(StructuredNode):
     frbr_uri = StringProperty(unique_index=True, required=True)
-    rank = FloatProperty(default=0)
+    ranking = FloatProperty(default=0)
     cites = RelationshipTo("peachjam.graph.models.Work", "CITES")

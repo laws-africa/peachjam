@@ -79,5 +79,5 @@ class GraphRanker:
 
         for neo_work in NeoWork.nodes.all():
             work = works[neo_work.frbr_uri]
-            work.rank = neo_work.rank
-            work.save(update_fields=["rank"])
+            work.ranking = neo_work.ranking
+            work.save(update_fields=["ranking"])
