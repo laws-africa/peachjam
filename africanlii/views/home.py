@@ -1,4 +1,4 @@
-from africanlii.models import AfricanUnionOrgan
+from africanlii.models import AfricanUnionOrgan, MemberState, RegionalEconomicCommunity
 from peachjam.models import Article, CoreDocument, GenericDocument, Locality
 from peachjam.views import HomePageView as BaseHomePageView
 
@@ -25,5 +25,7 @@ class HomePageView(BaseHomePageView):
             frbr_uri_doctype="act"
         ).order_by("-date")[:5]
         context["au_organs"] = AfricanUnionOrgan.objects.prefetch_related("author")
+        context["recs"] = RegionalEconomicCommunity.objects.prefetch_related("locality")
+        context["member_states"] = MemberState.objects.prefetch_related("country")
 
         return context

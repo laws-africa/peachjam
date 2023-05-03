@@ -7,6 +7,7 @@ from africanlii.models import (
     RatificationCountry,
     RegionalEconomicCommunity,
 )
+from peachjam.admin import EntityProfileInline
 
 
 class RatificationCountryAdmin(admin.TabularInline):
@@ -26,9 +27,9 @@ class RatificationAdmin(admin.ModelAdmin):
 
 @admin.register(AfricanUnionOrgan)
 class AfricanUnionOrganAdmin(admin.ModelAdmin):
-    pass
+    inlines = [EntityProfileInline]
 
 
 @admin.register(RegionalEconomicCommunity)
 class RegionalEconomicCommunityAdmin(admin.ModelAdmin):
-    pass
+    inlines = [EntityProfileInline]

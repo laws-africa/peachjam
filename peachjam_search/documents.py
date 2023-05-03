@@ -5,11 +5,16 @@ from django.conf import settings
 from django.utils.functional import classproperty
 from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
+from elasticsearch_dsl import RankFeature
 from elasticsearch_dsl.index import Index
 
 from peachjam.models import CoreDocument, ExternalDocument
 
 log = logging.getLogger(__name__)
+
+
+class RankField(fields.DEDField, RankFeature):
+    pass
 
 
 @registry.register_document
@@ -45,6 +50,8 @@ class SearchableDocument(Document):
     # GenericDocument, LegalInstrument
     author = fields.KeywordField(attr="author.name")
     nature = fields.KeywordField(attr="nature.name")
+
+    ranking = RankField(attr="work.ranking")
 
     pages = fields.NestedField(
         properties={
@@ -116,6 +123,10 @@ class SearchableDocument(Document):
         """Text content of document body for non-PDFs."""
         if instance.content_html:
             return instance.get_content_as_text()
+
+    def prepare_ranking(self, instance):
+        if instance.work.ranking > 0:
+            return instance.work.ranking
 
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""

@@ -114,8 +114,4 @@ export default {
 </script>
 
 <style scoped>
-.facets-scrollable {
-  max-height: 25vh;
-  overflow-y: auto;
-}
 </style>

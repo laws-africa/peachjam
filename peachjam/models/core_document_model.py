@@ -82,6 +82,8 @@ class Work(models.Model):
         default=list,
         verbose_name=_("languages"),
     )
+    # the rank (weight) of this work in the graph network, computer by peachjam.graph.ranker
+    ranking = models.FloatField(_("rank"), null=True, blank=False, default=0.0)
 
     class Meta:
         verbose_name = _("work")

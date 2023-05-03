@@ -14,6 +14,20 @@ urlpatterns = [
         name="agp_legal_instrument_list",
     ),
     path("au/", views.AfricanUnionDetailPageView.as_view(), name="au_detail_page"),
-    # path("au-organs/<int:pk>/", views.AfricanUnionOrganDetailView.as_view(), name="au_organ_detail_view"),
+    path(
+        "au-organs/<slug:code>/",
+        views.AfricanUnionOrganDetailView.as_view(),
+        name="au_organ_detail_view",
+    ),
+    path(
+        "rec/<int:pk>/",
+        views.RegionalEconomicCommunityDetailView.as_view(),
+        name="rec_detail_view",
+    ),
+    path(
+        "member-state/<int:pk>/",
+        views.MemberStateDetailView.as_view(),
+        name="member_state_detail_view",
+    ),
     path("", include("peachjam.urls")),
 ]

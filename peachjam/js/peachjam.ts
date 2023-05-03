@@ -53,6 +53,8 @@ class PeachJam {
         const vueComp = components[name];
         createAndMountApp({
           component: vueComp,
+          // pass in the element's data attributes as props
+          props: { ...(el as HTMLElement).dataset },
           use: [vueI18n],
           mountTarget: el as HTMLElement
         });

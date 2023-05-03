@@ -4,7 +4,7 @@
 {% block top-bar %}
   <div class="bg-dark p-2">
     <div class="container d-flex justify-content-between">
-      <a href="https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance"
+      <a href="https://dataforgovernance.africa"
          target="_blank"
          rel="noreferrer">
         <img class="me-4"
@@ -67,8 +67,9 @@
     </a>
     <ul class="dropdown-menu">
       <li class="dropdown-item">
+        <!-- djlint:off -->
         <a class=" nav-link px-0 {% if view.navbar_link == 'legal_instruments' %} active{% endif %} "
-           href="#">
+           href="/au/#au-organs"><!-- djlint:on -->
           {% trans 'AU Organs' %}
           <div class="dropdown-summary text-muted">{% trans 'AU Organs' %}</div>
         </a>

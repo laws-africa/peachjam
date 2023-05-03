@@ -13,20 +13,7 @@ class JudgmentListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        court_classes = (
-            CourtClass.objects.select_related("courts")
-            .values("name", "courts__name", "courts__code")
-            .all()
-        )
-        grouped_courts = {}
-        for c_c in court_classes:
-            grouped_courts.setdefault(c_c["name"], [])
-            if c_c.get("courts__name") and c_c.get("courts__code"):
-                grouped_courts[c_c["name"]].append(
-                    {"title": c_c["courts__name"], "code": c_c["courts__code"]}
-                )
-
-        context["grouped_courts"] = grouped_courts
+        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["recent_judgments"] = Judgment.objects.order_by("-date")[:30]
         return context
 

@@ -14,7 +14,7 @@
       </p>
       <p class="display-6 text-center">
         {% blocktrans trimmed %}
-        Search through {{ documents_count }} AU documents on the AfricanLII platform.
+        Search through {{ documents_count }} African Union documents on the AfricanLII platform.
       {% endblocktrans %}
       </p>
       <div class="row mt-5">
@@ -44,7 +44,7 @@
         <ul class="list-unstyled">
           {% for au_organ in au_organs %}
             <li>
-              <a href="#">{{ au_organ }}</a>
+              <a href="{% url 'au_organ_detail_view' au_organ.author.code %}">{{ au_organ }}</a>
             </li>
           {% endfor %}
         </ul>
@@ -52,9 +52,9 @@
       <div class="col-sm-4">
         <h3 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h3>
         <ul class="list-unstyled">
-          {% for locality in localities %}
+          {% for rec in recs %}
             <li>
-              <a href="{% url 'place' locality.place_code %}">{{ locality.name }}</a>
+              <a href="{% url 'rec_detail_view' rec.pk %}">{{ rec }}</a>
             </li>
           {% endfor %}
         </ul>
@@ -62,9 +62,9 @@
       <div class="col-sm-4">
         <h3 class="mb-4 heading-underlined">{% trans 'Member States' %}</h3>
         <ul class="list-unstyled">
-          {% for locality in localities %}
+          {% for member_state in member_states %}
             <li>
-              <a href="{% url 'place' locality.place_code %}">{{ locality.name }}</a>
+              <a href="{% url 'member_state_detail_view' member_state.pk %}">{{ member_state }}</a>
             </li>
           {% endfor %}
         </ul>
@@ -79,7 +79,7 @@
           <ul class="list-unstyled">
             {% for author in authors %}
               <li>
-                <a href="{% url 'author' author.id %}">{{ author.name }}</a>
+                <a href="{% url 'author' author.code %}">{{ author.name }}</a>
               </li>
             {% endfor %}
           </ul>
