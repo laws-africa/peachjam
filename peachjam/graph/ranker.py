@@ -63,7 +63,7 @@ class GraphRanker:
         graph = gds.graph.project("citations", "Work", "CITES")[0]
 
         log.info("Running articlerank")
-        res = gds.articleRank.write(graph, writeProperty="rank", scaler="L1NORM")
+        res = gds.articleRank.write(graph, writeProperty="ranking", scaler="L1NORM")
         if not res.didConverge:
             raise Exception(f"articleRank did not converge: {res}")
         log.info("Finished articlerank")
