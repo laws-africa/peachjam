@@ -39,12 +39,15 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]
-        grouped_courts = response.context.get("grouped_courts")
+        court_classes = [
+            court_class.name for court_class in response.context.get("court_classes")
+        ]
+
         self.assertIn(
             "Ababacar and Ors vs Senegal [2018] ECOWASCJ 17 (29 June 2018)",
             documents,
         )
-        self.assertIn("High Court", grouped_courts)
+        self.assertIn("High Court", court_classes)
 
     def test_court_listing(self):
         response = self.client.get("/judgments/ECOWASCJ/")
