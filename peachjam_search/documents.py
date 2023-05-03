@@ -169,6 +169,18 @@ ANALYZERS = {
 }
 
 
+def get_search_indexes(base_index):
+    return (
+        [base_index]
+        + [f"{base_index}_{lang}" for lang in ANALYZERS.keys()]
+        + [
+            f"{i}_{lang}"
+            for i in settings.EXTRA_SEARCH_INDEXES
+            for lang in ANALYZERS.keys()
+        ]
+    )
+
+
 def setup_language_indexes():
     """Setup multi-language indexes."""
     main_index = SearchableDocument._index

@@ -1,6 +1,18 @@
-from peachjam.models import Article, CoreDocument, GenericDocument, Locality
-from peachjam.views import DocumentListView, FilteredDocumentListView
+from django.shortcuts import get_object_or_404
+
+from peachjam.models import (
+    Article,
+    CoreDocument,
+    EntityProfile,
+    GenericDocument,
+    Locality,
+    Taxonomy,
+)
+from peachjam.views import FilteredDocumentListView, FirstLevelTaxonomyDetailView
 from peachjam.views import HomePageView as BaseHomePageView
+from peachjam.views.generic_views import DocumentListView
+from peachjam_search.documents import SearchableDocument, get_search_indexes
+from peachjam_search.views import DocumentSearchViewSet
 
 
 class HomePageView(BaseHomePageView):
@@ -60,3 +72,63 @@ class AGPReportsGuidesListView(DocumentListView):
         qs = super().get_base_queryset()
         qs = qs.filter(frbr_uri_doctype="doc").prefetch_related("work", "nature")
         return qs
+
+
+class CaseIndexDetailView(FirstLevelTaxonomyDetailView):
+    # TODO: fix the url structure to make more sense
+    pass
+
+
+class CaseIndexChildDetailView(DocumentListView):
+    """Similar to the normal TaxonomyDetailView, except the document list is pulled from Elasticsearch."""
+
+    template_name = "peachjam/taxonomy_detail.html"
+    navbar_link = "taxonomy"
+    context_object_name = "documents"
+
+    def get(self, request, *args, **kwargs):
+        if "/" in self.kwargs["topics"]:
+            slug = self.kwargs["topics"].split("/")[-1]
+            self.taxonomy = get_object_or_404(Taxonomy, slug=slug)
+        else:
+            self.taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["topics"])
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["taxonomy"] = self.taxonomy
+        context["entity_profile"] = EntityProfile.objects.filter(
+            object_id=self.taxonomy.pk
+        ).first()
+        context["root"] = self.taxonomy
+        ancestors = self.taxonomy.get_ancestors()
+        if len(ancestors) > 1:
+            context["root"] = ancestors[1]
+        context["ancestors"] = ancestors
+        context["root_taxonomy"] = context["root"].get_root().slug
+        context["taxonomy_tree"] = list(context["root"].dump_bulk(context["root"]))
+        context["first_level_taxonomy"] = context["taxonomy_tree"][0]["data"]["name"]
+        context["is_leaf_node"] = not (context["taxonomy_tree"][0].get("children"))
+
+        context["documents"] = self.decorate_documents(context["documents"])
+
+        return context
+
+    def decorate_documents(self, documents):
+        """Ensure some extra fields that the view needs are on each result."""
+        documents = list(documents)
+        for r in documents:
+            r["get_absolute_url"] = r["expression_frbr_uri"]
+        return documents
+
+    def get_base_queryset(self):
+        index = get_search_indexes(SearchableDocument._index._name)
+        search = (
+            SearchableDocument.search(index=index)
+            # TODO: filter on taxonomy details
+            .filter("term", locality="Western Cape").source(
+                exclude=DocumentSearchViewSet.source["excludes"]
+            )
+        )
+        return search
