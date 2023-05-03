@@ -35,6 +35,7 @@ class SearchableDocument(Document):
     alternative_names = fields.TextField()
     created_at = fields.DateField()
     updated_at = fields.DateField()
+    taxonomies = fields.KeywordField()
 
     # Judgment
     matter_type = fields.KeywordField(attr="matter_type.name")
@@ -143,6 +144,11 @@ class SearchableDocument(Document):
                     if page:
                         pages.append({"page_num": i, "body": page})
                 return pages
+
+    def prepare_taxonomies(self, instance):
+        """Taxonomy topics are stored as slugs, which are unique across the taxonomy hierarchy. This is easier than
+        storing and querying hierarchical taxonomy entries."""
+        return [t.topic.slug for t in instance.taxonomies.all()]
 
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)

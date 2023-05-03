@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView
 
 from peachjam.models import (
     Article,
@@ -8,7 +9,7 @@ from peachjam.models import (
     Locality,
     Taxonomy,
 )
-from peachjam.views import FilteredDocumentListView, FirstLevelTaxonomyDetailView
+from peachjam.views import FilteredDocumentListView
 from peachjam.views import HomePageView as BaseHomePageView
 from peachjam.views.generic_views import DocumentListView
 from peachjam_search.documents import SearchableDocument, get_search_indexes
@@ -74,15 +75,22 @@ class AGPReportsGuidesListView(DocumentListView):
         return qs
 
 
-class CaseIndexDetailView(FirstLevelTaxonomyDetailView):
-    # TODO: fix the url structure to make more sense
-    pass
+class CaseIndexesListView(TemplateView):
+    template_name = "africanlii/case_indexes.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # TODO: how to lay this page out, correct links
+        context["taxonomies"] = [get_object_or_404(Taxonomy, slug="case-index")]
+        return context
 
 
 class CaseIndexChildDetailView(DocumentListView):
     """Similar to the normal TaxonomyDetailView, except the document list is pulled from Elasticsearch."""
 
-    template_name = "peachjam/taxonomy_detail.html"
+    # TODO: case-index-specific URLs in the taxonomy tree component
+
+    template_name = "africanlii/case_index_detail.html"
     navbar_link = "taxonomy"
     context_object_name = "documents"
 
@@ -126,9 +134,7 @@ class CaseIndexChildDetailView(DocumentListView):
         index = get_search_indexes(SearchableDocument._index._name)
         search = (
             SearchableDocument.search(index=index)
-            # TODO: filter on taxonomy details
-            .filter("term", locality="Western Cape").source(
-                exclude=DocumentSearchViewSet.source["excludes"]
-            )
+            .source(exclude=DocumentSearchViewSet.source["excludes"])
+            .filter("term", taxonomies=self.taxonomy.slug)
         )
         return search
