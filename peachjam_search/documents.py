@@ -146,9 +146,14 @@ class SearchableDocument(Document):
                 return pages
 
     def prepare_taxonomies(self, instance):
-        """Taxonomy topics are stored as slugs, which are unique across the taxonomy hierarchy. This is easier than
+        """Taxonomy topics are stored as slugs of all the items in the tree down to that topic. This is easier than
         storing and querying hierarchical taxonomy entries."""
-        return [t.topic.slug for t in instance.taxonomies.all()]
+        # get all the ancestors of each topic
+        topics = list(instance.taxonomies.all())
+        topics = [t.topic for t in topics] + [
+            a for t in topics for a in t.topic.get_ancestors()
+        ]
+        return list({t.slug for t in topics})
 
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)

@@ -44,7 +44,9 @@ class TaxonomyDetailView(FilteredDocumentListView):
         return taxonomy
 
     def get_base_queryset(self):
-        return super().get_base_queryset().filter(taxonomies__topic=self.taxonomy)
+        # we want all documents that are in the current topic, and any of the topic's descendants
+        topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
+        return super().get_base_queryset().filter(taxonomies__topic__in=topics)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
