@@ -28,7 +28,6 @@ class TaxonomyDetailView(FilteredDocumentListView):
     navbar_link = "taxonomy"
 
     def get(self, request, *args, **kwargs):
-
         if "/" in self.kwargs["topics"]:
             slug = self.kwargs["topics"].split("/")[-1]
             self.taxonomy = get_object_or_404(Taxonomy, slug=slug)
@@ -56,4 +55,6 @@ class TaxonomyDetailView(FilteredDocumentListView):
         context["taxonomy_tree"] = list(context["root"].dump_bulk(context["root"]))
         context["first_level_taxonomy"] = context["taxonomy_tree"][0]["data"]["name"]
         context["is_leaf_node"] = not (context["taxonomy_tree"][0].get("children"))
+        context["taxonomy_link_prefix"] = "taxonomy"
+
         return context

@@ -82,11 +82,11 @@ def user_name(user):
 
 
 @register.simple_tag
-def build_taxonomy_url(item, base="/taxonomy"):
+def build_taxonomy_url(item, prefix="taxonomy"):
     items = [item.slug]
     item = item.get_parent()
     while item:
         items.insert(0, item.slug)
         item = item.get_parent()
 
-    return f"{base}/" + "/".join(items)
+    return f"/{prefix}/" + "/".join(items)

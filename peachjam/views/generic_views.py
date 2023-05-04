@@ -47,11 +47,21 @@ class FilteredDocumentListView(DocumentListView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.form.filter_queryset(super().get_queryset())
+        return self.filter_queryset(super().get_queryset())
+
+    def filter_queryset(self, qs):
+        return self.form.filter_queryset(qs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        self.add_facets(context)
+        context["doc_count"] = context["paginator"].count
+        context["labels"] = {"author": Author.model_label}
+
+        return context
+
+    def add_facets(self, context):
         authors = []
         courts = []
         natures = []
@@ -98,10 +108,6 @@ class FilteredDocumentListView(DocumentListView):
 
         context["doc_table_show_author"] = bool(authors)
         context["doc_table_show_doc_type"] = bool(natures)
-
-        context["doc_count"] = self.get_queryset().count()
-        context["labels"] = {"author": Author.model_label}
-
         context["facet_data"] = {
             "years": years,
             "authors": authors,
@@ -109,7 +115,6 @@ class FilteredDocumentListView(DocumentListView):
             "alphabet": lowercase_alphabet(),
             "natures": natures,
         }
-        return context
 
 
 class BaseDocumentDetailView(DetailView):

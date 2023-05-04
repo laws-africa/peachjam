@@ -1,16 +1,10 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
-from peachjam.models import (
-    Article,
-    CoreDocument,
-    EntityProfile,
-    GenericDocument,
-    Locality,
-    Taxonomy,
-)
+from peachjam.models import Article, CoreDocument, GenericDocument, Locality, Taxonomy
 from peachjam.views import FilteredDocumentListView
 from peachjam.views import HomePageView as BaseHomePageView
+from peachjam.views import TaxonomyDetailView
 from peachjam.views.generic_views import DocumentListView
 from peachjam_search.documents import SearchableDocument, get_search_indexes
 from peachjam_search.views import DocumentSearchViewSet
@@ -85,39 +79,13 @@ class DocIndexesListView(TemplateView):
         return context
 
 
-class DocIndexDetailView(DocumentListView):
+class DocIndexDetailView(TaxonomyDetailView):
     """Similar to the normal TaxonomyDetailView, except the document list is pulled from Elasticsearch."""
 
-    # TODO: case-index-specific URLs in the taxonomy tree component
-
     template_name = "africanlii/doc_index_detail.html"
-    navbar_link = "taxonomy"
-    context_object_name = "documents"
-
-    def get(self, request, *args, **kwargs):
-        if "/" in self.kwargs["topics"]:
-            slug = self.kwargs["topics"].split("/")[-1]
-            self.taxonomy = get_object_or_404(Taxonomy, slug=slug)
-        else:
-            self.taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["topics"])
-        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        context["taxonomy"] = self.taxonomy
-        context["entity_profile"] = EntityProfile.objects.filter(
-            object_id=self.taxonomy.pk
-        ).first()
-        context["root"] = self.taxonomy
-        ancestors = self.taxonomy.get_ancestors()
-        if len(ancestors) > 1:
-            context["root"] = ancestors[1]
-        context["ancestors"] = ancestors
-        context["root_taxonomy"] = context["root"].get_root().slug
-        context["taxonomy_tree"] = list(context["root"].dump_bulk(context["root"]))
-        context["first_level_taxonomy"] = context["taxonomy_tree"][0]["data"]["name"]
-        context["is_leaf_node"] = not (context["taxonomy_tree"][0].get("children"))
 
         context["documents"] = self.decorate_documents(context["documents"])
         context["taxonomy_link_prefix"] = "indexes"
@@ -139,3 +107,11 @@ class DocIndexDetailView(DocumentListView):
             .filter("term", taxonomies=self.taxonomy.slug)
         )
         return search
+
+    def add_facets(self, context):
+        # prevent superclass from adding facets based on database queries
+        pass
+
+    def filter_queryset(self, qs):
+        # prevent superclass from filtering based on database queries
+        return qs
