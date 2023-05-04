@@ -1,10 +1,10 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, TemplateView
 
 from peachjam.models import Article, CoreDocument, GenericDocument, Locality, Taxonomy
 from peachjam.views import FilteredDocumentListView
 from peachjam.views import HomePageView as BaseHomePageView
-from peachjam.views import TaxonomyDetailView
+from peachjam.views import TaxonomyDetailView, TaxonomyFirstLevelView
 from peachjam.views.generic_views import DocumentListView
 from peachjam_search.documents import SearchableDocument, get_search_indexes
 from peachjam_search.views import DocumentSearchViewSet
@@ -69,6 +69,12 @@ class AGPReportsGuidesListView(DocumentListView):
         return qs
 
 
+def is_doc_index_topic(topic):
+    """Return True if the topic is a doc index topic."""
+    # TODO: make this configurable
+    return topic.get_root().slug == "case-index"
+
+
 class DocIndexesListView(TemplateView):
     template_name = "africanlii/doc_indexes.html"
 
@@ -85,6 +91,13 @@ class DocIndexFirstLevelView(DetailView):
     slug_url_kwarg = "topic"
     context_object_name = "taxonomy"
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        # send non-indexes topics back to the normal taxonomy view
+        if not is_doc_index_topic(self.object):
+            return redirect("first_level_taxonomy_list", topic=self.object.slug)
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         return super().get_context_data(taxonomy_link_prefix="indexes", **kwargs)
 
@@ -93,6 +106,15 @@ class DocIndexDetailView(TaxonomyDetailView):
     """Similar to the normal TaxonomyDetailView, except the document list is pulled from Elasticsearch."""
 
     template_name = "africanlii/doc_index_detail.html"
+
+    def get(self, request, *args, **kwargs):
+        taxonomy = self.get_taxonomy()
+        # send non-indexes topics back to the normal taxonomy view
+        if not is_doc_index_topic(taxonomy):
+            return redirect(
+                "taxonomy_detail", topic=taxonomy.get_root().slug, child=taxonomy.slug
+            )
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -125,3 +147,25 @@ class DocIndexDetailView(TaxonomyDetailView):
     def filter_queryset(self, qs):
         # prevent superclass from filtering based on database queries
         return qs
+
+
+class CustomTaxonomyFirstLevelView(TaxonomyFirstLevelView):
+    """Redirects index topics to the doc index view."""
+
+    def get(self, request, *args, **kwargs):
+        taxonomy = self.get_taxonomy()
+        if is_doc_index_topic(taxonomy):
+            return redirect("doc_index_first_level", topic=taxonomy.slug)
+        return super().get(request, *args, **kwargs)
+
+
+class CustomTaxonomyDetailView(TaxonomyDetailView):
+    """Redirects index topics to the doc index view."""
+
+    def get(self, request, *args, **kwargs):
+        taxonomy = self.get_taxonomy()
+        if is_doc_index_topic(taxonomy):
+            return redirect(
+                "doc_index_detail", topic=taxonomy.get_root().slug, child=taxonomy.slug
+            )
+        return super().get(request, *args, **kwargs)

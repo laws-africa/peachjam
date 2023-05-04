@@ -14,16 +14,15 @@ class TaxonomyTree {
     const slugRoot: string = root.dataset.rootSlug || '';
     const prefix: string = root.dataset.prefix || 'taxonomy';
 
-    function formatItem (x: TOCItemType, ancestors: string[]): TOCItemType {
-      const newAncestors = [...ancestors, x.data.slug];
+    function formatItem (x: TOCItemType): TOCItemType {
       return {
         title: x.data.name,
-        url: '/' + newAncestors.join('/'),
-        children: (x.children || []).map(y => formatItem(y, newAncestors))
+        url: `/${prefix}/${slugRoot}/${x.data.slug}`,
+        children: (x.children || []).map(y => formatItem(y))
       };
     }
 
-    tocController.items = data[0].children.map((item: TOCItemType) => formatItem(item, [prefix, slugRoot]));
+    tocController.items = data[0].children.map((item: TOCItemType) => formatItem(item));
     tocController.expandAllBtnText = i18next.t('Expand all');
     tocController.collapseAllBtnText = i18next.t('Collapse all');
     tocController.titleFilterPlaceholder = i18next.t('Search');

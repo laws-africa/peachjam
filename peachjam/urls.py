@@ -120,7 +120,7 @@ urlpatterns = [
         name="first_level_taxonomy_list",
     ),
     path(
-        "taxonomy/<slug:first_level_topic>/<path:topics>",
+        "taxonomy/<slug:topic>/<slug:child>",
         TaxonomyDetailView.as_view(),
         name="taxonomy_detail",
     ),

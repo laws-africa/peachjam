@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import Http404, get_object_or_404
 from django.views.generic import DetailView, TemplateView
 
 from peachjam.models import EntityProfile, Taxonomy
@@ -32,13 +32,16 @@ class TaxonomyDetailView(FilteredDocumentListView):
     navbar_link = "taxonomy"
 
     def get(self, request, *args, **kwargs):
-        if "/" in self.kwargs["topics"]:
-            slug = self.kwargs["topics"].split("/")[-1]
-            self.taxonomy = get_object_or_404(Taxonomy, slug=slug)
-        else:
-            self.taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["topics"])
-
+        self.taxonomy = self.get_taxonomy()
         return super().get(request, *args, **kwargs)
+
+    def get_taxonomy(self):
+        root = get_object_or_404(Taxonomy, slug=self.kwargs["topic"])
+        taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["child"])
+        # first check the root
+        if taxonomy.get_root() != root:
+            raise Http404()
+        return taxonomy
 
     def get_base_queryset(self):
         return super().get_base_queryset().filter(taxonomies__topic=self.taxonomy)

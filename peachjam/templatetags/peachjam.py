@@ -83,10 +83,9 @@ def user_name(user):
 
 @register.simple_tag
 def build_taxonomy_url(item, prefix="taxonomy"):
-    items = [item.slug]
-    item = item.get_parent()
-    while item:
-        items.insert(0, item.slug)
-        item = item.get_parent()
-
+    items = []
+    root = item.get_root()
+    if root != item:
+        items.append(root.slug)
+    items.append(item.slug)
     return f"/{prefix}/" + "/".join(items)
