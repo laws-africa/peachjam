@@ -1,19 +1,23 @@
-from africanlii.models import AfricanUnionOrgan, MemberState, RegionalEconomicCommunity
-from peachjam.models import Article, CoreDocument, GenericDocument, Locality
+from peachjam.models import (
+    AfricanUnionOrgan,
+    Article,
+    CoreDocument,
+    GenericDocument,
+    MemberState,
+    RegionalEconomicCommunity,
+)
 from peachjam.views import HomePageView as BaseHomePageView
 
 
 class HomePageView(BaseHomePageView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        localities = Locality.objects.filter(jurisdiction__pk="AA").exclude(code="au")
         recent_articles = (
             Article.objects.prefetch_related("topics")
             .select_related("author")
             .order_by("-date")[:5]
         )
 
-        context["localities"] = localities
         context["recent_articles"] = recent_articles
         context["recent_soft_law"] = GenericDocument.objects.exclude(
             frbr_uri_doctype="doc"

@@ -67,22 +67,21 @@
     </a>
     <ul class="dropdown-menu">
       <li class="dropdown-item">
-        <!-- djlint:off -->
-        <a class=" nav-link px-0 {% if view.navbar_link == 'legal_instruments' %} active{% endif %} "
-           href="/au/#au-organs"><!-- djlint:on -->
-          {% trans 'AU Organs' %}
-          <div class="dropdown-summary text-muted">{% trans 'AU Organs' %}</div>
+        <a class=" nav-link px-0 {% if view.navbar_link == 'au' %} active{% endif %} "
+           href="{% url 'au_detail_page' %}#au-organs">
+          {% trans 'African Union Organs' %}
+          <div class="dropdown-summary text-muted">{% trans 'African Union (AU) Organs' %}</div>
         </a>
       </li>
       <li class="dropdown-item">
-        <a class="nav-link px-0 {% if view.navbar_link == 'judgments' %}active{% endif %}"
-           href="#">{% trans 'Regional Economic Communities (RECs)' %}
+        <a class="nav-link px-0 {% if view.navbar_link == 'au' %}active{% endif %}"
+           href="{% url 'au_detail_page' %}#rec">{% trans 'Regional Economic Communities (RECs)' %}
           <div class="dropdown-summary text-muted">{% trans 'Regional Economic Communities (RECs)' %}</div>
         </a>
       </li>
       <li class="dropdown-item">
-        <a class="nav-link px-0 {% if view.navbar_link == 'soft_law' %}active{% endif %}"
-           href="#">{% trans 'Member states' %}
+        <a class="nav-link px-0 {% if view.navbar_link == 'au' %}active{% endif %}"
+           href="{% url 'au_detail_page' %}#member-states">{% trans 'Member states' %}
           <div class="dropdown-summary text-muted">{% trans 'Member states' %}</div>
         </a>
       </li>

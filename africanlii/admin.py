@@ -1,13 +1,9 @@
 from countries_plus.models import Country
 from django.contrib import admin
 
-from africanlii.models import (
-    AfricanUnionOrgan,
-    Ratification,
-    RatificationCountry,
-    RegionalEconomicCommunity,
-)
+from africanlii.models import Ratification, RatificationCountry
 from peachjam.admin import EntityProfileInline
+from peachjam.models import AfricanUnionOrgan, MemberState, RegionalEconomicCommunity
 
 
 class RatificationCountryAdmin(admin.TabularInline):
@@ -32,4 +28,9 @@ class AfricanUnionOrganAdmin(admin.ModelAdmin):
 
 @admin.register(RegionalEconomicCommunity)
 class RegionalEconomicCommunityAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
+
+
+@admin.register(MemberState)
+class MemberStateAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]

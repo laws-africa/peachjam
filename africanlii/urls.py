@@ -15,17 +15,17 @@ urlpatterns = [
     ),
     path("au/", views.AfricanUnionDetailPageView.as_view(), name="au_detail_page"),
     path(
-        "au-organs/<slug:code>/",
+        "au/au-organs/<slug:code>/",
         views.AfricanUnionOrganDetailView.as_view(),
         name="au_organ_detail_view",
     ),
     path(
-        "rec/<int:pk>/",
+        "au/rec/<slug:code>/",
         views.RegionalEconomicCommunityDetailView.as_view(),
         name="rec_detail_view",
     ),
     path(
-        "member-state/<int:pk>/",
+        "au/member-state/<slug:code>/",
         views.MemberStateDetailView.as_view(),
         name="member_state_detail_view",
     ),

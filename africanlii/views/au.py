@@ -1,13 +1,15 @@
+from countries_plus.models import Country
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, TemplateView
 
-from africanlii.models import AfricanUnionOrgan, MemberState, RegionalEconomicCommunity
-from peachjam.views import AuthorDetailView
+from peachjam.models import AfricanUnionOrgan, MemberState, RegionalEconomicCommunity
+from peachjam.views import AuthorDetailView, PlaceDetailView
 
 
 class AfricanUnionDetailPageView(TemplateView):
     template_name = "peachjam/au_detail_page.html"
     model = AfricanUnionOrgan
+    navbar_link = "au"
 
     def get_queryset(self):
         return self.model.objects.prefetch_related("author")
@@ -16,20 +18,7 @@ class AfricanUnionDetailPageView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["au_organs"] = self.get_queryset()
         context["recs"] = RegionalEconomicCommunity.objects.prefetch_related("locality")
-        return context
-
-
-class BaseDetailView(DetailView):
-    template_name = None
-    model = None
-
-    def get(self, request, *args, **kwargs):
-        self.obj = get_object_or_404(self.model, pk=kwargs["pk"])
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["obj"] = self.obj
+        context["member_states"] = MemberState.objects.prefetch_related("country")
         return context
 
 
@@ -37,11 +26,27 @@ class AfricanUnionOrganDetailView(AuthorDetailView):
     template_name = "peachjam/au_organ_detail.html"
 
 
-class RegionalEconomicCommunityDetailView(BaseDetailView):
+class RegionalEconomicCommunityDetailView(PlaceDetailView):
     template_name = "peachjam/regional_economic_community_detail.html"
-    model = RegionalEconomicCommunity
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["rec"] = get_object_or_404(
+            RegionalEconomicCommunity, locality=self.locality
+        )
+        return context
 
 
-class MemberStateDetailView(BaseDetailView):
+class MemberStateDetailView(DetailView):
     template_name = "peachjam/member_state_detail.html"
     model = MemberState
+    slug_url_kwarg = "code"
+    slug_field = "code"
+
+    def get(self, request, *args, **kwargs):
+        self.country = get_object_or_404(Country, iso=self.kwargs["code"])
+        self.member_state = get_object_or_404(self.model.objects, country=self.country)
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs, member_state=self.member_state)

@@ -36,38 +36,35 @@
       </div>
     </div>
   </section>
-  <section class="container">
-    <h2 class="mb-4 heading-underlined text-center">{% trans 'African Union' %}</h2>
-    <div class="row">
-      <div class="col-sm-4">
-        <h3 class="mb-4 heading-underlined">{% trans 'African Union Organs' %}</h3>
-        <ul class="list-unstyled">
-          {% for au_organ in au_organs %}
-            <li>
-              <a href="{% url 'au_organ_detail_view' au_organ.author.code %}">{{ au_organ }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="col-sm-4">
-        <h3 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h3>
-        <ul class="list-unstyled">
-          {% for rec in recs %}
-            <li>
-              <a href="{% url 'rec_detail_view' rec.pk %}">{{ rec }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="col-sm-4">
-        <h3 class="mb-4 heading-underlined">{% trans 'Member States' %}</h3>
-        <ul class="list-unstyled">
-          {% for member_state in member_states %}
-            <li>
-              <a href="{% url 'member_state_detail_view' member_state.pk %}">{{ member_state }}</a>
-            </li>
-          {% endfor %}
-        </ul>
+  <section class="pb-5 pt-5 bg-light">
+    <div class="container">
+      <h1 class="mb-4 heading-underlined text-center">{% trans 'African Union' %}</h1>
+      <div class="row">
+        <div class="col-sm-6">
+          <h2 class="mb-4 heading-underlined">{% trans 'African Union Organs' %}</h2>
+          <ul class="list-unstyled">
+            {% for au_organ in au_organs %}
+              <li>
+                <a href="{% url 'au_organ_detail_view' au_organ.author.code %}">{{ au_organ }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-sm-6">
+          <h2 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h2>
+          <ul class="list-unstyled">
+            {% for rec in recs %}
+              <li>
+                <a href="{% url 'rec_detail_view' rec.locality.place_code %}">{{ rec }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="container">
+          <h2 class="mb-4 heading-underlined">{% trans 'Member States' %}</h2>
+          <a class="mt-3 btn btn-primary"
+             href="{% url 'au_detail_page' %}#member-states">{% trans "Click here to view Member States" %}</a>
+        </div>
       </div>
     </div>
   </section>
@@ -85,14 +82,6 @@
           </ul>
         </div>
         <div class="col-lg-6">
-          <h2 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h2>
-          <ul class="list-unstyled">
-            {% for locality in localities %}
-              <li>
-                <a href="{% url 'place' locality.place_code %}">{{ locality.name }}</a>
-              </li>
-            {% endfor %}
-          </ul>
           <h2 class="mb-4 heading-underlined">{% trans 'Regional Courts' %}</h2>
           <ul class="list-unstyled">
             {% for court in courts %}
