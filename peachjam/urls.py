@@ -43,7 +43,6 @@ from peachjam.views import (
     DocumentPopupView,
     DocumentSourcePDFView,
     DocumentSourceView,
-    FirstLevelTaxonomyDetailView,
     GazetteListView,
     GazetteYearView,
     HomePageView,
@@ -56,8 +55,9 @@ from peachjam.views import (
     PocketLawResources,
     RobotsView,
     TaxonomyDetailView,
+    TaxonomyFirstLevelView,
+    TaxonomyListView,
     TermsOfUsePageView,
-    TopLevelTaxonomyListView,
     UserProfileDetailView,
 )
 
@@ -113,12 +113,10 @@ urlpatterns = [
     ),
     path("books/", BookListView.as_view(), name="book_list"),
     path("journals/", JournalListView.as_view(), name="journal_list"),
-    path(
-        "taxonomy/", TopLevelTaxonomyListView.as_view(), name="top_level_taxonomy_list"
-    ),
+    path("taxonomy/", TaxonomyListView.as_view(), name="top_level_taxonomy_list"),
     path(
         "taxonomy/<slug:topic>",
-        FirstLevelTaxonomyDetailView.as_view(),
+        TaxonomyFirstLevelView.as_view(),
         name="first_level_taxonomy_list",
     ),
     path(

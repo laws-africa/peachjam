@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView
+from django.views.generic import DetailView, TemplateView
 
 from peachjam.models import Article, CoreDocument, GenericDocument, Locality, Taxonomy
 from peachjam.views import FilteredDocumentListView
@@ -74,9 +74,19 @@ class DocIndexesListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # TODO: how to lay this page out, correct links
         context["taxonomies"] = [get_object_or_404(Taxonomy, slug="case-index")]
+        context["taxonomy_link_prefix"] = "indexes"
         return context
+
+
+class DocIndexFirstLevelView(DetailView):
+    template_name = "africanlii/doc_index_first_level.html"
+    model = Taxonomy
+    slug_url_kwarg = "topic"
+    context_object_name = "taxonomy"
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(taxonomy_link_prefix="indexes", **kwargs)
 
 
 class DocIndexDetailView(TaxonomyDetailView):

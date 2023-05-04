@@ -5,22 +5,26 @@ from peachjam.models import EntityProfile, Taxonomy
 from peachjam.views.generic_views import FilteredDocumentListView
 
 
-class TopLevelTaxonomyListView(TemplateView):
-    template_name = "peachjam/top_level_taxonomy_list.html"
+class TaxonomyListView(TemplateView):
+    template_name = "peachjam/taxonomy_list.html"
     navbar_link = "taxonomy"
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         context["taxonomies"] = Taxonomy.get_tree()
+        context["taxonomy_link_prefix"] = "taxonomy"
         return self.render_to_response(context)
 
 
-class FirstLevelTaxonomyDetailView(DetailView):
-    template_name = "peachjam/first_level_taxonomy_detail.html"
+class TaxonomyFirstLevelView(DetailView):
+    template_name = "peachjam/taxonomy_first_level_detail.html"
     model = Taxonomy
     slug_url_kwarg = "topic"
     context_object_name = "taxonomy"
     navbar_link = "taxonomy"
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(taxonomy_link_prefix="taxonomy", **kwargs)
 
 
 class TaxonomyDetailView(FilteredDocumentListView):

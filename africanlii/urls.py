@@ -19,6 +19,11 @@ urlpatterns = [
         name="doc_index_list",
     ),
     path(
+        "indexes/<slug:topic>",
+        views.DocIndexFirstLevelView.as_view(),
+        name="doc_index_first_level",
+    ),
+    path(
         "indexes/<slug:first_level_topic>/<path:topics>",
         views.DocIndexDetailView.as_view(),
         name="doc_index_detail",
