@@ -10,7 +10,7 @@
               <ul class="list-group list-group-flush">
                 {% for child in taxonomy.get_children %}
                   <li class="list-group-item">
-                    <a href="{% build_taxonomy_url child prefix=taxonomy_link_prefix %}">{{ child }}</a>
+                    <a href="{% build_taxonomy_url child prefix=taxonomy_link_prefix|default:"taxonomy" %}">{{ child }}</a>
                   </li>
                 {% endfor %}
               </ul>

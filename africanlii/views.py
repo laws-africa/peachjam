@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, TemplateView
 
+from africanlii.forms import ESDocumentFilterForm
 from peachjam.models import Article, CoreDocument, GenericDocument, Locality, Taxonomy
 from peachjam.views import FilteredDocumentListView
 from peachjam.views import HomePageView as BaseHomePageView
@@ -106,6 +107,7 @@ class DocIndexDetailView(TaxonomyDetailView):
     """Similar to the normal TaxonomyDetailView, except the document list is pulled from Elasticsearch."""
 
     template_name = "africanlii/doc_index_detail.html"
+    form_class = ESDocumentFilterForm
 
     def get(self, request, *args, **kwargs):
         taxonomy = self.get_taxonomy()
@@ -143,10 +145,6 @@ class DocIndexDetailView(TaxonomyDetailView):
     def add_facets(self, context):
         # prevent superclass from adding facets based on database queries
         pass
-
-    def filter_queryset(self, qs):
-        # prevent superclass from filtering based on database queries
-        return qs
 
 
 class CustomTaxonomyFirstLevelView(TaxonomyFirstLevelView):
