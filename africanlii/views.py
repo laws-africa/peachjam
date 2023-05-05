@@ -183,7 +183,7 @@ class CustomTaxonomyFirstLevelView(TaxonomyFirstLevelView):
     """Redirects index topics to the doc index view."""
 
     def get(self, request, *args, **kwargs):
-        taxonomy = self.get_taxonomy()
+        taxonomy = self.get_object()
         if is_doc_index_topic(taxonomy):
             return redirect("doc_index_first_level", topic=taxonomy.slug)
         return super().get(request, *args, **kwargs)
