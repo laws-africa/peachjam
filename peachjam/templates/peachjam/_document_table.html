@@ -1,9 +1,12 @@
-{% load i18n %}
+{% load i18n peachjam %}
 <div class="table-responsive">
   <table class="table">
     <thead>
       <tr>
         <th scope="col" style="width: 70%">{% trans 'Title' %}</th>
+        {% if doc_table_show_jurisdiction %}
+          <th scope="col">{% trans 'Country' %}</th>
+        {% endif %}
         {% if doc_table_show_author %}<th scope="col"></th>{% endif %}
         {% if doc_table_show_court %}<th scope="col"></th>{% endif %}
         {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
@@ -16,8 +19,11 @@
           <td>
             <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
           </td>
-          {% if doc_table_show_author %}<td >{{ document.author|default_if_none:'' }}</td>{% endif %}
-          {% if doc_table_show_court %}<td >{{ document.court|default_if_none:'' }}</td>{% endif %}
+          {% if doc_table_show_jurisdiction %}
+            <td>{% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction }}</td>
+          {% endif %}
+          {% if doc_table_show_author %}<td>{{ document.author|default_if_none:'' }}</td>{% endif %}
+          {% if doc_table_show_court %}<td>{{ document.court|default_if_none:'' }}</td>{% endif %}
           {% if doc_table_show_doc_type %}<td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>{% endif %}
           <td style="white-space: nowrap;">{{ document.date }}</td>
           <td style="white-space: nowrap;">

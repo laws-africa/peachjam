@@ -24,3 +24,6 @@ EXTRA_SEARCH_INDEXES = [
     "zanzibarlii",
     "zimlii",
 ]
+
+# The slugs of the taxonomy roots that are treated as federated indexes
+FEDERATED_DOC_INDEX_ROOTS = ["case-index"]

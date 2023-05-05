@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, TemplateView
 
@@ -72,8 +73,7 @@ class AGPReportsGuidesListView(DocumentListView):
 
 def is_doc_index_topic(topic):
     """Return True if the topic is a doc index topic."""
-    # TODO: make this configurable
-    return topic.get_root().slug == "case-index"
+    return topic.get_root().slug in settings.FEDERATED_DOC_INDEX_ROOTS
 
 
 class DocIndexesListView(TemplateView):
@@ -123,6 +123,7 @@ class DocIndexDetailView(TaxonomyDetailView):
 
         context["documents"] = self.decorate_documents(context["documents"])
         context["taxonomy_link_prefix"] = "indexes"
+        context["doc_table_show_jurisdiction"] = True
 
         return context
 
