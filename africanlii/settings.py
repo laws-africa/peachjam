@@ -26,4 +26,4 @@ EXTRA_SEARCH_INDEXES = [
 ]
 
 # The slugs of the taxonomy roots that are treated as federated indexes
-FEDERATED_DOC_INDEX_ROOTS = ["case-index"]
+FEDERATED_DOC_INDEX_ROOTS = ["case-indexes"]

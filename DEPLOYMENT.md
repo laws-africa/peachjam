@@ -126,6 +126,6 @@ continent-wide taxonomy collections.
 
 To load these taxonomies, use the following command:
 
-    dokku run <app_name> python manage.py taxonomies --import --root Collections peachjam/fixtures/taxonomies/environmental.json
+    dokku run <app_name> python manage.py taxonomies --import --root "Case indexes" peachjam/fixtures/taxonomies/environmental.json
 
-    dokku run <app_name> python manage.py taxonomies --import --root Collections peachjam/fixtures/taxonomies/commercial.json
+    dokku run <app_name> python manage.py taxonomies --import --root "Case indexes" peachjam/fixtures/taxonomies/commercial.json
