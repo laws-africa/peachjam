@@ -274,6 +274,7 @@ class DocumentAdmin(admin.ModelAdmin):
     readonly_fields = (
         "expression_frbr_uri",
         "work",
+        "created_by",
         "created_at",
         "updated_at",
         "work_frbr_uri",
@@ -305,6 +306,7 @@ class DocumentAdmin(admin.ModelAdmin):
                 "fields": [
                     "citation",
                     "source_url",
+                    "created_by",
                     "created_at",
                     "updated_at",
                     "expression_frbr_uri",
@@ -379,6 +381,11 @@ class DocumentAdmin(admin.ModelAdmin):
             return NewForm
 
         return super().get_form(request, obj, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
