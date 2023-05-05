@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, TemplateView
+from elasticsearch_dsl.faceted_search import FacetedSearch, TermsFacet
 
 from africanlii.forms import ESDocumentFilterForm
 from peachjam.helpers import lowercase_alphabet
@@ -145,9 +146,33 @@ class DocIndexDetailView(TaxonomyDetailView):
         return search
 
     def add_facets(self, context):
-        # prevent superclass from adding facets based on database queries
+        """Add a limited set of facets pulled from ES."""
+        faceted = FacetedSearch()
+        faceted.index = get_search_indexes(SearchableDocument._index._name)
+        faceted.facets = {
+            "year": TermsFacet(field="year", size=100),
+            "jurisdiction": TermsFacet(field="jurisdiction", size=100),
+        }
+        # add filters, but only on fields that we also facet on
+        faceted = self.form.filter_faceted_search(faceted)
+        # add non-facet filters
+        search = self.form.filter_queryset(
+            faceted.build_search(), exclude=["years", "jurisdictions"]
+        )
+        # add our primary taxonomy filter
+        search = search.filter("term", taxonomies=self.taxonomy.slug)
+
+        # don't actually get any documents, we just want the facets
+        search = search[:0]
+
+        res = search.execute()
+        # this makes res.facets work
+        res._faceted_search = faceted
+
         context["facet_data"] = {
             "alphabet": lowercase_alphabet(),
+            "years": [y for y, n, x in res.facets.year],
+            "jurisdictions": [j for j, n, x in res.facets.jurisdiction],
         }
 
 
