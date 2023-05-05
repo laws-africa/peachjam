@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, TemplateView
 
 from africanlii.forms import ESDocumentFilterForm
+from peachjam.helpers import lowercase_alphabet
 from peachjam.models import Article, CoreDocument, GenericDocument, Locality, Taxonomy
 from peachjam.views import FilteredDocumentListView
 from peachjam.views import HomePageView as BaseHomePageView
@@ -145,7 +146,9 @@ class DocIndexDetailView(TaxonomyDetailView):
 
     def add_facets(self, context):
         # prevent superclass from adding facets based on database queries
-        pass
+        context["facet_data"] = {
+            "alphabet": lowercase_alphabet(),
+        }
 
 
 class CustomTaxonomyFirstLevelView(TaxonomyFirstLevelView):

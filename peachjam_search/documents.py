@@ -21,6 +21,8 @@ class RankField(fields.DEDField, RankFeature):
 class SearchableDocument(Document):
     doc_type = fields.KeywordField()
     title = fields.TextField()
+    # title field for sorting and alphabetical listing
+    title_keyword = fields.KeywordField(attr="title")
     date = fields.DateField()
     year = fields.KeywordField(attr="date.year")
     citation = fields.TextField()
