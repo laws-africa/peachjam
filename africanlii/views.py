@@ -80,6 +80,7 @@ def is_doc_index_topic(topic):
 
 class DocIndexesListView(TemplateView):
     template_name = "africanlii/doc_indexes.html"
+    navbar_link = "doc_index"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -93,6 +94,7 @@ class DocIndexFirstLevelView(DetailView):
     model = Taxonomy
     slug_url_kwarg = "topic"
     context_object_name = "taxonomy"
+    navbar_link = "doc_index"
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -110,6 +112,7 @@ class DocIndexDetailView(TaxonomyDetailView):
 
     template_name = "africanlii/doc_index_detail.html"
     form_class = ESDocumentFilterForm
+    navbar_link = "doc_index"
 
     def get(self, request, *args, **kwargs):
         taxonomy = self.get_taxonomy()
