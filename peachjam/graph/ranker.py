@@ -63,7 +63,7 @@ class GraphRanker:
         graph = gds.graph.project("citations", "Work", "CITES")[0]
 
         log.info("Running articlerank")
-        res = gds.articleRank.write(graph, writeProperty="rank", scaler="L1NORM")
+        res = gds.articleRank.write(graph, writeProperty="ranking", scaler="L1NORM")
         if not res.didConverge:
             raise Exception(f"articleRank did not converge: {res}")
         log.info("Finished articlerank")
@@ -79,5 +79,5 @@ class GraphRanker:
 
         for neo_work in NeoWork.nodes.all():
             work = works[neo_work.frbr_uri]
-            work.rank = neo_work.rank
-            work.save(update_fields=["rank"])
+            work.ranking = neo_work.ranking
+            work.save(update_fields=["ranking"])

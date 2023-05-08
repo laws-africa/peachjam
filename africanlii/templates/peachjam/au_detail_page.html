@@ -83,7 +83,7 @@
         <ul class="list-unstyled">
           {% for member_state in member_states %}
             <li>
-              <a href="{% url 'member_state_detail_view' member_state.code %}">{{ member_state.country }}</a>
+              <a href="{% url 'member_state_detail_view' member_state.country.iso %}">{{ member_state.country }}</a>
             </li>
           {% endfor %}
         </ul>

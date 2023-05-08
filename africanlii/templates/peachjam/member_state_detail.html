@@ -12,7 +12,7 @@
           <a href="{% url 'au_detail_page' %}#member-states">{% trans 'Member States' %}</a>
         </li>
         <li class="breadcrumb-item">
-          <a href="{% url 'member_state_detail_view' member_state.code %}">{{ member_state }}</a>
+          <a href="{% url 'member_state_detail_view' member_state.country.iso %}">{{ member_state }}</a>
         </li>
       </ol>
     </nav>
@@ -30,10 +30,10 @@
   {% include 'peachjam/_document_count.html' %}
   {% include 'peachjam/_years_list.html' with showallyears=True %}
 {% endblock %}
+{% block page-list-facets %}{% endblock %}
 {% block content %}
-  {% if documents %}
-    {% include 'peachjam/_judgment_table.html' %}
-    {% include 'peachjam/_pagination.html' %}
+  {% if ratification_countries %}
+    {% include 'peachjam/_ratification_table.html' %}
   {% else %}
     <p>{% trans 'No documents found.' %}</p>
   {% endif %}

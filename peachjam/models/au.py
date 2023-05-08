@@ -46,12 +46,6 @@ class MemberState(models.Model):
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
-    code = models.SlugField(_("code"), max_length=1024, editable=False, unique=True)
 
     def __str__(self):
         return self.country.name
-
-    def save(self, *args, **kwargs):
-        if not self.code:
-            self.code = self.country.iso
-        return super().save(*args, **kwargs)

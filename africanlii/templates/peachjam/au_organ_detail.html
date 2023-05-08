@@ -6,8 +6,10 @@
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
-          <!-- djlint:off -->
-          <a href="/au/#au-organs"><!-- djlint:on -->{% trans 'AU Organs' %}</a>
+          <a href="{% url 'au_detail_page' %}">{% trans 'African Union' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'au_detail_page' %}#au-organs">{% trans 'African Union Organs' %}</a>
         </li>
         <li class="breadcrumb-item">
           <a href="{% url 'au_organ_detail_view' author.code %}">{{ author }}</a>

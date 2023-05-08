@@ -25,7 +25,7 @@ urlpatterns = [
         name="rec_detail_view",
     ),
     path(
-        "au/member-state/<slug:code>/",
+        "au/member-state/<slug:country>/",
         views.MemberStateDetailView.as_view(),
         name="member_state_detail_view",
     ),

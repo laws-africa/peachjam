@@ -43,6 +43,20 @@
       Free access to legal information is a primary tenet of any sound justice system. We seek to serve the community in the TCI and beyond.
     {% endblocktrans %}
     </p>
+    <br/>
+    <div>
+      <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
+    </div>
+  {% endblock %}
+  {% block second-content-column %}
+    <h5>{% trans 'Our partners' %}</h5>
+    <div>
+      <a href="https://agp.africanlii.org/" target="_blank" rel="noreferrer">AfricanLII</a>
+    </div>
+    <div>
+      <a href="https://laws.africa/" target="_blank" rel="noreferrer">Laws.Africa</a>
+    </div>
+    <br/>
     <h5>{% trans 'World Law Resources' %}</h5>
     <div>
       <a href="https://www.jcpc.uk/decided-cases/index.html">{% trans 'Judicial Committee of the Privy Council' %}</a>
@@ -62,6 +76,8 @@
     <div>
       <a href="https://africanlii.org/">{% trans 'African Legal Information Institute' %}</a> (AfricanLII)
     </div>
+  {% endblock %}
+  {% block third-content-column %}
     <div class="card mt-4" style="width: 18rem;">
       <img class="card-img-top"
            src="{% static 'images/tciflag.png' %}"
@@ -80,19 +96,6 @@
     </div>
     <div>
       <a href="https://www.gov.tc/hoa/">{% trans 'House of Assembly: Government of the Turks and Caicos Islands' %}</a>
-    </div>
-    <br/>
-    <div>
-      <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
-    </div>
-  {% endblock %}
-  {% block second-content-column %}
-    <h5>{% trans 'Our partners' %}</h5>
-    <div>
-      <a href="https://agp.africanlii.org/" target="_blank" rel="noreferrer">AfricanLII</a>
-    </div>
-    <div>
-      <a href="https://laws.africa/" target="_blank" rel="noreferrer">Laws.Africa</a>
     </div>
   {% endblock %}
   {% block footer-logos %}
