@@ -264,3 +264,20 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
           git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/tanzlii-peachjam'
           git_push_flags: '--force'
+
+  deploy-eswatinilii:
+    if: ${{ always() }}
+    needs: deploy-tanzlii
+    name: Deploy to eswatinilii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: git push to eswatinilii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/eswatinilii-peachjam'
+          git_push_flags: '--force'
