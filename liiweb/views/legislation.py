@@ -55,7 +55,7 @@ class LegislationListView(TemplateView):
 
         children = defaultdict(list)
         children_qs = self.get_queryset().filter(
-            parent_work_id__in=parents, repealed=False
+            parent_work_id__in=parents, repealed=False, metadata_json__principal=True
         )
         # group children by parent
         for child in children_qs:
