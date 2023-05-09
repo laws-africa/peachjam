@@ -2,6 +2,7 @@ from tempfile import NamedTemporaryFile
 from unittest import mock
 
 import tablib
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 from peachjam.models import Judgment, Taxonomy
@@ -59,7 +60,7 @@ def mocked_response(*args, **kwargs):
 
 
 class JudgmentBulkImportTestCase(TestCase):
-    fixtures = ["tests/courts", "tests/countries", "tests/languages"]
+    fixtures = ["tests/courts", "tests/countries", "tests/languages", "tests/users"]
 
     @mock.patch("peachjam.resources.requests.get", side_effect=mocked_response)
     @mock.patch(
@@ -89,11 +90,15 @@ class JudgmentBulkImportTestCase(TestCase):
         "peachjam.resources.download_source_file", return_value=NamedTemporaryFile()
     )
     def test_judgment_bulk_import(self, mock_request, download):
+        user = User.objects.first()
         dataset = tablib.Dataset(row, headers=judgment_import_headers)
-        result = JudgmentResource().import_data(dataset=dataset, dry_run=False)
+        result = JudgmentResource().import_data(
+            dataset=dataset, dry_run=False, user=user
+        )
         judgment = Judgment.objects.first()
         self.assertFalse(result.has_errors())
         self.assertEquals(judgment.case_numbers.first().year, 2021)
+        self.assertEqual(judgment.created_by, user)
 
     @mock.patch("peachjam.resources.requests.get", side_effect=mocked_response)
     @mock.patch(
