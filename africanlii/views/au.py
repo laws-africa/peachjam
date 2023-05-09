@@ -1,4 +1,3 @@
-from countries_plus.models import Country
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, TemplateView
 
@@ -40,23 +39,21 @@ class RegionalEconomicCommunityDetailView(PlaceDetailView):
 
 class MemberStateDetailView(DetailView):
     template_name = "peachjam/member_state_detail.html"
-    model = MemberState
+    queryset = MemberState.objects.prefetch_related("country")
     slug_url_kwarg = "country"
     slug_field = "country"
-
-    def get(self, request, *args, **kwargs):
-        self.country = get_object_or_404(Country, iso=kwargs["country"])
-        self.member_state = get_object_or_404(self.model.objects, country=self.country)
-        self.ratification_countries = RatificationCountry.objects.prefetch_related(
-            "ratification", "country"
-        ).filter(country=self.country)
-
-        return super().get(request, *args, **kwargs)
+    context_object_name = "member_state"
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            **kwargs,
-            member_state=self.member_state,
-            ratification_countries=self.ratification_countries,
-            doc_count=self.ratification_countries.count()
+        context = super().get_context_data(**kwargs)
+
+        context[
+            "ratification_countries"
+        ] = ratification_countries = RatificationCountry.objects.prefetch_related(
+            "ratification", "country"
+        ).filter(
+            country=self.get_object().country
         )
+        context["doc_count"] = ratification_countries.count()
+
+        return context
