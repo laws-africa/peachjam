@@ -11,7 +11,9 @@ def forwards(apps, schema_editor):
     for doc in (
         CoreDocument.objects.filter(created_by=None)
         .prefetch_related("polymorphic_ctype")
+        .only("polymorphic_ctype", "pk")
         .all()
+        .iterator()
     ):
         # get the log entry for this document
         log = (
