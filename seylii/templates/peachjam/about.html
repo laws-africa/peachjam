@@ -1,5 +1,5 @@
 {% extends "peachjam/layouts/main.html" %}
-{% load peachjam i18n %}
+{% load i18n %}
 {% block title %}
   {% trans 'About' %}
 {% endblock %}
@@ -7,7 +7,7 @@
   <section class="py-5">
     <div class="container">
       <h1 class="mb-4">{% trans 'About SeyLII' %}</h1>
-      <p class="mb-4">
+      <p class="lead mb-4">
         {% blocktrans trimmed %}
         The Seychelles Legal Information Institute (SeyLII) offers free and anonymous access to case law, legislation and secondary legal materials from the Seychelles.
         SeyLII is an independent, self-funded organisation and needs your support.
