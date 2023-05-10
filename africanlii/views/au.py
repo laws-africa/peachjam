@@ -11,7 +11,7 @@ from peachjam.views import AuthorDetailView, PlaceDetailView
 
 
 class AfricanUnionDetailPageView(TemplateView):
-    template_name = "peachjam/au_detail_page.html"
+    template_name = "africanlii/au_detail_page.html"
     model = AfricanUnionOrgan
     navbar_link = "au"
 
@@ -27,11 +27,11 @@ class AfricanUnionDetailPageView(TemplateView):
 
 
 class AfricanUnionOrganDetailView(AuthorDetailView):
-    template_name = "peachjam/au_organ_detail.html"
+    template_name = "africanlii/au_organ_detail.html"
 
 
 class RegionalEconomicCommunityDetailView(PlaceDetailView):
-    template_name = "peachjam/regional_economic_community_detail.html"
+    template_name = "africanlii/regional_economic_community_detail.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -42,7 +42,7 @@ class RegionalEconomicCommunityDetailView(PlaceDetailView):
 
 
 class MemberStateDetailView(DetailView):
-    template_name = "peachjam/member_state_detail.html"
+    template_name = "africanlii/member_state_detail.html"
     queryset = MemberState.objects.prefetch_related("country")
     slug_url_kwarg = "country"
     slug_field = "country"
