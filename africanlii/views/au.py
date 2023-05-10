@@ -1,8 +1,12 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, TemplateView
 
-from africanlii.models import RatificationCountry
-from peachjam.models import AfricanUnionOrgan, MemberState, RegionalEconomicCommunity
+from africanlii.models import (
+    AfricanUnionOrgan,
+    MemberState,
+    RatificationCountry,
+    RegionalEconomicCommunity,
+)
 from peachjam.views import AuthorDetailView, PlaceDetailView
 
 

@@ -1,6 +1,5 @@
 # flake8: noqa
 from .article import *
-from .au import *
 from .author import *
 from .citations import *
 from .core_document_model import *

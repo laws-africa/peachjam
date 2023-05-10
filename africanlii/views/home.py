@@ -1,11 +1,5 @@
-from peachjam.models import (
-    AfricanUnionOrgan,
-    Article,
-    CoreDocument,
-    GenericDocument,
-    MemberState,
-    RegionalEconomicCommunity,
-)
+from africanlii.models import AfricanUnionOrgan, MemberState, RegionalEconomicCommunity
+from peachjam.models import Article, CoreDocument, GenericDocument
 from peachjam.views import HomePageView as BaseHomePageView
 
 
