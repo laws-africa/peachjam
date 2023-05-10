@@ -23,6 +23,8 @@ class SearchableDocument(Document):
     title = fields.TextField()
     # title field for sorting and alphabetical listing
     title_keyword = fields.KeywordField(attr="title")
+    # title and citations combined to allow searching that overlaps those fields
+    title_expanded = fields.TextField()
     date = fields.DateField()
     year = fields.KeywordField(attr="date.year")
     citation = fields.TextField()
@@ -156,6 +158,14 @@ class SearchableDocument(Document):
             a for t in topics for a in t.topic.get_ancestors()
         ]
         return list({t.slug for t in topics})
+
+    def prepare_title_expanded(self, instance):
+        # combination of the title, citation and alternative names
+        parts = [instance.title]
+        if instance.citation and instance.citation != instance.title:
+            parts.append(instance.citation)
+        parts.extend([a.title for a in instance.alternative_names.all()])
+        return " ".join(parts)
 
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
