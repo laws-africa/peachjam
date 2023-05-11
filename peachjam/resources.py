@@ -185,6 +185,28 @@ class TaxonomiesWidget(CharWidget):
         return value
 
 
+class IncomingManyToOneField(fields.Field):
+    """Handles many-to-one relationships on the incoming side."""
+
+    def save(self, obj, data, is_m2m=False, **kwargs):
+        if not self.readonly:
+            attrs = self.attribute.split("__")
+            for attr in attrs[:-1]:
+                obj = getattr(obj, attr, None)
+            cleaned = self.clean(data, **kwargs)
+            if cleaned is not None or self.saves_null_values:
+                assert is_m2m
+                getattr(obj, attrs[-1]).all().delete()
+                getattr(obj, attrs[-1]).set(cleaned, bulk=False)
+
+
+class ManyToOneWidget(ManyToManyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            return self.model.objects.none()
+        return [AlternativeName(**{self.field: v}) for v in value.split(self.separator)]
+
+
 class BaseDocumentResource(resources.ModelResource):
     date = fields.Field(attribute="date", widget=DateWidget(name="date"))
 
@@ -207,6 +229,10 @@ class BaseDocumentResource(resources.ModelResource):
     source_url = fields.Field(attribute="source_url", widget=SourceFileWidget())
     taxonomy = fields.Field(attribute="taxonomy", widget=TaxonomiesWidget())
     skip = fields.Field(attribute="skip", widget=SkipRowWidget())
+    alternative_names = IncomingManyToOneField(
+        attribute="alternative_names",
+        widget=ManyToOneWidget(AlternativeName, separator="|", field="title"),
+    )
 
     required_fields = []
 
@@ -219,6 +245,9 @@ class BaseDocumentResource(resources.ModelResource):
             "coredocument_ptr",
             "doc_type",
             "polymorphic_ctype",
+            "work",
+            "content_html",
+            "toc_json",
         )
         import_id_fields = ("expression_frbr_uri",)
 
@@ -339,11 +368,6 @@ class GenericDocumentResource(BaseDocumentResource):
         attribute="nature",
         widget=DocumentNatureWidget(DocumentNature, field="code"),
     )
-    work_frbr_uri = fields.Field(
-        column_name="work_frbr_uri",
-        attribute="work_fbr_uri",
-        widget=CharWidget(),
-    )
 
     required_fields = (
         "date",
@@ -402,7 +426,7 @@ class JudgmentResource(BaseDocumentResource):
     court = fields.Field(
         column_name="court",
         attribute="court",
-        widget=ForeignKeyWidget(Court, field="code"),
+        widget=ForeignKeyRequiredWidget(Court, field="code"),
     )
     registry = fields.Field(
         column_name="registry",
@@ -481,12 +505,6 @@ class JudgmentResource(BaseDocumentResource):
                 case_number.save()
 
             judgment.save()
-
-            if row.get("alternative_names"):
-                for alt_citation in str(row["alternative_names"]).split("|"):
-                    obj, _ = AlternativeName.objects.get_or_create(
-                        document=judgment, title=alt_citation
-                    )
 
             if row.get("media_summary_file"):
                 self.download_attachment(
