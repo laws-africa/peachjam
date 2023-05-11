@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:30+0200\n"
+"POT-Creation-Date: 2023-05-11 14:05+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,7 +75,7 @@ msgid "AfricanLII is an open-access research platform for African law jointly op
 msgstr ""
 
 #: templates/peachjam/_footer.html:17
-msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
+msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
 msgstr ""
 
 #: templates/peachjam/_footer.html:23
@@ -86,7 +86,7 @@ msgstr ""
 msgid "With support from"
 msgstr ""
 
-#: templates/peachjam/_footer.html:39 templates/peachjam/_footer.html:125
+#: templates/peachjam/_footer.html:39 templates/peachjam/_footer.html:128
 msgid "European Union"
 msgstr ""
 
@@ -94,7 +94,7 @@ msgstr ""
 msgid "Other African Legal Information Institutions"
 msgstr ""
 
-#: templates/peachjam/_footer.html:105
+#: templates/peachjam/_footer.html:108
 msgid "University of Cape Town"
 msgstr ""
 
@@ -225,7 +225,7 @@ msgstr ""
 
 #: templates/peachjam/home.html:16
 #, python-format
-msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
+msgid "Search through %(documents_count)s African Union documents on the AfricanLII platform."
 msgstr ""
 
 #: templates/peachjam/home.html:25 templates/peachjam/home.html:26
@@ -296,4 +296,8 @@ msgstr ""
 #: templates/peachjam/reports_guides_list.html:4
 #: templates/peachjam/reports_guides_list.html:7
 msgid "Reports and Guides"
+msgstr ""
+
+#: templates/peachjam_search/search.html:5
+msgid "Search regional and national African legal information."
 msgstr ""
