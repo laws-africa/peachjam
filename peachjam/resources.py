@@ -57,30 +57,18 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-class CharRequiredWidget(CharWidget):
-    def __init__(self, field):
-        self.field = field
-
-    def clean(self, value, row=None, *args, **kwargs):
-        if not value:
-            raise ValidationError(f"{self.field} is required")
-        return value
-
-
 class ForeignKeyRequiredWidget(ForeignKeyWidget):
-    def __init__(self, *args, name=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.name = name
-
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
-            raise ValidationError(f"{self.name} is required")
-        return self.model.objects.get(**{self.field: value})
+            raise ValueError("this field is required")
+        return super().clean(value, row, *args, **kwargs)
 
 
-class SourceFileWidget(CharRequiredWidget):
+class SourceFileWidget(CharWidget):
     def clean(self, value, row=None, **kwargs):
-        super().clean(value)
+        value = super().clean(value)
+        if not value:
+            return value
 
         source_url = self.get_source_url(value)
         try:
@@ -128,9 +116,7 @@ class SourceFileWidget(CharRequiredWidget):
             logger.warning(
                 f"Error processing source file: {source_url} -- {msg}", exc_info=e
             )
-            raise ValidationError(
-                f"Error processing source file: {source_url} -- {msg}"
-            )
+            raise ValueError(f"Error processing source file: {source_url} -- {msg}")
 
     @staticmethod
     def get_source_url(value):
@@ -170,13 +156,6 @@ class SkipRowWidget(BooleanWidget):
         return bool(value)
 
 
-class AuthorWidget(ForeignKeyWidget):
-    def clean(self, value, row=None, *args, **kwargs):
-        if not value:
-            raise ValidationError("author is required")
-        return self.model.objects.get(code__iexact=value)
-
-
 class DateWidget(CharWidget):
     def __init__(self, *args, name=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -184,7 +163,7 @@ class DateWidget(CharWidget):
 
     def clean(self, value, row=None, name=None, *args, **kwargs):
         if self.name == "date" and value is None:
-            raise ValidationError("Date is required")
+            raise ValueError("Date is required")
 
         if value:
             if type(value) == datetime:
@@ -194,14 +173,15 @@ class DateWidget(CharWidget):
 
 class TaxonomiesWidget(CharWidget):
     def clean(self, value, row=None, *args, **kwargs):
-        for taxonomy in value.split("|"):
-            try:
-                Taxonomy.objects.get(slug=taxonomy)
-            except Taxonomy.DoesNotExist as e:
-                msg = getattr(e, "message", repr(e)) or repr(e)
-                raise ValidationError(
-                    f"Taxonomy {taxonomy} does not exist - {msg}",
-                )
+        if value:
+            for taxonomy in value.split("|"):
+                try:
+                    Taxonomy.objects.get(slug=taxonomy)
+                except Taxonomy.DoesNotExist as e:
+                    msg = getattr(e, "message", repr(e)) or repr(e)
+                    raise ValueError(
+                        f"Taxonomy {taxonomy} does not exist - {msg}",
+                    )
         return value
 
 
@@ -210,23 +190,21 @@ class BaseDocumentResource(resources.ModelResource):
 
     author = fields.Field(
         attribute="author",
-        widget=AuthorWidget(Author),
+        widget=ForeignKeyWidget(Author, field="code__iexact"),
     )
     language = fields.Field(
         attribute="language",
-        widget=ForeignKeyRequiredWidget(Language, name="language", field="iso_639_2T"),
+        widget=ForeignKeyRequiredWidget(Language, field="iso_639_2T"),
     )
     jurisdiction = fields.Field(
         attribute="jurisdiction",
-        widget=ForeignKeyRequiredWidget(Country, name="jurisdiction", field="iso"),
+        widget=ForeignKeyRequiredWidget(Country, field="iso"),
     )
     locality = fields.Field(
         attribute="locality",
-        widget=ForeignKeyRequiredWidget(Locality, name="locality", field="code"),
+        widget=ForeignKeyWidget(Locality, field="code"),
     )
-    source_url = fields.Field(
-        attribute="source_url", widget=SourceFileWidget(field="source_url")
-    )
+    source_url = fields.Field(attribute="source_url", widget=SourceFileWidget())
     taxonomy = fields.Field(attribute="taxonomy", widget=TaxonomiesWidget())
     skip = fields.Field(attribute="skip", widget=SkipRowWidget())
 
@@ -240,6 +218,7 @@ class BaseDocumentResource(resources.ModelResource):
             "source_file",
             "coredocument_ptr",
             "doc_type",
+            "polymorphic_ctype",
         )
         import_id_fields = ("expression_frbr_uri",)
 
@@ -306,34 +285,12 @@ class BaseDocumentResource(resources.ModelResource):
 
     def after_save_instance(self, instance, using_transactions, dry_run):
         # get the preferred source url using the widget logic
-        source_url = SourceFileWidget.get_source_url(instance.source_url)
+        source_url = None
+        if instance.source_url and not dry_run:
+            source_url = SourceFileWidget.get_source_url(instance.source_url)
+            self.attach_source_file(instance, source_url)
 
         if not dry_run:
-            if source_url:
-                logger.info(f"Downloading Source file => {source_url}")
-                source_file = download_source_file(source_url)
-                if source_file:
-                    mime, _ = mimetypes.guess_type(source_url)
-                    file_ext = mimetypes.guess_extension(mime)
-                    SourceFile.objects.update_or_create(
-                        document=instance,
-                        defaults={
-                            "file": File(
-                                source_file,
-                                name=f"{slugify(instance.title[-250:])}{file_ext}",
-                            ),
-                            "mimetype": mime,
-                        },
-                    )
-                # check if there are other source urls after removing the one above
-                attachment_urls = instance.source_url.split("|")
-
-                for url in attachment_urls:
-                    if url == source_url:
-                        continue
-                    logger.info(f"Downloading Attachment => {url}")
-                    self.download_attachment(url, instance, "Other documents")
-
             # try to extract content from docx files
             instance.extract_content_from_source_file()
             instance.source_url = source_url
@@ -341,13 +298,39 @@ class BaseDocumentResource(resources.ModelResource):
             instance.extract_citations()
             instance.save()
 
+    def attach_source_file(self, instance, source_url):
+        if source_url:
+            logger.info(f"Downloading Source file => {source_url}")
+            source_file = download_source_file(source_url)
+            if source_file:
+                mime, _ = mimetypes.guess_type(source_url)
+                file_ext = mimetypes.guess_extension(mime)
+                SourceFile.objects.update_or_create(
+                    document=instance,
+                    defaults={
+                        "file": File(
+                            source_file,
+                            name=f"{slugify(instance.title[-250:])}{file_ext}",
+                        ),
+                        "mimetype": mime,
+                    },
+                )
+            # check if there are other source urls after removing the one above
+            attachment_urls = instance.source_url.split("|")
+
+            for url in attachment_urls:
+                if url == source_url:
+                    continue
+                logger.info(f"Downloading Attachment => {url}")
+                self.download_attachment(url, instance, "Other documents")
+
 
 class DocumentNatureWidget(ForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
-        nature, _ = self.model.objects.get_or_create(
-            code=value, defaults={"name": value}
-        )
-        return nature
+        if value:
+            return self.model.objects.get_or_create(
+                code=value, defaults={"name": value}
+            )[0]
 
 
 class GenericDocumentResource(BaseDocumentResource):
@@ -359,18 +342,14 @@ class GenericDocumentResource(BaseDocumentResource):
     work_frbr_uri = fields.Field(
         column_name="work_frbr_uri",
         attribute="work_fbr_uri",
-        widget=CharRequiredWidget(field="work_frbr_uri"),
+        widget=CharWidget(),
     )
 
     required_fields = (
-        "author",
         "date",
         "jurisdiction",
         "language",
-        "nature",
-        "source_url",
         "title",
-        "work_frbr_uri",
     )
 
     class Meta(BaseDocumentResource.Meta):
@@ -518,8 +497,7 @@ class JudgmentResource(BaseDocumentResource):
 class ArticleAuthorWidget(ForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
-            raise ValidationError("author is required")
-        author = value
+            raise ValueError("author is required")
         first_name, *last_name = value.split()
         author, _ = self.model.objects.get_or_create(
             username=slugify(value),
