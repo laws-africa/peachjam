@@ -47,6 +47,9 @@ class PeachJamSettings(BaseModel):
     google_analytics_id = models.CharField(
         verbose_name=_("google analytics id"), max_length=1024, null=True, blank=True
     )
+    pagerank_boost_value = models.FloatField(
+        verbose_name=_("pagerank boost value"), null=True, blank=True
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
