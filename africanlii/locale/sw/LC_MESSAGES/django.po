@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:30+0200\n"
+"POT-Creation-Date: 2023-05-11 14:05+0300\n"
 "PO-Revision-Date: 2023-03-28 18:15\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -74,7 +74,9 @@ msgid "AfricanLII is an open-access research platform for African law jointly op
 msgstr "AfricanLII ni jukwaa la huru la kupata utafiti wa sheria za Afrika linaloendeshwa kwa pamoja na programu ya AfricanLII ya Chuo Kikuu cha Cape Town na Laws.Africa. AfricanLII huchapisha sheria na sera ya Umoja wa Afrika na hushiriki utafutaji katika upatikanaji wa wazi wa sheria zote za taifa za Afrika zinazopatikana kupitia jumuiya ya <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> ya LII."
 
 #: templates/peachjam/_footer.html:17
-msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
+#, fuzzy
+#| msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
+msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
 msgstr "Uchapishaji wa maandiko ya Umoja wa Afrika unafadhiliwa kwa pamoja na Umoja wa Ulaya na ni sehemu ya mradi wa <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">wa Muungano wa Data kwa Utawala</a>."
 
 #: templates/peachjam/_footer.html:23
@@ -85,7 +87,7 @@ msgstr "Masharti ya matumizi"
 msgid "With support from"
 msgstr "Kwa msaada kutoka"
 
-#: templates/peachjam/_footer.html:39 templates/peachjam/_footer.html:125
+#: templates/peachjam/_footer.html:39 templates/peachjam/_footer.html:128
 msgid "European Union"
 msgstr "Umoja wa Ulaya"
 
@@ -93,7 +95,7 @@ msgstr "Umoja wa Ulaya"
 msgid "Other African Legal Information Institutions"
 msgstr "Taasisi Nyingine za Kisheria za Afrika"
 
-#: templates/peachjam/_footer.html:105
+#: templates/peachjam/_footer.html:108
 msgid "University of Cape Town"
 msgstr "Chuo Kikuu cha Cape Town"
 
@@ -223,8 +225,9 @@ msgid "We digitise the law and policy of the African Governance Architecture and
 msgstr "Tunaweka kidigiti sheria na sera ya Muundo wa Utawala wa Afrika na kuwasaidia Waafrika na ulimwengu kuungana na kuelewa ajenda ya Umoja wa Afrika."
 
 #: templates/peachjam/home.html:16
-#, python-format
-msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
+#, fuzzy, python-format
+#| msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
+msgid "Search through %(documents_count)s African Union documents on the AfricanLII platform."
 msgstr "Tafuta kupitia nyaraka %(documents_count)s za UA kwenye jukwaa la AfricanLII."
 
 #: templates/peachjam/home.html:25 templates/peachjam/home.html:26
@@ -297,3 +300,6 @@ msgstr "Tazama maoni zaidi"
 msgid "Reports and Guides"
 msgstr "Ripoti na Miongozo"
 
+#: templates/peachjam_search/search.html:5
+msgid "Search regional and national African legal information."
+msgstr ""
