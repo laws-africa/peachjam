@@ -14,5 +14,11 @@ files:
   - source: /senlii/locale/en/LC_MESSAGES/django.po
     translation: /senlii/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
 
+  - source: /tanzlii/locale/en/LC_MESSAGES/django.po
+    translation: /tanzlii/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
+
+  - source: /zanzibarlii/locale/en/LC_MESSAGES/django.po
+    translation: /zanzibarlii/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
+
   - source: /peachjam/js/locale/en/translation.json
     translation: /peachjam/js/locale/%two_letters_code%/%original_file_name%
