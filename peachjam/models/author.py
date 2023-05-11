@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 class Author(models.Model):
     model_label = _("Author")
+    model_label_plural = _("Authors")
 
     name = models.CharField(_("name"), max_length=255, null=False, unique=True)
     code = models.SlugField(_("code"), max_length=255, null=False, unique=True)

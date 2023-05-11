@@ -11,8 +11,8 @@ class AuthorDetailView(FilteredDocumentListView):
 
     def get_base_queryset(self):
         return CoreDocument.objects.prefetch_related("nature", "work").filter(
-            Q(genericdocument__author=self.author)
-            | Q(legalinstrument__author=self.author)
+            Q(genericdocument__authors__in=[self.author])
+            | Q(legalinstrument__authors__in=[self.author])
         )
 
     def get_queryset(self):

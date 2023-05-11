@@ -173,4 +173,4 @@ class PeachjamViewsTest(TestCase):
             response.context["document"].expression_frbr_uri,
             "/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03",
         )
-        self.assertTrue(hasattr(response.context["document"], "author"))
+        self.assertTrue(hasattr(response.context["document"], "authors"))

@@ -460,21 +460,23 @@ class CoreDocumentAdmin(DocumentAdmin):
 class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
     resource_class = GenericDocumentResource
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
-    fieldsets[0][1]["fields"].extend(["author", "nature"])
+    filter_horizontal = ("authors",)
+    fieldsets[0][1]["fields"].extend(["authors", "nature"])
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        qs = qs.prefetch_related("author", "nature")
+        qs = qs.prefetch_related("authors", "nature")
         return qs
 
 
 class LegalInstrumentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
-    fieldsets[0][1]["fields"].extend(["author", "nature"])
+    filter_horizontal = ("authors",)
+    fieldsets[0][1]["fields"].extend(["authors", "nature"])
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        qs = qs.prefetch_related("author", "nature")
+        qs = qs.prefetch_related("authors", "nature")
         return qs
 
 

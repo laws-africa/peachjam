@@ -12,12 +12,10 @@ from peachjam.models.author import Author
 
 
 class GenericDocument(CoreDocument):
-    author = models.ForeignKey(
+    authors = models.ManyToManyField(
         Author,
-        on_delete=models.PROTECT,
-        null=True,
         blank=True,
-        verbose_name=_("author"),
+        verbose_name=_("authors"),
     )
 
     frbr_uri_doctypes = ["doc", "statement"]
@@ -40,12 +38,10 @@ class GenericDocument(CoreDocument):
 
 
 class LegalInstrument(CoreDocument):
-    author = models.ForeignKey(
+    authors = models.ManyToManyField(
         Author,
-        on_delete=models.PROTECT,
-        null=True,
         blank=True,
-        verbose_name=_("author"),
+        verbose_name=_("authors"),
     )
 
     frbr_uri_doctypes = [x for x in FRBR_URI_DOCTYPES if x != "judgment"]

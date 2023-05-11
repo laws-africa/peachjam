@@ -227,7 +227,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     simple_query_string_options = {"default_operator": "AND"}
 
     filter_fields = {
-        "author": "author",
+        "authors": "authors",
         "court": "court",
         "date": "date",
         "doc_type": "doc_type",
@@ -246,7 +246,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     search_fields = {
         "title": {"boost": 6},
-        "author": None,
+        "authors": None,
         "citation": {"boost": 4},
         "judges": None,
         "content": None,
@@ -259,8 +259,8 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             "field": "doc_type",
             "options": {"size": 100},
         },
-        "author": {
-            "field": "author",
+        "authors": {
+            "field": "authors",
             "options": {"size": 100},
         },
         "jurisdiction": {
