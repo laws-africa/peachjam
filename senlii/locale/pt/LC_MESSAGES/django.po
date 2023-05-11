@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-11 14:05+0300\n"
-"PO-Revision-Date: 2023-03-28 08:27\n"
+"PO-Revision-Date: 2023-05-11 17:03\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -72,3 +72,4 @@ msgstr "Sobre"
 #: templates/senlii/home.html:4
 msgid "Home"
 msgstr "Página inicial"
+
