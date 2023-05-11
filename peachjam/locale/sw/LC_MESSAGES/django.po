@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-11 14:05+0300\n"
-"PO-Revision-Date: 2023-03-28 18:15\n"
+"PO-Revision-Date: 2023-05-11 17:03\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -222,7 +222,7 @@ msgstr "lugha"
 
 #: models/core_document_model.py:87
 msgid "ranking"
-msgstr ""
+msgstr "cheo"
 
 #: models/core_document_model.py:90 models/core_document_model.py:230
 msgid "work"
@@ -317,10 +317,8 @@ msgid "updated at"
 msgstr "imesasishwa saa"
 
 #: models/core_document_model.py:336
-#, fuzzy
-#| msgid "created at"
 msgid "created by"
-msgstr "imeundwa saa"
+msgstr "imetengenezwa na"
 
 #: models/core_document_model.py:339
 msgid "allow robots"
@@ -493,11 +491,11 @@ msgstr "majaji"
 
 #: models/judgment.py:46
 msgid "order outcome"
-msgstr ""
+msgstr "matokeo ya agizo"
 
 #: models/judgment.py:47
 msgid "order outcomes"
-msgstr ""
+msgstr "kuagiza matokeo"
 
 #: models/judgment.py:61 models/judgment.py:307
 msgid "matter type"
@@ -509,7 +507,7 @@ msgstr "aina za mambo"
 
 #: models/judgment.py:71 models/judgment.py:98
 msgid "order"
-msgstr ""
+msgstr "agizo"
 
 #: models/judgment.py:78 models/judgment.py:93
 msgid "court class"
@@ -773,12 +771,10 @@ msgstr "Umesahau nenosiri lako?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Ingia na %(provider.name)s\n"
 "          "
 
@@ -1389,7 +1385,7 @@ msgstr "Usajili wa Mahakama"
 
 #: templates/peachjam/judgment_detail.html:39
 msgid "Order"
-msgstr ""
+msgstr "Agizo"
 
 #: templates/peachjam/judgment_detail.html:48
 msgid "Case number"
@@ -1432,10 +1428,8 @@ msgid "Alternative names"
 msgstr "Majina mbadala"
 
 #: templates/peachjam/layouts/document_detail.html:187
-#, fuzzy
-#| msgid "court"
 msgid "Court"
-msgstr "mahakama"
+msgstr "Mahakama"
 
 #: templates/peachjam/layouts/document_detail.html:210
 msgid "Judgment date"
@@ -1520,3 +1514,4 @@ msgstr "Hili ni toleo la Sheria hii kama ilivyokuwa kutoka %(date_from)s hadi %(
 #, python-format
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr "Hili ni toleo la Sheria hii kama ilivyokuwa kutoka %(date_from)s hadi %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Soma toleo linalotumika sasa</a>."
+
