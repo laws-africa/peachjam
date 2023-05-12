@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-11 14:05+0300\n"
-"PO-Revision-Date: 2023-05-11 17:03\n"
+"PO-Revision-Date: 2023-05-12 08:17\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -318,7 +318,7 @@ msgstr "mis à jour le"
 
 #: models/core_document_model.py:336
 msgid "created by"
-msgstr "créé par"
+msgstr "créer par"
 
 #: models/core_document_model.py:339
 msgid "allow robots"
@@ -491,11 +491,11 @@ msgstr "juges"
 
 #: models/judgment.py:46
 msgid "order outcome"
-msgstr "résultat de la commande"
+msgstr "Résultat de la commande"
 
 #: models/judgment.py:47
 msgid "order outcomes"
-msgstr "résultats de la commande"
+msgstr "Résultats de la commande"
 
 #: models/judgment.py:61 models/judgment.py:307
 msgid "matter type"
@@ -507,7 +507,7 @@ msgstr "types de matière"
 
 #: models/judgment.py:71 models/judgment.py:98
 msgid "order"
-msgstr "commande"
+msgstr "Commande"
 
 #: models/judgment.py:78 models/judgment.py:93
 msgid "court class"
