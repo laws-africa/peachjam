@@ -9,6 +9,8 @@ JAZZMIN_SETTINGS["site_title"] = "SierraLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "SierraLII"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "sierralii.org"  # noqa
 
+MIDDLEWARE.insert(1, "sierralii.middleware.RedirectToGovSlMiddleware")  # noqa
+
 COURT_CODE_MAPPINGS = {
     "supreme-court": "SLSC",
     "court-of-appeal": "SLCA",
