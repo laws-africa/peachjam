@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-11 14:05+0300\n"
-"PO-Revision-Date: 2023-05-11 17:03\n"
+"PO-Revision-Date: 2023-05-12 08:17\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -75,7 +75,7 @@ msgstr "AfricanLII est une plate-forme de recherche ouverte pour le droit africa
 
 #: templates/peachjam/_footer.html:17
 msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
-msgstr "La publication du matériel de l'Union africaine est coparrainée par l'Union européenne et fait partie du projet <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance</a>."
+msgstr "La publication du matériel de l'Union africaine est coparrainée par l'Union européenne et fait partie du projet <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">Data for Gouvernance Alliance</a>."
 
 #: templates/peachjam/_footer.html:23
 msgid "Terms of Use"
