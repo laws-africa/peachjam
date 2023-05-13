@@ -39,7 +39,7 @@
   <section class="pb-5 pt-5 bg-light">
     <div class="container">
       <div class="row">
-        <div class="col-sm-6">
+        <div class="col-lg-6">
           <h2 class="mb-4 heading-underlined">{% trans 'African Union Organs' %}</h2>
           <ul class="list-unstyled">
             {% for au_organ in au_organs %}
@@ -49,7 +49,7 @@
             {% endfor %}
           </ul>
         </div>
-        <div class="col-sm-6">
+        <div class="col-lg-6">
           <h2 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h2>
           <ul class="list-unstyled">
             {% for rec in recs %}
@@ -59,7 +59,19 @@
             {% endfor %}
           </ul>
         </div>
-        <div class="container">
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
+          <h2 class="mb-4 heading-underlined">{% trans 'Regional Courts' %}</h2>
+          <ul class="list-unstyled">
+            {% for court in courts %}
+              <li>
+                <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-lg-6">
           <h2 class="mb-4 heading-underlined">{% trans 'African Union Member States' %}</h2>
           <p>
             The member states of the African Union are the independent countries within the African continent that collectively work towards the union's goals of promoting unity, economic development, and peace.
