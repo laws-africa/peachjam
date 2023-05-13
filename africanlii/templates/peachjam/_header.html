@@ -99,12 +99,6 @@
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'doc_index' %}active{% endif %}"
-       href="{% url 'doc_index_list' %}">
-      {% trans 'Case Indexes' %}
-    </a>
-  </li>
-  <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'articles' %}active{% endif %}"
        href="{% url 'article_list' %}">
       {% trans 'Articles' %}
