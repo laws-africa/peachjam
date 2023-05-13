@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-11 14:05+0300\n"
-"PO-Revision-Date: 2023-05-11 17:03\n"
+"POT-Creation-Date: 2023-05-13 09:08+0200\n"
+"PO-Revision-Date: 2023-05-13 07:36\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -682,7 +682,11 @@ msgstr "lebo ya sheria ndogo"
 msgid "google analytics id"
 msgstr "utambulisho wa kichanganuzi cha google"
 
-#: models/settings.py:52
+#: models/settings.py:51
+msgid "pagerank boost value"
+msgstr "thamani ya kukuza cheo"
+
+#: models/settings.py:55
 msgid "site settings"
 msgstr "mipangilio ya tovuti"
 
@@ -984,7 +988,7 @@ msgstr "Tarehe ya Saini"
 
 #: templates/peachjam/_recent_document_list.html:14
 #: templates/peachjam/court_detail.html:35
-#: templates/peachjam/layouts/document_list.html:57
+#: templates/peachjam/layouts/document_list.html:59
 msgid "No documents found."
 msgstr "Hakuna nyaraka zilizopatikana."
 
@@ -1459,7 +1463,7 @@ msgstr "%(n_relationships)s nyaraka zinazohusiana"
 msgid "Documents"
 msgstr "Nyaraka"
 
-#: templates/peachjam/layouts/document_list.html:41
+#: templates/peachjam/layouts/document_list.html:42
 msgid "Filters"
 msgstr "Vichujio"
 
