@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:30+0200\n"
+"POT-Creation-Date: 2023-05-13 09:08+0200\n"
 "PO-Revision-Date: 2023-03-28 18:15\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -20,6 +20,28 @@ msgstr ""
 #: apps.py:20
 msgid "Regional Body"
 msgstr "Bodi ya Kanda"
+
+#: models/au.py:13
+msgid "author"
+msgstr ""
+
+#: models/au.py:16 models/au.py:32 models/au.py:47
+msgid "profile"
+msgstr ""
+
+#: models/au.py:29
+msgid "locality"
+msgstr ""
+
+#: models/au.py:36
+#, fuzzy
+#| msgid "Regional Economic Communities"
+msgid "Regional economic communities"
+msgstr "Jumuiya za Kiuchumi za Kanda"
+
+#: models/au.py:44 models/ratification.py:42
+msgid "country"
+msgstr "nchi"
 
 #: models/ratification.py:15
 msgid "work"
@@ -41,10 +63,6 @@ msgstr "uridhiaji"
 msgid "ratifications"
 msgstr "uridhiaji"
 
-#: models/ratification.py:42
-msgid "country"
-msgstr "nchi"
-
 #: models/ratification.py:44
 msgid "ratification date"
 msgstr "tarehe ya uridhiaji"
@@ -65,6 +83,71 @@ msgstr "nchi iliyoridhia"
 msgid "ratification countries"
 msgstr "nchi zilizoridhia"
 
+#: templates/africanlii/_ratification_table.html:5
+#, fuzzy
+#| msgid "ratification date"
+msgid "Ratification Title"
+msgstr "tarehe ya uridhiaji"
+
+#: templates/africanlii/_ratification_table.html:6
+#, fuzzy
+#| msgid "ratification date"
+msgid "Ratification Date"
+msgstr "tarehe ya uridhiaji"
+
+#: templates/africanlii/au_detail_page.html:4
+#: templates/africanlii/au_detail_page.html:11
+#: templates/peachjam/_header.html:66
+msgid "African Union (AU)"
+msgstr ""
+
+#: templates/africanlii/au_detail_page.html:14
+msgid "The African Union (AU) is a continental body that comprises 55 countries in Africa, with its headquarters located in Addis Ababa, Ethiopia. It serves as a platform for its member states to collectively address the challenges they face, including peace and security, socio-economic development, and governance and human rights."
+msgstr ""
+
+#: templates/africanlii/au_detail_page.html:19
+msgid "The AU was established in 2002 as a successor to the Organisation of African Unity (OAU), with the aim of accelerating the process of integration in the continent to enable it to play its rightful role in the global economy, while also addressing multifaceted social, economic and political problems."
+msgstr ""
+
+#: templates/africanlii/au_detail_page.html:24
+msgid "Key initiatives of the AU include the African Continental Free Trade Area (AfCFTA) agreement, aiming to create a single market for goods and services across the continent, and Agenda 2063, a strategic framework for the socio-economic transformation of the continent over the next 50 years."
+msgstr ""
+
+#: templates/africanlii/au_detail_page.html:29
+msgid "For more information, visit the <a href=\"https://au.int/\" target=\"_blank\" rel=\"noreferrer noopener\">official African Union website</a> and the <a href=\"https://au.int/agenda2063/overview\">Agenda 2063 portal.</a>"
+msgstr ""
+
+#: templates/africanlii/au_detail_page.html:38
+#: templates/africanlii/au_organ_detail.html:12
+#: templates/peachjam/_header.html:72 templates/peachjam/home.html:43
+msgid "African Union Organs"
+msgstr ""
+
+#: templates/africanlii/au_detail_page.html:48
+#: templates/africanlii/regional_economic_community_detail.html:12
+#: templates/peachjam/home.html:53
+msgid "Regional Economic Communities"
+msgstr "Jumuiya za Kiuchumi za Kanda"
+
+#: templates/africanlii/au_detail_page.html:67
+#: templates/africanlii/member_state_detail.html:12
+msgid "Member States"
+msgstr ""
+
+#: templates/africanlii/au_organ_detail.html:9
+#: templates/africanlii/member_state_detail.html:9
+#: templates/africanlii/regional_economic_community_detail.html:9
+#, fuzzy
+#| msgid "European Union"
+msgid "African Union"
+msgstr "Umoja wa Ulaya"
+
+#: templates/africanlii/au_organ_detail.html:37
+#: templates/africanlii/member_state_detail.html:37
+#: templates/africanlii/regional_economic_community_detail.html:38
+msgid "No documents found."
+msgstr ""
+
 #: templates/peachjam/_footer.html:6
 msgid "About AfricanLII"
 msgstr "Kuhusu AfricanLII"
@@ -74,7 +157,9 @@ msgid "AfricanLII is an open-access research platform for African law jointly op
 msgstr "AfricanLII ni jukwaa la huru la kupata utafiti wa sheria za Afrika linaloendeshwa kwa pamoja na programu ya AfricanLII ya Chuo Kikuu cha Cape Town na Laws.Africa. AfricanLII huchapisha sheria na sera ya Umoja wa Afrika na hushiriki utafutaji katika upatikanaji wa wazi wa sheria zote za taifa za Afrika zinazopatikana kupitia jumuiya ya <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> ya LII."
 
 #: templates/peachjam/_footer.html:17
-msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
+#, fuzzy
+#| msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
+msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
 msgstr "Uchapishaji wa maandiko ya Umoja wa Afrika unafadhiliwa kwa pamoja na Umoja wa Ulaya na ni sehemu ya mradi wa <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">wa Muungano wa Data kwa Utawala</a>."
 
 #: templates/peachjam/_footer.html:23
@@ -85,7 +170,7 @@ msgstr "Masharti ya matumizi"
 msgid "With support from"
 msgstr "Kwa msaada kutoka"
 
-#: templates/peachjam/_footer.html:39 templates/peachjam/_footer.html:125
+#: templates/peachjam/_footer.html:39 templates/peachjam/_footer.html:128
 msgid "European Union"
 msgstr "Umoja wa Ulaya"
 
@@ -93,7 +178,7 @@ msgstr "Umoja wa Ulaya"
 msgid "Other African Legal Information Institutions"
 msgstr "Taasisi Nyingine za Kisheria za Afrika"
 
-#: templates/peachjam/_footer.html:105
+#: templates/peachjam/_footer.html:108
 msgid "University of Cape Town"
 msgstr "Chuo Kikuu cha Cape Town"
 
@@ -134,23 +219,37 @@ msgstr "Magazeti ya serikali"
 msgid "Regional economic community official Gazettes."
 msgstr "Magazeti rasmi ya serikali ya jumuiya ya kiuchumi ya kanda."
 
-#: templates/peachjam/_header.html:63
+#: templates/peachjam/_header.html:73
+msgid "African Union (AU) Organs"
+msgstr ""
+
+#: templates/peachjam/_header.html:78 templates/peachjam/_header.html:79
+#, fuzzy
+#| msgid "Regional Economic Communities"
+msgid "Regional Economic Communities (RECs)"
+msgstr "Jumuiya za Kiuchumi za Kanda"
+
+#: templates/peachjam/_header.html:84 templates/peachjam/_header.html:85
+msgid "Member states"
+msgstr ""
+
+#: templates/peachjam/_header.html:93
 msgid "Topics"
 msgstr "Mada"
 
-#: templates/peachjam/_header.html:68
+#: templates/peachjam/_header.html:98
 msgid "Reports & Guides"
 msgstr "Ripoti na Miongozo"
 
-#: templates/peachjam/_header.html:74
+#: templates/peachjam/_header.html:104
 msgid "Articles"
 msgstr "Makala"
 
-#: templates/peachjam/_header.html:80 templates/peachjam/about.html:4
+#: templates/peachjam/_header.html:110 templates/peachjam/about.html:4
 msgid "About"
 msgstr "Kuhusu"
 
-#: templates/peachjam/_header.html:86
+#: templates/peachjam/_header.html:116
 msgid "Help"
 msgstr "Msaada"
 
@@ -223,8 +322,9 @@ msgid "We digitise the law and policy of the African Governance Architecture and
 msgstr "Tunaweka kidigiti sheria na sera ya Muundo wa Utawala wa Afrika na kuwasaidia Waafrika na ulimwengu kuungana na kuelewa ajenda ya Umoja wa Afrika."
 
 #: templates/peachjam/home.html:16
-#, python-format
-msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
+#, fuzzy, python-format
+#| msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
+msgid "Search through %(documents_count)s African Union documents on the AfricanLII platform."
 msgstr "Tafuta kupitia nyaraka %(documents_count)s za UA kwenye jukwaa la AfricanLII."
 
 #: templates/peachjam/home.html:25 templates/peachjam/home.html:26
@@ -240,55 +340,55 @@ msgstr "Tafuta"
 msgid "Advanced search"
 msgstr "Utafutaji wa kina"
 
-#: templates/peachjam/home.html:43
-msgid "Regional Bodies"
-msgstr "Vyombo vya kanda"
-
-#: templates/peachjam/home.html:53
-msgid "Regional Economic Communities"
-msgstr "Jumuiya za Kiuchumi za Kanda"
-
-#: templates/peachjam/home.html:61
+#: templates/peachjam/home.html:65
 msgid "Regional Courts"
 msgstr "Mahakama za Kanda"
 
 #: templates/peachjam/home.html:75
+msgid "African Union Member States"
+msgstr ""
+
+#: templates/peachjam/home.html:80
+msgid "Explore Member States"
+msgstr ""
+
+#: templates/peachjam/home.html:87
 msgid "Recent Judgments"
 msgstr "Hukumu za Hivi Karibuni"
 
-#: templates/peachjam/home.html:76
+#: templates/peachjam/home.html:88
 msgid "View more judgments"
 msgstr "Tazama hukumu zaidi"
 
-#: templates/peachjam/home.html:82
+#: templates/peachjam/home.html:94
 msgid "Recent Legal Instruments"
 msgstr "Hati za Kisheria za Hivi Karibuni"
 
-#: templates/peachjam/home.html:83
+#: templates/peachjam/home.html:95
 msgid "View more legal instruments"
 msgstr "Tazama hati zaidi za kisheria"
 
-#: templates/peachjam/home.html:89
+#: templates/peachjam/home.html:101
 msgid "Recent Soft Law"
 msgstr "Sheria Zisizofunga za Hivi Karibuni"
 
-#: templates/peachjam/home.html:90
+#: templates/peachjam/home.html:102
 msgid "View more Soft Law"
 msgstr "Tazama zaidi Sheria Zisizofunga"
 
-#: templates/peachjam/home.html:96
+#: templates/peachjam/home.html:108
 msgid "Recent Reports and Guides"
 msgstr "Ripoti na Miongozo ya Hivi Karibuni"
 
-#: templates/peachjam/home.html:97
+#: templates/peachjam/home.html:109
 msgid "View more Reports and Guides"
 msgstr "Tazama Ripoti na Miongozo zaidi"
 
-#: templates/peachjam/home.html:103
+#: templates/peachjam/home.html:115
 msgid "Latest Commentary"
 msgstr "Maoni ya Hivi Karibuni"
 
-#: templates/peachjam/home.html:105
+#: templates/peachjam/home.html:117
 msgid "View more commentary"
 msgstr "Tazama maoni zaidi"
 
@@ -297,3 +397,9 @@ msgstr "Tazama maoni zaidi"
 msgid "Reports and Guides"
 msgstr "Ripoti na Miongozo"
 
+#: templates/peachjam_search/search.html:5
+msgid "Search regional and national African legal information."
+msgstr ""
+
+#~ msgid "Regional Bodies"
+#~ msgstr "Vyombo vya kanda"

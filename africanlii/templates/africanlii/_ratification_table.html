@@ -1,0 +1,19 @@
+{% load peachjam i18n %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>{% trans 'Ratification Title' %}</th>
+      <th>{% trans 'Ratification Date' %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ratification_country in ratification_countries %}
+      <tr>
+        <td>
+          <a href="{% url 'document_detail' frbr_uri=ratification_country.ratification.work.frbr_uri|strip_first_character %}">{{ ratification_country.ratification.work.title }}</a>
+        </td>
+        <td>{{ ratification_country.ratification_date.isoformat }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

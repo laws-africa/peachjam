@@ -1,7 +1,11 @@
 import logging
 
+from elasticsearch import helpers
 from graphdatascience import GraphDataScience
 from neomodel import db
+
+from peachjam.models import CoreDocument
+from peachjam_search.documents import SearchableDocument
 
 from ..models import ExtractedCitation, Work
 from .models import Work as NeoWork
@@ -18,6 +22,9 @@ class GraphRanker:
 
     See: https://neo4j.com/docs/graph-data-science/current/algorithms/article-rank/
     """
+
+    def __init__(self, force_update=False):
+        self.force_update = force_update
 
     def rank_and_publish(self):
         self.populate_graph()
@@ -73,11 +80,42 @@ class GraphRanker:
 
     def publish_ranks(self):
         """Store ranks for each work."""
-        # TODO: only update those that have changed
-        # TODO: update elasticsearch directly?
         works = {w.frbr_uri: w for w in Work.objects.all()}
+        updated = []
 
         for neo_work in NeoWork.nodes.all():
-            work = works[neo_work.frbr_uri]
-            work.ranking = neo_work.ranking
-            work.save(update_fields=["ranking"])
+            w = works[neo_work.frbr_uri]
+            # only update those that have changed
+            if w.ranking != neo_work.ranking or self.force_update:
+                w.ranking = neo_work.ranking
+                w.save(update_fields=["ranking"])
+                updated.append(w)
+
+        self.bulk_update(updated)
+
+    def bulk_update(self, works):
+        """use elasticsearch client to bulk update the "ranking" field on the provided docs"""
+        docs = CoreDocument.objects.filter(work__in=works).values(
+            "id", "work__ranking", "language__iso_639_2T"
+        )
+        log.info(
+            f"updating index with {len(docs)} documents",
+        )
+        searchable_doc = SearchableDocument()
+        actions = [
+            {
+                "_op_type": "update",
+                "_index": searchable_doc.get_index_for_language(
+                    doc["language__iso_639_2T"]
+                ),
+                "_id": doc["id"],
+                "doc": {"ranking": doc["work__ranking"]},
+            }
+            for doc in docs
+        ]
+        helpers.bulk(
+            SearchableDocument._index._get_connection(),
+            actions,
+            chunk_size=1000,
+            request_timeout=60 * 60 * 30,
+        )

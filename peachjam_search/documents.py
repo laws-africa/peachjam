@@ -132,6 +132,7 @@ class SearchableDocument(Document):
     def prepare_ranking(self, instance):
         if instance.work.ranking > 0:
             return instance.work.ranking
+        return 0.00000001
 
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""
@@ -167,14 +168,17 @@ class SearchableDocument(Document):
         parts.extend([a.title for a in instance.alternative_names.all()])
         return " ".join(parts)
 
+    def get_index_for_language(self, lang):
+        if lang in ANALYZERS:
+            return f"{self._index._name}_{lang}"
+        return self._index._name
+
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
         log.info(f"Prepared document #{object_instance.pk} for indexing")
-
-        # choose a language-specific index
-        lang = object_instance.language.iso_639_2T
-        if lang in ANALYZERS:
-            info["_index"] = f"{self._index._name}_{lang}"
+        info["_index"] = self.get_index_for_language(
+            object_instance.language.iso_639_2T
+        )
         return info
 
     def get_queryset(self):

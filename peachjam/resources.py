@@ -288,6 +288,8 @@ class BaseDocumentResource(resources.ModelResource):
             return
 
     def before_import_row(self, row, **kwargs):
+        if kwargs.get("user"):
+            row["created_by"] = kwargs["user"].id
         logger.info(f"Importing row: {row}")
 
     def skip_row(self, instance, original, row, import_validation_errors=None):

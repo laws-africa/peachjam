@@ -20,7 +20,7 @@ from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
 from rest_framework.permissions import AllowAny
 
-from peachjam.models import Author
+from peachjam.models import Author, pj_settings
 from peachjam_search.documents import SearchableDocument, get_search_indexes
 from peachjam_search.serializers import SearchableDocumentSerializer
 
@@ -53,6 +53,20 @@ class MultiFieldSearchQueryBackend(SimpleQueryStringQueryBackend):
             )
             for field, search_term in query_params.items()
         ]
+
+
+class RankFeatureBackend(BaseSearchQueryBackend):
+    @classmethod
+    def construct_search(cls, request, view, search_backend):
+
+        if pj_settings().pagerank_boost_value:
+            rank = Q(
+                "rank_feature",
+                field="ranking",
+                boost=pj_settings().pagerank_boost_value,
+            )
+            return [rank]
+        return []
 
 
 class NestedPageQueryBackend(BaseSearchQueryBackend):
@@ -134,7 +148,7 @@ class SearchFilterBackend(CompoundSearchFilterBackend):
     3. Combined simple and advanced, using both SHOULD and MUST from above.
     """
 
-    must_backends = [MultiFieldSearchQueryBackend()]
+    must_backends = [MultiFieldSearchQueryBackend(), RankFeatureBackend()]
 
     should_backends = [
         # Search each field individually using SimpleQueryString which allows quotes, +foo, -bar etc.

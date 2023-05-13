@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:30+0200\n"
+"POT-Creation-Date: 2023-05-11 14:05+0300\n"
 "PO-Revision-Date: 2023-03-28 08:34\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -118,4 +118,3 @@ msgstr "Outras Instituições Jurídicas Africanas"
 #: templates/peachjam/_header.html:11
 msgid "Judgments"
 msgstr "Julgamentos"
-

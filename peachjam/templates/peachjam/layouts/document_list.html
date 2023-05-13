@@ -28,22 +28,24 @@
         {% include 'peachjam/_document_count.html' %}
       {% endblock %}
     {% endblock %}
-    <div class="d-block d-lg-none my-2">
-      <button class="btn btn-primary"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#list-facets-offcanvas"
-              aria-controls="list-facets-offcanvas">
-        {% trans 'Filters' %}
-      </button>
-    </div>
-    <div class="row">
-      <div class="col-lg-3 d-none d-lg-block">
-        <div>
-          {% block desktop-taxonomy-list %}{% endblock %}
-        </div>
-        <div class="pocketlaw-hidden" data-list-facets></div>
+    {% block page-list-facets %}
+      <div class="d-block d-lg-none my-2">
+        <button class="btn btn-primary"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#list-facets-offcanvas"
+                aria-controls="list-facets-offcanvas">
+          {% trans 'Filters' %}
+        </button>
       </div>
+      <div class="row">
+        <div class="col-lg-3 d-none d-lg-block">
+          <div>
+            {% block desktop-taxonomy-list %}{% endblock %}
+          </div>
+          <div class="pocketlaw-hidden" data-list-facets></div>
+        </div>
+      {% endblock %}
       <div class="col-lg-9">
         <div class="position-relative">
           {% block content %}

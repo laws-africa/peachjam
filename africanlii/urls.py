@@ -13,6 +13,22 @@ urlpatterns = [
         views.AGPLegalInstrumentListView.as_view(),
         name="agp_legal_instrument_list",
     ),
+    path("au/", views.AfricanUnionDetailPageView.as_view(), name="au_detail_page"),
+    path(
+        "au/au-organs/<slug:code>/",
+        views.AfricanUnionOrganDetailView.as_view(),
+        name="au_organ_detail_view",
+    ),
+    path(
+        "au/rec/<slug:code>/",
+        views.RegionalEconomicCommunityDetailView.as_view(),
+        name="rec_detail_view",
+    ),
+    path(
+        "au/member-state/<slug:country>/",
+        views.MemberStateDetailView.as_view(),
+        name="member_state_detail_view",
+    ),
     path(
         "indexes/",
         views.DocIndexesListView.as_view(),

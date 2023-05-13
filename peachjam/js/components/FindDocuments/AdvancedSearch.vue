@@ -167,16 +167,20 @@ export default {
     formatFieldValues () {
       Object.keys(this.modelValue).forEach(field => {
         if (field !== 'date') {
+          const newValue = { ...this.modelValue };
           const fieldQuery = this.formatFieldQuery(field, this.modelValue[field]);
           if (fieldQuery) {
             if (field === 'all') {
               this.$emit('global-search-change', fieldQuery.trim());
             } else {
-              const newValue = { ...this.modelValue };
               newValue[field].q = fieldQuery.trim();
-              this.$emit('update:modelValue', newValue);
             }
+          } else {
+            if (field === 'all') {
+              this.$emit('global-search-change', '');
+            } else newValue[field].q = '';
           }
+          this.$emit('update:modelValue', newValue);
         }
       });
     },
