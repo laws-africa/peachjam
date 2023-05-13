@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
-from peachjam.models import Author, CoreDocument
+from peachjam.models import Author
 from peachjam.views.generic_views import FilteredDocumentListView
 
 
@@ -10,9 +10,13 @@ class AuthorDetailView(FilteredDocumentListView):
     navbar_link = "author_detail"
 
     def get_base_queryset(self):
-        return CoreDocument.objects.prefetch_related("nature", "work").filter(
-            Q(genericdocument__author=self.author)
-            | Q(legalinstrument__author=self.author)
+        return (
+            super()
+            .get_base_queryset()
+            .filter(
+                Q(genericdocument__author=self.author)
+                | Q(legalinstrument__author=self.author)
+            )
         )
 
     def get_queryset(self):

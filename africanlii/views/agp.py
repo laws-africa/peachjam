@@ -8,8 +8,7 @@ class AGPLegalInstrumentListView(FilteredDocumentListView):
     navbar_link = "legal_instruments"
 
     def get_base_queryset(self):
-        qs = super().get_base_queryset()
-        return qs.filter(frbr_uri_doctype="act").prefetch_related("work", "nature")
+        return super().get_base_queryset().filter(frbr_uri_doctype="act")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -22,9 +21,7 @@ class AGPSoftLawListView(DocumentListView):
     navbar_link = "soft_law"
 
     def get_base_queryset(self):
-        qs = super().get_base_queryset()
-        qs = qs.exclude(frbr_uri_doctype="doc").prefetch_related("work", "nature")
-        return qs
+        return super().get_base_queryset().exclude(frbr_uri_doctype="doc")
 
 
 class AGPReportsGuidesListView(DocumentListView):
@@ -32,6 +29,4 @@ class AGPReportsGuidesListView(DocumentListView):
     navbar_link = "reports_guides"
 
     def get_base_queryset(self):
-        qs = super().get_base_queryset()
-        qs = qs.filter(frbr_uri_doctype="doc").prefetch_related("work", "nature")
-        return qs
+        return super().get_base_queryset().filter(frbr_uri_doctype="doc")
