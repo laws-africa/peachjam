@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-11 14:05+0300\n"
-"PO-Revision-Date: 2023-05-12 08:17\n"
+"POT-Creation-Date: 2023-05-13 09:08+0200\n"
+"PO-Revision-Date: 2023-05-13 07:36\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -20,6 +20,26 @@ msgstr ""
 #: apps.py:20
 msgid "Regional Body"
 msgstr "Corps régional"
+
+#: models/au.py:13
+msgid "author"
+msgstr "auteur"
+
+#: models/au.py:16 models/au.py:32 models/au.py:47
+msgid "profile"
+msgstr "profil"
+
+#: models/au.py:29
+msgid "locality"
+msgstr "localité"
+
+#: models/au.py:36
+msgid "Regional economic communities"
+msgstr "Communautés économiques régionales"
+
+#: models/au.py:44 models/ratification.py:42
+msgid "country"
+msgstr "Pays"
 
 #: models/ratification.py:15
 msgid "work"
@@ -41,10 +61,6 @@ msgstr "ratification"
 msgid "ratifications"
 msgstr "ratifications"
 
-#: models/ratification.py:42
-msgid "country"
-msgstr "Pays"
-
 #: models/ratification.py:44
 msgid "ratification date"
 msgstr "Date de ratification"
@@ -64,6 +80,65 @@ msgstr "Pays de ratification"
 #: models/ratification.py:50
 msgid "ratification countries"
 msgstr "Pays de ratification"
+
+#: templates/africanlii/_ratification_table.html:5
+msgid "Ratification Title"
+msgstr "Titre de ratification"
+
+#: templates/africanlii/_ratification_table.html:6
+msgid "Ratification Date"
+msgstr "Date de ratification"
+
+#: templates/africanlii/au_detail_page.html:4
+#: templates/africanlii/au_detail_page.html:11
+#: templates/peachjam/_header.html:66
+msgid "African Union (AU)"
+msgstr "Union africaine (UA)"
+
+#: templates/africanlii/au_detail_page.html:14
+msgid "The African Union (AU) is a continental body that comprises 55 countries in Africa, with its headquarters located in Addis Ababa, Ethiopia. It serves as a platform for its member states to collectively address the challenges they face, including peace and security, socio-economic development, and governance and human rights."
+msgstr "L'Union africaine (UA) est un organisme continental qui comprend 55 pays d'Afrique, dont le siège est situé à Addis-Abeba, en Éthiopie. Il sert de plate-forme à ses États membres pour relever collectivement les défis auxquels ils sont confrontés, notamment la paix et la sécurité, le développement socio-économique, la gouvernance et les droits de l'homme."
+
+#: templates/africanlii/au_detail_page.html:19
+msgid "The AU was established in 2002 as a successor to the Organisation of African Unity (OAU), with the aim of accelerating the process of integration in the continent to enable it to play its rightful role in the global economy, while also addressing multifaceted social, economic and political problems."
+msgstr "L'UA a été créée en 2002 pour succéder à l'Organisation de l'unité africaine (OUA), dans le but d'accélérer le processus d'intégration sur le continent pour lui permettre de jouer le rôle qui lui revient dans l'économie mondiale, tout en abordant les multiples facettes sociales, problèmes économiques et politiques."
+
+#: templates/africanlii/au_detail_page.html:24
+msgid "Key initiatives of the AU include the African Continental Free Trade Area (AfCFTA) agreement, aiming to create a single market for goods and services across the continent, and Agenda 2063, a strategic framework for the socio-economic transformation of the continent over the next 50 years."
+msgstr "Les principales initiatives de l'UA comprennent l'accord sur la zone de libre-échange continentale africaine (AfCFTA), visant à créer un marché unique des biens et des services à travers le continent, et l'Agenda 2063, un cadre stratégique pour la transformation socio-économique du continent au cours des prochaines années. 50 ans."
+
+#: templates/africanlii/au_detail_page.html:29
+msgid "For more information, visit the <a href=\"https://au.int/\" target=\"_blank\" rel=\"noreferrer noopener\">official African Union website</a> and the <a href=\"https://au.int/agenda2063/overview\">Agenda 2063 portal.</a>"
+msgstr "Pour plus d'informations, visitez le <a href=\"https://au.int/\" target=\"_blank\" rel=\"noreferrer noopener\">site officiel de l'Union africaine</a> et le <a href=\"https://au.int/agenda2063/overview\">portail de l'Agenda 2063.</a>"
+
+#: templates/africanlii/au_detail_page.html:38
+#: templates/africanlii/au_organ_detail.html:12
+#: templates/peachjam/_header.html:72 templates/peachjam/home.html:43
+msgid "African Union Organs"
+msgstr "Organes de l'Union africaine"
+
+#: templates/africanlii/au_detail_page.html:48
+#: templates/africanlii/regional_economic_community_detail.html:12
+#: templates/peachjam/home.html:53
+msgid "Regional Economic Communities"
+msgstr "Communautés économiques régionales"
+
+#: templates/africanlii/au_detail_page.html:67
+#: templates/africanlii/member_state_detail.html:12
+msgid "Member States"
+msgstr "États membres"
+
+#: templates/africanlii/au_organ_detail.html:9
+#: templates/africanlii/member_state_detail.html:9
+#: templates/africanlii/regional_economic_community_detail.html:9
+msgid "African Union"
+msgstr "Union africaine"
+
+#: templates/africanlii/au_organ_detail.html:37
+#: templates/africanlii/member_state_detail.html:37
+#: templates/africanlii/regional_economic_community_detail.html:38
+msgid "No documents found."
+msgstr "Aucun document trouvé."
 
 #: templates/peachjam/_footer.html:6
 msgid "About AfricanLII"
@@ -134,23 +209,35 @@ msgstr "Journaux officiels"
 msgid "Regional economic community official Gazettes."
 msgstr "Gazettes officielles de la communauté économique régionale."
 
-#: templates/peachjam/_header.html:63
+#: templates/peachjam/_header.html:73
+msgid "African Union (AU) Organs"
+msgstr "Organes de l'Union africaine (UA)"
+
+#: templates/peachjam/_header.html:78 templates/peachjam/_header.html:79
+msgid "Regional Economic Communities (RECs)"
+msgstr "Communautés économiques régionales (CER)"
+
+#: templates/peachjam/_header.html:84 templates/peachjam/_header.html:85
+msgid "Member states"
+msgstr "États membres"
+
+#: templates/peachjam/_header.html:93
 msgid "Topics"
 msgstr "Sujets"
 
-#: templates/peachjam/_header.html:68
+#: templates/peachjam/_header.html:98
 msgid "Reports & Guides"
 msgstr "Rapports et tutoriels"
 
-#: templates/peachjam/_header.html:74
+#: templates/peachjam/_header.html:104
 msgid "Articles"
 msgstr "Articles"
 
-#: templates/peachjam/_header.html:80 templates/peachjam/about.html:4
+#: templates/peachjam/_header.html:110 templates/peachjam/about.html:4
 msgid "About"
 msgstr "À propos"
 
-#: templates/peachjam/_header.html:86
+#: templates/peachjam/_header.html:116
 msgid "Help"
 msgstr "Aide"
 
@@ -240,55 +327,55 @@ msgstr "Recherche"
 msgid "Advanced search"
 msgstr "Recherche avancée"
 
-#: templates/peachjam/home.html:43
-msgid "Regional Bodies"
-msgstr "Corps régionaux"
-
-#: templates/peachjam/home.html:53
-msgid "Regional Economic Communities"
-msgstr "Communautés économiques régionales"
-
-#: templates/peachjam/home.html:61
+#: templates/peachjam/home.html:65
 msgid "Regional Courts"
 msgstr "Cours régionaux"
 
 #: templates/peachjam/home.html:75
+msgid "African Union Member States"
+msgstr "États membres de l'Union africaine"
+
+#: templates/peachjam/home.html:80
+msgid "Explore Member States"
+msgstr "Explorer les États membres"
+
+#: templates/peachjam/home.html:87
 msgid "Recent Judgments"
 msgstr "Jugements récents"
 
-#: templates/peachjam/home.html:76
+#: templates/peachjam/home.html:88
 msgid "View more judgments"
 msgstr "Voir plus de jugements"
 
-#: templates/peachjam/home.html:82
+#: templates/peachjam/home.html:94
 msgid "Recent Legal Instruments"
 msgstr "Derniers instruments juridiques"
 
-#: templates/peachjam/home.html:83
+#: templates/peachjam/home.html:95
 msgid "View more legal instruments"
 msgstr "Voir plus d'instruments juridiques"
 
-#: templates/peachjam/home.html:89
+#: templates/peachjam/home.html:101
 msgid "Recent Soft Law"
 msgstr "Récente norme non contraignantes"
 
-#: templates/peachjam/home.html:90
+#: templates/peachjam/home.html:102
 msgid "View more Soft Law"
 msgstr "Voir plus de droit non contraignant"
 
-#: templates/peachjam/home.html:96
+#: templates/peachjam/home.html:108
 msgid "Recent Reports and Guides"
 msgstr "Rapports et guides récents"
 
-#: templates/peachjam/home.html:97
+#: templates/peachjam/home.html:109
 msgid "View more Reports and Guides"
 msgstr "Afficher plus de rapports et de guides"
 
-#: templates/peachjam/home.html:103
+#: templates/peachjam/home.html:115
 msgid "Latest Commentary"
 msgstr "Dernier commentaire"
 
-#: templates/peachjam/home.html:105
+#: templates/peachjam/home.html:117
 msgid "View more commentary"
 msgstr "Voir plus de commentaires"
 
