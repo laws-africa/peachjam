@@ -1,0 +1,78 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'African Union (AU)' %}
+{% endblock %}
+{% block page-content %}
+  <section class="pb-5">
+    <div class="container">
+      {% block breadcrumbs %}{% endblock %}
+      {% block page-heading %}
+        <h1 class="my-4 heading-underlined">{% trans 'African Union (AU)' %}</h1>
+      {% endblock %}
+      <p>
+        {% blocktrans trimmed %}
+          The African Union (AU) is a continental body that comprises 55 countries in Africa, with its headquarters located in Addis Ababa, Ethiopia. It serves as a platform for its member states to collectively address the challenges they face, including peace and security, socio-economic development, and governance and human rights.
+        {% endblocktrans %}
+      </p>
+      <p>
+        {% blocktrans trimmed %}
+          The AU was established in 2002 as a successor to the Organisation of African Unity (OAU), with the aim of accelerating the process of integration in the continent to enable it to play its rightful role in the global economy, while also addressing multifaceted social, economic and political problems.
+        {% endblocktrans %}
+      </p>
+      <p>
+        {% blocktrans trimmed %}
+          Key initiatives of the AU include the African Continental Free Trade Area (AfCFTA) agreement, aiming to create a single market for goods and services across the continent, and Agenda 2063, a strategic framework for the socio-economic transformation of the continent over the next 50 years.
+        {% endblocktrans %}
+      </p>
+      <p>
+        {%blocktrans trimmed %}
+        For more information, visit the <a href="https://au.int/" target="_blank" rel="noreferrer noopener">official African Union website</a> and the <a href="https://au.int/agenda2063/overview">Agenda 2063 portal.</a>
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+  <section class="container">
+    <div class="row">
+      <div class="col-sm-6">
+        <h3 class="mb-4 heading-underlined" id="au-organs">{% trans 'African Union Organs' %}</h3>
+        <ul class="list-unstyled">
+          {% for au_organ in au_organs %}
+            <li>
+              <a href="{% url 'au_organ_detail_view' au_organ.author.code %}">{{ au_organ }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-sm-6">
+        <h3 class="mb-4 heading-underlined" id="rec">{% trans 'Regional Economic Communities' %}</h3>
+        <ul class="list-unstyled">
+          {% for rec in recs %}
+            <li>
+              <a href="{% url 'rec_detail_view' rec.locality.place_code %}">{{ rec }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+  <section class="container">
+    <div class="row">
+      <div class="col-sm-12"></div>
+    </div>
+  </section>
+  <section class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <h3 class="mb-4 heading-underlined" id="member-states">{% trans 'Member States' %}</h3>
+        <ul class="list-unstyled">
+          {% for member_state in member_states %}
+            <li>
+              <a href="{% url 'member_state_detail_view' member_state.country.iso %}">{{ member_state.country }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+{% endblock %}

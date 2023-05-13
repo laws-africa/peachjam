@@ -36,41 +36,41 @@
       </div>
     </div>
   </section>
-  <section class="pb-5 pt-5">
+  <section class="pb-5 pt-5 bg-light">
     <div class="container">
       <div class="row">
-        <div class="col-lg-6 mb-4">
-          <h2 class="mb-4 heading-underlined">{% trans 'Regional Bodies' %}</h2>
+        <div class="col-sm-6">
+          <h2 class="mb-4 heading-underlined">{% trans 'African Union Organs' %}</h2>
           <ul class="list-unstyled">
-            {% for author in authors %}
+            {% for au_organ in au_organs %}
               <li>
-                <a href="{% url 'author' author.code %}">{{ author.name }}</a>
+                <a href="{% url 'au_organ_detail_view' au_organ.author.code %}">{{ au_organ }}</a>
               </li>
             {% endfor %}
           </ul>
         </div>
-        <div class="col-lg-6">
+        <div class="col-sm-6">
           <h2 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h2>
           <ul class="list-unstyled">
-            {% for locality in localities %}
+            {% for rec in recs %}
               <li>
-                <a href="{% url 'place' locality.place_code %}">{{ locality.name }}</a>
+                <a href="{% url 'rec_detail_view' rec.locality.place_code %}">{{ rec }}</a>
               </li>
             {% endfor %}
           </ul>
-          <h2 class="mb-4 heading-underlined">{% trans 'Regional Courts' %}</h2>
-          <ul class="list-unstyled">
-            {% for court in courts %}
-              <li>
-                <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-              </li>
-            {% endfor %}
-          </ul>
+        </div>
+        <div class="container">
+          <h2 class="mb-4 heading-underlined">{% trans 'African Union Member States' %}</h2>
+          <p>
+            The member states of the African Union are the independent countries within the African continent that collectively work towards the union's goals of promoting unity, economic development, and peace.
+          </p>
+          <a class="btn btn-primary"
+             href="{% url 'au_detail_page' %}#member-states">{% trans "Explore Member States" %}</a>
         </div>
       </div>
     </div>
   </section>
-  <section class="pb-5 pt-5 bg-light">
+  <section class="pb-5 pt-5">
     <div class="container">
       <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
       {% trans 'View more judgments' as text %}
@@ -91,14 +91,14 @@
       {% include 'peachjam/_recent_document_list.html' with documents=recent_soft_law view_more_text=text view_more_url_name='agp_soft_law_list' %}
     </div>
   </section>
-  <section class="pb-5 pt-5">
+  <section class="pb-5 pt-5 bg-light">
     <div class="container">
       <h2 class="mb-4 heading-underlined">{% trans 'Recent Reports and Guides' %}</h2>
       {% trans 'View more Reports and Guides' as text %}
       {% include 'peachjam/_recent_document_list.html' with documents=recent_reports_guides view_more_text=text view_more_url_name='agp_reports_guides_list' %}
     </div>
   </section>
-  <section class="pb-5 pt-5 bg-light">
+  <section class="pb-5 pt-5">
     <div class="container">
       <h2 class="mb-4 heading-underlined">{% trans 'Latest Commentary' %}</h2>
       {% include 'peachjam/_article_list.html' with articles=recent_articles %}
