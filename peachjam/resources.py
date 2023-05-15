@@ -210,10 +210,6 @@ class ManyToOneWidget(ManyToManyWidget):
 class BaseDocumentResource(resources.ModelResource):
     date = fields.Field(attribute="date", widget=DateWidget(name="date"))
 
-    author = fields.Field(
-        attribute="author",
-        widget=ForeignKeyWidget(Author, field="code__iexact"),
-    )
     language = fields.Field(
         attribute="language",
         widget=ForeignKeyRequiredWidget(Language, field="iso_639_2T"),
@@ -353,6 +349,10 @@ class BaseDocumentResource(resources.ModelResource):
                 logger.info(f"Downloading Attachment => {url}")
                 self.download_attachment(url, instance, "Other documents")
 
+    def dehydrate_taxonomy(self, instance):
+        values = [t.topic.slug for t in instance.taxonomies.all()]
+        return "|".join(values)
+
 
 class DocumentNatureWidget(ForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
@@ -363,6 +363,10 @@ class DocumentNatureWidget(ForeignKeyWidget):
 
 
 class GenericDocumentResource(BaseDocumentResource):
+    author = fields.Field(
+        attribute="author",
+        widget=ForeignKeyWidget(Author, field="code__iexact"),
+    )
     nature = fields.Field(
         column_name="nature",
         attribute="nature",
@@ -433,7 +437,15 @@ class JudgmentResource(BaseDocumentResource):
         attribute="registry",
         widget=ForeignKeyWidget(CourtRegistry, field="code"),
     )
-    case_numbers = fields.Field(column_name="case_numbers", widget=CharWidget)
+    case_number_numeric = fields.Field(
+        column_name="case_number_numeric", widget=CharWidget
+    )
+    case_number_year = fields.Field(column_name="case_number_year", widget=CharWidget)
+    case_string_override = fields.Field(
+        column_name="case_string_override", widget=CharWidget
+    )
+    matter_type = fields.Field(column_name="matter_type", widget=CharWidget)
+
     order_outcome = fields.Field(
         column_name="order_outcome",
         attribute="order_outcome",
@@ -460,14 +472,16 @@ class JudgmentResource(BaseDocumentResource):
 
         if row.get("case_number_numeric"):
             case_number_numeric = [
-                int(float(n)) for n in str(row["case_number_numeric"]).split("|")
+                int(float(n)) if n else None
+                for n in str(row["case_number_numeric"]).split("|")
             ]
             values.append(case_number_numeric)
             keys.append("number")
 
         if row.get("case_number_year"):
             case_number_year = [
-                int(float(n)) for n in str(row["case_number_year"]).split("|")
+                int(float(n)) if n else None
+                for n in str(row["case_number_year"]).split("|")
             ]
             values.append(case_number_year)
             keys.append("year")
@@ -480,8 +494,10 @@ class JudgmentResource(BaseDocumentResource):
         if row.get("matter_type"):
             matter_type = row["matter_type"].split("|")
             matter_types = [
-                MatterType.objects.get_or_create(name=m)[0] for m in matter_type
+                MatterType.objects.get_or_create(name=m)[0] if m else None
+                for m in matter_type
             ]
+
             keys.append("matter_type")
             values.append(matter_types)
 
@@ -510,6 +526,37 @@ class JudgmentResource(BaseDocumentResource):
                 self.download_attachment(
                     row["media_summary_file"], judgment, "Media summary"
                 )
+
+    def get_case_number_attributes(self, judgment, attribute):
+        values = []
+        for case_number in judgment.case_numbers.all().order_by(
+            "year", "number", "string_override"
+        ):
+            val = getattr(case_number, attribute)
+            values.append(f"{val or ''}")
+
+        return "|".join(values)
+
+    def dehydrate_case_number_numeric(self, judgment):
+        return self.get_case_number_attributes(judgment, "number")
+
+    def dehydrate_case_number_year(self, judgment):
+        return self.get_case_number_attributes(judgment, "year")
+
+    def dehydrate_case_string_override(self, judgment):
+        return self.get_case_number_attributes(judgment, "string_override")
+
+    def dehydrate_matter_type(self, judgment):
+        values = []
+        for case_number in judgment.case_numbers.all().order_by(
+            "year", "number", "string_override"
+        ):
+            if getattr(case_number, "matter_type"):
+                values.append(case_number.matter_type.name)
+            else:
+                values.append("")
+
+        return "|".join(values)
 
 
 class ArticleAuthorWidget(ForeignKeyWidget):
