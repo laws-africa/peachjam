@@ -79,7 +79,21 @@ class PeachJam {
         ],
         denyUrls: [
           new RegExp(window.location.host.replace('.', '\\.') + '/static/lib/pdfjs/')
-        ]
+        ],
+        beforeSend (event: any) {
+          try {
+            const frames = event.exception.values[0].stacktrace.frames;
+            // if all frames are anonymous, don't send this event
+            // see https://github.com/getsentry/sentry-javascript/issues/3147
+            if (frames && frames.length > 0 && frames.all((f: any) => f.filename === '<anonymous>')) {
+              return null;
+            }
+          } catch (e) {
+            // ignore error, send event
+          }
+
+          return event;
+        }
       });
     }
   }
