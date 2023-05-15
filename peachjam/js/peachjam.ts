@@ -33,6 +33,7 @@ class PeachJam {
   }
 
   setup () {
+    this.setupSentry();
     this.createComponents();
   }
 
@@ -62,6 +63,25 @@ class PeachJam {
         this.components.push(vueComp);
       }
     });
+  }
+
+  private setupSentry () {
+    const el = document.getElementById('sentry-config');
+    const config = el ? JSON.parse(el.innerHTML) : null;
+    // @ts-ignore
+    if (config && window.Sentry) {
+      // @ts-ignore
+      window.Sentry.init({
+        dsn: config.dsn,
+        environment: config.environment,
+        allowUrls: [
+          new RegExp(window.location.host.replace('.', '\\.') + '/static/')
+        ],
+        denyUrls: [
+          new RegExp(window.location.host.replace('.', '\\.') + '/static/lib/pdfjs/')
+        ]
+      });
+    }
   }
 }
 
