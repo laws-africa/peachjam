@@ -33,6 +33,7 @@ class PeachJam {
   }
 
   setup () {
+    this.setupSentry();
     this.createComponents();
   }
 
@@ -62,6 +63,39 @@ class PeachJam {
         this.components.push(vueComp);
       }
     });
+  }
+
+  private setupSentry () {
+    const el = document.getElementById('sentry-config');
+    const config = el ? JSON.parse(el.innerHTML) : null;
+    // @ts-ignore
+    if (config && window.Sentry) {
+      // @ts-ignore
+      window.Sentry.init({
+        dsn: config.dsn,
+        environment: config.environment,
+        allowUrls: [
+          new RegExp(window.location.host.replace('.', '\\.') + '/static/')
+        ],
+        denyUrls: [
+          new RegExp(window.location.host.replace('.', '\\.') + '/static/lib/pdfjs/')
+        ],
+        beforeSend (event: any) {
+          try {
+            const frames = event.exception.values[0].stacktrace.frames;
+            // if all frames are anonymous, don't send this event
+            // see https://github.com/getsentry/sentry-javascript/issues/3147
+            if (frames && frames.length > 0 && frames.all((f: any) => f.filename === '<anonymous>')) {
+              return null;
+            }
+          } catch (e) {
+            // ignore error, send event
+          }
+
+          return event;
+        }
+      });
+    }
   }
 }
 

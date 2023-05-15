@@ -26,8 +26,6 @@ class DocDiffsManager {
     if (response.ok) {
       const { provisions = [] } = await response.json();
       this.decorateChangedProvisions(provisions);
-    } else {
-      throw new Error(response.statusText);
     }
   }
 
