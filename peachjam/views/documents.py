@@ -20,7 +20,7 @@ class RedirectResolver:
         },
         "ghalii": {
             "country_code": "gh",
-            "domain": "new.ghalii.org",
+            "domain": "ghalii.org",
         },
         "lawlibrary": {
             "country_code": "za",
@@ -28,7 +28,7 @@ class RedirectResolver:
         },
         "lesotholii": {
             "country_code": "ls",
-            "domain": "new.lesotholii.org",
+            "domain": "lesotholii.org",
         },
         "malawilii": {
             "country_code": "mw",
@@ -44,11 +44,11 @@ class RedirectResolver:
         },
         "seylii": {
             "country_code": "sc",
-            "domain": "new.seylii.org",
+            "domain": "seylii.org",
         },
         "sierralii": {
             "country_code": "sl",
-            "domain": "new.sierralii.org",
+            "domain": "sierralii.org",
         },
         "tanzlii": {
             "country_code": "tz",
@@ -56,15 +56,15 @@ class RedirectResolver:
         },
         "tcilii": {
             "country_code": "tc",
-            "domain": "new.tcilii.org",
+            "domain": "tcilii.org",
         },
         "ulii": {
             "country_code": "ug",
-            "domain": "new.ulii.org",
+            "domain": "ulii.org",
         },
         "zambialii": {
             "country_code": "zm",
-            "domain": "new.zambialii.org",
+            "domain": "zambialii.org",
         },
         "zanzibarlii": {
             "place_code": "tz-znz",

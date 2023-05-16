@@ -12,6 +12,7 @@ JAZZMIN_SETTINGS["site_brand"] = "seylii.org"  # noqa
 COURT_CODE_MAPPINGS = {
     "constitutional-court": "SCCC",
     "court-of-appeal": "SCCA",
+    "court-appeal": "SCCA",
     "supreme-court": "SCSC",
 }
 LANGUAGES = [
