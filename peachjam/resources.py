@@ -57,30 +57,18 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-class CharRequiredWidget(CharWidget):
-    def __init__(self, field):
-        self.field = field
-
-    def clean(self, value, row=None, *args, **kwargs):
-        if not value:
-            raise ValidationError(f"{self.field} is required")
-        return value
-
-
 class ForeignKeyRequiredWidget(ForeignKeyWidget):
-    def __init__(self, *args, name=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.name = name
-
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
-            raise ValidationError(f"{self.name} is required")
-        return self.model.objects.get(**{self.field: value})
+            raise ValueError("this field is required")
+        return super().clean(value, row, *args, **kwargs)
 
 
-class SourceFileWidget(CharRequiredWidget):
+class SourceFileWidget(CharWidget):
     def clean(self, value, row=None, **kwargs):
-        super().clean(value)
+        value = super().clean(value)
+        if not value:
+            return value
 
         source_url = self.get_source_url(value)
         try:
@@ -105,9 +93,11 @@ class SourceFileWidget(CharRequiredWidget):
                             file.seek(0)
                             attempt += 1
                             try:
+                                logger.info(
+                                    f"converting file from {source_url} to html (attempt {attempt})"
+                                )
                                 soffice_convert(file, suffix, "html")
-                                if attempt > 1:
-                                    logger.info(f"soffice success on attempt {attempt}")
+                                logger.info(f"soffice success on attempt {attempt}")
                                 break
                             except SOfficeError as e:
                                 logger.warning(
@@ -128,9 +118,7 @@ class SourceFileWidget(CharRequiredWidget):
             logger.warning(
                 f"Error processing source file: {source_url} -- {msg}", exc_info=e
             )
-            raise ValidationError(
-                f"Error processing source file: {source_url} -- {msg}"
-            )
+            raise ValueError(f"Error processing source file: {source_url} -- {msg}")
 
     @staticmethod
     def get_source_url(value):
@@ -170,13 +158,6 @@ class SkipRowWidget(BooleanWidget):
         return bool(value)
 
 
-class AuthorWidget(ForeignKeyWidget):
-    def clean(self, value, row=None, *args, **kwargs):
-        if not value:
-            raise ValidationError("author is required")
-        return self.model.objects.get(code__iexact=value)
-
-
 class DateWidget(CharWidget):
     def __init__(self, *args, name=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -184,7 +165,7 @@ class DateWidget(CharWidget):
 
     def clean(self, value, row=None, name=None, *args, **kwargs):
         if self.name == "date" and value is None:
-            raise ValidationError("Date is required")
+            raise ValueError("Date is required")
 
         if value:
             if type(value) == datetime:
@@ -194,41 +175,62 @@ class DateWidget(CharWidget):
 
 class TaxonomiesWidget(CharWidget):
     def clean(self, value, row=None, *args, **kwargs):
-        for taxonomy in value.split("|"):
-            try:
-                Taxonomy.objects.get(slug=taxonomy)
-            except Taxonomy.DoesNotExist as e:
-                msg = getattr(e, "message", repr(e)) or repr(e)
-                raise ValidationError(
-                    f"Taxonomy {taxonomy} does not exist - {msg}",
-                )
+        if value:
+            for taxonomy in value.split("|"):
+                try:
+                    Taxonomy.objects.get(slug=taxonomy)
+                except Taxonomy.DoesNotExist as e:
+                    msg = getattr(e, "message", repr(e)) or repr(e)
+                    raise ValueError(
+                        f"Taxonomy {taxonomy} does not exist - {msg}",
+                    )
         return value
+
+
+class IncomingManyToOneField(fields.Field):
+    """Handles many-to-one relationships on the incoming side."""
+
+    def save(self, obj, data, is_m2m=False, **kwargs):
+        if not self.readonly:
+            attrs = self.attribute.split("__")
+            for attr in attrs[:-1]:
+                obj = getattr(obj, attr, None)
+            cleaned = self.clean(data, **kwargs)
+            if cleaned is not None or self.saves_null_values:
+                assert is_m2m
+                getattr(obj, attrs[-1]).all().delete()
+                getattr(obj, attrs[-1]).set(cleaned, bulk=False)
+
+
+class ManyToOneWidget(ManyToManyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            return self.model.objects.none()
+        return [AlternativeName(**{self.field: v}) for v in value.split(self.separator)]
 
 
 class BaseDocumentResource(resources.ModelResource):
     date = fields.Field(attribute="date", widget=DateWidget(name="date"))
 
-    author = fields.Field(
-        attribute="author",
-        widget=AuthorWidget(Author),
-    )
     language = fields.Field(
         attribute="language",
-        widget=ForeignKeyRequiredWidget(Language, name="language", field="iso_639_2T"),
+        widget=ForeignKeyRequiredWidget(Language, field="iso_639_2T"),
     )
     jurisdiction = fields.Field(
         attribute="jurisdiction",
-        widget=ForeignKeyRequiredWidget(Country, name="jurisdiction", field="iso"),
+        widget=ForeignKeyRequiredWidget(Country, field="iso"),
     )
     locality = fields.Field(
         attribute="locality",
-        widget=ForeignKeyRequiredWidget(Locality, name="locality", field="code"),
+        widget=ForeignKeyWidget(Locality, field="code"),
     )
-    source_url = fields.Field(
-        attribute="source_url", widget=SourceFileWidget(field="source_url")
-    )
+    source_url = fields.Field(attribute="source_url", widget=SourceFileWidget())
     taxonomy = fields.Field(attribute="taxonomy", widget=TaxonomiesWidget())
     skip = fields.Field(attribute="skip", widget=SkipRowWidget())
+    alternative_names = IncomingManyToOneField(
+        attribute="alternative_names",
+        widget=ManyToOneWidget(AlternativeName, separator="|", field="title"),
+    )
 
     required_fields = []
 
@@ -240,6 +242,10 @@ class BaseDocumentResource(resources.ModelResource):
             "source_file",
             "coredocument_ptr",
             "doc_type",
+            "polymorphic_ctype",
+            "work",
+            "content_html",
+            "toc_json",
         )
         import_id_fields = ("expression_frbr_uri",)
 
@@ -306,34 +312,12 @@ class BaseDocumentResource(resources.ModelResource):
 
     def after_save_instance(self, instance, using_transactions, dry_run):
         # get the preferred source url using the widget logic
-        source_url = SourceFileWidget.get_source_url(instance.source_url)
+        source_url = None
+        if instance.source_url and not dry_run:
+            source_url = SourceFileWidget.get_source_url(instance.source_url)
+            self.attach_source_file(instance, source_url)
 
         if not dry_run:
-            if source_url:
-                logger.info(f"Downloading Source file => {source_url}")
-                source_file = download_source_file(source_url)
-                if source_file:
-                    mime, _ = mimetypes.guess_type(source_url)
-                    file_ext = mimetypes.guess_extension(mime)
-                    SourceFile.objects.update_or_create(
-                        document=instance,
-                        defaults={
-                            "file": File(
-                                source_file,
-                                name=f"{slugify(instance.title[-250:])}{file_ext}",
-                            ),
-                            "mimetype": mime,
-                        },
-                    )
-                # check if there are other source urls after removing the one above
-                attachment_urls = instance.source_url.split("|")
-
-                for url in attachment_urls:
-                    if url == source_url:
-                        continue
-                    logger.info(f"Downloading Attachment => {url}")
-                    self.download_attachment(url, instance, "Other documents")
-
             # try to extract content from docx files
             instance.extract_content_from_source_file()
             instance.source_url = source_url
@@ -341,13 +325,43 @@ class BaseDocumentResource(resources.ModelResource):
             instance.extract_citations()
             instance.save()
 
+    def attach_source_file(self, instance, source_url):
+        if source_url:
+            logger.info(f"Downloading Source file => {source_url}")
+            source_file = download_source_file(source_url)
+            if source_file:
+                mime, _ = mimetypes.guess_type(source_url)
+                file_ext = mimetypes.guess_extension(mime)
+                SourceFile.objects.update_or_create(
+                    document=instance,
+                    defaults={
+                        "file": File(
+                            source_file,
+                            name=f"{slugify(instance.title[-250:])}{file_ext}",
+                        ),
+                        "mimetype": mime,
+                    },
+                )
+            # check if there are other source urls after removing the one above
+            attachment_urls = instance.source_url.split("|")
+
+            for url in attachment_urls:
+                if url == source_url:
+                    continue
+                logger.info(f"Downloading Attachment => {url}")
+                self.download_attachment(url, instance, "Other documents")
+
+    def dehydrate_taxonomy(self, instance):
+        values = [t.topic.slug for t in instance.taxonomies.all()]
+        return "|".join(values)
+
 
 class DocumentNatureWidget(ForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
-        nature, _ = self.model.objects.get_or_create(
-            code=value, defaults={"name": value}
-        )
-        return nature
+        if value:
+            return self.model.objects.get_or_create(
+                code=value, defaults={"name": value}
+            )[0]
 
 
 class ManyToManyFieldWidget(ManyToManyWidget):
@@ -364,15 +378,14 @@ class ManyToManyFieldWidget(ManyToManyWidget):
 
 
 class GenericDocumentResource(BaseDocumentResource):
+    author = fields.Field(
+        attribute="author",
+        widget=ForeignKeyWidget(Author, field="code__iexact"),
+    )
     nature = fields.Field(
         column_name="nature",
         attribute="nature",
         widget=DocumentNatureWidget(DocumentNature, field="code"),
-    )
-    work_frbr_uri = fields.Field(
-        column_name="work_frbr_uri",
-        attribute="work_fbr_uri",
-        widget=CharRequiredWidget(field="work_frbr_uri"),
     )
     authors = fields.Field(
         column_name="authors",
@@ -385,10 +398,7 @@ class GenericDocumentResource(BaseDocumentResource):
         "date",
         "jurisdiction",
         "language",
-        "nature",
-        "source_url",
         "title",
-        "work_frbr_uri",
     )
 
     class Meta(BaseDocumentResource.Meta):
@@ -428,14 +438,22 @@ class JudgmentResource(BaseDocumentResource):
     court = fields.Field(
         column_name="court",
         attribute="court",
-        widget=ForeignKeyWidget(Court, field="code"),
+        widget=ForeignKeyRequiredWidget(Court, field="code"),
     )
     registry = fields.Field(
         column_name="registry",
         attribute="registry",
         widget=ForeignKeyWidget(CourtRegistry, field="code"),
     )
-    case_numbers = fields.Field(column_name="case_numbers", widget=CharWidget)
+    case_number_numeric = fields.Field(
+        column_name="case_number_numeric", widget=CharWidget
+    )
+    case_number_year = fields.Field(column_name="case_number_year", widget=CharWidget)
+    case_string_override = fields.Field(
+        column_name="case_string_override", widget=CharWidget
+    )
+    matter_type = fields.Field(column_name="matter_type", widget=CharWidget)
+
     order_outcome = fields.Field(
         column_name="order_outcome",
         attribute="order_outcome",
@@ -462,14 +480,16 @@ class JudgmentResource(BaseDocumentResource):
 
         if row.get("case_number_numeric"):
             case_number_numeric = [
-                int(float(n)) for n in str(row["case_number_numeric"]).split("|")
+                int(float(n)) if n else None
+                for n in str(row["case_number_numeric"]).split("|")
             ]
             values.append(case_number_numeric)
             keys.append("number")
 
         if row.get("case_number_year"):
             case_number_year = [
-                int(float(n)) for n in str(row["case_number_year"]).split("|")
+                int(float(n)) if n else None
+                for n in str(row["case_number_year"]).split("|")
             ]
             values.append(case_number_year)
             keys.append("year")
@@ -482,8 +502,10 @@ class JudgmentResource(BaseDocumentResource):
         if row.get("matter_type"):
             matter_type = row["matter_type"].split("|")
             matter_types = [
-                MatterType.objects.get_or_create(name=m)[0] for m in matter_type
+                MatterType.objects.get_or_create(name=m)[0] if m else None
+                for m in matter_type
             ]
+
             keys.append("matter_type")
             values.append(matter_types)
 
@@ -508,23 +530,47 @@ class JudgmentResource(BaseDocumentResource):
 
             judgment.save()
 
-            if row.get("alternative_names"):
-                for alt_citation in str(row["alternative_names"]).split("|"):
-                    obj, _ = AlternativeName.objects.get_or_create(
-                        document=judgment, title=alt_citation
-                    )
-
             if row.get("media_summary_file"):
                 self.download_attachment(
                     row["media_summary_file"], judgment, "Media summary"
                 )
 
+    def get_case_number_attributes(self, judgment, attribute):
+        values = []
+        for case_number in judgment.case_numbers.all().order_by(
+            "year", "number", "string_override"
+        ):
+            val = getattr(case_number, attribute)
+            values.append(f"{val or ''}")
+
+        return "|".join(values)
+
+    def dehydrate_case_number_numeric(self, judgment):
+        return self.get_case_number_attributes(judgment, "number")
+
+    def dehydrate_case_number_year(self, judgment):
+        return self.get_case_number_attributes(judgment, "year")
+
+    def dehydrate_case_string_override(self, judgment):
+        return self.get_case_number_attributes(judgment, "string_override")
+
+    def dehydrate_matter_type(self, judgment):
+        values = []
+        for case_number in judgment.case_numbers.all().order_by(
+            "year", "number", "string_override"
+        ):
+            if getattr(case_number, "matter_type"):
+                values.append(case_number.matter_type.name)
+            else:
+                values.append("")
+
+        return "|".join(values)
+
 
 class ArticleAuthorWidget(ForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
-            raise ValidationError("author is required")
-        author = value
+            raise ValueError("author is required")
         first_name, *last_name = value.split()
         author, _ = self.model.objects.get_or_create(
             username=slugify(value),

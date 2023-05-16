@@ -3,6 +3,8 @@
 import { TOCItemType } from './types-and-interfaces';
 
 export function scrollToElement (elem: HTMLElement, callback: (element: HTMLElement) => void = () => false, offset: number = 0) {
+  if (window.IntersectionObserver === undefined) return;
+
   // Setup intersection observer
   const observer = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {

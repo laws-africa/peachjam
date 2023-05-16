@@ -5,6 +5,10 @@ on:
     branches:
       - l10n_main
 
+concurrency:
+  group: ${{ github.action }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest

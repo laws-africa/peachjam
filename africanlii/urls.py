@@ -29,5 +29,30 @@ urlpatterns = [
         views.MemberStateDetailView.as_view(),
         name="member_state_detail_view",
     ),
+    path(
+        "indexes/",
+        views.DocIndexesListView.as_view(),
+        name="doc_index_list",
+    ),
+    path(
+        "indexes/<slug:topic>",
+        views.DocIndexFirstLevelView.as_view(),
+        name="doc_index_first_level",
+    ),
+    path(
+        "indexes/<slug:topic>/<slug:child>",
+        views.DocIndexDetailView.as_view(),
+        name="doc_index_detail",
+    ),
+    path(
+        "taxonomy/<slug:topic>",
+        views.CustomTaxonomyFirstLevelView.as_view(),
+        name="first_level_taxonomy_list",
+    ),
+    path(
+        "taxonomy/<slug:topic>/<slug:child>",
+        views.CustomTaxonomyDetailView.as_view(),
+        name="taxonomy_detail",
+    ),
     path("", include("peachjam.urls")),
 ]

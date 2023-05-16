@@ -21,6 +21,10 @@ class RankField(fields.DEDField, RankFeature):
 class SearchableDocument(Document):
     doc_type = fields.KeywordField()
     title = fields.TextField()
+    # title field for sorting and alphabetical listing
+    title_keyword = fields.KeywordField(attr="title")
+    # title and citations combined to allow searching that overlaps those fields
+    title_expanded = fields.TextField()
     date = fields.DateField()
     year = fields.KeywordField(attr="date.year")
     citation = fields.TextField()
@@ -35,6 +39,7 @@ class SearchableDocument(Document):
     alternative_names = fields.TextField()
     created_at = fields.DateField()
     updated_at = fields.DateField()
+    taxonomies = fields.KeywordField()
 
     # Judgment
     matter_type = fields.KeywordField(attr="matter_type.name")
@@ -145,6 +150,24 @@ class SearchableDocument(Document):
                         pages.append({"page_num": i, "body": page})
                 return pages
 
+    def prepare_taxonomies(self, instance):
+        """Taxonomy topics are stored as slugs of all the items in the tree down to that topic. This is easier than
+        storing and querying hierarchical taxonomy entries."""
+        # get all the ancestors of each topic
+        topics = list(instance.taxonomies.all())
+        topics = [t.topic for t in topics] + [
+            a for t in topics for a in t.topic.get_ancestors()
+        ]
+        return list({t.slug for t in topics})
+
+    def prepare_title_expanded(self, instance):
+        # combination of the title, citation and alternative names
+        parts = [instance.title]
+        if instance.citation and instance.citation != instance.title:
+            parts.append(instance.citation)
+        parts.extend([a.title for a in instance.alternative_names.all()])
+        return " ".join(parts)
+
     def get_index_for_language(self, lang):
         if lang in ANALYZERS:
             return f"{self._index._name}_{lang}"
@@ -171,6 +194,18 @@ ANALYZERS = {
     "fra": "french",
     "por": "portuguese",
 }
+
+
+def get_search_indexes(base_index):
+    return (
+        [base_index]
+        + [f"{base_index}_{lang}" for lang in ANALYZERS.keys()]
+        + [
+            f"{i}_{lang}"
+            for i in settings.EXTRA_SEARCH_INDEXES
+            for lang in ANALYZERS.keys()
+        ]
+    )
 
 
 def setup_language_indexes():

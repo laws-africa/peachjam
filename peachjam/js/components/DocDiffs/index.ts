@@ -22,12 +22,16 @@ class DocDiffsManager {
 
   async loadProvisions () {
     const url = `${getBaseUrl()}/e/changed-provisions${this.frbrExpressionUri}`;
-    const response = await fetch(url);
-    if (response.ok) {
+    let response = null;
+    try {
+      response = await fetch(url);
+    } catch (e) {
+      // don't bubble the exception up
+    }
+
+    if (response && response.ok) {
       const { provisions = [] } = await response.json();
       this.decorateChangedProvisions(provisions);
-    } else {
-      throw new Error(response.statusText);
     }
   }
 

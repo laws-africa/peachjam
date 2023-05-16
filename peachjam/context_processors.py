@@ -11,7 +11,9 @@ def general(request):
         "DEBUG": settings.DEBUG,
         "APP_NAME": settings.PEACHJAM["APP_NAME"],
         "SUPPORT_EMAIL": settings.PEACHJAM["SUPPORT_EMAIL"],
-        "SENTRY_DSN_KEY": settings.PEACHJAM["SENTRY_DSN_KEY"],
-        "SENTRY_ENVIRONMENT": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
+        "SENTRY_CONFIG": {
+            "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],
+            "environment": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
+        },
         "PEACHJAM_SETTINGS": pj_settings(),
     }

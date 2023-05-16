@@ -225,7 +225,7 @@ class DocumentForm(forms.ModelForm):
                     data["frbr_uri_date"] = parse_date(
                         DateSelectorWidget().value_from_datadict(data, None, "date")
                     ).strftime("%Y-%m-%d")
-                except ValueError:
+                except (ValueError, AttributeError):
                     pass
 
         super().__init__(data, *args, **kwargs)
