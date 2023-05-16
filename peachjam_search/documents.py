@@ -53,7 +53,7 @@ class SearchableDocument(Document):
     order_outcome = fields.KeywordField(attr="order_outcome.name")
 
     # GenericDocument, LegalInstrument
-    authors = fields.TextField()
+    authors = fields.KeywordField()
     nature = fields.KeywordField(attr="nature.name")
 
     ranking = RankField(attr="work.ranking")
