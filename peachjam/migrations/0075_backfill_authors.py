@@ -5,7 +5,7 @@ from django.db import migrations
 
 def backfill_authors(apps, schema_editor):
     CoreDocument = apps.get_model("peachjam", "CoreDocument")
-    for doc in CoreDocument.objects.all().iterator(chunk_size=100):
+    for doc in CoreDocument.objects.only('author').all().iterator(chunk_size=100):
         if doc.author not in doc.authors:
             doc.authors.append(doc.author)
             doc.save()
