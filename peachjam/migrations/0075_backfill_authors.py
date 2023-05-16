@@ -4,11 +4,19 @@ from django.db import migrations
 
 
 def backfill_authors(apps, schema_editor):
-    CoreDocument = apps.get_model("peachjam", "CoreDocument")
-    for doc in CoreDocument.objects.only('author').all().iterator(chunk_size=100):
-        if doc.author not in doc.authors:
-            doc.authors.append(doc.author)
-            doc.save()
+    LegalInstrument = apps.get_model("peachjam", "LegalInstrument")
+    for legal_instrument in (
+        LegalInstrument.objects.only("author").all().iterator(chunk_size=100)
+    ):
+        legal_instrument.authors.set([legal_instrument.author])
+        legal_instrument.save()
+
+    GenericDocument = apps.get_model("peachjam", "GenericDocument")
+    for generic_document in (
+        GenericDocument.objects.only("author").all().iterator(chunk_size=100)
+    ):
+        generic_document.authors.set([generic_document.author])
+        generic_document.save()
 
 
 class Migration(migrations.Migration):
