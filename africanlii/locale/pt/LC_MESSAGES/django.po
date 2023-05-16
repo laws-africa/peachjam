@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-13 09:08+0200\n"
-"PO-Revision-Date: 2023-03-28 08:34\n"
+"PO-Revision-Date: 2023-05-16 07:12\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -23,21 +23,19 @@ msgstr "Órgão Regional"
 
 #: models/au.py:13
 msgid "author"
-msgstr ""
+msgstr "autor"
 
 #: models/au.py:16 models/au.py:32 models/au.py:47
 msgid "profile"
-msgstr ""
+msgstr "perfil"
 
 #: models/au.py:29
 msgid "locality"
-msgstr ""
+msgstr "localidade"
 
 #: models/au.py:36
-#, fuzzy
-#| msgid "Regional Economic Communities"
 msgid "Regional economic communities"
-msgstr "Comunidades Económicas Regionais"
+msgstr "Comunidades econômicas regionais"
 
 #: models/au.py:44 models/ratification.py:42
 msgid "country"
@@ -84,44 +82,40 @@ msgid "ratification countries"
 msgstr "países ratificados"
 
 #: templates/africanlii/_ratification_table.html:5
-#, fuzzy
-#| msgid "ratification date"
 msgid "Ratification Title"
-msgstr "data da ratificação"
+msgstr "Título de Ratificação"
 
 #: templates/africanlii/_ratification_table.html:6
-#, fuzzy
-#| msgid "ratification date"
 msgid "Ratification Date"
-msgstr "data da ratificação"
+msgstr "Data de ratificação"
 
 #: templates/africanlii/au_detail_page.html:4
 #: templates/africanlii/au_detail_page.html:11
 #: templates/peachjam/_header.html:66
 msgid "African Union (AU)"
-msgstr ""
+msgstr "União Africana (UA)"
 
 #: templates/africanlii/au_detail_page.html:14
 msgid "The African Union (AU) is a continental body that comprises 55 countries in Africa, with its headquarters located in Addis Ababa, Ethiopia. It serves as a platform for its member states to collectively address the challenges they face, including peace and security, socio-economic development, and governance and human rights."
-msgstr ""
+msgstr "A União Africana (UA) é um órgão continental que compreende 55 países da África, com sede em Adis Abeba, na Etiópia. Ele serve como uma plataforma para seus estados membros abordarem coletivamente os desafios que enfrentam, incluindo paz e segurança, desenvolvimento socioeconômico, governança e direitos humanos."
 
 #: templates/africanlii/au_detail_page.html:19
 msgid "The AU was established in 2002 as a successor to the Organisation of African Unity (OAU), with the aim of accelerating the process of integration in the continent to enable it to play its rightful role in the global economy, while also addressing multifaceted social, economic and political problems."
-msgstr ""
+msgstr "A UA foi criada em 2002 como sucessora da Organização da Unidade Africana (OUA), com o objetivo de acelerar o processo de integração no continente para permitir que desempenhe seu papel legítimo na economia global, ao mesmo tempo em que aborda questões sociais multifacetadas, problemas econômicos e políticos."
 
 #: templates/africanlii/au_detail_page.html:24
 msgid "Key initiatives of the AU include the African Continental Free Trade Area (AfCFTA) agreement, aiming to create a single market for goods and services across the continent, and Agenda 2063, a strategic framework for the socio-economic transformation of the continent over the next 50 years."
-msgstr ""
+msgstr "As principais iniciativas da UA incluem o acordo da Área de Livre Comércio Continental Africana (AfCFTA), com o objetivo de criar um mercado único para bens e serviços em todo o continente, e a Agenda 2063, uma estrutura estratégica para a transformação socioeconômica do continente nos próximos 50 anos."
 
 #: templates/africanlii/au_detail_page.html:29
 msgid "For more information, visit the <a href=\"https://au.int/\" target=\"_blank\" rel=\"noreferrer noopener\">official African Union website</a> and the <a href=\"https://au.int/agenda2063/overview\">Agenda 2063 portal.</a>"
-msgstr ""
+msgstr "Para mais informações, visite o <a href=\"https://au.int/\" target=\"_blank\" rel=\"noreferrer noopener\">site oficial da União Africana</a> e o <a href=\"https://au.int/agenda2063/overview\">portal da Agenda 2063.</a>"
 
 #: templates/africanlii/au_detail_page.html:38
 #: templates/africanlii/au_organ_detail.html:12
 #: templates/peachjam/_header.html:72 templates/peachjam/home.html:43
 msgid "African Union Organs"
-msgstr ""
+msgstr "Órgãos da União Africana"
 
 #: templates/africanlii/au_detail_page.html:48
 #: templates/africanlii/regional_economic_community_detail.html:12
@@ -132,21 +126,19 @@ msgstr "Comunidades Económicas Regionais"
 #: templates/africanlii/au_detail_page.html:67
 #: templates/africanlii/member_state_detail.html:12
 msgid "Member States"
-msgstr ""
+msgstr "Estados Membros"
 
 #: templates/africanlii/au_organ_detail.html:9
 #: templates/africanlii/member_state_detail.html:9
 #: templates/africanlii/regional_economic_community_detail.html:9
-#, fuzzy
-#| msgid "European Union"
 msgid "African Union"
-msgstr "União Europeia"
+msgstr "União Africana"
 
 #: templates/africanlii/au_organ_detail.html:37
 #: templates/africanlii/member_state_detail.html:37
 #: templates/africanlii/regional_economic_community_detail.html:38
 msgid "No documents found."
-msgstr ""
+msgstr "Nenhum documento encontrado."
 
 #: templates/peachjam/_footer.html:6
 msgid "About AfricanLII"
@@ -157,10 +149,8 @@ msgid "AfricanLII is an open-access research platform for African law jointly op
 msgstr "AfricanLII é uma plataforma de investigação de acesso aberto para o direito africano, gerida conjuntamente pelo programa AfricanLII da Universidade da Cidade do Cabo e das Leias. Africano LII publica a lei e a política da União Africana e federa busca em toda a legislação nacional africana de acesso aberto disponível através da <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Comunidade de Direito Aberto África</a> de LIIs."
 
 #: templates/peachjam/_footer.html:17
-#, fuzzy
-#| msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
 msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
-msgstr "A publicação do material da União Africana é co-patrocinada pela União Europeia e faz parte do <a class=\"text-primary\" href=\"https://www.afrobarometer.org/impact/informing-the-public-discourse/data-for-governance-alliance/\" target=\"_blank\" rel=\"noreferrer\">projeto da Aliança de Dados para a Governação</a>."
+msgstr "A publicação do material da União Africana é co-patrocinada pela União Europeia e faz parte do <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">projeto da Aliança de Dados para a Governação</a>."
 
 #: templates/peachjam/_footer.html:23
 msgid "Terms of Use"
@@ -221,17 +211,15 @@ msgstr "Gazettes oficiais da comunidade económica regional."
 
 #: templates/peachjam/_header.html:73
 msgid "African Union (AU) Organs"
-msgstr ""
+msgstr "Órgãos da União Africana (UA)"
 
 #: templates/peachjam/_header.html:78 templates/peachjam/_header.html:79
-#, fuzzy
-#| msgid "Regional Economic Communities"
 msgid "Regional Economic Communities (RECs)"
-msgstr "Comunidades Económicas Regionais"
+msgstr "Comunidades Económicas Regionais (CERs)"
 
 #: templates/peachjam/_header.html:84 templates/peachjam/_header.html:85
 msgid "Member states"
-msgstr ""
+msgstr "Estados membros"
 
 #: templates/peachjam/_header.html:93
 msgid "Topics"
@@ -322,10 +310,9 @@ msgid "We digitise the law and policy of the African Governance Architecture and
 msgstr "Digitalizamos a lei e a política da Arquitetura da Governação Africana e ajudamos os Africanos e o mundo a ligarem-se e a compreenderem a agenda da União Africana."
 
 #: templates/peachjam/home.html:16
-#, fuzzy, python-format
-#| msgid "Search through %(documents_count)s AU documents on the AfricanLII platform."
+#, python-format
 msgid "Search through %(documents_count)s African Union documents on the AfricanLII platform."
-msgstr "Procure por %(documents_count)s documentos da UA na plataforma AfricanLII."
+msgstr "Pesquise %(documents_count)s documentos da União Africana na plataforma AfricanLII."
 
 #: templates/peachjam/home.html:25 templates/peachjam/home.html:26
 #, python-format
@@ -346,11 +333,11 @@ msgstr "Tribunais Regionais"
 
 #: templates/peachjam/home.html:75
 msgid "African Union Member States"
-msgstr ""
+msgstr "Estados Membros da União Africana"
 
 #: templates/peachjam/home.html:80
 msgid "Explore Member States"
-msgstr ""
+msgstr "Explorar Estados Membros"
 
 #: templates/peachjam/home.html:87
 msgid "Recent Judgments"
@@ -399,7 +386,5 @@ msgstr "Relatórios e guias"
 
 #: templates/peachjam_search/search.html:5
 msgid "Search regional and national African legal information."
-msgstr ""
+msgstr "Pesquise informações legais africanas regionais e nacionais."
 
-#~ msgid "Regional Bodies"
-#~ msgstr "Órgãos Regionais"
