@@ -149,7 +149,7 @@ class PeachjamViewsTest(TestCase):
             response.context["document"].expression_frbr_uri,
             "/akn/aa-au/act/charter/2007/elections-democracy-and-governance/eng@2007-01-30",
         )
-        self.assertTrue(hasattr(response.context["document"], "author"))
+        self.assertTrue(hasattr(response.context["document"], "authors"))
 
     def test_generic_document_listing(self):
         response = self.client.get("/doc/")
