@@ -36,7 +36,7 @@ class GazetteAdapter(Adapter):
             .using("gazettes_africa")
         )
         # start building queryset for deleted gazettes
-        deleted_qs = Gazette.objects.filter(jurisdiction=self.jurisdiction)
+        deleted_qs = Gazette.objects
 
         if "-" not in self.jurisdiction:
             # locality code not specified hence None e.g "ZA"
@@ -48,6 +48,7 @@ class GazetteAdapter(Adapter):
             )
         else:
             updated_qs = updated_qs.filter(jurisdiction=self.jurisdiction.split("-")[0])
+            deleted_qs = deleted_qs.filter(jurisdiction=self.jurisdiction.split("-")[0])
 
             # locality code present e.g. "ZA-gp"
             if self.jurisdiction.split("-")[1] != "*":
