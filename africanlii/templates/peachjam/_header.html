@@ -57,6 +57,36 @@
       </li>
     </ul>
   </li>
+  <li class="nav-item dropdown main-nav">
+    <a class="nav-link {% if view.navbar_link == 'au' %} active{% endif %}  dropdown-toggle"
+       href="#"
+       role="button"
+       data-bs-toggle="dropdown"
+       aria-expanded="false">
+      {% trans 'African Union (AU)' %}
+    </a>
+    <ul class="dropdown-menu">
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if view.navbar_link == 'au' %} active{% endif %} "
+           href="{% url 'au_detail_page' %}#au-organs">
+          {% trans 'African Union Organs' %}
+          <div class="dropdown-summary text-muted">{% trans 'African Union (AU) Organs' %}</div>
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link px-0 {% if view.navbar_link == 'au' %}active{% endif %}"
+           href="{% url 'au_detail_page' %}#rec">{% trans 'Regional Economic Communities (RECs)' %}
+          <div class="dropdown-summary text-muted">{% trans 'Regional Economic Communities (RECs)' %}</div>
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link px-0 {% if view.navbar_link == 'au' %}active{% endif %}"
+           href="{% url 'au_detail_page' %}#member-states">{% trans 'Member states' %}
+          <div class="dropdown-summary text-muted">{% trans 'Member states' %}</div>
+        </a>
+      </li>
+    </ul>
+  </li>
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'taxonomy' %}active{% endif %}"
        href="{% url 'top_level_taxonomy_list' %}">

@@ -23,8 +23,10 @@ class PlaceDetailView(FilteredDocumentListView):
         return super().get(request, code, *args, **kwargs)
 
     def get_base_queryset(self):
-        return self.model.objects.prefetch_related("work").filter(
-            jurisdiction=self.country, locality=self.locality
+        return (
+            super()
+            .get_base_queryset()
+            .filter(jurisdiction=self.country, locality=self.locality)
         )
 
     def get_context_data(self, **kwargs):

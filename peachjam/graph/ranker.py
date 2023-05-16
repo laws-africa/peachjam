@@ -117,5 +117,5 @@ class GraphRanker:
             SearchableDocument._index._get_connection(),
             actions,
             chunk_size=1000,
-            request_timeout=60,
+            request_timeout=60 * 60 * 30,
         )

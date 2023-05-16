@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-11 14:05+0300\n"
+"POT-Creation-Date: 2023-05-13 09:08+0200\n"
 "PO-Revision-Date: 2023-03-28 08:34\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -684,7 +684,11 @@ msgstr "Rótulo de legislação subsidiária"
 msgid "google analytics id"
 msgstr "identificação do google analytics"
 
-#: models/settings.py:52
+#: models/settings.py:51
+msgid "pagerank boost value"
+msgstr ""
+
+#: models/settings.py:55
 msgid "site settings"
 msgstr "configurações do site"
 
@@ -988,7 +992,7 @@ msgstr "Data da Assinatura"
 
 #: templates/peachjam/_recent_document_list.html:14
 #: templates/peachjam/court_detail.html:35
-#: templates/peachjam/layouts/document_list.html:57
+#: templates/peachjam/layouts/document_list.html:59
 msgid "No documents found."
 msgstr "Nenhum documento encontrado."
 
@@ -1465,7 +1469,7 @@ msgstr "%(n_relationships)s documentos relacionados"
 msgid "Documents"
 msgstr "Documentos"
 
-#: templates/peachjam/layouts/document_list.html:41
+#: templates/peachjam/layouts/document_list.html:42
 msgid "Filters"
 msgstr "Filtros"
 
