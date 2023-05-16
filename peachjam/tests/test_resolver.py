@@ -18,8 +18,8 @@ class TestRedirectResolver(TestCase):
     def test_resolver_africanlii(self):
         resolver = RedirectResolver("africanlii")
         domains = [
-            "new.zambialii.org",
-            "new.ulii.org",
+            "zambialii.org",
+            "ulii.org",
             "lawlibrary.org.za",
             "lawlibrary.org.za",
             "new.tanzlii.org",
@@ -38,8 +38,8 @@ class TestRedirectResolver(TestCase):
         resolver = RedirectResolver("zanzibarlii")
 
         domains = [
-            "new.zambialii.org",
-            "new.ulii.org",
+            "zambialii.org",
+            "ulii.org",
             "lawlibrary.org.za",
             "lawlibrary.org.za",
             "new.tanzlii.org",
@@ -57,8 +57,8 @@ class TestRedirectResolver(TestCase):
         resolver = RedirectResolver("tanzlii")
 
         domains = [
-            "new.zambialii.org",
-            "new.ulii.org",
+            "zambialii.org",
+            "ulii.org",
             "lawlibrary.org.za",
             "lawlibrary.org.za",
             None,
