@@ -8121,14 +8121,14 @@
     },
     {
         "fields": {
-            "author": []
+            "authors": []
         },
         "model": "peachjam.legalinstrument",
         "pk": 5519
     },
     {
         "fields": {
-            "author": []
+            "authors": []
         },
         "model": "peachjam.legalinstrument",
         "pk": 2071
