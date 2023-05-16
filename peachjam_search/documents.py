@@ -53,7 +53,7 @@ class SearchableDocument(Document):
     order_outcome = fields.KeywordField(attr="order_outcome.name")
 
     # GenericDocument, LegalInstrument
-    authors = fields.KeywordField(attr="authors.name")
+    authors = fields.TextField()
     nature = fields.KeywordField(attr="nature.name")
 
     ranking = RankField(attr="work.ranking")
@@ -123,6 +123,10 @@ class SearchableDocument(Document):
     def prepare_attorneys(self, instance):
         if instance.doc_type == "judgment":
             return [a.name for a in instance.attorneys.all()]
+
+    def prepare_authors(self, instance):
+        if hasattr(instance, "authors"):
+            return [a.name for a in instance.authors.all()]
 
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""
