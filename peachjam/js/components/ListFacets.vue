@@ -142,11 +142,6 @@ export default {
           title: this.$t('Court registry')
         },
         {
-          name: 'attorneys',
-          type: 'checkboxes',
-          title: this.$t('Attorneys')
-        },
-        {
           name: 'docTypes',
           type: 'radio',
           title: this.$t('Document type')
@@ -185,6 +180,11 @@ export default {
           name: 'alphabet',
           type: 'letter-radio',
           title: this.$t('Alphabetical')
+        },
+        {
+          name: 'attorneys',
+          type: 'checkboxes',
+          title: this.$t('Attorneys')
         }
       ];
 
