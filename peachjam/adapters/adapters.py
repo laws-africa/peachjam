@@ -338,7 +338,7 @@ class IndigoAdapter(Adapter):
     def get_content_html(self, document):
         if document["stub"]:
             return None
-        return self.client_get(document["url"] + ".html").text
+        return self.client_get(document["url"] + ".html?resolver=none").text
 
     def get_toc_json(self, url):
         def remove_subparagraph(d):
