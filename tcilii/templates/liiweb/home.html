@@ -1,15 +1,19 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
 {% block hero-logos %}
-  <div class="d-flex justify-content-between">
-    <img height="26"
+  <div class="col-sm-auto p-3">
+    <img height="80"
          class="me-4"
          src="{% static 'images/africanlii-logo.svg' %}"
          alt="africanlii-logo"/>
-    <img height="26"
+  </div>
+  <div class="col-sm-auto p-3">
+    <img height="80"
          src="{% static 'images/laws-africa-logo.png' %}"
          alt="laws-logo"/>
-    <img height="26" src="{% static 'images/tci-logo.png' %}" alt="tci-logo"/>
+  </div>
+  <div class="col-sm-auto p-3">
+    <img height="80" src="{% static 'images/tci-logo.png' %}" alt="tci-logo"/>
   </div>
 {% endblock %}
 {% block hero-headings %}
@@ -51,20 +55,6 @@
     <div class="my-2">
       <a href="https://judicial.tc/procedures/going-to-court/">{% trans "Jury Information" %}</a>
     </div>
-  </div>
-{% endblock %}
-{% block second-col-logos %}
-  <div class="d-flex justify-content-between mb-4 mb-lg-4">
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/africanlii-logo.svg' %}"
-         alt="africanlii-logo"/>
-    <img height="26"
-         src="{% static 'images/laws-africa-logo.png' %}"
-         alt="laws-logo"/>
-    <img height="26"
-         src="{% static 'images/tci-logo.png' %}"
-         alt="indigo-logo"/>
   </div>
 {% endblock %}
 {% block facebook-url %}
