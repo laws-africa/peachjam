@@ -93,9 +93,11 @@ class SourceFileWidget(CharWidget):
                             file.seek(0)
                             attempt += 1
                             try:
+                                logger.info(
+                                    f"converting file from {source_url} to html (attempt {attempt})"
+                                )
                                 soffice_convert(file, suffix, "html")
-                                if attempt > 1:
-                                    logger.info(f"soffice success on attempt {attempt}")
+                                logger.info(f"soffice success on attempt {attempt}")
                                 break
                             except SOfficeError as e:
                                 logger.warning(
