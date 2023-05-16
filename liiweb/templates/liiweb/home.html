@@ -11,7 +11,7 @@
            alt="{{ APP_NAME }}"
            height="40"/>
     {% endblock %}
-    <div class="hero__content d-block">
+    <div class="hero__content">
       <div class="row">
         <div class="col-lg-8 col-12">
           {% block hero-content %}
@@ -22,48 +22,41 @@
     </div>
   </section>
   <section class="mt-5 mb-2">
-    <div class="justify-content-center d-flex">
+    <div class="container">
       {% block hero-search %}
-        <div class=" col-lg-8">
-          <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
-            <input type="text"
-                   class="form-control form-control-lg flex-grow-1"
-                   placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                   aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                   aria-describedby="button-addon2"
-                   autofocus=""
-                   name="q"/>
-            <input type="submit"
-                   class="btn btn-primary ms-2"
-                   value="{% trans 'Search' %}"/>
-          </form>
-          <div class="mb-2">
-            <a href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
+        <div class="row justify-content-center">
+          <div class="col col-md-10 col-lg-8">
+            <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
+              <input type="text"
+                     class="form-control form-control-lg flex-grow-1"
+                     placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                     aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                     aria-describedby="button-addon2"
+                     autofocus=""
+                     name="q"/>
+              <input type="submit"
+                     class="btn btn-primary ms-2"
+                     value="{% trans 'Search' %}"/>
+            </form>
+            <div class="mb-2">
+              <a href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
+            </div>
           </div>
         </div>
       {% endblock %}
     </div>
   </section>
   <section class="mt-2">
-    <div class="container justify-content-center">
-      <div class="row justify-content-center">
+    <div class="container">
+      <div class="row justify-content-center hero-logos mt-5 mb-3">
         {% block hero-logos %}
-          <div class="col-sm-auto p-3">
-            <img height="60"
-                 class="me-4"
-                 src="{% static 'images/africanlii-logo.svg' %}"
-                 alt="africanlii-logo"/>
-          </div>
-          <div class="col-sm-auto p-3">
-            <img height="60"
-                 src="{% static 'images/laws-africa-logo.png' %}"
-                 alt="laws-logo"/>
-          </div>
+          <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
+          <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
         {% endblock %}
       </div>
     </div>
   </section>
-  <section class="pb-5 pt-5">
+  <section class="py-5">
     <div class="container">
       <div class="row">
         <div class="col-12 col-lg-9">
