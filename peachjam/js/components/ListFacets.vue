@@ -58,6 +58,10 @@ export default {
       type: Array,
       default: () => []
     },
+    jurisdictions: {
+      type: Array,
+      default: () => []
+    },
     localities: {
       type: Array,
       default: () => []
@@ -161,6 +165,11 @@ export default {
           name: 'order_outcomes',
           type: 'checkboxes',
           title: this.$t('Order')
+        },
+        {
+          name: 'jurisdictions',
+          type: 'checkboxes',
+          title: this.$t('Jurisdiction')
         },
         {
           name: 'years',

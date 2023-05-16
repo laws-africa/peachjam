@@ -3,5 +3,10 @@
   <div class="list-group-item taxonomy-tree-list-group__header">
     <strong>{{ first_level_taxonomy }}</strong>
   </div>
-  <div class="list-group-item taxonomy-tree-list-group__body">{% include "peachjam/_taxonomy_tree.html" %}</div>
+  <div class="list-group-item taxonomy-tree-list-group__body">
+    <div data-component="TaxonomyTree"
+         data-root-slug="{{ root_taxonomy }}"
+         data-prefix="{{ taxonomy_link_prefix|default:"taxonomy" }}">
+    </div>
+  </div>
 </div>

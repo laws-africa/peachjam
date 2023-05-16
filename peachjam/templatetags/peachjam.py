@@ -5,6 +5,7 @@ from django import template
 from django.core.paginator import Paginator
 from django.http import QueryDict
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -82,11 +83,21 @@ def user_name(user):
 
 
 @register.simple_tag
-def build_taxonomy_url(item):
-    items = [item.slug]
-    item = item.get_parent()
-    while item:
-        items.insert(0, item.slug)
-        item = item.get_parent()
+def build_taxonomy_url(item, prefix="taxonomy"):
+    items = []
+    root = item.get_root()
+    if root != item:
+        items.append(root.slug)
+    items.append(item.slug)
+    return f"/{prefix}/" + "/".join(items)
 
-    return "/taxonomy/" + "/".join(items)
+
+@register.simple_tag
+def jurisdiction_icon(doc):
+    code = doc.expression_frbr_uri.split("/")[2].split("-")[0]
+    if code == "aa":
+        return mark_safe(
+            '<img style="width:1.33333em; vertical-align: baseline" alt="African Union Icon" '
+            'src="/static/images/au_icon.png">'
+        )
+    return mark_safe(f'<span class ="fi fi-{code}"></span>')

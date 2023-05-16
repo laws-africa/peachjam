@@ -39,6 +39,8 @@ jobs:
         git_push_flags: '--force'
 
   deploy-senlii:
+    if: ${{ always() }}
+    needs: deploy-eswatinilii
     name: Deploy to senlii
     runs-on: ubuntu-latest
     steps:
@@ -88,8 +90,6 @@ jobs:
           git_push_flags: '--force'
 
   deploy-malawilii:
-    if: ${{ always() }}
-    needs: deploy-senlii
     name: Deploy to malawilii
     runs-on: ubuntu-latest
     steps:

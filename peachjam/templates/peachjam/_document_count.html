@@ -1,10 +1,8 @@
 {% load i18n %}
-{% if doc_count %}
-  <p class="text-muted mb-4">
-    {% blocktrans trimmed count doc_count=doc_count %}
-      {{ doc_count }} document
-    {% plural %}
-      {{ doc_count }} documents
-    {% endblocktrans %}
-  </p>
-{% endif %}
+<p class="text-muted mb-4">
+  {% blocktrans trimmed count doc_count=doc_count %}
+    {{ doc_count }} document
+  {% plural %}
+    {{ doc_count }} documents
+  {% endblocktrans %}
+</p>

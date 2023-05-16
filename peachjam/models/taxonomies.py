@@ -3,7 +3,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from treebeard.mp_tree import MP_Node
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, EntityProfile
 
 
 class Taxonomy(MP_Node):
@@ -17,6 +17,16 @@ class Taxonomy(MP_Node):
 
     def __str__(self):
         return self.name
+
+    def get_entity_profile(self):
+        """Get the entity profile for this taxonomy, starting with the current taxonomy and then
+        looking up the tree until one is found."""
+        entity_profile = EntityProfile.objects.filter(object_id=self.pk).first()
+        if entity_profile:
+            return entity_profile
+        if self.is_root():
+            return None
+        return self.get_parent().get_entity_profile()
 
     def save(self, *args, **kwargs):
         parent = self.get_parent()
