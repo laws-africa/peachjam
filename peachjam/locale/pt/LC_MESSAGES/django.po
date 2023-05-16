@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-13 09:08+0200\n"
-"PO-Revision-Date: 2023-03-28 08:34\n"
+"PO-Revision-Date: 2023-05-16 07:12\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -222,7 +222,7 @@ msgstr "Idiomas"
 
 #: models/core_document_model.py:87
 msgid "ranking"
-msgstr ""
+msgstr "classificação"
 
 #: models/core_document_model.py:90 models/core_document_model.py:230
 msgid "work"
@@ -317,10 +317,8 @@ msgid "updated at"
 msgstr "atualizado em"
 
 #: models/core_document_model.py:336
-#, fuzzy
-#| msgid "created at"
 msgid "created by"
-msgstr "criado em"
+msgstr "criado por"
 
 #: models/core_document_model.py:339
 msgid "allow robots"
@@ -493,11 +491,11 @@ msgstr "juízes"
 
 #: models/judgment.py:46
 msgid "order outcome"
-msgstr ""
+msgstr "resultado do pedido"
 
 #: models/judgment.py:47
 msgid "order outcomes"
-msgstr ""
+msgstr "resultados de pedidos"
 
 #: models/judgment.py:61 models/judgment.py:307
 msgid "matter type"
@@ -509,7 +507,7 @@ msgstr "tipos de assuntos"
 
 #: models/judgment.py:71 models/judgment.py:98
 msgid "order"
-msgstr ""
+msgstr "ordem"
 
 #: models/judgment.py:78 models/judgment.py:93
 msgid "court class"
@@ -686,7 +684,7 @@ msgstr "identificação do google analytics"
 
 #: models/settings.py:51
 msgid "pagerank boost value"
-msgstr ""
+msgstr "valor de aumento de classificação de página"
 
 #: models/settings.py:55
 msgid "site settings"
@@ -777,12 +775,10 @@ msgstr "Esqueceu-se da sua senha?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Efetuar Login com %(provider.name)s\n"
 "          "
 
@@ -1393,7 +1389,7 @@ msgstr "Registro do Tribunal"
 
 #: templates/peachjam/judgment_detail.html:39
 msgid "Order"
-msgstr ""
+msgstr "Ordem"
 
 #: templates/peachjam/judgment_detail.html:48
 msgid "Case number"
@@ -1436,10 +1432,8 @@ msgid "Alternative names"
 msgstr "Nomes alternativos"
 
 #: templates/peachjam/layouts/document_detail.html:187
-#, fuzzy
-#| msgid "court"
 msgid "Court"
-msgstr "tribunal"
+msgstr "Tribunal"
 
 #: templates/peachjam/layouts/document_detail.html:210
 msgid "Judgment date"
@@ -1524,3 +1518,4 @@ msgstr "Esta é a versão desta Act como era de %(date_from)s para %(date_to)s. 
 #, python-format
 msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr "Esta é a versão desta Act, como era de %(date_from)s para %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Leia a versão em vigor</a>."
+
