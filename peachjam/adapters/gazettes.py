@@ -43,6 +43,9 @@ class GazetteAdapter(Adapter):
             updated_qs = updated_qs.filter(
                 jurisdiction=self.jurisdiction, locality=None
             )
+            deleted_qs = deleted_qs.filter(
+                jurisdiction=self.jurisdiction, locality=None
+            )
         else:
             updated_qs = updated_qs.filter(jurisdiction=self.jurisdiction.split("-")[0])
 
