@@ -1,18 +1,10 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
 {% block hero-logos %}
-  <div class="d-flex justify-content-between">
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/africanlii-logo.svg' %}"
-         alt="africanlii-logo"/>
-    <img height="26"
-         src="{% static 'images/laws-africa-logo.png' %}"
-         alt="laws-logo"/>
-    <img height="26"
-         src="{% static 'images/judiciary_of_uganda_logo.png' %}"
-         alt="judiciary_of_uganda_logo"/>
-  </div>
+  <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
+  <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
+  <img src="{% static 'images/judiciary_uganda_logo.png' %}"
+       alt="judiciary_of_uganda_logo"/>
 {% endblock %}
 {% block hero-headings %}
   <h1 class="mb-4">{% trans 'Welcome to the Uganda Legal Information Institute' %}</h1>
@@ -31,21 +23,6 @@
       ULII publishes the laws of Uganda for free online access. ULII is part of the Law Reporting Committee of the Judiciary of Uganda.
     {% endblocktrans %}
   </p>
-{% endblock %}
-{% block second-col-logos %}
-  <div class="d-flex justify-content-between mb-4 mb-lg-4">
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/africanlii-logo.svg' %}"
-         alt="africanlii-logo"/>
-    <img height="26"
-         src="{% static 'images/laws-africa-logo.png' %}"
-         alt="laws-logo"/>
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/judiciary_of_uganda_logo.png' %}"
-         alt="judiciary_of_uganda_logo"/>
-  </div>
 {% endblock %}
 {% block facebook-url %}
   https://www.facebook.com/v7.0/plugins/page.php?adapt_container_width=true&amp;app_id=323754998056442&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fx%2Fconnect%2Fxd_arbiter%2F%3Fversion%3D46%23cb%3Dfff64532b89928%26domain%3Dlawlibrary.org.za%26is_canvas%3Dfalse%26origin%3Dhttps%253A%252F%252Flawlibrary.org.za%252Ff3480a77dff53bc%26relation%3Dparent.parent&amp;container_width=248&amp;height=400&amp;hide_cover=false&amp;href=https%3A%2F%2Fwww.facebook.com%2Fugandalii%2F&amp;locale=en_US&amp;sdk=joey&amp;show_facepile=false&amp;small_header=true&amp;tabs=timeline&amp;width=248

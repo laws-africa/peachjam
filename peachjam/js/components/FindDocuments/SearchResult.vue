@@ -24,9 +24,9 @@
         class="me-3"
       >{{ item.court }}</span>
       <span
-        v-if="item.author"
+        v-if="item.authors"
         class="me-3"
-      >{{ item.author }}</span>
+      >{{ item.authors }}</span>
     </div>
     <div v-if="item.citation && item.citation !== item.title">
       <i>{{ item.citation }}</i>
@@ -87,6 +87,12 @@ export default {
       } else {
         return `<span class="fi fi-${code}"></span>`;
       }
+    },
+    authors (item) {
+      if (item.authors) {
+        return Array.isArray(item.authors) ? ', '.join(item.authors) : item.authors;
+      }
+      return '';
     }
   }
 };

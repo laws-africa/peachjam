@@ -107,7 +107,7 @@ class BaseDocumentFilterForm(forms.Form):
         alphabet = self.cleaned_data.get("alphabet")
         authors = self.params.getlist("authors")
         courts = self.params.getlist("courts")
-        doc_types = self.params.getlist("docTypes")
+        doc_type = self.params.getlist("doc_type")
         judges = self.params.getlist("judges")
         natures = self.params.getlist("natures")
         localities = self.params.getlist("localities")
@@ -130,8 +130,8 @@ class BaseDocumentFilterForm(forms.Form):
         if courts and exclude != "courts":
             queryset = queryset.filter(court__name__in=courts)
 
-        if doc_types and exclude != "doc_type":
-            queryset = queryset.filter(doc_type__in=doc_types)
+        if doc_type and exclude != "doc_type":
+            queryset = queryset.filter(doc_type__in=doc_type)
 
         if judges and exclude != "judges":
             queryset = queryset.filter(judges__name__in=judges)
