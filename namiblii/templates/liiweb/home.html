@@ -1,22 +1,9 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
 {% block hero-logos %}
-  <div class="col-sm-auto p-3">
-    <img height="80"
-         class="me-4"
-         src="{% static 'images/africanlii-logo.svg' %}"
-         alt="africanlii-logo"/>
-  </div>
-  <div class="col-sm-auto p-3">
-    <img height="80"
-         src="{% static 'images/laws-africa-logo.png' %}"
-         alt="laws-logo"/>
-  </div>
-  <div class="col-sm-auto p-3">
-    <img height="80"
-         src="{% static 'images/lac_logo_full.jpg' %}"
-         alt="lac-logo"/>
-  </div>
+  <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
+  <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
+  <img src="{% static 'images/lac_logo_full.jpg' %}" alt="lac-logo"/>
 {% endblock %}
 {% block hero-headings %}
   <h1 class="mb-4">{% trans 'Welcome to the Namibia Legal Information Institute' %}</h1>
