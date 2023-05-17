@@ -12,7 +12,6 @@
   <meta property="og:type" content="book" />
   <meta property="book:release_date"
         content="{{ document.date|date:'Y-m-d' }}"/>
-  {% if document.author %}<meta property="book:author" content="{{ document.author }}" />{% endif %}
   {% if not document.allow_robots %}<meta name="robots" content="noindex" />{% endif %}
   <meta name="twitter:card" content="summary"/>
   <meta name="twitter:title" content="{{ document.title }}"/>
@@ -174,14 +173,23 @@
                         {% endwith %}
                       {% endblock %}
                       {% block document-metadata-content-author %}
-                        {% if document.author %}
-                          <dt>
-                            {{ document.author.model_label }}
-                          </dt>
-                          <dd class="text-muted">
-                            <a href="{% url 'author' document.author.code %}">{{ document.author }}</a>
-                          </dd>
-                        {% endif %}
+                        {% with document.authors.all as authors %}
+                          {% if authors %}
+                            <dt>
+                              {% if authors|length > 1 %}
+                                {{ authors.first.model_label_plural }}
+                              {% else %}
+                                {{ authors.first.model_label }}
+                              {% endif %}
+                            </dt>
+                            <dd class="text-muted">
+                              {% for author in authors %}
+                                <a href="{% url 'author' author.code %}">{{ author.name }}</a>
+                                {% if not forloop.last %},{% endif %}
+                              {% endfor %}
+                            </dd>
+                          {% endif %}
+                        {% endwith %}
                         {% if document.court %}
                           <dt>
                             {% trans 'Court' %}

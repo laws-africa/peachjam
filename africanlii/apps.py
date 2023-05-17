@@ -18,3 +18,4 @@ class AfricanliiConfig(AppConfig):
         citation_analyser.matchers.append(MncMatcher)
 
         Author.model_label = _("Regional Body")
+        Author.model_label_plural = _("Regional Bodies")

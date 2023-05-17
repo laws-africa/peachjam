@@ -364,6 +364,19 @@ class DocumentNatureWidget(ForeignKeyWidget):
             )[0]
 
 
+class ManyToManyFieldWidget(ManyToManyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+
+        # Remove extra white space around and in between the judges' or attorneys' names
+        if value:
+            items = [" ".join(j.split()) for j in value.split(self.separator)]
+
+            for item in items:
+                obj, _ = self.model.objects.get_or_create(name=item)
+            return self.model.objects.filter(name__in=items)
+        return []
+
+
 class GenericDocumentResource(BaseDocumentResource):
     author = fields.Field(
         attribute="author",
@@ -374,8 +387,14 @@ class GenericDocumentResource(BaseDocumentResource):
         attribute="nature",
         widget=DocumentNatureWidget(DocumentNature, field="code"),
     )
+    authors = fields.Field(
+        column_name="authors",
+        attribute="authors",
+        widget=ManyToManyFieldWidget(Author, separator="|", field="name"),
+    )
 
     required_fields = (
+        "authors",
         "date",
         "jurisdiction",
         "language",
@@ -400,19 +419,6 @@ class GenericDocumentResource(BaseDocumentResource):
             if frbr_uri.actor:
                 row["frbr_uri_actor"] = frbr_uri.actor
                 row["author"] = frbr_uri.actor
-
-
-class ManyToManyFieldWidget(ManyToManyWidget):
-    def clean(self, value, row=None, *args, **kwargs):
-
-        # Remove extra white space around and in between the judges' or attorneys' names
-        if value:
-            items = [" ".join(j.split()) for j in value.split(self.separator)]
-
-            for item in items:
-                obj, _ = self.model.objects.get_or_create(name=item)
-            return self.model.objects.filter(name__in=items)
-        return []
 
 
 class JudgmentResource(BaseDocumentResource):

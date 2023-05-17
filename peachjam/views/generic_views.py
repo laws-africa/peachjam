@@ -82,7 +82,7 @@ class FilteredDocumentListView(DocumentListView):
                     a
                     for a in self.form.filter_queryset(
                         self.get_base_queryset(), exclude="authors"
-                    ).values_list("author__name", flat=True)
+                    ).values_list("authors__name", flat=True)
                     if a
                 }
             )

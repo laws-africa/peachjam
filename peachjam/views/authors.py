@@ -14,8 +14,8 @@ class AuthorDetailView(FilteredDocumentListView):
             super()
             .get_base_queryset()
             .filter(
-                Q(genericdocument__author=self.author)
-                | Q(legalinstrument__author=self.author)
+                Q(genericdocument__authors__in=[self.author])
+                | Q(legalinstrument__authors__in=[self.author])
             )
         )
 
