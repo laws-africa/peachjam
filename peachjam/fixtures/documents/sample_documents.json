@@ -3650,14 +3650,14 @@
     },
     {
         "fields": {
-            "author": null
+            "authors": []
         },
         "model": "peachjam.genericdocument",
         "pk": 5389
     },
     {
         "fields": {
-            "author": null
+            "authors": []
         },
         "model": "peachjam.genericdocument",
         "pk": 4124
@@ -8121,14 +8121,14 @@
     },
     {
         "fields": {
-            "author": null
+            "authors": []
         },
         "model": "peachjam.legalinstrument",
         "pk": 5519
     },
     {
         "fields": {
-            "author": null
+            "authors": []
         },
         "model": "peachjam.legalinstrument",
         "pk": 2071
