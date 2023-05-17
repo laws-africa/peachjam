@@ -2,6 +2,7 @@ from countries_plus.models import Country
 from django.contrib import admin
 
 from africanlii.models import (
+    AfricanUnionInstitution,
     AfricanUnionOrgan,
     MemberState,
     Ratification,
@@ -28,6 +29,11 @@ class RatificationAdmin(admin.ModelAdmin):
 
 @admin.register(AfricanUnionOrgan)
 class AfricanUnionOrganAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
+
+
+@admin.register(AfricanUnionInstitution)
+class AfricanUnionInstitutionAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]
 
 

@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, TemplateView
 
 from africanlii.models import (
+    AfricanUnionInstitution,
     AfricanUnionOrgan,
     MemberState,
     RatificationCountry,
@@ -23,11 +24,18 @@ class AfricanUnionDetailPageView(TemplateView):
         context["au_organs"] = self.get_queryset()
         context["recs"] = RegionalEconomicCommunity.objects.prefetch_related("locality")
         context["member_states"] = MemberState.objects.prefetch_related("country")
+        context["au_institutions"] = AfricanUnionInstitution.objects.prefetch_related(
+            "author"
+        )
         return context
 
 
 class AfricanUnionOrganDetailView(AuthorDetailView):
     template_name = "africanlii/au_organ_detail.html"
+
+
+class AfricanUnionInstitutionDetailView(AuthorDetailView):
+    template_name = "africanlii/au_institution_detail.html"
 
 
 class RegionalEconomicCommunityDetailView(PlaceDetailView):

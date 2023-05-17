@@ -72,6 +72,18 @@
           </ul>
         </div>
         <div class="col-lg-6">
+          <h2 class="mb-4 heading-underlined">{% trans 'African Union Institutions' %}</h2>
+          <ul class="list-unstyled">
+            {% for au_institution in au_institutions %}
+              <li>
+                <a href="{% url 'au_institution_detail_view' au_institution.author.code %}">{{ au_institution }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
           <h2 class="mb-4 heading-underlined">{% trans 'African Union Member States' %}</h2>
           <p>
             The member states of the African Union are the independent countries within the African continent that collectively work towards the union's goals of promoting unity, economic development, and peace.
