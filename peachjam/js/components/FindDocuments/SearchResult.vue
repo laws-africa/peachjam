@@ -26,7 +26,7 @@
       <span
         v-if="item.authors"
         class="me-3"
-      >{{ item.authors }}</span>
+      >{{ authors(item) }}</span>
     </div>
     <div v-if="item.citation && item.citation !== item.title">
       <i>{{ item.citation }}</i>
