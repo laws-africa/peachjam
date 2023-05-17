@@ -16,6 +16,13 @@
   {% if not document.allow_robots %}<meta name="robots" content="noindex" />{% endif %}
   <meta name="twitter:card" content="summary"/>
   <meta name="twitter:title" content="{{ document.title }}"/>
+  {% if language_versions|length > 1 %}
+    {% for version in language_versions %}
+      <link rel="alternate"
+            hreflang="{{ version.language.iso }}"
+            href="{{ request.scheme }}://{{ request.get_host }}{{ version.get_absolute_url }}"/>
+    {% endfor %}
+  {% endif %}
 {% endblock %}
 {% block page-content %}
   <div class="pb-5">
@@ -260,8 +267,9 @@
                                 {% for version in language_versions %}
                                   <li>
                                     <a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}"
-                                       href="{{ request.scheme }}://{{ request.get_host }}{{ version.get_absolute_url }}"
-                                       hreflang="{{ version.language.iso }}">{% trans version.language.name %}</a>
+                                       rel="alternate"
+                                       hreflang="{{ version.language.iso }}"
+                                       href="{{ request.scheme }}://{{ request.get_host }}{{ version.get_absolute_url }}">{{ version.language.iso }}">{% trans version.language.name %}</a>
                                   </li>
                                 {% endfor %}
                               </ul>
