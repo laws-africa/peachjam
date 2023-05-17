@@ -125,9 +125,11 @@ class Work(models.Model):
         for doc in self.documents.all():
             if doc.content_html:
                 root = html.fromstring(doc.content_html)
-                for a in root.xpath('//a[starts-with(@href, "/akn")]'):
+                for a in root.xpath('//a[starts-with(@data-href, "/akn")]'):
                     try:
-                        work_frbr_uris.add(FrbrUri.parse(a.attrib["href"]).work_uri())
+                        work_frbr_uris.add(
+                            FrbrUri.parse(a.attrib["data-href"]).work_uri()
+                        )
                     except ValueError:
                         # ignore malformed FRBR URIs
                         pass
