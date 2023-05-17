@@ -19,6 +19,11 @@
   }
 }
 
+.hero-search {
+  background-color: transparentize($primary, 0.90);
+
+}
+
 .hero-logos {
   img {
     @include make-col-auto();
