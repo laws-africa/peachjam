@@ -260,7 +260,8 @@
                                 {% for version in language_versions %}
                                   <li>
                                     <a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}"
-                                       href="{{ version.get_absolute_url }}">{% trans version.language.name %}</a>
+                                       href="{{ request.scheme }}://{{ request.get_host }}{{ version.get_absolute_url }}"
+                                       hreflang="{{ version.language.iso }}">{% trans version.language.name %}</a>
                                   </li>
                                 {% endfor %}
                               </ul>
