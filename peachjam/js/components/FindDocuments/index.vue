@@ -261,7 +261,7 @@ export default {
       },
       {
         title: JSON.parse(document.querySelector('#data-labels').textContent).author,
-        name: 'author',
+        name: 'authors',
         type: 'checkboxes',
         value: [],
         options: []
@@ -529,12 +529,14 @@ export default {
             )
           );
         } else {
-          facet.options = generateOptions(
-            this.sortGenericBuckets(
-              this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
-                .buckets
-            )
-          );
+          if (this.searchInfo.facets[`_filter_${facet.name}`]) {
+            facet.options = generateOptions(
+              this.sortGenericBuckets(
+                this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
+                  .buckets
+              )
+            );
+          }
         }
         facet.value = this.getUrlParamValue(facet.name);
       });
