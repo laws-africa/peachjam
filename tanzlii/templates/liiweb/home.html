@@ -1,19 +1,10 @@
 {% extends "liiweb/home.html" %}
 {% load static i18n %}
 {% block hero-logos %}
-  <div class="d-flex justify-content-between">
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/africanlii-logo.svg' %}"
-         alt="africanlii-logo"/>
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/judiciary_of_tanzania.png' %}"
-         alt="judiciary-of-tanzania-logo"/>
-    <img height="26"
-         src="{% static 'images/laws-africa-logo.png' %}"
-         alt="laws-logo"/>
-  </div>
+  <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
+  <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
+  <img src="{% static 'images/judiciary_of_tanzania.png' %}"
+       alt="judiciary-of-tanzania-logo"/>
 {% endblock %}
 {% block hero-headings %}
   <h1 class="mb-4">{% trans 'Karibu kwenye Tanzania Legal Information Institute' %}</h1>
@@ -34,19 +25,4 @@
       We aim to support the rule of law by publishing the law of Tanzania for free online access.
     {% endblocktrans %}
   </p>
-{% endblock %}
-{% block second-col-logos %}
-  <div class="d-flex justify-content-between mb-4 mb-lg-4">
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/africanlii-logo.svg' %}"
-         alt="africanlii-logo"/>
-    <img height="26"
-         class="me-4"
-         src="{% static 'images/judiciary_of_tanzania.png' %}"
-         alt="judiciary-of-tanzania-logo"/>
-    <img height="26"
-         src="{% static 'images/laws-africa-logo.png' %}"
-         alt="laws-logo"/>
-  </div>
 {% endblock %}
