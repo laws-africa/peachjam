@@ -24,6 +24,26 @@ class AfricanUnionOrgan(models.Model):
         return self.author.name
 
 
+class AfricanUnionInstitution(models.Model):
+    author = models.OneToOneField(
+        "peachjam.Author",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("author"),
+        related_name="au_institution",
+    )
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
+
+    class Meta:
+        ordering = ["author__name"]
+
+    def __str__(self):
+        return self.author.name
+
+
 class RegionalEconomicCommunity(models.Model):
     locality = models.OneToOneField(
         "peachjam.Locality",

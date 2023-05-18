@@ -20,6 +20,11 @@ urlpatterns = [
         name="au_organ_detail_view",
     ),
     path(
+        "au/au-institution/<slug:code>/",
+        views.AfricanUnionInstitutionDetailView.as_view(),
+        name="au_institution_detail_view",
+    ),
+    path(
         "au/rec/<slug:code>/",
         views.RegionalEconomicCommunityDetailView.as_view(),
         name="rec_detail_view",

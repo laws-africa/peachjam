@@ -80,6 +80,13 @@
         </a>
       </li>
       <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if view.navbar_link == 'au' %} active{% endif %} "
+           href="{% url 'au_detail_page' %}#au-institutions">
+          {% trans 'African Union Institutions' %}
+          <div class="dropdown-summary text-muted">{% trans 'African Union (AU) Institutions' %}</div>
+        </a>
+      </li>
+      <li class="dropdown-item">
         <a class="nav-link px-0 {% if view.navbar_link == 'au' %}active{% endif %}"
            href="{% url 'au_detail_page' %}#member-states">{% trans 'Member states' %}
           <div class="dropdown-summary text-muted">{% trans 'Member states' %}</div>

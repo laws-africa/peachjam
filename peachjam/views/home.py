@@ -28,7 +28,10 @@ class HomePageView(TemplateView):
             Q(legalinstrument__isnull=True),
         )
 
-        courts = Court.objects.all()
+        # We explicitly exclude African Commission on Human and Peoples Rights (ACHPR) and
+        # African Committee of Experts on the Rights and Welfare of the Child (ACERWC)
+        excluded_court_codes = ["ACHPR", "ACERWC"]
+        courts = Court.objects.exclude(code__in=excluded_court_codes)
 
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents
