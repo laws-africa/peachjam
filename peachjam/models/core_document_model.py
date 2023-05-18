@@ -123,23 +123,7 @@ class Work(models.Model):
         work_frbr_uris = set()
 
         for doc in self.documents.all():
-            if doc.content_html:
-                root = html.fromstring(doc.content_html)
-                for a in root.xpath('//a[starts-with(@data-href, "/akn")]'):
-                    try:
-                        work_frbr_uris.add(
-                            FrbrUri.parse(a.attrib["data-href"]).work_uri()
-                        )
-                    except ValueError:
-                        # ignore malformed FRBR URIs
-                        pass
-            else:
-                for citation_link in CitationLink.objects.filter(document_id=doc.pk):
-                    try:
-                        work_frbr_uris.add(FrbrUri.parse(citation_link.url).work_uri())
-                    except ValueError:
-                        # ignore malformed FRBR URIs
-                        pass
+            work_frbr_uris.update(doc.get_cited_work_frbr_uris())
 
         # A work does not cite itself
         if self.frbr_uri in work_frbr_uris:
@@ -526,6 +510,34 @@ class CoreDocument(PolymorphicModel):
     def update_text_content(self):
         """Update the extracted text content."""
         self.document_content = DocumentContent.update_or_create_for_document(self)
+
+    def get_cited_work_frbr_uris(self):
+        """Get a list of parsed FRBR URIs of works cited by this document."""
+        work_frbr_uris = set()
+
+        if self.content_html:
+            root = html.fromstring(self.content_html)
+            # get AKN links in the document content, except those in remarks or in the generated
+            # coverpage (which is outside the akn-akomaNtoso root)
+            xpath = (
+                '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
+                'not(ancestor::*[contains(@class, "akn-remark")])]'
+            )
+            for a in root.xpath(xpath):
+                try:
+                    work_frbr_uris.add(FrbrUri.parse(a.attrib["data-href"]).work_uri())
+                except ValueError:
+                    # ignore malformed FRBR URIs
+                    pass
+        else:
+            for citation_link in CitationLink.objects.filter(document_id=self.pk):
+                try:
+                    work_frbr_uris.add(FrbrUri.parse(citation_link.url).work_uri())
+                except ValueError:
+                    # ignore malformed FRBR URIs
+                    pass
+
+        return work_frbr_uris
 
 
 def file_location(instance, filename):
