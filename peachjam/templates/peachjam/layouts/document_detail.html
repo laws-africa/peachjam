@@ -164,9 +164,15 @@
                       {% block document-metadata-content-alternative-names %}
                         {% with document.alternative_names.all as alternative_names %}
                           {% if alternative_names %}
-                            <dt>
-                              {% trans 'Law Report Citations' %}
-                            </dt>
+                            {% if document.doc_type == "judgment" %}
+                              <dt>
+                                {% trans 'Law Report Citations' %}
+                              </dt>
+                            {% else %}
+                              <dt>
+                                {% trans 'Alternative names' %}
+                              </dt>
+                            {% endif %}
                             <dd class="text-muted">
                               {% for alternative_name in alternative_names %}<div>{{ alternative_name.title }}</div>{% endfor %}
                             </dd>
