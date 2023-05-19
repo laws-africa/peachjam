@@ -152,7 +152,21 @@ class SourceFileInline(BaseAttachmentFileInline):
     readonly_fields = (*BaseAttachmentFileInline.readonly_fields, "source_url")
 
 
+class TopicChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{'-'*(obj.depth-1)}{obj.name}"
+
+
+class TopicForm(forms.ModelForm):
+    topic = TopicChoiceField(queryset=Taxonomy.objects.all())
+
+    class Meta:
+        model = DocumentTopic
+        fields = "__all__"
+
+
 class DocumentTopicInline(admin.TabularInline):
+    form = TopicForm
     model = DocumentTopic
     extra = 1
 
