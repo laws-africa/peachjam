@@ -28,3 +28,34 @@ class CoreDocumentTestCase(TestCase):
 
         doc.refresh_from_db()
         self.assertEqual("test", doc.get_content_as_text())
+
+    def test_get_cited_work_frbr_uris(self):
+        doc = CoreDocument.objects.get(
+            expression_frbr_uri="/akn/za/act/1979/70/eng@2020-10-22"
+        )
+
+        frbr_uris = sorted(list(doc.get_cited_work_frbr_uris()))
+        self.assertEqual(
+            [
+                "/akn/za/act/1927/38",
+                "/akn/za/act/1935/32",
+                "/akn/za/act/1939/22",
+                "/akn/za/act/1943/17",
+                "/akn/za/act/1944/32",
+                "/akn/za/act/1945/35",
+                "/akn/za/act/1953/37",
+                "/akn/za/act/1956/24",
+                "/akn/za/act/1960/33",
+                "/akn/za/act/1965/66",
+                "/akn/za/act/1966/13",
+                "/akn/za/act/1968/70",
+                "/akn/za/act/1970/54",
+                "/akn/za/act/1973/18",
+                "/akn/za/act/1975/55",
+                "/akn/za/act/1996/65",
+                "/akn/za/act/1996/constitution",
+                "/akn/za/act/ord/1955/25",
+                "/akn/za/act/ord/1961/31",
+            ],
+            frbr_uris,
+        )
