@@ -664,7 +664,7 @@ class WorkAdmin(admin.ModelAdmin):
     list_display = fields
     readonly_fields = fields
     inlines = [RelationshipInline]
-    actions = ["update_extracted_citations"]
+    actions = ["update_extracted_citations", "update_languages"]
 
     def has_add_permission(self, request):
         # disallow adding works, they are managed automatically
@@ -681,6 +681,14 @@ class WorkAdmin(admin.ModelAdmin):
     update_extracted_citations.short_description = (
         "Update extracted citations (background)"
     )
+
+    def update_languages(self, request, queryset):
+        count = queryset.count()
+        for work in queryset:
+            work.update_languages()
+        self.message_user(request, f"Updated languages for {count} works.")
+
+    update_languages.short_description = "Update languages"
 
 
 @admin.register(DocumentNature)
