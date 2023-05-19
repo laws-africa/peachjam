@@ -15,15 +15,9 @@
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if view.document_nature.code == 'documents-and-guidelines' %}active{% endif %}"
-       href="{% url 'document_nature_list' 'documents-and-guidelines' %}">
-      {% trans 'Documents and Guidelines' %}
-    </a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {% if view.document_nature.code == 'speech' %}active{% endif %}"
-       href="{% url 'document_nature_list' 'speech' %}">
-      {% trans 'Speeches' %}
+    <a class="nav-link {% if request.path == '/akn/tz-znz/doc/2023-03-06/list-of-advocatesvakils-with-active-license-status-for-the-year-2023' %}active{% endif %}"
+       href="{% url 'document_detail' 'akn/tz-znz/doc/2023-03-06/list-of-advocatesvakils-with-active-license-status-for-the-year-2023' %}">
+      {% trans 'Licensed Advocates' %}
     </a>
   </li>
   <li class="nav-item">

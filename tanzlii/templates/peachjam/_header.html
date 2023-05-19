@@ -15,6 +15,12 @@
     </a>
   </li>
   <li class="nav-item">
+    <a class="nav-link {% if view.navbar_link == 'author_detail' %}active{% endif %}"
+       href="{% url 'author' 'TZLRC' %}">
+      {% trans 'Law Reform' %}
+    </a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'gazettes' %}active{% endif %}"
        href="{% url 'gazettes' %}">
       {% trans 'Gazettes' %}
