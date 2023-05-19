@@ -154,7 +154,7 @@ class SourceFileInline(BaseAttachmentFileInline):
 
 class TopicChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
-        return f"{'-'*(obj.depth-1)}{obj.name}"
+        return f"{'-'*(obj.depth-1)} {obj.name}"
 
 
 class TopicForm(forms.ModelForm):
