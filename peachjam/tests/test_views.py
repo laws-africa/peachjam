@@ -13,7 +13,7 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # documents
-        self.assertEqual(response.context.get("documents_count"), 8)
+        self.assertEqual(9, response.context.get("documents_count"))
 
         recent_judgments = [
             r_j.title for r_j in response.context.get("recent_judgments")
@@ -112,7 +112,9 @@ class PeachjamViewsTest(TestCase):
             "African Civil Aviation Commission Constitution (AFCAC)",
             documents,
         )
-        self.assertEqual(response.context["facet_data"]["years"], [1969, 2005])
+        self.assertEqual(
+            [1969, 2005, 2020], sorted(response.context["facet_data"]["years"])
+        )
 
     def test_legislation_detail(self):
         response = self.client.get(
