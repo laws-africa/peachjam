@@ -16,7 +16,6 @@ import os
 from pathlib import Path
 
 import dj_database_url
-import neomodel
 import sentry_sdk
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -177,9 +176,6 @@ DATABASES = {
     "default": default_db_config,
     "gazettes_africa": gazette_db_config,
 }
-
-
-neomodel.config.DATABASE_URL = os.environ.get("NEO4J_DATABASE_URL")
 
 
 # Password validation
