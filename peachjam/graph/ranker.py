@@ -54,6 +54,7 @@ class GraphRanker:
         updated = []
         for work, rank in zip(self.work_ids.keys(), self.ranks):
             if work.ranking != rank or self.force_update:
+                work.ranking = rank
                 work.save(update_fields=["ranking"])
                 updated.append(work)
 
