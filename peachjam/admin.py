@@ -661,7 +661,7 @@ class WorkAdmin(admin.ModelAdmin):
         "frbr_uri_subtype",
         "frbr_uri_actor",
     )
-    list_display = fields
+    list_display = ("title", "frbr_uri", "languages", "ranking")
     readonly_fields = fields
     inlines = [RelationshipInline]
     actions = ["update_extracted_citations", "update_languages"]
