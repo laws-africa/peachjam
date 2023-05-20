@@ -75,6 +75,55 @@ class Work(models.Model):
     frbr_uri = models.CharField(
         _("FRBR URI"), max_length=1024, null=False, blank=False, unique=True
     )
+    # components of the FRBR URI, useful for dashboards; derived from the frbr_uri field when saved
+    frbr_uri_country = models.CharField(
+        _("FRBR URI country"),
+        max_length=2,
+        null=False,
+        blank=False,
+    )
+    frbr_uri_locality = models.CharField(
+        _("FRBR URI locality"),
+        max_length=100,
+        null=True,
+        blank=True,
+    )
+    frbr_uri_place = models.CharField(
+        _("FRBR URI place"),
+        max_length=100,
+        null=False,
+        blank=False,
+    )
+    frbr_uri_doctype = models.CharField(
+        _("FRBR URI doctype"),
+        max_length=20,
+        null=False,
+        blank=False,
+    )
+    frbr_uri_subtype = models.CharField(
+        _("FRBR URI subtype"),
+        max_length=100,
+        null=True,
+        blank=True,
+    )
+    frbr_uri_actor = models.CharField(
+        _("FRBR URI actor"),
+        max_length=100,
+        null=True,
+        blank=True,
+    )
+    frbr_uri_date = models.CharField(
+        _("FRBR URI date"),
+        max_length=10,
+        null=False,
+        blank=False,
+    )
+    frbr_uri_number = models.CharField(
+        _("FRBR URI number"),
+        max_length=1024,
+        null=False,
+        blank=False,
+    )
     title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
     languages = ArrayField(
         models.CharField(max_length=3),
@@ -138,6 +187,21 @@ class Work(models.Model):
     def works_citing_current_work(self):
         """Shows a list of works that cite the current work."""
         return ExtractedCitation.for_target_works(self)
+
+    def save(self, *args, **kwargs):
+        self.explode_frbr_uri()
+        super().save(*args, **kwargs)
+
+    def explode_frbr_uri(self):
+        frbr_uri = FrbrUri.parse(self.frbr_uri)
+        self.frbr_uri_country = frbr_uri.country
+        self.frbr_uri_locality = frbr_uri.locality
+        self.frbr_uri_place = frbr_uri.place
+        self.frbr_uri_doctype = frbr_uri.doctype
+        self.frbr_uri_subtype = frbr_uri.subtype
+        self.frbr_uri_actor = frbr_uri.actor
+        self.frbr_uri_date = frbr_uri.date
+        self.frbr_uri_number = frbr_uri.number
 
     def __str__(self):
         return f"{self.frbr_uri} - {self.title}"

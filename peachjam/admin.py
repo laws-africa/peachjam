@@ -74,6 +74,7 @@ from peachjam.resources import (
     UserResource,
 )
 from peachjam.tasks import extract_citations as extract_citations_task
+from peachjam.tasks import update_extracted_citations_for_a_work
 from peachjam_search.tasks import search_model_saved
 
 User = get_user_model()
@@ -637,18 +638,57 @@ class RelationshipInline(admin.TabularInline):
 
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):
-    fields = ("title", "frbr_uri", "languages", "ranking")
+    fields = (
+        "title",
+        "frbr_uri",
+        "languages",
+        "ranking",
+        "frbr_uri_country",
+        "frbr_uri_locality",
+        "frbr_uri_doctype",
+        "frbr_uri_subtype",
+        "frbr_uri_actor",
+        "frbr_uri_date",
+        "frbr_uri_number",
+    )
     search_fields = (
         "title",
         "frbr_uri",
     )
-    list_display = fields
+    list_filter = (
+        "frbr_uri_country",
+        "frbr_uri_doctype",
+        "frbr_uri_subtype",
+        "frbr_uri_actor",
+    )
+    list_display = ("title", "frbr_uri", "languages", "ranking")
     readonly_fields = fields
     inlines = [RelationshipInline]
+    actions = ["update_extracted_citations", "update_languages"]
 
     def has_add_permission(self, request):
         # disallow adding works, they are managed automatically
         return False
+
+    def update_extracted_citations(self, request, queryset):
+        count = queryset.count()
+        for work in queryset:
+            update_extracted_citations_for_a_work(work.pk)
+        self.message_user(
+            request, f"Queued tasks to update extracted citations for {count} works."
+        )
+
+    update_extracted_citations.short_description = (
+        "Update extracted citations (background)"
+    )
+
+    def update_languages(self, request, queryset):
+        count = queryset.count()
+        for work in queryset:
+            work.update_languages()
+        self.message_user(request, f"Updated languages for {count} works.")
+
+    update_languages.short_description = "Update languages"
 
 
 @admin.register(DocumentNature)
