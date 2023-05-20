@@ -1,8 +1,7 @@
 {
   "scripts": {
     "dokku": {
-      "predeploy": "python manage.py compilescss && python manage.py collectstatic --noinput -i *.scss",
-      "postdeploy": "python manage.py migrate"
+      "predeploy": "python manage.py compilescss && python manage.py collectstatic --noinput -i *.scss && python manage.py migrate"
     }
   }
 }
