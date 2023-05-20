@@ -21,7 +21,7 @@
       </div>
     </div>
   </section>
-  <section class="mt-5 mb-2">
+  <section class="py-5 hero-search">
     <div class="container">
       {% block hero-search %}
         <div class="row justify-content-center">
@@ -35,12 +35,10 @@
                      autofocus=""
                      name="q"/>
               <input type="submit"
-                     class="btn btn-primary ms-2"
+                     class="btn btn-primary ms-2 btn-lg"
                      value="{% trans 'Search' %}"/>
             </form>
-            <div class="mb-2">
-              <a href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
-            </div>
+            <a href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
           </div>
         </div>
       {% endblock %}
