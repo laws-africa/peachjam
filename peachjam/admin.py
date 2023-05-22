@@ -621,8 +621,10 @@ class ArticleForm(forms.ModelForm):
 class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_class = ArticleResource
     form = ArticleForm
-    list_display = ("title", "date", "published")
+    list_display = ("title", "author", "date", "published")
     list_display_links = ("title",)
+    list_filter = ("published", "author")
+    date_hierarchy = "date"
     fields = (
         "title",
         "slug",
@@ -635,6 +637,7 @@ class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
         "author",
     )
     prepopulated_fields = {"slug": ("title",)}
+    actions = ["publish", "unpublish"]
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -645,6 +648,18 @@ class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
                 pk=request.user.pk
             )
         return form
+
+    def publish(self, request, queryset):
+        queryset.update(published=True)
+        self.message_user(request, _("Articles published."))
+
+    publish.short_description = gettext_lazy("Publish selected articles")
+
+    def unpublish(self, request, queryset):
+        queryset.update(published=False)
+        self.message_user(request, _("Articles unpublished."))
+
+    unpublish.short_description = gettext_lazy("Unpublish selected articles")
 
 
 @admin.register(UserProfile)

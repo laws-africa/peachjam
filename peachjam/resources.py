@@ -6,6 +6,7 @@ from os.path import splitext
 from subprocess import CalledProcessError
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 
+import lxml.html
 import magic
 import requests.exceptions
 from cobalt import FrbrUri
@@ -207,6 +208,16 @@ class ManyToOneWidget(ManyToManyWidget):
         if not value:
             return self.model.objects.none()
         return [AlternativeName(**{self.field: v}) for v in value.split(self.separator)]
+
+
+class StripHtmlWidget(CharWidget):
+    def clean(self, value, row=None, **kwargs):
+        value = super().clean(value)
+        # possibly html?
+        if value and value.startswith("<"):
+            tree = lxml.html.fromstring(value)
+            value = " ".join(tree.xpath("//text()")).strip()
+        return value
 
 
 class BaseDocumentResource(resources.ModelResource):
@@ -636,6 +647,11 @@ class ArticleResource(resources.ModelResource):
         column_name="topics",
         attribute="topics",
         widget=TopicsWidget(Taxonomy, separator=","),
+    )
+    summary = fields.Field(
+        column_name="summary",
+        attribute="summary",
+        widget=StripHtmlWidget(),
     )
 
     class Meta:
