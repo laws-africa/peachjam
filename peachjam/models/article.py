@@ -11,8 +11,6 @@ from django.utils.translation import gettext_lazy as _
 
 def file_location(instance, filename):
     filename = os.path.basename(filename)
-    print(instance.id)
-    print(instance.pk)
     return f"{instance.SAVE_FOLDER}/{instance.pk}/{filename}"
 
 
