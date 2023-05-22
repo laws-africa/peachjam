@@ -33,7 +33,7 @@ row = [
     "315|321|6",
     "2021|2021|2021",
     "EACJ",
-    "https://mediafile.pdf|https://mediafile.docx",
+    "https://example.com/mediafile.pdf|https://example.com/mediafile.docx",
     "[2022] EACJ 121",
     "44",
     "2022-09-14",
@@ -71,7 +71,7 @@ class JudgmentBulkImportTestCase(TestCase):
         result = JudgmentResource().import_data(dataset=dataset, dry_run=False)
         j = Judgment.objects.get(mnc="[2022] EACJ 121")
         self.assertFalse(result.has_errors())
-        self.assertEqual(j.source_url, "https://mediafile.docx")
+        self.assertEqual(j.source_url, "https://example.com/mediafile.docx")
 
     def test_case_number_import_without_matter_type(self):
         dataset = tablib.Dataset(row, headers=judgment_import_headers)
@@ -114,9 +114,10 @@ class JudgmentBulkImportTestCase(TestCase):
         get(node.pk).add_sibling(name="Environment")
 
         data.append("collections-land-rights|collections-environment")
-        headers.append("taxonomy")
+        headers.append("taxonomies")
         dataset = tablib.Dataset(data, headers=headers, depth=0)
         result = JudgmentResource().import_data(dataset=dataset, dry_run=False)
+        self.assertFalse(result.has_errors())
         j = Judgment.objects.first()
         self.assertEqual(len(j.taxonomies.all()), 2)
         self.assertFalse(result.has_errors())

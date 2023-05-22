@@ -8,7 +8,7 @@ class Gazette(CoreDocument):
         verbose_name = _("gazette")
         verbose_name_plural = _("gazettes")
 
-    def save(self, *args, **kwargs):
+    def pre_save(self):
         self.frbr_uri_doctype = "officialGazette"
         self.doc_type = "gazette"
-        return super().save(*args, **kwargs)
+        super().pre_save()

@@ -382,6 +382,7 @@ class CoreDocument(PolymorphicModel):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
+        blank=True,
         on_delete=models.SET_NULL,
         verbose_name=_("created by"),
     )
@@ -411,31 +412,42 @@ class CoreDocument(PolymorphicModel):
     def year(self):
         return self.date.year
 
+    def full_clean(self, *args, **kwargs):
+        # give ourselves and subclasses a chance to pre-populate derived fields before cleaning
+        self.pre_save()
+        super().full_clean(*args, **kwargs)
+
     def clean(self):
         super().clean()
 
-        if self.date is None:
-            raise ValidationError(_("Invalid Date"))
-
         if self.date > datetime.date.today():
-            raise ValidationError(_("You cannot set a future date for the document"))
+            raise ValidationError(
+                {"date": _("You cannot set a future date for the document")}
+            )
 
-        frbr_uri = self.generate_work_frbr_uri()
         try:
-            FrbrUri.parse(frbr_uri)
+            FrbrUri.parse(self.work_frbr_uri)
         except ValueError:
-            raise ValidationError(_("Invalid FRBR URI: %(uri)s") % {"uri": frbr_uri})
+            raise ValidationError(
+                {
+                    "work_frbr_uri": _("Invalid FRBR URI: %(uri)s")
+                    % {"uri": self.work_frbr_uri}
+                }
+            )
 
-        self.assign_frbr_uri()
-        expression_frbr_uri = self.generate_expression_frbr_uri()
         if (
-            self.__class__.objects.filter(expression_frbr_uri=expression_frbr_uri)
+            self.__class__.objects.filter(expression_frbr_uri=self.expression_frbr_uri)
             .exclude(pk=self.pk)
             .exists()
         ):
             raise ValidationError(
-                "Document with this Expression FRBR URI already exists!"
-                + expression_frbr_uri
+                {
+                    "expression_frbr_uri": _(
+                        "Document with this Expression FRBR URI already exists!"
+                    )
+                    + " "
+                    + self.expression_frbr_uri
+                }
             )
 
     def generate_expression_frbr_uri(self):
@@ -469,9 +481,9 @@ class CoreDocument(PolymorphicModel):
         )
         return frbr_uri.work_uri(work_component=False)
 
-    def save(self, *args, **kwargs):
+    def pre_save(self):
+        """Pre-populate various fields before saving or running full_clean."""
         self.frbr_uri_subtype = self.nature.code if self.nature else None
-
         self.assign_frbr_uri()
         self.expression_frbr_uri = self.generate_expression_frbr_uri()
 
@@ -487,6 +499,10 @@ class CoreDocument(PolymorphicModel):
             self.work.title = self.title
             self.work.save()
 
+    def save(self, *args, **kwargs):
+        # give ourselves and subclasses a chance to pre-populate derived fields before saving, in case full_clean() has
+        # not yet been called
+        self.pre_save()
         return super().save(*args, **kwargs)
 
     @cached_property
