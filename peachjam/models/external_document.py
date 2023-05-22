@@ -5,6 +5,6 @@ class ExternalDocument(CoreDocument):
 
     frbr_uri_doctypes = ["doc"]
 
-    def save(self, *args, **kwargs):
+    def pre_save(self):
         self.doc_type = "external"
-        return super().save(*args, **kwargs)
+        return super().pre_save()

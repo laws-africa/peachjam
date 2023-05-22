@@ -232,11 +232,8 @@ class BaseDocumentResource(resources.ModelResource):
         widget=ManyToOneWidget(AlternativeName, separator="|", field="title"),
     )
 
-    required_fields = []
-
     class Meta:
         exclude = (
-            "id",
             "created_at",
             "updated_at",
             "source_file",
@@ -248,14 +245,9 @@ class BaseDocumentResource(resources.ModelResource):
             "toc_json",
         )
         import_id_fields = ("expression_frbr_uri",)
+        clean_model_instances = True
 
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
-        dataset_headers = dataset.headers
-        missing_fields = set(self.required_fields).difference(dataset_headers)
-
-        if missing_fields:
-            raise ValidationError(f"Missing Columns: {missing_fields}")
-
         # clear out rows with 'skip' set; we don't remove them, so that the row numbers match the source, but
         # instead set all the columns (except skipped) to None
         try:
@@ -393,14 +385,6 @@ class GenericDocumentResource(BaseDocumentResource):
         widget=ManyToManyFieldWidget(Author, separator="|", field="name"),
     )
 
-    required_fields = (
-        "authors",
-        "date",
-        "jurisdiction",
-        "language",
-        "title",
-    )
-
     class Meta(BaseDocumentResource.Meta):
         model = GenericDocument
 
@@ -458,16 +442,6 @@ class JudgmentResource(BaseDocumentResource):
         column_name="order_outcome",
         attribute="order_outcome",
         widget=ForeignKeyWidget(OrderOutcome, field="name"),
-    )
-
-    required_fields = (
-        "case_name",
-        "court",
-        "date",
-        "judges",
-        "jurisdiction",
-        "language",
-        "source_url",
     )
 
     class Meta(BaseDocumentResource.Meta):
@@ -640,16 +614,6 @@ class ArticleResource(resources.ModelResource):
 
     class Meta:
         model = Article
-        required_fields = (
-            "date",
-            "title",
-            "body",
-            "author",
-            "image_url",
-            "summary",
-            "topics",
-            "published",
-        )
 
 
 class UserResource(resources.ModelResource):
