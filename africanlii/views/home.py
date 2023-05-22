@@ -13,6 +13,7 @@ class HomePageView(BaseHomePageView):
         context = super().get_context_data(**kwargs)
         recent_articles = (
             Article.objects.prefetch_related("topics")
+            .filter(published=True)
             .select_related("author")
             .order_by("-date")[:5]
         )
