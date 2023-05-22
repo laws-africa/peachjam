@@ -11,6 +11,8 @@ from django.utils.translation import gettext_lazy as _
 
 def file_location(instance, filename):
     filename = os.path.basename(filename)
+    print(instance.id)
+    print(instance.pk)
     return f"{instance.SAVE_FOLDER}/{instance.pk}/{filename}"
 
 
@@ -56,6 +58,14 @@ class Article(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
+
+        # save article first to get pk for image folder
+        if not self.pk:
+            saved_image = self.image
+            self.image = None
+            super().save(*args, **kwargs)
+            self.image = saved_image
+
         return super().save(*args, **kwargs)
 
 
