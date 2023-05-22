@@ -70,7 +70,7 @@ class SourceFileWidget(CharWidget):
         if not value:
             return value
 
-        source_url = self.get_source_url(value)
+        source_url = self.get_best_source_url(value)
         try:
             with TemporaryDirectory() as dir:
                 with NamedTemporaryFile(dir=dir) as file:
@@ -107,7 +107,7 @@ class SourceFileWidget(CharWidget):
                                 if attempt >= 3:
                                     raise
 
-            return value
+            return source_url
         except (
             requests.exceptions.RequestException,
             CalledProcessError,
@@ -121,7 +121,7 @@ class SourceFileWidget(CharWidget):
             raise ValueError(f"Error processing source file: {source_url} -- {msg}")
 
     @staticmethod
-    def get_source_url(value):
+    def get_best_source_url(value):
         source_files = [x.strip() for x in value.split("|")]
 
         docx = re.compile(r"\.docx?$")
@@ -173,22 +173,24 @@ class DateWidget(CharWidget):
             return parse(value)
 
 
-class TaxonomiesWidget(CharWidget):
+class TaxonomiesWidget(ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
-        if value:
-            for taxonomy in value.split("|"):
-                try:
-                    Taxonomy.objects.get(slug=taxonomy)
-                except Taxonomy.DoesNotExist as e:
-                    msg = getattr(e, "message", repr(e)) or repr(e)
-                    raise ValueError(
-                        f"Taxonomy {taxonomy} does not exist - {msg}",
-                    )
-        return value
+        if not value:
+            return self.model.objects.none()
+
+        taxonomies = []
+        for taxonomy in value.split(self.separator):
+            taxonomy = taxonomy.strip()
+            try:
+                taxonomies.append(Taxonomy.objects.get(slug=taxonomy))
+            except Taxonomy.DoesNotExist:
+                raise ValueError(f"Taxonomy does not exist: {taxonomy}")
+
+        return [self.model(**{self.field: t}) for t in taxonomies]
 
 
-class IncomingManyToOneField(fields.Field):
-    """Handles many-to-one relationships on the incoming side."""
+class ManyToManyField(fields.Field):
+    """Handles many-to-many relationships."""
 
     def save(self, obj, data, is_m2m=False, **kwargs):
         if not self.readonly:
@@ -206,12 +208,11 @@ class ManyToOneWidget(ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
             return self.model.objects.none()
-        return [AlternativeName(**{self.field: v}) for v in value.split(self.separator)]
+        return [self.model(**{self.field: v}) for v in value.split(self.separator)]
 
 
 class BaseDocumentResource(resources.ModelResource):
     date = fields.Field(attribute="date", widget=DateWidget(name="date"))
-
     language = fields.Field(
         attribute="language",
         widget=ForeignKeyRequiredWidget(Language, field="iso_639_2T"),
@@ -225,9 +226,12 @@ class BaseDocumentResource(resources.ModelResource):
         widget=ForeignKeyWidget(Locality, field="code"),
     )
     source_url = fields.Field(attribute="source_url", widget=SourceFileWidget())
-    taxonomy = fields.Field(attribute="taxonomy", widget=TaxonomiesWidget())
+    taxonomies = ManyToManyField(
+        attribute="taxonomies",
+        widget=TaxonomiesWidget(DocumentTopic, separator="|", field="topic"),
+    )
     skip = fields.Field(attribute="skip", widget=SkipRowWidget())
-    alternative_names = IncomingManyToOneField(
+    alternative_names = ManyToManyField(
         attribute="alternative_names",
         widget=ManyToOneWidget(AlternativeName, separator="|", field="title"),
     )
@@ -293,26 +297,17 @@ class BaseDocumentResource(resources.ModelResource):
     def skip_row(self, instance, original, row, import_validation_errors=None):
         return row["skip"]
 
-    def after_import_row(self, row, row_result, row_number=None, **kwargs):
-        if row.get("taxonomy"):
-            for taxonomy in row.get("taxonomy").split("|"):
-                taxonomy = Taxonomy.objects.get(slug=taxonomy)
-                topic = DocumentTopic.objects.get_or_create(
-                    topic=taxonomy, document_id=row_result.object_id
-                )
-                logger.info(f"Setting document topic - {topic}")
+    def save_m2m(self, instance, row, using_transactions, dry_run):
+        super().save_m2m(instance, row, using_transactions, dry_run)
 
-    def after_save_instance(self, instance, using_transactions, dry_run):
-        # get the preferred source url using the widget logic
-        source_url = None
-        if instance.source_url and not dry_run:
-            source_url = SourceFileWidget.get_source_url(instance.source_url)
-            self.attach_source_file(instance, source_url)
+        # attach source file, but only if it was explicitly provided during import
+        # the preferred source URL was set during import by the SourceFileWidget
+        if row.get("source_url") == instance.source_url and not dry_run:
+            self.attach_source_file(instance, instance.source_url)
 
         if not dry_run:
             # try to extract content from docx files
             instance.extract_content_from_source_file()
-            instance.source_url = source_url
             # extract citations
             instance.extract_citations()
             instance.save()
@@ -343,9 +338,8 @@ class BaseDocumentResource(resources.ModelResource):
                 logger.info(f"Downloading Attachment => {url}")
                 self.download_attachment(url, instance, "Other documents")
 
-    def dehydrate_taxonomy(self, instance):
-        values = [t.topic.slug for t in instance.taxonomies.all()]
-        return "|".join(values)
+    def dehydrate_taxonomies(self, instance):
+        return "|".join(t.topic.slug for t in instance.taxonomies.all())
 
 
 class DocumentNatureWidget(ForeignKeyWidget):
