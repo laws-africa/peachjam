@@ -32,7 +32,9 @@ class Article(models.Model):
     summary = models.TextField(_("summary"))
     slug = models.SlugField(_("slug"), max_length=1024, unique=True)
     published = models.BooleanField(_("published"), default=False)
-    topics = models.ManyToManyField("peachjam.Taxonomy", verbose_name=_("topics"))
+    topics = models.ManyToManyField(
+        "peachjam.Taxonomy", verbose_name=_("topics"), blank=True
+    )
 
     class Meta:
         verbose_name = _("article")
@@ -54,6 +56,14 @@ class Article(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
+
+        # save article first to get pk for image folder
+        if not self.pk:
+            saved_image = self.image
+            self.image = None
+            super().save(*args, **kwargs)
+            self.image = saved_image
+
         return super().save(*args, **kwargs)
 
 

@@ -6,6 +6,7 @@ from os.path import splitext
 from subprocess import CalledProcessError
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 
+import lxml.html
 import magic
 import requests.exceptions
 from cobalt import FrbrUri
@@ -209,6 +210,16 @@ class ManyToOneWidget(ManyToManyWidget):
         if not value:
             return self.model.objects.none()
         return [self.model(**{self.field: v}) for v in value.split(self.separator)]
+
+
+class StripHtmlWidget(CharWidget):
+    def clean(self, value, row=None, **kwargs):
+        value = super().clean(value)
+        # possibly html?
+        if value and value.startswith("<"):
+            tree = lxml.html.fromstring(value)
+            value = " ".join(tree.xpath("//text()")).strip()
+        return value
 
 
 class BaseDocumentResource(resources.ModelResource):
@@ -539,12 +550,12 @@ class ArticleAuthorWidget(ForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
             raise ValueError("author is required")
-        first_name, *last_name = value.split()
+        parts = value.split(None, 1)
         author, _ = self.model.objects.get_or_create(
             username=slugify(value),
             defaults={
-                "first_name": first_name,
-                "last_name": last_name[0],
+                "first_name": parts[0] if parts else "",
+                "last_name": parts[1] if len(parts) > 1 else "",
             },
         )
 
@@ -605,9 +616,15 @@ class ArticleResource(resources.ModelResource):
         attribute="topics",
         widget=TopicsWidget(Taxonomy, separator=","),
     )
+    summary = fields.Field(
+        column_name="summary",
+        attribute="summary",
+        widget=StripHtmlWidget(),
+    )
 
     class Meta:
         model = Article
+        exclude = ("slug",)
 
 
 class UserResource(resources.ModelResource):

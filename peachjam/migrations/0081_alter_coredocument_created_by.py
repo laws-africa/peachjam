@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("peachjam", "0079_peachjamsettings_allowed_login_domains"),
+        ("peachjam", "0080_alter_article_topics"),
     ]
 
     operations = [
