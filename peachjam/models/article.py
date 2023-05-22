@@ -32,7 +32,9 @@ class Article(models.Model):
     summary = models.TextField(_("summary"))
     slug = models.SlugField(_("slug"), max_length=1024, unique=True)
     published = models.BooleanField(_("published"), default=False)
-    topics = models.ManyToManyField("peachjam.Taxonomy", verbose_name=_("topics"))
+    topics = models.ManyToManyField(
+        "peachjam.Taxonomy", verbose_name=_("topics"), blank=True
+    )
 
     class Meta:
         verbose_name = _("article")

@@ -571,12 +571,12 @@ class ArticleAuthorWidget(ForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
             raise ValueError("author is required")
-        first_name, *last_name = value.split()
+        parts = value.split(None, 1)
         author, _ = self.model.objects.get_or_create(
             username=slugify(value),
             defaults={
-                "first_name": first_name,
-                "last_name": last_name[0],
+                "first_name": parts[0] if parts else "",
+                "last_name": parts[1] if len(parts) > 1 else "",
             },
         )
 
@@ -650,6 +650,7 @@ class ArticleResource(resources.ModelResource):
             "topics",
             "published",
         )
+        exclude = ("slug",)
 
 
 class UserResource(resources.ModelResource):
