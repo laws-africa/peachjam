@@ -17,7 +17,7 @@ from django.utils.dates import MONTHS
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
-from import_export.admin import ImportExportMixin
+from import_export.admin import ImportExportMixin as BaseImportExportMixin
 from languages_plus.models import Language
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
@@ -78,6 +78,14 @@ from peachjam.tasks import update_extracted_citations_for_a_work
 from peachjam_search.tasks import search_model_saved
 
 User = get_user_model()
+
+
+class ImportExportMixin(BaseImportExportMixin):
+    def import_action(self, request, *args, **kwargs):
+        resp = super().import_action(request, *args, **kwargs)
+        # fix for jazzmin not using the correct field variable
+        resp.context_data["fields"] = resp.context_data["fields_list"][0][1]
+        return resp
 
 
 class EntityProfileForm(forms.ModelForm):
