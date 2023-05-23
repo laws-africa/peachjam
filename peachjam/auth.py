@@ -6,16 +6,24 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.views import redirect_to_login
 
+from peachjam.models import pj_settings
+
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     """Adapter that permits logins only from specific domains."""
 
-    ALLOWED_DOMAINS = ["laws.africa", "africanlii.org"]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.allowed_domains = (
+            pj_settings().allowed_login_domains.split()
+            if pj_settings().allowed_login_domains
+            else None
+        )
 
     def pre_social_login(self, request, sociallogin):
         domain = sociallogin.email_addresses[0].email.split("@", 1)[1]
 
-        if domain not in self.ALLOWED_DOMAINS:
+        if self.allowed_domains and domain not in self.allowed_domains:
             messages.error(request, f"Domain {domain} not allowed.")
             raise ImmediateHttpResponse(redirect_to_login(next="/"))
 
@@ -29,3 +37,6 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 if not social_account:
                     sociallogin.state["process"] = "connect"
                     perform_login(request, user, email_verification="none")
+
+    def is_open_for_signup(self, request, sociallogin):
+        return False

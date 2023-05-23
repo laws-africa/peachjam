@@ -277,7 +277,7 @@ class Judgment(CoreDocument):
         self.title = " ".join(parts)
         self.citation = self.title
 
-    def save(self, *args, **kwargs):
+    def pre_save(self):
         # ensure registry aligns to the court
         if self.registry:
             self.court = self.registry.court
@@ -285,7 +285,7 @@ class Judgment(CoreDocument):
         self.doc_type = "judgment"
         self.assign_mnc()
         self.assign_title()
-        return super().save(*args, **kwargs)
+        super().pre_save()
 
 
 class CaseNumber(models.Model):

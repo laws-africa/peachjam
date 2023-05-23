@@ -32,9 +32,9 @@ class GenericDocument(CoreDocument):
             return super().get_doc_type_display()
         return self.nature.name
 
-    def save(self, *args, **kwargs):
+    def pre_save(self):
         self.doc_type = "generic_document"
-        return super().save(*args, **kwargs)
+        super().pre_save()
 
 
 class LegalInstrument(CoreDocument):
@@ -56,9 +56,9 @@ class LegalInstrument(CoreDocument):
     def get_doc_type_display(self):
         return self.nature.name
 
-    def save(self, *args, **kwargs):
+    def pre_save(self):
         self.doc_type = "legal_instrument"
-        return super().save(*args, **kwargs)
+        super().pre_save()
 
 
 class LegislationManager(CoreDocumentManager):
@@ -85,6 +85,6 @@ class Legislation(CoreDocument):
     def __str__(self):
         return self.title
 
-    def save(self, *args, **kwargs):
+    def pre_save(self):
         self.doc_type = "legislation"
-        return super().save(*args, **kwargs)
+        return super().pre_save()
