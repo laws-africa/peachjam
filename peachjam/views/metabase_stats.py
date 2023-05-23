@@ -8,9 +8,6 @@ class MetabaseStatsView(TemplateView):
     template_name = "peachjam/metabase_stats.html"
 
     def get(self, request, *args, **kwargs):
-        if pj_settings().metabase_dashboard_link:
-            context = self.get_context_data(**kwargs)
-            context["metabase_embed"] = pj_settings().metabase_dashboard_link
-            return self.render_to_response(context)
-        else:
+        if not pj_settings().metabase_dashboard_link:
             raise Http404
+        return super().get(request, *args, **kwargs)

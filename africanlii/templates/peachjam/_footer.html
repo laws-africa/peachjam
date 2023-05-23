@@ -2,9 +2,7 @@
 {% load static %}
 {% load i18n %}
 {% block first-content-column %}
-  <div class="mb-3">
-    <strong>{% trans 'About AfricanLII' %}</strong>
-  </div>
+  <h5>{% trans 'About' %} {{ APP_NAME }}</h5>
   <p>
     {% blocktrans trimmed %}
       AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of
@@ -22,9 +20,11 @@
   <div>
     <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
   </div>
-  <div>
-    <a href="{% url 'metabase_stats' %}">{% trans 'Site Statistics' %}</a>
-  </div>
+  {% if PEACHJAM_SETTINGS.metabase_dashboard_link %}
+    <div>
+      <a href="{% url 'metabase_stats' %}">{% trans 'Site Statistics' %}</a>
+    </div>
+  {% endif %}
 {% endblock %}
 {% block second-content-column %}
   <div class="mb-2">
