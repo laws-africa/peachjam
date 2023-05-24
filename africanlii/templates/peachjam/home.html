@@ -51,9 +51,10 @@
   </section>
   <section class="pb-5 pt-5 bg-light">
     <div class="container">
+      <h2 class="display-6 mb-5">{% trans "Explore the law and policy of the African Union" %}</h2>
       <div class="row">
-        <div class="col-lg-6">
-          <h2 class="mb-4 heading-underlined">{% trans 'African Union Organs' %}</h2>
+        <div class="col-lg-6 mb-3">
+          <h3>{% trans 'African Union Organs' %}</h3>
           <ul class="list-unstyled">
             {% for au_organ in au_organs %}
               <li>
@@ -62,30 +63,8 @@
             {% endfor %}
           </ul>
         </div>
-        <div class="col-lg-6">
-          <h2 class="mb-4 heading-underlined">{% trans 'Regional Economic Communities' %}</h2>
-          <ul class="list-unstyled">
-            {% for rec in recs %}
-              <li>
-                <a href="{% url 'rec_detail_view' rec.locality.place_code %}">{{ rec }}</a>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-6">
-          <h2 class="mb-4 heading-underlined">{% trans 'Regional Courts' %}</h2>
-          <ul class="list-unstyled">
-            {% for court in courts %}
-              <li>
-                <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-        <div class="col-lg-6">
-          <h2 class="mb-4 heading-underlined">{% trans 'African Union Institutions' %}</h2>
+        <div class="col-lg-6 mb-3">
+          <h3>{% trans 'African Union Institutions' %}</h3>
           <ul class="list-unstyled">
             {% for au_institution in au_institutions %}
               <li>
@@ -96,8 +75,28 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-lg-6">
-          <h2 class="mb-4 heading-underlined">{% trans 'African Union Member States' %}</h2>
+        <div class="col-md-6 col-lg-4 mb-3">
+          <h3>{% trans 'Regional Economic Communities' %}</h3>
+          <ul class="list-unstyled">
+            {% for rec in recs %}
+              <li>
+                <a href="{% url 'rec_detail_view' rec.locality.place_code %}">{{ rec }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-md-6 col-lg-4 mb-3">
+          <h3>{% trans 'Regional Courts' %}</h3>
+          <ul class="list-unstyled">
+            {% for court in courts %}
+              <li>
+                <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-lg-4 mb-3">
+          <h3>{% trans 'Member States' %}</h3>
           <p>
             The member states of the African Union are the independent countries within the African continent that collectively work towards the union's goals of promoting unity, economic development, and peace.
           </p>
@@ -109,30 +108,30 @@
   </section>
   <section class="pb-5 pt-5">
     <div class="container">
-      <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
-      {% trans 'View more judgments' as text %}
-      {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
-    </div>
-  </section>
-  <section class="pb-5 pt-5 bg-light">
-    <div class="container">
-      <h2 class="mb-4 heading-underlined">{% trans 'Recent Legal Instruments' %}</h2>
-      {% trans 'View more legal instruments' as text %}
-      {% include 'peachjam/_recent_document_list.html' with documents=recent_legal_instruments view_more_text=text view_more_url_name='agp_legal_instrument_list' %}
-    </div>
-  </section>
-  <section class="pb-5 pt-5">
-    <div class="container">
-      <h2 class="mb-4 heading-underlined">{% trans 'Recent Soft Law' %}</h2>
-      {% trans 'View more Soft Law' as text %}
-      {% include 'peachjam/_recent_document_list.html' with documents=recent_soft_law view_more_text=text view_more_url_name='agp_soft_law_list' %}
-    </div>
-  </section>
-  <section class="pb-5 pt-5 bg-light">
-    <div class="container">
-      <h2 class="mb-4 heading-underlined">{% trans 'Recent Reports and Guides' %}</h2>
-      {% trans 'View more Reports and Guides' as text %}
-      {% include 'peachjam/_recent_document_list.html' with documents=recent_reports_guides view_more_text=text view_more_url_name='agp_reports_guides_list' %}
+      <div class="row">
+        <div class="col-lg-6 mb-3">
+          <h3 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h3>
+          {% trans 'View more judgments' as text %}
+          {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
+        </div>
+        <div class="col-lg-6 mb-3">
+          <h3 class="mb-4 heading-underlined">{% trans 'Recent Legal Instruments' %}</h3>
+          {% trans 'View more legal instruments' as text %}
+          {% include 'peachjam/_recent_document_list.html' with documents=recent_legal_instruments view_more_text=text view_more_url_name='agp_legal_instrument_list' %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-6 mb-3">
+          <h3 class="mb-4 heading-underlined">{% trans 'Recent Soft Law' %}</h3>
+          {% trans 'View more Soft Law' as text %}
+          {% include 'peachjam/_recent_document_list.html' with documents=recent_soft_law view_more_text=text view_more_url_name='agp_soft_law_list' %}
+        </div>
+        <div class="col-lg-6 mb-3">
+          <h2 class="mb-4 heading-underlined">{% trans 'Recent Reports and Guides' %}</h2>
+          {% trans 'View more Reports and Guides' as text %}
+          {% include 'peachjam/_recent_document_list.html' with documents=recent_reports_guides view_more_text=text view_more_url_name='agp_reports_guides_list' %}
+        </div>
+      </div>
     </div>
   </section>
   <section class="pb-5 pt-5">
