@@ -51,7 +51,13 @@
   </section>
   <section class="pb-5 pt-5 bg-light">
     <div class="container">
-      <h2 class="display-6 mb-5">{% trans "Explore the law and policy of the African Union" %}</h2>
+      <h2 class="display-6">{% trans "Explore the law and policy of the African Union" %}</h2>
+      <p class="lead mb-5">
+        {% blocktrans trimmed %}
+          We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
+          with and understand the African Union agenda.
+        {% endblocktrans %}
+      </p>
       <div class="row">
         <div class="col-lg-6 mb-3">
           <h3>{% trans 'African Union Organs' %}</h3>
@@ -131,6 +137,43 @@
           {% trans 'View more Reports and Guides' as text %}
           {% include 'peachjam/_recent_document_list.html' with documents=recent_reports_guides view_more_text=text view_more_url_name='agp_reports_guides_list' %}
         </div>
+      </div>
+    </div>
+  </section>
+  <section class="pb-5 pt-5 bg-light">
+    <div class="container">
+      <h2 class="display-6">{% trans "Explore African national legal information" %}</h2>
+      <p class="lead">
+        {% blocktrans trimmed %}
+        Explore African national legislation and court judgments from Legal Information Institutes across Africa.
+        {% endblocktrans %}
+      </p>
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
+            <input type="text"
+                   class="form-control flex-grow-1"
+                   placeholder="{% blocktrans %}Search African legal information{% endblocktrans %}"
+                   aria-label="{% blocktrans %}Search African legal information{% endblocktrans %}"
+                   aria-describedby="button-addon2"
+                   name="q"/>
+            <button type="submit" class="btn btn-primary ms-2">{% trans "Search" %}</button>
+          </form>
+        </div>
+      </div>
+      <div class="row">
+        {% for lii in liis %}
+          <div class="col-6 col-md-4 col-lg-3">
+            <div class="card lii-card mb-3">
+              <div class="card-body">
+                <img src="{{ lii.logo }}" alt="{{ lii.name }}" class="mb-3"/>
+                <h5 class="card-title">{{ lii.country }}</h5>
+                <div>{{ lii.name }}</div>
+                <a href="{{ lii.url }}" class="stretched-link">{{ lii.url }}</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
       </div>
     </div>
   </section>
