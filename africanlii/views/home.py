@@ -4,7 +4,7 @@ from africanlii.models import (
     MemberState,
     RegionalEconomicCommunity,
 )
-from peachjam.models import Article, CoreDocument, GenericDocument
+from peachjam.models import Article, CoreDocument, GenericDocument, Taxonomy
 from peachjam.views import HomePageView as BaseHomePageView
 
 
@@ -34,9 +34,10 @@ class HomePageView(BaseHomePageView):
         )
         context["recs"] = RegionalEconomicCommunity.objects.prefetch_related("locality")
         context["member_states"] = MemberState.objects.prefetch_related("country")
+        context["taxonomies"] = Taxonomy.get_tree()
         context["liis"] = [
             {
-                "name": "GhalII",
+                "name": "GhaLII",
                 "country": "Ghana",
                 "url": "https://ghalii.org",
                 "logo": "/images/liis/ghalii.png",
@@ -60,7 +61,7 @@ class HomePageView(BaseHomePageView):
                 "logo": "/images/liis/malawilii.png",
             },
             {
-                "name": "Namiblii",
+                "name": "NamibLII",
                 "country": "Namibia",
                 "url": "https://namiblii.org",
                 "logo": "/images/liis/namiblii.png",
@@ -114,5 +115,7 @@ class HomePageView(BaseHomePageView):
                 "logo": "/images/liis/zimlii.png",
             },
         ]
+        for lii in context["liis"]:
+            lii["domain"] = lii["url"].split("/", 3)[2]
 
         return context

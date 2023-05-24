@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-13 09:08+0200\n"
+"POT-Creation-Date: 2023-05-24 15:05+0200\n"
 "PO-Revision-Date: 2023-05-16 07:12\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -21,23 +21,29 @@ msgstr ""
 msgid "Regional Body"
 msgstr "Órgão Regional"
 
-#: models/au.py:13
+#: apps.py:21
+#, fuzzy
+#| msgid "Regional Body"
+msgid "Regional Bodies"
+msgstr "Órgão Regional"
+
+#: models/au.py:13 models/au.py:33
 msgid "author"
 msgstr "autor"
 
-#: models/au.py:16 models/au.py:32 models/au.py:47
+#: models/au.py:17 models/au.py:37 models/au.py:57 models/au.py:76
 msgid "profile"
 msgstr "perfil"
 
-#: models/au.py:29
+#: models/au.py:53
 msgid "locality"
 msgstr "localidade"
 
-#: models/au.py:36
+#: models/au.py:61
 msgid "Regional economic communities"
 msgstr "Comunidades econômicas regionais"
 
-#: models/au.py:44 models/ratification.py:42
+#: models/au.py:72 models/ratification.py:42
 msgid "country"
 msgstr "País"
 
@@ -81,13 +87,29 @@ msgstr "país de ratificação"
 msgid "ratification countries"
 msgstr "países ratificados"
 
-#: templates/africanlii/_ratification_table.html:5
-msgid "Ratification Title"
-msgstr "Título de Ratificação"
+#: templates/africanlii/_ratification_table.html:2
+msgid "Ratified documents"
+msgstr ""
 
 #: templates/africanlii/_ratification_table.html:6
+msgid "Title"
+msgstr ""
+
+#: templates/africanlii/_ratification_table.html:7
 msgid "Ratification Date"
 msgstr "Data de ratificação"
+
+#: templates/africanlii/_ratification_table.html:8
+#, fuzzy
+#| msgid "deposit date"
+msgid "Deposit Date"
+msgstr "data do depósito"
+
+#: templates/africanlii/_ratification_table.html:9
+#, fuzzy
+#| msgid "signature date"
+msgid "Signature Date"
+msgstr "data da assinatura"
 
 #: templates/africanlii/au_detail_page.html:4
 #: templates/africanlii/au_detail_page.html:11
@@ -113,62 +135,85 @@ msgstr "Para mais informações, visite o <a href=\"https://au.int/\" target=\"_
 
 #: templates/africanlii/au_detail_page.html:38
 #: templates/africanlii/au_organ_detail.html:12
-#: templates/peachjam/_header.html:72 templates/peachjam/home.html:43
+#: templates/peachjam/_header.html:72 templates/peachjam/home.html:64
 msgid "African Union Organs"
 msgstr "Órgãos da União Africana"
 
 #: templates/africanlii/au_detail_page.html:48
 #: templates/africanlii/regional_economic_community_detail.html:12
-#: templates/peachjam/home.html:53
+#: templates/peachjam/home.html:86
 msgid "Regional Economic Communities"
 msgstr "Comunidades Económicas Regionais"
 
-#: templates/africanlii/au_detail_page.html:67
+#: templates/africanlii/au_detail_page.html:60
+#: templates/africanlii/au_institution_detail.html:12
+#: templates/peachjam/_header.html:85 templates/peachjam/home.html:74
+#, fuzzy
+#| msgid "Other African Legal Information Institutions"
+msgid "African Union Institutions"
+msgstr "Outras Instituições Jurídicas Africanas"
+
+#: templates/africanlii/au_detail_page.html:79
 #: templates/africanlii/member_state_detail.html:12
+#: templates/peachjam/home.html:106
 msgid "Member States"
 msgstr "Estados Membros"
 
+#: templates/africanlii/au_institution_detail.html:9
 #: templates/africanlii/au_organ_detail.html:9
 #: templates/africanlii/member_state_detail.html:9
 #: templates/africanlii/regional_economic_community_detail.html:9
 msgid "African Union"
 msgstr "União Africana"
 
+#: templates/africanlii/au_institution_detail.html:37
 #: templates/africanlii/au_organ_detail.html:37
 #: templates/africanlii/member_state_detail.html:37
 #: templates/africanlii/regional_economic_community_detail.html:38
 msgid "No documents found."
 msgstr "Nenhum documento encontrado."
 
-#: templates/peachjam/_footer.html:6
-msgid "About AfricanLII"
-msgstr "Sobre AfricanLII"
+#: templates/africanlii/doc_index_detail.html:8
+#: templates/africanlii/doc_index_first_level.html:7
+#: templates/africanlii/doc_indexes.html:4
+#: templates/africanlii/doc_indexes.html:8
+msgid "Indexes"
+msgstr ""
 
-#: templates/peachjam/_footer.html:9
+#: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:117
+#: templates/peachjam/about.html:4
+msgid "About"
+msgstr "Sobre"
+
+#: templates/peachjam/_footer.html:7
 msgid "AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and federates search across all open access African national law available through the <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Open Law Africa</a> community of LIIs."
 msgstr "AfricanLII é uma plataforma de investigação de acesso aberto para o direito africano, gerida conjuntamente pelo programa AfricanLII da Universidade da Cidade do Cabo e das Leias. Africano LII publica a lei e a política da União Africana e federa busca em toda a legislação nacional africana de acesso aberto disponível através da <a class=\"text-primary\" href=\"https://www.openlawafrica.org/\" target=\"_blank\" rel=\"noreferrer\">Comunidade de Direito Aberto África</a> de LIIs."
 
-#: templates/peachjam/_footer.html:17
+#: templates/peachjam/_footer.html:15
 msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
 msgstr "A publicação do material da União Africana é co-patrocinada pela União Europeia e faz parte do <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">projeto da Aliança de Dados para a Governação</a>."
 
-#: templates/peachjam/_footer.html:23
+#: templates/peachjam/_footer.html:21
 msgid "Terms of Use"
 msgstr "Termos de Utilização"
 
-#: templates/peachjam/_footer.html:28
+#: templates/peachjam/_footer.html:25
+msgid "Site Statistics"
+msgstr ""
+
+#: templates/peachjam/_footer.html:31
 msgid "With support from"
 msgstr "Com apoio de"
 
-#: templates/peachjam/_footer.html:39 templates/peachjam/_footer.html:128
+#: templates/peachjam/_footer.html:42 templates/peachjam/_footer.html:131
 msgid "European Union"
 msgstr "União Europeia"
 
-#: templates/peachjam/_footer.html:44
+#: templates/peachjam/_footer.html:47
 msgid "Other African Legal Information Institutions"
 msgstr "Outras Instituições Jurídicas Africanas"
 
-#: templates/peachjam/_footer.html:108
+#: templates/peachjam/_footer.html:111
 msgid "University of Cape Town"
 msgstr "Universidade da Cidade do Cabo"
 
@@ -217,27 +262,29 @@ msgstr "Órgãos da União Africana (UA)"
 msgid "Regional Economic Communities (RECs)"
 msgstr "Comunidades Económicas Regionais (CERs)"
 
-#: templates/peachjam/_header.html:84 templates/peachjam/_header.html:85
+#: templates/peachjam/_header.html:86
+#, fuzzy
+#| msgid "African Union (AU) Organs"
+msgid "African Union (AU) Institutions"
+msgstr "Órgãos da União Africana (UA)"
+
+#: templates/peachjam/_header.html:91 templates/peachjam/_header.html:92
 msgid "Member states"
 msgstr "Estados membros"
 
-#: templates/peachjam/_header.html:93
+#: templates/peachjam/_header.html:100
 msgid "Topics"
 msgstr "Disciplinas"
 
-#: templates/peachjam/_header.html:98
+#: templates/peachjam/_header.html:105
 msgid "Reports & Guides"
 msgstr "Relatórios e guias"
 
-#: templates/peachjam/_header.html:104
+#: templates/peachjam/_header.html:111
 msgid "Articles"
 msgstr "Artigos"
 
-#: templates/peachjam/_header.html:110 templates/peachjam/about.html:4
-msgid "About"
-msgstr "Sobre"
-
-#: templates/peachjam/_header.html:116
+#: templates/peachjam/_header.html:123
 msgid "Help"
 msgstr "Socorro"
 
@@ -305,79 +352,116 @@ msgstr "Nossos parceiros"
 msgid "Home"
 msgstr "Página inicial"
 
-#: templates/peachjam/home.html:10
-msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
-msgstr "Digitalizamos a lei e a política da Arquitetura da Governação Africana e ajudamos os Africanos e o mundo a ligarem-se e a compreenderem a agenda da União Africana."
+#: templates/peachjam/home.html:11
+msgid "Legal research across African borders"
+msgstr ""
 
-#: templates/peachjam/home.html:16
-#, python-format
-msgid "Search through %(documents_count)s African Union documents on the AfricanLII platform."
+#: templates/peachjam/home.html:12
+msgid "Research digitised African regional and national law."
+msgstr ""
+
+#: templates/peachjam/home.html:14
+msgid "Policies and regional laws of the African Union"
+msgstr ""
+
+#: templates/peachjam/home.html:17
+msgid "National law and policy"
+msgstr ""
+
+#: templates/peachjam/home.html:30
+#, fuzzy, python-format
+#| msgid "Search through %(documents_count)s African Union documents on the AfricanLII platform."
+msgid "Search %(documents_count)s African Union documents and legal information from %(lii_count)s African countries."
 msgstr "Pesquise %(documents_count)s documentos da União Africana na plataforma AfricanLII."
 
-#: templates/peachjam/home.html:25 templates/peachjam/home.html:26
+#: templates/peachjam/home.html:40 templates/peachjam/home.html:41
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr "Pesquisar %(APP_NAME)s"
 
-#: templates/peachjam/home.html:30
+#: templates/peachjam/home.html:44 templates/peachjam/home.html:161
 msgid "Search"
 msgstr "Pesquisa"
 
-#: templates/peachjam/home.html:33
+#: templates/peachjam/home.html:47
 msgid "Advanced search"
 msgstr "Pesquisa avançada"
 
-#: templates/peachjam/home.html:65
+#: templates/peachjam/home.html:55
+msgid "Explore the law and policy of the African Union"
+msgstr ""
+
+#: templates/peachjam/home.html:57
+msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
+msgstr "Digitalizamos a lei e a política da Arquitetura da Governação Africana e ajudamos os Africanos e o mundo a ligarem-se e a compreenderem a agenda da União Africana."
+
+#: templates/peachjam/home.html:96
 msgid "Regional Courts"
 msgstr "Tribunais Regionais"
 
-#: templates/peachjam/home.html:75
-msgid "African Union Member States"
-msgstr "Estados Membros da União Africana"
-
-#: templates/peachjam/home.html:80
+#: templates/peachjam/home.html:111
 msgid "Explore Member States"
 msgstr "Explorar Estados Membros"
 
-#: templates/peachjam/home.html:87
+#: templates/peachjam/home.html:120
 msgid "Recent Judgments"
 msgstr "Julgamentos Recentes"
 
-#: templates/peachjam/home.html:88
+#: templates/peachjam/home.html:121
 msgid "View more judgments"
 msgstr "Ver mais julgamentos"
 
-#: templates/peachjam/home.html:94
+#: templates/peachjam/home.html:125
 msgid "Recent Legal Instruments"
 msgstr "Instrumentos Jurídicos Recentes"
 
-#: templates/peachjam/home.html:95
+#: templates/peachjam/home.html:126
 msgid "View more legal instruments"
 msgstr "Ver mais instrumentos jurídicos"
 
-#: templates/peachjam/home.html:101
+#: templates/peachjam/home.html:132
 msgid "Recent Soft Law"
 msgstr "Lei branda recente"
 
-#: templates/peachjam/home.html:102
+#: templates/peachjam/home.html:133
 msgid "View more Soft Law"
 msgstr "Veja mais Soft Law"
 
-#: templates/peachjam/home.html:108
+#: templates/peachjam/home.html:137
 msgid "Recent Reports and Guides"
 msgstr "Relatórios e guias recentes"
 
-#: templates/peachjam/home.html:109
+#: templates/peachjam/home.html:138
 msgid "View more Reports and Guides"
 msgstr "Veja mais relatórios e guias"
 
-#: templates/peachjam/home.html:115
+#: templates/peachjam/home.html:146
+#, fuzzy
+#| msgid "African Legal Information"
+msgid "Explore African national legal information"
+msgstr "Informações Legais Africanas"
+
+#: templates/peachjam/home.html:148
+msgid "Explore African national legislation and court judgments from Legal Information Institutes across Africa."
+msgstr ""
+
+#: templates/peachjam/home.html:157 templates/peachjam/home.html:158
+#, fuzzy
+#| msgid "African Legal Information"
+msgid "Search African legal information"
+msgstr "Informações Legais Africanas"
+
+#: templates/peachjam/home.html:184
 msgid "Latest Commentary"
 msgstr "Comentário mais recente"
 
-#: templates/peachjam/home.html:117
+#: templates/peachjam/home.html:187
 msgid "View more commentary"
 msgstr "Ver mais comentários"
+
+#: templates/peachjam/home.html:193
+msgid "Collections"
+msgstr ""
 
 #: templates/peachjam/reports_guides_list.html:4
 #: templates/peachjam/reports_guides_list.html:7
@@ -388,3 +472,11 @@ msgstr "Relatórios e guias"
 msgid "Search regional and national African legal information."
 msgstr "Pesquise informações legais africanas regionais e nacionais."
 
+#~ msgid "Ratification Title"
+#~ msgstr "Título de Ratificação"
+
+#~ msgid "About AfricanLII"
+#~ msgstr "Sobre AfricanLII"
+
+#~ msgid "African Union Member States"
+#~ msgstr "Estados Membros da União Africana"

@@ -4,15 +4,17 @@
   {% trans 'Home' %}
 {% endblock %}
 {% block page-content %}
-  <section class="pb-5 pt-5">
+  <section class="py-5">
     <div class="container">
       <div class="row align-items-center mb-5">
         <div class="col-lg-7">
-          <p class="display-6 text-left">
-            {% blocktrans trimmed %}
-            We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
-            with and understand the African Union agenda.
-            {% endblocktrans %}
+          <p class="display-5 text-left mb-3 fw-bold">{% trans "Legal research across African borders" %}</p>
+          <p class="display-6 text-left mb-5">{% trans "Research digitised African regional and national law." %}</p>
+          <p class="display-7 text-left my-4">
+            <a href="#au" class="text-decoration-none">→ {% trans "Policies and regional laws of the African Union" %}</a>
+          </p>
+          <p class="display-7 text-left my-4">
+            <a href="#national" class="text-decoration-none">→ {% trans "National law and policy" %}</a>
           </p>
         </div>
         <div class="col-lg-5">
@@ -23,10 +25,10 @@
                   allowfullscreen></iframe>
         </div>
       </div>
-      <div class="row my-4">
+      <div class="row pt-5 mb-4">
         <p class="display-7 text-center">
-          {% blocktrans trimmed %}
-          Search through {{ documents_count }} African Union documents on the AfricanLII platform.
+          {% blocktrans trimmed with lii_count=liis|length %}
+          Search {{ documents_count }} African Union documents and legal information from {{ lii_count }} African countries.
           {% endblocktrans %}
         </p>
       </div>
@@ -38,7 +40,6 @@
                    placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                    aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                    aria-describedby="button-addon2"
-                   autofocus
                    name="q"/>
             <button type="submit" class="btn btn-primary btn-lg ms-2">{% trans "Search" %}</button>
           </form>
@@ -49,9 +50,9 @@
       </div>
     </div>
   </section>
-  <section class="pb-5 pt-5 bg-light">
+  <section class="py-5 bg-light">
     <div class="container">
-      <h2 class="display-6">{% trans "Explore the law and policy of the African Union" %}</h2>
+      <h2 class="display-6" id="au">{% trans "Explore the law and policy of the African Union" %}</h2>
       <p class="lead mb-5">
         {% blocktrans trimmed %}
           We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
@@ -112,7 +113,7 @@
       </div>
     </div>
   </section>
-  <section class="pb-5 pt-5">
+  <section class="py-5">
     <div class="container">
       <div class="row">
         <div class="col-lg-6 mb-3">
@@ -140,16 +141,16 @@
       </div>
     </div>
   </section>
-  <section class="pb-5 pt-5 bg-light">
+  <section class="py-5 bg-light">
     <div class="container">
-      <h2 class="display-6">{% trans "Explore African national legal information" %}</h2>
+      <h2 class="display-6" id="national">{% trans "Explore African national legal information" %}</h2>
       <p class="lead">
         {% blocktrans trimmed %}
         Explore African national legislation and court judgments from Legal Information Institutes across Africa.
         {% endblocktrans %}
       </p>
       <div class="row">
-        <div class="col-md-6 mb-4">
+        <div class="col-md-6 mb-5">
           <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
             <input type="text"
                    class="form-control flex-grow-1"
@@ -169,7 +170,7 @@
                 <img src="{% static lii.logo %}" alt="{{ lii.name }}" class="mb-3"/>
                 <h5 class="card-title">{{ lii.country }}</h5>
                 <div>{{ lii.name }}</div>
-                <a href="{{ lii.url }}" class="stretched-link" target="_blank">{{ lii.url }}</a>
+                <a href="{{ lii.url }}" class="stretched-link" target="_blank">{{ lii.domain }}</a>
               </div>
             </div>
           </div>
@@ -177,11 +178,21 @@
       </div>
     </div>
   </section>
-  <section class="pb-5 pt-5">
+  <section class="py-5">
     <div class="container">
-      <h2 class="mb-4 heading-underlined">{% trans 'Latest Commentary' %}</h2>
+      <h2 class="mb-4 heading-underlined">
+        {% trans 'Latest Commentary' %}
+      </h2>
       {% include 'peachjam/_article_list.html' with articles=recent_articles %}
       <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">{% trans "View more commentary" %}</a>
+    </div>
+  </section>
+  <section class="py-5">
+    <div class="container">
+      <h2 class="mb-4 heading-underlined">
+        {% trans 'Collections' %}
+      </h2>
+      {% include 'peachjam/_taxonomy_list.html' %}
     </div>
   </section>
 {% endblock %}
