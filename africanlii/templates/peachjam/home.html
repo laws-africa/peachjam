@@ -1,5 +1,5 @@
 {% extends "peachjam/home.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}
   {% trans 'Home' %}
 {% endblock %}
@@ -166,10 +166,10 @@
           <div class="col-6 col-md-4 col-lg-3">
             <div class="card lii-card mb-3">
               <div class="card-body">
-                <img src="{{ lii.logo }}" alt="{{ lii.name }}" class="mb-3"/>
+                <img src="{% static lii.logo %}" alt="{{ lii.name }}" class="mb-3"/>
                 <h5 class="card-title">{{ lii.country }}</h5>
                 <div>{{ lii.name }}</div>
-                <a href="{{ lii.url }}" class="stretched-link">{{ lii.url }}</a>
+                <a href="{{ lii.url }}" class="stretched-link" target="_blank">{{ lii.url }}</a>
               </div>
             </div>
           </div>
