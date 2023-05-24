@@ -6,18 +6,33 @@
 {% block page-content %}
   <section class="pb-5 pt-5">
     <div class="container">
-      <p class="display-6 text-center">
-        {% blocktrans trimmed %}
-        We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
-        with and understand the African Union agenda.
-      {% endblocktrans %}
-      </p>
-      <p class="display-6 text-center">
-        {% blocktrans trimmed %}
-        Search through {{ documents_count }} African Union documents on the AfricanLII platform.
-      {% endblocktrans %}
-      </p>
-      <div class="row mt-5">
+      <div class="row mx-3 align-items-center ">
+        <div class="col-lg">
+          <p class="display-6 text-left p-3">
+            {% blocktrans trimmed %}
+            We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
+            with and understand the African Union agenda.
+            {% endblocktrans %}
+          </p>
+        </div>
+        <div class="col-lg">
+          <iframe style="aspect-ratio: 16/9;
+                         width: 100%"
+                  src="https://www.youtube.com/embed/m54qqXDkCfk"
+                  title="YouTube video player"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="row my-4">
+        <p class="display-6 text-center">
+          {% blocktrans trimmed %}
+          Search through {{ documents_count }} African Union documents on the AfricanLII platform.
+          {% endblocktrans %}
+        </p>
+      </div>
+      <div class="row my-4">
         <div class="col-md-9 mx-auto">
           <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
             <input type="text"
