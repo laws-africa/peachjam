@@ -6,27 +6,25 @@
 {% block page-content %}
   <section class="pb-5 pt-5">
     <div class="container">
-      <div class="row mx-3 align-items-center ">
-        <div class="col-lg">
-          <p class="display-6 text-left p-3">
+      <div class="row align-items-center mb-5">
+        <div class="col-lg-7">
+          <p class="display-6 text-left">
             {% blocktrans trimmed %}
             We digitise the law and policy of the African Governance Architecture and help Africans and the world connect
             with and understand the African Union agenda.
             {% endblocktrans %}
           </p>
         </div>
-        <div class="col-lg">
-          <iframe style="aspect-ratio: 16/9;
-                         width: 100%"
+        <div class="col-lg-5">
+          <iframe class="video"
                   src="https://www.youtube.com/embed/m54qqXDkCfk"
                   title="YouTube video player"
-                  frameborder="0"
                   allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowfullscreen></iframe>
         </div>
       </div>
       <div class="row my-4">
-        <p class="display-6 text-center">
+        <p class="display-7 text-center">
           {% blocktrans trimmed %}
           Search through {{ documents_count }} African Union documents on the AfricanLII platform.
           {% endblocktrans %}
