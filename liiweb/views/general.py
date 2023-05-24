@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 
-from peachjam.models import CourtClass, Judgment, Legislation, Taxonomy
+from peachjam.models import Article, CourtClass, Judgment, Legislation, Taxonomy
 
 
 class HomePageView(TemplateView):
@@ -15,6 +15,12 @@ class HomePageView(TemplateView):
             metadata_json__stub=False
         ).order_by("-date")[:10]
         context["taxonomies"] = Taxonomy.get_tree()
+        context["recent_articles"] = (
+            Article.objects.prefetch_related("topics")
+            .filter(published=True)
+            .select_related("author")
+            .order_by("-date")[:5]
+        )
         return context
 
 
