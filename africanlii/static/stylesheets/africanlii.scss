@@ -6,3 +6,15 @@
 footer {
   @extend .bg-dark, .text-white;
 }
+
+.display-7 {
+  font-size: 2rem;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+iframe.video {
+  aspect-ratio: 16/9;
+  width: 100%;
+  border: 0px;
+}

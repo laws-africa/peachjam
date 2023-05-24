@@ -20,7 +20,7 @@ from django.utils.translation import gettext_lazy
 from import_export.admin import ImportExportMixin as BaseImportExportMixin
 from languages_plus.models import Language
 from treebeard.admin import TreeAdmin
-from treebeard.forms import movenodeform_factory
+from treebeard.forms import MoveNodeForm, movenodeform_factory
 
 from peachjam.forms import (
     AttachedFilesForm,
@@ -470,8 +470,17 @@ class DocumentAdmin(admin.ModelAdmin):
     reindex_for_search.short_description = "Re-index for search (background)"
 
 
+class TaxonomyForm(MoveNodeForm):
+    def save(self, commit=True):
+        super().save(commit=commit)
+        # save all children so that the slugs take into account the potentially updated parent
+        for node in self.instance.get_descendants():
+            node.save()
+        return self.instance
+
+
 class TaxonomyAdmin(TreeAdmin):
-    form = movenodeform_factory(Taxonomy)
+    form = movenodeform_factory(Taxonomy, TaxonomyForm)
     readonly_fields = ("slug",)
     inlines = [EntityProfileInline]
 

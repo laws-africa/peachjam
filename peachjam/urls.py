@@ -60,6 +60,7 @@ from peachjam.views import (
     TermsOfUsePageView,
     UserProfileDetailView,
 )
+from peachjam.views.metabase_stats import MetabaseStatsView
 
 # cache duration for most cached pages
 CACHE_DURATION = 60 * 60 * 24
@@ -204,6 +205,7 @@ urlpatterns = [
         "p/<str:partner>/e/popup/<path:frbr_uri>",
         cache_page(CACHE_DURATION)(DocumentPopupView.as_view()),
     ),
+    path("stats", MetabaseStatsView.as_view(), name="metabase_stats"),
 ]
 
 if settings.DEBUG:

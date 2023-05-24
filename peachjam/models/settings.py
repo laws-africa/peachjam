@@ -54,6 +54,10 @@ class PeachJamSettings(BaseModel):
         verbose_name=_("allowed login domains"), max_length=1024, null=True, blank=True
     )
 
+    metabase_dashboard_link = models.URLField(
+        verbose_name=_("metabase dashboard link"), null=True, blank=True
+    )
+
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
 

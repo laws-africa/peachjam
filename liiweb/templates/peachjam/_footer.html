@@ -17,8 +17,18 @@
   <hr/>
 {% endblock %}
 {% block first-content-column %}
-  <h5>{% trans 'About' %}</h5>
+  <h5>{% trans 'About' %} {{ APP_NAME }}</h5>
   {% block about %}{% endblock %}
+  {% block first-content-column-links %}
+    <div>
+      <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
+    </div>
+    {% if PEACHJAM_SETTINGS.metabase_dashboard_link %}
+      <div>
+        <a href="{% url 'metabase_stats' %}">{% trans 'Site Statistics' %}</a>
+      </div>
+    {% endif %}
+  {% endblock %}
 {% endblock %}
 {% block second-content-column %}
   <h5>{% trans 'Our partners' %}</h5>
