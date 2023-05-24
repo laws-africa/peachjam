@@ -24,13 +24,13 @@ class StripDomainPrefixMiddleware:
         return response
 
 
-class RedirectWWWMiddleware:
+class RedirectWWWMiddleware(StripDomainPrefixMiddleware):
     """Redirect from www.example.com to example.com"""
 
     prefix = "www."
 
 
-class RedirectNewMiddleware:
+class RedirectNewMiddleware(StripDomainPrefixMiddleware):
     """Redirect from new.example.com to example.com"""
 
     prefix = "new."
