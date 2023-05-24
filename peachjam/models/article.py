@@ -29,7 +29,7 @@ class Article(models.Model):
     image = models.ImageField(
         _("image"), upload_to=file_location, blank=True, null=True
     )
-    summary = models.TextField(_("summary"))
+    summary = models.TextField(_("summary"), null=True, blank=True)
     slug = models.SlugField(_("slug"), max_length=1024, unique=True)
     published = models.BooleanField(_("published"), default=False)
     topics = models.ManyToManyField(
