@@ -568,16 +568,17 @@ class ArticleAuthorWidget(ForeignKeyWidget):
 
 class ImageWidget(CharWidget):
     def clean(self, value, row=None, *args, **kwargs):
-        try:
-            file_url = value
-            file = download_source_file(file_url)
-            mime, _ = mimetypes.guess_type(file_url)
-            file_ext = mimetypes.guess_extension(mime)
-            return File(file, name=f"{slugify(value[:20])}{file_ext}")
-        except requests.exceptions.RequestException as e:
-            msg = getattr(e, "message", repr(e)) or repr(e)
-            logger.warning(f"Error downloading image: {value} - {msg}")
-            raise ValidationError(f"Error downloading image: {value} - {msg}")
+        if value:
+            try:
+                file_url = value
+                file = download_source_file(file_url)
+                mime, _ = mimetypes.guess_type(file_url)
+                file_ext = mimetypes.guess_extension(mime)
+                return File(file, name=f"{slugify(value[:20])}{file_ext}")
+            except requests.exceptions.RequestException as e:
+                msg = getattr(e, "message", repr(e)) or repr(e)
+                logger.warning(f"Error downloading image: {value} - {msg}")
+                raise ValidationError(f"Error downloading image: {value} - {msg}")
 
 
 class PublishedWidget(BooleanWidget):
