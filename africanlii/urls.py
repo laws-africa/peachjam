@@ -1,4 +1,5 @@
 from django.urls import include, path
+from django.views.generic import RedirectView
 
 from africanlii import views
 
@@ -59,5 +60,27 @@ urlpatterns = [
         views.CustomTaxonomyDetailView.as_view(),
         name="taxonomy_detail",
     ),
+    # redirects for legacy africanlii.org URLS
+    path(
+        "commercial",
+        RedirectView.as_view(
+            permanent=True, url="/indexes/case-indexes/case-indexes-commercial"
+        ),
+    ),
+    path(
+        "environmental",
+        RedirectView.as_view(
+            permanent=True, url="/indexes/case-indexes/case-indexes-environmental"
+        ),
+    ),
+    path(
+        "humanrights",
+        RedirectView.as_view(
+            permanent=True, url="/indexes/case-indexes/case-indexes-human-rights"
+        ),
+    ),
+    path("article", RedirectView.as_view(permanent=True, url="/articles")),
+    path("article/<path:path>", views.ArticleRedirectView.as_view()),
+    # peachjam site URLS
     path("", include("peachjam.urls")),
 ]
