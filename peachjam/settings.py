@@ -75,7 +75,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "log_request_id.middleware.RequestIDMiddleware",
     "peachjam.middleware.RedirectWWWMiddleware",
-    "peachjam.middleware.RedirectNewMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
