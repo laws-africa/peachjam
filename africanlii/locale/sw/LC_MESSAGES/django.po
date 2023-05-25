@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-24 15:05+0200\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"PO-Revision-Date: 2023-05-25 08:22\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -22,10 +22,8 @@ msgid "Regional Body"
 msgstr "Bodi ya Kanda"
 
 #: apps.py:21
-#, fuzzy
-#| msgid "Regional Body"
 msgid "Regional Bodies"
-msgstr "Bodi ya Kanda"
+msgstr "Vyombo vya kanda"
 
 #: models/au.py:13 models/au.py:33
 msgid "author"
@@ -89,27 +87,23 @@ msgstr "nchi zilizoridhia"
 
 #: templates/africanlii/_ratification_table.html:2
 msgid "Ratified documents"
-msgstr ""
+msgstr "Hati zilizoidhinishwa"
 
 #: templates/africanlii/_ratification_table.html:6
 msgid "Title"
-msgstr ""
+msgstr "Mada"
 
 #: templates/africanlii/_ratification_table.html:7
 msgid "Ratification Date"
 msgstr "Tarehe ya Kuridhiwa"
 
 #: templates/africanlii/_ratification_table.html:8
-#, fuzzy
-#| msgid "deposit date"
 msgid "Deposit Date"
-msgstr "tarehe ya kuweka"
+msgstr "Tarehe ya Kuweka"
 
 #: templates/africanlii/_ratification_table.html:9
-#, fuzzy
-#| msgid "signature date"
 msgid "Signature Date"
-msgstr "tarehe ya saini"
+msgstr "Tarehe ya Saini"
 
 #: templates/africanlii/au_detail_page.html:4
 #: templates/africanlii/au_detail_page.html:11
@@ -148,10 +142,8 @@ msgstr "Jumuiya za Kiuchumi za Kanda"
 #: templates/africanlii/au_detail_page.html:60
 #: templates/africanlii/au_institution_detail.html:12
 #: templates/peachjam/_header.html:85 templates/peachjam/home.html:74
-#, fuzzy
-#| msgid "Other African Legal Information Institutions"
 msgid "African Union Institutions"
-msgstr "Taasisi Nyingine za Kisheria za Afrika"
+msgstr "Taasisi za Umoja wa Afrika"
 
 #: templates/africanlii/au_detail_page.html:79
 #: templates/africanlii/member_state_detail.html:12
@@ -178,7 +170,7 @@ msgstr "Hakuna nyaraka zilizopatikana."
 #: templates/africanlii/doc_indexes.html:4
 #: templates/africanlii/doc_indexes.html:8
 msgid "Indexes"
-msgstr ""
+msgstr "Fahirisi"
 
 #: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:117
 #: templates/peachjam/about.html:4
@@ -199,7 +191,7 @@ msgstr "Masharti ya matumizi"
 
 #: templates/peachjam/_footer.html:25
 msgid "Site Statistics"
-msgstr ""
+msgstr "Takwimu za Tovuti"
 
 #: templates/peachjam/_footer.html:31
 msgid "With support from"
@@ -263,10 +255,8 @@ msgid "Regional Economic Communities (RECs)"
 msgstr "Jumuiya za Kiuchumi za Kikanda (RECs)"
 
 #: templates/peachjam/_header.html:86
-#, fuzzy
-#| msgid "African Union (AU) Organs"
 msgid "African Union (AU) Institutions"
-msgstr "Mashirika ya Umoja wa Afrika (AU)."
+msgstr "Taasisi za Umoja wa Afrika (AU)."
 
 #: templates/peachjam/_header.html:91 templates/peachjam/_header.html:92
 msgid "Member states"
@@ -354,25 +344,24 @@ msgstr "Nyumbani"
 
 #: templates/peachjam/home.html:11
 msgid "Legal research across African borders"
-msgstr ""
+msgstr "Utafiti wa kisheria katika mipaka ya Afrika"
 
 #: templates/peachjam/home.html:12
 msgid "Research digitised African regional and national law."
-msgstr ""
+msgstr "Utafiti uliweka kidigitali sheria za kikanda na kitaifa za Kiafrika."
 
 #: templates/peachjam/home.html:14
 msgid "Policies and regional laws of the African Union"
-msgstr ""
+msgstr "Sera na sheria za kikanda za Umoja wa Afrika"
 
 #: templates/peachjam/home.html:17
 msgid "National law and policy"
-msgstr ""
+msgstr "Sheria na sera za kitaifa"
 
 #: templates/peachjam/home.html:30
-#, fuzzy, python-format
-#| msgid "Search through %(documents_count)s African Union documents on the AfricanLII platform."
+#, python-format
 msgid "Search %(documents_count)s African Union documents and legal information from %(lii_count)s African countries."
-msgstr "Tafuta kupitia hati %(documents_count)s za Umoja wa Afrika kwenye jukwaa la AfricanLII."
+msgstr "Tafuta hati %(documents_count)s za Umoja wa Afrika na taarifa za kisheria kutoka nchi %(lii_count)s za Afrika."
 
 #: templates/peachjam/home.html:40 templates/peachjam/home.html:41
 #, python-format
@@ -389,7 +378,7 @@ msgstr "Utafutaji wa kina"
 
 #: templates/peachjam/home.html:55
 msgid "Explore the law and policy of the African Union"
-msgstr ""
+msgstr "Chunguza sheria na sera ya Umoja wa Afrika"
 
 #: templates/peachjam/home.html:57
 msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
@@ -436,20 +425,16 @@ msgid "View more Reports and Guides"
 msgstr "Tazama Ripoti na Miongozo zaidi"
 
 #: templates/peachjam/home.html:146
-#, fuzzy
-#| msgid "African Legal Information"
 msgid "Explore African national legal information"
-msgstr "Taarifa za Kisheria za Afrika"
+msgstr "Gundua taarifa za kisheria za kitaifa za Kiafrika"
 
 #: templates/peachjam/home.html:148
 msgid "Explore African national legislation and court judgments from Legal Information Institutes across Africa."
-msgstr ""
+msgstr "Gundua sheria za kitaifa za Kiafrika na hukumu za mahakama kutoka Taasisi za Habari za Kisheria kote barani Afrika."
 
 #: templates/peachjam/home.html:157 templates/peachjam/home.html:158
-#, fuzzy
-#| msgid "African Legal Information"
 msgid "Search African legal information"
-msgstr "Taarifa za Kisheria za Afrika"
+msgstr "Tafuta habari za kisheria za Kiafrika"
 
 #: templates/peachjam/home.html:184
 msgid "Latest Commentary"
@@ -461,7 +446,7 @@ msgstr "Tazama maoni zaidi"
 
 #: templates/peachjam/home.html:193
 msgid "Collections"
-msgstr ""
+msgstr "Makusanyo"
 
 #: templates/peachjam/reports_guides_list.html:4
 #: templates/peachjam/reports_guides_list.html:7
@@ -472,11 +457,3 @@ msgstr "Ripoti na Miongozo"
 msgid "Search regional and national African legal information."
 msgstr "Tafuta taarifa za kisheria za kikanda na kitaifa za Afrika."
 
-#~ msgid "Ratification Title"
-#~ msgstr "Kichwa cha Uidhinishaji"
-
-#~ msgid "About AfricanLII"
-#~ msgstr "Kuhusu AfricanLII"
-
-#~ msgid "African Union Member States"
-#~ msgstr "Nchi Wanachama wa Umoja wa Afrika"
