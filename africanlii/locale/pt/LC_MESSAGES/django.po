@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-24 15:05+0200\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"PO-Revision-Date: 2023-05-25 08:22\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -22,10 +22,8 @@ msgid "Regional Body"
 msgstr "Órgão Regional"
 
 #: apps.py:21
-#, fuzzy
-#| msgid "Regional Body"
 msgid "Regional Bodies"
-msgstr "Órgão Regional"
+msgstr "Órgãos Regionais"
 
 #: models/au.py:13 models/au.py:33
 msgid "author"
@@ -89,27 +87,23 @@ msgstr "países ratificados"
 
 #: templates/africanlii/_ratification_table.html:2
 msgid "Ratified documents"
-msgstr ""
+msgstr "Documentos ratificados"
 
 #: templates/africanlii/_ratification_table.html:6
 msgid "Title"
-msgstr ""
+msgstr "Título"
 
 #: templates/africanlii/_ratification_table.html:7
 msgid "Ratification Date"
 msgstr "Data de ratificação"
 
 #: templates/africanlii/_ratification_table.html:8
-#, fuzzy
-#| msgid "deposit date"
 msgid "Deposit Date"
-msgstr "data do depósito"
+msgstr "Data do Depósito"
 
 #: templates/africanlii/_ratification_table.html:9
-#, fuzzy
-#| msgid "signature date"
 msgid "Signature Date"
-msgstr "data da assinatura"
+msgstr "Data da Assinatura"
 
 #: templates/africanlii/au_detail_page.html:4
 #: templates/africanlii/au_detail_page.html:11
@@ -148,10 +142,8 @@ msgstr "Comunidades Económicas Regionais"
 #: templates/africanlii/au_detail_page.html:60
 #: templates/africanlii/au_institution_detail.html:12
 #: templates/peachjam/_header.html:85 templates/peachjam/home.html:74
-#, fuzzy
-#| msgid "Other African Legal Information Institutions"
 msgid "African Union Institutions"
-msgstr "Outras Instituições Jurídicas Africanas"
+msgstr "Instituições da União Africana"
 
 #: templates/africanlii/au_detail_page.html:79
 #: templates/africanlii/member_state_detail.html:12
@@ -178,7 +170,7 @@ msgstr "Nenhum documento encontrado."
 #: templates/africanlii/doc_indexes.html:4
 #: templates/africanlii/doc_indexes.html:8
 msgid "Indexes"
-msgstr ""
+msgstr "Índices"
 
 #: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:117
 #: templates/peachjam/about.html:4
@@ -199,7 +191,7 @@ msgstr "Termos de Utilização"
 
 #: templates/peachjam/_footer.html:25
 msgid "Site Statistics"
-msgstr ""
+msgstr "Estatísticas do site"
 
 #: templates/peachjam/_footer.html:31
 msgid "With support from"
@@ -263,10 +255,8 @@ msgid "Regional Economic Communities (RECs)"
 msgstr "Comunidades Económicas Regionais (CERs)"
 
 #: templates/peachjam/_header.html:86
-#, fuzzy
-#| msgid "African Union (AU) Organs"
 msgid "African Union (AU) Institutions"
-msgstr "Órgãos da União Africana (UA)"
+msgstr "Instituições da União Africana (UA)"
 
 #: templates/peachjam/_header.html:91 templates/peachjam/_header.html:92
 msgid "Member states"
@@ -354,25 +344,24 @@ msgstr "Página inicial"
 
 #: templates/peachjam/home.html:11
 msgid "Legal research across African borders"
-msgstr ""
+msgstr "Pesquisa jurídica através das fronteiras africanas"
 
 #: templates/peachjam/home.html:12
 msgid "Research digitised African regional and national law."
-msgstr ""
+msgstr "Pesquise o direito regional e nacional africano digitalizado."
 
 #: templates/peachjam/home.html:14
 msgid "Policies and regional laws of the African Union"
-msgstr ""
+msgstr "Políticas e leis regionais da União Africana"
 
 #: templates/peachjam/home.html:17
 msgid "National law and policy"
-msgstr ""
+msgstr "Lei e política nacional"
 
 #: templates/peachjam/home.html:30
-#, fuzzy, python-format
-#| msgid "Search through %(documents_count)s African Union documents on the AfricanLII platform."
+#, python-format
 msgid "Search %(documents_count)s African Union documents and legal information from %(lii_count)s African countries."
-msgstr "Pesquise %(documents_count)s documentos da União Africana na plataforma AfricanLII."
+msgstr "Pesquise %(documents_count)s documentos da União Africana e informações legais de %(lii_count)s países africanos."
 
 #: templates/peachjam/home.html:40 templates/peachjam/home.html:41
 #, python-format
@@ -389,7 +378,7 @@ msgstr "Pesquisa avançada"
 
 #: templates/peachjam/home.html:55
 msgid "Explore the law and policy of the African Union"
-msgstr ""
+msgstr "Explore a lei e a política da União Africana"
 
 #: templates/peachjam/home.html:57
 msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
@@ -436,20 +425,16 @@ msgid "View more Reports and Guides"
 msgstr "Veja mais relatórios e guias"
 
 #: templates/peachjam/home.html:146
-#, fuzzy
-#| msgid "African Legal Information"
 msgid "Explore African national legal information"
-msgstr "Informações Legais Africanas"
+msgstr "Explore as informações jurídicas nacionais africanas"
 
 #: templates/peachjam/home.html:148
 msgid "Explore African national legislation and court judgments from Legal Information Institutes across Africa."
-msgstr ""
+msgstr "Explore a legislação nacional africana e as decisões judiciais dos Institutos de Informação Jurídica em toda a África."
 
 #: templates/peachjam/home.html:157 templates/peachjam/home.html:158
-#, fuzzy
-#| msgid "African Legal Information"
 msgid "Search African legal information"
-msgstr "Informações Legais Africanas"
+msgstr "Pesquisar informações legais africanas"
 
 #: templates/peachjam/home.html:184
 msgid "Latest Commentary"
@@ -461,7 +446,7 @@ msgstr "Ver mais comentários"
 
 #: templates/peachjam/home.html:193
 msgid "Collections"
-msgstr ""
+msgstr "Coleções"
 
 #: templates/peachjam/reports_guides_list.html:4
 #: templates/peachjam/reports_guides_list.html:7
@@ -472,11 +457,3 @@ msgstr "Relatórios e guias"
 msgid "Search regional and national African legal information."
 msgstr "Pesquise informações legais africanas regionais e nacionais."
 
-#~ msgid "Ratification Title"
-#~ msgstr "Título de Ratificação"
-
-#~ msgid "About AfricanLII"
-#~ msgstr "Sobre AfricanLII"
-
-#~ msgid "African Union Member States"
-#~ msgstr "Estados Membros da União Africana"

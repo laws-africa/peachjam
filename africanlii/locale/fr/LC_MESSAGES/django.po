@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-24 15:05+0200\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"PO-Revision-Date: 2023-05-25 08:22\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -22,10 +22,8 @@ msgid "Regional Body"
 msgstr "Corps régional"
 
 #: apps.py:21
-#, fuzzy
-#| msgid "Regional Body"
 msgid "Regional Bodies"
-msgstr "Corps régional"
+msgstr "Organismes régionaux"
 
 #: models/au.py:13 models/au.py:33
 msgid "author"
@@ -89,25 +87,21 @@ msgstr "Pays de ratification"
 
 #: templates/africanlii/_ratification_table.html:2
 msgid "Ratified documents"
-msgstr ""
+msgstr "Documents ratifiés"
 
 #: templates/africanlii/_ratification_table.html:6
 msgid "Title"
-msgstr ""
+msgstr "Titre"
 
 #: templates/africanlii/_ratification_table.html:7
 msgid "Ratification Date"
 msgstr "Date de ratification"
 
 #: templates/africanlii/_ratification_table.html:8
-#, fuzzy
-#| msgid "deposit date"
 msgid "Deposit Date"
 msgstr "Date de dépôt"
 
 #: templates/africanlii/_ratification_table.html:9
-#, fuzzy
-#| msgid "signature date"
 msgid "Signature Date"
 msgstr "Date de signature"
 
@@ -148,10 +142,8 @@ msgstr "Communautés économiques régionales"
 #: templates/africanlii/au_detail_page.html:60
 #: templates/africanlii/au_institution_detail.html:12
 #: templates/peachjam/_header.html:85 templates/peachjam/home.html:74
-#, fuzzy
-#| msgid "Other African Legal Information Institutions"
 msgid "African Union Institutions"
-msgstr "Autres Institutions Africaines d'information Juridique"
+msgstr "Institutions de l'Union africaine"
 
 #: templates/africanlii/au_detail_page.html:79
 #: templates/africanlii/member_state_detail.html:12
@@ -178,7 +170,7 @@ msgstr "Aucun document trouvé."
 #: templates/africanlii/doc_indexes.html:4
 #: templates/africanlii/doc_indexes.html:8
 msgid "Indexes"
-msgstr ""
+msgstr "Index"
 
 #: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:117
 #: templates/peachjam/about.html:4
@@ -199,7 +191,7 @@ msgstr "Termes et conditions d'utilisation"
 
 #: templates/peachjam/_footer.html:25
 msgid "Site Statistics"
-msgstr ""
+msgstr "Statistiques du site"
 
 #: templates/peachjam/_footer.html:31
 msgid "With support from"
@@ -263,10 +255,8 @@ msgid "Regional Economic Communities (RECs)"
 msgstr "Communautés économiques régionales (CER)"
 
 #: templates/peachjam/_header.html:86
-#, fuzzy
-#| msgid "African Union (AU) Organs"
 msgid "African Union (AU) Institutions"
-msgstr "Organes de l'Union africaine (UA)"
+msgstr "Institutions de l'Union africaine (UA)"
 
 #: templates/peachjam/_header.html:91 templates/peachjam/_header.html:92
 msgid "Member states"
@@ -354,25 +344,24 @@ msgstr "Accueil"
 
 #: templates/peachjam/home.html:11
 msgid "Legal research across African borders"
-msgstr ""
+msgstr "Recherche juridique au-delà des frontières africaines"
 
 #: templates/peachjam/home.html:12
 msgid "Research digitised African regional and national law."
-msgstr ""
+msgstr "Recherche numérisée sur le droit régional et national africain."
 
 #: templates/peachjam/home.html:14
 msgid "Policies and regional laws of the African Union"
-msgstr ""
+msgstr "Politiques et lois régionales de l'Union africaine"
 
 #: templates/peachjam/home.html:17
 msgid "National law and policy"
-msgstr ""
+msgstr "Législation et politique nationale"
 
 #: templates/peachjam/home.html:30
-#, fuzzy, python-format
-#| msgid "Search through %(documents_count)s African Union documents on the AfricanLII platform."
+#, python-format
 msgid "Search %(documents_count)s African Union documents and legal information from %(lii_count)s African countries."
-msgstr "Recherchez parmi %(documents_count)s documents de l'Union africaine sur la plateforme AfricanLII."
+msgstr "Rechercher %(documents_count)s documents de l'Union africaine et informations juridiques de %(lii_count)s pays africains."
 
 #: templates/peachjam/home.html:40 templates/peachjam/home.html:41
 #, python-format
@@ -389,7 +378,7 @@ msgstr "Recherche avancée"
 
 #: templates/peachjam/home.html:55
 msgid "Explore the law and policy of the African Union"
-msgstr ""
+msgstr "Explorez la loi et la politique de l'Union africaine"
 
 #: templates/peachjam/home.html:57
 msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
@@ -436,20 +425,16 @@ msgid "View more Reports and Guides"
 msgstr "Afficher plus de rapports et de guides"
 
 #: templates/peachjam/home.html:146
-#, fuzzy
-#| msgid "African Legal Information"
 msgid "Explore African national legal information"
-msgstr "Informations juridiques africaines"
+msgstr "Explorer les informations juridiques nationales africaines"
 
 #: templates/peachjam/home.html:148
 msgid "Explore African national legislation and court judgments from Legal Information Institutes across Africa."
-msgstr ""
+msgstr "Explorez la législation nationale africaine et les jugements des tribunaux des instituts d'information juridique à travers l'Afrique."
 
 #: templates/peachjam/home.html:157 templates/peachjam/home.html:158
-#, fuzzy
-#| msgid "African Legal Information"
 msgid "Search African legal information"
-msgstr "Informations juridiques africaines"
+msgstr "Rechercher des informations juridiques africaines"
 
 #: templates/peachjam/home.html:184
 msgid "Latest Commentary"
@@ -461,7 +446,7 @@ msgstr "Voir plus de commentaires"
 
 #: templates/peachjam/home.html:193
 msgid "Collections"
-msgstr ""
+msgstr "Collections"
 
 #: templates/peachjam/reports_guides_list.html:4
 #: templates/peachjam/reports_guides_list.html:7
@@ -472,11 +457,3 @@ msgstr "Rapports et tutoriels"
 msgid "Search regional and national African legal information."
 msgstr "Rechercher des informations juridiques africaines régionales et nationales."
 
-#~ msgid "Ratification Title"
-#~ msgstr "Titre de ratification"
-
-#~ msgid "About AfricanLII"
-#~ msgstr "À propos d'AfricanLII"
-
-#~ msgid "African Union Member States"
-#~ msgstr "États membres de l'Union africaine"
