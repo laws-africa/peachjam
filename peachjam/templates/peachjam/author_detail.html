@@ -4,6 +4,7 @@
 {% block page-title %}
   <h1 class="mt-4">{% blocktrans %} Documents by {{ author }} {% endblocktrans %}</h1>
   {% include 'peachjam/_document_count.html' %}
+  {% include 'peachjam/_quick_search.html' %}
 {% endblock %}
 {% block entity-profile %}
   {% with entity_profile_title=author entity_profile=author.entity_profile.first %}
