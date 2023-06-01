@@ -8,6 +8,7 @@
     {% block article-list-title %}
       <h1 class="my-4">{% trans "Latest Articles" %}</h1>
     {% endblock %}
+    {% include 'peachjam/_years_list.html' with showallyears=True %}
     {% include "peachjam/_article_list.html" %}
     {% include 'peachjam/_pagination.html' %}
   </div>

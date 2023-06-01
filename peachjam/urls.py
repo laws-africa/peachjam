@@ -31,7 +31,9 @@ from peachjam.views import (
     AboutPageView,
     ArticleDetailView,
     ArticleListView,
+    ArticleMonthArchiveView,
     ArticleTopicListView,
+    ArticleYearArchiveView,
     AuthorDetailView,
     BookListView,
     CourtDetailView,
@@ -184,6 +186,21 @@ urlpatterns = [
         "articles/<str:date>/<str:author>/<slug:slug>",
         ArticleDetailView.as_view(),
         name="article_detail",
+    ),
+    path(
+        "articles/<int:year>/",
+        ArticleYearArchiveView.as_view(),
+        name="article_year_archive",
+    ),
+    path(
+        "<int:year>/<str:month>/",
+        ArticleMonthArchiveView.as_view(),
+        name="archive_month",
+    ),
+    path(
+        "articles/year/<int:year>/month/<int:month>/",
+        ArticleMonthArchiveView.as_view(),
+        name="month-archive",
     ),
     path("users/<username>", UserProfileDetailView.as_view(), name="user_profile"),
     path(
