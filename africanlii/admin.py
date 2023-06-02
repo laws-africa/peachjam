@@ -9,7 +9,8 @@ from africanlii.models import (
     RatificationCountry,
     RegionalEconomicCommunity,
 )
-from peachjam.admin import EntityProfileInline
+from africanlii.resources import RatificationResource
+from peachjam.admin import EntityProfileInline, ImportExportMixin
 
 
 class RatificationCountryAdmin(admin.TabularInline):
@@ -23,8 +24,9 @@ class RatificationCountryAdmin(admin.TabularInline):
 
 
 @admin.register(Ratification)
-class RatificationAdmin(admin.ModelAdmin):
+class RatificationAdmin(ImportExportMixin, admin.ModelAdmin):
     inlines = (RatificationCountryAdmin,)
+    resource_class = RatificationResource
 
 
 @admin.register(AfricanUnionOrgan)
