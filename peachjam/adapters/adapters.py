@@ -192,11 +192,15 @@ class IndigoAdapter(Adapter):
         logger.info(f"Importing as {model}")
 
         if document["subtype"]:
-            document_nature_name = " ".join(
-                [name for name in document["subtype"].split("-")]
-            ).capitalize()
+            if document["type_name"]:
+                document_nature_name = document["type_name"]
+            else:
+                document_nature_name = " ".join(
+                    [name for name in document["subtype"].split("-")]
+                ).capitalize()
             field_data["nature"] = DocumentNature.objects.update_or_create(
-                code=document["subtype"], defaults={"name": document_nature_name}
+                code=slugify(document_nature_name),
+                defaults={"name": document_nature_name},
             )[0]
 
         if hasattr(model, "author") and frbr_uri.actor:
