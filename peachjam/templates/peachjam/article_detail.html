@@ -36,7 +36,7 @@
               {% endfor %}
             </ul>
           </header>
-          <p class="lead">{{ article.summary }}</p>
+          {% if article.summary %}<p class="lead">{{ article.summary }}</p>{% endif %}
           <div class="article-body">{{ article.body|safe }}</div>
         </article>
       </div>

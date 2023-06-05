@@ -5,11 +5,26 @@
 {% endblock title %}
 {% block page-content %}
   <div class="container">
-    {% block article-list-title %}
-      <h1 class="my-4">{% trans "Latest Articles" %}</h1>
-    {% endblock %}
-    {% include 'peachjam/_years_list.html' with showallyears=True %}
-    {% include "peachjam/_article_list.html" %}
-    {% include 'peachjam/_pagination.html' %}
-  </div>
-{% endblock page-content %}
+    {% if grouped_articles %}
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{% url 'article_list' %}">{% trans 'Articles' %}</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">{{ year }}</li>
+        </ol>
+      </nav>
+      <h1 class="my-4">{% trans "Articles" %} - {{ year }}</h1>
+      {% include 'peachjam/_years_list.html' with showallyears=True %}
+      {% include 'peachjam/_grouped_article_list.html' %}
+      {% include 'peachjam/_pagination.html' %}
+    {% else %}
+      {% block article-list-title %}
+        <h1 class="my-4">{% trans "Latest Articles" %}</h1>
+      {% endblock %}
+      {% include 'peachjam/_years_list.html' with showallyears=True %}
+      {% include "peachjam/_article_list.html" %}
+      {% include 'peachjam/_pagination.html' %}
+    {% endif %}
+  {% endblock page-content %}
+</div>
