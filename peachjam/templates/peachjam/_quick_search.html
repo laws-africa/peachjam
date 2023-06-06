@@ -1,0 +1,12 @@
+<form action="{% url 'search:search' %}" method="get" class="d-flex mb-3">
+  <input type="text"
+         class="form-control flex-grow-1"
+         autofocus
+         name="q"
+         placeholder="Search {{ court.name }} {{ author.name }} {{ nature.name }} {{ year }}"/>
+  <input type="submit" class="btn btn-outline-primary ms-2" value="Search"/>
+  {% if year %}<input type="hidden" name="year" value="{{ year }}"/>{% endif %}
+  {% if court %}<input type="hidden" name="court" value="{{ court }}"/>{% endif %}
+  {% if author %}<input type="hidden" name="authors" value="{{ author }}"/>{% endif %}
+  {% if nature %}<input type="hidden" name="nature" value="{{ nature }}"/>{% endif %}
+</form>
