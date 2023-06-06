@@ -13,9 +13,9 @@ COURT_CODE_MAPPINGS = {"court-appeal-tanzania": "TZCA", "high-court-tanzania": "
 
 # Custom middleware to force the I18N machinery to always choose settings.LANGUAGE_CODE
 # as the default initial language, unless another one is set via sessions or cookies
-MIDDLEWARE = ["peachjam.middleware.ForceDefaultLanguageMiddleware"] + MIDDLEWARE  # noqa
+# MIDDLEWARE = ["peachjam.middleware.ForceDefaultLanguageMiddleware"] + MIDDLEWARE  # noqa
 
-LANGUAGE_CODE = "sw"
+# LANGUAGE_CODE = "sw"
 
 LANGUAGES = [
     ("en", _("English")),
