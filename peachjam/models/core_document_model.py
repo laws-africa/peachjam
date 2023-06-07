@@ -503,10 +503,14 @@ class CoreDocument(PolymorphicModel):
             self.work.title = self.title
             self.work.save()
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, is_extracting_citations=False, **kwargs):
         # give ourselves and subclasses a chance to pre-populate derived fields before saving, in case full_clean() has
         # not yet been called
         self.pre_save()
+
+        # we use this flag in the re_extract_citations signal to prevent an infinite loop
+        self.is_extracting_citations = is_extracting_citations
+
         return super().save(*args, **kwargs)
 
     @cached_property

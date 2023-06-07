@@ -4,7 +4,7 @@ from background_task import background
 from background_task.tasks import DBTaskRunner, Task, logger, tasks
 from django.db.utils import OperationalError
 
-from peachjam.models import CoreDocument, Work
+from peachjam.models import CoreDocument, Work, citations_processor
 
 log = logging.getLogger(__name__)
 
@@ -106,7 +106,7 @@ def extract_citations(document_id):
 
     try:
         if doc.extract_citations():
-            doc.save()
+            doc.save(is_extracting_citations=True)
     except Exception as e:
         log.error(f"Error extracting citations for {doc}", exc_info=e)
         raise
@@ -127,8 +127,14 @@ def update_extracted_citations_for_a_work(work_id):
 
     try:
         work.update_extracted_citations()
-        log.info(f"Citations for work {work_id} extracted")
+        log.info(f"Citations for work {work_id} updated")
 
     except Exception as e:
-        log.error(f"Error extracting citations for {work_id}", exc_info=e)
+        log.error(f"Error updating citations for {work_id}", exc_info=e)
         raise e
+
+
+@background(queue="peachjam", schedule=60 * 60, remove_existing_tasks=True)
+def re_extract_citations():
+    cp = citations_processor()
+    cp.re_extract_citations()
