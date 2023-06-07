@@ -1,5 +1,11 @@
+import logging
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from .settings import SingletonModel
+
+log = logging.getLogger(__name__)
 
 
 class CitationLink(models.Model):
@@ -78,3 +84,36 @@ class ExtractedCitation(models.Model):
             .filter(target_work=work)
             .order_by("citing_work__title")
         )
+
+
+class CitationProcessing(SingletonModel):
+    processing_date = models.DateField(_("processing date"), null=True, blank=True)
+
+    def update_processing_date(self, date):
+        self.processing_date = date
+        self.save()
+
+    def re_extract_citations(self):
+        """Extract citations for all documents dated on or after the processing date."""
+        from peachjam.models import CoreDocument
+        from peachjam.tasks import extract_citations
+
+        later_documents = CoreDocument.objects.filter(
+            date__gte=self.processing_date
+        ).order_by("date")
+        log.info("Re-extracting citations for %s documents", later_documents.count())
+        for document in later_documents:
+            extract_citations(document.id)
+
+        self.reset_processing_date()
+
+    def reset_processing_date(self):
+        """Reset the processing date to None."""
+        log.info("Resetting processing date.")
+        self.processing_date = None
+        self.save()
+
+
+def citations_processor():
+    """Return the CitationProcessing object."""
+    return CitationProcessing.load()
