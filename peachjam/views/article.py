@@ -1,5 +1,8 @@
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.dates import MONTHS
 from django.views.generic import DetailView, ListView
+from django.views.generic.dates import YearArchiveView
 
 from peachjam.models import Article, Taxonomy, UserProfile
 
@@ -10,7 +13,27 @@ class ArticleListView(ListView):
     template_name = "peachjam/article_list.html"
     context_object_name = "articles"
     navbar_link = "articles"
-    paginate_by = 5
+    paginate_by = 10
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        years = sorted(
+            list(
+                self.model.objects.filter(published=True)
+                .order_by()
+                .values_list("date__year", flat=True)
+                .distinct()
+            ),
+            reverse=True,
+        )
+
+        context["years"] = [
+            {"url": reverse("article_year_archive", args=[y]), "year": y} for y in years
+        ]
+
+        context["all_years_url"] = reverse("article_list")
+
+        return context
 
 
 class ArticleTopicListView(ArticleListView):
@@ -66,3 +89,53 @@ class UserProfileDetailView(DetailView):
             context["object"].user.articles.filter(published=True).order_by("-date")
         )
         return context
+
+
+class ArticleYearArchiveView(YearArchiveView):
+    queryset = Article.objects.filter(published=True).order_by("-date")
+    date_field = "date"
+    make_object_list = True
+    allow_future = True
+    context_object_name = "articles"
+    paginate_by = 10
+    template_name = "peachjam/article_list.html"
+    navbar_link = "articles"
+
+    def get_queryset(self):
+        qs = self.queryset
+        if self.get_year() is not None:
+            qs = qs.filter(date__year=self.get_year())
+        return qs
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        years = (
+            self.queryset.order_by("-date__year")
+            .values_list("date__year", flat=True)
+            .distinct()
+        )
+        context["years"] = [
+            {"url": reverse("article_year_archive", args=[year]), "year": year}
+            for year in years
+        ]
+
+        context["all_years_url"] = reverse("article_list")
+        context["year"] = int(self.kwargs["year"])
+        context["grouped_articles"] = self.grouped_articles(self.get_queryset())
+
+        return context
+
+    def grouped_articles(self, queryset):
+        """Group the articles by month and return a list of dicts with the month name and articles for that month"""
+
+        # Get the distinct months from the queryset
+        months = queryset.dates(self.date_field, "month")
+
+        # Create a list of { month: month_name, articles: [list of articles] } dicts
+        grouped_articles = [
+            {"month": MONTHS[m.month], "articles": queryset.filter(date__month=m.month)}
+            for m in months
+        ]
+
+        return grouped_articles
