@@ -379,10 +379,6 @@ class ManyToManyFieldWidget(ManyToManyWidget):
 
 
 class GenericDocumentResource(BaseDocumentResource):
-    author = fields.Field(
-        attribute="author",
-        widget=ForeignKeyWidget(Author, field="code__iexact"),
-    )
     nature = fields.Field(
         column_name="nature",
         attribute="nature",
@@ -391,7 +387,7 @@ class GenericDocumentResource(BaseDocumentResource):
     authors = fields.Field(
         column_name="authors",
         attribute="authors",
-        widget=ManyToManyFieldWidget(Author, separator="|", field="name"),
+        widget=ManyToManyFieldWidget(Author, separator="|", field="code__iexact"),
     )
 
     class Meta(BaseDocumentResource.Meta):
