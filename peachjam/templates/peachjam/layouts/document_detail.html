@@ -51,7 +51,9 @@
           </div>
         {% endblock %}
         {% include 'peachjam/_notices.html' with messages=notices %}
-        {% if perms.peachjam.change_coredocument %}<a href="{{ document|admin_url:'change' }}">Edit</a>{% endif %}
+        {% if perms.peachjam.change_coredocument or perms.peachjam.can_edit_own_document %}
+          <a href="{{ document|admin_url:'change' }}">Edit</a>
+        {% endif %}
         <ul class="nav nav-tabs border-bottom" role="tablist">
           {% block document-tabs %}
             <li class="nav-item" role="presentation">
