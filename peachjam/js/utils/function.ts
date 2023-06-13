@@ -76,18 +76,20 @@ export function generateHtmlTocItems (content: HTMLElement): TOCItemType[] {
       }
       const top = stack[stack.length - 1];
 
-      if (top.type === heading.tagName) {
-        // siblings
-        if (stack.length > 1) {
-          stack[stack.length - 2].children.push(item);
+      if (top) {
+        if (top.type === heading.tagName) {
+          // siblings
+          if (stack.length > 1) {
+            stack[stack.length - 2].children.push(item);
+          } else {
+            items.push(item);
+          }
+          stack[stack.length - 1] = item;
         } else {
-          items.push(item);
+          // child
+          top.children.push(item);
+          stack.push(item);
         }
-        stack[stack.length - 1] = item;
-      } else {
-        // child
-        top.children.push(item);
-        stack.push(item);
       }
     }
   });
