@@ -30,18 +30,15 @@ class CourtDetailView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        years = sorted(
-            list(
-                self.model.objects.filter(court=self.court)
-                .order_by()
-                .values_list("date__year", flat=True)
-                .distinct()
-            ),
-            reverse=True,
+        years = self.model.objects.filter(court=self.court).dates(
+            "date", "year", order="DESC"
         )
 
         context["years"] = [
-            {"url": reverse("court_year", args=[self.court.code, y]), "year": y}
+            {
+                "url": reverse("court_year", args=[self.court.code, y.year]),
+                "year": y.year,
+            }
             for y in years
         ]
 
