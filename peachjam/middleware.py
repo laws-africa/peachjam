@@ -2,23 +2,38 @@ from django.shortcuts import redirect
 from django.utils.deprecation import MiddlewareMixin
 
 
-class RedirectWWWMiddleware:
-    """Redirect www to non-www permanently."""
+class StripDomainPrefixMiddleware:
+    """If the domain starts with a certain prefix, strip it and redirect to the new URL permanently."""
+
+    prefix = None
 
     def __init__(self, get_response):
+        assert self.prefix
         self.get_response = get_response
 
     def __call__(self, request):
         response = self.get_response(request)
 
         host = request.get_host()
-        if host and host.startswith("www."):
-            non_www = host[4:]
+        if host and host.startswith(self.prefix):
+            stripped = host[len(self.prefix) :]
             return redirect(
-                f"https://{non_www}{request.get_full_path()}", permanent=True
+                f"https://{stripped}{request.get_full_path()}", permanent=True
             )
 
         return response
+
+
+class RedirectWWWMiddleware(StripDomainPrefixMiddleware):
+    """Redirect from www.example.com to example.com"""
+
+    prefix = "www."
+
+
+class RedirectNewMiddleware(StripDomainPrefixMiddleware):
+    """Redirect from new.example.com to example.com"""
+
+    prefix = "new."
 
 
 class ForceDefaultLanguageMiddleware(MiddlewareMixin):
