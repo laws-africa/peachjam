@@ -194,7 +194,6 @@
       {{ $t('Document type') }}
       {{ $t('Author') }}
       {{ $t('Court') }}
-      {{ $t('Court registry') }}
       {{ $t('Judges') }}
       {{ $t('Attorneys') }}
       {{ $t('Order') }}
@@ -269,13 +268,6 @@ export default {
       {
         title: this.$t('Court'),
         name: 'court',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Court registry'),
-        name: 'registry',
         type: 'checkboxes',
         value: [],
         options: []

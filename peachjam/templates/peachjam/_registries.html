@@ -1,0 +1,36 @@
+{% load i18n %}
+{% if registries %}
+  <div class="pl-0 mt-2 mb-3 align-items-center d-none d-lg-flex">
+    <i class="bi bi-calendar me-2"></i>
+    <ul class="year-nav mb-0 ms-2">
+      {% if showallregistries %}
+        <li>
+          <a class="{% if not registry %} active{% endif %}"
+             href="{{ all_registries_url }}">{% trans 'All registries' %}</a>
+        </li>
+      {% endif %}
+      {% for r in registries %}
+        <li>
+          <a class="{% if r.registry == registry.name %} active{% endif %}"
+             href="{{ r.url }}">{{ r.registry }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+{% if registries %}
+  <select class="form-select d-block d-lg-none"
+          data-component="NavigationSelect">
+    {% if showallregistries %}
+      <option value="{{ all_registries_url }}">
+        {% trans 'All registries' %}
+      </option>
+    {% endif %}
+    {% for r in registries %}
+      <option value="{{ r.url }}"
+              {% if r.registry == registry %} selected{% endif %}>
+        {{ r.registry }}
+      </option>
+    {% endfor %}
+  </select>
+{% endif %}
