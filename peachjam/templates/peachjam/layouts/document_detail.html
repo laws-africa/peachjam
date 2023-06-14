@@ -285,7 +285,7 @@
                                     <a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}"
                                        rel="alternate"
                                        hreflang="{{ version.language.iso }}"
-                                       href="{{ request.scheme }}://{{ request.get_host }}{{ version.get_absolute_url }}">{{ version.language.iso }}">{% trans version.language.name %}</a>
+                                       href="{{ request.scheme }}://{{ request.get_host }}{{ version.get_absolute_url }}">{% trans version.language.name %} ({{ version.language.iso }})</a>
                                   </li>
                                 {% endfor %}
                               </ul>
