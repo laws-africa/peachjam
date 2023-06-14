@@ -54,21 +54,41 @@ class SearchableDocument(Document):
     taxonomies = fields.KeywordField()
 
     # Judgment
+    court = fields.KeywordField(attr="court.name")
+    court_en = fields.KeywordField(attr="court.name_en")
+    court_sw = fields.KeywordField(attr="court.name_sw")
+    court_fr = fields.KeywordField(attr="court.name_fr")
+    court_pt = fields.KeywordField(attr="court.name_pt")
+
     matter_type = fields.KeywordField(attr="matter_type.name")
     case_number = fields.TextField()
     # this case party names etc. and so the standard analyzer is better than a language-based one
     case_name = fields.TextField(analyzer="standard")
-    court = fields.KeywordField(attr="court.name")
     headnote_holding = fields.TextField()
     flynote = fields.TextField()
     judges = fields.KeywordField(attr="judge.name")
-    registry = fields.KeywordField(attr="registry.name")
     attorneys = fields.KeywordField(attr="attorney.name")
+
+    registry = fields.KeywordField(attr="registry.name")
+    registry_en = fields.KeywordField(attr="registry.name_en")
+    registry_sw = fields.KeywordField(attr="registry.name_sw")
+    registry_fr = fields.KeywordField(attr="registry.name_fr")
+    registry_pt = fields.KeywordField(attr="registry.name_pt")
+
     order_outcome = fields.KeywordField(attr="order_outcome.name")
+    order_outcome_en = fields.KeywordField(attr="order_outcome.name_en")
+    order_outcome_sw = fields.KeywordField(attr="order_outcome.name_sw")
+    order_outcome_fr = fields.KeywordField(attr="order_outcome.name_fr")
+    order_outcome_pt = fields.KeywordField(attr="order_outcome.name_pt")
 
     # GenericDocument, LegalInstrument
     authors = fields.KeywordField()
+
     nature = fields.KeywordField(attr="nature.name")
+    nature_en = fields.KeywordField(attr="nature.name_en")
+    nature_sw = fields.KeywordField(attr="nature.name_sw")
+    nature_fr = fields.KeywordField(attr="nature.name_fr")
+    nature_pt = fields.KeywordField(attr="nature.name_pt")
 
     ranking = RankField(attr="work.ranking")
 
@@ -194,6 +214,86 @@ class SearchableDocument(Document):
         if instance.work.ranking > 0:
             return instance.work.ranking
         return 0.00000001
+
+    def prepare_court(self, instance):
+        if hasattr(instance, "court") and instance.court:
+            return instance.court.name
+
+    def prepare_court_en(self, instance):
+        if hasattr(instance, "court") and instance.court:
+            return instance.court.name_en or instance.court.name
+
+    def prepare_court_sw(self, instance):
+        if hasattr(instance, "court") and instance.court:
+            return instance.court.name_sw or instance.court.name
+
+    def prepare_court_pt(self, instance):
+        if hasattr(instance, "court") and instance.court:
+            return instance.court.name_pt or instance.court.name
+
+    def prepare_court_fr(self, instance):
+        if hasattr(instance, "court") and instance.court:
+            return instance.court.name_fr or instance.court.name
+
+    def prepare_registry(self, instance):
+        if hasattr(instance, "registry") and instance.registry:
+            return instance.registry.name
+
+    def prepare_registry_en(self, instance):
+        if hasattr(instance, "registry") and instance.registry:
+            return instance.registry.name_en or instance.registry.name
+
+    def prepare_registry_sw(self, instance):
+        if hasattr(instance, "registry") and instance.registry:
+            return instance.registry.name_sw or instance.registry.name
+
+    def prepare_registry_pt(self, instance):
+        if hasattr(instance, "registry") and instance.registry:
+            return instance.registry.name_pt or instance.registry.name
+
+    def prepare_registry_fr(self, instance):
+        if hasattr(instance, "registry") and instance.registry:
+            return instance.registry.name_fr or instance.registry.name
+
+    def prepare_nature(self, instance):
+        if hasattr(instance, "nature") and instance.nature:
+            return instance.nature.name
+
+    def prepare_nature_en(self, instance):
+        if hasattr(instance, "nature") and instance.nature:
+            return instance.nature.name_en or instance.nature.name
+
+    def prepare_nature_sw(self, instance):
+        if hasattr(instance, "nature") and instance.nature:
+            return instance.nature.name_sw or instance.nature.name
+
+    def prepare_nature_pt(self, instance):
+        if hasattr(instance, "nature") and instance.nature:
+            return instance.nature.name_pt or instance.nature.name
+
+    def prepare_nature_fr(self, instance):
+        if hasattr(instance, "nature") and instance.nature:
+            return instance.nature.name_fr or instance.nature.name
+
+    def prepare_order_outcome(self, instance):
+        if hasattr(instance, "order_outcome") and instance.order_outcome:
+            return instance.order_outcome.name
+
+    def prepare_order_outcome_en(self, instance):
+        if hasattr(instance, "order_outcome") and instance.order_outcome:
+            return instance.order_outcome.name_en or instance.order_outcome.name
+
+    def prepare_order_outcome_sw(self, instance):
+        if hasattr(instance, "order_outcome") and instance.order_outcome:
+            return instance.order_outcome.name_sw or instance.order_outcome.name
+
+    def prepare_order_outcome_pt(self, instance):
+        if hasattr(instance, "order_outcome") and instance.order_outcome:
+            return instance.order_outcome.name_pt or instance.order_outcome.name
+
+    def prepare_order_outcome_fr(self, instance):
+        if hasattr(instance, "order_outcome") and instance.order_outcome:
+            return instance.order_outcome.name_fr or instance.order_outcome.name
 
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""

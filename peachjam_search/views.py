@@ -1,5 +1,8 @@
+import copy
+
 from django.conf import settings
 from django.utils.decorators import method_decorator
+from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
@@ -321,6 +324,31 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         # search multiple language indexes
         self.index = get_search_indexes(self.document._index._name)
         self.search = self.search.index(self.index)
+
+    def get_translatable_fields(self, request):
+        # get language from request to use as suffix for translatable fields
+        current_language_code = get_language_from_request(request)
+        suffix = "_" + current_language_code
+
+        self.filter_fields = copy.deepcopy(self.filter_fields)
+        self.faceted_search_fields = copy.deepcopy(self.faceted_search_fields)
+
+        translatable_fields = [
+            "court",
+            "nature",
+            "registry",
+            "order_outcome",
+        ]
+
+        for field in translatable_fields:
+            self.filter_fields[field] = self.filter_fields[field] + suffix
+            self.faceted_search_fields[field]["field"] = (
+                self.faceted_search_fields[field]["field"] + suffix
+            )
+
+    def list(self, request, *args, **kwargs):
+        self.get_translatable_fields(request)
+        return super().list(request, *args, **kwargs)
 
     @method_decorator(cache_page(CACHE_SECS))
     def dispatch(self, request, *args, **kwargs):
