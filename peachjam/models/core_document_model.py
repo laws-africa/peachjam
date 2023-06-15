@@ -398,6 +398,10 @@ class CoreDocument(PolymorphicModel):
 
     class Meta:
         ordering = ["doc_type", "title"]
+        permissions = [
+            ("can_delete_own_document", "Can delete own document"),
+            ("can_edit_own_document", "Can edit own document"),
+        ]
 
     def __str__(self):
         return f"{self.doc_type} - {self.title}"

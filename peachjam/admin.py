@@ -84,7 +84,10 @@ class ImportExportMixin(BaseImportExportMixin):
     def import_action(self, request, *args, **kwargs):
         resp = super().import_action(request, *args, **kwargs)
         # fix for jazzmin not using the correct field variable
-        resp.context_data["fields"] = resp.context_data["fields_list"][0][1]
+        try:
+            resp.context_data["fields"] = resp.context_data["fields_list"][0][1]
+        except IndexError:
+            pass
         return resp
 
 
@@ -254,12 +257,16 @@ class DocumentForm(forms.ModelForm):
         super().__init__(data, *args, **kwargs)
 
         # adjust form based on peach jam site settings
-        settings = pj_settings()
-        self.fields["language"].initial = settings.default_document_language
-        if settings.document_languages.exists():
-            self.fields["language"].queryset = settings.document_languages
-        if settings.document_languages.exists():
-            self.fields["jurisdiction"].queryset = settings.document_jurisdictions
+        site_settings = pj_settings()
+        if "language" in self.fields:
+            self.fields["language"].initial = site_settings.default_document_language
+            if site_settings.document_languages.exists():
+                self.fields["language"].queryset = site_settings.document_languages
+        if "jurisdiction" in self.fields:
+            if site_settings.document_jurisdictions.exists():
+                self.fields[
+                    "jurisdiction"
+                ].queryset = site_settings.document_jurisdictions
 
         if "frbr_uri_doctype" in self.fields:
             # customise doctype options for different document models
@@ -292,7 +299,7 @@ class DocumentAdmin(admin.ModelAdmin):
         "language",
         "date",
     )
-    list_filter = ("jurisdiction", "locality", "language")
+    list_filter = ("jurisdiction", "locality", "language", "created_by")
     search_fields = ("title", "date")
     readonly_fields = (
         "expression_frbr_uri",
@@ -468,6 +475,24 @@ class DocumentAdmin(admin.ModelAdmin):
         self.message_user(request, f"Queued tasks to re-index for {count} documents.")
 
     reindex_for_search.short_description = "Re-index for search (background)"
+
+    def has_delete_permission(self, request, obj=None):
+        if obj:
+            if (
+                request.user.has_perm("peachjam.can_delete_own_document")
+                and obj.created_by == request.user
+            ):
+                return True
+        return super().has_delete_permission(request, obj=obj)
+
+    def has_change_permission(self, request, obj=None):
+        if obj:
+            if (
+                request.user.has_perm("peachjam.can_edit_own_document")
+                and obj.created_by == request.user
+            ):
+                return True
+        return super().has_change_permission(request, obj=obj)
 
 
 class TaxonomyForm(MoveNodeForm):

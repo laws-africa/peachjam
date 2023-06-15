@@ -373,16 +373,29 @@ class ManyToManyFieldWidget(ManyToManyWidget):
             items = [" ".join(j.split()) for j in value.split(self.separator)]
 
             for item in items:
-                obj, _ = self.model.objects.get_or_create(name=item)
-            return self.model.objects.filter(name__in=items)
+                obj, _ = self.model.objects.get_or_create(**{self.field: item})
+
+            lookup = f"{self.field}__in"
+            return self.model.objects.filter(**{lookup: items})
+        return []
+
+
+class ManyToManyRequiredWidget(ManyToManyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if value:
+            items = [j for j in value.split(self.separator)]
+            for item in items:
+                try:
+                    self.model.objects.get(**{self.field: item})
+                except self.model.DoesNotExist:
+                    raise ValueError(f"{item } does not exist in {self.model.__name__}")
+
+            lookup = f"{self.field}__in"
+            return self.model.objects.filter(**{lookup: items})
         return []
 
 
 class GenericDocumentResource(BaseDocumentResource):
-    author = fields.Field(
-        attribute="author",
-        widget=ForeignKeyWidget(Author, field="code__iexact"),
-    )
     nature = fields.Field(
         column_name="nature",
         attribute="nature",
@@ -391,7 +404,7 @@ class GenericDocumentResource(BaseDocumentResource):
     authors = fields.Field(
         column_name="authors",
         attribute="authors",
-        widget=ManyToManyFieldWidget(Author, separator="|", field="name"),
+        widget=ManyToManyRequiredWidget(Author, separator="|", field="code"),
     )
 
     class Meta(BaseDocumentResource.Meta):

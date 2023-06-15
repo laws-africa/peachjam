@@ -27,3 +27,6 @@ EXTRA_SEARCH_INDEXES = [
 
 # The slugs of the taxonomy roots that are treated as federated indexes
 FEDERATED_DOC_INDEX_ROOTS = ["case-indexes"]
+
+# add middleware to redirect from agp.africanlii.org to africanlii.org
+MIDDLEWARE.insert(1, "africanlii.middleware.RedirectAGPMiddleware")  # noqa
