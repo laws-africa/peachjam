@@ -36,6 +36,7 @@ class PeachJam {
     this.setupSentry();
     this.createComponents();
     this.setupTooltips();
+    this.scrollNavTabs();
   }
 
   createComponents () {
@@ -104,6 +105,15 @@ class PeachJam {
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
       // @ts-ignore
       new window.bootstrap.Tooltip(el);
+    });
+  }
+
+  scrollNavTabs () {
+    // for scrollable tabbed navs, the active element may be out of view on narrow devices; scroll it into view
+    document.querySelectorAll('.nav.nav-tabs.scroll-xs > .nav-item > .nav-link.active').forEach(link => {
+      if (link.parentElement && link.parentElement.parentElement) {
+        link.parentElement.parentElement.scrollLeft = (link as HTMLElement).offsetLeft;
+      }
     });
   }
 }
