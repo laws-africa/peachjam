@@ -35,6 +35,7 @@ class PeachJam {
   setup () {
     this.setupSentry();
     this.createComponents();
+    this.setupTooltips();
   }
 
   createComponents () {
@@ -65,7 +66,7 @@ class PeachJam {
     });
   }
 
-  private setupSentry () {
+  setupSentry () {
     const el = document.getElementById('sentry-config');
     const config = el ? JSON.parse(el.innerHTML) : null;
     // @ts-ignore
@@ -96,6 +97,14 @@ class PeachJam {
         }
       });
     }
+  }
+
+  setupTooltips () {
+    // setup bootstrap tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+      // @ts-ignore
+      new window.bootstrap.Tooltip(el);
+    });
   }
 }
 

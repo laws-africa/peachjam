@@ -267,6 +267,13 @@
                       {% block document-metadata-content-language %}
                         <dt>
                           {% translate 'Language' %}
+                          {% if language_versions|length > 1 %}
+                            <span class="d-inline-block"
+                                  data-bs-toggle="tooltip"
+                                  title="{% trans 'Multiple languages available' %}">
+                              <i class="bi bi-translate"></i>
+                            </span>
+                          {% endif %}
                         </dt>
                         {% if language_versions|length > 1 %}
                           <dd>
