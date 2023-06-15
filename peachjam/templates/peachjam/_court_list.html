@@ -5,11 +5,13 @@
       <div class="courts__item mb-3">
         <h4 class="heading-underlined">{{ court_class }}</h4>
         {% if court_class.courts.all %}
-          {% for court in court_class.courts.all %}
-            <div>
-              <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-            </div>
-          {% endfor %}
+          <ul class="list-unstyled">
+            {% for court in court_class.courts.all %}
+              <li>
+                <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
         {% else %}
           <div>{% trans 'No courts found.' %}</div>
         {% endif %}
