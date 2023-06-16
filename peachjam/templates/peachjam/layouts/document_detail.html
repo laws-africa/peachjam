@@ -54,7 +54,7 @@
         {% if perms.peachjam.change_coredocument or perms.peachjam.can_edit_own_document %}
           <a href="{{ document|admin_url:'change' }}">Edit</a>
         {% endif %}
-        <ul class="nav nav-tabs border-bottom" role="tablist">
+        <ul class="nav nav-tabs border-bottom scroll-xs" role="tablist">
           {% block document-tabs %}
             <li class="nav-item" role="presentation">
               <button class="nav-link active"
@@ -159,7 +159,7 @@
                           <dd class="text-muted">
                             {{ document.citation }}
                             <button type="button"
-                                    class="btn btn-secondary btn-xs ms-2"
+                                    class="btn btn-outline-secondary btn-xs ms-2"
                                     title="{% trans "Copy to clipboard" %}"
                                     data-component="CopyToClipboard"
                                     data-value="{{ document.citation }}"
@@ -267,6 +267,13 @@
                       {% block document-metadata-content-language %}
                         <dt>
                           {% translate 'Language' %}
+                          {% if language_versions|length > 1 %}
+                            <span class="d-inline-block"
+                                  data-bs-toggle="tooltip"
+                                  title="{% trans 'Multiple languages available' %}">
+                              <i class="bi bi-translate"></i>
+                            </span>
+                          {% endif %}
                         </dt>
                         {% if language_versions|length > 1 %}
                           <dd>
