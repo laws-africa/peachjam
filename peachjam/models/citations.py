@@ -94,7 +94,11 @@ class CitationProcessing(SingletonModel):
         self.save()
 
     def re_extract_citations(self):
-        """Extract citations for all documents dated on or after the processing date."""
+        """
+        Queues up background tasks to re-extract citations for all documents dated on or after the processing date.
+        This is to handle the case where an older document has just been added to the system, and newer documents may
+        therefore cite it.
+        """
         from peachjam.models import CoreDocument
         from peachjam.tasks import extract_citations
 
