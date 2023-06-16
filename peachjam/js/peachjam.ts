@@ -84,6 +84,11 @@ class PeachJam {
         ],
         beforeSend (event: any) {
           try {
+            // if there is no stacktrace, ignore it
+            if (!event.exception || !event.exception.values || !event.exception.values[0] || !event.exception.values[0].stacktrace) {
+              return null;
+            }
+
             const frames = event.exception.values[0].stacktrace.frames;
             // if all frames are anonymous, don't send this event
             // see https://github.com/getsentry/sentry-javascript/issues/3147
