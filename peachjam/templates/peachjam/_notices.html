@@ -2,27 +2,27 @@
   {% for message in messages %}
     {% if message.type == 10 %}
       <div class="alert alert-secondary">
-        <i class="fa fa-info-circle"></i> {{ message.html }}
+        <i class="bi bi-info-circle-fill"></i> {{ message.html }}
       </div>
     {% endif %}
     {% if message.type == 20 %}
       <div class="alert alert-info">
-        <i class="fa fa-info-circle"></i> {{ message.html }}
+        <i class="bi bi-info-circle-fill"></i> {{ message.html }}
       </div>
     {% endif %}
     {% if message.type == 25 %}
       <div class="alert alert-success">
-        <i class="fa fa-info-circle"></i> {{ message.html }}
+        <i class="bi bi-info-circle-fill"></i> {{ message.html }}
       </div>
     {% endif %}
     {% if message.type == 30 %}
       <div class="alert alert-warning">
-        <i class="fa fa-exclamation-triangle"></i> {{ message.html }}
+        <i class="bi bi-exclamation-triangle-fill"></i> {{ message.html }}
       </div>
     {% endif %}
     {% if message.type == 40 %}
       <div class="alert alert-danger">
-        <i class="fa fa-exclamation-triangle"></i> {{ message.html }}
+        <i class="bi bi-exclamation-triangle-fill"></i> {{ message.html }}
       </div>
     {% endif %}
   {% endfor %}
