@@ -282,7 +282,8 @@ if not DEBUG:
         environment=PEACHJAM["SENTRY_ENVIRONMENT"],
         integrations=[DjangoIntegration(), sentry_logging],
         send_default_pii=True,
-        traces_sample_rate=0.5,  # sample 50% of requests for performance metrics
+        # sample x% of requests for performance metrics
+        traces_sample_rate=float(os.environ.get("SENTRY_SAMPLE_RATE", "0.25")),
     )
 
 DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}
