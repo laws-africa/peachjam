@@ -1,19 +1,21 @@
 {% load i18n %}
 {% if registries %}
-  <h4 class="my-4">Registries</h4>
-  {% for group in registry_groups %}
-    <div class="col-sm">
-      <ul class="list-unstyled">
-        {% for r in group %}
-          {% if r.code == registry.code %}
-            <li class="disabled">{{ r.name }}</li>
-          {% else %}
-            <li>
-              <a href="{{ r.url }}">{{ r.name }}</a>
-            </li>
-          {% endif %}
-        </ul>
-      {% endfor %}
-    </div>
-  {% endfor %}
+  <h4>Registries</h4>
+  <div class="row mb-4">
+    {% for group in registry_groups %}
+      <div class="col-sm">
+        <ul class="list-unstyled">
+          {% for r in group %}
+            {% if r.code == registry.code %}
+              <li class="disabled">{{ r.name }}</li>
+            {% else %}
+              <li>
+                <a href="{{ r.get_absolute_url }}">{{ r.name }}</a>
+              </li>
+            {% endif %}
+          </ul>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
 {% endif %}

@@ -64,21 +64,9 @@ class CourtDetailView(FilteredDocumentListView):
             }
         )
 
-        registries = [
-            {
-                "name": registry["name"],
-                "code": registry["code"],
-                "url": reverse(
-                    "court_registry", args=[self.court.code, registry["code"]]
-                ),
-            }
-            for registry in self.court.registries.exclude(
-                judgments__isnull=True
-            ).values("name", "code")
-            if registry
-        ]  # display registries with judgments only
-
-        context["registries"] = registries
+        context["registries"] = self.court.registries.exclude(
+            judgments__isnull=True
+        )  # display registries with judgments only
 
         registry_group = max([len(context["registries"]) // 2, 1])
         context["registry_groups"] = (
@@ -100,8 +88,8 @@ class CourtDetailView(FilteredDocumentListView):
         context["formatted_court_name"] = self.court.name
         if "year" in self.kwargs:
             context["year"] = self.kwargs["year"]
-            context["formatted_court_name"] = (
-                self.court.name + " - " + str(self.kwargs["year"])
+            context["formatted_court_name"] = f"{self.court.name} - " + str(
+                self.kwargs["year"]
             )
 
         context["facet_data"] = {
@@ -115,7 +103,7 @@ class CourtDetailView(FilteredDocumentListView):
 
 
 class CourtYearView(CourtDetailView):
-    queryset = Judgment.objects.prefetch_related("judges")
+    pass
 
 
 class CourtRegistryDetailView(CourtDetailView):
@@ -138,8 +126,14 @@ class CourtRegistryDetailView(CourtDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["registry"] = self.registry
-        context["formatted_registry_name"] = self.registry.name
         context["court"] = self.court
+        context["formatted_court_name"] = self.registry.name
+
+        if "year" in self.kwargs:
+            context["year"] = self.kwargs["year"]
+            context["formatted_court_name"] = f"{self.registry.name} - " + str(
+                self.kwargs["year"]
+            )
 
         years = self.queryset.filter(registry=self.registry).dates(
             "date", "year", order="DESC"
@@ -159,15 +153,8 @@ class CourtRegistryDetailView(CourtDetailView):
             "court_registry", args=[self.court.code, self.registry.code]
         )
 
-        if "year" in self.kwargs:
-            context["year"] = self.kwargs["year"]
-            context["formatted_registry_name"] = (
-                self.registry.name + " - " + str(self.kwargs["year"])
-            )
-
         return context
 
 
 class CourtRegistryYearView(CourtRegistryDetailView):
-    queryset = Judgment.objects.prefetch_related("judges")
-    template_name = "peachjam/court_registry_detail.html"
+    pass
