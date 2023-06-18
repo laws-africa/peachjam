@@ -37,6 +37,12 @@ class HomePageView(BaseHomePageView):
         context["taxonomies"] = Taxonomy.get_tree()
         context["liis"] = [
             {
+                "name": "EswatiniLII",
+                "country": "Eswatini",
+                "url": "https://eswatinilii.org",
+                "logo": "images/liis/eswatinilii.png",
+            },
+            {
                 "name": "GhaLII",
                 "country": "Ghana",
                 "url": "https://ghalii.org",

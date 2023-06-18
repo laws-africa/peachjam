@@ -28,5 +28,31 @@ $dropdown-box-shadow: $box-shadow-lg;
       margin-top: 0;
     }
   }
+}
 
+.nav-tabs {
+  .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: inherit;
+    background-color: inherit;
+
+    &.active {
+      border: none;
+      font-weight: bold;
+      border-bottom: 2px solid $primary;
+      background-color: inherit;
+    }
+  }
+}
+
+.nav.nav-tabs.scroll-xs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+
+  > li.nav-item {
+    white-space: nowrap;
+    scroll-snap-align: start;
+  }
 }
