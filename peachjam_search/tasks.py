@@ -9,6 +9,7 @@ from django_elasticsearch_dsl.signals import (
 )
 
 from peachjam.models import CoreDocument
+from peachjam_search.documents import SearchableDocument
 
 log = logging.getLogger(__name__)
 
@@ -24,8 +25,9 @@ class BackgroundTaskSearchProcessor(RealTimeSignalProcessor):
         if not DEDConfig.autosync_enabled() or kwargs.get("raw"):
             return
 
-        # this assumes that only documents are being indexed with elasticsearch
-        if isinstance(instance, CoreDocument):
+        # Check if instance is in the list of related models or is a CoreDocument,
+        related_models = SearchableDocument.django.related_models
+        if any(isinstance(instance, cls) for cls in [CoreDocument, *related_models]):
             # queue up the task for 60 seconds from now, so that quick edits to the document don't all trigger
             # a re-index
             search_model_saved(sender._meta.label, instance.pk, schedule=60)

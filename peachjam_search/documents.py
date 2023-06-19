@@ -8,7 +8,19 @@ from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import RankFeature
 from elasticsearch_dsl.index import Index
 
-from peachjam.models import CoreDocument, ExternalDocument
+from peachjam.models import (
+    Attorney,
+    Author,
+    CoreDocument,
+    Court,
+    CourtRegistry,
+    DocumentNature,
+    ExternalDocument,
+    Judge,
+    Locality,
+    OrderOutcome,
+    Taxonomy,
+)
 
 log = logging.getLogger(__name__)
 
@@ -83,16 +95,32 @@ class SearchableDocument(Document):
 
         @classproperty
         def related_models(cls):
+
             # to ensure the CoreDocument will be re-saved when subclass models are updated
             # recursively find subclasses
-            def related(klass):
+            def get_subclasses(klass):
                 res = []
                 for subclass in klass.__subclasses__():
                     res.append(subclass)
-                    res.extend(related(subclass))
+                    res.extend(get_subclasses(subclass))
                 return res
 
-            return related(CoreDocument)
+            subclasses = get_subclasses(CoreDocument)
+
+            # add related models
+            related_models = [
+                Locality,
+                Court,
+                CourtRegistry,
+                OrderOutcome,
+                Author,
+                Judge,
+                Attorney,
+                DocumentNature,
+                Taxonomy,
+            ]
+
+            return subclasses + related_models
 
     def get_instances_from_related(self, related_instance):
         """Retrieve the CoreDocument instance from the related instance to ensure it is re-indexed
@@ -101,6 +129,33 @@ class SearchableDocument(Document):
         # if this extends CoreDocument, update it
         if isinstance(related_instance, CoreDocument):
             return related_instance
+
+        # for all related models we get the CoreDocument instances
+        if any(isinstance(related_instance, cls) for cls in [Locality, DocumentNature]):
+            return related_instance.coredocument_set.all()
+
+        if any(
+            isinstance(related_instance, cls) for cls in [CourtRegistry, OrderOutcome]
+        ):
+            return related_instance.judgments.all()
+
+        if any(isinstance(related_instance, cls) for cls in [Court, Judge, Attorney]):
+            return related_instance.judgment_set.all()
+
+        if isinstance(related_instance, Author):
+            generic = CoreDocument.objects.filter(
+                genericdocument__authors=related_instance
+            )
+            legal = CoreDocument.objects.filter(
+                legalinstrument__authors=related_instance
+            )
+            return generic | legal
+
+        if isinstance(related_instance, Taxonomy):
+            topics = [related_instance] + [
+                t for t in related_instance.get_descendants()
+            ]
+            return CoreDocument.objects.filter(taxonomies__topic__in=topics).distinct()
 
     def prepare_doc_type(self, instance):
         return instance.get_doc_type_display()
