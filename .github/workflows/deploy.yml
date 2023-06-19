@@ -9,14 +9,14 @@ concurrency:
 
 jobs:
   deploy-agp:
-    name: Deploy to agp.africanlii.org
+    name: Deploy to africanlii.org
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
 
-    - name: git push to agp.africanlii.org
+    - name: git push to africanlii.org
       uses: dokku/github-action@master
       with:
         ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
