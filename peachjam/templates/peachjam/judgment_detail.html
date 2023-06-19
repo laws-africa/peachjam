@@ -26,12 +26,20 @@
       {{ document.hearing_date }}
     </dd>
   {% endif %}
+  {% if document.court %}
+    <dt>
+      {% trans 'Court' %}
+    </dt>
+    <dd class="text-muted">
+      <a href="{% url 'court' document.court.code %}">{{ document.court.name }}</a>
+    </dd>
+  {% endif %}
   {% if document.registry %}
     <dt>
       {% trans 'Court Registry' %}
     </dt>
     <dd class="text-muted">
-      {{ document.registry.name }}
+      <a href="{% url 'court_registry' document.court.code document.registry.code %}">{{ document.registry.name }}</a>
     </dd>
   {% endif %}
   {% if document.order_outcome %}
