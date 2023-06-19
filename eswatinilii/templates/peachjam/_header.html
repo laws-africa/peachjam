@@ -18,6 +18,12 @@
     </a>
   </li>
   <li class="nav-item">
+    <a class="nav-link {% if request.path == '/doc/documents-and-guidelines' %}active{% endif %}"
+       href="{% url 'document_nature_list' 'documents-and-guidelines' %}">
+      {% trans 'Documents and Guidelines' %}
+    </a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link {% if request.path == '/doc/court-roll' %}active{% endif %}"
        href="{% url 'document_nature_list' 'court-roll' %}">
       {% trans 'Court Rolls' %}
