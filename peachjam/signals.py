@@ -8,8 +8,8 @@ from background_task.signals import (
 from django.db.models import signals
 from django.dispatch import receiver
 
-from peachjam.models import CoreDocument, Work, citations_processor
-from peachjam.tasks import re_extract_citations, update_extracted_citations_for_a_work
+from peachjam.models import CoreDocument, Work
+from peachjam.tasks import update_extracted_citations_for_a_work
 
 
 # monitor background tasks with sentry
@@ -75,14 +75,3 @@ def doc_deleted_update_extracted_citations(sender, instance, **kwargs):
     """Update language list on related work after a subclass of CoreDocument is deleted."""
     if isinstance(instance, CoreDocument):
         update_extracted_citations_for_a_work(instance.work_id)
-
-
-@receiver(signals.post_save)
-def process_citations_for_new_documents(sender, instance, **kwargs):
-    """Re-extract citations for new documents."""
-    if isinstance(instance, CoreDocument) and not kwargs["raw"]:
-        if not instance.is_extracting_citations:
-            cp = citations_processor()
-            if cp.processing_date is None or instance.date < cp.processing_date:
-                cp.update_processing_date(instance.date)
-                re_extract_citations()

@@ -106,7 +106,7 @@ def extract_citations(document_id):
 
     try:
         if doc.extract_citations():
-            doc.save(is_extracting_citations=True)
+            doc.save()
     except Exception as e:
         log.error(f"Error extracting citations for {doc}", exc_info=e)
         raise

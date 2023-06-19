@@ -58,6 +58,10 @@ class PeachJamSettings(SingletonModel):
         verbose_name=_("metabase dashboard link"), null=True, blank=True
     )
 
+    re_extract_citations = models.BooleanField(
+        verbose_name=_("re-extract citations"), default=True
+    )
+
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
 

@@ -49,6 +49,7 @@ from peachjam.models import (
     OrderOutcome,
     SourceFile,
     Taxonomy,
+    citations_processor,
 )
 from peachjam.pipelines import DOC_MIMETYPES
 
@@ -325,6 +326,11 @@ class BaseDocumentResource(resources.ModelResource):
             # extract citations
             instance.extract_citations()
             instance.save()
+
+    def after_save_instance(self, instance, using_transactions, dry_run):
+        if not dry_run:
+            cp = citations_processor()
+            cp.queue_re_extract_citations(instance.date)
 
     def attach_source_file(self, instance, source_url):
         if source_url:

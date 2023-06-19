@@ -89,9 +89,22 @@ class ExtractedCitation(models.Model):
 class CitationProcessing(SingletonModel):
     processing_date = models.DateField(_("processing date"), null=True, blank=True)
 
-    def update_processing_date(self, date):
-        self.processing_date = date
-        self.save()
+    class Meta:
+        verbose_name = verbose_name_plural = _("citation processing")
+
+    def __str__(self):
+        return "Citation processing"
+
+    def queue_re_extract_citations(self, date):
+        from peachjam.models import pj_settings
+        from peachjam.tasks import re_extract_citations
+
+        if pj_settings().re_extract_citations:
+            if self.processing_date is None or date < self.processing_date:
+                log.info("Updating processing date to %s", date)
+                self.processing_date = date
+                self.save()
+                re_extract_citations()
 
     def re_extract_citations(self):
         """
@@ -102,14 +115,21 @@ class CitationProcessing(SingletonModel):
         from peachjam.models import CoreDocument
         from peachjam.tasks import extract_citations
 
-        later_documents = CoreDocument.objects.filter(
-            date__gte=self.processing_date
-        ).order_by("date")
-        log.info("Re-extracting citations for %s documents", later_documents.count())
-        for document in later_documents:
-            extract_citations(document.id)
+        if self.processing_date:
+            later_documents = (
+                CoreDocument.objects.filter(date__gte=self.processing_date)
+                .only("pk")
+                .order_by("date")
+            )
+            log.info(
+                "Re-extracting citations for %s documents since date %s",
+                later_documents.count(),
+                self.processing_date,
+            )
+            for document in later_documents.iterator():
+                extract_citations(document.id)
 
-        self.reset_processing_date()
+            self.reset_processing_date()
 
     def reset_processing_date(self):
         """Reset the processing date to None."""
