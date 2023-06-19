@@ -9,7 +9,7 @@ from django.db.models import signals
 from django.dispatch import receiver
 
 from peachjam.models import CoreDocument, Work, citations_processor
-from peachjam.tasks import re_extract_citations, update_extracted_citations_for_a_work
+from peachjam.tasks import update_extracted_citations_for_a_work
 
 
 # monitor background tasks with sentry
@@ -83,6 +83,4 @@ def process_citations_for_new_documents(sender, instance, **kwargs):
     if isinstance(instance, CoreDocument) and not kwargs["raw"]:
         if not instance.is_extracting_citations:
             cp = citations_processor()
-            if cp.processing_date is None or instance.date < cp.processing_date:
-                cp.update_processing_date(instance.date)
-                re_extract_citations()
+            cp.update_processing_date(instance.date)
