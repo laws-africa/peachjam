@@ -30,7 +30,7 @@ class RedirectResolver:
             "country_code": "za",
             "domain": "lawlibrary.org.za",
         },
-        "lesotholii": {
+        "leslii": {
             "country_code": "ls",
             "domain": "lesotholii.org",
         },
