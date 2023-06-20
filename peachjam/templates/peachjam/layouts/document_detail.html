@@ -205,14 +205,6 @@
                             </dd>
                           {% endif %}
                         {% endwith %}
-                        {% if document.court %}
-                          <dt>
-                            {% trans 'Court' %}
-                          </dt>
-                          <dd class="text-muted">
-                            <a href="{% url 'court' document.court.code %}">{{ document.court.name }}</a>
-                          </dd>
-                        {% endif %}
                         {% with document.judges.all as judges %}
                           {% if judges %}
                             <dt>
@@ -428,9 +420,7 @@
              id="ratifications-tab"
              role="tabpanel"
              aria-labelledby="ratifications-tab">
-          <div class="container">
-            {% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}
-          </div>
+          <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
         </div>
       {% endif %}
     </div>

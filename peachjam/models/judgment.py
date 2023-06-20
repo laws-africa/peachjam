@@ -2,6 +2,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models import Max
 from django.template.defaultfilters import date as format_date
+from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
@@ -127,6 +128,9 @@ class CourtRegistry(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.court}"
+
+    def get_absolute_url(self):
+        return reverse("court_registry", args=[self.court.code, self.code])
 
     def save(self, *args, **kwargs):
         self.code = f"{self.court.code}-{slugify(self.name)}"
