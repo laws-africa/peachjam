@@ -48,3 +48,9 @@ def pdfjs_to_text(fname):
 
         subprocess.run(cmd, check=True)
         return outf.read().decode("utf-8")
+
+
+def chunks(lst, n):
+    """Yield successive n-sized chunks from list."""
+    for i in range(n):
+        yield lst[i::n]

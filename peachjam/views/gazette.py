@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.views.generic import TemplateView
 
+from peachjam.helpers import chunks
 from peachjam.models import Gazette, Locality
 from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView, DocumentListView
@@ -61,11 +62,7 @@ class GazetteListView(TemplateView):
             )
             context["localities"] = Locality.objects.filter(pk__in=locality_ids)
 
-        loc_group = max([len(context["localities"]) // 2, 1])
-        context["locality_groups"] = (
-            context["localities"][:loc_group],
-            context["localities"][loc_group:],
-        )
+        context["locality_groups"] = list(chunks(context["localities"], 2))
 
         if not self.locality:
             # counts and years for gazettes at the top-level?
