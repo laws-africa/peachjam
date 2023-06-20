@@ -1,101 +1,12 @@
 {% extends "liiweb/home.html" %}
-{% load static i18n %}
-{% block title %}
-  {% trans 'Home' %}
+{% load i18n static %}
+{% block hero-logos %}
+  <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
+  <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
 {% endblock %}
 {% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to the Nigeria Legal Information Institute' %}</h1>
+  <h1 class="mb-4">{% trans 'Welcome to Nigeria Legal Information Institute' %}</h1>
 {% endblock %}
-{% block hero-logos %}
-  <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
-  <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
-{% endblock %}
-{% block first-column-content %}
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
-    {% trans 'View more judgments' as text %}
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
-  </section>
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Legislation' %}</h2>
-    {% trans 'View more legislation' as text %}
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
-  </section>
-{% endblock %}
-{% block second-column-content %}
-  <ul class="nav nav-tabs about-tabs d-flex justify-content-center justify-content-lg-start"
-      role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link twitter-nav-link active"
-              id="twitter-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#twitter-tab-content"
-              type="button"
-              role="tab"
-              aria-controls="twitter"
-              aria-selected="true">
-        <i class="bi bi bi-twitter twitter-forecolor"></i>
-        <span class="twitter-forecolor">{% trans 'Twitter' %}</span>
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link fb-nav-link"
-              id="facebook-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#facebook-tab-content"
-              type="button"
-              role="tab"
-              aria-controls="facebook"
-              aria-selected="false">
-        <i class="bi bi bi-facebook facebook-forecolor"></i>
-        <span class="facebook-forecolor">{% trans 'Facebook' %}</span>
-      </button>
-    </li>
-  </ul>
-  <div class="tab-content">
-    <div class="tab-pane fade show active"
-         id="twitter-tab-content"
-         role="tabpanel"
-         aria-labelledby="twitter-tab">
-      <div class="d-flex justify-content-center justify-content-lg-start">
-        <a class="twitter-timeline"
-           data-width="248"
-           data-height="400"
-           href="https://twitter.com/NigeriaLII?ref_src=twsrc%5Etfw">
-          {% trans 'Tweets by AfricanLII' %}
-        </a>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-      </div>
-    </div>
-    <div class="tab-pane fade"
-         id="facebook-tab-content"
-         role="tabpanel"
-         aria-labelledby="facebook-tab-content">
-      <div class="d-flex justify-content-center justify-content-lg-start">
-        <iframe width="248px"
-                height="400px"
-                frameborder="0"
-                allowtransparency="true"
-                allowfullscreen="true"
-                scrolling="no"
-                allow="encrypted-media"
-                src="https://www.facebook.com/v7.0/plugins/page.php?adapt_container_width=true&amp;app_id=323754998056442&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fx%2Fconnect%2Fxd_arbiter%2F%3Fversion%3D46%23cb%3Dfff64532b89928%26domain%3Dlawlibrary.org.za%26is_canvas%3Dfalse%26origin%3Dhttps%253A%252F%252Flawlibrary.org.za%252Ff3480a77dff53bc%26relation%3Dparent.parent&amp;container_width=248&amp;height=400&amp;hide_cover=false&amp;href=https%3A%2F%2Fwww.facebook.com%2Fafricanlii%2F&amp;locale=en_US&amp;sdk=joey&amp;show_facepile=false&amp;small_header=true&amp;tabs=timeline&amp;width=248"
-                style="border: none;
-                       visibility: visible;
-                       width: 248px;
-                       height: 400px">
-        </iframe>
-      </div>
-    </div>
-  </div>
-{% endblock %}
-{% block lower-row-content %}
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4 heading-underlined">{% trans 'Courts' %}</h2>
-    {% include 'peachjam/_court_list.html' %}
-  </section>
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4 heading-underlined">{% trans 'Collections' %}</h2>
-    {% include 'peachjam/_taxonomy_list.html' %}
-  </section>
+{% block facebook-url %}
+  https://www.facebook.com/v7.0/plugins/page.php?adapt_container_width=true&amp;app_id=323754998056442&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fx%2Fconnect%2Fxd_arbiter%2F%3Fversion%3D46%23cb%3Dfff64532b89928%26domain%3Dlawlibrary.org.za%26is_canvas%3Dfalse%26origin%3Dhttps%253A%252F%252Flawlibrary.org.za%252Ff3480a77dff53bc%26relation%3Dparent.parent&amp;container_width=248&amp;height=400&amp;hide_cover=false&amp;href=https%3A%2F%2Fwww.facebook.com%2FLesothoLII%2F&amp;locale=en_US&amp;sdk=joey&amp;show_facepile=false&amp;small_header=true&amp;tabs=timeline&amp;width=248
 {% endblock %}
