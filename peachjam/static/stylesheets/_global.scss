@@ -40,24 +40,6 @@ main {
   break-inside: avoid;
 }
 
-.nav-tabs {
-  border: none;
-
-  .nav-link {
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: inherit;
-    background-color: inherit;
-
-    &.active {
-      border: none;
-      font-weight: bold;
-      border-bottom: 2px solid $primary;
-      background-color: inherit;
-    }
-  }
-}
-
 mark {
   background-color: yellow;
   padding: 0;

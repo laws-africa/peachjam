@@ -22,7 +22,7 @@ class TestRedirectResolver(TestCase):
             "ulii.org",
             "lawlibrary.org.za",
             "lawlibrary.org.za",
-            "new.tanzlii.org",
+            "tanzlii.org",
             "zanzibarlii.org",
             None,
         ]
@@ -42,9 +42,9 @@ class TestRedirectResolver(TestCase):
             "ulii.org",
             "lawlibrary.org.za",
             "lawlibrary.org.za",
-            "new.tanzlii.org",
+            "tanzlii.org",
             None,
-            "agp.africanlii.org",
+            "africanlii.org",
         ]
         results = zip(urls, domains)
         for result in results:
@@ -63,7 +63,7 @@ class TestRedirectResolver(TestCase):
             "lawlibrary.org.za",
             None,
             "zanzibarlii.org",
-            "agp.africanlii.org",
+            "africanlii.org",
         ]
         results = zip(urls, domains)
         for result in results:

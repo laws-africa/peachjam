@@ -35,6 +35,8 @@ class PeachJam {
   setup () {
     this.setupSentry();
     this.createComponents();
+    this.setupTooltips();
+    this.scrollNavTabs();
   }
 
   createComponents () {
@@ -65,7 +67,7 @@ class PeachJam {
     });
   }
 
-  private setupSentry () {
+  setupSentry () {
     const el = document.getElementById('sentry-config');
     const config = el ? JSON.parse(el.innerHTML) : null;
     // @ts-ignore
@@ -82,10 +84,15 @@ class PeachJam {
         ],
         beforeSend (event: any) {
           try {
+            // if there is no stacktrace, ignore it
+            if (!event.exception || !event.exception.values || !event.exception.values[0] || !event.exception.values[0].stacktrace) {
+              return null;
+            }
+
             const frames = event.exception.values[0].stacktrace.frames;
             // if all frames are anonymous, don't send this event
             // see https://github.com/getsentry/sentry-javascript/issues/3147
-            if (frames && frames.length > 0 && frames.all((f: any) => f.filename === '<anonymous>')) {
+            if (frames && frames.length > 0 && frames.every((f: any) => f.filename === '<anonymous>')) {
               return null;
             }
           } catch (e) {
@@ -96,6 +103,23 @@ class PeachJam {
         }
       });
     }
+  }
+
+  setupTooltips () {
+    // setup bootstrap tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+      // @ts-ignore
+      new window.bootstrap.Tooltip(el);
+    });
+  }
+
+  scrollNavTabs () {
+    // for scrollable tabbed navs, the active element may be out of view on narrow devices; scroll it into view
+    document.querySelectorAll('.nav.nav-tabs.scroll-xs > .nav-item > .nav-link.active').forEach(link => {
+      if (link.parentElement && link.parentElement.parentElement) {
+        link.parentElement.parentElement.scrollLeft = (link as HTMLElement).offsetLeft;
+      }
+    });
   }
 }
 

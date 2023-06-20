@@ -16,7 +16,11 @@ class RedirectResolver:
     RESOLVER_MAPPINGS = {
         "africanlii": {
             "country_code": "aa",
-            "domain": "agp.africanlii.org",
+            "domain": "africanlii.org",
+        },
+        "eswatinilii": {
+            "country_code": "sz",
+            "domain": "eswatinilii.org",
         },
         "ghalii": {
             "country_code": "gh",
@@ -26,7 +30,7 @@ class RedirectResolver:
             "country_code": "za",
             "domain": "lawlibrary.org.za",
         },
-        "lesotholii": {
+        "leslii": {
             "country_code": "ls",
             "domain": "lesotholii.org",
         },
@@ -56,7 +60,7 @@ class RedirectResolver:
         },
         "tanzlii": {
             "country_code": "tz",
-            "domain": "new.tanzlii.org",
+            "domain": "tanzlii.org",
         },
         "tcilii": {
             "country_code": "tc",
