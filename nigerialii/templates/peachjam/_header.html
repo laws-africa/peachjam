@@ -1,4 +1,4 @@
-{% extends 'peachjam/_header.html' %}
+gst{% extends 'peachjam/_header.html' %}
 {% load static i18n %}
 {% block top-bar %}{% endblock %}
 {% block nav-items %}
@@ -24,6 +24,12 @@
     <a class="nav-link {% if request.path == '/doc/speech' %}active{% endif %}"
        href="{% url 'document_nature_list' 'speech' %}">
       {% trans 'Speeches' %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if view.navbar_link == 'gazettes' %}active{% endif %}"
+       href="{% url 'gazettes' %}">
+      {% trans 'Gazettes' %}
     </a>
   </li>
   <li class="nav-item">
