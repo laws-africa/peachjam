@@ -246,6 +246,7 @@ class BaseDocumentResource(resources.ModelResource):
         attribute="alternative_names",
         widget=ManyToOneWidget(AlternativeName, separator="|", field="title"),
     )
+    content_html = fields.Field(attribute="content_html", widget=CharWidget())
 
     class Meta:
         exclude = (
