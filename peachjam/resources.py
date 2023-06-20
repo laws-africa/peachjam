@@ -246,7 +246,6 @@ class BaseDocumentResource(resources.ModelResource):
         attribute="alternative_names",
         widget=ManyToOneWidget(AlternativeName, separator="|", field="title"),
     )
-    content_html = fields.Field(attribute="content_html", widget=CharWidget())
 
     class Meta:
         exclude = (
@@ -257,7 +256,6 @@ class BaseDocumentResource(resources.ModelResource):
             "doc_type",
             "polymorphic_ctype",
             "work",
-            "content_html",
             "toc_json",
         )
         import_id_fields = ("expression_frbr_uri",)
