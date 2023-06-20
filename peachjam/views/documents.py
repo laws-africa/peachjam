@@ -18,6 +18,10 @@ class RedirectResolver:
             "country_code": "aa",
             "domain": "africanlii.org",
         },
+        "eswatinilii": {
+            "country_code": "sz",
+            "domain": "eswatinilii.org",
+        },
         "ghalii": {
             "country_code": "gh",
             "domain": "ghalii.org",
@@ -26,7 +30,7 @@ class RedirectResolver:
             "country_code": "za",
             "domain": "lawlibrary.org.za",
         },
-        "lesotholii": {
+        "leslii": {
             "country_code": "ls",
             "domain": "lesotholii.org",
         },
