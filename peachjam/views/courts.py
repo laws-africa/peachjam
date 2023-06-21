@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
-from peachjam.helpers import lowercase_alphabet
+from peachjam.helpers import chunks, lowercase_alphabet
 from peachjam.models import Court, CourtRegistry, Judgment
 from peachjam.views.generic_views import FilteredDocumentListView
 
@@ -68,11 +68,7 @@ class CourtDetailView(FilteredDocumentListView):
             judgments__isnull=True
         )  # display registries with judgments only
 
-        registry_group = max([len(context["registries"]) // 2, 1])
-        context["registry_groups"] = (
-            context["registries"][:registry_group],
-            context["registries"][registry_group:],
-        )
+        context["registry_groups"] = list(chunks(context["registries"], 2))
 
         order_outcomes = list(
             {
