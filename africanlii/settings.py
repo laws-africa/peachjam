@@ -8,7 +8,7 @@ JAZZMIN_SETTINGS["site_title"] = "Africanlii"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "Africanlii"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "Agp.africanlli.org"  # noqa
 
-EXTRA_SEARCH_INDEXES = [
+PEACHJAM["EXTRA_SEARCH_INDEXES"] = [  # noqa
     "ghalii",
     "lawlibrary",
     "lesotholii",
@@ -24,6 +24,7 @@ EXTRA_SEARCH_INDEXES = [
     "zanzibarlii",
     "zimlii",
 ]
+PEACHJAM["SEARCH_JURISDICTION_FILTER"] = True  # noqa
 
 # The slugs of the taxonomy roots that are treated as federated indexes
 FEDERATED_DOC_INDEX_ROOTS = ["case-indexes"]
