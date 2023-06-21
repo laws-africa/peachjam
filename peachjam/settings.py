@@ -115,6 +115,8 @@ PEACHJAM = {
         "CITATOR_API", "https://api.laws.africa/citator/v1/extract-citations"
     ),
     "CITATOR_API_KEY": os.environ.get("CITATOR_API_KEY"),
+    "EXTRA_SEARCH_INDEXES": [],
+    "SEARCH_JURISDICTION_FILTER": False,
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -257,8 +259,6 @@ ELASTICSEARCH_MAX_ANALYZED_OFFSET = os.environ.get(
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
     "peachjam_search.tasks.BackgroundTaskSearchProcessor"
 )
-
-EXTRA_SEARCH_INDEXES = []
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

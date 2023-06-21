@@ -261,7 +261,7 @@ def get_search_indexes(base_index):
         + [f"{base_index}_{lang}" for lang in ANALYZERS.keys()]
         + [
             f"{i}_{lang}"
-            for i in settings.EXTRA_SEARCH_INDEXES
+            for i in settings.PEACHJAM["EXTRA_SEARCH_INDEXES"]
             for lang in ANALYZERS.keys()
         ]
     )
