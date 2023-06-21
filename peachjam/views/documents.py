@@ -42,6 +42,10 @@ class RedirectResolver:
             "country_code": "na",
             "domain": "namiblii.org",
         },
+        "nigerialii": {
+            "country_code": "ng",
+            "domain": "nigerialii.org",
+        },
         "senlii": {
             "country_code": "sn",
             "domain": "senlii.org",
