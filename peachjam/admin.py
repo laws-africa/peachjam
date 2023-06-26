@@ -38,6 +38,7 @@ from peachjam.models import (
     Book,
     CaseNumber,
     CitationLink,
+    CitationProcessing,
     CoreDocument,
     Court,
     CourtClass,
@@ -65,6 +66,7 @@ from peachjam.models import (
     Taxonomy,
     UserProfile,
     Work,
+    citations_processor,
     pj_settings,
 )
 from peachjam.resources import (
@@ -413,13 +415,29 @@ class DocumentAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def save_model(self, request, obj, form, change):
+
         if not change:
             obj.created_by = request.user
+
         super().save_model(request, obj, form, change)
 
     def save_related(self, request, form, formsets, change):
-        super().save_related(request, form, formsets, change)
         # after saving related models, also save this model again so that it can update fields based on related changes
+        # if date, title, or content changed, re-extract citations or if new document
+
+        alternative_names_formset = [
+            formset for formset in formsets if formset.model == AlternativeName
+        ][0]
+
+        if (
+            not change
+            or ["date", "title", "citation"] in form.changed_data
+            or alternative_names_formset.has_changed()
+        ):
+            cp = citations_processor()
+            cp.queue_re_extract_citations(form.instance.date)
+
+        super().save_related(request, form, formsets, change)
         form.instance.save()
 
     def get_urls(self):
@@ -833,6 +851,7 @@ admin.site.register(
         MatterType,
         CourtClass,
         AttachedFileNature,
+        CitationProcessing,
     ]
 )
 admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)

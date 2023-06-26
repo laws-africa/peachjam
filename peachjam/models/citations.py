@@ -1,5 +1,11 @@
+import logging
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from .settings import SingletonModel
+
+log = logging.getLogger(__name__)
 
 
 class CitationLink(models.Model):
@@ -78,3 +84,60 @@ class ExtractedCitation(models.Model):
             .filter(target_work=work)
             .order_by("citing_work__title")
         )
+
+
+class CitationProcessing(SingletonModel):
+    processing_date = models.DateField(_("processing date"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = verbose_name_plural = _("citation processing")
+
+    def __str__(self):
+        return "Citation processing"
+
+    def queue_re_extract_citations(self, date):
+        from peachjam.models import pj_settings
+        from peachjam.tasks import re_extract_citations
+
+        if pj_settings().re_extract_citations:
+            if self.processing_date is None or date < self.processing_date:
+                log.info("Updating processing date to %s", date)
+                self.processing_date = date
+                self.save()
+                re_extract_citations()
+
+    def re_extract_citations(self):
+        """
+        Queues up background tasks to re-extract citations for all documents dated on or after the processing date.
+        This is to handle the case where an older document has just been added to the system, and newer documents may
+        therefore cite it.
+        """
+        from peachjam.models import CoreDocument
+        from peachjam.tasks import extract_citations
+
+        if self.processing_date:
+            later_documents = (
+                CoreDocument.objects.filter(date__gte=self.processing_date)
+                .only("pk")
+                .order_by("date")
+            )
+            log.info(
+                "Re-extracting citations for %s documents since date %s",
+                later_documents.count(),
+                self.processing_date,
+            )
+            for document in later_documents.iterator():
+                extract_citations(document.id)
+
+            self.reset_processing_date()
+
+    def reset_processing_date(self):
+        """Reset the processing date to None."""
+        log.info("Resetting processing date.")
+        self.processing_date = None
+        self.save()
+
+
+def citations_processor():
+    """Return the CitationProcessing object."""
+    return CitationProcessing.load()
