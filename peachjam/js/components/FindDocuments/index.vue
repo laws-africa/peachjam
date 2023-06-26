@@ -214,7 +214,6 @@ import SearchPagination from './SearchPagination.vue';
 import FilterFacets from '../FilterFacets/index.vue';
 import MobileFacetsDrawer from './MobileSideDrawer.vue';
 import AdvancedSearch from './AdvancedSearch.vue';
-import moment from 'moment';
 import { scrollToElement } from '../../utils/function';
 
 function resetAdvancedFields (fields) {
@@ -567,13 +566,13 @@ export default {
 
         if (key === 'date') {
           if (value.date_from && value.date_to) {
-            const dateFrom = moment(value.date_from).format('YYYY-MM-DD');
-            const dateTo = moment(value.date_to).format('YYYY-MM-DD');
+            const dateFrom = value.date_from;
+            const dateTo = value.date_to;
             params.append('date__range', `${dateFrom}__${dateTo}`);
           } else if (value.date_from) {
-            params.append('date__gte', moment(value.date_from).format('YYYY-MM-DD'));
+            params.append('date__gte', value.date_from);
           } else if (value.date_to) {
-            params.append('date__lte', moment(value.date_to).format('YYYY-MM-DD'));
+            params.append('date__lte', value.date_to);
           }
         } else if (value.q) {
           params.append(`search__${key}`, value.q);
