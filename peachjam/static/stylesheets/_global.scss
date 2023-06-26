@@ -133,7 +133,6 @@ footer {
   font-size: 22px;
 }
 
-
 @each $state, $value in $theme-colors {
   .alert-#{$state} {
     $alert-color: shift-color($value, $alert-color-scale);
@@ -150,4 +149,11 @@ footer {
 
 html[data-user-agent*='pocketlaw'] .pocketlaw-hidden {
   display: none;
+}
+
+// force font size on mobile to 16 px
+@include media-breakpoint-down(sm) {
+  input {
+    font-size: 16px !important;
+  }
 }
