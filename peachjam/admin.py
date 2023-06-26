@@ -427,12 +427,17 @@ class DocumentAdmin(admin.ModelAdmin):
 
         alternative_names_formset = [
             formset for formset in formsets if formset.model == AlternativeName
-        ][0]
+        ]
+
+        if alternative_names_formset:
+            alternative_names_has_changed = alternative_names_formset[0].has_changed()
+        else:
+            alternative_names_has_changed = False
 
         if (
             not change
             or ["date", "title", "citation"] in form.changed_data
-            or alternative_names_formset.has_changed()
+            or alternative_names_has_changed
         ):
             cp = citations_processor()
             cp.queue_re_extract_citations(form.instance.date)
