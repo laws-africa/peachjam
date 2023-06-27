@@ -169,19 +169,9 @@ class BaseDocumentDetailView(DetailView):
         context["taxonomies"] = doc.taxonomies.prefetch_related("topic")
 
         context["cited_documents"] = self.fetch_docs(doc.work.cited_works())
-        context["outgoing_citations"] = (
-            "outgoing-citations" if bool(context["cited_documents"]) else ""
-        )
-
         context["documents_citing_current_doc"] = self.fetch_docs(
             doc.work.works_citing_current_work()
         )
-        context["incoming_citations"] = (
-            "incoming-citations"
-            if bool(context["documents_citing_current_doc"])
-            else ""
-        )
-
         context["cited_documents_count"] = sum(
             [len(doc["docs"]) for doc in context["cited_documents"]]
         )
