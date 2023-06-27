@@ -199,7 +199,7 @@ class IndigoAdapter(Adapter):
                     [name for name in document["subtype"].split("-")]
                 ).capitalize()
             field_data["nature"] = DocumentNature.objects.update_or_create(
-                code=slugify(document_nature_name),
+                code=slugify(document["subtype"]),
                 defaults={"name": document_nature_name},
             )[0]
 
