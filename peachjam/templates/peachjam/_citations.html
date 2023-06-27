@@ -2,12 +2,16 @@
 <div class="container">
   <div class="row">
     <div class="col-sm">
-      <h5>{% translate 'Cited documents' %}</h5>
-      {% include 'peachjam/_citations_list.html' with citations=cited_documents %}
+      <h5>
+        {% translate 'Cited documents' %} <span class="badge bg-secondary">{{ cited_documents_count }}</span>
+      </h5>
+      {% include 'peachjam/_citations_list.html' with citations=cited_documents group=outgoing_citations %}
     </div>
     <div class="col-sm">
-      <h5>{% translate 'Documents citing this one' %}</h5>
-      {% include 'peachjam/_citations_list.html' with citations=documents_citing_current_doc %}
+      <h5>
+        {% translate 'Documents citing this one' %} <span class="badge bg-secondary">{{ documents_citing_current_doc_count }}</span>
+      </h5>
+      {% include 'peachjam/_citations_list.html' with citations=documents_citing_current_doc group=incoming_citations %}
     </div>
   </div>
 </div>

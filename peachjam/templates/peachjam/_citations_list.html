@@ -2,31 +2,24 @@
 {% for item in citations %}
   {{ item.doc_type }} <span class="badge bg-secondary">{{ item.docs|length }}</span>
   <ol>
-    {% if item.docs|length < 11 %}
-      {% for doc in item.docs|slice:":10" %}
-        <li>
-          <a href="{% url 'document_detail' frbr_uri=doc.work.frbr_uri|strip_first_character %}">{{ doc.title }}</a>
-        </li>
-      {% endfor %}
-    {% endif %}
+    {% for doc in item.docs|slice:":10" %}
+      <li class="{{ group }}">
+        <a href="{% url 'document_detail' frbr_uri=doc.work.frbr_uri|strip_first_character %}">{{ doc.title }}</a>
+      </li>
+    {% endfor %}
     {% if item.docs|length > 10 %}
-      {% for doc in item.docs|slice:":10" %}
-        <li>
-          <a href="{% url 'document_detail' frbr_uri=doc.work.frbr_uri|strip_first_character %}">{{ doc.title }}</a>
-        </li>
-      {% endfor %}
       {% for doc in item.docs|slice:"10:" %}
-        <li class="collapse" id="{{ item.doc_type }}">
+        <li class="collapse {{ group }}-{{ forloop.parentloop.counter }}">
           <a href="{% url 'document_detail' frbr_uri=doc.work.frbr_uri|strip_first_character %}">{{ doc.title }}</a>
         </li>
       {% endfor %}
-      <div>
+      <div class="mt-2">
         <a data-bs-toggle="collapse"
-           href="#{{ item.doc_type }}"
+           href=".{{ group }}-{{ forloop.counter }}"
            role="button"
            aria-expanded="false"
            aria-controls="{{ item.doc_type }}">
-          {% trans 'Show all...' %}
+          {% trans 'Show/Hide all' %}
         </a>
       </div>
     {% endif %}

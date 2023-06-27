@@ -168,17 +168,30 @@ class BaseDocumentDetailView(DetailView):
         context["notices"] = self.get_notices()
         context["taxonomies"] = doc.taxonomies.prefetch_related("topic")
 
-        cited_works = doc.work.cited_works()
-        context["cited_documents"] = self.fetch_docs(cited_works)
-
-        works_citing_current_work = doc.work.works_citing_current_work()
-        context["documents_citing_current_doc"] = self.fetch_docs(
-            works_citing_current_work
+        context["cited_documents"] = self.fetch_docs(doc.work.cited_works())
+        context["outgoing_citations"] = (
+            "outgoing-citations" if bool(context["cited_documents"]) else ""
         )
 
-        context["number_of_extracted_citations"] = sum(
+        context["documents_citing_current_doc"] = self.fetch_docs(
+            doc.work.works_citing_current_work()
+        )
+        context["incoming_citations"] = (
+            "incoming-citations"
+            if bool(context["documents_citing_current_doc"])
+            else ""
+        )
+
+        context["cited_documents_count"] = sum(
             [len(doc["docs"]) for doc in context["cited_documents"]]
-        ) + sum([len(doc["docs"]) for doc in context["documents_citing_current_doc"]])
+        )
+        context["documents_citing_current_doc_count"] = sum(
+            [len(doc["docs"]) for doc in context["documents_citing_current_doc"]]
+        )
+        context["number_of_extracted_citations"] = (
+            context["cited_documents_count"]
+            + context["documents_citing_current_doc_count"]
+        )
 
         return context
 
@@ -188,7 +201,8 @@ class BaseDocumentDetailView(DetailView):
                 CoreDocument.objects.prefetch_related("work")
                 .filter(work__in=works)
                 .distinct("work_frbr_uri")
-                .order_by("work_frbr_uri")
+                .order_by("work_frbr_uri", "-date")
+                .preferred_language(get_language(self.request))
             ),
             key=lambda d: d.get_doc_type_display(),
         )
