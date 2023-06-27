@@ -445,19 +445,19 @@ class CoreDocument(PolymorphicModel):
             .exists()
         ):
             raise ValidationError(
-                {
-                    "expression_frbr_uri": _(
-                        "Document with this Expression FRBR URI already exists!"
-                    )
-                    + " "
-                    + self.expression_frbr_uri
-                }
+                _("Document with this Expression FRBR URI already exists!")
+                + " "
+                + self.expression_frbr_uri
             )
 
     def generate_expression_frbr_uri(self):
-        frbr_uri = FrbrUri.parse(self.work_frbr_uri)
-        frbr_uri.expression_date = f"@{datestring(self.date)}"
-        frbr_uri.language = self.language.iso_639_3
+        try:
+            frbr_uri = FrbrUri.parse(self.work_frbr_uri)
+            frbr_uri.expression_date = f"@{datestring(self.date)}"
+            frbr_uri.language = self.language.iso_639_3
+        except ValueError as e:
+            raise ValidationError(f"Invalid FRBR URI: {self.work_frbr_uri}") from e
+
         return frbr_uri.expression_uri()
 
     def expression_uri(self):
