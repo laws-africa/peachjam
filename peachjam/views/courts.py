@@ -94,6 +94,7 @@ class CourtDetailView(FilteredDocumentListView):
             "attorneys": attorneys,
             "order_outcomes": order_outcomes,
         }
+        context["doc_type"] = "Judgment"
 
         return context
 

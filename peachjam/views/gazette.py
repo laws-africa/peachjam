@@ -70,6 +70,7 @@ class GazetteListView(TemplateView):
 
         context["num_gazettes"] = queryset.count()
         context["years"] = self.get_year_stats(queryset)
+        context["doc_type"] = "Gazette"
 
         return context
 
@@ -118,6 +119,7 @@ class GazetteYearView(DocumentListView):
 
         context["gazettes"] = self.group_gazettes(list(self.object_list))
         context["year"] = int(self.kwargs["year"])
+        context["doc_type"] = "Gazette"
 
         return context
 
