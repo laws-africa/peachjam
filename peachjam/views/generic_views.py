@@ -203,8 +203,6 @@ class BaseDocumentDetailView(DetailView):
             for doc_type, group in grouped_docs
         ]
 
-        print(result)
-
         return result
 
     def add_relationships(self, context):

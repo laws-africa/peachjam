@@ -10,8 +10,13 @@
       {% endfor %}
     {% endif %}
     {% if item.docs|length > 10 %}
-      {% for doc in item.docs|slice:"10:" %}
+      {% for doc in item.docs|slice:":10" %}
         <li>
+          <a href="{% url 'document_detail' frbr_uri=doc.work.frbr_uri|strip_first_character %}">{{ doc.title }}</a>
+        </li>
+      {% endfor %}
+      {% for doc in item.docs|slice:"10:" %}
+        <li class="collapse" id="{{ item.doc_type }}">
           <a href="{% url 'document_detail' frbr_uri=doc.work.frbr_uri|strip_first_character %}">{{ doc.title }}</a>
         </li>
       {% endfor %}
