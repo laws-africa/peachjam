@@ -601,15 +601,21 @@ class CoreDocument(PolymorphicModel):
 
         if self.content_html:
             root = html.fromstring(self.content_html)
-            # get AKN links in the document content, except those in remarks or in the generated
-            # coverpage (which is outside the akn-akomaNtoso root)
-            xpath = (
-                '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
-                'not(ancestor::*[contains(@class, "akn-remark")])]'
-            )
+            if self.content_html_is_akn:
+                # get AKN links in the document content, except those in remarks or in the generated
+                # coverpage (which is outside the akn-akomaNtoso root)
+                xpath = (
+                    '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
+                    'not(ancestor::*[contains(@class, "akn-remark")])]'
+                )
+                attr = "data-href"
+            else:
+                xpath = '//a[starts-with(@href, "/akn")]'
+                attr = "href"
+
             for a in root.xpath(xpath):
                 try:
-                    work_frbr_uris.add(FrbrUri.parse(a.attrib["data-href"]).work_uri())
+                    work_frbr_uris.add(FrbrUri.parse(a.attrib[attr]).work_uri())
                 except ValueError:
                     # ignore malformed FRBR URIs
                     pass

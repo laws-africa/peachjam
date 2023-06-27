@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class BaseModel(models.Model):
+class SingletonModel(models.Model):
     class Meta:
         abstract = True
 
@@ -11,7 +11,7 @@ class BaseModel(models.Model):
 
     def save(self, *args, **kwargs):
         self.pk = 1
-        super(BaseModel, self).save(*args, **kwargs)
+        super(SingletonModel, self).save(*args, **kwargs)
 
     @classmethod
     def load(cls):
@@ -19,7 +19,7 @@ class BaseModel(models.Model):
         return obj
 
 
-class PeachJamSettings(BaseModel):
+class PeachJamSettings(SingletonModel):
     default_document_language = models.ForeignKey(
         "languages_plus.Language",
         related_name="+",
@@ -56,6 +56,10 @@ class PeachJamSettings(BaseModel):
 
     metabase_dashboard_link = models.URLField(
         verbose_name=_("metabase dashboard link"), null=True, blank=True
+    )
+
+    re_extract_citations = models.BooleanField(
+        verbose_name=_("re-extract citations"), default=True
     )
 
     class Meta:

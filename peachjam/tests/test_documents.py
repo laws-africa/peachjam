@@ -59,3 +59,25 @@ class CoreDocumentTestCase(TestCase):
             ],
             frbr_uris,
         )
+
+    def test_get_cited_work_frbr_uris_html(self):
+        doc = CoreDocument.objects.get(
+            expression_frbr_uri="/akn/za/act/1979/70/eng@2020-10-22"
+        )
+        doc.content_html = """<div>
+<p><a class="sdfootnotesym" href="#sdfootnote5anc" name="sdfootnote5sym">5</a> <em>Motata v Minister of Justice and
+Constitutional Development and Others </em><a href="/akn/za/judgment/zagpphc/2012/196" aria-expanded="false">[2012]
+ZAGPPHC 196</a> para 6.</p>
+</div>
+<div>
+<p><a class="sdfootnotesym" href="#sdfootnote6anc" name="sdfootnote6sym">6</a> <em>Motata v Minister of Justice and
+Constitutional Development and Another </em><a href="/akn/za/judgment/zagpphc/2016/1063" aria-expanded="false">[2016]
+ZAGPPHC 1063</a>.</p>
+</div>"""
+        doc.content_html_is_akn = False
+
+        frbr_uris = sorted(list(doc.get_cited_work_frbr_uris()))
+        self.assertEqual(
+            ["/akn/za/judgment/zagpphc/2012/196", "/akn/za/judgment/zagpphc/2016/1063"],
+            frbr_uris,
+        )
