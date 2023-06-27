@@ -2,28 +2,12 @@
 <div class="container">
   <div class="row">
     <div class="col-sm">
-      <h5>
-        {% translate 'Cited documents' %} <span class="badge bg-secondary">{{ cited_works|length }}</span>
-      </h5>
-      <ol>
-        {% for work in cited_works %}
-          <li>
-            <a href="{% url 'document_detail' frbr_uri=work.target_work.frbr_uri|strip_first_character %}">{{ work.target_work.title }}</a>
-          </li>
-        {% endfor %}
-      </ol>
+      <h5>{% translate 'Cited documents' %}</h5>
+      {% include 'peachjam/_citations_list.html' with citations=cited_documents %}
     </div>
     <div class="col-sm">
-      <h5>
-        {% translate 'Documents citing this one' %} <span class="badge bg-secondary">{{ works_citing_current_work|length }}</span>
-      </h5>
-      <ol>
-        {% for work in works_citing_current_work %}
-          <li>
-            <a href="{% url 'document_detail' frbr_uri=work.citing_work.frbr_uri|strip_first_character %}">{{ work.citing_work.title }}</a>
-          </li>
-        {% endfor %}
-      </ol>
+      <h5>{% translate 'Documents citing this one' %}</h5>
+      {% include 'peachjam/_citations_list.html' with citations=documents_citing_current_doc %}
     </div>
   </div>
 </div>

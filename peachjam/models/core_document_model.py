@@ -182,11 +182,11 @@ class Work(models.Model):
 
     def cited_works(self):
         """Shows a list of works cited by the current work."""
-        return ExtractedCitation.for_citing_works(self)
+        return ExtractedCitation.for_citing_works(self).values("target_work")
 
     def works_citing_current_work(self):
         """Shows a list of works that cite the current work."""
-        return ExtractedCitation.for_target_works(self)
+        return ExtractedCitation.for_target_works(self).values("citing_work")
 
     def save(self, *args, **kwargs):
         self.explode_frbr_uri()

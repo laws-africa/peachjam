@@ -1,3 +1,5 @@
+import itertools
+
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 from lxml import html
@@ -165,15 +167,45 @@ class BaseDocumentDetailView(DetailView):
 
         context["notices"] = self.get_notices()
         context["taxonomies"] = doc.taxonomies.prefetch_related("topic")
-        context["cited_works"] = list(doc.work.cited_works())
-        context["works_citing_current_work"] = list(
-            doc.work.works_citing_current_work()
-        )
-        context["number_of_extracted_citations"] = len(context["cited_works"]) + len(
-            context["works_citing_current_work"]
+
+        cited_works = doc.work.cited_works()
+        context["cited_documents"] = self.fetch_docs(cited_works)
+
+        works_citing_current_work = doc.work.works_citing_current_work()
+        context["documents_citing_current_doc"] = self.fetch_docs(
+            works_citing_current_work
         )
 
+        context["number_of_extracted_citations"] = sum(
+            [len(doc["docs"]) for doc in context["cited_documents"]]
+        ) + sum([len(doc["docs"]) for doc in context["documents_citing_current_doc"]])
+
         return context
+
+    def fetch_docs(self, works):
+        docs = sorted(
+            list(
+                CoreDocument.objects.prefetch_related("work")
+                .filter(work__in=works)
+                .distinct("work_frbr_uri")
+                .order_by("work_frbr_uri")
+            ),
+            key=lambda d: d.get_doc_type_display(),
+        )
+
+        grouped_docs = itertools.groupby(docs, lambda d: d.get_doc_type_display())
+
+        result = [
+            {
+                "doc_type": doc_type,
+                "docs": sorted(list(group), key=lambda d: d.title),
+            }
+            for doc_type, group in grouped_docs
+        ]
+
+        print(result)
+
+        return result
 
     def add_relationships(self, context):
         context["relationships_as_subject"] = rels_as_subject = list(

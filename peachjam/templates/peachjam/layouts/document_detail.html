@@ -94,7 +94,7 @@
                 </button>
               </li>
             {% endif %}
-            {% if cited_works or works_citing_current_work %}
+            {% if cited_documents or documents_citing_current_doc %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
                         data-bs-toggle="tab"
@@ -407,7 +407,7 @@
           </div>
         {% endif %}
       {% endblock %}
-      {% if cited_works or works_citing_current_work %}
+      {% if cited_documents or documents_citing_this_one %}
         <div class="tab-pane fade"
              id="citations-tab"
              role="tabpanel"
