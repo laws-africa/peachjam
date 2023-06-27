@@ -1,6 +1,5 @@
 import { toRange as textPositionToRange, fromRange as textPositionFromRange } from 'dom-anchor-text-position';
 import { toRange as textQuoteToRange, fromTextPosition as textQuoteFromTextPosition } from 'dom-anchor-text-quote';
-import find from 'lodash/find';
 
 // Selector for elements that are foreign to AKN documents, such as table editor buttons
 // and annotations
@@ -177,8 +176,8 @@ export function targetToRange (target, root) {
  */
 export function selectorsToRange (anchor, selectors) {
   let range;
-  const posnSelector = find(selectors, { type: 'TextPositionSelector' });
-  const quoteSelector = find(selectors, { type: 'TextQuoteSelector' });
+  const posnSelector = selectors.find((x) => x.type === 'TextPositionSelector');
+  const quoteSelector = selectors.find((x) => x.type === 'TextQuoteSelector');
 
   if (posnSelector) {
     try {

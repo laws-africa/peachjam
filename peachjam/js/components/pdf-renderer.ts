@@ -223,24 +223,6 @@ class PdfRenderer {
       this.previewPanelsContainer.appendChild(panelPreview);
     }
   }
-
-  decoratePdf () {
-    const marks: { style: { backgroundColor: string; }; setAttribute: (arg0: string, arg1: string) => void; }[] = [];
-
-    for (const item of items) {
-      const range = targetToRange(item.target, this.pdfContentWrapper);
-      markRange(range, 'a', (element: { style: { backgroundColor: string; }; setAttribute: (arg0: string, arg1: string) => void; }) => {
-        element.style.backgroundColor = 'red';
-        element.setAttribute('href', '#');
-        marks.push(element);
-        return element;
-      });
-      this.pdfContentMarks.push({
-        ...item,
-        marks
-      });
-    }
-  }
 }
 
 export default PdfRenderer;
