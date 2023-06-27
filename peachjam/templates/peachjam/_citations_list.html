@@ -1,0 +1,30 @@
+{% load peachjam i18n %}
+{% for item in citations %}
+  <h5 class="mt-3">
+    {{ item.doc_type }} <span class="badge bg-secondary">{{ item.docs|length }}</span>
+  </h5>
+  <ol class="mb-0">
+    {% for doc in item.docs|slice:":10" %}
+      <li class="{{ group }}">
+        <a href="{% url 'document_detail' frbr_uri=doc.work.frbr_uri|strip_first_character %}">{{ doc.title }}</a>
+      </li>
+    {% endfor %}
+    {% if item.docs|length > 10 %}
+      {% for doc in item.docs|slice:"10:" %}
+        <li class="collapse {{ group }}-{{ forloop.parentloop.counter }}">
+          <a href="{% url 'document_detail' frbr_uri=doc.work.frbr_uri|strip_first_character %}">{{ doc.title }}</a>
+        </li>
+      {% endfor %}
+    {% endif %}
+  </ol>
+  {% if item.docs|length > 10 %}
+    <button class="btn btn-link"
+            data-bs-toggle="collapse"
+            data-bs-target=".{{ group }}-{{ forloop.counter }}"
+            role="button"
+            aria-expanded="false"
+            aria-controls="{{ item.doc_type }}">
+      {% trans 'Show/Hide all' %}
+    </button>
+  {% endif %}
+{% endfor %}
