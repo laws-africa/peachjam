@@ -9,7 +9,7 @@ export class CopyToClipboard {
   }
 
   copy () {
-    navigator.clipboard.writeText(this.root.dataset.value || '')
+    navigator?.clipboard?.writeText(this.root.dataset.value || '')
       .then(() => {
         this.root.innerText = this.root.dataset.confirmation || 'Copied!';
         setTimeout(() => {
