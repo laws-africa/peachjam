@@ -15,6 +15,7 @@ class JudgmentListView(TemplateView):
 
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["recent_judgments"] = Judgment.objects.order_by("-date")[:30]
+        context["doc_type"] = "Judgment"
         return context
 
 

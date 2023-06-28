@@ -1,7 +1,4 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
 {% block title %}{{ nature.name }}{% endblock %}
-{% block page-title %}
-  <h1 class="my-4">{{ nature.name }}</h1>
-  {% include 'peachjam/_quick_search.html' %}
-{% endblock %}
+{% block page-title %}<h1 class="my-4">{{ nature.name }}</h1>{% endblock %}
