@@ -1,5 +1,5 @@
 {% extends 'peachjam/layouts/base.html' %}
-{% load static %}
+{% load static peachjam %}
 {% load sass_tags %}
 {% block head-css %}
   <link rel="stylesheet"
@@ -24,13 +24,17 @@
     {% if PEACHJAM_SETTINGS.google_analytics_id %}
       <!-- Global site tag (gtag.js) - Google Analytics -->
       <script async
-              src="https://www.googletagmanager.com/gtag/js?id={{ PEACHJAM_SETTINGS.google_analytics_id }}"></script>
+              src="https://www.googletagmanager.com/gtag/js?id={{ PEACHJAM_SETTINGS.google_analytics_id|split|first }}"></script>
       <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-
-        gtag('config', '{{ PEACHJAM_SETTINGS.google_analytics_id }}');
+        // split multiple ids into array
+        const google_analytics_ids = '{{ PEACHJAM_SETTINGS.google_analytics_id }}'.trim().split(/\s+/);
+        // loop through ids and add config for each
+        google_analytics_ids.forEach(id => {
+          gtag('config', id);
+        });
       </script>
     {% endif %}
   {% endif %}
