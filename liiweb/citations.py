@@ -20,8 +20,30 @@ class MncMatcher(CitationMatcher):
     html_candidate_xpath = ".//text()[contains(., '[') and not(ancestor::a)]"
     xml_candidate_xpath = ".//text()[contains(., '[') and not(ancestor::ns:ref)]"
 
+    locality_court_codes = {
+        "za": {
+            "ec": "ec",
+            "fs": "fs",
+            "gp": "gp",
+            "kz": "kzn",
+            "lmp": "lp",
+            "mp": "mp",
+            "nc": "nc",
+            "nw": "nw",
+            "wc": "wc",
+        }
+    }
+
     def href_pattern_args(self, match):
         args = super().href_pattern_args(match)
-        args["place"] = args["court"][:2].lower()
-        args["court"] = args["court"].lower()
+        args["court"] = court = args["court"].lower()
+        args["place"] = court[:2]
+
+        # some court codes embed a locality that we must take into account
+        codes = self.locality_court_codes.get(args["place"], {})
+        for court_code, locality_code in codes.items():
+            if court[2 : 2 + len(court_code)] == court_code:
+                args["place"] = f"{args['place']}-{locality_code}"
+                break
+
         return args
