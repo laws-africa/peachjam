@@ -15,7 +15,7 @@ class ProvincialLegislationView(TemplateView):
     navbar_link = "legislation/provincial"
 
     def get_context_data(self, **kwargs):
-        codes = "mp ec nc kzn gp wc lim nw fs".split()
+        codes = "mp ec nc kzn gp wc lp nw fs".split()
         provinces = Locality.objects.filter(code__in=codes)
         groups = provinces[:5], provinces[5:]
         return super().get_context_data(province_groups=groups, **kwargs)
