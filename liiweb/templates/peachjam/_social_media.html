@@ -1,0 +1,28 @@
+{% load i18n static %}
+<h5 class="mb-2">{% trans 'Follow us on social media' %}</h5>
+<ul class="list-inline">
+  {% if PEACHJAM_SETTINGS.facebook_link %}
+    <li class="list-inline-item">
+      <a href="{{ PEACHJAM_SETTINGS.facebook_link }}"
+         target="_blank"
+         rel="noreferrer">
+        <img src="{% static 'images/facebook.svg' %}"
+             alt="Facebook"
+             width="40"
+             height="40"/>
+      </a>
+    </li>
+  {% endif %}
+  {% if PEACHJAM_SETTINGS.twitter_link %}
+    <li class="list-inline-item">
+      <a href="{{ PEACHJAM_SETTINGS.twitter_link }}"
+         target="_blank"
+         rel="noreferrer">
+        <img src="{% static 'images/twitter.svg' %}"
+             alt="Twitter"
+             width="40"
+             height="40"/>
+      </a>
+    </li>
+  {% endif %}
+</ul>

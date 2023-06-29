@@ -12,6 +12,11 @@
     </div>
     <div class="col-12 col-md-6 mb-2">
       {% block newsletter-form-code %}{% endblock %}
+      {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link %}
+        {% block social-media %}
+          {% include 'peachjam/_social_media.html' %}
+        {% endblock %}
+      {% endif %}
     </div>
   </div>
   <hr/>
