@@ -755,6 +755,16 @@ class AttachedFiles(AttachmentAbstractModel):
         return os.path.splitext(self.filename)[1].replace(".", "")
 
 
+class ArticleAttachment(AttachmentAbstractModel):
+    SAVE_FOLDER = "attachments"
+    document = models.ForeignKey(
+        "peachjam.Article", on_delete=models.CASCADE, related_name="attachments"
+    )
+
+    def __str__(self):
+        return self.file.name
+
+
 class AlternativeName(models.Model):
     document = models.ForeignKey(
         CoreDocument,

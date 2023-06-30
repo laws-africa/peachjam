@@ -38,6 +38,14 @@
           </header>
           {% if article.summary %}<p class="lead">{{ article.summary }}</p>{% endif %}
           <div class="article-body">{{ article.body|safe }}</div>
+          {% if article.attachments %}
+            {% for attachment in article.attachments.all %}
+              <p>
+                <a href="{{ attachment.file.url }}" target="_blank">{% trans "Download" %} {{ attachment.filename }}</a>
+                ({{ attachment.size|filesizeformat }})
+              </p>
+            {% endfor %}
+          {% endif %}
         </article>
       </div>
       <div class="col-lg-3">
