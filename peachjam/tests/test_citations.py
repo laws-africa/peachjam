@@ -128,7 +128,7 @@ class CitationAnalyserTestCase(TestCase):
         )
         doc.delete_citations()
         self.assertEqual(
-            """<
+            """
 <div>
 <p>Some text <a href="/akn/ke/act/2010/1">Act 1 of 2010</a></p>
 <p>Some text <a href="https://example.com">Example</a></p>
