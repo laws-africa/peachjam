@@ -76,3 +76,15 @@
     {% endif %}
   {% endwith %}
 {% endblock %}
+{% block extra-metadata %}
+  {% if document.headnote_holding %}
+    <dl>
+      <dt>
+        {% trans 'Headnote and Holding' %}
+      </dt>
+      <dd>
+        {{ document.headnote_holding|safe }}
+      </dd>
+    </dl>
+  {% endif %}
+{% endblock %}
