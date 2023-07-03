@@ -93,14 +93,18 @@
           </ul>
         </div>
         <div class="col-md-6 col-lg-4 mb-3">
-          <h3>{% trans 'Regional Courts' %}</h3>
-          <ul class="list-unstyled">
-            {% for court in courts %}
-              <li>
-                <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-              </li>
-            {% endfor %}
-          </ul>
+          {% for court_class in court_classes %}
+            <h3>{{ court_class.name }}</h3>
+            {% if court_class.courts.all %}
+              <ul class="list-unstyled">
+                {% for court in court_class.courts.all %}
+                  <li>
+                    <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+                  </li>
+                {% endfor %}
+              {% endif %}
+            </ul>
+          {% endfor %}
         </div>
         <div class="col-lg-4 mb-3">
           <h3>{% trans 'Member States' %}</h3>
