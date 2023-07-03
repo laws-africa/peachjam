@@ -17,6 +17,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
+from docpipe.xmlutils import unwrap_element
 from languages_plus.models import Language
 from lxml import html
 from polymorphic.managers import PolymorphicManager
@@ -533,11 +534,25 @@ class CoreDocument(PolymorphicModel):
         extraction will be run on that.
         """
         from peachjam.analysis.citations import citation_analyser
+
+        self.delete_citations()
+        return citation_analyser.extract_citations(self)
+
+    def delete_citations(self):
+        """Delete existing citation links and added citations from this document."""
         from peachjam.models.citations import CitationLink
 
-        # delete existing citation links
         CitationLink.objects.filter(document=self).delete()
-        return citation_analyser.extract_citations(self)
+
+        if self.content_html and not self.content_html_is_akn:
+            # delete existing citations in html
+            root = html.fromstring(self.content_html)
+            deleted = False
+            for a in root.xpath('//a[starts-with(@href, "/akn/")]'):
+                unwrap_element(a)
+                deleted = True
+            if deleted:
+                self.content_html = html.tostring(root, encoding="unicode")
 
     def extract_content_from_source_file(self):
         """Re-extract content from DOCX source files, overwriting anything in content_html and associated images.
