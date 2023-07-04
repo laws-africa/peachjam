@@ -35,17 +35,7 @@ class HomePageView(BaseHomePageView):
         context["recs"] = RegionalEconomicCommunity.objects.prefetch_related("locality")
         context["member_states"] = MemberState.objects.prefetch_related("country")
         context["taxonomies"] = Taxonomy.get_tree()
-        # We explicitly exclude African Commission on Human and Peoples Rights (ACHPR) and
-        # African Committee of Experts on the Rights and Welfare of the Child (ACERWC)
-        excluded_court_codes = ["ACHPR", "ACERWC"]
-        court_classes = [
-            {
-                "name": court_class.name,
-                "courts": court_class.courts.exclude(code__in=excluded_court_codes),
-            }
-            for court_class in CourtClass.objects.prefetch_related("courts")
-        ]
-        context["court_classes"] = court_classes
+        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
 
         context["liis"] = [
             {

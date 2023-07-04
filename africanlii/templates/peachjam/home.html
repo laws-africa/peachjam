@@ -94,16 +94,16 @@
         </div>
         <div class="col-md-6 col-lg-4 mb-3">
           {% for court_class in court_classes %}
-            <h3>{{ court_class.name }}</h3>
             {% if court_class.courts.all %}
+              <h3>{{ court_class.name }}</h3>
               <ul class="list-unstyled">
                 {% for court in court_class.courts.all %}
                   <li>
                     <a href="{% url 'court' court.code %}">{{ court.name }}</a>
                   </li>
                 {% endfor %}
-              {% endif %}
-            </ul>
+              </ul>
+            {% endif %}
           {% endfor %}
         </div>
         <div class="col-lg-4 mb-3">
