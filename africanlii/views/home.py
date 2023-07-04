@@ -4,7 +4,7 @@ from africanlii.models import (
     MemberState,
     RegionalEconomicCommunity,
 )
-from peachjam.models import Article, CoreDocument, GenericDocument, Taxonomy
+from peachjam.models import Article, CoreDocument, CourtClass, GenericDocument, Taxonomy
 from peachjam.views import HomePageView as BaseHomePageView
 
 
@@ -35,6 +35,8 @@ class HomePageView(BaseHomePageView):
         context["recs"] = RegionalEconomicCommunity.objects.prefetch_related("locality")
         context["member_states"] = MemberState.objects.prefetch_related("country")
         context["taxonomies"] = Taxonomy.get_tree()
+        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
+
         context["liis"] = [
             {
                 "name": "EswatiniLII",
