@@ -250,7 +250,6 @@ class BaseDocumentResource(resources.ModelResource):
 
     class Meta:
         exclude = (
-            "created_at",
             "updated_at",
             "source_file",
             "coredocument_ptr",
