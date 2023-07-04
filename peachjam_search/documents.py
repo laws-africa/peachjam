@@ -56,6 +56,8 @@ class SearchableDocument(Document):
     # Judgment
     matter_type = fields.KeywordField(attr="matter_type.name")
     case_number = fields.TextField()
+    # this case party names etc. and so the standard analyzer is better than a language-based one
+    case_name = fields.TextField(analyzer="standard")
     court = fields.KeywordField(attr="court.name")
     headnote_holding = fields.TextField()
     flynote = fields.TextField()
