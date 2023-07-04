@@ -31,6 +31,7 @@ from peachjam.forms import (
 from peachjam.models import (
     AlternativeName,
     Article,
+    ArticleAttachment,
     AttachedFileNature,
     AttachedFiles,
     Attorney,
@@ -672,6 +673,11 @@ class IngestorAdmin(admin.ModelAdmin):
     refresh_all_content.short_description = gettext_lazy("Refresh all content")
 
 
+class ArticleAttachmentInline(BaseAttachmentFileInline):
+    model = ArticleAttachment
+    extra = 1
+
+
 class ArticleForm(forms.ModelForm):
     body = forms.CharField(widget=CKEditorWidget())
 
@@ -679,6 +685,7 @@ class ArticleForm(forms.ModelForm):
 @admin.register(Article)
 class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_class = ArticleResource
+    inlines = [ArticleAttachmentInline]
     form = ArticleForm
     list_display = ("title", "author", "date", "published")
     list_display_links = ("title",)
