@@ -347,7 +347,8 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             )
 
     def list(self, request, *args, **kwargs):
-        self.get_translatable_fields(request)
+        # TODO: uncomment when we have reindexd the data
+        # self.get_translatable_fields(request)
         return super().list(request, *args, **kwargs)
 
     @method_decorator(cache_page(CACHE_SECS))

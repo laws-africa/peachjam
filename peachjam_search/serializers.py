@@ -1,4 +1,4 @@
-from django.utils.translation import get_language_from_request
+# from django.utils.translation import get_language_from_request
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 from rest_framework.serializers import SerializerMethodField
 
@@ -15,7 +15,9 @@ class SearchableDocumentSerializer(DocumentSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.language_suffix = "_" + get_language_from_request(self.context["request"])
+        # TODO: uncomment this when we have reindexed
+        # self.language_suffix = "_" + get_language_from_request(self.context["request"])
+        self.language_suffix = ""
 
     class Meta:
         document = SearchableDocument
