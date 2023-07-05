@@ -86,8 +86,9 @@ class NestedPageQueryBackend(BaseSearchQueryBackend):
                     must=[
                         SimpleQueryString(
                             query=search_term,
-                            default_operator="and",
+                            default_operator="OR",
                             quote_field_suffix=".exact",
+                            minimum_should_match="70%",
                             fields=["pages.body"],
                         )
                     ],
@@ -223,8 +224,11 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     # allowed and default ordering
     ordering_fields = {"date": "date", "title": "title"}
     ordering = ("_score", "date")
-    # this means that ALL terms must appear in ANY of the searched fields
-    simple_query_string_options = {"default_operator": "AND"}
+    # this means that at least 70% of terms must appear in ANY of the searched fields
+    simple_query_string_options = {
+        "default_operator": "OR",
+        "minimum_should_match": "70%",
+    }
 
     filter_fields = {
         "authors": "authors",

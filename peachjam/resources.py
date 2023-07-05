@@ -250,7 +250,6 @@ class BaseDocumentResource(resources.ModelResource):
 
     class Meta:
         exclude = (
-            "created_at",
             "updated_at",
             "source_file",
             "coredocument_ptr",
@@ -303,7 +302,8 @@ class BaseDocumentResource(resources.ModelResource):
     def before_import_row(self, row, **kwargs):
         if kwargs.get("user"):
             row["created_by"] = kwargs["user"].id
-        logger.info(f"Importing row: {row}")
+        if not row.get("skip"):
+            logger.info(f"Importing row: {row}")
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
         return row["skip"]
