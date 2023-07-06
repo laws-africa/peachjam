@@ -15,6 +15,7 @@ def file_location(instance, filename):
 
 
 class Article(models.Model):
+    SAVE_FOLDER = "articles"
     doc_type = "article"
 
     date = models.DateField(_("date"), null=False, blank=False)
