@@ -55,10 +55,10 @@ class SearchableDocument(Document):
 
     # Judgment
     court = fields.KeywordField(attr="court.name")
-    court_en = fields.KeywordField(attr="court.name_en")
-    court_sw = fields.KeywordField(attr="court.name_sw")
-    court_fr = fields.KeywordField(attr="court.name_fr")
-    court_pt = fields.KeywordField(attr="court.name_pt")
+    court_en = fields.KeywordField()
+    court_sw = fields.KeywordField()
+    court_fr = fields.KeywordField()
+    court_pt = fields.KeywordField()
 
     matter_type = fields.KeywordField(attr="matter_type.name")
     case_number = fields.TextField()
@@ -70,25 +70,25 @@ class SearchableDocument(Document):
     attorneys = fields.KeywordField(attr="attorney.name")
 
     registry = fields.KeywordField(attr="registry.name")
-    registry_en = fields.KeywordField(attr="registry.name_en")
-    registry_sw = fields.KeywordField(attr="registry.name_sw")
-    registry_fr = fields.KeywordField(attr="registry.name_fr")
-    registry_pt = fields.KeywordField(attr="registry.name_pt")
+    registry_en = fields.KeywordField()
+    registry_sw = fields.KeywordField()
+    registry_fr = fields.KeywordField()
+    registry_pt = fields.KeywordField()
 
     order_outcome = fields.KeywordField(attr="order_outcome.name")
-    order_outcome_en = fields.KeywordField(attr="order_outcome.name_en")
-    order_outcome_sw = fields.KeywordField(attr="order_outcome.name_sw")
-    order_outcome_fr = fields.KeywordField(attr="order_outcome.name_fr")
-    order_outcome_pt = fields.KeywordField(attr="order_outcome.name_pt")
+    order_outcome_en = fields.KeywordField()
+    order_outcome_sw = fields.KeywordField()
+    order_outcome_fr = fields.KeywordField()
+    order_outcome_pt = fields.KeywordField()
 
     # GenericDocument, LegalInstrument
     authors = fields.KeywordField()
 
     nature = fields.KeywordField(attr="nature.name")
-    nature_en = fields.KeywordField(attr="nature.name_en")
-    nature_sw = fields.KeywordField(attr="nature.name_sw")
-    nature_fr = fields.KeywordField(attr="nature.name_fr")
-    nature_pt = fields.KeywordField(attr="nature.name_pt")
+    nature_en = fields.KeywordField()
+    nature_sw = fields.KeywordField()
+    nature_fr = fields.KeywordField()
+    nature_pt = fields.KeywordField()
 
     ranking = RankField(attr="work.ranking")
 
@@ -98,6 +98,14 @@ class SearchableDocument(Document):
             "body": fields.TextField(analyzer="standard", fields={"exact": Text()}),
         }
     )
+
+    # this will be used to build prepare_xxx_xx fields for each of these
+    translated_fields = [
+        ("court", "name"),
+        ("registry", "name"),
+        ("order_outcome", "name"),
+        ("nature", "name"),
+    ]
 
     def should_index_object(self, obj):
         if isinstance(obj, ExternalDocument):
@@ -219,81 +227,17 @@ class SearchableDocument(Document):
         if hasattr(instance, "court") and instance.court:
             return instance.court.name
 
-    def prepare_court_en(self, instance):
-        if hasattr(instance, "court") and instance.court:
-            return instance.court.name_en or instance.court.name
-
-    def prepare_court_sw(self, instance):
-        if hasattr(instance, "court") and instance.court:
-            return instance.court.name_sw or instance.court.name
-
-    def prepare_court_pt(self, instance):
-        if hasattr(instance, "court") and instance.court:
-            return instance.court.name_pt or instance.court.name
-
-    def prepare_court_fr(self, instance):
-        if hasattr(instance, "court") and instance.court:
-            return instance.court.name_fr or instance.court.name
-
     def prepare_registry(self, instance):
         if hasattr(instance, "registry") and instance.registry:
             return instance.registry.name
-
-    def prepare_registry_en(self, instance):
-        if hasattr(instance, "registry") and instance.registry:
-            return instance.registry.name_en or instance.registry.name
-
-    def prepare_registry_sw(self, instance):
-        if hasattr(instance, "registry") and instance.registry:
-            return instance.registry.name_sw or instance.registry.name
-
-    def prepare_registry_pt(self, instance):
-        if hasattr(instance, "registry") and instance.registry:
-            return instance.registry.name_pt or instance.registry.name
-
-    def prepare_registry_fr(self, instance):
-        if hasattr(instance, "registry") and instance.registry:
-            return instance.registry.name_fr or instance.registry.name
 
     def prepare_nature(self, instance):
         if hasattr(instance, "nature") and instance.nature:
             return instance.nature.name
 
-    def prepare_nature_en(self, instance):
-        if hasattr(instance, "nature") and instance.nature:
-            return instance.nature.name_en or instance.nature.name
-
-    def prepare_nature_sw(self, instance):
-        if hasattr(instance, "nature") and instance.nature:
-            return instance.nature.name_sw or instance.nature.name
-
-    def prepare_nature_pt(self, instance):
-        if hasattr(instance, "nature") and instance.nature:
-            return instance.nature.name_pt or instance.nature.name
-
-    def prepare_nature_fr(self, instance):
-        if hasattr(instance, "nature") and instance.nature:
-            return instance.nature.name_fr or instance.nature.name
-
     def prepare_order_outcome(self, instance):
         if hasattr(instance, "order_outcome") and instance.order_outcome:
             return instance.order_outcome.name
-
-    def prepare_order_outcome_en(self, instance):
-        if hasattr(instance, "order_outcome") and instance.order_outcome:
-            return instance.order_outcome.name_en or instance.order_outcome.name
-
-    def prepare_order_outcome_sw(self, instance):
-        if hasattr(instance, "order_outcome") and instance.order_outcome:
-            return instance.order_outcome.name_sw or instance.order_outcome.name
-
-    def prepare_order_outcome_pt(self, instance):
-        if hasattr(instance, "order_outcome") and instance.order_outcome:
-            return instance.order_outcome.name_pt or instance.order_outcome.name
-
-    def prepare_order_outcome_fr(self, instance):
-        if hasattr(instance, "order_outcome") and instance.order_outcome:
-            return instance.order_outcome.name_fr or instance.order_outcome.name
 
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""
@@ -345,6 +289,30 @@ class SearchableDocument(Document):
     def get_queryset(self):
         # order by pk descending so that when we're indexing we can have an idea of progress
         return super().get_queryset().order_by("-pk")
+
+
+def prepare_translated_field(self, instance, field, attr, lang):
+    if getattr(instance, field, None):
+        fld = getattr(instance, field)
+        attr_name = f"{attr}_{lang}"
+        if hasattr(fld, attr_name):
+            return getattr(fld, attr_name) or getattr(fld, attr)
+
+
+def make_prepare(field, attr, lang):
+    return lambda s, i: prepare_translated_field(s, i, field, attr, lang)
+
+
+# add preparation methods for translated fields to avoid lots of copy-and-paste
+for field, attr in SearchableDocument.translated_fields:
+    # TODO: where should this language list be configured? they are languages that the interface is translated into
+    for lang in ["en", "fr", "pt", "sw"]:
+        # we must call make_prepare so that the variables are evaluated now, not when the function is called
+        setattr(
+            SearchableDocument,
+            f"prepare_{field}_{lang}",
+            make_prepare(field, attr, lang),
+        )
 
 
 # These are the language-specific indexes we create and their associated analyzers for text fields.
