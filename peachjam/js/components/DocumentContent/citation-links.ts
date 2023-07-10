@@ -5,9 +5,11 @@ import { vueI18n } from '../../i18n';
 import CitationLinkModal from './CitationLinkModal.vue';
 import CitationLinkGutterItem from './CitationLinkGutterItem.vue';
 import { ComponentPublicInstance } from 'vue';
+import { authHeaders } from '../../api';
 
 export interface ICitationLink {
-  // TODO: id
+  document: number | string | null;
+  id: number | null;
   text: string;
   url: string;
   // eslint-disable-next-line camelcase
@@ -27,23 +29,25 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
   protected readonly = true;
   protected anchors: Map<ICitationLink, HTMLElement[]> = new Map<ICitationLink, HTMLElement[]>();
   protected gutterItems: Map<ICitationLink, HTMLElement> = new Map<ICitationLink, HTMLElement>();
+  protected documentId: string | null;
 
   constructor (root: HTMLElement, manager: GutterEnrichmentManager) {
     this.root = root;
+    this.documentId = root.dataset.documentId || null;
     this.manager = manager;
     const el = document.getElementById('citation-links');
     this.links = JSON.parse((el ? el.textContent : '') || '[]');
 
     // TODO: if !readonly
     this.readonly = false;
-    this.insertLinks();
+    this.applyLinks();
     if (!this.readonly) {
       this.modal = this.createModal();
       this.manager.addProvider(this);
     }
   }
 
-  insertLinks () {
+  applyLinks () {
     for (const link of this.links) {
       this.applyLink(link);
     }
@@ -85,7 +89,7 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
     const item = createAndMountApp({
       component: CitationLinkGutterItem,
       props: {
-        enrichment: link,
+        link: link,
         anchorElement: anchor,
         provider: this
       },
@@ -99,11 +103,21 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
   editLink (link: ICitationLink) {
     if (this.modal) {
       // @ts-ignore
-      this.modal.showModal(link).then((result: ICitationLink | null) => {
+      this.modal.showModal(link).then(async (result: ICitationLink | null) => {
         if (result) {
-          // TODO: update on server
-          this.unapplyLink(link);
-          this.applyLink(link);
+          const resp = await fetch(`/api/citation-links/${link.id}/`, {
+            method: 'PUT',
+            // @ts-ignore
+            headers: {
+              ...authHeaders(),
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(link)
+          });
+          if (resp.ok) {
+            this.unapplyLink(link);
+            this.applyLink(link);
+          }
         } else {
           this.deleteLink(link);
         }
@@ -111,10 +125,17 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
     }
   }
 
-  deleteLink (link: ICitationLink) {
-    this.unapplyLink(link);
-    this.links.splice(this.links.indexOf(link), 1);
-    // TODO: delete from server
+  async deleteLink (link: ICitationLink) {
+    // delete from server
+    const resp = await fetch(`/api/citation-links/${link.id}/`, {
+      method: 'DELETE',
+      // @ts-ignore
+      headers: authHeaders()
+    });
+    if (resp.ok) {
+      this.unapplyLink(link);
+      this.links.splice(this.links.indexOf(link), 1);
+    }
   }
 
   unapplyLink (link: ICitationLink) {
@@ -139,11 +160,14 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
   }
 
   addEnrichment (target: IRangeTarget): void {
+    // A user has highlighted text and clicked the "Link citation" button
     if (this.modal && target.selectors) {
       // get the selected text
       const quoteSelector = target.selectors.find((x) => x.type === 'TextQuoteSelector');
       if (quoteSelector) {
-        const enrichment: ICitationLink = {
+        const link: ICitationLink = {
+          id: null,
+          document: this.documentId,
           text: quoteSelector.exact || '',
           url: '',
           target_id: target.anchor_id,
@@ -151,11 +175,23 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
         };
 
         // @ts-ignore
-        this.modal.showModal(enrichment).then((result: ICitationLink | null) => {
+        this.modal.showModal(link).then(async (result: ICitationLink | null) => {
           if (result) {
-            // TODO: save the new enrichment
-            this.links.push(enrichment);
-            this.applyLink(enrichment);
+            // save it
+            const resp = await fetch('/api/citation-links/', {
+              method: 'POST',
+              // @ts-ignore
+              headers: {
+                ...authHeaders(),
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(link)
+            });
+            if (resp.ok) {
+              link.id = (await resp.json()).id;
+              this.links.push(link);
+              this.applyLink(link);
+            }
           }
         });
       }

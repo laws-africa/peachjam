@@ -111,6 +111,7 @@
     <div class="content-and-enrichments"
          data-work-id="{{ document.work_id }}"
          data-work-frbr-uri="{{ document.work_frbr_uri }}"
+         data-document-id="{{ document.id }}"
          {% if not perms.peachjam.add_relationship %} data-readonly="true"{% endif %}>
       <div class="content-and-enrichments__inner la-akoma-ntoso-with-gutter">
         {% if display_type == 'akn' %}

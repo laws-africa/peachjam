@@ -2,7 +2,7 @@
   <la-gutter-item :anchor.prop="anchorElement">
     <div class="card">
       <div class="card-body">
-        <p>{{ enrichment.url }}</p>
+        <p>{{ link.url }}</p>
         <button class="btn btn-sm btn-outline-secondary" @click="edit">
           {{ $t('Edit') }}
         </button>
@@ -15,7 +15,7 @@
 export default {
   name: 'CitationLinkGutterItem',
   props: {
-    enrichment: {
+    link: {
       type: Object,
       default: null
     },
@@ -31,7 +31,7 @@ export default {
 
   methods: {
     edit () {
-      this.provider.editLink(this.enrichment);
+      this.provider.editLink(this.link);
     }
   }
 };
