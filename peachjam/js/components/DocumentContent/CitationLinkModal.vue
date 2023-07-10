@@ -2,7 +2,6 @@
   <div
     class="modal fade"
     tabindex="-1"
-    data-bs-keyboard="false"
     data-bs-backdrop="static"
     role="dialog"
     aria-hidden="true"
@@ -60,8 +59,8 @@
             <button
               v-if="enrichment.id"
               type="button"
-              class="btn btn-warning"
-              @click="remove"
+              class="btn btn-danger"
+              @click="confirmRemove"
             >
               Delete
             </button>
@@ -118,6 +117,12 @@ export default {
       if (this.enrichment.id) {
         this.close();
       } else {
+        this.remove();
+      }
+    },
+
+    confirmRemove () {
+      if (confirm(this.$t('Are you sure?'))) {
         this.remove();
       }
     }

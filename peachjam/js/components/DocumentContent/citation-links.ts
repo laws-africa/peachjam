@@ -26,7 +26,7 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
   protected links: ICitationLink[];
   protected manager: GutterEnrichmentManager;
   protected modal: ComponentPublicInstance | null = null;
-  protected readonly = true;
+  protected editable = true;
   protected anchors: Map<ICitationLink, HTMLElement[]> = new Map<ICitationLink, HTMLElement[]>();
   protected gutterItems: Map<ICitationLink, HTMLElement> = new Map<ICitationLink, HTMLElement>();
   protected documentId: string | null;
@@ -37,11 +37,10 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
     this.manager = manager;
     const el = document.getElementById('citation-links');
     this.links = JSON.parse((el ? el.textContent : '') || '[]');
+    this.editable = this.root.hasAttribute('data-editable-citation-links');
 
-    // TODO: if !readonly
-    this.readonly = false;
     this.applyLinks();
-    if (!this.readonly) {
+    if (this.editable) {
       this.modal = this.createModal();
       this.manager.addProvider(this);
     }
@@ -69,7 +68,7 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
     });
     this.anchors.set(link, elements);
 
-    if (!this.readonly && elements.length > 0) {
+    if (this.editable && elements.length > 0) {
       // add a gutter item
       // @ts-ignore
       this.manager.gutter?.appendChild(this.createGutterItem(link, elements[0]));

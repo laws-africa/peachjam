@@ -2,7 +2,11 @@
   <la-gutter-item :anchor.prop="anchorElement">
     <div class="card">
       <div class="card-body">
-        <p>{{ link.url }}</p>
+        <p>
+          {{ link.text }}
+          <br>
+          <a :href="link.url" target="_blank">{{ link.url }}</a>
+        </p>
         <button class="btn btn-sm btn-outline-secondary" @click="edit">
           {{ $t('Edit') }}
         </button>
