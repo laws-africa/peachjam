@@ -12,13 +12,14 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   akn: Element | null;
   enrichments: IRelationshipEnrichment[];
   listComponent: ComponentPublicInstance;
-  manager: GutterEnrichmentManager | null = null;
+  manager: GutterEnrichmentManager;
   workFrbrUri: string;
   workId: string;
   readonly: boolean;
 
-  constructor (root: HTMLElement) {
+  constructor (root: HTMLElement, manager: GutterEnrichmentManager) {
     this.root = root;
+    this.manager = manager;
     this.gutter = root.querySelector('la-gutter');
     this.akn = root.querySelector('la-akoma-ntoso');
     this.workFrbrUri = root.dataset.workFrbrUri || '';
@@ -55,7 +56,6 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
     }
 
     if (!this.readonly) {
-      this.manager = new GutterEnrichmentManager(this.root);
       this.manager.addProvider(this);
     }
   }

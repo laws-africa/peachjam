@@ -112,7 +112,7 @@ class PdfRenderer {
   }
 
   async setupPdfAndPreviewPanels () {
-    const docElement = document.querySelector('[data-document-element]');
+    const docElement = document.querySelector('.content-and-enrichments .content');
     if (!docElement) return;
     const containerWidth = docElement.clientWidth || 0;
     // render pdf at double scale, for high resolution

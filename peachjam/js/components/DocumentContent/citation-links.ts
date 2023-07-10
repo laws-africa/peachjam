@@ -1,4 +1,5 @@
-import { IRangeSelector, markRange, targetToRange } from '@lawsafrica/indigo-akn/dist/ranges';
+import { IRangeSelector, IRangeTarget, markRange, targetToRange } from '@lawsafrica/indigo-akn/dist/ranges';
+import { GutterEnrichmentManager, IGutterEnrichmentProvider } from '@lawsafrica/indigo-akn/dist/enrichments';
 
 export interface ICitationLink {
   text: string;
@@ -10,18 +11,23 @@ export interface ICitationLink {
 }
 
 /**
- * Inserts citation links into rendered PDF documents.
+ * Inserts citation links into rendered PDF documents, and allows admins to manage them.
  */
-export default class PDFCitationLinks {
+export default class PDFCitationLinks implements IGutterEnrichmentProvider {
   protected root: HTMLElement;
   protected links: ICitationLink[];
+  protected manager: GutterEnrichmentManager;
 
-  constructor (root: HTMLElement) {
+  constructor (root: HTMLElement, manager: GutterEnrichmentManager) {
     this.root = root;
+    this.manager = manager;
     const el = document.getElementById('citation-links');
     this.links = JSON.parse((el ? el.textContent : '') || '[]');
 
     this.insertLinks();
+
+    // TODO: if !readonly
+    this.manager.addProvider(this);
   }
 
   insertLinks () {
@@ -41,5 +47,17 @@ export default class PDFCitationLinks {
       a.setAttribute('href', link.url);
       return a;
     });
+  }
+
+  getButton (target: IRangeTarget): HTMLButtonElement | null {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-outline-secondary';
+    btn.type = 'button';
+    btn.innerText = 'Link citation...';
+    return btn;
+  }
+
+  addEnrichment(target: IRangeTarget): void {
+    throw new Error('Method not implemented.');
   }
 }
