@@ -3,13 +3,13 @@
     <div class="card">
       <div class="card-body">
         <p>
+          <button class="btn btn-sm btn-outline-secondary float-end ms-1" @click="edit">
+            {{ $t('Edit') }}
+          </button>
           {{ link.text }}
           <br>
           <a :href="link.url" target="_blank">{{ link.url }}</a>
         </p>
-        <button class="btn btn-sm btn-outline-secondary" @click="edit">
-          {{ $t('Edit') }}
-        </button>
       </div>
     </div>
   </la-gutter-item>
