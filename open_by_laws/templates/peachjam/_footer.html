@@ -1,0 +1,129 @@
+{% extends 'peachjam/_footer.html' %}
+{% load static i18n %}
+{% block newsletter-form %}
+  <h2 class="mb-2">{% trans 'Subscribe' %}</h2>
+  <div class="row">
+    <div class="col-12 col-md-6 mb-2">
+      <p class="lead mb-0">
+        {% block newsletter-blurb %}
+          {% trans 'Subscribe to our newsletter for updates and news.' %}
+        {% endblock %}
+      </p>
+    </div>
+    <div class="col-12 col-md-6 mb-2">
+      {% block newsletter-form-code %}{% endblock %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 col-md-12 mb-2">
+      {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link %}
+        {% block social-media %}
+          {% include 'peachjam/_social_media.html' %}
+        {% endblock %}
+      {% endif %}
+    </div>
+  </div>
+  <hr/>
+{% endblock %}
+{% block first-content-column %}
+  <h5>{% trans 'About' %} {{ APP_NAME }}</h5>
+  {% block about %}
+    <p>
+      {% blocktrans trimmed %}
+        Open By-laws is a community effort to make South African by-laws easy to find, ready and share.
+        <a href="/about">Find out more</a>.
+      {% endblocktrans %}
+    </p>
+    <p>
+      {% blocktrans trimmed %}
+        Thanks you to <a href="/about/#contributors">our contributors</a>. Much love.
+      {% endblocktrans %}
+    </p>
+    <p>
+      {% blocktrans trimmed %}
+        A project by <a href="https://laws.africa/">Laws.Africa</a>.
+      {% endblocktrans %}
+    </p>
+  {% endblock %}
+  {% block first-content-column-links %}
+    <div>
+      <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
+    </div>
+    {% if PEACHJAM_SETTINGS.metabase_dashboard_link %}
+      <div>
+        <a href="{% url 'metabase_stats' %}">{% trans 'Site Statistics' %}</a>
+      </div>
+    {% endif %}
+  {% endblock %}
+  <br/>
+{% endblock %}
+{% block second-content-column %}
+  <h5>{% trans 'Municipalities' %}</h5>
+  <div>
+    <a href="https://bergrivier.openbylaws.org.za/"
+       target="_blank"
+       rel="noreferrer">Bergrivier</a>
+  </div>
+  <div>
+    <a href="https://capeagulhas.openbylaws.org.za/"
+       target="_blank"
+       rel="noreferrer">Cape Agulhas</a>
+  </div>
+  <div>
+    <a href="https://openbylaws.org.za/za-cpt/eng/"
+       target="_blank"
+       rel="noreferrer">Cape Town</a>
+  </div>
+  <div>
+    <a href="https://cederberg.openbylaws.org.za/"
+       target="_blank"
+       rel="noreferrer">Cederberg</a>
+  </div>
+  <div>
+    <a href="https://openbylaws.org.za/za-wc023/eng/"
+       target="_blank"
+       rel="noreferrer">Drakenstein</a>
+  </div>
+  <div>
+    <a href="https://openbylaws.org.za/za-jhb/eng/"
+       target="_blank"
+       rel="noreferrer">Johannesburg</a>
+  </div>
+  <div>
+    <a href="https://openbylaws.org.za/za-wc041/eng/"
+       target="_blank"
+       rel="noreferrer">Kannaland</a>
+  </div>
+  <div>
+    <a href="https://matzikama.openbylaws.org.za/"
+       target="_blank"
+       rel="noreferrer">Matzikama</a>
+  </div>
+  <div>
+    <a href="https://mbizana.openbylaws.org.za/"
+       target="_blank"
+       rel="noreferrer">Mbizana</a>
+  </div>
+  <div>
+    <a href="https://openbylaws.org.za/za-wc015/eng/"
+       target="_blank"
+       rel="noreferrer">Swartland</a>
+  </div>
+  <div>
+    <a href="https://openbylaws.org.za/za-eth/eng/"
+       target="_blank"
+       rel="noreferrer">eThekwini</a>
+  </div>
+{% endblock %}
+{% block third-content-column %}{% endblock %}
+{% block footer-logos %}
+  <div class="footer-logos">
+    <a href="https://laws.africa/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/laws-africa-logo-horizontal.png' %}"
+           alt="Laws.Africa"/>
+    </a>
+  </div>
+{% endblock %}

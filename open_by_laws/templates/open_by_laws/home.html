@@ -1,0 +1,130 @@
+{% extends "peachjam/home.html" %}
+{% load i18n static %}
+{% block title %}
+  {% trans 'Home' %}
+{% endblock %}
+{% block page-content %}
+  <div id="main-page">
+    <section class="welcome py-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-7 pb-3">
+            <h1>
+              South Africa's
+              <nobr>By-laws</nobr>
+            </h1>
+            <h3 class="font-weight-normal">Freely available, easy to find, read and share.</h3>
+          </div>
+          <div class="col-sm-5">
+            <div class="text-center">
+              <img class="logo"
+                   src="{% static 'images/logo-lg.png' %}"
+                   alt="Open By-laws Logo"/>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <h5 class="text-sm-left">
+            A project by
+            <a href="https://laws.africa">
+              <img alt="Laws.Africa"
+                   class="ml-2"
+                   src="{% static 'images/lawsafrica-logo-horizontal.png' %}"
+                   style="width: 150px"/>
+            </a>
+          </h5>
+        </div>
+      </div>
+    </section>
+    <section class="py-5 hero-search">
+      <div class="container">
+        {% block hero-search %}
+          <div class="row justify-content-center">
+            <div class="col col-md-10 col-lg-8">
+              <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
+                <input type="text"
+                       class="form-control form-control-lg flex-grow-1"
+                       placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                       aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                       aria-describedby="button-addon2"
+                       autofocus=""
+                       name="q"/>
+                <input type="submit"
+                       class="btn btn-primary ms-2 btn-lg"
+                       value="{% trans 'Search' %}"/>
+              </form>
+              <a href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
+            </div>
+          </div>
+        {% endblock %}
+      </div>
+    </section>
+    <section class="municipalities py-5">
+      <div class="container">
+        <div class="row">
+          {% for municipality in municipalities %}
+            <div class="col-md-4">
+              <a class="placard {{ municipality.code }}"
+                 href="{% url 'municipal_by_laws' municipality.code %}"
+                 style="background-image: url('{% static "/images/municipalities/" %}{{ municipality.code }}-placard.jpg')">
+                <h3>{{ municipality.name }}</h3>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    <section class="about py-5">
+      <div class="container">
+        <h3>Anyone can help to make the law freely available</h3>
+        <div class="row">
+          <div class="col-md-8">
+            <p class="lead">
+              Open By-laws is maintained by the <a href="https://laws.africa">Laws.Africa</a> contributor community. Anyone can join the community and help to make African law freely available. You can help by adding new by-laws or keeping them up to date. Laws.Africa offers training and support.
+            </p>
+            <p>
+              <a href="https://laws.africa/faq">About the Laws.Africa Contributor Community →</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="my-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-9">
+            <h3>Powered by Laws.Africa</h3>
+            <p class="lead">Open By-laws is powered by the Laws.Africa legislation commons of African legislation.</p>
+            <p class="lead">
+              <a href="https://laws.africa">Laws.Africa</a> is a non-profit organisation that curates the African legislation commons and builds technology to enable free access to the law.
+            </p>
+          </div>
+          <div class="col-md-3 text-center align-self-center">
+            <img alt="Laws.Africa logo"
+                 class="my-3"
+                 src="{% static 'images/lawsafrica-logo.png' %}"
+                 style="width: 150px"/>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="my-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-8">
+            <h3>Use the by-laws in your app or website</h3>
+            <p class="lead">
+              Include the by-laws in your research, website, or app and build powerful interactive solutions for your users.
+            </p>
+            <p class="lead">
+              The by-laws are available as structured, machine-friendly Akoma Ntoso XML through the Laws.Africa Content API. Access rich content in HTML, PDF and ePub, and detailed metadata including publication and amendment information.
+            </p>
+            <p>
+              <a href="https://laws.africa/api/">About the Laws.Africa Content API →</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+{% endblock %}
