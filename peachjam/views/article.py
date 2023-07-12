@@ -9,7 +9,12 @@ from peachjam.models import Article, Taxonomy, UserProfile
 
 class ArticleListView(ListView):
     model = Article
-    queryset = Article.objects.filter(published=True).order_by("-date")
+    queryset = (
+        Article.objects.filter(published=True)
+        .select_related("author")
+        .prefetch_related("topics")
+        .order_by("-date")
+    )
     template_name = "peachjam/article_list.html"
     context_object_name = "articles"
     navbar_link = "articles"
@@ -17,14 +22,11 @@ class ArticleListView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        years = sorted(
-            list(
-                self.model.objects.filter(published=True)
-                .order_by()
-                .values_list("date__year", flat=True)
-                .distinct()
-            ),
-            reverse=True,
+        years = (
+            self.model.objects.filter(published=True)
+            .dates("date", "year", order="DESC")
+            .values_list("date__year", flat=True)
+            .distinct()
         )
 
         context["years"] = [
@@ -69,6 +71,8 @@ class ArticleDetailView(DetailView):
         )
         context["more_articles"] = (
             Article.objects.filter(author=self.object.author, published=True)
+            .select_related("author")
+            .prefetch_related("topics")
             .exclude(pk=self.object.pk)
             .order_by("-date")[:5]
         )
@@ -92,7 +96,12 @@ class UserProfileDetailView(DetailView):
 
 
 class ArticleYearArchiveView(YearArchiveView):
-    queryset = Article.objects.filter(published=True).order_by("-date")
+    queryset = (
+        Article.objects.select_related("author")
+        .prefetch_related("topics")
+        .filter(published=True)
+        .order_by("-date")
+    )
     date_field = "date"
     make_object_list = True
     allow_future = True
@@ -109,15 +118,15 @@ class ArticleYearArchiveView(YearArchiveView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-
         years = (
             self.queryset.order_by("-date__year")
+            .dates("date", "year", order="DESC")
             .values_list("date__year", flat=True)
             .distinct()
         )
+
         context["years"] = [
-            {"url": reverse("article_year_archive", args=[year]), "year": year}
-            for year in years
+            {"url": reverse("article_year_archive", args=[y]), "year": y} for y in years
         ]
 
         context["all_years_url"] = reverse("article_list")
