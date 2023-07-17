@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0088_model_translations"),
+        ("peachjam", "0089_alter_judge_options"),
     ]
 
     operations = [
