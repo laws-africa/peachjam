@@ -66,7 +66,7 @@ class RelationshipSerializer(serializers.ModelSerializer):
 class CitationLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = CitationLink
-        fields = ("document", "text", "url", "target_id", "target_selectors")
+        fields = ("id", "document", "text", "url", "target_id", "target_selectors")
 
 
 class ChildLegislationSerializer(serializers.ModelSerializer):

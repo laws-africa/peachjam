@@ -1,6 +1,7 @@
 import { RelationshipEnrichments } from '../RelationshipEnrichment';
 import DocDiffsManager from '../DocDiffs';
 import PDFCitationLinks from './citation-links';
+import { GutterEnrichmentManager } from '@lawsafrica/indigo-akn/dist/enrichments';
 
 /**
  * Class for handling the setup of all enrichments and interactions between enrichments
@@ -13,14 +14,20 @@ class EnrichmentsManager {
   private readonly gutter: HTMLLaGutterElement | null;
   private readonly akn: HTMLElement | null;
   private citationLinks: PDFCitationLinks | null = null;
+  gutterManager: GutterEnrichmentManager;
 
   constructor (contentAndEnrichmentsElement: HTMLElement) {
     this.root = contentAndEnrichmentsElement;
     this.gutter = this.root.querySelector('la-gutter');
-    this.akn = this.root.querySelector('la-akoma-ntoso');
+    // this is either div.content (for HTML and PDF) or la-akoma-ntoso.content (for AKN)
+    this.akn = this.root.querySelector('.content');
 
     this.docDiffsManager = this.setDocDiffs();
-    this.relationshipsManager = new RelationshipEnrichments(contentAndEnrichmentsElement);
+    this.gutterManager = new GutterEnrichmentManager(this.root);
+    // @ts-ignore
+    // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
+    this.gutterManager.akn = this.root.querySelector('.content');
+    this.relationshipsManager = new RelationshipEnrichments(contentAndEnrichmentsElement, this.gutterManager);
 
     this.gutter?.addEventListener('laItemChanged', (e: any) => {
       if (e.target.classList.contains('relationship-gutter-item') && e.target.active) {
@@ -37,7 +44,7 @@ class EnrichmentsManager {
   }
 
   setupPdfCitationLinks () {
-    this.citationLinks = new PDFCitationLinks(this.root);
+    this.citationLinks = new PDFCitationLinks(this.root, this.gutterManager);
   }
 }
 
