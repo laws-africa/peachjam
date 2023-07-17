@@ -106,11 +106,13 @@ export default {
     remove () {
       this.resolve(null);
       this.modal.hide();
+      this.enrichment = null;
     },
 
     close () {
       this.resolve(this.enrichment);
       this.modal.hide();
+      this.enrichment = null;
     },
 
     removeOrClose () {
