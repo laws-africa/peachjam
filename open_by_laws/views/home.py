@@ -1,4 +1,5 @@
 from liiweb.views import HomePageView as LiiWebPageView
+from peachjam.models import Locality
 
 
 class HomePageView(LiiWebPageView):
@@ -6,32 +7,6 @@ class HomePageView(LiiWebPageView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["municipalities"] = [
-            {"code": "cpt", "name": "Cape Town"},
-            {"code": "eth", "name": "eThekwini"},
-            {"code": "jhb", "name": "Johannesburg"},
-            {
-                "code": "wc033",
-                "name": "Cape Agulhas",
-            },
-            {
-                "code": "wc011",
-                "name": "Matzikama",
-            },
-            {
-                "code": "ec443",
-                "name": "Mbizana",
-            },
-            {
-                "code": "wc013",
-                "name": "Bergrivier",
-            },
-            {
-                "code": "wc012",
-                "name": "Cederberg",
-            },
-            {"code": "wc015", "name": "Swartland"},
-            {"code": "wc041", "name": "Kannaland"},
-            {"code": "wc023", "name": "Drakenstein"},
-        ]
+        codes = "cpt eth jhb wc033 wc011 ec443 wc013 wc012 wc015 wc041 wc023".split()
+        context["municipalities"] = Locality.objects.filter(code__in=codes)
         return context

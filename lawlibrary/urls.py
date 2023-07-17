@@ -7,8 +7,8 @@ urlpatterns = [
     path("legislation/", views.LegislationListView.as_view(), name="legislation_list"),
     path(
         "legislation/provincial",
-        views.ProvincialLegislationView.as_view(),
-        name="provincial_legislation",
+        views.LocalityLegislationView.as_view(),
+        name="locality_legislation",
     ),
     path(
         "legislation/repealed",
@@ -22,23 +22,23 @@ urlpatterns = [
     ),
     path(
         "legislation/<str:code>/",
-        views.ProvincialLegislationListView.as_view(),
-        name="provincial_legislation_list",
+        views.LocalityLegislationListView.as_view(),
+        name="locality_legislation_list",
     ),
     path(
         "legislation/<str:code>/repealed",
-        views.ProvincialLegislationListView.as_view(variant="repealed"),
-        name="provincial_legislation_list_repealed",
+        views.LocalityLegislationListView.as_view(variant="repealed"),
+        name="locality_legislation_list_repealed",
     ),
     path(
         "legislation/<str:code>/subsidiary",
-        views.ProvincialLegislationListView.as_view(variant="subleg"),
-        name="provincial_legislation_list_subsidiary",
+        views.LocalityLegislationListView.as_view(variant="subleg"),
+        name="locality_legislation_list_subsidiary",
     ),
     path(
         "legislation/<str:code>/all",
-        views.ProvincialLegislationListView.as_view(variant="all"),
-        name="provincial_legislation_list_all",
+        views.LocalityLegislationListView.as_view(variant="all"),
+        name="locality_legislation_list_all",
     ),
     path("", include("liiweb.urls")),
 ]

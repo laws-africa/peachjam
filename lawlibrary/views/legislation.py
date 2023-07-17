@@ -1,7 +1,6 @@
-from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView
-
-from liiweb.views.legislation import LegislationListView as BaseLegislationListView
+from liiweb.views import LegislationListView as BaseLegislationListView
+from liiweb.views import LocalityLegislationListView as BaseLocalityLegislationListView
+from liiweb.views import LocalityLegislationView as BaseLocalityLegislationView
 from peachjam.models import Locality
 
 
@@ -10,27 +9,18 @@ class LegislationListView(BaseLegislationListView):
         return super().get_queryset().filter(locality=None)
 
 
-class ProvincialLegislationView(TemplateView):
-    template_name = "lawlibrary/provincial_legislation.html"
+class LocalityLegislationView(BaseLocalityLegislationView):
     navbar_link = "legislation/provincial"
 
     def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
         codes = "mp ec nc kzn gp wc lp nw fs".split()
         provinces = Locality.objects.filter(code__in=codes)
-        groups = provinces[:5], provinces[5:]
-        return super().get_context_data(province_groups=groups, **kwargs)
+        context["province_groups"] = provinces[:5], provinces[5:]
+        context["page_heading"] = "Provincial Legislation"
+        return context
 
 
-class ProvincialLegislationListView(BaseLegislationListView):
-    template_name = "lawlibrary/provincial_legislation_list.html"
+class LocalityLegislationListView(BaseLocalityLegislationListView):
     navbar_link = "legislation/provincial"
-
-    def get(self, *args, **kwargs):
-        self.locality = get_object_or_404(Locality, code=kwargs["code"])
-        return super().get(*args, **kwargs)
-
-    def get_queryset(self):
-        return super().get_queryset().filter(locality=self.locality)
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(locality=self.locality, **kwargs)

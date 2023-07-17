@@ -6,14 +6,14 @@
 {% block page-content %}
   <section class="pb-5">
     <div class="container">
-      <h1 class="my-4">{% trans 'Provincial Legislation' %}</h1>
+      <h1 class="my-4">{% blocktrans %} {{ page_heading }} {% endblocktrans %}</h1>
       <div class="row">
         {% for group in province_groups %}
           <div class="col-lg">
             <ul class="list-unstyled mb-0">
               {% for locality in group %}
                 <li>
-                  <a href="{% url 'provincial_legislation_list' locality.code %}">{{ locality.name }}</a>
+                  <a href="{% url 'locality_legislation_list' locality.code %}">{{ locality.name }}</a>
                 </li>
               {% endfor %}
             </ul>

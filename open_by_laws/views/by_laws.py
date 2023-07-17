@@ -1,5 +1,5 @@
-from lawlibrary.views.legislation import ProvincialLegislationListView
+from lawlibrary.views.legislation import LocalityLegislationListView
 
 
-class MunicipalByLawsView(ProvincialLegislationListView):
+class MunicipalByLawsView(LocalityLegislationListView):
     template_name = "open_by_laws/municipal_by_laws_list.html"
