@@ -51,7 +51,7 @@ class PdfRenderer {
       this.setupPreviewSyncing();
       this.onPdfLoaded();
     }).catch((e:ErrorEvent) => {
-      this.root.innerText = e.message;
+      throw e;
     });
   }
 
