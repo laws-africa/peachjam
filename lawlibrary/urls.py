@@ -1,12 +1,13 @@
 from django.urls import include, path
 
 from lawlibrary import views
+from liiweb.views import LocalityLegislationListView
 
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),
     path("legislation/", views.LegislationListView.as_view(), name="legislation_list"),
     path(
-        "legislation/provincial",
+        "legislation/locality",
         views.LocalityLegislationView.as_view(),
         name="locality_legislation",
     ),
@@ -22,22 +23,22 @@ urlpatterns = [
     ),
     path(
         "legislation/<str:code>/",
-        views.LocalityLegislationListView.as_view(),
+        LocalityLegislationListView.as_view(),
         name="locality_legislation_list",
     ),
     path(
         "legislation/<str:code>/repealed",
-        views.LocalityLegislationListView.as_view(variant="repealed"),
+        LocalityLegislationListView.as_view(variant="repealed"),
         name="locality_legislation_list_repealed",
     ),
     path(
         "legislation/<str:code>/subsidiary",
-        views.LocalityLegislationListView.as_view(variant="subleg"),
+        LocalityLegislationListView.as_view(variant="subleg"),
         name="locality_legislation_list_subsidiary",
     ),
     path(
         "legislation/<str:code>/all",
-        views.LocalityLegislationListView.as_view(variant="all"),
+        LocalityLegislationListView.as_view(variant="all"),
         name="locality_legislation_list_all",
     ),
     path("", include("liiweb.urls")),

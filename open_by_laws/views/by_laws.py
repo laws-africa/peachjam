@@ -1,4 +1,4 @@
-from lawlibrary.views.legislation import LocalityLegislationListView
+from liiweb.views.legislation import LocalityLegislationListView
 
 
 class MunicipalByLawsView(LocalityLegislationListView):

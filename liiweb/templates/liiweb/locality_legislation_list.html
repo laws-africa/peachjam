@@ -1,13 +1,11 @@
 {% extends "liiweb/legislation_list.html" %}
 {% load i18n %}
-{% block title %}
-  {% trans 'Provincial Legislation' %}
-{% endblock %}
+{% block title %}{{ locality_legislation_title }}{% endblock %}
 {% block breadcrumbs %}
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item">
-        <a href="{% url 'locality_legislation' %}">{% trans 'Provincial Legislation' %}</a>
+        <a href="{% url 'locality_legislation' %}">{{ locality_legislation_title }}</a>
       </li>
     </ol>
   </nav>
