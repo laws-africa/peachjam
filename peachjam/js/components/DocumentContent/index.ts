@@ -36,7 +36,7 @@ class DocumentContent {
 
   constructor (root: HTMLElement) {
     this.root = root;
-    this.documentElement = this.root.querySelector('[data-document-element]');
+    this.documentElement = this.root.querySelector('.content');
 
     this.setupTabs();
     this.setupNav();

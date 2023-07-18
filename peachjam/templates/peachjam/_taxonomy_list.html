@@ -3,7 +3,7 @@
   {% if taxonomies|length > 0 %}
     <div class="row">
       {% for taxonomy in taxonomies %}
-        {% if taxonomy.is_root and taxonomy.get_children|length > 0 %}
+        {% if taxonomy.is_root and taxonomy.get_children_count > 0 %}
           <div class="col-12 col-lg-6 mb-4">
             <div class="card">
               <div class="card-header">{{ taxonomy }}</div>

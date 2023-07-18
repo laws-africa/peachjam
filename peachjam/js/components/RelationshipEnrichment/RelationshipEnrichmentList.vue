@@ -7,7 +7,7 @@
       :enrichment="enrichment"
       :view-root="viewRoot"
       :gutter="gutter"
-      :readonly="readonly"
+      :editable="editable"
       :this-work-frbr-uri="thisWorkFrbrUri"
       @delete="deleteEnrichment(enrichment)"
     />
@@ -39,7 +39,7 @@ export default {
     },
     viewRoot: HTMLElement,
     gutter: HTMLElement,
-    readonly: Boolean,
+    editable: Boolean,
     thisWorkFrbrUri: {
       type: String,
       default: ''

@@ -30,7 +30,10 @@ class Judge(models.Model):
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
-        ordering = ["name"]
+        ordering = (
+            "pk",
+            "name",
+        )
         verbose_name = _("judge")
         verbose_name_plural = _("judges")
 
