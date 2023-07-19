@@ -10,5 +10,5 @@ class LegislationListView(BaseLegislationListView):
 class LocalityLegislationView(BaseLocalityLegislationView):
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            locality_legislation_title="Locality Legislation", **kwargs
+            locality_legislation_title="Provincial Legislation", **kwargs
         )

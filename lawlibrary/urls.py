@@ -7,7 +7,7 @@ urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),
     path("legislation/", views.LegislationListView.as_view(), name="legislation_list"),
     path(
-        "legislation/locality",
+        "legislation/provincial",
         views.LocalityLegislationView.as_view(),
         name="locality_legislation",
     ),
