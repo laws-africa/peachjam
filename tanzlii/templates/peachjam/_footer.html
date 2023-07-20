@@ -1,78 +1,52 @@
 {% extends 'peachjam/_footer.html' %}
 {% load static i18n %}
-{% block newsletter-form-code %}
-  <form action="" {# TODO: To be replaced with mailchimp form link #}
-    method="post"
-    name="mc-embedded-subscribe-form"
-    target="_blank">
-    <div style="position: absolute; left: -5000px;" aria-hidden="true">
-      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-      <input type="text"
-        name="" {# TODO: To be replaced with mailchimp form link #}
-        tabindex="-1"
-        value=""/>
-      </div>
-      <div class="input-group">
-        <input type="email"
-          value=""{# TODO: To be replaced with mailchimp form link #}
-          name="EMAIL"
-          class="form-control"
-          placeholder="email address"
-          required=""/>
-          <input type="submit"
-                 value="Subscribe"
-                 name="subscribe"
-                 class="btn btn-secondary"/>
-        </div>
-      </form>
-    {% endblock %}
-    {% block about %}
-      <p>
-        {% blocktrans trimmed %}
-      TanzLII is based at the Judiciary of Tanzania and publishes the law of Tanzania for free online access for all.
-      Free Access to the law supports the rule of law and access to justice.
-      TanzLII partners with African Legal Information Institute (AfricanLII) and <a href="http://laws.africa/">Laws.Africa</a> NPO, who provide it with technical support.
+{% block about %}
+  <p>
+    {% blocktrans trimmed %}
+    TanzLII is based at the Judiciary of Tanzania and publishes the law of Tanzania for free online access for all.
+    Free Access to the law supports the rule of law and access to justice.
+    TanzLII partners with African Legal Information Institute (AfricanLII) and <a href="http://laws.africa/">Laws.Africa</a> NPO, who provide it with technical support.
     {% endblocktrans %}
-      </p>
-      <div>
-        <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
-      </div>
-    {% endblock %}
-    {% block second-content-column %}
-      <h5>{% trans 'Our partners' %}</h5>
-      <div>
-        <a href="https://africanlii.org/" target="_blank" rel="noreferrer">AfricanLII</a>
-      </div>
-      <div>
-        <a href="https://www.judiciary.go.tz/web/"
-           target="_blank"
-           rel="noreferrer">Judiciary of Tanzania</a>
-      </div>
-      <div>
-        <a href="https://laws.africa/" target="_blank" rel="noreferrer">Laws.Africa</a>
-      </div>
-    {% endblock %}
-    {% block footer-logos %}
-      <div class="footer-logos">
-        <a class="footer-logos__item"
-           href="https://africanlii.org/"
-           target="_blank"
-           rel="noreferrer">
-          <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII" />
-        </a>
-        <a href="https://www.judiciary.go.tz/web/"
-           target="_blank"
-           rel="noreferrer"
-           class="footer-logos__item">
-          <img src="{% static 'images/judiciary_of_tanzania.png' %}"
-               alt="Judiciary of Tanzania logo"/>
-        </a>
-        <a href="https://laws.africa/"
-           target="_blank"
-           rel="noreferrer"
-           class="footer-logos__item">
-          <img src="{% static 'images/laws-africa-logo-horizontal.png' %}"
-               alt="Laws.Africa"/>
-        </a>
-      </div>
-    {% endblock %}
+  </p>
+  <div>
+    <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
+  </div>
+{% endblock %}
+{% block second-content-column %}
+  <h5>{% trans 'Our partners' %}</h5>
+  <div>
+    <a href="https://africanlii.org/" target="_blank" rel="noreferrer">AfricanLII</a>
+  </div>
+  <div>
+    <a href="https://www.judiciary.go.tz/web/"
+       target="_blank"
+       rel="noreferrer">Judiciary of Tanzania</a>
+  </div>
+  <div>
+    <a href="https://laws.africa/" target="_blank" rel="noreferrer">Laws.Africa</a>
+  </div>
+{% endblock %}
+{% block footer-logos %}
+  <div class="footer-logos">
+    <a class="footer-logos__item"
+       href="https://africanlii.org/"
+       target="_blank"
+       rel="noreferrer">
+      <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII" />
+    </a>
+    <a href="https://www.judiciary.go.tz/web/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/judiciary_of_tanzania.png' %}"
+           alt="Judiciary of Tanzania logo"/>
+    </a>
+    <a href="https://laws.africa/"
+       target="_blank"
+       rel="noreferrer"
+       class="footer-logos__item">
+      <img src="{% static 'images/laws-africa-logo-horizontal.png' %}"
+           alt="Laws.Africa"/>
+    </a>
+  </div>
+{% endblock %}

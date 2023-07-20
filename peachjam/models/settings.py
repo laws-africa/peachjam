@@ -62,6 +62,9 @@ class PeachJamSettings(SingletonModel):
         verbose_name=_("metabase dashboard link"), null=True, blank=True
     )
 
+    mailchimp_form_url = models.URLField(
+        verbose_name=_("mailchimp form url"), null=True, blank=True
+    )
     twitter_link = models.URLField(
         verbose_name=_("twitter link"), null=True, blank=True
     )

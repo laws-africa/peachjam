@@ -5,10 +5,10 @@
     {% if document.locality %}
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
-          <a href="{% url 'provincial_legislation' %}">{% trans 'Provincial Legislation' %}</a>
+          <a href="{% url 'locality_legislation' %}">{% trans 'Provincial Legislation' %}</a>
         </li>
         <li class="breadcrumb-item">
-          <a href="{% url 'provincial_legislation_list' document.locality.code %}">{{ document.locality.name }}</a>
+          <a href="{% url 'locality_legislation_list' document.locality.code %}">{{ document.locality.name }}</a>
         </li>
       </ol>
     {% else %}

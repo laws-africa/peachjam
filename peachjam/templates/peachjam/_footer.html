@@ -3,7 +3,17 @@
 <footer class="pt-4 pb-4">
   <div class="container">
     <a href="{% url 'pocketlaw_resources' %}" style="display: none"></a>
-    {% block newsletter-form %}{% endblock %}
+    {% block newsletter-form %}
+      {% if PEACHJAM_SETTINGS.mailchimp_form_url %}
+        {% include 'peachjam/_mailchimp_form.html' %}
+      {% endif %}
+    {% endblock %}
+    {% block social-media %}
+      {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link %}
+        {% include 'peachjam/_social_media.html' %}
+      {% endif %}
+    {% endblock %}
+    <hr/>
     <div class="row">
       <div class="col-lg-4">
         {% block first-content-column %}
