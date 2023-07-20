@@ -4,21 +4,10 @@
   <h5>{% trans 'About' %} {{ APP_NAME }}</h5>
   {% block about %}
     <p>
-      {% blocktrans trimmed %}
-        Open By-laws is a community effort to make South African by-laws easy to find, ready and share.
-        <a href="/about">Find out more</a>.
-      {% endblocktrans %}
+      Open By-laws is part of <a href="https://lawlibrary.org.za">LawLibrary.org.za</a>, a project by
+      <a href="https://laws.africa">Laws.Africa</a> and <a href="https://africanlii.org">AfricanLII</a>.
     </p>
-    <p>
-      {% blocktrans trimmed %}
-        Thanks you to <a href="/about/#contributors">our contributors</a>. Much love.
-      {% endblocktrans %}
-    </p>
-    <p>
-      {% blocktrans trimmed %}
-        A project by <a href="https://laws.africa/">Laws.Africa</a>.
-      {% endblocktrans %}
-    </p>
+    <p>We make South Africa's by-laws easier to find, read and share.</p>
   {% endblock %}
   {% block first-content-column-links %}
     <div>
@@ -93,6 +82,20 @@
 {% block third-content-column %}{% endblock %}
 {% block footer-logos %}
   <div class="footer-logos">
+    <a class="footer-logos__item"
+       href="https://lawlibrary.org.za"
+       target="_blank"
+       rel="noreferrer">
+      <img height="40"
+           src="{% static 'images/lawlibrary-logo.png' %}"
+           alt="LawLibrary"/>
+    </a>
+    <a class="footer-logos__item"
+       href="https://africanlii.org/"
+       target="_blank"
+       rel="noreferrer">
+      <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
+    </a>
     <a href="https://laws.africa/"
        target="_blank"
        rel="noreferrer"
