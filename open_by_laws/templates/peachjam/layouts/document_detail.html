@@ -1,0 +1,13 @@
+{% extends 'peachjam/layouts/document_detail.html' %}
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home_page' %}">Municipalities</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'municipal_by_laws' code=document.locality.code %}">{{ document.locality.name }}</a>
+      </li>
+    </ol>
+  </nav>
+{% endblock %}
