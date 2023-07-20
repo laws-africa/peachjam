@@ -5,6 +5,7 @@ from docpipe.soffice import DocToHtml
 from docpipe.xmlutils import unwrap_element
 
 DOC_MIMETYPES = [
+    "application/vnd.oasis.opendocument.text",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "application/msword",
     "application/rtf",
