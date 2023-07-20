@@ -37,7 +37,7 @@ class RatificationResource(resources.ModelResource):
             ratification=Ratification.objects.get(pk=row_result.object_id),
             country=row.get("country"),
             ratification_date=row.get("ratification_date"),
-            signature_date=row.get("deposit_date"),
-            deposit_date=row.get("signature_date"),
+            signature_date=row.get("signature_date"),
+            deposit_date=row.get("deposit_date"),
         )
         r.save()
