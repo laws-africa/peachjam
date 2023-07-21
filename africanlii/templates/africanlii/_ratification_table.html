@@ -4,9 +4,9 @@
   <thead>
     <tr>
       <th>{% trans 'Title' %}</th>
+      <th>{% trans 'Signature Date' %}</th>
       <th>{% trans 'Ratification Date' %}</th>
       <th>{% trans 'Deposit Date' %}</th>
-      <th>{% trans 'Signature Date' %}</th>
     </tr>
   </thead>
   <tbody>
@@ -15,9 +15,9 @@
         <td>
           <a href="{% url 'document_detail' frbr_uri=ratification_country.ratification.work.frbr_uri|strip_first_character %}">{{ ratification_country.ratification.work.title }}</a>
         </td>
+        <td>{{ ratification_country.signature_date.isoformat }}</td>
         <td>{{ ratification_country.ratification_date.isoformat }}</td>
         <td>{{ ratification_country.deposit_date.isoformat }}</td>
-        <td>{{ ratification_country.signature_date.isoformat }}</td>
       </tr>
     {% endfor %}
   </tbody>
