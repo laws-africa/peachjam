@@ -36,6 +36,7 @@ from peachjam.models import (
     AttachedFiles,
     Attorney,
     Author,
+    Bench,
     Book,
     CaseNumber,
     CitationLink,
@@ -586,6 +587,14 @@ class AttachedFilesInline(BaseAttachmentFileInline):
     form = AttachedFilesForm
 
 
+class BenchInline(admin.TabularInline):
+    # by using an inline, the ordering of the judges is preserved
+    model = Bench
+    extra = 3
+    verbose_name = gettext_lazy("judge")
+    verbose_name_plural = gettext_lazy("judges")
+
+
 class JudgmentAdminForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
 
@@ -607,7 +616,11 @@ class JudgmentAdminForm(DocumentForm):
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     form = JudgmentAdminForm
     resource_class = JudgmentResource
-    inlines = [CaseNumberAdmin, AttachedFilesInline] + DocumentAdmin.inlines
+    inlines = [
+        BenchInline,
+        CaseNumberAdmin,
+        AttachedFilesInline,
+    ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys")
     list_filter = (*DocumentAdmin.list_filter, "court")
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
@@ -620,8 +633,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].insert(8, "serial_number_override")
     fieldsets[0][1]["fields"].insert(9, "serial_number")
     fieldsets[0][1]["fields"].append("hearing_date")
-    fieldsets[1][1]["fields"].insert(0, "judges")
-    fieldsets[1][1]["fields"].insert(1, "attorneys")
+    fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
     fieldsets[3][1]["fields"].extend(
@@ -650,7 +662,7 @@ class PredicateAdmin(admin.ModelAdmin):
 
 class IngestorSettingInline(admin.TabularInline):
     model = IngestorSetting
-    extra = 1
+    extra = 3
 
 
 @admin.register(Ingestor)

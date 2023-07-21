@@ -58,7 +58,6 @@ class Migration(migrations.Migration):
                         to="peachjam.author",
                     ),
                 ),
-                ("judges", models.ManyToManyField(blank=True, to="peachjam.Judge")),
             ],
             options={
                 "ordering": ["title"],
@@ -153,5 +152,48 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
+        ),
+        migrations.CreateModel(
+            name="Bench",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "judge",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="peachjam.judge",
+                        verbose_name="judge",
+                    ),
+                ),
+                (
+                    "judgment",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="bench",
+                        to="peachjam.judgment",
+                        verbose_name="judgment",
+                    ),
+                ),
+            ],
+            options={
+                "db_table": "peachjam_judgment_judges",
+                "ordering": ("pk",),
+                "unique_together": {("judgment", "judge")},
+            },
+        ),
+        migrations.AddField(
+            model_name="judgment",
+            name="judges",
+            field=models.ManyToManyField(
+                through="peachjam.Bench", to="peachjam.Judge", verbose_name="judges"
+            ),
         ),
     ]
