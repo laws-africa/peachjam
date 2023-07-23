@@ -8,6 +8,9 @@
     {% block hero-img %}
       <img class="hero__background-img"
            src="{% static 'images/banner.jpg' %}"
+           srcset="{% static 'images/banner-small.jpg' %} 770w,
+                   {% static 'images/banner.jpg' %} 1920w"
+           sizes="100vw"
            alt="{{ APP_NAME }}"
            height="40"/>
     {% endblock %}

@@ -15,18 +15,18 @@
   <thead>
     <tr>
       <th>{% trans 'Country' %}</th>
+      <th>{% trans 'Signature Date' %}</th>
       <th>{% trans 'Ratification Date' %}</th>
       <th>{% trans 'Deposit Date' %}</th>
-      <th>{% trans 'Signature Date' %}</th>
     </tr>
   </thead>
   <tbody>
     {% for ratification in ratification.countries.all %}
       <tr>
         <td>{{ ratification.country.name }}</td>
+        <td>{{ ratification.signature_date.isoformat }}</td>
         <td>{{ ratification.ratification_date.isoformat }}</td>
         <td>{{ ratification.deposit_date.isoformat }}</td>
-        <td>{{ ratification.signature_date.isoformat }}</td>
       </tr>
     {% endfor %}
   </tbody>
