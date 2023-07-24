@@ -12,7 +12,23 @@ TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa
 
 MICROSITES = {
     "bergrivier": {
-        "code": "cpt",
+        "code": "wc013",
         "website": "https://www.bergmun.org.za/",
+    },
+    "capeagulhas": {
+        "code": "wc033",
+        "website": "https://capeagulhas.gov.za/",
+    },
+    "cederberg": {
+        "code": "wc012",
+        "website": "http://www.cederbergmun.gov.za/",
+    },
+    "mbizana": {
+        "code": "ec443",
+        "website": "http://www.mbizana.gov.za/",
+    },
+    "matzikama": {
+        "code": "wc011",
+        "website": "https://www.matzikamamunicipality.co.za/",
     },
 }

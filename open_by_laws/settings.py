@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["open_by_laws.apps.OpenByLawsConfig"] + INSTALLED_APPS  # noqa
@@ -12,3 +14,7 @@ JAZZMIN_SETTINGS["site_brand"] = "openbylaws.org.za"  # noqa
 TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa
     "open_by_laws.context_processors.open_by_laws"
 )
+
+LANGUAGES = [
+    ("en", _("English")),
+]

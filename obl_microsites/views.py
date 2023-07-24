@@ -5,9 +5,10 @@ from django.views.generic import RedirectView
 
 class RedirectHomeView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        if not getattr(self.request, "obl_locality", None):
+        if not getattr(self.request, "microsite", None):
             raise Http404()
 
         return reverse(
-            "municipal_by_laws", kwargs={"code": self.request.obl_locality.code}
+            "municipal_by_laws",
+            kwargs={"code": self.request.microsite["locality"].code},
         )
