@@ -18,3 +18,36 @@ TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa
 LANGUAGES = [
     ("en", _("English")),
 ]
+
+MICROSITES = {
+    "bergrivier": {
+        "name": "Bergrivier",
+        "code": "wc013",
+        "website": "https://www.bergmun.org.za/",
+        "url": "https://bergrivier.openbylaws.org.za",
+    },
+    "capeagulhas": {
+        "name": "Cape Agulhas",
+        "code": "wc033",
+        "website": "https://capeagulhas.gov.za/",
+        "url": "https://capeagulhas.openbylaws.org.za",
+    },
+    "cederberg": {
+        "name": "Cederberg",
+        "code": "wc012",
+        "website": "http://www.cederbergmun.gov.za/",
+        "url": "https://cederberg.openbylaws.org.za",
+    },
+    "mbizana": {
+        "name": "Mbizana",
+        "code": "ec443",
+        "website": "http://www.mbizana.gov.za/",
+        "url": "https://mbizana.openbylaws.org.za",
+    },
+    "matzikama": {
+        "name": "Matzikama",
+        "code": "wc011",
+        "website": "https://www.matzikamamunicipality.co.za/",
+        "url": "https://matzikama.openbylaws.org.za",
+    },
+}

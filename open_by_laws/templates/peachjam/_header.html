@@ -1,23 +1,13 @@
 {% extends 'peachjam/_header.html' %}
 {% load static i18n %}
-{% block top-bar %}
-  <div class="p-2 bg-light">
-    <div class="container d-flex justify-content-end">
-      <a href="https://lawlibrary.org.za"
-         target="_blank"
-         rel="noreferrer"
-         class="ms-3">
-        <img src="{% static 'images/lawlibrary-logo.png' %}"
-             alt="lawlibrary"
-             height="40"/>
-      </a>
-    </div>
-  </div>
-{% endblock %}
+{% block top-bar %}{% endblock %}
 {% block navbar-logo %}
-  <img src="{% static 'images/logo-lg.png' %}"
+  <img src="{% static 'images/logo.png' %}"
+       alt="Law Library"
+       height="70"
+       class="me-3"/>
+  <img src="{% static 'images/lawlibrary-logo.png' %}"
        alt="Open By-laws"
-       width="65"
        height="70"/>
 {% endblock %}
 {% block nav-items %}
