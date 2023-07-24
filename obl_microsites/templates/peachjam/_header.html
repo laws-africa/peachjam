@@ -1,0 +1,7 @@
+{% extends 'peachjam/_header.html' %}
+{% block nav-items %}
+  <li class="nav-item">
+    <a class="nav-link"
+       href="{% url 'municipal_by_laws' code=LOCALITY.code %}">{{ LOCALITY.name }} By-laws</a>
+  </li>
+{% endblock %}
