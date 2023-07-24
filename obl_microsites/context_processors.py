@@ -1,4 +1,9 @@
+from django.contrib.staticfiles import finders
+
+searched_locations = finders.searched_locations
+
+
 def obl_microsites(request):
-    return {
-        "LOCALITY": request.obl_locality,
-    }
+    if not hasattr(request, "microsite"):
+        return {}
+    return {"MICROSITE": request.microsite}

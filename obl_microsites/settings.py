@@ -9,3 +9,10 @@ MIDDLEWARE = ["obl_microsites.middleware.LocalityMiddleware"] + MIDDLEWARE  # no
 TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa
     "obl_microsites.context_processors.obl_microsites"
 )
+
+MICROSITES = {
+    "bergrivier": {
+        "code": "cpt",
+        "website": "https://www.bergmun.org.za/",
+    },
+}

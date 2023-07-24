@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
@@ -14,14 +15,17 @@ class LocalityMiddleware(object):
         host = request.get_host()
 
         if host.startswith("127.0.0.1") or host.startswith("localhost"):
-            # TODO: falls back to CPT for debugging
-            code = "cpt"
-        else:
-            if "." in host:
-                host = host.split(".", 1)[0]
-            code = {"bergrivier": "wc013"}.get(host, None)
-        if not code:
+            host = "bergrivier"
+        elif "." in host:
+            host = host.split(".", 1)[0]
+
+        microsite = settings.MICROSITES.get(host)
+        if not microsite:
             raise Http404
 
-        request.obl_locality = get_object_or_404(Locality.objects, code=code)
+        if "locality" not in microsite:
+            microsite["locality"] = get_object_or_404(
+                Locality.objects, code=microsite["code"]
+            )
+        request.microsite = microsite
         return self.get_response(request)
