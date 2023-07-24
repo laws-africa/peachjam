@@ -48,7 +48,7 @@ class RedirectResolver:
         },
         "open by-laws": {
             "place_code": [],
-            "domain": "obl.laws.africa",
+            "domain": "openbylaws.org.za",
         },
         "senlii": {
             "country_code": "sn",
