@@ -46,6 +46,10 @@ class RedirectResolver:
             "country_code": "ng",
             "domain": "nigerialii.org",
         },
+        "open by-laws": {
+            "place_code": [],
+            "domain": "openbylaws.org.za",
+        },
         "senlii": {
             "country_code": "sn",
             "domain": "senlii.org",
