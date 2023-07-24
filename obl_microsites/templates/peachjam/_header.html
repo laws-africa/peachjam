@@ -23,3 +23,7 @@
        href="{% url 'municipal_by_laws' code=MICROSITE.locality.code %}">{{ MICROSITE.locality.name }} By-laws</a>
   </li>
 {% endblock %}
+{% block search-form %}
+  {{ block.super }}
+  <input type="hidden" name="locality" value="{{ MICROSITE.locality.name }}"/>
+{% endblock %}

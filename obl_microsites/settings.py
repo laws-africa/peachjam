@@ -32,3 +32,6 @@ MICROSITES = {
         "website": "https://www.matzikamamunicipality.co.za/",
     },
 }
+
+# rely on open-by-laws to manage search indexing
+ELASTICSEARCH_DSL_AUTOSYNC = False
