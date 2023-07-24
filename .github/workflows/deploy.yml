@@ -299,10 +299,10 @@ jobs:
           git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/nigerialii-peachjam'
           git_push_flags: '--force'
 
-  deploy-obl:
+  deploy-open-by-laws:
     if: ${{ always() }}
-    needs: deploy-lawlibrary
-    name: Deploy to obl
+    needs: deploy-tcilii
+    name: Deploy to open-by-laws
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
