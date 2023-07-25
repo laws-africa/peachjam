@@ -6,6 +6,7 @@ from peachjam.models import (
     CoreDocument,
     CoreDocumentManager,
     CoreDocumentQuerySet,
+    Label,
     Work,
 )
 from peachjam.models.author import Author
@@ -84,6 +85,20 @@ class Legislation(CoreDocument):
 
     def __str__(self):
         return self.title
+
+    def apply_labels(self):
+        # label to indicate that this legislation is repealed
+        label, _ = Label.objects.get_or_create(
+            code="repealed", defaults={"name": "Repealed", "code": "repealed"}
+        )
+        # apply label if repealed
+        if self.repealed:
+            self.labels.add(label.pk)
+        else:
+            # not repealed, remove label
+            self.labels.remove(label.pk)
+
+        super().apply_labels()
 
     def pre_save(self):
         self.doc_type = "legislation"

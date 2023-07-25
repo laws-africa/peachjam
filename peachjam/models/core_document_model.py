@@ -39,13 +39,23 @@ from peachjam.storage import DynamicStorageFileField
 
 
 class Label(models.Model):
-    name = models.CharField(_("name"), max_length=255, unique=True)
-    code = models.SlugField(_("code"), max_length=255, unique=True)
+    name = models.CharField(
+        _("name"), max_length=1024, unique=True, null=False, blank=False
+    )
+    code = models.SlugField(_("code"), max_length=1024, unique=True)
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.title)
+        if not self.code:
+            self.code = slugify(self.name)
         return super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = _("label")
+        verbose_name_plural = _("labels")
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name}"
 
 
 class DocumentNature(models.Model):
@@ -407,7 +417,7 @@ class CoreDocument(PolymorphicModel):
 
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES
-    labels = models.ManyToManyField(Label, verbose_name=_("labels"))
+    labels = models.ManyToManyField(Label, verbose_name=_("labels"), blank=True)
 
     class Meta:
         ordering = ["doc_type", "title"]
@@ -418,6 +428,9 @@ class CoreDocument(PolymorphicModel):
 
     def __str__(self):
         return f"{self.doc_type} - {self.title}"
+
+    def apply_labels(self):
+        pass
 
     def get_all_fields(self):
         return self._meta.get_fields()
@@ -517,10 +530,14 @@ class CoreDocument(PolymorphicModel):
             self.work.save()
 
     def save(self, *args, **kwargs):
-        # give ourselves and subclasses a chance to pre-populate derived fields before saving, in case full_clean() has
-        # not yet been called
-        self.pre_save()
-        return super().save(*args, **kwargs)
+        try:
+            # give ourselves and subclasses a chance to pre-populate derived fields before saving,
+            # in case full_clean() has not yet been called
+            self.pre_save()
+            return super().save(*args, **kwargs)
+        finally:
+            # apply labels
+            self.apply_labels()
 
     @cached_property
     def relationships_as_subject(self):

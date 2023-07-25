@@ -114,6 +114,27 @@ def extract_citations(document_id):
     log.info("Citations extracted")
 
 
+@background(queue="peachjam", remove_existing_tasks=True)
+def apply_labels(document_id):
+    """Applying labels for a document in the background."""
+
+    log.info(f"Applying labels for document {document_id}")
+
+    doc = CoreDocument.objects.filter(pk=document_id).first()
+    if not doc:
+        log.info(f"No document with id {document_id} exists, ignoring.")
+        return
+
+    try:
+        if doc.apply_labels():
+            doc.save()
+    except Exception as e:
+        log.error(f"Error applying labels for {doc}", exc_info=e)
+        raise
+
+    log.info("Labels applied")
+
+
 @background(queue="peachjam", schedule=60, remove_existing_tasks=True)
 def update_extracted_citations_for_a_work(work_id):
     """Update Extracted Citations for a work."""

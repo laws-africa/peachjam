@@ -7,7 +7,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, Label
 
 
 class Attorney(models.Model):
@@ -283,6 +283,21 @@ class Judgment(CoreDocument):
 
         self.title = " ".join(parts)
         self.citation = self.title
+
+    def apply_labels(self):
+        """Apply labels to this judgment based on its properties."""
+        # label showing that a judgment is cited/reported in law reports, hence "more important"
+        label, _ = Label.objects.get_or_create(
+            code="reported",
+            defaults={"name": "Reported", "code": "reported"},
+        )
+
+        # if the judgment has alternative_names, apply the "reported" label
+        if self.alternative_names.exists():
+            self.labels.add(label.pk)
+        # if the judgment no alternative_names, remove the "reported" label
+        else:
+            self.labels.remove(label.pk)
 
     def pre_save(self):
         # ensure registry aligns to the court
