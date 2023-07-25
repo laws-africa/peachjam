@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
@@ -35,6 +36,16 @@ from peachjam.models import CitationLink, ExtractedCitation
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
+
+
+class Label(models.Model):
+    name = models.CharField(_("name"), max_length=255, unique=True)
+    code = models.SlugField(_("code"), max_length=255, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
 
 
 class DocumentNature(models.Model):
@@ -396,6 +407,7 @@ class CoreDocument(PolymorphicModel):
 
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES
+    labels = models.ManyToManyField(Label, verbose_name=_("labels"))
 
     class Meta:
         ordering = ["doc_type", "title"]
