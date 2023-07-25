@@ -7,11 +7,12 @@ import { createTocController, generateHtmlTocItems, wrapTocItems } from '../../u
 import EnrichmentsManager from './enrichments-manager';
 import i18next from 'i18next';
 
+const bootstrap = (window as { [key: string]: any }).bootstrap;
 class OffCanvas {
   protected offCanvas: any;
   body: HTMLElement | null;
   constructor (element: HTMLElement) {
-    this.offCanvas = new (window as { [key: string]: any }).bootstrap.Offcanvas(element);
+    this.offCanvas = new bootstrap.Offcanvas(element);
     this.body = element.querySelector('[data-offcanvas-body]');
   }
 
@@ -56,15 +57,15 @@ class DocumentContent {
     const tocSetupOnTab = this.setupTocForTab();
 
     // If toc setup and mounted successfully, activate toc tab otherwise activate search tab
-    if (tocSetupOnTab && tocTabTriggerEl) {
+    if (bootstrap && tocSetupOnTab && tocTabTriggerEl) {
       tocTabTriggerEl.classList.remove('d-none');
-      const tocTab = new (window as { [key: string]: any }).bootstrap.Tab(tocTabTriggerEl);
+      const tocTab = new bootstrap.Tab(tocTabTriggerEl);
       tocTab.show();
     } else if (this.root.getAttribute('data-display-type') === 'pdf' && pdfPreviewsTabTriggerEl) {
-      const pdfPreviewsTab = new (window as { [key: string]: any }).bootstrap.Tab(pdfPreviewsTabTriggerEl);
+      const pdfPreviewsTab = new bootstrap.Tab(pdfPreviewsTabTriggerEl);
       pdfPreviewsTab.show();
     } else if (searchTabTriggerEl) {
-      const searchTab = new (window as { [key: string]: any }).bootstrap.Tab(searchTabTriggerEl);
+      const searchTab = new bootstrap.Tab(searchTabTriggerEl);
       searchTab.show();
     }
   }
