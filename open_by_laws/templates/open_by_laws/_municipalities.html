@@ -4,7 +4,7 @@
     <div class="col-md-4">
       <a class="placard {{ item.code }}"
          href="{% if item.url %}{{ item.url }}{% else %}{% url 'municipal_by_laws' item.code %}{% endif %}"
-         style="background-image: url('{% static "/images/municipalities/"|add:item.code|add:"-placard.jpg" %}')">
+         style="background-image: url('{% static "images/municipalities/"|add:item.code|add:"-placard.jpg" %}')">
         <h3>{{ item.name }}</h3>
       </a>
     </div>
