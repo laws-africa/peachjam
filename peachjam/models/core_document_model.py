@@ -731,9 +731,9 @@ class SourceFile(AttachmentAbstractModel):
     def filename_extension(self):
         return os.path.splitext(self.filename)[1][1:]
 
-    def filename_for_download(self):
+    def filename_for_download(self, ext=None):
         """Return a generated filename appropriate for use when downloading this source file."""
-        ext = os.path.splitext(self.filename)[1]
+        ext = ext or os.path.splitext(self.filename)[1]
         title = re.sub(r"[^a-zA-Z0-9() ]", "", self.document.title)
         return title + ext
 
