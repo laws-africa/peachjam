@@ -11,7 +11,7 @@ class OffCanvas {
   protected offCanvas: any;
   body: HTMLElement | null;
   constructor (element: HTMLElement) {
-    this.offCanvas = new (window as { [key: string]: any }).bootstrap.Offcanvas(element);
+    this.offCanvas = new window.bootstrap.Offcanvas(element);
     this.body = element.querySelector('[data-offcanvas-body]');
   }
 
@@ -36,7 +36,7 @@ class DocumentContent {
 
   constructor (root: HTMLElement) {
     this.root = root;
-    this.documentElement = this.root.querySelector('[data-document-element]');
+    this.documentElement = this.root.querySelector('.content');
 
     this.setupTabs();
     this.setupNav();
@@ -58,13 +58,13 @@ class DocumentContent {
     // If toc setup and mounted successfully, activate toc tab otherwise activate search tab
     if (tocSetupOnTab && tocTabTriggerEl) {
       tocTabTriggerEl.classList.remove('d-none');
-      const tocTab = new (window as { [key: string]: any }).bootstrap.Tab(tocTabTriggerEl);
+      const tocTab = new window.bootstrap.Tab(tocTabTriggerEl);
       tocTab.show();
     } else if (this.root.getAttribute('data-display-type') === 'pdf' && pdfPreviewsTabTriggerEl) {
-      const pdfPreviewsTab = new (window as { [key: string]: any }).bootstrap.Tab(pdfPreviewsTabTriggerEl);
+      const pdfPreviewsTab = new window.bootstrap.Tab(pdfPreviewsTabTriggerEl);
       pdfPreviewsTab.show();
     } else if (searchTabTriggerEl) {
-      const searchTab = new (window as { [key: string]: any }).bootstrap.Tab(searchTabTriggerEl);
+      const searchTab = new window.bootstrap.Tab(searchTabTriggerEl);
       searchTab.show();
     }
   }
