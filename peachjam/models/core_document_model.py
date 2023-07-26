@@ -425,7 +425,7 @@ class CoreDocument(PolymorphicModel):
     def clean(self):
         super().clean()
 
-        if self.date > datetime.date.today():
+        if self.date and self.date > datetime.date.today():
             raise ValidationError(
                 {"date": _("You cannot set a future date for the document")}
             )
