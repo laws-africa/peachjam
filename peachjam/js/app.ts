@@ -1,5 +1,5 @@
 import peachJam from './peachjam';
-import * as bootstrap from '../static/bootstrap/dist/js/bootstrap.bundle.js';
+import * as bootstrap from 'bootstrap';
 
 declare global {
   interface Window {
