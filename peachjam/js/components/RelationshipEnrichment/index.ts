@@ -12,18 +12,19 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   akn: Element | null;
   enrichments: IRelationshipEnrichment[];
   listComponent: ComponentPublicInstance;
-  manager: GutterEnrichmentManager | null = null;
+  manager: GutterEnrichmentManager;
   workFrbrUri: string;
   workId: string;
-  readonly: boolean;
+  editable: boolean;
 
-  constructor (root: HTMLElement) {
+  constructor (root: HTMLElement, manager: GutterEnrichmentManager) {
     this.root = root;
+    this.manager = manager;
     this.gutter = root.querySelector('la-gutter');
     this.akn = root.querySelector('la-akoma-ntoso');
     this.workFrbrUri = root.dataset.workFrbrUri || '';
     this.workId = root.dataset.workId || '';
-    this.readonly = !!root.dataset.readonly;
+    this.editable = this.root.hasAttribute('data-editable-relationships');
 
     const node = document.getElementById('provision-relationships');
     if (node) {
@@ -39,7 +40,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
         gutter: this.gutter,
         viewRoot: this.root,
         enrichments: this.enrichments,
-        readonly: this.readonly,
+        editable: this.editable,
         thisWorkFrbrUri: this.workFrbrUri
       },
       use: [vueI18n],
@@ -54,8 +55,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
       observer.observe(this.akn, { childList: true });
     }
 
-    if (!this.readonly) {
-      this.manager = new GutterEnrichmentManager(this.root);
+    if (this.editable) {
       this.manager.addProvider(this);
     }
   }

@@ -106,6 +106,41 @@ They should be re-enabled once the deployment process is completed successfully.
 
       dokku proxy:build-config <app_name>
 
+### Create an AWS S3 bucket to store files in the cloud
+
+- [Create an AWS S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html). The bucket
+  does NOT need any special permissions or public access.
+- [Create an IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console)
+  and apply the inline policy below to grant the user read/write access to the bucket.
+- **Note:** change `BUCKET` in the example policy to your bucket name:
+
+IAM policy:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListAllMyBuckets"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": [
+                "arn:aws:s3:::BUCKET",
+                "arn:aws:s3:::BUCKET/*"
+            ]
+        }
+    ]
+}
+```
+
 
 #### Enable checks
 - Re-enable Zero Downtime Deploy Checks on your application by:

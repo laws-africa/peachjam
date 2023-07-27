@@ -5,7 +5,7 @@ import shutil
 import tempfile
 
 import magic
-from cobalt.akn import datestring
+from cobalt.akn import StructuredDocument, datestring
 from cobalt.uri import FrbrUri
 from countries_plus.models import Country
 from django.conf import settings
@@ -813,10 +813,21 @@ class DocumentContent(models.Model):
     content_text = models.TextField(
         blank=True, null=True, verbose_name=_("document text")
     )
+    # option XML content of the document
+    content_xml = models.TextField(
+        blank=True, null=True, verbose_name=_("document XML")
+    )
 
     class Meta:
         verbose_name = _("document content")
         verbose_name_plural = _("document contents")
+
+    def akn_doc(self):
+        """Get a cobalt StructureDocument instance for this document's XML, assuming it is AKN XML."""
+        if self.content_xml:
+            return StructuredDocument.for_document_type(self.document.frbr_uri_doctype)(
+                self.content_xml
+            )
 
     @classmethod
     def update_or_create_for_document(cls, document):
