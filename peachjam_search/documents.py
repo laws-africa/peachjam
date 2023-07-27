@@ -52,6 +52,11 @@ class SearchableDocument(Document):
     created_at = fields.DateField()
     updated_at = fields.DateField()
     taxonomies = fields.KeywordField()
+    labels = fields.KeywordField(attr="label.name")
+    labels_en = fields.KeywordField()
+    labels_sw = fields.KeywordField()
+    labels_fr = fields.KeywordField()
+    labels_pt = fields.KeywordField()
 
     # Judgment
     court = fields.KeywordField(attr="court.name")
@@ -105,6 +110,7 @@ class SearchableDocument(Document):
         ("registry", "name"),
         ("order_outcome", "name"),
         ("nature", "name"),
+        ("labels", "name"),
     ]
 
     def should_index_object(self, obj):
@@ -125,7 +131,6 @@ class SearchableDocument(Document):
 
         @classproperty
         def related_models(cls):
-
             # to ensure the CoreDocument will be re-saved when subclass models are updated
             # recursively find subclasses
             def get_subclasses(klass):
@@ -213,6 +218,16 @@ class SearchableDocument(Document):
         if hasattr(instance, "authors"):
             return [a.name for a in instance.authors.all()]
 
+    def prepare_labels(self, instance):
+        if instance.labels.exists():
+            return [
+                {
+                    "name": label.name,
+                    "code": label.code,
+                }
+                for label in instance.labels.all()
+            ]
+
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""
         if instance.content_html:
@@ -229,7 +244,7 @@ class SearchableDocument(Document):
 
     def prepare_registry(self, instance):
         if hasattr(instance, "registry") and instance.registry:
-            return instance.registry.name
+            return instance.registry.namecourt
 
     def prepare_nature(self, instance):
         if hasattr(instance, "nature") and instance.nature:
@@ -313,7 +328,6 @@ for field, attr in SearchableDocument.translated_fields:
             f"prepare_{field}_{lang}",
             make_prepare(field, attr, lang),
         )
-
 
 # These are the language-specific indexes we create and their associated analyzers for text fields.
 # Documents in other languages are stored in a general index with the "standard" analyzer
