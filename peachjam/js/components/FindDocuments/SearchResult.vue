@@ -52,6 +52,20 @@
         v-html="highlights(item)"
       />
     </div>
+    <span v-if="item.labels.length">
+      <span v-if="documentLabels.length">
+        <span v-for="(l, idx) in item.labels" :key="idx">
+          <span v-for="(label, index) in documentLabels" :key="index">
+            <span v-if="l == 'repealed' && l == label.code " class="badge rounded-pill bg-danger">
+              {{ label.name }}
+            </span>
+            <span v-if="l == 'reported' && l == label.code " class="badge rounded-pill bg-success">
+              {{ label.name }}
+            </span>
+          </span>
+        </span>
+      </span>
+    </span>
   </li>
 </template>
 
@@ -72,6 +86,13 @@ export default {
     showJurisdiction: {
       type: Boolean,
       default: false,
+    }
+  },
+  data (){
+    const documentLabels = JSON.parse(document.querySelector('#data-labels').textContent).documentLabels;
+    console.log(documentLabels);
+    return {
+      documentLabels
     }
   },
   methods: {

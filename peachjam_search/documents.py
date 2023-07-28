@@ -52,11 +52,7 @@ class SearchableDocument(Document):
     created_at = fields.DateField()
     updated_at = fields.DateField()
     taxonomies = fields.KeywordField()
-    labels = fields.KeywordField(attr="label.name")
-    labels_en = fields.KeywordField()
-    labels_sw = fields.KeywordField()
-    labels_fr = fields.KeywordField()
-    labels_pt = fields.KeywordField()
+    labels = fields.KeywordField()
 
     # Judgment
     court = fields.KeywordField(attr="court.name")
@@ -110,7 +106,6 @@ class SearchableDocument(Document):
         ("registry", "name"),
         ("order_outcome", "name"),
         ("nature", "name"),
-        ("labels", "name"),
     ]
 
     def should_index_object(self, obj):
@@ -218,16 +213,6 @@ class SearchableDocument(Document):
         if hasattr(instance, "authors"):
             return [a.name for a in instance.authors.all()]
 
-    def prepare_labels(self, instance):
-        if instance.labels.exists():
-            return [
-                {
-                    "name": label.name,
-                    "code": label.code,
-                }
-                for label in instance.labels.all()
-            ]
-
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""
         if instance.content_html:
@@ -279,6 +264,9 @@ class SearchableDocument(Document):
             a for t in topics for a in t.topic.get_ancestors()
         ]
         return list({t.slug for t in topics})
+
+    def prepare_labels(self, instance):
+        return [label.code for label in instance.labels.all()]
 
     def prepare_title_expanded(self, instance):
         # combination of the title, citation and alternative names
