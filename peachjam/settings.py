@@ -308,7 +308,7 @@ DEBUG_TOOLBAR_PANELS = (
 )
 
 SASS_PROCESSOR_INCLUDE_DIRS = [
-    os.path.join(BASE_DIR, "node_modules"),
+    os.environ.get("NODE_PATH") or os.path.join(BASE_DIR, "node_modules"),
 ]
 
 # Configure dynamic file storage for fields which use it. This is a type of storage which can dynamically
