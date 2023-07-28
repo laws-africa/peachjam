@@ -1,8 +1,5 @@
 {% if labels %}
   <div class="d-flex align-items-center">
-    {% for label in labels %}
-      {% if label.code == "repealed" %}<span class="badge rounded-pill bg-danger">{{ label.name }}</span>{% endif %}
-      {% if label.code == "reported" %}<span class="badge rounded-pill bg-success">{{ label.name }}</span>{% endif %}
-    {% endfor %}
+    {% for label in labels %}<span class="badge rounded-pill bg-{{ label.level }}">{{ label.name }}</span>{% endfor %}
   </div>
 {% endif %}

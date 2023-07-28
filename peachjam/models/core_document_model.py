@@ -43,6 +43,9 @@ class Label(models.Model):
         _("name"), max_length=1024, unique=True, null=False, blank=False
     )
     code = models.SlugField(_("code"), max_length=1024, unique=True)
+    level = models.CharField(
+        _("level"), max_length=1024, null=False, blank=False, default="info"
+    )
 
     def save(self, *args, **kwargs):
         if not self.code:
@@ -530,14 +533,12 @@ class CoreDocument(PolymorphicModel):
             self.work.save()
 
     def save(self, *args, **kwargs):
-        try:
-            # give ourselves and subclasses a chance to pre-populate derived fields before saving,
-            # in case full_clean() has not yet been called
-            self.pre_save()
-            return super().save(*args, **kwargs)
-        finally:
-            # apply labels
-            self.apply_labels()
+        # give ourselves and subclasses a chance to pre-populate derived fields before saving,
+        # in case full_clean() has not yet been called
+        self.pre_save()
+        super().save(*args, **kwargs)
+        # apply labels
+        self.apply_labels()
 
     @cached_property
     def relationships_as_subject(self):
