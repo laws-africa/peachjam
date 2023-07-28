@@ -507,7 +507,6 @@ class DocumentAdmin(admin.ModelAdmin):
     reindex_for_search.short_description = "Re-index for search (background)"
 
     def apply_labels(self, request, queryset):
-        """Set up a background task to apply labels to documents."""
         count = queryset.count()
         for doc in queryset:
             doc.apply_labels()
