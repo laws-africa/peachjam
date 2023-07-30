@@ -113,7 +113,7 @@ PEACHJAM = {
     "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
     "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),
     "CITATOR_API": os.environ.get(
-        "CITATOR_API", "https://api.laws.africa/citator/v1/extract-citations"
+        "CITATOR_API", "https://services.lawsafrica.com/citator/v1/extract-citations"
     ),
     "CITATOR_API_KEY": os.environ.get("CITATOR_API_KEY"),
     "EXTRA_SEARCH_INDEXES": [],
