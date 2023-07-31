@@ -44,7 +44,12 @@ class Label(models.Model):
     )
     code = models.SlugField(_("code"), max_length=1024, unique=True)
     level = models.CharField(
-        _("level"), max_length=1024, null=False, blank=False, default="info"
+        _("level"),
+        max_length=1024,
+        null=False,
+        blank=False,
+        default="info",
+        help_text="One of: primary, secondary, success, danger, warning or info.",
     )
 
     def save(self, *args, **kwargs):
