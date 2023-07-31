@@ -2,13 +2,12 @@ from rest_framework import authentication, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from peachjam.models import CitationLink, Legislation, Relationship, Work
+from peachjam.models import CitationLink, Relationship, Work
 from peachjam.tasks import delete_document, update_document
 from peachjam_api.permissions import CoreDocumentPermission
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     IngestorWebHookSerializer,
-    LegislationSerializer,
     RelationshipSerializer,
     WorkSerializer,
 )
@@ -31,11 +30,6 @@ class WorksViewSet(viewsets.ReadOnlyModelViewSet):
 class CitationLinkViewSet(viewsets.ModelViewSet):
     queryset = CitationLink.objects.all()
     serializer_class = CitationLinkSerializer
-
-
-class LegislationViewSet(viewsets.ModelViewSet):
-    queryset = Legislation.objects.all()
-    serializer_class = LegislationSerializer
 
 
 class IngestorWebhookView(APIView):
