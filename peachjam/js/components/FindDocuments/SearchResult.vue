@@ -84,7 +84,7 @@ export default {
   computed: {
     labels () {
       // get documentLabels where the code is in item.labels
-      return this.documentLabels.filter(label => this.item.labels.includes(label.code));
+      return this.documentLabels.filter(label => (this.item.labels || []).includes(label.code));
     }
   },
   methods: {

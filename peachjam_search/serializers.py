@@ -1,6 +1,5 @@
-# from django.utils.translation import get_language_from_request
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
-from rest_framework.serializers import SerializerMethodField
+from rest_framework.serializers import CharField, SerializerMethodField
 
 from peachjam_search.documents import SearchableDocument
 
@@ -12,6 +11,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
     nature = SerializerMethodField()
     order_outcome = SerializerMethodField()
     registry = SerializerMethodField()
+    labels = CharField(allow_null=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
