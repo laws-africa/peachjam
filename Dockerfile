@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y libreoffice poppler-utils
 RUN pip install psycopg2==2.9.3 gunicorn==20.1.0
 
 # node
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get install -y nodejs
 
 # install sass for compiling assets before deploying
