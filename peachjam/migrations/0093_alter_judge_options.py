@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0091_peachjamsettings_mailchimp_form_url"),
+        ("peachjam", "0092_documentcontent_content_xml"),
     ]
 
     operations = [
