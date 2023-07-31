@@ -6,6 +6,7 @@ from peachjam.models import (
     CourtClass,
     CourtRegistry,
     DocumentNature,
+    Label,
     OrderOutcome,
     Predicate,
     Taxonomy,
@@ -34,6 +35,11 @@ class CourtRegistryTranslationOptions(TranslationOptions):
 
 @register(DocumentNature)
 class DocumentNatureTranslationOptions(TranslationOptions):
+    fields = ("name",)
+
+
+@register(Label)
+class LabelTranslationOptions(TranslationOptions):
     fields = ("name",)
 
 

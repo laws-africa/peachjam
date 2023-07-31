@@ -52,6 +52,7 @@ class SearchableDocument(Document):
     created_at = fields.DateField()
     updated_at = fields.DateField()
     taxonomies = fields.KeywordField()
+    labels = fields.KeywordField()
 
     # Judgment
     court = fields.KeywordField(attr="court.name")
@@ -125,7 +126,6 @@ class SearchableDocument(Document):
 
         @classproperty
         def related_models(cls):
-
             # to ensure the CoreDocument will be re-saved when subclass models are updated
             # recursively find subclasses
             def get_subclasses(klass):
@@ -265,6 +265,9 @@ class SearchableDocument(Document):
         ]
         return list({t.slug for t in topics})
 
+    def prepare_labels(self, instance):
+        return [label.code for label in instance.labels.all()]
+
     def prepare_title_expanded(self, instance):
         # combination of the title, citation and alternative names
         parts = [instance.title]
@@ -313,7 +316,6 @@ for field, attr in SearchableDocument.translated_fields:
             f"prepare_{field}_{lang}",
             make_prepare(field, attr, lang),
         )
-
 
 # These are the language-specific indexes we create and their associated analyzers for text fields.
 # Documents in other languages are stored in a general index with the "standard" analyzer

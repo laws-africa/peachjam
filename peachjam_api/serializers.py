@@ -3,6 +3,7 @@ from rest_framework import serializers
 from peachjam.models import (
     CitationLink,
     CoreDocument,
+    Label,
     Legislation,
     Predicate,
     Relationship,
@@ -130,3 +131,9 @@ class IngestorWebHookSerializer(serializers.Serializer):
             "action",
             "data",
         )
+
+
+class LabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Label
+        exclude = []

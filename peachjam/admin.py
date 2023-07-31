@@ -56,6 +56,7 @@ from peachjam.models import (
     Journal,
     Judge,
     Judgment,
+    Label,
     LegalInstrument,
     Legislation,
     Locality,
@@ -318,7 +319,12 @@ class DocumentAdmin(admin.ModelAdmin):
     exclude = ("doc_type",)
     date_hierarchy = "date"
     prepopulated_fields = {"frbr_uri_number": ("title",)}
-    actions = ["extract_citations", "reextract_content", "reindex_for_search"]
+    actions = [
+        "extract_citations",
+        "reextract_content",
+        "reindex_for_search",
+        "apply_labels",
+    ]
 
     fieldsets = [
         (
@@ -493,13 +499,21 @@ class DocumentAdmin(admin.ModelAdmin):
     reextract_content.short_description = "Re-extract content from DOCX files"
 
     def reindex_for_search(self, request, queryset):
-        """Setup a background task to re-index documents for search."""
+        """Set up a background task to re-index documents for search."""
         count = queryset.count()
         for doc in queryset:
             search_model_saved(doc._meta.label, doc.pk)
         self.message_user(request, f"Queued tasks to re-index for {count} documents.")
 
     reindex_for_search.short_description = "Re-index for search (background)"
+
+    def apply_labels(self, request, queryset):
+        count = queryset.count()
+        for doc in queryset:
+            doc.apply_labels()
+        self.message_user(request, f"Applying labels for {count} documents.")
+
+    apply_labels.short_description = "Apply labels"
 
     def has_delete_permission(self, request, obj=None):
         if obj:
@@ -864,6 +878,12 @@ class OutcomeAdmin(admin.ModelAdmin):
 
 class UserAdminCustom(ImportExportMixin, UserAdmin):
     resource_class = UserResource
+
+
+@admin.register(Label)
+class LabelAdmin(admin.ModelAdmin):
+    list_display = ("name", "code")
+    prepopulated_fields = {"code": ("name",)}
 
 
 admin.site.register(
