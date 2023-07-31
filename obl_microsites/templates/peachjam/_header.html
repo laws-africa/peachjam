@@ -1,0 +1,37 @@
+{% extends 'peachjam/_header.html' %}
+{% load static %}
+{% block top-bar %}
+  {% if MICROSITE %}
+    <div class="p-2 bg-dark">
+      <div class="container d-flex justify-content-end">
+        <a href="{{ MICROSITE.website }}"
+           target="_blank"
+           rel="noreferrer"
+           class="ms-3 text-white">
+          {{ MICROSITE.locality.name }} website →
+        </a>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+{% block navbar-logo %}
+  {% if MICROSITE %}
+    <img src="{% static 'images/municipalities/'|add:MICROSITE.code|add:"-logo.png" %}"
+         alt="{{ MICROSITE.locality.name }} By-laws"
+         height="70"/>
+  {% endif %}
+{% endblock %}
+{% block nav-items %}
+  {% if MICROSITE %}
+    <li class="nav-item">
+      <a class="nav-link"
+         href="{% url 'municipal_by_laws' code=MICROSITE.locality.code %}">{{ MICROSITE.locality.name }} By-laws</a>
+    </li>
+  {% endif %}
+{% endblock %}
+{% block search-form %}
+  {% if MICROSITE %}
+    {{ block.super }}
+    <input type="hidden" name="locality" value="{{ MICROSITE.locality.name }}"/>
+  {% endif %}
+{% endblock %}

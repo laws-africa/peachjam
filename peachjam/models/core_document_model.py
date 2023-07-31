@@ -5,7 +5,7 @@ import shutil
 import tempfile
 
 import magic
-from cobalt.akn import datestring
+from cobalt.akn import StructuredDocument, datestring
 from cobalt.uri import FrbrUri
 from countries_plus.models import Country
 from django.conf import settings
@@ -425,7 +425,7 @@ class CoreDocument(PolymorphicModel):
     def clean(self):
         super().clean()
 
-        if self.date > datetime.date.today():
+        if self.date and self.date > datetime.date.today():
             raise ValidationError(
                 {"date": _("You cannot set a future date for the document")}
             )
@@ -731,9 +731,9 @@ class SourceFile(AttachmentAbstractModel):
     def filename_extension(self):
         return os.path.splitext(self.filename)[1][1:]
 
-    def filename_for_download(self):
+    def filename_for_download(self, ext=None):
         """Return a generated filename appropriate for use when downloading this source file."""
-        ext = os.path.splitext(self.filename)[1]
+        ext = ext or os.path.splitext(self.filename)[1]
         title = re.sub(r"[^a-zA-Z0-9() ]", "", self.document.title)
         return title + ext
 
@@ -813,10 +813,21 @@ class DocumentContent(models.Model):
     content_text = models.TextField(
         blank=True, null=True, verbose_name=_("document text")
     )
+    # option XML content of the document
+    content_xml = models.TextField(
+        blank=True, null=True, verbose_name=_("document XML")
+    )
 
     class Meta:
         verbose_name = _("document content")
         verbose_name_plural = _("document contents")
+
+    def akn_doc(self):
+        """Get a cobalt StructureDocument instance for this document's XML, assuming it is AKN XML."""
+        if self.content_xml:
+            return StructuredDocument.for_document_type(self.document.frbr_uri_doctype)(
+                self.content_xml
+            )
 
     @classmethod
     def update_or_create_for_document(cls, document):

@@ -1,3 +1,5 @@
+from django.utils.translation import get_language_from_request
+
 from africanlii.models import (
     AfricanUnionInstitution,
     AfricanUnionOrgan,
@@ -125,5 +127,16 @@ class HomePageView(BaseHomePageView):
         ]
         for lii in context["liis"]:
             lii["domain"] = lii["url"].split("/", 3)[2]
+
+        # check user's preferred language
+        current_language = get_language_from_request(self.request)
+        video_links = {
+            "en": "https://www.youtube.com/embed/m54qqXDkCfk",
+            "fr": "https://www.youtube.com/embed/BMN38Hvt6Uw",
+            "sw": "https://www.youtube.com/embed/CbtPXhdTZyA",
+        }
+
+        # set video link based on user's preferred language, default to English if not available
+        context["video_link"] = video_links.get(current_language, video_links["en"])
 
         return context

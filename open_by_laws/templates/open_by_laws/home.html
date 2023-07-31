@@ -58,17 +58,13 @@
     </section>
     <section class="municipalities py-5">
       <div class="container">
-        <div class="row">
-          {% for municipality in municipalities %}
-            <div class="col-md-4">
-              <a class="placard {{ municipality.code }}"
-                 href="{% url 'municipal_by_laws' municipality.code %}"
-                 style="background-image: url('{% static "/images/municipalities/" %}{{ municipality.code }}-placard.jpg')">
-                <h3>{{ municipality.name }}</h3>
-              </a>
-            </div>
-          {% endfor %}
-        </div>
+        {% with object_list=municipalities %}
+          {% include "open_by_laws/_municipalities.html" %}
+        {% endwith %}
+        <h4>Official municipal partners</h4>
+        {% with object_list=microsites %}
+          {% include "open_by_laws/_municipalities.html" %}
+        {% endwith %}
       </div>
     </section>
   </div>

@@ -1,7 +1,7 @@
 from cobalt import FrbrUri
 from django.conf import settings
 from django.http import Http404, HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.generic import DetailView, View
@@ -45,6 +45,10 @@ class RedirectResolver:
         "nigerialii": {
             "country_code": "ng",
             "domain": "nigerialii.org",
+        },
+        "open by-laws": {
+            "place_code": [],
+            "domain": "openbylaws.org.za",
         },
         "senlii": {
             "country_code": "sn",
@@ -156,18 +160,33 @@ class DocumentSourceView(DetailView):
         if hasattr(self.object, "source_file") and self.object.source_file.file:
             source_file = self.object.source_file
 
+            if source_file.mimetype == "application/pdf":
+                # If the source file is a PDF, redirect to the source.pdf URL
+                # This avoids providing an identical file from two different URLs, which is bad for caching,
+                # bad for Google, and bad for PocketLaw.
+                return redirect(
+                    reverse(
+                        "document_source_pdf",
+                        kwargs={"frbr_uri": self.object.expression_frbr_uri[1:]},
+                    )
+                )
+
             if source_file.source_url:
                 return redirect(source_file.source_url)
 
-            file = source_file.file.open()
-            file_bytes = file.read()
-            response = HttpResponse(file_bytes, content_type=source_file.mimetype)
-            response[
-                "Content-Disposition"
-            ] = f"inline; filename={source_file.filename_for_download()}"
-            response["Content-Length"] = str(len(file_bytes))
-            return response
+            return self.make_response(
+                source_file.file.open(),
+                source_file.mimetype,
+                source_file.filename_for_download(),
+            )
         raise Http404
+
+    def make_response(self, f, content_type, fname):
+        file_bytes = f.read()
+        response = HttpResponse(file_bytes, content_type=content_type)
+        response["Content-Disposition"] = f"inline; filename={fname}"
+        response["Content-Length"] = str(len(file_bytes))
+        return response
 
 
 class DocumentSourcePDFView(DocumentSourceView):
@@ -175,12 +194,15 @@ class DocumentSourcePDFView(DocumentSourceView):
         if hasattr(self.object, "source_file"):
             source_file = self.object.source_file
 
+            # if the source file is remote and a pdf, just redirect there
             if source_file.source_url and source_file.mimetype == "application/pdf":
                 return redirect(source_file.source_url)
 
-            file = source_file.as_pdf()
-            return HttpResponse(file.read(), content_type="application/pdf")
-
+            return self.make_response(
+                source_file.as_pdf(),
+                "application/pdf",
+                source_file.filename_for_download(".pdf"),
+            )
         raise Http404()
 
 

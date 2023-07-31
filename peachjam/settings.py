@@ -113,7 +113,7 @@ PEACHJAM = {
     "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
     "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),
     "CITATOR_API": os.environ.get(
-        "CITATOR_API", "https://api.laws.africa/citator/v1/extract-citations"
+        "CITATOR_API", "https://services.lawsafrica.com/citator/v1/extract-citations"
     ),
     "CITATOR_API_KEY": os.environ.get("CITATOR_API_KEY"),
     "EXTRA_SEARCH_INDEXES": [],
@@ -308,7 +308,7 @@ DEBUG_TOOLBAR_PANELS = (
 )
 
 SASS_PROCESSOR_INCLUDE_DIRS = [
-    os.path.join(BASE_DIR, "node_modules"),
+    os.environ.get("NODE_PATH") or os.path.join(BASE_DIR, "node_modules"),
 ]
 
 # Configure dynamic file storage for fields which use it. This is a type of storage which can dynamically
