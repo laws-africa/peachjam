@@ -7,7 +7,6 @@ router = routers.DefaultRouter()
 router.register(r"relationships", views.RelationshipViewSet, basename="relationships")
 router.register(r"works", views.WorksViewSet, basename="works")
 router.register(r"citation-links", views.CitationLinkViewSet, basename="citation-links")
-router.register(r"legislation", views.LegislationViewSet, basename="legislation")
 
 urlpatterns = [
     path("", include(router.urls)),
