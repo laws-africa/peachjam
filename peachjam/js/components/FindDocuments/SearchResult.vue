@@ -34,7 +34,9 @@
     <div>
       {{ item.matter_type }}
     </div>
-
+    <div v-if="labels">
+      <span v-for="label in labels" :key="label.code" :class="[ `badge rounded-pill bg-${label.level}` ]">{{ label.name }}</span>
+    </div>
     <div v-if="item.pages.length" class="ms-3">
       <div
         v-for="(page, index) in item.pages"
@@ -71,7 +73,18 @@ export default {
     },
     showJurisdiction: {
       type: Boolean,
-      default: false,
+      default: false
+    },
+    documentLabels: {
+      type: Array,
+      default: () => []
+    }
+
+  },
+  computed: {
+    labels () {
+      // get documentLabels where the code is in item.labels
+      return this.documentLabels.filter(label => (this.item.labels || []).includes(label.code));
     }
   },
   methods: {

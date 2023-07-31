@@ -23,7 +23,8 @@ from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
 from rest_framework.permissions import AllowAny
 
-from peachjam.models import Author, pj_settings
+from peachjam.models import Author, Label, pj_settings
+from peachjam_api.serializers import LabelSerializer
 from peachjam_search.documents import SearchableDocument, get_search_indexes
 from peachjam_search.serializers import SearchableDocumentSerializer
 
@@ -199,6 +200,7 @@ class SearchView(TemplateView):
         context["labels"] = {
             "author": Author.model_label,
             "searchPlaceholder": search_placeholder_text,
+            "documentLabels": LabelSerializer(Label.objects.all(), many=True).data,
         }
         context["show_jurisdiction"] = settings.PEACHJAM["SEARCH_JURISDICTION_FILTER"]
         return context
