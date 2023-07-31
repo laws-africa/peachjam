@@ -299,6 +299,8 @@ class Judgment(CoreDocument):
         else:
             self.labels.remove(label.pk)
 
+        super().apply_labels()
+
     def pre_save(self):
         # ensure registry aligns to the court
         if self.registry:

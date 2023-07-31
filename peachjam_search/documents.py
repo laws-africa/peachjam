@@ -229,7 +229,7 @@ class SearchableDocument(Document):
 
     def prepare_registry(self, instance):
         if hasattr(instance, "registry") and instance.registry:
-            return instance.registry.namecourt
+            return instance.registry.name
 
     def prepare_nature(self, instance):
         if hasattr(instance, "nature") and instance.nature:
@@ -266,7 +266,7 @@ class SearchableDocument(Document):
         return list({t.slug for t in topics})
 
     def prepare_labels(self, instance):
-        return [label.code for label in instance.labels.all()]
+        return [label.level for label in instance.labels.all()]
 
     def prepare_title_expanded(self, instance):
         # combination of the title, citation and alternative names

@@ -164,6 +164,7 @@
                   :item="item"
                   :query="q"
                   :showJurisdiction="showJurisdiction"
+                  :documentLabels="documentLabels"
                 />
               </ul>
 
@@ -241,6 +242,7 @@ export default {
   data () {
     const data = {
       searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
+      documentLabels: JSON.parse(document.querySelector('#data-labels').textContent).documentLabels,
       loadingCount: 0,
       error: null,
       searchInfo: {},
@@ -346,6 +348,7 @@ export default {
         options: []
       });
     }
+
     data.facets = facets;
     resetAdvancedFields(data.advancedFields);
     return data;
