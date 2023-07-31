@@ -96,7 +96,8 @@ class Legislation(CoreDocument):
     def apply_labels(self):
         # label to indicate that this legislation is repealed
         label, _ = Label.objects.get_or_create(
-            code="repealed", defaults={"name": "Repealed", "code": "repealed"}
+            code="repealed",
+            defaults={"name": "Repealed", "code": "repealed", "level": "danger"},
         )
         # apply label if repealed
         if self.repealed:
