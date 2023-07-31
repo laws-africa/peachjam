@@ -92,6 +92,9 @@ class SearchableDocument(Document):
     nature_pt = fields.KeywordField()
 
     ranking = RankField(attr="work.ranking")
+    # a negative boost to search results; this must be a positive number, but is treated as a penalty
+    # it is applied linearly, simply reducing the score by this amount
+    penalty = RankField(attr="search_penalty", positive_score_impact=False)
 
     pages = fields.NestedField(
         properties={

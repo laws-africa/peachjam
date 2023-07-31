@@ -86,6 +86,13 @@ class Legislation(CoreDocument):
     def __str__(self):
         return self.title
 
+    def search_penalty(self):
+        # non-principal (ie. amendment) works get a slight search penalty so that principal works
+        # tend to appear above them in search results
+        if self.metadata_json and self.metadata_json.get("principal", None) is False:
+            return 10.0
+        return super().search_penalty()
+
     def apply_labels(self):
         # label to indicate that this legislation is repealed
         label, _ = Label.objects.get_or_create(

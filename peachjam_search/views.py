@@ -62,6 +62,10 @@ class MultiFieldSearchQueryBackend(SimpleQueryStringQueryBackend):
 class RankFeatureBackend(BaseSearchQueryBackend):
     @classmethod
     def construct_search(cls, request, view, search_backend):
+        # apply penalty as a linear change to the score
+        # DISABLED until the penalty field is populated
+        # queries = [Q("rank_feature", field="penalty", boost=1.0, linear={})]
+        queries = []
 
         if pj_settings().pagerank_boost_value:
             rank = Q(
@@ -69,8 +73,9 @@ class RankFeatureBackend(BaseSearchQueryBackend):
                 field="ranking",
                 boost=pj_settings().pagerank_boost_value,
             )
-            return [rank]
-        return []
+            queries.append(rank)
+
+        return queries
 
 
 class NestedPageQueryBackend(BaseSearchQueryBackend):
