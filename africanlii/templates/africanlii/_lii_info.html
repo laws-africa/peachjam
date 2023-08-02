@@ -1,0 +1,6 @@
+{% for lii in liis %}
+  {% if lii.country == member_state.country.name %}
+    <div>{{ lii.name }}</div>
+    <a href="{{ lii.url }}" target="_blank">{{ lii.domain }}</a>
+  {% endif %}
+{% endfor %}
