@@ -311,7 +311,7 @@ class Judgment(CoreDocument):
         # label showing that a judgment is cited/reported in law reports, hence "more important"
         label, _ = Label.objects.get_or_create(
             code="reported",
-            defaults={"name": "Reported", "code": "reported"},
+            defaults={"name": "Reported", "code": "reported", "level": "success"},
         )
 
         # if the judgment has alternative_names, apply the "reported" label

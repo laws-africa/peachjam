@@ -679,6 +679,11 @@ class CoreDocument(PolymorphicModel):
 
         return work_frbr_uris
 
+    def search_penalty(self):
+        """Optionally provide a penalty for this document in search results. This cannot be zero or None."""
+        # provide a very small number instead of zero
+        return 0.0000001
+
 
 def file_location(instance, filename):
     if not instance.document.pk:
