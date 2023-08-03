@@ -163,6 +163,7 @@ class JudgmentSerializer(serializers.ModelSerializer):
             "language",
             "locality",
             "mnc",
+            "id",
             "title",
             "updated_at",
             "url",

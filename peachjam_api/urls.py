@@ -12,7 +12,7 @@ internal_router.register(
     r"citation-links", views.CitationLinkViewSet, basename="citation-links"
 )
 
-public_router = routers.DefaultRouter()
+public_router = routers.DefaultRouter(trailing_slash=False)
 public_router.register(
     r"judgments", public_views.JudgmentsViewSet, basename="judgments"
 )
