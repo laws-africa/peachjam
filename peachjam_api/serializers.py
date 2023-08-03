@@ -4,6 +4,7 @@ from peachjam.models import (
     CitationLink,
     CoreDocument,
     Court,
+    Gazette,
     Judgment,
     Label,
     Legislation,
@@ -147,9 +148,15 @@ class CourtSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "code"]
 
 
-class JudgmentSerializer(serializers.ModelSerializer):
-    url = serializers.SerializerMethodField()
+class BaseSerializerMixin:
+    def get_url(self, instance):
+        # TODO: check https
+        return self.context["request"].build_absolute_uri(instance.get_absolute_url())
+
+
+class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
     court = CourtSerializer(read_only=True)
+    url = serializers.SerializerMethodField()
 
     class Meta:
         model = Judgment
@@ -170,6 +177,22 @@ class JudgmentSerializer(serializers.ModelSerializer):
             "work_frbr_uri",
         )
 
-    def get_url(self, instance):
-        # TODO: check https
-        return self.context["request"].build_absolute_uri(instance.get_absolute_url())
+
+class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Gazette
+        fields = (
+            "created_at",
+            "date",
+            "expression_frbr_uri",
+            "jurisdiction",
+            "language",
+            "locality",
+            "id",
+            "title",
+            "updated_at",
+            "url",
+            "work_frbr_uri",
+        )

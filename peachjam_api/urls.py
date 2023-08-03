@@ -14,7 +14,14 @@ internal_router.register(
 
 public_router = routers.DefaultRouter(trailing_slash=False)
 public_router.register(
-    r"judgments", public_views.JudgmentsViewSet, basename="judgments"
+    r"judgments",
+    public_views.JudgmentsViewSet,
+    basename="judgments",
+)
+public_router.register(
+    r"gazettes",
+    public_views.GazettesViewSet,
+    basename="gazettes",
 )
 
 urlpatterns = [

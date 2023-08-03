@@ -3,27 +3,28 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission, DjangoModelPermissions
 
-from peachjam.models import Judgment
-from peachjam_api.serializers import JudgmentSerializer
+from peachjam.models import Gazette, Judgment
+from peachjam_api.serializers import GazetteSerializer, JudgmentSerializer
 
 
 class JudgmentAPIPermission(BasePermission):
+    permission_name = "peachjam.api_judgment"
+
     def has_permission(self, request, view):
         # user must have perms to access judgments through the api
         return (
             request.user
             and request.user.is_authenticated
-            and request.user.has_perm("peachjam.api_judgment")
+            and request.user.has_perm(self.permission_name)
         )
 
 
-class JudgmentsViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [
-        JudgmentAPIPermission,
-        DjangoModelPermissions,
-    ]
-    queryset = Judgment.objects.select_related("court").all()
-    serializer_class = JudgmentSerializer
+class GazetteAPIPermission(JudgmentAPIPermission):
+    permission_name = "peachjam.api_gazette"
+
+
+class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [DjangoModelPermissions]
     filterset_fields = {
         "jurisdiction": ["exact"],
         "work_frbr_uri": ["exact"],
@@ -71,3 +72,21 @@ class JudgmentsViewSet(viewsets.ReadOnlyModelViewSet):
         response["Content-Disposition"] = f"inline; filename={fname}"
         response["Content-Length"] = str(len(file_bytes))
         return response
+
+
+class GazettesViewSet(BaseDocumentViewSet):
+    permission_classes = [
+        GazetteAPIPermission,
+        DjangoModelPermissions,
+    ]
+    queryset = Gazette.objects.all()
+    serializer_class = GazetteSerializer
+
+
+class JudgmentsViewSet(BaseDocumentViewSet):
+    permission_classes = [
+        JudgmentAPIPermission,
+        DjangoModelPermissions,
+    ]
+    queryset = Judgment.objects.select_related("court").all()
+    serializer_class = JudgmentSerializer
