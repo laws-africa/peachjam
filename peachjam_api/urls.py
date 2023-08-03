@@ -1,15 +1,27 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from . import views
+from . import public_views, views
 
-router = routers.DefaultRouter()
-router.register(r"relationships", views.RelationshipViewSet, basename="relationships")
-router.register(r"works", views.WorksViewSet, basename="works")
-router.register(r"citation-links", views.CitationLinkViewSet, basename="citation-links")
+internal_router = routers.DefaultRouter()
+internal_router.register(
+    r"relationships", views.RelationshipViewSet, basename="relationships"
+)
+internal_router.register(r"works", views.WorksViewSet, basename="works")
+internal_router.register(
+    r"citation-links", views.CitationLinkViewSet, basename="citation-links"
+)
+
+public_router = routers.DefaultRouter()
+public_router.register(
+    r"judgments", public_views.JudgmentsViewSet, basename="judgments"
+)
 
 urlpatterns = [
-    path("", include(router.urls)),
+    # internal API
+    path("", include(internal_router.urls)),
+    # public-facing API
+    path("v1/", include(public_router.urls)),
     path(
         "v1/ingestors/<int:ingestor_id>/webhook",
         views.IngestorWebhookView.as_view(),
