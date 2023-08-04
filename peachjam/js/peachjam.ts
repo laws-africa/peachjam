@@ -55,6 +55,7 @@ class PeachJam {
     this.setupSentry();
     this.createComponents();
     this.setupTooltips();
+    this.setupPopovers();
     this.scrollNavTabs();
   }
 
@@ -134,6 +135,19 @@ class PeachJam {
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
       // @ts-ignore
       new window.bootstrap.Tooltip(el);
+    });
+  }
+
+  setupPopovers () {
+    document.querySelectorAll('[data-bs-toggle="help-popover"]').forEach((el) => {
+      // @ts-ignore
+      new window.bootstrap.Popover(el, {
+        html: true,
+        content:
+          (el.getAttribute('data-bs-content')
+          + "<div><a href='" + el.getAttribute('href') + "' target='_blank' rel='noopener noreferrer'>Learn more</a></div>"),
+        container: 'body'
+      });
     });
   }
 
