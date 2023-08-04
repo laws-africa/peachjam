@@ -206,14 +206,14 @@
                             </dd>
                           {% endif %}
                         {% endwith %}
-                        {% with document.judges.all as judges %}
+                        {% with document.bench.all as judges %}
                           {% if judges %}
                             <dt>
                               {% trans 'Judges' %}
                             </dt>
                             <dd class="text-muted">
-                              {% for judge in judges %}
-                                {{ judge.name }}
+                              {% for bench in judges %}
+                                {{ bench.judge.name }}
                                 {% if not forloop.last %},{% endif %}
                               {% endfor %}
                             </dd>

@@ -879,7 +879,10 @@ class Migration(migrations.Migration):
             model_name="judgment",
             name="judges",
             field=models.ManyToManyField(
-                blank=True, to="peachjam.Judge", verbose_name="judges"
+                blank=True,
+                through="peachjam.Bench",
+                to="peachjam.Judge",
+                verbose_name="judges",
             ),
         ),
         migrations.AlterField(

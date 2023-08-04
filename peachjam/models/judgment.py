@@ -30,10 +30,7 @@ class Judge(models.Model):
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
-        ordering = (
-            "pk",
-            "name",
-        )
+        ordering = ("name",)
         verbose_name = _("judge")
         verbose_name_plural = _("judges")
 
@@ -140,6 +137,29 @@ class CourtRegistry(models.Model):
         return super().save(*args, **kwargs)
 
 
+class Bench(models.Model):
+    # This model is not strictly necessary, as it's almost identical to the default that Django creates
+    # for a many-to-many relationship. However, by creating it, we can indicate that the ordering should
+    # be on the PK of the model. This means that we can preserve the ordering of Judges as the are
+    # entered in the admin interface.
+    #
+    # To use this effectively, views that need the judges to be ordered, should call "judgement.bench.all()"
+    # and not "judgment.judges.all()".
+    judgment = models.ForeignKey(
+        "Judgment",
+        related_name="bench",
+        on_delete=models.CASCADE,
+        verbose_name=_("judgment"),
+    )
+    judge = models.ForeignKey(Judge, on_delete=models.PROTECT, verbose_name=_("judge"))
+
+    class Meta:
+        # this is to re-use the existing table rather than creating a new one
+        db_table = "peachjam_judgment_judges"
+        ordering = ("pk",)
+        unique_together = ("judgment", "judge")
+
+
 class Judgment(CoreDocument):
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
@@ -151,7 +171,9 @@ class Judgment(CoreDocument):
         related_name="judgments",
         blank=True,
     )
-    judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
+    judges = models.ManyToManyField(
+        Judge, blank=True, verbose_name=_("judges"), through=Bench
+    )
     attorneys = models.ManyToManyField(
         Attorney, blank=True, verbose_name=_("attorneys")
     )
