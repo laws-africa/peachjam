@@ -371,7 +371,19 @@ class CaseNumber(models.Model):
     def get_case_number_string(self):
         if self.string_override:
             return self.string_override
-        return f"{self.matter_type or ''} {self.number} of {self.year}".strip()
+
+        parts = []
+
+        if self.matter_type:
+            parts.append(self.matter_type.name)
+
+        if self.number:
+            parts.append(str(self.number))
+
+        if self.year:
+            parts.append(f"of {self.year}" if parts else str(self.year))
+
+        return " ".join(parts)
 
     def save(self, *args, **kwargs):
         self.string = self.get_case_number_string()

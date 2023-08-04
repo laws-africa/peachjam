@@ -1,4 +1,5 @@
 import copy
+import json
 from datetime import date
 
 from ckeditor.widgets import CKEditorWidget
@@ -547,6 +548,25 @@ class TaxonomyAdmin(TreeAdmin):
     form = movenodeform_factory(Taxonomy, TaxonomyForm)
     readonly_fields = ("slug",)
     inlines = [EntityProfileInline]
+    # prevent pagination
+    list_per_page = 1_000_000
+
+    def changelist_view(self, request, extra_context=None):
+        resp = super().changelist_view(request, extra_context)
+
+        def fixup(item):
+            item["title"] = item["data"]["name"]
+            item["href"] = reverse("admin:peachjam_taxonomy_change", args=[item["id"]])
+            for kid in item.get("children", []):
+                fixup(kid)
+
+        # grab the tree and turn it into something la-table-of-contents-controller understands
+        tree = self.model.dump_bulk()
+        for x in tree:
+            fixup(x)
+        resp.context_data["tree_json"] = json.dumps(tree)
+
+        return resp
 
 
 class CoreDocumentAdmin(DocumentAdmin):
