@@ -1,5 +1,12 @@
 {% load peachjam i18n %}
 <h4>{% trans "Related documents" %}</h4>
+<div class="mb-3">
+  <a href="#help"
+     class="btn btn-sm btn-outline-info"
+     data-bs-toggle="help-popover"
+     data-bs-content="Other documents related to this one."
+     data-bs-trigger="click"><i class="bi bi-question-circle"></i> Help</a>
+</div>
 <div class="row">
   {% if relationships_as_subject %}
     <div class="col-md">
