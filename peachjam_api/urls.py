@@ -1,37 +1,41 @@
 from django.urls import include, path
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 from rest_framework import routers
 
-from . import public_views, views
+from . import views
 
-internal_router = routers.DefaultRouter()
-internal_router.register(
-    r"relationships", views.RelationshipViewSet, basename="relationships"
-)
-internal_router.register(r"works", views.WorksViewSet, basename="works")
-internal_router.register(
-    r"citation-links", views.CitationLinkViewSet, basename="citation-links"
-)
-
-public_router = routers.DefaultRouter(trailing_slash=False)
-public_router.register(
-    r"judgments",
-    public_views.JudgmentsViewSet,
-    basename="judgments",
-)
-public_router.register(
-    r"gazettes",
-    public_views.GazettesViewSet,
-    basename="gazettes",
-)
+router = routers.DefaultRouter()
+router.register(r"relationships", views.RelationshipViewSet, basename="relationships")
+router.register(r"works", views.WorksViewSet, basename="works")
+router.register(r"citation-links", views.CitationLinkViewSet, basename="citation-links")
 
 urlpatterns = [
     # internal API
-    path("", include(internal_router.urls)),
-    # public-facing API
-    path("v1/", include(public_router.urls)),
+    path("", include(router.urls)),
+    # semi-public
     path(
         "v1/ingestors/<int:ingestor_id>/webhook",
         views.IngestorWebhookView.as_view(),
         name="ingestor_webhook",
+    ),
+    # public-facing API
+    path("v1/", include("peachjam_api.urls_public")),
+    # schema browsing
+    path(
+        "v1/schema",
+        SpectacularAPIView.as_view(urlconf="peachjam_api.urls_public"),
+        name="schema",
+    ),
+    path(
+        "v1/schema/swagger-ui",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path(
+        "v1/schema/redoc", SpectacularRedocView.as_view(url_name="schema"), name="redoc"
     ),
 ]

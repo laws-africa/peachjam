@@ -1,4 +1,5 @@
 from django.http import Http404, HttpResponse
+from drf_spectacular.utils import OpenApiTypes, extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission, DjangoModelPermissions
@@ -36,9 +37,10 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ["title", "date", "updated_at", "created_at"]
     ordering = ["updated_at"]
 
+    @extend_schema(responses={(200, "text/plain"): OpenApiTypes.STR})
     @action(detail=True, url_path="source.txt")
     def source_txt(self, request, pk=None):
-        """Source document (or text) for this judgment."""
+        """Source document in text form (if available)."""
         obj = self.get_object()
         # we only allow certain formats
         try:
@@ -49,6 +51,7 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
         # return content.content_text as a normal drf response object
         return HttpResponse(content.content_text, content_type="text/plain")
 
+    @extend_schema(responses={(200, "application/pdf"): OpenApiTypes.BINARY})
     @action(detail=True, url_path="source.pdf")
     def source_pdf(self, request, pk=None):
         """Source document in PDF form (if available)."""
