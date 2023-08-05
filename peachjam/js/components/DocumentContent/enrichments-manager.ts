@@ -2,12 +2,14 @@ import { RelationshipEnrichments } from '../RelationshipEnrichment';
 import DocDiffsManager from '../DocDiffs';
 import PDFCitationLinks from './citation-links';
 import { GutterEnrichmentManager } from '@lawsafrica/indigo-akn/dist/enrichments';
+import SelectionSearch from './selection-search';
 
 /**
  * Class for handling the setup of all enrichments and interactions between enrichments
  */
 class EnrichmentsManager {
   private relationshipsManager: RelationshipEnrichments;
+  private selectionSearch: SelectionSearch;
   private root: HTMLElement;
   private docDiffsManager: null | DocDiffsManager;
   // eslint-disable-next-line no-undef
@@ -28,6 +30,7 @@ class EnrichmentsManager {
     // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
     this.gutterManager.akn = this.root.querySelector('.content');
     this.relationshipsManager = new RelationshipEnrichments(contentAndEnrichmentsElement, this.gutterManager);
+    this.selectionSearch = new SelectionSearch(this.gutterManager);
 
     this.gutter?.addEventListener('laItemChanged', (e: any) => {
       if (e.target.classList.contains('relationship-gutter-item') && e.target.active) {
