@@ -18,7 +18,7 @@ export default class SelectionSearch implements IGutterEnrichmentProvider {
     const btn = document.createElement('button');
     btn.className = 'btn btn-outline-secondary';
     btn.type = 'button';
-    btn.innerText = i18next.t('Search {appName}...', { appName: peachJam.config.appName });
+    btn.innerText = i18next.t('Search {{appName}}...', { appName: peachJam.config.appName });
     return btn;
   }
 
