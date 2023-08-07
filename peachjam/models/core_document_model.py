@@ -756,6 +756,14 @@ class SourceFile(AttachmentAbstractModel):
         _("source URL"), max_length=2048, null=True, blank=True
     )
 
+    file_as_pdf = models.FileField(
+        _("file as pdf"),
+        upload_to=file_location,
+        max_length=1024,
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         verbose_name = _("source file")
         verbose_name_plural = _("source files")
@@ -763,10 +771,23 @@ class SourceFile(AttachmentAbstractModel):
     def as_pdf(self):
         if self.filename.endswith(".pdf"):
             return self.file
+        elif self.file_as_pdf:
+            return self.file_as_pdf
+        else:
+            return None
 
-        # convert with soffice
-        suffix = os.path.splitext(self.filename)[1].replace(".", "")
-        return soffice_convert(self.file, suffix, "pdf")[0]
+    def convert_to_pdf(self):
+        if self.mimetype != "application/pdf" and not self.file_as_pdf:
+            suffix = os.path.splitext(self.filename)[1].replace(".", "")
+            pdf = soffice_convert(self.file, suffix, "pdf")[0]
+            self.file_as_pdf = File(pdf, name=f"{self.file.name[:-5]}.pdf")
+            self.save()
+
+    def ensure_file_as_pdf(self):
+        from peachjam.tasks import convert_source_file_to_pdf
+
+        if self.mimetype != "application/pdf" and not self.file_as_pdf:
+            convert_source_file_to_pdf(self.id)
 
     def filename_extension(self):
         return os.path.splitext(self.filename)[1][1:]

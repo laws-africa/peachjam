@@ -8,7 +8,7 @@ from background_task.signals import (
 from django.db.models import signals
 from django.dispatch import receiver
 
-from peachjam.models import CoreDocument, Work
+from peachjam.models import CoreDocument, SourceFile, Work
 from peachjam.tasks import update_extracted_citations_for_a_work
 
 
@@ -75,3 +75,10 @@ def doc_deleted_update_extracted_citations(sender, instance, **kwargs):
     """Update language list on related work after a subclass of CoreDocument is deleted."""
     if isinstance(instance, CoreDocument):
         update_extracted_citations_for_a_work(instance.work_id)
+
+
+@receiver(signals.post_save, sender=SourceFile)
+def convert_to_pdf(sender, instance, created, **kwargs):
+    """Convert a source file to PDF when it's saved"""
+    if created:
+        instance.ensure_file_as_pdf()
