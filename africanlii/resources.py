@@ -3,41 +3,74 @@ from import_export import fields, resources, widgets
 
 from africanlii.models import Ratification, RatificationCountry
 from peachjam.models import Work
-from peachjam.resources import ForeignKeyRequiredWidget
+
+
+class RatificationField(widgets.ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            raise ValueError("work frbr_uri is required")
+        work = Work.objects.filter(frbr_uri=value).first()
+        if not work:
+            raise ValueError(f'work with frbr_uri "{value}" not found')
+        ratification = Ratification.objects.update_or_create(
+            work=work,
+            defaults={
+                "source_url": row.get("source_url"),
+                "last_updated": row.get("last_updated"),
+            },
+        )[0]
+        return ratification
+
+
+class CountryField(widgets.ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            raise ValueError("country code is required")
+        country = Country.objects.filter(iso=value.upper()).first()
+        if not country:
+            raise ValueError(f'country with iso "{value}" not found')
+        return country
 
 
 class RatificationResource(resources.ModelResource):
     work = fields.Field(
         column_name="work",
-        attribute="work",
-        widget=ForeignKeyRequiredWidget(Work, field="frbr_uri"),
+        attribute="ratification",
+        widget=RatificationField(Ratification, field="work__frbr_uri"),
     )
-    country = fields.Field(column_name="country", widget=widgets.CharWidget)
+    country = fields.Field(
+        attribute="country",
+        column_name="country",
+        widget=CountryField(Country, field="name"),
+    )
     ratification_date = fields.Field(
-        column_name="ratification_date", widget=widgets.DateWidget
+        attribute="ratification_date",
+        column_name="ratification_date",
+        widget=widgets.DateWidget(),
     )
-    deposit_date = fields.Field(column_name="deposit_date", widget=widgets.DateWidget)
+    deposit_date = fields.Field(
+        attribute="deposit_date",
+        column_name="deposit_date",
+        widget=widgets.DateWidget(),
+    )
     signature_date = fields.Field(
-        column_name="signature_date", widget=widgets.DateWidget
+        attribute="signature_date",
+        column_name="signature_date",
+        widget=widgets.DateWidget(),
+    )
+    source_url = fields.Field(
+        attribute="source_url", column_name="source_url", widget=widgets.CharWidget()
+    )
+    last_updated = fields.Field(
+        attribute="last_updated",
+        column_name="last_updated",
+        widget=widgets.DateWidget(),
     )
 
     class Meta:
-        model = Ratification
-        exclude = ("id",)
-        import_id_fields = ("work",)
-
-    def before_import_row(self, row, row_number=None, **kwargs):
-        country_code = row.get("country")
-        row["country"] = Country.objects.filter(iso__iexact=country_code).first()
-        if not row["country"]:
-            raise ValueError(f'country with code "{country_code}" not found')
-
-    def after_import_row(self, row, row_result, row_number=None, **kwargs):
-        r = RatificationCountry(
-            ratification=Ratification.objects.get(pk=row_result.object_id),
-            country=row.get("country"),
-            ratification_date=row.get("ratification_date"),
-            signature_date=row.get("signature_date"),
-            deposit_date=row.get("deposit_date"),
+        model = RatificationCountry
+        exclude = ("id", "ratification")
+        import_id_fields = (
+            "work",
+            "country",
         )
-        r.save()
