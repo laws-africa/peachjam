@@ -1,6 +1,6 @@
 from django.utils.translation import get_language_from_request
 
-from africanlii.context_processors import show_liis
+from africanlii.constants import LIIS
 from africanlii.models import (
     AfricanUnionInstitution,
     AfricanUnionOrgan,
@@ -40,10 +40,7 @@ class HomePageView(BaseHomePageView):
         context["taxonomies"] = Taxonomy.get_tree()
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
 
-        context["liis"] = show_liis(self.request)
-
-        for lii in context["liis"]:
-            lii["domain"] = lii["url"].split("/", 3)[2]
+        context["liis"] = LIIS
 
         # check user's preferred language
         current_language = get_language_from_request(self.request)

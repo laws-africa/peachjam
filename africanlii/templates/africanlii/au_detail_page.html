@@ -80,7 +80,7 @@
         <div class="col-6 col-md-4 col-lg-3">
           <div class="card lii-card mb-3">
             <div class="card-body">
-              <img src="{% static 'lib/flag-icons/flags/4x3/' %}{{ member_state.country.iso|lower }}.svg"
+              <img src="{% static 'lib/flag-icons/flags/4x3/'|add:member_state.country.iso|lower|add:".svg" %}"
                    alt="{{ member_state.name }}"
                    class="mb-3"/>
               <h5 class="card-title">

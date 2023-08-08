@@ -1,6 +1,12 @@
+{% load i18n %}
 {% for lii in liis %}
   {% if lii.country == member_state.country.name %}
-    <div>{{ lii.name }}</div>
-    <a href="{{ lii.url }}" target="_blank">{{ lii.domain }}</a>
-  {% endif %}
-{% endfor %}
+    <div>
+      {% blocktrans trimmed with lii_name=lii.name %}
+        Visit {{ lii_name }} for more legal information.</div>
+      {% endblocktrans %}
+      <div>
+        <a href="{{ lii.url }}" target="_blank">{{ lii.domain }}</a>
+      </div>
+    {% endif %}
+  {% endfor %}
