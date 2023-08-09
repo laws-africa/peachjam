@@ -30,8 +30,10 @@
         {% block breadcrumbs %}{% endblock %}
         {% block document-title %}
           <div class="d-md-flex justify-content-md-between py-4">
-            <h1>{{ document.title }}</h1>
-            {% include 'peachjam/_labels.html' %}
+            <div>
+              <h1>{{ document.title }}</h1>
+              {% include 'peachjam/_labels.html' %}
+            </div>
             <div class="d-flex align-items-center">
               <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
                  class="btn btn-link"
