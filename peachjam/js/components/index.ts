@@ -1,5 +1,4 @@
 import { CopyToClipboard } from './clipboard';
-import PdfRenderer from './pdf-renderer';
 import { RelationshipEnrichments } from './RelationshipEnrichment';
 import DocumentList from './document-list';
 import DocumentContent from './DocumentContent/index';
@@ -17,7 +16,6 @@ const components: Record<string, any> = {
   DocumentContent,
   DocumentList,
   NavigationSelect,
-  PdfRenderer,
   RelationshipEnrichments,
   ToggleTab,
   TaxonomyTree,

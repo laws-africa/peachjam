@@ -1,8 +1,8 @@
 import debounce from 'lodash/debounce';
-import items from '../items.json';
 // @ts-ignore
-import { markRange, rangeToTarget, targetToRange } from '../dom';
-import { scrollToElement } from '../utils/function';
+import { markRange, rangeToTarget, targetToRange } from '../../dom';
+import { scrollToElement } from '../../utils/function';
+import {startsWith} from "lodash";
 
 type GlobalWorkerOptionsType = {
   [key: string]: any,
@@ -46,8 +46,16 @@ class PdfRenderer {
   }
 
   loadPdf () {
+    // should we jump to a specific page?
+    let initialPage = null;
+    if ((document.location.hash || '').startsWith('#page-')) {
+      try {
+        initialPage = parseInt(document.location.hash.substring(6));
+      } catch {}
+    }
+
     this.root.removeAttribute('data-large-pdf');
-    this.setupPdfAndPreviewPanels().then(() => {
+    this.setupPdfAndPreviewPanels(initialPage).then(() => {
       this.setupPreviewSyncing();
       this.onPdfLoaded();
     }).catch((e:ErrorEvent) => {
@@ -92,6 +100,7 @@ class PdfRenderer {
     if (!e.currentTarget) return;
     this.activatePreviewPanel(e.currentTarget);
     if (!(e.currentTarget instanceof HTMLElement)) return;
+    document.location.hash = `#page-${e.currentTarget.dataset.page}`;
     this.scrollToPage(e.currentTarget.dataset.page);
   }
 
@@ -111,7 +120,7 @@ class PdfRenderer {
     this.scrollToPage(pageNumber);
   }
 
-  async setupPdfAndPreviewPanels () {
+  async setupPdfAndPreviewPanels (initialPage: number | null) {
     const docElement = document.querySelector('.content-and-enrichments .content');
     if (!docElement) return;
     const containerWidth = docElement.clientWidth || 0;
@@ -138,6 +147,9 @@ class PdfRenderer {
       for (let i = 0; i < pdf.numPages; i++) {
         const page = await pdf.getPage(i + 1);
         await this.renderSinglePage(page, i, scale, containerWidth);
+        if (initialPage && initialPage === i + 1) {
+          this.scrollToPage(i + 1);
+        }
       }
     } catch (e) {
       console.log(e);
