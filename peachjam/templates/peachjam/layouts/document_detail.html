@@ -215,8 +215,9 @@
                             </dt>
                             <dd class="text-muted">
                               {% for bench in judges %}
-                                {{ bench.judge.name }}
-                                {% if not forloop.last %},{% endif %}
+                                {# djlint:off #}
+                                {{ bench.judge.name }}{% if not forloop.last %},{% endif %}
+                                {# djlint:on #}
                               {% endfor %}
                             </dd>
                           {% endif %}
