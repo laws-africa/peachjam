@@ -3,10 +3,11 @@
   {% if lii.country == member_state.country.name %}
     <div>
       {% blocktrans trimmed with lii_name=lii.name %}
-        Visit {{ lii_name }} for more legal information.</div>
+        Visit {{ lii_name }} for more legal information.
       {% endblocktrans %}
-      <div>
-        <a href="{{ lii.url }}" target="_blank">{{ lii.domain }}</a>
-      </div>
-    {% endif %}
-  {% endfor %}
+    </div>
+    <div>
+      <a href="{{ lii.url }}" target="_blank">{{ lii.domain }}</a>
+    </div>
+  {% endif %}
+{% endfor %}
