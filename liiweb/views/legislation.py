@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks, get_language
@@ -45,6 +46,13 @@ class LegislationListView(TemplateView):
         qs = self.add_children(qs)
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
+
+        context["help_button_text"] = _("Help")
+        context["legislation_help_text"] = _(
+            "This is is a list of legislation for this jurisdiction. Click on the "
+            "tabs to filter according to current, repealed and subsidiary "
+            "legislation."
+        )
 
         return context
 

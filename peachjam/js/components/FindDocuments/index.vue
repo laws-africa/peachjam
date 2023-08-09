@@ -76,6 +76,18 @@
               Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
             </button>
           </form>
+          <div class="my-2">
+            <a
+              href="#"
+              class="btn btn-sm btn-outline-info"
+              data-bs-toggle="help-popover"
+              :data-bs-content="$t( 'You can search for documents by entering a keyword or phrase in the search box. You can also use the Advanced search to search for documents by more specific criteria.' )"
+              data-bs-trigger="click"
+            >
+              <i class="bi bi-question-circle" />
+              {{ $t("Help") }}
+            </a>
+          </div>
         </div>
         <div
           id="nav-advanced-search"
@@ -105,7 +117,6 @@
         {{ $t("No documents match your search.") }}
       </div>
     </div>
-
     <div ref="filters-results-container">
       <div class="row">
         <div class="col col-lg-3">

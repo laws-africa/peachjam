@@ -71,11 +71,24 @@
         </div>
       </div>
     </div>
-
-    <div class="text-end">
-      <button type="submit" class="btn btn-primary">
-        {{ $t('Search') }}
-      </button>
+    <div class="d-flex justify-content-between">
+      <div>
+        <a
+          href="#"
+          class="btn btn-sm btn-outline-info"
+          data-bs-toggle="help-popover"
+          :data-bs-content="$t('This is Advanced Search. Enter keywords in the fields above for a more fine grained search of documents.')"
+          data-bs-trigger="click"
+        >
+          <i class="bi bi-question-circle" />
+          Help
+        </a>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary">
+          {{ $t('Search') }}
+        </button>
+      </div>
     </div>
   </form>
 </template>

@@ -38,6 +38,7 @@
           </li>
         </nav>
       {% endblock %}
+      {% include "peachjam/_help_popover.html" with link="#" btn_text=help_button_text content=legislation_help_text %}
       {% if view.variant == 'repealed' %}
         <div class="alert alert-danger">{% trans 'You are viewing repealed legislation which is no longer in force.' %}</div>
       {% endif %}

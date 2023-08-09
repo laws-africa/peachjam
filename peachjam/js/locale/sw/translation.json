@@ -65,5 +65,8 @@
   "Try searching instead": "Jaribu kutafuta badala yake",
   "What changed?": "Nini kimebadilika?",
   "Year": "Mwaka",
-  "Years": "Miaka"
+  "Years": "Miaka",
+  "Help": "Msaada",
+  "You can search for documents by entering a keyword or phrase in the search box. You can also use the Advanced search to search for documents by more specific criteria.": "Unaweza kutafuta nyaraka kwa kuingiza neno au kifungu cha maneno katika sanduku la utafutaji.Unaweza pia kutumia utafutaji wa kina kutafuta nyaraka kwa vigezo zaidi maalum.",
+  "This is Advanced Search. Enter keywords in the fields above for a more fine grained search of documents.": "Hii ni utafutaji wa kina. Weka maneno katika uga ulio juu kwa utafutaji wa nyaraka kwa undani zaidi."
 }

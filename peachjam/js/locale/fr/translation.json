@@ -65,5 +65,8 @@
   "Try searching instead": "Essayez plutôt de faire une recherche",
   "What changed?": "Quels sont les changements ?",
   "Year": "Année",
-  "Years": "Années"
+  "Years": "Années",
+  "Help": "Aide",
+  "You can search for documents by entering a keyword or phrase in the search box. You can also use the Advanced search to search for documents by more specific criteria.": "Vous pouvez rechercher des documents en entrant un mot-clé ou une phrase dans la zone de recherche. Vous pouvez également utiliser la recherche avancée pour rechercher des documents selon des critères plus spécifiques.",
+  "This is Advanced Search. Enter keywords in the fields above for a more fine grained search of documents.": "Ceci est une recherche avancée. Entrez des mots-clés dans les champs ci-dessus pour une recherche plus fine des documents.",
 }

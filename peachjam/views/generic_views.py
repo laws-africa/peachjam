@@ -1,6 +1,7 @@
 import itertools
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 from lxml import html
 
@@ -183,6 +184,14 @@ class BaseDocumentDetailView(DetailView):
             + context["documents_citing_current_doc_count"]
         )
         context["labels"] = doc.labels.all()
+        context["help_button_text"] = _("Help")
+        context["citations_help_text"] = _(
+            "This is a list citations. On the left is a list of documents that this "
+            "document cites. On the right are documents that cite this one."
+        )
+        context["related_documents_help_text"] = _(
+            "This is a list of documents that are related to this one."
+        )
 
         return context
 

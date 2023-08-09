@@ -1,6 +1,7 @@
 {% load peachjam i18n %}
 <div class="container">
   <div class="row">
+    {% include 'peachjam/_help_popover.html' with link='#' btn_text=help_button_text content=citations_help_text %}
     <div class="col-sm">
       <h4 class="mb-3">
         {% translate 'Cited documents' %} <span class="badge bg-secondary">{{ cited_documents_count }}</span>

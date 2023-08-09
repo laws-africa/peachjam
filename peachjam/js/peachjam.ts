@@ -141,12 +141,25 @@ class PeachJam {
   setupPopovers () {
     document.querySelectorAll('[data-bs-toggle="help-popover"]').forEach((el) => {
       // @ts-ignore
-      new window.bootstrap.Popover(el, {
+      const helpPopover = new window.bootstrap.Popover(el, {
         html: true,
-        content:
-          (el.getAttribute('data-bs-content')
-          + "<div><a href='" + el.getAttribute('href') + "' target='_blank' rel='noopener noreferrer'>Learn more</a></div>"),
+        content: `
+        ${el.getAttribute('data-bs-content')}
+         <div><a href="${el.getAttribute('href')?.split('#')[1] || '#'}" target='_blank' rel='noopener noreferrer'>Learn more</a></div>
+        `,
         container: 'body'
+      });
+      // keep popover open when clicking inside it but close when clicking outside it
+      el.addEventListener('inserted.bs.popover', (e) => {
+        const popoverBody = document.querySelector('.popover-body');
+        const clickListener = (e: MouseEvent) => {
+          // Close the popover if the click is outside the popover
+          if (!popoverBody?.contains(e.target as Node)) {
+            helpPopover.hide();
+            document.removeEventListener('click', clickListener);
+          }
+        };
+        document.addEventListener('click', clickListener);
       });
     });
   }
