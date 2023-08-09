@@ -24,7 +24,7 @@
   "Delete": "Supprimez",
   "Document nature": "Type de document",
   "Document type": "Type de document",
-  "Edit": "Edit",
+  "Edit": "Modifier",
   "Enter end date": "Entrez la date de fin",
   "Enter start date": "Entrez la date de début",
   "Expand all": "Développer tout",
@@ -48,7 +48,7 @@
   "Relevance": "Pertinence",
   "Search": "Recherche",
   "Search {{appName}}": {
-    "": "Search {{appName}}..."
+    "": "Rechercher dans {{appName}}..."
   },
   "Search document content": "Rechercher le contenu du document",
   "Search documents": "Rechercher des documents",
