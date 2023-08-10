@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "background_task",
     "ckeditor",
     "polymorphic",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -267,9 +268,20 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissions"],
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.OrderingFilter",
+    ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 10,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": f'{PEACHJAM["APP_NAME"]} API',
+    "DESCRIPTION": "Read-only API for this website.",
+    "VERSION": "v1",
+    "SCHEMA_PATH_PREFIX_INSERT": "/api",
 }
 
 # Sentry

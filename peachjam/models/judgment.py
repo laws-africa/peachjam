@@ -229,6 +229,7 @@ class Judgment(CoreDocument):
         ordering = ["title"]
         verbose_name = _("judgment")
         verbose_name_plural = _("judgments")
+        permissions = [("api_judgment", "API judgment access")]
 
     def __str__(self):
         return self.title
