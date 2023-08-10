@@ -493,6 +493,8 @@ CKEDITOR_CONFIGS = {
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 SESSION_COOKIE_SECURE = True
+# nginx sets this header to indicate if the upstream request was secure
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Caches
 if DEBUG:
