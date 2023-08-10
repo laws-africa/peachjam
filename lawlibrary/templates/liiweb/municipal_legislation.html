@@ -1,0 +1,23 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}{{ locality_legislation_title }}{% endblock %}
+{% block page-content %}
+  <section class="pb-5">
+    <div class="container">
+      <h1 class="my-4">{{ locality_legislation_title }}</h1>
+      <div class="row">
+        {% for group in municipality_groups %}
+          <div class="col-lg">
+            <ul class="list-unstyled mb-0">
+              {% for municipality in group %}
+                <li>
+                  <a href="{% url 'municipal_by_laws' municipality.code %}">{{ municipality.name }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endblock %}
