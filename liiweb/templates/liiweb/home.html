@@ -8,6 +8,9 @@
     {% block hero-img %}
       <img class="hero__background-img"
            src="{% static 'images/banner.jpg' %}"
+           srcset="{% static 'images/banner-small.jpg' %} 770w,
+                   {% static 'images/banner.jpg' %} 1920w"
+           sizes="100vw"
            alt="{{ APP_NAME }}"
            height="40"/>
     {% endblock %}
@@ -75,23 +78,13 @@
           {% block second-column-content %}
             {% block second-col-about %}{% endblock %}
             {% block second-col-logos %}{% endblock %}
+            {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link %}
+              {% block social-media %}
+                {% include 'peachjam/_social_media.html' %}
+              {% endblock %}
+            {% endif %}
             <ul class="nav nav-tabs about-tabs d-flex justify-content-center justify-content-lg-start"
                 role="tablist">
-              {% block twitter-tab %}
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link twitter-nav-link active"
-                          id="twitter-tab"
-                          data-bs-toggle="tab"
-                          data-bs-target="#twitter-tab-content"
-                          type="button"
-                          role="tab"
-                          aria-controls="twitter"
-                          aria-selected="true">
-                    <i class="bi bi bi-twitter twitter-forecolor"></i>
-                    <span class="twitter-forecolor">{% trans 'Twitter' %}</span>
-                  </button>
-                </li>
-              {% endblock %}
               {% block facebook-tab %}
                 <li class="nav-item" role="presentation">
                   <button class="nav-link fb-nav-link"
@@ -109,24 +102,6 @@
               {% endblock %}
             </ul>
             <div class="tab-content">
-              {% block twitter-pane %}
-                <div class="tab-pane fade show active"
-                     id="twitter-tab-content"
-                     role="tabpanel"
-                     aria-labelledby="twitter-tab">
-                  <div class="d-flex justify-content-center justify-content-lg-start">
-                    <a class="twitter-timeline"
-                       data-width="248"
-                       data-height="400"
-                       href="{% block twitter-url %}https://twitter.com/AfricanLII?ref_src=twsrc%5Etfw{% endblock %}">
-                      {% block tweets-by %}
-                        {% trans 'Tweets by AfricanLII' %}
-                      {% endblock %}
-                    </a>
-                    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-                  </div>
-                </div>
-              {% endblock %}
               {% block facebook-pane %}
                 <div class="tab-pane fade"
                      id="facebook-tab-content"

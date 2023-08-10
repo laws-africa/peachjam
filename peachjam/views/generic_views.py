@@ -182,6 +182,7 @@ class BaseDocumentDetailView(DetailView):
             context["cited_documents_count"]
             + context["documents_citing_current_doc_count"]
         )
+        context["labels"] = doc.labels.all()
 
         return context
 

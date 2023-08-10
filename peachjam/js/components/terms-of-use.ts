@@ -7,7 +7,7 @@ class TermsOfUse {
     if (!content || !tocContainers.length) return;
     const items = generateHtmlTocItems(content);
     const nav: HTMLElement | null = document.getElementById('side-nav');
-    const offCanvas = new (window as { [key: string]: any }).bootstrap.Offcanvas(nav);
+    const offCanvas = new window.bootstrap.Offcanvas(nav);
 
     tocContainers.forEach(element => {
       const tableOfContents = document.createElement('la-table-of-contents');

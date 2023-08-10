@@ -1,28 +1,5 @@
 {% extends "peachjam/_footer.html" %}
 {% load i18n static %}
-{% block newsletter-form-code %}
-  <form action=""
-        method="post"
-        name="mc-embedded-subscribe-form"
-        target="_blank">
-    <div style="position: absolute; left: -5000px;" aria-hidden="true">
-      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-      <input type="text" name="" tabindex="-1" value=""/>
-    </div>
-    <div class="input-group">
-      <input type="email"
-             value=""
-             name="EMAIL"
-             class="form-control"
-             placeholder="email address"
-             required=""/>
-      <input type="submit"
-             value="Subscribe"
-             name="subscribe"
-             class="btn btn-secondary"/>
-    </div>
-  </form>
-{% endblock %}
 {% block about %}
   <p>
     {% blocktrans trimmed %}
@@ -62,7 +39,13 @@
        href="https://ghalii.org"
        target="_blank"
        rel="noreferrer">
-      <img height="26" src="{% static 'images/logo.png' %}" alt="ghalii-logo"/>
+      <img height="26" src="{% static 'images/logo.png' %}" alt="ghalii logo"/>
+    </a>
+    <a class="footer-logos__item"
+       href="https://ejudgment.judicial.gov.gh/"
+       target="_blank"
+       rel="noreferrer">
+      <img src="{% static 'images/ejudgment-logo.png' %}" alt="e-judgment logo"/>
     </a>
   </div>
 {% endblock %}

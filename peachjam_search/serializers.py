@@ -1,5 +1,5 @@
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
-from rest_framework.serializers import SerializerMethodField
+from rest_framework.serializers import CharField, SerializerMethodField
 
 from peachjam_search.documents import SearchableDocument
 
@@ -7,6 +7,17 @@ from peachjam_search.documents import SearchableDocument
 class SearchableDocumentSerializer(DocumentSerializer):
     highlight = SerializerMethodField()
     pages = SerializerMethodField()
+    court = SerializerMethodField()
+    nature = SerializerMethodField()
+    order_outcome = SerializerMethodField()
+    registry = SerializerMethodField()
+    labels = CharField(allow_null=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # TODO: uncomment this when we have reindexed
+        # self.language_suffix = "_" + get_language_from_request(self.context["request"])
+        self.language_suffix = ""
 
     class Meta:
         document = SearchableDocument
@@ -30,6 +41,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "highlight",
             "is_most_recent",
             "alternative_names",
+            "labels",
         ]
 
     def get_highlight(self, obj):
@@ -48,3 +60,15 @@ class SearchableDocumentSerializer(DocumentSerializer):
                 )
                 pages.append(info)
         return pages
+
+    def get_court(self, obj):
+        return obj["court" + self.language_suffix]
+
+    def get_nature(self, obj):
+        return obj["nature" + self.language_suffix]
+
+    def get_order_outcome(self, obj):
+        return obj["order_outcome" + self.language_suffix]
+
+    def get_registry(self, obj):
+        return obj["registry" + self.language_suffix]

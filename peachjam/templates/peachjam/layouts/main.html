@@ -1,5 +1,5 @@
 {% extends 'peachjam/layouts/base.html' %}
-{% load static %}
+{% load static peachjam %}
 {% load sass_tags %}
 {% block head-css %}
   <link rel="stylesheet"
@@ -7,16 +7,9 @@
         type="text/css"/>
 {% endblock %}
 {% block head-js %}
-  <script defer src="{% static 'bootstrap/dist/js/bootstrap.bundle.js' %}"></script>
-  <!-- Small script to add the current user agent to the root HTML element -->
-  <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function () {
-      document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
-    });
-  </script>
+  {{ PEACHJAM_JS_CONFIG|json_script:"peachjam-config" }}
   {% if not DEBUG %}
     <!-- sentry -->
-    {{ SENTRY_CONFIG|json_script:"sentry-config" }}
     <script src="https://browser.sentry-cdn.com/7.51.2/bundle.min.js"
             integrity="sha384-TIc4wz4oU9UgbI5Cu7R/6jhJOszkPGImz+Ney9MXZ3MESAGeYJUOV+36KnTacIXP"
             crossorigin="anonymous"
@@ -24,13 +17,17 @@
     {% if PEACHJAM_SETTINGS.google_analytics_id %}
       <!-- Global site tag (gtag.js) - Google Analytics -->
       <script async
-              src="https://www.googletagmanager.com/gtag/js?id={{ PEACHJAM_SETTINGS.google_analytics_id }}"></script>
+              src="https://www.googletagmanager.com/gtag/js?id={{ PEACHJAM_SETTINGS.google_analytics_id|split|first }}"></script>
       <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-
-        gtag('config', '{{ PEACHJAM_SETTINGS.google_analytics_id }}');
+        // split multiple ids into array
+        const google_analytics_ids = '{{ PEACHJAM_SETTINGS.google_analytics_id }}'.trim().split(/\s+/);
+        // loop through ids and add config for each
+        google_analytics_ids.forEach(id => {
+          gtag('config', id);
+        });
       </script>
     {% endif %}
   {% endif %}

@@ -1,9 +1,10 @@
 from collections import defaultdict
 
+from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
-from peachjam.helpers import get_language
-from peachjam.models import Legislation
+from peachjam.helpers import chunks, get_language
+from peachjam.models import Legislation, Locality
 from peachjam_api.serializers import LegislationSerializer
 
 
@@ -66,3 +67,33 @@ class LegislationListView(TemplateView):
         for parent in qs:
             parent.children = children.get(parent.work_id, [])
         return qs
+
+
+class LocalityLegislationView(TemplateView):
+    template_name = "liiweb/locality_legislation.html"
+    navbar_link = "legislation/locality"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        localities = Locality.objects.all()
+        context["province_groups"] = list(chunks(localities, 2))
+        return context
+
+
+class LocalityLegislationListView(LegislationListView):
+    template_name = "liiweb/locality_legislation_list.html"
+    navbar_link = "legislation/locality"
+
+    def get(self, *args, **kwargs):
+        self.locality = get_object_or_404(Locality, code=kwargs["code"])
+        return super().get(*args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(locality=self.locality)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            locality=self.locality,
+            locality_legislation_title="Provincial Legislation",
+            **kwargs
+        )

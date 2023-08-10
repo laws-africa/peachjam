@@ -17,16 +17,15 @@
   },
   "homepage": "https://github.com/laws-africa/peach-jam#readme",
   "devDependencies": {
-    "@lawsafrica/indigo-akn": "^5.1.0",
+    "@lawsafrica/indigo-akn": "^5.3.0",
     "@lawsafrica/law-widgets": "^1.4.0",
+    "@types/bootstrap": "^5.2.6",
     "@types/lodash": "^4.14.180",
     "@types/mark.js": "^8.11.7",
     "@typescript-eslint/eslint-plugin": "^5.14.0",
     "@typescript-eslint/parser": "^5.14.0",
     "@vue/compiler-sfc": "^3.2.31",
     "css-loader": "^6.7.1",
-    "dom-anchor-text-position": "^5.0.0",
-    "dom-anchor-text-quote": "^4.0.2",
     "eslint": "^7.3.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.21.2",
@@ -52,6 +51,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
+    "bootstrap": "^5.3.1",
     "pdfjs-dist": "^2.14.305"
   }
 }

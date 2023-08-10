@@ -19,7 +19,7 @@
         </div>
         <div class="col-lg-5">
           <iframe class="video"
-                  src="https://www.youtube.com/embed/m54qqXDkCfk"
+                  src="{{ video_link }}"
                   title="YouTube video player"
                   allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowfullscreen></iframe>
@@ -93,14 +93,18 @@
           </ul>
         </div>
         <div class="col-md-6 col-lg-4 mb-3">
-          <h3>{% trans 'Regional Courts' %}</h3>
-          <ul class="list-unstyled">
-            {% for court in courts %}
-              <li>
-                <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-              </li>
-            {% endfor %}
-          </ul>
+          {% for court_class in court_classes %}
+            {% if court_class.courts.all %}
+              <h3>{{ court_class.name }}</h3>
+              <ul class="list-unstyled">
+                {% for court in court_class.courts.all %}
+                  <li>
+                    <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          {% endfor %}
         </div>
         <div class="col-lg-4 mb-3">
           <h3>{% trans 'Member States' %}</h3>

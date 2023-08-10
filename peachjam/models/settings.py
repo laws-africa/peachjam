@@ -45,7 +45,11 @@ class PeachJamSettings(SingletonModel):
         default="Subsidiary legislation",
     )
     google_analytics_id = models.CharField(
-        verbose_name=_("google analytics id"), max_length=1024, null=True, blank=True
+        verbose_name=_("google analytics id"),
+        max_length=1024,
+        null=True,
+        blank=True,
+        help_text=_("Enter one or more Google Analytics IDs separated by spaces."),
     )
     pagerank_boost_value = models.FloatField(
         verbose_name=_("pagerank boost value"), null=True, blank=True
@@ -56,6 +60,16 @@ class PeachJamSettings(SingletonModel):
 
     metabase_dashboard_link = models.URLField(
         verbose_name=_("metabase dashboard link"), null=True, blank=True
+    )
+
+    mailchimp_form_url = models.URLField(
+        verbose_name=_("mailchimp form url"), null=True, blank=True
+    )
+    twitter_link = models.URLField(
+        verbose_name=_("twitter link"), null=True, blank=True
+    )
+    facebook_link = models.URLField(
+        verbose_name=_("facebook link"), null=True, blank=True
     )
 
     re_extract_citations = models.BooleanField(

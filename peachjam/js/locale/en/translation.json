@@ -24,6 +24,7 @@
   "Delete": "Delete",
   "Document nature": "Document nature",
   "Document type": "Document type",
+  "Edit": "Edit",
   "Enter end date": "Enter end date",
   "Enter start date": "Enter start date",
   "Expand all": "Expand all",
@@ -31,6 +32,7 @@
   "Judges": "Judges",
   "Jurisdiction": "Jurisdiction",
   "Language": "Language",
+  "Link citation": "Link citation",
   "Loading": "Loading",
   "Locality": "Locality",
   "Matter type": "Matter type",
@@ -45,6 +47,9 @@
   "Regional body": "Regional body",
   "Relevance": "Relevance",
   "Search": "Search",
+  "Search {{appName}}": {
+    "": "Search {{appName}}..."
+  },
   "Search document content": "Search document content",
   "Search documents": "Search documents",
   "Search table of contents": "Search table of contents",

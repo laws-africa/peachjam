@@ -5,7 +5,7 @@ import shutil
 import tempfile
 
 import magic
-from cobalt.akn import datestring
+from cobalt.akn import StructuredDocument, datestring
 from cobalt.uri import FrbrUri
 from countries_plus.models import Country
 from django.conf import settings
@@ -14,9 +14,11 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
+from docpipe.xmlutils import unwrap_element
 from languages_plus.models import Language
 from lxml import html
 from polymorphic.managers import PolymorphicManager
@@ -34,6 +36,34 @@ from peachjam.models import CitationLink, ExtractedCitation
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
+
+
+class Label(models.Model):
+    name = models.CharField(
+        _("name"), max_length=1024, unique=True, null=False, blank=False
+    )
+    code = models.SlugField(_("code"), max_length=1024, unique=True)
+    level = models.CharField(
+        _("level"),
+        max_length=1024,
+        null=False,
+        blank=False,
+        default="info",
+        help_text="One of: primary, secondary, success, danger, warning or info.",
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = slugify(self.name)
+        return super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = _("label")
+        verbose_name_plural = _("labels")
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name}"
 
 
 class DocumentNature(models.Model):
@@ -395,6 +425,7 @@ class CoreDocument(PolymorphicModel):
 
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES
+    labels = models.ManyToManyField(Label, verbose_name=_("labels"), blank=True)
 
     class Meta:
         ordering = ["doc_type", "title"]
@@ -405,6 +436,9 @@ class CoreDocument(PolymorphicModel):
 
     def __str__(self):
         return f"{self.doc_type} - {self.title}"
+
+    def apply_labels(self):
+        pass
 
     def get_all_fields(self):
         return self._meta.get_fields()
@@ -424,7 +458,7 @@ class CoreDocument(PolymorphicModel):
     def clean(self):
         super().clean()
 
-        if self.date > datetime.date.today():
+        if self.date and self.date > datetime.date.today():
             raise ValidationError(
                 {"date": _("You cannot set a future date for the document")}
             )
@@ -504,10 +538,12 @@ class CoreDocument(PolymorphicModel):
             self.work.save()
 
     def save(self, *args, **kwargs):
-        # give ourselves and subclasses a chance to pre-populate derived fields before saving, in case full_clean() has
-        # not yet been called
+        # give ourselves and subclasses a chance to pre-populate derived fields before saving,
+        # in case full_clean() has not yet been called
         self.pre_save()
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+        # apply labels
+        self.apply_labels()
 
     @cached_property
     def relationships_as_subject(self):
@@ -533,11 +569,25 @@ class CoreDocument(PolymorphicModel):
         extraction will be run on that.
         """
         from peachjam.analysis.citations import citation_analyser
+
+        self.delete_citations()
+        return citation_analyser.extract_citations(self)
+
+    def delete_citations(self):
+        """Delete existing citation links and added citations from this document."""
         from peachjam.models.citations import CitationLink
 
-        # delete existing citation links
         CitationLink.objects.filter(document=self).delete()
-        return citation_analyser.extract_citations(self)
+
+        if self.content_html and not self.content_html_is_akn:
+            # delete existing citations in html
+            root = html.fromstring(self.content_html)
+            deleted = False
+            for a in root.xpath('//a[starts-with(@href, "/akn/")]'):
+                unwrap_element(a)
+                deleted = True
+            if deleted:
+                self.content_html = html.tostring(root, encoding="unicode")
 
     def extract_content_from_source_file(self):
         """Re-extract content from DOCX source files, overwriting anything in content_html and associated images.
@@ -629,6 +679,11 @@ class CoreDocument(PolymorphicModel):
 
         return work_frbr_uris
 
+    def search_penalty(self):
+        """Optionally provide a penalty for this document in search results. This cannot be zero or None."""
+        # provide a very small number instead of zero
+        return 0.0000001
+
 
 def file_location(instance, filename):
     if not instance.document.pk:
@@ -716,9 +771,9 @@ class SourceFile(AttachmentAbstractModel):
     def filename_extension(self):
         return os.path.splitext(self.filename)[1][1:]
 
-    def filename_for_download(self):
+    def filename_for_download(self, ext=None):
         """Return a generated filename appropriate for use when downloading this source file."""
-        ext = os.path.splitext(self.filename)[1]
+        ext = ext or os.path.splitext(self.filename)[1]
         title = re.sub(r"[^a-zA-Z0-9() ]", "", self.document.title)
         return title + ext
 
@@ -755,6 +810,16 @@ class AttachedFiles(AttachmentAbstractModel):
         return os.path.splitext(self.filename)[1].replace(".", "")
 
 
+class ArticleAttachment(AttachmentAbstractModel):
+    SAVE_FOLDER = "attachments"
+    document = models.ForeignKey(
+        "peachjam.Article", on_delete=models.CASCADE, related_name="attachments"
+    )
+
+    def __str__(self):
+        return self.file.name
+
+
 class AlternativeName(models.Model):
     document = models.ForeignKey(
         CoreDocument,
@@ -788,10 +853,21 @@ class DocumentContent(models.Model):
     content_text = models.TextField(
         blank=True, null=True, verbose_name=_("document text")
     )
+    # option XML content of the document
+    content_xml = models.TextField(
+        blank=True, null=True, verbose_name=_("document XML")
+    )
 
     class Meta:
         verbose_name = _("document content")
         verbose_name_plural = _("document contents")
+
+    def akn_doc(self):
+        """Get a cobalt StructureDocument instance for this document's XML, assuming it is AKN XML."""
+        if self.content_xml:
+            return StructuredDocument.for_document_type(self.document.frbr_uri_doctype)(
+                self.content_xml
+            )
 
     @classmethod
     def update_or_create_for_document(cls, document):

@@ -31,9 +31,6 @@ class PeachjamViewsTest(TestCase):
             recent_documents,
         )
 
-        courts = [c.name for c in response.context.get("courts")]
-        self.assertIn("ECOWAS Community Court of Justice", courts)
-
     def test_judgment_listing(self):
         response = self.client.get("/judgments/")
         self.assertEqual(response.status_code, 200)

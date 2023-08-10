@@ -111,29 +111,25 @@
     <div class="content-and-enrichments"
          data-work-id="{{ document.work_id }}"
          data-work-frbr-uri="{{ document.work_frbr_uri }}"
-         {% if not perms.peachjam.add_relationship %} data-readonly="true"{% endif %}>
+         data-document-id="{{ document.id }}"
+         {% if perms.peachjam.add_citationlink %}data-editable-citation-links{% endif %}
+         {% if perms.peachjam.add_relationship %}data-editable-relationships{% endif %}>
       <div class="content-and-enrichments__inner la-akoma-ntoso-with-gutter">
         {% if display_type == 'akn' %}
           <la-akoma-ntoso
-          data-document-element
           frbr-expression-uri="{{ document.expression_frbr_uri }}"
-          class="flash-target"
-          lang="{{ document.language.iso }}"
-          >
+          class="flash-target content content__akn"
+          lang="{{ document.language.iso }}">
           <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
           <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
           {{ document.content_html|safe }}
           </la-akoma-ntoso>
         {% endif %}
         {% if display_type == 'html' %}
-          <div class="content content__html"
-               lang="{{ document.language.iso }}"
-               data-document-element>
-            {{ document.content_html|safe }}
-          </div>
+          <div class="content content__html" lang="{{ document.language.iso }}">{{ document.content_html|safe }}</div>
         {% endif %}
         {% if display_type == 'pdf' %}
-          <div class="content" data-document-element>
+          <div class="content content__pdf">
             <div class="pdf-loading">
               <div class="text-center mb-2">
                 <strong>{% trans 'Loading PDF...' %}</strong>
@@ -154,7 +150,7 @@
             </div>
           </div>
         {% endif %}
-        <la-gutter></la-gutter>
+        <la-gutter akoma-ntoso=".content-and-enrichments .content"></la-gutter>
       </div>
     </div>
   </div>

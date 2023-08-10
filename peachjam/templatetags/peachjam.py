@@ -101,3 +101,8 @@ def jurisdiction_icon(doc):
             'src="/static/images/au_icon.png">'
         )
     return mark_safe(f'<span class ="fi fi-{code}"></span>')
+
+
+@register.filter
+def split(value, sep=None):
+    return [v.strip() for v in value.split(sep)]

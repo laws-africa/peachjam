@@ -31,6 +31,7 @@
         {% block document-title %}
           <div class="d-md-flex justify-content-md-between py-4">
             <h1>{{ document.title }}</h1>
+            {% include 'peachjam/_labels.html' %}
             <div class="d-flex align-items-center">
               <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
                  class="btn btn-link"
@@ -205,14 +206,14 @@
                             </dd>
                           {% endif %}
                         {% endwith %}
-                        {% with document.judges.all as judges %}
+                        {% with document.bench.all as judges %}
                           {% if judges %}
                             <dt>
                               {% trans 'Judges' %}
                             </dt>
                             <dd class="text-muted">
-                              {% for judge in judges %}
-                                {{ judge.name }}
+                              {% for bench in judges %}
+                                {{ bench.judge.name }}
                                 {% if not forloop.last %},{% endif %}
                               {% endfor %}
                             </dd>
@@ -382,6 +383,7 @@
                 {% endif %}
               </div>
             {% endblock %}
+            {% block extra-metadata %}{% endblock %}
             <hr class="mb-5" />
           </div>
           <div class="container-fluid">

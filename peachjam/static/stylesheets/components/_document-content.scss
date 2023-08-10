@@ -1,5 +1,10 @@
 .document-content {
 
+  .content {
+    // so that gutter items can position relative to this
+    position: relative;
+  }
+
   .content.content__html {
     // reset line height so html documents use their default, rather than bootstrap's adjusted line height
     line-height: normal;

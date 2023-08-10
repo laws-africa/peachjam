@@ -1,9 +1,11 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
 {% block hero-logos %}
-  <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
-  <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
-  <img src="{% static 'images/logo.png' %}" alt="ghalii-logo"/>
+  <img src="{% static 'images/logo.png' %}" alt="ghalii logo"/>
+  <img src="{% static 'images/ejudgment-logo.png' %}" alt="e-judgment logo"/>
+  <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii logo"/>
+  <img src="{% static 'images/laws-africa-logo.png' %}"
+       alt="laws.africa logo"/>
 {% endblock %}
 {% block hero-headings %}
   <h1 class="mb-4">
@@ -13,7 +15,8 @@
   </h1>
   <h4 class="mb-4">
     {% blocktrans trimmed %}
-    GhaLII digitises and publishes the law of Ghana for free access to all.
+    GhaLII digitises and publishes the law of Ghana for free access to all, in partnership with the
+    Judicial Service of Ghana.
   {% endblocktrans %}
   </h4>
 {% endblock %}
@@ -23,8 +26,9 @@
   </div>
   <p>
     {% blocktrans trimmed %}
-      GhaLII is a non-profit organisation based in Accra that aims to source and publish digitally accessible to the general public parliamentary, legislative and judicial information from Ghana and ECOWAS.
+      GhaLII is a non-profit organisation based in Accra that publishes digital parliamentary, legislative and judicial information from Ghana and ECOWAS.
       GhaLII's objectives include promotion of access to legal information from Ghana as a fundamental part of the rule of law.
+      GhaLII works in partnership with the Judicial Service of Ghana.
     {% endblocktrans %}
   </p>
 {% endblock %}

@@ -39,21 +39,13 @@
       Legislation digitised by Laws.Africa.
     {% endblocktrans %}
   </p>
+  {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link %}
+    {% block social-media %}
+      {% include 'peachjam/_social_media.html' %}
+    {% endblock %}
+  {% endif %}
   <ul class="nav nav-tabs about-tabs d-flex justify-content-center justify-content-lg-start"
       role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link twitter-nav-link active"
-              id="twitter-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#twitter-tab-content"
-              type="button"
-              role="tab"
-              aria-controls="twitter"
-              aria-selected="true">
-        <i class="bi bi bi-twitter twitter-forecolor"></i>
-        <span class="twitter-forecolor">{% trans 'Twitter' %}</span>
-      </button>
-    </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link fb-nav-link"
               id="facebook-tab"
@@ -69,20 +61,6 @@
     </li>
   </ul>
   <div class="tab-content">
-    <div class="tab-pane fade show active"
-         id="twitter-tab-content"
-         role="tabpanel"
-         aria-labelledby="twitter-tab">
-      <div class="d-flex justify-content-center justify-content-lg-start">
-        <a class="twitter-timeline"
-           data-width="248"
-           data-height="400"
-           href="https://twitter.com/AfricanLII?ref_src=twsrc%5Etfw">
-          {% trans 'Tweets by AfricanLII' %}
-        </a>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-      </div>
-    </div>
     <div class="tab-pane fade"
          id="facebook-tab-content"
          role="tabpanel"

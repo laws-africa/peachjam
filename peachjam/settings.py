@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "django_elasticsearch_dsl",
     "django_elasticsearch_dsl_drf",
     "jazzmin",
+    "modeltranslation",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -70,6 +71,7 @@ INSTALLED_APPS = [
     "background_task",
     "ckeditor",
     "polymorphic",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -112,7 +114,7 @@ PEACHJAM = {
     "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
     "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),
     "CITATOR_API": os.environ.get(
-        "CITATOR_API", "https://api.laws.africa/citator/v1/extract-citations"
+        "CITATOR_API", "https://services.lawsafrica.com/citator/v1/extract-citations"
     ),
     "CITATOR_API_KEY": os.environ.get("CITATOR_API_KEY"),
     "EXTRA_SEARCH_INDEXES": [],
@@ -266,9 +268,20 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissions"],
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.OrderingFilter",
+    ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 10,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": f'{PEACHJAM["APP_NAME"]} API',
+    "DESCRIPTION": "Read-only API for this website.",
+    "VERSION": "v1",
+    "SCHEMA_PATH_PREFIX_INSERT": "/api",
 }
 
 # Sentry
@@ -307,7 +320,7 @@ DEBUG_TOOLBAR_PANELS = (
 )
 
 SASS_PROCESSOR_INCLUDE_DIRS = [
-    os.path.join(BASE_DIR, "node_modules"),
+    os.environ.get("NODE_PATH") or os.path.join(BASE_DIR, "node_modules"),
 ]
 
 # Configure dynamic file storage for fields which use it. This is a type of storage which can dynamically

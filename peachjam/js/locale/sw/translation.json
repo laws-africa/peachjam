@@ -24,6 +24,7 @@
   "Delete": "Futa",
   "Document nature": "Asili ya hati",
   "Document type": "Aina ya hati",
+  "Edit": "Hariri",
   "Enter end date": "Weka tarehe ya mwisho",
   "Enter start date": "Weka tarehe ya kuanza",
   "Expand all": "Panua zote",
@@ -31,6 +32,7 @@
   "Judges": "Majaji",
   "Jurisdiction": "Mamlaka ya kisheria",
   "Language": "Lugha",
+  "Link citation": "Nukuu ya kiungo",
   "Loading": "Inapakia",
   "Locality": "Eneo",
   "Matter type": "Aina ya jambo",
@@ -45,6 +47,9 @@
   "Regional body": "Chombo cha kanda",
   "Relevance": "Muhimu",
   "Search": "Tafuta",
+  "Search {{appName}}": {
+    "": "Tafuta {{appName}}..."
+  },
   "Search document content": "Tafuta yaliyomo kwenye waraka",
   "Search documents": "Tafuta nyaraka",
   "Search table of contents": "Tafuta yaliyomo",

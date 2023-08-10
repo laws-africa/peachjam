@@ -52,23 +52,49 @@ class SearchableDocument(Document):
     created_at = fields.DateField()
     updated_at = fields.DateField()
     taxonomies = fields.KeywordField()
+    labels = fields.KeywordField()
 
     # Judgment
+    court = fields.KeywordField(attr="court.name")
+    court_en = fields.KeywordField()
+    court_sw = fields.KeywordField()
+    court_fr = fields.KeywordField()
+    court_pt = fields.KeywordField()
+
     matter_type = fields.KeywordField(attr="matter_type.name")
     case_number = fields.TextField()
-    court = fields.KeywordField(attr="court.name")
+    # this case party names etc. and so the standard analyzer is better than a language-based one
+    case_name = fields.TextField(analyzer="standard")
     headnote_holding = fields.TextField()
     flynote = fields.TextField()
     judges = fields.KeywordField(attr="judge.name")
-    registry = fields.KeywordField(attr="registry.name")
     attorneys = fields.KeywordField(attr="attorney.name")
+
+    registry = fields.KeywordField(attr="registry.name")
+    registry_en = fields.KeywordField()
+    registry_sw = fields.KeywordField()
+    registry_fr = fields.KeywordField()
+    registry_pt = fields.KeywordField()
+
     order_outcome = fields.KeywordField(attr="order_outcome.name")
+    order_outcome_en = fields.KeywordField()
+    order_outcome_sw = fields.KeywordField()
+    order_outcome_fr = fields.KeywordField()
+    order_outcome_pt = fields.KeywordField()
 
     # GenericDocument, LegalInstrument
     authors = fields.KeywordField()
+
     nature = fields.KeywordField(attr="nature.name")
+    nature_en = fields.KeywordField()
+    nature_sw = fields.KeywordField()
+    nature_fr = fields.KeywordField()
+    nature_pt = fields.KeywordField()
 
     ranking = RankField(attr="work.ranking")
+    # a negative boost to search results; this must be a positive number, but is treated as a penalty
+    # it is applied linearly, simply reducing the score by this amount
+    penalty = RankField(attr="search_penalty", positive_score_impact=False)
 
     pages = fields.NestedField(
         properties={
@@ -76,6 +102,14 @@ class SearchableDocument(Document):
             "body": fields.TextField(analyzer="standard", fields={"exact": Text()}),
         }
     )
+
+    # this will be used to build prepare_xxx_xx fields for each of these
+    translated_fields = [
+        ("court", "name"),
+        ("registry", "name"),
+        ("order_outcome", "name"),
+        ("nature", "name"),
+    ]
 
     def should_index_object(self, obj):
         if isinstance(obj, ExternalDocument):
@@ -95,7 +129,6 @@ class SearchableDocument(Document):
 
         @classproperty
         def related_models(cls):
-
             # to ensure the CoreDocument will be re-saved when subclass models are updated
             # recursively find subclasses
             def get_subclasses(klass):
@@ -193,6 +226,22 @@ class SearchableDocument(Document):
             return instance.work.ranking
         return 0.00000001
 
+    def prepare_court(self, instance):
+        if hasattr(instance, "court") and instance.court:
+            return instance.court.name
+
+    def prepare_registry(self, instance):
+        if hasattr(instance, "registry") and instance.registry:
+            return instance.registry.name
+
+    def prepare_nature(self, instance):
+        if hasattr(instance, "nature") and instance.nature:
+            return instance.nature.name
+
+    def prepare_order_outcome(self, instance):
+        if hasattr(instance, "order_outcome") and instance.order_outcome:
+            return instance.order_outcome.name
+
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""
         if not instance.content_html:
@@ -219,6 +268,9 @@ class SearchableDocument(Document):
         ]
         return list({t.slug for t in topics})
 
+    def prepare_labels(self, instance):
+        return [label.code for label in instance.labels.all()]
+
     def prepare_title_expanded(self, instance):
         # combination of the title, citation and alternative names
         parts = [instance.title]
@@ -244,6 +296,29 @@ class SearchableDocument(Document):
         # order by pk descending so that when we're indexing we can have an idea of progress
         return super().get_queryset().order_by("-pk")
 
+
+def prepare_translated_field(self, instance, field, attr, lang):
+    if getattr(instance, field, None):
+        fld = getattr(instance, field)
+        attr_name = f"{attr}_{lang}"
+        if hasattr(fld, attr_name):
+            return getattr(fld, attr_name) or getattr(fld, attr)
+
+
+def make_prepare(field, attr, lang):
+    return lambda s, i: prepare_translated_field(s, i, field, attr, lang)
+
+
+# add preparation methods for translated fields to avoid lots of copy-and-paste
+for field, attr in SearchableDocument.translated_fields:
+    # TODO: where should this language list be configured? they are languages that the interface is translated into
+    for lang in ["en", "fr", "pt", "sw"]:
+        # we must call make_prepare so that the variables are evaluated now, not when the function is called
+        setattr(
+            SearchableDocument,
+            f"prepare_{field}_{lang}",
+            make_prepare(field, attr, lang),
+        )
 
 # These are the language-specific indexes we create and their associated analyzers for text fields.
 # Documents in other languages are stored in a general index with the "standard" analyzer

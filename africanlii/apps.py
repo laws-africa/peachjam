@@ -17,5 +17,5 @@ class AfricanliiConfig(AppConfig):
         citation_analyser.matchers.append(ActMatcher)
         citation_analyser.matchers.append(MncMatcher)
 
-        Author.model_label = _("Regional Body")
-        Author.model_label_plural = _("Regional Bodies")
+        Author.model_label = _("Regional Body / Author")
+        Author.model_label_plural = _("Regional Bodies / Authors")

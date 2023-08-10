@@ -1,5 +1,8 @@
+import copy
+
 from django.conf import settings
 from django.utils.decorators import method_decorator
+from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
@@ -20,7 +23,8 @@ from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
 from rest_framework.permissions import AllowAny
 
-from peachjam.models import Author, pj_settings
+from peachjam.models import Author, Label, pj_settings
+from peachjam_api.serializers import LabelSerializer
 from peachjam_search.documents import SearchableDocument, get_search_indexes
 from peachjam_search.serializers import SearchableDocumentSerializer
 
@@ -58,6 +62,10 @@ class MultiFieldSearchQueryBackend(SimpleQueryStringQueryBackend):
 class RankFeatureBackend(BaseSearchQueryBackend):
     @classmethod
     def construct_search(cls, request, view, search_backend):
+        # apply penalty as a linear change to the score
+        # DISABLED until the penalty field is populated
+        # queries = [Q("rank_feature", field="penalty", boost=1.0, linear={})]
+        queries = []
 
         if pj_settings().pagerank_boost_value:
             rank = Q(
@@ -65,8 +73,9 @@ class RankFeatureBackend(BaseSearchQueryBackend):
                 field="ranking",
                 boost=pj_settings().pagerank_boost_value,
             )
-            return [rank]
-        return []
+            queries.append(rank)
+
+        return queries
 
 
 class NestedPageQueryBackend(BaseSearchQueryBackend):
@@ -86,8 +95,9 @@ class NestedPageQueryBackend(BaseSearchQueryBackend):
                     must=[
                         SimpleQueryString(
                             query=search_term,
-                            default_operator="and",
+                            default_operator="OR",
                             quote_field_suffix=".exact",
+                            minimum_should_match="70%",
                             fields=["pages.body"],
                         )
                     ],
@@ -195,6 +205,7 @@ class SearchView(TemplateView):
         context["labels"] = {
             "author": Author.model_label,
             "searchPlaceholder": search_placeholder_text,
+            "documentLabels": LabelSerializer(Label.objects.all(), many=True).data,
         }
         context["show_jurisdiction"] = settings.PEACHJAM["SEARCH_JURISDICTION_FILTER"]
         return context
@@ -223,8 +234,11 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     # allowed and default ordering
     ordering_fields = {"date": "date", "title": "title"}
     ordering = ("_score", "date")
-    # this means that ALL terms must appear in ANY of the searched fields
-    simple_query_string_options = {"default_operator": "AND"}
+    # this means that at least 70% of terms must appear in ANY of the searched fields
+    simple_query_string_options = {
+        "default_operator": "OR",
+        "minimum_should_match": "70%",
+    }
 
     filter_fields = {
         "authors": "authors",
@@ -317,6 +331,32 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         # search multiple language indexes
         self.index = get_search_indexes(self.document._index._name)
         self.search = self.search.index(self.index)
+
+    def get_translatable_fields(self, request):
+        # get language from request to use as suffix for translatable fields
+        current_language_code = get_language_from_request(request)
+        suffix = "_" + current_language_code
+
+        self.filter_fields = copy.deepcopy(self.filter_fields)
+        self.faceted_search_fields = copy.deepcopy(self.faceted_search_fields)
+
+        translatable_fields = [
+            "court",
+            "nature",
+            "registry",
+            "order_outcome",
+        ]
+
+        for field in translatable_fields:
+            self.filter_fields[field] = self.filter_fields[field] + suffix
+            self.faceted_search_fields[field]["field"] = (
+                self.faceted_search_fields[field]["field"] + suffix
+            )
+
+    def list(self, request, *args, **kwargs):
+        # TODO: uncomment when we have reindexd the data
+        # self.get_translatable_fields(request)
+        return super().list(request, *args, **kwargs)
 
     @method_decorator(cache_page(CACHE_SECS))
     def dispatch(self, request, *args, **kwargs):

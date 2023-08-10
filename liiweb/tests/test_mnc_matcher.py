@@ -39,3 +39,22 @@ class MncMatcherTest(TestCase):
 </div>""",  # noqa
             lxml.html.tostring(html, encoding="unicode", pretty_print=True).strip(),
         )
+
+    def test_za_provincial_matches(self):
+        html = lxml.html.fromstring(
+            """
+<div>
+  <p>see, Grundler N.O. and Another v Zulu and Another (D8029/2021) [2023] ZAKZDHC 7 (20 February 2023).</p>
+  <p>ted in Motshegoa v Motshegoa and Another (995/98) [2000] ZANWHC 6 (11 May 2000) at p19:</p>
+</div>
+"""  # noqa
+        )
+        self.marker.markup_html_matches(self.frbr_uri, html)
+
+        self.assertMultiLineEqual(
+            """<div>
+  <p>see, Grundler N.O. and Another v Zulu and Another (D8029/2021) <a href="/akn/za-kzn/judgment/zakzdhc/2023/7">[2023] ZAKZDHC 7</a> (20 February 2023).</p>
+  <p>ted in Motshegoa v Motshegoa and Another (995/98) <a href="/akn/za-nw/judgment/zanwhc/2000/6">[2000] ZANWHC 6</a> (11 May 2000) at p19:</p>
+</div>""",  # noqa
+            lxml.html.tostring(html, encoding="unicode", pretty_print=True).strip(),
+        )

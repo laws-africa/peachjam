@@ -16,7 +16,7 @@ class CitationLink(models.Model):
         verbose_name=_("document"),
     )
     text = models.TextField(_("text"), null=False, blank=False)
-    url = models.URLField(_("url"), max_length=1024)
+    url = models.CharField(_("url"), max_length=1024)
     target_id = models.CharField(
         _("target id"), max_length=1024, null=False, blank=False
     )

@@ -1,3 +1,4 @@
+import logging
 from bisect import bisect_left
 
 import lxml.html
@@ -6,6 +7,8 @@ from django.conf import settings
 from docpipe.matchers import ExtractedCitation
 
 from peachjam.models import CitationLink
+
+log = logging.getLogger(__name__)
 
 
 class CitationAnalyser:
@@ -75,6 +78,7 @@ class CitatorMatcher:
 
     citator_url = settings.PEACHJAM["CITATOR_API"]
     citator_key = settings.PEACHJAM["CITATOR_API_KEY"]
+    max_text_size = 1024 * 1024 * 2
 
     def __init__(self):
         # extracted citations
@@ -93,6 +97,18 @@ class CitatorMatcher:
         return lxml.html.fromstring(resp["body"])
 
     def extract_text_matches(self, frbr_uri, text):
+        # Only extract citations from the first 2MB of text. In practice, this impacts only very large gazettes
+        # from SA.
+        # Size distribution of gazettes:
+        # - over 1MB: 1000
+        # - over 2MB: 306
+        # - over 5MB: 112
+        if len(text) > self.max_text_size:
+            log.info(
+                f"Limiting to first {self.max_text_size} bytes of text (actual size: {len(text)} bytes)"
+            )
+            text = text[: self.max_text_size]
+
         resp = self.call_citator(
             {
                 "frbr_uri": frbr_uri.expression_uri(),
@@ -116,7 +132,7 @@ class CitatorMatcher:
 
     def call_citator(self, body):
         headers = {"Authorization": f"token {self.citator_key}"}
-        resp = requests.post(self.citator_url, json=body, headers=headers, timeout=30)
+        resp = requests.post(self.citator_url, json=body, headers=headers, timeout=60)
         resp.raise_for_status()
         return resp.json()
 

@@ -1,5 +1,19 @@
 {% extends 'peachjam/_header.html' %}
-{% load i18n %}
+{% load i18n static %}
+{% block top-bar %}
+  <div class="bg-light p-2">
+    <div class="container d-flex">
+      <a href="https://ejudgment.judicial.gov.gh/"
+         target="_blank"
+         rel="noreferrer"
+         class="ms-auto">
+        <img src="{% static 'images/ejudgment-logo.png' %}"
+             alt="e-judgment logo"
+             height="40"/>
+      </a>
+    </div>
+  </div>
+{% endblock %}
 {% block nav-items %}
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'judgments' %}active{% endif %}"

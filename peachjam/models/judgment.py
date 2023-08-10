@@ -7,7 +7,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, Label
 
 
 class Attorney(models.Model):
@@ -30,7 +30,7 @@ class Judge(models.Model):
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
-        ordering = ["name"]
+        ordering = ("name",)
         verbose_name = _("judge")
         verbose_name_plural = _("judges")
 
@@ -137,6 +137,29 @@ class CourtRegistry(models.Model):
         return super().save(*args, **kwargs)
 
 
+class Bench(models.Model):
+    # This model is not strictly necessary, as it's almost identical to the default that Django creates
+    # for a many-to-many relationship. However, by creating it, we can indicate that the ordering should
+    # be on the PK of the model. This means that we can preserve the ordering of Judges as the are
+    # entered in the admin interface.
+    #
+    # To use this effectively, views that need the judges to be ordered, should call "judgement.bench.all()"
+    # and not "judgment.judges.all()".
+    judgment = models.ForeignKey(
+        "Judgment",
+        related_name="bench",
+        on_delete=models.CASCADE,
+        verbose_name=_("judgment"),
+    )
+    judge = models.ForeignKey(Judge, on_delete=models.PROTECT, verbose_name=_("judge"))
+
+    class Meta:
+        # this is to re-use the existing table rather than creating a new one
+        db_table = "peachjam_judgment_judges"
+        ordering = ("pk",)
+        unique_together = ("judgment", "judge")
+
+
 class Judgment(CoreDocument):
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
@@ -148,7 +171,9 @@ class Judgment(CoreDocument):
         related_name="judgments",
         blank=True,
     )
-    judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
+    judges = models.ManyToManyField(
+        Judge, blank=True, verbose_name=_("judges"), through=Bench
+    )
     attorneys = models.ManyToManyField(
         Attorney, blank=True, verbose_name=_("attorneys")
     )
@@ -204,6 +229,7 @@ class Judgment(CoreDocument):
         ordering = ["title"]
         verbose_name = _("judgment")
         verbose_name_plural = _("judgments")
+        permissions = [("api_judgment", "API judgment access")]
 
     def __str__(self):
         return self.title
@@ -281,6 +307,23 @@ class Judgment(CoreDocument):
         self.title = " ".join(parts)
         self.citation = self.title
 
+    def apply_labels(self):
+        """Apply labels to this judgment based on its properties."""
+        # label showing that a judgment is cited/reported in law reports, hence "more important"
+        label, _ = Label.objects.get_or_create(
+            code="reported",
+            defaults={"name": "Reported", "code": "reported", "level": "success"},
+        )
+
+        # if the judgment has alternative_names, apply the "reported" label
+        if self.alternative_names.exists():
+            self.labels.add(label.pk)
+        # if the judgment no alternative_names, remove the "reported" label
+        else:
+            self.labels.remove(label.pk)
+
+        super().apply_labels()
+
     def pre_save(self):
         # ensure registry aligns to the court
         if self.registry:
@@ -329,7 +372,19 @@ class CaseNumber(models.Model):
     def get_case_number_string(self):
         if self.string_override:
             return self.string_override
-        return f"{self.matter_type or ''} {self.number} of {self.year}".strip()
+
+        parts = []
+
+        if self.matter_type:
+            parts.append(self.matter_type.name)
+
+        if self.number:
+            parts.append(str(self.number))
+
+        if self.year:
+            parts.append(f"of {self.year}" if parts else str(self.year))
+
+        return " ".join(parts)
 
     def save(self, *args, **kwargs):
         self.string = self.get_case_number_string()

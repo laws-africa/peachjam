@@ -1,0 +1,32 @@
+{% extends 'peachjam/_footer.html' %}
+{% load static %}
+{% block newsletter-form %}{% endblock %}
+{% block social-media %}{% endblock %}
+{% block first-content-column %}
+  {% if MICROSITE %}
+    <h5>{{ MICROSITE.locality.name }} By-laws</h5>
+    <ul class="list-unstyled">
+      <li>
+        <a href="{% url 'home_page' %}">By-laws</a>
+      </li>
+      <li>
+        <a href="{{ MICROSITE.website }}">{{ MICROSITE.locality.name }} website</a>
+      </li>
+    </ul>
+    <img src="{% static 'images/municipalities/'|add:MICROSITE.code|add:"-logo.png" %}"
+         alt="{{ MICROSITE.locality.name }}"/>
+  {% endif %}
+{% endblock %}
+{% block second-content-column %}{% endblock %}
+{% block third-content-column %}
+  {% if MICROSITE %}
+    <p>
+      The by-laws are published through a partnership between {{ MICROSITE.locality.name }} Municipality and
+      <a href="https://openup.org.za">OpenUp</a>.
+    </p>
+    <img src="{% static 'images/openup-logo.svg' %}"
+         alt="OpenUp"
+         style="height: 40px"/>
+  {% endif %}
+{% endblock %}
+{% block footer-logos %}{% endblock %}

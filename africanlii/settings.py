@@ -9,6 +9,7 @@ JAZZMIN_SETTINGS["site_header"] = "Africanlii"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "Agp.africanlli.org"  # noqa
 
 PEACHJAM["EXTRA_SEARCH_INDEXES"] = [  # noqa
+    "eswatinilii",
     "ghalii",
     "lawlibrary",
     "lesotholii",

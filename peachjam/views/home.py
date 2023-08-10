@@ -4,7 +4,6 @@ from django.views.generic import TemplateView
 from peachjam.models import (
     Author,
     CoreDocument,
-    Court,
     GenericDocument,
     Judgment,
     LegalInstrument,
@@ -28,17 +27,11 @@ class HomePageView(TemplateView):
             Q(legalinstrument__isnull=True),
         )
 
-        # We explicitly exclude African Commission on Human and Peoples Rights (ACHPR) and
-        # African Committee of Experts on the Rights and Welfare of the Child (ACERWC)
-        excluded_court_codes = ["ACHPR", "ACERWC"]
-        courts = Court.objects.exclude(code__in=excluded_court_codes)
-
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents
         context["recent_instruments"] = recent_instruments
         context["recent_legislation"] = recent_legislation
         context["documents_count"] = documents_count
         context["authors"] = authors
-        context["courts"] = courts
 
         return context

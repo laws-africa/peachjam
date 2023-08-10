@@ -1,21 +1,5 @@
 {% extends 'peachjam/_footer.html' %}
 {% load static i18n %}
-{% block newsletter-form %}
-  <h2 class="mb-2">{% trans 'Subscribe' %}</h2>
-  <div class="row">
-    <div class="col-12 col-md-6 mb-2">
-      <p class="lead mb-0">
-        {% block newsletter-blurb %}
-          {% trans 'Subscribe to our newsletter for updates and news.' %}
-        {% endblock %}
-      </p>
-    </div>
-    <div class="col-12 col-md-6 mb-2">
-      {% block newsletter-form-code %}{% endblock %}
-    </div>
-  </div>
-  <hr/>
-{% endblock %}
 {% block first-content-column %}
   <h5>{% trans 'About' %} {{ APP_NAME }}</h5>
   {% block about %}{% endblock %}

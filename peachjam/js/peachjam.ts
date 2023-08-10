@@ -26,17 +26,43 @@ customElements.define('la-table-of-contents-controller', LaTableOfContentsContro
 customElements.define('la-table-of-contents', LaTableOfContents as any);
 customElements.define('la-toc-item', LaTocItem as any);
 
+export interface PeachJamConfig {
+  appName: string;
+  sentry: {
+    dsn: string | null;
+    environment: string | null;
+  }
+}
+
 class PeachJam {
   private components: any[];
+  public config: PeachJamConfig = {
+    appName: 'Peach Jam',
+    sentry: {
+      dsn: null,
+      environment: null
+    }
+  };
+
   constructor () {
     this.components = [];
   }
 
   setup () {
+    this.setupConfig();
+    // add the current user agent to the root HTML element for use with pocketlaw
+    document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
     this.setupSentry();
     this.createComponents();
     this.setupTooltips();
     this.scrollNavTabs();
+  }
+
+  setupConfig () {
+    const data = document.getElementById('peachjam-config')?.innerText;
+    if (data) {
+      this.config = JSON.parse(data);
+    }
   }
 
   createComponents () {
@@ -68,14 +94,12 @@ class PeachJam {
   }
 
   setupSentry () {
-    const el = document.getElementById('sentry-config');
-    const config = el ? JSON.parse(el.innerHTML) : null;
     // @ts-ignore
-    if (config && window.Sentry) {
+    if (this.config.sentry && window.Sentry) {
       // @ts-ignore
       window.Sentry.init({
-        dsn: config.dsn,
-        environment: config.environment,
+        dsn: this.config.sentry.dsn,
+        environment: this.config.sentry.environment,
         allowUrls: [
           new RegExp(window.location.host.replace('.', '\\.') + '/static/')
         ],

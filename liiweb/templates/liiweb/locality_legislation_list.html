@@ -1,0 +1,36 @@
+{% extends "liiweb/legislation_list.html" %}
+{% load i18n %}
+{% block title %}{{ locality_legislation_title }}{% endblock %}
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'locality_legislation' %}">{{ locality_legislation_title }}</a>
+      </li>
+    </ol>
+  </nav>
+{% endblock %}
+{% block page-heading %}
+  <h1 class="my-4">{% blocktrans with locality=locality.name %}{{ locality }} Legislation{% endblocktrans %}</h1>
+  {% include 'lawlibrary/_legislation_alert.html' %}
+{% endblock %}
+{% block legislation-nav %}
+  <nav class="nav nav-tabs mb-3 border-bottom">
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
+         href="{% url 'locality_legislation_list' locality.code %}">Current legislation</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
+         href="{% url 'locality_legislation_list_repealed' locality.code %}">Repealed legislation</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'subleg' %}active{% endif %}"
+         href="{% url 'locality_legislation_list_subsidiary' locality.code %}">{{ PEACHJAM_SETTINGS.subleg_label }}</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
+         href="{% url 'locality_legislation_list_all' locality.code %}">All legislation</a>
+    </li>
+  </nav>
+{% endblock %}

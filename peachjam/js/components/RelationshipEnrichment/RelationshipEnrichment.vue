@@ -17,7 +17,7 @@
         </div>
 
         <div
-          v-if="!readonly"
+          v-if="editable"
           class="float-end d-none d-lg-block"
         >
           <div class="dropdown">
@@ -75,7 +75,7 @@ export default {
     },
     viewRoot: HTMLElement,
     gutter: HTMLElement,
-    readonly: Boolean,
+    editable: Boolean,
     thisWorkFrbrUri: {
       type: String,
       default: ''

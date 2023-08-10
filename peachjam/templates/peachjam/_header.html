@@ -26,17 +26,19 @@
         {% if request.path == '/' %}
         {% else %}
           <form method="get" action="{% url 'search:search' %}">
-            <div class="input-group">
-              <input type="text"
-                     class="form-control"
-                     placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                     aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                     aria-describedby="button-addon2"
-                     name="q"/>
-              <button class="btn btn-dark" type="submit" id="button-addon2">
-                <i class="bi bi-search text-white"></i>
-              </button>
-            </div>
+            {% block search-form %}
+              <div class="input-group">
+                <input type="text"
+                       class="form-control"
+                       placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                       aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
+                       aria-describedby="button-addon2"
+                       name="q"/>
+                <button class="btn btn-dark" type="submit" id="button-addon2">
+                  <i class="bi bi-search text-white"></i>
+                </button>
+              </div>
+            {% endblock %}
           </form>
         {% endif %}
         {% if user.is_authenticated %}

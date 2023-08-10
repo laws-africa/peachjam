@@ -298,3 +298,37 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
           git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/nigerialii-peachjam'
           git_push_flags: '--force'
+
+  deploy-open-by-laws:
+    if: ${{ always() }}
+    needs: deploy-tcilii
+    name: Deploy to open-by-laws
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: git push to obl.laws.africa
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/open-by-laws'
+          git_push_flags: '--force'
+
+  deploy-lii:
+    if: ${{ always() }}
+    needs: deploy-senlii
+    name: Deploy to lii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: git push to lii.laws.africa
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/liiweb'
+          git_push_flags: '--force'
