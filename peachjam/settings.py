@@ -71,6 +71,8 @@ INSTALLED_APPS = [
     "background_task",
     "ckeditor",
     "polymorphic",
+    "drf_spectacular",
+    "django_advanced_password_validation",
 ]
 
 MIDDLEWARE = [
@@ -197,6 +199,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+    {
+        "NAME": "django_advanced_password_validation.advanced_password_validation.ContainsDigitsValidator",
+        "OPTIONS": {"min_digits": 1},
+    },
+    {
+        "NAME": "django_advanced_password_validation.advanced_password_validation.ContainsUppercaseValidator",
+        "OPTIONS": {"min_uppercase": 1},
+    },
+    {
+        "NAME": "django_advanced_password_validation.advanced_password_validation.ContainsLowercaseValidator",
+        "OPTIONS": {"min_lowercase": 1},
+    },
+    {
+        "NAME": "django_advanced_password_validation.advanced_password_validation.ContainsSpecialCharactersValidator",
+        "OPTIONS": {"min_characters": 1},
     },
 ]
 
