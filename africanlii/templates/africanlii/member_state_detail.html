@@ -27,6 +27,7 @@
 {% endblock %}
 {% block page-header %}
   <h1 class="mt-4">{{ member_state }}</h1>
+  {% include 'africanlii/_lii_info.html' %}
   {% include 'peachjam/_document_count.html' %}
 {% endblock %}
 {% block page-list-facets %}{% endblock %}

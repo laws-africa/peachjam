@@ -24,6 +24,7 @@
   "Delete": "Excluir",
   "Document nature": "Natureza do documento",
   "Document type": "Tipo de documento",
+  "Edit": "Editar",
   "Enter end date": "Digite a data final",
   "Enter start date": "Digite a data inicial",
   "Expand all": "Expandir tudo",
@@ -31,6 +32,7 @@
   "Judges": "Juízes",
   "Jurisdiction": "Jurisdição",
   "Language": "Idioma",
+  "Link citation": "Citação de link",
   "Loading": "Carregando...",
   "Locality": "Localidade",
   "Matter type": "Tipo de matéria",
@@ -45,6 +47,9 @@
   "Regional body": "Corpo regional",
   "Relevance": "Relevância",
   "Search": "Pesquisa",
+  "Search {{appName}}": {
+    "": "Pesquisar {{appName}}..."
+  },
   "Search document content": "Pesquisar conteúdo de documento",
   "Search documents": "Pesquisar documentos",
   "Search table of contents": "Pesquisar na tabela de conteúdos",

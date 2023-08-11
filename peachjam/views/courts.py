@@ -15,7 +15,7 @@ class CourtDetailView(FilteredDocumentListView):
     model = Judgment
     template_name = "peachjam/court_detail.html"
     navbar_link = "judgments"
-    queryset = Judgment.objects.prefetch_related("judges")
+    queryset = Judgment.objects.prefetch_related("labels")
 
     def get_base_queryset(self):
         qs = super().get_base_queryset().filter(court=self.court)
