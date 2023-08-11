@@ -17,5 +17,5 @@ router.register(
 
 urlpatterns = [
     # public-facing API
-    path("v1/", include(router.urls)),
+    path("", include(router.urls)),
 ]
