@@ -33,8 +33,11 @@ def add_slash_to_frbr_uri(*args, **kwargs):
 
 def get_language(request):
     """Get language from the request object and return its 3-letter language code."""
-    language = get_language_from_request(request)
-    return Language.objects.get(iso_639_1__iexact=language).iso_639_3
+    if not hasattr(request, "language"):
+        language = get_language_from_request(request)
+        # store it on the request object because it won't change
+        request.language = Language.objects.get(iso_639_1__iexact=language).iso_639_3
+    return request.language
 
 
 def pdfjs_to_text(fname):
