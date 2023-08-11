@@ -1,6 +1,7 @@
 import logging
 import re
 from datetime import datetime
+from functools import cached_property, reduce
 from tempfile import NamedTemporaryFile
 
 import magic
@@ -9,6 +10,7 @@ from cobalt import FrbrUri
 from countries_plus.models import Country
 from dateutil import parser
 from django.core.files import File
+from django.db.models import Q
 from django.utils.text import slugify
 from languages_plus.models import Language
 
@@ -67,6 +69,15 @@ class Adapter:
 
 @plugins.register("ingestor-adapter")
 class IndigoAdapter(Adapter):
+    """Adapter that pulls data from the Indigo API.
+
+    Settings:
+
+    * token: API token
+    * api_url: URL to API base (no ending slash)
+    * places: space-separate list of place codes, such as: bw za-*
+    """
+
     def __init__(self, settings):
         super().__init__(settings)
         self.client = requests.session()
@@ -75,13 +86,7 @@ class IndigoAdapter(Adapter):
                 "Authorization": f"Token {self.settings['token']}",
             }
         )
-        self.url = self.settings["url"]
         self.api_url = self.settings["api_url"]
-        self.locality = self.settings.get(
-            "locality"
-        )  # using .get to avoid KeyError since locality is not required
-        self.jurisdiction = self.settings["jurisdiction"]
-        self.place_code = f"{self.jurisdiction}{'-' if self.locality else ''}{self.locality if self.locality else ''}"
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -94,13 +99,46 @@ class IndigoAdapter(Adapter):
         return updated_docs, deleted_docs
 
     def get_doc_list(self):
-        url = f"{self.api_url}/akn/{self.place_code}/.json"
         results = []
-        while url:
-            res = self.client_get(url).json()
-            results.extend(res["results"])
-            url = res["next"]
+
+        for place_code in self.place_codes:
+            logger.info(f"Getting document list for {place_code}")
+            url = f"{self.api_url}/akn/{place_code}/.json"
+            while url:
+                res = self.client_get(url).json()
+                results.extend(res["results"])
+                url = res["next"]
+
         return results
+
+    @cached_property
+    def place_codes(self):
+        """Get a list of place codes, based on the `places` setting.
+
+        * za: just za
+        * za-cpt: just za-cpt
+        * za-*: all localities in za
+        """
+        codes = []
+
+        for code in self.settings["places"].split():
+            if code.endswith("-*"):
+                place = code.split("-", 1)[0]
+                codes.append(place)
+                # get all localities for this place
+                for loc in self.places[place]["localities"]:
+                    codes.append(loc["frbr_uri_code"])
+                continue
+            else:
+                codes.append(code)
+
+        return codes
+
+    @cached_property
+    def places(self):
+        """Get place information from server as a dict from code to place info."""
+        places = self.client_get(f"{self.api_url}/countries.json").json()["results"]
+        return {p["code"]: p for p in places}
 
     def check_for_deleted(self, docs):
         uris = {d["expression_frbr_uri"] for d in docs}
@@ -109,16 +147,22 @@ class IndigoAdapter(Adapter):
                 for expr in pit["expressions"]:
                     uris.add(expr["expression_frbr_uri"])
 
-        qs = Legislation.objects.filter(jurisdiction__iso=self.jurisdiction.upper())
-        if self.locality:
-            qs = qs.filter(locality__code=self.locality)
-        else:
-            qs = qs.filter(locality=None)
-        deleted = qs.exclude(expression_frbr_uri__in=list(uris)).values_list(
+        # filter by place/locality codes
+        places = []
+        for code in self.place_codes:
+            if "-" in code:
+                country, locality = code.split("-", 1)
+                places.append(
+                    Q(jurisdiction__iso=country.upper(), locality__code=locality)
+                )
+            else:
+                places.append(Q(jurisdiction__iso=code.upper(), locality__code=None))
+        # combine the place queries with OR
+        qs = Legislation.objects.filter(reduce(lambda a, b: a | b, places))
+
+        return qs.exclude(expression_frbr_uri__in=list(uris)).values_list(
             "expression_frbr_uri", flat=True
         )
-
-        return deleted
 
     def check_for_updated(self, docs, last_refreshed):
         docs = [

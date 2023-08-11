@@ -82,15 +82,35 @@ def delete_document(ingestor_id, expression_frbr_uri):
 
 @background(queue="peachjam", remove_existing_tasks=True)
 def run_ingestors():
+    """Queues up background tasks to run ingestors."""
     from peachjam.models import Ingestor
 
-    log.info("Running ingestors...")
+    log.info("Setting up background tasks to run ingestors...")
 
     for ingestor in Ingestor.objects.all():
         if ingestor.enabled:
-            ingestor.check_for_updates()
+            run_ingestor(ingestor.pk)
 
-    log.info("Running ingestors done")
+    log.info("Done")
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def run_ingestor(ingestor_id):
+    """Run an ingestor."""
+    from peachjam.models import Ingestor
+
+    log.info(f"Running ingestor {ingestor_id}...")
+
+    ingestor = Ingestor.objects.filter(pk=ingestor_id).first()
+    if not ingestor:
+        log.info(f"No ingestor with id {ingestor_id} exists, ignoring.")
+        return
+
+    if ingestor.enabled:
+        ingestor.check_for_updates()
+        log.info("Done")
+    else:
+        log.info("Ingestor not enabled, ignoring.")
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
