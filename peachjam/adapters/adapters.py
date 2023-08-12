@@ -127,7 +127,9 @@ class IndigoAdapter(Adapter):
                 codes.append(place)
                 # get all localities for this place
                 for loc in self.places[place]["localities"]:
-                    codes.append(loc["frbr_uri_code"])
+                    # ignore playgrounds when expanding wildcards
+                    if loc["code"] != "playground":
+                        codes.append(loc["frbr_uri_code"])
                 continue
             else:
                 codes.append(code)
