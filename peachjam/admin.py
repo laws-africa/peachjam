@@ -909,9 +909,14 @@ class LabelAdmin(admin.ModelAdmin):
     prepopulated_fields = {"code": ("name",)}
 
 
+@admin.register(Locality)
+class LocalityAdmin(admin.ModelAdmin):
+    list_display = ("name", "jurisdiction", "code")
+    prepopulated_fields = {"code": ("name",)}
+
+
 admin.site.register(
     [
-        Locality,
         CitationLink,
         Attorney,
         Judge,
