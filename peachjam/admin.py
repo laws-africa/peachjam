@@ -853,6 +853,8 @@ class DocumentNatureAdmin(admin.ModelAdmin):
 @admin.register(Court)
 class CourtAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]
+    list_display = ("name", "code")
+    search_fields = ("name", "code")
 
 
 @admin.register(Author)
@@ -913,13 +915,19 @@ class LabelAdmin(admin.ModelAdmin):
 class LocalityAdmin(admin.ModelAdmin):
     list_display = ("name", "jurisdiction", "code")
     prepopulated_fields = {"code": ("name",)}
+    search_fields = ("name", "code")
+
+
+@admin.register(Judge)
+class JudgeAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
 
 
 admin.site.register(
     [
         CitationLink,
         Attorney,
-        Judge,
         MatterType,
         CourtClass,
         AttachedFileNature,
