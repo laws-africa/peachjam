@@ -3,6 +3,9 @@ from rest_framework import serializers
 from peachjam.models import (
     CitationLink,
     CoreDocument,
+    Court,
+    Gazette,
+    Judgment,
     Label,
     Legislation,
     Predicate,
@@ -137,3 +140,59 @@ class LabelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Label
         exclude = []
+
+
+class CourtSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Court
+        fields = ["id", "name", "code"]
+
+
+class BaseSerializerMixin:
+    def get_url(self, instance):
+        # TODO: check https
+        return self.context["request"].build_absolute_uri(instance.get_absolute_url())
+
+
+class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
+    court = CourtSerializer(read_only=True)
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Judgment
+        fields = (
+            "citation",
+            "court",
+            "created_at",
+            "date",
+            "expression_frbr_uri",
+            "jurisdiction",
+            "language",
+            "locality",
+            "mnc",
+            "id",
+            "title",
+            "updated_at",
+            "url",
+            "work_frbr_uri",
+        )
+
+
+class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Gazette
+        fields = (
+            "created_at",
+            "date",
+            "expression_frbr_uri",
+            "jurisdiction",
+            "language",
+            "locality",
+            "id",
+            "title",
+            "updated_at",
+            "url",
+            "work_frbr_uri",
+        )

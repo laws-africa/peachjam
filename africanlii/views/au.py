@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, TemplateView
 
+from africanlii.constants import LIIS
 from africanlii.models import (
     AfricanUnionInstitution,
     AfricanUnionOrgan,
@@ -27,6 +28,7 @@ class AfricanUnionDetailPageView(TemplateView):
         context["au_institutions"] = AfricanUnionInstitution.objects.prefetch_related(
             "author"
         )
+        context["liis"] = LIIS
         return context
 
 
@@ -67,5 +69,6 @@ class MemberStateDetailView(DetailView):
             country=self.get_object().country
         )
         context["doc_count"] = ratification_countries.count()
+        context["liis"] = LIIS
 
         return context

@@ -7,15 +7,9 @@
         type="text/css"/>
 {% endblock %}
 {% block head-js %}
-  <!-- Small script to add the current user agent to the root HTML element -->
-  <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function () {
-      document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
-    });
-  </script>
+  {{ PEACHJAM_JS_CONFIG|json_script:"peachjam-config" }}
   {% if not DEBUG %}
     <!-- sentry -->
-    {{ SENTRY_CONFIG|json_script:"sentry-config" }}
     <script src="https://browser.sentry-cdn.com/7.51.2/bundle.min.js"
             integrity="sha384-TIc4wz4oU9UgbI5Cu7R/6jhJOszkPGImz+Ney9MXZ3MESAGeYJUOV+36KnTacIXP"
             crossorigin="anonymous"

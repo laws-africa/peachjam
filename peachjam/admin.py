@@ -709,14 +709,17 @@ class IngestorAdmin(admin.ModelAdmin):
     list_display = ("name", "last_refreshed_at", "enabled")
 
     def refresh_all_content(self, request, queryset):
-        from peachjam.tasks import run_ingestors
+        from peachjam.tasks import run_ingestor
 
         queryset.update(last_refreshed_at=None)
-        # queue up the background ingestor update task
-        run_ingestors()
+        for ing in queryset:
+            # queue up the background ingestor update task
+            run_ingestor(ing.pk)
         self.message_user(request, _("Refreshing content in the background."))
 
-    refresh_all_content.short_description = gettext_lazy("Refresh all content")
+    refresh_all_content.short_description = gettext_lazy(
+        "Refresh content selected ingestors"
+    )
 
 
 class ArticleAttachmentInline(BaseAttachmentFileInline):
@@ -906,9 +909,14 @@ class LabelAdmin(admin.ModelAdmin):
     prepopulated_fields = {"code": ("name",)}
 
 
+@admin.register(Locality)
+class LocalityAdmin(admin.ModelAdmin):
+    list_display = ("name", "jurisdiction", "code")
+    prepopulated_fields = {"code": ("name",)}
+
+
 admin.site.register(
     [
-        Locality,
         CitationLink,
         Attorney,
         Judge,

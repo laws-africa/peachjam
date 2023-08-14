@@ -11,9 +11,13 @@ def general(request):
         "DEBUG": settings.DEBUG,
         "APP_NAME": settings.PEACHJAM["APP_NAME"],
         "SUPPORT_EMAIL": settings.PEACHJAM["SUPPORT_EMAIL"],
-        "SENTRY_CONFIG": {
-            "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],
-            "environment": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
-        },
         "PEACHJAM_SETTINGS": pj_settings(),
+        # this object will be injected into Javascript to provide configuration settings to the Javascript app
+        "PEACHJAM_JS_CONFIG": {
+            "appName": settings.PEACHJAM["APP_NAME"],
+            "sentry": {
+                "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],
+                "environment": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
+            },
+        },
     }
