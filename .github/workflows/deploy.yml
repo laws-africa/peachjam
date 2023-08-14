@@ -309,7 +309,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: git push to obl.laws.africa
+      - name: git push to openbylaws.org.za
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}

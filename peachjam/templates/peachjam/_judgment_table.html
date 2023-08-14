@@ -4,7 +4,6 @@
     <thead>
       <tr>
         <th scope="col" style="width: 70%">{% trans 'Title' %}</th>
-        <th scope="col">{% trans 'Judges' %}</th>
         <th scope="col">{% trans 'Date' %}</th>
       </tr>
     </thead>
@@ -13,8 +12,8 @@
         <tr>
           <td>
             <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+            {% include 'peachjam/_labels.html' with labels=document.labels.all %}
           </td>
-          <td>{{ document.judges_string }}</td>
           <td style="white-space: nowrap;">{{ document.date }}</td>
         </tr>
       {% endfor %}
