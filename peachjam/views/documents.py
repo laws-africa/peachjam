@@ -50,10 +50,6 @@ class RedirectResolver:
             "place_code": [],
             "domain": "openbylaws.org.za",
         },
-        "senlii": {
-            "country_code": "sn",
-            "domain": "senlii.org",
-        },
         "seylii": {
             "country_code": "sc",
             "domain": "seylii.org",
