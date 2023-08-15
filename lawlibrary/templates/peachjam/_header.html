@@ -28,6 +28,12 @@
     </a>
   </li>
   <li class="nav-item">
+    <a class="nav-link {% if view.navbar_link == 'legislation/municipal' %}active{% endif %}"
+       href="{% url 'municipal_legislation' %}">
+      {% trans 'Municipal By-laws' %}
+    </a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'gazettes' %}active{% endif %}"
        href="{% url 'gazettes' %}">
       {% trans 'Gazettes' %}
