@@ -4,14 +4,25 @@
   <h5>{% trans 'About' %} {{ APP_NAME }}</h5>
   {% block about %}{% endblock %}
   {% block first-content-column-links %}
-    <div>
-      <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
-    </div>
+    {% if PEACHJAM_SETTINGS.pocket_law_repo %}
+      {% block pocketlaw %}
+        <div class="mb-3">
+          <h5>Pocket Law</h5>
+          {% url 'pocketlaw' as pocket_law_url %}
+          {% blocktrans trimmed %}
+            Use {{ APP_NAME }} offline with <a href="{{ pocket_law_url }}">Pocket Law</a>.
+          {% endblocktrans %}
+        </div>
+      {% endblock %}
+    {% endif %}
     {% if PEACHJAM_SETTINGS.metabase_dashboard_link %}
-      <div>
+      <div class="mb-3">
         <a href="{% url 'metabase_stats' %}">{% trans 'Site Statistics' %}</a>
       </div>
     {% endif %}
+    <div>
+      <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
+    </div>
   {% endblock %}
 {% endblock %}
 {% block second-content-column %}

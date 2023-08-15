@@ -71,9 +71,11 @@ class PeachJamSettings(SingletonModel):
     facebook_link = models.URLField(
         verbose_name=_("facebook link"), null=True, blank=True
     )
-
     re_extract_citations = models.BooleanField(
         verbose_name=_("re-extract citations"), default=True
+    )
+    pocket_law_repo = models.CharField(
+        verbose_name=_("Pocket Law repo"), max_length=1024, null=True, blank=True
     )
 
     class Meta:
