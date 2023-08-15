@@ -1,0 +1,36 @@
+{% if locality_type == "province" %}
+  <nav class="nav nav-tabs mb-3 border-bottom">
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
+         href="{% url 'locality_legislation_list' locality.code %}">Current legislation</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
+         href="{% url 'locality_legislation_list_repealed' locality.code %}">Repealed legislation</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'subleg' %}active{% endif %}"
+         href="{% url 'locality_legislation_list_subsidiary' locality.code %}">{{ PEACHJAM_SETTINGS.subleg_label }}</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
+         href="{% url 'locality_legislation_list_all' locality.code %}">All legislation</a>
+    </li>
+  </nav>
+{% endif %}
+{% if locality_type == "municipality" %}
+  <nav class="nav nav-tabs mb-3 border-bottom">
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
+         href="{% url 'locality_legislation_list' locality.code %}">Current legislation</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
+         href="{% url 'locality_legislation_list_repealed' locality.code %}">Repealed legislation</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
+         href="{% url 'locality_legislation_list_all' locality.code %}">All legislation</a>
+    </li>
+  </nav>
+{% endif %}
