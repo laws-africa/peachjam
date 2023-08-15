@@ -15,7 +15,6 @@ PEACHJAM["EXTRA_SEARCH_INDEXES"] = [  # noqa
     "lesotholii",
     "malawilii",
     "namiblii",
-    "senlii",
     "seylii",
     "sierralii",
     "tanzlii",
