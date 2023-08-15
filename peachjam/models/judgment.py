@@ -26,7 +26,9 @@ class Attorney(models.Model):
 
 
 class Judge(models.Model):
-    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
@@ -39,7 +41,9 @@ class Judge(models.Model):
 
 
 class OrderOutcome(models.Model):
-    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
