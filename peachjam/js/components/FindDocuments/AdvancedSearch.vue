@@ -122,7 +122,7 @@ export default {
 
     disableDate () {
       // Disable dates if there are no search values
-      return !(['title', 'headnote_holding', 'flynote', 'content'].some(key => this.modelValue[key]) || this.globalSearchValue);
+      return !(['title', 'case_summary', 'flynote', 'content'].some(key => this.modelValue[key]) || this.globalSearchValue);
     }
   },
 

@@ -245,7 +245,7 @@ class DocumentForm(forms.ModelForm):
         required=False,
     )
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
-    headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
+    case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
     date = forms.DateField(widget=DateSelectorWidget())
 
     def __init__(self, data=None, *args, **kwargs):
@@ -671,7 +671,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
     fieldsets[2][1]["classes"] = ["collapse"]
     fieldsets[3][1]["fields"].extend(
-        ["headnote_holding", "additional_citations", "flynote"]
+        ["case_summary", "additional_citations", "flynote"]
     )
     readonly_fields = [
         "mnc",

@@ -324,7 +324,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     }
 
     # TODO perhaps better to explicitly include specific fields
-    source = {"excludes": ["pages", "content", "flynote", "headnote_holding"]}
+    source = {"excludes": ["pages", "content", "flynote", "case_summary"]}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
