@@ -99,10 +99,14 @@ class Legislation(CoreDocument):
             code="repealed",
             defaults={"name": "Repealed", "code": "repealed", "level": "danger"},
         )
+
+        labels = list(self.labels.all())
+
         # apply label if repealed
         if self.repealed:
-            self.labels.add(label.pk)
-        else:
+            if label not in labels:
+                self.labels.add(label.pk)
+        elif label in labels:
             # not repealed, remove label
             self.labels.remove(label.pk)
 
