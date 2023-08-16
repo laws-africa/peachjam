@@ -1,5 +1,5 @@
 import DocumentSearch from '../DocumentSearch/index.vue';
-import PdfRenderer from '../pdf-renderer';
+import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { vueI18n } from '../../i18n';
