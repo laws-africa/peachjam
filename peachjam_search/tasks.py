@@ -22,6 +22,15 @@ class BackgroundTaskSearchProcessor(RealTimeSignalProcessor):
     """
 
     def handle_save(self, sender, instance, **kwargs):
+        self.update_if_core_document(sender, instance, **kwargs)
+
+    def handle_pre_delete(self, sender, instance, **kwargs):
+        # an instance of a model potentially related to a CoreDocument (but not a CoreDocument itself) is being deleted
+        # if it's related, queue up a re-index of the CoreDocument
+        self.update_if_core_document(sender, instance, **kwargs)
+
+    def update_if_core_document(self, sender, instance, **kwargs):
+        """If the instance is a CoreDocument or a model related to a CoreDocument, queue up a re-index."""
         if not DEDConfig.autosync_enabled() or kwargs.get("raw"):
             return
 
@@ -30,7 +39,7 @@ class BackgroundTaskSearchProcessor(RealTimeSignalProcessor):
         if any(isinstance(instance, cls) for cls in [CoreDocument, *related_models]):
             # queue up the task for 60 seconds from now, so that quick edits to the document don't all trigger
             # a re-index
-            search_model_saved(sender._meta.label, instance.pk, schedule=60)
+            search_model_saved(instance.__class__._meta.label, instance.pk, schedule=60)
 
 
 def get_processor():

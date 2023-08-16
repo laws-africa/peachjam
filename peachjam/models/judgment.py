@@ -319,11 +319,14 @@ class Judgment(CoreDocument):
             defaults={"name": "Reported", "code": "reported", "level": "success"},
         )
 
+        labels = list(self.labels.all())
+
         # if the judgment has alternative_names, apply the "reported" label
         if self.alternative_names.exists():
-            self.labels.add(label.pk)
+            if label not in labels:
+                self.labels.add(label.pk)
         # if the judgment no alternative_names, remove the "reported" label
-        else:
+        elif label in labels:
             self.labels.remove(label.pk)
 
         super().apply_labels()
