@@ -218,7 +218,7 @@ import AdvancedSearch from './AdvancedSearch.vue';
 import { scrollToElement } from '../../utils/function';
 
 function resetAdvancedFields (fields) {
-  const advanced = ['all', 'title', 'judges', 'headnote_holding', 'flynote', 'content'];
+  const advanced = ['all', 'title', 'judges', 'case_summary', 'flynote', 'content'];
   for (const a of advanced) {
     fields[a] = {
       q: '',
