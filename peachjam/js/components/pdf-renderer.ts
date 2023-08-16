@@ -1,5 +1,5 @@
 import debounce from 'lodash/debounce';
-import items from '../items.json';
+import peachJam from '../peachjam';
 // @ts-ignore
 import { markRange, rangeToTarget, targetToRange } from '../dom';
 import { scrollToElement } from '../utils/function';
@@ -33,7 +33,7 @@ class PdfRenderer {
     if (!this.pdfjsLib) {
       throw new Error('Failed to load pdf.js');
     }
-    this.pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/js/pdf.worker-prod.js';
+    this.pdfjsLib.GlobalWorkerOptions.workerSrc = peachJam.config.pdfWorker;
     this.root = root;
     this.pdfUrl = root.dataset.pdf;
     this.pdfContentWrapper = root.querySelector('.pdf-content');
