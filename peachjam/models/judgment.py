@@ -26,7 +26,9 @@ class Attorney(models.Model):
 
 
 class Judge(models.Model):
-    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
@@ -39,7 +41,9 @@ class Judge(models.Model):
 
 
 class OrderOutcome(models.Model):
-    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
@@ -184,7 +188,7 @@ class Judgment(CoreDocument):
         related_name="judgments",
         blank=True,
     )
-    headnote_holding = models.TextField(_("headnote holding"), null=True, blank=True)
+    case_summary = models.TextField(_("case summary"), null=True, blank=True)
     additional_citations = models.TextField(
         _("additional citations"), null=True, blank=True
     )

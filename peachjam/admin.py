@@ -245,7 +245,7 @@ class DocumentForm(forms.ModelForm):
         required=False,
     )
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
-    headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
+    case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
     date = forms.DateField(widget=DateSelectorWidget())
 
     def __init__(self, data=None, *args, **kwargs):
@@ -671,7 +671,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
     fieldsets[2][1]["classes"] = ["collapse"]
     fieldsets[3][1]["fields"].extend(
-        ["headnote_holding", "additional_citations", "flynote"]
+        ["case_summary", "additional_citations", "flynote"]
     )
     readonly_fields = [
         "mnc",
@@ -853,6 +853,8 @@ class DocumentNatureAdmin(admin.ModelAdmin):
 @admin.register(Court)
 class CourtAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]
+    list_display = ("name", "code")
+    search_fields = ("name", "code")
 
 
 @admin.register(Author)
@@ -913,13 +915,19 @@ class LabelAdmin(admin.ModelAdmin):
 class LocalityAdmin(admin.ModelAdmin):
     list_display = ("name", "jurisdiction", "code")
     prepopulated_fields = {"code": ("name",)}
+    search_fields = ("name", "code")
+
+
+@admin.register(Judge)
+class JudgeAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
 
 
 admin.site.register(
     [
         CitationLink,
         Attorney,
-        Judge,
         MatterType,
         CourtClass,
         AttachedFileNature,
