@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks, get_language
@@ -76,7 +77,7 @@ class LocalityLegislationView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         localities = Locality.objects.all()
-        context["province_groups"] = list(chunks(localities, 2))
+        context["locality_groups"] = list(chunks(localities, 2))
         return context
 
 
@@ -95,5 +96,6 @@ class LocalityLegislationListView(LegislationListView):
         return super().get_context_data(
             locality=self.locality,
             locality_legislation_title="Provincial Legislation",
-            **kwargs
+            page_heading=_("%(locality)s Legislation" % {"locality": self.locality}),
+            **kwargs,
         )
