@@ -709,14 +709,17 @@ class IngestorAdmin(admin.ModelAdmin):
     list_display = ("name", "last_refreshed_at", "enabled")
 
     def refresh_all_content(self, request, queryset):
-        from peachjam.tasks import run_ingestors
+        from peachjam.tasks import run_ingestor
 
         queryset.update(last_refreshed_at=None)
-        # queue up the background ingestor update task
-        run_ingestors()
+        for ing in queryset:
+            # queue up the background ingestor update task
+            run_ingestor(ing.pk)
         self.message_user(request, _("Refreshing content in the background."))
 
-    refresh_all_content.short_description = gettext_lazy("Refresh all content")
+    refresh_all_content.short_description = gettext_lazy(
+        "Refresh content selected ingestors"
+    )
 
 
 class ArticleAttachmentInline(BaseAttachmentFileInline):
@@ -850,6 +853,8 @@ class DocumentNatureAdmin(admin.ModelAdmin):
 @admin.register(Court)
 class CourtAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]
+    list_display = ("name", "code")
+    search_fields = ("name", "code")
 
 
 @admin.register(Author)
@@ -906,12 +911,23 @@ class LabelAdmin(admin.ModelAdmin):
     prepopulated_fields = {"code": ("name",)}
 
 
+@admin.register(Locality)
+class LocalityAdmin(admin.ModelAdmin):
+    list_display = ("name", "jurisdiction", "code")
+    prepopulated_fields = {"code": ("name",)}
+    search_fields = ("name", "code")
+
+
+@admin.register(Judge)
+class JudgeAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+
 admin.site.register(
     [
-        Locality,
         CitationLink,
         Attorney,
-        Judge,
         MatterType,
         CourtClass,
         AttachedFileNature,
