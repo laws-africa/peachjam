@@ -3,7 +3,6 @@ import peachJam from '../../peachjam';
 // @ts-ignore
 import { markRange, rangeToTarget, targetToRange } from '../../dom';
 import { scrollToElement } from '../../utils/function';
-import {startsWith} from "lodash";
 
 type GlobalWorkerOptionsType = {
   [key: string]: any,
