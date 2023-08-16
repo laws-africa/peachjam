@@ -8,7 +8,7 @@ import peachjam.models.core_document_model
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0096_auto_20230814_1557"),
+        ("peachjam", "0099_peachjamsettings_pocket_law_repo"),
     ]
 
     operations = [
