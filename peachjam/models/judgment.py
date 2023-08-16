@@ -188,7 +188,7 @@ class Judgment(CoreDocument):
         related_name="judgments",
         blank=True,
     )
-    headnote_holding = models.TextField(_("headnote holding"), null=True, blank=True)
+    case_summary = models.TextField(_("case summary"), null=True, blank=True)
     additional_citations = models.TextField(
         _("additional citations"), null=True, blank=True
     )
