@@ -1,9 +1,12 @@
 {% extends 'peachjam/layouts/base.html' %}
+{% load static %}
 <title>
   {% block title %}PocketLaw Resources{% endblock %}
 - {{ APP_NAME }}</title>
 {% block head-css %}{% endblock %}
-{% block head-js %}<script src="/static/lib/pdfjs/pdf.worker.js"></script>{% endblock %}
+{% block head-js %}
+  <script src="{% static 'js/pdf.worker-prod.js' %}"></script>
+{% endblock %}
 {% block header %}{% endblock %}
 {% block body-content %}{% endblock %}
 {% block footer %}{% endblock %}

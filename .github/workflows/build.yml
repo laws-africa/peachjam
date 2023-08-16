@@ -32,5 +32,5 @@ jobs:
       - name: Push
         uses: EndBug/add-and-commit@v7
         with:
-          add: 'peachjam/static/js/*app-prod.js --force'
+          add: 'peachjam/static/js/*app-prod.js peachjam/static/js/pdf.worker-prod.js --force'
           message: 'Update compiled javascript'
