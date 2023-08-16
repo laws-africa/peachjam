@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0096_auto_20230814_1557"),
+        ("peachjam", "0098_alter_judgment_case_summary"),
     ]
 
     operations = [
