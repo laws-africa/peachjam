@@ -1,11 +1,6 @@
 {% extends 'peachjam/layouts/main.html' %}
 {% load peachjam i18n static %}
 {% block title %}{{ document.title }}{% endblock %}
-{% block head-js %}
-  <!--  app-prod.js depends on pdf.js to be loaded-->
-  <!-- <script defer src="{% static 'lib/pdfjs/pdf.js' %}"></script> -->
-  {{ block.super }}
-{% endblock %}
 {% block head-meta %}
   {{ block.super }}
   <meta property="og:title" content="{{ document.title }}" />
