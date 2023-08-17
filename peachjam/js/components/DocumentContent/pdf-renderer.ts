@@ -108,7 +108,7 @@ class PdfRenderer {
     if (!(e.currentTarget instanceof HTMLElement)) return;
     document.location.hash = `#page-${e.currentTarget.dataset.page}`;
     // update the current portion for sharing purposes
-    const portion = i18next.t('Page {{page}}', { page: e.currentTarget.dataset.page });
+    const portion = i18next.t('Page') + ' ' + e.currentTarget.dataset.page;
     this.manager.setSharedPortion(portion);
     this.scrollToPage(e.currentTarget.dataset.page);
   }
