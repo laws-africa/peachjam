@@ -11,6 +11,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericStackedInline
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -95,6 +96,20 @@ class ImportExportMixin(BaseImportExportMixin):
         except IndexError:
             pass
         return resp
+
+    def process_result(self, result, request):
+        if result.has_errors():
+            # HACK
+            # this allows us to show an error page if there were errors during the actual import,
+            # otherwise it fails silently
+            context = self.get_import_context_data()
+            context["result"] = result
+            context.update(self.admin_site.each_context(request))
+            context["title"] = _("Import")
+            context["opts"] = self.model._meta
+            request.current_app = self.admin_site.name
+            return TemplateResponse(request, [self.import_template_name], context)
+        return super().process_result(result, request)
 
 
 class EntityProfileForm(forms.ModelForm):
