@@ -23,11 +23,15 @@ async function getText(data) {
 
   // gather the text for peach page
   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-    const page = await doc.getPage(pageNum);
-
-    const textContent = await page.getTextContent();
+    let pageText = "";
+    try {
+      const page = await doc.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      pageText = textContent.items.map(x => x.str.length === 0 ? '\n' : x.str).join('');
+    } catch (e) {
+      console.warn(`Error on page ${pageNum}:`, e);
+    }
     // convert empty strings to newlines
-    const pageText = textContent.items.map(x => x.str.length === 0 ? '\n' : x.str).join('');
     pages.push(pageText);
   }
 
