@@ -3,6 +3,8 @@ import peachJam from '../../peachjam';
 // @ts-ignore
 import { markRange, rangeToTarget, targetToRange } from '../../dom';
 import { scrollToElement } from '../../utils/function';
+import DocumentContent from './index';
+import i18next from 'i18next';
 
 type GlobalWorkerOptionsType = {
   [key: string]: any,
@@ -25,16 +27,18 @@ class PdfRenderer {
   protected pdfContentMarks: any[] = [];
   protected progressBarElement: HTMLElement | null;
   protected previewPanelsContainer: Element | null;
+  protected manager: DocumentContent;
   public onPreviewPanelClick: () => void = () => {};
   public onPdfLoaded: () => void = () => {};
 
-  constructor (root: HTMLElement) {
+  constructor (root: HTMLElement, manager: DocumentContent) {
+    this.root = root;
+    this.manager = manager;
     this.pdfjsLib = pdfjsLib as iPdfLib;
     if (!this.pdfjsLib) {
       throw new Error('Failed to load pdf.js');
     }
     this.pdfjsLib.GlobalWorkerOptions.workerSrc = peachJam.config.pdfWorker;
-    this.root = root;
     this.pdfUrl = root.dataset.pdf;
     this.pdfContentWrapper = root.querySelector('.pdf-content');
     this.progressBarElement = root.querySelector('.progress-bar');
@@ -103,6 +107,9 @@ class PdfRenderer {
     this.activatePreviewPanel(e.currentTarget);
     if (!(e.currentTarget instanceof HTMLElement)) return;
     document.location.hash = `#page-${e.currentTarget.dataset.page}`;
+    // update the current portion for sharing purposes
+    const portion = i18next.t('Page {{page}}', { page: e.currentTarget.dataset.page });
+    this.manager.setSharedPortion(portion);
     this.scrollToPage(e.currentTarget.dataset.page);
   }
 

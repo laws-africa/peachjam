@@ -43,6 +43,7 @@ class DocumentContent {
     this.setupPdf();
     this.setupSearch();
     this.setupEnrichments();
+    this.setSharedPortion();
     if (this.root.getAttribute('data-display-type') !== 'pdf') {
       // for PDFs, this will be done once the pages are rendered
       this.setupPopups();
@@ -102,7 +103,7 @@ class DocumentContent {
           this.root.dataset[key] = pdfAttrsElement.dataset[key];
         });
       }
-      this.pdfRenderer = new PdfRenderer(this.root);
+      this.pdfRenderer = new PdfRenderer(this.root, this);
       this.pdfRenderer.onPreviewPanelClick = () => {
         this.navOffCanvas?.hide();
       };
@@ -209,6 +210,11 @@ class DocumentContent {
       this.setupTocShowActiveItemOnly();
     }
 
+    this.tocController.addEventListener('itemTitleClicked', (e) => {
+      // @ts-ignore
+      this.setSharedPortion(e.target?.item?.title);
+    });
+
     return true;
   }
 
@@ -255,6 +261,29 @@ class DocumentContent {
     el.popups = true;
     el.provider = '//' + window.location.host;
     this.documentElement.appendChild(el);
+  }
+
+  /**
+   * When the user is focused only on a certain portion of the document, update the social sharing mechanisms
+   * to reflect that.
+   * @param portion a description of the portion being shared
+   */
+  setSharedPortion (portion: string = '') {
+    const parts = [this.root.dataset.title];
+    if (portion) parts.push(portion);
+    parts.push(window.location.toString());
+    const text = parts.join(' - ');
+
+    for (const el of Array.from(document.querySelectorAll('.share-link'))) {
+      const a = el as HTMLAnchorElement;
+      const url = new URL(a.href);
+      for (const key of Array.from(url.searchParams.keys())) {
+        if (key === 'text') {
+          url.searchParams.set(key, text);
+        }
+      }
+      a.href = url.toString();
+    }
   }
 }
 
