@@ -3,6 +3,7 @@
 <div class="document-content"
      data-component="DocumentContent"
      data-display-type="{{ display_type }}"
+     data-title="{{ document.title }}"
      {% if document.frbr_uri_subtype == 'book' %} data-toc-show-active-item-only{% endif %}>
   <!--
   contents of #navigation-content will be placed in [data-offcanvas-body] for tablet/mobile screensize
