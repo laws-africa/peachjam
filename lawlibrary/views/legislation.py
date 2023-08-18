@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from lawlibrary.constants import PROVINCIAL_CODES
@@ -45,11 +46,13 @@ class LocalityLegislationListView(BaseLocalityLegislationListView):
                 "%(locality)s Legislation" % {"locality": self.locality}
             )
             context["show_subleg"] = True
+            context["breadcrumb_link"] = reverse("locality_legislation")
         else:
             context["locality_legislation_title"] = "Municipal By-laws"
             context["page_heading"] = _(
                 "%(locality)s By-laws" % {"locality": self.locality}
             )
             self.navbar_link = "legislation/municipal"
+            context["breadcrumb_link"] = reverse("municipal_legislation")
 
         return context
