@@ -77,6 +77,16 @@
   {% endwith %}
 {% endblock %}
 {% block extra-metadata %}
+  {% if document.flynote %}
+    <dl>
+      <dt>
+        {% trans 'Flynote' %}
+      </dt>
+      <dd>
+        {{ document.flynote|safe }}
+      </dd>
+    </dl>
+  {% endif %}
   {% if document.case_summary %}
     <dl>
       <dt>
