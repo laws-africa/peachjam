@@ -325,7 +325,7 @@ class Judgment(CoreDocument):
         if self.alternative_names.exists():
             if label not in labels:
                 self.labels.add(label.pk)
-        # if the judgment no alternative_names, remove the "reported" label
+        # if the judgment has no alternative_names, remove the "reported" label
         elif label in labels:
             self.labels.remove(label.pk)
 

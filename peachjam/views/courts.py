@@ -104,7 +104,7 @@ class CourtYearView(CourtDetailView):
 
 
 class CourtRegistryDetailView(CourtDetailView):
-    queryset = Judgment.objects.prefetch_related("judges")
+    queryset = Judgment.objects.prefetch_related("judges", "labels")
     template_name = "peachjam/court_registry_detail.html"
 
     def get_base_queryset(self):
