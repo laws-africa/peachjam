@@ -14,13 +14,14 @@
     a,
     a:visited {
       color: $primary;
-      text-decoration: none;
+      text-decoration: underline;
     }
 
     a.active,
     a.active:visited {
       color: black;
       font-weight: 500;
+      text-decoration: none;
     }
   }
 }

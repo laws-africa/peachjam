@@ -21,6 +21,10 @@ class CourtDetailView(FilteredDocumentListView):
         qs = super().get_base_queryset().filter(court=self.court)
         if "year" in self.kwargs:
             qs = qs.filter(date__year=self.kwargs["year"])
+
+        if "month" in self.kwargs:
+            qs = qs.filter(date__month=self.kwargs["month"])
+
         return qs
 
     def get_queryset(self):

@@ -1,14 +1,14 @@
 {% load i18n %}
 {% if years %}
+  {% if showallyears %}
+    <div>
+      <a class="{% if not year %} active{% endif %}"
+         href="{{ all_years_url }}">{% trans 'All years' %}</a>
+    </div>
+  {% endif %}
   <div class="pl-0 mt-2 mb-3 align-items-center d-none d-lg-flex">
     <i class="bi bi-calendar me-2"></i>
     <ul class="year-nav mb-0 ms-2">
-      {% if showallyears %}
-        <li>
-          <a class="{% if not year %} active{% endif %}"
-             href="{{ all_years_url }}">{% trans 'All years' %}</a>
-        </li>
-      {% endif %}
       {% for y in years %}
         <li>
           <a class="{% if y.year == year %} active{% endif %}" href="{{ y.url }}">{{ y.year }}</a>

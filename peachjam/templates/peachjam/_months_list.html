@@ -1,0 +1,35 @@
+{% load i18n %}
+{% if years %}
+  {% if showallmonths %}
+    <div>
+      <a class="{% if not month %} active{% endif %}"
+         href="{{ all_months_url }}">{% trans 'All months' %}</a>
+    </div>
+  {% endif %}
+  <div class="pl-0 mt-2 mb-3 align-items-center d-none d-lg-flex">
+    <i class="bi bi-calendar me-2"></i>
+    <ul class="year-nav mb-0 ms-2">
+      {% for m in months %}
+        <li>
+          <a class="{% if m.month == month %} active{% endif %}"
+             href="{{ m.url }}">{{ m.month }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+{% if years %}
+  <select class="form-select d-block d-lg-none"
+          data-component="NavigationSelect">
+    {% if showallmonths %}
+      <option value="{{ all_months_url }}">
+        {% trans 'All months' %}
+      </option>
+    {% endif %}
+    {% for m in months %}
+      <option value="{{ m.url }}" {% if m.month == month %} selected{% endif %}>
+        {{ m.month }}
+      </option>
+    {% endfor %}
+  </select>
+{% endif %}
