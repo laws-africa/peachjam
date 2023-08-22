@@ -3,6 +3,7 @@ import DocDiffsManager from '../DocDiffs';
 import PDFCitationLinks from './citation-links';
 import { GutterEnrichmentManager } from '@lawsafrica/indigo-akn/dist/enrichments';
 import SelectionSearch from './selection-search';
+import SelectionShare from './selection-share';
 
 /**
  * Class for handling the setup of all enrichments and interactions between enrichments
@@ -10,6 +11,7 @@ import SelectionSearch from './selection-search';
 class EnrichmentsManager {
   private relationshipsManager: RelationshipEnrichments;
   private selectionSearch: SelectionSearch;
+  private selectionShare: SelectionShare;
   private root: HTMLElement;
   private docDiffsManager: null | DocDiffsManager;
   // eslint-disable-next-line no-undef
@@ -31,6 +33,7 @@ class EnrichmentsManager {
     this.gutterManager.akn = this.root.querySelector('.content');
     this.relationshipsManager = new RelationshipEnrichments(contentAndEnrichmentsElement, this.gutterManager);
     this.selectionSearch = new SelectionSearch(this.gutterManager);
+    this.selectionShare = new SelectionShare(this.gutterManager);
 
     this.gutter?.addEventListener('laItemChanged', (e: any) => {
       if (e.target.classList.contains('relationship-gutter-item') && e.target.active) {
