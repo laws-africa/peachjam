@@ -340,6 +340,7 @@ class DocumentAdmin(admin.ModelAdmin):
         "reextract_content",
         "reindex_for_search",
         "apply_labels",
+        "ensure_source_file_pdf",
     ]
 
     fieldsets = [
@@ -494,7 +495,7 @@ class DocumentAdmin(admin.ModelAdmin):
 
     def extract_citations(self, request, queryset):
         count = queryset.count()
-        for doc in queryset:
+        for doc in queryset.iterator():
             extract_citations_task(doc.pk)
         self.message_user(
             request, f"Queued tasks to extract citations from {count} documents."
@@ -505,7 +506,7 @@ class DocumentAdmin(admin.ModelAdmin):
     def reextract_content(self, request, queryset):
         """Re-extract content from source files that are Word documents, overwriting content_html."""
         count = 0
-        for doc in queryset:
+        for doc in queryset.iterator():
             if doc.extract_content_from_source_file():
                 count += 1
                 doc.extract_citations()
@@ -517,7 +518,7 @@ class DocumentAdmin(admin.ModelAdmin):
     def reindex_for_search(self, request, queryset):
         """Set up a background task to re-index documents for search."""
         count = queryset.count()
-        for doc in queryset:
+        for doc in queryset.iterator():
             search_model_saved(doc._meta.label, doc.pk)
         self.message_user(request, f"Queued tasks to re-index for {count} documents.")
 
@@ -525,11 +526,20 @@ class DocumentAdmin(admin.ModelAdmin):
 
     def apply_labels(self, request, queryset):
         count = queryset.count()
-        for doc in queryset:
+        for doc in queryset.iterator():
             doc.apply_labels()
         self.message_user(request, f"Applying labels for {count} documents.")
 
     apply_labels.short_description = "Apply labels"
+
+    def ensure_source_file_pdf(self, request, queryset):
+        count = queryset.count()
+        for doc in queryset.iterator():
+            if hasattr(doc, "source_file"):
+                doc.source_file.ensure_file_as_pdf()
+        self.message_user(request, f"Ensuring PDF for {count} documents.")
+
+    ensure_source_file_pdf.short_description = "Ensure PDF for source file (background)"
 
     def has_delete_permission(self, request, obj=None):
         if obj:

@@ -194,11 +194,13 @@ class DocumentSourcePDFView(DocumentSourceView):
             if source_file.source_url and source_file.mimetype == "application/pdf":
                 return redirect(source_file.source_url)
 
-            return self.make_response(
-                source_file.as_pdf(),
-                "application/pdf",
-                source_file.filename_for_download(".pdf"),
-            )
+            pdf = source_file.as_pdf()
+            if pdf:
+                return self.make_response(
+                    pdf,
+                    "application/pdf",
+                    source_file.filename_for_download(".pdf"),
+                )
         raise Http404()
 
 

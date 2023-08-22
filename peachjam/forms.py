@@ -174,12 +174,17 @@ class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
     class Meta:
         model = SourceFile
         fields = "__all__"
+        exclude = ("file_as_pdf",)
 
     def _save_m2m(self):
         super()._save_m2m()
         if "file" in self.changed_data:
             if self.instance.document.extract_content_from_source_file():
                 self.instance.document.save()
+
+                # if the file is changed, we need delete the existing pdf and re-generate
+                self.instance.file_as_pdf.delete()
+                self.instance.ensure_file_as_pdf()
 
 
 class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):

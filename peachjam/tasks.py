@@ -158,3 +158,24 @@ def update_extracted_citations_for_a_work(work_id):
 def re_extract_citations():
     cp = citations_processor()
     cp.re_extract_citations()
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def convert_source_file_to_pdf(source_file_id):
+    from peachjam.models import SourceFile
+
+    source_file = SourceFile.objects.filter(pk=source_file_id).first()
+    if not source_file:
+        log.info(f"No source file with id {source_file_id} exists, ignoring.")
+        return
+
+    log.info(f"Converting source file {source_file_id} to PDF")
+
+    try:
+        source_file.convert_to_pdf()
+
+    except Exception as e:
+        log.error(f"Error converting source file {source_file_id} to PDF", exc_info=e)
+        raise e
+
+    log.info("Conversion to PDF done")
