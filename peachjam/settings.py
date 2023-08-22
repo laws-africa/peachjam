@@ -182,6 +182,12 @@ DATABASES = {
     "default": default_db_config,
     "gazettes_africa": gazette_db_config,
 }
+# descriptive name for this application in psql's pg_stat_activity output, to help link connections to apps
+db_app_name = "-".join(
+    [slugify(PEACHJAM["APP_NAME"]), os.environ.get("DYNO", "django")]
+)
+for cfg in DATABASES.values():
+    cfg.setdefault("OPTIONS", {})["options"] = f"-c application_name={db_app_name}"
 
 
 # Password validation
