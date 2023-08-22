@@ -27,6 +27,9 @@
   {% include 'peachjam/_document_count.html' %}
   {% include 'peachjam/_registries.html' %}
   {% include 'peachjam/_years_list.html' with showallyears=True %}
+  {% if months %}
+    {% include 'peachjam/_months_list.html' with showallmonths=True %}
+  {% endif %}
 {% endblock %}
 {% block content %}
   {% if documents %}
