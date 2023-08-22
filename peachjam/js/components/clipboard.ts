@@ -9,7 +9,7 @@ export class CopyToClipboard {
   }
 
   copy () {
-    if (navigator && navigator.clipboard) {
+    if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(this.root.dataset.value || '')
         .then(() => {
           this.root.innerText = this.root.dataset.confirmation || 'Copied!';
