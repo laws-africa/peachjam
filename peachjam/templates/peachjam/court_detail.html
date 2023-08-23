@@ -26,13 +26,16 @@
   <h1 class="mt-4">{{ formatted_court_name }}</h1>
   {% include 'peachjam/_document_count.html' %}
   {% include 'peachjam/_registries.html' %}
-  {% include 'peachjam/_years_list.html' with showallyears=True %}
+  {% include 'peachjam/_years_list.html' %}
   {% if months %}
-    {% include 'peachjam/_months_list.html' with showallmonths=True %}
+    {% include 'peachjam/_months_list.html' %}
   {% endif %}
 {% endblock %}
 {% block content %}
-  {% if documents %}
+  {% if grouped_documents %}
+    {% include 'peachjam/_grouped_judgments_table.html' %}
+    {% include 'peachjam/_pagination.html' %}
+  {% elif documents %}
     {% include 'peachjam/_judgment_table.html' %}
     {% include 'peachjam/_pagination.html' %}
   {% else %}

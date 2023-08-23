@@ -1,30 +1,28 @@
 {% load i18n %}
 {% if years %}
-  {% if showallyears %}
+  <div class="pl-0 mt-2 mb-3 align-items-center d-none d-lg-flex">
+    <i class="bi bi-calendar me-2"></i>
     <div>
       <a class="{% if not year %} active{% endif %}"
          href="{{ all_years_url }}">{% trans 'All years' %}</a>
     </div>
-  {% endif %}
-  <div class="pl-0 mt-2 mb-3 align-items-center d-none d-lg-flex">
-    <i class="bi bi-calendar me-2"></i>
     <ul class="year-nav mb-0 ms-2">
       {% for y in years %}
         <li>
-          <a class="{% if y.year == year %} active{% endif %}" href="{{ y.url }}">{{ y.year }}</a>
+          {% if y.year == year %}
+            {{ y.year }}
+          {% else %}
+            <a href="{{ y.url }}">{{ y.year }}</a>
+          {% endif %}
         </li>
       {% endfor %}
     </ul>
   </div>
-{% endif %}
-{% if years %}
-  <select class="form-select d-block d-lg-none"
+  <select class="form-select mb-3 d-block d-lg-none"
           data-component="NavigationSelect">
-    {% if showallyears %}
-      <option value="{{ all_years_url }}">
-        {% trans 'All years' %}
-      </option>
-    {% endif %}
+    <option value="{{ all_years_url }}">
+      {% trans 'All years' %}
+    </option>
     {% for y in years %}
       <option value="{{ y.url }}" {% if y.year == year %} selected{% endif %}>
         {{ y.year }}

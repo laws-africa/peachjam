@@ -5,17 +5,5 @@
   li {
     display: inline;
     margin-right: 15px;
-
-    a,
-    a:visited {
-      color: $primary;
-      text-decoration: none;
-    }
-
-    a.active,
-    a.active:visited {
-      color: black;
-      font-weight: 500;
-    }
   }
 }
