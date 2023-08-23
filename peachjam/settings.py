@@ -187,7 +187,8 @@ db_app_name = "-".join(
     [slugify(PEACHJAM["APP_NAME"]), os.environ.get("DYNO", "django")]
 )
 for cfg in DATABASES.values():
-    cfg.setdefault("OPTIONS", {})["options"] = f"-c application_name={db_app_name}"
+    if "proxy" not in cfg["HOST"]:
+        cfg.setdefault("OPTIONS", {})["options"] = f"-c application_name={db_app_name}"
 
 
 # Password validation
