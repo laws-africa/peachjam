@@ -5,6 +5,9 @@ from peachjam.helpers import chunks, lowercase_alphabet
 from peachjam.models import Court, CourtRegistry, Judgment
 from peachjam.views.generic_views import FilteredDocumentListView
 
+# XXX
+MONTHS = []
+
 
 class CourtDetailView(FilteredDocumentListView):
     """List View class for filtering a court's judgments.
@@ -34,20 +37,36 @@ class CourtDetailView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        years = self.model.objects.filter(court=self.court).dates(
-            "date", "year", order="DESC"
-        )
+        context["doc_type"] = "Judgment"
+        context["court"] = self.court
+        context["formatted_court_name"] = self.formatted_court_name()
+        context["registries"] = self.court.registries.exclude(
+            judgments__isnull=True
+        )  # display registries with judgments only
+        context["registry_groups"] = list(chunks(context["registries"], 2))
 
-        context["years"] = [
-            {
-                "url": reverse("court_year", args=[self.court.code, y.year]),
-                "year": y.year,
-            }
-            for y in years
-        ]
+        if "year" in self.kwargs:
+            context["year"] = self.kwargs["year"]
+            if "month" in self.kwargs:
+                context["month"] = MONTHS[self.kwargs["month"]]
+                context[
+                    "formatted_court_name"
+                ] = f"{context['formatted_court_name']} - {context['month']} {self.kwargs['year']}"
+            else:
+                context[
+                    "formatted_court_name"
+                ] = f"{context['formatted_court_name']} - {self.kwargs['year']}"
+            self.populate_months(context)
+            context["grouped_judgments"] = self.grouped_judgments(
+                self.get_base_queryset()
+            )
 
-        context["all_years_url"] = reverse("court", args=[self.court.code])
+        self.populate_years(context)
+        self.populate_facets(context)
 
+        return context
+
+    def populate_facets(self, context):
         judges = list(
             {
                 judge
@@ -68,12 +87,6 @@ class CourtDetailView(FilteredDocumentListView):
             }
         )
 
-        context["registries"] = self.court.registries.exclude(
-            judgments__isnull=True
-        )  # display registries with judgments only
-
-        context["registry_groups"] = list(chunks(context["registries"], 2))
-
         order_outcomes = list(
             {
                 order_outcome
@@ -84,23 +97,56 @@ class CourtDetailView(FilteredDocumentListView):
             }
         )
 
-        context["court"] = self.court
-        context["formatted_court_name"] = self.court.name
-        if "year" in self.kwargs:
-            context["year"] = self.kwargs["year"]
-            context["formatted_court_name"] = f"{self.court.name} - " + str(
-                self.kwargs["year"]
-            )
-
         context["facet_data"] = {
             "judges": judges,
             "alphabet": lowercase_alphabet(),
             "attorneys": attorneys,
             "order_outcomes": order_outcomes,
         }
-        context["doc_type"] = "Judgment"
 
-        return context
+    def formatted_court_name(self):
+        return self.court.name
+
+    def populate_years(self, context):
+        years = self.queryset.filter(court=self.court).dates(
+            "date", "year", order="DESC"
+        )
+        context["years"] = [
+            {
+                "url": reverse("court_year", args=[self.court.code, year.year]),
+                "year": year.year,
+            }
+            for year in years
+        ]
+        context["all_years_url"] = reverse("court", args=[self.court.code])
+
+    def populate_months(self, context):
+        year = self.kwargs["year"]
+        months = self.queryset.filter(court=self.court, date__year=year).dates(
+            "date", "month", order="ASC"
+        )
+        context["months"] = [
+            {
+                "url": reverse("court_month", args=[self.court.code, year, item.month]),
+                "month": MONTHS[item.month],
+            }
+            for item in months
+        ]
+
+    def grouped_judgments(self, queryset):
+        """Group the judgments by month and return a list of dicts with the month name and judgments for that month"""
+
+        # Get the distinct months from the queryset
+        months = queryset.dates("date", "month")
+
+        # Create a list of { month: month_name, articles: [list of judgments] } dicts
+        return [
+            {
+                "month": MONTHS[m.month],
+                "judgments": queryset.filter(date__month=m.month),
+            }
+            for m in months
+        ]
 
 
 class CourtYearView(CourtDetailView):
@@ -112,10 +158,7 @@ class CourtRegistryDetailView(CourtDetailView):
     template_name = "peachjam/court_registry_detail.html"
 
     def get_base_queryset(self):
-        qs = super().get_base_queryset().filter(registry=self.registry)
-        if "year" in self.kwargs:
-            qs = qs.filter(date__year=self.kwargs["year"])
-        return qs
+        return super().get_base_queryset().filter(registry=self.registry)
 
     def get_queryset(self):
         self.court = get_object_or_404(Court, code=self.kwargs["code"])
@@ -127,34 +170,44 @@ class CourtRegistryDetailView(CourtDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["registry"] = self.registry
-        context["court"] = self.court
-        context["formatted_court_name"] = self.registry.name
+        return context
 
-        if "year" in self.kwargs:
-            context["year"] = self.kwargs["year"]
-            context["formatted_court_name"] = f"{self.registry.name} - " + str(
-                self.kwargs["year"]
-            )
+    def formatted_court_name(self):
+        return self.registry.name
 
+    def populate_years(self, context):
         years = self.queryset.filter(registry=self.registry).dates(
             "date", "year", order="DESC"
         )
-
-        context["years"] = list(
+        context["years"] = [
             {
                 "url": reverse(
                     "court_registry_year",
-                    args=[self.court.code, self.registry.code, y.year],
+                    args=[self.court.code, self.registry.code, year.year],
                 ),
-                "year": y.year,
+                "year": year.year,
             }
-            for y in years
-        )
+            for year in years
+        ]
         context["all_years_url"] = reverse(
             "court_registry", args=[self.court.code, self.registry.code]
         )
 
-        return context
+    def populate_months(self, context):
+        year = self.kwargs["year"]
+        months = self.queryset.filter(registry=self.registry, date__year=year).dates(
+            "date", "month", order="ASC"
+        )
+        context["months"] = [
+            {
+                "url": reverse(
+                    "court_registry_month",
+                    args=[self.court.code, self.registry.code, year, item.month],
+                ),
+                "month": MONTHS[item.month],
+            }
+            for item in months
+        ]
 
 
 class CourtRegistryYearView(CourtRegistryDetailView):
