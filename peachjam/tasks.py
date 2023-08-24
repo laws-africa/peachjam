@@ -65,6 +65,7 @@ def delete_document(ingestor_id, expression_frbr_uri):
 
     if not ingestor:
         log.info(f"No ingestor with id {ingestor_id} ")
+        return
     if ingestor.enabled:
         log.info(f"Deleting document {expression_frbr_uri} with ingestor {ingestor}")
 
