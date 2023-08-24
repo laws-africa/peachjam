@@ -311,21 +311,22 @@ class BaseDocumentResource(resources.ModelResource):
     def save_m2m(self, instance, row, using_transactions, dry_run):
         super().save_m2m(instance, row, using_transactions, dry_run)
 
-        # attach source file, but only if it was explicitly provided during import
-        # the preferred source URL was set during import by the SourceFileWidget
-        if (
-            row.get("source_url") == instance.source_url
-            and instance.source_url
-            and not dry_run
-        ):
-            self.attach_source_file(instance, instance.source_url)
-
         if not dry_run:
-            # try to extract content from docx files
-            instance.extract_content_from_source_file()
-            # extract citations
-            instance.extract_citations()
-            instance.save()
+            # only re-extract content if the content explicitly changed, or the source file changed (next block)
+            extract_content = "content_html" in row
+
+            # attach source file, but only if it was explicitly provided during import
+            # the preferred source URL was set during import by the SourceFileWidget
+            if row.get("source_url") == instance.source_url and instance.source_url:
+                self.attach_source_file(instance, instance.source_url)
+                extract_content = True
+
+            if extract_content:
+                # try to extract content from docx files
+                instance.extract_content_from_source_file()
+                # extract citations
+                instance.extract_citations()
+                instance.save()
 
     def after_save_instance(self, instance, using_transactions, dry_run):
         if not dry_run:
