@@ -8,11 +8,15 @@ def general(request):
     """
     Add some useful context to templates.
     """
+    # get current language
+    language = request.LANGUAGE_CODE
+
     return {
         "DEBUG": settings.DEBUG,
         "APP_NAME": settings.PEACHJAM["APP_NAME"],
         "SUPPORT_EMAIL": settings.PEACHJAM["SUPPORT_EMAIL"],
         "PEACHJAM_SETTINGS": pj_settings(),
+        "CURRENT_LANGUAGE": language,
         # this object will be injected into Javascript to provide configuration settings to the Javascript app
         "PEACHJAM_JS_CONFIG": {
             "appName": settings.PEACHJAM["APP_NAME"],
