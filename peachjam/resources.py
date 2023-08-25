@@ -210,7 +210,8 @@ class ManyToOneWidget(ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
             return self.model.objects.none()
-        return [self.model(**{self.field: v}) for v in value.split(self.separator)]
+        values = [v.strip() for v in value.split(self.separator)]
+        return [self.model(**{self.field: v}) for v in values if v]
 
 
 class StripHtmlWidget(CharWidget):
@@ -300,6 +301,9 @@ class BaseDocumentResource(resources.ModelResource):
             return
 
     def before_import_row(self, row, **kwargs):
+        # strip whitespace from all string fields
+        for k, v in row.items():
+            row[k] = v.strip() if isinstance(v, str) else v
         if kwargs.get("user"):
             row["created_by"] = kwargs["user"].id
         if not row.get("skip"):
