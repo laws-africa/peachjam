@@ -46,7 +46,8 @@
       {% if view.variant == 'repealed' %}
         <div class="alert alert-danger">{% trans 'You are viewing repealed legislation which is no longer in force.' %}</div>
       {% endif %}
-      <div data-vue-component="LegislationTable" data-show-side-facets>
+      <div data-vue-component="LegislationTable"
+           {% if legislation_list_show_dates %}data-show-dates="true"{% endif %}>
         {% comment %}
         This ensures that peachjam has links to scrape. This content is replaced when the javacript LegislationTable
         component runs.
