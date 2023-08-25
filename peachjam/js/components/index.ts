@@ -25,7 +25,7 @@ const components: Record<string, any> = {
   // Vue components
   FindDocuments,
   LegislationTable,
-  PocketLawDownload,
+  PocketLawDownload
 };
 
 export default components;
