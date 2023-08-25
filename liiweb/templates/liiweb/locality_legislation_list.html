@@ -2,14 +2,16 @@
 {% load i18n %}
 {% block title %}{{ locality_legislation_title }}{% endblock %}
 {% block breadcrumbs %}
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="{% url 'locality_legislation' %}">{{ locality_legislation_title }}</a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">{{ locality.name }}</li>
-    </ol>
-  </nav>
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'locality_legislation' %}">{{ locality_legislation_title }}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ locality.name }}</li>
+      </ol>
+    </nav>
+  </div>
 {% endblock %}
 {% block page-heading %}
   <h1 class="my-4">{{ page_heading }}</h1>
