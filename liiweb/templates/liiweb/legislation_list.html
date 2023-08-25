@@ -4,9 +4,14 @@
   {% trans 'Legislation' %}
 {% endblock %}
 {% block page-content %}
+  {% block breadcrumbs %}{% endblock %}
+  {% block entity-profile %}
+    {% if entity_profile %}
+      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
+    {% endif %}
+  {% endblock %}
   <section class="pb-5">
     <div class="container">
-      {% block breadcrumbs %}{% endblock %}
       {% block page-heading %}
         <h1 class="my-4">{% trans 'Legislation' %}</h1>
       {% endblock %}

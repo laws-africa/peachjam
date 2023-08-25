@@ -9,6 +9,7 @@ from cobalt.akn import StructuredDocument, datestring
 from cobalt.uri import FrbrUri
 from countries_plus.models import Country
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.files import File
@@ -87,6 +88,9 @@ class Locality(models.Model):
         Country, on_delete=models.PROTECT, verbose_name=_("jurisdiction")
     )
     code = models.CharField(_("code"), max_length=20, null=False)
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
 
     class Meta:
         verbose_name = _("locality")
