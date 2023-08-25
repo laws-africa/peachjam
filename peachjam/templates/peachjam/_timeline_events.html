@@ -1,5 +1,8 @@
 {% load peachjam i18n %}
-<h4>{% trans 'History of this document' %}</h4>
+<h4>
+  <i class="bi bi-pj pj-history"></i>
+  {% trans 'History of this document' %}
+</h4>
 <div class="vertical-timeline ms-5 mt-4">
   {% for history_item in timeline_events %}
     <div class="vertical-timeline__item">
