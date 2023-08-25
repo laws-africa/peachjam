@@ -69,6 +69,7 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]
+
         self.assertIn(
             "Obi vs Federal Republic of Nigeria [2016] ECOWASCJ 52 (09 November 2016)",
             documents,

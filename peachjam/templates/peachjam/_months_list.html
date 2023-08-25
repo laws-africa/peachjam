@@ -3,16 +3,16 @@
   <div class="pl-0 mt-2 mb-3 align-items-center d-none d-lg-flex">
     <i class="bi bi-calendar me-2"></i>
     <div>
-      <a class="{% if not year %} active{% endif %}"
-         href="{{ all_years_url }}">{% trans 'All years' %}</a>
+      <a class="{% if not month %} active{% endif %}"
+         href="{{ all_months_url }}">{% trans 'All months' %}</a>
     </div>
     <ul class="year-nav mb-0 ms-2">
-      {% for y in years %}
+      {% for m in months %}
         <li>
-          {% if y.year == year %}
-            {{ y.year }}
+          {% if m.month == month %}
+            {{ m.month }}
           {% else %}
-            <a href="{{ y.url }}">{{ y.year }}</a>
+            <a href="{{ m.url }}">{{ m.month }}</a>
           {% endif %}
         </li>
       {% endfor %}
@@ -20,12 +20,12 @@
   </div>
   <select class="form-select mb-3 d-block d-lg-none"
           data-component="NavigationSelect">
-    <option value="{{ all_years_url }}">
-      {% trans 'All years' %}
+    <option value="{{ all_months_url }}">
+      {% trans 'All months' %}
     </option>
-    {% for y in years %}
-      <option value="{{ y.url }}" {% if y.year == year %} selected{% endif %}>
-        {{ y.year }}
+    {% for m in months %}
+      <option value="{{ m.url }}" {% if m.month == month %} selected{% endif %}>
+        {{ m.month }}
       </option>
     {% endfor %}
   </select>

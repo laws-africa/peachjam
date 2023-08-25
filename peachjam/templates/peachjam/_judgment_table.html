@@ -7,16 +7,18 @@
         <th scope="col">{% trans 'Date' %}</th>
       </tr>
     </thead>
-    <tbody>
-      {% for document in documents %}
-        <tr>
-          <td>
-            <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-            {% include 'peachjam/_labels.html' with labels=document.labels.all %}
-          </td>
-          <td style="white-space: nowrap;">{{ document.date }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
+    {% block table-body %}
+      <tbody>
+        {% for document in documents %}
+          <tr>
+            <td>
+              <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+              {% include 'peachjam/_labels.html' with labels=document.labels.all %}
+            </td>
+            <td style="white-space: nowrap;">{{ document.date }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    {% endblock %}
   </table>
 </div>
