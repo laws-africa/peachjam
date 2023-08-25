@@ -189,9 +189,6 @@ class Judgment(CoreDocument):
         blank=True,
     )
     case_summary = models.TextField(_("case summary"), null=True, blank=True)
-    additional_citations = models.TextField(
-        _("additional citations"), null=True, blank=True
-    )
     flynote = models.TextField(_("flynote"), null=True, blank=True)
     case_name = models.CharField(
         _("case name"),

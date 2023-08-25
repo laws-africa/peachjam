@@ -440,7 +440,6 @@ class DocumentAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def save_model(self, request, obj, form, change):
-
         if not change:
             obj.created_by = request.user
 
@@ -941,6 +940,7 @@ class LocalityAdmin(admin.ModelAdmin):
     list_display = ("name", "jurisdiction", "code")
     prepopulated_fields = {"code": ("name",)}
     search_fields = ("name", "code")
+    inlines = [EntityProfileInline]
 
 
 @admin.register(Judge)
