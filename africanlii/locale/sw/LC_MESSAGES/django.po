@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-24 15:05+0200\n"
-"PO-Revision-Date: 2023-08-28 08:01\n"
+"PO-Revision-Date: 2023-08-28 09:01\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -113,7 +113,7 @@ msgstr "Umoja wa Afrika (AU)"
 
 #: templates/africanlii/au_detail_page.html:14
 msgid "The African Union (AU) is a continental body that comprises 55 countries in Africa, with its headquarters located in Addis Ababa, Ethiopia. It serves as a platform for its member states to collectively address the challenges they face, including peace and security, socio-economic development, and governance and human rights."
-msgstr "Umoja wa Afrika (AU) ni chombo cha bara ambacho kinajumuisha nchi 55 barani Afrika, na makao yake makuu yako Addis Ababa, Ethiopia. Inatumika kama jukwaa kwa nchi wanachama kushughulikia kwa pamoja changamoto zinazowakabili, ikiwa ni pamoja na amani na usalama, maendeleo ya kijamii na kiuchumi, na utawala na haki za binadamu."
+msgstr "Umoja wa Afrika (AU) ni chombo cha bara la Afrika ambacho kinajumuisha nchi 55, makao yake makuu yako Addis Ababa, Ethiopia. Unatumika kama jukwaa kwa nchi wanachama kushughulikia kwa pamoja changamoto zinazowakabili, ikiwa ni pamoja na amani na usalama, maendeleo ya kijamii na kiuchumi, na utawala na haki za binadamu."
 
 #: templates/africanlii/au_detail_page.html:19
 msgid "The AU was established in 2002 as a successor to the Organisation of African Unity (OAU), with the aim of accelerating the process of integration in the continent to enable it to play its rightful role in the global economy, while also addressing multifaceted social, economic and political problems."
@@ -121,7 +121,7 @@ msgstr "AU ilianzishwa mwaka 2002 kama mrithi wa Umoja wa Nchi Huru za Afrika (O
 
 #: templates/africanlii/au_detail_page.html:24
 msgid "Key initiatives of the AU include the African Continental Free Trade Area (AfCFTA) agreement, aiming to create a single market for goods and services across the continent, and Agenda 2063, a strategic framework for the socio-economic transformation of the continent over the next 50 years."
-msgstr "Juhudi muhimu za AU ni pamoja na makubaliano ya Eneo Huria la Biashara ya Bara la Afrika (AfCFTA), yenye lengo la kuunda soko moja la bidhaa na huduma katika bara zima, na Ajenda 2063, mfumo wa kimkakati wa mageuzi ya kijamii na kiuchumi ya bara hilo katika siku zijazo. Miaka 50."
+msgstr "Juhudi muhimu za AU ni pamoja na makubaliano ya Eneo Huru la Biashara Afrika (AfCFTA), yenye lengo la kuunda soko moja la bidhaa na huduma katika bara zima, na Ajenda  ya mwaka 2063, mfumo wa kimkakati wa mageuzi ya kijamii na kiuchumi ya bara la Afrika kwa  zaidi ya miaka 50 ijayo."
 
 #: templates/africanlii/au_detail_page.html:29
 msgid "For more information, visit the <a href=\"https://au.int/\" target=\"_blank\" rel=\"noreferrer noopener\">official African Union website</a> and the <a href=\"https://au.int/agenda2063/overview\">Agenda 2063 portal.</a>"
@@ -183,7 +183,7 @@ msgstr "AfricanLII ni jukwaa la huru la kupata utafiti wa sheria za Afrika linal
 
 #: templates/peachjam/_footer.html:15
 msgid "The publication of the African Union material is co-sponsored by the European Union and is part of the <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">Data for Governance Alliance project</a>."
-msgstr "Uchapishaji wa maandiko ya Umoja wa Afrika unafadhiliwa kwa kushirikiana na Umoja wa Ulaya na ni sehemu ya mradi wa <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\">wa Pamoja wa Data za Utawala</a>."
+msgstr "Uchapishaji wa maandiko ya Umoja wa Afrika unafadhiliwa kwa kushirikiana na Umoja wa Ulaya na ni sehemu ya mradi wa <a class=\"text-primary\" href=\"https://dataforgovernance.africa/\" target=\"_blank\" rel=\"noreferrer\"> Pamoja wa Data za Utawala</a>."
 
 #: templates/peachjam/_footer.html:21
 msgid "Terms of Use"
@@ -248,7 +248,7 @@ msgstr "Magazeti rasmi ya serikali ya jumuiya ya kiuchumi ya kanda."
 
 #: templates/peachjam/_header.html:73
 msgid "African Union (AU) Organs"
-msgstr "Mashirika ya Umoja wa Afrika (AU)."
+msgstr "Mashirika ya Umoja wa Afrika (AU)"
 
 #: templates/peachjam/_header.html:78 templates/peachjam/_header.html:79
 msgid "Regional Economic Communities (RECs)"
