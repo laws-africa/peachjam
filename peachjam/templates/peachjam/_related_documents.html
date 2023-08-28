@@ -1,5 +1,8 @@
 {% load peachjam i18n %}
-<h4>{% trans "Related documents" %}</h4>
+<h4 class="mb-3">
+  <i class="bi bi-pj pj-related"></i>
+  {% trans "Related documents" %}
+</h4>
 <div class="row">
   {% if relationships_as_subject %}
     <div class="col-md">
