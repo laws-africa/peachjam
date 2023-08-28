@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-24 15:05+0200\n"
-"PO-Revision-Date: 2023-08-28 06:59\n"
+"PO-Revision-Date: 2023-08-28 08:01\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -348,7 +348,7 @@ msgstr "Utafiti wa kisheria katika mipaka ya Afrika"
 
 #: templates/peachjam/home.html:12
 msgid "Research digitised African regional and national law."
-msgstr "Utafiti uliweka kidigitali sheria za kikanda na kitaifa za Kiafrika."
+msgstr "Utafiti uliweka kidigitali sheria za Afrika za kikanda na kitaifa."
 
 #: templates/peachjam/home.html:14
 msgid "Policies and regional laws of the African Union"
