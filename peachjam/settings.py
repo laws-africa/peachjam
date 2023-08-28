@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     "polymorphic",
     "drf_spectacular",
     "django_advanced_password_validation",
+    "django_browser_reload",
 ]
 
 MIDDLEWARE = [
@@ -166,6 +167,7 @@ if DEBUG:
     INSTALLED_APPS.append("django_extensions")
     INSTALLED_APPS.append("elastic_panel")
     MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+    MIDDLEWARE.append("django_browser_reload.middleware.BrowserReloadMiddleware")
     INTERNAL_IPS = ["127.0.0.1"]
 
 # Database
