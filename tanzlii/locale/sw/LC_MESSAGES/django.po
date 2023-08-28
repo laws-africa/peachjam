@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-11 14:05+0300\n"
-"PO-Revision-Date: 2023-08-28 11:58\n"
+"PO-Revision-Date: 2023-08-28 13:04\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -31,7 +31,7 @@ msgstr "Karibu katika Taasisi ya Taarifa za Sheria Tanzania"
 
 #: templates/liiweb/home.html:21
 msgid "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. TanzLII provides free access to the law of Tanzania and is a member of the African LII community."
-msgstr "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, Sheria na Kanuni kwa bure Mtandaoni. TanzLII inatoa ufikiaji wa bure kwa sheria ya Tanzania na ni mwanachama wa Jumuiya ya Kiafrika ya LII."
+msgstr "Fahamu sheria za kitaifa za Kiafrika na hukumu za mahakama kutoka Taasisi za Taarifa  za Kisheria kote barani Afrika."
 
 #: templates/liiweb/home.html:29 templates/peachjam/_header.html:26
 #: templates/peachjam/about.html:4
@@ -40,7 +40,7 @@ msgstr "Kuhusu"
 
 #: templates/liiweb/home.html:32 templates/peachjam/about.html:11
 msgid "TanzLII is a project of the Tanzanian Judiciary. We aim to support the rule of law by publishing the law of Tanzania for free online access."
-msgstr "TanzLII ni mradi wa Mahakama ya Tanzania. Tunalenga kuunga mkono utawala wa sheria kwa kuchapisha sheria ya Tanzania kwa ufikiaji wa mtandaoni bila malipo."
+msgstr "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha  mtandaoni bure maamuzi, Sheria na Kanuni. TanzLII inatoa upatoikanaji bure sheria ya Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LII."
 
 #: templates/peachjam/_footer.html:31
 msgid "TanzLII is based at the Judiciary of Tanzania and publishes the law of Tanzania for free online access for all. Free Access to the law supports the rule of law and access to justice. TanzLII partners with African Legal Information Institute (AfricanLII) and <a href=\"http://laws.africa/\">Laws.Africa</a> NPO, who provide it with technical support."
