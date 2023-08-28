@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-11 14:05+0300\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"PO-Revision-Date: 2023-08-28 11:58\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -27,7 +27,7 @@ msgstr "Kiswahili"
 
 #: templates/liiweb/home.html:19
 msgid "Karibu kwenye Tanzania Legal Information Institute"
-msgstr "Karibu kwenye Taasisi ya Taarifa za Sheria Tanzania"
+msgstr "Karibu katika Taasisi ya Taarifa za Sheria Tanzania"
 
 #: templates/liiweb/home.html:21
 msgid "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. TanzLII provides free access to the law of Tanzania and is a member of the African LII community."
