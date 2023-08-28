@@ -773,7 +773,7 @@ class SourceFile(AttachmentAbstractModel):
         verbose_name_plural = _("source files")
 
     def as_pdf(self):
-        if self.filename.endswith(".pdf"):
+        if self.mimetype == "application/pdf":
             return self.file
         elif self.file_as_pdf:
             return self.file_as_pdf
