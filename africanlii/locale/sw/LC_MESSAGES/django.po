@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-24 15:05+0200\n"
-"PO-Revision-Date: 2023-08-28 09:01\n"
+"PO-Revision-Date: 2023-08-28 11:58\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -356,7 +356,7 @@ msgstr "Sera na sheria za kikanda za Umoja wa Afrika"
 
 #: templates/peachjam/home.html:17
 msgid "National law and policy"
-msgstr "Sheria na sera za kitaifa"
+msgstr "Sheria na sera ya kitaifa"
 
 #: templates/peachjam/home.html:30
 #, python-format
@@ -378,7 +378,7 @@ msgstr "Utafutaji wa kina"
 
 #: templates/peachjam/home.html:55
 msgid "Explore the law and policy of the African Union"
-msgstr "Chunguza sheria na sera ya Umoja wa Afrika"
+msgstr "Fahamu sheria na sera ya Umoja wa Afrika"
 
 #: templates/peachjam/home.html:57
 msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
@@ -390,7 +390,7 @@ msgstr "Mahakama za Kanda"
 
 #: templates/peachjam/home.html:111
 msgid "Explore Member States"
-msgstr "Gundua Nchi Wanachama"
+msgstr "Fahamu Nchi Wanachama"
 
 #: templates/peachjam/home.html:120
 msgid "Recent Judgments"
@@ -426,7 +426,7 @@ msgstr "Tazama Ripoti na Miongozo zaidi"
 
 #: templates/peachjam/home.html:146
 msgid "Explore African national legal information"
-msgstr "Gundua taarifa za kisheria za kitaifa za Kiafrika"
+msgstr "Fahamu taarifa za kisheria za kitaifa za Afrika"
 
 #: templates/peachjam/home.html:148
 msgid "Explore African national legislation and court judgments from Legal Information Institutes across Africa."
@@ -434,7 +434,7 @@ msgstr "Gundua sheria za kitaifa za Kiafrika na hukumu za mahakama kutoka Taasis
 
 #: templates/peachjam/home.html:157 templates/peachjam/home.html:158
 msgid "Search African legal information"
-msgstr "Tafuta habari za kisheria za Kiafrika"
+msgstr "Tafuta habari za kisheria za Afrika"
 
 #: templates/peachjam/home.html:184
 msgid "Latest Commentary"
