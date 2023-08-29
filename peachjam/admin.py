@@ -87,6 +87,18 @@ from peachjam_search.tasks import search_model_saved
 User = get_user_model()
 
 
+class BaseAdmin(admin.ModelAdmin):
+    """Base admin class for Peachjam. Includes some common fields and methods
+    for all models.
+    """
+
+    def changelist_view(self, request, extra_context=None):
+        resp = super().changelist_view(request, extra_context)
+        if hasattr(self, "help_topic"):
+            resp.context_data["help_topic"] = self.help_topic
+        return resp
+
+
 class ImportExportMixin(BaseImportExportMixin):
     def import_action(self, request, *args, **kwargs):
         resp = super().import_action(request, *args, **kwargs)
@@ -313,7 +325,7 @@ class DocumentForm(forms.ModelForm):
         self.instance.update_text_content()
 
 
-class DocumentAdmin(admin.ModelAdmin):
+class DocumentAdmin(BaseAdmin):
     form = DocumentForm
     inlines = [DocumentTopicInline, SourceFileInline, AlternativeNameInline]
     list_display = (
@@ -673,6 +685,7 @@ class JudgmentAdminForm(DocumentForm):
 
 
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
+    help_topic = "judgments/upload-a-judgment"
     form = JudgmentAdminForm
     resource_class = JudgmentResource
     inlines = [
@@ -926,7 +939,8 @@ class ExternalDocumentAdmin(DocumentAdmin):
 
 
 @admin.register(CourtRegistry)
-class CourtRegistryAdmin(admin.ModelAdmin):
+class CourtRegistryAdmin(BaseAdmin):
+    help_topic = "site-admin/add-court-registries"
     readonly_fields = ("code",)
     list_display = ("name", "code")
 
@@ -960,11 +974,15 @@ class JudgeAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
+@admin.register(MatterType)
+class MatterTypeAdmin(BaseAdmin):
+    help_topic = "site-admin/add-matter-types"
+
+
 admin.site.register(
     [
         CitationLink,
         Attorney,
-        MatterType,
         CourtClass,
         AttachedFileNature,
         CitationProcessing,

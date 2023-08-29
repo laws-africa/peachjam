@@ -18,3 +18,5 @@ COURT_CODE_MAPPINGS = {
 LANGUAGES = [
     ("en", _("English")),
 ]
+
+ROOT_URLCONF = "seylii.urls"  # noqa
