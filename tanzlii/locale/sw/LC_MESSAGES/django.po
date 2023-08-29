@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-11 14:05+0300\n"
-"PO-Revision-Date: 2023-08-28 13:04\n"
+"PO-Revision-Date: 2023-08-29 05:27\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -44,7 +44,7 @@ msgstr "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha  mtandaoni bure 
 
 #: templates/peachjam/_footer.html:31
 msgid "TanzLII is based at the Judiciary of Tanzania and publishes the law of Tanzania for free online access for all. Free Access to the law supports the rule of law and access to justice. TanzLII partners with African Legal Information Institute (AfricanLII) and <a href=\"http://laws.africa/\">Laws.Africa</a> NPO, who provide it with technical support."
-msgstr "TanzLII ina makao yake katika Mahakama ya Tanzania na inachapisha sheria ya Tanzania kwa upatikanaji wa bure mtandaoni kwa wote. Upatikanaji Huru wa sheria unasaidia utawala wa sheria na upatikanaji wa haki. TanzLII inashirikiana na Taasisi ya Taarifa za Kisheria ya Afrika (AfricanLII) na <a href=\"http://laws.africa/\">Laws.Africa</a> NPO, ambao huipatia msaada wa kiufundi."
+msgstr "TanzLII ina makao yake katika Mahakama ya Tanzania na inachapisha sheria ya Tanzania bure mtandaoni kwa wote. Upatikanaji bure wa sheria unasaidia utawala wa sheria na upatikanaji wa haki. TanzLII inashirikiana na Taasisi ya Taarifa za Kisheria ya Afrika (AfricanLII) na <a href=\"http://laws.africa/\">Laws.Africa</a> NPO, ambao huipatia msaada wa kitaalamu."
 
 #: templates/peachjam/_footer.html:38
 msgid "Terms of Use"
