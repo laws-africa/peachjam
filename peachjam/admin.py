@@ -930,7 +930,7 @@ class ExternalDocumentAdmin(DocumentAdmin):
 
 @admin.register(CourtRegistry)
 class CourtRegistryAdmin(BaseAdmin):
-    help_topic = "site_admin/add-court-registries"
+    help_topic = "site-admin/add-court-registries"
     readonly_fields = ("code",)
     list_display = ("name", "code")
 
@@ -966,7 +966,7 @@ class JudgeAdmin(admin.ModelAdmin):
 
 @admin.register(MatterType)
 class MatterTypeAdmin(BaseAdmin):
-    help_topic = "site_admin/add-matter-types"
+    help_topic = "site-admin/add-matter-types"
 
 
 admin.site.register(
