@@ -11,7 +11,7 @@ from peachjam.resources import JudgmentResource
 judgment_import_headers = [
     "skip",
     "case_name",
-    "full_case_number_as_printed_on_judgment,",
+    "case_string_override",
     "case_number_numeric",
     "case_number_year",
     "court",

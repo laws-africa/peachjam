@@ -268,7 +268,7 @@ class Judgment(CoreDocument):
         )
 
     def generate_work_frbr_uri(self):
-        # enforce certain defaults for judgment FRBR URIs
+        # enforce certain defaults for judgment JudgmFRBR URIs
         self.frbr_uri_doctype = "judgment"
         self.frbr_uri_actor = self.court.code.lower() if self.court else None
         self.frbr_uri_date = str(self.date.year) if self.date else ""
@@ -341,7 +341,7 @@ class Judgment(CoreDocument):
 
 class CaseNumber(models.Model):
     string_override = models.CharField(
-        _("string override"),
+        _("Full case number as printed on judgment"),
         max_length=1024,
         null=True,
         blank=True,

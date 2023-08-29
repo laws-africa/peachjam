@@ -4,14 +4,16 @@
   {% blocktrans with locality=locality.name %}{{ locality }} By-laws{% endblocktrans %}
 {% endblock %}
 {% block breadcrumbs %}
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="{% url 'home_page' %}">{% trans 'Municipalities' %}</a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">{{ locality }}</li>
-    </ol>
-  </nav>
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Municipalities' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ locality }}</li>
+      </ol>
+    </nav>
+  </div>
 {% endblock %}
 {% block page-heading %}
   <h1 class="my-4">{% blocktrans with locality=locality.name %}{{ locality }} By-laws{% endblocktrans %}</h1>

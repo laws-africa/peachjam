@@ -62,6 +62,7 @@
                       role="tab"
                       aria-controls="document-detail-tab"
                       aria-selected="true">
+                <i class="bi bi-pj pj-document-detail"></i>
                 {% trans "Document detail" %}
               </button>
             </li>
@@ -74,6 +75,7 @@
                         role="tab"
                         aria-controls="history-tab"
                         aria-selected="false">
+                  <i class="bi bi-pj pj-history"></i>
                   {% trans "History" %}
                 </button>
               </li>
@@ -87,6 +89,7 @@
                         role="tab"
                         aria-controls="related-tab"
                         aria-selected="false">
+                  <i class="bi bi-pj pj-related"></i>
                   {% trans "Related documents" %}
                   <span class="badge bg-secondary">{{ n_relationships }}</span>
                 </button>
@@ -101,8 +104,9 @@
                         role="tab"
                         aria-controls="citations-tab"
                         aria-selected="false">
+                  <i class="bi bi-pj pj-citations"></i>
                   {% trans "Citations" %}
-                  <span class="badge bg-secondary">{{ number_of_extracted_citations }}</span>
+                  <span class="badge bg-secondary">{{ cited_documents_count|default:"-" }} / {{ documents_citing_current_doc_count|default:"-" }}</span>
                 </button>
               </li>
             {% endif %}
@@ -348,7 +352,10 @@
                     {% endblock %}
                     {% block document-relationships-content %}
                       {% if n_relationships %}
-                        <h5>{% translate 'Related documents' %}</h5>
+                        <h5>
+                          <i class="bi bi-pj pj-related"></i>
+                          {% translate 'Related documents' %}
+                        </h5>
                         <ul class="list-unstyled">
                           {% if n_relationships > relationship_limit %}
                             <li>

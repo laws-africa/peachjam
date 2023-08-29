@@ -853,7 +853,12 @@ class AlternativeName(models.Model):
         related_name="alternative_names",
         verbose_name=_("document"),
     )
-    title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
+    title = models.CharField(
+        _("Law report citation/Alternative known name"),
+        max_length=1024,
+        null=False,
+        blank=False,
+    )
 
     class Meta:
         verbose_name = _("alternative name")

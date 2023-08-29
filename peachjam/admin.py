@@ -161,7 +161,7 @@ class SourceFileFilter(admin.SimpleListFilter):
             return queryset
 
 
-class BaseAttachmentFileInline(admin.TabularInline):
+class BaseAttachmentFileInline(admin.StackedInline):
     extra = 0
     readonly_fields = ("filename", "mimetype", "attachment_link", "size")
 
@@ -631,7 +631,7 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     readonly_fields = ["parent_work"] + list(DocumentAdmin.readonly_fields)
 
 
-class CaseNumberAdmin(admin.TabularInline):
+class CaseNumberAdmin(admin.StackedInline):
     model = CaseNumber
     extra = 1
     verbose_name = gettext_lazy("case number")
@@ -694,9 +694,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets[3][1]["fields"].extend(
-        ["case_summary", "additional_citations", "flynote"]
-    )
+    fieldsets[3][1]["fields"].extend(["case_summary", "flynote"])
     readonly_fields = [
         "mnc",
         "serial_number",
@@ -709,6 +707,18 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         "frbr_uri_number",
     ] + list(DocumentAdmin.readonly_fields)
     prepopulated_fields = {}
+    jazzmin_section_order = (
+        "Key details",
+        "Case numbers",
+        "Judges",
+        "Additional details",
+        "Content",
+        "Alternative names",
+        "Attached files",
+        "Document topics",
+        "Work identification",
+        "Advanced",
+    )
 
 
 @admin.register(Predicate)

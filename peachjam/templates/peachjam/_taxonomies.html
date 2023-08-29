@@ -1,5 +1,8 @@
 {% load peachjam i18n %}
-<h5>{% translate 'Taxonomies' %}</h5>
+<h5>
+  <i class="bi bi-pj bi-tags-fill"></i>
+  {% translate 'Taxonomies' %}
+</h5>
 <ul class="list-unstyled">
   {% for taxonomy in taxonomies %}
     <li>
