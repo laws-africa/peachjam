@@ -202,7 +202,8 @@ class Work(models.Model):
 
     def fetch_cited_works_frbr_uris(self):
         """Returns a set of work_frbr_uris,
-        taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links."""
+        taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links.
+        """
         work_frbr_uris = set()
 
         for doc in self.documents.all():
@@ -436,6 +437,7 @@ class CoreDocument(PolymorphicModel):
         permissions = [
             ("can_delete_own_document", "Can delete own document"),
             ("can_edit_own_document", "Can edit own document"),
+            ("can_edit_advanced_fields", "Can edit advanced fields"),
         ]
 
     def __str__(self):
@@ -852,7 +854,12 @@ class AlternativeName(models.Model):
         related_name="alternative_names",
         verbose_name=_("document"),
     )
-    title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
+    title = models.CharField(
+        _("Law report citation/Alternative known name"),
+        max_length=1024,
+        null=False,
+        blank=False,
+    )
 
     class Meta:
         verbose_name = _("alternative name")

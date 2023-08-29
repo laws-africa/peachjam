@@ -33,6 +33,13 @@ class PeachJamSettings(SingletonModel):
         blank=True,
         verbose_name=_("document languages"),
     )
+    default_document_jurisdiction = models.ForeignKey(
+        "countries_plus.Country",
+        related_name="+",
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("default document jurisdiction"),
+    )
     document_jurisdictions = models.ManyToManyField(
         "countries_plus.Country",
         related_name="+",

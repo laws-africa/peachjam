@@ -173,7 +173,7 @@ class SourceFileFilter(admin.SimpleListFilter):
             return queryset
 
 
-class BaseAttachmentFileInline(admin.TabularInline):
+class BaseAttachmentFileInline(admin.StackedInline):
     extra = 0
     readonly_fields = ("filename", "mimetype", "attachment_link", "size")
 
@@ -296,6 +296,9 @@ class DocumentForm(forms.ModelForm):
             if site_settings.document_languages.exists():
                 self.fields["language"].queryset = site_settings.document_languages
         if "jurisdiction" in self.fields:
+            self.fields[
+                "jurisdiction"
+            ].initial = site_settings.default_document_jurisdiction
             if site_settings.document_jurisdictions.exists():
                 self.fields[
                     "jurisdiction"
@@ -434,7 +437,22 @@ class DocumentAdmin(BaseAdmin):
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
         if obj is None:
-            fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
+            if request.user.has_perm("peachjam.can_edit_advanced_fields"):
+                fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
+            else:
+                # Users without permission to edit advanced fields can't view the
+                # Advanced and Work identification fieldsets
+                restricted_fieldsets = [
+                    (x[0], x[1])
+                    for x in fieldsets
+                    if x[0]
+                    not in [
+                        gettext_lazy("Advanced"),
+                        gettext_lazy("Work identification"),
+                    ]
+                ]
+                fieldsets = restricted_fieldsets
+
         return fieldsets
 
     def get_form(self, request, obj=None, **kwargs):
@@ -452,7 +470,6 @@ class DocumentAdmin(BaseAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def save_model(self, request, obj, form, change):
-
         if not change:
             obj.created_by = request.user
 
@@ -554,21 +571,19 @@ class DocumentAdmin(BaseAdmin):
     ensure_source_file_pdf.short_description = "Ensure PDF for source file (background)"
 
     def has_delete_permission(self, request, obj=None):
-        if obj:
-            if (
-                request.user.has_perm("peachjam.can_delete_own_document")
-                and obj.created_by == request.user
-            ):
-                return True
+        if obj and (
+            request.user.has_perm("peachjam.can_delete_own_document")
+            and obj.created_by == request.user
+        ):
+            return True
         return super().has_delete_permission(request, obj=obj)
 
     def has_change_permission(self, request, obj=None):
-        if obj:
-            if (
-                request.user.has_perm("peachjam.can_edit_own_document")
-                and obj.created_by == request.user
-            ):
-                return True
+        if obj and (
+            request.user.has_perm("peachjam.can_edit_own_document")
+            and obj.created_by == request.user
+        ):
+            return True
         return super().has_change_permission(request, obj=obj)
 
 
@@ -644,7 +659,7 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     readonly_fields = ["parent_work"] + list(DocumentAdmin.readonly_fields)
 
 
-class CaseNumberAdmin(admin.TabularInline):
+class CaseNumberAdmin(admin.StackedInline):
     model = CaseNumber
     extra = 1
     verbose_name = gettext_lazy("case number")
@@ -708,9 +723,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets[3][1]["fields"].extend(
-        ["case_summary", "additional_citations", "flynote"]
-    )
+    fieldsets[3][1]["fields"].extend(["case_summary", "flynote"])
     readonly_fields = [
         "mnc",
         "serial_number",
@@ -723,6 +736,18 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         "frbr_uri_number",
     ] + list(DocumentAdmin.readonly_fields)
     prepopulated_fields = {}
+    jazzmin_section_order = (
+        "Key details",
+        "Case numbers",
+        "Judges",
+        "Additional details",
+        "Content",
+        "Alternative names",
+        "Attached files",
+        "Document topics",
+        "Work identification",
+        "Advanced",
+    )
 
 
 @admin.register(Predicate)

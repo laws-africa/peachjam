@@ -189,9 +189,6 @@ class Judgment(CoreDocument):
         blank=True,
     )
     case_summary = models.TextField(_("case summary"), null=True, blank=True)
-    additional_citations = models.TextField(
-        _("additional citations"), null=True, blank=True
-    )
     flynote = models.TextField(_("flynote"), null=True, blank=True)
     case_name = models.CharField(
         _("case name"),
@@ -344,7 +341,7 @@ class Judgment(CoreDocument):
 
 class CaseNumber(models.Model):
     string_override = models.CharField(
-        _("string override"),
+        _("Full case number as printed on judgment"),
         max_length=1024,
         null=True,
         blank=True,
