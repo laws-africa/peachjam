@@ -8,21 +8,21 @@ export class CopyToClipboard {
     root.addEventListener('click', () => this.copy());
   }
 
-  copy () {
-    if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(this.root.dataset.value || '')
-        .then(() => {
-          this.root.innerText = this.root.dataset.confirmation || 'Copied!';
-          setTimeout(() => {
-            this.root.innerText = this.text;
-          }, 1500);
-        })
-        .catch(() => {
-          this.root.innerText = 'Copy failed!';
-          setTimeout(() => {
-            this.root.innerText = this.text;
-          }, 1500);
-        });
+  async copy () {
+    try {
+      if (navigator && navigator.clipboard) {
+        await navigator.clipboard.writeText(this.root.dataset.value || '');
+
+        this.root.innerText = this.root.dataset.confirmation || 'Copied!';
+        setTimeout(() => {
+          this.root.innerText = this.text;
+        }, 1500);
+      }
+    } catch {
+      this.root.innerText = 'Copy failed!';
+      setTimeout(() => {
+        this.root.innerText = this.text;
+      }, 1500);
     }
   }
 }
