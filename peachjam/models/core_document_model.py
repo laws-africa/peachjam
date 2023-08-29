@@ -437,6 +437,7 @@ class CoreDocument(PolymorphicModel):
         permissions = [
             ("can_delete_own_document", "Can delete own document"),
             ("can_edit_own_document", "Can edit own document"),
+            ("can_edit_advanced_fields", "Can edit advanced fields"),
         ]
 
     def __str__(self):

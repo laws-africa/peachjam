@@ -284,6 +284,9 @@ class DocumentForm(forms.ModelForm):
             if site_settings.document_languages.exists():
                 self.fields["language"].queryset = site_settings.document_languages
         if "jurisdiction" in self.fields:
+            self.fields[
+                "jurisdiction"
+            ].initial = site_settings.default_document_jurisdiction
             if site_settings.document_jurisdictions.exists():
                 self.fields[
                     "jurisdiction"
@@ -541,21 +544,19 @@ class DocumentAdmin(admin.ModelAdmin):
     ensure_source_file_pdf.short_description = "Ensure PDF for source file (background)"
 
     def has_delete_permission(self, request, obj=None):
-        if obj:
-            if (
-                request.user.has_perm("peachjam.can_delete_own_document")
-                and obj.created_by == request.user
-            ):
-                return True
+        if obj and (
+            request.user.has_perm("peachjam.can_delete_own_document")
+            and obj.created_by == request.user
+        ):
+            return True
         return super().has_delete_permission(request, obj=obj)
 
     def has_change_permission(self, request, obj=None):
-        if obj:
-            if (
-                request.user.has_perm("peachjam.can_edit_own_document")
-                and obj.created_by == request.user
-            ):
-                return True
+        if obj and (
+            request.user.has_perm("peachjam.can_edit_own_document")
+            and obj.created_by == request.user
+        ):
+            return True
         return super().has_change_permission(request, obj=obj)
 
 
