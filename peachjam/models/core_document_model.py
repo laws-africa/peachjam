@@ -911,16 +911,18 @@ class DocumentContent(models.Model):
             text = " ".join(root.itertext())
 
         elif hasattr(document, "source_file"):
-            # get the text from the source file, via PDF if necessary
-            with tempfile.NamedTemporaryFile() as tmp:
-                # convert document to pdf and then extract the text
-                pdf = document.source_file.as_pdf()
-                shutil.copyfileobj(pdf, tmp)
-                tmp.flush()
-                text = pdfjs_to_text(tmp.name)
-                # some PDFs have nulls, which breaks SQL insertion
-                # replace rather than deleting to keep string length the same
-                text = text.replace("\0", " ")
+            if document.source_file.pk:
+                # get the text from the source file, via PDF if necessary
+                with tempfile.NamedTemporaryFile() as tmp:
+                    # convert document to pdf and then extract the text
+                    pdf = document.source_file.as_pdf()
+                    if pdf:
+                        shutil.copyfileobj(pdf, tmp)
+                        tmp.flush()
+                        text = pdfjs_to_text(tmp.name)
+                        # some PDFs have nulls, which breaks SQL insertion
+                        # replace rather than deleting to keep string length the same
+                        text = text.replace("\0", " ")
 
         doc_content = DocumentContent.objects.update_or_create(
             document=document, defaults={"content_text": text}
