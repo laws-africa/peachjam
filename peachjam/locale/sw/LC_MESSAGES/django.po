@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-08-30 10:47+0200\n"
-"PO-Revision-Date: 2023-08-30 09:45\n"
+"PO-Revision-Date: 2023-08-30 12:51\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: admin.py:120
 msgid "Import"
-msgstr "Ingiza"
+msgstr "Ingiza/tuma"
 
 #: admin.py:363
 msgid "Key details"
@@ -63,19 +63,19 @@ msgstr "Inaonyesha upya maudhui kwa nyuma."
 
 #: admin.py:769
 msgid "Refresh content selected ingestors"
-msgstr "Onyesha upya viingiza vilivyochaguliwa vya maudhui"
+msgstr "Rekebisha upya viingiza maudhui vilivyochaguliwa "
 
 #: admin.py:817
 msgid "Articles published."
-msgstr "Makala yaliyochapishwa."
+msgstr "Makala zilizochapishwa."
 
 #: admin.py:819
 msgid "Publish selected articles"
-msgstr "Chapisha makala uliyochagua"
+msgstr "Chapisha makala zilizochaguliwa"
 
 #: admin.py:823
 msgid "Articles unpublished."
-msgstr "Makala hayajachapishwa."
+msgstr "Makala ambazo hazijachapishwa."
 
 #: admin.py:825
 msgid "Unpublish selected articles"
@@ -221,11 +221,11 @@ msgstr "kazi lengwa"
 
 #: models/citations.py:90
 msgid "processing date"
-msgstr "tarehe ya usindikaji"
+msgstr "tarehe ya kushughulikia"
 
 #: models/citations.py:93
 msgid "citation processing"
-msgstr "usindikaji wa nukuu"
+msgstr "ushughulikiaji wa nukuu"
 
 #: models/core_document_model.py:48
 msgid "level"
