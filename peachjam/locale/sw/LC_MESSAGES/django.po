@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-08-30 10:47+0200\n"
-"PO-Revision-Date: 2023-08-30 12:51\n"
+"PO-Revision-Date: 2023-08-30 13:49\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -404,7 +404,7 @@ msgstr "URI FRBR sio sahihi: %(uri)s"
 
 #: models/core_document_model.py:488
 msgid "Document with this Expression FRBR URI already exists!"
-msgstr "Hati iliyo na Usemi huu FRBR URI tayari ipo!"
+msgstr "Hati/nyaraka yenye Msimbo huu FRBR URI tayari ipo!"
 
 #: models/core_document_model.py:705
 msgid "filename"
@@ -652,7 +652,7 @@ msgstr "hukumu"
 
 #: models/judgment.py:344
 msgid "Full case number as printed on judgment"
-msgstr "Nambari kamili ya kesi kama ilivyochapishwa kwenye hukumu"
+msgstr "Namba kamili ya kesi kama ilivyochapishwa kwenye hukumu"
 
 #: models/judgment.py:348
 msgid "Override for full case number string"
