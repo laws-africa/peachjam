@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-11 14:05+0300\n"
+"POT-Creation-Date: 2023-08-30 10:34+0200\n"
 "PO-Revision-Date: 2023-05-16 07:12\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -25,33 +25,33 @@ msgstr "Suaíli"
 msgid "English"
 msgstr "Inglês"
 
-#: templates/liiweb/home.html:18
+#: templates/liiweb/home.html:10
 msgid "Karibu kwenye Zanzibar Legal Information Institute"
 msgstr "Karibu kwenye Instituto de Informações Jurídicas de Zanzibar"
 
-#: templates/liiweb/home.html:20
+#: templates/liiweb/home.html:12
 msgid "ZanzibarLII ni tovuti ya Mahakama ya Zanzibar inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. ZanzibarLII provides free access to the law of Zanzibar and is a member of the African LII community."
 msgstr "ZanzibarLII ni tovuti ya Mahakama ya Zanzibar inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. ZanzibarLII fornece acesso gratuito à lei de Zanzibar e é membro da comunidade africana LII."
 
-#: templates/liiweb/home.html:27 templates/peachjam/_header.html:32
+#: templates/liiweb/home.html:19 templates/peachjam/_header.html:26
 #: templates/peachjam/about.html:4
 msgid "About"
 msgstr "Sobre"
 
-#: templates/liiweb/home.html:30 templates/peachjam/_footer.html:30
+#: templates/liiweb/home.html:22 templates/peachjam/_footer.html:5
 #: templates/peachjam/about.html:11
 msgid "ZanzibarLII is developed under the auspices of the Judiciary of Zanzibar and publishes the law of Zanzibar for free online access to all. ZanzibarLII promotes the rule of law and access to justice in Zanzibar."
 msgstr "ZanzibarLII é desenvolvido sob os auspícios do Judiciário de Zanzibar e publica a lei de Zanzibar para acesso online gratuito a todos. O ZanzibarLII promove o estado de direito e o acesso à justiça em Zanzibar."
 
-#: templates/liiweb/home.html:50
+#: templates/liiweb/home.html:28
 msgid "Tweets by AfricanLII"
 msgstr "Tweets de AfricanLII"
 
-#: templates/peachjam/_footer.html:35
+#: templates/peachjam/_footer.html:10
 msgid "Terms of Use"
 msgstr "Termos de Utilização"
 
-#: templates/peachjam/_footer.html:39
+#: templates/peachjam/_footer.html:14
 msgid "Our partners"
 msgstr "Nossos parceiros"
 
@@ -64,12 +64,8 @@ msgid "Legislation"
 msgstr "Legislação"
 
 #: templates/peachjam/_header.html:20
-msgid "Documents and Guidelines"
-msgstr "Documentos e Diretrizes"
-
-#: templates/peachjam/_header.html:26
-msgid "Speeches"
-msgstr "Discursos"
+msgid "Licensed Advocates"
+msgstr ""
 
 #: templates/peachjam/about.html:9
 msgid "About ZanzibarLII"
@@ -91,3 +87,8 @@ msgstr "Contate-nos"
 msgid "Contact us on <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> for more information."
 msgstr "Contacte-nos em <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> para mais informações."
 
+#~ msgid "Documents and Guidelines"
+#~ msgstr "Documentos e Diretrizes"
+
+#~ msgid "Speeches"
+#~ msgstr "Discursos"
