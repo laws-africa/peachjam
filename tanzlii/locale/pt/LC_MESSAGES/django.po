@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-08-30 10:34+0200\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"PO-Revision-Date: 2023-08-31 14:25\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -27,13 +27,11 @@ msgstr "Suaíli"
 
 #: templates/liiweb/home.html:10
 msgid "Karibu Katika Mfumo wa Taarifa za Maamuzi, Sheria na Kanuni za Tanzania"
-msgstr ""
+msgstr "Karibu Katika Mfumo wa Taarifa para Maamuzi, Sheria na Kanuni para Tanzânia"
 
 #: templates/liiweb/home.html:12
-#, fuzzy
-#| msgid "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. TanzLII provides free access to the law of Tanzania and is a member of the African LII community."
 msgid "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
-msgstr "TanzLII ni tovuti ya Mahakama ya Tanzânia inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. TanzLII fornece acesso gratuito à lei da Tanzânia e é membro da comunidade African LII."
+msgstr "TanzLII ni tovuti ya Mahakama ya Tanzânia inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzânia na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 
 #: templates/liiweb/home.html:21 templates/peachjam/_header.html:44
 #: templates/peachjam/about.html:4
@@ -62,7 +60,7 @@ msgstr "Legislação"
 
 #: templates/peachjam/_header.html:20
 msgid "Law Reform"
-msgstr ""
+msgstr "Reforma Legislativa"
 
 #: templates/peachjam/_header.html:26
 msgid "Gazettes"
@@ -70,11 +68,11 @@ msgstr "Gazettes"
 
 #: templates/peachjam/_header.html:32
 msgid "Speeches"
-msgstr ""
+msgstr "Discursos"
 
 #: templates/peachjam/_header.html:38
 msgid "JOT Documents and Guidelines"
-msgstr ""
+msgstr "Documentos e Diretrizes JOT"
 
 #: templates/peachjam/about.html:9
 msgid "About TanzLII"
@@ -96,8 +94,3 @@ msgstr "Contate-nos"
 msgid "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@tanzlii.org</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 msgstr "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@tanzlii.org</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 
-#~ msgid "Karibu kwenye Tanzania Legal Information Institute"
-#~ msgstr "Karibu kwenye Instituto de Informações Jurídicas da Tanzânia"
-
-#~ msgid "Terms of Use"
-#~ msgstr "Termos de Utilização"
