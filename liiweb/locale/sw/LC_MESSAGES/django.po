@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-30 10:34+0200\n"
-"PO-Revision-Date: 2023-08-31 07:34\n"
+"POT-Creation-Date: 2023-08-31 09:30+0200\n"
+"PO-Revision-Date: 2023-08-31 14:25\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -85,19 +85,19 @@ msgstr "Tazama makala zaidi"
 msgid "Legislation"
 msgstr "Sheria"
 
-#: templates/liiweb/legislation_list.html:23
+#: templates/liiweb/legislation_list.html:24
 msgid "Current legislation"
 msgstr "Sheria za sasa"
 
-#: templates/liiweb/legislation_list.html:29
+#: templates/liiweb/legislation_list.html:30
 msgid "Repealed legislation"
 msgstr "Sheria iliyofutwa"
 
-#: templates/liiweb/legislation_list.html:41
+#: templates/liiweb/legislation_list.html:42
 msgid "All legislation"
 msgstr "Sheria zote"
 
-#: templates/liiweb/legislation_list.html:47
+#: templates/liiweb/legislation_list.html:48
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr "Unatazama sheria iliyobatilishwa ambayo haitumiki tena."
 
