@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-30 10:34+0200\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"POT-Creation-Date: 2023-08-31 09:30+0200\n"
+"PO-Revision-Date: 2023-08-31 14:25\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -65,41 +65,39 @@ msgstr "Collections"
 #: templates/liiweb/home.html:152
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
-msgstr ""
+msgstr "Utilisez %(APP_NAME)s lorsque vous êtes hors ligne"
 
 #: templates/liiweb/home.html:154
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
-msgstr ""
+msgstr "Pocket Law est une copie hors ligne de la jurisprudence, de la législation et d'autres documents juridiques de %(APP_NAME)s."
 
 #: templates/liiweb/home.html:166
 msgid "Latest Articles"
-msgstr ""
+msgstr "Derniers articles"
 
 #: templates/liiweb/home.html:168
-#, fuzzy
-#| msgid "View more legislation"
 msgid "View more articles"
-msgstr "Voir plus de législation"
+msgstr "Voir plus d'articles"
 
 #: templates/liiweb/legislation_list.html:4
 #: templates/liiweb/legislation_list.html:16 templates/peachjam/_header.html:17
 msgid "Legislation"
 msgstr "Législation"
 
-#: templates/liiweb/legislation_list.html:23
+#: templates/liiweb/legislation_list.html:24
 msgid "Current legislation"
 msgstr "Législation en vigueur"
 
-#: templates/liiweb/legislation_list.html:29
+#: templates/liiweb/legislation_list.html:30
 msgid "Repealed legislation"
 msgstr "Législation abrogée"
 
-#: templates/liiweb/legislation_list.html:41
+#: templates/liiweb/legislation_list.html:42
 msgid "All legislation"
 msgstr "Toutes les lois"
 
-#: templates/liiweb/legislation_list.html:47
+#: templates/liiweb/legislation_list.html:48
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr "Vous consultez une législation abrogée qui n'est plus en vigueur."
 
@@ -114,15 +112,15 @@ msgstr "À propos"
 #: templates/peachjam/_footer.html:12
 #, python-format
 msgid "Use %(APP_NAME)s offline with <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
-msgstr ""
+msgstr "Utilisez %(APP_NAME)s hors ligne avec <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
 
 #: templates/peachjam/_footer.html:20
 msgid "Site Statistics"
-msgstr ""
+msgstr "Statistiques du site"
 
 #: templates/peachjam/_footer.html:24
 msgid "Terms of Use"
-msgstr ""
+msgstr "Termes et conditions d'utilisation"
 
 #: templates/peachjam/_footer.html:29
 msgid "Our partners"
@@ -137,19 +135,7 @@ msgid "Judgments"
 msgstr "Jugements"
 
 #: views/legislation.py:99
-#, fuzzy, python-format
-#| msgid "Recent Legislation"
+#, python-format
 msgid "%(locality)s Legislation"
-msgstr "Législation récente"
+msgstr "%(locality)s Législation"
 
-#~ msgid "Twitter"
-#~ msgstr "Twitter"
-
-#~ msgid "Tweets by AfricanLII"
-#~ msgstr "Tweets par AfricanLII"
-
-#~ msgid "Subscribe"
-#~ msgstr "S'abonner"
-
-#~ msgid "Subscribe to our newsletter for updates and news."
-#~ msgstr "Abonnez-vous à notre newsletter pour les mises à jour et les nouvelles."
