@@ -106,7 +106,7 @@ export default {
 
   data: function () {
     return {
-      showAdditionalOptions: false,
+      showAdditionalOptions: false
     };
   },
 
