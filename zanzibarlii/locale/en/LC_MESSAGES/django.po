@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-11 14:05+0300\n"
+"POT-Creation-Date: 2023-08-30 10:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,33 +26,33 @@ msgstr ""
 msgid "English"
 msgstr ""
 
-#: templates/liiweb/home.html:18
+#: templates/liiweb/home.html:10
 msgid "Karibu kwenye Zanzibar Legal Information Institute"
 msgstr ""
 
-#: templates/liiweb/home.html:20
+#: templates/liiweb/home.html:12
 msgid "ZanzibarLII ni tovuti ya Mahakama ya Zanzibar inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. ZanzibarLII provides free access to the law of Zanzibar and is a member of the African LII community."
 msgstr ""
 
-#: templates/liiweb/home.html:27 templates/peachjam/_header.html:32
+#: templates/liiweb/home.html:19 templates/peachjam/_header.html:26
 #: templates/peachjam/about.html:4
 msgid "About"
 msgstr ""
 
-#: templates/liiweb/home.html:30 templates/peachjam/_footer.html:30
+#: templates/liiweb/home.html:22 templates/peachjam/_footer.html:5
 #: templates/peachjam/about.html:11
 msgid "ZanzibarLII is developed under the auspices of the Judiciary of Zanzibar and publishes the law of Zanzibar for free online access to all. ZanzibarLII promotes the rule of law and access to justice in Zanzibar."
 msgstr ""
 
-#: templates/liiweb/home.html:50
+#: templates/liiweb/home.html:28
 msgid "Tweets by AfricanLII"
 msgstr ""
 
-#: templates/peachjam/_footer.html:35
+#: templates/peachjam/_footer.html:10
 msgid "Terms of Use"
 msgstr ""
 
-#: templates/peachjam/_footer.html:39
+#: templates/peachjam/_footer.html:14
 msgid "Our partners"
 msgstr ""
 
@@ -65,11 +65,7 @@ msgid "Legislation"
 msgstr ""
 
 #: templates/peachjam/_header.html:20
-msgid "Documents and Guidelines"
-msgstr ""
-
-#: templates/peachjam/_header.html:26
-msgid "Speeches"
+msgid "Licensed Advocates"
 msgstr ""
 
 #: templates/peachjam/about.html:9

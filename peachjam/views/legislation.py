@@ -42,20 +42,31 @@ class LegislationDetailView(BaseDocumentDetailView):
         commenced = self.get_commencement_info()
 
         if self.object.repealed and repeal:
-            msg = (
-                f'This {friendly_type} was repealed on %(date)s by <a href="%(repealing_uri)s">'
-                "%(repealing_title)s</a>."
-            )
+            args = {"friendly_type": friendly_type}
+            args.update(repeal)
             notices.append(
                 {
                     "type": messages.ERROR,
-                    "html": mark_safe(_(msg) % repeal),
+                    "html": mark_safe(
+                        _(
+                            'This %(friendly_type)s was repealed on %(date)s by <a href="%(repealing_uri)s">'
+                            "%(repealing_title)s</a>."
+                        )
+                        % args
+                    ),
                 }
             )
 
         if not commenced:
-            msg = f"This {friendly_type} has not yet commenced and is not yet law."
-            notices.append({"type": messages.WARNING, "html": _(msg)})
+            notices.append(
+                {
+                    "type": messages.WARNING,
+                    "html": _(
+                        "This %(friendly_type)s has not yet commenced and is not yet law."
+                    )
+                    % {"friendly_type": friendly_type},
+                }
+            )
 
         points_in_time = self.get_points_in_time()
         work_amendments = self.get_work_amendments()
@@ -81,11 +92,13 @@ class LegislationDetailView(BaseDocumentDetailView):
 
             if index == len(point_in_time_dates) - 1:
                 if self.object.repealed and repeal:
-                    msg = f"This is the version of this {friendly_type} as it was when it was repealed."
                     notices.append(
                         {
                             "type": messages.INFO,
-                            "html": _(msg),
+                            "html": _(
+                                "This is the version of this %(friendly_type)s as it was when it was repealed."
+                            )
+                            % {"friendly_type": friendly_type},
                         }
                     )
 
@@ -93,11 +106,13 @@ class LegislationDetailView(BaseDocumentDetailView):
                     self.set_unapplied_amendment_notice(notices, friendly_type)
 
                 else:
-                    msg = f"This is the latest version of this {friendly_type}."
                     notices.append(
                         {
                             "type": messages.INFO,
-                            "html": _(msg),
+                            "html": _(
+                                "This is the latest version of this %(friendly_type)s."
+                            )
+                            % {"friendly_type": friendly_type},
                         }
                     )
             else:
@@ -108,21 +123,27 @@ class LegislationDetailView(BaseDocumentDetailView):
                     "expression_frbr_uri"
                 ]
 
-                msg = f"This is the version of this {friendly_type} as it was from %(date_from)s to %(date_to)s."
                 if self.object.repealed and repeal:
-                    msg += ' <a href="%(expression_frbr_uri)s">Read the version as it was when it was repealed</a>.'
+                    msg = _(
+                        "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. "
+                        ' <a href="%(expression_frbr_uri)s">Read the version as it was when it was repealed</a>.'
+                    )
                 else:
-                    msg += ' <a href="%(expression_frbr_uri)s">Read the version currently in force</a>.'
+                    msg = _(
+                        "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. "
+                        ' <a href="%(expression_frbr_uri)s">Read the version currently in force</a>.'
+                    )
 
                 notices.append(
                     {
                         "type": messages.WARNING,
                         "html": mark_safe(
-                            _(msg)
+                            msg
                             % {
                                 "date_from": format_date(self.object.date, "j F Y"),
                                 "date_to": format_date(date, "j F Y"),
                                 "expression_frbr_uri": expression_frbr_uri,
+                                "friendly_type": friendly_type,
                             }
                         ),
                     }
@@ -146,15 +167,13 @@ class LegislationDetailView(BaseDocumentDetailView):
         return self.object.metadata_json.get("commenced", None)
 
     def set_unapplied_amendment_notice(self, notices, friendly_type):
-        unapplied_amendment_msg = (
-            f"This is the latest available version of this {friendly_type}. "
-            f"There are outstanding amendments that have not yet been applied. "
-            f"See the History tab for more information."
-        )
         notices.append(
             {
                 "type": messages.WARNING,
-                "html": _(unapplied_amendment_msg),
+                "html": _(
+                    "There are outstanding amendments that have not yet been applied. "
+                    "See the History tab for more information."
+                ),
             }
         )
 
@@ -274,19 +293,3 @@ class LegislationDetailView(BaseDocumentDetailView):
         # TODO: we're not guaranteed to get documents in the same language, here
         docs = sorted(docs, key=lambda d: d.title)
         return docs
-
-
-# Translation strings that include the friendly document type to ensure we have translations for the full string.
-_("This is the version of this Act as it was when it was repealed.")
-_("This is the latest version of this Act.")
-_(
-    'This Act was repealed on %(date)s by <a href="%(repealing_uri)s">%(repealing_title)s</a>.'
-)
-_(
-    'This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href="%(expression_frbr_uri)s">'
-    "Read the version as it was when it was repealed</a>."
-)
-_(
-    'This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href="%(expression_frbr_uri)s">'
-    "Read the version currently in force</a>."
-)
