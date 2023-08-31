@@ -438,6 +438,20 @@ class DocumentAdmin(BaseAdmin):
         fieldsets = super().get_fieldsets(request, obj)
         if obj is None:
             fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
+
+        if not request.user.has_perm("peachjam.can_edit_advanced_fields"):
+            # Users without permission to edit advanced fields can't view the
+            # Advanced and Work identification fieldsets
+            return [
+                x
+                for x in fieldsets
+                if x[0]
+                not in [
+                    gettext_lazy("Advanced"),
+                    gettext_lazy("Work identification"),
+                ]
+            ]
+
         return fieldsets
 
     def get_form(self, request, obj=None, **kwargs):
