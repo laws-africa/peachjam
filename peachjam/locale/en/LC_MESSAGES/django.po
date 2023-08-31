@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-30 10:47+0200\n"
+"POT-Creation-Date: 2023-08-31 09:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -789,10 +789,14 @@ msgid "Pocket Law repo"
 msgstr ""
 
 #: models/settings.py:88
-msgid "help link"
+msgid "editor help link"
 msgstr ""
 
-#: models/settings.py:95
+#: models/settings.py:94
+msgid "user help link"
+msgstr ""
+
+#: models/settings.py:101
 msgid "site settings"
 msgstr ""
 
@@ -944,6 +948,7 @@ msgid "Your password has been reset."
 msgstr ""
 
 #: templates/admin/change_form.html:7 templates/admin/change_list.html:10
+#: templates/peachjam/_help_button.html:6
 msgid "Help"
 msgstr ""
 
@@ -1562,7 +1567,7 @@ msgstr ""
 msgid "Case summary"
 msgstr ""
 
-#: templates/peachjam/judgment_list.html:15
+#: templates/peachjam/judgment_list.html:16
 msgid "Recent judgments"
 msgstr ""
 
@@ -1664,36 +1669,36 @@ msgstr ""
 msgid "Navigation"
 msgstr ""
 
-#: views/legislation.py:51
+#: views/legislation.py:52
 #, python-format
 msgid "This %(friendly_type)s was repealed on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 msgstr ""
 
-#: views/legislation.py:59
+#: views/legislation.py:65
 #, python-format
 msgid "This %(friendly_type)s has not yet commenced and is not yet law."
 msgstr ""
 
-#: views/legislation.py:90
+#: views/legislation.py:99
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it was repealed."
 msgstr ""
 
-#: views/legislation.py:103
+#: views/legislation.py:113
 #, python-format
 msgid "This is the latest version of this %(friendly_type)s."
 msgstr ""
 
-#: views/legislation.py:117
+#: views/legislation.py:128
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was repealed</a>."
 msgstr ""
 
-#: views/legislation.py:122
+#: views/legislation.py:133
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr ""
 
-#: views/legislation.py:162
+#: views/legislation.py:174
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr ""
