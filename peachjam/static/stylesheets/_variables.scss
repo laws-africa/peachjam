@@ -1,9 +1,12 @@
 $font-family-sans-serif: Lato, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !default;
 $font-size-base: 0.875rem !default;
-
 $h1-font-size: $font-size-base * 2.25 !default;
 
 $nav-tabs-border-width: 0px;
+
+$enable-shadows: true;
+// no shadows on buttons
+$btn-box-shadow: none;
 
 //Colors
 $facebook-color: #1A77F2 !default;

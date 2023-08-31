@@ -14,6 +14,7 @@
     <div class="container">
       {% block page-heading %}
         <h1 class="my-4">{% trans 'Legislation' %}</h1>
+        {% include "peachjam/_help_button.html" with link="legislation/" %}
       {% endblock %}
       {% block legislation-nav %}
         <nav class="nav nav-tabs scroll-xs mb-3 border-bottom">
