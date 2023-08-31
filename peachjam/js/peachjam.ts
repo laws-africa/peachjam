@@ -29,6 +29,7 @@ customElements.define('la-toc-item', LaTocItem as any);
 export interface PeachJamConfig {
   appName: string;
   pdfWorker: string;
+  userHelpLink: string;
   sentry: {
     dsn: string | null;
     environment: string | null;
@@ -40,6 +41,7 @@ class PeachJam {
   public config: PeachJamConfig = {
     appName: 'Peach Jam',
     pdfWorker: '/static/js/pdf.worker-prod.js',
+    userHelpLink: '',
     sentry: {
       dsn: null,
       environment: null

@@ -77,16 +77,7 @@
             </button>
           </form>
           <div class="my-2">
-            <a
-              href="#"
-              class="btn btn-sm btn-outline-info"
-              data-bs-toggle="help-popover"
-              :data-bs-content="$t( 'You can search for documents by entering a keyword or phrase in the search box. You can also use the Advanced search to search for documents by more specific criteria.' )"
-              data-bs-trigger="click"
-            >
-              <i class="bi bi-question-circle" />
-              {{ $t("Help") }}
-            </a>
+            <HelpBtn page="search/" />
           </div>
         </div>
         <div
@@ -226,6 +217,7 @@ import SearchPagination from './SearchPagination.vue';
 import FilterFacets from '../FilterFacets/index.vue';
 import MobileFacetsDrawer from './MobileSideDrawer.vue';
 import AdvancedSearch from './AdvancedSearch.vue';
+import HelpBtn from '../HelpBtn.vue';
 import { scrollToElement } from '../../utils/function';
 
 function resetAdvancedFields (fields) {
@@ -248,7 +240,7 @@ function resetAdvancedFields (fields) {
 
 export default {
   name: 'FindDocuments',
-  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
+  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
   props: ['showJurisdiction'],
   data () {
     const data = {

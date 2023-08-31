@@ -47,13 +47,6 @@ class LegislationListView(TemplateView):
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
 
-        context["help_button_text"] = _("Help")
-        context["legislation_help_text"] = _(
-            "This is is a list of legislation for this jurisdiction. Click on the "
-            "tabs to filter according to current, repealed and subsidiary "
-            "legislation."
-        )
-
         return context
 
     def add_children(self, queryset):

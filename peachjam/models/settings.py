@@ -84,9 +84,15 @@ class PeachJamSettings(SingletonModel):
     pocket_law_repo = models.CharField(
         verbose_name=_("Pocket Law repo"), max_length=1024, null=True, blank=True
     )
-    help_link = models.URLField(
-        _("help link"),
+    editor_help_link = models.URLField(
+        _("editor help link"),
         default="https://liieditors.docs.laws.africa/",
+        null=True,
+        blank=True,
+    )
+    user_help_link = models.URLField(
+        _("user help link"),
+        default="https://liiguide.docs.laws.africa/",
         null=True,
         blank=True,
     )

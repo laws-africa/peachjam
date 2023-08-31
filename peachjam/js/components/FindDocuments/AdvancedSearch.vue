@@ -71,20 +71,9 @@
         </div>
       </div>
     </div>
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-end">
       <div>
-        <a
-          href="#"
-          class="btn btn-sm btn-outline-info"
-          data-bs-toggle="help-popover"
-          :data-bs-content="$t('This is Advanced Search. Enter keywords in the fields above for a more fine grained search of documents.')"
-          data-bs-trigger="click"
-        >
-          <i class="bi bi-question-circle" />
-          Help
-        </a>
-      </div>
-      <div>
+        <HelpBtn page="search/advanced-search" />
         <button type="submit" class="btn btn-primary">
           {{ $t('Search') }}
         </button>
@@ -95,11 +84,12 @@
 
 <script>
 import AdvancedSearchFields from './AdvancedSearchFields.vue';
+import HelpBtn from '../HelpBtn.vue';
 
 export default {
   name: 'AdvancedSearch',
 
-  components: { AdvancedSearchFields },
+  components: { AdvancedSearchFields, HelpBtn },
 
   props: {
     modelValue: {
@@ -116,7 +106,7 @@ export default {
 
   data: function () {
     return {
-      showAdditionalOptions: false
+      showAdditionalOptions: false,
     };
   },
 
