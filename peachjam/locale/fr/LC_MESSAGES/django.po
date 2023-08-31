@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-08-31 09:30+0200\n"
-"PO-Revision-Date: 2023-08-31 14:25\n"
+"PO-Revision-Date: 2023-08-31 15:20\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -789,11 +789,11 @@ msgstr "Dépôt Pocket Law"
 
 #: models/settings.py:88
 msgid "editor help link"
-msgstr ""
+msgstr "lien d'aide de l'éditeur"
 
 #: models/settings.py:94
 msgid "user help link"
-msgstr ""
+msgstr "lien d'aide utilisateur"
 
 #: models/settings.py:101
 msgid "site settings"
