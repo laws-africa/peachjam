@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-08-30 10:34+0200\n"
-"PO-Revision-Date: 2023-08-31 07:34\n"
+"PO-Revision-Date: 2023-08-31 10:25\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -72,7 +72,7 @@ msgstr "Hotuba"
 
 #: templates/peachjam/_header.html:38
 msgid "JOT Documents and Guidelines"
-msgstr "Nyaraka za JOT na Miongozo"
+msgstr "Nyaraka na Miongozo ya JOT"
 
 #: templates/peachjam/about.html:9
 msgid "About TanzLII"
