@@ -26,7 +26,9 @@ class Attorney(models.Model):
 
 
 class Judge(models.Model):
-    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
@@ -39,7 +41,9 @@ class Judge(models.Model):
 
 
 class OrderOutcome(models.Model):
-    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
@@ -184,10 +188,7 @@ class Judgment(CoreDocument):
         related_name="judgments",
         blank=True,
     )
-    headnote_holding = models.TextField(_("headnote holding"), null=True, blank=True)
-    additional_citations = models.TextField(
-        _("additional citations"), null=True, blank=True
-    )
+    case_summary = models.TextField(_("case summary"), null=True, blank=True)
     flynote = models.TextField(_("flynote"), null=True, blank=True)
     case_name = models.CharField(
         _("case name"),
@@ -229,6 +230,7 @@ class Judgment(CoreDocument):
         ordering = ["title"]
         verbose_name = _("judgment")
         verbose_name_plural = _("judgments")
+        permissions = [("api_judgment", "API judgment access")]
 
     def __str__(self):
         return self.title
@@ -314,11 +316,14 @@ class Judgment(CoreDocument):
             defaults={"name": "Reported", "code": "reported", "level": "success"},
         )
 
+        labels = list(self.labels.all())
+
         # if the judgment has alternative_names, apply the "reported" label
         if self.alternative_names.exists():
-            self.labels.add(label.pk)
-        # if the judgment no alternative_names, remove the "reported" label
-        else:
+            if label not in labels:
+                self.labels.add(label.pk)
+        # if the judgment has no alternative_names, remove the "reported" label
+        elif label in labels:
             self.labels.remove(label.pk)
 
         super().apply_labels()
@@ -336,7 +341,7 @@ class Judgment(CoreDocument):
 
 class CaseNumber(models.Model):
     string_override = models.CharField(
-        _("string override"),
+        _("Full case number as printed on judgment"),
         max_length=1024,
         null=True,
         blank=True,

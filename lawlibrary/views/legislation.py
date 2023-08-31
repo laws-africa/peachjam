@@ -1,5 +1,12 @@
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+
+from lawlibrary.constants import PROVINCIAL_CODES
 from liiweb.views import LegislationListView as BaseLegislationListView
+from liiweb.views import LocalityLegislationListView as BaseLocalityLegislationListView
 from liiweb.views import LocalityLegislationView as BaseLocalityLegislationView
+from peachjam.helpers import chunks
+from peachjam.models import Locality
 
 
 class LegislationListView(BaseLegislationListView):
@@ -8,7 +15,45 @@ class LegislationListView(BaseLegislationListView):
 
 
 class LocalityLegislationView(BaseLocalityLegislationView):
+    variant = None
+
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            locality_legislation_title="Provincial Legislation", **kwargs
-        )
+        context = super().get_context_data(**kwargs)
+
+        if self.variant == "provincial":
+            context["locality_legislation_title"] = "Provincial Legislation"
+            localities = Locality.objects.filter(code__in=PROVINCIAL_CODES)
+            context["locality_groups"] = list(chunks(localities, 2))
+
+        if self.variant == "municipal":
+            context["locality_legislation_title"] = "Municipal By-laws"
+            localities = Locality.objects.exclude(code__in=PROVINCIAL_CODES)
+            context["locality_groups"] = list(chunks(localities, 2))
+            self.navbar_link = "legislation/municipal"
+
+        return context
+
+
+class LocalityLegislationListView(BaseLocalityLegislationListView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["locality"] = self.locality
+
+        if self.locality.code in PROVINCIAL_CODES:
+            context["locality_legislation_title"] = "Provincial Legislation"
+            context["page_heading"] = _(
+                "%(locality)s Legislation" % {"locality": self.locality}
+            )
+            context["show_subleg"] = True
+            context["breadcrumb_link"] = reverse("locality_legislation")
+        else:
+            context["locality_legislation_title"] = "Municipal By-laws"
+            context["page_heading"] = _(
+                "%(locality)s By-laws" % {"locality": self.locality}
+            )
+            self.navbar_link = "legislation/municipal"
+            context["breadcrumb_link"] = reverse("municipal_legislation")
+            context["legislation_list_show_dates"] = True
+
+        return context

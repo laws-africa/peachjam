@@ -2,8 +2,9 @@
 <div class="container">
   <div class="row">
     {% include 'peachjam/_help_popover.html' with link='#' btn_text=help_button_text content=citations_help_text %}
-    <div class="col-sm">
+    <div class="col-sm mb-3">
       <h4 class="mb-3">
+        <i class="bi bi-pj pj-citations"></i>
         {% translate 'Cited documents' %} <span class="badge bg-secondary">{{ cited_documents_count }}</span>
       </h4>
       {% include 'peachjam/_citations_list.html' with citations=cited_documents group="outgoing" %}

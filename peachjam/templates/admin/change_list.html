@@ -1,0 +1,13 @@
+{% extends 'admin/change_list.html' %}
+{% load i18n %}
+{% block object-tools-items %}
+  {{ block.super }}
+  {% if PEACHJAM_SETTINGS.help_link and help_topic %}
+    <a class="btn btn-info"
+       target="_blank"
+       href="{{ PEACHJAM_SETTINGS.help_link }}{{ help_topic }}">
+      <i class="fa fa-question-circle"></i>
+      {% trans 'Help' %}
+    </a>
+  {% endif %}
+{% endblock %}

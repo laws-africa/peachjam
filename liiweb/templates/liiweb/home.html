@@ -47,6 +47,7 @@
       {% endblock %}
     </div>
   </section>
+  {% block after-search %}{% endblock %}
   <section class="mt-2">
     <div class="container">
       <div class="row justify-content-center hero-logos mt-5 mb-3">
@@ -95,7 +96,7 @@
                           role="tab"
                           aria-controls="facebook"
                           aria-selected="false">
-                    <i class="bi bi bi-facebook facebook-forecolor"></i>
+                    <i class="bi bi-facebook facebook-forecolor"></i>
                     <span class="facebook-forecolor">{% trans 'Facebook' %}</span>
                   </button>
                 </li>
@@ -138,6 +139,28 @@
             <h2 class="mb-4 heading-underlined">{% trans 'Collections' %}</h2>
             {% include 'peachjam/_taxonomy_list.html' %}
           </section>
+          {% if PEACHJAM_SETTINGS.pocket_law_repo %}
+            {% block pocketlaw %}
+              <section class="py-5">
+                <div class="row">
+                  <div class="col-sm-3 mb-3">
+                    <img src="{% static 'images/pocketlaw-logo.png' %}"
+                         alt="Pocket Law"
+                         class="img-fluid"/>
+                  </div>
+                  <div class="col-sm-9 ps-sm-5">
+                    <h2 class="mb-4">{% blocktrans trimmed %}Use {{ APP_NAME }} when you're offline{% endblocktrans %}</h2>
+                    <p class="lead">
+                      {% blocktrans trimmed %}
+                        Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.
+                      {% endblocktrans %}
+                    </p>
+                    <a href="{% url 'pocketlaw' %}" class="btn btn-lg btn-primary">Pocket Law</a>
+                  </div>
+                </div>
+              </section>
+            {% endblock %}
+          {% endif %}
           {% if recent_articles %}
             <section class="pb-5 pt-5">
               <h2 class="mb-4 heading-underlined">{% trans 'Latest Articles' %}</h2>

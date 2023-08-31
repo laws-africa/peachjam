@@ -1,5 +1,4 @@
 import { CopyToClipboard } from './clipboard';
-import PdfRenderer from './pdf-renderer';
 import { RelationshipEnrichments } from './RelationshipEnrichment';
 import DocumentList from './document-list';
 import DocumentContent from './DocumentContent/index';
@@ -10,6 +9,7 @@ import TermsOfUse from './terms-of-use';
 
 import FindDocuments from './FindDocuments/index.vue';
 import LegislationTable from './LegislationTable/index.vue';
+import PocketLawDownload from './PocketLawDownload.vue';
 
 const components: Record<string, any> = {
   // Data components
@@ -17,7 +17,6 @@ const components: Record<string, any> = {
   DocumentContent,
   DocumentList,
   NavigationSelect,
-  PdfRenderer,
   RelationshipEnrichments,
   ToggleTab,
   TaxonomyTree,
@@ -25,7 +24,8 @@ const components: Record<string, any> = {
 
   // Vue components
   FindDocuments,
-  LegislationTable
+  LegislationTable,
+  PocketLawDownload
 };
 
 export default components;

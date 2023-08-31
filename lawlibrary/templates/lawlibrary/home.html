@@ -83,31 +83,8 @@
     </div>
   </div>
 {% endblock %}
-{% block lower-row-content %}
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4 heading-underlined">{% trans 'Courts' %}</h2>
-    {% include 'peachjam/_court_list.html' %}
-  </section>
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4 heading-underlined">{% trans 'Collections' %}</h2>
-    {% include 'peachjam/_taxonomy_list.html' %}
-  </section>
-  <section class="py-5">
-    <div class="row">
-      <div class="col-sm-3 mb-3">
-        <img src="{% static 'images/pocketlaw-logo.png' %}"
-             alt="Pocket Law"
-             class="img-fluid"/>
-      </div>
-      <div class="col-sm-9 ps-sm-5">
-        <h2 class="mb-4">Use {{ APP_NAME }} when you're offline</h2>
-        <p class="lead">
-          Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.
-        </p>
-        <a href="{% url 'pocketlaw' %}" class="btn btn-lg btn-primary">Pocket Law</a>
-      </div>
-    </div>
-  </section>
+{% block pocketlaw %}
+  {{ block.super }}
   <section class="py-5">
     <div class="row">
       <div class="col-sm-3 mb-3">

@@ -84,7 +84,7 @@ class LocalityLegislationView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         localities = Locality.objects.all()
-        context["province_groups"] = list(chunks(localities, 2))
+        context["locality_groups"] = list(chunks(localities, 2))
         return context
 
 
@@ -103,5 +103,8 @@ class LocalityLegislationListView(LegislationListView):
         return super().get_context_data(
             locality=self.locality,
             locality_legislation_title="Provincial Legislation",
-            **kwargs
+            page_heading=_("%(locality)s Legislation" % {"locality": self.locality}),
+            entity_profile=self.locality.entity_profile.first(),
+            entity_profile_title=self.locality.name,
+            **kwargs,
         )

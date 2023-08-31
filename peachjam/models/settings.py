@@ -33,6 +33,13 @@ class PeachJamSettings(SingletonModel):
         blank=True,
         verbose_name=_("document languages"),
     )
+    default_document_jurisdiction = models.ForeignKey(
+        "countries_plus.Country",
+        related_name="+",
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("default document jurisdiction"),
+    )
     document_jurisdictions = models.ManyToManyField(
         "countries_plus.Country",
         related_name="+",
@@ -71,9 +78,17 @@ class PeachJamSettings(SingletonModel):
     facebook_link = models.URLField(
         verbose_name=_("facebook link"), null=True, blank=True
     )
-
     re_extract_citations = models.BooleanField(
         verbose_name=_("re-extract citations"), default=True
+    )
+    pocket_law_repo = models.CharField(
+        verbose_name=_("Pocket Law repo"), max_length=1024, null=True, blank=True
+    )
+    help_link = models.URLField(
+        _("help link"),
+        default="https://liieditors.docs.laws.africa/",
+        null=True,
+        blank=True,
     )
 
     class Meta:

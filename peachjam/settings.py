@@ -71,6 +71,8 @@ INSTALLED_APPS = [
     "background_task",
     "ckeditor",
     "polymorphic",
+    "drf_spectacular",
+    "django_advanced_password_validation",
 ]
 
 MIDDLEWARE = [
@@ -180,6 +182,13 @@ DATABASES = {
     "default": default_db_config,
     "gazettes_africa": gazette_db_config,
 }
+# descriptive name for this application in psql's pg_stat_activity output, to help link connections to apps
+db_app_name = "-".join(
+    [slugify(PEACHJAM["APP_NAME"]), os.environ.get("DYNO", "django")]
+)
+for cfg in DATABASES.values():
+    if "proxy" not in cfg["HOST"]:
+        cfg.setdefault("OPTIONS", {})["options"] = f"-c application_name={db_app_name}"
 
 
 # Password validation
@@ -197,6 +206,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+    {
+        "NAME": "django_advanced_password_validation.advanced_password_validation.ContainsDigitsValidator",
+        "OPTIONS": {"min_digits": 1},
+    },
+    {
+        "NAME": "django_advanced_password_validation.advanced_password_validation.ContainsUppercaseValidator",
+        "OPTIONS": {"min_uppercase": 1},
+    },
+    {
+        "NAME": "django_advanced_password_validation.advanced_password_validation.ContainsLowercaseValidator",
+        "OPTIONS": {"min_lowercase": 1},
+    },
+    {
+        "NAME": "django_advanced_password_validation.advanced_password_validation.ContainsSpecialCharactersValidator",
+        "OPTIONS": {"min_characters": 1},
     },
 ]
 
@@ -267,9 +292,20 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissions"],
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.OrderingFilter",
+    ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 10,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": f'{PEACHJAM["APP_NAME"]} API',
+    "DESCRIPTION": "Read-only API for this website.",
+    "VERSION": "v1",
+    "SCHEMA_PATH_PREFIX_INSERT": "/api",
 }
 
 # Sentry
@@ -481,6 +517,8 @@ CKEDITOR_CONFIGS = {
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 SESSION_COOKIE_SECURE = True
+# nginx sets this header to indicate if the upstream request was secure
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Caches
 if DEBUG:

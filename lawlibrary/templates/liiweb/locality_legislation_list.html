@@ -1,0 +1,13 @@
+{% extends 'liiweb/locality_legislation_list.html' %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{{ breadcrumb_link }}">{{ locality_legislation_title }}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ locality.name }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}

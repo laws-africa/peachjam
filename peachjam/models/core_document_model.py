@@ -9,6 +9,7 @@ from cobalt.akn import StructuredDocument, datestring
 from cobalt.uri import FrbrUri
 from countries_plus.models import Country
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.files import File
@@ -87,6 +88,9 @@ class Locality(models.Model):
         Country, on_delete=models.PROTECT, verbose_name=_("jurisdiction")
     )
     code = models.CharField(_("code"), max_length=20, null=False)
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
 
     class Meta:
         verbose_name = _("locality")
@@ -198,7 +202,8 @@ class Work(models.Model):
 
     def fetch_cited_works_frbr_uris(self):
         """Returns a set of work_frbr_uris,
-        taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links."""
+        taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links.
+        """
         work_frbr_uris = set()
 
         for doc in self.documents.all():
@@ -432,6 +437,7 @@ class CoreDocument(PolymorphicModel):
         permissions = [
             ("can_delete_own_document", "Can delete own document"),
             ("can_edit_own_document", "Can edit own document"),
+            ("can_edit_advanced_fields", "Can edit advanced fields"),
         ]
 
     def __str__(self):
@@ -756,17 +762,38 @@ class SourceFile(AttachmentAbstractModel):
         _("source URL"), max_length=2048, null=True, blank=True
     )
 
+    file_as_pdf = models.FileField(
+        _("file as pdf"),
+        upload_to=file_location,
+        max_length=1024,
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         verbose_name = _("source file")
         verbose_name_plural = _("source files")
 
     def as_pdf(self):
-        if self.filename.endswith(".pdf"):
+        if self.mimetype == "application/pdf":
             return self.file
+        elif self.file_as_pdf:
+            return self.file_as_pdf
+        else:
+            return None
 
-        # convert with soffice
-        suffix = os.path.splitext(self.filename)[1].replace(".", "")
-        return soffice_convert(self.file, suffix, "pdf")[0]
+    def convert_to_pdf(self):
+        if self.mimetype != "application/pdf" and not self.file_as_pdf:
+            suffix = os.path.splitext(self.filename)[1].replace(".", "")
+            pdf = soffice_convert(self.file, suffix, "pdf")[0]
+            self.file_as_pdf = File(pdf, name=f"{self.file.name[:-5]}.pdf")
+            self.save()
+
+    def ensure_file_as_pdf(self):
+        from peachjam.tasks import convert_source_file_to_pdf
+
+        if self.mimetype != "application/pdf" and not self.file_as_pdf:
+            convert_source_file_to_pdf(self.id)
 
     def filename_extension(self):
         return os.path.splitext(self.filename)[1][1:]
@@ -827,7 +854,12 @@ class AlternativeName(models.Model):
         related_name="alternative_names",
         verbose_name=_("document"),
     )
-    title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
+    title = models.CharField(
+        _("Law report citation/Alternative known name"),
+        max_length=1024,
+        null=False,
+        blank=False,
+    )
 
     class Meta:
         verbose_name = _("alternative name")

@@ -77,13 +77,23 @@
   {% endwith %}
 {% endblock %}
 {% block extra-metadata %}
-  {% if document.headnote_holding %}
+  {% if document.flynote %}
     <dl>
       <dt>
-        {% trans 'Headnote and Holding' %}
+        {% trans 'Flynote' %}
       </dt>
       <dd>
-        {{ document.headnote_holding|safe }}
+        {{ document.flynote|safe }}
+      </dd>
+    </dl>
+  {% endif %}
+  {% if document.case_summary %}
+    <dl>
+      <dt>
+        {% trans 'Case summary' %}
+      </dt>
+      <dd>
+        {{ document.case_summary|safe }}
       </dd>
     </dl>
   {% endif %}

@@ -21,7 +21,10 @@
       <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
+        // set up default config
         gtag('js', new Date());
+        gtag('set', {'lii_user_language': '{{ CURRENT_LANGUAGE }}'});
+
         // split multiple ids into array
         const google_analytics_ids = '{{ PEACHJAM_SETTINGS.google_analytics_id }}'.trim().split(/\s+/);
         // loop through ids and add config for each

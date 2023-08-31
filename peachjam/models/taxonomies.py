@@ -1,15 +1,19 @@
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from treebeard.mp_tree import MP_Node
 
-from peachjam.models import CoreDocument, EntityProfile
+from peachjam.models import CoreDocument
 
 
 class Taxonomy(MP_Node):
     name = models.CharField(_("name"), max_length=255)
     slug = models.SlugField(_("slug"), max_length=255, unique=True)
     node_order_by = ["name"]
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
 
     class Meta:
         verbose_name = _("taxonomies")
@@ -21,7 +25,7 @@ class Taxonomy(MP_Node):
     def get_entity_profile(self):
         """Get the entity profile for this taxonomy, starting with the current taxonomy and then
         looking up the tree until one is found."""
-        entity_profile = EntityProfile.objects.filter(object_id=self.pk).first()
+        entity_profile = self.entity_profile.first()
         if entity_profile:
             return entity_profile
         if self.is_root():

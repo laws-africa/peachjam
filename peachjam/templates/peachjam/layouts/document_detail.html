@@ -1,11 +1,6 @@
 {% extends 'peachjam/layouts/main.html' %}
 {% load peachjam i18n static %}
 {% block title %}{{ document.title }}{% endblock %}
-{% block head-js %}
-  <!--  app-prod.js depends on pdf.js to be loaded-->
-  <script defer src="{% static 'lib/pdfjs/pdf.js' %}"></script>
-  {{ block.super }}
-{% endblock %}
 {% block head-meta %}
   {{ block.super }}
   <meta property="og:title" content="{{ document.title }}" />
@@ -30,21 +25,23 @@
         {% block breadcrumbs %}{% endblock %}
         {% block document-title %}
           <div class="d-md-flex justify-content-md-between py-4">
-            <h1>{{ document.title }}</h1>
-            {% include 'peachjam/_labels.html' %}
+            <div>
+              <h1>{{ document.title }}</h1>
+              {% include 'peachjam/_labels.html' %}
+            </div>
             <div class="d-flex align-items-center">
               <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
-                 class="btn btn-link"
+                 class="btn btn-link share-link"
                  target="_blank">
                 <i class="bi bi-whatsapp whatsapp-forecolor share-icon"></i>
               </a>
-              <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}"
-                 class="btn btn-link"
+              <a href="https://twitter.com/intent/tweet?text={{ request.build_absolute_uri }}"
+                 class="btn btn-link share-link"
                  target="_blank">
                 <i class="bi bi-twitter twitter-forecolor share-icon"></i>
               </a>
               <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
-                 class="btn btn-link"
+                 class="btn btn-link share-link"
                  target="_blank">
                 <i class="bi bi-facebook facebook-forecolor share-icon"></i>
               </a>
@@ -65,6 +62,7 @@
                       role="tab"
                       aria-controls="document-detail-tab"
                       aria-selected="true">
+                <i class="bi bi-pj pj-document-detail"></i>
                 {% trans "Document detail" %}
               </button>
             </li>
@@ -77,6 +75,7 @@
                         role="tab"
                         aria-controls="history-tab"
                         aria-selected="false">
+                  <i class="bi bi-pj pj-history"></i>
                   {% trans "History" %}
                 </button>
               </li>
@@ -90,6 +89,7 @@
                         role="tab"
                         aria-controls="related-tab"
                         aria-selected="false">
+                  <i class="bi bi-pj pj-related"></i>
                   {% trans "Related documents" %}
                   <span class="badge bg-secondary">{{ n_relationships }}</span>
                 </button>
@@ -104,8 +104,9 @@
                         role="tab"
                         aria-controls="citations-tab"
                         aria-selected="false">
+                  <i class="bi bi-pj pj-citations"></i>
                   {% trans "Citations" %}
-                  <span class="badge bg-secondary">{{ number_of_extracted_citations }}</span>
+                  <span class="badge bg-secondary">{{ cited_documents_count|default:"-" }} / {{ documents_citing_current_doc_count|default:"-" }}</span>
                 </button>
               </li>
             {% endif %}
@@ -213,8 +214,9 @@
                             </dt>
                             <dd class="text-muted">
                               {% for bench in judges %}
-                                {{ bench.judge.name }}
-                                {% if not forloop.last %},{% endif %}
+                                {# djlint:off #}
+                                {{ bench.judge.name }}{% if not forloop.last %},{% endif %}
+                                {# djlint:on #}
                               {% endfor %}
                             </dd>
                           {% endif %}
@@ -350,7 +352,10 @@
                     {% endblock %}
                     {% block document-relationships-content %}
                       {% if n_relationships %}
-                        <h5>{% translate 'Related documents' %}</h5>
+                        <h5>
+                          <i class="bi bi-pj pj-related"></i>
+                          {% translate 'Related documents' %}
+                        </h5>
                         <ul class="list-unstyled">
                           {% if n_relationships > relationship_limit %}
                             <li>

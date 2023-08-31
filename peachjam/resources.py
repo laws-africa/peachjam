@@ -210,7 +210,8 @@ class ManyToOneWidget(ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
             return self.model.objects.none()
-        return [self.model(**{self.field: v}) for v in value.split(self.separator)]
+        values = [v.strip() for v in value.split(self.separator)]
+        return [self.model(**{self.field: v}) for v in values if v]
 
 
 class StripHtmlWidget(CharWidget):
@@ -300,6 +301,9 @@ class BaseDocumentResource(resources.ModelResource):
             return
 
     def before_import_row(self, row, **kwargs):
+        # strip whitespace from all string fields
+        for k, v in row.items():
+            row[k] = v.strip() if isinstance(v, str) else v
         if kwargs.get("user"):
             row["created_by"] = kwargs["user"].id
         if not row.get("skip"):
@@ -311,21 +315,22 @@ class BaseDocumentResource(resources.ModelResource):
     def save_m2m(self, instance, row, using_transactions, dry_run):
         super().save_m2m(instance, row, using_transactions, dry_run)
 
-        # attach source file, but only if it was explicitly provided during import
-        # the preferred source URL was set during import by the SourceFileWidget
-        if (
-            row.get("source_url") == instance.source_url
-            and instance.source_url
-            and not dry_run
-        ):
-            self.attach_source_file(instance, instance.source_url)
-
         if not dry_run:
-            # try to extract content from docx files
-            instance.extract_content_from_source_file()
-            # extract citations
-            instance.extract_citations()
-            instance.save()
+            # only re-extract content if the content explicitly changed, or the source file changed (next block)
+            extract_content = "content_html" in row
+
+            # attach source file, but only if it was explicitly provided during import
+            # the preferred source URL was set during import by the SourceFileWidget
+            if row.get("source_url") == instance.source_url and instance.source_url:
+                self.attach_source_file(instance, instance.source_url)
+                extract_content = True
+
+            if extract_content:
+                # try to extract content from docx files
+                instance.extract_content_from_source_file()
+                # extract citations
+                instance.extract_citations()
+                instance.save()
 
     def after_save_instance(self, instance, using_transactions, dry_run):
         if not dry_run:

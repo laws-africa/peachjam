@@ -11,6 +11,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericStackedInline
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -86,6 +87,18 @@ from peachjam_search.tasks import search_model_saved
 User = get_user_model()
 
 
+class BaseAdmin(admin.ModelAdmin):
+    """Base admin class for Peachjam. Includes some common fields and methods
+    for all models.
+    """
+
+    def changelist_view(self, request, extra_context=None):
+        resp = super().changelist_view(request, extra_context)
+        if hasattr(self, "help_topic"):
+            resp.context_data["help_topic"] = self.help_topic
+        return resp
+
+
 class ImportExportMixin(BaseImportExportMixin):
     def import_action(self, request, *args, **kwargs):
         resp = super().import_action(request, *args, **kwargs)
@@ -95,6 +108,20 @@ class ImportExportMixin(BaseImportExportMixin):
         except IndexError:
             pass
         return resp
+
+    def process_result(self, result, request):
+        if result.has_errors():
+            # HACK
+            # this allows us to show an error page if there were errors during the actual import,
+            # otherwise it fails silently
+            context = self.get_import_context_data()
+            context["result"] = result
+            context.update(self.admin_site.each_context(request))
+            context["title"] = _("Import")
+            context["opts"] = self.model._meta
+            request.current_app = self.admin_site.name
+            return TemplateResponse(request, [self.import_template_name], context)
+        return super().process_result(result, request)
 
 
 class EntityProfileForm(forms.ModelForm):
@@ -146,7 +173,7 @@ class SourceFileFilter(admin.SimpleListFilter):
             return queryset
 
 
-class BaseAttachmentFileInline(admin.TabularInline):
+class BaseAttachmentFileInline(admin.StackedInline):
     extra = 0
     readonly_fields = ("filename", "mimetype", "attachment_link", "size")
 
@@ -245,7 +272,7 @@ class DocumentForm(forms.ModelForm):
         required=False,
     )
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
-    headnote_holding = forms.CharField(widget=CKEditorWidget(), required=False)
+    case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
     date = forms.DateField(widget=DateSelectorWidget())
 
     def __init__(self, data=None, *args, **kwargs):
@@ -269,6 +296,9 @@ class DocumentForm(forms.ModelForm):
             if site_settings.document_languages.exists():
                 self.fields["language"].queryset = site_settings.document_languages
         if "jurisdiction" in self.fields:
+            self.fields[
+                "jurisdiction"
+            ].initial = site_settings.default_document_jurisdiction
             if site_settings.document_jurisdictions.exists():
                 self.fields[
                     "jurisdiction"
@@ -295,7 +325,7 @@ class DocumentForm(forms.ModelForm):
         self.instance.update_text_content()
 
 
-class DocumentAdmin(admin.ModelAdmin):
+class DocumentAdmin(BaseAdmin):
     form = DocumentForm
     inlines = [DocumentTopicInline, SourceFileInline, AlternativeNameInline]
     list_display = (
@@ -325,6 +355,7 @@ class DocumentAdmin(admin.ModelAdmin):
         "reextract_content",
         "reindex_for_search",
         "apply_labels",
+        "ensure_source_file_pdf",
     ]
 
     fieldsets = [
@@ -424,7 +455,6 @@ class DocumentAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def save_model(self, request, obj, form, change):
-
         if not change:
             obj.created_by = request.user
 
@@ -479,7 +509,7 @@ class DocumentAdmin(admin.ModelAdmin):
 
     def extract_citations(self, request, queryset):
         count = queryset.count()
-        for doc in queryset:
+        for doc in queryset.iterator():
             extract_citations_task(doc.pk)
         self.message_user(
             request, f"Queued tasks to extract citations from {count} documents."
@@ -490,7 +520,7 @@ class DocumentAdmin(admin.ModelAdmin):
     def reextract_content(self, request, queryset):
         """Re-extract content from source files that are Word documents, overwriting content_html."""
         count = 0
-        for doc in queryset:
+        for doc in queryset.iterator():
             if doc.extract_content_from_source_file():
                 count += 1
                 doc.extract_citations()
@@ -502,7 +532,7 @@ class DocumentAdmin(admin.ModelAdmin):
     def reindex_for_search(self, request, queryset):
         """Set up a background task to re-index documents for search."""
         count = queryset.count()
-        for doc in queryset:
+        for doc in queryset.iterator():
             search_model_saved(doc._meta.label, doc.pk)
         self.message_user(request, f"Queued tasks to re-index for {count} documents.")
 
@@ -510,28 +540,35 @@ class DocumentAdmin(admin.ModelAdmin):
 
     def apply_labels(self, request, queryset):
         count = queryset.count()
-        for doc in queryset:
+        for doc in queryset.iterator():
             doc.apply_labels()
         self.message_user(request, f"Applying labels for {count} documents.")
 
     apply_labels.short_description = "Apply labels"
 
+    def ensure_source_file_pdf(self, request, queryset):
+        count = queryset.count()
+        for doc in queryset.iterator():
+            if hasattr(doc, "source_file"):
+                doc.source_file.ensure_file_as_pdf()
+        self.message_user(request, f"Ensuring PDF for {count} documents.")
+
+    ensure_source_file_pdf.short_description = "Ensure PDF for source file (background)"
+
     def has_delete_permission(self, request, obj=None):
-        if obj:
-            if (
-                request.user.has_perm("peachjam.can_delete_own_document")
-                and obj.created_by == request.user
-            ):
-                return True
+        if obj and (
+            request.user.has_perm("peachjam.can_delete_own_document")
+            and obj.created_by == request.user
+        ):
+            return True
         return super().has_delete_permission(request, obj=obj)
 
     def has_change_permission(self, request, obj=None):
-        if obj:
-            if (
-                request.user.has_perm("peachjam.can_edit_own_document")
-                and obj.created_by == request.user
-            ):
-                return True
+        if obj and (
+            request.user.has_perm("peachjam.can_edit_own_document")
+            and obj.created_by == request.user
+        ):
+            return True
         return super().has_change_permission(request, obj=obj)
 
 
@@ -607,7 +644,7 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     readonly_fields = ["parent_work"] + list(DocumentAdmin.readonly_fields)
 
 
-class CaseNumberAdmin(admin.TabularInline):
+class CaseNumberAdmin(admin.StackedInline):
     model = CaseNumber
     extra = 1
     verbose_name = gettext_lazy("case number")
@@ -648,6 +685,7 @@ class JudgmentAdminForm(DocumentForm):
 
 
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
+    help_topic = "judgments/upload-a-judgment"
     form = JudgmentAdminForm
     resource_class = JudgmentResource
     inlines = [
@@ -670,9 +708,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets[3][1]["fields"].extend(
-        ["headnote_holding", "additional_citations", "flynote"]
-    )
+    fieldsets[3][1]["fields"].extend(["case_summary", "flynote"])
     readonly_fields = [
         "mnc",
         "serial_number",
@@ -685,6 +721,18 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         "frbr_uri_number",
     ] + list(DocumentAdmin.readonly_fields)
     prepopulated_fields = {}
+    jazzmin_section_order = (
+        "Key details",
+        "Case numbers",
+        "Judges",
+        "Additional details",
+        "Content",
+        "Alternative names",
+        "Attached files",
+        "Document topics",
+        "Work identification",
+        "Advanced",
+    )
 
 
 @admin.register(Predicate)
@@ -709,14 +757,17 @@ class IngestorAdmin(admin.ModelAdmin):
     list_display = ("name", "last_refreshed_at", "enabled")
 
     def refresh_all_content(self, request, queryset):
-        from peachjam.tasks import run_ingestors
+        from peachjam.tasks import run_ingestor
 
         queryset.update(last_refreshed_at=None)
-        # queue up the background ingestor update task
-        run_ingestors()
+        for ing in queryset:
+            # queue up the background ingestor update task
+            run_ingestor(ing.pk)
         self.message_user(request, _("Refreshing content in the background."))
 
-    refresh_all_content.short_description = gettext_lazy("Refresh all content")
+    refresh_all_content.short_description = gettext_lazy(
+        "Refresh content selected ingestors"
+    )
 
 
 class ArticleAttachmentInline(BaseAttachmentFileInline):
@@ -850,6 +901,8 @@ class DocumentNatureAdmin(admin.ModelAdmin):
 @admin.register(Court)
 class CourtAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]
+    list_display = ("name", "code")
+    search_fields = ("name", "code")
 
 
 @admin.register(Author)
@@ -886,7 +939,8 @@ class ExternalDocumentAdmin(DocumentAdmin):
 
 
 @admin.register(CourtRegistry)
-class CourtRegistryAdmin(admin.ModelAdmin):
+class CourtRegistryAdmin(BaseAdmin):
+    help_topic = "site-admin/add-court-registries"
     readonly_fields = ("code",)
     list_display = ("name", "code")
 
@@ -906,13 +960,29 @@ class LabelAdmin(admin.ModelAdmin):
     prepopulated_fields = {"code": ("name",)}
 
 
+@admin.register(Locality)
+class LocalityAdmin(admin.ModelAdmin):
+    list_display = ("name", "jurisdiction", "code")
+    prepopulated_fields = {"code": ("name",)}
+    search_fields = ("name", "code")
+    inlines = [EntityProfileInline]
+
+
+@admin.register(Judge)
+class JudgeAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+
+@admin.register(MatterType)
+class MatterTypeAdmin(BaseAdmin):
+    help_topic = "site-admin/add-matter-types"
+
+
 admin.site.register(
     [
-        Locality,
         CitationLink,
         Attorney,
-        Judge,
-        MatterType,
         CourtClass,
         AttachedFileNature,
         CitationProcessing,

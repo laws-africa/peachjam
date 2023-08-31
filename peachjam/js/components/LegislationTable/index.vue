@@ -24,7 +24,6 @@
     </div>
     <div class="row">
       <div
-        v-if="showSideFacets"
         class="col col-lg-3 d-none d-lg-block"
       >
         <FilterFacets
@@ -44,7 +43,7 @@
             Filters
           </button>
         </div>
-        <div class="card legislation-table">
+        <div :class="`card legislation-table ${showDates ? 'with-dates' : ''}`">
           <div class="card-header">
             <input
               v-model="q"
@@ -68,7 +67,7 @@
                   role="button"
                   @click="updateSort('title')"
                 >
-                  <strong>Title</strong>
+                  <strong>{{ $t('Title') }}</strong>
                   <i
                     v-if="sortableFields.title === 'asc'"
                     class="bi bi-sort-up ms-2"
@@ -79,17 +78,34 @@
                   />
                 </div>
                 <div
-                  class="content__numbered-title"
+                  v-if="!showDates"
+                  class="content__secondary"
                   role="button"
                   @click="updateSort('citation')"
                 >
-                  <strong>Numbered title</strong>
+                  <strong>{{ $t('Numbered title') }}</strong>
                   <i
                     v-if="sortableFields.citation === 'asc'"
                     class="bi bi-sort-up ms-2"
                   />
                   <i
                     v-if="sortableFields.citation === 'desc'"
+                    class="bi bi-sort-down ms-2"
+                  />
+                </div>
+                <div
+                  v-if="showDates"
+                  class="content__secondary"
+                  role="button"
+                  @click="updateSort('date')"
+                >
+                  <strong>{{ $t('Date') }}</strong>
+                  <i
+                    v-if="sortableFields.date === 'asc'"
+                    class="bi bi-sort-up ms-2"
+                  />
+                  <i
+                    v-if="sortableFields.date === 'desc'"
                     class="bi bi-sort-down ms-2"
                   />
                 </div>
@@ -121,15 +137,17 @@
                 <div class="content">
                   <div class="content__title">
                     <a :href="`${row.work_frbr_uri}`">{{ row.title }}</a>
-                  </div>
-                  <div class="content__numbered-title">
-                    {{ row.citation }}
-                  </div>
-                  <div class="content__icon">
                     <i
                       v-if="row.languages.length > 1"
-                      class="bi bi-translate"
+                      class="bi bi-translate ps-2"
+                      :title="$t('Multiple languages available')"
                     />
+                  </div>
+                  <div v-if="showDates" class="content__secondary">
+                    {{ row.date }}
+                  </div>
+                  <div v-else class="content__secondary">
+                    {{ row.citation }}
                   </div>
                   <div
                     v-if="row.children.length"
@@ -146,7 +164,10 @@
                         <div class="content__title">
                           <a :href="`${subleg.work_frbr_uri}`">{{ subleg.title }}</a>
                         </div>
-                        <div class="content__numbered-title">
+                        <div v-if="showDates" class="content__secondary">
+                          {{ subleg.date }}
+                        </div>
+                        <div v-else class="content__secondary">
                           {{ subleg.citation }}
                         </div>
                       </div>
@@ -188,10 +209,10 @@ export default {
   components: {
     FilterFacets
   },
+  props: ['showDates'],
   data: () => ({
     offCanvasFacets: null,
     facets: [],
-    showSideFacets: false,
     tableData: [],
     filteredData: [],
     lockAccordion: false,
@@ -199,7 +220,8 @@ export default {
     windowWith: window.innerWidth,
     sortableFields: {
       title: 'asc',
-      citation: ''
+      citation: '',
+      date: ''
     }
   }),
   watch: {
@@ -223,8 +245,6 @@ export default {
       this.$refs['mobile-legislation-facets-ref']
     );
     window.addEventListener('resize', this.setWindowWidth);
-    const root = this.$el.closest('[data-vue-component="LegislationTable"]');
-    if (Object.keys(root.dataset).includes('showSideFacets')) { this.showSideFacets = true; }
 
     // To use this component json element #legislation-table-data must be in the dom
     const tableJsonElement = document.getElementById('legislation-table');
@@ -320,7 +340,8 @@ export default {
       this.sortableFields = {
         ...{
           title: '',
-          citation: ''
+          citation: '',
+          date: ''
         },
         [field]: newSortValue
       };
@@ -336,27 +357,25 @@ export default {
         });
       }
 
-      if (this.showSideFacets) {
-        const facetDict = {};
-        this.facets.forEach((facet) => {
-          if (
-            !facet.value ||
-            (Array.isArray(facet.value) && !facet.value.length)
-          ) { return; }
-          facetDict[facet.name] = facet.value;
+      const facetDict = {};
+      this.facets.forEach((facet) => {
+        if (
+          !facet.value ||
+          (Array.isArray(facet.value) && !facet.value.length)
+        ) { return; }
+        facetDict[facet.name] = facet.value;
+      });
+      Object.keys(facetDict).forEach((key) => {
+        data = data.filter((item) => {
+          if (Array.isArray(facetDict[key])) {
+            const arr1 = facetDict[key].map((x) => String(x));
+            const arr2 = item[key].map((x) => String(x));
+            return arr1.some((item) => arr2.includes(item));
+          } else {
+            return String(item[key]) === String(facetDict[key]);
+          }
         });
-        Object.keys(facetDict).forEach((key) => {
-          data = data.filter((item) => {
-            if (Array.isArray(facetDict[key])) {
-              const arr1 = facetDict[key].map((x) => String(x));
-              const arr2 = item[key].map((x) => String(x));
-              return arr1.some((item) => arr2.includes(item));
-            } else {
-              return String(item[key]) === String(facetDict[key]);
-            }
-          });
-        });
-      }
+      });
 
       Object.keys(this.sortableFields).forEach((key) => {
         if (this.sortableFields[key]) {
@@ -438,23 +457,27 @@ export default {
 }
 
 .content__children {
-  grid-column: 1/13;
+  grid-column: span 12;
   margin-top: 10px;
 }
 
 .content__children .content__title {
-  padding-left: 30px;
+  padding-left: 1rem;
 }
 
 .content__title {
-  grid-column: 1/7;
+  grid-column: span 8;
 }
 
-.content__numbered-title {
-  grid-column: 7/12;
+.content__secondary {
+  grid-column: span 4;
 }
 
-.content__icon {
-  grid-column: 12/13;
+.legislation-table.with-dates .content__title {
+  grid-column: span 9;
+}
+
+.legislation-table.with-dates .content__secondary {
+  grid-column: span 3;
 }
 </style>
