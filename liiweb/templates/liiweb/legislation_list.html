@@ -6,8 +6,10 @@
 {% block page-content %}
   {% block breadcrumbs %}{% endblock %}
   {% block entity-profile %}
-    {% if entity_profile %}
-      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
+    {% if jurisdiction_entity_profile %}
+      {% with entity_profile=jurisdiction_entity_profile entity_profile_title=jurisdiction_entity_profile_title %}
+        <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
+      {% endwith %}
     {% endif %}
   {% endblock %}
   <section class="pb-5">

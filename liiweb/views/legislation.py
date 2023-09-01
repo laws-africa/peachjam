@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks, get_language
-from peachjam.models import Legislation, Locality
+from peachjam.models import JurisdictionProfile, Legislation, Locality, pj_settings
 from peachjam_api.serializers import LegislationSerializer
 
 
@@ -46,6 +46,19 @@ class LegislationListView(TemplateView):
         qs = self.add_children(qs)
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
+
+        site_jurisdictions = pj_settings().document_jurisdictions.all()
+        if site_jurisdictions.count() == 1:
+            jurisdiction_profile = JurisdictionProfile.objects.filter(
+                jurisdiction=site_jurisdictions.first()
+            ).first()
+            if jurisdiction_profile:
+                context[
+                    "jurisdiction_entity_profile"
+                ] = jurisdiction_profile.entity_profile.first()
+                context[
+                    "jurisdiction_entity_profile_title"
+                ] = jurisdiction_profile.jurisdiction.name
 
         return context
 
