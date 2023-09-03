@@ -245,18 +245,15 @@ class SearchableDocument(Document):
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""
         if not instance.content_html:
-            if hasattr(
-                instance, "source_file"
-            ) and instance.source_file.filename.endswith(".pdf"):
-                text = instance.get_content_as_text()
-                page_texts = text.split("\x0c")
-                pages = []
-                for i, page in enumerate(page_texts):
-                    i = i + 1
-                    page = page.strip()
-                    if page:
-                        pages.append({"page_num": i, "body": page})
-                return pages
+            text = instance.get_content_as_text()
+            page_texts = text.split("\x0c")
+            pages = []
+            for i, page in enumerate(page_texts):
+                i = i + 1
+                page = page.strip()
+                if page:
+                    pages.append({"page_num": i, "body": page})
+            return pages
 
     def prepare_taxonomies(self, instance):
         """Taxonomy topics are stored as slugs of all the items in the tree down to that topic. This is easier than
