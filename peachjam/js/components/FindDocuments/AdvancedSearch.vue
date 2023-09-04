@@ -71,22 +71,25 @@
         </div>
       </div>
     </div>
-
-    <div class="text-end">
-      <button type="submit" class="btn btn-primary">
-        {{ $t('Search') }}
-      </button>
+    <div class="d-flex justify-content-end">
+      <div>
+        <HelpBtn page="search/advanced-search" />
+        <button type="submit" class="btn btn-primary">
+          {{ $t('Search') }}
+        </button>
+      </div>
     </div>
   </form>
 </template>
 
 <script>
 import AdvancedSearchFields from './AdvancedSearchFields.vue';
+import HelpBtn from '../HelpBtn.vue';
 
 export default {
   name: 'AdvancedSearch',
 
-  components: { AdvancedSearchFields },
+  components: { AdvancedSearchFields, HelpBtn },
 
   props: {
     modelValue: {

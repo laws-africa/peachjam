@@ -1,0 +1,8 @@
+{% load i18n %}
+{% if PEACHJAM_SETTINGS.user_help_link %}
+  <div class="mb-3">
+    <a href="{{ PEACHJAM_SETTINGS.user_help_link }}{{ link }}"
+       target="_blank"
+       rel="noopener noreferrer"><i class="bi bi-question-circle me-1"></i>{% trans 'Help' %}</a>
+  </div>
+{% endif %}

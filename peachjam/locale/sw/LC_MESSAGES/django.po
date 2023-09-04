@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-30 10:47+0200\n"
+"POT-Creation-Date: 2023-08-31 09:30+0200\n"
 "PO-Revision-Date: 2023-05-16 07:12\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -814,10 +814,14 @@ msgid "Pocket Law repo"
 msgstr ""
 
 #: models/settings.py:88
-msgid "help link"
+msgid "editor help link"
 msgstr ""
 
-#: models/settings.py:95
+#: models/settings.py:94
+msgid "user help link"
+msgstr ""
+
+#: models/settings.py:101
 msgid "site settings"
 msgstr "mipangilio ya tovuti"
 
@@ -972,6 +976,7 @@ msgid "Your password has been reset."
 msgstr "Nenosiri lako limewekwa upya."
 
 #: templates/admin/change_form.html:7 templates/admin/change_list.html:10
+#: templates/peachjam/_help_button.html:6
 msgid "Help"
 msgstr ""
 
@@ -1596,7 +1601,7 @@ msgstr "mada"
 msgid "Case summary"
 msgstr "muhtasari"
 
-#: templates/peachjam/judgment_list.html:15
+#: templates/peachjam/judgment_list.html:16
 msgid "Recent judgments"
 msgstr "Hukumu za hivi karibuni"
 
@@ -1700,42 +1705,42 @@ msgstr "Masharti ya matumizi"
 msgid "Navigation"
 msgstr "Urambazaji"
 
-#: views/legislation.py:51
+#: views/legislation.py:52
 #, fuzzy, python-format
 #| msgid "This Act was repealed on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 msgid "This %(friendly_type)s was repealed on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 msgstr "Sheria hii ilifutwa tarehe %(date)s na <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
-#: views/legislation.py:59
+#: views/legislation.py:65
 #, python-format
 msgid "This %(friendly_type)s has not yet commenced and is not yet law."
 msgstr ""
 
-#: views/legislation.py:90
+#: views/legislation.py:99
 #, fuzzy, python-format
 #| msgid "This is the version of this Act as it was when it was repealed."
 msgid "This is the version of this %(friendly_type)s as it was when it was repealed."
 msgstr "Hili ni toleo la Sheria hii kama ilivyokuwa wakati inafutwa."
 
-#: views/legislation.py:103
+#: views/legislation.py:113
 #, fuzzy, python-format
 #| msgid "This is the latest version of this Act."
 msgid "This is the latest version of this %(friendly_type)s."
 msgstr "Hili ni toleo la hivi karibuni la Sheria hii."
 
-#: views/legislation.py:117
+#: views/legislation.py:128
 #, fuzzy, python-format
 #| msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was repealed</a>."
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was repealed</a>."
 msgstr "Hili ni toleo la Sheria hii kama ilivyokuwa kutoka %(date_from)s hadi %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Soma toleo kama lilivyokuwa wakati lilipofutwa</a>."
 
-#: views/legislation.py:122
+#: views/legislation.py:133
 #, fuzzy, python-format
 #| msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
 msgstr "Hili ni toleo la Sheria hii kama ilivyokuwa kutoka %(date_from)s hadi %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Soma toleo linalotumika sasa</a>."
 
-#: views/legislation.py:162
+#: views/legislation.py:174
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr ""
 
