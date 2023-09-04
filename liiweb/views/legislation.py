@@ -53,12 +53,8 @@ class LegislationListView(TemplateView):
                 jurisdiction=site_jurisdictions.first()
             ).first()
             if jurisdiction_profile:
-                context[
-                    "jurisdiction_entity_profile"
-                ] = jurisdiction_profile.entity_profile.first()
-                context[
-                    "jurisdiction_entity_profile_title"
-                ] = jurisdiction_profile.jurisdiction.name
+                context["entity_profile"] = jurisdiction_profile.entity_profile.first()
+                context["entity_profile_title"] = jurisdiction_profile.jurisdiction.name
 
         return context
 
@@ -106,11 +102,16 @@ class LocalityLegislationListView(LegislationListView):
         return super().get_queryset().filter(locality=self.locality)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            locality=self.locality,
-            locality_legislation_title="Provincial Legislation",
-            page_heading=_("%(locality)s Legislation" % {"locality": self.locality}),
-            entity_profile=self.locality.entity_profile.first(),
-            entity_profile_title=self.locality.name,
-            **kwargs,
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "locality": self.locality,
+                "locality_legislation_title": "Provincial Legislation",
+                "page_heading": _(
+                    "%(locality)s Legislation" % {"locality": self.locality}
+                ),
+                "entity_profile": self.locality.entity_profile.first(),
+                "entity_profile_title": self.locality.name,
+            }
         )
+        return context

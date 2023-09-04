@@ -17,11 +17,6 @@
   <h1 class="my-4">{{ page_heading }}</h1>
   {% include 'lawlibrary/_legislation_alert.html' %}
 {% endblock %}
-{% block entity-profile %}
-  {% if entity_profile %}
-    <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
-  {% endif %}
-{% endblock %}
 {% block legislation-nav %}
   <nav class="nav nav-tabs mb-3 border-bottom">
     <li class="nav-item">

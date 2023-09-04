@@ -42,7 +42,7 @@ class EntityProfile(models.Model):
 
 class JurisdictionProfile(models.Model):
     jurisdiction = models.OneToOneField(
-        Country, on_delete=models.PROTECT, verbose_name=_("jurisdiction")
+        Country, on_delete=models.PROTECT, verbose_name=_("jurisdiction"), unique=True
     )
     entity_profile = GenericRelation(EntityProfile, verbose_name=_("profile"))
 
