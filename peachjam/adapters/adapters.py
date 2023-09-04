@@ -321,10 +321,9 @@ class IndigoAdapter(Adapter):
 
     def remove_existing_relationships(self, subject_work):
         # delete any existing relationships first
-        predicates = [p for p in self.predicates.keys()]
         relationships = Relationship.objects.filter(
             subject_work=subject_work,
-            predicate__slug__in=predicates,
+            predicate__slug__in=list(self.predicates.keys()),
         )
         logger.info(f"Deleting {relationships.count()} relationships")
         relationships.delete()
