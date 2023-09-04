@@ -94,7 +94,7 @@ class BaseAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         resp = super().changelist_view(request, extra_context)
-        if hasattr(self, "help_topic"):
+        if hasattr(resp, "context_data") and hasattr(self, "help_topic"):
             resp.context_data["help_topic"] = self.help_topic
         return resp
 
