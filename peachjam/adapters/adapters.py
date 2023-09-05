@@ -319,8 +319,18 @@ class IndigoAdapter(Adapter):
             created_document.parent_work = None
         created_document.save()
 
+    def remove_existing_relationships(self, subject_work):
+        # delete any existing relationships first
+        relationships = Relationship.objects.filter(
+            subject_work=subject_work,
+            predicate__slug__in=list(self.predicates.keys()),
+        )
+        logger.info(f"Deleting {relationships.count()} relationships")
+        relationships.delete()
+
     def fetch_relationships(self, imported_document, created_document):
         subject_work = created_document.work
+        self.remove_existing_relationships(subject_work)
 
         if imported_document["repeal"]:
             repealing_work, _ = Work.objects.get_or_create(
