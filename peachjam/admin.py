@@ -58,6 +58,7 @@ from peachjam.models import (
     Journal,
     Judge,
     Judgment,
+    JurisdictionProfile,
     Label,
     LegalInstrument,
     Legislation,
@@ -984,6 +985,12 @@ class LocalityAdmin(admin.ModelAdmin):
     list_display = ("name", "jurisdiction", "code")
     prepopulated_fields = {"code": ("name",)}
     search_fields = ("name", "code")
+    inlines = [EntityProfileInline]
+
+
+@admin.register(JurisdictionProfile)
+class JurisdictionProfileAdmin(admin.ModelAdmin):
+    list_display = ("jurisdiction",)
     inlines = [EntityProfileInline]
 
 
