@@ -49,10 +49,9 @@ class CourtDetailView(FilteredDocumentListView):
             context["grouped_documents"] = self.grouped_judgments(context["documents"])
 
         if "year" in self.kwargs:
-
             context["year"] = self.kwargs["year"]
 
-            if "month" in self.kwargs:
+            if "month" in self.kwargs and self.kwargs["month"] in set(range(1, 13)):
                 context["month"] = MONTHS[self.kwargs["month"]]
                 context[
                     "formatted_court_name"
