@@ -107,9 +107,8 @@ class LocalityLegislationListView(LegislationListView):
             {
                 "locality": self.locality,
                 "locality_legislation_title": "Provincial Legislation",
-                "page_heading": _(
-                    "%(locality)s Legislation" % {"locality": self.locality}
-                ),
+                "page_heading": _("%(locality)s Legislation")
+                % {"locality": self.locality},
                 "entity_profile": self.locality.entity_profile.first(),
                 "entity_profile_title": self.locality.name,
             }
