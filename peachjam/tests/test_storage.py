@@ -44,7 +44,7 @@ class DynamicS3StorageTestCase(TestCase):
         sf = SourceFile(document=self.doc)
         sf.filename = "test.txt"
         sf.mimetype = "text/plain"
-        sf.file = cf = ContentFile(b"test data", "test.txt")
+        sf.file = ContentFile(b"test data", "test.txt")
         sf.save()
         self.assertEqual(
             [
@@ -52,7 +52,7 @@ class DynamicS3StorageTestCase(TestCase):
                 call.Bucket().Object(
                     f"media/core_document/{self.doc.pk}/source_file/test.txt"
                 ),
-                call.Bucket().Object().upload_fileobj(cf, ExtraArgs=ANY, Config=ANY),
+                call.Bucket().Object().upload_fileobj(ANY, ExtraArgs=ANY, Config=ANY),
             ],
             self.mock.mock_calls,
         )
@@ -76,7 +76,7 @@ class DynamicS3StorageTestCase(TestCase):
                     f"media/core_document/{self.doc.pk}/source_file/test.txt"
                 ),
                 call.Bucket().Object().load(),
-                call.Bucket().Object().download_fileobj(ANY, Config=ANY),
+                call.Bucket().Object().download_fileobj(ANY, ExtraArgs=ANY, Config=ANY),
             ],
             self.mock.mock_calls,
         )
@@ -92,7 +92,7 @@ class DynamicS3StorageTestCase(TestCase):
                     f"media/core_document/{self.doc.pk}/source_file/test.txt"
                 ),
                 call.Bucket().Object().load(),
-                call.Bucket().Object().download_fileobj(ANY, Config=ANY),
+                call.Bucket().Object().download_fileobj(ANY, ExtraArgs=ANY, Config=ANY),
             ],
             self.mock.mock_calls,
         )
