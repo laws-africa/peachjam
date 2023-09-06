@@ -259,11 +259,11 @@ class IndigoAdapter(Adapter):
 
         if hasattr(model, "timeline"):
             timeline = self.client_get(f"{url}/timeline.json").json()
-            field_data["timeline"] = timeline
+            field_data["timeline"] = timeline["timeline"]
 
         if hasattr(model, "commencements_json"):
             commencements_json = self.client_get(f"{url}/commencements.json").json()
-            field_data["commencements_json"] = commencements_json
+            field_data["commencements_json"] = commencements_json["commencements"]
 
         if hasattr(model, "repealed") and document["repeal"]:
             field_data["repealed"] = True
