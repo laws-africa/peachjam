@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='legislation',
             name='commencements_json',
-            field=models.JSONField(default=list, verbose_name='timeline'),
+            field=models.JSONField(default=list, verbose_name='commencements_json'),
         ),
     ]
