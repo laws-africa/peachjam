@@ -65,13 +65,15 @@ class LegalInstrument(CoreDocument):
 class LegislationManager(CoreDocumentManager):
     def get_queryset(self):
         # defer expensive fields
-        return super().get_queryset().defer("metadata_json")
+        return super().get_queryset().defer("metadata_json", "timeline", "commencements_json")
 
 
 class Legislation(CoreDocument):
     objects = LegislationManager.from_queryset(CoreDocumentQuerySet)()
 
     metadata_json = models.JSONField(_("metadata JSON"), null=False, blank=False)
+    timeline = models.JSONField(_("timeline"), null=False, blank=False, default=list)
+    commencements_json = models.JSONField(_("timeline"), null=False, blank=False, default=list)
     repealed = models.BooleanField(_("repealed"), default=False, null=False)
     parent_work = models.ForeignKey(
         Work, null=True, on_delete=models.PROTECT, verbose_name=_("parent work")
