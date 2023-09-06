@@ -9459,17 +9459,6 @@
                 "assent_date": null,
                 "commenced": true,
                 "commencement_date": "2009-12-18",
-                "commencements": [
-                    {
-                        "all_provisions": true,
-                        "commencing_frbr_uri": null,
-                        "commencing_title": null,
-                        "date": "2009-12-18",
-                        "main": true,
-                        "note": "",
-                        "provisions": []
-                    }
-                ],
                 "commencing_work": null,
                 "country": "aa",
                 "created_at": "2022-08-15T18:01:56.600733Z",
@@ -9571,6 +9560,50 @@
                 "url": "https://api.laws.africa/v2/akn/aa-au/act/pact/2005/non-aggression-and-common-defence/eng@2005-01-31",
                 "year": "2005"
             },
+            "timeline": [
+                {
+                    "date": "2020-12-15",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "publication",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Published"
+                        },
+                        {
+                            "note": "",
+                            "type": "commencement",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Commenced"
+                        }
+                    ]
+                },
+                {
+                    "date": "2020-12-14",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "assent",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Assented to"
+                        }
+                    ]
+                }
+            ],
+            "commencements_json": [
+                {
+                    "all_provisions": true,
+                    "commencing_frbr_uri": null,
+                    "commencing_title": null,
+                    "date": "2009-12-18",
+                    "main": true,
+                    "note": "",
+                    "provisions": []
+                }
+            ],
             "parent_work": null,
             "repealed": false
         },
@@ -9608,17 +9641,6 @@
                 "assent_date": null,
                 "commenced": true,
                 "commencement_date": "1972-03-15",
-                "commencements": [
-                    {
-                        "all_provisions": true,
-                        "commencing_frbr_uri": null,
-                        "commencing_title": null,
-                        "date": "1972-03-15",
-                        "main": true,
-                        "note": "",
-                        "provisions": []
-                    }
-                ],
                 "commencing_work": null,
                 "country": "aa",
                 "created_at": "2022-08-30T10:11:39.239608Z",
@@ -9720,6 +9742,43 @@
                 "url": "https://api.laws.africa/v2/akn/aa-au/act/1969/civil-aviation-commission/eng@1969-01-17",
                 "year": "1969"
             },
+            "timeline": [
+                {
+                    "date": "1972-03-15",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "commencement",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Commenced"
+                        }
+                    ]
+                },
+                {
+                    "date": "1969-01-17",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "consolidation",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Consolidation"
+                        }
+                    ]
+                }
+            ],
+            "commencements_json": [
+                {
+                    "all_provisions": true,
+                    "commencing_frbr_uri": null,
+                    "commencing_title": null,
+                    "date": "1972-03-15",
+                    "main": true,
+                    "note": "",
+                    "provisions": []
+                }
+            ],
             "parent_work": null,
             "repealed": false
         },
@@ -10170,17 +10229,6 @@
                 "updated_at": "2022-05-17T08:25:31.533995Z",
                 "assent_date": "1979-06-08",
                 "parent_work": null,
-                "commencements": [
-                    {
-                        "date": "1979-07-01",
-                        "main": true,
-                        "note": "See section 19",
-                        "provisions": [],
-                        "all_provisions": true,
-                        "commencing_title": null,
-                        "commencing_frbr_uri": null
-                    }
-                ],
                 "numbered_title": "Act 70 of 1979",
                 "points_in_time": [
                     {
@@ -10451,6 +10499,223 @@
                     "mime_type": "application/pdf"
                 }
             },
+            "timeline": [
+                {
+                    "date": "2020-10-22",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Judicial Matters Amendment Act, 2020",
+                            "by_frbr_uri": "/akn/za/act/2020/12",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "2010-08-09",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Jurisdiction of Regional Courts Amendment Act, 2008",
+                            "by_frbr_uri": "/akn/za/act/2008/31",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "2005-03-31",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Judicial Matters Second Amendment Act, 2003",
+                            "by_frbr_uri": "/akn/za/act/2003/55",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1998-06-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Films and Publications Act, 1996",
+                            "by_frbr_uri": "/akn/za/act/1996/65",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1998-04-06",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Divorce Courts Amendment Act, 1997",
+                            "by_frbr_uri": "/akn/za/act/1997/65",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1997-04-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Justice Laws Rationalisation Act, 1996",
+                            "by_frbr_uri": "/akn/za/act/1996/18",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1996-11-22",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Divorce Amendment Act, 1996",
+                            "by_frbr_uri": "/akn/za/act/1996/95",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1992-08-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Domicile Act, 1992",
+                            "by_frbr_uri": "/akn/za/act/1992/3",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1992-04-15",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Divorce Amendment Act, 1992",
+                            "by_frbr_uri": "/akn/za/act/1992/44",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1990-10-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Mediation in Certain Divorce Matters Act, 1987",
+                            "by_frbr_uri": "/akn/za/act/1987/24",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1989-08-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Divorce Amendment Act, 1989",
+                            "by_frbr_uri": "/akn/za/act/1989/7",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1988-12-02",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Marriage and Matrimonial Property Law Amendment Act, 1988",
+                            "by_frbr_uri": "/akn/za/act/1988/3",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1986-10-03",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Transfer of Powers and Duties of the State President Act, 1986",
+                            "by_frbr_uri": "/akn/za/act/1986/97",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1984-11-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Matrimonial Property Act, 1984",
+                            "by_frbr_uri": "/akn/za/act/1984/88",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1979-07-01",
+                    "events": [
+                        {
+                            "note": "Note: See section 19",
+                            "type": "commencement",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Commenced"
+                        }
+                    ]
+                },
+                {
+                    "date": "1979-06-15",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "publication",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Published"
+                        }
+                    ]
+                },
+                {
+                    "date": "1979-06-08",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "assent",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Assented to"
+                        }
+                    ]
+                }
+            ],
+            "commencements_json": [
+                {
+                    "date": "1979-07-01",
+                    "main": true,
+                    "all_provisions": true,
+                    "provisions": [],
+                    "commencing_title": null,
+                    "commencing_frbr_uri": null,
+                    "note": "See section 19"
+                }
+            ],
             "repealed": false,
             "parent_work": null
         }
