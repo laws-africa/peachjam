@@ -19,6 +19,11 @@
   <div>
     <a href="https://ghalii.org/" target="_blank" rel="noreferrer">{% trans 'Ghana Legal Information Institute' %}</a>
   </div>
+  <div>
+    <a href="https://www.openlawafrica.org/"
+       target="_blank"
+       rel="noreferrer">Open Law Africa</a>
+  </div>
 {% endblock %}
 {% block footer-logos %}
   <div class="footer-logos">
@@ -46,6 +51,14 @@
        target="_blank"
        rel="noreferrer">
       <img src="{% static 'images/ejudgment-logo.png' %}" alt="e-judgment logo"/>
+    </a>
+    <a class="footer-logos__item"
+       href="https://www.openlawafrica.org/"
+       target="_blank"
+       rel="noreferrer">
+      <img height="26"
+           src="{% static 'images/open-law-africa.png' %}"
+           alt="{% trans 'Open Law Africa' %}"/>
     </a>
   </div>
 {% endblock %}

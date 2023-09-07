@@ -2,13 +2,21 @@
 {% load i18n static %}
 {% block top-bar %}
   <div class="bg-light p-2">
-    <div class="container d-flex">
+    <div class="container d-flex justify-content-between">
       <a href="https://ejudgment.judicial.gov.gh/"
          target="_blank"
          rel="noreferrer"
-         class="ms-auto">
+         class="me-4">
         <img src="{% static 'images/ejudgment-logo.png' %}"
              alt="e-judgment logo"
+             height="40"/>
+      </a>
+      <a href="https://www.openlawafrica.org/"
+         target="_blank"
+         rel="noreferrer">
+        <img class="me-4"
+             src="{% static 'images/open-law-africa.png' %}"
+             alt="{% trans 'Open Law Africa' %}"
              height="40"/>
       </a>
     </div>
