@@ -1,18 +1,7 @@
 {% extends 'peachjam/_header.html' %}
 {% load static i18n %}
 {% block top-bar %}
-  <div class="bg-dark p-2">
-    <div class="container d-flex justify-content-between">
-      <a href="https://www.openlawafrica.org/"
-         target="_blank"
-         rel="noreferrer">
-        <img class="me-4"
-             src="{% static 'images/open-law-africa-inverted.png' %}"
-             alt="{% trans 'Open Law Africa' %}"
-             height="40"/>
-      </a>
-    </div>
-  </div>
+  {% include "peachjam/_open_law_africa.html" %}
 {% endblock %}
 {% block nav-items %}
   <li class="nav-item">
