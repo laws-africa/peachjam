@@ -18,12 +18,14 @@ from peachjam.models import (
     Author,
     CoreDocument,
     DocumentNature,
+    DocumentTopic,
     GenericDocument,
     LegalInstrument,
     Legislation,
     Locality,
     Predicate,
     Relationship,
+    Taxonomy,
     Work,
 )
 from peachjam.plugins import plugins
@@ -289,6 +291,21 @@ class IndigoAdapter(Adapter):
         else:
             # the source file is the PDF version
             self.download_source_file(f"{url}.pdf", created_doc, title)
+
+        if document["taxonomy_topics"]:
+            # get topics beginning with "subject-areas"
+            topics = [
+                t for t in document["taxonomy_topics"] if t.startswith("subject-areas")
+            ]
+            if topics:
+                taxonomies = Taxonomy.objects.filter(slug__in=topics)
+                created_doc.taxonomies.all().delete()
+                for taxonomy in taxonomies:
+                    DocumentTopic.objects.create(
+                        document=created_doc,
+                        topic=taxonomy,
+                    )
+                logger.info(f"Added {len(taxonomies)} taxonomies to {created_doc}")
 
         self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
