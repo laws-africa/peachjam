@@ -299,7 +299,9 @@ class IndigoAdapter(Adapter):
             ]
             if topics:
                 taxonomies = Taxonomy.objects.filter(slug__in=topics)
-                created_doc.taxonomies.all().delete()
+                created_doc.taxonomies.filter(
+                    topic__slug__startswith="subject-areas"
+                ).delete()
                 for taxonomy in taxonomies:
                     DocumentTopic.objects.create(
                         document=created_doc,
