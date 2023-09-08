@@ -2,15 +2,15 @@
 {% load static i18n %}
 {% block top-bar %}
   {% include 'lawlibrary/_early_preview_warning.html' %}
-  <div class="bg-dark p-2">
-    <div class="container d-flex justify-content-between">
+  <div class="top-bar bg-dark p-2">
+    <div class="container d-flex">
       <a href="https://www.openlawafrica.org/"
          target="_blank"
+         class="ms-auto"
          rel="noreferrer">
-        <img class="me-4"
+        <img class="top-bar-logo ola-logo"
              src="{% static 'images/open-law-africa-inverted.png' %}"
-             alt="{% trans 'Open Law Africa' %}"
-             height="40"/>
+             alt="{% trans 'Open Law Africa' %}"/>
       </a>
     </div>
   </div>
