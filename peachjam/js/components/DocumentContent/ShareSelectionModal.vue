@@ -46,6 +46,13 @@
               @click="modal.hide()"
             ><i class="bi bi-facebook facebook-forecolor share-icon" />
             </a>
+            <a
+              :href="`https://www.linkedin.com/sharing/share-offsite/?url=${ encodeURIComponent(url) }`"
+              class="btn btn-link"
+              target="_blank"
+              @click="modal.hide()"
+            ><i class="bi bi-linkedin linkedin-forecolor share-icon" />
+            </a>
           </div>
         </div>
       </div>
