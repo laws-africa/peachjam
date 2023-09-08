@@ -7,3 +7,92 @@
        class="btn btn-block btn-info">{% trans 'Help' %}</a>
   {% endif %}
 {% endblock %}
+{% block extrajs %}
+  {{ block.super }}
+  <script type="text/javascript">
+  const currentPath = window.location.pathname;
+  // check if we're in the judgment change form
+  if (currentPath.includes("/judgment/")) {
+      let judgmentId = ""
+      // get the judgment id from the url
+      if (currentPath.includes("/change/")) {
+          judgmentId = currentPath.match(/\/judgment\/(\d+)\/change\/$/)[1];
+      }
+
+    // add container for duplicate alert
+    let actions_block = $("#jazzy-actions").find("div:first-child");
+    actions_block.prepend("<div id='duplicate-alert-container'></div>")
+
+    // courtesy of https://davidwalsh.name/javascript-debounce-function
+    const debounce = (func, wait, immediate) => {
+      let timeout;
+      return function() {
+        let context = this, args = arguments;
+        let later = function() {
+          timeout = null;
+          if (!immediate) func.apply(context, args);
+        };
+        let callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args)
+      }
+    }
+
+    function caseNumbers () {
+        // get select elements and input elements from case_numbers-group
+        let obj = {};
+        $("[name^='case_numbers-']").filter(function() {
+            return $(this).is("input, select");
+        }).each(function() {
+            let name = $(this).attr("name");
+            obj[name] = $(this).val();
+        });
+        return obj;
+    }
+
+    function checkDuplicates() {
+            let court = $("[name='court']").val();
+            let day = $("[name='date_0']").val();
+            let month = $("[name='date_1']").val();
+            let year = $("[name='date_2']").val();
+            let case_numbers = caseNumbers();
+
+
+            if (court && day && month && year) {
+                let date = year + '-' + month + '-' + day;
+                const data = {
+                    judgment_id: judgmentId,
+                    court: court,
+                    date: date,
+                    ...case_numbers,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                }
+                console.log(data);
+                $.ajax({
+                    type: "post",
+                    url: "{% url 'check_duplicates' %}",
+                    data,
+                    success: function(data) {
+                        let container = $("#duplicate-alert-container");
+                        $("#duplicate-alert").remove();
+                        container.html(data);
+                    },
+                    error: function(data) {
+                        console.log(data);
+                    }
+                });
+            }
+        }
+
+    // add event listener to parent elements because the case_numbers-group is a dynamic formset
+    $("#case_numbers-group, #key-details-tab").on("change",
+        "[name^='case_numbers-']:input, " +
+        "[name^='case_numbers-'] select, " +
+        "[name='court'], [name='date_0'], " +
+        "[name='date_1'], [name='date_2']",
+        debounce(checkDuplicates, 3000)
+        );
+  }
+  </script>
+{% endblock %}
