@@ -2,18 +2,7 @@
 {% load static i18n %}
 {% block top-bar %}
   {% include 'lawlibrary/_early_preview_warning.html' %}
-  <div class="top-bar bg-dark p-2">
-    <div class="container d-flex">
-      <a href="https://www.openlawafrica.org/"
-         target="_blank"
-         class="ms-auto"
-         rel="noreferrer">
-        <img class="top-bar-logo ola-logo"
-             src="{% static 'images/open-law-africa-inverted.png' %}"
-             alt="{% trans 'Open Law Africa' %}"/>
-      </a>
-    </div>
-  </div>
+  {% include 'peachjam/_open_law_africa.html' %}
 {% endblock %}
 {% block navbar-logo %}
   <img src="{% static 'images/lawlibrary-logo.png' %}"
