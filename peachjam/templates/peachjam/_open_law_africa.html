@@ -1,13 +1,13 @@
 {% load i18n static %}
-<div class="bg-dark p-2">
-  <div class="container d-flex justify-content-between">
+<div class="top-bar bg-dark p-2">
+  <div class="container d-flex">
     <a href="https://www.openlawafrica.org/"
        target="_blank"
-       rel="noreferrer">
-      <img class="me-4"
-           src="{% static 'images/open-law-africa-inverted.png' %}"
+       rel="noreferrer"
+       class="ms-auto">
+      <img src="{% static 'images/open-law-africa-inverted.png' %}"
            alt="{% trans 'Open Law Africa' %}"
-           height="40"/>
+           class="top-bar-logo ola-logo"/>
     </a>
   </div>
 </div>

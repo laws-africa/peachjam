@@ -1,23 +1,21 @@
 {% extends 'peachjam/_header.html' %}
 {% load i18n static %}
 {% block top-bar %}
-  <div class="bg-light p-2">
+  <div class="top-bar bg-light p-2">
     <div class="container d-flex justify-content-between">
       <a href="https://ejudgment.judicial.gov.gh/"
          target="_blank"
-         rel="noreferrer"
-         class="me-4">
+         rel="noreferrer">
         <img src="{% static 'images/ejudgment-logo.png' %}"
-             alt="e-judgment logo"
-             height="40"/>
+             class="top-bar-logo"
+             alt="e-judgment logo"/>
       </a>
       <a href="https://www.openlawafrica.org/"
          target="_blank"
          rel="noreferrer">
-        <img class="me-4"
+        <img class="top-bar-logo"
              src="{% static 'images/open-law-africa.png' %}"
-             alt="{% trans 'Open Law Africa' %}"
-             height="40"/>
+             alt="{% trans 'Open Law Africa' %}"/>
       </a>
     </div>
   </div>

@@ -2,23 +2,21 @@
 {% load static %}
 {% load i18n %}
 {% block top-bar %}
-  <div class="bg-dark p-2">
+  <div class="top-bar bg-dark p-2">
     <div class="container d-flex justify-content-between">
       <a href="https://dataforgovernance.africa"
          target="_blank"
          rel="noreferrer">
-        <img class="me-4"
+        <img class="top-bar-logo d4ga-logo"
              src="{% static 'images/cso-agp-logo-horizontal.png' %}"
-             alt="africanlii"
-             height="40"/>
+             alt="Data for Governance Alliance"/>
       </a>
       <a href="https://www.openlawafrica.org/"
          target="_blank"
          rel="noreferrer">
-        <img class="me-4"
+        <img class="top-bar-logo ola-logo"
              src="{% static 'images/open-law-africa-inverted.png' %}"
-             alt="{% trans 'Open Law Africa' %}"
-             height="40"/>
+             alt="{% trans 'Open Law Africa' %}"/>
       </a>
     </div>
   </div>
