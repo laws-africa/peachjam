@@ -3,14 +3,14 @@
   {% if taxonomies|length > 0 %}
     <div class="row">
       {% for taxonomy in taxonomies %}
-        {% if taxonomy.is_root and taxonomy.get_children_count > 0 %}
+        {% if taxonomy.children|length > 0 %}
           <div class="col-12 col-lg-6 mb-4">
             <div class="card">
-              <div class="card-header">{{ taxonomy }}</div>
+              <div class="card-header">{{ taxonomy.data.name }}</div>
               <ul class="list-group list-group-flush">
-                {% for child in taxonomy.get_children %}
+                {% for child in taxonomy.children %}
                   <li class="list-group-item">
-                    <a href="{% build_taxonomy_url child prefix=taxonomy_link_prefix|default:"taxonomy" %}">{{ child }}</a>
+                    <a href="{% url taxonomy_url taxonomy.data.slug child.data.slug %}">{{ child.data.name }}</a>
                   </li>
                 {% endfor %}
               </ul>
