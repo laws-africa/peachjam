@@ -8,13 +8,15 @@
       AfricanLII is an open-access research platform for African law jointly operated by the AfricanLII programme of
       the University of Cape Town and Laws.Africa. AfricanLII publishes the law and policy of the African Union and
       federates search across all open access African national law available through the
-      <a class="text-primary" href="https://www.openlawafrica.org/" target="_blank" rel="noreferrer">Open Law Africa</a> community of LIIs.
+      <a class="text-primary" href="https://www.openlawafrica.org/" target="_blank" rel="noreferrer">Open Law Africa</a>
+      community of LIIs.
     {% endblocktrans %}
   </p>
   <p>
     {% blocktrans trimmed %}
       The publication of the African Union material is co-sponsored by the European Union and is part of the
-      <a class="text-primary" href="https://dataforgovernance.africa/" target="_blank" rel="noreferrer">Data for Governance Alliance project</a>.
+      <a class="text-primary" href="https://dataforgovernance.africa/" target="_blank" rel="noreferrer">Data for
+        Governance Alliance project</a>.
     {% endblocktrans %}
   </p>
   <div>
@@ -40,6 +42,11 @@
   </div>
   <div>
     <a href="https://www.eeas.europa.eu/" target="_blank" rel="noreferrer">{% trans 'European Union' %}</a>
+  </div>
+  <div>
+    <a href="https://www.openlawafrica.org/"
+       target="_blank"
+       rel="noreferrer">{% trans 'Open Law Africa' %}</a>
   </div>
 {% endblock %}
 {% block third-content-column %}
@@ -110,23 +117,23 @@
       <img src="{% static 'images/uct-logo.svg' %}"
            alt="{% trans 'University of Cape Town' %}"/>
     </a>
-    <a href="https://laws.africa/"
+    <a class="footer-logos__item"
+       href="https://laws.africa/"
        target="_blank"
-       rel="noreferrer"
-       class="footer-logos__item">
+       rel="noreferrer">
       <img src="{% static 'images/laws-africa-logo-horizontal-white.png' %}"
            alt="Laws.Africa"/>
     </a>
-    <a href="https://www.indigotrust.org.uk/"
+    <a class="footer-logos__item"
+       href="https://www.indigotrust.org.uk/"
        target="_blank"
-       rel="noreferrer"
-       class="footer-logos__item">
+       rel="noreferrer">
       <img src="{% static 'images/indigo-trust-logo.jpg' %}" alt="Indigo Trust"/>
     </a>
-    <a href="https://european-union.europa.eu/select-language?destination=/node/1"
+    <a class="footer-logos__item"
+       href="https://european-union.europa.eu/select-language?destination=/node/1"
        target="_blank"
-       rel="noreferrer"
-       class="footer-logos__item">
+       rel="noreferrer">
       <img src="{% static 'images/eu_logo.jpg' %}"
            alt="{% trans 'European Union' %}"/>
     </a>
@@ -135,6 +142,13 @@
        target="_blank"
        rel="noreferrer">
       <img src="{% static 'images/srt-logo.jpg' %}" alt="Sigrid Rausing Trust"/>
+    </a>
+    <a class="footer-logos__item"
+       href="https://www.openlawafrica.org/"
+       target="_blank"
+       rel="noreferrer">
+      <img src="{% static 'images/open-law-africa-inverted.png' %}"
+           alt="{% trans 'Open Law Africa' %}"/>
     </a>
   </div>
 {% endblock %}

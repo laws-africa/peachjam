@@ -37,5 +37,7 @@ class AuthorDetailView(FilteredDocumentListView):
         context["doc_table_show_author"] = False
         context["doc_table_show_doc_type"] = bool(doc_types)
         context["facet_data"]["docTypes"] = doc_types
+        context["entity_profile"] = self.author.entity_profile.first()
+        context["entity_profile_title"] = self.author.name
 
         return context

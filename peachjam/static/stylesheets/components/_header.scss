@@ -1,0 +1,11 @@
+.top-bar {
+  .top-bar-logo {
+    max-height: 40px;
+  }
+
+  @include media-breakpoint-down(sm) {
+    .top-bar-logo {
+      max-height: 30px;
+    }
+  }
+}
