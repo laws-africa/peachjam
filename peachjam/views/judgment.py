@@ -23,3 +23,14 @@ class JudgmentListView(TemplateView):
 class JudgmentDetailView(BaseDocumentDetailView):
     model = Judgment
     template_name = "peachjam/judgment_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "judges": self.get_object()
+                .bench.prefetch_related("judge")
+                .values_list("judge__name", flat=True)
+            }
+        )
+        return context
