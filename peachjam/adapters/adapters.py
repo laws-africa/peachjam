@@ -293,26 +293,27 @@ class IndigoAdapter(Adapter):
             # the source file is the PDF version
             self.download_source_file(f"{url}.pdf", created_doc, title)
 
-        # clear any existing taxonomies
-        created_doc.taxonomies.filter(
-            topic__slug__startswith=self.taxonomy_topic_root
-        ).delete()
+        if self.taxonomy_topic_root:
+            # clear any existing taxonomies
+            created_doc.taxonomies.filter(
+                topic__slug__startswith=self.taxonomy_topic_root
+            ).delete()
 
-        if document["taxonomy_topics"] and self.taxonomy_topic_root:
-            # get topics beginning with "subject-areas"
-            topics = [
-                t
-                for t in document["taxonomy_topics"]
-                if t.startswith(self.taxonomy_topic_root)
-            ]
-            if topics:
-                taxonomies = Taxonomy.objects.filter(slug__in=topics)
-                for taxonomy in taxonomies:
-                    DocumentTopic.objects.create(
-                        document=created_doc,
-                        topic=taxonomy,
-                    )
-                logger.info(f"Added {len(taxonomies)} taxonomies to {created_doc}")
+            if document["taxonomy_topics"]:
+                # get topics beginning with "subject-areas"
+                topics = [
+                    t
+                    for t in document["taxonomy_topics"]
+                    if t.startswith(self.taxonomy_topic_root)
+                ]
+                if topics:
+                    taxonomies = Taxonomy.objects.filter(slug__in=topics)
+                    for taxonomy in taxonomies:
+                        DocumentTopic.objects.create(
+                            document=created_doc,
+                            topic=taxonomy,
+                        )
+                    logger.info(f"Added {len(taxonomies)} taxonomies to {created_doc}")
 
         self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
