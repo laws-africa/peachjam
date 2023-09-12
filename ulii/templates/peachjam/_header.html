@@ -1,5 +1,8 @@
 {% extends 'peachjam/_header.html' %}
-{% load i18n %}
+{% load static i18n %}
+{% block top-bar %}
+  {% include 'peachjam/_open_law_africa.html' %}
+{% endblock %}
 {% block nav-items %}
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'judgments' %}active{% endif %}"
