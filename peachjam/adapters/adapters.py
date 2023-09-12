@@ -89,9 +89,7 @@ class IndigoAdapter(Adapter):
             }
         )
         self.api_url = self.settings["api_url"]
-        self.taxonomy_topic_root = self.settings.get(
-            "taxonomy_topic_root", "subject-areas"
-        )
+        self.taxonomy_topic_root = self.settings.get("taxonomy_topic_root")
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -230,9 +228,7 @@ class IndigoAdapter(Adapter):
             "date": datetime.strptime(document["expression_date"], "%Y-%m-%d").date(),
         }
         if document["locality"]:
-            frbr_uri_data["locality"] = Locality.objects.gapi_urlet(
-                code=document["locality"]
-            )
+            frbr_uri_data["locality"] = Locality.objects.get(code=document["locality"])
 
         doc = CoreDocument(**frbr_uri_data)
         doc.work_frbr_uri = doc.generate_work_frbr_uri()
@@ -302,7 +298,7 @@ class IndigoAdapter(Adapter):
             topic__slug__startswith=self.taxonomy_topic_root
         ).delete()
 
-        if document["taxonomy_topics"]:
+        if document["taxonomy_topics"] and self.taxonomy_topic_root:
             # get topics beginning with "subject-areas"
             topics = [
                 t
