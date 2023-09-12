@@ -22,11 +22,10 @@
           {{ $t("Search") }}
         </button>
       </div>
-      <div
-        v-if="marks.length"
-        class="text-end mt-2"
-      >
+      <div class="text-end mt-2">
+        <HelpBtn page="search/search-inside-a-document" />
         <a
+          v-if="marks.length"
           href="#"
           @click.prevent="clear"
         >{{ $t("Clear") }}</a>
@@ -67,10 +66,11 @@ import HTMLSnippets from './HTMLSnippets.vue';
 import PdfSnippets from './PdfSnippets.vue';
 import AknSnippets from './AknSnippets.vue';
 import { scrollToElement } from '../../utils/function';
+import HelpBtn from "../HelpBtn.vue";
 
 export default {
   name: 'DocumentSearch',
-  components: { AknSnippets, PdfSnippets, HTMLSnippets },
+  components: {HelpBtn, AknSnippets, PdfSnippets, HTMLSnippets },
   props: {
     docType: {
       type: String,

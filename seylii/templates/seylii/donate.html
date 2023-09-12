@@ -1,0 +1,35 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Donate' %}
+{% endblock %}
+{% block page-content %}
+  <section class="container my-4">
+    <h1>Donate to the Seychelles Legal Information Institute</h1>
+    <p>
+      Donate to the Seychelles Legal Information Institute (SEYLII) and support our work to providing free and anonymous access to case law, legislation and secondary legal materials from the Seychelles. SeyLII is an independent, self-funded organisation and needs your support. Your contribution will make a real difference and help us bring to life various of our projects for 2022-2025. (<a href="{% url 'document_detail' 'akn/sc/doc/strategic-plan/2022-10-31/seylii-strategic-plan/eng@2022-10-31' %}">Link to our strategic plan</a>)
+    </p>
+    <p>If you would like to make a cash donation please see our banking details below:</p>
+    <p>
+      Account name: <strong>SEYLII ASSOCIATION OF SEYCHELLES</strong>
+    </p>
+    <p>
+      Bank name: <strong>The Mauritius Commercial Bank (Seychelles) Ltd</strong>
+    </p>
+    <p>
+      Bank Address: <strong>P.O Box 122 - Main Branch, Caravelle House, Manglier Street, Victoria, Mahe, Republic of Seychelles +2 48 428 4555 F: +248 432 2676</strong>
+    </p>
+    <p>
+      Account number: <strong>00000426814</strong>
+    </p>
+    <p>
+      BRN: <strong>A431282</strong>
+    </p>
+    <p>
+      SWIFT: <strong>MCBLSCSC</strong>
+    </p>
+    <p>
+      If you wish to donate to a specific project, to donate in kind or to learn how you may assist us in other ways please do not hesitate to contact us via email on <a href="mailto:info@seylii.org">info@seylii.org</a> for more information.
+    </p>
+  </section>
+{% endblock %}

@@ -58,6 +58,7 @@ from peachjam.models import (
     Journal,
     Judge,
     Judgment,
+    JurisdictionProfile,
     Label,
     LegalInstrument,
     Legislation,
@@ -85,6 +86,18 @@ from peachjam.tasks import update_extracted_citations_for_a_work
 from peachjam_search.tasks import search_model_saved
 
 User = get_user_model()
+
+
+class BaseAdmin(admin.ModelAdmin):
+    """Base admin class for Peachjam. Includes some common fields and methods
+    for all models.
+    """
+
+    def changelist_view(self, request, extra_context=None):
+        resp = super().changelist_view(request, extra_context)
+        if hasattr(resp, "context_data") and hasattr(self, "help_topic"):
+            resp.context_data["help_topic"] = self.help_topic
+        return resp
 
 
 class ImportExportMixin(BaseImportExportMixin):
@@ -161,7 +174,7 @@ class SourceFileFilter(admin.SimpleListFilter):
             return queryset
 
 
-class BaseAttachmentFileInline(admin.TabularInline):
+class BaseAttachmentFileInline(admin.StackedInline):
     extra = 0
     readonly_fields = ("filename", "mimetype", "attachment_link", "size")
 
@@ -284,6 +297,9 @@ class DocumentForm(forms.ModelForm):
             if site_settings.document_languages.exists():
                 self.fields["language"].queryset = site_settings.document_languages
         if "jurisdiction" in self.fields:
+            self.fields[
+                "jurisdiction"
+            ].initial = site_settings.default_document_jurisdiction
             if site_settings.document_jurisdictions.exists():
                 self.fields[
                     "jurisdiction"
@@ -310,7 +326,7 @@ class DocumentForm(forms.ModelForm):
         self.instance.update_text_content()
 
 
-class DocumentAdmin(admin.ModelAdmin):
+class DocumentAdmin(BaseAdmin):
     form = DocumentForm
     inlines = [DocumentTopicInline, SourceFileInline, AlternativeNameInline]
     list_display = (
@@ -423,6 +439,7 @@ class DocumentAdmin(admin.ModelAdmin):
         fieldsets = super().get_fieldsets(request, obj)
         if obj is None:
             fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
+
         return fieldsets
 
     def get_form(self, request, obj=None, **kwargs):
@@ -440,7 +457,6 @@ class DocumentAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def save_model(self, request, obj, form, change):
-
         if not change:
             obj.created_by = request.user
 
@@ -542,21 +558,19 @@ class DocumentAdmin(admin.ModelAdmin):
     ensure_source_file_pdf.short_description = "Ensure PDF for source file (background)"
 
     def has_delete_permission(self, request, obj=None):
-        if obj:
-            if (
-                request.user.has_perm("peachjam.can_delete_own_document")
-                and obj.created_by == request.user
-            ):
-                return True
+        if obj and (
+            request.user.has_perm("peachjam.can_delete_own_document")
+            and obj.created_by == request.user
+        ):
+            return True
         return super().has_delete_permission(request, obj=obj)
 
     def has_change_permission(self, request, obj=None):
-        if obj:
-            if (
-                request.user.has_perm("peachjam.can_edit_own_document")
-                and obj.created_by == request.user
-            ):
-                return True
+        if obj and (
+            request.user.has_perm("peachjam.can_edit_own_document")
+            and obj.created_by == request.user
+        ):
+            return True
         return super().has_change_permission(request, obj=obj)
 
 
@@ -632,7 +646,7 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     readonly_fields = ["parent_work"] + list(DocumentAdmin.readonly_fields)
 
 
-class CaseNumberAdmin(admin.TabularInline):
+class CaseNumberAdmin(admin.StackedInline):
     model = CaseNumber
     extra = 1
     verbose_name = gettext_lazy("case number")
@@ -673,6 +687,7 @@ class JudgmentAdminForm(DocumentForm):
 
 
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
+    help_topic = "judgments/upload-a-judgment"
     form = JudgmentAdminForm
     resource_class = JudgmentResource
     inlines = [
@@ -695,9 +710,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets[3][1]["fields"].extend(
-        ["case_summary", "additional_citations", "flynote"]
-    )
+    fieldsets[3][1]["fields"].extend(["case_summary", "flynote"])
     readonly_fields = [
         "mnc",
         "serial_number",
@@ -710,6 +723,36 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         "frbr_uri_number",
     ] + list(DocumentAdmin.readonly_fields)
     prepopulated_fields = {}
+    jazzmin_section_order = (
+        "Key details",
+        "Case numbers",
+        "Judges",
+        "Additional details",
+        "Content",
+        "Alternative names",
+        "Attached files",
+        "Document topics",
+        "Work identification",
+        "Advanced",
+    )
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+
+        if not request.user.has_perm("peachjam.can_edit_advanced_fields"):
+            # Users without permission to edit advanced fields can't view the
+            # Advanced and Work identification fieldsets
+            return [
+                x
+                for x in fieldsets
+                if x[0]
+                not in [
+                    gettext_lazy("Advanced"),
+                    gettext_lazy("Work identification"),
+                ]
+            ]
+
+        return fieldsets
 
 
 @admin.register(Predicate)
@@ -916,7 +959,8 @@ class ExternalDocumentAdmin(DocumentAdmin):
 
 
 @admin.register(CourtRegistry)
-class CourtRegistryAdmin(admin.ModelAdmin):
+class CourtRegistryAdmin(BaseAdmin):
+    help_topic = "site-admin/add-court-registries"
     readonly_fields = ("code",)
     list_display = ("name", "code")
 
@@ -944,17 +988,27 @@ class LocalityAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]
 
 
+@admin.register(JurisdictionProfile)
+class JurisdictionProfileAdmin(admin.ModelAdmin):
+    list_display = ("jurisdiction",)
+    inlines = [EntityProfileInline]
+
+
 @admin.register(Judge)
 class JudgeAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
 
 
+@admin.register(MatterType)
+class MatterTypeAdmin(BaseAdmin):
+    help_topic = "site-admin/add-matter-types"
+
+
 admin.site.register(
     [
         CitationLink,
         Attorney,
-        MatterType,
         CourtClass,
         AttachedFileNature,
         CitationProcessing,

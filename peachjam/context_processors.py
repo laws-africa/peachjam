@@ -21,6 +21,7 @@ def general(request):
         "PEACHJAM_JS_CONFIG": {
             "appName": settings.PEACHJAM["APP_NAME"],
             "pdfWorker": static("js/pdf.worker-prod.js"),
+            "userHelpLink": pj_settings().user_help_link,
             "sentry": {
                 "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],
                 "environment": settings.PEACHJAM["SENTRY_ENVIRONMENT"],

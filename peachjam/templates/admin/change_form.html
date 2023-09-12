@@ -1,0 +1,9 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% block extra_actions %}
+  {% if PEACHJAM_SETTINGS.editor_help_link and adminform.model_admin.help_topic %}
+    <a target="_blank"
+       href="{{ PEACHJAM_SETTINGS.editor_help_link }}{{ adminform.model_admin.help_topic }}"
+       class="btn btn-block btn-info">{% trans 'Help' %}</a>
+  {% endif %}
+{% endblock %}

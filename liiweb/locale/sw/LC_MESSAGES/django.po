@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:30+0200\n"
+"POT-Creation-Date: 2023-08-31 09:30+0200\n"
 "PO-Revision-Date: 2023-05-16 07:12\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -21,73 +21,85 @@ msgstr ""
 msgid "Home"
 msgstr "Nyumbani"
 
-#: templates/liiweb/home.html:25 templates/liiweb/home.html:26
+#: templates/liiweb/home.html:35 templates/liiweb/home.html:36
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr "Tafuta %(APP_NAME)s"
 
-#: templates/liiweb/home.html:32
+#: templates/liiweb/home.html:42
 msgid "Search"
 msgstr "Tafuta"
 
-#: templates/liiweb/home.html:35
+#: templates/liiweb/home.html:44
 msgid "Advanced search"
 msgstr "Utafutaji wa kina"
 
-#: templates/liiweb/home.html:62
+#: templates/liiweb/home.html:67
 msgid "Recent Judgments"
 msgstr "Hukumu za Hivi Karibuni"
 
-#: templates/liiweb/home.html:63
+#: templates/liiweb/home.html:68
 msgid "View more judgments"
 msgstr "Tazama hukumu zaidi"
 
-#: templates/liiweb/home.html:67
+#: templates/liiweb/home.html:72
 msgid "Recent Legislation"
 msgstr "Sheria ya Hivi Karibuni"
 
-#: templates/liiweb/home.html:68
+#: templates/liiweb/home.html:73
 msgid "View more legislation"
 msgstr "Tazama sheria zaidi"
 
-#: templates/liiweb/home.html:89
-msgid "Twitter"
-msgstr "Twitter"
-
-#: templates/liiweb/home.html:102
+#: templates/liiweb/home.html:100
 msgid "Facebook"
 msgstr "Facebook"
 
-#: templates/liiweb/home.html:117
-msgid "Tweets by AfricanLII"
-msgstr "Tweets na AfricanLII"
-
-#: templates/liiweb/home.html:150
+#: templates/liiweb/home.html:135
 msgid "Courts"
 msgstr "Mahakama"
 
-#: templates/liiweb/home.html:154
+#: templates/liiweb/home.html:139
 msgid "Collections"
 msgstr "Makusanyo"
 
+#: templates/liiweb/home.html:152
+#, python-format
+msgid "Use %(APP_NAME)s when you're offline"
+msgstr ""
+
+#: templates/liiweb/home.html:154
+#, python-format
+msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
+msgstr ""
+
+#: templates/liiweb/home.html:166
+msgid "Latest Articles"
+msgstr ""
+
+#: templates/liiweb/home.html:168
+#, fuzzy
+#| msgid "View more legislation"
+msgid "View more articles"
+msgstr "Tazama sheria zaidi"
+
 #: templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:11 templates/peachjam/_header.html:17
+#: templates/liiweb/legislation_list.html:16 templates/peachjam/_header.html:17
 msgid "Legislation"
 msgstr "Sheria"
 
-#: templates/liiweb/legislation_list.html:18
+#: templates/liiweb/legislation_list.html:24
 msgid "Current legislation"
 msgstr "Sheria za sasa"
 
-#: templates/liiweb/legislation_list.html:24
+#: templates/liiweb/legislation_list.html:30
 msgid "Repealed legislation"
 msgstr "Sheria iliyofutwa"
 
-#: templates/liiweb/legislation_list.html:36
+#: templates/liiweb/legislation_list.html:42
 msgid "All legislation"
 msgstr "Sheria zote"
 
-#: templates/liiweb/legislation_list.html:42
+#: templates/liiweb/legislation_list.html:48
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr "Unatazama sheria iliyobatilishwa ambayo haitumiki tena."
 
@@ -95,23 +107,28 @@ msgstr "Unatazama sheria iliyobatilishwa ambayo haitumiki tena."
 msgid "Pocket Law"
 msgstr "Sheria zisizo mtandaoni"
 
-#: templates/peachjam/_footer.html:4
-msgid "Subscribe"
-msgstr "Jiandikishe"
-
-#: templates/peachjam/_footer.html:9
-msgid "Subscribe to our newsletter for updates and news."
-msgstr "Jiandikishe kwenye jarida letu kwa usasishaji na habari."
-
-#: templates/peachjam/_footer.html:20 templates/peachjam/_header.html:23
+#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:23
 msgid "About"
 msgstr "Kuhusu"
 
+#: templates/peachjam/_footer.html:12
+#, python-format
+msgid "Use %(APP_NAME)s offline with <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
+msgstr ""
+
+#: templates/peachjam/_footer.html:20
+msgid "Site Statistics"
+msgstr ""
+
 #: templates/peachjam/_footer.html:24
+msgid "Terms of Use"
+msgstr ""
+
+#: templates/peachjam/_footer.html:29
 msgid "Our partners"
 msgstr "Washirika wetu"
 
-#: templates/peachjam/_footer.html:33
+#: templates/peachjam/_footer.html:38
 msgid "Other African Legal Information Institutions"
 msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 
@@ -119,3 +136,20 @@ msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 msgid "Judgments"
 msgstr "Hukumu"
 
+#: views/legislation.py:99
+#, fuzzy, python-format
+#| msgid "Recent Legislation"
+msgid "%(locality)s Legislation"
+msgstr "Sheria ya Hivi Karibuni"
+
+#~ msgid "Twitter"
+#~ msgstr "Twitter"
+
+#~ msgid "Tweets by AfricanLII"
+#~ msgstr "Tweets na AfricanLII"
+
+#~ msgid "Subscribe"
+#~ msgstr "Jiandikishe"
+
+#~ msgid "Subscribe to our newsletter for updates and news."
+#~ msgstr "Jiandikishe kwenye jarida letu kwa usasishaji na habari."

@@ -14,7 +14,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
-from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
@@ -202,7 +201,8 @@ class Work(models.Model):
 
     def fetch_cited_works_frbr_uris(self):
         """Returns a set of work_frbr_uris,
-        taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links."""
+        taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links.
+        """
         work_frbr_uris = set()
 
         for doc in self.documents.all():
@@ -436,6 +436,7 @@ class CoreDocument(PolymorphicModel):
         permissions = [
             ("can_delete_own_document", "Can delete own document"),
             ("can_edit_own_document", "Can edit own document"),
+            ("can_edit_advanced_fields", "Can edit advanced fields"),
         ]
 
     def __str__(self):
@@ -548,24 +549,6 @@ class CoreDocument(PolymorphicModel):
         super().save(*args, **kwargs)
         # apply labels
         self.apply_labels()
-
-    @cached_property
-    def relationships_as_subject(self):
-        """Returns a list of relationships where this work is the subject."""
-        from peachjam.models import Relationship
-
-        return Relationship.for_subject_document(self).prefetch_related(
-            "subject_work", "subject_work__documents"
-        )
-
-    @cached_property
-    def relationships_as_object(self):
-        """Returns a list of relationships where this work is the subject."""
-        from peachjam.models import Relationship
-
-        return Relationship.for_object_document(self).prefetch_related(
-            "object_work", "object_work__documents"
-        )
 
     def extract_citations(self):
         """Run citation extraction on this document. If the document has content_html,
@@ -773,7 +756,7 @@ class SourceFile(AttachmentAbstractModel):
         verbose_name_plural = _("source files")
 
     def as_pdf(self):
-        if self.filename.endswith(".pdf"):
+        if self.mimetype == "application/pdf":
             return self.file
         elif self.file_as_pdf:
             return self.file_as_pdf
@@ -852,7 +835,12 @@ class AlternativeName(models.Model):
         related_name="alternative_names",
         verbose_name=_("document"),
     )
-    title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
+    title = models.CharField(
+        _("Law report citation/Alternative known name"),
+        max_length=1024,
+        null=False,
+        blank=False,
+    )
 
     class Meta:
         verbose_name = _("alternative name")
@@ -904,16 +892,18 @@ class DocumentContent(models.Model):
             text = " ".join(root.itertext())
 
         elif hasattr(document, "source_file"):
-            # get the text from the source file, via PDF if necessary
-            with tempfile.NamedTemporaryFile() as tmp:
-                # convert document to pdf and then extract the text
-                pdf = document.source_file.as_pdf()
-                shutil.copyfileobj(pdf, tmp)
-                tmp.flush()
-                text = pdfjs_to_text(tmp.name)
-                # some PDFs have nulls, which breaks SQL insertion
-                # replace rather than deleting to keep string length the same
-                text = text.replace("\0", " ")
+            if document.source_file.pk:
+                # get the text from the source file, via PDF if necessary
+                with tempfile.NamedTemporaryFile() as tmp:
+                    # convert document to pdf and then extract the text
+                    pdf = document.source_file.as_pdf()
+                    if pdf:
+                        shutil.copyfileobj(pdf, tmp)
+                        tmp.flush()
+                        text = pdfjs_to_text(tmp.name)
+                        # some PDFs have nulls, which breaks SQL insertion
+                        # replace rather than deleting to keep string length the same
+                        text = text.replace("\0", " ")
 
         doc_content = DocumentContent.objects.update_or_create(
             document=document, defaults={"content_text": text}

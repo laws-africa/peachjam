@@ -29,6 +29,7 @@ customElements.define('la-toc-item', LaTocItem as any);
 export interface PeachJamConfig {
   appName: string;
   pdfWorker: string;
+  userHelpLink: string;
   sentry: {
     dsn: string | null;
     environment: string | null;
@@ -40,6 +41,7 @@ class PeachJam {
   public config: PeachJamConfig = {
     appName: 'Peach Jam',
     pdfWorker: '/static/js/pdf.worker-prod.js',
+    userHelpLink: '',
     sentry: {
       dsn: null,
       environment: null
@@ -57,6 +59,7 @@ class PeachJam {
     this.setupSentry();
     this.createComponents();
     this.setupTooltips();
+    this.setupPopovers();
     this.scrollNavTabs();
   }
 
@@ -136,6 +139,32 @@ class PeachJam {
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
       // @ts-ignore
       new window.bootstrap.Tooltip(el);
+    });
+  }
+
+  setupPopovers () {
+    document.querySelectorAll('[data-bs-toggle="help-popover"]').forEach((el) => {
+      // @ts-ignore
+      const helpPopover = new window.bootstrap.Popover(el, {
+        html: true,
+        content: `
+        ${el.getAttribute('data-bs-content')}
+         <div><a href="${el.getAttribute('href')?.split('#')[1] || '#'}" target='_blank' rel='noopener noreferrer'>Learn more</a></div>
+        `,
+        container: 'body'
+      });
+      // keep popover open when clicking inside it but close when clicking outside it
+      el.addEventListener('inserted.bs.popover', (e) => {
+        const popoverBody = document.querySelector('.popover-body');
+        const clickListener = (e: MouseEvent) => {
+          // Close the popover if the click is outside the popover
+          if (!popoverBody?.contains(e.target as Node)) {
+            helpPopover.hide();
+            document.removeEventListener('click', clickListener);
+          }
+        };
+        document.addEventListener('click', clickListener);
+      });
     });
   }
 

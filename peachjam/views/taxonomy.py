@@ -11,8 +11,8 @@ class TaxonomyListView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context["taxonomies"] = Taxonomy.get_tree()
-        context["taxonomy_link_prefix"] = "taxonomy"
+        context["taxonomies"] = Taxonomy.dump_bulk()
+        context["taxonomy_url"] = "taxonomy_detail"
         return self.render_to_response(context)
 
 

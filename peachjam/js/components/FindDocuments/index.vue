@@ -76,6 +76,9 @@
               Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
             </button>
           </form>
+          <div class="my-2">
+            <HelpBtn page="search/" />
+          </div>
         </div>
         <div
           id="nav-advanced-search"
@@ -105,7 +108,6 @@
         {{ $t("No documents match your search.") }}
       </div>
     </div>
-
     <div ref="filters-results-container">
       <div class="row">
         <div class="col col-lg-3">
@@ -215,6 +217,7 @@ import SearchPagination from './SearchPagination.vue';
 import FilterFacets from '../FilterFacets/index.vue';
 import MobileFacetsDrawer from './MobileSideDrawer.vue';
 import AdvancedSearch from './AdvancedSearch.vue';
+import HelpBtn from '../HelpBtn.vue';
 import { scrollToElement } from '../../utils/function';
 
 function resetAdvancedFields (fields) {
@@ -237,7 +240,7 @@ function resetAdvancedFields (fields) {
 
 export default {
   name: 'FindDocuments',
-  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch },
+  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
   props: ['showJurisdiction'],
   data () {
     const data = {
