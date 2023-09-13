@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
+from africanlii.models import AfricanUnionOrgan
 from peachjam.models import Author
 from peachjam.views.generic_views import FilteredDocumentListView
 
@@ -21,6 +22,7 @@ class AuthorDetailView(FilteredDocumentListView):
 
     def get_queryset(self):
         self.author = get_object_or_404(Author, code=self.kwargs["code"])
+        self.au_organ = get_object_or_404(AfricanUnionOrgan, author=self.author)
         return super().get_queryset()
 
     def get_context_data(self, **kwargs):
@@ -37,7 +39,6 @@ class AuthorDetailView(FilteredDocumentListView):
         context["doc_table_show_author"] = False
         context["doc_table_show_doc_type"] = bool(doc_types)
         context["facet_data"]["docTypes"] = doc_types
-        context["entity_profile"] = self.author.entity_profile.first()
-        context["entity_profile_title"] = self.author.name
-
+        context["entity_profile"] = self.au_organ.entity_profile.first()
+        context["entity_profile_title"] = self.au_organ.author.name
         return context

@@ -18,12 +18,14 @@ from peachjam.models import (
     Author,
     CoreDocument,
     DocumentNature,
+    DocumentTopic,
     GenericDocument,
     LegalInstrument,
     Legislation,
     Locality,
     Predicate,
     Relationship,
+    Taxonomy,
     Work,
 )
 from peachjam.plugins import plugins
@@ -87,6 +89,7 @@ class IndigoAdapter(Adapter):
             }
         )
         self.api_url = self.settings["api_url"]
+        self.taxonomy_topic_root = self.settings.get("taxonomy_topic_root")
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -289,6 +292,28 @@ class IndigoAdapter(Adapter):
         else:
             # the source file is the PDF version
             self.download_source_file(f"{url}.pdf", created_doc, title)
+
+        if self.taxonomy_topic_root:
+            # clear any existing taxonomies
+            created_doc.taxonomies.filter(
+                topic__slug__startswith=self.taxonomy_topic_root
+            ).delete()
+
+            if document["taxonomy_topics"]:
+                # get topics beginning with "subject-areas"
+                topics = [
+                    t
+                    for t in document["taxonomy_topics"]
+                    if t.startswith(self.taxonomy_topic_root)
+                ]
+                if topics:
+                    taxonomies = Taxonomy.objects.filter(slug__in=topics)
+                    for taxonomy in taxonomies:
+                        DocumentTopic.objects.create(
+                            document=created_doc,
+                            topic=taxonomy,
+                        )
+                    logger.info(f"Added {len(taxonomies)} taxonomies to {created_doc}")
 
         self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
