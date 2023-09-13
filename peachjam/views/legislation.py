@@ -217,8 +217,8 @@ class LegislationDetailView(BaseDocumentDetailView):
                 # add contains_unapplied_amendment flag
                 if event['type'] == 'amendment':
                     entry['contains_unapplied_amendment'] = (
-                        entry['date'] not in point_in_time_dates and
-                        entry['date'] > latest_expression_date
+                            entry['date'] not in point_in_time_dates and
+                            entry['date'] > latest_expression_date
                     )
 
         return timeline
