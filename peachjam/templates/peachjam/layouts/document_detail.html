@@ -184,7 +184,19 @@
                               </dt>
                             {% endif %}
                             <dd class="text-muted">
-                              {% for alternative_name in alternative_names %}<div>{{ alternative_name.title }}</div>{% endfor %}
+                              {% for alternative_name in alternative_names %}
+                                <div>
+                                  {{ alternative_name.title }}
+                                  <button type="button"
+                                          class="btn btn-outline-secondary btn-xs ms-2"
+                                          title="{% trans "Copy to clipboard" %}"
+                                          data-component="CopyToClipboard"
+                                          data-value="{{ alternative_name.title }}"
+                                          data-confirmation="{% trans "Copied!" %}">
+                                    {% trans "Copy" %}
+                                  </button>
+                                </div>
+                              {% endfor %}
                             </dd>
                           {% endif %}
                         {% endwith %}
