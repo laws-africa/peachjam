@@ -1,6 +1,8 @@
 from django import forms
 from django.db.models import Q
 from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
 from rest_framework import authentication, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -116,11 +118,12 @@ class CheckDuplicatesView(APIView):
             duplicate = qs.first()
 
             if duplicate:
-                # reverse to admin change view
                 url = reverse("admin:peachjam_judgment_change", args=[duplicate.pk])
-                return Response(
-                    f'<div id="duplicate-alert" class="alert alert-danger" role="alert">Possible duplicate of '
-                    f'<a target="_blank" href="{url}">{duplicate}</a'
-                    f"</div>"
+                html = format_html(
+                    "<div id='duplicate-alert' class='alert alert-danger' role='alert'>"
+                    f"{_('Possible duplicate of')} "
+                    f"<a target='_blank' href='{url}'>{duplicate}</a>"
+                    "</div>",
                 )
+                return Response(html)
         return Response()
