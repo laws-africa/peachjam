@@ -212,20 +212,18 @@
                             </dd>
                           {% endif %}
                         {% endwith %}
-                        {% with document.bench.all as judges %}
-                          {% if judges %}
-                            <dt>
-                              {% trans 'Judges' %}
-                            </dt>
-                            <dd class="text-muted">
-                              {% for bench in judges %}
-                                {# djlint:off #}
-                                {{ bench.judge.name }}{% if not forloop.last %},{% endif %}
-                                {# djlint:on #}
-                              {% endfor %}
-                            </dd>
-                          {% endif %}
-                        {% endwith %}
+                        {% if judges %}
+                          <dt>
+                            {% trans 'Judges' %}
+                          </dt>
+                          <dd class="text-muted">
+                            {% for judge in judges %}
+                              {# djlint:off #}
+                              {{ judge }}{% if not forloop.last %},{% endif %}
+                              {# djlint:on #}
+                            {% endfor %}
+                          </dd>
+                        {% endif %}
                       {% endblock %}
                       {% block document-metadata-content-date %}
                         {% if document.doc_type == "judgment" %}

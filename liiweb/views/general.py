@@ -14,7 +14,8 @@ class HomePageView(TemplateView):
         context["recent_legislation"] = Legislation.objects.filter(
             metadata_json__stub=False
         ).order_by("-date")[:10]
-        context["taxonomies"] = Taxonomy.get_root_nodes()
+        context["taxonomies"] = Taxonomy.dump_bulk()
+        context["taxonomy_url"] = "taxonomy_detail"
         context["recent_articles"] = (
             Article.objects.prefetch_related("topics", "author")
             .filter(published=True)

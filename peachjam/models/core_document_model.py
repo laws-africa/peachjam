@@ -14,7 +14,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
-from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
@@ -550,24 +549,6 @@ class CoreDocument(PolymorphicModel):
         super().save(*args, **kwargs)
         # apply labels
         self.apply_labels()
-
-    @cached_property
-    def relationships_as_subject(self):
-        """Returns a list of relationships where this work is the subject."""
-        from peachjam.models import Relationship
-
-        return Relationship.for_subject_document(self).prefetch_related(
-            "subject_work", "subject_work__documents"
-        )
-
-    @cached_property
-    def relationships_as_object(self):
-        """Returns a list of relationships where this work is the subject."""
-        from peachjam.models import Relationship
-
-        return Relationship.for_object_document(self).prefetch_related(
-            "object_work", "object_work__documents"
-        )
 
     def extract_citations(self):
         """Run citation extraction on this document. If the document has content_html,

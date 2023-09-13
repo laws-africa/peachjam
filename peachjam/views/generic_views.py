@@ -11,7 +11,6 @@ from peachjam.models import (
     CitationLink,
     CoreDocument,
     GenericDocument,
-    Judgment,
     LegalInstrument,
     Predicate,
     Relationship,
@@ -66,8 +65,6 @@ class FilteredDocumentListView(DocumentListView):
 
     def add_facets(self, context):
         authors = []
-        courts = []
-        natures = []
         # Initialize facet data values
         natures = list(
             {
@@ -89,18 +86,6 @@ class FilteredDocumentListView(DocumentListView):
                 }
             )
 
-        # Legislation objects don't have an associated author, hence empty authors list
-        if self.model is Judgment:
-            courts = list(
-                {
-                    a
-                    for a in self.form.filter_queryset(
-                        self.get_base_queryset(), exclude="courts"
-                    ).values_list("court__name", flat=True)
-                    if a
-                }
-            )
-
         years = list(
             set(
                 self.form.filter_queryset(
@@ -114,7 +99,6 @@ class FilteredDocumentListView(DocumentListView):
         context["facet_data"] = {
             "years": years,
             "authors": authors,
-            "courts": courts,
             "alphabet": lowercase_alphabet(),
             "natures": natures,
         }
@@ -212,13 +196,17 @@ class BaseDocumentDetailView(DetailView):
 
     def add_relationships(self, context):
         context["relationships_as_subject"] = rels_as_subject = list(
-            context["document"].relationships_as_subject.all()
+            Relationship.for_subject_document(context["document"])
+            .prefetch_related("subject_work")
+            .select_related("predicate")
         )
         context["relationships_as_object"] = rels_as_object = list(
-            context["document"].relationships_as_object.all()
+            Relationship.for_object_document(context["document"])
+            .prefetch_related("object_work")
+            .select_related("predicate")
         )
-        context["relationship_limit"] = 4
         context["n_relationships"] = len(rels_as_subject) + len(rels_as_object)
+        context["relationship_limit"] = 4
 
     def add_provision_relationships(self, context):
         rels = [
