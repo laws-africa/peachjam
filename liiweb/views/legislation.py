@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks, get_language
-from peachjam.models import Legislation, Locality
+from peachjam.models import JurisdictionProfile, Legislation, Locality, pj_settings
 from peachjam_api.serializers import LegislationSerializer
 
 
@@ -46,6 +46,15 @@ class LegislationListView(TemplateView):
         qs = self.add_children(qs)
 
         context["legislation_table"] = LegislationSerializer(qs, many=True).data
+
+        site_jurisdictions = pj_settings().document_jurisdictions.all()
+        if site_jurisdictions.count() == 1:
+            jurisdiction_profile = JurisdictionProfile.objects.filter(
+                jurisdiction=site_jurisdictions.first()
+            ).first()
+            if jurisdiction_profile:
+                context["entity_profile"] = jurisdiction_profile.entity_profile.first()
+                context["entity_profile_title"] = jurisdiction_profile.jurisdiction.name
 
         return context
 
@@ -93,11 +102,15 @@ class LocalityLegislationListView(LegislationListView):
         return super().get_queryset().filter(locality=self.locality)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            locality=self.locality,
-            locality_legislation_title="Provincial Legislation",
-            page_heading=_("%(locality)s Legislation" % {"locality": self.locality}),
-            entity_profile=self.locality.entity_profile.first(),
-            entity_profile_title=self.locality.name,
-            **kwargs,
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "locality": self.locality,
+                "locality_legislation_title": "Provincial Legislation",
+                "page_heading": _("%(locality)s Legislation")
+                % {"locality": self.locality},
+                "entity_profile": self.locality.entity_profile.first(),
+                "entity_profile_title": self.locality.name,
+            }
         )
+        return context

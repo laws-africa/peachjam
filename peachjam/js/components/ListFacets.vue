@@ -11,7 +11,6 @@
   <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
   <div v-if="false">
     {{ $t('Alphabetical') }}
-    {{ $t('Court') }}
     {{ $t('Document type') }}
     {{ $t('Judges') }}
     {{ $t('Attorneys') }}
@@ -34,10 +33,6 @@ export default {
       default: () => []
     },
     authors: {
-      type: Array,
-      default: () => []
-    },
-    courts: {
       type: Array,
       default: () => []
     },
@@ -130,12 +125,6 @@ export default {
           type: 'radio',
           title: JSON.parse(document.querySelector('#data-labels').textContent).author
         },
-        {
-          name: 'courts',
-          type: 'radio',
-          title: this.$t('Court')
-        },
-
         {
           name: 'docTypes',
           type: 'radio',
