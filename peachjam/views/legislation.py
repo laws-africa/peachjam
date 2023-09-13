@@ -203,22 +203,24 @@ class LegislationDetailView(BaseDocumentDetailView):
         # fold in links to expressions corresponding to each event date (if any)
         # TODO: match on language rather than using first expression?
         expression_uris = {
-            point_in_time["date"]: point_in_time["expressions"][0]["expression_frbr_uri"]
+            point_in_time["date"]: point_in_time["expressions"][0][
+                "expression_frbr_uri"
+            ]
             for point_in_time in points_in_time
         }
 
         for entry in timeline:
             # add expression_frbr_uri
-            for event in entry['events']:
+            for event in entry["events"]:
                 entry["expression_frbr_uri"] = expression_uris.get(entry["date"])
                 # add publication_url to publication event
-                if event['type'] == 'publication':
-                    event['link_url'] = publication_url
+                if event["type"] == "publication":
+                    event["link_url"] = publication_url
                 # add contains_unapplied_amendment flag
-                if event['type'] == 'amendment':
-                    entry['contains_unapplied_amendment'] = (
-                            entry['date'] not in point_in_time_dates and
-                            entry['date'] > latest_expression_date
+                if event["type"] == "amendment":
+                    entry["contains_unapplied_amendment"] = (
+                        entry["date"] not in point_in_time_dates
+                        and entry["date"] > latest_expression_date
                     )
 
         return timeline
