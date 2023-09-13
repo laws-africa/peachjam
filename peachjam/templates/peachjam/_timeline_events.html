@@ -28,7 +28,8 @@
                   {{ event.description }}
                 {% endif %}
               {% else %}
-                {{ event.description }}{% if event.by_frbr_uri %} <a href="{{ event.by_frbr_uri }}">{{ event.by_title }}</a>{% endif %}
+                {{ event.description }}
+                {% if event.by_frbr_uri %}<a href="{{ event.by_frbr_uri }}">{{ event.by_title }}</a>{% endif %}
               {% endif %}
             </div>
           {% endfor %}
