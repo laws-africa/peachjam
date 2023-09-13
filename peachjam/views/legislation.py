@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from itertools import groupby
 
 from django.contrib import messages
 from django.template.defaultfilters import date as format_date
@@ -81,7 +80,7 @@ class LegislationDetailView(BaseDocumentDetailView):
             latest_amendment_date = max(work_amendments_dates)
 
             if not points_in_time and latest_amendment_date > current_object_date:
-                self.set_unapplied_amendment_notice(notices, friendly_type)
+                self.set_unapplied_amendment_notice(notices)
 
         if points_in_time and work_amendments:
             point_in_time_dates = [
@@ -103,7 +102,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                     )
 
                 elif work_amendments and latest_amendment_date > current_object_date:
-                    self.set_unapplied_amendment_notice(notices, friendly_type)
+                    self.set_unapplied_amendment_notice(notices)
 
                 else:
                     notices.append(
@@ -166,7 +165,7 @@ class LegislationDetailView(BaseDocumentDetailView):
     def get_commencement_info(self):
         return self.object.metadata_json.get("commenced", None)
 
-    def set_unapplied_amendment_notice(self, notices, friendly_type):
+    def set_unapplied_amendment_notice(self, notices):
         notices.append(
             {
                 "type": messages.WARNING,
@@ -178,110 +177,51 @@ class LegislationDetailView(BaseDocumentDetailView):
         )
 
     def get_timeline_events(self):
-        events = []
+        timeline = self.object.timeline
+        publication_url = None
         work = self.object.metadata_json
+        points_in_time = self.get_points_in_time()
 
-        assent_date = self.object.metadata_json.get("assent_date", None)
-        if assent_date:
-            events.append(
-                {
-                    "date": work.get("assent_date"),
-                    "event": "assent",
-                }
-            )
-
-        publication_date = self.object.metadata_json.get("publication_date", None)
+        # set publication_url
+        publication_date = work.get("publication_date")
         if publication_date:
+            # TODO: update to v3 throughout
             api_url = "https://api.laws.africa/v2/"
             commons_url = "https://commons.laws.africa/"
             publication_url = (work.get("publication_document") or {}).get("url")
             if publication_url and api_url in publication_url:
                 publication_url = publication_url.replace(api_url, commons_url)
 
-            events.append(
-                {
-                    "date": publication_date,
-                    "event": "publication",
-                    "publication_name": work.get("publication_name"),
-                    "publication_number": work.get("publication_number"),
-                    "publication_url": publication_url,
-                }
-            )
-
-        commencement_date = self.object.metadata_json.get("commencement_date", None)
-        if commencement_date:
-            events.append(
-                {
-                    "date": commencement_date,
-                    "event": "commencement",
-                    "friendly_type": work.get("type_name"),
-                }
-            )
-
-        points_in_time = self.get_points_in_time()
-
-        amendments = self.get_work_amendments()
-        if amendments:
-            point_in_time_dates = [
-                point_in_time["date"] for point_in_time in points_in_time
-            ]
-            latest_expression_date = (
-                max(point_in_time_dates)
-                if point_in_time_dates
-                else self.object.date.strftime("%Y-%m-%d")
-            )
-
-            events.extend(
-                [
-                    {
-                        "date": amendment.get("date"),
-                        "event": "amendment",
-                        "amending_title": amendment.get("amending_title"),
-                        "amending_uri": amendment.get("amending_uri"),
-                        "unapplied_amendment": bool(
-                            amendment.get("date") not in point_in_time_dates
-                            and amendment.get("date") > latest_expression_date
-                        ),
-                    }
-                    for amendment in amendments
-                ]
-            )
-
-        repeal = self.get_repeal_info()
-        if repeal:
-            events.append(
-                {
-                    "date": repeal.get("date"),
-                    "event": "repeal",
-                    "repealing_title": repeal.get("repealing_title"),
-                    "repealing_uri": repeal.get("repealing_uri"),
-                }
-            )
-
-        events.sort(key=lambda event: event["date"])
-        events = [
-            {
-                "date": date,
-                "events": list(group),
-            }
-            for date, group in groupby(events, lambda event: event["date"])
-        ]
+        # prepare for setting contains_unapplied_amendment flag
+        point_in_time_dates = [p["date"] for p in points_in_time]
+        latest_expression_date = (
+            max(point_in_time_dates)
+            if point_in_time_dates
+            else self.object.date.strftime("%Y-%m-%d")
+        )
 
         # fold in links to expressions corresponding to each event date (if any)
-        expressions = {
-            point_in_time["date"]: point_in_time["expressions"][0]
+        # TODO: match on language rather than using first expression?
+        expression_uris = {
+            point_in_time["date"]: point_in_time["expressions"][0]["expression_frbr_uri"]
             for point_in_time in points_in_time
         }
-        for event in events:
-            for e in event["events"]:
-                del e["date"]
-            uri = expressions.get(event["date"], {}).get("expression_frbr_uri")
-            if uri:
-                event["expression_frbr_uri"] = uri
 
-        events.sort(key=lambda event: event["date"], reverse=True)
+        for entry in timeline:
+            # add expression_frbr_uri
+            for event in entry['events']:
+                entry["expression_frbr_uri"] = expression_uris.get(entry["date"])
+                # add publication_url to publication event
+                if event['type'] == 'publication':
+                    event['link_url'] = publication_url
+                # add contains_unapplied_amendment flag
+                if event['type'] == 'amendment':
+                    entry['contains_unapplied_amendment'] = (
+                        entry['date'] not in point_in_time_dates and
+                        entry['date'] > latest_expression_date
+                    )
 
-        return events
+        return timeline
 
     def get_child_documents(self):
         docs = (
