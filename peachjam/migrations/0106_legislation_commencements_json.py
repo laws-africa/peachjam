@@ -5,13 +5,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('peachjam', '0105_legislation_timeline'),
+        ("peachjam", "0105_legislation_timeline"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='legislation',
-            name='commencements_json',
-            field=models.JSONField(default=list, verbose_name='commencements_json'),
+            model_name="legislation",
+            name="commencements_json",
+            field=models.JSONField(default=list, verbose_name="commencements_json"),
         ),
     ]
