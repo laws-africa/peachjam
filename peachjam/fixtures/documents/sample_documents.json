@@ -10063,6 +10063,283 @@
         }
     },
     {
+        "model": "peachjam.coredocument",
+        "pk": 3041,
+        "fields": {
+            "polymorphic_ctype": [
+                "peachjam",
+                "legislation"
+            ],
+            "work": 2433,
+            "doc_type": "legislation",
+            "title": "Divorce Act, 1979",
+            "date": "2010-08-09",
+            "source_url": "https://api.laws.africa/v2/akn/za/act/1979/70/media/publication/za-act-1979-70-publication-document.pdf",
+            "citation": "Act 70 of 1979",
+            "content_html": "\n\n\n\n  \n\n\n<div class=\"coverpage\">\n  \n\n  \n    <div class=\"place-name\">\n      \n      South Africa\n    </div>\n  \n\n  \n    \n  \n\n  \n    <h1>Divorce Act, 1979</h1>\n  \n\n  \n    \n      \n        <h2>Act 70 of 1979</h2>\n      \n    \n  \n\n  \n    <ul class=\"notice-list\">\n      \n  \n    <li class=\"publication-info\">\n      \n        \n        \n          \n            Published in <a href=\"https://commons.laws.africa/akn/za/act/1979/70/media/publication/za-act-1979-70-publication-document.pdf\">Government Gazette no. 6506</a> on 15 June 1979\n          \n        \n\n      \n    </li>\n  \n\n\n      \n        \n          <li class=\"assent-date\">\n            Assented to on 8 June 1979\n          </li>\n        \n      \n\n      \n        \n          \n            <li class=\"commencement-date\">\n              \n                Commenced on 1 July 1979\n              \n              \n                \n              \n            </li>\n          \n          \n            <li class=\"commencement-note\">Note: See section 19</li>\n          \n        \n      \n\n      \n        \n          <li class=\"as-at-date-notice\">\n            [This is the version of this document from 22 October 2020.]\n          </li>\n        \n      \n\n      \n        \n        \n        \n      \n\n      \n        \n          \n        \n      \n\n      \n        \n          \n        \n      \n    </ul>\n  \n\n  \n    \n\n\n<ol class=\"amendment-list\">\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1984/88\" class=\"amending-title\">Matrimonial Property Act, 1984 (Act 88 of 1984)</a> on <span class=\"amendment-date\">1 November 1984</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1986/97\" class=\"amending-title\">Transfer of Powers and Duties of the State President Act, 1986 (Act 97 of 1986)</a> on <span class=\"amendment-date\">3 October 1986</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1988/3\" class=\"amending-title\">Marriage and Matrimonial Property Law Amendment Act, 1988 (Act 3 of 1988)</a> on <span class=\"amendment-date\">2 December 1988</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1989/7\" class=\"amending-title\">Divorce Amendment Act, 1989 (Act 7 of 1989)</a> on <span class=\"amendment-date\">1 August 1989</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1987/24\" class=\"amending-title\">Mediation in Certain Divorce Matters Act, 1987 (Act 24 of 1987)</a> on <span class=\"amendment-date\">1 October 1990</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1992/44\" class=\"amending-title\">Divorce Amendment Act, 1992 (Act 44 of 1992)</a> on <span class=\"amendment-date\">15 April 1992</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1992/3\" class=\"amending-title\">Domicile Act, 1992 (Act 3 of 1992)</a> on <span class=\"amendment-date\">1 August 1992</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1996/95\" class=\"amending-title\">Divorce Amendment Act, 1996 (Act 95 of 1996)</a> on <span class=\"amendment-date\">22 November 1996</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1996/18\" class=\"amending-title\">Justice Laws Rationalisation Act, 1996 (Act 18 of 1996)</a> on <span class=\"amendment-date\">1 April 1997</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1997/65\" class=\"amending-title\">Divorce Courts Amendment Act, 1997 (Act 65 of 1997)</a> on <span class=\"amendment-date\">6 April 1998</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/1996/65\" class=\"amending-title\">Films and Publications Act, 1996 (Act 65 of 1996)</a> on <span class=\"amendment-date\">1 June 1998</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/2003/55\" class=\"amending-title\">Judicial Matters Second Amendment Act, 2003 (Act 55 of 2003)</a> on <span class=\"amendment-date\">31 March 2005</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/2008/31\" class=\"amending-title\">Jurisdiction of Regional Courts Amendment Act, 2008 (Act 31 of 2008)</a> on <span class=\"amendment-date\">9 August 2010</span>]\n      \n    \n  </li>\n  \n  <li class=\"amendment\">\n    \n      \n      \n        [Amended by <a href=\"https://resolver.laws.africa/resolve/akn/za/act/2020/12\" class=\"amending-title\">Judicial Matters Amendment Act, 2020 (Act 12 of 2020)</a> on <span class=\"amendment-date\">22 October 2020</span>]\n      \n    \n  </li>\n  \n\n  \n</ol>\n\n\n  \n</div>\n\n\n\n\n\n\n\n<span class=\"akn-akomaNtoso\"><span class=\"akn-act\" data-name=\"act\" data-contains=\"singleVersion\"><section class=\"akn-preface\" id=\"preface\"><span class=\"akn-p\" id=\"preface__p_1\" data-eId=\"preface__p_1\">(Afrikaans text signed by the Acting State President)</span><span class=\"akn-p\" id=\"preface__p_2\" data-eId=\"preface__p_2\">ACT</span><span class=\"akn-longTitle\" id=\"preface__longTitle_1\" data-eId=\"preface__longTitle_1\"><span class=\"akn-p\" id=\"preface__longTitle_1__p_1\" data-eId=\"preface__longTitle_1__p_1\">To amend the law relating to divorce and to provide for incidental matters.</span></span><span class=\"akn-p\" id=\"preface__p_3\" data-eId=\"preface__p_3\">BE IT ENACTED by the State President, the Senate and the House of Assembly of the Republic of South Africa, as follows:—</span></section><span class=\"akn-body\"><section class=\"akn-section\" id=\"sec_1\" data-eId=\"sec_1\"><h3>1. Definitions</h3>\n<section class=\"akn-subsection\" id=\"sec_1__subsec_1\" data-eId=\"sec_1__subsec_1\"><span class=\"akn-num\">(1)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_1__subsec_1__p_1\" data-eId=\"sec_1__subsec_1__p_1\">In this Act, unless inconsistent with the context—</span><span class=\"akn-p\" data-refersTo=\"#term-court\" id=\"sec_1__subsec_1__p_2\" data-eId=\"sec_1__subsec_1__p_2\">\"<span class=\"akn-def\" data-refersTo=\"#term-court\" id=\"sec_1__subsec_1__p_2__def_1\" data-eId=\"sec_1__subsec_1__p_2__def_1\">court</span>\"  means  any High Court as contemplated in section 166 of the <a data-href=\"/akn/za/act/1996/constitution\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1996/constitution\" id=\"sec_1__subsec_1__p_2__ref_1\" data-eId=\"sec_1__subsec_1__p_2__ref_1\">Constitution of the Republic of South Africa, 1996</a>, or a court for a regional division contemplated in section 29(1B) of the Magistrates' Courts Act, 1944 (<a data-href=\"/akn/za/act/1944/32\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1944/32\" id=\"sec_1__subsec_1__p_2__ref_2\" data-eId=\"sec_1__subsec_1__p_2__ref_2\">Act No. 32 of 1944</a>), which has jurisdiction with respect to a divorce action;</span><span class=\"akn-p\" id=\"sec_1__subsec_1__p_3\" data-eId=\"sec_1__subsec_1__p_3\"><span class=\"akn-remark\" data-status=\"editorial\">[definition of \"court\" substituted by section 4 of <a data-href=\"/akn/za/act/1997/65\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1997/65\" id=\"sec_1__subsec_1__p_3__ref_1\" data-eId=\"sec_1__subsec_1__p_3__ref_1\">Act 65 of 1997</a> and by section 10(2) of <a data-href=\"/akn/za/act/2008/31\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/2008/31\" id=\"sec_1__subsec_1__p_3__ref_2\" data-eId=\"sec_1__subsec_1__p_3__ref_2\">Act 31 of 2008</a>]</span></span><span class=\"akn-blockList\" data-refersTo=\"#term-divorce_action\" id=\"sec_1__subsec_1__list_1\" data-eId=\"sec_1__subsec_1__list_1\"><span class=\"akn-listIntroduction\" id=\"sec_1__subsec_1__list_1__intro_1\" data-eId=\"sec_1__subsec_1__list_1__intro_1\">\"<span class=\"akn-def\" data-refersTo=\"#term-divorce_action\" id=\"sec_1__subsec_1__list_1__intro_1__def_1\" data-eId=\"sec_1__subsec_1__list_1__intro_1__def_1\">divorce action</span>\" means an action by which a decree of divorce or other relief in connection therewith is applied for, and includes—</span><span class=\"akn-item\" id=\"sec_1__subsec_1__list_1__item_a\" data-eId=\"sec_1__subsec_1__list_1__item_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-p\" id=\"sec_1__subsec_1__list_1__item_a__p_1\" data-eId=\"sec_1__subsec_1__list_1__item_a__p_1\">an application pendente life for an interdict or for the interim custody of, or access to, a minor child of the marriage concerned or for the payment of maintenance; or</span></span><span class=\"akn-item\" id=\"sec_1__subsec_1__list_1__item_b\" data-eId=\"sec_1__subsec_1__list_1__item_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-p\" id=\"sec_1__subsec_1__list_1__item_b__p_1\" data-eId=\"sec_1__subsec_1__list_1__item_b__p_1\">an application for a contribution towards the costs of such action or to institute such action, or make such application, in forma pauperis, or for the substituted service of process in, or the edictal citation of a party to, such action or such application;</span></span></span><span class=\"akn-p\" data-refersTo=\"#term-pension_fund\" id=\"sec_1__subsec_1__p_4\" data-eId=\"sec_1__subsec_1__p_4\">\"<span class=\"akn-def\" data-refersTo=\"#term-pension_fund\" id=\"sec_1__subsec_1__p_4__def_1\" data-eId=\"sec_1__subsec_1__p_4__def_1\">pension fund</span>\" means a pension fund as defined in section 1(1) of the Pension Funds Act, 1956 (<a data-href=\"/akn/za/act/1956/24\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1956/24\" id=\"sec_1__subsec_1__p_4__ref_1\" data-eId=\"sec_1__subsec_1__p_4__ref_1\">Act No. 24 of 1956</a>), irrespective of whether the provisions of that Act apply to the pension fund or not;</span><span class=\"akn-p\" id=\"sec_1__subsec_1__p_5\" data-eId=\"sec_1__subsec_1__p_5\"><span class=\"akn-remark\" data-status=\"editorial\">[definition of \"pension fund\" added by section 1 of <a data-href=\"/akn/za/act/1989/7\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1989/7\" id=\"sec_1__subsec_1__p_5__ref_1\" data-eId=\"sec_1__subsec_1__p_5__ref_1\">Act 7 of 1989</a>]</span></span><span class=\"akn-blockList\" data-refersTo=\"#term-pension_interest\" id=\"sec_1__subsec_1__list_2\" data-eId=\"sec_1__subsec_1__list_2\"><span class=\"akn-listIntroduction\" id=\"sec_1__subsec_1__list_2__intro_1\" data-eId=\"sec_1__subsec_1__list_2__intro_1\">\"<span class=\"akn-def\" data-refersTo=\"#term-pension_interest\" id=\"sec_1__subsec_1__list_2__intro_1__def_1\" data-eId=\"sec_1__subsec_1__list_2__intro_1__def_1\">pension interest</span>\", in relation to a party to a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_1__subsec_1__list_2__intro_1__term_1\" data-eId=\"sec_1__subsec_1__list_2__intro_1__term_1\">divorce action</span> who-</span><span class=\"akn-item\" id=\"sec_1__subsec_1__list_2__item_a\" data-eId=\"sec_1__subsec_1__list_2__item_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-p\" id=\"sec_1__subsec_1__list_2__item_a__p_1\" data-eId=\"sec_1__subsec_1__list_2__item_a__p_1\">is a member of a <span class=\"akn-term\" data-refersTo=\"#term-pension_fund\" id=\"sec_1__subsec_1__list_2__item_a__p_1__term_1\" data-eId=\"sec_1__subsec_1__list_2__item_a__p_1__term_1\">pension fund</span> (excluding a retirement annuity fund), means the benefits to which that party as such a member would have been entitled in terms of the <span class=\"akn-term\" data-refersTo=\"#term-rules\" id=\"sec_1__subsec_1__list_2__item_a__p_1__term_2\" data-eId=\"sec_1__subsec_1__list_2__item_a__p_1__term_2\">rules</span> of that fund if his membership of the fund would have been terminated on the date of the divorce on account of his resignation from his office;</span></span><span class=\"akn-item\" id=\"sec_1__subsec_1__list_2__item_b\" data-eId=\"sec_1__subsec_1__list_2__item_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-p\" id=\"sec_1__subsec_1__list_2__item_b__p_1\" data-eId=\"sec_1__subsec_1__list_2__item_b__p_1\">is a member of a retirement annuity fund which was <i class=\"akn-i\">bona fide</i> established for the purpose of providing life annuities for the members of the fund, and which is a <span class=\"akn-term\" data-refersTo=\"#term-pension_fund\" id=\"sec_1__subsec_1__list_2__item_b__p_1__term_1\" data-eId=\"sec_1__subsec_1__list_2__item_b__p_1__term_1\">pension fund</span>, means the total amount of that party's contributions to the fund up to the date of the divorce, together with a total amount of annual simple interest on those contributions up to that date, calculated at the same rate as the rate prescribed as at that date by the Minister of Justice in terms of section 1(2) of the Prescribed Rate of Interest Act, 1975 (<a data-href=\"/akn/za/act/1975/55\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1975/55\" id=\"sec_1__subsec_1__list_2__item_b__p_1__ref_1\" data-eId=\"sec_1__subsec_1__list_2__item_b__p_1__ref_1\">Act No. 55 of 1975</a>), for the purposes of that Act;</span></span></span><span class=\"akn-p\" id=\"sec_1__subsec_1__p_6\" data-eId=\"sec_1__subsec_1__p_6\"><span class=\"akn-remark\" data-status=\"editorial\">[definition of \"pension interest\" added by section 1 of <a data-href=\"/akn/za/act/1989/7\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1989/7\" id=\"sec_1__subsec_1__p_6__ref_1\" data-eId=\"sec_1__subsec_1__p_6__ref_1\">Act 7 of 1989</a>]</span></span><span class=\"akn-p\" data-refersTo=\"#term-rules\" id=\"sec_1__subsec_1__p_7\" data-eId=\"sec_1__subsec_1__p_7\">\"<span class=\"akn-def\" data-refersTo=\"#term-rules\" id=\"sec_1__subsec_1__p_7__def_1\" data-eId=\"sec_1__subsec_1__p_7__def_1\">rules</span>\", in relation to a <span class=\"akn-term\" data-refersTo=\"#term-pension_fund\" id=\"sec_1__subsec_1__p_7__term_1\" data-eId=\"sec_1__subsec_1__p_7__term_1\">pension fund</span>, means rules as defined in section 1(1) of the Pension Funds Act, 1956.</span><span class=\"akn-p\" id=\"sec_1__subsec_1__p_8\" data-eId=\"sec_1__subsec_1__p_8\"><span class=\"akn-remark\" data-status=\"editorial\">[definition of \"rules\" added by section 1 of <a data-href=\"/akn/za/act/1989/7\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1989/7\" id=\"sec_1__subsec_1__p_8__ref_1\" data-eId=\"sec_1__subsec_1__p_8__ref_1\">Act 7 of 1989</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_1__subsec_2\" data-eId=\"sec_1__subsec_2\"><span class=\"akn-num\">(2)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_1__subsec_2__p_1\" data-eId=\"sec_1__subsec_2__p_1\">For the purposes of this Act a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_1__subsec_2__p_1__term_1\" data-eId=\"sec_1__subsec_2__p_1__term_1\">divorce action</span> shall be deemed to be instituted on the date on which the summons is issued or the notice of motion is filed or the notice is delivered in terms of the <span class=\"akn-term\" data-refersTo=\"#term-rules\" id=\"sec_1__subsec_2__p_1__term_2\" data-eId=\"sec_1__subsec_2__p_1__term_2\">rules</span> of <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_1__subsec_2__p_1__term_3\" data-eId=\"sec_1__subsec_2__p_1__term_3\">court</span>, as the case may be.</span></span></section></section><section class=\"akn-section\" id=\"sec_2\" data-eId=\"sec_2\"><h3>2. Jurisdiction</h3>\n<section class=\"akn-subsection\" id=\"sec_2__subsec_1\" data-eId=\"sec_2__subsec_1\"><span class=\"akn-num\">(1)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_2__subsec_1__intro__p_1\" data-eId=\"sec_2__subsec_1__intro__p_1\">A <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_2__subsec_1__intro__p_1__term_1\" data-eId=\"sec_2__subsec_1__intro__p_1__term_1\">court</span> shall have jurisdiction in a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_2__subsec_1__intro__p_1__term_2\" data-eId=\"sec_2__subsec_1__intro__p_1__term_2\">divorce action</span> if the parties are or either of the parties is—</span></span><section class=\"akn-paragraph\" id=\"sec_2__subsec_1__para_a\" data-eId=\"sec_2__subsec_1__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_2__subsec_1__para_a__p_1\" data-eId=\"sec_2__subsec_1__para_a__p_1\">domiciled in the area of jurisdiction of the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_2__subsec_1__para_a__p_1__term_1\" data-eId=\"sec_2__subsec_1__para_a__p_1__term_1\">court</span> on the date on which the action is instituted; or</span></span></section><section class=\"akn-paragraph\" id=\"sec_2__subsec_1__para_b\" data-eId=\"sec_2__subsec_1__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_2__subsec_1__para_b__p_1\" data-eId=\"sec_2__subsec_1__para_b__p_1\">ordinarily resident in the area of jurisdiction of the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_2__subsec_1__para_b__p_1__term_1\" data-eId=\"sec_2__subsec_1__para_b__p_1__term_1\">court</span> on the said date and have or has been ordinarily resident in the Republic for a period of not less than one year immediately prior to that date.</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_2__subsec_1__wrapup__p_1\" data-eId=\"sec_2__subsec_1__wrapup__p_1\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (1) substituted by section 6(a) of <a data-href=\"/akn/za/act/1992/3\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1992/3\" id=\"sec_2__subsec_1__wrapup__p_1__ref_1\" data-eId=\"sec_2__subsec_1__wrapup__p_1__ref_1\">Act 3 of 1992</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_2__subsec_2\" data-eId=\"sec_2__subsec_2\"><span class=\"akn-num\">(2)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_2__subsec_2__p_1\" data-eId=\"sec_2__subsec_2__p_1\">A <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_2__subsec_2__p_1__term_1\" data-eId=\"sec_2__subsec_2__p_1__term_1\">court</span> which has jurisdiction in terms of subsection (1) shall also have jurisdiction in respect of a claim in reconvention or a counter-application in the <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_2__subsec_2__p_1__term_2\" data-eId=\"sec_2__subsec_2__p_1__term_2\">divorce action</span> concerned.</span><span class=\"akn-p\" id=\"sec_2__subsec_2__p_2\" data-eId=\"sec_2__subsec_2__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (2) amended by section 6(b) of <a data-href=\"/akn/za/act/1992/3\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1992/3\" id=\"sec_2__subsec_2__p_2__ref_1\" data-eId=\"sec_2__subsec_2__p_2__ref_1\">Act 3 of 1992</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_2__subsec_3\" data-eId=\"sec_2__subsec_3\"><span class=\"akn-num\">(3)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_2__subsec_3__p_1\" data-eId=\"sec_2__subsec_3__p_1\">A <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_2__subsec_3__p_1__term_1\" data-eId=\"sec_2__subsec_3__p_1__term_1\">court</span> which has jurisdiction in terms of this section in a case where the parties are or either of the parties is not domiciled in the Republic shall determine any issue in accordance with the law which would have been applicable had the parties been domiciled in the area of jurisdiction of the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_2__subsec_3__p_1__term_2\" data-eId=\"sec_2__subsec_3__p_1__term_2\">court</span> concerned on the date on which the <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_2__subsec_3__p_1__term_3\" data-eId=\"sec_2__subsec_3__p_1__term_3\">divorce action</span> was instituted.</span><span class=\"akn-p\" id=\"sec_2__subsec_3__p_2\" data-eId=\"sec_2__subsec_3__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (3) substituted by section 6(c) of <a data-href=\"/akn/za/act/1992/3\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1992/3\" id=\"sec_2__subsec_3__p_2__ref_1\" data-eId=\"sec_2__subsec_3__p_2__ref_1\">Act 3 of 1992</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_2__subsec_4\" data-eId=\"sec_2__subsec_4\"><span class=\"akn-num\">(4)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_2__subsec_4__p_1\" data-eId=\"sec_2__subsec_4__p_1\">The provisions of this Act shall not derogate from the jurisdiction which a <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_2__subsec_4__p_1__term_1\" data-eId=\"sec_2__subsec_4__p_1__term_1\">court</span> has in terms of any other law or the common law.</span></span></section></section><section class=\"akn-section\" id=\"sec_3\" data-eId=\"sec_3\"><h3>3. Dissolution of marriage and grounds of divorce</h3>\n<span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_3__intro__p_1\" data-eId=\"sec_3__intro__p_1\">A marriage may be dissolved by a <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_3__intro__p_1__term_1\" data-eId=\"sec_3__intro__p_1__term_1\">court</span> by a decree of divorce and the only grounds on which such a decree may be granted are—</span></span><section class=\"akn-paragraph\" id=\"sec_3__para_a\" data-eId=\"sec_3__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_3__para_a__p_1\" data-eId=\"sec_3__para_a__p_1\">the irretrievable break-down of the marriage as contemplated in <a data-href=\"#sec_4\" class=\"akn-ref\" href=\"#sec_4\" id=\"sec_3__para_a__p_1__ref_1\" data-eId=\"sec_3__para_a__p_1__ref_1\">section 4</a>;</span></span></section><section class=\"akn-paragraph\" id=\"sec_3__para_b\" data-eId=\"sec_3__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_3__para_b__p_1\" data-eId=\"sec_3__para_b__p_1\">the mental illness or the continuous unconsciousness, as contemplated in <a data-href=\"#sec_5\" class=\"akn-ref\" href=\"#sec_5\" id=\"sec_3__para_b__p_1__ref_1\" data-eId=\"sec_3__para_b__p_1__ref_1\">section 5</a>, of a party to the marriage.</span></span></section></section><section class=\"akn-section\" id=\"sec_4\" data-eId=\"sec_4\"><h3>4. Irretrievable break-down of marriage as ground of divorce</h3>\n<section class=\"akn-subsection\" id=\"sec_4__subsec_1\" data-eId=\"sec_4__subsec_1\"><span class=\"akn-num\">(1)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_4__subsec_1__p_1\" data-eId=\"sec_4__subsec_1__p_1\">A <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_4__subsec_1__p_1__term_1\" data-eId=\"sec_4__subsec_1__p_1__term_1\">court</span> may grant a decree of divorce on the ground of the irretrievable break-down of a marriage if it is satisfied that the marriage relationship between the parties to the marriage has reached such a state of disintegration that there is no reasonable prospect of the restoration of a normal marriage relationship between them.</span></span></section><section class=\"akn-subsection\" id=\"sec_4__subsec_2\" data-eId=\"sec_4__subsec_2\"><span class=\"akn-num\">(2)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_4__subsec_2__intro__p_1\" data-eId=\"sec_4__subsec_2__intro__p_1\">Subject to the provisions of subsection (1), and without excluding any facts or circumstances which may be indicative of the irretrievable break-down of a marriage, the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_4__subsec_2__intro__p_1__term_1\" data-eId=\"sec_4__subsec_2__intro__p_1__term_1\">court</span> may accept evidence—</span></span><section class=\"akn-paragraph\" id=\"sec_4__subsec_2__para_a\" data-eId=\"sec_4__subsec_2__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_4__subsec_2__para_a__p_1\" data-eId=\"sec_4__subsec_2__para_a__p_1\">that the parties have not lived together as husband and wife for a continuous period of at least one year immediately prior to the date of the institution of the <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_4__subsec_2__para_a__p_1__term_1\" data-eId=\"sec_4__subsec_2__para_a__p_1__term_1\">divorce action</span>;</span></span></section><section class=\"akn-paragraph\" id=\"sec_4__subsec_2__para_b\" data-eId=\"sec_4__subsec_2__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_4__subsec_2__para_b__p_1\" data-eId=\"sec_4__subsec_2__para_b__p_1\">that the defendant has committed adultery and that the plaintiff finds it irreconcilable with a continued marriage relationship; or</span></span></section><section class=\"akn-paragraph\" id=\"sec_4__subsec_2__para_c\" data-eId=\"sec_4__subsec_2__para_c\"><span class=\"akn-num\">(c)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_4__subsec_2__para_c__p_1\" data-eId=\"sec_4__subsec_2__para_c__p_1\">that the defendant has in terms of a sentence of a <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_4__subsec_2__para_c__p_1__term_1\" data-eId=\"sec_4__subsec_2__para_c__p_1__term_1\">court</span> been declared an habitual criminal and is undergoing imprisonment as a result of such sentence,</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_4__subsec_2__wrapup__p_1\" data-eId=\"sec_4__subsec_2__wrapup__p_1\">as proof of the irretrievable break-down of a marriage,</span></span></section><section class=\"akn-subsection\" id=\"sec_4__subsec_3\" data-eId=\"sec_4__subsec_3\"><span class=\"akn-num\">(3)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_4__subsec_3__p_1\" data-eId=\"sec_4__subsec_3__p_1\">If it appears to the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_4__subsec_3__p_1__term_1\" data-eId=\"sec_4__subsec_3__p_1__term_1\">court</span> that there is a reasonable possibility that the parties may become reconciled through marriage counsel, treatment or reflection, the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_4__subsec_3__p_1__term_2\" data-eId=\"sec_4__subsec_3__p_1__term_2\">court</span> may postpone the proceedings in order that the parties may attempt a reconcilation.</span></span></section><section class=\"akn-subsection\" id=\"sec_4__subsec_4\" data-eId=\"sec_4__subsec_4\"><span class=\"akn-num\">(4)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_4__subsec_4__p_1\" data-eId=\"sec_4__subsec_4__p_1\">Where a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_4__subsec_4__p_1__term_1\" data-eId=\"sec_4__subsec_4__p_1__term_1\">divorce action</span> which is not defended is postponed in terms of subsection (3), the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_4__subsec_4__p_1__term_2\" data-eId=\"sec_4__subsec_4__p_1__term_2\">court</span> may direct that the action be tried <i class=\"akn-i\">de novo</i>, on the date of resumption thereof, by any other judge of the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_4__subsec_4__p_1__term_3\" data-eId=\"sec_4__subsec_4__p_1__term_3\">court</span> concerned.</span></span></section></section><section class=\"akn-section\" id=\"sec_5\" data-eId=\"sec_5\"><h3>5. Mental illness or continuous unconsciousness as grounds of divorce</h3>\n<section class=\"akn-subsection\" id=\"sec_5__subsec_1\" data-eId=\"sec_5__subsec_1\"><span class=\"akn-num\">(1)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_5__subsec_1__intro__p_1\" data-eId=\"sec_5__subsec_1__intro__p_1\">A <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5__subsec_1__intro__p_1__term_1\" data-eId=\"sec_5__subsec_1__intro__p_1__term_1\">court</span> may grant a decree of divorce on the ground of the mental illness of the defendant if it is satisfied—</span></span><section class=\"akn-paragraph\" id=\"sec_5__subsec_1__para_a\" data-eId=\"sec_5__subsec_1__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_5__subsec_1__para_a__intro__p_1\" data-eId=\"sec_5__subsec_1__para_a__intro__p_1\">that the defendant in terms of the Mental Health Act, 1973 (<a data-href=\"/akn/za/act/1973/18\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1973/18\" id=\"sec_5__subsec_1__para_a__intro__p_1__ref_1\" data-eId=\"sec_5__subsec_1__para_a__intro__p_1__ref_1\">Act No. 18 of 1973</a>)—</span></span><section class=\"akn-subparagraph\" id=\"sec_5__subsec_1__para_a__subpara_i\" data-eId=\"sec_5__subsec_1__para_a__subpara_i\"><span class=\"akn-num\">(i)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_5__subsec_1__para_a__subpara_i__p_1\" data-eId=\"sec_5__subsec_1__para_a__subpara_i__p_1\">has been admitted as a patient to an institution in terms of a reception order;</span></span></section><section class=\"akn-subparagraph\" id=\"sec_5__subsec_1__para_a__subpara_ii\" data-eId=\"sec_5__subsec_1__para_a__subpara_ii\"><span class=\"akn-num\">(ii)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_5__subsec_1__para_a__subpara_ii__p_1\" data-eId=\"sec_5__subsec_1__para_a__subpara_ii__p_1\">is being detained as a State patient at an institution or other place specified by the Minister of Correctional Services; or</span><span class=\"akn-p\" id=\"sec_5__subsec_1__para_a__subpara_ii__p_2\" data-eId=\"sec_5__subsec_1__para_a__subpara_ii__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[sub-paragraph (ii) amended by section 4 of <a data-href=\"/akn/za/act/1996/18\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1996/18\" id=\"sec_5__subsec_1__para_a__subpara_ii__p_2__ref_1\" data-eId=\"sec_5__subsec_1__para_a__subpara_ii__p_2__ref_1\">Act 18 of 1996</a>]</span></span></span></section><section class=\"akn-subparagraph\" id=\"sec_5__subsec_1__para_a__subpara_iii\" data-eId=\"sec_5__subsec_1__para_a__subpara_iii\"><span class=\"akn-num\">(iii)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_5__subsec_1__para_a__subpara_iii__p_1\" data-eId=\"sec_5__subsec_1__para_a__subpara_iii__p_1\">is being detained as a mentally ill convicted prisoner at an institution, and that he has, for a continuous period of at least two years immediately prior to the institution of the <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_5__subsec_1__para_a__subpara_iii__p_1__term_1\" data-eId=\"sec_5__subsec_1__para_a__subpara_iii__p_1__term_1\">divorce action</span>, not been discharged unconditionally as such a patient, State patient or mentally ill prisoner; and</span><span class=\"akn-p\" id=\"sec_5__subsec_1__para_a__subpara_iii__p_2\" data-eId=\"sec_5__subsec_1__para_a__subpara_iii__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[sub-paragraph (iii) amended by section 4 of <a data-href=\"/akn/za/act/1996/18\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1996/18\" id=\"sec_5__subsec_1__para_a__subpara_iii__p_2__ref_1\" data-eId=\"sec_5__subsec_1__para_a__subpara_iii__p_2__ref_1\">Act 18 of 1996</a>]</span></span></span></section></section><section class=\"akn-paragraph\" id=\"sec_5__subsec_1__para_b\" data-eId=\"sec_5__subsec_1__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_5__subsec_1__para_b__p_1\" data-eId=\"sec_5__subsec_1__para_b__p_1\">after having heard the evidence of at least two psychiatrists, of whom one shall have been appointed by the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5__subsec_1__para_b__p_1__term_1\" data-eId=\"sec_5__subsec_1__para_b__p_1__term_1\">court</span>, that the defendant is mentally ill and that there is no reasonable prospect that he will be cured of his mental illness.</span></span></section></section><section class=\"akn-subsection\" id=\"sec_5__subsec_2\" data-eId=\"sec_5__subsec_2\"><span class=\"akn-num\">(2)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_5__subsec_2__intro__p_1\" data-eId=\"sec_5__subsec_2__intro__p_1\">A <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5__subsec_2__intro__p_1__term_1\" data-eId=\"sec_5__subsec_2__intro__p_1__term_1\">court</span> may grant a decree of divorce on the ground that the defendant is by reason of a physical disorder in a state of continuous unconsciousness, if it is satisfied—</span></span><section class=\"akn-paragraph\" id=\"sec_5__subsec_2__para_a\" data-eId=\"sec_5__subsec_2__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_5__subsec_2__para_a__p_1\" data-eId=\"sec_5__subsec_2__para_a__p_1\">that the defendant’s unconsciousness has lasted for a continuous period of at least six months immediately prior to the institution of the <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_5__subsec_2__para_a__p_1__term_1\" data-eId=\"sec_5__subsec_2__para_a__p_1__term_1\">divorce action</span>; and</span></span></section><section class=\"akn-paragraph\" id=\"sec_5__subsec_2__para_b\" data-eId=\"sec_5__subsec_2__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_5__subsec_2__para_b__p_1\" data-eId=\"sec_5__subsec_2__para_b__p_1\">after having heard the evidence of at least two medical practitioners, of whom one shall be a neurologist or a neurosurgeon appointed by the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5__subsec_2__para_b__p_1__term_1\" data-eId=\"sec_5__subsec_2__para_b__p_1__term_1\">court</span>, that there is no reasonable prospect that the defendant will regain consciousness.</span></span></section></section><section class=\"akn-subsection\" id=\"sec_5__subsec_3\" data-eId=\"sec_5__subsec_3\"><span class=\"akn-num\">(3)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_5__subsec_3__p_1\" data-eId=\"sec_5__subsec_3__p_1\">The <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5__subsec_3__p_1__term_1\" data-eId=\"sec_5__subsec_3__p_1__term_1\">court</span> may appoint a legal practitioner to represent the defendant at proceedings under this section and order the plaintiff to pay the costs of such representation.</span></span></section><section class=\"akn-subsection\" id=\"sec_5__subsec_4\" data-eId=\"sec_5__subsec_4\"><span class=\"akn-num\">(4)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_5__subsec_4__p_1\" data-eId=\"sec_5__subsec_4__p_1\">The <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5__subsec_4__p_1__term_1\" data-eId=\"sec_5__subsec_4__p_1__term_1\">court</span> may make any order it may deem fit with regard to the furnishing of security by the plaintiff in respect of any patrimonial benefits to which the defendant may be entitled by reason of the dissolution of the marriage.</span></span></section><section class=\"akn-subsection\" id=\"sec_5__subsec_5\" data-eId=\"sec_5__subsec_5\"><span class=\"akn-num\">(5)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_5__subsec_5__p_1\" data-eId=\"sec_5__subsec_5__p_1\">For the purposes of this section the expressions \"institution\", \"mental illness\", \"patient\", \"State patient\" and \"reception order\" shall bear the meaning assigned to them in the Mental Health Act, 1973.</span><span class=\"akn-p\" id=\"sec_5__subsec_5__p_2\" data-eId=\"sec_5__subsec_5__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[section 5 amended by section 4 of <a data-href=\"/akn/za/act/1996/18\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1996/18\" id=\"sec_5__subsec_5__p_2__ref_1\" data-eId=\"sec_5__subsec_5__p_2__ref_1\">Act 18 of 1996</a>]</span></span></span></section></section><section class=\"akn-section\" id=\"sec_5A\" data-eId=\"sec_5A\"><h3>5A. Refusal to grant divorce</h3>\n<span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_5A__p_1\" data-eId=\"sec_5A__p_1\">If it appears to a <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5A__p_1__term_1\" data-eId=\"sec_5A__p_1__term_1\">court</span> in divorce proceedings that despite the granting of a decree of divorce by the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5A__p_1__term_2\" data-eId=\"sec_5A__p_1__term_2\">court</span> the spouses or either one of them will, by reason of the prescripts of their religion or the religion of either one of them, not be free to remarry unless the marriage is also dissolved in accordance with such prescripts or unless a barrier to the remarriage of the spouse concerned is removed, the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5A__p_1__term_3\" data-eId=\"sec_5A__p_1__term_3\">court</span> may refuse to grant a decree of divorce unless the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5A__p_1__term_4\" data-eId=\"sec_5A__p_1__term_4\">court</span> is satisfied that the spouse within whose power it is to have the marriage so dissolved or the said barrier so removed, has taken all the necessary steps to have the marriage so dissolved or the barrier to the remarriage of the other spouse removed or the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_5A__p_1__term_5\" data-eId=\"sec_5A__p_1__term_5\">court</span> may make any other order that it finds just.</span><span class=\"akn-p\" id=\"sec_5A__p_2\" data-eId=\"sec_5A__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[section 5A inserted by section 1 of <a data-href=\"/akn/za/act/1996/95\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1996/95\" id=\"sec_5A__p_2__ref_1\" data-eId=\"sec_5A__p_2__ref_1\">Act 95 of 1996</a>]</span></span></span></section><section class=\"akn-section\" id=\"sec_6\" data-eId=\"sec_6\"><h3>6. Safeguarding of interests of dependent and minor children</h3>\n<section class=\"akn-subsection\" id=\"sec_6__subsec_1\" data-eId=\"sec_6__subsec_1\"><span class=\"akn-num\">(1)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_6__subsec_1__intro__p_1\" data-eId=\"sec_6__subsec_1__intro__p_1\">A decree of divorce shall not be granted until the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_6__subsec_1__intro__p_1__term_1\" data-eId=\"sec_6__subsec_1__intro__p_1__term_1\">court</span>—</span></span><section class=\"akn-paragraph\" id=\"sec_6__subsec_1__para_a\" data-eId=\"sec_6__subsec_1__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_6__subsec_1__para_a__p_1\" data-eId=\"sec_6__subsec_1__para_a__p_1\">is satisfied that the provisions made or contemplated with regard to the welfare of any minor or dependent child of the marriage are satisfactory or are the best that can be effected in the circumstances; and</span></span></section><section class=\"akn-paragraph\" id=\"sec_6__subsec_1__para_b\" data-eId=\"sec_6__subsec_1__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_6__subsec_1__para_b__p_1\" data-eId=\"sec_6__subsec_1__para_b__p_1\">if an enquiry is instituted by the Family Advocate in terms of section 4 (1) (a) or (2) (a) of the Mediation in Certain Divorce Matters Act, 1987, has considered the report and recommendations referred to in the said section 4 (1).</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_6__subsec_1__wrapup__p_1\" data-eId=\"sec_6__subsec_1__wrapup__p_1\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (1) substituted by section 6 of <a data-href=\"/akn/za/act/1987/24\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1987/24\" id=\"sec_6__subsec_1__wrapup__p_1__ref_1\" data-eId=\"sec_6__subsec_1__wrapup__p_1__ref_1\">Act 24 of 1987</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_6__subsec_2\" data-eId=\"sec_6__subsec_2\"><span class=\"akn-num\">(2)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_6__subsec_2__p_1\" data-eId=\"sec_6__subsec_2__p_1\">For the purposes of subsection (1) the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_6__subsec_2__p_1__term_1\" data-eId=\"sec_6__subsec_2__p_1__term_1\">court</span> may cause any investigation which it may deem necessary, to be carried out and may order any person to appear before it and may order the parties or any one of them to pay the costs of the investigation and appearance.</span></span></section><section class=\"akn-subsection\" id=\"sec_6__subsec_3\" data-eId=\"sec_6__subsec_3\"><span class=\"akn-num\">(3)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_6__subsec_3__p_1\" data-eId=\"sec_6__subsec_3__p_1\">A <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_6__subsec_3__p_1__term_1\" data-eId=\"sec_6__subsec_3__p_1__term_1\">court</span> granting a decree of divorce may, in regard to the maintenance of a dependent child of the marriage or the custody or guardianship of, or access to, a minor child of the marriage, make any order which it may deem fit, and may in particular, if in its opinion it would be in the interests of such minor child to do so, grant to either parent the sole guardianship (which shall include the power to consent to the marriage of the child) or the sole custody of the minor, arid the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_6__subsec_3__p_1__term_2\" data-eId=\"sec_6__subsec_3__p_1__term_2\">court</span> may order that, on the predecease of the parent to whom the sole guardianship of the minor is granted, a person other than the surviving parent shall be the guardian of the minor, either jointly with or to the exclusion of the surviving parent.</span></span></section><section class=\"akn-subsection\" id=\"sec_6__subsec_4\" data-eId=\"sec_6__subsec_4\"><span class=\"akn-num\">(4)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_6__subsec_4__p_1\" data-eId=\"sec_6__subsec_4__p_1\">For the purposes of this section the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_6__subsec_4__p_1__term_1\" data-eId=\"sec_6__subsec_4__p_1__term_1\">court</span> may appoint a legal practitioner to represent a child at the proceedings and may order the parties or any one of them to pay the costs of the representation.</span></span></section></section><section class=\"akn-section\" id=\"sec_7\" data-eId=\"sec_7\"><h3>7. Division of assets and maintenance of parties</h3>\n<section class=\"akn-subsection\" id=\"sec_7__subsec_1\" data-eId=\"sec_7__subsec_1\"><span class=\"akn-num\">(1)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_1__p_1\" data-eId=\"sec_7__subsec_1__p_1\">A court granting a decree of divorce may in accordance with a written agreement between the parties make an order with regard to the division of the assets of the parties or the payment of maintenance by the one party to the other.</span></span></section><section class=\"akn-subsection\" id=\"sec_7__subsec_2\" data-eId=\"sec_7__subsec_2\"><span class=\"akn-num\">(2)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_2__p_1\" data-eId=\"sec_7__subsec_2__p_1\">In the absence of an order made in terms of subsection (1) with regard to the payment of maintenance by the one party to the other, the court may, having regard to the existing or prospective means of each of the parties, their respective earning capacities, financial needs and obligations, the age of each of the parties, the duration of the marriage, the standard of living of the parties prior to the divorce, their conduct in so far as it may be relevant to the break-down of the marriage, an order in terms of subsection (3) and any other factor which in the opinion of the court should be taken into account, make an order which the court finds just in respect of the payment of maintenance by the one party to the other for any period until the death or remarriage of the party in whose favour the order is given, whichever event may first occur.</span><span class=\"akn-p\" id=\"sec_7__subsec_2__p_2\" data-eId=\"sec_7__subsec_2__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (2) substituted by section 36(a) of <a data-href=\"/akn/za/act/1984/88\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1984/88\" id=\"sec_7__subsec_2__p_2__ref_1\" data-eId=\"sec_7__subsec_2__p_2__ref_1\">Act 88 of 1984</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_7__subsec_3\" data-eId=\"sec_7__subsec_3\"><span class=\"akn-num\">(3)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_7__subsec_3__intro__p_1\" data-eId=\"sec_7__subsec_3__intro__p_1\">A court granting a decree of divorce in respect of a marriage out of community of property—</span></span><section class=\"akn-paragraph\" id=\"sec_7__subsec_3__para_a\" data-eId=\"sec_7__subsec_3__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_3__para_a__p_1\" data-eId=\"sec_7__subsec_3__para_a__p_1\">entered into before the commencement of the Matrimonial Property Act, 1984, in terms of an antenuptial contract by which community of property, community of profit and loss and accrual sharing in any form are excluded;</span><span class=\"akn-p\" id=\"sec_7__subsec_3__para_a__p_2\" data-eId=\"sec_7__subsec_3__para_a__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[Please note: The High Court of South Africa, Gauteng Division, Pretoria has declared section 7(3)(a) \"inconsistent with the Constitution and invalid to the extent that the provision limits the operation of section 7(3) of the Divorce Act to marriages out of community of property entered into before the commencement of the Matrimonial Property Act\". See full judgement here: <a data-href=\"https://lawlibrary.org.za/za/judgment/high-court-south-africa-north-gauteng-pretoria/2022/3\" class=\"akn-ref\" href=\"https://lawlibrary.org.za/za/judgment/high-court-south-africa-north-gauteng-pretoria/2022/3\" id=\"sec_7__subsec_3__para_a__p_2__ref_1\" data-eId=\"sec_7__subsec_3__para_a__p_2__ref_1\">Greyling v Minister of Home Affairs and Others (40023 of 2021) [2022] ZAGPPHC 3 (11 May 2022)</a>]</span></span></span></section><section class=\"akn-paragraph\" id=\"sec_7__subsec_3__para_b\" data-eId=\"sec_7__subsec_3__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_3__para_b__p_1\" data-eId=\"sec_7__subsec_3__para_b__p_1\">entered into before the commencement of the Marriage and Matrimonial Property Law Amendment Act, 1988, in terms of section 22(6) of the Black Administration Act, 1927 (<a data-href=\"/akn/za/act/1927/38\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1927/38\" id=\"sec_7__subsec_3__para_b__p_1__ref_1\" data-eId=\"sec_7__subsec_3__para_b__p_1__ref_1\">Act No. 38 of 1927</a>), as it existed immediately prior to its repeal by the said Marriage and Matrimonial Property Law Amendment Act, 1988; or</span></span></section><section class=\"akn-paragraph\" id=\"sec_7__subsec_3__para_c\" data-eId=\"sec_7__subsec_3__para_c\"><span class=\"akn-num\">(c)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_3__para_c__p_1\" data-eId=\"sec_7__subsec_3__para_c__p_1\">entered into in terms of any law applicable in a former homeland, without entering into an antenuptial contract or agreement in terms of such law,</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_7__subsec_3__wrapup__p_1\" data-eId=\"sec_7__subsec_3__wrapup__p_1\">may, subject to the provisions of subsections (4), (5) and (6), on application by one of the parties to that marriage, in the absence of any agreement between them regarding the division of their assets, order that such assets, or such part of the assets, of the other party as the court may deem just, be transferred to the first-mentioned.</span><span class=\"akn-p\" id=\"sec_7__subsec_3__wrapup__p_2\" data-eId=\"sec_7__subsec_3__wrapup__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (3) added by section 36(b) of <a data-href=\"/akn/za/act/1984/88\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1984/88\" id=\"sec_7__subsec_3__wrapup__p_2__ref_1\" data-eId=\"sec_7__subsec_3__wrapup__p_2__ref_1\">Act 88 of 1984</a> and substituted by section 2(a) of <a data-href=\"/akn/za/act/1988/3\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1988/3\" id=\"sec_7__subsec_3__wrapup__p_2__ref_2\" data-eId=\"sec_7__subsec_3__wrapup__p_2__ref_2\">Act 3 of 1988</a> and by section 1 of <a data-href=\"/akn/za/act/2020/12\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/2020/12\" id=\"sec_7__subsec_3__wrapup__p_2__ref_3\" data-eId=\"sec_7__subsec_3__wrapup__p_2__ref_3\">Act 12 of 2020</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_7__subsec_4\" data-eId=\"sec_7__subsec_4\"><span class=\"akn-num\">(4)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_4__p_1\" data-eId=\"sec_7__subsec_4__p_1\">An order under subsection (3) shall not be granted unless the court is satisfied that it is equitable and just by reason of the fact that the party in whose favour the order is granted, contributed directly or indirectly to the maintenance or increase of the estate of the other party during the subsistence of the marriage, either by the rendering of services, or the saving of expenses which would otherwise have been incurred, or in any other manner.</span><span class=\"akn-p\" id=\"sec_7__subsec_4__p_2\" data-eId=\"sec_7__subsec_4__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (4) added by section 36(b) of <a data-href=\"/akn/za/act/1984/88\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1984/88\" id=\"sec_7__subsec_4__p_2__ref_1\" data-eId=\"sec_7__subsec_4__p_2__ref_1\">Act 88 of 1984</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_7__subsec_5\" data-eId=\"sec_7__subsec_5\"><span class=\"akn-num\">(5)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_7__subsec_5__intro__p_1\" data-eId=\"sec_7__subsec_5__intro__p_1\">In the determination of the assets or part of the assets to be transferred as contemplated in subsection (3), the court shall, apart from any direct or indirect contribution made by the party concerned to the maintenance or increase of the estate of the other party as contemplated in subsection (4), also take into account-</span></span><section class=\"akn-paragraph\" id=\"sec_7__subsec_5__para_a\" data-eId=\"sec_7__subsec_5__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_5__para_a__p_1\" data-eId=\"sec_7__subsec_5__para_a__p_1\">the existing means and obligations of the parties, including any obligation that a husband to a marriage as contemplated in subsection 3(b) of this section may have in terms of section 22(7) of the Black Administration Act, 1927 (<a data-href=\"/akn/za/act/1927/38\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1927/38\" id=\"sec_7__subsec_5__para_a__p_1__ref_1\" data-eId=\"sec_7__subsec_5__para_a__p_1__ref_1\">Act No. 38 of 1927</a>);</span></span></section><section class=\"akn-paragraph\" id=\"sec_7__subsec_5__para_b\" data-eId=\"sec_7__subsec_5__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_5__para_b__p_1\" data-eId=\"sec_7__subsec_5__para_b__p_1\">any donation made by one party to the other during the subsistence of the marriage, or which is owing and enforceable in terms of the antenuptial contract concerned;</span></span></section><section class=\"akn-paragraph\" id=\"sec_7__subsec_5__para_c\" data-eId=\"sec_7__subsec_5__para_c\"><span class=\"akn-num\">(c)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_5__para_c__p_1\" data-eId=\"sec_7__subsec_5__para_c__p_1\">any order which the court grants under <a data-href=\"#sec_9\" class=\"akn-ref\" href=\"#sec_9\" id=\"sec_7__subsec_5__para_c__p_1__ref_1\" data-eId=\"sec_7__subsec_5__para_c__p_1__ref_1\">section 9</a> of this Act or under any other law which affects the patrimonial position of the parties; and</span></span></section><section class=\"akn-paragraph\" id=\"sec_7__subsec_5__para_d\" data-eId=\"sec_7__subsec_5__para_d\"><span class=\"akn-num\">(d)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_5__para_d__p_1\" data-eId=\"sec_7__subsec_5__para_d__p_1\">any other factor which should in the opinion of the court be taken into account.</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_7__subsec_5__wrapup__p_1\" data-eId=\"sec_7__subsec_5__wrapup__p_1\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (5) added by section 36(b) of <a data-href=\"/akn/za/act/1984/88\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1984/88\" id=\"sec_7__subsec_5__wrapup__p_1__ref_1\" data-eId=\"sec_7__subsec_5__wrapup__p_1__ref_1\">Act 88 of 1984</a> and substituted by section 2(b) of <a data-href=\"/akn/za/act/1988/3\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1988/3\" id=\"sec_7__subsec_5__wrapup__p_1__ref_2\" data-eId=\"sec_7__subsec_5__wrapup__p_1__ref_2\">Act 3 of 1988</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_7__subsec_5A\" data-eId=\"sec_7__subsec_5A\"><span class=\"akn-num\">(5A)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_5A__p_1\" data-eId=\"sec_7__subsec_5A__p_1\">Refusal to grant divorce</span><span class=\"akn-p\" id=\"sec_7__subsec_5A__p_2\" data-eId=\"sec_7__subsec_5A__p_2\">If it appears to a court in divorce proceedings that despite the granting of a decree of divorce by the court the spouses or either one of them will, by reason of the prescripts of their religion or the religion of either one of them, not be free to remarry unless the marriage is also dissolved in accordance with such prescripts or unless a barrier to the remarriage of the spouse concerned is removed, the court may refuse to grant a decree of divorce unless the court is satisfied that the spouse within whose power it is to have the marriage so dissolved or the said barrier so removed, has taken all the necessary steps to have the marriage so dissolved or the barrier to the remarriage of the other spouse removed or the court may make any other order that it finds just.</span><span class=\"akn-p\" id=\"sec_7__subsec_5A__p_3\" data-eId=\"sec_7__subsec_5A__p_3\"><span class=\"akn-remark\" data-status=\"editorial\">[section (5A) inserted by section 1 of <a data-href=\"/akn/za/act/1996/95\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1996/95\" id=\"sec_7__subsec_5A__p_3__ref_1\" data-eId=\"sec_7__subsec_5A__p_3__ref_1\">Act 95 of 1996</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_7__subsec_6\" data-eId=\"sec_7__subsec_6\"><span class=\"akn-num\">(6)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_6__p_1\" data-eId=\"sec_7__subsec_6__p_1\">A court granting an order under subsection (3) may, on application by the party against whom the order is granted, order that satisfaction of the order be deferred on such conditions, including conditions relating to the furnishing of security, the payment of interest, the payment of instalments, and the delivery or transfer of specified assets, as the court may deem just.</span><span class=\"akn-p\" id=\"sec_7__subsec_6__p_2\" data-eId=\"sec_7__subsec_6__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (6) added by section 36(b) of <a data-href=\"/akn/za/act/1984/88\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1984/88\" id=\"sec_7__subsec_6__p_2__ref_1\" data-eId=\"sec_7__subsec_6__p_2__ref_1\">Act 88 of 1984</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_7__subsec_7\" data-eId=\"sec_7__subsec_7\"><span class=\"akn-num\">(7)</span><section class=\"akn-paragraph\" id=\"sec_7__subsec_7__para_a\" data-eId=\"sec_7__subsec_7__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_7__para_a__p_1\" data-eId=\"sec_7__subsec_7__para_a__p_1\">In the determination of the patrimonial benefits to which the parties to any divorce action may be entitled, the pension interest of a party shall, subject to paragraphs (b) and (c), be deemed to be part of his assets.</span></span></section><section class=\"akn-paragraph\" id=\"sec_7__subsec_7__para_b\" data-eId=\"sec_7__subsec_7__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_7__subsec_7__para_b__intro__p_1\" data-eId=\"sec_7__subsec_7__para_b__intro__p_1\">The amount so deemed to be part of a party's assets, shall be reduced by any amount of his pension interest which, by virtue of paragraph (a), in a previous divorce-</span></span><section class=\"akn-subparagraph\" id=\"sec_7__subsec_7__para_b__subpara_i\" data-eId=\"sec_7__subsec_7__para_b__subpara_i\"><span class=\"akn-num\">(i)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_7__para_b__subpara_i__p_1\" data-eId=\"sec_7__subsec_7__para_b__subpara_i__p_1\">was paid over or awarded to another party; or</span></span></section><section class=\"akn-subparagraph\" id=\"sec_7__subsec_7__para_b__subpara_ii\" data-eId=\"sec_7__subsec_7__para_b__subpara_ii\"><span class=\"akn-num\">(ii)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_7__para_b__subpara_ii__p_1\" data-eId=\"sec_7__subsec_7__para_b__subpara_ii__p_1\">for the purposes of an agreement contemplated in subsection (1), was accounted in favour of another party.</span></span></section></section><section class=\"akn-paragraph\" id=\"sec_7__subsec_7__para_c\" data-eId=\"sec_7__subsec_7__para_c\"><span class=\"akn-num\">(c)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_7__para_c__p_1\" data-eId=\"sec_7__subsec_7__para_c__p_1\">Paragraph (a) shall not apply to a divorce action in respect of a marriage out of community of property entered into on or after 1 November 1984 in terms of an antenuptial contract by which community of property, community of profit and loss and the accrual system are excluded.</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_7__subsec_7__wrapup__p_1\" data-eId=\"sec_7__subsec_7__wrapup__p_1\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (7) added by section 2 of <a data-href=\"/akn/za/act/1989/7\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1989/7\" id=\"sec_7__subsec_7__wrapup__p_1__ref_1\" data-eId=\"sec_7__subsec_7__wrapup__p_1__ref_1\">Act 7 of 1989</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_7__subsec_8\" data-eId=\"sec_7__subsec_8\"><span class=\"akn-num\">(8)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_7__subsec_8__intro__p_1\" data-eId=\"sec_7__subsec_8__intro__p_1\">Notwithstanding the provisions of any other law or of the rules of any pension fund-</span></span><section class=\"akn-paragraph\" id=\"sec_7__subsec_8__para_a\" data-eId=\"sec_7__subsec_8__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_7__subsec_8__para_a__intro__p_1\" data-eId=\"sec_7__subsec_8__para_a__intro__p_1\">the court granting a decree of divorce in respect of a member of such a fund, may make an order that-</span></span><section class=\"akn-subparagraph\" id=\"sec_7__subsec_8__para_a__subpara_i\" data-eId=\"sec_7__subsec_8__para_a__subpara_i\"><span class=\"akn-num\">(i)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_8__para_a__subpara_i__p_1\" data-eId=\"sec_7__subsec_8__para_a__subpara_i__p_1\">any part of the pension interest of that member which, by virtue of subsection (7), is due or assigned to the other party to the divorce action concerned, shall be paid by that fund to that other party when any pension benefits accrue in respect of that member;</span></span></section><section class=\"akn-subparagraph\" id=\"sec_7__subsec_8__para_a__subpara_ii\" data-eId=\"sec_7__subsec_8__para_a__subpara_ii\"><span class=\"akn-num\">(ii)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_8__para_a__subpara_ii__p_1\" data-eId=\"sec_7__subsec_8__para_a__subpara_ii__p_1\">the registrar of the court in question forthwith notify the fund concerned that an endorsement be made in the records of that fund that that part of the pension interest concerned is so payable to that other party and that the administrator of the pension fund furnish proof of such endorsement to the registrar, in writing, within one month of receipt of such notification;</span><span class=\"akn-p\" id=\"sec_7__subsec_8__para_a__subpara_ii__p_2\" data-eId=\"sec_7__subsec_8__para_a__subpara_ii__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[subparagraph (ii) substituted by section 11 of <a data-href=\"/akn/za/act/2003/55\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/2003/55\" id=\"sec_7__subsec_8__para_a__subpara_ii__p_2__ref_1\" data-eId=\"sec_7__subsec_8__para_a__subpara_ii__p_2__ref_1\">Act 55 of 2003</a>]</span></span></span></section></section><section class=\"akn-paragraph\" id=\"sec_7__subsec_8__para_b\" data-eId=\"sec_7__subsec_8__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_8__para_b__p_1\" data-eId=\"sec_7__subsec_8__para_b__p_1\">any law which applies in relation to the reduction, assignment, transfer, cession, pledge, hypothecation or attachment of the pension benefits, or any right in respect thereof, in that fund, shall apply <i class=\"akn-i\">mutatis mutandis</i> with regard to the right of that other party in respect of that part of the pension interest concerned.</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_7__subsec_8__wrapup__p_1\" data-eId=\"sec_7__subsec_8__wrapup__p_1\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (8) added by section 2 of <a data-href=\"/akn/za/act/1989/7\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1989/7\" id=\"sec_7__subsec_8__wrapup__p_1__ref_1\" data-eId=\"sec_7__subsec_8__wrapup__p_1__ref_1\">Act 7 of 1989</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_7__subsec_9\" data-eId=\"sec_7__subsec_9\"><span class=\"akn-num\">(9)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_7__subsec_9__p_1\" data-eId=\"sec_7__subsec_9__p_1\">When a court grants a decree of divorce in respect of a marriage the patrimonial consequences of which are according to the rules of the South African private international law governed by the law of a foreign state, the court shall have the same power as a competent court of the foreign state concerned would have had at that time to order that assets be transferred from one spouse to the other spouse.</span><span class=\"akn-p\" id=\"sec_7__subsec_9__p_2\" data-eId=\"sec_7__subsec_9__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (9) added by section 1 of <a data-href=\"/akn/za/act/1992/44\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1992/44\" id=\"sec_7__subsec_9__p_2__ref_1\" data-eId=\"sec_7__subsec_9__p_2__ref_1\">Act 44 of 1992</a>]</span></span></span></section></section><section class=\"akn-section\" id=\"sec_8\" data-eId=\"sec_8\"><h3>8. Rescission, suspension or variation of orders</h3>\n<section class=\"akn-subsection\" id=\"sec_8__subsec_1\" data-eId=\"sec_8__subsec_1\"><span class=\"akn-num\">(1)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_8__subsec_1__intro__p_1\" data-eId=\"sec_8__subsec_1__intro__p_1\">Any candidate attorney who has satisfied all the requirements for the degree referred to in paragraph (a) of section 2(1), or for the degrees referred to in paragraph (aA) of that section, or for a degree or degrees referred to in paragraph (aB) of that section in respect of which a certification in accordance with that paragraph has been done, shall be entitled to appear in any <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_8__subsec_1__intro__p_1__term_1\" data-eId=\"sec_8__subsec_1__intro__p_1__term_1\">court</span>, other than High Court, and before any board, tribunal or similar institution in or before which his or her principal is entitled to appear, instead of and on behalf of such principal who shall be entitled to charge the fees for such appearance as if he or she himself or herself had appeared: Provided that such a candidate attorney shall not be entitled to appear in a <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_8__subsec_1__intro__p_1__term_2\" data-eId=\"sec_8__subsec_1__intro__p_1__term_2\">court</span> of a regional division established under section 2 of the Magistrates' Courts Act, 1944 (Act No. 32 of 1944), unless he or she—</span></span><section class=\"akn-paragraph\" id=\"sec_8__subsec_1__para_i\" data-eId=\"sec_8__subsec_1__para_i\"><span class=\"akn-num\">(i)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_8__subsec_1__para_i__p_1\" data-eId=\"sec_8__subsec_1__para_i__p_1\">has previously practised as an advocate for at least a year; or</span></span></section><section class=\"akn-paragraph\" id=\"sec_8__subsec_1__para_ii\" data-eId=\"sec_8__subsec_1__para_ii\"><span class=\"akn-num\">(ii)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_8__subsec_1__para_ii__p_1\" data-eId=\"sec_8__subsec_1__para_ii__p_1\">has served for at least one year under his articles or contract of service; or</span></span></section><section class=\"akn-paragraph\" id=\"sec_8__subsec_1__para_iii\" data-eId=\"sec_8__subsec_1__para_iii\"><span class=\"akn-num\">(iii)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_8__subsec_1__para_iii__p_1\" data-eId=\"sec_8__subsec_1__para_iii__p_1\">has at least one year's experience as a state advocate, state prosecutor or magistrate.</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_8__subsec_1__wrapup__p_1\" data-eId=\"sec_8__subsec_1__wrapup__p_1\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (1) substituted by section 7 of Act 24 of 198 and section 10(2) of <a data-href=\"/akn/za/act/2008/31\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/2008/31\" id=\"sec_8__subsec_1__wrapup__p_1__ref_1\" data-eId=\"sec_8__subsec_1__wrapup__p_1__ref_1\">Act 31 of 2008</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_8__subsec_2\" data-eId=\"sec_8__subsec_2\"><span class=\"akn-num\">(2)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_8__subsec_2__p_1\" data-eId=\"sec_8__subsec_2__p_1\">A <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_8__subsec_2__p_1__term_1\" data-eId=\"sec_8__subsec_2__p_1__term_1\">court</span> other than the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_8__subsec_2__p_1__term_2\" data-eId=\"sec_8__subsec_2__p_1__term_2\">court</span> which made an order referred to in subsection (1) may rescind, vary or suspend such order if the parties are domiciled in the area of jurisdiction of such first-mentioned <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_8__subsec_2__p_1__term_3\" data-eId=\"sec_8__subsec_2__p_1__term_3\">court</span> or the applicant is domiciled in the area of jurisdiction of such first-mentioned <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_8__subsec_2__p_1__term_4\" data-eId=\"sec_8__subsec_2__p_1__term_4\">court</span> and the respondent consents to the jurisdiction of that <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_8__subsec_2__p_1__term_5\" data-eId=\"sec_8__subsec_2__p_1__term_5\">court</span>.</span></span></section><section class=\"akn-subsection\" id=\"sec_8__subsec_3\" data-eId=\"sec_8__subsec_3\"><span class=\"akn-num\">(3)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_8__subsec_3__p_1\" data-eId=\"sec_8__subsec_3__p_1\">The provisions of subsections (1) and (2) shall mutatis mutandis apply with reference to any order referred to in subsection (1) given by a <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_8__subsec_3__p_1__term_1\" data-eId=\"sec_8__subsec_3__p_1__term_1\">court</span> in a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_8__subsec_3__p_1__term_2\" data-eId=\"sec_8__subsec_3__p_1__term_2\">divorce action</span> before the commencement of this Act.</span></span></section></section><section class=\"akn-section\" id=\"sec_9\" data-eId=\"sec_9\"><h3>9. Forfeiture of patrimonial benefits of marriage</h3>\n<section class=\"akn-subsection\" id=\"sec_9__subsec_1\" data-eId=\"sec_9__subsec_1\"><span class=\"akn-num\">(1)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_9__subsec_1__p_1\" data-eId=\"sec_9__subsec_1__p_1\">When a decree of divorce is granted on the ground of the irretrievable break-down of a marriage the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_9__subsec_1__p_1__term_1\" data-eId=\"sec_9__subsec_1__p_1__term_1\">court</span> may make an order that the patrimonial benefits of the marriage be forfeited by one party in favour of the other, either wholly or in part, if the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_9__subsec_1__p_1__term_2\" data-eId=\"sec_9__subsec_1__p_1__term_2\">court</span>, having regard to the duration of the marriage, the circumstances which gave rise to the break-down thereof and any substantial misconduct on the part of either of the parties, is satisfied that, if the order for forfeiture is not made, the one party will in relation to the other be unduly benefited.</span></span></section><section class=\"akn-subsection\" id=\"sec_9__subsec_2\" data-eId=\"sec_9__subsec_2\"><span class=\"akn-num\">(2)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_9__subsec_2__p_1\" data-eId=\"sec_9__subsec_2__p_1\">In the case of a decree of divorce granted on the ground of the mental illness or continuous unconsciousness of the defendant, no order for the forfeiture of any patrimonial benefits of the marriage shall be made against the defendant.</span></span></section></section><section class=\"akn-section\" id=\"sec_10\" data-eId=\"sec_10\"><h3>10. Costs</h3>\n<span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_10__p_1\" data-eId=\"sec_10__p_1\">In a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_10__p_1__term_1\" data-eId=\"sec_10__p_1__term_1\">divorce action</span> the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_10__p_1__term_2\" data-eId=\"sec_10__p_1__term_2\">court</span> shall not be bound to make an order for costs in favour of the successful party, but the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_10__p_1__term_3\" data-eId=\"sec_10__p_1__term_3\">court</span> may, having regard to the means of the parties, and their conduct in so far as it may be relevant, make such order as it considers just, and the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_10__p_1__term_4\" data-eId=\"sec_10__p_1__term_4\">court</span> may order that the costs of the proceedings be apportioned between the parties.</span></span></section><section class=\"akn-section\" id=\"sec_11\" data-eId=\"sec_11\"><h3>11. Procedure</h3>\n<span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_11__p_1\" data-eId=\"sec_11__p_1\">The procedure applicable with reference to a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_11__p_1__term_1\" data-eId=\"sec_11__p_1__term_1\">divorce action</span> shall be the procedure prescribed from time to time by <span class=\"akn-term\" data-refersTo=\"#term-rules\" id=\"sec_11__p_1__term_2\" data-eId=\"sec_11__p_1__term_2\">rules</span> of <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_11__p_1__term_3\" data-eId=\"sec_11__p_1__term_3\">court</span>.</span></span></section><section class=\"akn-section\" id=\"sec_12\" data-eId=\"sec_12\"><h3>12. Limitation of publication of particulars of <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_12__term_1\" data-eId=\"sec_12__term_1\">divorce action</span>\n</h3>\n<section class=\"akn-subsection\" id=\"sec_12__subsec_1\" data-eId=\"sec_12__subsec_1\"><span class=\"akn-num\">(1)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_12__subsec_1__p_1\" data-eId=\"sec_12__subsec_1__p_1\">Except for making known or publishing the names of the parties to a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_12__subsec_1__p_1__term_1\" data-eId=\"sec_12__subsec_1__p_1__term_1\">divorce action</span>, or that a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_12__subsec_1__p_1__term_2\" data-eId=\"sec_12__subsec_1__p_1__term_2\">divorce action</span> between the parties is pending in a <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_12__subsec_1__p_1__term_3\" data-eId=\"sec_12__subsec_1__p_1__term_3\">court</span> of law, or the judgement or order of the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_12__subsec_1__p_1__term_4\" data-eId=\"sec_12__subsec_1__p_1__term_4\">court</span>, no person shall make known in public or publish for the information of the public or any section of the public any particulars of a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_12__subsec_1__p_1__term_5\" data-eId=\"sec_12__subsec_1__p_1__term_5\">divorce action</span> or any information which comes to light in the course of such an action.</span></span></section><section class=\"akn-subsection\" id=\"sec_12__subsec_2\" data-eId=\"sec_12__subsec_2\"><span class=\"akn-num\">(2)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_12__subsec_2__intro__p_1\" data-eId=\"sec_12__subsec_2__intro__p_1\">The provisions of subsection (1) shall not apply with reference to the publication of particulars or information—</span></span><section class=\"akn-paragraph\" id=\"sec_12__subsec_2__para_a\" data-eId=\"sec_12__subsec_2__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_12__subsec_2__para_a__p_1\" data-eId=\"sec_12__subsec_2__para_a__p_1\">for the purposes of the administration of justice;</span></span></section><section class=\"akn-paragraph\" id=\"sec_12__subsec_2__para_b\" data-eId=\"sec_12__subsec_2__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_12__subsec_2__para_b__p_1\" data-eId=\"sec_12__subsec_2__para_b__p_1\">in a <i class=\"akn-i\">bona fide</i> law report which does not form part of any other publication than a series of reports of the proceedings in courts of law; or</span></span></section><section class=\"akn-paragraph\" id=\"sec_12__subsec_2__para_c\" data-eId=\"sec_12__subsec_2__para_c\"><span class=\"akn-num\">(c)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_12__subsec_2__para_c__p_1\" data-eId=\"sec_12__subsec_2__para_c__p_1\">for the advancement of or use in a particular profession or science.</span></span></section></section><section class=\"akn-subsection\" id=\"sec_12__subsec_3\" data-eId=\"sec_12__subsec_3\"><span class=\"akn-num\">(3)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_12__subsec_3__p_1\" data-eId=\"sec_12__subsec_3__p_1\">The provisions of subsections (1) and (2) shall <i class=\"akn-i\">mutatis mutandis</i> apply with reference to proceedings relating to the enforcement or variation of any order made in terms of this Act as well as in relation to any enquiry instituted by a Family Advocate in terms of the Mediation in Certain Divorce Matters Act, 1987.</span><span class=\"akn-p\" id=\"sec_12__subsec_3__p_2\" data-eId=\"sec_12__subsec_3__p_2\"><span class=\"akn-remark\" data-status=\"editorial\">[subsection (3) substituted by section 8 of <a data-href=\"/akn/za/act/1987/24\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1987/24\" id=\"sec_12__subsec_3__p_2__ref_1\" data-eId=\"sec_12__subsec_3__p_2__ref_1\">Act 24 of 1987</a>]</span></span></span></section><section class=\"akn-subsection\" id=\"sec_12__subsec_4\" data-eId=\"sec_12__subsec_4\"><span class=\"akn-num\">(4)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_12__subsec_4__p_1\" data-eId=\"sec_12__subsec_4__p_1\">Any person who in contravention of this section publishes any particulars or information shall be guilty of an offence and liable on conviction to a fine, not exceeding one thousand rand or to imprisonment for a period not exceeding one year or to both such fine and such imprisonment.</span></span></section></section><section class=\"akn-section\" id=\"sec_13\" data-eId=\"sec_13\"><h3>13. Recognition of certain foreign divorce orders</h3>\n<span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_13__intro__p_1\" data-eId=\"sec_13__intro__p_1\">The validity of a divorce order or an order for the annulment of a marriage or for judicial separation granted in a <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_13__intro__p_1__term_1\" data-eId=\"sec_13__intro__p_1__term_1\">court</span> of a foreign country or territory shall be recognized by a <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_13__intro__p_1__term_2\" data-eId=\"sec_13__intro__p_1__term_2\">court</span> in the Republic if, on the date on which the order was granted, either party to the marriage-</span></span><section class=\"akn-paragraph\" id=\"sec_13__para_a\" data-eId=\"sec_13__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_13__para_a__p_1\" data-eId=\"sec_13__para_a__p_1\">was domiciled in the country or territory concerned, whether according to South African law or according to the law of that country or territory;</span></span></section><section class=\"akn-paragraph\" id=\"sec_13__para_b\" data-eId=\"sec_13__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_13__para_b__p_1\" data-eId=\"sec_13__para_b__p_1\">was ordinarily resident in that country or territory; or</span></span></section><section class=\"akn-paragraph\" id=\"sec_13__para_c\" data-eId=\"sec_13__para_c\"><span class=\"akn-num\">(c)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_13__para_c__p_1\" data-eId=\"sec_13__para_c__p_1\">was a national of that country or territory.</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_13__wrapup__p_1\" data-eId=\"sec_13__wrapup__p_1\"><span class=\"akn-remark\" data-status=\"editorial\">[section 13 amended by sections 46 and 47 of <a data-href=\"/akn/za/act/1986/97\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1986/97\" id=\"sec_13__wrapup__p_1__ref_1\" data-eId=\"sec_13__wrapup__p_1__ref_1\">Act 97 of 1986</a> and substituted by section 7 of <a data-href=\"/akn/za/act/1992/3\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1992/3\" id=\"sec_13__wrapup__p_1__ref_2\" data-eId=\"sec_13__wrapup__p_1__ref_2\">Act 3 of 1992</a>]</span></span></span></section><section class=\"akn-section\" id=\"sec_14\" data-eId=\"sec_14\"><h3>14. Abolition of orders for restitution of conjugal rights and judicial separation</h3>\n<span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_14__p_1\" data-eId=\"sec_14__p_1\">It shall not be competent for a <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_14__p_1__term_1\" data-eId=\"sec_14__p_1__term_1\">court</span> to issue an order for the restitution of conjugal rights or for judicial separation.</span></span></section><section class=\"akn-section\" id=\"sec_15\" data-eId=\"sec_15\"><h3>15. Application of Act</h3>\n<span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_15__p_1\" data-eId=\"sec_15__p_1\">This Act shall not apply with reference to a <span class=\"akn-term\" data-refersTo=\"#term-divorce_action\" id=\"sec_15__p_1__term_1\" data-eId=\"sec_15__p_1__term_1\">divorce action</span> or proceedings for the restitution of conjugal rights or for judicial separation instituted before the commencement of this Act.</span></span></section><section class=\"akn-section\" id=\"sec_16\" data-eId=\"sec_16\"><h3>16. Amendment of section 5 of <a data-href=\"/akn/za/act/1953/37\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1953/37\" id=\"sec_16__ref_1\" data-eId=\"sec_16__ref_1\">Act 37 of 1953</a>, as amended by section 2 of <a data-href=\"/akn/za/act/1966/13\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1966/13\" id=\"sec_16__ref_2\" data-eId=\"sec_16__ref_2\">Act 13 of 1966</a>\n</h3>\n<span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_16__intro__p_1\" data-eId=\"sec_16__intro__p_1\">Section 5 of the Matrimonial Affairs Act, 1953, is hereby amended—</span></span><section class=\"akn-paragraph\" id=\"sec_16__para_a\" data-eId=\"sec_16__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_16__para_a__p_1\" data-eId=\"sec_16__para_a__p_1\">by the substitution for subsection (1) of the following subsection:</span><span class=\"akn-p\" id=\"sec_16__para_a__p_2\" data-eId=\"sec_16__para_a__p_2\">\"(1) Any provincial or local division of the Supreme Court or any judge thereof may, on the application of either parent of a minor whose parents are divorced or are living apart, in regard to the custody or guardianship of, or access to, the minor, make any order which it may deem fit, and may in particular, if in its opinion it would be in the interests of such minor to do so, grant to either parent the sole guardianship (which shall include the power to consent to the marriage of the child) or the sole custody of the minor, and the <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_16__para_a__p_2__term_1\" data-eId=\"sec_16__para_a__p_2__term_1\">court</span> may order that, on the predecease of the parent to whom the sole guardianship of the minor is granted, a person other than the surviving parent shall be the guardian of the minor, either jointly with or to the exclusion of the surviving parent.\";</span></span></section><section class=\"akn-paragraph\" id=\"sec_16__para_b\" data-eId=\"sec_16__para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_16__para_b__p_1\" data-eId=\"sec_16__para_b__p_1\">by the substitution for subsection (2) of the following subsection:</span><span class=\"akn-p\" id=\"sec_16__para_b__p_2\" data-eId=\"sec_16__para_b__p_2\">\"(2) An order under subsection (1) in regard to a minor whose parents are living apart shall, if the parents become reconciled and live together again as husband and wife, lapse with effect from the date on which the parents commence to live together again.\";</span></span></section><section class=\"akn-paragraph\" id=\"sec_16__para_c\" data-eId=\"sec_16__para_c\"><span class=\"akn-num\">(c)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_16__para_c__intro__p_1\" data-eId=\"sec_16__para_c__intro__p_1\">by the substitution for subsection (3) of the following subsection:</span><span class=\"akn-p\" id=\"sec_16__para_c__intro__p_2\" data-eId=\"sec_16__para_c__intro__p_2\">\"(3) Subject to any order of <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_16__para_c__intro__p_2__term_1\" data-eId=\"sec_16__para_c__intro__p_2__term_1\">court</span>—</span></span><section class=\"akn-subparagraph\" id=\"sec_16__para_c__subpara_a\" data-eId=\"sec_16__para_c__subpara_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_16__para_c__subpara_a__p_1\" data-eId=\"sec_16__para_c__subpara_a__p_1\">a parent to whom the sole guardianship or custody of a minor has been granted under subsection (1) or the Divorce Act, 1979, or a father or a mother upon whom a children’s <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_16__para_c__subpara_a__p_1__term_1\" data-eId=\"sec_16__para_c__subpara_a__p_1__term_1\">court</span> has under section 60 (1) of the Children’s Act, 1960 (<a data-href=\"/akn/za/act/1960/33\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1960/33\" id=\"sec_16__para_c__subpara_a__p_1__ref_1\" data-eId=\"sec_16__para_c__subpara_a__p_1__ref_1\">Act No. 33 of 1960</a>), conferred the exclusive right to exercise any parental powers in regard to a minor, may by testamentary disposition appoint any person to be the sole guardian or to be vested with the sole custody of the minor, as the case may be; and</span></span></section><section class=\"akn-subparagraph\" id=\"sec_16__para_c__subpara_b\" data-eId=\"sec_16__para_c__subpara_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_16__para_c__subpara_b__p_1\" data-eId=\"sec_16__para_c__subpara_b__p_1\">the father of a minor to whom the sole guardianship of the minor has not been granted under subsection (1) or the Divorce Act, 1979, or upon whom a children’s <span class=\"akn-term\" data-refersTo=\"#term-court\" id=\"sec_16__para_c__subpara_b__p_1__term_1\" data-eId=\"sec_16__para_c__subpara_b__p_1__term_1\">court</span> has not conferred the exclusive right to exercise any parental powers in regard to the minor, shall not be entitled by testamentary disposition to appoint any person as the guardian of the minor in any other manner than to act jointly with the mother.\"; and</span></span></section></section><section class=\"akn-paragraph\" id=\"sec_16__para_d\" data-eId=\"sec_16__para_d\"><span class=\"akn-num\">(d)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_16__para_d__p_1\" data-eId=\"sec_16__para_d__p_1\">by the substitution for subsection (6) of the following subsection:</span><span class=\"akn-p\" id=\"sec_16__para_d__p_2\" data-eId=\"sec_16__para_d__p_2\">\"(6) If an order under section 60 of the Children’s Act, 1960, is rescinded, or if an order under subsection (1) of this section or under the Divorce Act, 1979, granting the sole guardianship or custody of a minor to a parent, lapses or is rescinded or is varied in such a manner that the parent is no longer the sole guardian or vested with the sole custody of the minor, any disposition under subsection (3)(a) shall lapse.\".</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_16__wrapup__p_1\" data-eId=\"sec_16__wrapup__p_1\">.</span></span></section><section class=\"akn-section\" id=\"sec_17\" data-eId=\"sec_17\"><h3>17. Amendment of section 72 of <a data-href=\"/akn/za/act/1965/66\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1965/66\" id=\"sec_17__ref_1\" data-eId=\"sec_17__ref_1\">Act 66 of 1965</a>, as amended by section 7 of <a data-href=\"/akn/za/act/1970/54\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1970/54\" id=\"sec_17__ref_2\" data-eId=\"sec_17__ref_2\">Act 54 of 1970</a>\n</h3>\n<span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_17__intro__p_1\" data-eId=\"sec_17__intro__p_1\">Section 72 of the Administration of Estates Act, 1965, is hereby amended by the substitution for that part of subsection (1) which precedes paragraph (b) thereof, of the following:</span><span class=\"akn-p\" id=\"sec_17__intro__p_2\" data-eId=\"sec_17__intro__p_2\">\"(1) The Master shall, subject to the provisions of subsection (3) and to any applicable provision of section 5 of the Matrimonial Affairs Act, 1953 (<a data-href=\"/akn/za/act/1953/37\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1953/37\" id=\"sec_17__intro__p_2__ref_1\" data-eId=\"sec_17__intro__p_2__ref_1\">Act No. 37 of 1953</a>), and section 4 of the Matrimonial Affairs Ordinance, 1955 (<a data-href=\"/akn/za/act/ord/1955/25\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/ord/1955/25\" id=\"sec_17__intro__p_2__ref_2\" data-eId=\"sec_17__intro__p_2__ref_2\">Ordinance No. 25 of 1955</a>), of the territory, or any order of court made under any such provision or any provision of the Divorce Act, 1979, on the written application of any person—</span></span><section class=\"akn-paragraph\" id=\"sec_17__para_a\" data-eId=\"sec_17__para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-intro\"><span class=\"akn-p\" id=\"sec_17__para_a__intro__p_1\" data-eId=\"sec_17__para_a__intro__p_1\">who has been nominated by will or written instrument—</span></span><section class=\"akn-subparagraph\" id=\"sec_17__para_a__subpara_i\" data-eId=\"sec_17__para_a__subpara_i\"><span class=\"akn-num\">(i)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_17__para_a__subpara_i__p_1\" data-eId=\"sec_17__para_a__subpara_i__p_1\">by the father of a legitimate minor, who has not been deprived, as a result of an order under subsection (1) of the said <a data-href=\"#sec_5\" class=\"akn-ref\" href=\"#sec_5\" id=\"sec_17__para_a__subpara_i__p_1__ref_1\" data-eId=\"sec_17__para_a__subpara_i__p_1__ref_1\">section 5</a> or subsection (1) of the said <a data-href=\"#sec_4\" class=\"akn-ref\" href=\"#sec_4\" id=\"sec_17__para_a__subpara_i__p_1__ref_2\" data-eId=\"sec_17__para_a__subpara_i__p_1__ref_2\">section 4</a> or the Divorce Act, 1979, of the guardianship of such minor, or under section 60 of the Children’s Act, 1960 (<a data-href=\"/akn/za/act/1960/33\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1960/33\" id=\"sec_17__para_a__subpara_i__p_1__ref_3\" data-eId=\"sec_17__para_a__subpara_i__p_1__ref_3\">Act No. 33 of 1960</a>), or section 58 of the Children’s Ordinance, 1961 (<a data-href=\"/akn/za/act/ord/1961/31\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/ord/1961/31\" id=\"sec_17__para_a__subpara_i__p_1__ref_4\" data-eId=\"sec_17__para_a__subpara_i__p_1__ref_4\">Ordinance No. 31 of 1961</a>), of the territory, of his parental powers over him; or</span></span></section><section class=\"akn-subparagraph\" id=\"sec_17__para_a__subpara_ii\" data-eId=\"sec_17__para_a__subpara_ii\"><span class=\"akn-num\">(ii)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_17__para_a__subpara_ii__p_1\" data-eId=\"sec_17__para_a__subpara_ii__p_1\">by the mother of an illegitimate minor or of a legitimate minor whose father is dead, who has not been so deprived of the guardianship of such minor or of her, parental powers over him; or</span></span></section><section class=\"akn-subparagraph\" id=\"sec_17__para_a__subpara_iii\" data-eId=\"sec_17__para_a__subpara_iii\"><span class=\"akn-num\">(iii)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_17__para_a__subpara_iii__p_1\" data-eId=\"sec_17__para_a__subpara_iii__p_1\">by the parent to whom the sole guardianship of a minor has been granted under subsection (1) of the said <a data-href=\"#sec_5\" class=\"akn-ref\" href=\"#sec_5\" id=\"sec_17__para_a__subpara_iii__p_1__ref_1\" data-eId=\"sec_17__para_a__subpara_iii__p_1__ref_1\">section 5</a> or under subsection (1) of the said <a data-href=\"#sec_4\" class=\"akn-ref\" href=\"#sec_4\" id=\"sec_17__para_a__subpara_iii__p_1__ref_2\" data-eId=\"sec_17__para_a__subpara_iii__p_1__ref_2\">section 4</a> or under the Divorce Act, 1979, or on whom the exclusive right to exercise parental powers in regard to a minor has been conferred under the said section 60 or the said section 58,</span></span></section><span class=\"akn-wrapUp\"><span class=\"akn-p\" id=\"sec_17__para_a__wrapup__p_1\" data-eId=\"sec_17__para_a__wrapup__p_1\">to administer the property of such minor and to take care of his person as tutor, or to take care of or administer his property as curator; or\".</span></span></section></section><section class=\"akn-section\" id=\"sec_18\" data-eId=\"sec_18\"><h3>18. Repeal of laws</h3>\n<span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_18__p_1\" data-eId=\"sec_18__p_1\">The laws mentioned in the Schedule are hereby repealed to the extent set out in the third column of the Schedule.</span></span></section><section class=\"akn-section\" id=\"sec_19\" data-eId=\"sec_19\"><h3>19. Short title and commencement</h3>\n<span class=\"akn-content\"><span class=\"akn-p\" id=\"sec_19__p_1\" data-eId=\"sec_19__p_1\">This Act shall be called the Divorce Act, 1979, and shall come into operation on 1 July 1979.</span></span></section></span><span class=\"akn-attachments\"><div class=\"akn-attachment\" id=\"att_1\" data-eId=\"att_1\">\n<h2 class=\"akn-heading\">Schedule</h2>\n<span class=\"akn-doc\" data-name=\"schedule\"><span class=\"akn-mainBody\"><div class=\"akn--table-container\"><table class=\"akn-table\" id=\"att_1__table_1\" data-eId=\"att_1__table_1\">\n<tr class=\"akn-tr\">\n<td class=\"akn-td akn--text-center\"><span class=\"akn-p\" id=\"att_1__table_1__p_1\" data-eId=\"att_1__table_1__p_1\"><b class=\"akn-b\">No. and year of law</b></span></td>\n<td class=\"akn-td akn--text-center\"><span class=\"akn-p\" id=\"att_1__table_1__p_2\" data-eId=\"att_1__table_1__p_2\"><b class=\"akn-b\">Short title</b></span></td>\n<td class=\"akn-td akn--text-center\"><span class=\"akn-p\" id=\"att_1__table_1__p_3\" data-eId=\"att_1__table_1__p_3\"><b class=\"akn-b\">Extent of repeal</b></span></td>\n</tr>\n<tr class=\"akn-tr\">\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_4\" data-eId=\"att_1__table_1__p_4\"><a data-href=\"/akn/za/act/1935/32\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1935/32\" id=\"att_1__table_1__p_4__ref_1\" data-eId=\"att_1__table_1__p_4__ref_1\">Act No. 32 of 1935</a></span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_5\" data-eId=\"att_1__table_1__p_5\">Divorce Laws Amendment Act, 1935</span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_6\" data-eId=\"att_1__table_1__p_6\">The whole</span></td>\n</tr>\n<tr class=\"akn-tr\">\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_7\" data-eId=\"att_1__table_1__p_7\"><a data-href=\"/akn/za/act/1939/22\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1939/22\" id=\"att_1__table_1__p_7__ref_1\" data-eId=\"att_1__table_1__p_7__ref_1\">Act No. 22 of 1939</a></span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_8\" data-eId=\"att_1__table_1__p_8\">Matrimonial Causes Jurisdiction Act, 1939</span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_9\" data-eId=\"att_1__table_1__p_9\">The whole</span></td>\n</tr>\n<tr class=\"akn-tr\">\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_10\" data-eId=\"att_1__table_1__p_10\"><a data-href=\"/akn/za/act/1943/17\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1943/17\" id=\"att_1__table_1__p_10__ref_1\" data-eId=\"att_1__table_1__p_10__ref_1\">Act No. 17 of 1943</a></span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_11\" data-eId=\"att_1__table_1__p_11\">Matrimonial Causes Jurisdiction Amendment Act, 1943</span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_12\" data-eId=\"att_1__table_1__p_12\">The whole</span></td>\n</tr>\n<tr class=\"akn-tr\">\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_13\" data-eId=\"att_1__table_1__p_13\"><a data-href=\"/akn/za/act/1945/35\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1945/35\" id=\"att_1__table_1__p_13__ref_1\" data-eId=\"att_1__table_1__p_13__ref_1\">Act No. 35 of 1945</a></span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_14\" data-eId=\"att_1__table_1__p_14\">Matrimonial Causes Jurisdiction Act, 1945</span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_15\" data-eId=\"att_1__table_1__p_15\">The whole</span></td>\n</tr>\n<tr class=\"akn-tr\">\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_16\" data-eId=\"att_1__table_1__p_16\"><a data-href=\"/akn/za/act/1953/37\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1953/37\" id=\"att_1__table_1__p_16__ref_1\" data-eId=\"att_1__table_1__p_16__ref_1\">Act No. 37 of 1953</a></span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_17\" data-eId=\"att_1__table_1__p_17\">Matrimonial Affairs Act, 1953</span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_18\" data-eId=\"att_1__table_1__p_18\">Sections 6, 7, 8, 9 and 10</span></td>\n</tr>\n<tr class=\"akn-tr\">\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_19\" data-eId=\"att_1__table_1__p_19\"><a data-href=\"/akn/za/act/1968/70\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1968/70\" id=\"att_1__table_1__p_19__ref_1\" data-eId=\"att_1__table_1__p_19__ref_1\">Act No. 70 of 1968</a></span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_20\" data-eId=\"att_1__table_1__p_20\">General Law Amendment Act, 1968</span></td>\n<td class=\"akn-td\"><span class=\"akn-p\" id=\"att_1__table_1__p_21\" data-eId=\"att_1__table_1__p_21\">Sections 21, 22 and 23</span></td>\n</tr>\n<tr class=\"akn-tr\"><td class=\"akn-td\" colspan=\"3\"><span class=\"akn-p\" id=\"att_1__table_1__p_22\" data-eId=\"att_1__table_1__p_22\"><i class=\"akn-i\">[item repealed by section 33 of </i><a data-href=\"/akn/za/act/1996/65\" class=\"akn-ref\" href=\"https://resolver.laws.africa/resolve/akn/za/act/1996/65\" id=\"att_1__table_1__p_22__ref_1\" data-eId=\"att_1__table_1__p_22__ref_1\">Act 65 of 1996</a><i class=\"akn-i\">]</i></span></td></tr>\n</table></div></span></span>\n</div></span></span></span>\n\n\n\n\n\n",
+            "content_html_is_akn": true,
+            "toc_json": [
+                {
+                    "id": null,
+                    "num": null,
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~preface",
+                    "type": "preface",
+                    "title": "Preface",
+                    "heading": null,
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": false
+                },
+                {
+                    "id": "sec_1",
+                    "num": "1.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_1",
+                    "type": "section",
+                    "title": "1. Definitions",
+                    "heading": "Definitions",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_2",
+                    "num": "2.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_2",
+                    "type": "section",
+                    "title": "2. Jurisdiction",
+                    "heading": "Jurisdiction",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_3",
+                    "num": "3.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_3",
+                    "type": "section",
+                    "title": "3. Dissolution of marriage and grounds of divorce",
+                    "heading": "Dissolution of marriage and grounds of divorce",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_4",
+                    "num": "4.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_4",
+                    "type": "section",
+                    "title": "4. Irretrievable break-down of marriage as ground of divorce",
+                    "heading": "Irretrievable break-down of marriage as ground of divorce",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_5",
+                    "num": "5.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_5",
+                    "type": "section",
+                    "title": "5. Mental illness or continuous unconsciousness as grounds of divorce",
+                    "heading": "Mental illness or continuous unconsciousness as grounds of divorce",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_5A",
+                    "num": "5A.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_5A",
+                    "type": "section",
+                    "title": "5A. Refusal to grant divorce",
+                    "heading": "Refusal to grant divorce",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_6",
+                    "num": "6.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_6",
+                    "type": "section",
+                    "title": "6. Safeguarding of interests of dependent and minor children",
+                    "heading": "Safeguarding of interests of dependent and minor children",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_7",
+                    "num": "7.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_7",
+                    "type": "section",
+                    "title": "7. Division of assets and maintenance of parties",
+                    "heading": "Division of assets and maintenance of parties",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_8",
+                    "num": "8.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_8",
+                    "type": "section",
+                    "title": "8. Rescission, suspension or variation of orders",
+                    "heading": "Rescission, suspension or variation of orders",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_9",
+                    "num": "9.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_9",
+                    "type": "section",
+                    "title": "9. Forfeiture of patrimonial benefits of marriage",
+                    "heading": "Forfeiture of patrimonial benefits of marriage",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_10",
+                    "num": "10.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_10",
+                    "type": "section",
+                    "title": "10. Costs",
+                    "heading": "Costs",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_11",
+                    "num": "11.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_11",
+                    "type": "section",
+                    "title": "11. Procedure",
+                    "heading": "Procedure",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_12",
+                    "num": "12.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_12",
+                    "type": "section",
+                    "title": "12. Limitation of publication of particulars of divorce action",
+                    "heading": "Limitation of publication of particulars of divorce action",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_13",
+                    "num": "13.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_13",
+                    "type": "section",
+                    "title": "13. Recognition of certain foreign divorce orders",
+                    "heading": "Recognition of certain foreign divorce orders",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_14",
+                    "num": "14.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_14",
+                    "type": "section",
+                    "title": "14. Abolition of orders for restitution of conjugal rights and judicial separation",
+                    "heading": "Abolition of orders for restitution of conjugal rights and judicial separation",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_15",
+                    "num": "15.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_15",
+                    "type": "section",
+                    "title": "15. Application of Act",
+                    "heading": "Application of Act",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_16",
+                    "num": "16.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_16",
+                    "type": "section",
+                    "title": "16. Amendment of section 5 of Act 37 of 1953, as amended by section 2 of Act 13 of 1966",
+                    "heading": "Amendment of section 5 of Act 37 of 1953, as amended by section 2 of Act 13 of 1966",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_17",
+                    "num": "17.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_17",
+                    "type": "section",
+                    "title": "17. Amendment of section 72 of Act 66 of 1965, as amended by section 7 of Act 54 of 1970",
+                    "heading": "Amendment of section 72 of Act 66 of 1965, as amended by section 7 of Act 54 of 1970",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_18",
+                    "num": "18.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_18",
+                    "type": "section",
+                    "title": "18. Repeal of laws",
+                    "heading": "Repeal of laws",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "sec_19",
+                    "num": "19.",
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!main~sec_19",
+                    "type": "section",
+                    "title": "19. Short title and commencement",
+                    "heading": "Short title and commencement",
+                    "children": [],
+                    "component": "main",
+                    "basic_unit": true
+                },
+                {
+                    "id": "att_1",
+                    "num": null,
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/!schedule_1~att_1",
+                    "type": "attachment",
+                    "title": "Schedule",
+                    "heading": "Schedule",
+                    "children": [],
+                    "component": "schedule_1",
+                    "basic_unit": false
+                }
+            ],
+            "language": "en",
+            "jurisdiction": "ZA",
+            "locality": null,
+            "nature": null,
+            "work_frbr_uri": "/akn/za/act/1979/70",
+            "frbr_uri_doctype": "act",
+            "frbr_uri_subtype": null,
+            "frbr_uri_actor": null,
+            "frbr_uri_date": "1979",
+            "frbr_uri_number": "70",
+            "expression_frbr_uri": "/akn/za/act/1979/70/eng@2010-08-09",
+            "created_at": "2023-03-31T11:52:59.472Z",
+            "updated_at": "2023-03-31T11:53:05.678Z",
+            "created_by": null,
+            "allow_robots": true
+        }
+    },
+    {
         "model": "peachjam.work",
         "pk": 2433,
         "fields": {
@@ -10492,6 +10769,649 @@
                 "custom_properties": [],
                 "publication_number": "6506",
                 "expression_frbr_uri": "/akn/za/act/1979/70/eng@2020-10-22",
+                "publication_document": {
+                    "url": "https://api.laws.africa/v2/akn/za/act/1979/70/media/publication/za-act-1979-70-publication-document.pdf",
+                    "size": 4237092,
+                    "filename": "za-act-1979-70-publication-document.pdf",
+                    "mime_type": "application/pdf"
+                }
+            },
+            "timeline": [
+                {
+                    "date": "2020-10-22",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Judicial Matters Amendment Act, 2020",
+                            "by_frbr_uri": "/akn/za/act/2020/12",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "2010-08-09",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Jurisdiction of Regional Courts Amendment Act, 2008",
+                            "by_frbr_uri": "/akn/za/act/2008/31",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "2005-03-31",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Judicial Matters Second Amendment Act, 2003",
+                            "by_frbr_uri": "/akn/za/act/2003/55",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1998-06-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Films and Publications Act, 1996",
+                            "by_frbr_uri": "/akn/za/act/1996/65",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1998-04-06",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Divorce Courts Amendment Act, 1997",
+                            "by_frbr_uri": "/akn/za/act/1997/65",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1997-04-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Justice Laws Rationalisation Act, 1996",
+                            "by_frbr_uri": "/akn/za/act/1996/18",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1996-11-22",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Divorce Amendment Act, 1996",
+                            "by_frbr_uri": "/akn/za/act/1996/95",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1992-08-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Domicile Act, 1992",
+                            "by_frbr_uri": "/akn/za/act/1992/3",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1992-04-15",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Divorce Amendment Act, 1992",
+                            "by_frbr_uri": "/akn/za/act/1992/44",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1990-10-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Mediation in Certain Divorce Matters Act, 1987",
+                            "by_frbr_uri": "/akn/za/act/1987/24",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1989-08-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Divorce Amendment Act, 1989",
+                            "by_frbr_uri": "/akn/za/act/1989/7",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1988-12-02",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Marriage and Matrimonial Property Law Amendment Act, 1988",
+                            "by_frbr_uri": "/akn/za/act/1988/3",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1986-10-03",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Transfer of Powers and Duties of the State President Act, 1986",
+                            "by_frbr_uri": "/akn/za/act/1986/97",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1984-11-01",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "amendment",
+                            "by_title": "Matrimonial Property Act, 1984",
+                            "by_frbr_uri": "/akn/za/act/1984/88",
+                            "description": "Amended by"
+                        }
+                    ]
+                },
+                {
+                    "date": "1979-07-01",
+                    "events": [
+                        {
+                            "note": "Note: See section 19",
+                            "type": "commencement",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Commenced"
+                        }
+                    ]
+                },
+                {
+                    "date": "1979-06-15",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "publication",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Published in Government Gazette 6506"
+                        }
+                    ]
+                },
+                {
+                    "date": "1979-06-08",
+                    "events": [
+                        {
+                            "note": "",
+                            "type": "assent",
+                            "by_title": "",
+                            "by_frbr_uri": "",
+                            "description": "Assented to"
+                        }
+                    ]
+                }
+            ],
+            "commencements_json": [
+                {
+                    "date": "1979-07-01",
+                    "main": true,
+                    "all_provisions": true,
+                    "provisions": [],
+                    "commencing_title": null,
+                    "commencing_frbr_uri": null,
+                    "note": "See section 19"
+                }
+            ],
+            "repealed": false,
+            "parent_work": null
+        }
+    },
+    {
+        "model": "peachjam.legislation",
+        "pk": 3041,
+        "fields": {
+            "metadata_json": {
+                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09",
+                "stub": false,
+                "year": "1979",
+                "links": [
+                    {
+                        "rel": "alternate",
+                        "href": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09.html",
+                        "title": "HTML",
+                        "mediaType": "text/html"
+                    },
+                    {
+                        "rel": "alternate",
+                        "href": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09.html?standalone=1",
+                        "title": "Standalone HTML",
+                        "mediaType": "text/html"
+                    },
+                    {
+                        "rel": "alternate",
+                        "href": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09.xml",
+                        "title": "Akoma Ntoso",
+                        "mediaType": "application/xml"
+                    },
+                    {
+                        "rel": "alternate",
+                        "href": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09.pdf",
+                        "title": "PDF",
+                        "mediaType": "application/pdf"
+                    },
+                    {
+                        "rel": "alternate",
+                        "href": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09.epub",
+                        "title": "ePUB",
+                        "mediaType": "application/epub+zip"
+                    },
+                    {
+                        "rel": "toc",
+                        "href": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/toc.json",
+                        "title": "Table of Contents",
+                        "mediaType": "application/json"
+                    },
+                    {
+                        "rel": "media",
+                        "href": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09/media.json",
+                        "title": "Media",
+                        "mediaType": "application/json"
+                    }
+                ],
+                "title": "Divorce Act, 1979",
+                "nature": "act",
+                "number": "70",
+                "repeal": null,
+                "country": "za",
+                "subtype": null,
+                "frbr_uri": "/akn/za/act/1979/70",
+                "language": "eng",
+                "locality": null,
+                "commenced": true,
+                "principal": true,
+                "type_name": "Act",
+                "amendments": [
+                    {
+                        "date": "1984-11-01",
+                        "amending_uri": "/akn/za/act/1984/88",
+                        "amending_title": "Matrimonial Property Act, 1984"
+                    },
+                    {
+                        "date": "1986-10-03",
+                        "amending_uri": "/akn/za/act/1986/97",
+                        "amending_title": "Transfer of Powers and Duties of the State President Act, 1986"
+                    },
+                    {
+                        "date": "1988-12-02",
+                        "amending_uri": "/akn/za/act/1988/3",
+                        "amending_title": "Marriage and Matrimonial Property Law Amendment Act, 1988"
+                    },
+                    {
+                        "date": "1989-08-01",
+                        "amending_uri": "/akn/za/act/1989/7",
+                        "amending_title": "Divorce Amendment Act, 1989"
+                    },
+                    {
+                        "date": "1990-10-01",
+                        "amending_uri": "/akn/za/act/1987/24",
+                        "amending_title": "Mediation in Certain Divorce Matters Act, 1987"
+                    },
+                    {
+                        "date": "1992-04-15",
+                        "amending_uri": "/akn/za/act/1992/44",
+                        "amending_title": "Divorce Amendment Act, 1992"
+                    },
+                    {
+                        "date": "1992-08-01",
+                        "amending_uri": "/akn/za/act/1992/3",
+                        "amending_title": "Domicile Act, 1992"
+                    },
+                    {
+                        "date": "1996-11-22",
+                        "amending_uri": "/akn/za/act/1996/95",
+                        "amending_title": "Divorce Amendment Act, 1996"
+                    },
+                    {
+                        "date": "1997-04-01",
+                        "amending_uri": "/akn/za/act/1996/18",
+                        "amending_title": "Justice Laws Rationalisation Act, 1996"
+                    },
+                    {
+                        "date": "1998-04-06",
+                        "amending_uri": "/akn/za/act/1997/65",
+                        "amending_title": "Divorce Courts Amendment Act, 1997"
+                    },
+                    {
+                        "date": "1998-06-01",
+                        "amending_uri": "/akn/za/act/1996/65",
+                        "amending_title": "Films and Publications Act, 1996"
+                    },
+                    {
+                        "date": "2005-03-31",
+                        "amending_uri": "/akn/za/act/2003/55",
+                        "amending_title": "Judicial Matters Second Amendment Act, 2003"
+                    },
+                    {
+                        "date": "2010-08-09",
+                        "amending_uri": "/akn/za/act/2008/31",
+                        "amending_title": "Jurisdiction of Regional Courts Amendment Act, 2008"
+                    }
+                ],
+                "as_at_date": null,
+                "created_at": "2022-01-13T19:46:11.150418Z",
+                "taxonomies": [
+                    {
+                        "title": "Special Collections",
+                        "topics": [
+                            {
+                                "level_1": "Magistrates' Legislation Handbook",
+                                "level_2": null
+                            },
+                            {
+                                "level_1": "Pension Funds Adjudicator",
+                                "level_2": null
+                            }
+                        ],
+                        "vocabulary": "lawsafrica-special"
+                    }
+                ],
+                "updated_at": "2022-05-17T08:25:31.533995Z",
+                "assent_date": "1979-06-08",
+                "parent_work": null,
+                "numbered_title": "Act 70 of 1979",
+                "points_in_time": [
+                    {
+                        "date": "1979-06-15",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1979-06-15",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1979-06-15",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1979-06-15"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1984-11-01",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1984-11-01",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1984-11-01",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1984-11-01"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1986-10-03",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1986-10-03",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1986-10-03",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1986-10-03"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1988-12-02",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1988-12-02",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1988-12-02",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1988-12-02"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1989-08-01",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1989-08-01",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1989-08-01",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1989-08-01"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1990-10-01",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1990-10-01",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1990-10-01",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1990-10-01"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1992-04-15",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1992-04-15",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1992-04-15",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1992-04-15"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1992-08-01",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1992-08-01",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1992-08-01",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1992-08-01"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1996-11-22",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1996-11-22",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1996-11-22",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1996-11-22"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1997-04-01",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1997-04-01",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1997-04-01",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1997-04-01"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1998-04-06",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1998-04-06",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1998-04-06",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1998-04-06"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "1998-06-01",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@1998-06-01",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "1998-06-01",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@1998-06-01"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "2005-03-31",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2005-03-31",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "2005-03-31",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@2005-03-31"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "2010-08-09",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2010-08-09",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "2010-08-09",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@2010-08-09"
+                            }
+                        ]
+                    },
+                    {
+                        "date": "2020-10-22",
+                        "expressions": [
+                            {
+                                "url": "https://api.laws.africa/v2/akn/za/act/1979/70/eng@2020-10-22",
+                                "title": "Divorce Act, 1979",
+                                "language": "eng",
+                                "expression_date": "2020-10-22",
+                                "expression_frbr_uri": "/akn/za/act/1979/70/eng@2020-10-22"
+                            }
+                        ]
+                    }
+                ],
+                "commencing_work": null,
+                "expression_date": "2010-08-09",
+                "work_amendments": [
+                    {
+                        "date": "1984-11-01",
+                        "amending_uri": "/akn/za/act/1984/88",
+                        "amending_title": "Matrimonial Property Act, 1984"
+                    },
+                    {
+                        "date": "1986-10-03",
+                        "amending_uri": "/akn/za/act/1986/97",
+                        "amending_title": "Transfer of Powers and Duties of the State President Act, 1986"
+                    },
+                    {
+                        "date": "1988-12-02",
+                        "amending_uri": "/akn/za/act/1988/3",
+                        "amending_title": "Marriage and Matrimonial Property Law Amendment Act, 1988"
+                    },
+                    {
+                        "date": "1989-08-01",
+                        "amending_uri": "/akn/za/act/1989/7",
+                        "amending_title": "Divorce Amendment Act, 1989"
+                    },
+                    {
+                        "date": "1990-10-01",
+                        "amending_uri": "/akn/za/act/1987/24",
+                        "amending_title": "Mediation in Certain Divorce Matters Act, 1987"
+                    },
+                    {
+                        "date": "1992-04-15",
+                        "amending_uri": "/akn/za/act/1992/44",
+                        "amending_title": "Divorce Amendment Act, 1992"
+                    },
+                    {
+                        "date": "1992-08-01",
+                        "amending_uri": "/akn/za/act/1992/3",
+                        "amending_title": "Domicile Act, 1992"
+                    },
+                    {
+                        "date": "1996-11-22",
+                        "amending_uri": "/akn/za/act/1996/95",
+                        "amending_title": "Divorce Amendment Act, 1996"
+                    },
+                    {
+                        "date": "1997-04-01",
+                        "amending_uri": "/akn/za/act/1996/18",
+                        "amending_title": "Justice Laws Rationalisation Act, 1996"
+                    },
+                    {
+                        "date": "1998-04-06",
+                        "amending_uri": "/akn/za/act/1997/65",
+                        "amending_title": "Divorce Courts Amendment Act, 1997"
+                    },
+                    {
+                        "date": "1998-06-01",
+                        "amending_uri": "/akn/za/act/1996/65",
+                        "amending_title": "Films and Publications Act, 1996"
+                    },
+                    {
+                        "date": "2005-03-31",
+                        "amending_uri": "/akn/za/act/2003/55",
+                        "amending_title": "Judicial Matters Second Amendment Act, 2003"
+                    },
+                    {
+                        "date": "2010-08-09",
+                        "amending_uri": "/akn/za/act/2008/31",
+                        "amending_title": "Jurisdiction of Regional Courts Amendment Act, 2008"
+                    },
+                    {
+                        "date": "2020-10-22",
+                        "amending_uri": "/akn/za/act/2020/12",
+                        "amending_title": "Judicial Matters Amendment Act, 2020"
+                    }
+                ],
+                "publication_date": "1979-06-15",
+                "publication_name": "Government Gazette",
+                "commencement_date": "1979-07-01",
+                "custom_properties": [],
+                "publication_number": "6506",
+                "expression_frbr_uri": "/akn/za/act/1979/70/eng@2010-08-09",
                 "publication_document": {
                     "url": "https://api.laws.africa/v2/akn/za/act/1979/70/media/publication/za-act-1979-70-publication-document.pdf",
                     "size": 4237092,
