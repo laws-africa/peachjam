@@ -260,7 +260,7 @@ class IndigoAdapter(Adapter):
         if hasattr(model, "metadata_json"):
             field_data["metadata_json"] = document
 
-        if hasattr(model, "timeline"):
+        if hasattr(model, "timeline_json"):
             timeline = self.client_get(f"{url}/timeline.json").json()
             field_data["timeline_json"] = timeline["timeline"]
 
