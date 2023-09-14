@@ -736,6 +736,9 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         "Advanced",
     )
 
+    class Media:
+        js = ("js/judgment_duplicates.js",)
+
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
 

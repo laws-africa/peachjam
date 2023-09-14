@@ -38,4 +38,9 @@ urlpatterns = [
     path(
         "v1/schema/redoc", SpectacularRedocView.as_view(url_name="schema"), name="redoc"
     ),
+    path(
+        "check-duplicates/",
+        views.CheckDuplicatesView.as_view(),
+        name="check_duplicates",
+    ),
 ]
