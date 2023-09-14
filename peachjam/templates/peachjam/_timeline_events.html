@@ -31,6 +31,9 @@
                 {{ event.description }}
                 {% if event.by_frbr_uri %}<a href="{{ event.by_frbr_uri }}">{{ event.by_title }}</a>{% endif %}
               {% endif %}
+            {% if event.note %}
+              <p>{{ event.note }}</p>
+            {% endif %}
             </div>
           {% endfor %}
           {% if history_item.date != current_object_date and history_item.expression_frbr_uri %}
