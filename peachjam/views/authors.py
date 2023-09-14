@@ -37,5 +37,4 @@ class AuthorDetailView(FilteredDocumentListView):
         context["doc_table_show_author"] = False
         context["doc_table_show_doc_type"] = bool(doc_types)
         context["facet_data"]["docTypes"] = doc_types
-
         return context
