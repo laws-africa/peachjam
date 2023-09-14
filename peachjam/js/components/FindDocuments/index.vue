@@ -109,6 +109,7 @@
       </div>
     </div>
     <div ref="filters-results-container">
+      <FacetBadges v-model="facets" :facets="facets" />
       <div class="row">
         <div class="col col-lg-3">
           <MobileFacetsDrawer
@@ -219,6 +220,7 @@ import MobileFacetsDrawer from './MobileSideDrawer.vue';
 import AdvancedSearch from './AdvancedSearch.vue';
 import HelpBtn from '../HelpBtn.vue';
 import { scrollToElement } from '../../utils/function';
+import FacetBadges from './FacetBadges.vue';
 
 function resetAdvancedFields (fields) {
   const advanced = ['all', 'title', 'judges', 'case_summary', 'flynote', 'content'];
@@ -240,9 +242,18 @@ function resetAdvancedFields (fields) {
 
 export default {
   name: 'FindDocuments',
-  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
+  components: { FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
   props: ['showJurisdiction'],
   data () {
+    const getLabelOptionLabels = (labels) => {
+      // the function name is a bit confusing but this gets labels for the options in Labels facet
+      const labelOptions = {};
+      for (const label of labels) {
+        labelOptions[label.code] = label.name;
+      }
+      return labelOptions;
+    };
+
     const data = {
       searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
       documentLabels: JSON.parse(document.querySelector('#data-labels').textContent).documentLabels,
@@ -262,6 +273,14 @@ export default {
         type: 'checkboxes',
         value: [],
         options: []
+      },
+      {
+        title: this.$t('Labels'),
+        name: 'labels',
+        type: 'checkboxes',
+        value: [],
+        options: [],
+        optionLabels: getLabelOptionLabels(data.documentLabels)
       },
       {
         title: JSON.parse(document.querySelector('#data-labels').textContent).author,
@@ -517,9 +536,9 @@ export default {
     },
 
     formatFacets () {
-      const generateOptions = (buckets) => {
+      const generateOptions = (buckets, labels) => {
         return buckets.map((bucket) => ({
-          label: bucket.key,
+          label: labels ? labels[bucket.key] : bucket.key,
           count: bucket.doc_count,
           value: bucket.key
         }));
@@ -532,7 +551,8 @@ export default {
               this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
                 .buckets,
               true
-            )
+            ),
+            facet.optionLabels
           );
         } else {
           if (this.searchInfo.facets[`_filter_${facet.name}`]) {
@@ -540,7 +560,8 @@ export default {
               this.sortGenericBuckets(
                 this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
                   .buckets
-              )
+              ),
+              facet.optionLabels
             );
           }
         }
