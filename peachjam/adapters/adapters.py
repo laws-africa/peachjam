@@ -262,7 +262,7 @@ class IndigoAdapter(Adapter):
 
         if hasattr(model, "timeline"):
             timeline = self.client_get(f"{url}/timeline.json").json()
-            field_data["timeline"] = timeline["timeline"]
+            field_data["timeline_json"] = timeline["timeline"]
 
         if hasattr(model, "commencements_json"):
             commencements_json = self.client_get(f"{url}/commencements.json").json()

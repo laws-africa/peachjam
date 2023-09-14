@@ -177,7 +177,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         )
 
     def get_timeline_events(self):
-        timeline = self.object.timeline
+        timeline = self.object.timeline_json
         publication_url = None
         work = self.object.metadata_json
         points_in_time = self.get_points_in_time()

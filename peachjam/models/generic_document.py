@@ -68,7 +68,7 @@ class LegislationManager(CoreDocumentManager):
         return (
             super()
             .get_queryset()
-            .defer("metadata_json", "timeline", "commencements_json")
+            .defer("metadata_json", "timeline_json", "commencements_json")
         )
 
 
@@ -76,9 +76,9 @@ class Legislation(CoreDocument):
     objects = LegislationManager.from_queryset(CoreDocumentQuerySet)()
 
     metadata_json = models.JSONField(_("metadata JSON"), null=False, blank=False)
-    timeline = models.JSONField(_("timeline"), null=False, blank=False, default=list)
+    timeline_json = models.JSONField(_("timeline JSON"), null=False, blank=False, default=list)
     commencements_json = models.JSONField(
-        _("commencements_json"), null=False, blank=False, default=list
+        _("commencements JSON"), null=False, blank=False, default=list
     )
     repealed = models.BooleanField(_("repealed"), default=False, null=False)
     parent_work = models.ForeignKey(
