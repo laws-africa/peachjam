@@ -76,7 +76,9 @@ class Legislation(CoreDocument):
     objects = LegislationManager.from_queryset(CoreDocumentQuerySet)()
 
     metadata_json = models.JSONField(_("metadata JSON"), null=False, blank=False)
-    timeline_json = models.JSONField(_("timeline JSON"), null=False, blank=False, default=list)
+    timeline_json = models.JSONField(
+        _("timeline JSON"), null=False, blank=False, default=list
+    )
     commencements_json = models.JSONField(
         _("commencements JSON"), null=False, blank=False, default=list
     )
