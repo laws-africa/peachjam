@@ -158,7 +158,8 @@
                   </select>
                 </div>
                 <div class="col-md order-md-1">
-                  {{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}
+                  <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found') }}</span>
+                  <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
                 </div>
               </div>
 
@@ -168,8 +169,8 @@
                   :key="item.key"
                   :item="item"
                   :query="q"
-                  :show-jurisdiction="showJurisdiction"
-                  :document-labels="documentLabels"
+                  :showJurisdiction="showJurisdiction"
+                  :documentLabels="documentLabels"
                 />
               </ul>
 
