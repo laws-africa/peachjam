@@ -9560,7 +9560,7 @@
                 "url": "https://api.laws.africa/v2/akn/aa-au/act/pact/2005/non-aggression-and-common-defence/eng@2005-01-31",
                 "year": "2005"
             },
-            "timeline": [
+            "timeline_json": [
                 {
                     "date": "2020-12-15",
                     "events": [
@@ -9742,7 +9742,7 @@
                 "url": "https://api.laws.africa/v2/akn/aa-au/act/1969/civil-aviation-commission/eng@1969-01-17",
                 "year": "1969"
             },
-            "timeline": [
+            "timeline_json": [
                 {
                     "date": "1972-03-15",
                     "events": [
@@ -10776,7 +10776,7 @@
                     "mime_type": "application/pdf"
                 }
             },
-            "timeline": [
+            "timeline_json": [
                 {
                     "date": "2020-10-22",
                     "events": [
@@ -11419,7 +11419,7 @@
                     "mime_type": "application/pdf"
                 }
             },
-            "timeline": [
+            "timeline_json": [
                 {
                     "date": "2020-10-22",
                     "events": [
