@@ -1,5 +1,5 @@
 <template>
-  <div id="search">
+  <div id="search" ref="search-box">
     <div class="mb-4">
       <nav>
         <div
@@ -137,9 +137,8 @@
         <div class="col-md-12 col-lg-9 search-pane position-relative">
           <div class="search-results">
             <div v-if="searchInfo.count">
-              <div class="mb-3 sort-body">
-                <div>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</div>
-                <div class="sort__inner d-flex align-items-center">
+              <div class="mb-3 sort-body row">
+                <div class="col-md-3 order-md-2 mb-2 sort__inner d-flex align-items-center">
                   <div style="width: 65px;">
                     {{ $t('Sort by') }}
                   </div>
@@ -158,6 +157,9 @@
                     </option>
                   </select>
                 </div>
+                <div class="col-md order-md-1">
+                  {{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}
+                </div>
               </div>
 
               <ul class="list-unstyled">
@@ -166,8 +168,8 @@
                   :key="item.key"
                   :item="item"
                   :query="q"
-                  :showJurisdiction="showJurisdiction"
-                  :documentLabels="documentLabels"
+                  :show-jurisdiction="showJurisdiction"
+                  :document-labels="documentLabels"
                 />
               </ul>
 
@@ -645,7 +647,10 @@ export default {
 
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
-        scrollToElement(this.$refs['filters-results-container']);
+        scrollToElement(this.$refs['search-box']);
+
+        const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#search-tab'));
+        tabTrigger.show();
       }
     }
   }
