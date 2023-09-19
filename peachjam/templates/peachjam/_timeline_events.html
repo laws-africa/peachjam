@@ -4,42 +4,91 @@
   {% trans 'History of this document' %}
 </h4>
 <div class="vertical-timeline ms-5 mt-4">
-  {% for history_item in timeline_events %}
-    <div class="vertical-timeline__item">
-      <div class="card mb-3">
-        <div class="card-header">
-          <h5 class="mb-0">
-            {{ history_item.date|parse_string_date|date:"d F Y" }}
-            {% if history_item.date == current_object_date %}
-              <span class="badge rounded-pill bg-primary">{% trans 'this version' %}</span>
-            {% endif %}
-            {% if history_item.contains_unapplied_amendment %}
-              <span class="badge rounded-pill bg-secondary">{% trans 'amendment not yet applied' %}</span>
-            {% endif %}
-          </h5>
-        </div>
-        <div class="card-body">
-          {% for event in history_item.events %}
-            <div>
-              {% if event.type == "publication" %}
-                {% if event.link_url %}
-                  <a href="{{ event.link_url }}">{{ event.description }}</a>
+  {% if timeline %}
+    {% for entry in timeline %}
+      <div class="vertical-timeline__item">
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="mb-0">
+              {{ entry.date|parse_string_date|date:"d F Y" }}
+              {% if entry.date == current_object_date %}
+                <span class="badge rounded-pill bg-primary">{% trans 'this version' %}</span>
+              {% endif %}
+              {% if entry.contains_unapplied_amendment %}
+                <span class="badge rounded-pill bg-secondary">{% trans 'amendment not yet applied' %}</span>
+              {% endif %}
+            </h5>
+          </div>
+          <div class="card-body">
+            {% for event in entry.events %}
+              <div>
+                {% if event.type == "publication" %}
+                  {% if event.link_url %}
+                    <a href="{{ event.link_url }}">{{ event.description }}</a>
+                  {% else %}
+                    {{ event.description }}
+                  {% endif %}
                 {% else %}
                   {{ event.description }}
+                  {% if event.by_frbr_uri %}<a href="{{ event.by_frbr_uri }}">{{ event.by_title }}</a>{% endif %}
                 {% endif %}
-              {% else %}
-                {{ event.description }}
-                {% if event.by_frbr_uri %}<a href="{{ event.by_frbr_uri }}">{{ event.by_title }}</a>{% endif %}
-              {% endif %}
-              {% if event.note %}<p>{{ event.note }}</p>{% endif %}
-            </div>
-          {% endfor %}
-          {% if history_item.date != current_object_date and history_item.expression_frbr_uri %}
-            <a class="btn btn-outline-primary mt-2"
-               href="{{ history_item.expression_frbr_uri }}">{% trans 'Read this version' %}</a>
-          {% endif %}
+                {% if event.note %}<p>{{ event.note }}</p>{% endif %}
+              </div>
+            {% endfor %}
+            {% if entry.date != current_object_date and entry.expression_frbr_uri %}
+              <a class="btn btn-outline-primary mt-2"
+                 href="{{ entry.expression_frbr_uri }}">{% trans 'Read this version' %}</a>
+            {% endif %}
+          </div>
         </div>
       </div>
-    </div>
-  {% endfor %}
+    {% endfor %}
+  {% else %}
+    {#  TODO: get rid of timeline_events once all Legislation objects have been re-ingested  #}
+    {% for history_item in timeline_events %}
+      <div class="vertical-timeline__item">
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="mb-0">
+              {{ history_item.date|parse_string_date|date:"d F Y" }}
+              {% if history_item.date == current_object_date %}
+                <span class="badge rounded-pill bg-primary">{% trans 'this version' %}</span>
+              {% endif %}
+              {% for event in history_item.events %}
+                {% if event.unapplied_amendment %}
+                  <span class="badge rounded-pill bg-secondary">{% trans 'amendment not yet applied' %}</span>
+                {% endif %}
+              {% endfor %}
+            </h5>
+          </div>
+          <div class="card-body">
+            {% for event in history_item.events %}
+              <div>
+                {% if event.event == "amendment" %}
+                  {% trans 'Amended by' %}
+                  <a href="{{ event.amending_uri }}"><i>{{ event.amending_title }}</i></a>
+                {% elif event.event == "assent" %}
+                  {% trans 'Assented to' %}.
+                {% elif event.event == "commencement" %}
+                  {% trans 'Commences' %}.
+                {% elif event.event == "publication" %}
+                  {% trans 'Published in' %}
+                  <a href="{{ event.publication_url }}">{{ event.publication_name }} {% trans 'number' %} {{ event.publication_number }}</a>
+                {% elif event.event == "repeal" %}
+                  {% trans 'Repealed by' %}
+                  <a href="{{ event.repealing_uri }}"><i>{{ event.repealing_title }}</i></a>
+                {% endif %}
+              </div>
+            {% endfor %}
+            {% if history_item.date != current_object_date %}
+              {% if history_item.expression_frbr_uri %}
+                <a class="btn btn-outline-primary mt-2"
+                   href="{{ history_item.expression_frbr_uri }}">{% trans 'Read this version' %}</a>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
 </div>
