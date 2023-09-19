@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-08-30 10:34+0200\n"
-"PO-Revision-Date: 2023-05-25 08:22\n"
+"PO-Revision-Date: 2023-09-19 11:54\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -18,16 +18,12 @@ msgstr ""
 "X-Crowdin-File-ID: 101\n"
 
 #: apps.py:20
-#, fuzzy
-#| msgid "Regional Body"
 msgid "Regional Body / Author"
-msgstr "Corps régional"
+msgstr "Organisme régional / Auteur"
 
 #: apps.py:21
-#, fuzzy
-#| msgid "Regional Bodies"
 msgid "Regional Bodies / Authors"
-msgstr "Organismes régionaux"
+msgstr "Organismes régionaux / Auteurs"
 
 #: models/au.py:13 models/au.py:33
 msgid "author"
@@ -92,7 +88,7 @@ msgstr "Pays de ratification"
 #: templates/africanlii/_lii_info.html:5
 #, python-format
 msgid "Visit %(lii_name)s for more legal information."
-msgstr ""
+msgstr "Visitez %(lii_name)s pour plus d’informations juridiques."
 
 #: templates/africanlii/_ratification_table.html:2
 msgid "Ratified documents"
@@ -462,5 +458,3 @@ msgstr "Rapports et tutoriels"
 msgid "Search regional and national African legal information."
 msgstr "Rechercher des informations juridiques africaines régionales et nationales."
 
-#~ msgid "Regional Courts"
-#~ msgstr "Cours régionaux"
