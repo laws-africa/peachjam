@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-08-31 09:30+0200\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"PO-Revision-Date: 2023-09-19 11:54\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -65,22 +65,20 @@ msgstr "Makusanyo"
 #: templates/liiweb/home.html:152
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
-msgstr ""
+msgstr "Tumia %(APP_NAME)s ukiwa nje ya mtandao"
 
 #: templates/liiweb/home.html:154
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
-msgstr ""
+msgstr "Pocket Law ni nakala ya nje ya mtandao ya sheria ya kesi, sheria na nyaraka nyingine za kisheria kutoka %(APP_NAME)s."
 
 #: templates/liiweb/home.html:166
 msgid "Latest Articles"
-msgstr ""
+msgstr "Makala za Hivi Karibuni"
 
 #: templates/liiweb/home.html:168
-#, fuzzy
-#| msgid "View more legislation"
 msgid "View more articles"
-msgstr "Tazama sheria zaidi"
+msgstr "Tazama makala zaidi"
 
 #: templates/liiweb/legislation_list.html:4
 #: templates/liiweb/legislation_list.html:16 templates/peachjam/_header.html:17
@@ -114,15 +112,15 @@ msgstr "Kuhusu"
 #: templates/peachjam/_footer.html:12
 #, python-format
 msgid "Use %(APP_NAME)s offline with <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
-msgstr ""
+msgstr "Tumia %(APP_NAME)s nje ya mtandao na <a href=\"%(pocket_law_url)s\">Pocket law</a>."
 
 #: templates/peachjam/_footer.html:20
 msgid "Site Statistics"
-msgstr ""
+msgstr "Takwimu za Tovuti"
 
 #: templates/peachjam/_footer.html:24
 msgid "Terms of Use"
-msgstr ""
+msgstr "Masharti ya matumizi"
 
 #: templates/peachjam/_footer.html:29
 msgid "Our partners"
@@ -137,19 +135,7 @@ msgid "Judgments"
 msgstr "Hukumu"
 
 #: views/legislation.py:99
-#, fuzzy, python-format
-#| msgid "Recent Legislation"
+#, python-format
 msgid "%(locality)s Legislation"
-msgstr "Sheria ya Hivi Karibuni"
+msgstr "%(locality)s Sheria"
 
-#~ msgid "Twitter"
-#~ msgstr "Twitter"
-
-#~ msgid "Tweets by AfricanLII"
-#~ msgstr "Tweets na AfricanLII"
-
-#~ msgid "Subscribe"
-#~ msgstr "Jiandikishe"
-
-#~ msgid "Subscribe to our newsletter for updates and news."
-#~ msgstr "Jiandikishe kwenye jarida letu kwa usasishaji na habari."
