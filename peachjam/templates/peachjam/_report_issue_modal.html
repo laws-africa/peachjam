@@ -1,0 +1,63 @@
+<div class="row">
+  <div class="col-md-3"></div>
+  <div class="col-md-3"></div>
+  <div class="col-md-3"></div>
+  <div class="col-md-3">
+    <button type="button"
+            class="btn btn-outline-dark float-right"
+            data-bs-toggle="modal"
+            data-bs-target="#reportModal">
+      Report a problem
+    </button>
+  </div>
+</div>
+<div class="modal fade"
+     id="reportModal"
+     tabindex="-1"
+     aria-labelledby="reportModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reportModalLabel">Is there something wrong with this document? Tell us about it.</h5>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{% url 'document_problem' %}" method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="problemDescription">
+              Problem Description <span class="text-danger">*</span>
+            </label>
+            <textarea class="form-control"
+                      id="problem_description"
+                      name="problem_description"
+                      rows="4"
+                      required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="emailAddress">Email Address (optional)</label>
+            <input type="email"
+                   class="form-control"
+                   id="email_address"
+                   name="email_address"
+                   placeholder="example@example.com"/>
+          </div>
+          <input type="hidden"
+                 name="document_link"
+                 value="{{ request.build_absolute_uri }}"
+                 required/>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

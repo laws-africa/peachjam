@@ -43,4 +43,9 @@ urlpatterns = [
         views.CheckDuplicatesView.as_view(),
         name="check_duplicates",
     ),
+    path(
+        "document-problem/",
+        views.DocumentProblemView.as_view(),
+        name="document_problem",
+    ),
 ]

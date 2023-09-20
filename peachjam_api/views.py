@@ -1,5 +1,9 @@
 from django import forms
+from django.conf import settings
+from django.core.mail import send_mail
 from django.db.models import Q
+from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
@@ -127,3 +131,35 @@ class CheckDuplicatesView(APIView):
                 )
                 return Response(html)
         return Response()
+
+
+class DocumentProblemView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        document_link = request.POST.get("document_link")
+        problem_description = request.POST.get("problem_description")
+        email_address = request.POST.get("email_address")
+
+        message = render_to_string(
+            "peachjam/document_problem_email.html",
+            {
+                "document_link": document_link,
+                "problem_description": problem_description,
+            },
+        )
+
+        recipient_list = [settings.DEFAULT_FROM_EMAIL]
+        if email_address:
+            recipient_list.append(email_address)
+
+        send_mail(
+            subject="Reported Document Problem",
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=recipient_list,
+            fail_silently=False,
+            html_message=message,
+        )
+
+        return redirect(document_link)
