@@ -13,7 +13,7 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # documents
-        self.assertEqual(9, response.context.get("documents_count"))
+        self.assertEqual(10, response.context.get("documents_count"))
 
         recent_judgments = [
             r_j.title for r_j in response.context.get("recent_judgments")
@@ -111,7 +111,7 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertEqual(
-            [1969, 2005, 2020], sorted(response.context["facet_data"]["years"])
+            [1969, 2005, 2010, 2020], sorted(response.context["facet_data"]["years"])
         )
 
     def test_legislation_detail(self):
