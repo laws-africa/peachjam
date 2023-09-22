@@ -1,7 +1,7 @@
 <template>
   <li class="mb-4 hit">
     <a
-      class="h5"
+      class="h5 text-primary"
       target="_blank"
       rel="noreferrer"
       :href="item.expression_frbr_uri"
