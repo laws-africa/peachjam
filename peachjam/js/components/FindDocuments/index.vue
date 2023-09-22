@@ -394,10 +394,11 @@ export default {
       return buckets;
     },
 
-    getUrlParamValue (key) {
+    getUrlParamValue (key, options) {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
-      return urlParams.getAll(key);
+      const availableOptions = options.map(option => option.value);
+      return urlParams.getAll(key).filter(value => availableOptions.includes(value));
     },
 
     handlePageChange (newPage) {
@@ -543,7 +544,7 @@ export default {
             );
           }
         }
-        facet.value = this.getUrlParamValue(facet.name);
+        facet.value = this.getUrlParamValue(facet.name, facet.options);
       });
     },
 
