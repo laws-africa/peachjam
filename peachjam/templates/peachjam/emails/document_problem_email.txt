@@ -1,0 +1,9 @@
+Hello,
+
+We have received a report regarding the following document: {{ document_link }}.
+
+The reported problem is described as follows:
+
+{{ problem_description }}.
+
+Thank you for bringing this to our attention.

@@ -2,7 +2,7 @@ from django import forms
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Q
-from django.shortcuts import redirect
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import format_html
@@ -135,31 +135,40 @@ class CheckDuplicatesView(APIView):
 
 class DocumentProblemView(APIView):
     permission_classes = []
+    allowed_methods = ["post", "get"]
 
     def post(self, request):
         document_link = request.POST.get("document_link")
         problem_description = request.POST.get("problem_description")
         email_address = request.POST.get("email_address")
 
+        context = {
+            "document_link": document_link,
+            "problem_description": problem_description,
+        }
+
+        plain_txt_msg = render_to_string(
+            "peachjam/emails/document_problem_email.txt",
+            context=context,
+        )
+
         message = render_to_string(
-            "peachjam/document_problem_email.html",
-            {
-                "document_link": document_link,
-                "problem_description": problem_description,
-            },
+            "peachjam/emails/document_problem_email.html", context=context
         )
 
         recipient_list = [settings.DEFAULT_FROM_EMAIL]
         if email_address:
             recipient_list.append(email_address)
 
-        send_mail(
-            subject="Reported Document Problem",
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=recipient_list,
-            fail_silently=False,
-            html_message=message,
+        return (
+            render(request, "peachjam/emails/document_issue_email_success.html")
+            if send_mail(
+                subject=f"Document problem reported on {settings.PEACHJAM['APP_NAME']}",
+                message=plain_txt_msg,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=recipient_list,
+                fail_silently=False,
+                html_message=message,
+            )
+            else render(request, "peachjam/emails/document_issue_email_error.html")
         )
-
-        return redirect(document_link)

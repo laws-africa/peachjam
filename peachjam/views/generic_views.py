@@ -167,6 +167,7 @@ class BaseDocumentDetailView(DetailView):
             + context["documents_citing_current_doc_count"]
         )
         context["labels"] = doc.labels.all()
+
         return context
 
     def fetch_docs(self, works):
