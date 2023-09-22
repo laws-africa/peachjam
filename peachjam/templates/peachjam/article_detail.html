@@ -84,7 +84,7 @@
         {% if more_articles %}
           {% user_name article.author as username %}
           <h4>{% blocktrans trimmed %}Recent articles by {{ username }}{% endblocktrans %}</h4>
-          {% include 'peachjam/_article_list.html' with articles=more_articles %}
+          {% include 'peachjam/_recent_article_list.html' with articles=more_articles %}
         {% endif %}
       </div>
     </div>
