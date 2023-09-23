@@ -18,7 +18,7 @@
           />
         </div>
       </div>
-      <div class="facets-scrollable">
+      <div :class="`${facet.type === 'letter-radio' ? '' : 'facets-scrollable'}`">
         <template v-if="facet.type === 'checkboxes'">
           <div
             v-for="(option, optIndex) in facet.options"
