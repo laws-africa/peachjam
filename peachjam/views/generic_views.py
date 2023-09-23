@@ -31,17 +31,21 @@ class DocumentListView(ListView):
     queryset = CoreDocument.objects.prefetch_related("nature", "work")
 
     def get_base_queryset(self):
-        qs = self.queryset if self.queryset is not None else self.model.objects
-        return qs.preferred_language(get_language(self.request))
+        return self.queryset if self.queryset is not None else self.model.objects
 
     def get_queryset(self):
-        return self.get_base_queryset()
+        qs = self.get_base_queryset()
+        return qs.preferred_language(get_language(self.request))
 
 
 class FilteredDocumentListView(DocumentListView):
     """Generic list view for filtered document lists."""
 
     form_class = BaseDocumentFilterForm
+    # Should the listing filter to include only the latest expressions of a document?
+    # This is a bit more expensive and so is opt-in. It is only necessary for document types
+    # that have multiple points-in-time (dated expressions), such as Legislation.
+    latest_expression_only = False
 
     def get(self, request, *args, **kwargs):
         self.form = self.form_class(request.GET)
@@ -49,7 +53,22 @@ class FilteredDocumentListView(DocumentListView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.filter_queryset(super().get_queryset())
+        qs = super().get_queryset()
+        filtered_qs = self.filter_queryset(qs)
+
+        if self.latest_expression_only:
+            # Getting only the latest expression requires ordering on the work, which breaks the actual ordering
+            # we want on the results. So, we take the filtered queryset and move that into a subquery,
+            # and then apply the normal ordering on a fresh copy of the main queryset.
+
+            # first, do the latest expression filtering
+            filtered_qs = filtered_qs.order_by().latest_expression()
+            # now move that into a subquery on the unfiltered queryset -- the filtering will come from the subquery
+            filtered_qs = qs.filter(pk__in=filtered_qs.values("id"))
+            # now apply the standard ordering
+            filtered_qs = self.form.order_queryset(filtered_qs)
+
+        return filtered_qs
 
     def filter_queryset(self, qs):
         return self.form.filter_queryset(qs)

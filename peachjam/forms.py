@@ -115,14 +115,13 @@ class BaseDocumentFilterForm(forms.Form):
         attorneys = self.params.getlist("attorneys")
         order_outcomes = self.params.getlist("order_outcomes")
 
-        # Order by date descending initially
-        queryset = queryset.order_by("-date", "title")
+        queryset = self.order_queryset(queryset, exclude)
 
         if years and exclude != "years":
             queryset = queryset.filter(date__year__in=years)
 
         if alphabet and exclude != "alphabet":
-            queryset = queryset.order_by("title").filter(title__istartswith=alphabet)
+            queryset = queryset.filter(title__istartswith=alphabet)
 
         if authors and exclude != "authors":
             queryset = queryset.filter(authors__name__in=authors)
@@ -151,6 +150,13 @@ class BaseDocumentFilterForm(forms.Form):
         if order_outcomes and exclude != "order_outcomes":
             queryset = queryset.filter(order_outcome__name__in=order_outcomes)
 
+        return queryset
+
+    def order_queryset(self, queryset, exclude=None):
+        if self.cleaned_data.get("alphabet") and exclude != "alphabet":
+            queryset = queryset.order_by("title")
+        else:
+            queryset = queryset.order_by("-date", "title")
         return queryset
 
 
