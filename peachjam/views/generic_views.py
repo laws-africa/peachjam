@@ -90,7 +90,10 @@ class FilteredDocumentListView(DocumentListView):
                 doc_n
                 for doc_n in self.form.filter_queryset(
                     self.get_base_queryset(), exclude="natures"
-                ).values_list("nature__name", flat=True)
+                )
+                .order_by()
+                .values_list("nature__name", flat=True)
+                .distinct()
                 if doc_n
             }
         )
@@ -100,16 +103,20 @@ class FilteredDocumentListView(DocumentListView):
                     a
                     for a in self.form.filter_queryset(
                         self.get_base_queryset(), exclude="authors"
-                    ).values_list("authors__name", flat=True)
+                    )
+                    .order_by()
+                    .values_list("authors__name", flat=True)
+                    .distinct()
                     if a
                 }
             )
 
         years = list(
             set(
-                self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="years"
-                ).values_list("date__year", flat=True)
+                self.form.filter_queryset(self.get_base_queryset(), exclude="years")
+                .order_by()
+                .values_list("date__year", flat=True)
+                .distinct()
             )
         )
 
