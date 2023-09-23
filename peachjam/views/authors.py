@@ -27,9 +27,10 @@ class AuthorDetailView(FilteredDocumentListView):
         context = super().get_context_data(**kwargs)
         doc_types = list(
             set(
-                self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="doc_type"
-                ).values_list("doc_type", flat=True)
+                self.form.filter_queryset(self.get_base_queryset(), exclude="doc_type")
+                .order_by()
+                .values_list("doc_type", flat=True)
+                .distinct()
             )
         )
 

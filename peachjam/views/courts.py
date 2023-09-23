@@ -74,7 +74,10 @@ class CourtDetailView(FilteredDocumentListView):
                 judge
                 for judge in self.form.filter_queryset(
                     self.get_base_queryset(), exclude="judges"
-                ).values_list("judges__name", flat=True)
+                )
+                .order_by()
+                .values_list("judges__name", flat=True)
+                .distinct()
                 if judge
             }
         )
@@ -84,7 +87,10 @@ class CourtDetailView(FilteredDocumentListView):
                 attorney
                 for attorney in self.form.filter_queryset(
                     self.get_base_queryset(), exclude="attorneys"
-                ).values_list("attorneys__name", flat=True)
+                )
+                .order_by()
+                .values_list("attorneys__name", flat=True)
+                .distinct()
                 if attorney
             }
         )
@@ -94,7 +100,10 @@ class CourtDetailView(FilteredDocumentListView):
                 order_outcome
                 for order_outcome in self.form.filter_queryset(
                     self.get_base_queryset(), exclude="order_outcomes"
-                ).values_list("order_outcome__name", flat=True)
+                )
+                .order_by()
+                .values_list("order_outcome__name", flat=True)
+                .distinct()
                 if order_outcome
             }
         )
