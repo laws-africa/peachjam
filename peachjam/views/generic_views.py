@@ -197,12 +197,12 @@ class BaseDocumentDetailView(DetailView):
     def add_relationships(self, context):
         context["relationships_as_subject"] = rels_as_subject = list(
             Relationship.for_subject_document(context["document"])
-            .prefetch_related("subject_work")
+            .prefetch_related("subject_work", "object_work")
             .select_related("predicate")
         )
         context["relationships_as_object"] = rels_as_object = list(
             Relationship.for_object_document(context["document"])
-            .prefetch_related("object_work")
+            .prefetch_related("object_work", "subject_work")
             .select_related("predicate")
         )
         context["n_relationships"] = len(rels_as_subject) + len(rels_as_object)
