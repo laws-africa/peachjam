@@ -377,7 +377,6 @@ class DocumentNatureWidget(ForeignKeyWidget):
 
 class ManyToManyFieldWidget(ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
-
         # Remove extra white space around and in between the judges' or attorneys' names
         if value:
             items = [" ".join(j.split()) for j in value.split(self.separator)]
@@ -674,3 +673,15 @@ class UserResource(resources.ModelResource):
             instance.password = make_password(instance.password)
             instance.is_staff = True
             instance.save()
+
+
+class AttorneyResource(resources.ModelResource):
+    description = fields.Field(
+        column_name="description",
+        attribute="description",
+        widget=CharWidget(),
+        default="",
+    )
+
+    class Meta:
+        model = Attorney
