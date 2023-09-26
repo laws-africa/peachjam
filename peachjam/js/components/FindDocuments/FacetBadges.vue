@@ -1,5 +1,5 @@
 <template>
-  <div class="my-2">
+  <div class="my-2 d-none d-md-block">
     <button
       v-for="option in activeOptions"
       :key="option.value"
