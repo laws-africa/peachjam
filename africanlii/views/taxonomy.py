@@ -88,6 +88,9 @@ class DocIndexDetailView(TaxonomyDetailView):
         )
         return search
 
+    def get_queryset(self):
+        return self.filter_queryset(self.get_base_queryset())
+
     def add_facets(self, context):
         """Add a limited set of facets pulled from ES."""
         faceted = FacetedSearch()
