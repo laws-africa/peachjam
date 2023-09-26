@@ -88,6 +88,12 @@ class DocIndexDetailView(TaxonomyDetailView):
         )
         return search
 
+    def get_queryset(self):
+        search = self.filter_queryset(self.get_base_queryset())
+        if self.latest_expression_only:
+            search = search.filter("term", is_most_recent=True)
+        return search
+
     def add_facets(self, context):
         """Add a limited set of facets pulled from ES."""
         faceted = FacetedSearch()
