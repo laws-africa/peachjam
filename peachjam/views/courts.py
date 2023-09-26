@@ -70,42 +70,36 @@ class CourtDetailView(FilteredDocumentListView):
 
     def populate_facets(self, context):
         judges = list(
-            {
-                judge
-                for judge in self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="judges"
-                )
-                .order_by()
-                .values_list("judges__name", flat=True)
-                .distinct()
-                if judge
-            }
+            judge
+            for judge in self.form.filter_queryset(
+                self.get_base_queryset(), exclude="judges"
+            )
+            .order_by()
+            .values_list("judges__name", flat=True)
+            .distinct()
+            if judge
         )
 
         attorneys = list(
-            {
-                attorney
-                for attorney in self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="attorneys"
-                )
-                .order_by()
-                .values_list("attorneys__name", flat=True)
-                .distinct()
-                if attorney
-            }
+            attorney
+            for attorney in self.form.filter_queryset(
+                self.get_base_queryset(), exclude="attorneys"
+            )
+            .order_by()
+            .values_list("attorneys__name", flat=True)
+            .distinct()
+            if attorney
         )
 
         order_outcomes = list(
-            {
-                order_outcome
-                for order_outcome in self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="order_outcomes"
-                )
-                .order_by()
-                .values_list("order_outcome__name", flat=True)
-                .distinct()
-                if order_outcome
-            }
+            order_outcome
+            for order_outcome in self.form.filter_queryset(
+                self.get_base_queryset(), exclude="order_outcomes"
+            )
+            .order_by()
+            .values_list("order_outcome__name", flat=True)
+            .distinct()
+            if order_outcome
         )
 
         context["facet_data"] = {

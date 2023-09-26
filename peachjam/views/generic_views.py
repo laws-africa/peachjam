@@ -86,38 +86,32 @@ class FilteredDocumentListView(DocumentListView):
         authors = []
         # Initialize facet data values
         natures = list(
-            {
-                doc_n
-                for doc_n in self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="natures"
-                )
-                .order_by()
-                .values_list("nature__name", flat=True)
-                .distinct()
-                if doc_n
-            }
+            doc_n
+            for doc_n in self.form.filter_queryset(
+                self.get_base_queryset(), exclude="natures"
+            )
+            .order_by()
+            .values_list("nature__name", flat=True)
+            .distinct()
+            if doc_n
         )
         if self.model in [GenericDocument, LegalInstrument]:
             authors = list(
-                {
-                    a
-                    for a in self.form.filter_queryset(
-                        self.get_base_queryset(), exclude="authors"
-                    )
-                    .order_by()
-                    .values_list("authors__name", flat=True)
-                    .distinct()
-                    if a
-                }
+                a
+                for a in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="authors"
+                )
+                .order_by()
+                .values_list("authors__name", flat=True)
+                .distinct()
+                if a
             )
 
         years = list(
-            set(
-                self.form.filter_queryset(self.get_base_queryset(), exclude="years")
-                .order_by()
-                .values_list("date__year", flat=True)
-                .distinct()
-            )
+            self.form.filter_queryset(self.get_base_queryset(), exclude="years")
+            .order_by()
+            .values_list("date__year", flat=True)
+            .distinct()
         )
 
         context["doc_table_show_author"] = bool(authors)
