@@ -15,7 +15,7 @@ export class ReportDocumentIssue {
 
     const form = new FormData(this.form || undefined);
 
-    fetch('/api/document-problem/', {
+    fetch('/document-problem/', {
       method: 'post',
       body: form
     }).then(response => {

@@ -77,6 +77,7 @@ from peachjam.models import (
 )
 from peachjam.resources import (
     ArticleResource,
+    AttorneyResource,
     GenericDocumentResource,
     JudgmentResource,
     UserResource,
@@ -1008,10 +1009,15 @@ class MatterTypeAdmin(BaseAdmin):
     help_topic = "site-admin/add-matter-types"
 
 
+@admin.register(Attorney)
+class AttorneyAdmin(ImportExportMixin, admin.ModelAdmin):
+    resource_class = AttorneyResource
+    list_display = ("name", "description")
+
+
 admin.site.register(
     [
         CitationLink,
-        Attorney,
         CourtClass,
         AttachedFileNature,
         CitationProcessing,

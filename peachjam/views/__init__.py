@@ -5,6 +5,7 @@ from .authors import *
 from .books import *
 from .courts import *
 from .document_nature import *
+from .document_problem import *
 from .documents import *
 from .external_document import *
 from .gazette import *

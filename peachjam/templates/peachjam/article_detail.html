@@ -35,6 +35,23 @@
                 </li>
               {% endfor %}
             </ul>
+            <div class="d-flex align-items-center">
+              <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
+                 class="btn btn-link share-link"
+                 target="_blank">
+                <i class="bi bi-whatsapp whatsapp-forecolor share-icon"></i>
+              </a>
+              <a href="https://twitter.com/intent/tweet?text={{ request.build_absolute_uri }}"
+                 class="btn btn-link share-link"
+                 target="_blank">
+                <i class="bi bi-twitter twitter-forecolor share-icon"></i>
+              </a>
+              <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+                 class="btn btn-link share-link"
+                 target="_blank">
+                <i class="bi bi-facebook facebook-forecolor share-icon"></i>
+              </a>
+            </div>
           </header>
           {% if article.summary %}<p class="lead">{{ article.summary }}</p>{% endif %}
           <div class="article-body">{{ article.body|safe }}</div>
@@ -67,7 +84,7 @@
         {% if more_articles %}
           {% user_name article.author as username %}
           <h4>{% blocktrans trimmed %}Recent articles by {{ username }}{% endblocktrans %}</h4>
-          {% include 'peachjam/_article_list.html' with articles=more_articles %}
+          {% include 'peachjam/_recent_article_list.html' with articles=more_articles %}
         {% endif %}
       </div>
     </div>

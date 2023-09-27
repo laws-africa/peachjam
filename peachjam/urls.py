@@ -46,6 +46,7 @@ from peachjam.views import (
     DocumentMediaView,
     DocumentNatureListView,
     DocumentPopupView,
+    DocumentProblemView,
     DocumentSourcePDFView,
     DocumentSourceView,
     GazetteListView,
@@ -236,6 +237,11 @@ urlpatterns = [
         cache_page(CACHE_DURATION)(DocumentPopupView.as_view()),
     ),
     path("stats", MetabaseStatsView.as_view(), name="metabase_stats"),
+    path(
+        "document-problem/",
+        DocumentProblemView.as_view(),
+        name="document_problem",
+    ),
 ]
 
 if settings.DEBUG:
