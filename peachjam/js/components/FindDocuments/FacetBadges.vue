@@ -1,14 +1,14 @@
 <template>
-  <div class="my-2 d-none d-md-block">
+  <div class="d-none d-md-block">
     <button
       v-for="option in activeOptions"
       :key="option.value"
-      class="btn btn-outline-secondary me-2 mb-2"
+      class="btn btn-outline-primary me-2 mb-2"
       :name="option.value"
       @click="updateModel"
+      :title="$t('Remove')"
     >
-      <i class="bi bi-x pe-none" />
-      {{ option.label }}
+      × {{ option.label }}
     </button>
   </div>
 </template>

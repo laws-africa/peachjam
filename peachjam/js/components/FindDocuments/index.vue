@@ -109,7 +109,6 @@
       </div>
     </div>
     <div ref="filters-results-container">
-      <FacetBadges v-model="facets" :facets="facets" />
       <div class="row">
         <div class="col col-lg-3">
           <MobileFacetsDrawer
@@ -134,9 +133,10 @@
           </MobileFacetsDrawer>
         </div>
 
-        <div class="col-md-12 col-lg-9 search-pane position-relative">
+        <div class="col-md-12 col-lg-9 position-relative">
           <div class="search-results">
             <div v-if="searchInfo.count">
+              <FacetBadges v-model="facets" />
               <div class="mb-3 sort-body row">
                 <div class="col-md-3 order-md-2 mb-2 sort__inner d-flex align-items-center">
                   <div style="width: 65px;">
@@ -158,8 +158,8 @@
                   </select>
                 </div>
                 <div class="col-md order-md-1">
-                  <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found') }}</span>
-                  <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
+                  <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
+                  <span v-else>{{ $t('{document_count} documents found.', { document_count: searchInfo.count }) }}</span>
                 </div>
               </div>
 
@@ -618,6 +618,12 @@ export default {
       if (this.q || Object.values(this.advancedFields).some(f => f.q)) {
         this.loadingCount = this.loadingCount + 1;
 
+        // ensure the search tab is activated and scroll to put the search box at the top
+        // of the window
+        const searchTab = new window.bootstrap.Tab(this.$el.querySelector('#search-tab'));
+        searchTab.show();
+        scrollToElement(this.$refs['search-box']);
+
         try {
           const url = this.generateSearchUrl();
           if (pushState) {
@@ -648,10 +654,6 @@ export default {
 
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
-        scrollToElement(this.$refs['search-box']);
-
-        const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#search-tab'));
-        tabTrigger.show();
       }
     }
   }
@@ -659,10 +661,6 @@ export default {
 </script>
 
 <style scoped>
-.search-pane {
-  padding-top: 10px;
-}
-
 .overlay {
   position: absolute;
   top: 0;
