@@ -46,7 +46,7 @@ class DocIndexFirstLevelView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["taxonomy_link_prefix"] = "indexes"
-        context["link"] = "federated-case-indexes-on-africanlii"
+        context["help_link"] = "federated-case-indexes-on-africanlii"
         return context
 
 
