@@ -3,12 +3,13 @@
     <button
       v-for="option in activeOptions"
       :key="option.value"
-      class="btn btn-outline-primary me-2 mb-2"
-      :name="option.value"
-      @click="updateModel"
+      class="btn btn-outline-primary me-2 mb-2 btn-sm"
+      type="button"
       :title="$t('Remove')"
+      @click="updateModel(option.value)"
     >
-      × {{ option.label }}
+      {{ option.label }}
+      &nbsp;×
     </button>
   </div>
 </template>
@@ -35,10 +36,10 @@ export default {
     }
   },
   methods: {
-    updateModel (e) {
+    updateModel (val) {
       // remove the clicked option from the facet.value array
       const updatedModel = [...this.modelValue].map(item => {
-        item.value = item.value.filter(value => value !== e.target.name);
+        item.value = item.value.filter(value => value !== val);
         return item;
       });
       this.$emit('update:modelValue', updatedModel);
