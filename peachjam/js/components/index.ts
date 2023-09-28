@@ -7,6 +7,7 @@ import { ToggleTab } from './tabs';
 import TaxonomyTree from './taxonomy-tree';
 import TermsOfUse from './terms-of-use';
 
+import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
 import LegislationTable from './LegislationTable/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
@@ -23,6 +24,7 @@ const components: Record<string, any> = {
   TermsOfUse,
 
   // Vue components
+  DocumentProblemModal,
   FindDocuments,
   LegislationTable,
   PocketLawDownload

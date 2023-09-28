@@ -558,3 +558,8 @@ EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", 25))
 EMAIL_USE_TLS = os.environ.get("DJANGO_EMAIL_USE_TLS", "false") == "true"
 EMAIL_USE_SSL = os.environ.get("DJANGO_EMAIL_USE_SSL", "false") == "true"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+
+# Adminstrators intended to receive email notifications
+# Each item in the list should be a tuple of (Full name, email address). Example:
+# [('Someone', 'someone@example.com')]
+ADMINS = []

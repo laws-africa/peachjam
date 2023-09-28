@@ -2,9 +2,13 @@ import copy
 from os.path import splitext
 
 from django import forms
+from django.conf import settings
 from django.core.files import File
+from django.core.mail import mail_admins
 from django.http import QueryDict
+from django.template.loader import render_to_string
 from django.utils.text import slugify
+from django.utils.translation import gettext as _
 
 from peachjam.models import AttachedFiles, CoreDocument, Ingestor, SourceFile
 from peachjam.plugins import plugins
@@ -197,3 +201,40 @@ class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):
     class Meta:
         model = AttachedFiles
         fields = "__all__"
+
+
+class DocumentProblemForm(forms.Form):
+    document_link = forms.CharField(max_length=255, required=True)
+    problem_description = forms.CharField(widget=forms.Textarea, required=True)
+    email_address = forms.EmailField(required=False)
+
+    def send_email(self):
+        document_link = self.cleaned_data["document_link"]
+        problem_description = self.cleaned_data["problem_description"]
+        email_address = self.cleaned_data["email_address"]
+
+        context = {
+            "document_link": document_link,
+            "problem_description": problem_description,
+        }
+        if email_address:
+            context["email_address"] = email_address
+
+        html = render_to_string(
+            "peachjam/emails/document_problem_email.html", context=context
+        )
+        plain_txt_msg = render_to_string(
+            "peachjam/emails/document_problem_email.txt",
+            context=context,
+        )
+
+        subject = _("Document problem reported on %(app_name)s") % {
+            "app_name": settings.PEACHJAM["APP_NAME"]
+        }
+
+        mail_admins(
+            subject=subject,
+            message=plain_txt_msg,
+            html_message=html,
+            fail_silently=False,
+        )

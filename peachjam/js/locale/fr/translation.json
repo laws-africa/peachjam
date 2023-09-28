@@ -1,5 +1,5 @@
 {
-  "{document_count} documents found.": "{document_count} documents trouvés.",
+  "{document_count} documents found": "{document_count} documents trouvés.",
   "{reverse_verb} this provision": "{reverse_verb} cette disposition",
   "Advanced search": "Recherche avancée",
   "All these words": "Tous ces mots",
@@ -9,6 +9,7 @@
   "Attorneys": "Avocats",
   "Author": "Auteur",
   "Between {prev_expression_date} and {new_expression_date}": "Entre {prev_expression_date} et {new_expression_date}",
+  "Cancel": "Annuler",
   "Clear": "Nettoyer",
   "Clear all": "Effacer tout",
   "Close": "Fermer",
@@ -30,6 +31,7 @@
   "Expand all": "Développer tout",
   "Filters": "Filtres",
   "Help": "Aide",
+  "Is there something wrong with this document?": "Y a-t-il quelque chose qui ne va pas avec ce document?",
   "Judges": "Juges",
   "Jurisdiction": "Juridiction",
   "Language": "Langue",
@@ -37,6 +39,7 @@
   "Loading": "En cours de chargement",
   "Locality": "Localité",
   "Matter type": "Type de matière",
+  "More than 10,000 documents found": "Plus de 10 000 documents trouvés.",
   "Multiple languages available": "Plusieurs langues disponibles",
   "Nature": "Nature",
   "No documents match your search": "Aucun document ne correspond à votre recherche.",
@@ -49,6 +52,8 @@
   "Page": "Page",
   "Regional body": "Corps régional",
   "Relevance": "Pertinence",
+  "Remove": "Retirer",
+  "Report problem": "Signaler un problème",
   "Search": "Recherche",
   "Search {{appName}}": {
     "": "Rechercher dans {{appName}}..."
@@ -58,8 +63,10 @@
   "Search table of contents": "Rechercher la table des matières",
   "Share": "Partager",
   "Show changes side-by-side": "Afficher les modifications côte à côte",
+  "Something went wrong": "Quelque chose s'est mal passé",
   "Sort by": "Trier par",
   "Taxonomies": "Taxonomies",
+  "Thank you for your feedback": "Merci pour votre commentaire.",
   "The date range is invalid": "La plage de dates n'est pas valide",
   "This exact word or phrase": "Cette phrase ou ce mot exact",
   "This provision": "Cette disposition",
@@ -67,7 +74,9 @@
   "Title": "Titre",
   "To the top": "En haut",
   "Try searching instead": "Essayez plutôt de faire une recherche",
-  "What changed?": "Quels sont les changements ?",
+  "What changed?": "Quels sont les changements?",
+  "What's the problem?": "Quel est le problème?",
   "Year": "Année",
-  "Years": "Années"
+  "Years": "Années",
+  "Your email address (optional)": "Votre adresse e-mail (facultatif)"
 }
