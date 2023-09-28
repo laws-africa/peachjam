@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-08-31 09:30+0200\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"PO-Revision-Date: 2023-09-28 05:15\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: admin.py:120
 msgid "Import"
-msgstr ""
+msgstr "Importer"
 
 #: admin.py:363
 msgid "Key details"
@@ -63,27 +63,23 @@ msgstr "Actualisation du contenu en arrière-plan."
 
 #: admin.py:769
 msgid "Refresh content selected ingestors"
-msgstr ""
+msgstr "Actualiser le contenu des ingesteurs sélectionnés"
 
 #: admin.py:817
-#, fuzzy
-#| msgid "published"
 msgid "Articles published."
-msgstr "publié"
+msgstr "Articles publiés."
 
 #: admin.py:819
 msgid "Publish selected articles"
-msgstr ""
+msgstr "Publier les articles sélectionnés"
 
 #: admin.py:823
-#, fuzzy
-#| msgid "published"
 msgid "Articles unpublished."
-msgstr "publié"
+msgstr "Articles inédits."
 
 #: admin.py:825
 msgid "Unpublish selected articles"
-msgstr ""
+msgstr "Annuler la publication des articles sélectionnés"
 
 #: models/article.py:21 models/core_document_model.py:326
 msgid "date"
@@ -155,10 +151,8 @@ msgid "Author"
 msgstr "Auteur"
 
 #: models/author.py:8
-#, fuzzy
-#| msgid "Author"
 msgid "Authors"
-msgstr "Auteur"
+msgstr "Auteurs"
 
 #: models/author.py:10 models/core_document_model.py:44
 #: models/core_document_model.py:72 models/core_document_model.py:86
@@ -226,28 +220,24 @@ msgid "target work"
 msgstr "Travail ciblé"
 
 #: models/citations.py:90
-#, fuzzy
-#| msgid "Hearing date"
 msgid "processing date"
-msgstr "Date de l'audience"
+msgstr "date de traitement"
 
 #: models/citations.py:93
-#, fuzzy
-#| msgid "citation link"
 msgid "citation processing"
-msgstr "lien de citation"
+msgstr "traitement des citations"
 
 #: models/core_document_model.py:48
 msgid "level"
-msgstr ""
+msgstr "niveau"
 
 #: models/core_document_model.py:62
 msgid "label"
-msgstr ""
+msgstr "étiquette"
 
 #: models/core_document_model.py:63 models/core_document_model.py:433
 msgid "labels"
-msgstr ""
+msgstr "Étiquettes"
 
 #: models/core_document_model.py:75 models/core_document_model.py:812
 #: models/judgment.py:17 models/judgment.py:32 models/judgment.py:47
@@ -280,22 +270,16 @@ msgid "FRBR URI"
 msgstr "FRBR URI"
 
 #: models/core_document_model.py:114
-#, fuzzy
-#| msgid "FRBR URI actor"
 msgid "FRBR URI country"
-msgstr "acteur de FRBR URI"
+msgstr "Pays URI FRBR"
 
 #: models/core_document_model.py:120
-#, fuzzy
-#| msgid "FRBR URI doctype"
 msgid "FRBR URI locality"
-msgstr "doctype de FRBR URI"
+msgstr "Localité URI FRBR"
 
 #: models/core_document_model.py:126
-#, fuzzy
-#| msgid "FRBR URI date"
 msgid "FRBR URI place"
-msgstr "date de FRBR URI"
+msgstr "Lieu URI FRBR"
 
 #: models/core_document_model.py:132 models/core_document_model.py:369
 msgid "FRBR URI doctype"
@@ -420,7 +404,7 @@ msgstr "Invalid FRBR URI: %(uri)s"
 
 #: models/core_document_model.py:488
 msgid "Document with this Expression FRBR URI already exists!"
-msgstr ""
+msgstr "Un document avec cette expression FRBR URI existe déjà !"
 
 #: models/core_document_model.py:705
 msgid "filename"
@@ -444,7 +428,7 @@ msgstr "images"
 
 #: models/core_document_model.py:766
 msgid "file as pdf"
-msgstr ""
+msgstr "fichier en pdf"
 
 #: models/core_document_model.py:774
 msgid "source file"
@@ -472,7 +456,7 @@ msgstr "pièces jointes"
 
 #: models/core_document_model.py:858
 msgid "Law report citation/Alternative known name"
-msgstr ""
+msgstr "Citation du rapport juridique/Nom alternatif connu"
 
 #: models/core_document_model.py:865
 msgid "alternative name"
@@ -487,10 +471,8 @@ msgid "document text"
 msgstr "Texte du document"
 
 #: models/core_document_model.py:890
-#, fuzzy
-#| msgid "document"
 msgid "document XML"
-msgstr "document"
+msgstr "document XML"
 
 #: models/core_document_model.py:894
 msgid "document content"
@@ -625,10 +607,8 @@ msgid "judgment"
 msgstr "jugement"
 
 #: models/judgment.py:191
-#, fuzzy
-#| msgid "summary"
 msgid "case summary"
-msgstr "résumé"
+msgstr "résumé du cas"
 
 #: models/judgment.py:192
 msgid "flynote"
@@ -672,7 +652,7 @@ msgstr "jugements"
 
 #: models/judgment.py:344
 msgid "Full case number as printed on judgment"
-msgstr ""
+msgstr "Numéro complet du dossier tel qu'imprimé sur le jugement"
 
 #: models/judgment.py:348
 msgid "Override for full case number string"
@@ -756,10 +736,8 @@ msgid "document languages"
 msgstr "langues du document"
 
 #: models/settings.py:41
-#, fuzzy
-#| msgid "document jurisdictions"
 msgid "default document jurisdiction"
-msgstr "juridictions du document"
+msgstr "juridiction du document par défaut"
 
 #: models/settings.py:47
 msgid "document jurisdictions"
@@ -775,7 +753,7 @@ msgstr "Identifiant google analytiques"
 
 #: models/settings.py:59
 msgid "Enter one or more Google Analytics IDs separated by spaces."
-msgstr ""
+msgstr "Saisissez un ou plusieurs identifiants Google Analytics séparés par des espaces."
 
 #: models/settings.py:62
 msgid "pagerank boost value"
@@ -783,43 +761,39 @@ msgstr "valeur d'augmentation du PageRank"
 
 #: models/settings.py:65
 msgid "allowed login domains"
-msgstr ""
+msgstr "domaines de connexion autorisés"
 
 #: models/settings.py:69
 msgid "metabase dashboard link"
-msgstr ""
+msgstr "lien vers le tableau de bord de la métabase"
 
 #: models/settings.py:73
 msgid "mailchimp form url"
-msgstr ""
+msgstr "URL du formulaire mailchimp"
 
 #: models/settings.py:76
-#, fuzzy
-#| msgid "citation link"
 msgid "twitter link"
-msgstr "lien de citation"
+msgstr "lien Twitter"
 
 #: models/settings.py:79
 msgid "facebook link"
-msgstr ""
+msgstr "lien Facebook"
 
 #: models/settings.py:82
-#, fuzzy
-#| msgid "Media neutral citation"
 msgid "re-extract citations"
-msgstr "Citation neutre des médias"
+msgstr "réextraire les citations"
 
 #: models/settings.py:85
 msgid "Pocket Law repo"
-msgstr ""
+msgstr "Dépôt Pocket Law"
 
 #: models/settings.py:88
 msgid "editor help link"
-msgstr ""
+msgstr "lien d'aide de l'éditeur"
 
 #: models/settings.py:94
 msgid "user help link"
-msgstr ""
+msgstr "lien d'aide utilisateur"
 
 #: models/settings.py:101
 msgid "site settings"
@@ -910,12 +884,10 @@ msgstr "Mot de passe oublié ?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Connectez-vous à %(provider.name)s\n"
 "          "
 
@@ -978,7 +950,7 @@ msgstr "Votre mot de passe a été réinitialisé."
 #: templates/admin/change_form.html:7 templates/admin/change_list.html:10
 #: templates/peachjam/_help_button.html:6
 msgid "Help"
-msgstr ""
+msgstr "Aide"
 
 #: templates/admin/login.html:20
 msgid "Please correct the error below."
@@ -1004,11 +976,11 @@ msgstr "Recherche"
 
 #: templates/admin/tree_change_list.html:8
 msgid "Collapse all"
-msgstr ""
+msgstr "Réduire tout"
 
 #: templates/admin/tree_change_list.html:9
 msgid "Expand all"
-msgstr ""
+msgstr "Développer tout"
 
 #: templates/peachjam/_child_documents.html:2
 msgid "Subsidiary legislation"
@@ -1034,7 +1006,7 @@ msgstr "Documents citant celui-ci"
 
 #: templates/peachjam/_citations_list.html:27
 msgid "Show/Hide all"
-msgstr ""
+msgstr "Afficher/Masquer tout"
 
 #: templates/peachjam/_court_list.html:16
 #: templates/peachjam/_court_list.html:22
@@ -1112,16 +1084,16 @@ msgstr "Déconnexion"
 
 #: templates/peachjam/_mailchimp_form.html:4
 msgid "Subscribe"
-msgstr ""
+msgstr "S'abonner"
 
 #: templates/peachjam/_mailchimp_form.html:11
 msgid "Subscribe to our newsletter for updates and news."
-msgstr ""
+msgstr "Abonnez-vous à notre newsletter pour les mises à jour et les nouvelles."
 
 #: templates/peachjam/_months_list.html:7
 #: templates/peachjam/_months_list.html:24
 msgid "All months"
-msgstr ""
+msgstr "Tous les mois"
 
 #: templates/peachjam/_pagination.html:6
 msgid "Previous"
@@ -1158,10 +1130,8 @@ msgid "No documents found."
 msgstr "Aucun document trouvé."
 
 #: templates/peachjam/_registries.html:3
-#, fuzzy
-#| msgid "court registries"
 msgid "Registries"
-msgstr "Registres judiciaires"
+msgstr "Registres"
 
 #: templates/peachjam/_related_documents.html:4
 #: templates/peachjam/layouts/document_detail.html:93
@@ -1171,7 +1141,7 @@ msgstr "Documents connexes"
 
 #: templates/peachjam/_social_media.html:2
 msgid "Follow us on social media"
-msgstr ""
+msgstr "Suivez-nous sur les réseaux sociaux"
 
 #: templates/peachjam/_taxonomies.html:4
 #: templates/peachjam/taxonomy_detail.html:10
@@ -1590,16 +1560,12 @@ msgid "Attorneys"
 msgstr "Avocats"
 
 #: templates/peachjam/judgment_detail.html:83
-#, fuzzy
-#| msgid "flynote"
 msgid "Flynote"
-msgstr "mot-clé"
+msgstr "Mot-clé"
 
 #: templates/peachjam/judgment_detail.html:93
-#, fuzzy
-#| msgid "summary"
 msgid "Case summary"
-msgstr "résumé"
+msgstr "Résumé du cas"
 
 #: templates/peachjam/judgment_list.html:16
 msgid "Recent judgments"
@@ -1630,10 +1596,8 @@ msgid "Citation"
 msgstr "Référence"
 
 #: templates/peachjam/layouts/document_detail.html:179
-#, fuzzy
-#| msgid "Media neutral citation"
 msgid "Law report citations"
-msgstr "Citation neutre des médias"
+msgstr "Citations de rapports de droit"
 
 #: templates/peachjam/layouts/document_detail.html:183
 msgid "Alternative names"
@@ -1684,11 +1648,11 @@ msgstr "Législation"
 
 #: templates/peachjam/metabase_stats.html:4
 msgid "Site Statistics"
-msgstr ""
+msgstr "Statistiques du site"
 
 #: templates/peachjam/metabase_stats.html:9
 msgid "Statistics"
-msgstr ""
+msgstr "Statistiques"
 
 #: templates/peachjam/taxonomy_list.html:4
 msgid "Taxonomy"
@@ -1706,55 +1670,36 @@ msgid "Navigation"
 msgstr "Navigation"
 
 #: views/legislation.py:52
-#, fuzzy, python-format
-#| msgid "This Act was repealed on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
+#, python-format
 msgid "This %(friendly_type)s was repealed on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
-msgstr "Cette loi a été abrogé le %(date)s par <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
+msgstr "Ce %(friendly_type)s a été abrogé le %(date)s par <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
 #: views/legislation.py:65
 #, python-format
 msgid "This %(friendly_type)s has not yet commenced and is not yet law."
-msgstr ""
+msgstr "Ce %(friendly_type)s n’a pas encore commencé et n’est pas encore loi."
 
 #: views/legislation.py:99
-#, fuzzy, python-format
-#| msgid "This is the version of this Act as it was when it was repealed."
+#, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it was repealed."
-msgstr "Il s'agit de la version de la présente loi telle qu'elle était au moment de son abrogation."
+msgstr "Il s’agit de la version de ce %(friendly_type)s telle qu’elle était lors de son abrogation."
 
 #: views/legislation.py:113
-#, fuzzy, python-format
-#| msgid "This is the latest version of this Act."
+#, python-format
 msgid "This is the latest version of this %(friendly_type)s."
-msgstr "Il s'agit de la dernière version de la présente Loi."
+msgstr "Il s'agit de la dernière version de ce %(friendly_type)s."
 
 #: views/legislation.py:128
-#, fuzzy, python-format
-#| msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was repealed</a>."
+#, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was repealed</a>."
-msgstr "Il s'agit de la version de cette loi telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lire la version telle qu'elle était quand elle a été abrogée</a>."
+msgstr "C'est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Lire la version telle qu'elle était au moment de son abrogation</a>."
 
 #: views/legislation.py:133
-#, fuzzy, python-format
-#| msgid "This is the version of this Act as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
+#, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
-msgstr "Il s'agit de la version de cette loi telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lire la version actuellement en vigueur</a>."
+msgstr "C'est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Lire la version actuellement en vigueur</a>."
 
 #: views/legislation.py:174
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
-msgstr ""
+msgstr "Il existe des amendements en suspens qui n’ont pas encore été appliqués. Voir l'onglet Historique pour plus d'informations."
 
-#~ msgid "Refresh all content"
-#~ msgstr "Actualiser tout le contenu"
-
-#~ msgid "Invalid Date"
-#~ msgstr "Date non valide"
-
-#~ msgid "headnote holding"
-#~ msgstr "résumé détaillé"
-
-#~ msgid "additional citations"
-#~ msgstr "références supplémentaires"
-
-#~ msgid "string override"
-#~ msgstr "remplacement de chaîne de caractères"
