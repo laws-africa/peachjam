@@ -20,9 +20,9 @@ export class ReportDocumentIssue {
       body: form
     }).then(response => {
       if (response.ok) {
-        return response.text();
+        return 'Thank you for your feedback.';
       } else {
-        throw new Error('Something went wrong');
+        return 'Something went wrong.';
       }
     }).then(data => {
       this.handleResponse(data);
@@ -33,7 +33,7 @@ export class ReportDocumentIssue {
 
   handleResponse (response: string) {
     if (this.form) {
-      this.form.innerHTML = response;
+      this.form.innerText = response;
     }
   }
 }

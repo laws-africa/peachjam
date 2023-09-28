@@ -4,7 +4,7 @@ from os.path import splitext
 from django import forms
 from django.conf import settings
 from django.core.files import File
-from django.core.mail import send_mail
+from django.core.mail import mail_admins
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils.text import slugify
@@ -231,13 +231,10 @@ class DocumentProblemForm(forms.Form):
         subject = _("Document problem reported on %(app_name)s") % {
             "app_name": settings.PEACHJAM["APP_NAME"]
         }
-        from_email = settings.DEFAULT_FROM_EMAIL
 
-        return send_mail(
+        mail_admins(
             subject=subject,
             message=plain_txt_msg,
-            from_email=from_email,
-            recipient_list=[email for name, email in settings.ADMINS],
-            fail_silently=False,
             html_message=html,
+            fail_silently=False,
         )

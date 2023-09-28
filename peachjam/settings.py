@@ -562,4 +562,4 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 # Adminstrators intended to receive email notifications
 # Each item in the list should be a tuple of (Full name, email address). Example:
 # [('Someone', 'someone@example.com')]
-ADMINS = [("Nick", "nick@laws.africa")]
+ADMINS = []
