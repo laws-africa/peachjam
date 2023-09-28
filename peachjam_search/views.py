@@ -256,6 +256,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "registry": "registry",
         "attorneys": "attorneys",
         "order_outcome": "order_outcome",
+        "labels": "labels",
     }
 
     search_fields = {
@@ -309,6 +310,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "registry": {"field": "registry", "options": {"size": 100}},
         "attorneys": {"field": "attorneys", "options": {"size": 100}},
         "order_outcome": {"field": "order_outcome", "options": {"size": 100}},
+        "labels": {"field": "labels", "options": {"size": 100}},
     }
 
     highlight_fields = {

@@ -1,5 +1,5 @@
 {
-  "{document_count} documents found": "{document_count} documentos encontrados",
+  "{document_count} documents found.": "{document_count} documentos encontrados.",
   "{reverse_verb} this provision": "{reverse_verb} esta disposição",
   "Advanced search": "Pesquisa avançada",
   "All these words": "Todas essas palavras",
@@ -29,7 +29,7 @@
   "Enter start date": "Digite a data inicial",
   "Expand all": "Expandir tudo",
   "Filters": "Filtros",
-  "Help": "Help",
+  "Help": "Socorro",
   "Judges": "Juízes",
   "Jurisdiction": "Jurisdição",
   "Language": "Idioma",
