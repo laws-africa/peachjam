@@ -3,11 +3,11 @@ import { RelationshipEnrichments } from './RelationshipEnrichment';
 import DocumentList from './document-list';
 import DocumentContent from './DocumentContent/index';
 import NavigationSelect from './navigation-select';
-import { ReportDocumentIssue } from './report_document_issue';
 import { ToggleTab } from './tabs';
 import TaxonomyTree from './taxonomy-tree';
 import TermsOfUse from './terms-of-use';
 
+import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
 import LegislationTable from './LegislationTable/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
@@ -19,12 +19,12 @@ const components: Record<string, any> = {
   DocumentList,
   NavigationSelect,
   RelationshipEnrichments,
-  ReportDocumentIssue,
   ToggleTab,
   TaxonomyTree,
   TermsOfUse,
 
   // Vue components
+  DocumentProblemModal,
   FindDocuments,
   LegislationTable,
   PocketLawDownload
