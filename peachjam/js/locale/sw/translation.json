@@ -1,5 +1,5 @@
 {
-  "{document_count} documents found": "{document_count} hati zimepatikana.",
+  "{document_count} documents found": "Nyaraka {document_count} zilizopatikana.",
   "{reverse_verb} this provision": "{reverse_verb} kifungu hiki",
   "Advanced search": "Utafutaji wa kina",
   "All these words": "Maneno  yote haya",
@@ -31,7 +31,7 @@
   "Expand all": "Panua zote",
   "Filters": "Vichujio",
   "Help": "Msaada",
-  "Is there something wrong with this document?": "Kuna kitu kibaya na hati hii?",
+  "Is there something wrong with this document?": "Je, kuna kitu kibaya na hati hii?",
   "Judges": "Majaji",
   "Jurisdiction": "Mamlaka ya kisheria",
   "Language": "Lugha",
@@ -39,7 +39,7 @@
   "Loading": "Inapakia",
   "Locality": "Eneo",
   "Matter type": "Aina ya jambo",
-  "More than 10,000 documents found": "Zaidi ya hati 10,000 zimepatikana.",
+  "More than 10,000 documents found": "Zaidi ya hati 10,000 zilipatikana.",
   "Multiple languages available": "Lugha nyingi zinapatikana",
   "Nature": "Asili",
   "No documents match your search": "Hakuna hati zinazolingana na utafutaji wako.",
@@ -63,10 +63,10 @@
   "Search table of contents": "Tafuta yaliyomo",
   "Share": "Sambaza",
   "Show changes side-by-side": "Tafuta yaliyomo sambamba",
-  "Something went wrong": "Kuna tatizo limetokea",
+  "Something went wrong": "Hitilafu fulani imetokea.",
   "Sort by": "Ainisha kwa",
   "Taxonomies": "Taksonomia",
-  "Thank you for your feedback": "Asante kwa maoni yako",
+  "Thank you for your feedback": "Asante kwa maoni yako.",
   "The date range is invalid": "Tarehe siyo sahihi",
   "This exact word or phrase": "Neno au kifungu hiki cha maneno",
   "This provision": "Kifungu hiki",
@@ -75,8 +75,8 @@
   "To the top": "Hadi juu",
   "Try searching instead": "Jaribu kutafuta badala yake",
   "What changed?": "Nini kimebadilika?",
-  "What's the problem?": "Kuna tatizo gani?",
+  "What's the problem?": "Tatizo ni nini?",
   "Year": "Mwaka",
   "Years": "Miaka",
-  "Your email address (optional)": "Anwani yako ya barua pepe (hiari)"
+  "Your email address (optional)": "Anwani yako ya barua pepe (si lazima)"
 }
