@@ -13,7 +13,7 @@
       </div>
       <div class="modal-body">
         <form
-          v-if="!message.length"
+          v-if="!submitted"
           id="document-problem-form"
           ref="form"
           method="post"
@@ -50,14 +50,16 @@
             >
           </div>
         </form>
-        <div v-else>{{ message }}</div>
+        <div v-else>
+          {{ success ? $t('Thank you for your feedback.') : $t('Something went wrong.') }}
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          {{ sent ? $t('Close') : $t('Cancel') }}
+          {{ submitted ? $t('Close') : $t('Cancel') }}
         </button>
         <button
-          v-if="!message.length"
+          v-if="!submitted"
           type="submit"
           class="btn btn-success"
           form="document-problem-form"
@@ -70,6 +72,8 @@
 </template>
 
 <script>
+import { authHeaders } from '../api';
+
 export default {
   name: 'DocumentProblemModal',
   data () {
@@ -77,7 +81,8 @@ export default {
       email: '',
       message: '',
       problem: '',
-      sent: false,
+      submitted: false,
+      success: true,
       url: window.location.toString()
     };
   },
@@ -90,21 +95,19 @@ export default {
       this.email = '';
       this.message = '';
       this.problem = '';
-      this.sent = false;
+      this.submitted = false;
+      this.success = true;
     },
     onSubmit () {
       const form = new FormData(this.$refs.form);
 
       fetch('/document-problem/', {
         method: 'post',
-        body: form
+        body: form,
+        headers: authHeaders()
       }).then(response => {
-        if (response.ok) {
-          this.message = 'Thank you for your feedback.';
-          this.sent = true;
-        } else {
-          this.message = 'Something went wrong.';
-        }
+        this.submitted = true;
+        this.success = response.ok;
       }).catch(error => {
         console.log(error);
       });
