@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-09-28 17:00+0200\n"
-"PO-Revision-Date: 2023-09-28 05:15\n"
+"PO-Revision-Date: 2023-09-28 16:16\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -84,7 +84,7 @@ msgstr "Annuler la publication des articles sélectionnés"
 #: forms.py:231
 #, python-format
 msgid "Document problem reported on %(app_name)s"
-msgstr ""
+msgstr "Problème de document signalé le %(app_name)s"
 
 #: models/article.py:21 models/core_document_model.py:325
 msgid "date"
@@ -519,11 +519,11 @@ msgstr "métadonnées JSON"
 
 #: models/generic_document.py:80
 msgid "timeline JSON"
-msgstr ""
+msgstr "chronologie JSON"
 
 #: models/generic_document.py:83
 msgid "commencements JSON"
-msgstr ""
+msgstr "débuts JSON"
 
 #: models/generic_document.py:85 templates/peachjam/document_popup.html:9
 msgid "repealed"
@@ -706,16 +706,12 @@ msgid "background photo"
 msgstr "photo d'arrière plan"
 
 #: models/profile.py:50
-#, fuzzy
-#| msgid "jurisdiction"
 msgid "jurisdiction profile"
-msgstr "juridiction"
+msgstr "profil de juridiction"
 
 #: models/profile.py:51
-#, fuzzy
-#| msgid "jurisdiction"
 msgid "jurisdiction profiles"
-msgstr "juridiction"
+msgstr "profils de juridiction"
 
 #: models/relationships.py:8
 msgid "verb"
@@ -911,12 +907,10 @@ msgstr "Mot de passe oublié ?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Connectez-vous à %(provider.name)s\n"
 "          "
 
@@ -1076,7 +1070,7 @@ msgstr[1] "%(doc_count)s Documents"
 
 #: templates/peachjam/_document_problem_modal.html:7
 msgid "Report a problem"
-msgstr ""
+msgstr "Signaler un problème"
 
 #: templates/peachjam/_document_table.html:8
 #: templates/peachjam/_ratifications.html:17
@@ -1130,7 +1124,7 @@ msgstr "Tous les mois"
 
 #: templates/peachjam/_open_law_africa.html:9
 msgid "Open Law Africa"
-msgstr ""
+msgstr "Droit Ouvert Afrique"
 
 #: templates/peachjam/_pagination.html:6
 msgid "Previous"
@@ -1745,3 +1739,4 @@ msgstr "C'est la version de ce %(friendly_type)s telle qu'elle était de %(date_
 #: views/legislation.py:176
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Il existe des amendements en suspens qui n’ont pas encore été appliqués. Voir l'onglet Historique pour plus d'informations."
+
