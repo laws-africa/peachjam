@@ -327,9 +327,19 @@ class DocumentForm(forms.ModelForm):
         self.instance.update_text_content()
 
 
+class AttachedFilesInline(BaseAttachmentFileInline):
+    model = AttachedFiles
+    form = AttachedFilesForm
+
+
 class DocumentAdmin(BaseAdmin):
     form = DocumentForm
-    inlines = [DocumentTopicInline, SourceFileInline, AlternativeNameInline]
+    inlines = [
+        DocumentTopicInline,
+        SourceFileInline,
+        AlternativeNameInline,
+        AttachedFilesInline,
+    ]
     list_display = (
         "title",
         "jurisdiction",
@@ -656,11 +666,6 @@ class CaseNumberAdmin(admin.StackedInline):
     fields = ["matter_type", "number", "year", "string_override"]
 
 
-class AttachedFilesInline(BaseAttachmentFileInline):
-    model = AttachedFiles
-    form = AttachedFilesForm
-
-
 class BenchInline(admin.TabularInline):
     # by using an inline, the ordering of the judges is preserved
     model = Bench
@@ -694,7 +699,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     inlines = [
         BenchInline,
         CaseNumberAdmin,
-        AttachedFilesInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys")
     list_filter = (*DocumentAdmin.list_filter, "court")

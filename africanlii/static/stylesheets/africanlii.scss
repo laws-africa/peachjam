@@ -2,6 +2,8 @@
 @import "variables";
 //Base styles
 @import "stylesheets/peachjam";
+@import "../lib/flag-icons/css/flag-icons.min.css";
+
 
 footer {
   @extend .bg-dark, .text-white;

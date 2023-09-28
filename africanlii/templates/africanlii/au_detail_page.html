@@ -9,6 +9,7 @@
       {% block breadcrumbs %}{% endblock %}
       {% block page-heading %}
         <h1 class="my-4 heading-underlined">{% trans 'African Union (AU)' %}</h1>
+        {% include "peachjam/_help_button.html" with link="african-union-documents-au" %}
       {% endblock %}
       <p>
         {% blocktrans trimmed %}
@@ -81,6 +82,7 @@
           <div class="card lii-card mb-3">
             <div class="card-body">
               <img src="{% static 'lib/flag-icons/flags/4x3/'|add:member_state.country.iso|lower|add:".svg" %}"
+                   loading="lazy"
                    alt="{{ member_state.name }}"
                    class="mb-3"/>
               <h5 class="card-title">
