@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-09-28 17:00+0200\n"
-"PO-Revision-Date: 2023-09-30 13:24\n"
+"PO-Revision-Date: 2023-09-30 14:24\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -707,11 +707,11 @@ msgstr "picha ya mandharinyuma"
 
 #: models/profile.py:50
 msgid "jurisdiction profile"
-msgstr "wasifu wa mamlaka"
+msgstr "maelezo ya mamlaka"
 
 #: models/profile.py:51
 msgid "jurisdiction profiles"
-msgstr "wasifu wa mamlaka"
+msgstr "maelezo ya mamlaka"
 
 #: models/relationships.py:8
 msgid "verb"
@@ -1124,7 +1124,7 @@ msgstr "Miezi yote"
 
 #: templates/peachjam/_open_law_africa.html:9
 msgid "Open Law Africa"
-msgstr "Sheria Huria Afrika"
+msgstr "Open Law Afrika"
 
 #: templates/peachjam/_pagination.html:6
 msgid "Previous"
