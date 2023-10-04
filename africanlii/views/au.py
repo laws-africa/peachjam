@@ -35,33 +35,9 @@ class AfricanUnionDetailPageView(TemplateView):
 class AfricanUnionOrganDetailView(AuthorDetailView):
     template_name = "africanlii/au_organ_detail.html"
 
-    def get_queryset(self):
-        self.au_organ = get_object_or_404(
-            AfricanUnionOrgan, author__code=self.kwargs["code"]
-        )
-        return super().get_queryset()
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["entity_profile"] = self.au_organ.entity_profile.first()
-        context["entity_profile_title"] = self.au_organ.author.name
-        return context
-
 
 class AfricanUnionInstitutionDetailView(AuthorDetailView):
     template_name = "africanlii/au_institution_detail.html"
-
-    def get_queryset(self):
-        self.au_institution = get_object_or_404(
-            AfricanUnionInstitution, author__code=self.kwargs["code"]
-        )
-        return super().get_queryset()
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["entity_profile"] = self.au_institution.entity_profile.first()
-        context["entity_profile_title"] = self.au_institution.author.name
-        return context
 
 
 class RegionalEconomicCommunityDetailView(PlaceDetailView):

@@ -19,9 +19,11 @@
   </div>
 {% endblock %}
 {% block entity-profile %}
-  {% if entity_profile %}
-    <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
-  {% endif %}
+  {% with entity_profile=author.au_institution.entity_profile.first entity_profile_title=author.name %}
+    {% if entity_profile %}
+      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
+    {% endif %}
+  {% endwith %}
 {% endblock %}
 {% block page-header %}
   <h1 class="mt-4">{{ obj }}</h1>
