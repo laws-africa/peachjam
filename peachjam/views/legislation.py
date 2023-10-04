@@ -59,7 +59,22 @@ class LegislationDetailView(BaseDocumentDetailView):
                 }
             )
 
-        if not commenced:
+        current_date = datetime.now().date()
+        latest_commencement_date = self.get_latest_commencement_date()
+        if commenced:
+            if latest_commencement_date > current_date:
+                notices.append(
+                    {
+                        "type": messages.WARNING,
+                        "html": _("This %(friendly_type)s will commence on %(date)s.")
+                        % {
+                            "friendly_type": friendly_type,
+                            "date": format_date(latest_commencement_date, "j F Y"),
+                        },
+                    }
+                )
+
+        else:
             notices.append(
                 {
                     "type": messages.WARNING,
@@ -167,6 +182,13 @@ class LegislationDetailView(BaseDocumentDetailView):
 
     def get_commencement_info(self):
         return self.object.metadata_json.get("commenced", None)
+
+    def get_latest_commencement_date(self):
+        commencement_dates = [
+            commencement["date"]
+            for commencement in self.object.metadata_json.get("commencements", None)
+        ]
+        return datetime.strptime(max(commencement_dates), "%Y-%m-%d").date()
 
     def set_unapplied_amendment_notice(self, notices):
         notices.append(
