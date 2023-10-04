@@ -63,9 +63,7 @@ class LegislationDetailView(BaseDocumentDetailView):
             notices.append(
                 {
                     "type": messages.WARNING,
-                    "html": _(
-                        "This %(friendly_type)s has not yet commenced and is not yet law."
-                    )
+                    "html": _("This %(friendly_type)s has not yet come into force.")
                     % {"friendly_type": friendly_type},
                 }
             )
