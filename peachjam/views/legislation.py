@@ -62,7 +62,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         current_date = datetime.now().date()
         latest_commencement_date = self.get_latest_commencement_date()
         if commenced:
-            if latest_commencement_date > current_date:
+            if latest_commencement_date and latest_commencement_date > current_date:
                 notices.append(
                     {
                         "type": messages.WARNING,
@@ -184,11 +184,14 @@ class LegislationDetailView(BaseDocumentDetailView):
         return self.object.metadata_json.get("commenced", None)
 
     def get_latest_commencement_date(self):
-        commencement_dates = [
-            commencement["date"]
-            for commencement in self.object.metadata_json.get("commencements", None)
-        ]
-        return datetime.strptime(max(commencement_dates), "%Y-%m-%d").date()
+        commencements = self.object.metadata_json.get("commencements", None)
+        if commencements:
+            commencement_dates = [
+                commencement["date"] for commencement in commencements
+            ]
+            return datetime.strptime(max(commencement_dates), "%Y-%m-%d").date()
+
+        return None
 
     def set_unapplied_amendment_notice(self, notices):
         notices.append(
