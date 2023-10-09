@@ -162,6 +162,13 @@ class PdfRenderer {
           this.scrollToPage(i + 1);
         }
       }
+
+      // free up the canvas so that iOS doesn't complain about memory usage
+      // see https://pqina.nl/blog/total-canvas-memory-use-exceeds-the-maximum-limit/
+      canvas.width = 1;
+      canvas.height = 1;
+      const ctx = canvas.getContext('2d');
+      if (ctx) ctx.clearRect(0, 0, 1, 1);
     } catch (e) {
       console.log(e);
     }
