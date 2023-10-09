@@ -196,6 +196,7 @@ class PdfRenderer {
     await page.render(renderContext).promise;
     // add the text layer
     pageContainer.append(this.addImageLayer(page, containerWidth, canvas));
+    pageContainer.append(await this.addTextLayer(page, containerWidth, canvas));
     // add image previews
     this.addPreviewPanel(canvas, index + 1);
   }
@@ -218,6 +219,33 @@ class PdfRenderer {
     image.style.width = `${viewport.width}px`;
 
     return image;
+  }
+
+  async addTextLayer (page: any, containerWidth: number, canvas: HTMLCanvasElement) {
+    const textLayer = document.createElement('div');
+    textLayer.classList.add('textLayer');
+
+    // when rendering the text layer, we want the renderer to know that we'll place the text on top
+    // of a canvas that has been scaled up/down to fit into the containing div; so we need to calculate
+    // the scale required to go from the original PDF width, to the container width.
+    let viewport = page.getViewport({ scale: 1 });
+    const textScale = containerWidth / viewport.width;
+    // this viewport will have the correct scale to render text to, to be placed directly over the canvas
+    viewport = page.getViewport({ scale: textScale });
+
+    textLayer.style.left = `${canvas.offsetLeft}px`;
+    textLayer.style.top = `${canvas.offsetTop}px`;
+    textLayer.style.height = `${viewport.height}px`;
+    textLayer.style.width = `${viewport.width}px`;
+
+    this.pdfjsLib.renderTextLayer({
+      textContent: await page.getTextContent(),
+      container: textLayer,
+      viewport,
+      textDivs: []
+    });
+
+    return textLayer;
   }
 
   addPreviewPanel (canvas: HTMLCanvasElement, pageNum: number) {
