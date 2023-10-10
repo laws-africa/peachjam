@@ -44,7 +44,10 @@ class DocIndexFirstLevelView(DetailView):
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(taxonomy_link_prefix="indexes", **kwargs)
+        context = super().get_context_data(**kwargs)
+        context["taxonomy_link_prefix"] = "indexes"
+        context["help_link"] = "federated-case-indexes-on-africanlii"
+        return context
 
 
 class DocIndexDetailView(TaxonomyDetailView):
@@ -86,6 +89,12 @@ class DocIndexDetailView(TaxonomyDetailView):
             .source(exclude=DocumentSearchViewSet.source["excludes"])
             .filter("term", taxonomies=self.taxonomy.slug)
         )
+        return search
+
+    def get_queryset(self):
+        search = self.filter_queryset(self.get_base_queryset())
+        if self.latest_expression_only:
+            search = search.filter("term", is_most_recent=True)
         return search
 
     def add_facets(self, context):

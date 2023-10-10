@@ -1,5 +1,5 @@
 <template>
-  <div id="search">
+  <div id="search" ref="search-box">
     <div class="mb-4">
       <nav>
         <div
@@ -133,12 +133,12 @@
           </MobileFacetsDrawer>
         </div>
 
-        <div class="col-md-12 col-lg-9 search-pane position-relative">
+        <div class="col-md-12 col-lg-9 position-relative">
           <div class="search-results">
             <div v-if="searchInfo.count">
-              <div class="mb-3 sort-body">
-                <div>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</div>
-                <div class="sort__inner d-flex align-items-center">
+              <FacetBadges v-model="facets" />
+              <div class="mb-3 sort-body row">
+                <div class="col-md-3 order-md-2 mb-2 sort__inner d-flex align-items-center">
                   <div style="width: 65px;">
                     {{ $t('Sort by') }}
                   </div>
@@ -156,6 +156,10 @@
                       {{ $t('Date (newest first)') }}
                     </option>
                   </select>
+                </div>
+                <div class="col-md order-md-1">
+                  <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
+                  <span v-else>{{ $t('{document_count} documents found.', { document_count: searchInfo.count }) }}</span>
                 </div>
               </div>
 
@@ -219,6 +223,7 @@ import MobileFacetsDrawer from './MobileSideDrawer.vue';
 import AdvancedSearch from './AdvancedSearch.vue';
 import HelpBtn from '../HelpBtn.vue';
 import { scrollToElement } from '../../utils/function';
+import FacetBadges from './FacetBadges.vue';
 
 function resetAdvancedFields (fields) {
   const advanced = ['all', 'title', 'judges', 'case_summary', 'flynote', 'content'];
@@ -240,9 +245,18 @@ function resetAdvancedFields (fields) {
 
 export default {
   name: 'FindDocuments',
-  components: { MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
+  components: { FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
   props: ['showJurisdiction'],
   data () {
+    const getLabelOptionLabels = (labels) => {
+      // the function name is a bit confusing but this gets labels for the options in Labels facet
+      const labelOptions = {};
+      for (const label of labels) {
+        labelOptions[label.code] = label.name;
+      }
+      return labelOptions;
+    };
+
     const data = {
       searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
       documentLabels: JSON.parse(document.querySelector('#data-labels').textContent).documentLabels,
@@ -262,6 +276,14 @@ export default {
         type: 'checkboxes',
         value: [],
         options: []
+      },
+      {
+        title: this.$t('Labels'),
+        name: 'labels',
+        type: 'checkboxes',
+        value: [],
+        options: [],
+        optionLabels: getLabelOptionLabels(data.documentLabels)
       },
       {
         title: JSON.parse(document.querySelector('#data-labels').textContent).author,
@@ -394,10 +416,11 @@ export default {
       return buckets;
     },
 
-    getUrlParamValue (key) {
+    getUrlParamValue (key, options) {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
-      return urlParams.getAll(key);
+      const availableOptions = options.map(option => option.value);
+      return urlParams.getAll(key).filter(value => availableOptions.includes(value));
     },
 
     handlePageChange (newPage) {
@@ -516,9 +539,9 @@ export default {
     },
 
     formatFacets () {
-      const generateOptions = (buckets) => {
+      const generateOptions = (buckets, labels) => {
         return buckets.map((bucket) => ({
-          label: bucket.key,
+          label: labels ? labels[bucket.key] : bucket.key,
           count: bucket.doc_count,
           value: bucket.key
         }));
@@ -531,7 +554,8 @@ export default {
               this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
                 .buckets,
               true
-            )
+            ),
+            facet.optionLabels
           );
         } else {
           if (this.searchInfo.facets[`_filter_${facet.name}`]) {
@@ -539,11 +563,12 @@ export default {
               this.sortGenericBuckets(
                 this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
                   .buckets
-              )
+              ),
+              facet.optionLabels
             );
           }
         }
-        facet.value = this.getUrlParamValue(facet.name);
+        facet.value = this.getUrlParamValue(facet.name, facet.options);
       });
     },
 
@@ -593,6 +618,12 @@ export default {
       if (this.q || Object.values(this.advancedFields).some(f => f.q)) {
         this.loadingCount = this.loadingCount + 1;
 
+        // ensure the search tab is activated and scroll to put the search box at the top
+        // of the window
+        const searchTab = new window.bootstrap.Tab(this.$el.querySelector('#search-tab'));
+        searchTab.show();
+        scrollToElement(this.$refs['search-box']);
+
         try {
           const url = this.generateSearchUrl();
           if (pushState) {
@@ -623,7 +654,6 @@ export default {
 
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
-        scrollToElement(this.$refs['filters-results-container']);
       }
     }
   }
@@ -631,10 +661,6 @@ export default {
 </script>
 
 <style scoped>
-.search-pane {
-  padding-top: 10px;
-}
-
 .overlay {
   position: absolute;
   top: 0;

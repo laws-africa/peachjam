@@ -31,17 +31,21 @@ class DocumentListView(ListView):
     queryset = CoreDocument.objects.prefetch_related("nature", "work")
 
     def get_base_queryset(self):
-        qs = self.queryset if self.queryset is not None else self.model.objects
-        return qs.preferred_language(get_language(self.request))
+        return self.queryset if self.queryset is not None else self.model.objects
 
     def get_queryset(self):
-        return self.get_base_queryset()
+        qs = self.get_base_queryset()
+        return qs.preferred_language(get_language(self.request))
 
 
 class FilteredDocumentListView(DocumentListView):
     """Generic list view for filtered document lists."""
 
     form_class = BaseDocumentFilterForm
+    # Should the listing filter to include only the latest expressions of a document?
+    # This is a bit more expensive and so is opt-in. It is only necessary for document types
+    # that have multiple points-in-time (dated expressions), such as Legislation.
+    latest_expression_only = False
 
     def get(self, request, *args, **kwargs):
         self.form = self.form_class(request.GET)
@@ -49,7 +53,22 @@ class FilteredDocumentListView(DocumentListView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.filter_queryset(super().get_queryset())
+        qs = super().get_queryset()
+        filtered_qs = self.filter_queryset(qs)
+
+        if self.latest_expression_only:
+            # Getting only the latest expression requires ordering on the work, which breaks the actual ordering
+            # we want on the results. So, we take the filtered queryset and move that into a subquery,
+            # and then apply the normal ordering on a fresh copy of the main queryset.
+
+            # first, do the latest expression filtering
+            filtered_qs = filtered_qs.order_by().latest_expression()
+            # now move that into a subquery on the unfiltered queryset -- the filtering will come from the subquery
+            filtered_qs = qs.filter(pk__in=filtered_qs.values("id"))
+            # now apply the standard ordering
+            filtered_qs = self.form.order_queryset(filtered_qs)
+
+        return filtered_qs
 
     def filter_queryset(self, qs):
         return self.form.filter_queryset(qs)
@@ -67,31 +86,32 @@ class FilteredDocumentListView(DocumentListView):
         authors = []
         # Initialize facet data values
         natures = list(
-            {
-                doc_n
-                for doc_n in self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="natures"
-                ).values_list("nature__name", flat=True)
-                if doc_n
-            }
+            doc_n
+            for doc_n in self.form.filter_queryset(
+                self.get_base_queryset(), exclude="natures"
+            )
+            .order_by()
+            .values_list("nature__name", flat=True)
+            .distinct()
+            if doc_n
         )
         if self.model in [GenericDocument, LegalInstrument]:
             authors = list(
-                {
-                    a
-                    for a in self.form.filter_queryset(
-                        self.get_base_queryset(), exclude="authors"
-                    ).values_list("authors__name", flat=True)
-                    if a
-                }
+                a
+                for a in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="authors"
+                )
+                .order_by()
+                .values_list("authors__name", flat=True)
+                .distinct()
+                if a
             )
 
         years = list(
-            set(
-                self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="years"
-                ).values_list("date__year", flat=True)
-            )
+            self.form.filter_queryset(self.get_base_queryset(), exclude="years")
+            .order_by()
+            .values_list("date__year", flat=True)
+            .distinct()
         )
 
         context["doc_table_show_author"] = bool(authors)
@@ -197,12 +217,12 @@ class BaseDocumentDetailView(DetailView):
     def add_relationships(self, context):
         context["relationships_as_subject"] = rels_as_subject = list(
             Relationship.for_subject_document(context["document"])
-            .prefetch_related("subject_work")
+            .prefetch_related("subject_work", "object_work")
             .select_related("predicate")
         )
         context["relationships_as_object"] = rels_as_object = list(
             Relationship.for_object_document(context["document"])
-            .prefetch_related("object_work")
+            .prefetch_related("object_work", "subject_work")
             .select_related("predicate")
         )
         context["n_relationships"] = len(rels_as_subject) + len(rels_as_object)

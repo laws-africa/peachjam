@@ -26,16 +26,14 @@ class AuthorDetailView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         doc_types = list(
-            set(
-                self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="doc_type"
-                ).values_list("doc_type", flat=True)
-            )
+            self.form.filter_queryset(self.get_base_queryset(), exclude="doc_type")
+            .order_by()
+            .values_list("doc_type", flat=True)
+            .distinct()
         )
 
         context["author"] = self.author
         context["doc_table_show_author"] = False
         context["doc_table_show_doc_type"] = bool(doc_types)
         context["facet_data"]["docTypes"] = doc_types
-
         return context

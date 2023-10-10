@@ -19,7 +19,7 @@
   </div>
 {% endblock %}
 {% block entity-profile %}
-  {% with entity_profile=author.entity_profile.first entity_profile_title=author.name %}
+  {% with entity_profile=author.au_organ.entity_profile.first entity_profile_title=author.name %}
     {% if entity_profile %}
       <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
     {% endif %}

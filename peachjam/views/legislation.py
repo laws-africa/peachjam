@@ -29,6 +29,8 @@ class LegislationDetailView(BaseDocumentDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["current_object_date"] = self.object.date.strftime("%Y-%m-%d")
+        context["timeline"] = self.get_timeline()
+        # TODO: get rid of timeline_events once all Legislation objects have been re-ingested
         context["timeline_events"] = self.get_timeline_events()
         context["friendly_type"] = self.get_friendly_type()
         context["notices"] = self.get_notices()
@@ -61,9 +63,7 @@ class LegislationDetailView(BaseDocumentDetailView):
             notices.append(
                 {
                     "type": messages.WARNING,
-                    "html": _(
-                        "This %(friendly_type)s has not yet commenced and is not yet law."
-                    )
+                    "html": _("This %(friendly_type)s has not yet come into force.")
                     % {"friendly_type": friendly_type},
                 }
             )
@@ -81,7 +81,7 @@ class LegislationDetailView(BaseDocumentDetailView):
             latest_amendment_date = max(work_amendments_dates)
 
             if not points_in_time and latest_amendment_date > current_object_date:
-                self.set_unapplied_amendment_notice(notices, friendly_type)
+                self.set_unapplied_amendment_notice(notices)
 
         if points_in_time and work_amendments:
             point_in_time_dates = [
@@ -103,7 +103,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                     )
 
                 elif work_amendments and latest_amendment_date > current_object_date:
-                    self.set_unapplied_amendment_notice(notices, friendly_type)
+                    self.set_unapplied_amendment_notice(notices)
 
                 else:
                     notices.append(
@@ -166,7 +166,7 @@ class LegislationDetailView(BaseDocumentDetailView):
     def get_commencement_info(self):
         return self.object.metadata_json.get("commenced", None)
 
-    def set_unapplied_amendment_notice(self, notices, friendly_type):
+    def set_unapplied_amendment_notice(self, notices):
         notices.append(
             {
                 "type": messages.WARNING,
@@ -176,6 +176,55 @@ class LegislationDetailView(BaseDocumentDetailView):
                 ),
             }
         )
+
+    def get_timeline(self):
+        timeline = self.object.timeline_json
+        publication_url = None
+        work = self.object.metadata_json
+        points_in_time = self.get_points_in_time()
+
+        # set publication_url
+        publication_date = work.get("publication_date")
+        if publication_date:
+            # TODO: update to v3 throughout
+            api_url = "https://api.laws.africa/v2/"
+            commons_url = "https://commons.laws.africa/"
+            publication_url = (work.get("publication_document") or {}).get("url")
+            if publication_url and api_url in publication_url:
+                publication_url = publication_url.replace(api_url, commons_url)
+
+        # prepare for setting contains_unapplied_amendment flag
+        point_in_time_dates = [p["date"] for p in points_in_time]
+        latest_expression_date = (
+            max(point_in_time_dates)
+            if point_in_time_dates
+            else self.object.date.strftime("%Y-%m-%d")
+        )
+
+        # fold in links to expressions corresponding to each event date (if any)
+        # TODO: match on language rather than using first expression?
+        expression_uris = {
+            point_in_time["date"]: point_in_time["expressions"][0][
+                "expression_frbr_uri"
+            ]
+            for point_in_time in points_in_time
+        }
+
+        for entry in timeline:
+            # add expression_frbr_uri
+            for event in entry["events"]:
+                entry["expression_frbr_uri"] = expression_uris.get(entry["date"])
+                # add publication_url to publication event
+                if event["type"] == "publication":
+                    event["link_url"] = publication_url
+                # add contains_unapplied_amendment flag
+                if event["type"] == "amendment":
+                    entry["contains_unapplied_amendment"] = (
+                        entry["date"] not in point_in_time_dates
+                        and entry["date"] > latest_expression_date
+                    )
+
+        return timeline
 
     def get_timeline_events(self):
         events = []

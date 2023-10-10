@@ -77,6 +77,7 @@ from peachjam.models import (
 )
 from peachjam.resources import (
     ArticleResource,
+    AttorneyResource,
     GenericDocumentResource,
     JudgmentResource,
     UserResource,
@@ -326,9 +327,19 @@ class DocumentForm(forms.ModelForm):
         self.instance.update_text_content()
 
 
+class AttachedFilesInline(BaseAttachmentFileInline):
+    model = AttachedFiles
+    form = AttachedFilesForm
+
+
 class DocumentAdmin(BaseAdmin):
     form = DocumentForm
-    inlines = [DocumentTopicInline, SourceFileInline, AlternativeNameInline]
+    inlines = [
+        DocumentTopicInline,
+        SourceFileInline,
+        AlternativeNameInline,
+        AttachedFilesInline,
+    ]
     list_display = (
         "title",
         "jurisdiction",
@@ -655,11 +666,6 @@ class CaseNumberAdmin(admin.StackedInline):
     fields = ["matter_type", "number", "year", "string_override"]
 
 
-class AttachedFilesInline(BaseAttachmentFileInline):
-    model = AttachedFiles
-    form = AttachedFilesForm
-
-
 class BenchInline(admin.TabularInline):
     # by using an inline, the ordering of the judges is preserved
     model = Bench
@@ -693,7 +699,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     inlines = [
         BenchInline,
         CaseNumberAdmin,
-        AttachedFilesInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys")
     list_filter = (*DocumentAdmin.list_filter, "court")
@@ -735,6 +740,9 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         "Work identification",
         "Advanced",
     )
+
+    class Media:
+        js = ("js/judgment_duplicates.js",)
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
@@ -1005,10 +1013,15 @@ class MatterTypeAdmin(BaseAdmin):
     help_topic = "site-admin/add-matter-types"
 
 
+@admin.register(Attorney)
+class AttorneyAdmin(ImportExportMixin, admin.ModelAdmin):
+    resource_class = AttorneyResource
+    list_display = ("name", "description")
+
+
 admin.site.register(
     [
         CitationLink,
-        Attorney,
         CourtClass,
         AttachedFileNature,
         CitationProcessing,

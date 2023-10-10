@@ -1,0 +1,16 @@
+{% load static i18n %}
+<div class="d-flex justify-content-end mb-3">
+  <button type="button"
+          class="btn btn-outline-secondary"
+          data-bs-toggle="modal"
+          data-bs-target="#documentProblemModal">
+    {% trans 'Report a problem' %}
+  </button>
+</div>
+<div class="modal fade"
+     id="documentProblemModal"
+     tabindex="-1"
+     aria-labelledby="documentProblemModalTitle"
+     aria-hidden="true"
+     data-vue-component="DocumentProblemModal">
+</div>

@@ -1,5 +1,5 @@
 {
-  "{document_count} documents found": "{document_count} documentos encontrados",
+  "{document_count} documents found": "{document_count} documentos encontrados.",
   "{reverse_verb} this provision": "{reverse_verb} esta disposição",
   "Advanced search": "Pesquisa avançada",
   "All these words": "Todas essas palavras",
@@ -9,6 +9,7 @@
   "Attorneys": "Advogados",
   "Author": "Autor",
   "Between {prev_expression_date} and {new_expression_date}": "Entre {prev_expression_date} e {new_expression_date}",
+  "Cancel": "Cancelar",
   "Clear": "Limpar",
   "Clear all": "Limpar tudo",
   "Close": "FECHAR",
@@ -29,7 +30,8 @@
   "Enter start date": "Digite a data inicial",
   "Expand all": "Expandir tudo",
   "Filters": "Filtros",
-  "Help": "Help",
+  "Help": "Socorro",
+  "Is there something wrong with this document?": "Há algo errado com este documento?",
   "Judges": "Juízes",
   "Jurisdiction": "Jurisdição",
   "Language": "Idioma",
@@ -37,6 +39,7 @@
   "Loading": "Carregando...",
   "Locality": "Localidade",
   "Matter type": "Tipo de matéria",
+  "More than 10,000 documents found": "Mais de 10.000 documentos encontrados.",
   "Multiple languages available": "Vários idiomas disponíveis",
   "Nature": "Natureza",
   "No documents match your search": "Nenhum documento corresponde à sua pesquisa.",
@@ -49,6 +52,8 @@
   "Page": "Página",
   "Regional body": "Corpo regional",
   "Relevance": "Relevância",
+  "Remove": "Remover",
+  "Report problem": "Reportar problema",
   "Search": "Pesquisa",
   "Search {{appName}}": {
     "": "Pesquisar {{appName}}..."
@@ -58,8 +63,10 @@
   "Search table of contents": "Pesquisar na tabela de conteúdos",
   "Share": "Compartilhar",
   "Show changes side-by-side": "Mostrar mudanças lado a lado",
+  "Something went wrong": "Algo deu errado",
   "Sort by": "Classificar por",
-  "Taxonomies": "Taxonomies",
+  "Taxonomies": "Taxonomias",
+  "Thank you for your feedback": "Obrigado pelo seu feedback.",
   "The date range is invalid": "O intervalo de datas é inválido",
   "This exact word or phrase": "Esta palavra ou frase exata",
   "This provision": "Esta disposição",
@@ -68,6 +75,8 @@
   "To the top": "Para o topo",
   "Try searching instead": "Tente pesquisar no lugar",
   "What changed?": "O que mudou?",
+  "What's the problem?": "Qual é o problema?",
   "Year": "Ano",
-  "Years": "anos"
+  "Years": "anos",
+  "Your email address (optional)": "Seu endereço de e-mail (opcional)"
 }

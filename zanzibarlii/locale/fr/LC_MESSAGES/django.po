@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-08-30 10:34+0200\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"PO-Revision-Date: 2023-09-19 11:54\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -65,7 +65,7 @@ msgstr "Législation"
 
 #: templates/peachjam/_header.html:20
 msgid "Licensed Advocates"
-msgstr ""
+msgstr "Avocats agréés"
 
 #: templates/peachjam/about.html:9
 msgid "About ZanzibarLII"
@@ -87,8 +87,3 @@ msgstr "Contactez-nous"
 msgid "Contact us on <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> for more information."
 msgstr "Contactez-nous au <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> pour plus d'informations."
 
-#~ msgid "Documents and Guidelines"
-#~ msgstr "Documents et lignes directrices"
-
-#~ msgid "Speeches"
-#~ msgstr "Discours"

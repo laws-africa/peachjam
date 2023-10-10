@@ -249,8 +249,8 @@ class CoreDocumentManager(PolymorphicManager):
 
 class CoreDocumentQuerySet(PolymorphicQuerySet):
     def latest_expression(self):
-        """Select only the most recent expression for documents with the same frbr_uri."""
-        return self.distinct("work_frbr_uri").order_by("work_frbr_uri", "-date")
+        """Select only the most recent expression for documents from the same work."""
+        return self.distinct("work_id").order_by("work_id", "-date")
 
     def preferred_language(self, language):
         """Return documents whose language match the preferred one,

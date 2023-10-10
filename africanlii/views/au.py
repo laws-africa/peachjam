@@ -9,7 +9,7 @@ from africanlii.models import (
     RatificationCountry,
     RegionalEconomicCommunity,
 )
-from peachjam.views import AuthorDetailView, PlaceDetailView
+from peachjam.views import AuthorDetailView, CoreDocument, PlaceDetailView
 
 
 class AfricanUnionDetailPageView(TemplateView):
@@ -42,6 +42,7 @@ class AfricanUnionInstitutionDetailView(AuthorDetailView):
 
 class RegionalEconomicCommunityDetailView(PlaceDetailView):
     template_name = "africanlii/regional_economic_community_detail.html"
+    queryset = CoreDocument.objects.prefetch_related("labels")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -1,7 +1,7 @@
 <template>
   <li class="mb-4 hit">
     <a
-      class="h5"
+      class="h5 text-primary"
       target="_blank"
       rel="noreferrer"
       :href="item.expression_frbr_uri"
@@ -96,7 +96,7 @@ export default {
     getFlag (item) {
       const code = item.expression_frbr_uri.split('/')[2].split('-')[0];
       if (code === 'aa') {
-        return '<img style="width:1.33333em; vertical-align: baseline" alt="African Union Icon"  src="/static/images/au_icon.png" />';
+        return '<img style="width:1.33333em; vertical-align: baseline" alt="African Union Icon"  src="/static/images/au_icon.png" loading="lazy"/>';
       } else {
         return `<span class="fi fi-${code}"></span>`;
       }

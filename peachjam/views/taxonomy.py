@@ -30,6 +30,8 @@ class TaxonomyFirstLevelView(DetailView):
 class TaxonomyDetailView(FilteredDocumentListView):
     template_name = "peachjam/taxonomy_detail.html"
     navbar_link = "taxonomy"
+    # taxonomies may include legislation, so we want to show the latest expression only
+    latest_expression_only = True
 
     def get(self, request, *args, **kwargs):
         self.taxonomy = self.get_taxonomy()

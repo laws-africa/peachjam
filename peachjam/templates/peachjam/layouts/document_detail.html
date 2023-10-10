@@ -45,6 +45,11 @@
                  target="_blank">
                 <i class="bi bi-facebook facebook-forecolor share-icon"></i>
               </a>
+              <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}"
+                 class="btn btn-link share-link"
+                 target="_blank">
+                <i class="bi bi-linkedin linkedin-forecolor share-icon"></i>
+              </a>
             </div>
           </div>
         {% endblock %}
@@ -136,6 +141,7 @@
              aria-labelledby="document-detail-tab">
           <div class="container">
             {% block document-metadata %}
+              {% include "peachjam/_document_problem_modal.html" %}
               <div class="row">
                 <div class="col-md mb-3">
                   {% block document-metadata-content %}
@@ -184,7 +190,19 @@
                               </dt>
                             {% endif %}
                             <dd class="text-muted">
-                              {% for alternative_name in alternative_names %}<div>{{ alternative_name.title }}</div>{% endfor %}
+                              {% for alternative_name in alternative_names %}
+                                <div>
+                                  {{ alternative_name.title }}
+                                  <button type="button"
+                                          class="btn btn-outline-secondary btn-xs ms-2"
+                                          title="{% trans "Copy to clipboard" %}"
+                                          data-component="CopyToClipboard"
+                                          data-value="{{ alternative_name.title }}"
+                                          data-confirmation="{% trans "Copied!" %}">
+                                    {% trans "Copy" %}
+                                  </button>
+                                </div>
+                              {% endfor %}
                             </dd>
                           {% endif %}
                         {% endwith %}
@@ -207,20 +225,18 @@
                             </dd>
                           {% endif %}
                         {% endwith %}
-                        {% with document.bench.all as judges %}
-                          {% if judges %}
-                            <dt>
-                              {% trans 'Judges' %}
-                            </dt>
-                            <dd class="text-muted">
-                              {% for bench in judges %}
-                                {# djlint:off #}
-                                {{ bench.judge.name }}{% if not forloop.last %},{% endif %}
-                                {# djlint:on #}
-                              {% endfor %}
-                            </dd>
-                          {% endif %}
-                        {% endwith %}
+                        {% if judges %}
+                          <dt>
+                            {% trans 'Judges' %}
+                          </dt>
+                          <dd class="text-muted">
+                            {% for judge in judges %}
+                              {# djlint:off #}
+                              {{ judge }}{% if not forloop.last %},{% endif %}
+                              {# djlint:on #}
+                            {% endfor %}
+                          </dd>
+                        {% endif %}
                       {% endblock %}
                       {% block document-metadata-content-date %}
                         {% if document.doc_type == "judgment" %}
