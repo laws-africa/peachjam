@@ -43,6 +43,14 @@ class LegislationDetailView(BaseDocumentDetailView):
         friendly_type = self.get_friendly_type()
         commenced = self.get_commencement_info()
 
+        if self.object.metadata_json.get("disclaimer"):
+            notices.append(
+                {
+                    "type": messages.WARNING,
+                    "html": mark_safe(self.object.metadata_json.get("disclaimer")),
+                }
+            )
+
         if self.object.repealed and repeal:
             args = {"friendly_type": friendly_type}
             args.update(repeal)
