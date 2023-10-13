@@ -159,7 +159,7 @@
                 </div>
                 <div class="col-md order-md-1">
                   <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
-                  <span v-else>{{ $t('{document_count} documents found.', { document_count: searchInfo.count }) }}</span>
+                  <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
                 </div>
               </div>
 
