@@ -183,6 +183,8 @@ DATABASES = {
     "default": default_db_config,
     "gazettes_africa": gazette_db_config,
 }
+CONN_MAX_AGE = int(os.environ.get("CONN_MAX_AGE", 0))
+
 # descriptive name for this application in psql's pg_stat_activity output, to help link connections to apps
 db_app_name = "-".join(
     [slugify(PEACHJAM["APP_NAME"]), os.environ.get("DYNO", "django")]
