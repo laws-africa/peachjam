@@ -762,11 +762,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
         return fieldsets
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "registry":
-            kwargs["queryset"] = CourtRegistry.objects.select_related("court")
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
 
 @admin.register(Predicate)
 class PredicateAdmin(admin.ModelAdmin):
