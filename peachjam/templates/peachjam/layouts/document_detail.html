@@ -387,7 +387,7 @@
                                 </li>
                               {% endif %}
                             {% endfor %}
-                            {% for rel in document.relationships_as_object %}
+                            {% for rel in relationships_as_object %}
                               {% if rel.subject_work %}
                                 <li>
                                   {% translate rel.predicate.reverse_verb as verb %}
