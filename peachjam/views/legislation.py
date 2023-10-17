@@ -192,10 +192,13 @@ class LegislationDetailView(BaseDocumentDetailView):
     def get_latest_commencement_date(self):
         commencements = self.object.metadata_json.get("commencements", None)
         if commencements:
-            commencement_dates = [
-                commencement["date"] for commencement in commencements
-            ]
-            return datetime.strptime(max(commencement_dates), "%Y-%m-%d").date()
+            latest_commencement_date = max(
+                [commencement["date"] for commencement in commencements]
+            )
+            if latest_commencement_date:
+                return datetime.strptime(
+                    str(latest_commencement_date), "%Y-%m-%d"
+                ).date()
 
         return None
 
