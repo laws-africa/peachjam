@@ -190,16 +190,13 @@ class LegislationDetailView(BaseDocumentDetailView):
         return self.object.metadata_json.get("commenced", None)
 
     def get_latest_commencement_date(self):
-        commencements = self.object.metadata_json.get("commencements", None)
-        if commencements:
-            latest_commencement_date = max(
-                [commencement["date"] for commencement in commencements]
-            )
-            if latest_commencement_date:
-                return datetime.strptime(
-                    str(latest_commencement_date), "%Y-%m-%d"
-                ).date()
-
+        commencement_dates = [
+            commencement["date"]
+            for commencement in self.object.metadata_json.get("commencements", [])
+            if commencement["date"]
+        ]
+        if commencement_dates:
+            return datetime.strptime(str(max(commencement_dates)), "%Y-%m-%d").date()
         return None
 
     def set_unapplied_amendment_notice(self, notices):
