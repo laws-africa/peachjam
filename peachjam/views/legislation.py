@@ -41,7 +41,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         notices = super().get_notices()
         repeal = self.get_repeal_info()
         friendly_type = self.get_friendly_type()
-        commenced = self.get_commencement_info()
+        commenced, commenced_in_full = self.get_commencement_info()
 
         if self.object.metadata_json.get("disclaimer"):
             notices.append(
@@ -74,11 +74,26 @@ class LegislationDetailView(BaseDocumentDetailView):
                 notices.append(
                     {
                         "type": messages.WARNING,
-                        "html": _("This %(friendly_type)s will commence on %(date)s.")
+                        "html": _(
+                            "This %(friendly_type)s will come into force on %(date)s."
+                        )
                         % {
                             "friendly_type": friendly_type,
                             "date": format_date(latest_commencement_date, "j F Y"),
                         },
+                    }
+                )
+            # don't overwhelm users with commencement notices -- only add this if
+            # it is commenced in general, AND there isn't also a future commencement
+            elif not commenced_in_full:
+                notices.append(
+                    {
+                        "type": messages.WARNING,
+                        "html": _(
+                            "This %(friendly_type)s has not yet come into force in full."
+                            " See the Document detail tab for more information."
+                        )
+                        % {"friendly_type": friendly_type},
                     }
                 )
 
@@ -187,7 +202,11 @@ class LegislationDetailView(BaseDocumentDetailView):
         return self.object.metadata_json.get("work_amendments", None)
 
     def get_commencement_info(self):
-        return self.object.metadata_json.get("commenced", None)
+        """Returns commenced, commenced_in_full.
+        commenced_in_full defaults to True.
+        """
+        data = self.object.metadata_json
+        return data.get("commenced"), data.get("commenced_in_full", True)
 
     def get_latest_commencement_date(self):
         commencement_dates = [
