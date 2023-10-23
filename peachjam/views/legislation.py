@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from itertools import groupby
 
 from django.contrib import messages
 from django.template.defaultfilters import date as format_date
@@ -30,8 +29,6 @@ class LegislationDetailView(BaseDocumentDetailView):
         context = super().get_context_data(**kwargs)
         context["current_object_date"] = self.object.date.strftime("%Y-%m-%d")
         context["timeline"] = self.get_timeline()
-        # TODO: get rid of timeline_events once all Legislation objects have been re-ingested
-        context["timeline_events"] = self.get_timeline_events()
         context["friendly_type"] = self.get_friendly_type()
         context["notices"] = self.get_notices()
         context["child_documents"] = self.get_child_documents()
@@ -41,7 +38,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         notices = super().get_notices()
         repeal = self.get_repeal_info()
         friendly_type = self.get_friendly_type()
-        commenced = self.get_commencement_info()
+        commenced, commenced_in_full = self.get_commencement_info()
 
         if self.object.metadata_json.get("disclaimer"):
             notices.append(
@@ -74,11 +71,26 @@ class LegislationDetailView(BaseDocumentDetailView):
                 notices.append(
                     {
                         "type": messages.WARNING,
-                        "html": _("This %(friendly_type)s will commence on %(date)s.")
+                        "html": _(
+                            "This %(friendly_type)s will come into force on %(date)s."
+                        )
                         % {
                             "friendly_type": friendly_type,
                             "date": format_date(latest_commencement_date, "j F Y"),
                         },
+                    }
+                )
+            # don't overwhelm users with commencement notices -- only add this if
+            # it is commenced in general, AND there isn't also a future commencement
+            elif not commenced_in_full:
+                notices.append(
+                    {
+                        "type": messages.WARNING,
+                        "html": _(
+                            "This %(friendly_type)s has not yet come into force in full."
+                            " See the Document detail tab for more information."
+                        )
+                        % {"friendly_type": friendly_type},
                     }
                 )
 
@@ -187,7 +199,11 @@ class LegislationDetailView(BaseDocumentDetailView):
         return self.object.metadata_json.get("work_amendments", None)
 
     def get_commencement_info(self):
-        return self.object.metadata_json.get("commenced", None)
+        """Returns commenced, commenced_in_full.
+        commenced_in_full defaults to True.
+        """
+        data = self.object.metadata_json
+        return data.get("commenced"), data.get("commenced_in_full", True)
 
     def get_latest_commencement_date(self):
         commencement_dates = [
@@ -258,112 +274,6 @@ class LegislationDetailView(BaseDocumentDetailView):
                     )
 
         return timeline
-
-    def get_timeline_events(self):
-        events = []
-        work = self.object.metadata_json
-
-        assent_date = self.object.metadata_json.get("assent_date", None)
-        if assent_date:
-            events.append(
-                {
-                    "date": work.get("assent_date"),
-                    "event": "assent",
-                }
-            )
-
-        publication_date = self.object.metadata_json.get("publication_date", None)
-        if publication_date:
-            api_url = "https://api.laws.africa/v2/"
-            commons_url = "https://commons.laws.africa/"
-            publication_url = (work.get("publication_document") or {}).get("url")
-            if publication_url and api_url in publication_url:
-                publication_url = publication_url.replace(api_url, commons_url)
-
-            events.append(
-                {
-                    "date": publication_date,
-                    "event": "publication",
-                    "publication_name": work.get("publication_name"),
-                    "publication_number": work.get("publication_number"),
-                    "publication_url": publication_url,
-                }
-            )
-
-        commencement_date = self.object.metadata_json.get("commencement_date", None)
-        if commencement_date:
-            events.append(
-                {
-                    "date": commencement_date,
-                    "event": "commencement",
-                    "friendly_type": work.get("type_name"),
-                }
-            )
-
-        points_in_time = self.get_points_in_time()
-
-        amendments = self.get_work_amendments()
-        if amendments:
-            point_in_time_dates = [
-                point_in_time["date"] for point_in_time in points_in_time
-            ]
-            latest_expression_date = (
-                max(point_in_time_dates)
-                if point_in_time_dates
-                else self.object.date.strftime("%Y-%m-%d")
-            )
-
-            events.extend(
-                [
-                    {
-                        "date": amendment.get("date"),
-                        "event": "amendment",
-                        "amending_title": amendment.get("amending_title"),
-                        "amending_uri": amendment.get("amending_uri"),
-                        "unapplied_amendment": bool(
-                            amendment.get("date") not in point_in_time_dates
-                            and amendment.get("date") > latest_expression_date
-                        ),
-                    }
-                    for amendment in amendments
-                ]
-            )
-
-        repeal = self.get_repeal_info()
-        if repeal:
-            events.append(
-                {
-                    "date": repeal.get("date"),
-                    "event": "repeal",
-                    "repealing_title": repeal.get("repealing_title"),
-                    "repealing_uri": repeal.get("repealing_uri"),
-                }
-            )
-
-        events.sort(key=lambda event: event["date"])
-        events = [
-            {
-                "date": date,
-                "events": list(group),
-            }
-            for date, group in groupby(events, lambda event: event["date"])
-        ]
-
-        # fold in links to expressions corresponding to each event date (if any)
-        expressions = {
-            point_in_time["date"]: point_in_time["expressions"][0]
-            for point_in_time in points_in_time
-        }
-        for event in events:
-            for e in event["events"]:
-                del e["date"]
-            uri = expressions.get(event["date"], {}).get("expression_frbr_uri")
-            if uri:
-                event["expression_frbr_uri"] = uri
-
-        events.sort(key=lambda event: event["date"], reverse=True)
-
-        return events
 
     def get_child_documents(self):
         docs = (
