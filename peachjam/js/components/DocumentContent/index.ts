@@ -178,15 +178,15 @@ class DocumentContent {
       this.tocController?.addEventListener('itemTitleClicked', (e) => {
         if (this.originalDocument && this.documentElement) {
           const id = (e as CustomEvent).detail.target.getAttribute('href');
-          if (id) {
+          if (!id || id === '#') {
+            this.documentElement.replaceChildren(...Array.from(this.originalDocument.children).map(node => node.cloneNode(true)));
+          } else {
+            // @ts-ignore
             const sectionOfFocus = this.originalDocument.querySelector(id)?.cloneNode(true) as HTMLElement;
             if (sectionOfFocus) {
               // Delete content within document element and then append section of focus
               this.documentElement.replaceChildren(sectionOfFocus);
             }
-          } else {
-            // @ts-ignore
-            this.documentElement.replaceChildren(...Array.from(this.originalDocument.children).map(node => node.cloneNode(true)));
           }
         }
       });
@@ -196,6 +196,17 @@ class DocumentContent {
   setupTocForTab () {
     // If there is no toc item don't create and mount la-toc-controller
     const tocItems = this.getTocItems();
+
+    if (this.root.hasAttribute('data-toc-show-active-item-only')) {
+      // Add a "Show full text" item to the top of the TOC when the "show active item only" option is enabled
+      tocItems.unshift({
+        tag: 'H1',
+        title: i18next.t('Show full text'),
+        id: '',
+        children: []
+      });
+    }
+
     if (!tocItems.length) return false;
 
     this.tocController = createTocController(tocItems);

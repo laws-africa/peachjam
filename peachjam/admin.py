@@ -652,6 +652,8 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["nature"])
     fieldsets[3][1]["fields"].extend(["metadata_json"])
+    fieldsets[3][1]["fields"].extend(["commencements_json"])
+    fieldsets[3][1]["fields"].extend(["timeline_json"])
     fieldsets[2][1]["classes"] = ("collapse",)
     fieldsets[4][1]["fields"].extend(["parent_work"])
     readonly_fields = ["parent_work"] + list(DocumentAdmin.readonly_fields)

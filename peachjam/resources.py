@@ -321,7 +321,11 @@ class BaseDocumentResource(resources.ModelResource):
 
             # attach source file, but only if it was explicitly provided during import
             # the preferred source URL was set during import by the SourceFileWidget
-            if row.get("source_url") == instance.source_url and instance.source_url:
+            if (
+                instance.source_url
+                and row.get("source_url")
+                and instance.source_url in row.get("source_url")
+            ):
                 self.attach_source_file(instance, instance.source_url)
                 extract_content = True
 

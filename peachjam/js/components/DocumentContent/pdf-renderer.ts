@@ -153,21 +153,29 @@ class PdfRenderer {
       const pdf = await loadingTask.promise;
       this.root.removeAttribute('data-pdf-loading');
 
+      const canvas = document.createElement('canvas');
+
       for (let i = 0; i < pdf.numPages; i++) {
         const page = await pdf.getPage(i + 1);
-        await this.renderSinglePage(page, i, scale, containerWidth);
+        await this.renderSinglePage(page, i, scale, containerWidth, canvas);
         if (initialPage && initialPage === i + 1) {
           this.scrollToPage(i + 1);
         }
       }
+
+      // free up the canvas so that iOS doesn't complain about memory usage
+      // see https://pqina.nl/blog/total-canvas-memory-use-exceeds-the-maximum-limit/
+      canvas.width = 1;
+      canvas.height = 1;
+      const ctx = canvas.getContext('2d');
+      if (ctx) ctx.clearRect(0, 0, 1, 1);
     } catch (e) {
       console.log(e);
     }
   }
 
-  async renderSinglePage (page: any, index: number, scale: number, containerWidth: number) {
+  async renderSinglePage (page: any, index: number, scale: number, containerWidth: number, canvas: HTMLCanvasElement) {
     const viewport = page.getViewport({ scale });
-    const canvas = document.createElement('canvas');
     canvas.style.display = 'block';
     // set the logical size of the canvas to match the scaled-up size of the viewport
     canvas.width = viewport.width;
@@ -186,7 +194,7 @@ class PdfRenderer {
     pageContainer.dataset.page = String(index + 1);
     pageContainer.classList.add('pdf-content__page');
     pageContainer.style.position = 'relative';
-    pageContainer.appendChild(canvas);
+
     if (this.pdfContentWrapper) {
       this.pdfContentWrapper.appendChild(pageContainer);
     }
@@ -194,9 +202,30 @@ class PdfRenderer {
     // render the page
     await page.render(renderContext).promise;
     // add the text layer
-    pageContainer.appendChild(await this.addTextLayer(page, containerWidth, canvas));
+    pageContainer.append(this.addImageLayer(page, containerWidth, canvas));
+    pageContainer.append(await this.addTextLayer(page, containerWidth, canvas));
     // add image previews
     this.addPreviewPanel(canvas, index + 1);
+  }
+
+  addImageLayer (page: any, containerWidth: number, canvas: HTMLCanvasElement) {
+    const image = new Image();
+    image.src = canvas.toDataURL('image/jpeg');
+
+    // when rendering the image layer, we want the renderer to know that we'll place the image on top
+    // of a canvas that has been scaled up/down to fit into the containing div; so we need to calculate
+    // the scale required to go from the original PDF width, to the container width.
+    let viewport = page.getViewport({ scale: 1 });
+    const textScale = containerWidth / viewport.width;
+    // this viewport will have the correct scale to render image to, to be placed directly over the canvas
+    viewport = page.getViewport({ scale: textScale });
+
+    image.style.left = `${canvas.offsetLeft}px`;
+    image.style.top = `${canvas.offsetTop}px`;
+    image.style.height = `${viewport.height}px`;
+    image.style.width = `${viewport.width}px`;
+
+    return image;
   }
 
   async addTextLayer (page: any, containerWidth: number, canvas: HTMLCanvasElement) {
