@@ -197,6 +197,12 @@ class IndigoAdapter(Adapter):
             else:
                 raise error
 
+        # don't ingest stubs that don't have a publication document
+        if document["stub"]:
+            pubdoc = document["publication_document"]
+            if not pubdoc or not pubdoc["url"]:
+                return
+
         frbr_uri = FrbrUri.parse(document["frbr_uri"])
         title = document["title"]
         toc_json = self.get_toc_json(url)
