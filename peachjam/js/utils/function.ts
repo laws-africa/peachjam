@@ -105,7 +105,7 @@ export function wrapTocItems (root: HTMLElement, items: TOCItemType[]) {
     const item = items[i];
     const nextItem = i + 1 < items.length ? items[i + 1] : null;
     const nextId: string | null = nextItem ? nextItem.id : null;
-    const el: HTMLElement | null = root.querySelector(`#${item.id}`);
+    const el: HTMLElement | null = document.getElementById(item.id);
 
     if (el) {
       const wrapper = document.createElement('div');

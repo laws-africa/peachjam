@@ -505,6 +505,7 @@ CKEDITOR_CONFIGS = {
                 "Italic",
                 "Underline",
                 "Strike",
+                "Blockquote",
                 "SpellChecker",
                 "Undo",
                 "Redo",
