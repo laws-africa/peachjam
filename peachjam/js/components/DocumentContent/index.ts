@@ -172,20 +172,28 @@ class DocumentContent {
       this.originalDocument = this.documentElement.cloneNode(true) as HTMLElement;
 
       this.tocController?.addEventListener('itemTitleClicked', (e) => {
-        if (this.originalDocument && this.documentElement) {
-          const id = (e as CustomEvent).detail.target.getAttribute('href');
-          if (!id || id === '#') {
-            this.documentElement.replaceChildren(...Array.from(this.originalDocument.children).map(node => node.cloneNode(true)));
-          } else {
-            // @ts-ignore
-            const sectionOfFocus = this.originalDocument.querySelector(id)?.cloneNode(true) as HTMLElement;
-            if (sectionOfFocus) {
-              // Delete content within document element and then append section of focus
-              this.documentElement.replaceChildren(sectionOfFocus);
-            }
-          }
-        }
+        this.showDocumentPortion((e as CustomEvent).detail.target.getAttribute('href'));
       });
+
+      // now that the page has loaded, check if there is a hash in the URL and if so, activate the corresponding TOC item
+      if (window.location.hash) {
+        this.showDocumentPortion(window.location.hash);
+      }
+    }
+  }
+
+  showDocumentPortion (id: string) {
+    if (this.originalDocument && this.documentElement) {
+      if (!id || id === '#') {
+        this.documentElement.replaceChildren(...Array.from(this.originalDocument.children).map(node => node.cloneNode(true)));
+      } else {
+        // @ts-ignore
+        const sectionOfFocus = this.originalDocument.querySelector(id)?.cloneNode(true) as HTMLElement;
+        if (sectionOfFocus) {
+          // Delete content within document element and then append section of focus
+          this.documentElement.replaceChildren(sectionOfFocus);
+        }
+      }
     }
   }
 

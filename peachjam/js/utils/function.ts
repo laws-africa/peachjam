@@ -52,10 +52,12 @@ export function scrollToElement (elem: HTMLElement, callback: (element: HTMLElem
 export function generateHtmlTocItems (content: HTMLElement): TOCItemType[] {
   let stack: any;
   const items: TOCItemType[] = [];
+  const ids = new Map<string, number>();
 
   content.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5').forEach((heading) => {
     if (!heading.id) {
-      heading.id = heading.tagName + '_' + Math.floor(Math.random() * 10000);
+      ids.set(heading.tagName, (ids.get(heading.tagName) || 0) + 1);
+      heading.id = heading.tagName + '_' + ids.get(heading.tagName);
     }
 
     const item = {
