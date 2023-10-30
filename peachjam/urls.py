@@ -206,8 +206,8 @@ urlpatterns = [
         ArticleTopicListView.as_view(),
         name="article_topic_list",
     ),
-    path(
-        "articles/<str:date>/<str:author>/<slug:slug>",
+    re_path(
+        "^articles/(?P<date>[0-9]{4}-[0-9]{2}-[0-9]{2})/(?P<author>[-a-zA-Z0-9_]+)/(?P<slug>[-a-zA-Z0-9_]+)$",
         ArticleDetailView.as_view(),
         name="article_detail",
     ),
