@@ -71,7 +71,7 @@
                 {% trans "Document detail" %}
               </button>
             </li>
-            {% if timeline_events %}
+            {% if timeline %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
                         data-bs-toggle="tab"
@@ -413,7 +413,7 @@
             {% endblock %}
           </div>
         </div>
-        {% if timeline_events %}
+        {% if timeline %}
           <div class="tab-pane fade"
                id="history-tab"
                role="tabpanel"
