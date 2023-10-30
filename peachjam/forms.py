@@ -10,7 +10,14 @@ from django.template.loader import render_to_string
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
-from peachjam.models import AttachedFiles, CoreDocument, Ingestor, SourceFile
+from peachjam.models import (
+    AttachedFiles,
+    CoreDocument,
+    Ingestor,
+    Predicate,
+    SourceFile,
+    Work,
+)
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
 
@@ -82,6 +89,37 @@ class NewDocumentFormMixin:
     def adjust_fields(cls, fields):
         # don't include 'upload_field' when generating the form
         return [f for f in fields if f != "upload_file"]
+
+
+class RelatedJudgmentWidget(forms.MultiWidget):
+    def __init__(self, attrs=None):
+        widgets = (
+            forms.Select(attrs=attrs, choices=self.work_choices()),
+            forms.Select(attrs=attrs, choices=self.predicate_choices()),
+        )
+        super().__init__(widgets, attrs)
+
+    def decompress(self, value):
+        return (value.pk, value.title) if value else (None, None)
+
+    # def format_output(self, rendered_widgets):
+    #     return f"""
+    #         <div class="related-judgment">
+    #             {rendered_widgets[0]}
+    #             {rendered_widgets[1]}
+    #         </div>
+    #     """
+
+    def work_choices(self):
+        return [("", "---")] + [
+            (work.pk, work.frbr_uri)
+            for work in Work.objects.filter(documents__doc_type="judgment").distinct()
+        ]
+
+    def predicate_choices(self):
+        return [("", "---")] + [
+            (p.pk, p.name) for p in Predicate.objects.filter(slug="overturned-by")
+        ]
 
 
 class BaseDocumentFilterForm(forms.Form):
