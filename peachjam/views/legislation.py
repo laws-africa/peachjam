@@ -208,7 +208,7 @@ class LegislationDetailView(BaseDocumentDetailView):
     def get_latest_commencement_date(self):
         commencement_dates = [
             commencement["date"]
-            for commencement in self.object.metadata_json.get("commencements", [])
+            for commencement in self.object.metadata_json.get("commencements", []) or []
             if commencement["date"]
         ]
         if commencement_dates:
