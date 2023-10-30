@@ -127,7 +127,10 @@
           </la-akoma-ntoso>
         {% endif %}
         {% if display_type == 'html' %}
-          <div class="content content__html" lang="{{ document.language.iso }}">{{ document.content_html|safe }}</div>
+          <div class="content content__html frbr-doctype-{{ document.frbr_uri_doctype }} frbr-subtype-{{ document.frbr_uri_subtype }}"
+               lang="{{ document.language.iso }}">
+            {{ document.content_html|safe }}
+          </div>
         {% endif %}
         {% if display_type == 'pdf' %}
           <div class="content content__pdf">
