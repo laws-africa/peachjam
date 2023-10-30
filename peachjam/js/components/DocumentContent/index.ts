@@ -79,16 +79,12 @@ class DocumentContent {
       this.navOffCanvas = new OffCanvas(navOffCanvasElement);
       if (this.navOffCanvas.body) {
         this.setupResponsiveContentTransporter(navColumn, this.navOffCanvas.body, navContent);
-      }
-    }
-
-    // Close navOffCanvas on lac-toc title click
-    if (this.root.getAttribute('data-display-type') === 'akn') {
-      const element = this.root.querySelector('la-table-of-contents-controller');
-      if (element) {
-        element.addEventListener('itemTitleClicked', () => {
-          this.navOffCanvas?.hide();
-        });
+        const toc = this.root.querySelector('la-table-of-contents-controller');
+        if (toc) {
+          toc.addEventListener('itemTitleClicked', () => {
+            this.navOffCanvas?.hide();
+          });
+        }
       }
     }
   }
