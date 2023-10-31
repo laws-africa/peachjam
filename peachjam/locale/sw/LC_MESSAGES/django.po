@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-28 17:00+0200\n"
+"POT-Creation-Date: 2023-10-31 08:54+0300\n"
 "PO-Revision-Date: 2023-09-30 14:24\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -21,63 +21,63 @@ msgstr ""
 msgid "Import"
 msgstr "Ingiza/tuma"
 
-#: admin.py:365
+#: admin.py:375
 msgid "Key details"
 msgstr "Maelezo muhimu"
 
-#: admin.py:378
+#: admin.py:388
 msgid "Additional details"
 msgstr "Maelezo ya ziada"
 
-#: admin.py:391 admin.py:755
+#: admin.py:401 admin.py:761
 msgid "Work identification"
 msgstr "Utambulisho wa kazi"
 
-#: admin.py:404
+#: admin.py:414
 msgid "Content"
 msgstr "Maudhui"
 
-#: admin.py:412 admin.py:754
+#: admin.py:422 admin.py:760
 msgid "Advanced"
 msgstr "Ya hali ya juu"
 
-#: admin.py:653 models/judgment.py:370
+#: admin.py:665 models/judgment.py:376
 msgid "case number"
 msgstr "namba ya kesi"
 
-#: admin.py:654 models/judgment.py:371
+#: admin.py:666 models/judgment.py:377
 msgid "case numbers"
 msgstr "namba za kesi"
 
-#: admin.py:668 models/judgment.py:36 models/judgment.py:158
+#: admin.py:675 models/judgment.py:36 models/judgment.py:164
 msgid "judge"
 msgstr "jaji"
 
-#: admin.py:669 models/judgment.py:37 models/judgment.py:179
+#: admin.py:676 models/judgment.py:37 models/judgment.py:185
 msgid "judges"
 msgstr "majaji"
 
-#: admin.py:790
+#: admin.py:796
 msgid "Refreshing content in the background."
 msgstr "Inaonyesha upya maudhui kwa nyuma."
 
-#: admin.py:793
+#: admin.py:799
 msgid "Refresh content selected ingestors"
 msgstr "Rekebisha upya viingiza maudhui vilivyochaguliwa "
 
-#: admin.py:841
+#: admin.py:847
 msgid "Articles published."
 msgstr "Makala zilizochapishwa."
 
-#: admin.py:843
+#: admin.py:849
 msgid "Publish selected articles"
 msgstr "Chapisha makala zilizochaguliwa"
 
-#: admin.py:847
+#: admin.py:853
 msgid "Articles unpublished."
 msgstr "Makala ambazo hazijachapishwa."
 
-#: admin.py:849
+#: admin.py:855
 msgid "Unpublish selected articles"
 msgstr "Batilisha uchapishaji wa makala uliyochagua"
 
@@ -164,14 +164,14 @@ msgstr "Waandishi"
 #: models/core_document_model.py:791 models/ingestors.py:14
 #: models/ingestors.py:33 models/judgment.py:15 models/judgment.py:30
 #: models/judgment.py:45 models/judgment.py:60 models/judgment.py:74
-#: models/judgment.py:91 models/judgment.py:125 models/relationships.py:6
+#: models/judgment.py:91 models/judgment.py:131 models/relationships.py:6
 #: models/taxonomies.py:11
 msgid "name"
 msgstr "jina"
 
 #: models/author.py:11 models/core_document_model.py:45
 #: models/core_document_model.py:73 models/core_document_model.py:89
-#: models/judgment.py:92 models/judgment.py:126
+#: models/judgment.py:92 models/judgment.py:132
 msgid "code"
 msgstr "mfumo"
 
@@ -189,7 +189,7 @@ msgstr "waandishi"
 #: models/citations.py:16 models/core_document_model.py:714
 #: models/core_document_model.py:740 models/core_document_model.py:807
 #: models/core_document_model.py:836 models/core_document_model.py:862
-#: models/judgment.py:365 models/taxonomies.py:46
+#: models/judgment.py:371 models/taxonomies.py:46
 msgid "document"
 msgstr "hati"
 
@@ -569,7 +569,7 @@ msgstr "wezeshwa"
 msgid "attorney"
 msgstr "wakili"
 
-#: models/judgment.py:22 models/judgment.py:182
+#: models/judgment.py:22 models/judgment.py:188
 msgid "attorneys"
 msgstr "mawakili"
 
@@ -581,7 +581,7 @@ msgstr "matokeo ya agizo"
 msgid "order outcomes"
 msgstr "kuagiza matokeo"
 
-#: models/judgment.py:66 models/judgment.py:358
+#: models/judgment.py:66 models/judgment.py:364
 msgid "matter type"
 msgstr "aina ya jambo"
 
@@ -601,7 +601,7 @@ msgstr "daraja la mahakama"
 msgid "court classes"
 msgstr "makundi ya mahakama"
 
-#: models/judgment.py:110 models/judgment.py:123 models/judgment.py:169
+#: models/judgment.py:110 models/judgment.py:129 models/judgment.py:175
 msgid "court"
 msgstr "mahakama"
 
@@ -609,79 +609,79 @@ msgstr "mahakama"
 msgid "courts"
 msgstr "mahakama"
 
-#: models/judgment.py:129
+#: models/judgment.py:135
 msgid "court registry"
 msgstr "usajili wa mahakama"
 
-#: models/judgment.py:130
+#: models/judgment.py:136
 msgid "court registries"
 msgstr "masijala za mahakama"
 
-#: models/judgment.py:156 models/judgment.py:231
+#: models/judgment.py:162 models/judgment.py:237
 msgid "judgment"
 msgstr "hukumu"
 
-#: models/judgment.py:191
+#: models/judgment.py:197
 msgid "case summary"
 msgstr "muhtasari wa kesi"
 
-#: models/judgment.py:192
+#: models/judgment.py:198
 msgid "flynote"
 msgstr "mada"
 
-#: models/judgment.py:194
+#: models/judgment.py:200
 msgid "case name"
 msgstr "jina la kesi"
 
-#: models/judgment.py:196
+#: models/judgment.py:202
 msgid "Party names for use in title"
 msgstr "Majina ya Upande mmoja kwa ajili ya matumizi katika cheo"
 
-#: models/judgment.py:202
+#: models/judgment.py:208
 msgid "serial number"
 msgstr "mfuatano wa namba"
 
-#: models/judgment.py:204
+#: models/judgment.py:210
 msgid "Serial number for MNC, unique for a year and an author."
 msgstr "Mfuatano wa namba kwa MNC, ya kipekee kwa mwaka mmoja na mwandishi."
 
-#: models/judgment.py:207
+#: models/judgment.py:213
 msgid "serial number override"
 msgstr "kubadilisha mfuatano wa namba"
 
-#: models/judgment.py:210
+#: models/judgment.py:216
 msgid "Specific MNC serial number assigned by the court."
 msgstr "Mfuatano wa namba maalumu ya MNC iliyotolewa na mahakama."
 
-#: models/judgment.py:214
+#: models/judgment.py:220
 msgid "MNC"
 msgstr "MNC"
 
-#: models/judgment.py:216
+#: models/judgment.py:222
 msgid "Media neutral citation"
 msgstr "Nukuu isiyoegemea upande wowote"
 
-#: models/judgment.py:232
+#: models/judgment.py:238
 msgid "judgments"
 msgstr "hukumu"
 
-#: models/judgment.py:344
+#: models/judgment.py:350
 msgid "Full case number as printed on judgment"
 msgstr "Namba kamili ya kesi kama ilivyochapishwa kwenye hukumu"
 
-#: models/judgment.py:348
+#: models/judgment.py:354
 msgid "Override for full case number string"
 msgstr "Batilisha kwa mfuatano wa nukuu ya kesi kamili"
 
-#: models/judgment.py:350
+#: models/judgment.py:356
 msgid "string"
 msgstr "nukuu nyingi"
 
-#: models/judgment.py:351 templates/peachjam/_timeline_events.html:76
+#: models/judgment.py:357
 msgid "number"
 msgstr "namba"
 
-#: models/judgment.py:352
+#: models/judgment.py:358
 msgid "year"
 msgstr "mwaka"
 
@@ -838,19 +838,19 @@ msgstr "mada ya hati"
 msgid "document topics"
 msgstr "mada za hati"
 
-#: settings.py:236
+#: settings.py:238
 msgid "English"
 msgstr "Kiingereza"
 
-#: settings.py:237
+#: settings.py:239
 msgid "French"
 msgstr "Kifaransa"
 
-#: settings.py:238
+#: settings.py:240
 msgid "Portuguese"
 msgstr "Kireno"
 
-#: settings.py:239
+#: settings.py:241
 msgid "Swahili"
 msgstr "Kiswahili"
 
@@ -907,10 +907,12 @@ msgstr "Umesahau nenosiri lako?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid "\n"
+msgid ""
+"\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr "\n"
+msgstr ""
+"\n"
 "            Ingia na %(provider.name)s\n"
 "          "
 
@@ -1182,7 +1184,7 @@ msgid "Taxonomies"
 msgstr "Taksonomia"
 
 #: templates/peachjam/_taxonomy_list.html:23
-#: templates/peachjam/taxonomy_first_level_detail.html:28
+#: templates/peachjam/taxonomy_first_level_detail.html:31
 msgid "No taxonomies found"
 msgstr "Hakuna taksonomia zilizopatikana"
 
@@ -1430,40 +1432,17 @@ msgstr "Tarehe ya taarifa: 14 Novemba 2022"
 msgid "History of this document"
 msgstr "Historia ya hati hii"
 
-#: templates/peachjam/_timeline_events.html:15
-#: templates/peachjam/_timeline_events.html:55
+#: templates/peachjam/_timeline_events.html:14
 msgid "this version"
 msgstr "toleo hili"
 
-#: templates/peachjam/_timeline_events.html:18
-#: templates/peachjam/_timeline_events.html:59
+#: templates/peachjam/_timeline_events.html:17
 msgid "amendment not yet applied"
 msgstr "marekebisho bado hayajatumika"
 
-#: templates/peachjam/_timeline_events.html:40
-#: templates/peachjam/_timeline_events.html:86
+#: templates/peachjam/_timeline_events.html:39
 msgid "Read this version"
 msgstr "Soma toleo hili"
-
-#: templates/peachjam/_timeline_events.html:68
-msgid "Amended by"
-msgstr "Imerekebishwa na"
-
-#: templates/peachjam/_timeline_events.html:71
-msgid "Assented to"
-msgstr "Imeidhinishwa"
-
-#: templates/peachjam/_timeline_events.html:73
-msgid "Commences"
-msgstr "Kuanza"
-
-#: templates/peachjam/_timeline_events.html:75
-msgid "Published in"
-msgstr "Imechapishwa katika"
-
-#: templates/peachjam/_timeline_events.html:78
-msgid "Repealed by"
-msgstr "Imefutwa na"
 
 #: templates/peachjam/_years_list.html:7 templates/peachjam/_years_list.html:24
 msgid "All years"
@@ -1706,37 +1685,65 @@ msgstr "Masharti ya matumizi"
 msgid "Navigation"
 msgstr "Urambazaji"
 
-#: views/legislation.py:54
+#: views/legislation.py:59
 #, python-format
 msgid "This %(friendly_type)s was repealed on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 msgstr "Hii %(friendly_type)s ilifutwa tarehe %(date)s na <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
-#: views/legislation.py:67
-#, python-format
-msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+#: views/legislation.py:75
+#, fuzzy, python-format
+#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+msgid "This %(friendly_type)s will come into force on %(date)s."
+msgstr "Hii %(friendly_type)s bado haijaanza na bado siyo sheria."
+
+#: views/legislation.py:90
+#, fuzzy, python-format
+#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+msgid "This %(friendly_type)s has not yet come into force in full. See the Document detail tab for more information."
 msgstr "Hii %(friendly_type)s bado haijaanza na bado siyo sheria."
 
 #: views/legislation.py:101
+#, fuzzy, python-format
+#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+msgid "This %(friendly_type)s has not yet come into force."
+msgstr "Hii %(friendly_type)s bado haijaanza na bado siyo sheria."
+
+#: views/legislation.py:134
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it was repealed."
 msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa wakati wa kufutwa."
 
-#: views/legislation.py:115
+#: views/legislation.py:148
 #, python-format
 msgid "This is the latest version of this %(friendly_type)s."
 msgstr "Hili ni toleo la hivi karibuni la %(friendly_type)s hii."
 
-#: views/legislation.py:130
+#: views/legislation.py:163
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was repealed</a>."
 msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa kutoka %(date_from)s hadi %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Soma toleo kama lilivyokuwa wakati lilipofutwa</a>."
 
-#: views/legislation.py:135
-#, python-format
-msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
+#: views/legislation.py:168
+#, fuzzy, python-format
+#| msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
+msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the latest available version</a>."
 msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa kuanzia %(date_from)s hadi %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Soma toleo linalotumika sasa</a>."
 
-#: views/legislation.py:176
+#: views/legislation.py:223
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Kuna marekebisho ambayo hayajatekelezwa ambayo bado hayajatekelezwa. Tazama kichupo cha Historia kwa habari zaidi."
 
+#~ msgid "Amended by"
+#~ msgstr "Imerekebishwa na"
+
+#~ msgid "Assented to"
+#~ msgstr "Imeidhinishwa"
+
+#~ msgid "Commences"
+#~ msgstr "Kuanza"
+
+#~ msgid "Published in"
+#~ msgstr "Imechapishwa katika"
+
+#~ msgid "Repealed by"
+#~ msgstr "Imefutwa na"

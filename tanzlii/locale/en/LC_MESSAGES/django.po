@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-30 10:34+0200\n"
+"POT-Creation-Date: 2023-10-31 08:54+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,20 +26,20 @@ msgstr ""
 msgid "Swahili"
 msgstr ""
 
-#: templates/liiweb/home.html:10
+#: templates/liiweb/home.html:12
 msgid "Karibu Katika Mfumo wa Taarifa za Maamuzi, Sheria na Kanuni za Tanzania"
 msgstr ""
 
-#: templates/liiweb/home.html:12
+#: templates/liiweb/home.html:14
 msgid "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 msgstr ""
 
-#: templates/liiweb/home.html:21 templates/peachjam/_header.html:44
+#: templates/liiweb/home.html:23 templates/peachjam/_header.html:46
 #: templates/peachjam/about.html:4
 msgid "About"
 msgstr ""
 
-#: templates/liiweb/home.html:24 templates/peachjam/about.html:11
+#: templates/liiweb/home.html:26 templates/peachjam/about.html:11
 msgid "TanzLII is a project of the Tanzanian Judiciary. We aim to support the rule of law by publishing the law of Tanzania for free online access."
 msgstr ""
 
@@ -51,27 +51,27 @@ msgstr ""
 msgid "Our partners"
 msgstr ""
 
-#: templates/peachjam/_header.html:8
+#: templates/peachjam/_header.html:10
 msgid "Judgments"
 msgstr ""
 
-#: templates/peachjam/_header.html:14
+#: templates/peachjam/_header.html:16
 msgid "Legislation"
 msgstr ""
 
-#: templates/peachjam/_header.html:20
+#: templates/peachjam/_header.html:22
 msgid "Law Reform"
 msgstr ""
 
-#: templates/peachjam/_header.html:26
+#: templates/peachjam/_header.html:28
 msgid "Gazettes"
 msgstr ""
 
-#: templates/peachjam/_header.html:32
+#: templates/peachjam/_header.html:34
 msgid "Speeches"
 msgstr ""
 
-#: templates/peachjam/_header.html:38
+#: templates/peachjam/_header.html:40
 msgid "JOT Documents and Guidelines"
 msgstr ""
 
