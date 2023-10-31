@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path, re_path
+from django.urls import include, path, re_path, register_converter
 from django.views.decorators.cache import cache_page
 
 from peachjam.feeds import (
@@ -27,6 +27,7 @@ from peachjam.feeds import (
     LegalInstrumentAtomSiteNewsFeed,
     LegislationAtomSiteNewsFeed,
 )
+from peachjam.helpers import ISODateConverter
 from peachjam.views import (
     AboutPageView,
     ArticleDetailView,
@@ -67,6 +68,9 @@ from peachjam.views import (
     UserProfileDetailView,
 )
 from peachjam.views.metabase_stats import MetabaseStatsView
+
+register_converter(ISODateConverter, "isodate")
+
 
 # cache duration for most cached pages
 CACHE_DURATION = 60 * 60 * 24
@@ -206,8 +210,8 @@ urlpatterns = [
         ArticleTopicListView.as_view(),
         name="article_topic_list",
     ),
-    re_path(
-        "^articles/(?P<date>[0-9]{4}-[0-9]{2}-[0-9]{2})/(?P<author>[-a-zA-Z0-9_]+)/(?P<slug>[-a-zA-Z0-9_]+)$",
+    path(
+        "articles/<isodate:date>/<str:author>/<slug:slug>",
         ArticleDetailView.as_view(),
         name="article_detail",
     ),

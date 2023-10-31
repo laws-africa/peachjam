@@ -2,6 +2,7 @@ import os
 import string
 import subprocess
 import tempfile
+from datetime import datetime
 from functools import wraps
 
 from django.utils.translation import get_language_from_request
@@ -57,3 +58,15 @@ def chunks(lst, n):
     """Yield successive n-sized chunks from list."""
     for i in range(n):
         yield lst[i::n]
+
+
+class ISODateConverter:
+    regex = r"\d{4}-\d{2}-\d{2}"
+
+    def to_python(self, value):
+        # invalid values will raise ValueError which will raise 404
+        return datetime.strptime(value, "%Y-%m-%d").date()
+
+    def to_url(self, value):
+        # invalid values will raise ValueError which will raise NoReverseMatch
+        return datetime.strptime(value, "%Y-%m-%d").date().strftime("%Y-%m-%d")
