@@ -166,7 +166,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                 else:
                     msg = _(
                         "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. "
-                        ' <a href="%(expression_frbr_uri)s">Read the version currently in force</a>.'
+                        ' <a href="%(expression_frbr_uri)s">Read the latest available version</a>.'
                     )
 
                 notices.append(
