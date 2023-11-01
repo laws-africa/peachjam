@@ -194,6 +194,7 @@ class BaseDocumentDetailView(DetailView):
         docs = sorted(
             list(
                 CoreDocument.objects.prefetch_related("work")
+                .select_related("nature")
                 .filter(work__in=works)
                 .distinct("work_frbr_uri")
                 .order_by("work_frbr_uri", "-date")
