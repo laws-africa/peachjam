@@ -1,0 +1,10 @@
+{% extends "liiweb/home.html" %}
+{% load i18n static %}
+{% block hero-headings %}
+  <h1 class="mb-4">{% trans 'Welcome to Rwanda Legal Information Institute' %}</h1>
+  <h4 class="mb-4">
+    {% blocktrans trimmed %}
+  Free access to the law of Rwanda. RwandaLII is a member of the community of African LIIs and of the Free Access to Law Movement.
+  {% endblocktrans %}
+  </h4>
+{% endblock %}
