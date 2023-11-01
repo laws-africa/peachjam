@@ -27,24 +27,28 @@ class OffCanvas {
 class DocumentContent {
   protected root: HTMLElement;
   private pdfRenderer: PdfRenderer | undefined;
-  private searchApp: any;
   private navOffCanvas: OffCanvas | undefined;
-  private enchrichmentsManager: EnrichmentsManager | null = null;
+  private enrichmentsManager: EnrichmentsManager | null = null;
   private originalDocument: HTMLElement | undefined;
   private tocController: HTMLElement| null = null;
   private documentElement: Element | null;
+  private tocShowActiveItemOnly: boolean = false;
+  private displayType: string;
+  private tocItemIndex = new Map<String, any>();
+  private activeTocItem: any = null;
 
   constructor (root: HTMLElement) {
     this.root = root;
     this.documentElement = this.root.querySelector('.content');
+    this.displayType = this.root.getAttribute('data-display-type') || '';
 
     this.setupTabs();
-    this.setupNav();
+    this.setupOffCanvasNav();
     this.setupPdf();
     this.setupSearch();
     this.setupEnrichments();
     this.setSharedPortion();
-    if (this.root.getAttribute('data-display-type') !== 'pdf') {
+    if (this.displayType !== 'pdf') {
       // for PDFs, this will be done once the pages are rendered
       this.setupPopups();
     }
@@ -54,14 +58,14 @@ class DocumentContent {
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
     const pdfPreviewsTabTriggerEl = this.root.querySelector('#pdf-previews-tab');
-    const tocSetupOnTab = this.setupTocForTab();
+    const tocCreated = this.setupToc();
 
     // If toc setup and mounted successfully, activate toc tab otherwise activate search tab
-    if (tocSetupOnTab && tocTabTriggerEl) {
+    if (tocCreated && tocTabTriggerEl) {
       tocTabTriggerEl.classList.remove('d-none');
       const tocTab = new window.bootstrap.Tab(tocTabTriggerEl);
       tocTab.show();
-    } else if (this.root.getAttribute('data-display-type') === 'pdf' && pdfPreviewsTabTriggerEl) {
+    } else if (this.displayType === 'pdf' && pdfPreviewsTabTriggerEl) {
       const pdfPreviewsTab = new window.bootstrap.Tab(pdfPreviewsTabTriggerEl);
       pdfPreviewsTab.show();
     } else if (searchTabTriggerEl) {
@@ -70,7 +74,7 @@ class DocumentContent {
     }
   }
 
-  setupNav () {
+  setupOffCanvasNav () {
     const navColumn: HTMLElement | null = this.root.querySelector('#navigation-column');
     const navContent: HTMLElement | null = this.root.querySelector('#navigation-content .navigation__inner');
     const navOffCanvasElement: HTMLElement | null = this.root.querySelector('#navigation-offcanvas');
@@ -81,21 +85,11 @@ class DocumentContent {
         this.setupResponsiveContentTransporter(navColumn, this.navOffCanvas.body, navContent);
       }
     }
-
-    // Close navOffCanvas on lac-toc title click
-    if (this.root.getAttribute('data-display-type') === 'akn') {
-      const element = this.root.querySelector('la-table-of-contents-controller');
-      if (element) {
-        element.addEventListener('itemTitleClicked', () => {
-          this.navOffCanvas?.hide();
-        });
-      }
-    }
   }
 
   setupPdf () {
     // if pdf setup pdf renderer instance
-    if (this.root.getAttribute('data-display-type') === 'pdf') {
+    if (this.displayType === 'pdf') {
       // get dataset attributes
       const pdfAttrsElement: HTMLElement | null = this.root.querySelector('[data-pdf]');
       if (pdfAttrsElement) {
@@ -108,8 +102,8 @@ class DocumentContent {
         this.navOffCanvas?.hide();
       };
       this.pdfRenderer.onPdfLoaded = () => {
-        if (this.enchrichmentsManager) {
-          this.enchrichmentsManager.setupPdfCitationLinks();
+        if (this.enrichmentsManager) {
+          this.enrichmentsManager.setupPdfCitationLinks();
         }
         this.setupPopups();
 
@@ -124,11 +118,11 @@ class DocumentContent {
   setupSearch () {
     const targetMountElement = this.root.querySelector('[data-doc-search]');
     if (targetMountElement) {
-      this.searchApp = createAndMountApp({
+      createAndMountApp({
         component: DocumentSearch,
         props: {
           document: this.documentElement,
-          docType: this.root.getAttribute('data-display-type'),
+          docType: this.displayType,
           mountElement: targetMountElement
         },
         use: [vueI18n],
@@ -168,46 +162,22 @@ class DocumentContent {
     , 200));
   }
 
-  /**
-   * Setup the TOC so that when an item is activated, only the content for that item is shown in the document view.
-   */
-  setupTocShowActiveItemOnly () {
-    if (this.documentElement) {
-      this.originalDocument = this.documentElement.cloneNode(true) as HTMLElement;
+  setupToc () {
+    this.tocShowActiveItemOnly = this.root.hasAttribute('data-toc-show-active-item-only');
 
-      this.tocController?.addEventListener('itemTitleClicked', (e) => {
-        if (this.originalDocument && this.documentElement) {
-          const id = (e as CustomEvent).detail.target.getAttribute('href');
-          if (!id || id === '#') {
-            this.documentElement.replaceChildren(...Array.from(this.originalDocument.children).map(node => node.cloneNode(true)));
-          } else {
-            // @ts-ignore
-            const sectionOfFocus = this.originalDocument.querySelector(id)?.cloneNode(true) as HTMLElement;
-            if (sectionOfFocus) {
-              // Delete content within document element and then append section of focus
-              this.documentElement.replaceChildren(sectionOfFocus);
-            }
-          }
-        }
-      });
-    }
-  }
-
-  setupTocForTab () {
     // If there is no toc item don't create and mount la-toc-controller
     const tocItems = this.getTocItems();
-
-    if (this.root.hasAttribute('data-toc-show-active-item-only')) {
-      // Add a "Show full text" item to the top of the TOC when the "show active item only" option is enabled
-      tocItems.unshift({
-        tag: 'H1',
-        title: i18next.t('Show full text'),
-        id: '',
-        children: []
-      });
-    }
-
     if (!tocItems.length) return false;
+
+    // index from id to TOC items
+    const indexItems = (items: any[]) => {
+      for (const item of items) {
+        // @ts-ignore
+        this.tocItemIndex.set(item.id, item);
+        indexItems(item.children);
+      }
+    };
+    indexItems(tocItems);
 
     this.tocController = createTocController(tocItems);
     // @ts-ignore
@@ -217,14 +187,24 @@ class DocumentContent {
     if (!tocContainer) return;
     tocContainer.appendChild(this.tocController);
 
-    if (this.root.hasAttribute('data-toc-show-active-item-only')) {
-      this.setupTocShowActiveItemOnly();
+    if (this.tocShowActiveItemOnly && this.documentElement) {
+      this.originalDocument = this.documentElement.cloneNode(true) as HTMLElement;
     }
 
     this.tocController.addEventListener('itemTitleClicked', (e) => {
       // @ts-ignore
       this.setSharedPortion(e.target?.item?.title);
+      // hide off-canvas nav, if necessary
+      this.navOffCanvas?.hide();
+      if (this.tocShowActiveItemOnly) {
+        this.showDocumentPortion((e as CustomEvent).detail.target.getAttribute('href'));
+      }
     });
+
+    // now that the page has loaded, check if there is a hash in the URL and if so, activate the corresponding TOC item
+    if (window.location.hash) {
+      this.showDocumentPortion(window.location.hash);
+    }
 
     return true;
   }
@@ -232,12 +212,12 @@ class DocumentContent {
   getTocItems = () => {
     let items = [];
 
-    if (this.root.getAttribute('data-display-type') === 'akn') {
+    if (this.displayType === 'akn') {
       const tocElement: HTMLElement | null = this.root.querySelector('#akn_toc_json');
       if (tocElement) {
         items = JSON.parse(tocElement.textContent as string) || [];
       }
-    } else if (this.root.getAttribute('data-display-type') === 'html') {
+    } else if (this.displayType === 'html') {
       const content: HTMLElement | null = this.root.querySelector('.content__html');
       if (content) {
         items = generateHtmlTocItems(content);
@@ -245,13 +225,33 @@ class DocumentContent {
       }
     }
 
+    if (this.tocShowActiveItemOnly) {
+      // Add a "Show full text" item to the top of the TOC when the "show active item only" option is enabled
+      items.unshift({
+        tag: 'H1',
+        title: i18next.t('Show full text'),
+        id: '',
+        children: []
+      });
+    }
+
+    // recursively add parent and depth information
+    function addParentAndDepth (items: any[], parent: any = null, depth: number = 1) {
+      for (const item of items) {
+        item.parent = parent;
+        item.depth = depth;
+        addParentAndDepth(item.children, item, depth + 1);
+      }
+    }
+    addParentAndDepth(items);
+
     return items;
   }
 
   setupEnrichments () {
     const contentAndEnrichmentsElement = this.root.querySelector('.content-and-enrichments');
     if (!contentAndEnrichmentsElement) return;
-    this.enchrichmentsManager = new EnrichmentsManager(contentAndEnrichmentsElement as HTMLElement);
+    this.enrichmentsManager = new EnrichmentsManager(contentAndEnrichmentsElement as HTMLElement);
   }
 
   setupPopups () {
@@ -272,6 +272,35 @@ class DocumentContent {
     el.popups = true;
     el.provider = '//' + window.location.host;
     this.documentElement.appendChild(el);
+  }
+
+  /** Show only the portion of the document identified by the given ID, or the entire document if no ID is given. */
+  showDocumentPortion (id: string) {
+    // strip leading #
+    if (id && id.startsWith('#')) id = id.substring(1);
+
+    if (this.originalDocument && this.documentElement) {
+      if (!id) {
+        // show entire document
+        this.documentElement.replaceChildren(...Array.from(this.originalDocument.children).map(node => node.cloneNode(true)));
+        this.activeTocItem = null;
+      } else {
+        // find the owning portion for this portion, by looking for the container that has a TOC entry of depth 1
+        // @ts-ignore
+        let tocItem = this.tocItemIndex.get(id);
+        while (tocItem && tocItem.depth > 1) {
+          tocItem = tocItem.parent;
+        }
+        if (!tocItem) return;
+
+        // swap in the main owner of this portion, if necessary
+        if (this.activeTocItem !== tocItem) {
+          const portion = this.originalDocument.querySelector(`[id="${tocItem.id}"]`)?.cloneNode(true) as HTMLElement;
+          this.documentElement.replaceChildren(portion);
+          this.activeTocItem = tocItem;
+        }
+      }
+    }
   }
 
   /**

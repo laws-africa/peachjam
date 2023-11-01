@@ -1,6 +1,6 @@
 from django.db import models
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, DocumentNature
 
 
 class Book(CoreDocument):
@@ -8,7 +8,10 @@ class Book(CoreDocument):
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"
-        self.frbr_uri_subtype = "book"
+        if not self.nature:
+            self.nature = DocumentNature.objects.get_or_create(
+                code="book", defaults={"name": "Book"}
+            )[0]
         self.doc_type = "book"
         return super().pre_save()
 
@@ -18,6 +21,9 @@ class Journal(CoreDocument):
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"
-        self.frbr_uri_subtype = "journal"
+        if not self.nature:
+            self.nature = DocumentNature.objects.get_or_create(
+                code="journal", defaults={"name": "Journal"}
+            )[0]
         self.doc_type = "journal"
         return super().pre_save()
