@@ -316,6 +316,23 @@ jobs:
           git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/obl-microsites'
           git_push_flags: '--force'
 
+  deploy-rwandalii:
+    if: ${{ always() }}
+    needs: deploy-nigerialii
+    name: Deploy to rwandalii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: git push to rwandalii.laws.africa
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/rwandalii-peachjam'
+          git_push_flags: '--force'
+
   deploy-lii:
     if: ${{ always() }}
     needs: deploy-eswatinilii

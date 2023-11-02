@@ -125,7 +125,17 @@ class DocumentDetailViewResolver(View):
         except ValueError:
             raise Http404()
 
-        obj, exact = CoreDocument.objects.best_for_frbr_uri(frbr_uri, get_language())
+        # ensure portion is ignored when looking for a document
+        portion = parsed_frbr_uri.portion
+        parsed_frbr_uri.portion = None
+        uri_to_search = (
+            parsed_frbr_uri.expression_uri()
+            if parsed_frbr_uri.expression_date
+            else parsed_frbr_uri.work_uri()
+        )
+        obj, exact = CoreDocument.objects.best_for_frbr_uri(
+            uri_to_search, get_language()
+        )
 
         if not obj:
             resolver = RedirectResolver(settings.PEACHJAM["APP_NAME"])
@@ -135,8 +145,12 @@ class DocumentDetailViewResolver(View):
                 return redirect(url)
             raise Http404()
 
-        if not exact:
-            return redirect(obj.get_absolute_url())
+        if not exact or portion:
+            url = obj.get_absolute_url()
+            # this translates from /akn/.../~sec_2 to /akn/.../#sec_2
+            if portion:
+                url = url + "#" + portion
+            return redirect(url)
 
         view_class = registry.views.get(obj.doc_type)
         if view_class:

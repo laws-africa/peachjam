@@ -235,8 +235,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         # set publication_url
         publication_date = work.get("publication_date")
         if publication_date:
-            # TODO: update to v3 throughout
-            api_url = "https://api.laws.africa/v2/"
+            api_url = "https://api.laws.africa/v3/"
             commons_url = "https://commons.laws.africa/"
             publication_url = (work.get("publication_document") or {}).get("url")
             if publication_url and api_url in publication_url:
