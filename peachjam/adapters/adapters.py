@@ -395,8 +395,9 @@ class IndigoAdapter(Adapter):
                         object_work=amending_work,
                     )
 
-        if imported_document["commencements"]:
-            for commencement in imported_document["commencements"]:
+        commencements = created_document.commencements_json
+        if commencements:
+            for commencement in commencements:
                 if (
                     commencement["commencing_frbr_uri"]
                     and commencement["commencing_title"]
