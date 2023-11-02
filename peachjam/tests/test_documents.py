@@ -1,6 +1,8 @@
+from datetime import date
+
 from django.test import TestCase
 
-from peachjam.models import CoreDocument
+from peachjam.models import Book, CoreDocument, Country, Journal, Language
 
 
 class CoreDocumentTestCase(TestCase):
@@ -81,3 +83,27 @@ ZAGPPHC 1063</a>.</p>
             ["/akn/za/judgment/zagpphc/2012/196", "/akn/za/judgment/zagpphc/2016/1063"],
             frbr_uris,
         )
+
+    def test_book(self):
+        book = Book(
+            jurisdiction=Country.objects.get(pk="ZM"),
+            date=date(2020, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_number="test",
+            title="test",
+        )
+        book.save()
+        self.assertEqual("doc", book.frbr_uri_doctype)
+        self.assertEqual("book", book.frbr_uri_subtype)
+
+    def test_journal(self):
+        journal = Journal(
+            jurisdiction=Country.objects.get(pk="ZM"),
+            date=date(2020, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_number="test",
+            title="test",
+        )
+        journal.save()
+        self.assertEqual("doc", journal.frbr_uri_doctype)
+        self.assertEqual("journal", journal.frbr_uri_subtype)

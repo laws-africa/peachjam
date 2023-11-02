@@ -659,7 +659,9 @@ class CoreDocument(PolymorphicModel):
         else:
             for citation_link in CitationLink.objects.filter(document_id=self.pk):
                 try:
-                    work_frbr_uris.add(FrbrUri.parse(citation_link.url).work_uri())
+                    uri = FrbrUri.parse(citation_link.url)
+                    uri.portion = None
+                    work_frbr_uris.add(uri.work_uri())
                 except ValueError:
                     # ignore malformed FRBR URIs
                     pass
