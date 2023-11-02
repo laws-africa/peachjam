@@ -330,7 +330,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/rwandalii'
+          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/rwandalii-peachjam'
           git_push_flags: '--force'
 
   deploy-lii:
