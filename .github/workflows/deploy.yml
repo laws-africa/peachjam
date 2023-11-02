@@ -319,7 +319,7 @@ jobs:
   deploy-rwandalii:
     if: ${{ always() }}
     needs: deploy-nigerialii
-    name: Deploy to lii
+    name: Deploy to rwandalii
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
