@@ -70,3 +70,11 @@ class ISODateConverter:
     def to_url(self, value):
         # invalid values will raise ValueError which will raise NoReverseMatch
         return datetime.strptime(value, "%Y-%m-%d").date().strftime("%Y-%m-%d")
+
+
+def parse_utf8_html(html):
+    """Parse html assuming utf8 encoding and return lxml tree."""
+    import lxml.html
+
+    parser = lxml.html.HTMLParser(encoding="utf-8")
+    return lxml.html.fromstring(html, parser=parser)
