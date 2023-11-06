@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-31 09:30+0200\n"
+"POT-Creation-Date: 2023-10-31 08:54+0300\n"
 "PO-Revision-Date: 2023-09-19 11:54\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -134,8 +134,7 @@ msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 msgid "Judgments"
 msgstr "Hukumu"
 
-#: views/legislation.py:99
+#: views/legislation.py:110
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Sheria"
-

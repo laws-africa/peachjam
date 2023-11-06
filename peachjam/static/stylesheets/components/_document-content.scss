@@ -19,6 +19,55 @@
       padding: $spacer;
       margin-bottom: $spacer;
     }
+
+    &.frbr-subtype-book {
+      line-height: 1.4;
+
+      // reduce headers to match content body font size
+      h1 {
+        font-size: 1rem * 1.75;
+        border-bottom: 1px solid;
+        border-left: 10px solid;
+        padding-left: 1rem;
+      }
+
+      h2 {
+        font-size: 1rem * 1.5;
+        border-bottom: 1px solid;
+      }
+      h3 { font-size: 1rem * 1.3; }
+      h4 { font-size: 1rem * 1; }
+      h5 { font-size: 1rem * 1; }
+      h6 { font-size: 1rem * 1; }
+
+      h1, h2 {
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+      }
+
+      h3, h4, h5 {
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      li {
+        margin-bottom: 0.5rem;
+      }
+
+      li > p:last-child {
+        margin-bottom: 0px;
+      }
+
+      blockquote {
+        padding: $spacer;
+        margin-bottom: 1rem; // must much bottom margin of p tags
+        background-color: $gray-200;
+
+        & > p:last-child {
+          margin-bottom: 0px;
+        }
+      }
+    }
   }
 
   .document-content__toggle {

@@ -26,6 +26,21 @@ class CitationLink(models.Model):
         verbose_name = _("citation link")
         verbose_name_plural = _("citation links")
 
+    def to_citator_api(self):
+        """Transform into a format suitable for the Citator API."""
+        selector = next(
+            (t for t in self.target_selectors if t["type"] == "TextPositionSelector"),
+            None,
+        )
+        return {
+            "href": self.url,
+            "text": self.text,
+            # strip the page- and just keep the num
+            "target_id": int(self.target_id.split("-", 1)[1]) - 1,
+            "start": selector["start"] if selector else -1,
+            "end": selector["end"] if selector else -1,
+        }
+
     def __str__(self):
         return f"Citation link for {self.document.doc_type} - {self.document.title}"
 

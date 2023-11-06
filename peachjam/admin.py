@@ -28,7 +28,6 @@ from peachjam.forms import (
     AttachedFilesForm,
     IngestorForm,
     NewDocumentFormMixin,
-    RelatedJudgmentWidget,
     SourceFileForm,
 )
 from peachjam.models import (
@@ -653,6 +652,8 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["nature"])
     fieldsets[3][1]["fields"].extend(["metadata_json"])
+    fieldsets[3][1]["fields"].extend(["commencements_json"])
+    fieldsets[3][1]["fields"].extend(["timeline_json"])
     fieldsets[2][1]["classes"] = ("collapse",)
     fieldsets[4][1]["fields"].extend(["parent_work"])
     readonly_fields = ["parent_work"] + list(DocumentAdmin.readonly_fields)
@@ -677,28 +678,10 @@ class BenchInline(admin.TabularInline):
 
 class JudgmentAdminForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
-    related_judgments = forms.ChoiceField(
-        widget=RelatedJudgmentWidget(),
-        required=False,
-    )
 
     class Meta:
         model = Judgment
         fields = ("hearing_date",)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["related_judgments"] = forms.ChoiceField(
-            required=False, widget=RelatedJudgmentWidget()
-        )
-
-    @classmethod
-    def adjust_fieldsets(cls, fieldsets):
-        # add the upload_file to the first set of fields to include on the page
-        fieldsets = copy.deepcopy(fieldsets)
-        fieldsets[0][2]["fields"].append("related_judgments")
-
-        return fieldsets
 
     def save(self, *args, **kwargs):
         if (
@@ -735,9 +718,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
     fieldsets[2][1]["classes"] = ["collapse"]
     fieldsets[3][1]["fields"].extend(["case_summary", "flynote"])
-
-    fieldsets.append(("Related judgments", {"fields": ["related_judgments"]}))
-
     readonly_fields = [
         "mnc",
         "serial_number",
@@ -761,7 +741,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         "Document topics",
         "Work identification",
         "Advanced",
-        "Related judgments",
     )
 
     class Media:

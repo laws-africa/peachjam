@@ -109,13 +109,30 @@ class CitatorMatcher:
             )
             text = text[: self.max_text_size]
 
+        # For text documents, we need to provide the existing citations for context. For html, existing citations
+        # are already marked up in the HTML.
+        citations = [
+            c.to_citator_api()
+            for c in CitationLink.objects.filter(
+                document__expression_frbr_uri=frbr_uri.expression_uri()
+            )
+        ]
+
         resp = self.call_citator(
             {
                 "frbr_uri": frbr_uri.expression_uri(),
                 "format": "text",
                 "body": text,
+                "citations": citations,
             }
         )
+
+        # only keep new citations
+        existing = {(c["start"], c["end"]) for c in citations}
+        citations = [
+            c for c in resp["citations"] if (c["start"], c["end"]) not in existing
+        ]
+
         # store the extracted citations
         self.citations = [
             ExtractedCitation(
@@ -127,7 +144,7 @@ class CitatorMatcher:
                 c["prefix"],
                 c["suffix"],
             )
-            for c in resp["citations"]
+            for c in citations
         ]
 
     def call_citator(self, body):

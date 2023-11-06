@@ -114,7 +114,13 @@ class Court(models.Model):
         return self.name
 
 
+class CourtRegistryManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("court")
+
+
 class CourtRegistry(models.Model):
+    objects = CourtRegistryManager()
     court = models.ForeignKey(
         Court,
         on_delete=models.CASCADE,

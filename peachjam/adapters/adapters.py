@@ -197,6 +197,12 @@ class IndigoAdapter(Adapter):
             else:
                 raise error
 
+        # don't ingest stubs that don't have a publication document
+        if document["stub"]:
+            pubdoc = document["publication_document"]
+            if not pubdoc or not pubdoc["url"]:
+                return
+
         frbr_uri = FrbrUri.parse(document["frbr_uri"])
         title = document["title"]
         toc_json = self.get_toc_json(url)
@@ -389,8 +395,9 @@ class IndigoAdapter(Adapter):
                         object_work=amending_work,
                     )
 
-        if imported_document["commencements"]:
-            for commencement in imported_document["commencements"]:
+        commencements = created_document.commencements_json
+        if commencements:
+            for commencement in commencements:
                 if (
                     commencement["commencing_frbr_uri"]
                     and commencement["commencing_title"]
