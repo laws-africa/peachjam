@@ -395,22 +395,23 @@ class IndigoAdapter(Adapter):
                         object_work=amending_work,
                     )
 
-        commencements = created_document.commencements_json
-        if commencements:
-            for commencement in commencements:
-                if (
-                    commencement["commencing_frbr_uri"]
-                    and commencement["commencing_title"]
-                ):
-                    commencing_work, _ = Work.objects.get_or_create(
-                        frbr_uri=commencement["commencing_frbr_uri"],
-                        defaults={"title": commencement["commencing_title"]},
-                    )
-                    self.create_relationship(
-                        "commenced-by",
-                        subject_work=subject_work,
-                        object_work=commencing_work,
-                    )
+        if hasattr(created_document, "commencements_json"):
+            commencements = created_document.commencements_json
+            if commencements:
+                for commencement in commencements:
+                    if (
+                        commencement["commencing_frbr_uri"]
+                        and commencement["commencing_title"]
+                    ):
+                        commencing_work, _ = Work.objects.get_or_create(
+                            frbr_uri=commencement["commencing_frbr_uri"],
+                            defaults={"title": commencement["commencing_title"]},
+                        )
+                        self.create_relationship(
+                            "commenced-by",
+                            subject_work=subject_work,
+                            object_work=commencing_work,
+                        )
         logger.info(f"Fetching of relationships for {subject_work} is complete!")
 
     def create_relationship(self, slug, subject_work, object_work):
