@@ -161,7 +161,7 @@ class Bench(models.Model):
         on_delete=models.CASCADE,
         verbose_name=_("judgment"),
     )
-    judge = models.ForeignKey(Judge, on_delete=models.PROTECT, verbose_name=_("judge"))
+    judge = models.ForeignKey(Judge, on_delete=models.CASCADE, verbose_name=_("judge"))
 
     class Meta:
         # this is to re-use the existing table rather than creating a new one
