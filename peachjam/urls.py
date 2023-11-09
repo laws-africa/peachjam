@@ -66,6 +66,7 @@ from peachjam.views import (
     TaxonomyListView,
     TermsOfUsePageView,
     UserProfileDetailView,
+    WorkAutocomplete,
 )
 from peachjam.views.metabase_stats import MetabaseStatsView
 
@@ -199,6 +200,12 @@ urlpatterns = [
         "admin/login/",
         PeachjamAdminLoginView.as_view(),
         name="login",
+    ),
+    # autocomplete for admin area
+    path(
+        "admin/autocomplete/works",
+        WorkAutocomplete.as_view(),
+        name="autocomplete-works",
     ),
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
