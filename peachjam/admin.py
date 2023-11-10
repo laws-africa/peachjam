@@ -3,6 +3,7 @@ import json
 from datetime import date
 
 from ckeditor.widgets import CKEditorWidget
+from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin
@@ -21,6 +22,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from import_export.admin import ImportExportMixin as BaseImportExportMixin
 from languages_plus.models import Language
+from nonrelated_inlines.admin import NonrelatedTabularInline
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
@@ -676,6 +678,30 @@ class BenchInline(admin.TabularInline):
     verbose_name_plural = gettext_lazy("judges")
 
 
+class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
+    model = Relationship
+    fields = ["predicate", "subject_work"]
+    verbose_name = "Related judgment"
+    verbose_name_plural = "Related judgments"
+    extra = 2
+
+    def get_form_queryset(self, obj):
+        return Relationship.objects.filter(object_work=obj.work)
+
+    def save_new_instance(self, parent, instance):
+        instance.object_work = parent.work
+
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(
+            request,
+            obj,
+            widgets={
+                "subject_work": autocomplete.ModelSelect2(url="autocomplete-works")
+            },
+            **kwargs,
+        )
+
+
 class JudgmentAdminForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
 
@@ -701,6 +727,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     inlines = [
         BenchInline,
         CaseNumberAdmin,
+        JudgmentRelationshipStackedInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys")
     list_filter = (*DocumentAdmin.list_filter, "court")
@@ -864,6 +891,16 @@ class RelationshipInline(admin.TabularInline):
     model = Relationship
     fk_name = "subject_work"
     fields = ("predicate", "object_work")
+
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(
+            request,
+            obj,
+            widgets={
+                "object_work": autocomplete.ModelSelect2(url="autocomplete-works")
+            },
+            **kwargs,
+        )
 
 
 @admin.register(Work)

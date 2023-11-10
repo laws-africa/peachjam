@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     "django_elasticsearch_dsl",
     "django_elasticsearch_dsl_drf",
     "jazzmin",
+    "dal",
+    "dal_select2",
     "modeltranslation",
     "django.contrib.admin",
     "django.contrib.auth",
