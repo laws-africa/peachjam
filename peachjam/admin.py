@@ -892,6 +892,16 @@ class RelationshipInline(admin.TabularInline):
     fk_name = "subject_work"
     fields = ("predicate", "object_work")
 
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(
+            request,
+            obj,
+            widgets={
+                "object_work": autocomplete.ModelSelect2(url="autocomplete-works")
+            },
+            **kwargs,
+        )
+
 
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):
