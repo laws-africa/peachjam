@@ -2,6 +2,7 @@
 from .about import *
 from .article import *
 from .authors import *
+from .autocomplete import *
 from .books import *
 from .courts import *
 from .document_nature import *
