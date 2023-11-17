@@ -109,8 +109,18 @@ class IndigoAdapter(Adapter):
             url = f"{self.api_url}/akn/{place_code}/.json"
             while url:
                 res = self.client_get(url).json()
-                results.extend(res["results"])
-                url = res["next"]
+
+                # Filter by actor, if setting is present
+                actor = self.settings.get("actor", None)
+                if actor:
+                    results_filtered_by_actor = [
+                        result for result in res["results"] if result["actor"] == actor
+                    ]
+                    results.extend(results_filtered_by_actor)
+                    url = res["next"]
+                else:
+                    results.extend(res["results"])
+                    url = res["next"]
 
         return results
 
