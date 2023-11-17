@@ -6,13 +6,13 @@ from django.db import migrations
 def add_overturned_and_upheld_predicates(apps, schema_editor):
     """Add the predicates for overturned and upheld."""
     Predicate = apps.get_model("peachjam", "Predicate")
-    Predicate.objects.create(
+    Predicate.objects.update_or_create(
         name="overturns",
         slug="overturns",
         verb="overturns",
         reverse_verb="is overturned by",
     )
-    Predicate.objects.create(
+    Predicate.objects.update_or_create(
         name="upholds",
         slug="upholds",
         verb="upholds",
