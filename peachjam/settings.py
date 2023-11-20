@@ -584,3 +584,5 @@ MARTOR_ENABLE_CONFIGS = {
     "spellcheck": "false",  # to enable/disable spellcheck in form textareas
     "hljs": "false",  # to enable/disable hljs highlighting in preview
 }
+# disable the normal martor theme which pulls in another bootstrap version
+MARTOR_ALTERNATIVE_CSS_FILE_THEME = "x"
