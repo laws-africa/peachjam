@@ -5,6 +5,7 @@ import tempfile
 from datetime import datetime
 from functools import wraps
 
+import martor.utils
 from django.utils.translation import get_language_from_request
 from languages_plus.models import Language
 
@@ -78,3 +79,25 @@ def parse_utf8_html(html):
 
     parser = lxml.html.HTMLParser(encoding="utf-8")
     return lxml.html.fromstring(html, parser=parser)
+
+
+def markdownify(text):
+    """Convert markdown text to html using pandoc on the commandline."""
+    with tempfile.NamedTemporaryFile(suffix=".md") as inf:
+        with tempfile.NamedTemporaryFile(suffix=".html") as outf:
+            inf.write(text.encode("utf-8"))
+            inf.flush()
+            cmd = [
+                "pandoc",
+                "--from=markdown",
+                "--to=html",
+                "--output",
+                outf.name,
+                inf.name,
+            ]
+            subprocess.run(cmd, check=True)
+            return outf.read().decode("utf-8")
+
+
+# override martor's markownify to use pandoc, so that we get alpha-numbered list support
+martor.utils.markdownify = markdownify

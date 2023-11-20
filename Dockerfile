@@ -3,7 +3,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # LibreOffice
-RUN apt-get update && apt-get install -y libreoffice poppler-utils
+RUN apt-get update && apt-get install -y libreoffice poppler-utils pandoc
 
 # Production-only dependencies
 RUN pip install psycopg2==2.9.3 gunicorn==20.1.0

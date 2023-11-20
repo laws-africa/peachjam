@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "polymorphic",
     "drf_spectacular",
     "django_advanced_password_validation",
+    "martor",
 ]
 
 MIDDLEWARE = [
@@ -568,3 +569,18 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 # Each item in the list should be a tuple of (Full name, email address). Example:
 # [('Someone', 'someone@example.com')]
 ADMINS = []
+
+# django-markdown-editor
+# https://github.com/agusmakmun/django-markdown-editor
+MARTOR_UPLOAD_URL = ""
+MARTOR_SEARCH_USERS_URL = ""
+MARTOR_ENABLE_LABEL = True
+MARTOR_ENABLE_CONFIGS = {
+    "emoji": "true",  # to enable/disable emoji icons.
+    "imgur": "false",  # to enable/disable imgur/custom uploader.
+    "mention": "false",  # to enable/disable mention
+    "jquery": "true",  # to include/revoke jquery (require for admin default django)
+    "living": "false",  # to enable/disable live updates in preview
+    "spellcheck": "false",  # to enable/disable spellcheck in form textareas
+    "hljs": "false",  # to enable/disable hljs highlighting in preview
+}
