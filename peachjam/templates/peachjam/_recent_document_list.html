@@ -1,15 +1,19 @@
 {% load peachjam i18n %}
-{% if documents %}
-  {% for object in documents %}
-    <a class="mb-2 d-flex"
-       href="{% url 'document_detail' object.expression_frbr_uri|strip_first_character %}">
-      <span class="flex-grow-1">{{ object.title }}</span>
-      <span class="text-nowrap">{{ object.date }}</span>
-    </a>
-  {% endfor %}
-  {% if view_more_url_name %}
-    <a class="mt-3 btn btn-primary" href="{% url view_more_url_name %}">{{ view_more_text }}</a>
+{% block documents %}
+  {% if documents %}
+    {% for object in documents %}
+      <a class="mb-2 d-flex"
+         href="{% url 'document_detail' object.expression_frbr_uri|strip_first_character %}">
+        <span class="flex-grow-1">{{ object.title }}</span>
+        <span class="text-nowrap">{{ object.date }}</span>
+      </a>
+    {% endfor %}
+    {% block view-more %}
+      {% if view_more_url_name %}
+        <a class="mt-3 btn btn-primary" href="{% url view_more_url_name %}">{{ view_more_text }}</a>
+      {% endif %}
+    {% endblock %}
+  {% else %}
+    <p>{% trans 'No documents found.' %}</p>
   {% endif %}
-{% else %}
-  <p>{% trans 'No documents found.' %}</p>
-{% endif %}
+{% endblock %}
