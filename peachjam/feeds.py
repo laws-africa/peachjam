@@ -14,7 +14,6 @@ from peachjam.models import (
 
 
 class BaseFeed(Feed):
-
     model = None
 
     def items(self):
