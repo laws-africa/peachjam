@@ -14,7 +14,6 @@ from peachjam.models import (
 
 
 class BaseFeed(Feed):
-
     model = None
 
     def items(self):
@@ -87,7 +86,7 @@ class CoreDocumentAtomSiteNewsFeed(CoreDocumentFeed, BaseAtomFeed):
 
 class ArticleFeed(BaseFeed):
     model = Article
-    title = "Articles"
+    title = "Articles by AfricanLII"
     link = "/articles/"
     description = "Updates on changes and additions to articles"
 
