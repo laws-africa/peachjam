@@ -88,7 +88,7 @@ class ArticleFeed(BaseFeed):
     model = Article
     title = "Articles by AfricanLII"
     link = "/articles/"
-    description = "Updates on changes and additions to articles"
+    description = "Updates on changes and additions to articles by AfricanLII"
 
 
 class ArticleAtomSiteNewsFeed(ArticleFeed, BaseAtomFeed):
