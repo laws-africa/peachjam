@@ -1,7 +1,7 @@
 import datetime
 
 from django.contrib.syndication.views import Feed
-from django.utils.feedgenerator import Atom1Feed
+from django.utils.feedgenerator import Atom1Feed, Rss201rev2Feed
 
 from peachjam.models import (
     Article,
@@ -84,11 +84,33 @@ class CoreDocumentAtomSiteNewsFeed(CoreDocumentFeed, BaseAtomFeed):
     subtitle = CoreDocumentFeed.description
 
 
+class CustomFeedGenerator(Rss201rev2Feed):
+    def add_item_elements(self, handler, item):
+        super().add_item_elements(handler, item)
+        handler.addQuickElement("image", item.get("image", ""))
+        handler.addQuickElement("body", item.get("body", ""))
+
+
 class ArticleFeed(BaseFeed):
     model = Article
-    title = "Articles"
+    title = "AfricanLII Articles"
     link = "/articles/"
     description = "Updates on changes and additions to articles"
+    feed_type = CustomFeedGenerator
+
+    def item_extra_kwargs(self, item):
+        return {
+            "image": item.image.url if item.image else None,
+            "body": item.body,
+        }
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context["body"] = kwargs["item"].body or None
+    #     context["image"] = kwargs["item"].image.url if kwargs["item"].image else None
+    #     print(context)
+    #
+    #     return context
 
 
 class ArticleAtomSiteNewsFeed(ArticleFeed, BaseAtomFeed):
