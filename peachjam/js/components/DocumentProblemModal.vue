@@ -39,7 +39,9 @@
             />
           </div>
           <div class="form-group">
-            <label for="email_address">{{ $t('Your email address (optional)') }}</label>
+            <label for="email_address">{{ $t('Your email address') }}
+              <span class="text-danger">*</span>
+            </label>
             <input
               id="email_address"
               v-model="email"
@@ -47,6 +49,7 @@
               class="form-control"
               name="email_address"
               placeholder="example@example.com"
+              required
             >
           </div>
         </form>
