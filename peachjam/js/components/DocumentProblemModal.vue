@@ -9,7 +9,8 @@
           type="button"
           class="btn-close"
           data-bs-dismiss="modal"
-          aria-label="Close"/>
+          aria-label="Close"
+        />
       </div>
       <div class="modal-body">
         <form
@@ -37,6 +38,26 @@
               rows="4"
               required
             />
+          </div>
+          <div class="form-group mb-2">
+            <label for="message">
+              {{ $t('Problem category') }}
+            </label>
+            <select
+              id="message"
+              v-model="selected"
+              class="form-control"
+              name="message"
+              :options="options"
+            >
+              <option
+                v-for="option in options"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.text }}
+              </option>
+            </select>
           </div>
           <div class="form-group">
             <label for="email_address">{{ $t('Your email address') }}
@@ -86,7 +107,13 @@ export default {
       problem: '',
       submitted: false,
       success: true,
-      url: window.location.toString()
+      url: window.location.toString(),
+      selected: null,
+      options: [
+        { text: 'Incorrect information', value: 'Incorrect information' },
+        { text: 'Missing information', value: 'Missing information' },
+        { text: 'Other', value: 'Other' }
+      ]
     };
   },
   mounted () {
