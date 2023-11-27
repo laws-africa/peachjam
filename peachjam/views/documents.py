@@ -12,7 +12,6 @@ from peachjam.registry import registry
 
 
 class RedirectResolver:
-
     RESOLVER_MAPPINGS = {
         "africanlii": {
             "country_code": "aa",
@@ -38,6 +37,10 @@ class RedirectResolver:
             "country_code": "mw",
             "domain": "malawilii.org",
         },
+        "mauritiuslii": {
+            "country_code": "mu",
+            "domain": "mauritius.org",
+        },
         "namiblii": {
             "country_code": "na",
             "domain": "namiblii.org",
@@ -49,6 +52,10 @@ class RedirectResolver:
         "open by-laws": {
             "place_code": [],
             "domain": "openbylaws.org.za",
+        },
+        "rwandalii": {
+            "country_code": "rw",
+            "domain": "rwandalii.org",
         },
         "seylii": {
             "country_code": "sc",
