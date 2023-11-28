@@ -49,6 +49,7 @@
               class="form-control"
               name="problem_category"
               :options="options"
+              @change="handleOptionChange"
             >
               <option
                 v-for="option in options"
@@ -58,6 +59,20 @@
                 {{ option.text }}
               </option>
             </select>
+          </div>
+          <div v-if="selected === 'Other'">
+            <label for="message">
+              {{ $t('If other, please specify') }}
+              <span class="text-danger">*</span>
+            </label>
+            <textarea
+              id="other_problem_description"
+              v-model="other"
+              class="form-control"
+              name="other_problem_description"
+              rows="4"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="email_address">{{ $t('Your email address') }}
@@ -109,6 +124,7 @@ export default {
       success: true,
       url: window.location.toString(),
       selected: null,
+      other: '',
       options: [
         { text: 'Incorrect information', value: 'Incorrect information' },
         { text: 'Missing information', value: 'Missing information' },
@@ -127,6 +143,7 @@ export default {
     onShow () {
       this.selected = null;
       this.category = '';
+      this.other = '';
       this.email = '';
       this.message = '';
       this.problem = '';
@@ -146,6 +163,11 @@ export default {
       }).catch(error => {
         console.log(error);
       });
+    },
+    handleOptionChange () {
+      if (this.selected === 'Other') {
+        // if the user selects 'Other', clear the problem description
+      }
     }
   }
 };

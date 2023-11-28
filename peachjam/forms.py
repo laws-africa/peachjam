@@ -206,16 +206,19 @@ class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):
 class DocumentProblemForm(forms.Form):
     document_link = forms.CharField(max_length=255, required=True)
     problem_description = forms.CharField(widget=forms.Textarea, required=True)
-    email_address = forms.EmailField(required=False)
+    other_problem_description = forms.CharField(widget=forms.Textarea, required=False)
+    email_address = forms.EmailField(required=True)
 
     def send_email(self):
         document_link = self.cleaned_data["document_link"]
         problem_description = self.cleaned_data["problem_description"]
+        other_problem_description = self.cleaned_data.get("other_problem_description")
         email_address = self.cleaned_data["email_address"]
 
         context = {
             "document_link": document_link,
             "problem_description": problem_description,
+            "other_problem_description": other_problem_description or None,
         }
         if email_address:
             context["email_address"] = email_address

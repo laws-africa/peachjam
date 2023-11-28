@@ -11,10 +11,12 @@
     </p>
     <p>The reported problem is described as follows:</p>
     <p>{{ problem_description }}</p>
-    {% if email_address %}
-      <p>
-        This was reported by: <a href="mailto:{{ email_address }}">{{ email_address }}</a>
-      </p>
+    {% if other_problem_description %}
+      <p>The reporter also added the following information:</p>
+      <p>{{ other_problem_description }}</p>
     {% endif %}
+    <p>
+      This was reported by: <a href="mailto:{{ email_address }}">{{ email_address }}</a>
+    </p>
   </body>
 </html>
