@@ -171,7 +171,9 @@
           <div class="col-6 col-md-4 col-lg-3">
             <div class="card lii-card mb-3">
               <div class="card-body">
-                <img src="{% static lii.logo %}" alt="{{ lii.name }}" class="mb-3"/>
+                {% if lii.logo %}
+                  <img src="{% static lii.logo %}" alt="{{ lii.name }}" class="mb-3"/>
+                {% endif %}
                 <h5 class="card-title">{{ lii.country }}</h5>
                 <div>{{ lii.name }}</div>
                 <a href="{{ lii.url }}" class="stretched-link" target="_blank">{{ lii.domain }}</a>
