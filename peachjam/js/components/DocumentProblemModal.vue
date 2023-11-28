@@ -49,7 +49,6 @@
               class="form-control"
               name="problem_category"
               :options="options"
-              @change="handleOptionChange"
             >
               <option
                 v-for="option in options"
@@ -163,11 +162,6 @@ export default {
       }).catch(error => {
         console.log(error);
       });
-    },
-    handleOptionChange () {
-      if (this.selected === 'Other') {
-        // if the user selects 'Other', clear the problem description
-      }
     }
   }
 };
