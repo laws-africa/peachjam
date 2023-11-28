@@ -5,9 +5,8 @@
       target="_blank"
       rel="noreferrer"
       :href="item.expression_frbr_uri"
-    >
-      {{ item.title }}
-    </a>
+      v-html="item.highlight.title || item.title"
+    ></a>
     <div>
       <span v-if="showJurisdiction || item.locality" class="me-3">
         <span v-if="showJurisdiction" v-html="getFlag(item)" class="me-1" />
@@ -128,6 +127,7 @@ export default {
 .hit mark {
   font-weight: bold;
   padding: 0px;
+  color: inherit;
 }
 .snippet {
   line-height: 1.3;
