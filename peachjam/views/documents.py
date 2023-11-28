@@ -39,7 +39,7 @@ class RedirectResolver:
         },
         "mauritiuslii": {
             "country_code": "mu",
-            "domain": "mauritius.org",
+            "domain": "mauritiuslii.org",
         },
         "namiblii": {
             "country_code": "na",
