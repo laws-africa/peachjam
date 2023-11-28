@@ -35,11 +35,23 @@ LIIS = [
         "domain": "malawilii.org",
     },
     {
+        "name": "MauritiusLII",
+        "country": "Mauritius",
+        "url": "https://mauritiuslii.org",
+        "domain": "mauritiuslii.org",
+    },
+    {
         "name": "NamibLII",
         "country": "Namibia",
         "url": "https://namiblii.org",
         "logo": "images/liis/namiblii.png",
         "domain": "namiblii.org",
+    },
+    {
+        "name": "RwandaLII",
+        "country": "Rwanda",
+        "url": "https://rwandalii.org",
+        "domain": "rwandalii.org",
     },
     {
         "name": "SierraLII",
