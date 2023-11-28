@@ -56,7 +56,6 @@
               v-model="other"
               class="form-control"
               name="other_problem_description"
-              rows="4"
               required
             />
           </div>
