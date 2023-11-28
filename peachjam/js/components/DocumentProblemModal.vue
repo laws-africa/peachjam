@@ -47,12 +47,12 @@
               id="message"
               v-model="selected"
               class="form-control"
-              name="message"
+              name="problem_category"
               :options="options"
             >
               <option
                 v-for="option in options"
-                :key="option.value"
+                :key="option.text"
                 :value="option.value"
               >
                 {{ option.text }}
@@ -112,6 +112,9 @@ export default {
       options: [
         { text: 'Incorrect information', value: 'Incorrect information' },
         { text: 'Missing information', value: 'Missing information' },
+        { text: 'No PDF download', value: 'No PDF download' },
+        { text: 'Document is empty', value: 'Document is empty' },
+        { text: 'Document is not accessible on my device', value: 'Document is not accessible on my device' },
         { text: 'Other', value: 'Other' }
       ]
     };
@@ -122,6 +125,8 @@ export default {
   },
   methods: {
     onShow () {
+      this.selected = null;
+      this.category = '';
       this.email = '';
       this.message = '';
       this.problem = '';
