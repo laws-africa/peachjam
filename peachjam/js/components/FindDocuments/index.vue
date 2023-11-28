@@ -169,8 +169,10 @@
                   :key="item.key"
                   :item="item"
                   :query="q"
+                  :debug="searchInfo.can_debug"
                   :showJurisdiction="showJurisdiction"
                   :documentLabels="documentLabels"
+                  @explain="explain(item)"
                 />
               </ul>
 
@@ -572,7 +574,7 @@ export default {
       });
     },
 
-    generateSearchUrl () {
+    generateSearchParams () {
       const params = new URLSearchParams();
       if (this.q) params.append('search', this.q);
       params.append('page', this.page);
@@ -610,7 +612,7 @@ export default {
         }
       });
 
-      return `/search/api/documents/?${params.toString()}`;
+      return params;
     },
 
     async search (pushState = true) {
@@ -625,7 +627,8 @@ export default {
         scrollToElement(this.$refs['search-box']);
 
         try {
-          const url = this.generateSearchUrl();
+          const params = this.generateSearchParams().toString();
+          const url = `/search/api/documents/?${params}`;
           if (pushState) {
             window.history.pushState(
               null,
@@ -636,7 +639,7 @@ export default {
           const response = await fetch(url);
 
           // check that the search state hasn't changed since we sent the request
-          if (url === this.generateSearchUrl()) {
+          if (params === this.generateSearchParams().toString()) {
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
@@ -655,6 +658,15 @@ export default {
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
       }
+    },
+
+    async explain (item) {
+      const params = this.generateSearchParams();
+      params.set('index', item._index);
+      const url = `/search/api/documents/${item.id}/explain/?${params.toString()}`;
+      const resp = await fetch(url);
+      const json = await resp.json();
+      item.explanation = JSON.stringify(json, null, 2);
     }
   }
 };

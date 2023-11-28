@@ -19,6 +19,12 @@
       </span>
       <span class="me-3">{{ item.date }}</span>
       <span class="me-3">{{ item.doc_type }}</span>
+      <a
+        v-if="debug"
+        class="me-3"
+        href="#"
+        @click.prevent="$emit('explain')"
+      >{{ item._score }}</a>
       <span
         v-if="item.court"
         class="me-3"
@@ -54,6 +60,10 @@
         v-html="highlights(item)"
       />
     </div>
+    <div v-if="debug && item.explanation" class="ms-3 mt-2">
+      <h5>Explanation</h5>
+      <pre class="explanation border bg-light p-2">{{ item.explanation }}</pre>
+    </div>
   </li>
 </template>
 
@@ -78,8 +88,11 @@ export default {
     documentLabels: {
       type: Array,
       default: () => []
+    },
+    debug: {
+      type: Boolean,
+      default: false
     }
-
   },
   computed: {
     labels () {
@@ -119,5 +132,9 @@ export default {
 .snippet {
   line-height: 1.3;
   word-break: break-word;
+}
+.hit pre.explanation {
+  max-height: 50vh;
+  overflow-y: auto;
 }
 </style>
