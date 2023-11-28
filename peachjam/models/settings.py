@@ -104,5 +104,20 @@ class PeachJamSettings(SingletonModel):
         return "Settings"
 
 
+class AdminEmail(models.Model):
+    name = models.CharField(
+        max_length=255, verbose_name=_("name"), blank=False, null=False
+    )
+    email = models.EmailField(
+        verbose_name=_("email"), blank=False, null=False, unique=True
+    )
+    site_settings = models.ForeignKey(
+        PeachJamSettings,
+        related_name="admin_emails",
+        on_delete=models.CASCADE,
+        verbose_name=_("site settings"),
+    )
+
+
 def pj_settings():
     return PeachJamSettings.load()

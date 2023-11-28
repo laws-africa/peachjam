@@ -2,12 +2,15 @@ Hello,
 
 We have received a report regarding the following document: {{ document_link }}
 
-The reported problem is described as follows:
-{{ problem_description }}
+Problem category: {{ problem_category }}
 
-{% if other_problem_description %}
-  The reporter also added the following information:
+{% if problem_description %}
+  The reported problem is described as follows:
+  {{ problem_description }}
+{% else %}
+  The reported problem is described as follows:
   {{ other_problem_description }}
 {% endif %}
+
 
 This was reported by: {{ email_address }}

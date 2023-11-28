@@ -26,29 +26,16 @@
             :value="url"
           >
           <div class="form-group mb-2">
-            <label for="problem_description">
-              {{ $t("What's the problem?") }}
-              <span class="text-danger">*</span>
-            </label>
-            <textarea
-              id="problem_description"
-              v-model="problem"
-              class="form-control"
-              name="problem_description"
-              rows="4"
-              required
-            />
-          </div>
-          <div class="form-group mb-2">
             <label for="message">
               {{ $t('Problem category') }}
             </label>
             <select
               id="message"
-              v-model="selected"
+              v-model="selectedOption"
               class="form-control"
               name="problem_category"
               :options="options"
+              required
             >
               <option
                 v-for="option in options"
@@ -59,7 +46,7 @@
               </option>
             </select>
           </div>
-          <div v-if="selected === 'Other'">
+          <div v-if="selectedOption === 'Other'">
             <label for="message">
               {{ $t('If other, please specify') }}
               <span class="text-danger">*</span>
@@ -69,6 +56,19 @@
               v-model="other"
               class="form-control"
               name="other_problem_description"
+              rows="4"
+              required
+            />
+          </div>
+          <div v-if="isVisible" class="form-group mb-2">
+            <label for="problem_description">
+              {{ $t("What's the problem?") }}
+              <span class="text-danger">*</span>
+            </label>
+            <textarea
+              v-model="problem"
+              class="form-control"
+              name="problem_description"
               rows="4"
               required
             />
@@ -122,8 +122,9 @@ export default {
       submitted: false,
       success: true,
       url: window.location.toString(),
-      selected: null,
+      selectedOption: '',
       other: '',
+      isVisible: true,
       options: [
         { text: 'Incorrect information', value: 'Incorrect information' },
         { text: 'Missing information', value: 'Missing information' },
@@ -140,8 +141,7 @@ export default {
   },
   methods: {
     onShow () {
-      this.selected = null;
-      this.category = '';
+      this.selectedOption = '';
       this.other = '';
       this.email = '';
       this.message = '';
