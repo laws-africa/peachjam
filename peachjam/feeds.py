@@ -1,5 +1,6 @@
 import datetime
 
+from django.conf import settings
 from django.contrib.syndication.views import Feed
 from django.utils.feedgenerator import Atom1Feed, Rss201rev2Feed
 
@@ -84,7 +85,7 @@ class CoreDocumentAtomSiteNewsFeed(CoreDocumentFeed, BaseAtomFeed):
     subtitle = CoreDocumentFeed.description
 
 
-class CustomFeedGenerator(Rss201rev2Feed):
+class CustomArticleFeedGenerator(Rss201rev2Feed):
     def add_item_elements(self, handler, item):
         super().add_item_elements(handler, item)
         handler.addQuickElement("image", item.get("image", ""))
@@ -93,24 +94,16 @@ class CustomFeedGenerator(Rss201rev2Feed):
 
 class ArticleFeed(BaseFeed):
     model = Article
-    title = "AfricanLII Articles"
+    title = f"{settings.PEACHJAM['APP_NAME']} Articles"
     link = "/articles/"
     description = "Updates on changes and additions to articles"
-    feed_type = CustomFeedGenerator
+    feed_type = CustomArticleFeedGenerator
 
     def item_extra_kwargs(self, item):
         return {
-            "image": item.image.url if item.image else None,
+            "image": item.image.url if item.image else "",
             "body": item.body,
         }
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context["body"] = kwargs["item"].body or None
-    #     context["image"] = kwargs["item"].image.url if kwargs["item"].image else None
-    #     print(context)
-    #
-    #     return context
 
 
 class ArticleAtomSiteNewsFeed(ArticleFeed, BaseAtomFeed):
