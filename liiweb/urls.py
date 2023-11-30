@@ -1,6 +1,7 @@
 from django.urls import include, path, re_path
 
 from liiweb import views
+from liiweb.views.donate import DonatePageView
 
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),
@@ -27,5 +28,6 @@ urlpatterns = [
         views.RedirectCaseURLsView.as_view(),
         name="old_lii_case_redirect",
     ),
+    path("donate/", DonatePageView.as_view(), name="donate"),
     path("", include("peachjam.urls")),
 ]
