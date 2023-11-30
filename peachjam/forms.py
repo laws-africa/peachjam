@@ -241,23 +241,25 @@ class DocumentProblemForm(forms.Form):
             "app_name": settings.PEACHJAM["APP_NAME"]
         }
 
-        # fetch admin emails
-        site_admin_emails = pj_settings().admin_emails.split()
-        if not site_admin_emails:
-            send_mail(
-                subject=subject,
-                message=plain_txt_msg,
-                from_email=None,
-                recipient_list=settings.ADMINS,
-                html_message=html,
-                fail_silently=False,
-            )
+        default_admin_emails = [email for name, email in settings.ADMINS]
+        if default_admin_emails:
+            site_admin_emails = pj_settings().admin_emails.split()
 
-        send_mail(
-            subject=subject,
-            message=plain_txt_msg,
-            from_email=None,
-            recipient_list=settings.ADMINS + site_admin_emails,
-            html_message=html,
-            fail_silently=False,
-        )
+            if site_admin_emails:
+                send_mail(
+                    subject=subject,
+                    message=plain_txt_msg,
+                    from_email=None,
+                    recipient_list=default_admin_emails + site_admin_emails,
+                    html_message=html,
+                    fail_silently=False,
+                )
+            else:
+                send_mail(
+                    subject=subject,
+                    message=plain_txt_msg,
+                    from_email=None,
+                    recipient_list=default_admin_emails,
+                    html_message=html,
+                    fail_silently=False,
+                )
