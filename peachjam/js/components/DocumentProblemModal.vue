@@ -36,12 +36,24 @@
               name="problem_category"
               required
             >
-              <option value="Incorrect information">{{ $t('Incorrect information') }}</option>
-              <option value="Missing information">{{ $t('Missing information') }}</option>
-              <option value="No PDF download">{{ $t('No PDF download') }}</option>
-              <option value="Document is empty">{{ $t('Document is empty') }}</option>
-              <option value="Document is not accessible on my device">{{ $t('Document is not accessible on my device') }}</option>
-              <option value="Other">{{ $t('Other') }}</option>
+              <option value="Incorrect information">
+                {{ $t('Incorrect information') }}
+              </option>
+              <option value="Missing information">
+                {{ $t('Missing information') }}
+              </option>
+              <option value="No PDF download">
+                {{ $t('No PDF download') }}
+              </option>
+              <option value="Document is empty">
+                {{ $t('Document is empty') }}
+              </option>
+              <option value="Document is not accessible on my device">
+                {{ $t('Document is not accessible on my device') }}
+              </option>
+              <option value="Other">
+                {{ $t('Other') }}
+              </option>
             </select>
           </div>
           <div class="form-group mb-2">
