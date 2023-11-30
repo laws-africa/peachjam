@@ -3,14 +3,7 @@ Hello,
 We have received a report regarding the following document: {{ document_link }}
 
 Problem category: {{ problem_category }}
-
-{% if problem_description %}
-  The reported problem is described as follows:
-  {{ problem_description }}
-{% else %}
-  The reported problem is described as follows:
-  {{ other_problem_description }}
-{% endif %}
-
+The reported problem is described as follows:
+{{ problem_description }}
 
 This was reported by: {{ email_address }}

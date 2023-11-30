@@ -96,27 +96,19 @@ class PeachJamSettings(SingletonModel):
         null=True,
         blank=True,
     )
+    admin_emails = models.CharField(
+        verbose_name=_("admin emails"),
+        max_length=1024,
+        null=True,
+        blank=True,
+        help_text=_("Enter one or more email addresses separated by spaces."),
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
 
     def __str__(self):
         return "Settings"
-
-
-class AdminEmail(models.Model):
-    name = models.CharField(
-        max_length=255, verbose_name=_("name"), blank=False, null=False
-    )
-    email = models.EmailField(
-        verbose_name=_("email"), blank=False, null=False, unique=True
-    )
-    site_settings = models.ForeignKey(
-        PeachJamSettings,
-        related_name="admin_emails",
-        on_delete=models.CASCADE,
-        verbose_name=_("site settings"),
-    )
 
 
 def pj_settings():

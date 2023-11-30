@@ -33,7 +33,6 @@ from peachjam.forms import (
     SourceFileForm,
 )
 from peachjam.models import (
-    AdminEmail,
     AlternativeName,
     Article,
     ArticleAttachment,
@@ -146,15 +145,7 @@ class EntityProfileInline(GenericStackedInline):
     form = EntityProfileForm
 
 
-class AdminEmailInline(admin.TabularInline):
-    model = AdminEmail
-    extra = 1
-    verbose_name = gettext_lazy("admin email")
-    verbose_name_plural = gettext_lazy("admin emails")
-
-
 class PeachJamSettingsAdmin(admin.ModelAdmin):
-    inlines = [AdminEmailInline]
     filter_horizontal = (
         "document_languages",
         "document_jurisdictions",

@@ -10,13 +10,8 @@
       We have received a report regarding the following document: <a href="{{ document_link }}">{{ document_link }}</a>
     </p>
     <p>Problem category: {{ problem_category }}</p>
-    {% if problem_description %}
-      <p>The reported problem is described as follows:</p>
-      <p>{{ problem_description }}</p>
-    {% else %}
-      <p>The reported problem is described as follows:</p>
-      <p>{{ other_problem_description }}</p>
-    {% endif %}
+    <p>The reported problem is described as follows:</p>
+    <p>{{ problem_description }}</p>
     <p>
       This was reported by: <a href="mailto:{{ email_address }}">{{ email_address }}</a>
     </p>

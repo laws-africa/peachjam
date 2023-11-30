@@ -4,7 +4,7 @@ from os.path import splitext
 from django import forms
 from django.conf import settings
 from django.core.files import File
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import send_mail
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils.text import slugify
@@ -211,22 +211,19 @@ class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):
 
 class DocumentProblemForm(forms.Form):
     document_link = forms.CharField(max_length=255, required=True)
-    problem_description = forms.CharField(widget=forms.Textarea, required=False)
-    other_problem_description = forms.CharField(widget=forms.Textarea, required=False)
-    problem_category = forms.CharField(required=True)
-    email_address = forms.EmailField(required=True)
+    problem_description = forms.CharField(widget=forms.Textarea, required=True)
+    problem_category = forms.CharField(widget=forms.Textarea, required=True)
+    email_address = forms.EmailField(required=False)
 
     def send_email(self):
         document_link = self.cleaned_data["document_link"]
-        problem_description = self.cleaned_data.get("problem_description")
-        other_problem_description = self.cleaned_data.get("other_problem_description")
+        problem_description = self.cleaned_data["problem_description"]
         problem_category = self.cleaned_data["problem_category"]
         email_address = self.cleaned_data["email_address"]
 
         context = {
             "document_link": document_link,
             "problem_description": problem_description,
-            "other_problem_description": other_problem_description,
             "problem_category": problem_category,
         }
         if email_address:
@@ -244,21 +241,23 @@ class DocumentProblemForm(forms.Form):
             "app_name": settings.PEACHJAM["APP_NAME"]
         }
 
-        # get admin emails from settings
-        admin_emails = [admin[1] for admin in settings.ADMINS]
+        # fetch admin emails
+        site_admin_emails = pj_settings().admin_emails.split()
+        if not site_admin_emails:
+            send_mail(
+                subject=subject,
+                message=plain_txt_msg,
+                from_email=None,
+                recipient_list=settings.ADMINS,
+                html_message=html,
+                fail_silently=False,
+            )
 
-        # get admin emails from site settings
-        site_admin_emails = list(
-            pj_settings().admin_emails.values_list("email", flat=True)
-        )
-
-        recipients = admin_emails + site_admin_emails
-
-        email = EmailMultiAlternatives(
+        send_mail(
             subject=subject,
-            body=plain_txt_msg,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=recipients,
+            message=plain_txt_msg,
+            from_email=None,
+            recipient_list=settings.ADMINS + site_admin_emails,
+            html_message=html,
+            fail_silently=False,
         )
-        email.attach_alternative(html, "text/html")
-        email.send(fail_silently=True)

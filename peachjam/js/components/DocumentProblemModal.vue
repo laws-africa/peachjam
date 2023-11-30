@@ -26,40 +26,25 @@
             :value="url"
           >
           <div class="form-group mb-2">
-            <label for="message">
+            <label for="problem_category">
               {{ $t('Problem category') }}
-            </label>
-            <select
-              id="message"
-              v-model="selectedOption"
-              class="form-control"
-              name="problem_category"
-              :options="options"
-              required
-            >
-              <option
-                v-for="option in options"
-                :key="option.text"
-                :value="option.value"
-              >
-                {{ option.text }}
-              </option>
-            </select>
-          </div>
-          <div v-if="selectedOption === 'Other'">
-            <label for="message">
-              {{ $t('If other, please specify') }}
               <span class="text-danger">*</span>
             </label>
-            <textarea
-              id="other_problem_description"
-              v-model="other"
+            <select
+              v-model="problem_category"
               class="form-control"
-              name="other_problem_description"
+              name="problem_category"
               required
-            />
+            >
+              <option>{{ $t('Incorrect information') }}</option>
+              <option>{{ $t('Missing information') }}</option>
+              <option>{{ $t('No PDF download') }}</option>
+              <option>{{ $t('Document is empty') }}</option>
+              <option>{{ $t('Document is not accessible on my device') }}</option>
+              <option>{{ $t('Other') }}</option>
+            </select>
           </div>
-          <div v-if="isVisible" class="form-group mb-2">
+          <div class="form-group mb-2">
             <label for="problem_description">
               {{ $t("What's the problem?") }}
               <span class="text-danger">*</span>
@@ -118,20 +103,10 @@ export default {
       email: '',
       message: '',
       problem: '',
+      problem_category: '',
       submitted: false,
       success: true,
-      url: window.location.toString(),
-      selectedOption: '',
-      other: '',
-      isVisible: true,
-      options: [
-        { text: 'Incorrect information', value: 'Incorrect information' },
-        { text: 'Missing information', value: 'Missing information' },
-        { text: 'No PDF download', value: 'No PDF download' },
-        { text: 'Document is empty', value: 'Document is empty' },
-        { text: 'Document is not accessible on my device', value: 'Document is not accessible on my device' },
-        { text: 'Other', value: 'Other' }
-      ]
+      url: window.location.toString()
     };
   },
   mounted () {
@@ -140,11 +115,10 @@ export default {
   },
   methods: {
     onShow () {
-      this.selectedOption = '';
-      this.other = '';
       this.email = '';
       this.message = '';
       this.problem = '';
+      this.problem_category = '';
       this.submitted = false;
       this.success = true;
     },
