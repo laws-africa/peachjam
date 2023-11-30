@@ -50,6 +50,7 @@
               <span class="text-danger">*</span>
             </label>
             <textarea
+              id="problem_description"
               v-model="problem"
               class="form-control"
               name="problem_description"
