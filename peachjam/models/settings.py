@@ -96,6 +96,13 @@ class PeachJamSettings(SingletonModel):
         null=True,
         blank=True,
     )
+    admin_emails = models.CharField(
+        verbose_name=_("admin emails"),
+        max_length=1024,
+        null=True,
+        blank=True,
+        help_text=_("Enter one or more email addresses separated by spaces."),
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
