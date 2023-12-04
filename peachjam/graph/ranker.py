@@ -1,9 +1,10 @@
 import logging
+from statistics import geometric_mean
 
 import igraph as ig
 from elasticsearch import helpers
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, pj_settings
 from peachjam_search.documents import SearchableDocument
 
 from ..models import ExtractedCitation
@@ -51,6 +52,13 @@ class GraphRanker:
 
     def publish_ranks(self):
         """Store ranks for each work."""
+        # calculate the pivot as the geometric mean of the ranks
+        pivot = geometric_mean(x for x in self.ranks if x > 0.0)
+        log.info(f"Updating pagerank pivot (geometric mean of non-zero ranks): {pivot}")
+        settings = pj_settings()
+        settings.pagerank_pivot_value = pivot
+        settings.save(update_fields=["pagerank_pivot_value"])
+
         updated = []
         for work, rank in zip(self.work_ids.keys(), self.ranks):
             if work.ranking != rank or self.force_update:
@@ -58,9 +66,11 @@ class GraphRanker:
                 work.save(update_fields=["ranking"])
                 updated.append(work)
 
-        log.info(f"Updated db rankings for {len(updated)} works")
+        log.info(f"Updating db rankings for {len(updated)} works")
 
         self.bulk_update(updated)
+
+        log.info("Done")
 
     def bulk_update(self, works):
         """use elasticsearch client to bulk update the "ranking" field on the provided docs"""

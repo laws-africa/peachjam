@@ -67,18 +67,15 @@ class MultiFieldSearchQueryBackend(SimpleQueryStringQueryBackend):
 class RankFeatureBackend(BaseSearchQueryBackend):
     @classmethod
     def construct_search(cls, request, view, search_backend):
-        # apply penalty as a linear change to the score
-        # DISABLED until the penalty field is populated
-        # queries = [Q("rank_feature", field="penalty", boost=1.0, linear={})]
         queries = []
 
         if pj_settings().pagerank_boost_value:
-            rank = Q(
-                "rank_feature",
-                field="ranking",
-                boost=pj_settings().pagerank_boost_value,
-            )
-            queries.append(rank)
+            # apply pagerank boost to the score using the saturation function
+            kwargs = {"field": "ranking", "boost": pj_settings().pagerank_boost_value}
+            if pj_settings().pagerank_pivot_value:
+                kwargs["saturation"] = {"pivot": pj_settings().pagerank_pivot_value}
+
+            queries.append(Q("rank_feature", **kwargs))
 
         return queries
 

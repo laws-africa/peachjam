@@ -61,6 +61,9 @@ class PeachJamSettings(SingletonModel):
     pagerank_boost_value = models.FloatField(
         verbose_name=_("pagerank boost value"), null=True, blank=True
     )
+    pagerank_pivot_value = models.FloatField(
+        verbose_name=_("pagerank pivot value"), null=True, blank=True
+    )
     allowed_login_domains = models.CharField(
         verbose_name=_("allowed login domains"), max_length=1024, null=True, blank=True
     )
