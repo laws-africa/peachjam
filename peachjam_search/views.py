@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from django.views.generic import TemplateView
 from django_elasticsearch_dsl_drf.filter_backends import (
     CompoundSearchFilterBackend,
@@ -391,6 +392,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         resp = es.explain(index, pk, {"query": query})
         return JsonResponse(resp)
 
+    @vary_on_cookie
     @method_decorator(cache_page(CACHE_SECS))
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
