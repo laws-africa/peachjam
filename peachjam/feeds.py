@@ -99,9 +99,18 @@ class ArticleFeed(BaseFeed):
     description = "Updates on changes and additions to articles"
     feed_type = CustomArticleFeedGenerator
 
+    def __call__(self, request, *args, **kwargs):
+        self.request = request
+        return super().__call__(request, *args, **kwargs)
+
     def item_extra_kwargs(self, item):
+        if item.image:
+            image_url = self.request.build_absolute_uri(item.image.url)
+        else:
+            image_url = ""
+
         return {
-            "image": item.image.url if item.image else "",
+            "image": image_url,
             "body": item.body,
         }
 

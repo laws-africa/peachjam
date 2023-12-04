@@ -40,7 +40,7 @@
       {% ifequal request.path '/articles/' %}
         <link rel="alternate"
               type="application/atom+xml"
-              title="AfricanLII Articles RSS Feed"
+              title="{{ APP_NAME }} Articles RSS Feed"
               href="{% url 'article_feed' %}"/>
       {% endifequal %}
     {% endblock %}
