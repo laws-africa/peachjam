@@ -242,24 +242,12 @@ class DocumentProblemForm(forms.Form):
         }
 
         default_admin_emails = [email for name, email in settings.ADMINS]
-        if default_admin_emails:
-            site_admin_emails = pj_settings().admin_emails.split()
-
-            if site_admin_emails:
-                send_mail(
-                    subject=subject,
-                    message=plain_txt_msg,
-                    from_email=None,
-                    recipient_list=default_admin_emails + site_admin_emails,
-                    html_message=html,
-                    fail_silently=False,
-                )
-            else:
-                send_mail(
-                    subject=subject,
-                    message=plain_txt_msg,
-                    from_email=None,
-                    recipient_list=default_admin_emails,
-                    html_message=html,
-                    fail_silently=False,
-                )
+        site_admin_emails = pj_settings().admin_emails.split()
+        send_mail(
+            subject=subject,
+            message=plain_txt_msg,
+            from_email=None,
+            recipient_list=default_admin_emails + site_admin_emails,
+            html_message=html,
+            fail_silently=False,
+        )
