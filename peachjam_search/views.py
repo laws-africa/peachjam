@@ -1,6 +1,7 @@
 import copy
 
 from django.conf import settings
+from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
@@ -20,7 +21,10 @@ from django_elasticsearch_dsl_drf.filter_backends.search.query_backends import (
 )
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from elasticsearch_dsl import DateHistogramFacet
+from elasticsearch_dsl.connections import get_connection
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
+from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 
 from peachjam.models import Author, Label, pj_settings
@@ -314,6 +318,15 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     }
 
     highlight_fields = {
+        "title": {
+            "options": {
+                "pre_tags": ["<mark>"],
+                "post_tags": ["</mark>"],
+                "fragment_size": 0,
+                "number_of_fragments": 0,
+                "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
+            }
+        },
         "content": {
             "options": {
                 "pre_tags": ["<mark>"],
@@ -322,7 +335,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
                 "number_of_fragments": 2,
                 "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
             }
-        }
+        },
     }
 
     # TODO perhaps better to explicitly include specific fields
@@ -358,7 +371,25 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     def list(self, request, *args, **kwargs):
         # TODO: uncomment when we have reindexd the data
         # self.get_translatable_fields(request)
-        return super().list(request, *args, **kwargs)
+        resp = super().list(request, *args, **kwargs)
+
+        # show debug information to this user?
+        resp.data["can_debug"] = self.request.user.has_perm("peachjam.can_debug_search")
+
+        return resp
+
+    @action(detail=True)
+    def explain(self, request, pk, *args, **kwargs):
+        if not request.user.has_perm("peachjam.can_debug_search"):
+            raise PermissionDenied()
+
+        query = self.filter_queryset(self.get_queryset()).to_dict()["query"]
+        # the index must be passed in as a query param otherwise we don't know which one to use
+        index = request.GET.get("index") or self.index[0]
+
+        es = get_connection(self.search._using)
+        resp = es.explain(index, pk, {"query": query})
+        return JsonResponse(resp)
 
     @method_decorator(cache_page(CACHE_SECS))
     def dispatch(self, request, *args, **kwargs):
