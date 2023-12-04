@@ -237,9 +237,7 @@ class DocumentProblemForm(forms.Form):
             context=context,
         )
 
-        subject = _("Document problem reported on %(app_name)s") % {
-            "app_name": settings.PEACHJAM["APP_NAME"]
-        }
+        subject = settings.EMAIL_SUBJECT_PREFIX + _("Document problem reported")
 
         default_admin_emails = [email for name, email in settings.ADMINS]
         site_admin_emails = pj_settings().admin_emails.split()
