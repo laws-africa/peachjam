@@ -9,7 +9,8 @@
           type="button"
           class="btn-close"
           data-bs-dismiss="modal"
-          aria-label="Close"/>
+          aria-label="Close"
+        />
       </div>
       <div class="modal-body">
         <form
@@ -25,6 +26,37 @@
             :value="url"
           >
           <div class="form-group mb-2">
+            <label for="problem_category">
+              {{ $t('Problem category') }}
+              <span class="text-danger">*</span>
+            </label>
+            <select
+              v-model="problem_category"
+              class="form-control"
+              name="problem_category"
+              required
+            >
+              <option value="Incorrect information">
+                {{ $t('Incorrect information') }}
+              </option>
+              <option value="Missing information">
+                {{ $t('Missing information') }}
+              </option>
+              <option value="No PDF download">
+                {{ $t('No PDF download') }}
+              </option>
+              <option value="Document is empty">
+                {{ $t('Document is empty') }}
+              </option>
+              <option value="Document is not accessible on my device">
+                {{ $t('Document is not accessible on my device') }}
+              </option>
+              <option value="Other">
+                {{ $t('Other') }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group mb-2">
             <label for="problem_description">
               {{ $t("What's the problem?") }}
               <span class="text-danger">*</span>
@@ -39,7 +71,9 @@
             />
           </div>
           <div class="form-group">
-            <label for="email_address">{{ $t('Your email address (optional)') }}</label>
+            <label for="email_address">{{ $t('Your email address') }}
+              <span class="text-danger">*</span>
+            </label>
             <input
               id="email_address"
               v-model="email"
@@ -47,6 +81,7 @@
               class="form-control"
               name="email_address"
               placeholder="example@example.com"
+              required
             >
           </div>
         </form>
@@ -81,6 +116,7 @@ export default {
       email: '',
       message: '',
       problem: '',
+      problem_category: '',
       submitted: false,
       success: true,
       url: window.location.toString()
@@ -95,6 +131,7 @@ export default {
       this.email = '';
       this.message = '';
       this.problem = '';
+      this.problem_category = '';
       this.submitted = false;
       this.success = true;
     },

@@ -180,3 +180,10 @@ def convert_source_file_to_pdf(source_file_id):
         raise e
 
     log.info("Conversion to PDF done")
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def rank_works():
+    from peachjam.graph.ranker import GraphRanker
+
+    GraphRanker().rank_and_publish()
