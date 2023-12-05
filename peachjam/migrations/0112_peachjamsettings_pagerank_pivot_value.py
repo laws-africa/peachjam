@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0110_alter_peachjamsettings_options"),
+        ("peachjam", "0111_peachjamsettings_admin_emails"),
     ]
 
     operations = [
