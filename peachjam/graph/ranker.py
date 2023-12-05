@@ -53,11 +53,15 @@ class GraphRanker:
     def publish_ranks(self):
         """Store ranks for each work."""
         # calculate the pivot as the geometric mean of the ranks
-        pivot = geometric_mean(x for x in self.ranks if x > 0.0)
-        log.info(f"Updating pagerank pivot (geometric mean of non-zero ranks): {pivot}")
-        settings = pj_settings()
-        settings.pagerank_pivot_value = pivot
-        settings.save(update_fields=["pagerank_pivot_value"])
+        ranks = [x for x in self.ranks if x > 0.0]
+        if ranks:
+            pivot = geometric_mean(ranks)
+            log.info(
+                f"Updating pagerank pivot (geometric mean of non-zero ranks): {pivot}"
+            )
+            settings = pj_settings()
+            settings.pagerank_pivot_value = pivot
+            settings.save(update_fields=["pagerank_pivot_value"])
 
         updated = []
         for work, rank in zip(self.work_ids.keys(), self.ranks):
