@@ -12,6 +12,9 @@
     {% endblocktrans %}
   </h4>
 {% endblock %}
+{% block after-search %}
+  {% include 'liiweb/_donate_call_to_action.html' %}
+{% endblock %}
 {% block hero-logos %}
   <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
   <img src="{% static 'images/jifa.png' %}" alt="JIFA"/>
