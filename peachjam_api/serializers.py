@@ -153,15 +153,19 @@ class BaseSerializerMixin:
 class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
     court = CourtSerializer(read_only=True)
     url = serializers.SerializerMethodField()
+    judges = serializers.SerializerMethodField()
+    case_numbers = serializers.SerializerMethodField()
 
     class Meta:
         model = Judgment
         fields = (
+            "case_numbers",
             "citation",
             "court",
             "created_at",
             "date",
             "expression_frbr_uri",
+            "judges",
             "jurisdiction",
             "language",
             "locality",
@@ -172,6 +176,12 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
             "url",
             "work_frbr_uri",
         )
+
+    def get_judges(self, instance):
+        return [j.name for j in instance.judges.all()]
+
+    def get_case_numbers(self, instance):
+        return [str(c) for c in instance.case_numbers.all()]
 
 
 class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):
