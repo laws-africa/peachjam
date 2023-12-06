@@ -4,12 +4,10 @@
   {% trans 'Donate' %}
 {% endblock %}
 {% block page-content %}
-  <section class="py-5">
-    <div class="container">
-      <h1 class="mb-4">Donate to {{ APP_NAME }}</h1>
-      {% block intro %}{% endblock %}
-      {% block about %}{% endblock %}
-      {% block payment-details %}{% endblock %}
-    </div>
+  <section class="container my-4">
+    <h1 class="mb-4">{% blocktrans %}Donate to {{ APP_NAME }}{% endblocktrans %}</h1>
+    {% block intro %}{% endblock %}
+    {% block about %}{% endblock %}
+    {% block payment-details %}{% endblock %}
   </section>
 {% endblock %}
