@@ -1,0 +1,46 @@
+{% extends 'liiweb/donate.html' %}
+{% load static i18n %}
+{% block intro %}
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    Donate to LawLibrary and support our work to providing free and anonymous access
+    to case law, legislation and secondary legal materials from South Africa.
+    {% endblocktrans %}
+  </p>
+  <h3 class="mb-4">Donate with Snapscan</h3>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    Scan the Snapscan QR code below to donate to LawLibrary.
+    {% endblocktrans %}
+  </p>
+  <p>
+    <img src="{% static 'images/snapscan.png' %}"
+         alt="Snapscan QR code"
+         width="270"
+         height="315"/>
+  </p>
+  <h3 class="mb-4">Donate directly</h3>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    You can also donate directly to LawLibrary by making a deposit into our bank account.
+    {% endblocktrans %}
+  </p>
+  <p class="mb-4">
+    <strong>Bank:</strong> FNB South Africa
+    <br/>
+    <strong>Account number:</strong> 6279 279 6579
+    <br/>
+    <strong>Account name:</strong>Laws.Africa
+    <br/>
+    <strong>Swift code:</strong> FIRNZAJJ
+    <br/>
+  </p>
+  <h3 class="mb-4">Section 18A Tax Certificate</h3>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    To receive your Section 18A Tax Certificate for your donation, please email us at <a href="mailto:info@lawlibrary.org.za">info@lawlibrary.org.za</a>
+    {% endblocktrans %}
+  </p>
+{% endblock %}
+{% block about %}{% endblock %}
+{% block payment-details %}{% endblock %}
