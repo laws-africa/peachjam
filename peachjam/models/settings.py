@@ -61,6 +61,9 @@ class PeachJamSettings(SingletonModel):
     pagerank_boost_value = models.FloatField(
         verbose_name=_("pagerank boost value"), null=True, blank=True
     )
+    pagerank_pivot_value = models.FloatField(
+        verbose_name=_("pagerank pivot value"), null=True, blank=True
+    )
     allowed_login_domains = models.CharField(
         verbose_name=_("allowed login domains"), max_length=1024, null=True, blank=True
     )
@@ -96,9 +99,19 @@ class PeachJamSettings(SingletonModel):
         null=True,
         blank=True,
     )
+    admin_emails = models.CharField(
+        verbose_name=_("admin emails"),
+        max_length=1024,
+        null=True,
+        blank=True,
+        help_text=_("Enter one or more email addresses separated by spaces."),
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
+        permissions = [
+            ("can_debug_search", "Can debug search"),
+        ]
 
     def __str__(self):
         return "Settings"

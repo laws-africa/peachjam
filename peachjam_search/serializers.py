@@ -1,10 +1,11 @@
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
-from rest_framework.serializers import CharField, SerializerMethodField
+from rest_framework.serializers import CharField, FloatField, SerializerMethodField
 
 from peachjam_search.documents import SearchableDocument
 
 
 class SearchableDocumentSerializer(DocumentSerializer):
+    id = CharField(source="meta.id")
     highlight = SerializerMethodField()
     pages = SerializerMethodField()
     court = SerializerMethodField()
@@ -12,6 +13,8 @@ class SearchableDocumentSerializer(DocumentSerializer):
     order_outcome = SerializerMethodField()
     registry = SerializerMethodField()
     labels = CharField(allow_null=True)
+    _score = FloatField(source="meta.score")
+    _index = CharField(source="meta.index")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,6 +45,8 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "is_most_recent",
             "alternative_names",
             "labels",
+            "_score",
+            "_index",
         ]
 
     def get_highlight(self, obj):

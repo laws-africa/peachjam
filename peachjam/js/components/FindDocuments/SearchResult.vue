@@ -5,9 +5,8 @@
       target="_blank"
       rel="noreferrer"
       :href="item.expression_frbr_uri"
-    >
-      {{ item.title }}
-    </a>
+      v-html="item.highlight.title || item.title"
+    ></a>
     <div>
       <span v-if="showJurisdiction || item.locality" class="me-3">
         <span v-if="showJurisdiction" v-html="getFlag(item)" class="me-1" />
@@ -19,6 +18,12 @@
       </span>
       <span class="me-3">{{ item.date }}</span>
       <span class="me-3">{{ item.doc_type }}</span>
+      <a
+        v-if="debug"
+        class="me-3"
+        href="#"
+        @click.prevent="$emit('explain')"
+      >{{ item._score }}</a>
       <span
         v-if="item.court"
         class="me-3"
@@ -54,6 +59,10 @@
         v-html="highlights(item)"
       />
     </div>
+    <div v-if="debug && item.explanation" class="ms-3 mt-2">
+      <h5>Explanation</h5>
+      <pre class="explanation border bg-light p-2">{{ item.explanation }}</pre>
+    </div>
   </li>
 </template>
 
@@ -78,8 +87,11 @@ export default {
     documentLabels: {
       type: Array,
       default: () => []
+    },
+    debug: {
+      type: Boolean,
+      default: false
     }
-
   },
   computed: {
     labels () {
@@ -115,9 +127,14 @@ export default {
 .hit mark {
   font-weight: bold;
   padding: 0px;
+  color: inherit;
 }
 .snippet {
   line-height: 1.3;
   word-break: break-word;
+}
+.hit pre.explanation {
+  max-height: 50vh;
+  overflow-y: auto;
 }
 </style>
