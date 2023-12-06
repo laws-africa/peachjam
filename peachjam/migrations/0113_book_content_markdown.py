@@ -7,7 +7,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0109_add_overturned_and_upheld_predicates"),
+        ("peachjam", "0112_peachjamsettings_pagerank_pivot_value"),
     ]
 
     operations = [
