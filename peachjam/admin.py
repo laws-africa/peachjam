@@ -988,6 +988,11 @@ class BookAdmin(DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[3][1]["fields"].insert(3, "content_markdown")
 
+    class Media:
+        js = (
+            "https://cdn.jsdelivr.net/npm/@lawsafrica/law-widgets@latest/dist/lawwidgets/lawwidgets.js",
+        )
+
     def save_model(self, request, obj, form, change):
         if "content_markdown" in form.changed_data:
             obj.content_html = markdownify(form.cleaned_data["content_markdown"])
