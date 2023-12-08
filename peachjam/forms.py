@@ -240,10 +240,7 @@ class DocumentProblemForm(forms.Form):
         subject = settings.EMAIL_SUBJECT_PREFIX + _("Document problem reported")
 
         default_admin_emails = [email for name, email in settings.ADMINS]
-
-        site_admin_emails = []
-        if pj_settings().admin_emails:
-            site_admin_emails = pj_settings().admin_emails.split()
+        site_admin_emails = (pj_settings().admin_emails or "").split()
 
         send_mail(
             subject=subject,
