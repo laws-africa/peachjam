@@ -361,7 +361,7 @@ class Judgment(CoreDocument):
 
     def save(self, *args, **kwargs):
         # ensure judgment locality matches the court's locality
-        if self.court and self.court.locality:
+        if self.court.locality:
             self.locality = self.court.locality
 
         super().save(*args, **kwargs)
