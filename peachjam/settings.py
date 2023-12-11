@@ -509,6 +509,8 @@ CKEDITOR_CONFIGS = {
                 "Underline",
                 "Strike",
                 "Blockquote",
+                "Superscript",
+                "Subscript",
                 "SpellChecker",
                 "Undo",
                 "Redo",
