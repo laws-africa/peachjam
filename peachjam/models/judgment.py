@@ -354,17 +354,18 @@ class Judgment(CoreDocument):
         if self.registry:
             self.court = self.registry.court
 
-        self.doc_type = "judgment"
-        self.assign_mnc()
-        self.assign_title()
-        super().pre_save()
-
-    def save(self, *args, **kwargs):
         # ensure judgment locality matches the court's locality
         if self.court.locality:
             self.locality = self.court.locality
 
-        super().save(*args, **kwargs)
+        # ensure judgment country matches the court's country
+        if self.court.country:
+            self.country = self.court.country
+
+        self.doc_type = "judgment"
+        self.assign_mnc()
+        self.assign_title()
+        super().pre_save()
 
 
 class CaseNumber(models.Model):
