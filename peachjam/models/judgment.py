@@ -1,3 +1,4 @@
+from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models import Max
@@ -7,7 +8,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
-from peachjam.models import CoreDocument, Label
+from peachjam.models import CoreDocument, Label, Locality
 
 
 class Attorney(models.Model):
@@ -101,6 +102,20 @@ class Court(models.Model):
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
     order = models.IntegerField(_("order"), null=True, blank=True)
+    country = models.ForeignKey(
+        Country,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        verbose_name=_("country"),
+    )
+    locality = models.ForeignKey(
+        Locality,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("locality"),
+    )
 
     class Meta:
         ordering = (
@@ -343,6 +358,13 @@ class Judgment(CoreDocument):
         self.assign_mnc()
         self.assign_title()
         super().pre_save()
+
+    def save(self, *args, **kwargs):
+        # ensure judgment locality matches the court's locality
+        if self.court and self.court.locality:
+            self.locality = self.court.locality
+
+        super().save(*args, **kwargs)
 
 
 class CaseNumber(models.Model):
