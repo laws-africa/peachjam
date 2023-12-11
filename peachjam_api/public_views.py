@@ -91,5 +91,9 @@ class JudgmentsViewSet(BaseDocumentViewSet):
         JudgmentAPIPermission,
         DjangoModelPermissions,
     ]
-    queryset = Judgment.objects.select_related("court").all()
+    queryset = (
+        Judgment.objects.select_related("court")
+        .prefetch_related("judges", "case_numbers")
+        .all()
+    )
     serializer_class = JudgmentSerializer

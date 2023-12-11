@@ -3,10 +3,13 @@
 {% block intro %}
   <p class="mb-4">
     {% blocktrans trimmed %}
-    Donate to LawLibrary and support our work to providing free and anonymous access
-    to case law, legislation and secondary legal materials from South Africa.
+    Donate to LawLibrary and support our work to providing free and anonymous access to case law,
+      legislation and secondary legal materials from South Africa.
     {% endblocktrans %}
   </p>
+{% endblock %}
+{% block about %}{% endblock %}
+{% block payment-details %}
   <h3 class="mb-4">Donate with Snapscan</h3>
   <p class="mb-4">
     {% blocktrans trimmed %}
@@ -30,7 +33,7 @@
     <br/>
     <strong>Account number:</strong> 6279 279 6579
     <br/>
-    <strong>Account name:</strong>Laws.Africa
+    <strong>Account name:</strong> Laws.Africa
     <br/>
     <strong>Swift code:</strong> FIRNZAJJ
     <br/>
@@ -42,5 +45,3 @@
     {% endblocktrans %}
   </p>
 {% endblock %}
-{% block about %}{% endblock %}
-{% block payment-details %}{% endblock %}
