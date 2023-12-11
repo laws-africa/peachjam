@@ -7,7 +7,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0112_peachjamsettings_pagerank_pivot_value"),
+        ("peachjam", "0113_auto_20231211_0917"),
     ]
 
     operations = [
