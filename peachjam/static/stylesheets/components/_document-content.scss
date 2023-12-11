@@ -67,6 +67,17 @@
           margin-bottom: 0px;
         }
       }
+
+      table {
+        width: 100%;
+        margin-bottom: 1rem;
+        border-color: var(--bs-border-color);
+
+        th, td {
+          border-bottom-width: 1px;
+          padding: 0.5rem 0.5rem;
+        }
+      }
     }
   }
 

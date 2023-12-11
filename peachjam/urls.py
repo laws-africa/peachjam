@@ -253,6 +253,8 @@ urlpatterns = [
         DocumentProblemView.as_view(),
         name="document_problem",
     ),
+    # django-markdown-editor
+    path("martor/", include("martor.urls")),
 ]
 
 if settings.DEBUG:
