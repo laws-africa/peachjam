@@ -359,13 +359,6 @@ class Judgment(CoreDocument):
         self.assign_title()
         super().pre_save()
 
-    def save(self, *args, **kwargs):
-        # ensure judgment locality matches the court's locality
-        if self.court and self.court.locality:
-            self.locality = self.court.locality
-
-        super().save(*args, **kwargs)
-
 
 class CaseNumber(models.Model):
     string_override = models.CharField(
