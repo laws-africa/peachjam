@@ -22,6 +22,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from import_export.admin import ImportExportMixin as BaseImportExportMixin
 from languages_plus.models import Language
+from martor.utils import markdownify
 from nonrelated_inlines.admin import NonrelatedTabularInline
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
@@ -984,7 +985,24 @@ class GazetteAdmin(DocumentAdmin):
 
 @admin.register(Book)
 class BookAdmin(DocumentAdmin):
-    pass
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[3][1]["fields"].insert(3, "content_markdown")
+
+    class Media:
+        js = (
+            "https://cdn.jsdelivr.net/npm/@lawsafrica/law-widgets@latest/dist/lawwidgets/lawwidgets.js",
+        )
+
+    def save_model(self, request, obj, form, change):
+        if "content_markdown" in form.changed_data:
+            obj.content_html = markdownify(form.cleaned_data["content_markdown"])
+
+        resp = super().save_model(request, obj, form, change)
+
+        if "content_markdown" in form.changed_data:
+            obj.extract_citations()
+
+        return resp
 
 
 @admin.register(Journal)
