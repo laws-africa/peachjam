@@ -193,10 +193,6 @@ class SearchableDocument(Document):
     def prepare_doc_type(self, instance):
         return instance.get_doc_type_display()
 
-    def prepare_citation(self, instance):
-        # if there is no citation, fall back to the title so as not to penalise documents that don't have a citation
-        return instance.citation or instance.title
-
     def prepare_case_number(self, instance):
         if hasattr(instance, "case_numbers"):
             return [c.get_case_number_string() for c in instance.case_numbers.all()]
