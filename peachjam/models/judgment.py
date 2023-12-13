@@ -106,7 +106,7 @@ class Court(models.Model):
         Country,
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         verbose_name=_("country"),
     )
     locality = models.ForeignKey(
