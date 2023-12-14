@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -43,6 +44,21 @@
               title="{{ APP_NAME }} Articles RSS Feed"
               href="{% url 'article_feed' %}"/>
       {% endifequal %}
+      {% block favicon %}
+        <link rel="icon" type="image/ico" href="{% static 'images/favicon.ico' %}" />
+        <link rel="icon"
+              type="image/png"
+              href="{% static 'images/favicon-16x16.png' %}"/>
+        <link rel="icon"
+              type="image/png"
+              href="{% static 'images/favicon-32x32.png' %}"/>
+        <link rel="icon"
+              type="image/png"
+              href="{% static 'images/favicon-96x96.png' %}"/>
+        <link rel="icon"
+              type="image/png"
+              href="{% static 'images/favicon-180x180.png' %}"/>
+      {% endblock %}
     {% endblock %}
     {% block head-css %}{% endblock %}
     {% block head-js %}{% endblock %}
