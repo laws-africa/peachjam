@@ -355,11 +355,11 @@ class Judgment(CoreDocument):
             self.court = self.registry.court
 
         # ensure judgment locality matches the court's locality
-        if self.locality and self.court.locality:
+        if self.court.locality:
             self.locality = self.court.locality
 
         # ensure judgment country matches the court's country
-        if self.jurisdiction and self.court.country:
+        if self.court.country:
             self.jurisdiction = self.court.country
 
         self.doc_type = "judgment"
