@@ -262,7 +262,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     }
 
     search_fields = {
-        "title": {"boost": 6},
+        "title": {"boost": 8},
         "title_expanded": {"boost": 4},
         "authors": None,
         "citation": {"boost": 4},
