@@ -39,7 +39,7 @@ jobs:
         git_push_flags: '--force'
 
   deploy-ulii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-agp
     name: Deploy to ulii
     runs-on: ubuntu-latest
@@ -56,7 +56,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-zanzibarlii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-lawlibrary
     name: Deploy to zanzibarlii
     runs-on: ubuntu-latest
@@ -88,7 +88,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-ghalii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-ulii
     name: Deploy to ghalii
     runs-on: ubuntu-latest
@@ -105,7 +105,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-zambialii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-zanzibarlii
     name: Deploy to zambialii
     runs-on: ubuntu-latest
@@ -124,7 +124,7 @@ jobs:
 
 
   deploy-namiblii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-malawilii
     name: Deploy to namiblii
     runs-on: ubuntu-latest
@@ -142,7 +142,7 @@ jobs:
 
 
   deploy-seylii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-ghalii
     name: Deploy to seylii
     runs-on: ubuntu-latest
@@ -160,7 +160,7 @@ jobs:
 
 
   deploy-lesotholii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-zambialii
     name: Deploy to lesotholii
     runs-on: ubuntu-latest
@@ -178,7 +178,7 @@ jobs:
 
 
   deploy-sierralii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-namiblii
     name: Deploy to sierralii
     runs-on: ubuntu-latest
@@ -197,7 +197,7 @@ jobs:
 
 
   deploy-zimlii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-seylii
     name: Deploy to zimlii
     runs-on: ubuntu-latest
@@ -215,7 +215,7 @@ jobs:
 
 
   deploy-tcilii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-lesotholii
     name: Deploy to tcilii
     runs-on: ubuntu-latest
@@ -232,7 +232,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-tanzlii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-sierralii
     name: Deploy to tanzlii
     runs-on: ubuntu-latest
@@ -249,7 +249,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-eswatinilii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-tanzlii
     name: Deploy to eswatinilii
     runs-on: ubuntu-latest
@@ -266,7 +266,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-nigerialii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-zimlii
     name: Deploy to nigerialii
     runs-on: ubuntu-latest
@@ -283,7 +283,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-open-by-laws:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-tcilii
     name: Deploy to open-by-laws
     runs-on: ubuntu-latest
@@ -300,7 +300,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-obl-microsites:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-open-by-laws
     name: Deploy to open by-laws microsites
     runs-on: ubuntu-latest
@@ -317,7 +317,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-rwandalii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-nigerialii
     name: Deploy to rwandalii
     runs-on: ubuntu-latest
@@ -334,7 +334,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-mauritiuslii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-eswatinilii
     name: Deploy to mauritiuslii
     runs-on: ubuntu-latest
@@ -352,7 +352,7 @@ jobs:
 
 
   deploy-lii:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: deploy-mauritiuslii
     name: Deploy to lii
     runs-on: ubuntu-latest
