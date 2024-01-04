@@ -322,7 +322,10 @@ if not DEBUG:
         event_level=None,  # Don't send errors based on log messages
     )
 
-    def exclude_static(event, hint):
+    def before_send(event, hint):
+        # set the app name on all events
+        event.setdefault("tags", {})["app_name"] = PEACHJAM["APP_NAME"]
+
         # don't set /static to Sentry, to avoid using up quota
         if "request" in event and event["request"].get("url"):
             url = urlparse(event["request"]["url"])
@@ -334,7 +337,7 @@ if not DEBUG:
         dsn=PEACHJAM["SENTRY_DSN_KEY"],
         environment=PEACHJAM["SENTRY_ENVIRONMENT"],
         integrations=[DjangoIntegration(), sentry_logging],
-        before_send_transaction=exclude_static,
+        before_send_transaction=before_send,
         send_default_pii=True,
         # sample x% of requests for performance metrics
         traces_sample_rate=float(os.environ.get("SENTRY_SAMPLE_RATE", "0.25")),
