@@ -1,5 +1,6 @@
 import logging
 
+import sentry_sdk
 from background_task import background
 from background_task.tasks import DBTaskRunner, Task, logger, tasks
 from django.db.utils import OperationalError
@@ -28,6 +29,18 @@ class PatchedDBTaskRunner(DBTaskRunner):
             return None
         except OperationalError:
             logger.warning("Failed to retrieve tasks. Database unreachable.")
+
+    def run_task(self, tasks, task):
+        # wrap the task in a sentry transaction
+        with sentry_sdk.start_transaction(
+            op="queue.task", name=task.task_name
+        ) as transaction:
+            try:
+                super().run_task(tasks, task)
+                transaction.set_status("ok")
+            except Exception:
+                transaction.set_status("internal_error")
+                raise
 
 
 # use the patched runner
