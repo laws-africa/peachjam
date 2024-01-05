@@ -63,7 +63,7 @@ export default {
     async deleteEnrichment (enrichment) {
       const resp = await fetch(`/api/relationships/${enrichment.id}/`, {
         method: 'DELETE',
-        headers: authHeaders()
+        headers: await authHeaders()
       });
       if (resp.ok) {
         const ix = this.items.findIndex((e) => e.id === enrichment.id);
@@ -75,7 +75,7 @@ export default {
     },
 
     async save (enrichment) {
-      const headers = authHeaders();
+      const headers = await authHeaders();
       headers['Content-Type'] = 'application/json';
 
       const resp = await fetch('/api/relationships/', {

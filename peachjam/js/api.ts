@@ -1,15 +1,25 @@
 let token: string | null = null;
 
-export function csrfToken (): string {
+export async function csrfToken (): Promise<string> {
   if (token === null) {
-    const meta = document.querySelector('meta[name="csrfmiddlewaretoken"]');
-    token = meta ? (meta.getAttribute('content') || '') : '';
+    // fetch a token
+    try {
+      const resp = await fetch('/_token');
+      if (resp.ok) {
+        token = await resp.text();
+      } else {
+        token = 'unknown';
+      }
+    } catch (error) {
+      console.log(error);
+      token = 'error';
+    }
   }
   return token;
 }
 
-export function authHeaders (): object {
+export async function authHeaders (): Promise<object> {
   return {
-    'X-CSRFToken': csrfToken()
+    'X-CSRFToken': await csrfToken()
   };
 }

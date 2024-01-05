@@ -139,9 +139,6 @@ class BaseDocumentDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # authenticated users may need to use the API which requires CSRF tokens
-        context["uses_api_csrf_token"] = self.request.user.is_staff
-
         # citation links for a document
         doc = get_object_or_404(CoreDocument, pk=self.object.pk)
         citation_links = CitationLink.objects.filter(document=doc)
