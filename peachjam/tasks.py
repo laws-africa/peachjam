@@ -4,6 +4,7 @@ import sentry_sdk
 from background_task import background
 from background_task.tasks import DBTaskRunner, Task, logger, tasks
 from django.db.utils import OperationalError
+from sentry_sdk.tracing import TRANSACTION_SOURCE_TASK
 
 from peachjam.models import CoreDocument, Work, citations_processor
 
@@ -33,14 +34,10 @@ class PatchedDBTaskRunner(DBTaskRunner):
     def run_task(self, tasks, task):
         # wrap the task in a sentry transaction
         with sentry_sdk.start_transaction(
-            op="queue.task", name=task.task_name
+            op="queue.task", source=TRANSACTION_SOURCE_TASK, name=task.task_name
         ) as transaction:
-            try:
-                super().run_task(tasks, task)
-                transaction.set_status("ok")
-            except Exception:
-                transaction.set_status("internal_error")
-                raise
+            transaction.set_status("ok")
+            super().run_task(tasks, task)
 
 
 # use the patched runner
