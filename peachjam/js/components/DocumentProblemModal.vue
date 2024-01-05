@@ -135,13 +135,13 @@ export default {
       this.submitted = false;
       this.success = true;
     },
-    onSubmit () {
+    async onSubmit () {
       const form = new FormData(this.$refs.form);
 
       fetch('/document-problem/', {
         method: 'post',
         body: form,
-        headers: authHeaders()
+        headers: await authHeaders()
       }).then(response => {
         this.submitted = true;
         this.success = response.ok;

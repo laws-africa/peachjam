@@ -68,6 +68,7 @@ from peachjam.views import (
     UserProfileDetailView,
     WorkAutocomplete,
 )
+from peachjam.views.generic_views import CSRFTokenView
 from peachjam.views.metabase_stats import MetabaseStatsView
 
 register_converter(ISODateConverter, "isodate")
@@ -78,6 +79,7 @@ CACHE_DURATION = 60 * 60 * 24
 
 urlpatterns = [
     path("", HomePageView.as_view(), name="home_page"),
+    path("_token", CSRFTokenView.as_view(), name="csrf_token"),
     path("terms-of-use/", TermsOfUsePageView.as_view(), name="terms_of_use"),
     path(
         "about/",

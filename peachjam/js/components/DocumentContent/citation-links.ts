@@ -108,7 +108,7 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
             method: 'PUT',
             // @ts-ignore
             headers: {
-              ...authHeaders(),
+              ...(await authHeaders()),
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(link)
@@ -129,7 +129,7 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
     const resp = await fetch(`/api/citation-links/${link.id}/`, {
       method: 'DELETE',
       // @ts-ignore
-      headers: authHeaders()
+      headers: await authHeaders()
     });
     if (resp.ok) {
       this.unapplyLink(link);
@@ -181,7 +181,7 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
               method: 'POST',
               // @ts-ignore
               headers: {
-                ...authHeaders(),
+                ...(await authHeaders()),
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify(link)
