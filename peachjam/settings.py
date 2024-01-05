@@ -80,9 +80,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "peachjam.middleware.GeneralUpdateCacheMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
     "peachjam.middleware.RedirectWWWMiddleware",
-    "peachjam.middleware.RedirectNewMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -93,6 +93,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware",
 ]
 
 ROOT_URLCONF = "peachjam.urls"
