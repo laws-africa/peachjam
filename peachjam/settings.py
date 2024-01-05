@@ -551,6 +551,8 @@ if DEBUG:
             "BACKEND": "django.core.cache.backends.dummy.DummyCache",
         },
     }
+    # don't cache in DEBUG mode
+    CACHE_MIDDLEWARE_SECONDS = 0
 else:
     CACHES = {
         "default": {
@@ -558,6 +560,8 @@ else:
             "LOCATION": "/var/tmp/django_cache",
         },
     }
+    # in general, cache most pages
+    CACHE_MIDDLEWARE_SECONDS = 60 * 30
 
 # Override X-Frame-Options header value
 X_FRAME_OPTIONS = "SAMEORIGIN"

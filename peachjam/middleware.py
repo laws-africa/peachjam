@@ -73,10 +73,6 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
         "/_",
     ]
 
-    def __init__(self, get_response):
-        super().__init__(get_response)
-        self.page_timeout = 60 * 30
-
     def _should_update_cache(self, request, response):
         if (
             hasattr(request, "_cache_update_cache")
