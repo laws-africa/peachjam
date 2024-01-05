@@ -91,4 +91,8 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
             return False
 
         # anonymous and non-staff users should see cached content
-        return request.user.is_anonymous or not request.user.is_staff
+        return (
+            getattr(request, "user", None) is not None
+            and request.user.is_anonymous
+            or not request.user.is_staff
+        )
