@@ -80,9 +80,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "peachjam.middleware.GeneralUpdateCacheMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
     "peachjam.middleware.RedirectWWWMiddleware",
-    "peachjam.middleware.RedirectNewMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -93,6 +93,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware",
 ]
 
 ROOT_URLCONF = "peachjam.urls"
@@ -550,6 +551,8 @@ if DEBUG:
             "BACKEND": "django.core.cache.backends.dummy.DummyCache",
         },
     }
+    # don't cache in DEBUG mode
+    CACHE_MIDDLEWARE_SECONDS = 0
 else:
     CACHES = {
         "default": {
@@ -557,6 +560,8 @@ else:
             "LOCATION": "/var/tmp/django_cache",
         },
     }
+    # in general, cache most pages
+    CACHE_MIDDLEWARE_SECONDS = 60 * 30
 
 # Override X-Frame-Options header value
 X_FRAME_OPTIONS = "SAMEORIGIN"
