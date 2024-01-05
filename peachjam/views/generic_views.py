@@ -1,7 +1,9 @@
 import itertools
 
+from django.http.response import HttpResponse
+from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, View
 from lxml import html
 
 from peachjam.forms import BaseDocumentFilterForm
@@ -136,6 +138,9 @@ class BaseDocumentDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # authenticated users may need to use the API which requires CSRF tokens
+        context["uses_api_csrf_token"] = self.request.user.is_staff
 
         # citation links for a document
         doc = get_object_or_404(CoreDocument, pk=self.object.pk)
@@ -277,3 +282,10 @@ class BaseDocumentDetailView(DetailView):
                 )
 
         document.content_html = html.tostring(root, encoding="unicode")
+
+
+class CSRFTokenView(View):
+    """This view returns a CSRF token for use with the API."""
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponse(get_token(request), content_type="text/plain")

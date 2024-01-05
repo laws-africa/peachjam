@@ -107,8 +107,6 @@
 </template>
 
 <script>
-import { authHeaders } from '../api';
-
 export default {
   name: 'DocumentProblemModal',
   data () {
@@ -127,13 +125,18 @@ export default {
     this.$el.parentElement.addEventListener('show.bs.modal', this.onShow);
   },
   methods: {
-    onShow () {
+    async onShow () {
       this.email = '';
       this.message = '';
       this.problem = '';
       this.problem_category = '';
       this.submitted = false;
       this.success = true;
+      // fetch a csrf token
+      const resp = await fetch('/_token');
+      if (resp.ok) {
+        this.csrfToken = await resp.text();
+      }
     },
     onSubmit () {
       const form = new FormData(this.$refs.form);
@@ -141,7 +144,9 @@ export default {
       fetch('/document-problem/', {
         method: 'post',
         body: form,
-        headers: authHeaders()
+        headers: {
+          'X-CSRFToken': this.csrfToken
+        }
       }).then(response => {
         this.submitted = true;
         this.success = response.ok;
