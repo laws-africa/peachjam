@@ -354,11 +354,12 @@ class Judgment(CoreDocument):
         if self.registry:
             self.court = self.registry.court
 
-        if self.court is not None and self.court.country:
-            self.jurisdiction = self.court.country
+        if self.court is not None:
+            if self.court.country:
+                self.jurisdiction = self.court.country
 
-        if self.court.locality:
-            self.locality = self.court.locality
+            if self.court.locality:
+                self.locality = self.court.locality
 
         self.doc_type = "judgment"
         self.assign_mnc()
