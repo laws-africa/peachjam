@@ -29,7 +29,7 @@ function getCaseNumbers () {
 
 function getCSRFToken () {
   const cookies = document.cookie.split(';');
-  const cookie = cookies.find(cookie => cookie.startsWith('csrftoken'));
+  const cookie = cookies.find(cookie => cookie.trim().startsWith('csrftoken'));
   return cookie.split('=')[1];
 }
 
