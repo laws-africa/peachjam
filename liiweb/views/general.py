@@ -11,9 +11,7 @@ class HomePageView(TemplateView):
 
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["recent_judgments"] = Judgment.objects.order_by("-date")[:5]
-        context["recent_legislation"] = Legislation.objects.filter(
-            metadata_json__stub=False
-        ).order_by("-date")[:10]
+        context["recent_legislation"] = Legislation.objects.order_by("-date")[:10]
         context["taxonomies"] = Taxonomy.dump_bulk()
         context["taxonomy_url"] = "taxonomy_detail"
         context["recent_articles"] = (
