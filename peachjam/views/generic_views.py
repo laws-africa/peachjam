@@ -218,16 +218,22 @@ class BaseDocumentDetailView(DetailView):
         return result
 
     def add_relationships(self, context):
-        context["relationships_as_subject"] = rels_as_subject = list(
-            Relationship.for_subject_document(context["document"])
-            .prefetch_related("subject_work", "object_work")
-            .select_related("predicate")
-        )
-        context["relationships_as_object"] = rels_as_object = list(
-            Relationship.for_object_document(context["document"])
-            .prefetch_related("object_work", "subject_work")
-            .select_related("predicate")
-        )
+        relationships_as_subject = [
+            relationship
+            for relationship in Relationship.for_subject_document(context["document"])
+            if relationship.object_work
+            and CoreDocument.objects.filter(work=relationship.object_work)
+        ]
+
+        relationships_as_object = [
+            relationship
+            for relationship in Relationship.for_object_document(context["document"])
+            if relationship.subject_work
+            and CoreDocument.objects.filter(work=relationship.subject_work)
+        ]
+
+        context["relationships_as_subject"] = rels_as_subject = relationships_as_subject
+        context["relationships_as_object"] = rels_as_object = relationships_as_object
         context["n_relationships"] = len(rels_as_subject) + len(rels_as_object)
         context["relationship_limit"] = 4
 
