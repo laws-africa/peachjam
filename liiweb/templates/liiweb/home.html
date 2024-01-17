@@ -41,7 +41,10 @@
                      class="btn btn-primary ms-2 btn-lg"
                      value="{% trans 'Search' %}"/>
             </form>
-            <a href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
+            <div class="d-flex">
+              <a class="me-4" href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
+              {% include "peachjam/_help_button.html" with link="search" %}
+            </div>
           </div>
         </div>
       {% endblock %}
