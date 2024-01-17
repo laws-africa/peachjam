@@ -42,6 +42,12 @@
                      value="{% trans 'Search' %}"/>
             </form>
             <a href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
+            {% if PEACHJAM_SETTINGS.user_help_link %}
+              <a class="ms-4"
+                 href="{{ PEACHJAM_SETTINGS.user_help_link }}{{ link }}"
+                 target="_blank"
+                 rel="noopener noreferrer">{% trans 'Help' %}</a>
+            {% endif %}
           </div>
         </div>
       {% endblock %}
