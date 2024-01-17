@@ -1,15 +1,13 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
 {% block hero-logos %}
-  <div class="d-flex justify-content-between">
-    <img class="me-4"
-         src="{% static 'images/africanlii-logo.svg' %}"
-         alt="africanlii-logo"/>
-    <img class="me-4"
-         src="{% static 'images/judiciary_swazi.png' %}"
-         alt="judiciary-logo"/>
-    <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
-  </div>
+  <img class="me-4"
+       src="{% static 'images/africanlii-logo.svg' %}"
+       alt="africanlii-logo"/>
+  <img class="me-4"
+       src="{% static 'images/judiciary_swazi.png' %}"
+       alt="judiciary-logo"/>
+  <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
 {% endblock %}
 {% block hero-headings %}
   <h1 class="mb-4">{% trans 'Welcome to eSwatini Legal Information Institute' %}</h1>
@@ -20,9 +18,6 @@
   </h4>
 {% endblock %}
 {% block second-col-about %}
-  <div>
-    <strong>{% trans 'About' %}</strong>
-  </div>
   <p>
     {% blocktrans trimmed %}
     ESwatiniLII is a free access to law website by the Judiciary of eSwatini. eSwatiniLII exists to provide free access to the law for everyone, as a fundamental right of every citizen to know the law that governs them.

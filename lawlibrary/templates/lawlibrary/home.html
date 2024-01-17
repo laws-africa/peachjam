@@ -33,9 +33,6 @@
   </section>
 {% endblock %}
 {% block second-column-content %}
-  <div>
-    <strong>{% trans 'About' %}</strong>
-  </div>
   <p>
     {% blocktrans trimmed %}
       LawLibrary.org.za is a project of the AfricanLII and Judicial Institute for Africa at the University of Cape Town.
@@ -47,44 +44,6 @@
       {% include 'peachjam/_social_media.html' %}
     {% endblock %}
   {% endif %}
-  <ul class="nav nav-tabs about-tabs d-flex justify-content-center justify-content-lg-start"
-      role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link fb-nav-link"
-              id="facebook-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#facebook-tab-content"
-              type="button"
-              role="tab"
-              aria-controls="facebook"
-              aria-selected="false">
-        <i class="bi bi bi-facebook facebook-forecolor"></i>
-        <span class="facebook-forecolor">{% trans 'Facebook' %}</span>
-      </button>
-    </li>
-  </ul>
-  <div class="tab-content">
-    <div class="tab-pane fade"
-         id="facebook-tab-content"
-         role="tabpanel"
-         aria-labelledby="facebook-tab-content">
-      <div class="d-flex justify-content-center justify-content-lg-start">
-        <iframe width="248px"
-                height="400px"
-                frameborder="0"
-                allowtransparency="true"
-                allowfullscreen="true"
-                scrolling="no"
-                allow="encrypted-media"
-                src="https://www.facebook.com/v7.0/plugins/page.php?adapt_container_width=true&amp;app_id=323754998056442&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fx%2Fconnect%2Fxd_arbiter%2F%3Fversion%3D46%23cb%3Dfff64532b89928%26domain%3Dlawlibrary.org.za%26is_canvas%3Dfalse%26origin%3Dhttps%253A%252F%252Flawlibrary.org.za%252Ff3480a77dff53bc%26relation%3Dparent.parent&amp;container_width=248&amp;height=400&amp;hide_cover=false&amp;href=https%3A%2F%2Fwww.facebook.com%2Fafricanlii%2F&amp;locale=en_US&amp;sdk=joey&amp;show_facepile=false&amp;small_header=true&amp;tabs=timeline&amp;width=248"
-                style="border: none;
-                       visibility: visible;
-                       width: 248px;
-                       height: 400px">
-        </iframe>
-      </div>
-    </div>
-  </div>
 {% endblock %}
 {% block pocketlaw %}
   {{ block.super }}
