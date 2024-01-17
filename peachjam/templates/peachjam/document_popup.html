@@ -7,7 +7,7 @@
       </la-akoma-ntoso>
     {% endblock %}
   {% else %}
-    <div class="mb-2">
+    <div>
       <div>
         {% block title %}
           <b>{{ document.title }}</b>
@@ -19,13 +19,21 @@
         {% endblock %}
       </div>
       {% block citation %}
-        {% if document.citation %}
+        {% if document.citation and document.citation != document.title %}
           <div>
             <i>{{ document.citation }}</i>
           </div>
         {% endif %}
       {% endblock %}
+      {% block date %}<div>{{ document.date }}</div>{% endblock %}
     </div>
-    {% block date %}<div>{{ document.date }}</div>{% endblock %}
+    {% block offsite_request %}
+      {% if offsite_request %}
+        <div class="mt-2">
+          <a href="https://{{ request.get_host }}{{ document.expression_frbr_uri }}"
+             target="_blank">{{ APP_NAME }}</a>
+        </div>
+      {% endif %}
+    {% endblock %}
   {% endif %}
 </div>

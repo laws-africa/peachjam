@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_advanced_password_validation",
     "martor",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -87,6 +88,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -607,3 +609,7 @@ MARTOR_ENABLE_CONFIGS = {
 }
 # disable the normal martor theme which pulls in another bootstrap version
 MARTOR_ALTERNATIVE_CSS_FILE_THEME = "martor/css/peachjam.css"
+
+# CORS
+# disable regex matches, we do matching using signals
+CORS_URLS_REGEX = r"^$"
