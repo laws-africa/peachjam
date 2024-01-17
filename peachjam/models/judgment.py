@@ -202,7 +202,7 @@ class Judgment(CoreDocument):
     attorneys = models.ManyToManyField(
         Attorney, blank=True, verbose_name=_("attorneys")
     )
-    order_outcome = models.ManyToManyField(
+    order_outcomes = models.ManyToManyField(
         OrderOutcome,
         blank=True,
     )

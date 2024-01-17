@@ -730,7 +730,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         CaseNumberAdmin,
         JudgmentRelationshipStackedInline,
     ] + DocumentAdmin.inlines
-    filter_horizontal = ("judges", "attorneys", "order_outcome")
+    filter_horizontal = ("judges", "attorneys", "order_outcomes")
     list_filter = (*DocumentAdmin.list_filter, "court")
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
 
