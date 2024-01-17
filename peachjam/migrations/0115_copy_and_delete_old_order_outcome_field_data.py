@@ -6,7 +6,7 @@ from django.db import migrations, models
 def copy_data(apps, schema_editor):
     Judgment = apps.get_model("peachjam", "Judgment")
 
-    for judgment in Judgment.objects.all().iterator(chunk_size=100):
+    for judgment in Judgment.objects.filter(order_outcome__isnull=False).iterator(chunk_size=100):
         judgment.order_outcomes.add(judgment.order_outcome)
         judgment.save()
 
