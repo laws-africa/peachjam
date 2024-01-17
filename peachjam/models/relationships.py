@@ -83,8 +83,16 @@ class Relationship(models.Model):
 
     @classmethod
     def for_subject_document(cls, doc):
-        return cls.objects.filter(subject_work=doc.work)
+        return (
+            cls.objects.filter(subject_work=doc.work)
+            .prefetch_related("subject_work", "object_work")
+            .select_related("predicate")
+        )
 
     @classmethod
     def for_object_document(cls, doc):
-        return cls.objects.filter(object_work=doc.work)
+        return (
+            cls.objects.filter(object_work=doc.work)
+            .prefetch_related("object_work", "subject_work")
+            .select_related("predicate")
+        )
