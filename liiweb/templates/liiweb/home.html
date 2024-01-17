@@ -50,32 +50,8 @@
   {% block after-search %}{% endblock %}
   <section class="mt-2">
     <div class="container">
-      <div class="row justify-content-center hero-logos mt-5 mb-3">
-        {% block hero-logos %}
-          <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
-          <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
-        {% endblock %}
-      </div>
-    </div>
-  </section>
-  <section class="py-5">
-    <div class="container">
-      <div class="row">
-        <div class="col-12 col-lg-9">
-          {% block first-column-content %}
-            <section class="pb-3 pt-3">
-              <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
-              {% trans 'View more judgments' as text %}
-              {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
-            </section>
-            <section class="pb-3 pt-3">
-              <h2 class="mb-4 heading-underlined">{% trans 'Recent Legislation' %}</h2>
-              {% trans 'View more legislation' as text %}
-              {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
-            </section>
-          {% endblock %}
-        </div>
-        <div class="col-12 col-lg-3">
+      <div class="row justify-content-between align-items-center mt-5 mb-3">
+        <div class="col-12 col-lg-6">
           {% block second-column-content %}
             {% block second-col-about %}{% endblock %}
             {% block second-col-logos %}{% endblock %}
@@ -84,50 +60,34 @@
                 {% include 'peachjam/_social_media.html' %}
               {% endblock %}
             {% endif %}
-            <ul class="nav nav-tabs about-tabs d-flex justify-content-center justify-content-lg-start"
-                role="tablist">
-              {% block facebook-tab %}
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link fb-nav-link"
-                          id="facebook-tab"
-                          data-bs-toggle="tab"
-                          data-bs-target="#facebook-tab-content"
-                          type="button"
-                          role="tab"
-                          aria-controls="facebook"
-                          aria-selected="false">
-                    <i class="bi bi-facebook facebook-forecolor"></i>
-                    <span class="facebook-forecolor">{% trans 'Facebook' %}</span>
-                  </button>
-                </li>
-              {% endblock %}
-            </ul>
-            <div class="tab-content">
-              {% block facebook-pane %}
-                <div class="tab-pane fade"
-                     id="facebook-tab-content"
-                     role="tabpanel"
-                     aria-labelledby="facebook-tab-content">
-                  <div class="d-flex justify-content-center justify-content-lg-start">
-                    <iframe width="248px"
-                            height="400px"
-                            frameborder="0"
-                            allowtransparency="true"
-                            allowfullscreen="true"
-                            scrolling="no"
-                            allow="encrypted-media"
-                            src="{% block facebook-url %} https://www.facebook.com/v7.0/plugins/page.php?adapt_container_width=true&amp;app_id=323754998056442&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fx%2Fconnect%2Fxd_arbiter%2F%3Fversion%3D46%23cb%3Dfff64532b89928%26domain%3Dlawlibrary.org.za%26is_canvas%3Dfalse%26origin%3Dhttps%253A%252F%252Flawlibrary.org.za%252Ff3480a77dff53bc%26relation%3Dparent.parent&amp;container_width=248&amp;height=400&amp;hide_cover=false&amp;href=https%3A%2F%2Fwww.facebook.com%2Fafricanlii%2F&amp;locale=en_US&amp;sdk=joey&amp;show_facepile=false&amp;small_header=true&amp;tabs=timeline&amp;width=248 {% endblock %}"
-                            style="border: none;
-                                   visibility: visible;
-                                   width: 248px;
-                                   height: 400px">
-                    </iframe>
-                  </div>
-                </div>
-              {% endblock %}
-            </div>
           {% endblock %}
         </div>
+        <div class="col-12 col-lg-6">
+          <div class="hero-logos row justify-content-center">
+            {% block hero-logos %}
+              <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
+              <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
+            {% endblock %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="py-5">
+    <div class="container">
+      <div>
+        {% block first-column-content %}
+          <section class="pb-3 pt-3">
+            <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
+            {% trans 'View more judgments' as text %}
+            {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
+          </section>
+          <section class="pb-3 pt-3">
+            <h2 class="mb-4 heading-underlined">{% trans 'Recent Legislation' %}</h2>
+            {% trans 'View more legislation' as text %}
+            {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
+          </section>
+        {% endblock %}
       </div>
       <div>
         {% block lower-row-content %}
