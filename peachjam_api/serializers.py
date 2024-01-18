@@ -1,9 +1,11 @@
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 from peachjam.models import (
     CitationLink,
     CoreDocument,
     Court,
+    DocumentMedia,
     Gazette,
     Judgment,
     Label,
@@ -201,4 +203,24 @@ class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):
             "updated_at",
             "url",
             "work_frbr_uri",
+        )
+
+
+class DocumentMediaSerializer(serializers.ModelSerializer):
+    filename = serializers.CharField(max_length=1024, required=True)
+    file = serializers.FileField(required=True, write_only=True)
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DocumentMedia
+        fields = ("id", "filename", "file", "url")
+        read_only_fields = ("mimetype",)
+
+    def get_url(self, instance):
+        if not instance.pk:
+            return None
+        return reverse(
+            "document-attachments-detail",
+            request=self.context["request"],
+            kwargs={"pk": instance.pk},
         )

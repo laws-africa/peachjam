@@ -17,6 +17,7 @@ from languages_plus.models import Language
 from peachjam.models import (
     Author,
     CoreDocument,
+    DocumentMedia,
     DocumentNature,
     DocumentTopic,
     GenericDocument,
@@ -341,6 +342,34 @@ class IndigoAdapter(Adapter):
 
         self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
+        self.download_and_save_document_images(document, created_doc)
+
+    def list_images_from_content_api(self, document):
+        links = document["links"]
+        if links:
+            for link in links:
+                if link["href"].endswith("media.json"):
+                    response = self.client_get(link["href"])
+                    if response.status_code == 200 and response.json()["results"]:
+                        return response.json()["results"]
+
+    def download_and_save_document_images(self, document, created_document):
+        image_list = self.list_images_from_content_api(document)
+        if image_list:
+            for result in image_list:
+                if "image/" in result["mime_type"]:
+                    with NamedTemporaryFile() as file:
+                        r = self.client_get(result["url"])
+                        file.write(r.content)
+
+                        DocumentMedia.objects.get_or_create(
+                            document=created_document,
+                            defaults={
+                                "file": File(file, name=result["filename"]),
+                                "mimetype": result["mime_type"],
+                                "filename": result["filename"],
+                            },
+                        )
 
     def get_model(self, document):
         if document["nature"] == "act":

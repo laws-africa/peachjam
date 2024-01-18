@@ -912,3 +912,27 @@ class DocumentContent(models.Model):
         )[0]
         document.document_content = doc_content
         return doc_content
+
+
+class DocumentMedia(models.Model):
+    SAVE_FOLDER = "document_media"
+    document = models.ForeignKey(
+        CoreDocument,
+        on_delete=models.CASCADE,
+        related_name="document_media",
+        verbose_name=_("document"),
+    )
+    filename = models.CharField(_("filename"), max_length=1024, null=False, blank=False)
+    file = models.FileField(
+        _("file"),
+        upload_to=file_location,
+        max_length=1024,
+    )
+    mimetype = models.CharField(_("mimetype"), max_length=1024, null=False, blank=False)
+
+    class Meta:
+        verbose_name = _("document media")
+        verbose_name_plural = _("document media")
+
+    def __str__(self):
+        return self.filename
