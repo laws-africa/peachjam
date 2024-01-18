@@ -912,3 +912,19 @@ class DocumentContent(models.Model):
         )[0]
         document.document_content = doc_content
         return doc_content
+
+
+class DocumentMedia(models.Model):
+    document = models.ForeignKey(
+        CoreDocument,
+        on_delete=models.CASCADE,
+        related_name="document_media",
+        verbose_name=_("document"),
+    )
+    filename = models.CharField(_("filename"), max_length=1024, null=False, blank=False)
+    file = models.FileField(
+        _("file"),
+        upload_to=file_location,
+        max_length=1024,
+    )
+    mimetype = models.CharField(_("mimetype"), max_length=1024, null=False, blank=False)
