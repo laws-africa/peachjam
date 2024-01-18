@@ -10,7 +10,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
     pages = SerializerMethodField()
     court = SerializerMethodField()
     nature = SerializerMethodField()
-    order_outcome = SerializerMethodField()
+    order_outcomes = SerializerMethodField()
     registry = SerializerMethodField()
     labels = CharField(allow_null=True)
     _score = FloatField(source="meta.score")
@@ -72,8 +72,12 @@ class SearchableDocumentSerializer(DocumentSerializer):
     def get_nature(self, obj):
         return obj["nature" + self.language_suffix]
 
-    def get_order_outcome(self, obj):
-        return obj["order_outcome" + self.language_suffix]
+    def get_order_outcomes(self, obj):
+        order_outcomes = obj["order_outcomes"]
+        if order_outcomes:
+            return [
+                order_outcome + self.language_suffix for order_outcome in order_outcomes
+            ]
 
     def get_registry(self, obj):
         return obj["registry" + self.language_suffix]

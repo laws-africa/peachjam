@@ -76,11 +76,11 @@ class SearchableDocument(Document):
     registry_fr = fields.KeywordField()
     registry_pt = fields.KeywordField()
 
-    order_outcome = fields.KeywordField(attr="order_outcome.name")
-    order_outcome_en = fields.KeywordField()
-    order_outcome_sw = fields.KeywordField()
-    order_outcome_fr = fields.KeywordField()
-    order_outcome_pt = fields.KeywordField()
+    order_outcomes = fields.KeywordField(attr="order_outcome.name")
+    order_outcomes_en = fields.KeywordField()
+    order_outcomes_sw = fields.KeywordField()
+    order_outcomes_fr = fields.KeywordField()
+    order_outcomes_pt = fields.KeywordField()
 
     # GenericDocument, LegalInstrument
     authors = fields.KeywordField()
@@ -107,7 +107,7 @@ class SearchableDocument(Document):
     translated_fields = [
         ("court", "name"),
         ("registry", "name"),
-        ("order_outcome", "name"),
+        ("order_outcomes", "name"),
         ("nature", "name"),
     ]
 
@@ -234,9 +234,11 @@ class SearchableDocument(Document):
         if hasattr(instance, "nature") and instance.nature:
             return instance.nature.name
 
-    def prepare_order_outcome(self, instance):
-        if hasattr(instance, "order_outcome") and instance.order_outcome:
-            return instance.order_outcome.name
+    def prepare_order_outcomes(self, instance):
+        if hasattr(instance, "order_outcomes") and instance.order_outcomes:
+            return [
+                order_outcome.name for order_outcome in instance.order_outcomes.all()
+            ]
 
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""
