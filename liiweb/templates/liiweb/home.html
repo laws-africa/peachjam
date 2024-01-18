@@ -58,7 +58,7 @@
           {% block second-column-content %}
             {% block second-col-about %}{% endblock %}
             {% block second-col-logos %}{% endblock %}
-            {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link %}
+            {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link or PEACHJAM_SETTINGS.linkedin_link %}
               {% block social-media %}
                 {% include 'peachjam/_social_media.html' %}
               {% endblock %}

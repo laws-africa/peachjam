@@ -81,6 +81,9 @@ class PeachJamSettings(SingletonModel):
     facebook_link = models.URLField(
         verbose_name=_("facebook link"), null=True, blank=True
     )
+    linkedin_link = models.URLField(
+        verbose_name=_("linkedin link"), null=True, blank=True
+    )
     re_extract_citations = models.BooleanField(
         verbose_name=_("re-extract citations"), default=True
     )
