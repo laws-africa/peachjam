@@ -49,7 +49,8 @@
       </dt>
       <dd class="text-muted">
         {% for order_outcome in order_outcomes %}
-          {% if not forloop.last %}{{ order_outcome.name }},{% endif %}
+          {{ order_outcome.name }}
+          {% if not forloop.last %},{% endif %}
         {% endfor %}
       </dd>
     {% endif %}
