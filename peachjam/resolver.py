@@ -82,11 +82,11 @@ class RedirectResolver:
     }
 
     def __init__(self, app_name):
-        self.current_authority = self.RESOLVER_MAPPINGS[app_name.lower()]
+        self.current_authority = self.RESOLVER_MAPPINGS.get(app_name.lower())
 
     def get_domain_for_frbr_uri(self, parsed_frbr_uri):
         best_domain = self.get_best_domain(parsed_frbr_uri)
-        if best_domain != self.current_authority["domain"]:
+        if self.current_authority and best_domain != self.current_authority["domain"]:
             return best_domain
         return None
 
