@@ -110,6 +110,10 @@ class IndigoAdapter(Adapter):
             while url:
                 res = self.client_get(url).json()
 
+                # ignore bills
+                # TODO: later, make this configurable
+                res["results"] = [r for r in res["results"] if r["nature"] != "bill"]
+
                 # Filter by actor, if setting is present
                 actor = self.settings.get("actor", None)
                 if actor:
