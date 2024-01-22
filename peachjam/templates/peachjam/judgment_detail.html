@@ -42,14 +42,19 @@
       <a href="{% url 'court_registry' document.court.code document.registry.code %}">{{ document.registry.name }}</a>
     </dd>
   {% endif %}
-  {% if document.order_outcome %}
-    <dt>
-      {% trans 'Order' %}
-    </dt>
-    <dd class="text-muted">
-      {{ document.order_outcome.name }}
-    </dd>
-  {% endif %}
+  {% with document.order_outcomes.all as order_outcomes %}
+    {% if order_outcomes %}
+      <dt>
+        {% trans 'Order' %}
+      </dt>
+      <dd class="text-muted">
+        {% for order_outcome in order_outcomes %}
+          {{ order_outcome.name }}
+          {% if not forloop.last %},{% endif %}
+        {% endfor %}
+      </dd>
+    {% endif %}
+  {% endwith %}
   {% with document.case_numbers.all as case_numbers %}
     {% if case_numbers %}
       <dt>

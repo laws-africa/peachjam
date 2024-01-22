@@ -1,7 +1,7 @@
 from cobalt import FrbrUri
 from django.test import TestCase
 
-from peachjam.views.documents import RedirectResolver
+from peachjam.resolver import RedirectResolver
 
 urls = [
     "/akn/zm/judgment/zmsc/2021/7/eng@2021-01-19",

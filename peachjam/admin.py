@@ -731,14 +731,14 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         CaseNumberAdmin,
         JudgmentRelationshipStackedInline,
     ] + DocumentAdmin.inlines
-    filter_horizontal = ("judges", "attorneys")
+    filter_horizontal = ("judges", "attorneys", "order_outcomes")
     list_filter = (*DocumentAdmin.list_filter, "court")
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
 
     fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "registry")
     fieldsets[0][1]["fields"].insert(5, "case_name")
-    fieldsets[0][1]["fields"].insert(6, "order_outcome")
+    fieldsets[0][1]["fields"].insert(6, "order_outcomes")
     fieldsets[0][1]["fields"].insert(7, "mnc")
     fieldsets[0][1]["fields"].insert(8, "serial_number_override")
     fieldsets[0][1]["fields"].insert(9, "serial_number")
