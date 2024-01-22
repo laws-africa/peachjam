@@ -128,6 +128,8 @@ PEACHJAM = {
     "CITATOR_API_KEY": os.environ.get("CITATOR_API_KEY"),
     "EXTRA_SEARCH_INDEXES": [],
     "SEARCH_JURISDICTION_FILTER": False,
+    "MULTIPLE_JURISDICTIONS": False,
+    "MULTIPLE_LOCALITIES": False,
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))

@@ -4,8 +4,8 @@
     <thead>
       <tr>
         <th scope="col" style="width: 70%">{% trans 'Title' %}</th>
-        {% if doc_table_show_jurisdiction %}
-          <th scope="col">{% trans 'Country' %}</th>
+        {% if MULTIPLE_JURISDICTIONS or MULTIPLE_LOCALITIES %}
+          <th scope="col">{% trans 'Jurisdiction' %}</th>
         {% endif %}
         {% if doc_table_show_author %}<th scope="col"></th>{% endif %}
         {% if doc_table_show_court %}<th scope="col"></th>{% endif %}
@@ -19,8 +19,13 @@
           <td>
             <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
           </td>
-          {% if doc_table_show_jurisdiction %}
-            <td>{% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction }}</td>
+          {% if MULTIPLE_JURISDICTIONS %}
+            <td>
+              {% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction|default_if_none:'' }}
+              {% if document.locality %}· {{ document.locality }}{% endif %}
+            </td>
+          {% elif MULTIPLE_LOCALITIES %}
+            <td>{{ document.locality|default_if_none:'' }}</td>
           {% endif %}
           {% if doc_table_show_author %}<td>{{ document.author|default_if_none:'' }}</td>{% endif %}
           {% if doc_table_show_court %}<td>{{ document.court|default_if_none:'' }}</td>{% endif %}
