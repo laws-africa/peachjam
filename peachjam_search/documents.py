@@ -25,6 +25,11 @@ from peachjam.models import (
 log = logging.getLogger(__name__)
 
 
+# the languages that translated fields support, that will be indexed into ES
+# TODO: where should this language list be configured? they are languages that the interface is translated into
+TRANSLATED_FIELD_LANGS = ["en", "fr", "pt", "sw"]
+
+
 class RankField(fields.DEDField, RankFeature):
     pass
 
@@ -107,7 +112,6 @@ class SearchableDocument(Document):
     translated_fields = [
         ("court", "name"),
         ("registry", "name"),
-        ("order_outcomes", "name"),
         ("nature", "name"),
     ]
 
@@ -240,6 +244,18 @@ class SearchableDocument(Document):
                 order_outcome.name for order_outcome in instance.order_outcomes.all()
             ]
 
+    def prepare_order_outcomes_en(self, instance):
+        return get_translated_m2m_name(instance, "order_outcomes", "en")
+
+    def prepare_order_outcomes_fr(self, instance):
+        return get_translated_m2m_name(instance, "order_outcomes", "fr")
+
+    def prepare_order_outcomes_pt(self, instance):
+        return get_translated_m2m_name(instance, "order_outcomes", "pt")
+
+    def prepare_order_outcomes_sw(self, instance):
+        return get_translated_m2m_name(instance, "order_outcomes", "sw")
+
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""
         if not instance.content_html:
@@ -292,6 +308,15 @@ class SearchableDocument(Document):
         return super().get_queryset().order_by("-pk")
 
 
+def get_translated_m2m_name(instance, field, lang):
+    """Get the translated name of a many-to-many field."""
+    if hasattr(instance, field) and getattr(instance, field):
+        return [
+            getattr(v, f"name_{lang}", None) or v.name
+            for v in getattr(instance, field).all()
+        ]
+
+
 def prepare_translated_field(self, instance, field, attr, lang):
     if getattr(instance, field, None):
         fld = getattr(instance, field)
@@ -306,8 +331,7 @@ def make_prepare(field, attr, lang):
 
 # add preparation methods for translated fields to avoid lots of copy-and-paste
 for field, attr in SearchableDocument.translated_fields:
-    # TODO: where should this language list be configured? they are languages that the interface is translated into
-    for lang in ["en", "fr", "pt", "sw"]:
+    for lang in TRANSLATED_FIELD_LANGS:
         # we must call make_prepare so that the variables are evaluated now, not when the function is called
         setattr(
             SearchableDocument,
