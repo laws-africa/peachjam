@@ -202,11 +202,8 @@ class Judgment(CoreDocument):
     attorneys = models.ManyToManyField(
         Attorney, blank=True, verbose_name=_("attorneys")
     )
-    order_outcome = models.ForeignKey(
+    order_outcomes = models.ManyToManyField(
         OrderOutcome,
-        on_delete=models.PROTECT,
-        null=True,
-        related_name="judgments",
         blank=True,
     )
     case_summary = models.TextField(_("case summary"), null=True, blank=True)

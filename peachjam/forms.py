@@ -158,7 +158,9 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(attorneys__name__in=attorneys)
 
         if order_outcomes and exclude != "order_outcomes":
-            queryset = queryset.filter(order_outcome__name__in=order_outcomes)
+            queryset = queryset.filter(
+                order_outcomes__name__in=order_outcomes
+            ).distinct()
 
         return queryset
 

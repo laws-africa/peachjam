@@ -73,7 +73,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
         return obj["nature" + self.language_suffix]
 
     def get_order_outcome(self, obj):
-        return obj["order_outcome" + self.language_suffix]
+        return list(obj["order_outcome" + self.language_suffix])
 
     def get_registry(self, obj):
         return obj["registry" + self.language_suffix]
