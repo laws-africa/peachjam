@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             name="order_outcomes",
             field=models.ManyToManyField(blank=True, to="peachjam.OrderOutcome"),
         ),
-        migrations.RunPython(copy_data),
+        migrations.RunPython(copy_data, migrations.RunPython.noop),
         migrations.RemoveField(
             model_name="judgment",
             name="order_outcome",

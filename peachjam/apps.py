@@ -13,7 +13,7 @@ class PeachJamConfig(AppConfig):
 
         jazzmin.settings.THEMES["peachjam"] = "stylesheets/peachjam-jazzmin.css"
 
-        if settings.DEBUG:
+        if not settings.DEBUG:
             from background_task.models import Task
 
             from peachjam.tasks import rank_works, run_ingestors
