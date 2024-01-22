@@ -19,9 +19,10 @@
           <td>
             <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
           </td>
-          {% if MULTIPLE_JURISDICTIONS and MULTIPLE_LOCALITIES %}
+          {% if MULTIPLE_JURISDICTIONS %}
             <td>
-              {% jurisdiction_icon document %}&nbsp;{{ document.locality|default_if_none:'' }}&nbsp;{{ document.jurisdiction|default_if_none:'' }}
+              {% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction|default_if_none:'' }}
+              {% if document.locality %}· {{ document.locality }}{% endif %}
             </td>
           {% elif MULTIPLE_LOCALITIES %}
             <td>{{ document.locality|default_if_none:'' }}</td>

@@ -71,7 +71,6 @@ class DocIndexDetailView(TaxonomyDetailView):
 
         context["documents"] = self.decorate_documents(context["documents"])
         context["taxonomy_link_prefix"] = "indexes"
-        context["doc_table_show_jurisdiction"] = True
 
         return context
 
