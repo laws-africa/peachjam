@@ -81,11 +81,11 @@ class SearchableDocument(Document):
     registry_fr = fields.KeywordField()
     registry_pt = fields.KeywordField()
 
-    order_outcomes = fields.KeywordField(attr="order_outcome.name")
-    order_outcomes_en = fields.KeywordField()
-    order_outcomes_sw = fields.KeywordField()
-    order_outcomes_fr = fields.KeywordField()
-    order_outcomes_pt = fields.KeywordField()
+    order_outcome = fields.KeywordField()
+    order_outcome_en = fields.KeywordField()
+    order_outcome_sw = fields.KeywordField()
+    order_outcome_fr = fields.KeywordField()
+    order_outcome_pt = fields.KeywordField()
 
     # GenericDocument, LegalInstrument
     authors = fields.KeywordField()
@@ -238,22 +238,22 @@ class SearchableDocument(Document):
         if hasattr(instance, "nature") and instance.nature:
             return instance.nature.name
 
-    def prepare_order_outcomes(self, instance):
+    def prepare_order_outcome(self, instance):
         if hasattr(instance, "order_outcomes") and instance.order_outcomes:
             return [
                 order_outcome.name for order_outcome in instance.order_outcomes.all()
             ]
 
-    def prepare_order_outcomes_en(self, instance):
+    def prepare_order_outcome_en(self, instance):
         return get_translated_m2m_name(instance, "order_outcomes", "en")
 
-    def prepare_order_outcomes_fr(self, instance):
+    def prepare_order_outcome_fr(self, instance):
         return get_translated_m2m_name(instance, "order_outcomes", "fr")
 
-    def prepare_order_outcomes_pt(self, instance):
+    def prepare_order_outcome_pt(self, instance):
         return get_translated_m2m_name(instance, "order_outcomes", "pt")
 
-    def prepare_order_outcomes_sw(self, instance):
+    def prepare_order_outcome_sw(self, instance):
         return get_translated_m2m_name(instance, "order_outcomes", "sw")
 
     def prepare_pages(self, instance):
