@@ -2,7 +2,7 @@
   <nav>
     <ul
       v-if="totalPages > 1"
-      class="pagination"
+      class="pagination flex-wrap"
     >
       <li
         v-for="num in pages"
@@ -43,7 +43,7 @@ export default {
   emits: ['changed'],
   data: () => {
     return {
-      maxPages: 8,
+      maxPages: 15,
       pageSize: 10
     };
   },
