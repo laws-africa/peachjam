@@ -370,10 +370,12 @@ class IndigoAdapter(Adapter):
                             document=created_document,
                             defaults={
                                 "file": File(file, name=result["filename"]),
-                                "mimetype": result["mime_type"],
+                                "mime_type": result["mime_type"],
                                 "filename": result["filename"],
+                                "size": result["size"],
                             },
                         )
+                        logger.info(f"Downloaded image for {created_document}")
 
     def get_model(self, document):
         if document["nature"] == "act":

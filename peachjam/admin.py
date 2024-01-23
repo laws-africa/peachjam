@@ -1079,7 +1079,7 @@ class AttorneyAdmin(ImportExportMixin, admin.ModelAdmin):
 
 @admin.register(DocumentMedia)
 class DocumentMediaAdmin(admin.ModelAdmin):
-    list_display = ("filename", "mimetype")
+    list_display = ("filename", "mime_type")
 
 
 admin.site.register(

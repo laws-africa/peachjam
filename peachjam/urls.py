@@ -68,6 +68,7 @@ from peachjam.views import (
     UserProfileDetailView,
     WorkAutocomplete,
 )
+from peachjam.views.attachment_media import AttachmentMediaView
 from peachjam.views.generic_views import CSRFTokenView
 from peachjam.views.metabase_stats import MetabaseStatsView
 
@@ -257,6 +258,12 @@ urlpatterns = [
     ),
     # django-markdown-editor
     path("martor/", include("martor.urls")),
+    # Get a specific media file for a document
+    re_path(
+        r"documents/(?P<document_id>[0-9]+)/media/(?P<filename>.*)$",
+        AttachmentMediaView.as_view(),
+        name="document-media",
+    ),
 ]
 
 if settings.DEBUG:

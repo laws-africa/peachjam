@@ -928,7 +928,10 @@ class DocumentMedia(models.Model):
         upload_to=file_location,
         max_length=1024,
     )
-    mimetype = models.CharField(_("mimetype"), max_length=1024, null=False, blank=False)
+    mime_type = models.CharField(
+        _("mime_type"), max_length=1024, null=False, blank=False
+    )
+    size = models.PositiveIntegerField(_("size"), null=False, blank=False)
 
     class Meta:
         verbose_name = _("document media")
