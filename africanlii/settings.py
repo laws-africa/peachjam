@@ -27,6 +27,7 @@ PEACHJAM["EXTRA_SEARCH_INDEXES"] = [  # noqa
     "zimlii",
 ]
 PEACHJAM["SEARCH_JURISDICTION_FILTER"] = True  # noqa
+PEACHJAM["MULTIPLE_JURISDICTIONS"] = True  # noqa
 
 # The slugs of the taxonomy roots that are treated as federated indexes
 FEDERATED_DOC_INDEX_ROOTS = ["case-indexes"]

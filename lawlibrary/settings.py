@@ -8,6 +8,8 @@ JAZZMIN_SETTINGS["site_title"] = "Lawlibrary"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "Lawlibrary"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "Lawlibrary.org.za"  # noqa
 
+PEACHJAM["MULTIPLE_LOCALITIES"] = True  # noqa
+
 
 TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa
     "lawlibrary.context_processors.lawlibrary"
