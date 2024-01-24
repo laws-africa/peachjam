@@ -50,7 +50,6 @@ from peachjam.models import (
     Court,
     CourtClass,
     CourtRegistry,
-    DocumentMedia,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -1081,11 +1080,6 @@ class MatterTypeAdmin(BaseAdmin):
 class AttorneyAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_class = AttorneyResource
     list_display = ("name", "description")
-
-
-@admin.register(DocumentMedia)
-class DocumentMediaAdmin(admin.ModelAdmin):
-    list_display = ("filename", "mime_type")
 
 
 admin.site.register(
