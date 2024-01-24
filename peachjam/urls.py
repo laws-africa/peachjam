@@ -170,7 +170,7 @@ urlpatterns = [
         name="document_source_pdf",
     ),
     re_path(
-        r"^(?P<frbr_uri>akn/.*)/media/media/(?P<filename>.+)$",
+        r"^(?P<frbr_uri>akn/.*)/media/(?P<filename>.+)$",
         cache_page(CACHE_DURATION)(DocumentMediaView.as_view()),
         name="document_media",
     ),
