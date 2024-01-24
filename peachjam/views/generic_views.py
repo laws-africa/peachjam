@@ -165,6 +165,7 @@ class BaseDocumentDetailView(DetailView):
             context["display_type"] = (
                 "akn" if context["document"].content_html_is_akn else "html"
             )
+        if not context["document"].content_html_is_akn:
             self.prefix_images(context["document"])
         elif hasattr(context["document"], "source_file"):
             context["display_type"] = "pdf"

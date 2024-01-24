@@ -68,7 +68,6 @@ from peachjam.views import (
     UserProfileDetailView,
     WorkAutocomplete,
 )
-from peachjam.views.attachment_media import AttachmentMediaView
 from peachjam.views.generic_views import CSRFTokenView
 from peachjam.views.metabase_stats import MetabaseStatsView
 
@@ -171,7 +170,7 @@ urlpatterns = [
         name="document_source_pdf",
     ),
     re_path(
-        r"^(?P<frbr_uri>akn/.*)/media/(?P<filename>.+)$",
+        r"^(?P<frbr_uri>akn/.*)/media/media/(?P<filename>.+)$",
         cache_page(CACHE_DURATION)(DocumentMediaView.as_view()),
         name="document_media",
     ),
@@ -258,12 +257,6 @@ urlpatterns = [
     ),
     # django-markdown-editor
     path("martor/", include("martor.urls")),
-    # Get a specific media file for a document
-    re_path(
-        r"documents/(?P<document_id>[0-9]+)/media/(?P<filename>.*)$",
-        AttachmentMediaView.as_view(),
-        name="document-media",
-    ),
 ]
 
 if settings.DEBUG:

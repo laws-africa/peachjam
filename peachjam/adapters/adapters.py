@@ -17,10 +17,10 @@ from languages_plus.models import Language
 from peachjam.models import (
     Author,
     CoreDocument,
-    DocumentMedia,
     DocumentNature,
     DocumentTopic,
     GenericDocument,
+    Image,
     LegalInstrument,
     Legislation,
     Locality,
@@ -354,28 +354,29 @@ class IndigoAdapter(Adapter):
             for link in links:
                 if link["href"].endswith("media.json"):
                     response = self.client_get(link["href"])
-                    if response.status_code == 200 and response.json()["results"]:
+                    if response.json()["results"]:
                         return response.json()["results"]
 
     def download_and_save_document_images(self, document, created_document):
         image_list = self.list_images_from_content_api(document)
         if image_list:
             for result in image_list:
-                if "image/" in result["mime_type"]:
+                if result["mime_type"].startswith("image/"):
                     with NamedTemporaryFile() as file:
                         r = self.client_get(result["url"])
                         file.write(r.content)
 
-                        DocumentMedia.objects.get_or_create(
+                        Image.objects.get_or_create(
                             document=created_document,
                             defaults={
                                 "file": File(file, name=result["filename"]),
-                                "mime_type": result["mime_type"],
+                                "mimetype": result["mime_type"],
                                 "filename": result["filename"],
                                 "size": result["size"],
                             },
                         )
-                        logger.info(f"Downloaded image for {created_document}")
+
+            logger.info(f"Downloaded image(s) for {created_document}")
 
     def get_model(self, document):
         if document["nature"] == "act":
