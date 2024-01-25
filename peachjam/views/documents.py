@@ -45,6 +45,9 @@ class DocumentDetailViewResolver(View):
                 return redirect(url)
             raise Http404()
 
+        if not obj.published:
+            raise Http404()
+
         if not exact or portion:
             url = obj.get_absolute_url()
             # this translates from /akn/.../~sec_2 to /akn/.../#sec_2
@@ -53,6 +56,7 @@ class DocumentDetailViewResolver(View):
             return redirect(url)
 
         view_class = registry.views.get(obj.doc_type)
+
         if view_class:
             view = view_class()
             view.setup(request, *args, **kwargs)

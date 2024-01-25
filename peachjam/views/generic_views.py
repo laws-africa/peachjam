@@ -30,7 +30,9 @@ class DocumentListView(ListView):
     context_object_name = "documents"
     paginate_by = 50
     model = CoreDocument
-    queryset = CoreDocument.objects.prefetch_related("nature", "work")
+    queryset = CoreDocument.objects.exclude(published=False).prefetch_related(
+        "nature", "work"
+    )
 
     def get_base_queryset(self):
         return self.queryset if self.queryset is not None else self.model.objects
@@ -130,9 +132,10 @@ class BaseDocumentDetailView(DetailView):
     slug_field = "expression_frbr_uri"
     slug_url_kwarg = "frbr_uri"
     context_object_name = "document"
+    queryset = CoreDocument.objects.exclude(published=False)
 
     def get_object(self, *args, **kwargs):
-        return self.model.objects.get(
+        return self.queryset.get(
             expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri"))
         )
 

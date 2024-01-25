@@ -371,6 +371,8 @@ class DocumentAdmin(BaseAdmin):
         "reindex_for_search",
         "apply_labels",
         "ensure_source_file_pdf",
+        "publish",
+        "unpublish",
     ]
 
     fieldsets = [
@@ -384,6 +386,7 @@ class DocumentAdmin(BaseAdmin):
                     "title",
                     "date",
                     "language",
+                    "published",
                 ]
             },
         ),
@@ -586,6 +589,18 @@ class DocumentAdmin(BaseAdmin):
         ):
             return True
         return super().has_change_permission(request, obj=obj)
+
+    def publish(self, request, queryset):
+        queryset.update(published=True)
+        self.message_user(request, _("Documents published."))
+
+    publish.short_description = gettext_lazy("Publish selected documents")
+
+    def unpublish(self, request, queryset):
+        queryset.update(published=False)
+        self.message_user(request, _("Documents unpublished."))
+
+    unpublish.short_description = gettext_lazy("Unpublish selected documents")
 
 
 class TaxonomyForm(MoveNodeForm):

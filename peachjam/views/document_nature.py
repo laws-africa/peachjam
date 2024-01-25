@@ -7,7 +7,9 @@ from peachjam.views.generic_views import FilteredDocumentListView
 class DocumentNatureListView(FilteredDocumentListView):
     template_name = "peachjam/document_nature_list.html"
     model = GenericDocument
-    queryset = GenericDocument.objects.prefetch_related("authors", "nature", "work")
+    queryset = GenericDocument.objects.exclude(published=False).prefetch_related(
+        "authors", "nature", "work"
+    )
 
     def get(self, *args, **kwargs):
         self.document_nature = get_object_or_404(

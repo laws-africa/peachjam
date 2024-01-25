@@ -17,7 +17,8 @@ class LegislationListView(TemplateView):
 
     def get_queryset(self):
         qs = (
-            self.model.objects.distinct("work_frbr_uri")
+            self.model.objects.exclude(published=False)
+            .distinct("work_frbr_uri")
             .order_by("work_frbr_uri", "-date", "language__pk")
             .preferred_language(get_language(self.request))
         )
