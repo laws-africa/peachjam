@@ -276,16 +276,17 @@ class BaseDocumentDetailView(DetailView):
 
     def prefix_images(self, document):
         """Rewrite image URLs so that we can server them correctly."""
-        root = html.fromstring(document.content_html)
+        if document.content_html and not document.content_html_is_akn:
+            root = html.fromstring(document.content_html)
 
-        for img in root.xpath(".//img[@src]"):
-            src = img.attrib["src"]
-            if not src.startswith("/") and not src.startswith("data:"):
-                img.attrib["src"] = (
-                    document.expression_frbr_uri + "/media/" + img.attrib["src"]
-                )
+            for img in root.xpath(".//img[@src]"):
+                src = img.attrib["src"]
+                if not src.startswith("/") and not src.startswith("data:"):
+                    img.attrib["src"] = (
+                        document.expression_frbr_uri + "/media/" + img.attrib["src"]
+                    )
 
-        document.content_html = html.tostring(root, encoding="unicode")
+            document.content_html = html.tostring(root, encoding="unicode")
 
 
 class CSRFTokenView(View):
