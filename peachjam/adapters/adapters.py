@@ -358,6 +358,9 @@ class IndigoAdapter(Adapter):
                         return response.json()["results"]
 
     def download_and_save_document_images(self, document, created_document):
+        # delete all existing images for the doc
+        Image.objects.filter(document=created_document).delete()
+
         image_list = self.list_images_from_content_api(document)
         if image_list:
             for result in image_list:
@@ -366,14 +369,12 @@ class IndigoAdapter(Adapter):
                         r = self.client_get(result["url"])
                         file.write(r.content)
 
-                        Image.objects.get_or_create(
+                        Image.objects.create(
                             document=created_document,
-                            defaults={
-                                "file": File(file, name=result["filename"]),
-                                "mimetype": result["mime_type"],
-                                "filename": result["filename"],
-                                "size": result["size"],
-                            },
+                            file=File(file, name=result["filename"]),
+                            mimetype=result["mime_type"],
+                            filename=result["filename"],
+                            size=result["size"],
                         )
 
             logger.info(f"Downloaded image(s) for {created_document}")

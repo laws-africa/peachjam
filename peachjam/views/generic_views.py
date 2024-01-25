@@ -165,8 +165,8 @@ class BaseDocumentDetailView(DetailView):
             context["display_type"] = (
                 "akn" if context["document"].content_html_is_akn else "html"
             )
-        if not context["document"].content_html_is_akn:
-            self.prefix_images(context["document"])
+            if not context["document"].content_html_is_akn:
+                self.prefix_images(context["document"])
         elif hasattr(context["document"], "source_file"):
             context["display_type"] = "pdf"
         else:
@@ -276,17 +276,16 @@ class BaseDocumentDetailView(DetailView):
 
     def prefix_images(self, document):
         """Rewrite image URLs so that we can server them correctly."""
-        if document.content_html and not document.content_html_is_akn:
-            root = html.fromstring(document.content_html)
+        root = html.fromstring(document.content_html)
 
-            for img in root.xpath(".//img[@src]"):
-                src = img.attrib["src"]
-                if not src.startswith("/") and not src.startswith("data:"):
-                    img.attrib["src"] = (
-                        document.expression_frbr_uri + "/media/" + img.attrib["src"]
-                    )
+        for img in root.xpath(".//img[@src]"):
+            src = img.attrib["src"]
+            if not src.startswith("/") and not src.startswith("data:"):
+                img.attrib["src"] = (
+                    document.expression_frbr_uri + "/media/" + img.attrib["src"]
+                )
 
-            document.content_html = html.tostring(root, encoding="unicode")
+        document.content_html = html.tostring(root, encoding="unicode")
 
 
 class CSRFTokenView(View):
