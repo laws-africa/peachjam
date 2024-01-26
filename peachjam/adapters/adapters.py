@@ -21,6 +21,7 @@ from peachjam.models import (
     DocumentNature,
     DocumentTopic,
     GenericDocument,
+    Image,
     LegalInstrument,
     Legislation,
     Locality,
@@ -348,6 +349,38 @@ class IndigoAdapter(Adapter):
         self.fetch_and_create_aliases(document, created_doc)
         self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
+        self.download_and_save_document_images(document, created_doc)
+
+    def list_images_from_content_api(self, document):
+        links = document["links"]
+        if links:
+            for link in links:
+                if link["href"].endswith("media.json"):
+                    response = self.client_get(link["href"])
+                    if response.json()["results"]:
+                        return response.json()["results"]
+
+    def download_and_save_document_images(self, document, created_document):
+        # delete all existing images for the doc
+        Image.objects.filter(document=created_document).delete()
+
+        image_list = self.list_images_from_content_api(document)
+        if image_list:
+            for result in image_list:
+                if result["mime_type"].startswith("image/"):
+                    with NamedTemporaryFile() as file:
+                        r = self.client_get(result["url"])
+                        file.write(r.content)
+
+                        Image.objects.create(
+                            document=created_document,
+                            file=File(file, name=result["filename"]),
+                            mimetype=result["mime_type"],
+                            filename=result["filename"],
+                            size=result["size"],
+                        )
+
+            logger.info(f"Downloaded image(s) for {created_document}")
 
     def get_model(self, document):
         if document["nature"] == "act":

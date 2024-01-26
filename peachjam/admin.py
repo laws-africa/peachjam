@@ -56,6 +56,7 @@ from peachjam.models import (
     ExternalDocument,
     Gazette,
     GenericDocument,
+    Image,
     Ingestor,
     IngestorSetting,
     Journal,
@@ -335,6 +336,10 @@ class AttachedFilesInline(BaseAttachmentFileInline):
     form = AttachedFilesForm
 
 
+class ImageInline(BaseAttachmentFileInline):
+    model = Image
+
+
 class DocumentAdmin(BaseAdmin):
     form = DocumentForm
     inlines = [
@@ -342,6 +347,7 @@ class DocumentAdmin(BaseAdmin):
         SourceFileInline,
         AlternativeNameInline,
         AttachedFilesInline,
+        ImageInline,
     ]
     list_display = (
         "title",
