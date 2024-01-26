@@ -386,7 +386,6 @@ class DocumentAdmin(BaseAdmin):
                     "title",
                     "date",
                     "language",
-                    "published",
                 ]
             },
         ),
@@ -432,6 +431,7 @@ class DocumentAdmin(BaseAdmin):
                     "toc_json",
                     "content_html_is_akn",
                     "allow_robots",
+                    "published",
                 ],
             },
         ),

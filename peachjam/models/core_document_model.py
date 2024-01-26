@@ -430,6 +430,8 @@ class CoreDocument(PolymorphicModel):
     published = models.BooleanField(
         _("published"),
         default=True,
+        db_index=True,
+        help_text=_("Is this document published and visible on the website?"),
     )
 
     # options for the FRBR URI doctypes

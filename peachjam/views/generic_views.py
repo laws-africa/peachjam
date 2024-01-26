@@ -30,12 +30,14 @@ class DocumentListView(ListView):
     context_object_name = "documents"
     paginate_by = 50
     model = CoreDocument
-    queryset = CoreDocument.objects.exclude(published=False).prefetch_related(
-        "nature", "work"
-    )
+    queryset = CoreDocument.objects.prefetch_related("nature", "work")
 
     def get_base_queryset(self):
-        return self.queryset if self.queryset is not None else self.model.objects
+        return (
+            self.queryset.exclude(published=False)
+            if self.queryset is not None
+            else self.model.objects.exclude(published=False)
+        )
 
     def get_queryset(self):
         qs = self.get_base_queryset()
