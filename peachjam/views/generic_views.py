@@ -165,8 +165,6 @@ class BaseDocumentDetailView(DetailView):
             context["display_type"] = (
                 "akn" if context["document"].content_html_is_akn else "html"
             )
-            self.prefix_images(context["document"])
-
             if not context["document"].content_html_is_akn:
                 self.prefix_images(context["document"])
         elif hasattr(context["document"], "source_file"):
@@ -284,7 +282,7 @@ class BaseDocumentDetailView(DetailView):
             src = img.attrib["src"]
             if not src.startswith("/") and not src.startswith("data:"):
                 img.attrib["src"] = (
-                    document.expression_frbr_uri + "/" + img.attrib["src"]
+                    document.expression_frbr_uri + "/media/" + img.attrib["src"]
                 )
 
         document.content_html = html.tostring(root, encoding="unicode")
