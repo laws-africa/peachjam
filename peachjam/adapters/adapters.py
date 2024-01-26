@@ -15,6 +15,7 @@ from django.utils.text import slugify
 from languages_plus.models import Language
 
 from peachjam.models import (
+    AlternativeName,
     Author,
     CoreDocument,
     DocumentNature,
@@ -343,6 +344,8 @@ class IndigoAdapter(Adapter):
                         )
                     logger.info(f"Added {len(taxonomies)} taxonomies to {created_doc}")
 
+        # fetch associated aliases
+        self.fetch_and_create_aliases(document, created_doc)
         self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
 
@@ -506,3 +509,14 @@ class IndigoAdapter(Adapter):
                     document.delete()
             else:
                 raise e
+
+    def fetch_and_create_aliases(self, document, created_document):
+        aliases = document["aliases"]
+        if aliases:
+            # delete all existing alternative names/aliases for doc
+            AlternativeName.objects.filter(document=created_document).delete()
+
+            for alias in aliases:
+                AlternativeName.objects.create(document=created_document, title=alias)
+
+            logger.info(f"Fetching of aliases for {created_document} is complete!")
