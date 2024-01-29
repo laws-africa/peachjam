@@ -7,6 +7,10 @@ class RedirectResolver:
             "country_code": "aa",
             "domain": "africanlii.org",
         },
+        "civlii": {
+            "country_code": "ci",
+            "domain": "civlii.laws.africa",
+        },
         "eswatinilii": {
             "country_code": "sz",
             "domain": "eswatinilii.org",
