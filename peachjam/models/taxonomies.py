@@ -9,7 +9,7 @@ from peachjam.models import CoreDocument
 
 class Taxonomy(MP_Node):
     name = models.CharField(_("name"), max_length=255)
-    slug = models.SlugField(_("slug"), max_length=255, unique=True)
+    slug = models.SlugField(_("slug"), max_length=10 * 1024, unique=True)
     node_order_by = ["name"]
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
@@ -33,9 +33,15 @@ class Taxonomy(MP_Node):
         return self.get_parent().get_entity_profile()
 
     def save(self, *args, **kwargs):
+        old_slug = self.slug
         parent = self.get_parent()
         self.slug = (f"{parent.slug}-" if parent else "") + slugify(self.name)
         super().save(*args, **kwargs)
+
+        if old_slug != self.slug:
+            # update all our children to use the new slug
+            for child in self.get_children():
+                child.save()
 
 
 class DocumentTopic(models.Model):
