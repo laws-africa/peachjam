@@ -11,7 +11,7 @@ from peachjam.models.taxonomies import Taxonomy
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
-            "--root", type=str, help="Root of the taxonomy to import or export"
+            "--root", type=str, help="Slug of the taxonomy to import or export"
         )
         parser.add_argument(
             "--import", action="store_true", help="Import the taxonomy tree"
@@ -49,7 +49,7 @@ class Command(BaseCommand):
         root_node = None
         root = kwargs.get("root")
         if root:
-            root_node = Taxonomy.get_root_nodes().filter(name=root).first()
+            root_node = Taxonomy.objects.filter(slug=root).first()
             if not root_node:
                 root_node = Taxonomy.add_root(name=root)
         data = json.load(kwargs["infile"])
@@ -59,8 +59,20 @@ class Command(BaseCommand):
         root_node = None
         root = kwargs.get("root")
         if root:
-            root_node = Taxonomy.get_root_nodes().filter(name=root).first()
+            root_node = Taxonomy.objects.filter(slug=root).first()
             if not root_node:
                 raise ValueError("Root node not found: " + root)
         data = Taxonomy.dump_bulk(root_node, keep_ids=False)
+
+        # keep only the name and slug of the data
+        def fixup(node):
+            node["data"] = {
+                k: v for k, v in node["data"].items() if k in ["name", "slug"]
+            }
+            for child in node.get("children", []):
+                fixup(child)
+
+        for node in data:
+            fixup(node)
+
         json.dump(data, kwargs["outfile"])
