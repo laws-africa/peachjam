@@ -34,7 +34,7 @@ def group_years(years, locality={}):
 
 
 class GazetteListView(TemplateView):
-    queryset = Gazette.objects.prefetch_related("source_file")
+    queryset = Gazette.objects.exclude(published=False).prefetch_related("source_file")
     template_name = "peachjam/gazette_list.html"
     navbar_link = "gazettes"
 

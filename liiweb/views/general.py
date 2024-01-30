@@ -10,8 +10,12 @@ class HomePageView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
-        context["recent_judgments"] = Judgment.objects.order_by("-date")[:5]
-        context["recent_legislation"] = Legislation.objects.order_by("-date")[:10]
+        context["recent_judgments"] = Judgment.objects.exclude(
+            published=False
+        ).order_by("-date")[:5]
+        context["recent_legislation"] = Legislation.objects.exclude(
+            published=False
+        ).order_by("-date")[:10]
         context["taxonomies"] = Taxonomy.dump_bulk()
         context["taxonomy_url"] = "taxonomy_detail"
         context["recent_articles"] = (

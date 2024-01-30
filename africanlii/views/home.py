@@ -22,15 +22,21 @@ class HomePageView(BaseHomePageView):
         )
 
         context["recent_articles"] = recent_articles
-        context["recent_soft_law"] = GenericDocument.objects.exclude(
-            frbr_uri_doctype="doc"
-        ).order_by("-date")[:5]
-        context["recent_reports_guides"] = GenericDocument.objects.filter(
-            frbr_uri_doctype="doc"
-        ).order_by("-date")[:5]
-        context["recent_legal_instruments"] = CoreDocument.objects.filter(
-            frbr_uri_doctype="act"
-        ).order_by("-date")[:5]
+        context["recent_soft_law"] = (
+            GenericDocument.objects.exclude(published=False)
+            .exclude(frbr_uri_doctype="doc")
+            .order_by("-date")[:5]
+        )
+        context["recent_reports_guides"] = (
+            GenericDocument.objects.exclude(published=False)
+            .filter(frbr_uri_doctype="doc")
+            .order_by("-date")[:5]
+        )
+        context["recent_legal_instruments"] = (
+            CoreDocument.objects.exclude(published=False)
+            .filter(frbr_uri_doctype="act")
+            .order_by("-date")[:5]
+        )
         context["au_organs"] = AfricanUnionOrgan.objects.prefetch_related("author")
         context["au_institutions"] = AfricanUnionInstitution.objects.prefetch_related(
             "author"

@@ -116,7 +116,7 @@ class SearchableDocument(Document):
     ]
 
     def should_index_object(self, obj):
-        if isinstance(obj, ExternalDocument):
+        if isinstance(obj, ExternalDocument) or not obj.published:
             return False
         return True
 

@@ -427,6 +427,13 @@ class CoreDocument(PolymorphicModel):
         help_text=_("Allow this document to be indexed by search engine robots."),
     )
 
+    published = models.BooleanField(
+        _("published"),
+        default=True,
+        db_index=True,
+        help_text=_("Is this document published and visible on the website?"),
+    )
+
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES
     labels = models.ManyToManyField(Label, verbose_name=_("labels"), blank=True)
