@@ -17,6 +17,7 @@ class AuthorDetailView(FilteredDocumentListView):
                 Q(genericdocument__authors__in=[self.author])
                 | Q(legalinstrument__authors__in=[self.author])
             )
+            .select_related("locality")
         )
 
     def get_queryset(self):
