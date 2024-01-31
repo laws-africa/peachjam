@@ -8,7 +8,7 @@
     <div class="container">
       {% block breadcrumbs %}{% endblock %}
       {% block page-heading %}
-        <h1 class="my-4 heading">{% trans 'African Union (AU)' %}</h1>
+        <h1 class="my-4">{% trans 'African Union (AU)' %}</h1>
         {% include "peachjam/_help_button.html" with link="african-union-documents-au" %}
       {% endblock %}
       <p>
@@ -36,7 +36,7 @@
   <section class="container">
     <div class="row">
       <div class="col-lg-6">
-        <h3 class="mb-4 heading" id="au-organs">{% trans 'African Union Organs' %}</h3>
+        <h3 class="mb-4" id="au-organs">{% trans 'African Union Organs' %}</h3>
         <ul class="list-unstyled">
           {% for au_organ in au_organs %}
             <li>
@@ -46,7 +46,7 @@
         </ul>
       </div>
       <div class="col-lg-6">
-        <h3 class="mb-4 heading" id="rec">{% trans 'Regional Economic Communities' %}</h3>
+        <h3 class="mb-4" id="rec">{% trans 'Regional Economic Communities' %}</h3>
         <ul class="list-unstyled">
           {% for rec in recs %}
             <li>
@@ -58,7 +58,7 @@
     </div>
     <div class="row">
       <div class="col-lg-6">
-        <h3 class="mb-4 heading" id="au-institutions">{% trans 'African Union Institutions' %}</h3>
+        <h3 class="mb-4" id="au-institutions">{% trans 'African Union Institutions' %}</h3>
         <ul class="list-unstyled">
           {% for au_institution in au_institutions %}
             <li>
@@ -76,7 +76,7 @@
   </section>
   <section class="container">
     <div class="row">
-      <h3 class="mb-4 heading" id="member-states">{% trans 'Member States' %}</h3>
+      <h3 class="mb-4" id="member-states">{% trans 'Member States' %}</h3>
       {% for member_state in member_states %}
         <div class="col-6 col-md-4 col-lg-3">
           <div class="card lii-card mb-3">
