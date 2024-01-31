@@ -544,7 +544,7 @@ class IndigoAdapter(Adapter):
                 raise e
 
     def fetch_and_create_aliases(self, document, created_document):
-        aliases = document["aliases"]
+        aliases = document.get("aliases", [])
         if aliases:
             # delete all existing alternative names/aliases for doc
             AlternativeName.objects.filter(document=created_document).delete()
