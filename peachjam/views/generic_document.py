@@ -10,7 +10,9 @@ class DocumentListView(FilteredDocumentListView):
     template_name = "peachjam/generic_document_list.html"
     model = GenericDocument
     navbar_link = "doc"
-    queryset = GenericDocument.objects.prefetch_related("authors", "nature", "work")
+    queryset = GenericDocument.objects.prefetch_related(
+        "authors", "nature", "work", "locality"
+    )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
