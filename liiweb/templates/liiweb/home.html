@@ -81,12 +81,12 @@
       <div>
         {% block first-column-content %}
           <section class="pb-3 pt-3">
-            <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
+            <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
             {% trans 'View more judgments' as text %}
             {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
           </section>
           <section class="pb-3 pt-3">
-            <h2 class="mb-4 heading-underlined">{% trans 'Recent Legislation' %}</h2>
+            <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
             {% trans 'View more legislation' as text %}
             {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
           </section>
@@ -95,11 +95,11 @@
       <div>
         {% block lower-row-content %}
           <section class="pb-3 pt-3">
-            <h2 class="mb-4 heading-underlined">{% trans 'Courts' %}</h2>
+            <h2 class="mb-4">{% trans 'Courts' %}</h2>
             {% include 'peachjam/_court_list.html' %}
           </section>
           <section class="pb-3 pt-3">
-            <h2 class="mb-4 heading-underlined">{% trans 'Collections' %}</h2>
+            <h2 class="mb-4">{% trans 'Collections' %}</h2>
             {% include 'peachjam/_taxonomy_list.html' %}
           </section>
           {% if PEACHJAM_SETTINGS.pocket_law_repo %}
@@ -126,7 +126,7 @@
           {% endif %}
           {% if recent_articles %}
             <section class="pb-5 pt-5">
-              <h2 class="mb-4 heading-underlined">{% trans 'Latest Articles' %}</h2>
+              <h2 class="mb-4">{% trans 'Latest Articles' %}</h2>
               {% include 'peachjam/_article_list.html' with articles=recent_articles %}
               <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">{% trans "View more articles" %}</a>
             </section>

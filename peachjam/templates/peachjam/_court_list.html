@@ -3,7 +3,7 @@
   <div class="courts__column-wrapper mb-3">
     {% for court_class in court_classes %}
       <div class="courts__item mb-3">
-        <h4 class="heading-underlined">{{ court_class }}</h4>
+        <h4 class="mb-2">{{ court_class }}</h4>
         {% if court_class.courts.all %}
           <ul class="list-unstyled">
             {% for court in court_class.courts.all %}

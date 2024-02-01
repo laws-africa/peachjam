@@ -121,24 +121,24 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-6 mb-3">
-          <h3 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h3>
+          <h3 class="mb-4">{% trans 'Recent Judgments' %}</h3>
           {% trans 'View more judgments' as text %}
           {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
         </div>
         <div class="col-lg-6 mb-3">
-          <h3 class="mb-4 heading-underlined">{% trans 'Recent Legal Instruments' %}</h3>
+          <h3 class="mb-4">{% trans 'Recent Legal Instruments' %}</h3>
           {% trans 'View more legal instruments' as text %}
           {% include 'peachjam/_recent_document_list.html' with documents=recent_legal_instruments view_more_text=text view_more_url_name='agp_legal_instrument_list' %}
         </div>
       </div>
       <div class="row">
         <div class="col-lg-6 mb-3">
-          <h3 class="mb-4 heading-underlined">{% trans 'Recent Soft Law' %}</h3>
+          <h3 class="mb-4">{% trans 'Recent Soft Law' %}</h3>
           {% trans 'View more Soft Law' as text %}
           {% include 'peachjam/_recent_document_list.html' with documents=recent_soft_law view_more_text=text view_more_url_name='agp_soft_law_list' %}
         </div>
         <div class="col-lg-6 mb-3">
-          <h2 class="mb-4 heading-underlined">{% trans 'Recent Reports and Guides' %}</h2>
+          <h2 class="mb-4">{% trans 'Recent Reports and Guides' %}</h2>
           {% trans 'View more Reports and Guides' as text %}
           {% include 'peachjam/_recent_document_list.html' with documents=recent_reports_guides view_more_text=text view_more_url_name='agp_reports_guides_list' %}
         </div>
@@ -186,7 +186,7 @@
   </section>
   <section class="py-5">
     <div class="container">
-      <h2 class="mb-4 heading-underlined">
+      <h2 class="mb-4">
         {% trans 'Latest Commentary' %}
       </h2>
       {% include 'peachjam/_article_list.html' with articles=recent_articles %}
@@ -195,7 +195,7 @@
   </section>
   <section class="py-5">
     <div class="container">
-      <h2 class="mb-4 heading-underlined">
+      <h2 class="mb-4">
         {% trans 'Collections' %}
       </h2>
       {% include 'peachjam/_taxonomy_list.html' %}

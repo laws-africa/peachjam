@@ -22,12 +22,12 @@
 {% endblock %}
 {% block first-column-content %}
   <section class="pb-3 pt-3">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Judgments' %}</h2>
+    <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
     {% trans 'View more judgments' as text %}
     {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
   </section>
   <section class="pb-3 pt-3">
-    <h2 class="mb-4 heading-underlined">{% trans 'Recent Legislation' %}</h2>
+    <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
     {% trans 'View more legislation' as text %}
     {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
   </section>
