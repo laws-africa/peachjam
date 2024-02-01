@@ -20,6 +20,7 @@ from django_elasticsearch_dsl_drf.filter_backends.search.query_backends import (
     BaseSearchQueryBackend,
     SimpleQueryStringQueryBackend,
 )
+from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.connections import get_connection
@@ -34,6 +35,10 @@ from peachjam_search.documents import SearchableDocument, get_search_indexes
 from peachjam_search.serializers import SearchableDocumentSerializer
 
 CACHE_SECS = 15 * 60
+
+
+class CustomPageNumberPagination(PageNumberPagination):
+    page_size = 10
 
 
 class MultiFieldSearchQueryBackend(SimpleQueryStringQueryBackend):
@@ -232,6 +237,8 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         SourceBackend,
         HighlightBackend,
     ]
+
+    pagination_class = CustomPageNumberPagination
 
     # allowed and default ordering
     ordering_fields = {"date": "date", "title": "title"}
