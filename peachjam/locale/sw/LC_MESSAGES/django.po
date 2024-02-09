@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 08:54+0300\n"
-"PO-Revision-Date: 2023-09-30 14:24\n"
+"PO-Revision-Date: 2023-10-31 12:02\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -907,12 +907,10 @@ msgstr "Umesahau nenosiri lako?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Ingia na %(provider.name)s\n"
 "          "
 
@@ -1691,22 +1689,19 @@ msgid "This %(friendly_type)s was repealed on %(date)s by <a href=\"%(repealing_
 msgstr "Hii %(friendly_type)s ilifutwa tarehe %(date)s na <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
 #: views/legislation.py:75
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+#, python-format
 msgid "This %(friendly_type)s will come into force on %(date)s."
-msgstr "Hii %(friendly_type)s bado haijaanza na bado siyo sheria."
+msgstr "Hii %(friendly_type)s itaanza kutumika tarehe %(date)s."
 
 #: views/legislation.py:90
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+#, python-format
 msgid "This %(friendly_type)s has not yet come into force in full. See the Document detail tab for more information."
-msgstr "Hii %(friendly_type)s bado haijaanza na bado siyo sheria."
+msgstr "Hii %(friendly_type)s bado haijaanza kutumika kikamilifu. Tazama kichupo cha maelezo ya Hati kwa maelezo zaidi."
 
 #: views/legislation.py:101
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+#, python-format
 msgid "This %(friendly_type)s has not yet come into force."
-msgstr "Hii %(friendly_type)s bado haijaanza na bado siyo sheria."
+msgstr "Hii %(friendly_type)s bado haijaanza kutumika."
 
 #: views/legislation.py:134
 #, python-format
@@ -1724,26 +1719,11 @@ msgid "This is the version of this %(friendly_type)s as it was from %(date_from)
 msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa kutoka %(date_from)s hadi %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Soma toleo kama lilivyokuwa wakati lilipofutwa</a>."
 
 #: views/legislation.py:168
-#, fuzzy, python-format
-#| msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
+#, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the latest available version</a>."
-msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa kuanzia %(date_from)s hadi %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Soma toleo linalotumika sasa</a>."
+msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa kutoka %(date_from)s hadi %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Soma toleo jipya zaidi la</a>linalopatikana."
 
 #: views/legislation.py:223
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Kuna marekebisho ambayo hayajatekelezwa ambayo bado hayajatekelezwa. Tazama kichupo cha Historia kwa habari zaidi."
 
-#~ msgid "Amended by"
-#~ msgstr "Imerekebishwa na"
-
-#~ msgid "Assented to"
-#~ msgstr "Imeidhinishwa"
-
-#~ msgid "Commences"
-#~ msgstr "Kuanza"
-
-#~ msgid "Published in"
-#~ msgstr "Imechapishwa katika"
-
-#~ msgid "Repealed by"
-#~ msgstr "Imefutwa na"

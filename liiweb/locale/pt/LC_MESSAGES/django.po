@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 08:54+0300\n"
-"PO-Revision-Date: 2023-09-19 11:54\n"
+"PO-Revision-Date: 2023-10-31 12:02\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -138,3 +138,4 @@ msgstr "Julgamentos"
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Legislação"
+

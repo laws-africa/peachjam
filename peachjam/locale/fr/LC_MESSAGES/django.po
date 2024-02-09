@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 08:54+0300\n"
-"PO-Revision-Date: 2023-09-28 16:16\n"
+"PO-Revision-Date: 2023-10-31 12:02\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -907,12 +907,10 @@ msgstr "Mot de passe oublié ?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Connectez-vous à %(provider.name)s\n"
 "          "
 
@@ -1691,22 +1689,19 @@ msgid "This %(friendly_type)s was repealed on %(date)s by <a href=\"%(repealing_
 msgstr "Ce %(friendly_type)s a été abrogé le %(date)s par <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
 #: views/legislation.py:75
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+#, python-format
 msgid "This %(friendly_type)s will come into force on %(date)s."
-msgstr "Ce %(friendly_type)s n’a pas encore commencé et n’est pas encore loi."
+msgstr "Ce %(friendly_type)s entrera en vigueur le %(date)s."
 
 #: views/legislation.py:90
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+#, python-format
 msgid "This %(friendly_type)s has not yet come into force in full. See the Document detail tab for more information."
-msgstr "Ce %(friendly_type)s n’a pas encore commencé et n’est pas encore loi."
+msgstr "Ce %(friendly_type)s n’est pas encore pleinement entré en vigueur. Voir l'onglet Détails du document pour plus d'informations."
 
 #: views/legislation.py:101
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+#, python-format
 msgid "This %(friendly_type)s has not yet come into force."
-msgstr "Ce %(friendly_type)s n’a pas encore commencé et n’est pas encore loi."
+msgstr "Ce %(friendly_type)s n’est pas encore entré en vigueur."
 
 #: views/legislation.py:134
 #, python-format
@@ -1724,26 +1719,11 @@ msgid "This is the version of this %(friendly_type)s as it was from %(date_from)
 msgstr "C'est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Lire la version telle qu'elle était au moment de son abrogation</a>."
 
 #: views/legislation.py:168
-#, fuzzy, python-format
-#| msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
+#, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the latest available version</a>."
-msgstr "C'est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Lire la version actuellement en vigueur</a>."
+msgstr "C'est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Lisez la dernière version disponible</a>."
 
 #: views/legislation.py:223
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Il existe des amendements en suspens qui n’ont pas encore été appliqués. Voir l'onglet Historique pour plus d'informations."
 
-#~ msgid "Amended by"
-#~ msgstr "Modifié par"
-
-#~ msgid "Assented to"
-#~ msgstr "Consenti à"
-
-#~ msgid "Commences"
-#~ msgstr "Commence"
-
-#~ msgid "Published in"
-#~ msgstr "Publié dans"
-
-#~ msgid "Repealed by"
-#~ msgstr "Abrogé par"
