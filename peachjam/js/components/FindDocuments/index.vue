@@ -228,21 +228,22 @@ import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 
 function resetAdvancedFields (fields) {
-  const advanced = ['all', 'title', 'judges', 'case_summary', 'flynote', 'content'];
-  for (const a of advanced) {
-    fields[a] = {
-      q: '',
-      all: '',
-      exact: '',
-      any: '',
-      none: ''
-    };
-  }
-
+  fields.search = '';
+  fields.exact = false;
+  fields.fields = {
+    title: false,
+    judges: false,
+    case_summary: false,
+    flynote: false,
+    content: false
+  };
   fields.date = {
     date_to: null,
     date_from: null
   };
+  fields.and = '';
+  fields.any = '';
+  fields.none = '';
 }
 
 export default {
@@ -480,12 +481,14 @@ export default {
           } else if (value.date_to) {
             params.append('date_to', this.advancedFields.date.date_to);
           }
-        } else {
+        } else if (key === 'fields') {
           for (const mod of Object.keys(value)) {
             if (value[mod]) {
-              params.append(`${key}_${mod}`, value[mod]);
+              params.append('fields', mod);
             }
           }
+        } else if (key !== 'search') {
+          params.append(key, value);
         }
       });
 
@@ -516,12 +519,17 @@ export default {
         if (field !== 'date') {
           const values = this.advancedFields[field];
 
-          for (const mod of Object.keys(values)) {
-            const key = `${field}_${mod}`;
-            if (params.get(key)) {
-              values[mod] = params.get(key);
-              showAdvanced = true;
+          if (field === 'fields' && params.getAll('fields').length) {
+            const fields = params.getAll('fields');
+            for (const mod of Object.keys(values)) {
+              if (fields.includes(mod)) {
+                values[mod] = true;
+                showAdvanced = true;
+              }
             }
+          } else if (params.get(field)) {
+            this.advancedFields[field] = params.get(field);
+            showAdvanced = true;
           }
         }
       }
@@ -576,7 +584,8 @@ export default {
 
     generateSearchParams () {
       const params = new URLSearchParams();
-      if (this.q) params.append('search', this.q);
+      const search = this.advancedFields.search || this.q;
+      if (search) params.append('search', search);
       params.append('page', this.page);
       params.append('ordering', this.ordering);
       params.append('highlight', 'content');
@@ -608,8 +617,12 @@ export default {
           } else if (value.date_to) {
             params.append('date__lte', value.date_to);
           }
-        } else if (value.q) {
-          params.append(`search__${key}`, value.q);
+        } else if (key === 'fields') {
+          for (const mod of Object.keys(value)) {
+            if (value[mod]) {
+              params.append(`search__${mod}`, this.advancedFields.search);
+            }
+          }
         }
       });
 
@@ -618,7 +631,7 @@ export default {
 
     async search (pushState = true) {
       // if one of the search fields is true perform search
-      if (this.q || Object.values(this.advancedFields).some(f => f.q)) {
+      if (this.q || this.advancedFields.search) {
         this.loadingCount = this.loadingCount + 1;
 
         // ensure the search tab is activated and scroll to put the search box at the top
