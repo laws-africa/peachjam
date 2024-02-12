@@ -150,7 +150,7 @@ class CitatorMatcher:
     def call_citator(self, body):
         headers = {"Authorization": f"token {self.citator_key}"}
         resp = requests.post(
-            self.citator_url, json=body, headers=headers, timeout=60 * 5
+            self.citator_url, json=body, headers=headers, timeout=60 * 10
         )
         resp.raise_for_status()
         return resp.json()
