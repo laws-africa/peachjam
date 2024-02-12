@@ -61,14 +61,21 @@
     </div>
     <div v-if="debug && item.explanation" class="ms-3 mt-2">
       <h5>Explanation</h5>
-      <pre class="explanation border bg-light p-2">{{ item.explanation }}</pre>
+      <div class="explanation border p-2">
+        <json-table :data="item.explanation" />
+      </div>
     </div>
   </li>
 </template>
 
 <script>
+import JsonTable from './JsonTable.vue';
+
 export default {
   name: 'SearchResult',
+  components: {
+    JsonTable
+  },
   props: {
     item: {
       type: Object,
@@ -133,7 +140,7 @@ export default {
   line-height: 1.3;
   word-break: break-word;
 }
-.hit pre.explanation {
+.hit .explanation {
   max-height: 50vh;
   overflow-y: auto;
 }

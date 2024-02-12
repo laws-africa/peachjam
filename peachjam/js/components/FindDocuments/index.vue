@@ -667,7 +667,7 @@ export default {
       const url = `/search/api/documents/${item.id}/explain/?${params.toString()}`;
       const resp = await fetch(url);
       const json = await resp.json();
-      item.explanation = JSON.stringify(json, null, 2);
+      item.explanation = json;
     }
   }
 };
