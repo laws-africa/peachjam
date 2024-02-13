@@ -1,5 +1,5 @@
 import logging
-from statistics import geometric_mean
+import math
 
 import igraph as ig
 from elasticsearch import helpers
@@ -55,10 +55,10 @@ class GraphRanker:
         # calculate the pivot as the geometric mean of the ranks
         ranks = [x for x in self.ranks if x > 0.0]
         if ranks:
-            pivot = geometric_mean(ranks)
-            log.info(
-                f"Updating pagerank pivot (geometric mean of non-zero ranks): {pivot}"
-            )
+            # analysis shows that the p99 is a good pivot
+            # see https://colab.research.google.com/drive/1KlYC7A9JeqS_uaLhL8yv_IrAmHHXNCdK
+            pivot = percentile(sorted(ranks), 0.99)
+            log.info(f"Updating pagerank pivot (p99 of non-zero ranks): {pivot}")
             settings = pj_settings()
             settings.pagerank_pivot_value = pivot
             settings.save(update_fields=["pagerank_pivot_value"])
@@ -103,3 +103,24 @@ class GraphRanker:
             request_timeout=60 * 60 * 30,
         )
         log.info("Updated index")
+
+
+def percentile(values, percent):
+    """
+    Find the percentile of a list of values.
+
+    @parameter N - is a list of values. Note N MUST BE already sorted.
+    @parameter percent - a float value from 0.0 to 1.0.
+
+    @return - the percentile of the values
+    """
+    if not values:
+        return None
+    k = (len(values) - 1) * percent
+    f = math.floor(k)
+    c = math.ceil(k)
+    if f == c:
+        return values[int(k)]
+    d0 = values[int(f)] * (c - k)
+    d1 = values[int(c)] * (k - f)
+    return d0 + d1
