@@ -21,30 +21,52 @@
         </nav>
       {% endblock %}
       {% block page-title %}
-        <h1 class="my-4">{% trans 'Gazettes' %} - {{ year }}</h1>
+        <h1 class="mt-4">{% trans 'Gazettes' %} - {{ year }}</h1>
+      {% endblock %}
+      {% block document-count %}
+        <p class="text-muted mb-4">
+          {% blocktrans trimmed count doc_count=doc_count %}
+            {{ doc_count }} gazette
+          {% plural %}
+            {{ doc_count }} gazettes
+          {% endblocktrans %}
+        </p>
       {% endblock %}
       {% include "peachjam/_years_list.html" %}
       {% include "peachjam/_quick_search.html" %}
     </header>
     <div class="my-4">
       {% block content %}
-        {% for month, items in gazettes %}
-          {% if items %}
-            <h2 class="sans-serif" id="{{ forloop.counter }}">{{ month }} {{ year }}</h2>
-            <ul>
+        <div class="row">
+          <div class="col col-md-4 my-3">{% include 'peachjam/_monthly_column_chart.html' with url='' year=years.0 %}</div>
+        </div>
+        <table class="table table-borderless table-sm">
+          {% for month, items in gazettes %}
+            {% if items %}
+              <tr>
+                <td>
+                  <h2 class="mt-3" id="{{ forloop.counter }}">{{ month }} {{ year }}</h2>
+                </td>
+              </tr>
               {% for gazette in items %}
-                <li>
-                  <a href="{{ gazette.get_absolute_url }}">{{ gazette.title }}</a>
-                  <span class="text-muted m-0">
-                    &nbsp;({{ gazette.source_file.size|filesizeformat }},
-                    <a href="{% url 'document_source_pdf' frbr_uri=gazette.expression_frbr_uri|strip_first_character %}"
-                       target="_blank">PDF</a>)
-                  </span>
-                </li>
+                <tr>
+                  <td>
+                    <a href="{{ gazette.get_absolute_url }}">{{ gazette.title }}</a>
+                  </td>
+                  <td>
+                    <span class="d-none d-lg-block">{{ gazette.sub_publication|default:'' }}</span>
+                  </td>
+                  <td>
+                    <span class="d-none d-lg-block">{{ gazette.number }}</span>
+                  </td>
+                  <td>
+                    <span class="d-none d-lg-block">{{ gazette.date|date:"Y-m-d" }}</span>
+                  </td>
+                </tr>
               {% endfor %}
-            </ul>
-          {% endif %}
-        {% endfor %}
+            {% endif %}
+          {% endfor %}
+        </table>
       {% endblock %}
     </div>
     {% include "peachjam/_years_list.html" %}

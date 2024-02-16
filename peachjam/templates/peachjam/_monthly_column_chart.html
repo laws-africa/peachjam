@@ -1,0 +1,10 @@
+<div class="monthly-column-chart">
+  {% for month in year.months %}
+    <div class="month">
+      <a href="{{ url }}#{{ month.month }}"
+         class="column"
+         style="height: {% widthratio month.count year.month_max 40 %}px"></a>
+      <span>{{ month.label|slice:":1" }}</span>
+    </div>
+  {% endfor %}
+</div>
