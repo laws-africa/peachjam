@@ -51,20 +51,19 @@
                 </td>
               </tr>
               {% for gazette in items %}
-                <tr>
-                  <td>
-                    <a href="{{ gazette.get_absolute_url }}">{{ gazette.title }}</a>
-                  </td>
-                  <td>
-                    <span class="d-none d-lg-block">{{ gazette.sub_publication|default:'' }}</span>
-                  </td>
-                  <td>
-                    <span class="d-none d-lg-block">{{ gazette.number }}</span>
-                  </td>
-                  <td>
-                    <span class="d-none d-lg-block">{{ gazette.date|date:"Y-m-d" }}</span>
-                  </td>
-                </tr>
+                {% block gazette-item %}
+                  <tr>
+                    <td>
+                      <a href="{{ gazette.get_absolute_url }}">{{ gazette.title }}</a>
+                    </td>
+                    <td>
+                      <span class="d-none d-lg-block">{{ gazette.frbr_uri_number }}</span>
+                    </td>
+                    <td>
+                      <span class="d-none d-lg-block">{{ gazette.date|date:"Y-m-d" }}</span>
+                    </td>
+                  </tr>
+                {% endblock %}
               {% endfor %}
             {% endif %}
           {% endfor %}

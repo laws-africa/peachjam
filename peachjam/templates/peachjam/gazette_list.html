@@ -24,60 +24,56 @@
         </h1>
       {% endblock %}
       {% include 'peachjam/_quick_search.html' %}
-      <div class="row">
-        {% block localities %}
-          {% if not locality %}
-            {% include 'peachjam/_gazette_localities.html' %}
-          {% endif %}
-        {% endblock %}
-        {% if doc_count %}
-          <h4 class="sans-serif text-muted mt-3 mb-0">
-            {% blocktrans trimmed count counter=doc_count %}
-              {{ counter }} gazette
-            {% plural %}
-              {{ counter }} gazettes
-            {% endblocktrans %}
-          </h4>
-          {% block years-list %}
-            <div class="col-md-10 mt-5 mb-5">
-              <div class="row">
-                {% for year in years %}
-                  <div class="col-md-4 col-sm-6 col-12 mb-5 mr-3">
-                    <div class="card">
-                      <div class="card-body">
-                        <h2 class="text-center fw-bold">
-                          {% block gazette-year-link %}
-                            {% if locality %}
-                              <a href="{% url 'gazettes_by_year' locality.code year.year %}">{{ year.year }}</a>
-                            {% else %}
-                              <a href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
-                            {% endif %}
-                          {% endblock %}
-                        </h2>
-                        <div class="text-center mb-3">
-                          {% blocktrans trimmed count num_gazettes=year.count %}
-                            {{ num_gazettes }} gazette
-                          {% plural %}
-                            {{ num_gazettes }} gazettes
-                          {% endblocktrans %}
-                        </div>
-                        {% block monthly-chart %}
-                          {% if locality %}
-                            {% url 'gazettes_by_year' locality.code year.year as url %}
-                          {% else %}
-                            {% url 'gazettes_by_year' year.year as url %}
-                          {% endif %}
-                          {% include 'peachjam/_monthly_column_chart.html' %}
-                        {% endblock %}
-                      </div>
-                    </div>
-                  </div>
-                {% endfor %}
-              </div>
-            </div>
-          {% endblock %}
+      {% block localities %}
+        {% if not locality %}
+          {% include 'peachjam/_gazette_localities.html' %}
         {% endif %}
-      </div>
+      {% endblock %}
+      {% if doc_count %}
+        <h4 class="text-muted my-3">
+          {% blocktrans trimmed count counter=doc_count %}
+            {{ counter }} gazette
+          {% plural %}
+            {{ counter }} gazettes
+          {% endblocktrans %}
+        </h4>
+        {% block years-list %}
+          <div class="row mt-5">
+            {% for year in years %}
+              <div class="col-md-4 col-sm-6 col-12 mb-5 mr-3">
+                <div class="card">
+                  <div class="card-body">
+                    <h2 class="text-center fw-bold">
+                      {% block gazette-year-link %}
+                        {% if locality %}
+                          <a href="{% url 'gazettes_by_year' locality.code year.year %}">{{ year.year }}</a>
+                        {% else %}
+                          <a href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
+                        {% endif %}
+                      {% endblock %}
+                    </h2>
+                    <div class="text-center mb-3">
+                      {% blocktrans trimmed count num_gazettes=year.count %}
+                        {{ num_gazettes }} gazette
+                      {% plural %}
+                        {{ num_gazettes }} gazettes
+                      {% endblocktrans %}
+                    </div>
+                    {% block monthly-chart %}
+                      {% if locality %}
+                        {% url 'gazettes_by_year' locality.code year.year as url %}
+                      {% else %}
+                        {% url 'gazettes_by_year' year.year as url %}
+                      {% endif %}
+                      {% include 'peachjam/_monthly_column_chart.html' %}
+                    {% endblock %}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endblock %}
+      {% endif %}
     </div>
   </section>
 {% endblock %}
