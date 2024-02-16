@@ -3,7 +3,7 @@
     <div class="month">
       <a href="{{ url }}#{{ month.month }}"
          class="column"
-         style="height: {% widthratio month.count year.month_max 40 %}px"></a>
+         style="height: {% if month.count %}{% widthratio month.count year.month_max 40 %}{% else %}1{% endif %}px"></a>
       <span>{{ month.label|slice:":1" }}</span>
     </div>
   {% endfor %}

@@ -23,17 +23,19 @@
       {% block page-title %}
         <h1 class="mt-4">{% trans 'Gazettes' %} - {{ year }}</h1>
       {% endblock %}
-      {% block document-count %}
-        <p class="text-muted mb-4">
-          {% blocktrans trimmed count doc_count=doc_count %}
-            {{ doc_count }} gazette
-          {% plural %}
-            {{ doc_count }} gazettes
-          {% endblocktrans %}
-        </p>
+      {% block preamble %}
+        {% block document-count %}
+          <p class="text-muted mb-4">
+            {% blocktrans trimmed count doc_count=doc_count %}
+              {{ doc_count }} gazette
+            {% plural %}
+              {{ doc_count }} gazettes
+            {% endblocktrans %}
+          </p>
+        {% endblock %}
+        {% include "peachjam/_years_list.html" %}
+        {% include "peachjam/_quick_search.html" %}
       {% endblock %}
-      {% include "peachjam/_years_list.html" %}
-      {% include "peachjam/_quick_search.html" %}
     </header>
     <div class="my-4">
       {% block content %}

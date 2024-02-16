@@ -68,37 +68,34 @@ class GazetteListView(TemplateView):
         self.locality = get_object_or_404(Locality, code=code) if code else None
         return super().get(request, *args, **kwargs)
 
+    def get_base_queryset(self):
+        return self.queryset
+
     def get_queryset(self):
-        qs = self.queryset
-        if self.locality:
-            qs = qs.filter(locality=self.locality)
-        return qs
+        return self.get_base_queryset().filter(locality=self.locality)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(locality=self.locality, **kwargs)
 
-        queryset = self.get_queryset()
-
-        context["localities"] = []
-        if self.locality is None:
-            locality_ids = list(
-                queryset.order_by()
-                .distinct("locality")
-                .values_list("locality", flat=True)
-            )
-            context["localities"] = Locality.objects.filter(pk__in=locality_ids)
-
+        context["localities"] = self.get_localities(context)
         context["locality_groups"] = list(chunks(context["localities"], 2))
-
-        if not self.locality:
-            # counts and years for gazettes at the top-level?
-            queryset = queryset.filter(locality=None)
-
+        queryset = self.get_queryset()
         context["years"] = year_and_month_aggs(queryset, self.locality)
         context["doc_count"] = queryset.count()
         context["doc_type"] = "Gazette"
 
         return context
+
+    def get_localities(self, context):
+        if self.locality is None:
+            locality_ids = list(
+                self.get_base_queryset()
+                .order_by()
+                .distinct("locality")
+                .values_list("locality", flat=True)
+            )
+            return Locality.objects.filter(pk__in=locality_ids)
+        return []
 
 
 class GazetteYearView(DocumentListView):
