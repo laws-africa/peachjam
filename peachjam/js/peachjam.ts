@@ -176,7 +176,7 @@ class PeachJam {
         link.parentElement.parentElement.scrollLeft = (link as HTMLElement).offsetLeft;
       }
     });
-  },
+  }
 
   clearGACookies () {
     // if window.dataLayer is not set, then Google Analytics is not enabled, but there may be cookies still set; clear them
