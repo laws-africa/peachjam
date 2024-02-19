@@ -180,6 +180,7 @@ class PeachJam {
 
   clearGACookies () {
     // if window.dataLayer is not set, then Google Analytics is not enabled, but there may be cookies still set; clear them
+    // @ts-ignore
     if (!window.dataLayer) {
       const cookies = document.cookie.split(';');
       for (let i = 0; i < cookies.length; i++) {
