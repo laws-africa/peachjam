@@ -228,22 +228,19 @@ import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 
 function resetAdvancedFields (fields) {
-  fields.search = '';
-  fields.exact = false;
-  fields.fields = {
-    title: false,
-    judges: false,
-    case_summary: false,
-    flynote: false,
-    content: false
-  };
+  for (const a of ['all', 'and', 'any', 'none']) {
+    fields[a] = {
+      q: '',
+      input: '',
+      fields: [],
+      exact: false
+    };
+  }
+
   fields.date = {
     date_to: null,
     date_from: null
   };
-  fields.and = '';
-  fields.any = '';
-  fields.none = '';
 }
 
 export default {
@@ -481,14 +478,14 @@ export default {
           } else if (value.date_to) {
             params.append('date_to', this.advancedFields.date.date_to);
           }
-        } else if (key === 'fields') {
+        } else {
           for (const mod of Object.keys(value)) {
-            if (value[mod]) {
-              params.append('fields', mod);
+            if (mod === 'fields' && value[mod].length) {
+              value[mod].forEach(modValue => params.append(`${key}_${mod}`, modValue));
+            } else if (value[mod]) {
+              params.append(`${key}_${mod}`, value[mod]);
             }
           }
-        } else if (key !== 'search') {
-          params.append(key, value);
         }
       });
 
@@ -519,17 +516,15 @@ export default {
         if (field !== 'date') {
           const values = this.advancedFields[field];
 
-          if (field === 'fields' && params.getAll('fields').length) {
-            const fields = params.getAll('fields');
-            for (const mod of Object.keys(values)) {
-              if (fields.includes(mod)) {
-                values[mod] = true;
-                showAdvanced = true;
-              }
+          for (const mod of Object.keys(values)) {
+            const key = `${field}_${mod}`;
+            if (mod === 'fields' && params.has(key)) {
+              values[mod] = params.getAll('fields');
+              showAdvanced = true;
+            } else if (params.has(key)) {
+              values[mod] = params.get(key);
+              showAdvanced = true;
             }
-          } else if (params.get(field)) {
-            this.advancedFields[field] = params.get(field);
-            showAdvanced = true;
           }
         }
       }
@@ -540,7 +535,7 @@ export default {
         tabTrigger.show();
       }
 
-      this.search(false);
+      this.search();
     },
 
     suggest (q) {
@@ -584,8 +579,7 @@ export default {
 
     generateSearchParams () {
       const params = new URLSearchParams();
-      const search = this.advancedFields.search || this.q;
-      if (search) params.append('search', search);
+      let query = this.q;
       params.append('page', this.page);
       params.append('ordering', this.ordering);
       params.append('highlight', 'content');
@@ -617,21 +611,22 @@ export default {
           } else if (value.date_to) {
             params.append('date__lte', value.date_to);
           }
-        } else if (key === 'fields') {
-          for (const mod of Object.keys(value)) {
-            if (value[mod]) {
-              params.append(`search__${mod}`, this.advancedFields.search);
-            }
+        } else {
+          if (value.q && value.fields.length) {
+            value.fields.forEach(field => params.append(`search__${field}`, value.q));
+          } else if (key !== 'all' && value.q) {
+            query = query + '+' + value.q;
           }
         }
       });
+      params.append('search', query);
 
       return params;
     },
 
     async search (pushState = true) {
       // if one of the search fields is true perform search
-      if (this.q || this.advancedFields.search) {
+      if (this.q || Object.values(this.advancedFields).some(f => f.q)) {
         this.loadingCount = this.loadingCount + 1;
 
         // ensure the search tab is activated and scroll to put the search box at the top

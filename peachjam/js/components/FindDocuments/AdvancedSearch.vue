@@ -1,62 +1,363 @@
 <template>
   <form @submit.prevent="submitAdvancedForm">
-    <div class="mb-4">
-      <div>
-        <label for="global">{{ $t("Search available fields") }}:</label>
-        <input
-          id="global"
-          name="global"
-          type="text"
-          class="form-control"
-          :value="globalSearchValue"
-          :aria-describedby="$t('Search available fields')"
-          :placeholder="$t('Search documents')"
-          @input="onGlobalSearch"
-        >
-      </div>
-      <div class="form-check d-flex justify-content-end mt-2">
-        <input
-          :value="modelValue.exact"
-          name="exact"
-          type="checkbox"
-          class="form-check-input me-2"
-          @change="onChange"
-        >
-        <label
-          class="form-check-label"
-          for="exact_checkbox"
-        >
-          Exact Phrase
-        </label>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-lg">
+    <div class="row mt-5">
+      <div class="col-12">
         <div class="card mb-3">
           <h5 class="card-header">
-            {{ $t("Fields to search") }}
+            {{ $t("Search documents") }}
           </h5>
           <div class="card-body">
-            <div
-              v-for="field in Object.keys(modelValue.fields)"
-              :key="field"
-              class="form-check"
-            >
+            <div>
               <input
-                :id="`${field}_checkbox`"
-                :name="`field-${field}`"
-                :checked="modelValue.fields[field]"
-                class="form-check-input"
-                type="checkbox"
+                id="all-input"
+                name="all-input"
+                :value="modelValue.all.input"
+                type="text"
+                class="form-control"
+                :aria-describedby="$t('Search available fields')"
+                :placeholder="$t('Search documents')"
                 @change="onChange"
               >
-              <label
-                class="form-check-label"
-                :for="`${field}_checkbox`"
-              >
-                {{ formatName(field) }}
-              </label>
+
+              <div class="d-flex justify-content-between">
+                <div class="dropdown">
+                  <span
+                    id="all-dropdown_fields"
+                    class="dropdown-toggle"
+                    href="#"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                  >
+                    Choose fields
+                  </span>
+
+                  <div class="dropdown-menu" aria-labelledby="all-dropdown_fields">
+                    <div
+                      v-for="field in fields"
+                      :key="field"
+                      class="form-check dropdown-item"
+                    >
+                      <input
+                        :id="`all-${field}`"
+                        v-model="modelValue.all.fields"
+                        :name="`all-${field}`"
+                        :value="field"
+                        class="form-check-input"
+                        type="checkbox"
+                      >
+                      <label
+                        class="form-check-label"
+                        :for="`all-${field}`"
+                      >
+                        {{ formatName(field) }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-check">
+                  <input
+                    id="all-exact"
+                    :value="modelValue.all.exact"
+                    name="all-exact"
+                    type="checkbox"
+                    class="form-check-input"
+                    @change="onExactChange"
+                  >
+                  <label
+                    class="form-check-label"
+                    for="all-exact"
+                  >
+                    Exact Phrase
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 row">
+              <div v-if="!showAllOptions" class="dropdown col-3">
+                <span
+                  :id="`${firstLogic}-dropdown`"
+                  class="btn btn-secondary dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  {{ firstLogic.toUpperCase() }} of these words
+                </span>
+
+                <div class="dropdown-menu p-2" :aria-labelledby="`${firstLogic}-dropdown`">
+                  <button
+                    v-for="logicField in logicFields.slice(1)"
+                    :key="logicField"
+                    class="dropdown-item"
+                    type="button"
+                    @click="firstLogic=logicField"
+                  >
+                    {{ logicField.toUpperCase() }} of these words
+                  </button>
+                </div>
+              </div>
+
+              <div v-else class="col-3">
+                <span
+                  id=""
+                  class="btn btn-secondary "
+                  href="#"
+                  role="button"
+                  data-bs-toggle=""
+                  aria-expanded="false"
+                >
+                  {{ firstLogic.toUpperCase() }} of these words
+                </span>
+              </div>
+              <div class="col-9">
+                <input
+                  :id="`${firstLogic}-input`"
+                  :name="`${firstLogic}-input`"
+                  type="text"
+                  :value="modelValue[firstLogic]?.input"
+                  class="form-control"
+                  @input="onChange"
+                >
+                <div class="d-flex justify-content-between">
+                  <div class="dropdown">
+                    <span
+                      :id="`${firstLogic}-dropdown_fields`"
+                      class="dropdown-toggle"
+                      href="#"
+                      role="button"
+                      data-bs-toggle="dropdown"
+                      data-bs-auto-close="outside"
+                      aria-expanded="false"
+                    >
+                      Choose fields
+                    </span>
+
+                    <div class="dropdown-menu p-2" :aria-labelledby="`${firstLogic}-dropdown_fields`">
+                      <div
+                        v-for="field in fields"
+                        :key="field"
+                        class="form-check dropdown-item"
+                      >
+                        <input
+                          :id="`${firstLogic}-${field}`"
+                          :name="`${firstLogic}-${field}`"
+                          :value="field"
+                          class="form-check-input"
+                          type="checkbox"
+                          @change="onChange"
+                        >
+                        <label
+                          class="form-check-label"
+                          :for="`${firstLogic}-${field}`"
+                        >
+                          {{ formatName(field) }}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-check">
+                    <input
+                      :value="modelValue[firstLogic]?.exact"
+                      :name="`${firstLogic}-exact`"
+                      type="checkbox"
+                      class="form-check-input"
+                      @change="onExactChange"
+                    >
+                    <label
+                      class="form-check-label"
+                      :for="`${firstLogic}-exact`"
+                    >
+                      Exact Phrase
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-if="modelValue[firstLogic].input || showAllOptions" class="mt-3 row">
+              <div v-if="!showAllOptions" class="dropdown col-3">
+                <span
+                  :id="`${secondLogic}-dropdown`"
+                  class="btn btn-secondary dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  {{ secondLogic.toUpperCase() }} of these words
+                </span>
+
+                <div class="dropdown-menu p-2" :aria-labelledby="`${secondLogic}-dropdown`">
+                  <button
+                    v-for="logicField in logicFields.slice(1)"
+                    :key="logicField"
+                    class="dropdown-item"
+                    type="button"
+                    @click="secondLogic=logicField"
+                  >
+                    {{ logicField.toUpperCase() }} of these words
+                  </button>
+                </div>
+              </div>
+
+              <div v-else class="col-3">
+                <span
+                  id=""
+                  class="btn btn-secondary "
+                  href="#"
+                  role="button"
+                  data-bs-toggle=""
+                  aria-expanded="false"
+                >
+                  {{ secondLogic.toUpperCase() }} of these words
+                </span>
+              </div>
+              <div class="col-9">
+                <input
+                  :id="`${secondLogic}-input`"
+                  :name="`${secondLogic}-input`"
+                  type="text"
+                  :value="modelValue[secondLogic]?.input"
+                  class="form-control"
+                  @input="onChange"
+                >
+                <div class="d-flex justify-content-between">
+                  <div class="dropdown">
+                    <span
+                      :id="`${secondLogic}-dropdown_fields`"
+                      class="dropdown-toggle"
+                      href="#"
+                      role="button"
+                      data-bs-toggle="dropdown"
+                      data-bs-auto-close="outside"
+                      aria-expanded="false"
+                    >
+                      Choose fields
+                    </span>
+
+                    <div class="dropdown-menu p-2" :aria-labelledby="`${secondLogic}-dropdown_fields`">
+                      <div
+                        v-for="field in fields"
+                        :key="field"
+                        class="form-check dropdown-item"
+                      >
+                        <input
+                          :id="`${secondLogic}-${field}`"
+                          :name="`${secondLogic}-${field}`"
+                          :value="field"
+                          class="form-check-input"
+                          type="checkbox"
+                          @change="onChange"
+                        >
+                        <label
+                          class="form-check-label"
+                          :for="`${secondLogic}-${field}`"
+                        >
+                          {{ formatName(field) }}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-check">
+                    <input
+                      :value="modelValue[secondLogic]?.exact"
+                      :name="`${secondLogic}-exact`"
+                      type="checkbox"
+                      class="form-check-input"
+                      @change="onExactChange"
+                    >
+                    <label
+                      class="form-check-label"
+                      :for="`${secondLogic}-exact`"
+                    >
+                      Exact Phrase
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-if="modelValue[secondLogic].input || showAllOptions" class="mt-3 row">
+              <div class="col-3">
+                <span
+                  id=""
+                  class="btn btn-secondary "
+                  href="#"
+                  role="button"
+                  data-bs-toggle=""
+                  aria-expanded="false"
+                >
+                  {{ thirdLogic.toUpperCase() }} of these words
+                </span>
+              </div>
+              <div class="col-9">
+                <input
+                  :id="`${thirdLogic}-input`"
+                  :name="`${thirdLogic}-input`"
+                  type="text"
+                  :value="modelValue[thirdLogic]?.input"
+                  class="form-control"
+                  @input="onChange"
+                >
+                <div class="d-flex justify-content-between">
+                  <div class="dropdown">
+                    <span
+                      :id="`${thirdLogic}-dropdown_fields`"
+                      class="dropdown-toggle"
+                      href="#"
+                      role="button"
+                      data-bs-toggle="dropdown"
+                      data-bs-auto-close="outside"
+                      aria-expanded="false"
+                    >
+                      Choose fields
+                    </span>
+
+                    <div class="dropdown-menu p-2" :aria-labelledby="`${thirdLogic}-dropdown_fields`">
+                      <div
+                        v-for="field in fields"
+                        :key="field"
+                        class="form-check dropdown-item"
+                      >
+                        <input
+                          :id="`${thirdLogic}-${field}`"
+                          :name="`${thirdLogic}-${field}`"
+                          :value="field"
+                          class="form-check-input"
+                          type="checkbox"
+                          @change="onChange"
+                        >
+                        <label
+                          class="form-check-labels"
+                          :for="`${thirdLogic}-${field}`"
+                        >
+                          {{ formatName(field) }}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-check">
+                    <input
+                      :value="modelValue[thirdLogic]?.exact"
+                      :name="`${thirdLogic}-exact`"
+                      type="checkbox"
+                      class="form-check-input"
+                      @change="onExactChange"
+                    >
+                    <label
+                      class="form-check-label"
+                      :for="`${thirdLogic}-exact`"
+                    >
+                      Exact Phrase
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -109,67 +410,11 @@
         </div>
       </div>
     </div>
-
-    <div class="row">
-      <div class="col-lg">
-        <div class="card mb-3">
-          <h5 class="card-header">
-            {{ $t("Additional filters") }}
-          </h5>
-          <div class="card-body">
-            <div>
-              <div class="row">
-                <label class="form-label col-sm-3" for="and-words">{{ $t("AND these words") }}</label>
-                <div class="col-sm-9">
-                  <input
-                    id="and-words"
-                    name="and"
-                    type="text"
-                    :value="modelValue.and"
-                    class="form-control"
-                    @input="onChange"
-                  >
-                </div>
-              </div>
-
-              <div class="row mt-3">
-                <label class="form-label col-sm-3" for="or-words">{{ $t("OR these words") }}</label>
-                <div class="col-sm-9">
-                  <input
-                    id="or-words"
-                    name="any"
-                    type="text"
-                    :value="modelValue.any"
-                    class="form-control"
-                    @input="onChange"
-                  >
-                </div>
-              </div>
-
-              <div class="row mt-3">
-                <label class="form-label col-sm-3" for="not-words">{{ $t("NOT these words") }}</label>
-                <div class="col-sm-9">
-                  <input
-                    id="not-words"
-                    name="none"
-                    type="text"
-                    :value="modelValue.none"
-                    class="form-control"
-                    @input="onChange"
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="d-flex justify-content-end">
       <div>
         <HelpBtn page="search/advanced-search" />
         <button type="submit" class="btn btn-primary">
-          {{ $t("Search") }}
+          {{ $t('Search') }}
         </button>
       </div>
     </div>
@@ -181,7 +426,6 @@ import HelpBtn from '../HelpBtn.vue';
 
 export default {
   name: 'AdvancedSearch',
-
   components: { HelpBtn },
 
   props: {
@@ -196,6 +440,16 @@ export default {
   },
 
   emits: ['submit', 'update:modelValue', 'global-search-change'],
+
+  data: function () {
+    return {
+      showAllOptions: false,
+      fields: ['title', 'judges', 'case_summary', 'flynote', 'content'],
+      firstLogic: 'and',
+      secondLogic: 'any',
+      thirdLogic: 'none'
+    };
+  },
 
   computed: {
     invalidDates () {
@@ -222,6 +476,9 @@ export default {
           (key) => this.modelValue[key]
         ) || this.globalSearchValue
       );
+    },
+    logicFields () {
+      return ['and', 'any', 'none'].filter((field) => !this.modelValue[field].input);
     }
   },
 
@@ -239,19 +496,41 @@ export default {
           });
         }
       }
+    },
+
+    logicFields: {
+      handler (newValue, oldValue) {
+        if (newValue.length < 2) this.showAllOptions = true;
+        if (newValue.length < oldValue.length) {
+          if (newValue.length === 1) {
+            this.thirdLogic = newValue[0];
+          } else if (newValue.length === 2) {
+            this.secondLogic = newValue[0];
+          }
+        }
+      }
     }
   },
 
   methods: {
     onChange (e) {
       const data = { ...this.modelValue };
-      const name = e.target.name;
-      if (name.startsWith('field')) {
-        const field = name.split('-')[1];
-        data.fields[field] = e.target.checked;
+      const splitInput = e.target.name.split('-');
+
+      if (e.target.type === 'checkbox') {
+        if (e.target.checked) data[splitInput[0]].fields.push(splitInput[1]);
       } else {
-        data[name] = e.target.value;
+        data[splitInput[0]][splitInput[1]] = e.target.value;
       }
+
+      this.$emit('update:modelValue', data);
+    },
+
+    onExactChange (e) {
+      const data = { ...this.modelValue };
+      const splitInput = e.target.name.split('-');
+      if (e.target.checked) data[splitInput[0]][splitInput[1]] = e.target.checked;
+
       this.$emit('update:modelValue', data);
     },
 
@@ -269,57 +548,59 @@ export default {
       this.$emit('global-search-change', e.target.value);
     },
 
-    formatFieldQuery () {
+    /**
+     * Build a single query string from the advanced values for a field.
+     * @param field the name of the field
+     * @param modifiers the advanced search modifiers object
+     * @returns {string} a fully formatted search string
+     */
+    formatFieldValues () {
       const newValue = { ...this.modelValue };
-      let q = this.modelValue.exact ? '"' + this.globalSearchValue + '"' : this.globalSearchValue;
+      Object.keys(this.modelValue).forEach(field => {
+        if (field !== 'date') {
+          const fieldQuery = this.formatFieldQuery(field, this.modelValue[field]);
+          newValue[field].q = fieldQuery;
 
-      if (this.modelValue.and) {
-        let splitValue = this.modelValue.and.match(/\w+|"[^"]+"/g);
-        // add quotes around runs of non-quoted tokens
-        const tokens = [];
-        let unquoted = [];
-
-        splitValue.forEach((value) => {
-          if (value.startsWith('"')) {
-            if (unquoted.length) {
-              tokens.push('"' + unquoted.join(' ') + '"');
-              unquoted = [];
-            }
-            tokens.push(value);
-          } else {
-            unquoted.push(value);
+          if (field === 'all') {
+            this.$emit('global-search-change', fieldQuery);
           }
-        });
-
-        if (unquoted.length) {
-          tokens.push('"' + unquoted.join(' ') + '"');
         }
-        splitValue = tokens.join(' ');
-
-        // special case for the "and" modifier - we want to update the input box to reflect the quoted string
-        newValue.and = splitValue;
-
-        q = q + ' ' + splitValue.trim();
-      }
-
-      if (this.modelValue.any) {
-        let splitValue = this.modelValue.any.match(/\w+|"[^"]+"/g);
-        splitValue = `(${splitValue.join('|')})`;
-        q = q + ' ' + splitValue.trim();
-      }
-
-      if (this.modelValue.none) {
-        let splitValue = this.modelValue.none.match(/\w+|"[^"]+"/g);
-        splitValue = splitValue.map((value) => `-${value}`).join(' ');
-        q = q + ' ' + splitValue.trim();
-      }
-
-      newValue.search = q;
+      });
       this.$emit('update:modelValue', newValue);
     },
 
+    formatFieldQuery (field, modifiers) {
+      let q = '';
+      const input = modifiers.exact ? '"' + modifiers.input.trim() + '"' : modifiers.input;
+      if (!input) return '';
+      let splitValue = input.match(/\w+|"[^"]+"/g);
+
+      if (field === 'and') {
+        // add quotes around runs of non-quoted tokens
+        const tokens = [];
+
+        splitValue.forEach((value) => {
+          if (value.startsWith('"')) {
+            tokens.push(value);
+          } else {
+            tokens.push('"' + value + '"');
+          }
+        });
+
+        splitValue = tokens.join('+');
+      } else if (field === 'any') {
+        splitValue = `(|${splitValue.join('|')})`;
+      } else if (field === 'none') {
+        splitValue = splitValue.map((value) => `-${value}`).join(' ');
+      } else splitValue = splitValue.join(' ');
+
+      q = q + ' ' + splitValue.trim();
+
+      return q.trim();
+    },
+
     submitAdvancedForm () {
-      this.formatFieldQuery();
+      this.formatFieldValues();
       this.$emit('submit');
     },
 
@@ -331,3 +612,10 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.dropdown-menu .dropdown-item {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+</style>
