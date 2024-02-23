@@ -1,7 +1,4 @@
-from countries_plus.models import Country
-from django.shortcuts import get_object_or_404
-
-from peachjam.models import Locality
+from peachjam.models.core_document_model import get_country_and_locality_or_404
 from peachjam.views import FilteredDocumentListView
 
 
@@ -9,16 +6,7 @@ class PlaceDetailView(FilteredDocumentListView):
     template_name = "peachjam/place_detail.html"
 
     def get(self, request, code, *args, **kwargs):
-        if "-" in code:
-            cty_code, locality_code = code.split("-", 1)
-            self.country = get_object_or_404(Country.objects, pk=cty_code.upper())
-            self.locality = get_object_or_404(
-                Locality.objects, jurisdiction=self.country, code=locality_code
-            )
-        else:
-            self.country = get_object_or_404(Country.objects, pk=code)
-            self.locality = None
-
+        self.country, self.locality = get_country_and_locality_or_404(code)
         self.place = self.locality or self.country
         return super().get(request, code, *args, **kwargs)
 

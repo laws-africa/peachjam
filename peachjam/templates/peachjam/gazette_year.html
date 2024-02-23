@@ -1,7 +1,7 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n peachjam %}
 {% block title %}
-  {% trans 'Gazettes' %} {{ year }}
+  {{ place }} {% trans 'Gazettes' %} {{ year }}
 {% endblock %}
 {% block page-content %}
   <div class="container">
@@ -12,16 +12,25 @@
             <li class="breadcrumb-item">
               <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
             </li>
-            {% if locality %}
+            {% if country %}
               <li class="breadcrumb-item">
-                <a href="{% url 'gazettes_by_locality' code=locality.code %}">{{ locality }}</a>
+                <a href="{% url 'gazettes_by_locality' country.pk.lower %}">{{ country }}</a>
               </li>
             {% endif %}
+            {% if locality %}
+              <li class="breadcrumb-item">
+                <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality }}</a>
+              </li>
+            {% endif %}
+            <li class="breadcrumb-item active">{{ year }}</li>
           </ol>
         </nav>
       {% endblock %}
       {% block page-title %}
-        <h1 class="mt-4">{% trans 'Gazettes' %} - {{ year }}</h1>
+        <h1 class="mt-4">
+          {{ place }}
+          {% trans 'Gazettes' %} - {{ year }}
+        </h1>
       {% endblock %}
       {% block preamble %}
         {% block document-count %}
@@ -40,7 +49,13 @@
     <div class="my-4">
       {% block content %}
         <div class="row">
-          <div class="col col-md-4 my-3">{% include 'peachjam/_monthly_column_chart.html' with url='' year=years.0 %}</div>
+          <div class="col col-md-4 my-3">
+            {% for y in years %}
+              {% if y.year == year %}
+                {% include 'peachjam/_monthly_column_chart.html' with url='' year=y %}
+              {% endif %}
+            {% endfor %}
+          </div>
         </div>
         <table class="table table-borderless table-sm">
           {% for month, items in gazettes %}

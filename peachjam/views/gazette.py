@@ -2,18 +2,17 @@ from itertools import groupby
 
 from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
-from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks
-from peachjam.models import Gazette, Locality
+from peachjam.models import Gazette, Locality, get_country_and_locality_or_404
 from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView, DocumentListView
 
 
-def year_and_month_aggs(queryset, locality=None):
+def year_and_month_aggs(queryset, place_code=None):
     """Group and count items by year and month."""
     results = []
 
@@ -51,7 +50,7 @@ def year_and_month_aggs(queryset, locality=None):
                 "month_max": max(month_counts),
                 "url": reverse(
                     "gazettes_by_year",
-                    args=[locality.code, year] if locality else [year],
+                    args=[place_code, year] if place_code else [year],
                 ),
             }
         )
@@ -60,27 +59,33 @@ def year_and_month_aggs(queryset, locality=None):
 
 
 class GazetteListView(TemplateView):
-    queryset = Gazette.objects.exclude(published=False).prefetch_related("source_file")
+    queryset = Gazette.objects.filter(published=True)
     template_name = "peachjam/gazette_list.html"
     navbar_link = "gazettes"
 
     def get(self, request, code=None, *args, **kwargs):
-        self.locality = get_object_or_404(Locality, code=code) if code else None
+        self.country, self.locality = get_country_and_locality_or_404(code)
+        self.place = self.locality or self.country
         return super().get(request, *args, **kwargs)
 
     def get_base_queryset(self):
         return self.queryset
 
     def get_queryset(self):
-        return self.get_base_queryset().filter(locality=self.locality)
+        qs = self.get_base_queryset().filter(locality=self.locality)
+        if self.country:
+            qs = qs.filter(jurisdiction=self.country)
+        return qs
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(locality=self.locality, **kwargs)
+        context = super().get_context_data(
+            locality=self.locality, country=self.country, place=self.place, **kwargs
+        )
 
         context["localities"] = self.get_localities(context)
         context["locality_groups"] = list(chunks(context["localities"], 2))
         queryset = self.get_queryset()
-        context["years"] = year_and_month_aggs(queryset, self.locality)
+        context["years"] = year_and_month_aggs(queryset, self.kwargs.get("code"))
         context["doc_count"] = queryset.count()
         context["doc_type"] = "Gazette"
 
@@ -107,24 +112,29 @@ class GazetteYearView(DocumentListView):
     locality = None
 
     def get(self, request, code=None, *args, **kwargs):
-        self.locality = get_object_or_404(Locality, code=code) if code else None
+        self.country, self.locality = get_country_and_locality_or_404(code)
+        self.place = self.locality or self.country
         return super().get(request, *args, **kwargs)
 
     def get_base_queryset(self):
-        qs = super().get_base_queryset()
-        qs = qs.filter(locality=self.locality)
+        qs = super().get_base_queryset().filter(locality=self.locality)
+        if self.country:
+            qs = qs.filter(jurisdiction=self.country)
         return qs
 
     def get_queryset(self):
         return super().get_queryset().filter(date__year=self.kwargs["year"])
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(
+            place=self.place, country=self.country, locality=self.locality, **kwargs
+        )
 
-        context["locality"] = self.locality
         context["gazettes"] = self.group_gazettes(list(self.object_list))
         context["year"] = int(self.kwargs["year"])
-        context["years"] = year_and_month_aggs(self.object_list, self.locality)
+        context["years"] = year_and_month_aggs(
+            self.get_base_queryset(), self.kwargs.get("code")
+        )
         context["doc_type"] = "Gazette"
         context["doc_count"] = len(self.object_list)
 

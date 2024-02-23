@@ -11,9 +11,10 @@ from countries_plus.models import Country
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.db import models
+from django.http import Http404
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
@@ -919,3 +920,24 @@ class DocumentContent(models.Model):
         )[0]
         document.document_content = doc_content
         return doc_content
+
+
+def get_country_and_locality(code):
+    if not code:
+        return None, None
+
+    if "-" in code:
+        cty_code, locality_code = code.split("-", 1)
+        country = Country.objects.get(pk=cty_code.upper())
+        locality = Locality.objects.get(jurisdiction=country, code=locality_code)
+    else:
+        country = Country.objects.get(pk=code.upper())
+        locality = None
+    return country, locality
+
+
+def get_country_and_locality_or_404(code):
+    try:
+        return get_country_and_locality(code)
+    except ObjectDoesNotExist:
+        raise Http404()

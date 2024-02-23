@@ -6,16 +6,19 @@
       <li class="breadcrumb-item">
         <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
       </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'gazettes_by_locality' document.jurisdiction.pk.lower %}">{{ document.jurisdiction }}</a>
+      </li>
       {% if document.locality %}
         <li class="breadcrumb-item">
-          <a href="{% url 'gazettes_by_locality' document.locality.code %}">{{ document.locality }}</a>
+          <a href="{% url 'gazettes_by_locality' document.locality.place_code %}">{{ document.locality }}</a>
         </li>
         <li class="breadcrumb-item">
-          <a href="{% url 'gazettes_by_year' document.locality.code document.date.year %}">{{ document.date.year }}</a>
+          <a href="{% url 'gazettes_by_year' document.locality.place_code document.date.year %}">{{ document.date.year }}</a>
         </li>
       {% else %}
         <li class="breadcrumb-item">
-          <a href="{% url 'gazettes_by_year' year=document.date.year %}">{{ document.date.year }}</a>
+          <a href="{% url 'gazettes_by_year' document.date.year %}">{{ document.date.year }}</a>
         </li>
       {% endif %}
     </ol>

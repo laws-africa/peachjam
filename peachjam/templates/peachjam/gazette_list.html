@@ -1,31 +1,41 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
 {% block title %}
-  {{ locality.name }} {% trans 'Gazettes' %}
+  {{ place }} {% trans 'Gazettes' %} {{ year }}
 {% endblock %}
 {% block page-content %}
   <section class="pb-5">
     <div class="container">
       {% block breadcrumbs %}
-        {% if locality %}
+        {% if place %}
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
               <li class="breadcrumb-item">
                 <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
               </li>
+              {% if country %}
+                <li class="breadcrumb-item">
+                  <a href="{% url 'gazettes_by_locality' country.pk.lower %}">{{ country }}</a>
+                </li>
+              {% endif %}
+              {% if locality %}
+                <li class="breadcrumb-item">
+                  <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality }}</a>
+                </li>
+              {% endif %}
             </ol>
           </nav>
         {% endif %}
       {% endblock %}
       {% block page-title %}
         <h1 class="my-4">
-          {% if locality %}{{ locality }}{% endif %}
+          {% if place %}{{ place }}{% endif %}
           {% trans 'Gazettes' %}
         </h1>
       {% endblock %}
       {% include 'peachjam/_quick_search.html' %}
       {% block localities %}
-        {% if not locality %}
+        {% if localities %}
           {% include 'peachjam/_gazette_localities.html' %}
         {% endif %}
       {% endblock %}
@@ -46,7 +56,9 @@
                     <h2 class="text-center fw-bold">
                       {% block gazette-year-link %}
                         {% if locality %}
-                          <a href="{% url 'gazettes_by_year' locality.code year.year %}">{{ year.year }}</a>
+                          <a href="{% url 'gazettes_by_year' locality.place_code year.year %}">{{ year.year }}</a>
+                        {% elif country %}
+                          <a href="{% url 'gazettes_by_year' country.pk.lower year.year %}">{{ year.year }}</a>
                         {% else %}
                           <a href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
                         {% endif %}
@@ -61,7 +73,9 @@
                     </div>
                     {% block monthly-chart %}
                       {% if locality %}
-                        {% url 'gazettes_by_year' locality.code year.year as url %}
+                        {% url 'gazettes_by_year' locality.place_code year.year as url %}
+                      {% elif country %}
+                        {% url 'gazettes_by_year' country.pk.lower year.year as url %}
                       {% else %}
                         {% url 'gazettes_by_year' year.year as url %}
                       {% endif %}
