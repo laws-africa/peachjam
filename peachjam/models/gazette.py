@@ -1,9 +1,22 @@
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from peachjam.models import CoreDocument
 
 
 class Gazette(CoreDocument):
+    publication = models.CharField(
+        _("publication"), max_length=100, null=True, blank=True
+    )
+    sub_publication = models.CharField(
+        _("sub publication"), max_length=100, null=True, blank=True
+    )
+    supplement = models.BooleanField(_("supplement"), default=False)
+    supplement_number = models.IntegerField(
+        _("supplement number"), null=True, blank=True
+    )
+    part = models.CharField(_("part"), max_length=10, null=True, blank=True)
+
     class Meta(CoreDocument.Meta):
         verbose_name = _("gazette")
         verbose_name_plural = _("gazettes")

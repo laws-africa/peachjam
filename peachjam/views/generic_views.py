@@ -35,11 +35,8 @@ class DocumentListView(ListView):
     )
 
     def get_base_queryset(self):
-        return (
-            self.queryset.exclude(published=False)
-            if self.queryset is not None
-            else self.model.objects.exclude(published=False)
-        )
+        qs = self.queryset if self.queryset is not None else self.model.objects
+        return qs.filter(published=True)
 
     def get_queryset(self):
         qs = self.get_base_queryset()
