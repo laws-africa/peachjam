@@ -22,6 +22,11 @@ class Gazette(CoreDocument):
         verbose_name_plural = _("gazettes")
         permissions = [("api_gazette", "API gazette access")]
 
+    def set_frbr_uri_subtype(self):
+        # preserve the existing subtype if nature is not set
+        if self.nature:
+            self.frbr_uri_subtype = self.nature.code
+
     def pre_save(self):
         self.frbr_uri_doctype = "officialGazette"
         self.doc_type = "gazette"

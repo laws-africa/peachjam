@@ -532,9 +532,12 @@ class CoreDocument(PolymorphicModel):
         )
         return frbr_uri.work_uri(work_component=False)
 
+    def set_frbr_uri_subtype(self):
+        self.frbr_uri_subtype = self.nature.code if self.nature else None
+
     def pre_save(self):
         """Pre-populate various fields before saving or running full_clean."""
-        self.frbr_uri_subtype = self.nature.code if self.nature else None
+        self.set_frbr_uri_subtype()
         self.assign_frbr_uri()
         self.expression_frbr_uri = self.generate_expression_frbr_uri()
 
