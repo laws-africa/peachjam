@@ -164,7 +164,7 @@ class GazetteAdapter(Adapter):
 class GazetteAPIAdapter(Adapter):
     def __init__(self, settings):
         super().__init__(settings)
-        self.jurisdiction = self.settings["jurisdiction"]
+        self.jurisdiction = self.settings.get("jurisdiction")
         self.client = requests.session()
         self.client.headers.update(
             {
