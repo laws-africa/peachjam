@@ -282,11 +282,13 @@ class IndigoAdapter(Adapter):
         if hasattr(model, "metadata_json"):
             field_data["metadata_json"] = document
 
-        if hasattr(model, "timeline_json"):
+        if hasattr(model, "timeline_json") and not self.settings.get("skip_timeline"):
             timeline = self.client_get(f"{url}/timeline.json").json()
             field_data["timeline_json"] = timeline["timeline"]
 
-        if hasattr(model, "commencements_json"):
+        if hasattr(model, "commencements_json") and not self.settings.get(
+            "skip_commencements"
+        ):
             commencements_json = self.client_get(f"{url}/commencements.json").json()
             field_data["commencements_json"] = commencements_json["commencements"]
 
@@ -432,8 +434,15 @@ class IndigoAdapter(Adapter):
                 object_work=repealing_work,
             )
 
-        if imported_document["work_amendments"]:
-            for amendment in imported_document["work_amendments"]:
+        if imported_document.get("work_amendments") or imported_document.get(
+            "amendments"
+        ):
+            amendments = (
+                imported_document.get("work_amendments")
+                or imported_document.get("amendments")
+                or []
+            )
+            for amendment in amendments:
                 if amendment["amending_uri"] and amendment["amending_title"]:
                     amending_work, _ = Work.objects.get_or_create(
                         frbr_uri=amendment["amending_uri"],
