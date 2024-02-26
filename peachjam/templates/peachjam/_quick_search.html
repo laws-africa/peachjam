@@ -3,13 +3,14 @@
          class="form-control flex-grow-1"
          autofocus
          name="q"
-         placeholder="Search {{ court.name }} {{ author.name }} {{ nature.name }} {{ registry.name }} {{ locality.name }} {{ year }} "/>
+         placeholder="Search {{ court.name }} {{ author.name }} {{ nature.name }} {{ registry.name }} {% if MULTIPLE_JURISDICTIONS and country %}{{ country.name }}{% endif %}{{ locality.name }} {{ year }} "/>
   <input type="submit" class="btn btn-outline-primary ms-2" value="Search"/>
   {% if year %}<input type="hidden" name="year" value="{{ year }}"/>{% endif %}
   {% if court %}<input type="hidden" name="court" value="{{ court }}"/>{% endif %}
   {% if author %}<input type="hidden" name="authors" value="{{ author }}"/>{% endif %}
   {% if nature %}<input type="hidden" name="nature" value="{{ nature }}"/>{% endif %}
   {% if registry %}<input type="hidden" name="registry" value="{{ registry }}"/>{% endif %}
+  {% if MULTIPLE_JURISDICTIONS and country %}<input type="hidden" name="jurisdiction" value="{{ country }}"/>{% endif %}
   {% if locality %}<input type="hidden" name="locality" value="{{ locality }}"/>{% endif %}
   {% if doc_type %}<input type="hidden" name="doc_type" value="{{ doc_type }}"/>{% endif %}
 </form>
