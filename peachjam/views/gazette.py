@@ -105,7 +105,7 @@ class GazetteListView(TemplateView):
 
 class GazetteYearView(DocumentListView):
     model = Gazette
-    queryset = Gazette.objects.prefetch_related("source_file").order_by("-date")
+    queryset = Gazette.objects.prefetch_related("source_file").order_by("date")
     template_name = "peachjam/gazette_year.html"
     paginate_by = 0
     navbar_link = "gazettes"
