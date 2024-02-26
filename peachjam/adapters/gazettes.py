@@ -190,8 +190,14 @@ class GazetteAPIAdapter(Adapter):
         if last_refreshed:
             params["updated_at__gte"] = last_refreshed
         if self.jurisdiction:
-            # TODO: handle jurisdiction wildcards, eg za-*
-            params["jurisdiction"] = self.jurisdiction
+            if self.jurisdiction.endswith("-*"):
+                # handle jurisdiction wildcards, eg za-*
+                # instead of asking for a jurisdiction code, we must ask for a specific
+                # country and all jurisdictions under it
+                params["country"] = self.jurisdiction.split("-")[0]
+                params["locality__isnull"] = False
+            else:
+                params["jurisdiction"] = self.jurisdiction
 
         results = []
         url = f"{self.api_url}/gazettes/archived.json"
