@@ -188,7 +188,7 @@ class GazetteAPIAdapter(Adapter):
 
         params = {}
         if last_refreshed:
-            params["updated_at__gte"] = last_refreshed
+            params["updated_at__gte"] = last_refreshed.isoformat()
         if self.jurisdiction:
             if self.jurisdiction.endswith("-*"):
                 # handle jurisdiction wildcards, eg za-*
@@ -223,7 +223,7 @@ class GazetteAPIAdapter(Adapter):
 
         frbr_uri = FrbrUri.parse(document["expression_frbr_uri"])
         country, locality = get_country_and_locality(document["jurisdiction"])
-        language = Language.objects.get(iso_639_2T__iexact=document["language"])
+        language = Language.objects.get(pk=document["language"])
 
         data = {
             "jurisdiction": country,
@@ -258,9 +258,11 @@ class GazetteAPIAdapter(Adapter):
 
         log.info(f"New document: {new}")
 
+        s3_file = "s3:" + document["s3_location"].replace("/", ":", 1)
         SourceFile.objects.update_or_create(
             document=gazette,
             defaults={
+                "file": s3_file,
                 "source_url": document["download_url"],
                 "mimetype": "application/pdf",
                 "filename": document["key"] + ".pdf",
