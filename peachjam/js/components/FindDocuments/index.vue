@@ -226,6 +226,7 @@ import AdvancedSearch from './AdvancedSearch.vue';
 import HelpBtn from '../HelpBtn.vue';
 import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
+import analytics from '../analytics';
 
 function resetAdvancedFields (fields) {
   const advanced = ['all', 'title', 'judges', 'case_summary', 'flynote', 'content'];
@@ -636,6 +637,7 @@ export default {
               '',
               document.location.pathname + '?' + this.serialiseState()
             );
+            analytics.trackPageView();
           }
           const response = await fetch(url);
 
