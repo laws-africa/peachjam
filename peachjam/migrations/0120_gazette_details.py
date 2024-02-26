@@ -43,4 +43,11 @@ class Migration(migrations.Migration):
                 blank=True, null=True, verbose_name="supplement number"
             ),
         ),
+        migrations.AddField(
+            model_name="gazette",
+            name="key",
+            field=models.CharField(
+                max_length=512, null=True, blank=True, db_index=True, verbose_name="key"
+            ),
+        ),
     ]

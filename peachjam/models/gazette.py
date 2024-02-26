@@ -16,6 +16,10 @@ class Gazette(CoreDocument):
         _("supplement number"), null=True, blank=True
     )
     part = models.CharField(_("part"), max_length=10, null=True, blank=True)
+    # this is the unique key from Gazettes.Africa and is used to redirect old URLs
+    key = models.CharField(
+        _("key"), max_length=512, null=True, blank=True, db_index=True
+    )
 
     class Meta(CoreDocument.Meta):
         verbose_name = _("gazette")
