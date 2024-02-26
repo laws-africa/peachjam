@@ -210,6 +210,8 @@ class GazetteAPIAdapter(Adapter):
 
     def update_document(self, url):
         log.info(f"Updating gazette ... {url}")
+        if url.endswith("/"):
+            url = url[:-1]
 
         try:
             document = self.client_get(f"{url}.json").json()
