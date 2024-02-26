@@ -16,6 +16,10 @@
         <li class="breadcrumb-item">
           <a href="{% url 'gazettes_by_year' document.locality.place_code document.date.year %}">{{ document.date.year }}</a>
         </li>
+      {% elif MULTIPLE_JURISDICTIONS %}
+        <li class="breadcrumb-item">
+          <a href="{% url 'gazettes_by_year' document.jurisdiction.pk.lower document.date.year %}">{{ document.date.year }}</a>
+        </li>
       {% else %}
         <li class="breadcrumb-item">
           <a href="{% url 'gazettes_by_year' document.date.year %}">{{ document.date.year }}</a>
