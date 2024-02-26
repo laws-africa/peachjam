@@ -259,7 +259,7 @@ class GazetteAPIAdapter(Adapter):
         log.info(f"New document: {new}")
 
         s3_file = "s3:" + document["s3_location"].replace("/", ":", 1)
-        SourceFile.objects.update_or_create(
+        sf, created = SourceFile.objects.update_or_create(
             document=gazette,
             defaults={
                 "file": s3_file,
@@ -269,6 +269,8 @@ class GazetteAPIAdapter(Adapter):
                 "size": document["size"],
             },
         )
+        # force the dynamic file field to be set correctly
+        SourceFile.objects.filter(pk=sf.pk).update(file=s3_file)
 
         log.info("Done.")
 
