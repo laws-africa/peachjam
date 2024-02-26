@@ -845,7 +845,7 @@ class IngestorAdmin(admin.ModelAdmin):
         self.message_user(request, _("Refreshing content in the background."))
 
     refresh_all_content.short_description = gettext_lazy(
-        "Refresh content selected ingestors"
+        "Refresh content for selected ingestors"
     )
 
 
