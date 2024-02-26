@@ -240,6 +240,7 @@ class GazetteAPIAdapter(Adapter):
             "supplement": document["supplement"],
             "supplement_number": document["supplement_number"],
             "part": document["part"],
+            "key": document["key"],
             "created_at": document["created_at"],
             "updated_at": document["updated_at"],
         }
