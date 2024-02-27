@@ -543,7 +543,7 @@ export default {
       let lastAdvancedKey = advancedKeys.pop();
       if (lastAdvancedKey === 'date') lastAdvancedKey = advancedKeys.pop();
       if (lastAdvancedKey === 'all' || this.advancedFields[lastAdvancedKey].input) {
-        const index = Number(lastAdvancedKey.split('_')[1]) + 1 || 0;
+        const index = Number(lastAdvancedKey.split('_')[1]) + 1 || 1;
         this.advancedFields[`and_${index}`] = {
           q: '',
           input: '',
