@@ -228,14 +228,12 @@ import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 
 function resetAdvancedFields (fields) {
-  for (const a of ['all', 'and_1']) {
-    fields[a] = {
-      q: '',
-      input: '',
-      fields: [],
-      exact: false
-    };
-  }
+  fields.all = {
+    q: '',
+    input: '',
+    fields: [],
+    exact: false
+  };
 
   fields.date = {
     date_to: null,
@@ -516,28 +514,37 @@ export default {
       let showAdvanced = params.get('show-advanced-tab');
       const paramObject = Object.fromEntries(params.entries());
       let key = '';
+      const keyValues = Object.entries(this.advancedFields);
       for (const field of Object.keys(paramObject)) {
         if (!['show-advanced-tab', 'ordering', 'q', 'page', 'date_from', 'date_to', ...facetNames].includes(field)) {
           const splitKey = field.split('-');
 
           if (splitKey[0] !== key) {
+            const index = Number(splitKey[0].split('_')[1]) || 0;
             key = splitKey[0];
-            this.advancedFields[splitKey[0]] = {
+            const derivedFields = {
               q: paramObject[`${splitKey[0]}-q`] || '',
               input: paramObject[`${splitKey[0]}-input`] || '',
               fields: params.getAll(`${splitKey[0]}-fields`) || [],
               exact: paramObject[`${splitKey[0]}-exact`] === 'true'
             };
+
+            // To ensure the fields are added at the right index.
+            // Helps prevent the fields from moving levels when changed either to and, any, or none
+            if (index === 0) keyValues.splice(index, 1, [splitKey[0], derivedFields]);
+            else keyValues.splice(index, 0, [splitKey[0], derivedFields]);
           }
           showAdvanced = true;
         }
       }
+      this.advancedFields = Object.fromEntries(keyValues);
 
       const advancedKeys = Object.keys(this.advancedFields);
       let lastAdvancedKey = advancedKeys.pop();
       if (lastAdvancedKey === 'date') lastAdvancedKey = advancedKeys.pop();
-      if (this.advancedFields[lastAdvancedKey].input) {
-        this.advancedFields[`and_${Number(lastAdvancedKey.split('_')[1]) + 1}`] = {
+      if (lastAdvancedKey === 'all' || this.advancedFields[lastAdvancedKey].input) {
+        const index = Number(lastAdvancedKey.split('_')[1]) + 1 || 0;
+        this.advancedFields[`and_${index}`] = {
           q: '',
           input: '',
           fields: [],
