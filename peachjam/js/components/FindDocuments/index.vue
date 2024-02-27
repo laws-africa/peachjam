@@ -170,8 +170,8 @@
                   :item="item"
                   :query="q"
                   :debug="searchInfo.can_debug"
-                  :showJurisdiction="showJurisdiction"
-                  :documentLabels="documentLabels"
+                  :show-jurisdiction="showJurisdiction"
+                  :document-labels="documentLabels"
                   @explain="explain(item)"
                 />
               </ul>
@@ -228,7 +228,7 @@ import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 
 function resetAdvancedFields (fields) {
-  for (const a of ['all', 'and', 'any', 'none']) {
+  for (const a of ['all', 'and_1']) {
     fields[a] = {
       q: '',
       input: '',
@@ -481,9 +481,9 @@ export default {
         } else {
           for (const mod of Object.keys(value)) {
             if (mod === 'fields' && value[mod].length) {
-              value[mod].forEach(modValue => params.append(`${key}_${mod}`, modValue));
-            } else if (value[mod]) {
-              params.append(`${key}_${mod}`, value[mod]);
+              value[mod].forEach(modValue => params.append(`${key}-${mod}`, modValue));
+            } else if (mod !== 'fields' && value[mod]) {
+              params.append(`${key}-${mod}`, value[mod]);
             }
           }
         }
@@ -508,25 +508,41 @@ export default {
         }
       });
 
+      const facetNames = this.facets.map(facet => facet.name);
+
       if (params.has('date_from')) this.advancedFields.date.date_from = params.get('date_from');
       if (params.has('date_to')) this.advancedFields.date.date_to = params.get('date_to');
 
       let showAdvanced = params.get('show-advanced-tab');
-      for (const field of Object.keys(this.advancedFields)) {
-        if (field !== 'date') {
-          const values = this.advancedFields[field];
+      const paramObject = Object.fromEntries(params.entries());
+      let key = '';
+      for (const field of Object.keys(paramObject)) {
+        if (!['show-advanced-tab', 'ordering', 'q', 'page', 'date_from', 'date_to', ...facetNames].includes(field)) {
+          const splitKey = field.split('-');
 
-          for (const mod of Object.keys(values)) {
-            const key = `${field}_${mod}`;
-            if (mod === 'fields' && params.has(key)) {
-              values[mod] = params.getAll('fields');
-              showAdvanced = true;
-            } else if (params.has(key)) {
-              values[mod] = params.get(key);
-              showAdvanced = true;
-            }
+          if (splitKey[0] !== key) {
+            key = splitKey[0];
+            this.advancedFields[splitKey[0]] = {
+              q: paramObject[`${splitKey[0]}-q`] || '',
+              input: paramObject[`${splitKey[0]}-input`] || '',
+              fields: params.getAll(`${splitKey[0]}-fields`) || [],
+              exact: paramObject[`${splitKey[0]}-exact`] === 'true'
+            };
           }
+          showAdvanced = true;
         }
+      }
+
+      const advancedKeys = Object.keys(this.advancedFields);
+      let lastAdvancedKey = advancedKeys.pop();
+      if (lastAdvancedKey === 'date') lastAdvancedKey = advancedKeys.pop();
+      if (this.advancedFields[lastAdvancedKey].input) {
+        this.advancedFields[`and_${Number(lastAdvancedKey.split('_')[1]) + 1}`] = {
+          q: '',
+          input: '',
+          fields: [],
+          exact: false
+        };
       }
 
       // if there are advance search fields or show-advanced-tab param, activate tab
@@ -615,7 +631,7 @@ export default {
           if (value.q && value.fields.length) {
             value.fields.forEach(field => params.append(`search__${field}`, value.q));
           } else if (key !== 'all' && value.q) {
-            query = query + '+' + value.q;
+            query = query + ' ' + value.q;
           }
         }
       });
