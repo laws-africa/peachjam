@@ -249,6 +249,9 @@ class BaseDocumentResource(resources.ModelResource):
         widget=ManyToOneWidget(AlternativeName, separator="|", field="title"),
     )
 
+    def get_queryset(self):
+        return self._meta.model.objects.get_qs_no_defer()
+
     class Meta:
         exclude = (
             "updated_at",

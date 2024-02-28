@@ -246,6 +246,9 @@ class CoreDocumentManager(PolymorphicManager):
         # defer expensive fields
         return super().get_queryset().defer("content_html", "toc_json")
 
+    def get_qs_no_defer(self):
+        return super().get_queryset()
+
 
 class CoreDocumentQuerySet(PolymorphicQuerySet):
     def latest_expression(self):
