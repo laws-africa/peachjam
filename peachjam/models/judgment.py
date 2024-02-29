@@ -199,6 +199,12 @@ class Judgment(CoreDocument):
     judges = models.ManyToManyField(
         Judge, blank=True, verbose_name=_("judges"), through=Bench
     )
+    lower_court_judges = models.ManyToManyField(
+        Judge,
+        blank=True,
+        verbose_name=_("lower court judges"),
+        related_name="lower_court_judgments",
+    )
     attorneys = models.ManyToManyField(
         Attorney, blank=True, verbose_name=_("attorneys")
     )
