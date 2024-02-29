@@ -28,7 +28,7 @@
       {% endblock %}
       {% block page-title %}
         <h1 class="mt-4">
-          {{ place }}
+          {{ place|default_if_none:"" }}
           {% trans 'Gazettes' %} - {{ year }}
         </h1>
       {% endblock %}
