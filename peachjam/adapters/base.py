@@ -1,5 +1,6 @@
 class Adapter:
-    def __init__(self, settings):
+    def __init__(self, ingestor, settings):
+        self.ingestor = ingestor
         self.settings = settings
         self.predicates = {
             "amended-by": {
@@ -28,6 +29,10 @@ class Adapter:
     def update_document(self, document_id):
         """Update the document identified by some opaque id, returned by check_for_updates."""
         raise NotImplementedError()
+
+    def handle_webhook(self, data):
+        """Handle webhook from a remote server."""
+        pass
 
     @classmethod
     def name(cls):
