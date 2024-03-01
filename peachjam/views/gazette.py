@@ -135,6 +135,11 @@ class GazetteYearView(DocumentListView):
         context["years"] = year_and_month_aggs(
             self.get_base_queryset(), self.kwargs.get("code")
         )
+        context["all_years_url"] = (
+            reverse("gazettes")
+            if not self.kwargs.get("code")
+            else reverse("gazettes_by_locality", args=[self.kwargs["code"]])
+        )
         context["doc_type"] = "Gazette"
         context["doc_count"] = len(self.object_list)
 
