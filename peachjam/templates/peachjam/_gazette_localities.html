@@ -4,7 +4,7 @@
       <ul class="list-unstyled mb-0">
         {% for locality in group %}
           <li>
-            <a href="{% url 'gazettes_by_locality' locality.code %}">{{ locality.name }}</a>
+            <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality.name }}</a>
           </li>
         {% endfor %}
       </ul>

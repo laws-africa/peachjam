@@ -1,5 +1,8 @@
 import logging
+from datetime import date
 
+import requests
+from cobalt.uri import FrbrUri
 from countries_plus.models import Country
 from languages_plus.models import Language
 
@@ -10,10 +13,11 @@ from peachjam.models import (
     Gazette,
     Locality,
     SourceFile,
+    get_country_and_locality,
 )
 from peachjam.plugins import plugins
 
-from .adapters import Adapter
+from .base import Adapter
 
 log = logging.getLogger(__name__)
 
@@ -154,3 +158,131 @@ class GazetteAdapter(Adapter):
         ).first()
         if not ga_gazette and local_gazette:
             local_gazette.delete()
+
+
+@plugins.register("ingestor-adapter")
+class GazetteAPIAdapter(Adapter):
+    def __init__(self, settings):
+        super().__init__(settings)
+        self.jurisdiction = self.settings.get("jurisdiction")
+        self.client = requests.session()
+        self.client.headers.update(
+            {
+                "Authorization": f"Token {self.settings['token']}",
+            }
+        )
+        self.api_url = self.settings["api_url"]
+
+    def check_for_updates(self, last_refreshed):
+        """Checks for documents updated since last_refreshed (which may be None), and returns a list
+        of urls which must be updated.
+        """
+        docs = self.get_updated_docs(last_refreshed)
+        urls = [d["url"] for d in docs]
+        return urls, []
+
+    def get_updated_docs(self, last_refreshed):
+        results = []
+        # self.jurisdiction can be a space-separated list of jurisdiction codes or an empty string for all jurisdictions
+        for juri in (self.jurisdiction or "").split() or [None]:
+            log.info(
+                f"Checking for new gazettes from Gazettes.Africa since {last_refreshed} for jurisdiction {juri}"
+            )
+
+            params = {}
+            if last_refreshed:
+                params["updated_at__gte"] = last_refreshed.isoformat()
+
+            if juri:
+                if juri.endswith("-*"):
+                    # handle jurisdiction wildcards, eg za-*
+                    # instead of asking for a jurisdiction code, we must ask for a specific
+                    # country and all jurisdictions under it
+                    params["country"] = juri.split("-")[0]
+                    params["locality__isnull"] = False
+                else:
+                    params["jurisdiction"] = juri
+
+            url = f"{self.api_url}/gazettes/archived.json"
+            while url:
+                res = self.client_get(url, params=params).json()
+                results.extend(res["results"])
+                url = res["next"]
+
+        return results
+
+    def update_document(self, url):
+        log.info(f"Updating gazette ... {url}")
+        if url.endswith("/"):
+            url = url[:-1]
+
+        try:
+            document = self.client_get(f"{url}.json").json()
+        except requests.HTTPError as error:
+            if error.response.status_code == 404:
+                return
+            else:
+                raise error
+
+        frbr_uri = FrbrUri.parse(document["expression_frbr_uri"])
+        country, locality = get_country_and_locality(document["jurisdiction"])
+        language = Language.objects.get(pk=document["language"])
+
+        data = {
+            "jurisdiction": country,
+            "locality": locality,
+            "frbr_uri_doctype": frbr_uri.doctype,
+            "frbr_uri_subtype": frbr_uri.subtype,
+            "frbr_uri_actor": frbr_uri.actor,
+            "frbr_uri_number": frbr_uri.number,
+            "frbr_uri_date": frbr_uri.date,
+            "nature": None,  # see https://github.com/laws-africa/gazettemachine/issues/172
+            "language": language,
+            "date": date.fromisoformat(document["date"]),
+            "title": document["name"],
+            "publication": document["publication"],
+            "sub_publication": document["sub_publication"],
+            "supplement": document["supplement"],
+            "supplement_number": document["supplement_number"],
+            "part": document["part"],
+            "key": document["key"],
+            "created_at": document["created_at"],
+            "updated_at": document["updated_at"],
+        }
+        gazette, new = Gazette.objects.update_or_create(
+            expression_frbr_uri=document["expression_frbr_uri"],
+            defaults={**data},
+        )
+
+        if frbr_uri.expression_uri() != gazette.expression_frbr_uri:
+            raise Exception(
+                f"FRBR URIs do not match: {frbr_uri.expression_uri()} != {gazette.expression_frbr_uri}"
+            )
+
+        log.info(f"New document: {new}")
+
+        s3_file = "s3:" + document["s3_location"].replace("/", ":", 1)
+        sf, created = SourceFile.objects.update_or_create(
+            document=gazette,
+            defaults={
+                "file": s3_file,
+                "source_url": document["download_url"],
+                "mimetype": "application/pdf",
+                "filename": document["key"] + ".pdf",
+                "size": document["size"],
+            },
+        )
+        # force the dynamic file field to be set correctly
+        SourceFile.objects.filter(pk=sf.pk).update(file=s3_file)
+
+        log.info("Done.")
+
+    def delete_document(self, expression_frbr_uri):
+        # TODO:
+        pass
+
+    def client_get(self, url, **kwargs):
+        log.debug(f"GET {url} kwargs={kwargs}")
+        r = self.client.get(url, **kwargs)
+        r.raise_for_status()
+        return r

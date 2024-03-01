@@ -27,12 +27,7 @@ from nonrelated_inlines.admin import NonrelatedTabularInline
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
-from peachjam.forms import (
-    AttachedFilesForm,
-    IngestorForm,
-    NewDocumentFormMixin,
-    SourceFileForm,
-)
+from peachjam.forms import AttachedFilesForm, NewDocumentFormMixin, SourceFileForm
 from peachjam.models import (
     AlternativeName,
     Article,
@@ -829,8 +824,6 @@ class IngestorSettingInline(admin.TabularInline):
 @admin.register(Ingestor)
 class IngestorAdmin(admin.ModelAdmin):
     inlines = [IngestorSettingInline]
-    readonly_fields = ("last_refreshed_at",)
-    form = IngestorForm
     actions = ["refresh_all_content"]
     fields = ("adapter", "name", "last_refreshed_at", "enabled")
     list_display = ("name", "last_refreshed_at", "enabled")
@@ -845,7 +838,7 @@ class IngestorAdmin(admin.ModelAdmin):
         self.message_user(request, _("Refreshing content in the background."))
 
     refresh_all_content.short_description = gettext_lazy(
-        "Refresh content selected ingestors"
+        "Refresh content for selected ingestors"
     )
 
 

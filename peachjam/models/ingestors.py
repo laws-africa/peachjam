@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 class IngestorSetting(models.Model):
     name = models.CharField(_("name"), max_length=2048)
-    value = models.CharField(_("value"), max_length=2048)
+    value = models.CharField(_("value"), max_length=2048, blank=True, default="")
     ingestor = models.ForeignKey(
         "peachjam.Ingestor", on_delete=models.CASCADE, verbose_name=_("ingestor")
     )
