@@ -75,7 +75,13 @@ class IndigoAdapter(Adapter):
             logger.info(f"Getting document list for {place_code}")
             url = f"{self.api_url}/akn/{place_code}/.json"
             while url:
-                res = self.client_get(url).json()
+                try:
+                    res = self.client_get(url).json()
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        logger.warning(f"Ignoring 404 for {url}")
+                        continue
+                    raise e
 
                 # ignore bills
                 # TODO: later, make this configurable
