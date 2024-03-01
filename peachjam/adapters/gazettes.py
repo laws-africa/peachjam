@@ -146,13 +146,15 @@ class GazetteAPIAdapter(Adapter):
     def handle_webhook(self, data):
         from peachjam.tasks import delete_document, update_document
 
-        logger.info(f"Handling webhook {data}")
+        logger.info(f"Ingestor {self.ingestor} handling webhook {data}")
 
-        if data.get("action") == "updated" and data.get("data", {}).get("url"):
-            update_document(self.ingestor.pk, data["data"]["url"])
+        if data.get("action") == "updated" and data.get("gazette", {}).get("url"):
+            logger.info("Will update document")
+            update_document(self.ingestor.pk, data["gazette"]["url"])
 
-        if data.get("action") == "deleted" and data.get("data", {}).get("frbr_uri"):
-            delete_document(self.ingestor.pk, data["data"]["frbr_uri"])
+        if data.get("action") == "deleted" and data.get("gazette", {}).get("frbr_uri"):
+            logger.info("Will delete document")
+            delete_document(self.ingestor.pk, data["gazette"]["frbr_uri"])
 
     def client_get(self, url, **kwargs):
         logger.debug(f"GET {url} kwargs={kwargs}")
