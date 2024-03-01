@@ -1,7 +1,7 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n peachjam %}
 {% block title %}
-  {{ place }} {% trans 'Gazettes' %} {{ year }}
+  {{ place|default_if_none:"" }} {% trans 'Gazettes' %} {{ year }}
 {% endblock %}
 {% block page-content %}
   <div class="container">
