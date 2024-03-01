@@ -182,29 +182,32 @@ class GazetteAPIAdapter(Adapter):
         return urls, []
 
     def get_updated_docs(self, last_refreshed):
-        log.info(
-            f"Checking for new gazettes from Gazettes.Africa since {last_refreshed}"
-        )
-
-        params = {}
-        if last_refreshed:
-            params["updated_at__gte"] = last_refreshed.isoformat()
-        if self.jurisdiction:
-            if self.jurisdiction.endswith("-*"):
-                # handle jurisdiction wildcards, eg za-*
-                # instead of asking for a jurisdiction code, we must ask for a specific
-                # country and all jurisdictions under it
-                params["country"] = self.jurisdiction.split("-")[0]
-                params["locality__isnull"] = False
-            else:
-                params["jurisdiction"] = self.jurisdiction
-
         results = []
-        url = f"{self.api_url}/gazettes/archived.json"
-        while url:
-            res = self.client_get(url, params=params).json()
-            results.extend(res["results"])
-            url = res["next"]
+        # self.jurisdiction can be a space-separated list of jurisdiction codes or an empty string for all jurisdictions
+        for juri in (self.jurisdiction or "").split() or [None]:
+            log.info(
+                f"Checking for new gazettes from Gazettes.Africa since {last_refreshed} for jurisdiction {juri}"
+            )
+
+            params = {}
+            if last_refreshed:
+                params["updated_at__gte"] = last_refreshed.isoformat()
+
+            if juri:
+                if juri.endswith("-*"):
+                    # handle jurisdiction wildcards, eg za-*
+                    # instead of asking for a jurisdiction code, we must ask for a specific
+                    # country and all jurisdictions under it
+                    params["country"] = juri.split("-")[0]
+                    params["locality__isnull"] = False
+                else:
+                    params["jurisdiction"] = juri
+
+            url = f"{self.api_url}/gazettes/archived.json"
+            while url:
+                res = self.client_get(url, params=params).json()
+                results.extend(res["results"])
+                url = res["next"]
 
         return results
 
