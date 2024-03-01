@@ -74,6 +74,7 @@ from peachjam.models import (
     citations_processor,
     pj_settings,
 )
+from peachjam.plugins import plugins
 from peachjam.resources import (
     ArticleResource,
     AttorneyResource,
@@ -821,12 +822,22 @@ class IngestorSettingInline(admin.TabularInline):
     extra = 3
 
 
+class IngestorForm(forms.ModelForm):
+    adapter = forms.ChoiceField(
+        choices=lambda: [(y, y) for y in plugins.registry["ingestor-adapter"].keys()]
+    )
+
+    class Meta:
+        model = Ingestor
+        fields = ("adapter", "name", "last_refreshed_at", "enabled")
+
+
 @admin.register(Ingestor)
 class IngestorAdmin(admin.ModelAdmin):
     inlines = [IngestorSettingInline]
     actions = ["refresh_all_content"]
-    fields = ("adapter", "name", "last_refreshed_at", "enabled")
-    list_display = ("name", "last_refreshed_at", "enabled")
+    list_display = ("name", "adapter", "last_refreshed_at", "enabled")
+    form = IngestorForm
 
     def refresh_all_content(self, request, queryset):
         from peachjam.tasks import run_ingestor
