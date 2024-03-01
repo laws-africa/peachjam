@@ -80,7 +80,7 @@ class IndigoAdapter(Adapter):
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
                         logger.warning(f"Ignoring 404 for {url}")
-                        continue
+                        break
                     raise e
 
                 # ignore bills
