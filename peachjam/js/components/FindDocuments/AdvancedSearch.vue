@@ -8,10 +8,10 @@
           </h5>
           <div class="card-body">
             <AdvancedSearchFields
-              v-for="(inputName) in Object.keys(modelValue).filter(key => key !== 'date')"
-              :key="inputName"
-              :field-values="modelValue[inputName]"
-              :input-name="inputName"
+              v-for="(criterion, index) in modelValue"
+              :key="index"
+              :criterion="criterion"
+              :target-index="index"
               @on-change="onChange"
               @on-logic-change="onLogicChange"
               @on-exact-change="onExactChange"
@@ -38,7 +38,7 @@
                   class="form-control"
                   :aria-describedby="$t('Date from')"
                   :placeholder="$t('Enter start date')"
-                  :value="modelValue.date.date_from"
+                  :value="advancedSearchDateCriteria.date_from"
                   :disabled="disableDate"
                   @change="onDateChange"
                 >
@@ -54,7 +54,7 @@
                   class="form-control"
                   :aria-describedby="$t('Date to')"
                   :placeholder="$t('Enter end date')"
-                  :value="modelValue.date.date_to"
+                  :value="advancedSearchDateCriteria.date_to"
                   :disabled="disableDate"
                   @change="onDateChange"
                 >
@@ -88,6 +88,10 @@ export default {
 
   props: {
     modelValue: {
+      type: Array,
+      default: () => []
+    },
+    advancedSearchDateCriteria: {
       type: Object,
       default: () => ({})
     },
@@ -97,23 +101,13 @@ export default {
     }
   },
 
-  emits: ['submit', 'update:modelValue', 'global-search-change'],
-
-  data: function () {
-    return {
-      showAllOptions: false,
-      fields: ['title', 'judges', 'case_summary', 'flynote', 'content'],
-      firstLogic: 'and',
-      secondLogic: 'any',
-      thirdLogic: 'none'
-    };
-  },
+  emits: ['submit', 'update:modelValue', 'global-search-change', 'date-change'],
 
   computed: {
     invalidDates () {
       const datesStrings = [
-        this.modelValue.date.date_from,
-        this.modelValue.date.date_to
+        this.advancedSearchDateCriteria.date_from,
+        this.advancedSearchDateCriteria.date_to
       ];
 
       if (datesStrings.every((date) => !date)) {
@@ -130,8 +124,8 @@ export default {
     disableDate () {
       // Disable dates if there are no search values
       return !(
-        ['title', 'case_summary', 'flynote', 'content'].some(
-          (key) => this.modelValue[key]
+        this.modelValue.some(
+          (criterion) => criterion.text
         ) || this.globalSearchValue
       );
     }
@@ -156,112 +150,50 @@ export default {
 
   methods: {
     onChange (e, index = 0) {
-      const data = { ...this.modelValue };
-      const splitInput = e.target.name.split('-');
+      const data = [...this.modelValue];
 
       if (e.target.type === 'checkbox') {
-        if (e.target.checked) data[splitInput[0]].fields.push(splitInput[1]);
+        if (e.target.checked) data[index].fields.push(e.target.value);
       } else {
-        data[splitInput[0]][splitInput[1]] = e.target.value;
+        data[index] = { ...data[index], text: e.target.value };
 
-        if (index && index === Object.keys(data).length - 2 && e.target.value) {
-          data[`and_${index + 1}`] = {
-            q: '',
-            input: '',
+        if (index && index === data.length - 1 && e.target.value) {
+          data.push({
+            text: '',
             fields: [],
+            condition: 'AND',
             exact: false
-          };
+          });
         }
+
+        if (index === 0) this.$emit('global-search-change', e.target.value);
       }
 
       this.$emit('update:modelValue', data);
     },
 
-    onExactChange (e) {
-      const data = { ...this.modelValue };
-      const splitInput = e.target.name.split('-');
-      data[splitInput[0]][splitInput[1]] = e.target.checked;
+    onExactChange (e, index) {
+      const data = [...this.modelValue];
+      data[index] = { ...data[index], exact: e.target.checked };
 
       this.$emit('update:modelValue', data);
     },
 
     onDateChange (e) {
-      this.$emit('update:modelValue', {
-        ...this.modelValue,
-        date: {
-          ...this.modelValue.date,
-          [e.target.name]: e.target.value
-        }
+      this.$emit('date-change', {
+        ...this.advancedSearchDateCriteria,
+        [e.target.name]: e.target.value
       });
     },
 
-    onLogicChange (logicName, oldName, index) {
-      let data = { ...this.modelValue };
-      const keyValues = Object.entries(data);
-      keyValues.splice(index, 0, [logicName, data[oldName]]);
-      data = Object.fromEntries(keyValues);
-      delete data[oldName];
+    onLogicChange (logicName, index) {
+      const data = [...this.modelValue];
+      data[index] = { ...data[index], condition: logicName };
 
       this.$emit('update:modelValue', data);
     },
 
-    onGlobalSearch (e) {
-      this.$emit('global-search-change', e.target.value);
-    },
-
-    /**
-     * Build a single query string from the advanced values for a field.
-     * @param field the name of the field
-     * @param modifiers the advanced search modifiers object
-     * @returns {string} a fully formatted search string
-     */
-    formatFieldValues () {
-      const newValue = { ...this.modelValue };
-      Object.keys(this.modelValue).forEach(field => {
-        if (field !== 'date') {
-          const fieldQuery = this.formatFieldQuery(field.split('_')[0], this.modelValue[field]);
-          newValue[field].q = fieldQuery;
-
-          if (field === 'all') {
-            this.$emit('global-search-change', fieldQuery);
-          }
-        }
-      });
-      this.$emit('update:modelValue', newValue);
-    },
-
-    formatFieldQuery (field, modifiers) {
-      let q = '';
-      const input = modifiers.exact ? '"' + modifiers.input.trim() + '"' : modifiers.input;
-      if (!input) return '';
-      let splitValue = input.match(/\w+|"[^"]+"/g);
-
-      if (field === 'and') {
-        // add quotes around runs of non-quoted tokens
-        const tokens = [];
-
-        splitValue.forEach((value) => {
-          if (value.startsWith('"')) {
-            tokens.push(value);
-          } else {
-            tokens.push('"' + value + '"');
-          }
-        });
-
-        splitValue = tokens.join(' ');
-      } else if (field === 'any') {
-        splitValue = `(|${splitValue.join('|')})`;
-      } else if (field === 'none') {
-        splitValue = splitValue.map((value) => `-${value}`).join(' ');
-      } else splitValue = splitValue.join(' ');
-
-      q = q + ' ' + splitValue.trim();
-
-      return q.trim();
-    },
-
     submitAdvancedForm () {
-      this.formatFieldValues();
       this.$emit('submit');
     }
   }
