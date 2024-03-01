@@ -121,17 +121,6 @@ class WebhookDataSerializer(serializers.Serializer):
         )
 
 
-class IngestorWebHookSerializer(serializers.Serializer):
-    action = serializers.CharField()
-    data = WebhookDataSerializer()
-
-    class Meta:
-        fields = (
-            "action",
-            "data",
-        )
-
-
 class LabelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Label

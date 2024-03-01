@@ -1,5 +1,6 @@
 from django import forms
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
@@ -7,12 +8,17 @@ from rest_framework import authentication, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from peachjam.models import CaseNumber, CitationLink, Judgment, Relationship, Work
-from peachjam.tasks import delete_document, update_document
+from peachjam.models import (
+    CaseNumber,
+    CitationLink,
+    Ingestor,
+    Judgment,
+    Relationship,
+    Work,
+)
 from peachjam_api.permissions import CoreDocumentPermission
 from peachjam_api.serializers import (
     CitationLinkSerializer,
-    IngestorWebHookSerializer,
     RelationshipSerializer,
     WorkSerializer,
 )
@@ -40,23 +46,12 @@ class CitationLinkViewSet(viewsets.ModelViewSet):
 class IngestorWebhookView(APIView):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [CoreDocumentPermission]
-    serializer_class = IngestorWebHookSerializer
 
     def post(self, request, ingestor_id):
-        body = self.request.data
-
-        serializer = self.serializer_class(data=body)
-        if serializer.is_valid():
-            if serializer.data["action"] == "updated":
-                update_document(ingestor_id, serializer.data["data"]["url"])
-
-            elif serializer.data["action"] == "deleted":
-                delete_document(
-                    ingestor_id, serializer.data["data"]["expression_frbr_uri"]
-                )
-
-            return Response({"data": serializer.data, "ingestor_id": ingestor_id})
-        return Response(serializer.errors, status=400)
+        ingestor = get_object_or_404(Ingestor, pk=ingestor_id)
+        if ingestor.enabled:
+            ingestor.handle_webhook(request.data)
+        return Response({}, status=200)
 
 
 class DuplicateForm(forms.Form):

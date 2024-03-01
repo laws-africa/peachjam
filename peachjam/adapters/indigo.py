@@ -47,8 +47,8 @@ class IndigoAdapter(Adapter):
     * places: space-separate list of place codes, such as: bw za-*
     """
 
-    def __init__(self, settings):
-        super().__init__(settings)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.client = requests.session()
         self.client.headers.update(
             {
@@ -534,3 +534,16 @@ class IndigoAdapter(Adapter):
                 AlternativeName.objects.create(document=created_document, title=alias)
 
             logger.info(f"Fetching of aliases for {created_document} is complete!")
+
+    def handle_webhook(self, data):
+        from peachjam.tasks import delete_document, update_document
+
+        logger.info(f"Handling webhook {data}")
+
+        if data.get("action") == "updated" and data.get("data", {}).get("url"):
+            update_document(self.ingestor.pk, data["data"]["url"])
+
+        if data.get("action") == "deleted" and data.get("data", {}).get(
+            "expression_frbr_uri"
+        ):
+            delete_document(self.ingestor.pk, data["data"]["expression_frbr_uri"])
