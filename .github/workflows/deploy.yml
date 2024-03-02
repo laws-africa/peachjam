@@ -57,7 +57,7 @@ jobs:
 
   deploy-gazettes:
     if: ${{ !cancelled() }}
-    needs: deploy-gazettes
+    needs: deploy-lawlibrary
     name: Deploy to gazettes.africa
     runs-on: ubuntu-latest
     steps:
