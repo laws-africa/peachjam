@@ -1,0 +1,127 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load static humanize %}
+{% block title %}Gazettes for Africa{% endblock %}
+{% block page-content %}
+  <header class="py-5 bg-light">
+    <div class="container text-center">
+      <h1 class="mb-3">Gazettes.Africa</h1>
+      <h3>The largest digital collection of free African Gazettes.</h3>
+      <h4>{{ num_gazettes|intcomma }} gazettes and growing daily.</h4>
+      <div class="row mt-5">
+        <div class="col-md-9 mx-auto">
+          <form action="{% url 'search:search' %}" method="get" class="d-flex">
+            <input type="text"
+                   class="form-control form-control-lg flex-grow-1"
+                   autofocus
+                   name="q"
+                   placeholder="Search the gazettes"/>
+            <select class="form-control ms-2 homepage-search-jurisdiction d-md-block d-none"
+                    name="jurisdiction">
+              <option value="" selected>
+                All countries
+              </option>
+              <option value="" disabled>
+                -----
+              </option>
+              {% for juri in country_jurisdictions %}
+                <option value="{{ juri.name }}">
+                  {{ juri.name }}
+                </option>
+              {% endfor %}
+              <option value="" disabled>
+                -----
+              </option>
+              {% for juri in community_jurisdictions %}
+                <option value="{{ juri.name }}">
+                  {{ juri.name }}
+                </option>
+              {% endfor %}
+            </select>
+            <input type="submit" class="btn btn-primary ms-2" value="Search"/>
+          </form>
+        </div>
+      </div>
+      <div class="row mt-5">
+        <div class="offset-md-3 col-md-3 mt-3 text-center align-self-center">
+          <a href="https://laws.africa">
+            <img src="{% static 'img/lawsafrica-logo.png' %}"
+                 height="140px"
+                 alt="Laws.Africa logo"/>
+          </a>
+        </div>
+        <div class="col-md-3 mt-3 text-center">
+          <a href="https://africanlii.org">
+            <img src="{% static 'img/africanlii-logo.svg' %}"
+                 height="140px"
+                 alt="AfricanLII logo"/>
+          </a>
+        </div>
+      </div>
+      <div class="lead mt-4 text-center">
+        Gazettes.Africa is a project by <a href="https://laws.africa">Laws.Africa</a> and <a href="https://africanlii.org">AfricanLII</a>.
+      </div>
+    </div>
+  </header>
+  <section class="py-5">
+    <div class="container">
+      <h2 class="header mb-4">National Gazettes</h2>
+      <div class="row">
+        {% for juri in country_jurisdictions %}
+          <div class="col-md-3 mb-4">
+            <a href="{% url 'jurisdiction' juri.code %}" class="flag">
+              <img class="flag__image"
+                   src="{% static 'img/flags/'|add:juri.code|add:".svg" %}"
+                   alt="{{ juri.code }}"/>
+              <div class="flag__title">
+                <div>{{ juri.name }}</div>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+      {% if community_jurisdictions %}
+        <h2 class="header mb-4">Economic Communities Gazettes</h2>
+        <div class="row">
+          {% for juri in community_jurisdictions %}
+            <div class="col-md-3 mb-4">
+              <a href="{% url 'jurisdiction' juri.code %}" class="flag">
+                <img class="flag__image"
+                     src="{% static 'img/flags/'|add:juri.code|add:".svg" %}"
+                     alt="{{ juri.code }}"/>
+                <div class="flag__title">{{ juri.name }}</div>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+  <section class="py-4">
+    <div class="container text-center lead">
+      We welcome donations of gazette collections. We will scan and digitise gazettes for free.
+      <br/>
+      <a href="mailto:info@laws.africa" class="mt-3 btn btn-primary">Donate gazettes</a>
+    </div>
+  </section>
+  <section class="pt-5">
+    <div class="container">
+      <h3>Partners &amp; Funders</h3>
+      <div class="row mt-3">
+        {% for contrib in contributors %}
+          <div class="col-6 col-md-3 mb-3 text-center align-self-center">
+            <a href="{{ contrib.url }}">
+              {% if contrib.img %}
+                <img src="{% static 'img/'|add:contrib.img %}"
+                     class="img-fluid"
+                     alt="{{ contrib.name }}"
+                     title="{{ contrib.name }}"/>
+              {% else %}
+                {{ contrib.name }}
+              {% endif %}
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endblock %}

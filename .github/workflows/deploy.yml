@@ -55,9 +55,26 @@ jobs:
           git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/ulii-peachjam'
           git_push_flags: '--force'
 
+  deploy-gazettes:
+    if: ${{ !cancelled() }}
+    needs: deploy-gazettes
+    name: Deploy to gazettes.africa
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: git push to gazettes.africa
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/gazettes'
+          git_push_flags: '--force'
+
   deploy-zanzibarlii:
     if: ${{ !cancelled() }}
-    needs: deploy-lawlibrary
+    needs: deploy-gazettes
     name: Deploy to zanzibarlii
     runs-on: ubuntu-latest
     steps:
