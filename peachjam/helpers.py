@@ -2,7 +2,7 @@ import os
 import string
 import subprocess
 import tempfile
-from datetime import datetime
+from datetime import date, datetime
 from functools import wraps
 
 import martor.utils
@@ -70,7 +70,11 @@ class ISODateConverter:
 
     def to_url(self, value):
         # invalid values will raise ValueError which will raise NoReverseMatch
-        return datetime.strptime(value, "%Y-%m-%d").date().strftime("%Y-%m-%d")
+        if isinstance(value, str):
+            value = datetime.strptime(value, "%Y-%m-%d")
+        elif not isinstance(value, (datetime, date)):
+            raise ValueError(value)
+        return value.strftime("%Y-%m-%d")
 
 
 def parse_utf8_html(html):
