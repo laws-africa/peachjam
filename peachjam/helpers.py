@@ -70,6 +70,8 @@ class ISODateConverter:
 
     def to_url(self, value):
         # invalid values will raise ValueError which will raise NoReverseMatch
+        if isinstance(value, datetime):
+            return value.strftime("%Y-%m-%d")
         return datetime.strptime(value, "%Y-%m-%d").date().strftime("%Y-%m-%d")
 
 
