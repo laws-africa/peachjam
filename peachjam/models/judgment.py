@@ -185,6 +185,22 @@ class Bench(models.Model):
         unique_together = ("judgment", "judge")
 
 
+class LowerBench(models.Model):
+    judgment = models.ForeignKey(
+        "Judgment",
+        related_name="lower_bench",
+        on_delete=models.CASCADE,
+        verbose_name=_("judgment"),
+    )
+    judge = models.ForeignKey(
+        Judge, on_delete=models.PROTECT, verbose_name=_("lower_court_judge")
+    )
+
+    class Meta:
+        ordering = ("pk",)
+        unique_together = ("judgment", "judge")
+
+
 class Judgment(CoreDocument):
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
@@ -201,6 +217,7 @@ class Judgment(CoreDocument):
     )
     lower_court_judges = models.ManyToManyField(
         Judge,
+        through=LowerBench,
         blank=True,
         verbose_name=_("lower court judges"),
         related_name="lower_court_judgments",

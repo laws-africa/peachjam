@@ -67,6 +67,7 @@ from peachjam.models import (
     LegalInstrument,
     Legislation,
     Locality,
+    LowerBench,
     MatterType,
     OrderOutcome,
     PeachJamSettings,
@@ -700,6 +701,13 @@ class BenchInline(admin.TabularInline):
     verbose_name_plural = gettext_lazy("judges")
 
 
+class LowerBenchInline(admin.TabularInline):
+    model = LowerBench
+    extra = 3
+    verbose_name = gettext_lazy("lower court judge")
+    verbose_name_plural = gettext_lazy("lower court judges")
+
+
 class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
     model = Relationship
     fields = ["predicate", "subject_work"]
@@ -748,6 +756,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     resource_class = JudgmentResource
     inlines = [
         BenchInline,
+        LowerBenchInline,
         CaseNumberAdmin,
         JudgmentRelationshipStackedInline,
     ] + DocumentAdmin.inlines
