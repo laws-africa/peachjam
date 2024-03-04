@@ -1,3 +1,4 @@
 # flake8: noqa
-from .adapters import *
+from .base import *
 from .gazettes import *
+from .indigo import *

@@ -10,13 +10,7 @@ from django.template.loader import render_to_string
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
-from peachjam.models import (
-    AttachedFiles,
-    CoreDocument,
-    Ingestor,
-    SourceFile,
-    pj_settings,
-)
+from peachjam.models import AttachedFiles, CoreDocument, SourceFile, pj_settings
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
 
@@ -29,16 +23,6 @@ def work_choices():
 
 def adapter_choices():
     return [(key, p.name) for key, p in plugins.registry["ingestor-adapter"].items()]
-
-
-class IngestorForm(forms.ModelForm):
-    adapter = forms.ChoiceField(choices=adapter_choices)
-    last_refreshed_at = forms.DateTimeField(required=False)
-    name = forms.CharField(max_length=255)
-
-    class Meta:
-        model = Ingestor
-        fields = ("adapter", "name")
 
 
 class NewDocumentFormMixin:

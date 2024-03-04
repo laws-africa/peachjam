@@ -1,0 +1,78 @@
+{% load static %}
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__body">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <h6>
+            <a href="{% url 'home_page' %}">Gazettes.Africa</a>
+          </h6>
+          <p>
+            Gazettes.Africa is a project of <a href="https://laws.africa/" target="_blank">Laws.Africa</a>
+            and <a href="https://africanlii.org/" target="_blank">AfricanLII</a>.
+          </p>
+          <p>
+            <span class="me-2">🔥</span>
+            A fire destroyed hundreds of thousands of African gazettes. We're asking librarians and funders to help preserve Gazettes before more are lost.
+          </p>
+          <p>
+            <a href="https://drive.google.com/file/d/1XPTFNkQh5ytpTQoutx4GEU5wNV4fqWbl/view"
+               class="btn btn-primary btn-sm d-block d-md-inline">How you can help</a>
+          </p>
+          <p>
+            We welcome donations of gazette collections. We will scan and digitise gazettes for free. Please <a href="mailto:info@laws.africa">get in touch</a> to donate gazettes.
+          </p>
+          <img src="{% static 'img/logo.png' %}"
+               alt="Gazettes.Africa logo"
+               width="200"/>
+        </div>
+        <div class="col-md-3 mb-3">
+          <h6>National Gazettes</h6>
+          <ul class="list-unstyled">
+            {% for juri in jurisdictions %}
+              {% if not juri.parent_code %}
+                <li>
+                  <a href="{% url 'jurisdiction' juri.code %}">{{ juri.name }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-md-3 mb-3">
+          <h6>Contact Us</h6>
+          <ul class="list-unstyled">
+            <li>
+              <a href="mailto:info@laws.africa">info@laws.africa</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <hr class="my-3"/>
+      <div class="row">
+        <div class="col-lg-6">
+          <p>
+            <small><a href="https://laws.africa">Laws.Africa</a> is a non-profit organisation registered with the South African Department of Social Development, registration number 216-824 NPO.</small>
+          </p>
+          <p>
+            <small><a href="https://africanlii.org">AfricanLII</a> is a programme of the Democratic Governance and Rights Unit (DGRU) at the University of Cape Town.</small>
+          </p>
+        </div>
+        <div class="col-lg-3 mt-3 text-center">
+          <a href="https://laws.africa">
+            <img src="{% static 'img/lawsafrica-logo.png' %}"
+                 style="max-width: 200px"
+                 alt="Laws.Africa logo"/>
+          </a>
+        </div>
+        <div class="col-lg-3 mt-3 text-center">
+          <a href="https://africanlii.org">
+            <img src="{% static 'img/africanlii-logo.svg' %}"
+                 style="max-width: 200px"
+                 alt="AfricanLII logo"/>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="site-footer__bottom-redline"></div>
+</footer>
