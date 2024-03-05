@@ -39,7 +39,7 @@
           data-bs-auto-close="outside"
           aria-expanded="false"
         >
-          {{ $t('In these fields...') }}
+          {{ $t('In these fields') }}
         </button>
 
         <div class="dropdown-menu" :aria-labelledby="`${criterion.condition}_${targetIndex}-dropdown_fields`">
@@ -51,7 +51,7 @@
             <input
               :id="`${criterion.condition}_${targetIndex}-${field.field}`"
               :name="`${criterion.condition}_${targetIndex}-${field.field}`"
-              :checked="criterion.fields.indexOf(field.field) > -1"
+              :checked="field.field === 'ANY' && criterion.fields.length === 0 || criterion.fields.indexOf(field.field) > -1"
               class="form-check-input"
               type="checkbox"
               @change="(e) => fieldChanged(field.field, e.target.checked)"
@@ -103,6 +103,9 @@ export default {
   data: (self) => {
     return {
       fields: [{
+        field: 'ANY',
+        label: self.$t('Any field')
+      },{
         field: 'title',
         label: self.$t('Title')
       }, {
@@ -125,12 +128,16 @@ export default {
       this.$emit('on-change');
     },
     fieldChanged (field, checked) {
-      if (checked) {
-        if (!this.criterion.fields.includes(field)) {
-          this.criterion.fields.push(field);
-        }
+      if (field === 'ANY') {
+        this.criterion.fields = [];
       } else {
-        this.criterion.fields = this.criterion.fields.filter((f) => f !== field);
+        if (checked) {
+          if (!this.criterion.fields.includes(field)) {
+            this.criterion.fields.push(field);
+          }
+        } else {
+          this.criterion.fields = this.criterion.fields.filter((f) => f !== field);
+        }
       }
       this.changed();
     }
