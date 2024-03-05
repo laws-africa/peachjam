@@ -33,7 +33,7 @@
     <div class="d-flex mb-2">
       <div class="dropdown me-3">
         <button
-          :id="`${criterion.condition}_${targetIndex}-dropdown_fields`"
+          :id="`advanced-${targetIndex}-fields-btn`"
           class="btn btn-secondary dropdown-toggle"
           data-bs-toggle="dropdown"
           data-bs-auto-close="outside"
@@ -42,15 +42,14 @@
           {{ $t('In these fields') }}
         </button>
 
-        <div class="dropdown-menu" :aria-labelledby="`${criterion.condition}_${targetIndex}-dropdown_fields`">
+        <div class="dropdown-menu" :aria-labelledby="`advanced-${targetIndex}-fields-btn`">
           <div
             v-for="field in fields"
             :key="field.field"
             class="form-check dropdown-item"
           >
             <input
-              :id="`${criterion.condition}_${targetIndex}-${field.field}`"
-              :name="`${criterion.condition}_${targetIndex}-${field.field}`"
+              :id="`advanced-${targetIndex}-fields-${field.field}`"
               :checked="field.field === 'ANY' && criterion.fields.length === 0 || criterion.fields.indexOf(field.field) > -1"
               class="form-check-input"
               type="checkbox"
@@ -58,7 +57,7 @@
             >
             <label
               class="form-check-label"
-              :for="`${criterion.condition}_${targetIndex}-${field.field}`"
+              :for="`advanced-${targetIndex}-fields-${field.field}`"
             >
               {{ field.label }}
             </label>
@@ -68,16 +67,15 @@
 
       <div class="form-check">
         <input
-          :id="`${criterion.condition}_${targetIndex}-exact`"
+          :id="`advanced-${targetIndex}-exact`"
           v-model="criterion.exact"
-          :name="`${criterion.condition}_${targetIndex}-exact`"
           type="checkbox"
           class="form-check-input"
           @change="changed"
         >
         <label
           class="form-check-label"
-          :for="`${criterion.condition}_${targetIndex}-exact`"
+          :for="`advanced-${targetIndex}-exact`"
         >
           {{ $t('Exact phrase') }}
         </label>
