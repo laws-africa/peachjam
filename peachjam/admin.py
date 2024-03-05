@@ -322,11 +322,6 @@ class DocumentForm(forms.ModelForm):
             return self.instance.content_html
         return self.cleaned_data["content_html"]
 
-    def _save_m2m(self):
-        super()._save_m2m()
-        # update document text
-        self.instance.update_text_content()
-
 
 class AttachedFilesInline(BaseAttachmentFileInline):
     model = AttachedFiles
@@ -504,7 +499,9 @@ class DocumentAdmin(BaseAdmin):
             cp.queue_re_extract_citations(form.instance.date)
 
         super().save_related(request, form, formsets, change)
+
         form.instance.save()
+        form.instance.update_text_content()
 
     def get_urls(self):
         return [
