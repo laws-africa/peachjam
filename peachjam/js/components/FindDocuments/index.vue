@@ -515,7 +515,7 @@ export default {
             text: criterion.text,
             fields: criterion.fields || [],
             condition: criterion.condition || '',
-            exact: criterion.exact === 'true'
+            exact: !!criterion.exact
           };
           if (index === 0 && !criterion.condition) this.advancedSearchCriteria.splice(0, 1, fullCriterion);
           else this.advancedSearchCriteria.splice(index, 0, fullCriterion);

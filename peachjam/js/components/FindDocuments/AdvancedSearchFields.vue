@@ -1,96 +1,76 @@
 <template>
-  <div class="mb-3 row">
-    <div v-if="criterion.condition" class="dropdown col-3">
-      <span
-        :id="`${criterion.condition}_${targetIndex}-dropdown`"
-        class="btn btn-secondary dropdown-toggle"
-        href="#"
-        role="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
+  <div class="mb-3 d-flex">
+    <div v-if="criterion.condition" class="me-3">
+      <select
+        v-model="criterion.condition"
+        class="form-control"
+        @change="changed"
       >
-        {{ criterion.condition }} these words
-      </span>
-
-      <div class="dropdown-menu p-2" :aria-labelledby="`${criterion.condition}_${targetIndex}-dropdown`">
-        <button
-          v-for="logicField in logicFields"
-          :key="logicField"
-          class="dropdown-item"
-          type="button"
-          @click="$emit('on-logic-change', logicField, targetIndex)"
-        >
-          {{ logicField }} these words
-        </button>
-      </div>
+        <option value="AND">AND</option>
+        <option value="OR">OR</option>
+        <option value="NOT">NOT</option>
+      </select>
     </div>
 
-    <div :class="`${criterion.condition ? 'col-9' : 'col-12'}`">
+    <div class="flex-grow-1 me-3">
       <input
-        :id="`${criterion.condition}_${targetIndex}-text`"
-        :value="criterion.text"
-        :name="`${criterion.condition}_${targetIndex}-text`"
+        v-model="criterion.text"
         type="text"
         class="form-control"
-        @input="(e) => $emit('on-change', e, targetIndex)"
+        @input="changed"
       >
+    </div>
 
-      <div class="d-flex justify-content-between">
-        <div class="dropdown">
-          <span
-            :id="`${criterion.condition}_${targetIndex}-dropdown_fields`"
-            class="dropdown-toggle"
-            href="#"
-            role="button"
-            data-bs-toggle="dropdown"
-            data-bs-auto-close="outside"
-            aria-expanded="false"
-          >
-            Choose fields
-          </span>
+    <div class="dropdown me-3">
+      <button
+        :id="`${criterion.condition}_${targetIndex}-dropdown_fields`"
+        class="btn btn-secondary dropdown-toggle"
+        data-bs-toggle="dropdown"
+        data-bs-auto-close="outside"
+        aria-expanded="false"
+      >
+        In these fields
+      </button>
 
-          <div class="dropdown-menu" :aria-labelledby="`${criterion.condition}_${targetIndex}-dropdown_fields`">
-            <div
-              v-for="field in ['title', 'judges', 'case_summary', 'flynote', 'content']"
-              :key="field"
-              class="form-check dropdown-item"
-            >
-              <input
-                :id="`${criterion.condition}_${targetIndex}-${field}`"
-                :checked="criterion.fields.includes(field)"
-                :name="`${criterion.condition}_${targetIndex}-${field}`"
-                :value="field"
-                class="form-check-input"
-                type="checkbox"
-                @change="(e) => $emit('on-change', e)"
-              >
-              <label
-                class="form-check-label"
-                :for="`${criterion.condition}_${targetIndex}-${field}`"
-              >
-                {{ formatName(field) }}
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-check">
+      <div class="dropdown-menu" :aria-labelledby="`${criterion.condition}_${targetIndex}-dropdown_fields`">
+        <div
+          v-for="field in ['title', 'judges', 'case_summary', 'flynote', 'content']"
+          :key="field"
+          class="form-check dropdown-item"
+        >
           <input
-            :id="`${criterion.condition}_${targetIndex}-exact`"
-            :checked="criterion.exact"
-            :name="`${criterion.condition}_${targetIndex}-exact`"
-            type="checkbox"
+            :id="`${criterion.condition}_${targetIndex}-${field}`"
+            :name="`${criterion.condition}_${targetIndex}-${field}`"
+            :checked="criterion.fields.indexOf(field) > -1"
             class="form-check-input"
-            @change="(e) => $emit('on-exact-change', e)"
+            type="checkbox"
+            @change="(e) => fieldChanged(field, e.target.checked)"
           >
           <label
             class="form-check-label"
-            :for="`${criterion.condition}_${targetIndex}-exact`"
+            :for="`${criterion.condition}_${targetIndex}-${field}`"
           >
-            Exact Phrase
+            {{ formatName(field) }}
           </label>
         </div>
       </div>
+    </div>
+
+    <div class="form-check">
+      <input
+        :id="`${criterion.condition}_${targetIndex}-exact`"
+        v-model="criterion.exact"
+        :name="`${criterion.condition}_${targetIndex}-exact`"
+        type="checkbox"
+        class="form-check-input"
+        @change="changed"
+      >
+      <label
+        class="form-check-label"
+        :for="`${criterion.condition}_${targetIndex}-exact`"
+      >
+        Exact phrase
+      </label>
     </div>
   </div>
 </template>
@@ -99,22 +79,30 @@
 export default {
   name: 'AdvancedSearchFields',
   props: {
-    targetIndex: {
-      type: Number,
-      default: 0
-    },
     criterion: {
       type: Object,
       default: () => ({})
+    },
+    targetIndex: {
+      type: Number,
+      default: 0
     }
   },
-  emits: ['on-change', 'on-logic-change', 'on-exact-change'],
-  computed: {
-    logicFields () {
-      return ['AND', 'OR', 'NOT'].filter(logic => logic !== this.criterion.condition);
-    }
-  },
+  emits: ['on-change'],
   methods: {
+    changed () {
+      this.$emit('on-change');
+    },
+    fieldChanged (field, checked) {
+      if (checked) {
+        if (!this.criterion.fields.includes(field)) {
+          this.criterion.fields.push(field);
+        }
+      } else {
+        this.criterion.fields = this.criterion.fields.filter((f) => f !== field);
+      }
+      this.changed();
+    },
     formatName (name) {
       let splitName = name.split('_');
       splitName = splitName.map((word) => word.charAt(0).toUpperCase() + word.slice(1));
