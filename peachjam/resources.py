@@ -15,6 +15,7 @@ from dateutil.parser import parse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
+from django.contrib.sites.models import Site
 from django.core.files.base import File
 from django.forms import ValidationError
 from django.urls import reverse
@@ -252,8 +253,7 @@ class BaseDocumentResource(resources.ModelResource):
 
     download_url = fields.Field(readonly=True)
 
-    # domain = Site.objects.get_current().domain
-    domain = ""
+    domain = Site.objects.get_current().domain
 
     def get_queryset(self):
         return self._meta.model.objects.get_qs_no_defer()
