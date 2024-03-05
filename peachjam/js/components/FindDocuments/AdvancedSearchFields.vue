@@ -7,9 +7,15 @@
           class="form-control"
           @change="changed"
         >
-          <option value="AND">AND</option>
-          <option value="OR">OR</option>
-          <option value="NOT">NOT</option>
+          <option value="AND">
+            {{ $t('AND') }}
+          </option>
+          <option value="OR">
+            {{ $t('OR') }}
+          </option>
+          <option value="NOT">
+            {{ $t('NOT') }}
+          </option>
         </select>
       </div>
 
@@ -33,28 +39,28 @@
           data-bs-auto-close="outside"
           aria-expanded="false"
         >
-          In these fields
+          {{ $t('In these fields...') }}
         </button>
 
         <div class="dropdown-menu" :aria-labelledby="`${criterion.condition}_${targetIndex}-dropdown_fields`">
           <div
-            v-for="field in ['title', 'judges', 'case_summary', 'flynote', 'content']"
-            :key="field"
+            v-for="field in fields"
+            :key="field.field"
             class="form-check dropdown-item"
           >
             <input
-              :id="`${criterion.condition}_${targetIndex}-${field}`"
-              :name="`${criterion.condition}_${targetIndex}-${field}`"
-              :checked="criterion.fields.indexOf(field) > -1"
+              :id="`${criterion.condition}_${targetIndex}-${field.field}`"
+              :name="`${criterion.condition}_${targetIndex}-${field.field}`"
+              :checked="criterion.fields.indexOf(field.field) > -1"
               class="form-check-input"
               type="checkbox"
-              @change="(e) => fieldChanged(field, e.target.checked)"
+              @change="(e) => fieldChanged(field.field, e.target.checked)"
             >
             <label
               class="form-check-label"
-              :for="`${criterion.condition}_${targetIndex}-${field}`"
+              :for="`${criterion.condition}_${targetIndex}-${field.field}`"
             >
-              {{ formatName(field) }}
+              {{ field.label }}
             </label>
           </div>
         </div>
@@ -73,7 +79,7 @@
           class="form-check-label"
           :for="`${criterion.condition}_${targetIndex}-exact`"
         >
-          Exact phrase
+          {{ $t('Exact phrase') }}
         </label>
       </div>
     </div>
@@ -94,6 +100,26 @@ export default {
     }
   },
   emits: ['on-change'],
+  data: (self) => {
+    return {
+      fields: [{
+        field: 'title',
+        label: self.$t('Title')
+      }, {
+        field: 'judges',
+        label: self.$t('Judges')
+      }, {
+        field: 'case_summary',
+        label: self.$t('Case summary')
+      }, {
+        field: 'flynote',
+        label: self.$t('Flynote')
+      }, {
+        field: 'content',
+        label: self.$t('Content')
+      }]
+    };
+  },
   methods: {
     changed () {
       this.$emit('on-change');
@@ -107,11 +133,6 @@ export default {
         this.criterion.fields = this.criterion.fields.filter((f) => f !== field);
       }
       this.changed();
-    },
-    formatName (name) {
-      let splitName = name.split('_');
-      splitName = splitName.map((word) => word.charAt(0).toUpperCase() + word.slice(1));
-      return splitName.join(' ');
     }
   }
 };

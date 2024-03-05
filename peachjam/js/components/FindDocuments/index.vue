@@ -612,10 +612,7 @@ export default {
       if (this.q || this.advancedSearchCriteria.some(f => f.text)) {
         this.loadingCount = this.loadingCount + 1;
 
-        // ensure the search tab is activated and scroll to put the search box at the top
-        // of the window
-        const searchTab = new window.bootstrap.Tab(this.$el.querySelector('#search-tab'));
-        searchTab.show();
+        // scroll to put the search box at the top of the window
         scrollToElement(this.$refs['search-box']);
 
         try {
