@@ -15,8 +15,10 @@ from dateutil.parser import parse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
+from django.contrib.sites.models import Site
 from django.core.files.base import File
 from django.forms import ValidationError
+from django.urls import reverse
 from django.utils.text import slugify
 from docpipe.pdf import pdf_to_text
 from docpipe.soffice import SOfficeError, soffice_convert
@@ -249,8 +251,20 @@ class BaseDocumentResource(resources.ModelResource):
         widget=ManyToOneWidget(AlternativeName, separator="|", field="title"),
     )
 
+    download_url = fields.Field(readonly=True)
+
     def get_queryset(self):
         return self._meta.model.objects.get_qs_no_defer()
+
+    def dehydrate_download_url(self, obj):
+        domain = Site.objects.get_current().domain
+        if obj.expression_frbr_uri:
+            download_source = reverse(
+                "document_source", kwargs={"frbr_uri": obj.expression_frbr_uri[1:]}
+            )
+            scheme = "https"
+            return f"{scheme}://{domain}{download_source}"
+        return ""
 
     class Meta:
         exclude = (
