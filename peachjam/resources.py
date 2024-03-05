@@ -253,18 +253,17 @@ class BaseDocumentResource(resources.ModelResource):
 
     download_url = fields.Field(readonly=True)
 
-    domain = Site.objects.get_current().domain
-
     def get_queryset(self):
         return self._meta.model.objects.get_qs_no_defer()
 
     def dehydrate_download_url(self, obj):
+        domain = Site.objects.get_current().domain
         if obj.expression_frbr_uri:
             download_source = reverse(
                 "document_source", kwargs={"frbr_uri": obj.expression_frbr_uri[1:]}
             )
             scheme = "https"
-            return f"{scheme}://{self.domain}{download_source}"
+            return f"{scheme}://{domain}{download_source}"
         return ""
 
     class Meta:
