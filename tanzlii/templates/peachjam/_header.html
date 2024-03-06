@@ -17,27 +17,33 @@
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'author_detail' %}active{% endif %}"
-       href="{% url 'author' 'TZLRC' %}">
-      {% trans 'Law Reform' %}
-    </a>
-  </li>
-  <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'gazettes' %}active{% endif %}"
        href="{% url 'gazettes' %}">
       {% trans 'Gazettes' %}
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if request.path == '/doc/speech' %}active{% endif %}"
-       href="{% url 'document_nature_list' 'speech' %}">
-      {% trans 'Speeches' %}
-    </a>
-  </li>
-  <li class="nav-item">
     <a class="nav-link {% if request.path == '/doc/jot-documents-and-guidelines' %}active{% endif %}"
        href="{% url 'document_nature_list' 'jot-documents-and-guidelines' %}">
       {% trans 'JOT Documents and Guidelines' %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if request.path == '/authors/TZLRC/' %}active{% endif %}"
+       href="{% url 'author' 'TZLRC' %}">
+      {% trans 'Law Reform' %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if request.path == '/authors/TZNPS/' %}active{% endif %}"
+       href="{% url 'author' 'TZNPS' %}">
+      {% trans 'NPS Documents' %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if request.path == '/doc/speech' %}active{% endif %}"
+       href="{% url 'document_nature_list' 'speech' %}">
+      {% trans 'Speeches' %}
     </a>
   </li>
   <li class="nav-item">

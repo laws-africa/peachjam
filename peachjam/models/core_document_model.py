@@ -11,9 +11,10 @@ from countries_plus.models import Country
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.db import models
+from django.http import Http404
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
@@ -245,6 +246,9 @@ class CoreDocumentManager(PolymorphicManager):
     def get_queryset(self):
         # defer expensive fields
         return super().get_queryset().defer("content_html", "toc_json")
+
+    def get_qs_no_defer(self):
+        return super().get_queryset()
 
 
 class CoreDocumentQuerySet(PolymorphicQuerySet):
@@ -531,9 +535,12 @@ class CoreDocument(PolymorphicModel):
         )
         return frbr_uri.work_uri(work_component=False)
 
+    def set_frbr_uri_subtype(self):
+        self.frbr_uri_subtype = self.nature.code if self.nature else None
+
     def pre_save(self):
         """Pre-populate various fields before saving or running full_clean."""
-        self.frbr_uri_subtype = self.nature.code if self.nature else None
+        self.set_frbr_uri_subtype()
         self.assign_frbr_uri()
         self.expression_frbr_uri = self.generate_expression_frbr_uri()
 
@@ -704,7 +711,8 @@ class AttachmentAbstractModel(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        self.filename = self.file.name
+        if not self.filename:
+            self.filename = self.file.name
         if not self.size:
             self.size = self.file.size
         if not self.mimetype:
@@ -919,3 +927,24 @@ class DocumentContent(models.Model):
         )[0]
         document.document_content = doc_content
         return doc_content
+
+
+def get_country_and_locality(code):
+    if not code:
+        return None, None
+
+    if "-" in code:
+        cty_code, locality_code = code.split("-", 1)
+        country = Country.objects.get(pk=cty_code.upper())
+        locality = Locality.objects.get(jurisdiction=country, code=locality_code)
+    else:
+        country = Country.objects.get(pk=code.upper())
+        locality = None
+    return country, locality
+
+
+def get_country_and_locality_or_404(code):
+    try:
+        return get_country_and_locality(code)
+    except ObjectDoesNotExist:
+        raise Http404()

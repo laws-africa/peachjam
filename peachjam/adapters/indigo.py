@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.utils.text import slugify
 from languages_plus.models import Language
 
+from peachjam.adapters.base import Adapter
 from peachjam.models import (
     AlternativeName,
     Author,
@@ -35,42 +36,6 @@ from peachjam.plugins import plugins
 logger = logging.getLogger(__name__)
 
 
-class Adapter:
-    def __init__(self, settings):
-        self.settings = settings
-        self.predicates = {
-            "amended-by": {
-                "name": "amended by",
-                "verb": "is amended by",
-                "reverse_verb": "amends",
-            },
-            "repealed-by": {
-                "name": "repealed by",
-                "verb": "is repealed by",
-                "reverse_verb": "repeals",
-            },
-            "commenced-by": {
-                "name": "commenced by",
-                "verb": "is commenced by",
-                "reverse_verb": "commences",
-            },
-        }
-
-    def check_for_updates(self, last_refreshed):
-        """Checks for documents updated since last_refreshed (which may be None), and returns a list
-        of document identifiers (expression FRBR URIs) which must be updated.
-        """
-        raise NotImplementedError()
-
-    def update_document(self, document_id):
-        """Update the document identified by some opaque id, returned by check_for_updates."""
-        raise NotImplementedError()
-
-    @classmethod
-    def name(cls):
-        return cls.__name__
-
-
 @plugins.register("ingestor-adapter")
 class IndigoAdapter(Adapter):
     """Adapter that pulls data from the Indigo API.
@@ -82,8 +47,8 @@ class IndigoAdapter(Adapter):
     * places: space-separate list of place codes, such as: bw za-*
     """
 
-    def __init__(self, settings):
-        super().__init__(settings)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.client = requests.session()
         self.client.headers.update(
             {
@@ -110,7 +75,13 @@ class IndigoAdapter(Adapter):
             logger.info(f"Getting document list for {place_code}")
             url = f"{self.api_url}/akn/{place_code}/.json"
             while url:
-                res = self.client_get(url).json()
+                try:
+                    res = self.client_get(url).json()
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        logger.warning(f"Ignoring 404 for {url}")
+                        break
+                    raise e
 
                 # ignore bills
                 # TODO: later, make this configurable
@@ -282,11 +253,13 @@ class IndigoAdapter(Adapter):
         if hasattr(model, "metadata_json"):
             field_data["metadata_json"] = document
 
-        if hasattr(model, "timeline_json"):
+        if hasattr(model, "timeline_json") and not self.settings.get("skip_timeline"):
             timeline = self.client_get(f"{url}/timeline.json").json()
             field_data["timeline_json"] = timeline["timeline"]
 
-        if hasattr(model, "commencements_json"):
+        if hasattr(model, "commencements_json") and not self.settings.get(
+            "skip_commencements"
+        ):
             commencements_json = self.client_get(f"{url}/commencements.json").json()
             field_data["commencements_json"] = commencements_json["commencements"]
 
@@ -432,8 +405,15 @@ class IndigoAdapter(Adapter):
                 object_work=repealing_work,
             )
 
-        if imported_document["work_amendments"]:
-            for amendment in imported_document["work_amendments"]:
+        if imported_document.get("work_amendments") or imported_document.get(
+            "amendments"
+        ):
+            amendments = (
+                imported_document.get("work_amendments")
+                or imported_document.get("amendments")
+                or []
+            )
+            for amendment in amendments:
                 if amendment["amending_uri"] and amendment["amending_title"]:
                     amending_work, _ = Work.objects.get_or_create(
                         frbr_uri=amendment["amending_uri"],
@@ -482,6 +462,7 @@ class IndigoAdapter(Adapter):
         logger.info(f"{self.predicates[slug]['name']} relationship created")
 
     def client_get(self, url):
+        logger.debug(f"GET {url}")
         r = self.client.get(url)
         r.raise_for_status()
         return r
@@ -553,3 +534,16 @@ class IndigoAdapter(Adapter):
                 AlternativeName.objects.create(document=created_document, title=alias)
 
             logger.info(f"Fetching of aliases for {created_document} is complete!")
+
+    def handle_webhook(self, data):
+        from peachjam.tasks import delete_document, update_document
+
+        logger.info(f"Handling webhook {data}")
+
+        if data.get("action") == "updated" and data.get("data", {}).get("url"):
+            update_document(self.ingestor.pk, data["data"]["url"])
+
+        if data.get("action") == "deleted" and data.get("data", {}).get(
+            "expression_frbr_uri"
+        ):
+            delete_document(self.ingestor.pk, data["data"]["expression_frbr_uri"])

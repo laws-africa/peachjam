@@ -18,5 +18,5 @@ class PeachJamConfig(AppConfig):
 
             from peachjam.tasks import rank_works, run_ingestors
 
-            run_ingestors(repeat=60 * 60 * 24)
-            rank_works(repeat=Task.WEEKLY)
+            run_ingestors(schedule=Task.DAILY, repeat=Task.DAILY)
+            rank_works(schedule=Task.WEEKLY, repeat=Task.WEEKLY)

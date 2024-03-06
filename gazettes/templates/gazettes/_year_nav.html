@@ -1,0 +1,8 @@
+<ul class="year-nav mb-0 ms-2">
+  {% for y in years %}
+    <li>
+      <a href="{{ y }}"
+         class="{% if y|slugify == year|add:"" %} active {% endif %}">{{ y }}</a>
+    </li>
+  {% endfor %}
+</ul>

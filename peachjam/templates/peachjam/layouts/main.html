@@ -2,7 +2,9 @@
 {% load static peachjam %}
 {% load sass_tags %}
 {% block head-css %}
-  <link rel="preconnect" href="cdn.jsdelivr.net" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="stylesheet"
         href="{% sass_src 'stylesheets/peachjam.scss' %}"
         type="text/css"/>
@@ -32,6 +34,23 @@
         google_analytics_ids.forEach(id => {
           gtag('config', id);
         });
+      </script>
+    {% endif %}
+    {% if PEACHJAM_SETTINGS.matomo_domain and PEACHJAM_SETTINGS.matomo_site_id %}
+      <script>
+        var _paq = window._paq = window._paq || [];
+        _paq.push(["setDoNotTrack", true]);
+        _paq.push(["disableCookies"]);
+        _paq.push(['setCustomDimension', 1, '{{ CURRENT_LANGUAGE }}']);
+        _paq.push(["trackPageView"]);
+        _paq.push(["enableLinkTracking"]);
+        (function() {
+          var u="https://{{ PEACHJAM_SETTINGS.matomo_domain }}/";
+          _paq.push(['setTrackerUrl', u+'matomo.php']);
+          _paq.push(['setSiteId', '{{ PEACHJAM_SETTINGS.matomo_site_id }}']);
+          var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+          g.async=true; g.src='//cdn.matomo.cloud/{{ PEACHJAM_SETTINGS.matomo_domain }}/matomo.js'; s.parentNode.insertBefore(g,s);
+        })();
       </script>
     {% endif %}
   {% endif %}

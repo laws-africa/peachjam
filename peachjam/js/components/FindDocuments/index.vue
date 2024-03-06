@@ -228,6 +228,7 @@ import AdvancedSearch from './AdvancedSearch.vue';
 import HelpBtn from '../HelpBtn.vue';
 import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
+import analytics from '../analytics';
 
 export default {
   name: 'FindDocuments',
@@ -624,6 +625,7 @@ export default {
               '',
               document.location.pathname + '?' + this.serialiseState()
             );
+            analytics.trackPageView();
           }
           const response = await fetch(url);
 
@@ -655,7 +657,7 @@ export default {
       const url = `/search/api/documents/${item.id}/explain/?${params.toString()}`;
       const resp = await fetch(url);
       const json = await resp.json();
-      item.explanation = JSON.stringify(json, null, 2);
+      item.explanation = json;
     },
 
     resetAdvancedFields () {

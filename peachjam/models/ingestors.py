@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 class IngestorSetting(models.Model):
     name = models.CharField(_("name"), max_length=2048)
-    value = models.CharField(_("value"), max_length=2048)
+    value = models.CharField(_("value"), max_length=2048, blank=True, default="")
     ingestor = models.ForeignKey(
         "peachjam.Ingestor", on_delete=models.CASCADE, verbose_name=_("ingestor")
     )
@@ -65,8 +65,12 @@ class Ingestor(models.Model):
         adapter = self.get_adapter()
         adapter.delete_document(expression_frbr_uri)
 
+    def handle_webhook(self, data):
+        adapter = self.get_adapter()
+        adapter.handle_webhook(data)
+
     def get_adapter(self):
         klass = plugins.registry["ingestor-adapter"][self.adapter]
         ingestor_settings = IngestorSetting.objects.filter(ingestor=self)
         settings = {s.name: s.value for s in ingestor_settings}
-        return klass(settings)
+        return klass(self, settings)

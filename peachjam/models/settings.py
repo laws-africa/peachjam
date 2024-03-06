@@ -109,6 +109,20 @@ class PeachJamSettings(SingletonModel):
         blank=True,
         help_text=_("Enter one or more email addresses separated by spaces."),
     )
+    matomo_domain = models.CharField(
+        verbose_name=_("matomo domain"),
+        max_length=1024,
+        null=True,
+        blank=True,
+        help_text=_("Matomo domain (e.g. mysite.matomo.cloud)"),
+    )
+    matomo_site_id = models.CharField(
+        verbose_name=_("matomo site ID"),
+        max_length=10,
+        null=True,
+        blank=True,
+        help_text=_("Matomo site ID (e.g. 2)"),
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")

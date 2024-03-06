@@ -1,7 +1,7 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n peachjam %}
 {% block title %}
-  {% trans 'Gazettes' %} {{ year }}
+  {{ place|default_if_none:"" }} {% trans 'Gazettes' %} {{ year }}
 {% endblock %}
 {% block page-content %}
   <div class="container">
@@ -12,39 +12,80 @@
             <li class="breadcrumb-item">
               <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
             </li>
-            {% if locality %}
+            {% if country %}
               <li class="breadcrumb-item">
-                <a href="{% url 'gazettes_by_locality' code=locality.code %}">{{ locality }}</a>
+                <a href="{% url 'gazettes_by_locality' country.pk.lower %}">{{ country }}</a>
               </li>
             {% endif %}
+            {% if locality %}
+              <li class="breadcrumb-item">
+                <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality }}</a>
+              </li>
+            {% endif %}
+            <li class="breadcrumb-item active">{{ year }}</li>
           </ol>
         </nav>
       {% endblock %}
       {% block page-title %}
-        <h1 class="my-4">{% trans 'Gazettes' %} - {{ year }}</h1>
+        <h1 class="mt-4">
+          {{ place|default_if_none:"" }}
+          {% trans 'Gazettes' %} - {{ year }}
+        </h1>
       {% endblock %}
-      {% include "peachjam/_years_list.html" %}
-      {% include "peachjam/_quick_search.html" %}
+      {% block preamble %}
+        {% block document-count %}
+          <p class="text-muted mb-4">
+            {% blocktrans trimmed count doc_count=doc_count %}
+              {{ doc_count }} gazette
+            {% plural %}
+              {{ doc_count }} gazettes
+            {% endblocktrans %}
+          </p>
+        {% endblock %}
+        {% include "peachjam/_years_list.html" %}
+        {% include "peachjam/_quick_search.html" %}
+      {% endblock %}
     </header>
     <div class="my-4">
       {% block content %}
-        {% for month, items in gazettes %}
-          {% if items %}
-            <h2 class="sans-serif" id="{{ forloop.counter }}">{{ month }} {{ year }}</h2>
-            <ul>
+        <div class="row">
+          <div class="col col-md-4 my-3">
+            {% for y in years %}
+              {% if y.year == year %}
+                {% include 'peachjam/_monthly_column_chart.html' with url='' year=y %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        <table class="table table-borderless table-sm">
+          {% for month, items in gazettes %}
+            {% if items %}
+              <tr>
+                <td>
+                  <h2 class="mt-3" id="{{ forloop.counter }}">{{ month }} {{ year }}</h2>
+                </td>
+              </tr>
               {% for gazette in items %}
-                <li>
-                  <a href="{{ gazette.get_absolute_url }}">{{ gazette.title }}</a>
-                  <span class="text-muted m-0">
-                    &nbsp;({{ gazette.source_file.size|filesizeformat }},
-                    <a href="{% url 'document_source_pdf' frbr_uri=gazette.expression_frbr_uri|strip_first_character %}"
-                       target="_blank">PDF</a>)
-                  </span>
-                </li>
+                {% block gazette-item %}
+                  <tr>
+                    <td>
+                      <a href="{{ gazette.get_absolute_url }}">{{ gazette.title }}</a>
+                    </td>
+                    <td>
+                      <span class="d-none d-lg-block">{{ gazette.sub_publication|default:"" }}</span>
+                    </td>
+                    <td>
+                      <span class="d-none d-lg-block">{{ gazette.frbr_uri_number }}</span>
+                    </td>
+                    <td>
+                      <span class="d-none d-lg-block">{{ gazette.date|date:"Y-m-d" }}</span>
+                    </td>
+                  </tr>
+                {% endblock %}
               {% endfor %}
-            </ul>
-          {% endif %}
-        {% endfor %}
+            {% endif %}
+          {% endfor %}
+        </table>
       {% endblock %}
     </div>
     {% include "peachjam/_years_list.html" %}

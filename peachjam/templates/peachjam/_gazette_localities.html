@@ -1,11 +1,13 @@
-{% for group in locality_groups %}
-  <div class="col-lg">
-    <ul class="list-unstyled mb-0">
-      {% for locality in group %}
-        <li>
-          <a href="{% url 'gazettes_by_locality' locality.code %}">{{ locality.name }}</a>
-        </li>
-      {% endfor %}
-    </ul>
-  </div>
-{% endfor %}
+<div class="row">
+  {% for group in locality_groups %}
+    <div class="col-lg">
+      <ul class="list-unstyled mb-0">
+        {% for locality in group %}
+          <li>
+            <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality.name }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</div>
