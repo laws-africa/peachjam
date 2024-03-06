@@ -135,8 +135,8 @@ class BaseDocumentDetailView(DetailView):
     context_object_name = "document"
 
     def get_object(self, *args, **kwargs):
-        return self.model.objects.get(
-            expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri"))
+        return get_object_or_404(
+            self.model, expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri"))
         )
 
     def get_context_data(self, **kwargs):
