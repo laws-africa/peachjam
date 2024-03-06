@@ -192,8 +192,10 @@ class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
         cleaned_data = super().clean()
         if "file" in self.changed_data:
             # clear all the fields that are derived from the file
-            for field in ["mimetype", "size", "file_as_pdf", "filename"]:
-                self.instance.__dict__[field] = None
+            self.instance.mimetype = None
+            self.instance.size = None
+            self.instance.file_as_pdf = None
+            self.instance.filename = None
 
         return cleaned_data
 
