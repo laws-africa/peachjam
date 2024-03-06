@@ -92,7 +92,7 @@
             :global-search-value="q"
             @global-search-change="value => q = value"
             @date-change="value => advancedSearchDateCriteria = {...value}"
-            @submit="submit"
+            @submit="advancedSearch"
           />
         </div>
       </div>
@@ -431,6 +431,11 @@ export default {
 
     simpleSearch () {
       this.resetAdvancedFields();
+      this.submit();
+    },
+
+    advancedSearch () {
+      this.q = '';
       this.submit();
     },
 
