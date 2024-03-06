@@ -92,7 +92,7 @@
             :global-search-value="q"
             @global-search-change="value => q = value"
             @date-change="value => advancedSearchDateCriteria = {...value}"
-            @submit="submit"
+            @submit="advancedSearch"
           />
         </div>
       </div>
@@ -434,6 +434,11 @@ export default {
       this.submit();
     },
 
+    advancedSearch () {
+      this.q = '';
+      this.submit();
+    },
+
     submit () {
       this.page = 1;
       this.search();
@@ -707,11 +712,10 @@ export default {
 
       q = q + ' ' + splitValue.trim();
 
-      if (criterion.fields.length) {
-        for (const field of criterion.fields) {
-          params.set(`search_${field}`, (params.get(`search_${field}`)?.trim() || '') + ' ' + q.trim());
-        }
-      } else params.set('search', (params.get('search')?.trim() || '') + ' ' + q.trim());
+      const fields = criterion.fields.length ? criterion.fields.map(f => `search__${f}`) : ['search'];
+      for (const field of fields) {
+        params.set(field, (params.get(field)?.trim() || '') + ' ' + q.trim());
+      }
     }
   }
 };
