@@ -712,11 +712,10 @@ export default {
 
       q = q + ' ' + splitValue.trim();
 
-      if (criterion.fields.length) {
-        for (const field of criterion.fields) {
-          params.set(`search_${field}`, (params.get(`search_${field}`)?.trim() || '') + ' ' + q.trim());
-        }
-      } else params.set('search', (params.get('search')?.trim() || '') + ' ' + q.trim());
+      const fields = criterion.fields.length ? criterion.fields.map(f => `search__${f}`) : ['search'];
+      for (const field of fields) {
+        params.set(field, (params.get(field)?.trim() || '') + ' ' + q.trim());
+      }
     }
   }
 };
