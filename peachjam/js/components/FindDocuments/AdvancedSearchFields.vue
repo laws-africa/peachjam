@@ -1,58 +1,84 @@
 <template>
-  <div>
-    <div class="row">
-      <label class="form-label col-sm-3" :for="`${inputName}-all`">{{ $t("All these words") }}</label>
-      <div class="col-sm-9">
-        <input
-          :id="`${inputName}-all`"
-          :name="`${inputName}-all`"
-          type="text"
-          :value="fieldValues.all"
+  <div class="mb-3 d-md-flex">
+    <div class="d-flex mb-2 flex-grow-1">
+      <div v-if="criterion.condition" class="me-3">
+        <select
+          v-model="criterion.condition"
           class="form-control"
-          @input="e => updateSubfields(e, 'all')"
+          @change="changed"
+        >
+          <option value="AND">
+            {{ $t('AND') }}
+          </option>
+          <option value="OR">
+            {{ $t('OR') }}
+          </option>
+          <option value="NOT">
+            {{ $t('NOT') }}
+          </option>
+        </select>
+      </div>
+
+      <div class="flex-grow-1 me-3">
+        <input
+          v-model="criterion.text"
+          type="text"
+          class="form-control"
+          placeholder="Text to search for..."
+          @input="changed"
         >
       </div>
     </div>
 
-    <div class="row mt-3">
-      <label class="form-label col-sm-3" :for="`${inputName}-exact`">{{ $t("This exact word or phrase") }}</label>
-      <div class="col-sm-9">
-        <input
-          :id="`${inputName}-exact`"
-          :name="`${inputName}-exact`"
-          type="text"
-          :value="fieldValues.exact"
-          class="form-control"
-          @input="e => updateSubfields(e, 'exact')"
+    <div class="d-flex mb-2">
+      <div class="dropdown me-3">
+        <button
+          :id="`advanced-${targetIndex}-fields-btn`"
+          class="btn btn-secondary dropdown-toggle"
+          data-bs-toggle="dropdown"
+          data-bs-auto-close="outside"
+          aria-expanded="false"
         >
-      </div>
-    </div>
+          {{ $t('In these fields') }}
+        </button>
 
-    <div class="row mt-3">
-      <label class="form-label col-sm-3" :for="`${inputName}-any`">{{ $t("Any of these words") }}</label>
-      <div class="col-sm-9">
-        <input
-          :id="`${inputName}-any`"
-          :name="`${inputName}-any`"
-          type="text"
-          :value="fieldValues.any"
-          class="form-control"
-          @input="e => updateSubfields(e, 'any')"
-        >
+        <div class="dropdown-menu" :aria-labelledby="`advanced-${targetIndex}-fields-btn`">
+          <div
+            v-for="field in fields"
+            :key="field.field"
+            class="form-check dropdown-item"
+          >
+            <input
+              :id="`advanced-${targetIndex}-fields-${field.field}`"
+              :checked="field.field === 'ANY' && criterion.fields.length === 0 || criterion.fields.indexOf(field.field) > -1"
+              class="form-check-input"
+              type="checkbox"
+              @change="(e) => fieldChanged(field.field, e.target.checked)"
+            >
+            <label
+              class="form-check-label"
+              :for="`advanced-${targetIndex}-fields-${field.field}`"
+            >
+              {{ field.label }}
+            </label>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="row mt-3">
-      <label class="form-label col-sm-3" :for="`${inputName}-none`">{{ $t("None of these words") }}</label>
-      <div class="col-sm-9">
+      <div class="form-check">
         <input
-          :id="`${inputName}-none`"
-          :name="`${inputName}-none`"
-          type="text"
-          :value="fieldValues.none"
-          class="form-control"
-          @input="e => updateSubfields(e, 'none')"
+          :id="`advanced-${targetIndex}-exact`"
+          v-model="criterion.exact"
+          type="checkbox"
+          class="form-check-input"
+          @change="changed"
         >
+        <label
+          class="form-check-label"
+          :for="`advanced-${targetIndex}-exact`"
+        >
+          {{ $t('Exact phrase') }}
+        </label>
       </div>
     </div>
   </div>
@@ -62,23 +88,64 @@
 export default {
   name: 'AdvancedSearchFields',
   props: {
-    inputName: {
-      type: String,
-      default: ''
-    },
-    fieldValues: {
+    criterion: {
       type: Object,
       default: () => ({})
+    },
+    targetIndex: {
+      type: Number,
+      default: 0
     }
   },
-  emits: ['update:fieldValues'],
+  emits: ['on-change'],
+  data: (self) => {
+    return {
+      fields: [{
+        field: 'ANY',
+        label: self.$t('Any field')
+      },{
+        field: 'title',
+        label: self.$t('Title')
+      }, {
+        field: 'judges',
+        label: self.$t('Judges')
+      }, {
+        field: 'case_summary',
+        label: self.$t('Case summary')
+      }, {
+        field: 'flynote',
+        label: self.$t('Flynote')
+      }, {
+        field: 'content',
+        label: self.$t('Content')
+      }]
+    };
+  },
   methods: {
-    updateSubfields (e, subfield) {
-      this.$emit('update:fieldValues', {
-        ...this.fieldValues,
-        [subfield]: e.target.value
-      });
+    changed () {
+      this.$emit('on-change');
+    },
+    fieldChanged (field, checked) {
+      if (field === 'ANY') {
+        this.criterion.fields = [];
+      } else {
+        if (checked) {
+          if (!this.criterion.fields.includes(field)) {
+            this.criterion.fields.push(field);
+          }
+        } else {
+          this.criterion.fields = this.criterion.fields.filter((f) => f !== field);
+        }
+      }
+      this.changed();
     }
   }
 };
 </script>
+
+<style scoped>
+.dropdown-menu .dropdown-item {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+</style>

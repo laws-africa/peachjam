@@ -87,9 +87,11 @@
           aria-labelledby="advanced-search-tab"
         >
           <AdvancedSearch
-            v-model="advancedFields"
+            v-model="advancedSearchCriteria"
+            :advanced-search-date-criteria="advancedSearchDateCriteria"
             :global-search-value="q"
             @global-search-change="value => q = value"
+            @date-change="value => advancedSearchDateCriteria = {...value}"
             @submit="submit"
           />
         </div>
@@ -170,8 +172,8 @@
                   :item="item"
                   :query="q"
                   :debug="searchInfo.can_debug"
-                  :showJurisdiction="showJurisdiction"
-                  :documentLabels="documentLabels"
+                  :show-jurisdiction="showJurisdiction"
+                  :document-labels="documentLabels"
                   @explain="explain(item)"
                 />
               </ul>
@@ -228,24 +230,6 @@ import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 import analytics from '../analytics';
 
-function resetAdvancedFields (fields) {
-  const advanced = ['all', 'title', 'judges', 'case_summary', 'flynote', 'content'];
-  for (const a of advanced) {
-    fields[a] = {
-      q: '',
-      all: '',
-      exact: '',
-      any: '',
-      none: ''
-    };
-  }
-
-  fields.date = {
-    date_to: null,
-    date_from: null
-  };
-}
-
 export default {
   name: 'FindDocuments',
   components: { FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
@@ -270,7 +254,22 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
-      advancedFields: {}
+      advancedSearchCriteria: [{
+        text: '',
+        fields: [],
+        condition: '',
+        exact: false
+      },
+      {
+        text: '',
+        fields: [],
+        condition: 'AND',
+        exact: false
+      }],
+      advancedSearchDateCriteria: {
+        date_to: null,
+        date_from: null
+      }
     };
     const facets = [
       {
@@ -378,7 +377,6 @@ export default {
     }
 
     data.facets = facets;
-    resetAdvancedFields(data.advancedFields);
     return data;
   },
 
@@ -432,7 +430,7 @@ export default {
     },
 
     simpleSearch () {
-      resetAdvancedFields(this.advancedFields);
+      this.resetAdvancedFields();
       this.submit();
     },
 
@@ -467,34 +465,32 @@ export default {
         });
       });
 
-      // Set advanced fields to url
-      Object.keys(this.advancedFields).forEach(key => {
-        const value = this.advancedFields[key];
-        if (!value) return;
+      if (this.advancedSearchDateCriteria.date_from && this.advancedSearchDateCriteria.date_to) {
+        params.append('date_from', this.advancedSearchDateCriteria.date_from);
+        params.append('date_to', this.advancedSearchDateCriteria.date_to);
+      } else if (this.advancedSearchDateCriteria.date_from) {
+        params.append('date_from', this.advancedSearchDateCriteria.date_from);
+      } else if (this.advancedSearchDateCriteria.date_to) {
+        params.append('date_to', this.advancedSearchDateCriteria.date_to);
+      }
 
-        if (key === 'date') {
-          if (value.date_from && value.date_to) {
-            params.append('date_from', this.advancedFields.date.date_from);
-            params.append('date_to', this.advancedFields.date.date_to);
-          } else if (value.date_from) {
-            params.append('date_from', this.advancedFields.date.date_from);
-          } else if (value.date_to) {
-            params.append('date_to', this.advancedFields.date.date_to);
-          }
-        } else {
-          for (const mod of Object.keys(value)) {
-            if (value[mod]) {
-              params.append(`${key}_${mod}`, value[mod]);
-            }
-          }
-        }
+      const searchParams = this.advancedSearchCriteria.filter(criterion => criterion.text).map((criterion) => {
+        const reducedCriterion = { text: criterion.text };
+        if (criterion.fields.length) reducedCriterion.fields = criterion.fields;
+        if (criterion.condition) reducedCriterion.condition = criterion.condition;
+        if (criterion.exact) reducedCriterion.exact = criterion.exact;
+
+        return reducedCriterion;
       });
+
+      // Set advanced fields to url
+      if (searchParams.length) params.append('a', JSON.stringify(searchParams));
 
       return params.toString();
     },
 
     loadState () {
-      resetAdvancedFields(this.advancedFields);
+      this.resetAdvancedFields();
 
       // load state from URL
       const params = new URLSearchParams(window.location.search);
@@ -509,31 +505,32 @@ export default {
         }
       });
 
-      if (params.has('date_from')) this.advancedFields.date.date_from = params.get('date_from');
-      if (params.has('date_to')) this.advancedFields.date.date_to = params.get('date_to');
+      if (params.has('date_from')) this.advancedSearchDateCriteria.date_from = params.get('date_from');
+      if (params.has('date_to')) this.advancedSearchDateCriteria.date_to = params.get('date_to');
 
       let showAdvanced = params.get('show-advanced-tab');
-      for (const field of Object.keys(this.advancedFields)) {
-        if (field !== 'date') {
-          const values = this.advancedFields[field];
-
-          for (const mod of Object.keys(values)) {
-            const key = `${field}_${mod}`;
-            if (params.get(key)) {
-              values[mod] = params.get(key);
-              showAdvanced = true;
-            }
-          }
-        }
+      if (params.has('a')) {
+        const advancedSearchParams = JSON.parse(params.get('a'));
+        advancedSearchParams.forEach((criterion, index) => {
+          const fullCriterion = {
+            text: criterion.text,
+            fields: criterion.fields || [],
+            condition: criterion.condition || '',
+            exact: !!criterion.exact
+          };
+          if (index === 0 && !criterion.condition) this.advancedSearchCriteria.splice(0, 1, fullCriterion);
+          else this.advancedSearchCriteria.splice(index, 0, fullCriterion);
+        });
+        showAdvanced = true;
       }
 
-      // if there are advance search fields or show-advanced-tab param, activate tab
+      // if there are advanced search fields or show-advanced-tab param, activate tab
       if (showAdvanced) {
         const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#advanced-search-tab'));
         tabTrigger.show();
       }
 
-      this.search(false);
+      this.search();
     },
 
     suggest (q) {
@@ -596,36 +593,27 @@ export default {
       });
 
       // advanced search fields, if any
-      Object.keys(this.advancedFields).forEach(key => {
-        const value = this.advancedFields[key];
+      if (this.advancedSearchDateCriteria.date_from && this.advancedSearchDateCriteria.date_to) {
+        const dateFrom = this.advancedSearchDateCriteria.date_from;
+        const dateTo = this.advancedSearchDateCriteria.date_to;
+        params.append('date__range', `${dateFrom}__${dateTo}`);
+      } else if (this.advancedSearchDateCriteria.date_from) {
+        params.append('date__gte', this.advancedSearchDateCriteria.date_from);
+      } else if (this.advancedSearchDateCriteria.date_to) {
+        params.append('date__lte', this.advancedSearchDateCriteria.date_to);
+      }
 
-        if (key === 'date') {
-          if (value.date_from && value.date_to) {
-            const dateFrom = value.date_from;
-            const dateTo = value.date_to;
-            params.append('date__range', `${dateFrom}__${dateTo}`);
-          } else if (value.date_from) {
-            params.append('date__gte', value.date_from);
-          } else if (value.date_to) {
-            params.append('date__lte', value.date_to);
-          }
-        } else if (value.q) {
-          params.append(`search__${key}`, value.q);
-        }
-      });
+      this.advancedSearchCriteria.forEach(criterion => this.addAdvancedSearchParams(criterion, params));
 
       return params;
     },
 
     async search (pushState = true) {
       // if one of the search fields is true perform search
-      if (this.q || Object.values(this.advancedFields).some(f => f.q)) {
+      if (this.q || this.advancedSearchCriteria.some(f => f.text)) {
         this.loadingCount = this.loadingCount + 1;
 
-        // ensure the search tab is activated and scroll to put the search box at the top
-        // of the window
-        const searchTab = new window.bootstrap.Tab(this.$el.querySelector('#search-tab'));
-        searchTab.show();
+        // scroll to put the search box at the top of the window
         scrollToElement(this.$refs['search-box']);
 
         try {
@@ -670,6 +658,60 @@ export default {
       const resp = await fetch(url);
       const json = await resp.json();
       item.explanation = json;
+    },
+
+    resetAdvancedFields () {
+      this.advancedSearchCriteria = [{
+        text: '',
+        fields: [],
+        condition: '',
+        exact: false
+      },
+      {
+        text: '',
+        fields: [],
+        condition: 'AND',
+        exact: false
+      }];
+
+      this.advancedSearchDateCriteria = {
+        date_to: null,
+        date_from: null
+      };
+    },
+
+    addAdvancedSearchParams (criterion, params) {
+      if (!criterion.text) return;
+
+      let q = '';
+      const text = criterion.exact ? `"${criterion.text}"` : criterion.text;
+      let splitValue = text.match(/\w+|"[^"]+"/g);
+
+      if (criterion.condition === 'AND') {
+        const tokens = [];
+
+        splitValue.forEach((value) => {
+          if (value.startsWith('"')) {
+            tokens.push(value);
+          } else {
+            tokens.push('"' + value + '"');
+          }
+        });
+
+        splitValue = tokens.join(' ');
+      } else if (criterion.condition === 'OR') {
+        splitValue = `(|${splitValue.join('|')})`;
+      } else if (criterion.condition === 'NOT') {
+        splitValue = splitValue.map((value) => `-${value}`).join(' ');
+      } else splitValue = splitValue.join(' ');
+
+      q = q + ' ' + splitValue.trim();
+
+      if (criterion.fields.length) {
+        for (const field of criterion.fields) {
+          params.set(`search_${field}`, (params.get(`search_${field}`)?.trim() || '') + ' ' + q.trim());
+        }
+      } else params.set('search', (params.get('search')?.trim() || '') + ' ' + q.trim());
     }
   }
 };
