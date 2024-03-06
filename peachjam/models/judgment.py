@@ -228,6 +228,7 @@ class Judgment(CoreDocument):
     order_outcomes = models.ManyToManyField(
         OrderOutcome,
         blank=True,
+        related_name="judgments",
     )
     case_summary = models.TextField(_("case summary"), null=True, blank=True)
     flynote = models.TextField(_("flynote"), null=True, blank=True)
