@@ -1,95 +1,84 @@
 <template>
-  <div class="mb-3 row">
-    <div v-if="criterion.condition" class="dropdown col-3">
-      <span
-        :id="`${criterion.condition}_${targetIndex}-dropdown`"
-        class="btn btn-secondary dropdown-toggle"
-        href="#"
-        role="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-      >
-        {{ criterion.condition }} these words
-      </span>
-
-      <div class="dropdown-menu p-2" :aria-labelledby="`${criterion.condition}_${targetIndex}-dropdown`">
-        <button
-          v-for="logicField in logicFields"
-          :key="logicField"
-          class="dropdown-item"
-          type="button"
-          @click="$emit('on-logic-change', logicField, targetIndex)"
+  <div class="mb-3 d-md-flex">
+    <div class="d-flex mb-2 flex-grow-1">
+      <div v-if="criterion.condition" class="me-3">
+        <select
+          v-model="criterion.condition"
+          class="form-control"
+          @change="changed"
         >
-          {{ logicField }} these words
-        </button>
+          <option value="AND">
+            {{ $t('AND') }}
+          </option>
+          <option value="OR">
+            {{ $t('OR') }}
+          </option>
+          <option value="NOT">
+            {{ $t('NOT') }}
+          </option>
+        </select>
+      </div>
+
+      <div class="flex-grow-1 me-3">
+        <input
+          v-model="criterion.text"
+          type="text"
+          class="form-control"
+          placeholder="Text to search for..."
+          @input="changed"
+        >
       </div>
     </div>
 
-    <div :class="`${criterion.condition ? 'col-9' : 'col-12'}`">
-      <input
-        :id="`${criterion.condition}_${targetIndex}-text`"
-        :value="criterion.text"
-        :name="`${criterion.condition}_${targetIndex}-text`"
-        type="text"
-        class="form-control"
-        @input="(e) => $emit('on-change', e, targetIndex)"
-      >
+    <div class="d-flex mb-2">
+      <div class="dropdown me-3">
+        <button
+          :id="`advanced-${targetIndex}-fields-btn`"
+          class="btn btn-secondary dropdown-toggle"
+          data-bs-toggle="dropdown"
+          data-bs-auto-close="outside"
+          aria-expanded="false"
+        >
+          {{ $t('In these fields') }}
+        </button>
 
-      <div class="d-flex justify-content-between">
-        <div class="dropdown">
-          <span
-            :id="`${criterion.condition}_${targetIndex}-dropdown_fields`"
-            class="dropdown-toggle"
-            href="#"
-            role="button"
-            data-bs-toggle="dropdown"
-            data-bs-auto-close="outside"
-            aria-expanded="false"
+        <div class="dropdown-menu" :aria-labelledby="`advanced-${targetIndex}-fields-btn`">
+          <div
+            v-for="field in fields"
+            :key="field.field"
+            class="form-check dropdown-item"
           >
-            Choose fields
-          </span>
-
-          <div class="dropdown-menu" :aria-labelledby="`${criterion.condition}_${targetIndex}-dropdown_fields`">
-            <div
-              v-for="field in ['title', 'judges', 'case_summary', 'flynote', 'content']"
-              :key="field"
-              class="form-check dropdown-item"
+            <input
+              :id="`advanced-${targetIndex}-fields-${field.field}`"
+              :checked="field.field === 'ANY' && criterion.fields.length === 0 || criterion.fields.indexOf(field.field) > -1"
+              class="form-check-input"
+              type="checkbox"
+              @change="(e) => fieldChanged(field.field, e.target.checked)"
             >
-              <input
-                :id="`${criterion.condition}_${targetIndex}-${field}`"
-                :checked="criterion.fields.includes(field)"
-                :name="`${criterion.condition}_${targetIndex}-${field}`"
-                :value="field"
-                class="form-check-input"
-                type="checkbox"
-                @change="(e) => $emit('on-change', e)"
-              >
-              <label
-                class="form-check-label"
-                :for="`${criterion.condition}_${targetIndex}-${field}`"
-              >
-                {{ formatName(field) }}
-              </label>
-            </div>
+            <label
+              class="form-check-label"
+              :for="`advanced-${targetIndex}-fields-${field.field}`"
+            >
+              {{ field.label }}
+            </label>
           </div>
         </div>
+      </div>
 
-        <div class="form-check">
-          <input
-            :id="`${criterion.condition}_${targetIndex}-exact`"
-            :checked="criterion.exact"
-            :name="`${criterion.condition}_${targetIndex}-exact`"
-            type="checkbox"
-            class="form-check-input"
-            @change="(e) => $emit('on-exact-change', e)"
-          >
-          <label
-            class="form-check-label"
-            :for="`${criterion.condition}_${targetIndex}-exact`"
-          >
-            Exact Phrase
-          </label>
-        </div>
+      <div class="form-check">
+        <input
+          :id="`advanced-${targetIndex}-exact`"
+          v-model="criterion.exact"
+          type="checkbox"
+          class="form-check-input"
+          @change="changed"
+        >
+        <label
+          class="form-check-label"
+          :for="`advanced-${targetIndex}-exact`"
+        >
+          {{ $t('Exact phrase') }}
+        </label>
       </div>
     </div>
   </div>
@@ -99,26 +88,56 @@
 export default {
   name: 'AdvancedSearchFields',
   props: {
-    targetIndex: {
-      type: Number,
-      default: 0
-    },
     criterion: {
       type: Object,
       default: () => ({})
+    },
+    targetIndex: {
+      type: Number,
+      default: 0
     }
   },
-  emits: ['on-change', 'on-logic-change', 'on-exact-change'],
-  computed: {
-    logicFields () {
-      return ['AND', 'OR', 'NOT'].filter(logic => logic !== this.criterion.condition);
-    }
+  emits: ['on-change'],
+  data: (self) => {
+    return {
+      fields: [{
+        field: 'ANY',
+        label: self.$t('Any field')
+      },{
+        field: 'title',
+        label: self.$t('Title')
+      }, {
+        field: 'judges',
+        label: self.$t('Judges')
+      }, {
+        field: 'case_summary',
+        label: self.$t('Case summary')
+      }, {
+        field: 'flynote',
+        label: self.$t('Flynote')
+      }, {
+        field: 'content',
+        label: self.$t('Content')
+      }]
+    };
   },
   methods: {
-    formatName (name) {
-      let splitName = name.split('_');
-      splitName = splitName.map((word) => word.charAt(0).toUpperCase() + word.slice(1));
-      return splitName.join(' ');
+    changed () {
+      this.$emit('on-change');
+    },
+    fieldChanged (field, checked) {
+      if (field === 'ANY') {
+        this.criterion.fields = [];
+      } else {
+        if (checked) {
+          if (!this.criterion.fields.includes(field)) {
+            this.criterion.fields.push(field);
+          }
+        } else {
+          this.criterion.fields = this.criterion.fields.filter((f) => f !== field);
+        }
+      }
+      this.changed();
     }
   }
 };

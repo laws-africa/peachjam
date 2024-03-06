@@ -1,74 +1,54 @@
 <template>
   <form @submit.prevent="submitAdvancedForm">
-    <div class="row mt-5">
-      <div class="col-12">
-        <div class="card mb-3">
-          <h5 class="card-header">
-            {{ $t("Search documents") }}
-          </h5>
-          <div class="card-body">
-            <AdvancedSearchFields
-              v-for="(criterion, index) in modelValue"
-              :key="index"
-              :criterion="criterion"
-              :target-index="index"
-              @on-change="onChange"
-              @on-logic-change="onLogicChange"
-              @on-exact-change="onExactChange"
-            />
-          </div>
-        </div>
-      </div>
+    <div class="card">
+      <div class="card-body">
+        <AdvancedSearchFields
+          v-for="(criterion, index) in modelValue"
+          :key="index"
+          :criterion="criterion"
+          :target-index="index"
+          @on-change="onChange"
+        />
 
-      <div class="col-lg">
-        <div class="card mb-3">
-          <h5 class="card-header">
-            {{ $t("Date") }}
-          </h5>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-6">
-                <label class="form-label" for="date_from">{{
-                  $t("Date from")
-                }}</label>
-                <input
-                  id="date_from"
-                  name="date_from"
-                  type="date"
-                  class="form-control"
-                  :aria-describedby="$t('Date from')"
-                  :placeholder="$t('Enter start date')"
-                  :value="advancedSearchDateCriteria.date_from"
-                  :disabled="disableDate"
-                  @change="onDateChange"
-                >
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="date_to">{{
-                  $t("Date to")
-                }}</label>
-                <input
-                  id="date_to"
-                  name="date_to"
-                  type="date"
-                  class="form-control"
-                  :aria-describedby="$t('Date to')"
-                  :placeholder="$t('Enter end date')"
-                  :value="advancedSearchDateCriteria.date_to"
-                  :disabled="disableDate"
-                  @change="onDateChange"
-                >
-              </div>
-            </div>
-            <div v-if="invalidDates" class="text-danger">
-              {{ $t("The date range is invalid") }}.
-            </div>
+        <div class="row mt-5">
+          <div class="col-6">
+            <label class="form-label" for="date_from">{{
+              $t("Date from")
+            }}</label>
+            <input
+              id="date_from"
+              name="date_from"
+              type="date"
+              class="form-control"
+              :aria-describedby="$t('Date from')"
+              :placeholder="$t('Enter start date')"
+              :value="advancedSearchDateCriteria.date_from"
+              :disabled="disableDate"
+              @change="onDateChange"
+            >
+          </div>
+          <div class="col-6">
+            <label class="form-label" for="date_to">{{
+              $t("Date to")
+            }}</label>
+            <input
+              id="date_to"
+              name="date_to"
+              type="date"
+              class="form-control"
+              :aria-describedby="$t('Date to')"
+              :placeholder="$t('Enter end date')"
+              :value="advancedSearchDateCriteria.date_to"
+              :disabled="disableDate"
+              @change="onDateChange"
+            >
           </div>
         </div>
+        <div v-if="invalidDates" class="text-danger">
+          {{ $t("The date range is invalid") }}.
+        </div>
       </div>
-    </div>
-    <div class="d-flex justify-content-end">
-      <div>
+      <div class="card-footer d-flex justify-content-end">
         <HelpBtn page="search/advanced-search" />
         <button type="submit" class="btn btn-primary">
           {{ $t('Search') }}
@@ -149,34 +129,8 @@ export default {
   },
 
   methods: {
-    onChange (e, index = 0) {
-      const data = [...this.modelValue];
-
-      if (e.target.type === 'checkbox') {
-        if (e.target.checked) data[index].fields.push(e.target.value);
-      } else {
-        data[index] = { ...data[index], text: e.target.value };
-
-        if (index && index === data.length - 1 && e.target.value) {
-          data.push({
-            text: '',
-            fields: [],
-            condition: 'AND',
-            exact: false
-          });
-        }
-
-        if (index === 0) this.$emit('global-search-change', e.target.value);
-      }
-
-      this.$emit('update:modelValue', data);
-    },
-
-    onExactChange (e, index) {
-      const data = [...this.modelValue];
-      data[index] = { ...data[index], exact: e.target.checked };
-
-      this.$emit('update:modelValue', data);
+    onChange () {
+      this.cleanupCriteria(false);
     },
 
     onDateChange (e) {
@@ -186,14 +140,24 @@ export default {
       });
     },
 
-    onLogicChange (logicName, index) {
-      const data = [...this.modelValue];
-      data[index] = { ...data[index], condition: logicName };
+    cleanupCriteria (removeEmpty) {
+      let data = [...this.modelValue];
+
+      if (removeEmpty) {
+        data = data.filter((criterion) => criterion.condition === '' || criterion.text);
+      }
+
+      // ensure there's an empty entry at the end
+      if (data[data.length - 1].text) {
+        data.push({ text: '', fields: [], exact: false, condition: 'AND' });
+      }
 
       this.$emit('update:modelValue', data);
     },
 
     submitAdvancedForm () {
+      // remove empty criteria
+      this.cleanupCriteria(true);
       this.$emit('submit');
     }
   }
