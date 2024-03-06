@@ -116,12 +116,10 @@ export default {
       handler (newValue) {
         // When disabling calendar set date input values to null
         if (newValue) {
-          this.$emit('update:modelValue', {
-            ...this.modelValue,
-            date: {
-              date_from: null,
-              date_to: null
-            }
+          this.$emit('date-change', {
+            ...this.advancedSearchDateCriteria,
+            date_from: null,
+            date_to: null
           });
         }
       }

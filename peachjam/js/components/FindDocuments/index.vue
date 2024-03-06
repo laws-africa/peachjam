@@ -615,7 +615,7 @@ export default {
 
     async search (pushState = true) {
       // if one of the search fields is true perform search
-      if (this.q || this.advancedSearchCriteria.some(f => f.text)) {
+      if (this.q || (Array.isArray(this.advancedSearchCriteria) && this.advancedSearchCriteria.some(f => f.text))) {
         this.loadingCount = this.loadingCount + 1;
 
         // scroll to put the search box at the top of the window
