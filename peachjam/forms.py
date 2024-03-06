@@ -188,6 +188,15 @@ class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
                 self.instance.file_as_pdf.delete()
                 self.instance.ensure_file_as_pdf()
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if "file" in self.changed_data:
+            # clear all the fields that are derived from the file
+            for field in ["mimetype", "size", "file_as_pdf", "filename"]:
+                self.instance.__dict__[field] = None
+
+        return cleaned_data
+
 
 class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):
     class Meta:
