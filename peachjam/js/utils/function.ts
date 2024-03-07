@@ -55,6 +55,7 @@ export function generateHtmlTocItems (content: HTMLElement): TOCItemType[] {
   const ids = new Map<string, number>();
 
   content.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5').forEach((heading) => {
+    if (!heading.innerText) return;
     if (!heading.id) {
       ids.set(heading.tagName, (ids.get(heading.tagName) || 0) + 1);
       heading.id = heading.tagName + '_' + ids.get(heading.tagName);
