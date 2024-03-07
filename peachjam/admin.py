@@ -648,7 +648,7 @@ class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
     resource_class = GenericDocumentResource
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     list_display = list(DocumentAdmin.list_display) + ["nature"]
-    list_filter = list(DocumentAdmin.list_filter) + ["nature"]
+    list_filter = list(DocumentAdmin.list_filter) + ["nature", "authors"]
     filter_horizontal = ("authors",)
     fieldsets[0][1]["fields"].extend(["authors", "nature"])
 
