@@ -342,6 +342,7 @@ if not DEBUG:
         dsn=PEACHJAM["SENTRY_DSN_KEY"],
         environment=PEACHJAM["SENTRY_ENVIRONMENT"],
         integrations=[DjangoIntegration(), sentry_logging],
+        before_send=before_send,
         before_send_transaction=before_send,
         send_default_pii=True,
         # sample x% of requests for performance metrics
