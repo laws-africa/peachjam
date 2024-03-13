@@ -500,7 +500,7 @@ export default {
       // load state from URL
       const params = new URLSearchParams(window.location.search);
       // skip the first event if there's a query, because the page load will already have sent it
-      this.q = (params.get('q') || '').trim();
+      this.q = params.get('q') || '';
       this.page = parseInt(params.get('page')) || this.page;
       this.ordering = params.get('ordering') || this.ordering;
 
@@ -624,13 +624,14 @@ export default {
         try {
           const params = this.generateSearchParams().toString();
           const url = `/search/api/documents/?${params}`;
+          let searchParams;
           if (pushState) {
+            searchParams = this.serialiseState();
             window.history.pushState(
               null,
               '',
-              document.location.pathname + '?' + this.serialiseState()
+              document.location.pathname + '?' + searchParams
             );
-            analytics.trackPageView();
           }
           const response = await fetch(url);
 
@@ -639,6 +640,9 @@ export default {
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
+              if (searchParams) {
+                analytics.trackSiteSearch(searchParams, this.searchInfo.count);
+              }
               if (this.searchInfo.count === 0) {
                 this.clearAllFilters();
               }
