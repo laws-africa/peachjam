@@ -46,9 +46,8 @@ class NewDocumentFormMixin:
         file_ext = splitext(upload_file.name)[1]
         SourceFile(
             document=self.instance,
-            file=File(
-                upload_file, name=f"{slugify(self.instance.title[-250:])}{file_ext}"
-            ),
+            file=File(upload_file, name=upload_file.name),
+            filename=f"{slugify(self.instance.title[-250:])}{file_ext}",
             mimetype=upload_file.content_type,
         ).save()
 
@@ -171,7 +170,6 @@ class AttachmentFormMixin:
             self.instance.mimetype = None
             ext = splitext(self.instance.file.name)[1]
             filename = f"{slugify(self.instance.document.title[-250:])}{ext}"
-            self.instance.file.name = filename
             self.instance.filename = filename
         return super().save(commit)
 
