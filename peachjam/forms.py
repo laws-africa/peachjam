@@ -169,6 +169,10 @@ class AttachmentFormMixin:
         if "file" in self.changed_data:
             self.instance.size = None
             self.instance.mimetype = None
+            ext = splitext(self.instance.file.name)[1]
+            filename = f"{slugify(self.instance.document.title[-250:])}{ext}"
+            self.instance.file.name = filename
+            self.instance.filename = filename
         return super().save(commit)
 
 
