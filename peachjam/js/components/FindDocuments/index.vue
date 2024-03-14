@@ -624,13 +624,12 @@ export default {
         try {
           const params = this.generateSearchParams().toString();
           const url = `/search/api/documents/?${params}`;
-          let searchParams;
+
           if (pushState) {
-            searchParams = this.serialiseState();
             window.history.pushState(
               null,
               '',
-              document.location.pathname + '?' + searchParams
+              document.location.pathname + '?' + this.serialiseState()
             );
           }
           const response = await fetch(url);
@@ -640,9 +639,7 @@ export default {
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
-              if (searchParams) {
-                analytics.trackSiteSearch(searchParams, this.searchInfo.count);
-              }
+              this.trackSearch(this.generateSearchParams());
               if (this.searchInfo.count === 0) {
                 this.clearAllFilters();
               }
@@ -658,6 +655,25 @@ export default {
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
       }
+    },
+
+    trackSearch (params) {
+      let keyword = params.get('search');
+      let facets = '';
+      ['ANY', 'title', 'content', 'flynote', 'case_summary', 'judges', 'title'].forEach(field => {
+        if (params.has(`search__${field}`)) keyword = keyword ? keyword + ',' + params.get(`search__${field}`) : params.get(`search__${field}`);
+      });
+      if (params.has('date__range')) {
+        keyword = keyword + ',' + params.get('date__range');
+      } else if (params.has('date__gte')) {
+        keyword = keyword + ',' + params.get('date__gte');
+      } else if (params.has('date__lte')) keyword = keyword + ',' + params.get('date__lte');
+
+      this.facets.foreach(facet => {
+        if (params.has(facet.name)) facets = facets ? facets + `,${facet.name}=` + params.getAll(facet.name).join(';') : `${facet.name}=${params.getAll(facet.name).join(';')}`;
+      });
+
+      if (keyword) analytics.trackSiteSearch(keyword, facets, this.searchInfo.count);
     },
 
     async explain (item) {
