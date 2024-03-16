@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django_webtest import WebTest
@@ -29,10 +31,16 @@ class TestJudgmentAdmin(WebTest):
         form["date_1"] = "2"
         form["date_2"] = "2000"
 
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/zagpjhc_judgment.docx"),
+            "rb",
+        ) as docx_file:
+            docx_file_content = docx_file.read()
+
         # upload file
         form["upload_file"] = Upload(
             "file.docx",
-            b"test case file judgment details",
+            docx_file_content,
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
 
@@ -45,7 +53,10 @@ class TestJudgmentAdmin(WebTest):
         self.assertIsNotNone(judgment)
 
         # check if content_html has been extracted
-        self.assertIn("test case", judgment.content_html)
+        self.assertIn(
+            "The second count is robbery, in that on or about near the place mentioned in count",
+            judgment.content_html,
+        )
         self.assertEqual(
             "test-case-2000-eacj-1-21-february-2000.docx",
             judgment.source_file.filename,
@@ -56,8 +67,13 @@ class TestJudgmentAdmin(WebTest):
             "admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk}
         )
         form2 = self.app.get(judgment_change_url).form
+
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/gauteng_judgment.pdf"), "rb"
+        ) as pdf_file:
+            pdf_file_content = pdf_file.read()
         form2["source_file-0-file"] = Upload(
-            "upload_pdf.pdf", b"pdf judgment content", "application/pdf"
+            "upload_pdf.pdf", pdf_file_content, "application/pdf"
         )
         response2 = form2.submit()
         self.assertRedirects(response2, judgment_list_url)
@@ -85,9 +101,14 @@ class TestJudgmentAdmin(WebTest):
         form["date_2"] = "1999"
 
         # upload file
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/gauteng_judgment.pdf"), "rb"
+        ) as pdf_file:
+            pdf_file_content = pdf_file.read()
 
-        raw_pdf_data = b"%PDF-1.4\n1 0 obj\n<< /Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<< /Type /Pages\n/Kids [3 0 R]\n/Count 1\n>>\nendobj\n3 0 obj\n<< /Type /Page\n/Parent 2 0 R\n/Contents 4 0 R\n/MediaBox [0 0 612 792]\n/Resources << /ProcSet 5 0 R\n/Font << /F1 6 0 R\n>>\n>>\nendobj\n4 0 obj\n<< /Length 5 0 R\n>>\nstream\nBT\n/F1 24 Tf\n100 700 Td\n(Hello, World!) Tj\nET\nendstream\nendobj\n5 0 obj\n32\nendobj\n6 0 obj\n<< /Type /Font\n/Subtype /Type1\n/Name /F1\n/BaseFont /Helvetica\n/Encoding /WinAnsiEncoding\n>>\nendobj\nxref\n0 7\n0000000000 65535 f\n0000000009 00000 n\n0000000078 00000 n\n0000000171 00000 n\n0000000260 00000 n\n0000000315 00000 n\n0000000389 00000 n\ntrailer\n<< /Size 7\n/Root 1 0 R\n>>\nstartxref\n477\n%%EOF\n"  # noqa
-        form["upload_file"] = Upload("upload_pdf.pdf", raw_pdf_data, "application/pdf")
+        form["upload_file"] = Upload(
+            "upload_pdf.pdf", pdf_file_content, "application/pdf"
+        )
 
         response = form.submit()
         self.assertRedirects(response, judgment_list_url)
@@ -107,17 +128,28 @@ class TestJudgmentAdmin(WebTest):
         judgment_change_url = reverse(
             "admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk}
         )
+
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/zagpjhc_judgment.docx"),
+            "rb",
+        ) as docx_file:
+            docx_file_content = docx_file.read()
+
         form2 = self.app.get(judgment_change_url).form
         form2["source_file-0-file"] = Upload(
             "file.docx",
-            b"test case file judgment details",
+            docx_file_content,
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
+
         response2 = form2.submit()
         self.assertRedirects(response2, judgment_list_url)
 
         judgment.refresh_from_db()
-        self.assertIn("test case", judgment.content_html)
+        self.assertIn(
+            "The second count is robbery, in that on or about near the place mentioned in count",
+            judgment.content_html,
+        )
         self.assertEqual(
             "test-case-1999-eacj-1-25-march-1999.docx", judgment.source_file.filename
         )
