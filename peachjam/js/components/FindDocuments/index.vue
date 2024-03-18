@@ -662,13 +662,11 @@ export default {
       const facets = [];
       const fields = this.facets.map(facet => facet.name).concat(['date__range', 'date__gte', 'date__lte']);
 
-      let currentKey = '';
-      params.forEach((value, key) => {
+      [...new Set(params.keys())].forEach((key) => {
         if (key.startsWith('search')) {
           const s = key === 'search' ? '' : (key.substring(8) + '=');
-          keywords.push(s + value.trim());
-        } else if (fields.includes(key) && key !== currentKey) {
-          currentKey = key;
+          keywords.push(s + params.get(key).trim());
+        } else if (fields.includes(key)) {
           facets.push(`${key}=${params.getAll(key).join(',')}`);
         }
       });
