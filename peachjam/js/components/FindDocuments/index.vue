@@ -659,17 +659,16 @@ export default {
 
     trackSearch (params) {
       const keywords = [];
+      const facets = [];
+      const fields = this.facets.map(facet => facet.name).concat(['date__range', 'date__gte', 'date__lte']);
+
       params.forEach((value, key) => {
         if (key.startsWith('search')) {
           const s = key === 'search' ? '' : (key.substring(8) + '=');
-          keywords.push(s + value.strip());
+          keywords.push(s + value.trim());
+        } else if (fields.includes(key)) {
+          facets.push(`${key}=${params.getAll(key).join(',')}`);
         }
-      });
-
-      const facets = [];
-      const fields = this.facets.map(f => f.name).concat('date__range', 'date__gte', 'date__lte');
-      fields.forEach(facet => {
-        if (params.has(facet)) facets.push(`${facet}=` + params.getAll(facet).join(';'));
       });
 
       analytics.trackSiteSearch(keywords.join('; '), facets.join('; '), this.searchInfo.count);
