@@ -58,7 +58,7 @@ class TestJudgmentAdmin(WebTest):
             judgment.content_html,
         )
         self.assertEqual(
-            "test-case-2000-eacj-1-21-february-2000.docx",
+            "file.docx",
             judgment.source_file.filename,
         )
 
@@ -79,9 +79,7 @@ class TestJudgmentAdmin(WebTest):
         self.assertRedirects(response2, judgment_list_url)
 
         judgment.refresh_from_db()
-        self.assertEqual(
-            "test-case-2000-eacj-1-21-february-2000.pdf", judgment.source_file.filename
-        )
+        self.assertEqual("upload_pdf.pdf", judgment.source_file.filename)
 
     def test_add_judgment_pdf_swap_docx(self):
         # add judgment
@@ -120,7 +118,7 @@ class TestJudgmentAdmin(WebTest):
 
         # check if content_html has been extracted
         self.assertEqual(
-            "test-case-1999-eacj-1-25-march-1999.pdf",
+            "upload_pdf.pdf",
             judgment.source_file.filename,
         )
 
@@ -150,6 +148,4 @@ class TestJudgmentAdmin(WebTest):
             "The second count is robbery, in that on or about near the place mentioned in count",
             judgment.content_html,
         )
-        self.assertEqual(
-            "test-case-1999-eacj-1-25-march-1999.docx", judgment.source_file.filename
-        )
+        self.assertEqual("file.docx", judgment.source_file.filename)
