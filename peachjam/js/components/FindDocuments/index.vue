@@ -500,7 +500,7 @@ export default {
       // load state from URL
       const params = new URLSearchParams(window.location.search);
       // skip the first event if there's a query, because the page load will already have sent it
-      this.q = (params.get('q') || '').trim();
+      this.q = params.get('q') || '';
       this.page = parseInt(params.get('page')) || this.page;
       this.ordering = params.get('ordering') || this.ordering;
 
@@ -622,20 +622,20 @@ export default {
         scrollToElement(this.$refs['search-box']);
 
         try {
-          const params = this.generateSearchParams().toString();
-          const url = `/search/api/documents/?${params}`;
+          const params = this.generateSearchParams();
+          const url = `/search/api/documents/?${params.toString()}`;
+
           if (pushState) {
             window.history.pushState(
               null,
               '',
               document.location.pathname + '?' + this.serialiseState()
             );
-            analytics.trackPageView();
           }
           const response = await fetch(url);
 
           // check that the search state hasn't changed since we sent the request
-          if (params === this.generateSearchParams().toString()) {
+          if (params.toString() === this.generateSearchParams().toString()) {
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
@@ -643,6 +643,7 @@ export default {
                 this.clearAllFilters();
               }
               this.formatFacets();
+              this.trackSearch(params);
             } else {
               this.error = response.statusText;
             }
@@ -654,6 +655,23 @@ export default {
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
       }
+    },
+
+    trackSearch (params) {
+      const keywords = [];
+      const facets = [];
+      const fields = this.facets.map(facet => facet.name).concat(['date__range', 'date__gte', 'date__lte']);
+
+      [...new Set(params.keys())].forEach((key) => {
+        if (key.startsWith('search')) {
+          const s = key === 'search' ? '' : (key.substring(8) + '=');
+          keywords.push(s + params.get(key).trim());
+        } else if (fields.includes(key)) {
+          facets.push(`${key}=${params.getAll(key).join(',')}`);
+        }
+      });
+
+      analytics.trackSiteSearch(keywords.join('; '), facets.join('; '), this.searchInfo.count);
     },
 
     async explain (item) {

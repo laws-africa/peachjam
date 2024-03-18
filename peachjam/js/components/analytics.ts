@@ -21,6 +21,11 @@ export class Analytics {
     this.paq.push(['trackPageView']);
     this.gtag('event', 'page_view');
   }
+
+  trackSiteSearch (keyword: string, category: string, searchCount: number) {
+    this.paq.push(['trackSiteSearch', keyword, category, searchCount]);
+    this.gtag('event', 'site_search', { keyword, category, searchCount });
+  }
 }
 
 const analytics = new Analytics();
