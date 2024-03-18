@@ -622,8 +622,8 @@ export default {
         scrollToElement(this.$refs['search-box']);
 
         try {
-          const params = this.generateSearchParams().toString();
-          const url = `/search/api/documents/?${params}`;
+          const params = this.generateSearchParams();
+          const url = `/search/api/documents/?${params.toString()}`;
 
           if (pushState) {
             window.history.pushState(
@@ -635,15 +635,15 @@ export default {
           const response = await fetch(url);
 
           // check that the search state hasn't changed since we sent the request
-          if (params === this.generateSearchParams().toString()) {
+          if (params.toString() === this.generateSearchParams().toString()) {
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
-              this.trackSearch(this.generateSearchParams());
               if (this.searchInfo.count === 0) {
                 this.clearAllFilters();
               }
               this.formatFacets();
+              this.trackSearch(params);
             } else {
               this.error = response.statusText;
             }
@@ -658,22 +658,21 @@ export default {
     },
 
     trackSearch (params) {
-      let keyword = params.get('search');
-      let facets = '';
-      ['ANY', 'title', 'content', 'flynote', 'case_summary', 'judges', 'title'].forEach(field => {
-        if (params.has(`search__${field}`)) keyword = keyword ? keyword + ',' + params.get(`search__${field}`) : params.get(`search__${field}`);
-      });
-      if (params.has('date__range')) {
-        keyword = keyword + ',' + params.get('date__range');
-      } else if (params.has('date__gte')) {
-        keyword = keyword + ',' + params.get('date__gte');
-      } else if (params.has('date__lte')) keyword = keyword + ',' + params.get('date__lte');
-
-      this.facets.foreach(facet => {
-        if (params.has(facet.name)) facets = facets ? facets + `,${facet.name}=` + params.getAll(facet.name).join(';') : `${facet.name}=${params.getAll(facet.name).join(';')}`;
+      const keywords = [];
+      params.forEach((value, key) => {
+        if (key.startsWith('search')) {
+          const s = key === 'search' ? '' : (key.substring(8) + '=');
+          keywords.push(s + value.strip());
+        }
       });
 
-      if (keyword) analytics.trackSiteSearch(keyword, facets, this.searchInfo.count);
+      const facets = [];
+      const fields = this.facets.map(f => f.name).concat('date__range', 'date__gte', 'date__lte');
+      fields.forEach(facet => {
+        if (params.has(facet)) facets.push(`${facet}=` + params.getAll(facet).join(';'));
+      });
+
+      analytics.trackSiteSearch(keywords.join('; '), facets.join('; '), this.searchInfo.count);
     },
 
     async explain (item) {
