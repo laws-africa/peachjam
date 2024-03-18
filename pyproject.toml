@@ -51,6 +51,7 @@ dependencies = [
     "django-sass-processor-dart-sass>=0.1.0",
     "django-storages>=1.12.3",
     "django-treebeard>=4.5.1",
+    "django-webtest>=1.9.11",
     "djangorestframework>=3.13.1",
     "drf-spectacular>=0.26.0",
     "docpipe @ git+https://github.com/laws-africa/docpipe.git@dadd9683eb946066816ad1250c098ff96686eb5f",
