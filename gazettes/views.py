@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.http import Http404
 from django.shortcuts import get_list_or_404
 from django.views.generic import RedirectView, TemplateView
 
@@ -47,8 +48,11 @@ class JurisdictionListView(TemplateView):
 
 class JurisdictionView(GazetteListView):
     def get(self, request, code, *args, **kwargs):
-        self.jurisdiction = JURISDICTION_MAP[code]
-        return super().get(request, code, *args, **kwargs)
+        try:
+            self.jurisdiction = JURISDICTION_MAP[code]
+            return super().get(request, code, *args, **kwargs)
+        except KeyError:
+            raise Http404()
 
     def get_localities(self, context):
         return self.jurisdiction.children
