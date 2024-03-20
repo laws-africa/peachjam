@@ -916,6 +916,7 @@ class DocumentContent(models.Model):
                     pdf = document.source_file.as_pdf()
                     if pdf:
                         shutil.copyfileobj(pdf, tmp)
+                        pdf.seek(0)
                         tmp.flush()
                         text = pdfjs_to_text(tmp.name)
                         # some PDFs have nulls, which breaks SQL insertion

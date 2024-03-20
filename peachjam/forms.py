@@ -1,5 +1,4 @@
 import copy
-from os.path import splitext
 
 from django import forms
 from django.conf import settings
@@ -7,7 +6,6 @@ from django.core.files import File
 from django.core.mail import send_mail
 from django.http import QueryDict
 from django.template.loader import render_to_string
-from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
 from peachjam.models import AttachedFiles, CoreDocument, SourceFile, pj_settings
@@ -43,12 +41,10 @@ class NewDocumentFormMixin:
     def process_upload_file(self, upload_file):
         # store the uploaded file
         upload_file.seek(0)
-        file_ext = splitext(upload_file.name)[1]
         SourceFile(
             document=self.instance,
-            file=File(
-                upload_file, name=f"{slugify(self.instance.title[-250:])}{file_ext}"
-            ),
+            file=File(upload_file, name=upload_file.name),
+            filename=upload_file.name,
             mimetype=upload_file.content_type,
         ).save()
 
@@ -169,6 +165,7 @@ class AttachmentFormMixin:
         if "file" in self.changed_data:
             self.instance.size = None
             self.instance.mimetype = None
+            self.instance.filename = self.instance.file.name
         return super().save(commit)
 
 

@@ -322,11 +322,6 @@ class DocumentForm(forms.ModelForm):
             return self.instance.content_html
         return self.cleaned_data["content_html"]
 
-    def _save_m2m(self):
-        super()._save_m2m()
-        # update document text
-        self.instance.update_text_content()
-
 
 class AttachedFilesInline(BaseAttachmentFileInline):
     model = AttachedFiles
