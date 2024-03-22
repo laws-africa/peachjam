@@ -1,73 +1,57 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends "peachjam/about.html" %}
 {% load i18n %}
-{% block title %}
-  {% trans 'About' %}
-{% endblock %}
-{% block page-content %}
-  <section class="py-5">
-    <div class="container">
-      <h1 class="mb-4">{% trans 'About LawLibrary.org.za' %}</h1>
-      <p class="lead mb-4">
-        {% blocktrans trimmed %}
-        LawLibrary makes South African legal information freely accessible to everyone, in support of the rule of law,
-        access to justice, and innovation.
-      {% endblocktrans %}
-      </p>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        LawLibrary.org.za is curated by <a href="https://africanlii.org/" target="_blank" rel="noopener noreferrer">AfricanLII</a>
-        in partnership with <a href="http://www.jifa.uct.ac.za/" target="_blank" rel="noreferrer noopener">JIFA</a> and
-        <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a>. AfricanLII and
-        Laws.Africa are members of the regional and global <a href="http://www.fatlm.org/" target="_blank" rel="noreferrer noopener">Free Access to Law</a>
-        community and subscribe to the principles of the Montreal Declaration on Free Access to Law.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">AfricanLII</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
-        <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
-          Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
-        (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
-        free access to law portals, and reach the people of Africa and beyond.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">JIFA</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        <a href="http://www.jifa.uct.ac.za/" target="_blank" rel="noreferrer noopener">Judicial Institute for Africa
-          (JIFA)</a>
-        is a part of the <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
-        Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. JIFA
-        complements
-        the work being done by domestic judicial institutes in Africa where they exist and offers opportunities for judges
-        from jurisdictions where there
-        are no judicial institutes to participate in courses for professional development.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">Laws.Africa</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
-        non-profit organisation that digitises African legal information for public use.
-        Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
-        officers and civil servants to deliver services efficiently and effectively.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        Contact us on <a href="mailto:info@laws.africa">info@laws.africa</a> for more information.
-      {% endblocktrans %}
-      </p>
-      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfScWM9gOpnTuceE61jLYALFLGH9kwIX3JKdK4t7IYAwz0JTA/viewform?embedded=true"
-              class="mb-4"
-              width="100%"
-              height="750px"
-              frameborder="0"
-              marginheight="0"
-              marginwidth="0">Loading…
-      </iframe>
-    </div>
-  </section>
+{% block about-top-content %}
+  <p class="lead mb-4">
+    {% blocktrans trimmed %}
+    LawLibrary makes South African legal information freely accessible to everyone, in support of the rule of law,
+    access to justice, and innovation.
+  {% endblocktrans %}
+  </p>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    LawLibrary.org.za is curated by <a href="https://africanlii.org/" target="_blank" rel="noopener noreferrer">AfricanLII</a>
+    in partnership with <a href="http://www.jifa.uct.ac.za/" target="_blank" rel="noreferrer noopener">JIFA</a> and
+    <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a>. AfricanLII and
+    Laws.Africa are members of the regional and global <a href="http://www.fatlm.org/" target="_blank" rel="noreferrer noopener">Free Access to Law</a>
+    community and subscribe to the principles of the Montreal Declaration on Free Access to Law.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">AfricanLII</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
+    <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
+      Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
+    (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
+    free access to law portals, and reach the people of Africa and beyond.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">JIFA</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    <a href="http://www.jifa.uct.ac.za/" target="_blank" rel="noreferrer noopener">Judicial Institute for Africa
+      (JIFA)</a>
+    is a part of the <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
+    Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. JIFA
+    complements
+    the work being done by domestic judicial institutes in Africa where they exist and offers opportunities for judges
+    from jurisdictions where there
+    are no judicial institutes to participate in courses for professional development.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">Laws.Africa</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
+    non-profit organisation that digitises African legal information for public use.
+    Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
+    officers and civil servants to deliver services efficiently and effectively.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+      Contact us on <a href="mailto:info@laws.africa">info@laws.africa</a> for more information.
+    {% endblocktrans %}
+  </p>
 {% endblock %}

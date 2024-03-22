@@ -1,90 +1,82 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends "peachjam/about.html" %}
 {% load i18n %}
-{% block title %}
-  {% trans 'About' %}
-{% endblock %}
-{% block page-content %}
-  <section class="py-5">
-    <div class="container">
-      <h1 class="mb-4">{% trans 'About TCILII' %}</h1>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-         TCILII is a Judiciary-led initiative, which champions the provision of access to quality justice in Turks and Caicos Islands (TCI).
-          The initiative is to ensure that legal practitioners and the public alike, have free access to legal material necessary to advance and inform the protection of their legal rights.
-        {% endblocktrans %}
-      </p>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-          The initiative is a collaborative work between the TCILII Committee, with a membership drawn from members of the Public and Private Bar, with Ms. Justice Tanya Lobban Jackson as its Chairperson, and African Legal Information Institute (AfricanLII), with Ms. Badeva-Bright, Project Director of AfricanLII, providing technical support.
-          The following persons constitute the members of the steering committee:
-          <ul>
-            <li>Ms. Renee Mc Clean - Registrar of the Supreme Court</li>
-            <li>Ms. Nalini Shiwram -Kulpa - Court Administrator</li>
-            <li>Mr Selvyn Hawkins - Representative of the Private Bar</li>
-            <li>Ms. Kerchelle E. Bain - Secretary of Bar Association</li>
-            <li>Ms. Desiree Downes - Principal Crown Counsel Legislative Drafting Division - Attorney General's Chambers</li>
-            <li>Ms. Gogontle Gatang - Senior Crown Counsel Legislative Drafting Division - Attorney General's Chambers</li>
-            <li>Ms. Clemar B Hippolyte - Principal Crown Counsel - Civil and Commercial Litigation - Attorney General's Chambers</li>
-            <li>Ms. Tamika Grant –Crown Counsel –Office of the Director of Public Prosecutions</li>
-          </ul>
-        {% endblocktrans %}
-      </p>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-          TCILII has provided a mechanism by which electronic publication of judgments and other sources of law can be accessed in one location.
-          It provides subscription-free access to the comprehensive set of local TCI judgments, as well as links to primary legal material including judicial writings and updated legislation.
-        {% endblocktrans %}
-      </p>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-          Free access to legal information is a primary tenet of any sound justice system. We seek to serve the community in the TCI and beyond.
-        {% endblocktrans %}
-      </p>
-      <p class=" mb-4">
-        {% blocktrans trimmed %}
-          The search engine is user friendly and searches can be filtered by Subject Matter, Judgment Date, Court or Judge.
-        {% endblocktrans %}
-      </p>
-      <p class=" mb-4">
-        {% blocktrans trimmed %}
-          The software and approaches that are used on TCILII have been provided by the <a href="https://www.africanlii.org/" target="_blank">African Legal Information Institute</a> (AfricanLII) which is a capacity-building programme of the <a href="https://www.dgru.uct.ac.za/" target="_blank">Democratic Governance and Rights Unit</a> (DGRU), Faculty of Law, University of Cape Town, South Africa.
-        {% endblocktrans %}
-      </p>
-      <p class=" mb-4">
-        {% blocktrans trimmed %}
-          We welcome feedback about how this site can be improved.
-        {% endblocktrans %}
-      </p>
-      <p class=" mb-4">
-        {% blocktrans trimmed %}
-          TCILII is a website of the Judiciary of the Turks and Caicos Islands.
-        {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">AfricanLII</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
-        <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
-          Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
-        (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
-        free access to law portals, and reach the people of Africa and beyond.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">Laws.Africa</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
-        non-profit organisation that digitises African legal information for public use.
-        Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
-        officers and civil servants to deliver services efficiently and effectively.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        Contact us on <a href="mailto:info@tcilii.org">info@tcilii.org</a> for more information.
-      {% endblocktrans %}
-      </p>
-    </div>
-  </section>
+{% block about-top-content %}
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+     TCILII is a Judiciary-led initiative, which champions the provision of access to quality justice in Turks and Caicos Islands (TCI).
+      The initiative is to ensure that legal practitioners and the public alike, have free access to legal material necessary to advance and inform the protection of their legal rights.
+    {% endblocktrans %}
+  </p>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+      The initiative is a collaborative work between the TCILII Committee, with a membership drawn from members of the Public and Private Bar, with Ms. Justice Tanya Lobban Jackson as its Chairperson, and African Legal Information Institute (AfricanLII), with Ms. Badeva-Bright, Project Director of AfricanLII, providing technical support.
+      The following persons constitute the members of the steering committee:
+      <ul>
+        <li>Ms. Renee Mc Clean - Registrar of the Supreme Court</li>
+        <li>Ms. Nalini Shiwram -Kulpa - Court Administrator</li>
+        <li>Mr Selvyn Hawkins - Representative of the Private Bar</li>
+        <li>Ms. Kerchelle E. Bain - Secretary of Bar Association</li>
+        <li>Ms. Desiree Downes - Principal Crown Counsel Legislative Drafting Division - Attorney General's Chambers</li>
+        <li>Ms. Gogontle Gatang - Senior Crown Counsel Legislative Drafting Division - Attorney General's Chambers</li>
+        <li>Ms. Clemar B Hippolyte - Principal Crown Counsel - Civil and Commercial Litigation - Attorney General's Chambers</li>
+        <li>Ms. Tamika Grant –Crown Counsel –Office of the Director of Public Prosecutions</li>
+      </ul>
+    {% endblocktrans %}
+  </p>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+      TCILII has provided a mechanism by which electronic publication of judgments and other sources of law can be accessed in one location.
+      It provides subscription-free access to the comprehensive set of local TCI judgments, as well as links to primary legal material including judicial writings and updated legislation.
+    {% endblocktrans %}
+  </p>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+      Free access to legal information is a primary tenet of any sound justice system. We seek to serve the community in the TCI and beyond.
+    {% endblocktrans %}
+  </p>
+  <p class=" mb-4">
+    {% blocktrans trimmed %}
+      The search engine is user friendly and searches can be filtered by Subject Matter, Judgment Date, Court or Judge.
+    {% endblocktrans %}
+  </p>
+  <p class=" mb-4">
+    {% blocktrans trimmed %}
+      The software and approaches that are used on TCILII have been provided by the <a href="https://www.africanlii.org/" target="_blank">African Legal Information Institute</a> (AfricanLII) which is a capacity-building programme of the <a href="https://www.dgru.uct.ac.za/" target="_blank">Democratic Governance and Rights Unit</a> (DGRU), Faculty of Law, University of Cape Town, South Africa.
+    {% endblocktrans %}
+  </p>
+  <p class=" mb-4">
+    {% blocktrans trimmed %}
+      We welcome feedback about how this site can be improved.
+    {% endblocktrans %}
+  </p>
+  <p class=" mb-4">
+    {% blocktrans trimmed %}
+      TCILII is a website of the Judiciary of the Turks and Caicos Islands.
+    {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">AfricanLII</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
+    <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
+      Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
+    (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
+    free access to law portals, and reach the people of Africa and beyond.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">Laws.Africa</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
+    non-profit organisation that digitises African legal information for public use.
+    Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
+    officers and civil servants to deliver services efficiently and effectively.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    Contact us on <a href="mailto:info@tcilii.org">info@tcilii.org</a> for more information.
+  {% endblocktrans %}
+  </p>
 {% endblock %}

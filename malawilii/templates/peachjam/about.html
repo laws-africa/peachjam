@@ -1,73 +1,55 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends "peachjam/about.html" %}
 {% load i18n %}
-{% block title %}
-  {% trans 'About' %}
-{% endblock %}
-{% block page-content %}
-  <section class="py-5">
-    <div class="container">
-      <h1 class="mb-4">{% trans 'About MalawiLII' %}</h1>
-      <p class="lead mb-4">
-        {% blocktrans trimmed %}
-        Launched in 2009, the Malawi Legal Information Institute (MalawiLII) is an online resource that provides free access to the laws of Malawi. On MalawiLII you have access to electronic copies of:
-        <ul>
-          <li>The most current digital collection of Malawian caselaw from all courts of record in Malawi</li>
-          <li>The Laws of Malawi</li>
-          <li>A selection of Malawian legislation a selection of Malawi Government Gazettes</li>
-        </ul>
-      {% endblocktrans %}
-      </p>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        MalawiLII is hosted by the Gender and Justice Unit (GJU) a non-governmental organisation that hones in on legal empowerment as one of the most powerful catalysts of gender equality and social justice. Working with the support of AfricanLII and partners, the GJU sources, scans, digitizes and uploads all gazettes, gazette supplements, caselaw and other legal materials as made available by the state or other contributors.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">AfricanLII</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
-        <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
-          Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
-        (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
-        free access to law portals, and reach the people of Africa and beyond.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">Laws.Africa</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
-        non-profit organisation that digitises African legal information for public use.
-        Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
-        officers and civil servants to deliver services efficiently and effectively.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-          <div>
-            <a href="tel:+26 (46) 1229 097"><span style="margin-right: .2rem"><i class="bi bi-telephone-fill mr-2"></i></span>+26 (46) 1229 097</a>
-          </div>
-          <div>
-            <a href="mailto:info@malawilii.org"><span style="margin-right: .2rem"><i class="bi bi-envelope mr-2"></i></span>info@malawilii.org</a>
-          </div>
-          <div>
-            <a href="https://facebook.com/africanlii/"><span style="margin-right: .2rem"><i class="bi bi-facebook mr-2"></i></span>facebook.com/africanlii</a>
-          </div>
-          <div>
-            <a href="https://twitter.com/AfricanLII/"><span style="margin-right: .2rem"><i class="bi bi-twitter mr-2"></i></span>twitter.com/AfricanLII</a>
-          </div>
-        {% endblocktrans %}
-      </p>
-      {% if PEACHJAM_SETTINGS.contact_form_url %}
-        <iframe src="{{ PEACHJAM_SETTINGS.contact_form_url }}"
-                class="mb-4"
-                width="100%"
-                height="750px"
-                frameborder="0"
-                marginheight="0"
-                marginwidth="0">Loading…
-        </iframe>
-      {% endif %}
-    </div>
-  </section>
+{% block about-top-content %}
+  <p class="lead mb-4">
+    {% blocktrans trimmed %}
+      Launched in 2009, the Malawi Legal Information Institute (MalawiLII) is an online resource that provides free access to the laws of Malawi. On MalawiLII you have access to electronic copies of:
+      <ul>
+        <li>The most current digital collection of Malawian caselaw from all courts of record in Malawi</li>
+        <li>The Laws of Malawi</li>
+        <li>A selection of Malawian legislation a selection of Malawi Government Gazettes</li>
+      </ul>
+    {% endblocktrans %}
+  </p>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+      MalawiLII is hosted by the Gender and Justice Unit (GJU) a non-governmental organisation that hones in on legal empowerment as one of the most powerful catalysts of gender equality and social justice. Working with the support of AfricanLII and partners, the GJU sources, scans, digitizes and uploads all gazettes, gazette supplements, caselaw and other legal materials as made available by the state or other contributors.
+    {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">AfricanLII</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+      <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
+      <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
+        Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
+      (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
+      free access to law portals, and reach the people of Africa and beyond.
+    {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">Laws.Africa</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
+    non-profit organisation that digitises African legal information for public use.
+    Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
+    officers and civil servants to deliver services efficiently and effectively.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+      <div>
+        <a href="tel:+26 (46) 1229 097"><span style="margin-right: .2rem"><i class="bi bi-telephone-fill mr-2"></i></span>+26 (46) 1229 097</a>
+      </div>
+      <div>
+        <a href="mailto:info@malawilii.org"><span style="margin-right: .2rem"><i class="bi bi-envelope mr-2"></i></span>info@malawilii.org</a>
+      </div>
+      <div>
+        <a href="https://facebook.com/africanlii/"><span style="margin-right: .2rem"><i class="bi bi-facebook mr-2"></i></span>facebook.com/africanlii</a>
+      </div>
+      <div>
+        <a href="https://twitter.com/AfricanLII/"><span style="margin-right: .2rem"><i class="bi bi-twitter mr-2"></i></span>twitter.com/AfricanLII</a>
+      </div>
+    {% endblocktrans %}
+  </p>
 {% endblock %}
