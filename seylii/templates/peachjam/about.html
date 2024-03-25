@@ -1,71 +1,63 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends "peachjam/about.html" %}
 {% load i18n %}
-{% block title %}
-  {% trans 'About' %}
-{% endblock %}
-{% block page-content %}
-  <section class="py-5">
-    <div class="container">
-      <h1 class="mb-4">{% trans 'About SeyLII' %}</h1>
-      <p class="lead mb-4">
-        {% blocktrans trimmed %}
-        The Seychelles Legal Information Institute (SeyLII) offers free and anonymous access to case law, legislation and secondary legal materials from the Seychelles.
-        SeyLII is an independent, self-funded organisation and needs your support.
-      {% endblocktrans %}
-      </p>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        SeyLII was established in 2012 under the auspices of the Judiciary of Seychelles and with the support of AfricanLII.  It became an independent registered association in 2015.
-        SEYLII is a member of the international Free Access to Law Movement and subscribes to the principles of the <a href="http://www.fatlm.org/declaration/">Declaration on Free Access to Law</a>.
-      {% endblocktrans %}
-      </p>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        The vision of SeyLII is to be the primary legal resource institution in Seychelles, providing free, reliable online access to essential Seychelles legal resources.
-        These core resources have not previously been readily or cheaply available to most citizens of Seychelles. They make it easier for practitioners and judges to research the law, to prepare cases for hearing,
-        and to write fairly researched judgments and decisions, and for lawyers and non-lawyers (both local and international) to understand and monitor the changing nature of Seychelles’ legal environment.
-      {% endblocktrans %}
-      </p>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        In addition to providing a portal for case law and legislation, SeyLII aims to increase public awareness of the operations of the domestic courts and the broader legal profession,
-        thereby improving access to the courts and strengthening public confidence in the administration of justice.
-      {% endblocktrans %}
-      </p>
-      <h3 class="mb-4">Strategic Plan</h3>
-      <p>
-        {# djlint:off #}
-        {% blocktrans trimmed %}
-          The <a href="/akn/sc/doc/strategic-plan/2022-10-31/seylii-strategic-plan/eng@2022-10-31">SeyLII strategic plan for 2023 to 2025</a> outlines the objectives and strategy of SeyLII.
-          For any further queries, or to offer assistance to the SeyLII team, please contact us <a href="#contact">here</a>.
-        {% endblocktrans %}
-        {# djlint:on #}
-      </p>
-      <h2 class="mb-4">AfricanLII</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
-        <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
-          Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
-        (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
-        free access to law portals, and reach the people of Africa and beyond.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">Laws.Africa</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
-        non-profit organisation that digitises African legal information for public use.
-        Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
-        officers and civil servants to deliver services efficiently and effectively.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-        Contact us on <a href="mailto:info@seylii.org">info@seylii.org</a> for more information.
-      {% endblocktrans %}
-      </p>
-    </div>
-  </section>
+{% block about-top-content %}
+  <p class="lead mb-4">
+    {% blocktrans trimmed %}
+    The Seychelles Legal Information Institute (SeyLII) offers free and anonymous access to case law, legislation and secondary legal materials from the Seychelles.
+    SeyLII is an independent, self-funded organisation and needs your support.
+  {% endblocktrans %}
+  </p>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    SeyLII was established in 2012 under the auspices of the Judiciary of Seychelles and with the support of AfricanLII.  It became an independent registered association in 2015.
+    SEYLII is a member of the international Free Access to Law Movement and subscribes to the principles of the <a href="http://www.fatlm.org/declaration/">Declaration on Free Access to Law</a>.
+  {% endblocktrans %}
+  </p>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    The vision of SeyLII is to be the primary legal resource institution in Seychelles, providing free, reliable online access to essential Seychelles legal resources.
+    These core resources have not previously been readily or cheaply available to most citizens of Seychelles. They make it easier for practitioners and judges to research the law, to prepare cases for hearing,
+    and to write fairly researched judgments and decisions, and for lawyers and non-lawyers (both local and international) to understand and monitor the changing nature of Seychelles’ legal environment.
+  {% endblocktrans %}
+  </p>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    In addition to providing a portal for case law and legislation, SeyLII aims to increase public awareness of the operations of the domestic courts and the broader legal profession,
+    thereby improving access to the courts and strengthening public confidence in the administration of justice.
+  {% endblocktrans %}
+  </p>
+  <h3 class="mb-4">Strategic Plan</h3>
+  <p>
+    {# djlint:off #}
+    {% blocktrans trimmed %}
+      The <a href="/akn/sc/doc/strategic-plan/2022-10-31/seylii-strategic-plan/eng@2022-10-31">SeyLII strategic plan for 2023 to 2025</a> outlines the objectives and strategy of SeyLII.
+      For any further queries, or to offer assistance to the SeyLII team, please contact us <a href="#contact">here</a>.
+    {% endblocktrans %}
+    {# djlint:on #}
+  </p>
+  <h2 class="mb-4">AfricanLII</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
+    <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
+      Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
+    (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
+    free access to law portals, and reach the people of Africa and beyond.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">Laws.Africa</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
+    non-profit organisation that digitises African legal information for public use.
+    Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
+    officers and civil servants to deliver services efficiently and effectively.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+    Contact us on <a href="mailto:info@seylii.org">info@seylii.org</a> for more information.
+  {% endblocktrans %}
+  </p>
 {% endblock %}

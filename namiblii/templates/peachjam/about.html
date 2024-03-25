@@ -1,62 +1,54 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends "peachjam/about.html" %}
 {% load i18n %}
-{% block title %}
-  {% trans 'About' %}
-{% endblock %}
-{% block page-content %}
-  <section class="py-5">
-    <div class="container">
-      <h1 class="mb-4">{% trans 'About NamibLII' %}</h1>
-      <p class="lead mb-4">
-        {% blocktrans trimmed %}
-          NamibLII is a project of the Law Reform and Development Commission managed by the Directorate: Law Reform of the Ministry of Justice of the Republic of Namibia.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          In terms of the Law Reform and Development Commission Act, 1991 (Act No. 29 of 1991) the Commission is mandated to consolidate or codify any branch of the law or to introduce other measures aimed at making the law more readily accessible.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          NamibLII is the embodiment of this mandate making annotated statutes, judgments and gazettes available in a user-friendly format.
-        {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">AfricanLII</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-      <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
-      <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
-        Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
-      (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
-      free access to law portals, and reach the people of Africa and beyond.
-      {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">Laws.Africa</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-      <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
-      non-profit organisation that digitises African legal information for public use.
-      Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
-      officers and civil servants to deliver services efficiently and effectively.
-      {% endblocktrans %}
-      </p>
-      <h2>{% trans 'Contact Us' %}</h2>
-      <div>8th floor, Sanlam Building</div>
-      <div>Independence Avenue</div>
-      <div>Windhoek, Namibia</div>
-      <div>
-        <a href="tel:+26 (46) 1229 097"><span style="margin-right: .2rem"><i class="bi bi-telephone-fill mr-2"></i></span>+26 (46) 1229 097</a>
-      </div>
-      <div>
-        <a href="mailto:info@namiblii.org"><span style="margin-right: .2rem"><i class="bi bi-envelope mr-2"></i></span>info@namiblii.org</a>
-      </div>
-      <div>
-        <a href="https://facebook.com/namiblii/"><span style="margin-right: .2rem"><i class="bi bi-facebook mr-2"></i></span>facebook.com/namiblii</a>
-      </div>
-      <div>
-        <a href="https://twitter.com/AfricanLII/"><span style="margin-right: .2rem"><i class="bi bi-twitter mr-2"></i></span>twitter.com/AfricanLII</a>
-      </div>
-    </div>
-  </section>
+{% block about-top-content %}
+  <p class="lead mb-4">
+    {% blocktrans trimmed %}
+      NamibLII is a project of the Law Reform and Development Commission managed by the Directorate: Law Reform of the Ministry of Justice of the Republic of Namibia.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      In terms of the Law Reform and Development Commission Act, 1991 (Act No. 29 of 1991) the Commission is mandated to consolidate or codify any branch of the law or to introduce other measures aimed at making the law more readily accessible.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      NamibLII is the embodiment of this mandate making annotated statutes, judgments and gazettes available in a user-friendly format.
+    {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">AfricanLII</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+  <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
+  <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
+    Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
+  (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
+  free access to law portals, and reach the people of Africa and beyond.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">Laws.Africa</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+  <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
+  non-profit organisation that digitises African legal information for public use.
+  Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
+  officers and civil servants to deliver services efficiently and effectively.
+  {% endblocktrans %}
+  </p>
+  <h2>{% trans 'Contact Us' %}</h2>
+  <div>8th floor, Sanlam Building</div>
+  <div>Independence Avenue</div>
+  <div>Windhoek, Namibia</div>
+  <div>
+    <a href="tel:+26 (46) 1229 097"><span style="margin-right: .2rem"><i class="bi bi-telephone-fill mr-2"></i></span>+26 (46) 1229 097</a>
+  </div>
+  <div>
+    <a href="mailto:info@namiblii.org"><span style="margin-right: .2rem"><i class="bi bi-envelope mr-2"></i></span>info@namiblii.org</a>
+  </div>
+  <div>
+    <a href="https://facebook.com/namiblii/"><span style="margin-right: .2rem"><i class="bi bi-facebook mr-2"></i></span>facebook.com/namiblii</a>
+  </div>
+  <div>
+    <a href="https://twitter.com/AfricanLII/"><span style="margin-right: .2rem"><i class="bi bi-twitter mr-2"></i></span>twitter.com/AfricanLII</a>
+  </div>
 {% endblock %}

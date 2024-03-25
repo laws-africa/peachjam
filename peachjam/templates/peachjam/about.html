@@ -6,7 +6,23 @@
 {% block page-content %}
   <section class="py-5">
     <div class="container">
-      <h1 class="mb-4">{% trans 'About' %} {{ APP_NAME }}</h1>
+      {% block about-heading %}
+        <h1 class="mb-4">{% trans 'About' %} {{ APP_NAME }}</h1>
+      {% endblock %}
+      {% block about-top-content %}{% endblock %}
+      {% block contact-form %}
+        {% if PEACHJAM_SETTINGS.contact_form_url %}
+          <iframe src="{{ PEACHJAM_SETTINGS.contact_form_url }}"
+                  class="mb-4"
+                  width="100%"
+                  height="750px"
+                  frameborder="0"
+                  marginheight="0"
+                  marginwidth="0">Loading…
+          </iframe>
+        {% endif %}
+      {% endblock %}
+      {% block about-bottom-content %}{% endblock %}
     </div>
   </section>
 {% endblock %}

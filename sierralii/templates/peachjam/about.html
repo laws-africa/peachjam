@@ -1,140 +1,132 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends "peachjam/about.html" %}
 {% load i18n %}
-{% block title %}
-  {% trans 'About' %}
-{% endblock %}
-{% block page-content %}
-  <section class="py-5">
-    <div class="container">
-      <h1 class="mb-4">{% trans 'About SierraLII' %}</h1>
-      <p class="lead mb-4">
-        {% blocktrans trimmed %}
-        SierraLII provides free, unrestricted access to the primary and secondary legal materials of Sierra Leone. Free Access to Law supports the rule of law, access to justice and transparency.
+{% block about-top-content %}
+  <p class="lead mb-4">
+    {% blocktrans trimmed %}
+    SierraLII provides free, unrestricted access to the primary and secondary legal materials of Sierra Leone. Free Access to Law supports the rule of law, access to justice and transparency.
+  {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+   Sierra Leone Legal Information Institute ("SierraLII") is a non-profit organization registered in Sierra Leone that aims to contribute to the continuing national progress by providing free access to the nation’s legal information.
+   Free access to legal information from other countries and regions of the world is also made possible through its affiliation with the Free Access to Law Movement and the global network of Legal Information Institutes.
+  {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+    It was originally established as a legacy project of the Special Court for Sierra Leone (SCSL) in 2010,
+    with generous sponsorship from the <a href="http://www.soros.org">Open Society Foundations</a>  and was managed by Maria Warren,
+    Chief of Legal Operations of the Office of the Prosecutor.
+    She was assisted by Bridget Osho, Legal Officer, who subsequently served as the sites first Sierra Leonean Coordinator.
+    Bridget was succeeded by Martina Egbenda, and then by Leroy Spencer, who is now the current Coordinator of the Institute.
+  {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+    Membership in Sierra LII is open to all organizations and individuals who are providers and consumers of legal information.
+    The primary target user groups of Sierra LII are members of the Judiciary, Parliament, Legal and associated professions, schools and universities, the Media, NGO community and the business sector.
+    Free, easily accessible, up-to-date information delivers two key benefits to various user groups:
+    {% endblocktrans %}
+  </p>
+  <ul>
+    <li>{% blocktrans %} enhance the quality of their work {% endblocktrans %}</li>
+    <li>{% blocktrans %} reduce the cost and effort to complete such work{% endblocktrans %}</li>
+  </ul>
+  <h4>SierraLII Organizational Structure</h4>
+  <p>
+    {% blocktrans trimmed %}
+    Sierra LII is set up as a Company limited by guarantee with a Board of Directors and General Members.
+    Within the Board of Directors, there are working committees established to handle specific SierraLii issues.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+    Oversight of the work of Sierra LII is conducted by the Board of Directors.
+    The current directors are representatives of the following organizations:
+    {% endblocktrans %}
+  </p>
+  <ul>
+    <li>
+      {% blocktrans %}
+        Justice Sector Coordination Office -Chairperson
       {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-       Sierra Leone Legal Information Institute ("SierraLII") is a non-profit organization registered in Sierra Leone that aims to contribute to the continuing national progress by providing free access to the nation’s legal information.
-       Free access to legal information from other countries and regions of the world is also made possible through its affiliation with the Free Access to Law Movement and the global network of Legal Information Institutes.
+    </li>
+    <li>
+      {% blocktrans %}
+        University of Sierra Leone
       {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-        It was originally established as a legacy project of the Special Court for Sierra Leone (SCSL) in 2010,
-        with generous sponsorship from the <a href="http://www.soros.org">Open Society Foundations</a>  and was managed by Maria Warren,
-        Chief of Legal Operations of the Office of the Prosecutor.
-        She was assisted by Bridget Osho, Legal Officer, who subsequently served as the sites first Sierra Leonean Coordinator.
-        Bridget was succeeded by Martina Egbenda, and then by Leroy Spencer, who is now the current Coordinator of the Institute.
+    </li>
+    <li>
+      {% blocktrans %}
+        Attorney General & Minister of Justice
       {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-        Membership in Sierra LII is open to all organizations and individuals who are providers and consumers of legal information.
-        The primary target user groups of Sierra LII are members of the Judiciary, Parliament, Legal and associated professions, schools and universities, the Media, NGO community and the business sector.
-        Free, easily accessible, up-to-date information delivers two key benefits to various user groups:
-        {% endblocktrans %}
-      </p>
-      <ul>
-        <li>{% blocktrans %} enhance the quality of their work {% endblocktrans %}</li>
-        <li>{% blocktrans %} reduce the cost and effort to complete such work{% endblocktrans %}</li>
-      </ul>
-      <h4>SierraLII Organizational Structure</h4>
-      <p>
-        {% blocktrans trimmed %}
-        Sierra LII is set up as a Company limited by guarantee with a Board of Directors and General Members.
-        Within the Board of Directors, there are working committees established to handle specific SierraLii issues.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-        Oversight of the work of Sierra LII is conducted by the Board of Directors.
-        The current directors are representatives of the following organizations:
-        {% endblocktrans %}
-      </p>
-      <ul>
-        <li>
-          {% blocktrans %}
-            Justice Sector Coordination Office -Chairperson
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans %}
-            University of Sierra Leone
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans %}
-            Attorney General & Minister of Justice
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans %}
-            The Sierra Leone Judiciary
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans %}
-            The Sierra Leone Parliament
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans %}
-            Law Reform Commission
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans %}
-            Human Rights Commission Sierra Leone
-            {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans %}
-            Selected Civil Society Groups
-          {% endblocktrans %}
-        </li>
-      </ul>
-      <p>
-        {% blocktrans trimmed %}
-        The General Membership is open to all organizations and individuals who are providers and consumers of legal information.
-        Regular meetings are held with the General Membership to provide updates on recent progress with SierraLII and to receive feedback and input when necessary.
-        If you are interested in attending a General Membership meeting, please visit the contact us page and send us an email.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-        SierraLII is a member of the AfricanLII community.
-        It has also received generous funding from the Indigo Trust to implement a project titled <em>Free Access to Law</em>.
-        {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">AfricanLII</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-      <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
-      <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
-        Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
-      (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
-      free access to law portals, and reach the people of Africa and beyond.
+    </li>
+    <li>
+      {% blocktrans %}
+        The Sierra Leone Judiciary
       {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">Laws.Africa</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-      <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
-      non-profit organisation that digitises African legal information for public use.
-      Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
-      officers and civil servants to deliver services efficiently and effectively.
+    </li>
+    <li>
+      {% blocktrans %}
+        The Sierra Leone Parliament
       {% endblocktrans %}
-      </p>
-      <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
-      <div>
-        <a href="mailto:info@sierralii.org"><span style="margin-right:.2rem"><i class="bi bi-envelope"></i></span>info@sierralii.org</a>
-      </div>
-      <div>
-        <a href="https://facebook.com/www.sierralii.org/"><span style="margin-right:.2rem"><i class="bi bi-facebook"></i></span>facebook.com/www.sierralii.org</a>
-      </div>
-      <div>
-        <a href="https://twitter.com/AfricanLII/"><span style="margin-right:.2rem"><i class="bi bi-twitter"></i></span>twitter.com/AfricanLII</a>
-      </div>
-    </div>
-  </section>
+    </li>
+    <li>
+      {% blocktrans %}
+        Law Reform Commission
+      {% endblocktrans %}
+    </li>
+    <li>
+      {% blocktrans %}
+        Human Rights Commission Sierra Leone
+        {% endblocktrans %}
+    </li>
+    <li>
+      {% blocktrans %}
+        Selected Civil Society Groups
+      {% endblocktrans %}
+    </li>
+  </ul>
+  <p>
+    {% blocktrans trimmed %}
+    The General Membership is open to all organizations and individuals who are providers and consumers of legal information.
+    Regular meetings are held with the General Membership to provide updates on recent progress with SierraLII and to receive feedback and input when necessary.
+    If you are interested in attending a General Membership meeting, please visit the contact us page and send us an email.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+    SierraLII is a member of the AfricanLII community.
+    It has also received generous funding from the Indigo Trust to implement a project titled <em>Free Access to Law</em>.
+    {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">AfricanLII</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+  <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
+  <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
+    Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
+  (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
+  free access to law portals, and reach the people of Africa and beyond.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">Laws.Africa</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+  <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
+  non-profit organisation that digitises African legal information for public use.
+  Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
+  officers and civil servants to deliver services efficiently and effectively.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4" id="contact">{% trans 'Contact us' %}</h2>
+  <div>
+    <a href="mailto:info@sierralii.org"><span style="margin-right:.2rem"><i class="bi bi-envelope"></i></span>info@sierralii.org</a>
+  </div>
+  <div>
+    <a href="https://facebook.com/www.sierralii.org/"><span style="margin-right:.2rem"><i class="bi bi-facebook"></i></span>facebook.com/www.sierralii.org</a>
+  </div>
+  <div>
+    <a href="https://twitter.com/AfricanLII/"><span style="margin-right:.2rem"><i class="bi bi-twitter"></i></span>twitter.com/AfricanLII</a>
+  </div>
 {% endblock %}

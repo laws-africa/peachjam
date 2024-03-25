@@ -1,141 +1,133 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends "peachjam/about.html" %}
 {% load i18n %}
-{% block title %}
-  {% trans 'About' %}
-{% endblock %}
-{% block page-content %}
-  <section class="py-5">
-    <div class="container">
-      <h1 class="mb-4">{% trans 'About Zimlii' %}</h1>
-      <p class="lead mb-4">
-        {% blocktrans trimmed %}
-          The Zimbabwe Legal Information Institute (ZimLII) is an independent not-for-profit Trust hosting an online repository of legal information from Zimbabwe and beyond.
-          The organisation aims to provide for the knowledge needs of a growing group of people learning, aware and interested in the justice and legal framework of our country.
-          ZimLII is a member of the global Free Access to Law Movement.
-          The organisation works closely with other regional and international Legal Information Institutes (LIIs) to promote justice and rule of law by maximising access at no cost to public legal information.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-        The Montreal Declaration of the Free Access to Law Movement (2002) states:
-        {% endblocktrans %}
-      </p>
-      <p>
-        <em>
-          {% blocktrans trimmed %}
-          "Public legal information from all countries and international institutions is part of the common heritage of humanity. Maximising access to this information promotes justice and the rule of law.
-          {% endblocktrans %}
-        </em>
-      </p>
-      <p>
-        <em>
-          {% blocktrans trimmed %}
-            Public legal information is digital common property and should be accessible to all on a non-profit basis and free of charge.
-          {% endblocktrans %}
-        </em>
-      </p>
-      <p>
-        <em>
-          {% blocktrans trimmed %}
-            Organisations such as legal information institutes have the right to publish legal information and the government bodies that create or control that information should provide access to it so that it can be published by other parties."
-          {% endblocktrans %}
-        </em>
-      </p>
-      <h5>
-        <strong>{% trans 'Zimlii Objectives' %}</strong>
-      </h5>
-      <ol>
-        <li>To increase access to public legal information</li>
-        <li>To provide precedents for jurisprudential development of Zimbabwe's legal system</li>
-        <li>
-          To create a technologically advanced platform for faster and more open circulation of legal material hitherto archived in hard copy in Zimbabwe
-        </li>
-        <li>
-          TO provide support to regional and international legal key players to access crucial legal databases from Zimbabwe and to provide links to other legal information institutes
-        </li>
-        <li>To promote justice and the rule of law</li>
-      </ol>
-      <h5>
-        <strong>{% trans 'Zimlii Board of Trustees' %}</strong>
-      </h5>
-      <ol>
-        <li>
-          <strong>Justice Ahmed Moosa Ebrahim,</strong> Zimbabwe Supreme Court Judge
-        </li>
-        <li>
-          <strong>Professor Geoffrey Feltoe,</strong> BA (Rhodes), LLB (Lond.), MPhil (Kent), Lecturer (UZ Faculty of Law)
-        </li>
-        <li>
-          <strong>Professor Anne Hellum</strong> (Institute of Women's Law, University of Oslo, Norway)
-        </li>
-        <li>
-          <strong>Professor Julie Elliot Stewart</strong> LLB (Hons) London, Director of Southern and Eastern African Centre for Women's Law (SEARCWL)
-        </li>
-      </ol>
-      <h5>
-        <strong>{% trans 'Zimlii Steering Committee' %}</strong>
-      </h5>
-      <p>Chaired by the Legal Resources Foundation (LRF)</p>
-      <ol>
-        <li>
-          <strong>Deborah Barron</strong> – LRF National Director
-        </li>
-        <li>
-          <strong>Kamurai Mudzingwa</strong> – LRF Publications Manager
-        </li>
-        <li>
-          <strong>Adv. John Reid-Rowland</strong> – LRF Legal Expert
-        </li>
-        <li>
-          <strong>Sesedzai Munyaradzi</strong> – SEARCWL IT Administrator
-        </li>
-        <li>
-          <strong>Stanley Nyamanhindi</strong> – Law Society of Zimbabwe, Lawyer
-        </li>
-        <li>
-          <strong>Cecilie Butenschøn Mariri</strong> – SEARCWL Librarian
-        </li>
-        <li>
-          <strong>Josiline Chigwada</strong> - Bindura University Sub-Librarian
-        </li>
-        <li>
-          <strong>Darlington Musemburi</strong> – University of Zimbabwe Faculty of Law Sub-Librarian
-        </li>
-        <li>
-          <strong>Takudzwa Chatora</strong> - ZimLII Coordinator
-        </li>
-      </ol>
-      <h2 class="mb-4">AfricanLII</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-      <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
-      <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
-        Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
-      (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
-      free access to law portals, and reach the people of Africa and beyond.
+{% block about-top-content %}
+  <p class="lead mb-4">
+    {% blocktrans trimmed %}
+      The Zimbabwe Legal Information Institute (ZimLII) is an independent not-for-profit Trust hosting an online repository of legal information from Zimbabwe and beyond.
+      The organisation aims to provide for the knowledge needs of a growing group of people learning, aware and interested in the justice and legal framework of our country.
+      ZimLII is a member of the global Free Access to Law Movement.
+      The organisation works closely with other regional and international Legal Information Institutes (LIIs) to promote justice and rule of law by maximising access at no cost to public legal information.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+    The Montreal Declaration of the Free Access to Law Movement (2002) states:
+    {% endblocktrans %}
+  </p>
+  <p>
+    <em>
+      {% blocktrans trimmed %}
+      "Public legal information from all countries and international institutions is part of the common heritage of humanity. Maximising access to this information promotes justice and the rule of law.
       {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">Laws.Africa</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-      <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
-      non-profit organisation that digitises African legal information for public use.
-      Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
-      officers and civil servants to deliver services efficiently and effectively.
+    </em>
+  </p>
+  <p>
+    <em>
+      {% blocktrans trimmed %}
+        Public legal information is digital common property and should be accessible to all on a non-profit basis and free of charge.
       {% endblocktrans %}
-      </p>
-      <h2>
-        {% trans 'Contact Us' %}
-      </h2>
-      <div>
-        <a href="mailto:info@zmilii.org"><span style="margin-right: .2rem"><i class="bi bi-envelope mr-2"></i></span>info@zimlii.org</a>
-      </div>
-      <div>
-        <a href="https://facebook.com/zimlii/"><span style="margin-right: .2rem"><i class="bi bi-facebook mr-2"></i></span>facebook.com/zimlii</a>
-      </div>
-      <div>
-        <a href="https://twitter.com/AfricanLII/"><span style="margin-right: .2rem"><i class="bi bi-twitter mr-2"></i></span>twitter.com/AfricanLII</a>
-      </div>
-    </div>
-  </section>
+    </em>
+  </p>
+  <p>
+    <em>
+      {% blocktrans trimmed %}
+        Organisations such as legal information institutes have the right to publish legal information and the government bodies that create or control that information should provide access to it so that it can be published by other parties."
+      {% endblocktrans %}
+    </em>
+  </p>
+  <h5>
+    <strong>{% trans 'Zimlii Objectives' %}</strong>
+  </h5>
+  <ol>
+    <li>To increase access to public legal information</li>
+    <li>To provide precedents for jurisprudential development of Zimbabwe's legal system</li>
+    <li>
+      To create a technologically advanced platform for faster and more open circulation of legal material hitherto archived in hard copy in Zimbabwe
+    </li>
+    <li>
+      TO provide support to regional and international legal key players to access crucial legal databases from Zimbabwe and to provide links to other legal information institutes
+    </li>
+    <li>To promote justice and the rule of law</li>
+  </ol>
+  <h5>
+    <strong>{% trans 'Zimlii Board of Trustees' %}</strong>
+  </h5>
+  <ol>
+    <li>
+      <strong>Justice Ahmed Moosa Ebrahim,</strong> Zimbabwe Supreme Court Judge
+    </li>
+    <li>
+      <strong>Professor Geoffrey Feltoe,</strong> BA (Rhodes), LLB (Lond.), MPhil (Kent), Lecturer (UZ Faculty of Law)
+    </li>
+    <li>
+      <strong>Professor Anne Hellum</strong> (Institute of Women's Law, University of Oslo, Norway)
+    </li>
+    <li>
+      <strong>Professor Julie Elliot Stewart</strong> LLB (Hons) London, Director of Southern and Eastern African Centre for Women's Law (SEARCWL)
+    </li>
+  </ol>
+  <h5>
+    <strong>{% trans 'Zimlii Steering Committee' %}</strong>
+  </h5>
+  <p>Chaired by the Legal Resources Foundation (LRF)</p>
+  <ol>
+    <li>
+      <strong>Deborah Barron</strong> – LRF National Director
+    </li>
+    <li>
+      <strong>Kamurai Mudzingwa</strong> – LRF Publications Manager
+    </li>
+    <li>
+      <strong>Adv. John Reid-Rowland</strong> – LRF Legal Expert
+    </li>
+    <li>
+      <strong>Sesedzai Munyaradzi</strong> – SEARCWL IT Administrator
+    </li>
+    <li>
+      <strong>Stanley Nyamanhindi</strong> – Law Society of Zimbabwe, Lawyer
+    </li>
+    <li>
+      <strong>Cecilie Butenschøn Mariri</strong> – SEARCWL Librarian
+    </li>
+    <li>
+      <strong>Josiline Chigwada</strong> - Bindura University Sub-Librarian
+    </li>
+    <li>
+      <strong>Darlington Musemburi</strong> – University of Zimbabwe Faculty of Law Sub-Librarian
+    </li>
+    <li>
+      <strong>Takudzwa Chatora</strong> - ZimLII Coordinator
+    </li>
+  </ol>
+  <h2 class="mb-4">AfricanLII</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+  <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
+  <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
+    Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
+  (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
+  free access to law portals, and reach the people of Africa and beyond.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">Laws.Africa</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+  <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
+  non-profit organisation that digitises African legal information for public use.
+  Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
+  officers and civil servants to deliver services efficiently and effectively.
+  {% endblocktrans %}
+  </p>
+  <h2>
+    {% trans 'Contact Us' %}
+  </h2>
+  <div>
+    <a href="mailto:info@zmilii.org"><span style="margin-right: .2rem"><i class="bi bi-envelope mr-2"></i></span>info@zimlii.org</a>
+  </div>
+  <div>
+    <a href="https://facebook.com/zimlii/"><span style="margin-right: .2rem"><i class="bi bi-facebook mr-2"></i></span>facebook.com/zimlii</a>
+  </div>
+  <div>
+    <a href="https://twitter.com/AfricanLII/"><span style="margin-right: .2rem"><i class="bi bi-twitter mr-2"></i></span>twitter.com/AfricanLII</a>
+  </div>
 {% endblock %}

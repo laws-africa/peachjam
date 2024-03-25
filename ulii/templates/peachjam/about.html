@@ -1,219 +1,211 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends "peachjam/about.html" %}
 {% load i18n %}
-{% block title %}
-  {% trans 'About' %}
-{% endblock %}
-{% block page-content %}
-  <section class="py-5">
-    <div class="container">
-      <h1 class="mb-4">{% trans 'About ULII' %}</h1>
-      <p class="lead mb-4">
-        {% blocktrans trimmed %}
-          ULII is a free online legal information database of Uganda's law.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          The Uganda Legal Information Institute (ULII) is an internet facility that provides the public with legal information relating to Uganda, with a view of promoting and supporting the rule of law.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          ULII publishes public legal information - that is decisions of courts, legislation and some publicly available secondary legal materials created by public bodies for purposes of public access, for example the Justice Law and Order Sector (JLOS), the Uganda Law Reform Commission and the Uganda Law Reform Commission (ULRC).
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          ULII has obtained the kind assistance of the African Legal Information Institute (AfricanLII) in its development and is a member of the global free access to law movement.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          The Law Reporting department is a department of the Judiciary of Uganda and is currently operating at the Judicial Studies Institute. The department carries out various activities including on-line publication of case law and laws of Uganda.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          The Uganda legal information institute (ULII) is an internet facility that provides the public with legal information relating to Uganda, with a view of promoting and supporting the rule of law. The website can be accessed on www.ulii.org.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          ULII publishes legal information that is: legally significant decisions of courts, legislation, treaties and some publicly available secondary legal material created by public bodies for purposes of public access for example the JLOS (Justice Law and Order Sector) and the ULRC (Uganda Law Reform Commission).
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          The decisions of court that are published are from all courts of record, that is; the Supreme Court, Court of Appeal, Constitutional Court, High Court, Commercial Court, as well as CADER(Centre for Arbitration and Dispute Resolution) together with an electronic citation for each decision.
-        {% endblocktrans %}
-      </p>
-      <h5>
-        <strong>{% trans 'Objectives' %}</strong>
-      </h5>
-      <ul>
-        <li>
-          {% blocktrans trimmed %}
-            Improve on-going collection of case law in electronic format from courts of record
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans trimmed %}
-            Ensure completeness of the database for covered years for all courts
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans trimmed %}
-             Scanning of older collection
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans trimmed %}
-            To digest the judgments to enhance the textual search capacity online
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans trimmed %}
-            Improve use of the website by conducting training and promotion
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans trimmed %}
-            Publish law reports from the case law already online.
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans trimmed %}
-            Publication of treaties entered into by the government of Uganda with other government and international organisations.
-          {% endblocktrans %}
-        </li>
-      </ul>
-      <h5>
-        <strong>{% trans 'How we found things' %}</strong>
-      </h5>
-      <p>
-        {% blocktrans trimmed %}
-          The Uganda Law Reports were last published in 1973.
-          The East African Law Reports went out of print in 1975.
-          Though it recently made a come back, it does not reflect the last series that covered East African courts fairly and comprehensively with the courts of all three countries participating in the editorial work.
-          The current series mainly concentrate on reporting Kenya court decisions.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-         The last revision of the Laws of Uganda was the 1964 edition revised in 2000.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          New statutes continue to be published as supplements to the Uganda gazette.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          There is no official publication in respect of treaties entered into by government of Uganda with other government and international organisations.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          The market is deficient of serious case law reporting products save for the irregular High Court Bulletins and Uganda Commercial Law Reports.
-        {% endblocktrans %}
-      </p>
-      <p>
-        {% blocktrans trimmed %}
-          The situation has simply been disastrous for the last three decades for a common law jurisdiction where making of decisions by courts is governed by the doctrine of precedents.
-        {% endblocktrans %}
-      </p>
-      <h5>
-        <strong>{% trans 'Access to law' %}</strong>
-      </h5>
-      <p>
-        {% blocktrans trimmed %}
-          Online access through the internet can be in an office, at home, computer labs in schools, institution of learning or public internet cafes.
-          It is this medium that is proposed to be utilized to provide access to Uganda’s primary and secondary legal materials on the following principles of the declaration of free access to law:
-        {% endblocktrans %}
-      </p>
-      <ul>
-        <li>
-          {% blocktrans trimmed %}
-            Publication of legal information from all countries and international institutions is part of the common heritage of humanity.
-            Maximizing access to this information promotes justice and the rule of law.
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans trimmed %}
-            Public legal information is digital common property and should be accessible to all free of charge.
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans trimmed %}
-            Independent non-profit organisations have the right to publish public legal information and the government bodies that create or control that information should provide access to it so that it can be published.
-          {% endblocktrans %}
-        </li>
-      </ul>
-      <p>
-        {% blocktrans trimmed %}
-          In the manner of the worldwide movement of legal information institutes, it was proposed that we organize to:
-        {% endblocktrans %}
-      </p>
-      <ul>
-        <li>
-          {% blocktrans trimmed %}
-            Publish via the internet primary materials including statutes from government/parliament, case law from all courts of record and treaties entered into by the government of Uganda whether ratified by parliament or not.
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans trimmed %}
-            Publish secondary legal materials like reports of the Uganda Law Reform Commission and other bodies.
-          {% endblocktrans %}
-        </li>
-        <li>
-          {% blocktrans trimmed %}
-            Provide free, full and anonymous public access to the said information.
-          {% endblocktrans %}
-        </li>
-      </ul>
-      <p>
-        {% blocktrans trimmed %}
-          Though there are no figures that show the connectivity of the legal community to the internet specifically, a significant number of offices in the judiciary, government law offices, parliament, DPP, academia and the public are connected to the internet.
-          With this access it is anticipated that legal resources which has until now been unavailable in an organized manner or at all to the public and the legal profession would become available, increasing access to law, thus access to justice and the rule of law.
-        {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">AfricanLII</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-      <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
-      <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
-        Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
-      (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
-      free access to law portals, and reach the people of Africa and beyond.
+{% block about-top-content %}
+  <p class="lead mb-4">
+    {% blocktrans trimmed %}
+      ULII is a free online legal information database of Uganda's law.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      The Uganda Legal Information Institute (ULII) is an internet facility that provides the public with legal information relating to Uganda, with a view of promoting and supporting the rule of law.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      ULII publishes public legal information - that is decisions of courts, legislation and some publicly available secondary legal materials created by public bodies for purposes of public access, for example the Justice Law and Order Sector (JLOS), the Uganda Law Reform Commission and the Uganda Law Reform Commission (ULRC).
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      ULII has obtained the kind assistance of the African Legal Information Institute (AfricanLII) in its development and is a member of the global free access to law movement.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      The Law Reporting department is a department of the Judiciary of Uganda and is currently operating at the Judicial Studies Institute. The department carries out various activities including on-line publication of case law and laws of Uganda.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      The Uganda legal information institute (ULII) is an internet facility that provides the public with legal information relating to Uganda, with a view of promoting and supporting the rule of law. The website can be accessed on www.ulii.org.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      ULII publishes legal information that is: legally significant decisions of courts, legislation, treaties and some publicly available secondary legal material created by public bodies for purposes of public access for example the JLOS (Justice Law and Order Sector) and the ULRC (Uganda Law Reform Commission).
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      The decisions of court that are published are from all courts of record, that is; the Supreme Court, Court of Appeal, Constitutional Court, High Court, Commercial Court, as well as CADER(Centre for Arbitration and Dispute Resolution) together with an electronic citation for each decision.
+    {% endblocktrans %}
+  </p>
+  <h5>
+    <strong>{% trans 'Objectives' %}</strong>
+  </h5>
+  <ul>
+    <li>
+      {% blocktrans trimmed %}
+        Improve on-going collection of case law in electronic format from courts of record
       {% endblocktrans %}
-      </p>
-      <h2 class="mb-4">Laws.Africa</h2>
-      <p class="mb-4">
-        {% blocktrans trimmed %}
-      <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
-      non-profit organisation that digitises African legal information for public use.
-      Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
-      officers and civil servants to deliver services efficiently and effectively.
+    </li>
+    <li>
+      {% blocktrans trimmed %}
+        Ensure completeness of the database for covered years for all courts
       {% endblocktrans %}
-      </p>
-      <h2>{% trans 'Contact Us' %}</h2>
-      <div>Judicial Training Institute</div>
-      <div>Plot M105, Kinawataka Road</div>
-      <div>Mbuya 1, Kampala</div>
-      <div>Uganda</div>
-      <div>
-        <a href="tel:+256 (41) 4286 765"><span style="margin-right: .2rem"><i class="bi bi-telephone-fill mr-2"></i></span>+256 (41) 4286 765</a>
-      </div>
-      <div>
-        <a href="mailto:info@ulii.org"><span style="margin-right: .2rem"><i class="bi bi-envelope mr-2"></i></span>info@ulii.org</a>
-      </div>
-      <div>
-        <a href="https://facebook.com/ulii/"><span style="margin-right: .2rem"><i class="bi bi-facebook mr-2"></i></span>facebook.com/ulii</a>
-      </div>
-      <div>
-        <a href="https://twitter.com/AfricanLII/"><span style="margin-right: .2rem"><i class="bi bi-twitter mr-2"></i></span>twitter.com/AfricanLII</a>
-      </div>
-    </div>
-  </section>
+    </li>
+    <li>
+      {% blocktrans trimmed %}
+         Scanning of older collection
+      {% endblocktrans %}
+    </li>
+    <li>
+      {% blocktrans trimmed %}
+        To digest the judgments to enhance the textual search capacity online
+      {% endblocktrans %}
+    </li>
+    <li>
+      {% blocktrans trimmed %}
+        Improve use of the website by conducting training and promotion
+      {% endblocktrans %}
+    </li>
+    <li>
+      {% blocktrans trimmed %}
+        Publish law reports from the case law already online.
+      {% endblocktrans %}
+    </li>
+    <li>
+      {% blocktrans trimmed %}
+        Publication of treaties entered into by the government of Uganda with other government and international organisations.
+      {% endblocktrans %}
+    </li>
+  </ul>
+  <h5>
+    <strong>{% trans 'How we found things' %}</strong>
+  </h5>
+  <p>
+    {% blocktrans trimmed %}
+      The Uganda Law Reports were last published in 1973.
+      The East African Law Reports went out of print in 1975.
+      Though it recently made a come back, it does not reflect the last series that covered East African courts fairly and comprehensively with the courts of all three countries participating in the editorial work.
+      The current series mainly concentrate on reporting Kenya court decisions.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+     The last revision of the Laws of Uganda was the 1964 edition revised in 2000.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      New statutes continue to be published as supplements to the Uganda gazette.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      There is no official publication in respect of treaties entered into by government of Uganda with other government and international organisations.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      The market is deficient of serious case law reporting products save for the irregular High Court Bulletins and Uganda Commercial Law Reports.
+    {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+      The situation has simply been disastrous for the last three decades for a common law jurisdiction where making of decisions by courts is governed by the doctrine of precedents.
+    {% endblocktrans %}
+  </p>
+  <h5>
+    <strong>{% trans 'Access to law' %}</strong>
+  </h5>
+  <p>
+    {% blocktrans trimmed %}
+      Online access through the internet can be in an office, at home, computer labs in schools, institution of learning or public internet cafes.
+      It is this medium that is proposed to be utilized to provide access to Uganda’s primary and secondary legal materials on the following principles of the declaration of free access to law:
+    {% endblocktrans %}
+  </p>
+  <ul>
+    <li>
+      {% blocktrans trimmed %}
+        Publication of legal information from all countries and international institutions is part of the common heritage of humanity.
+        Maximizing access to this information promotes justice and the rule of law.
+      {% endblocktrans %}
+    </li>
+    <li>
+      {% blocktrans trimmed %}
+        Public legal information is digital common property and should be accessible to all free of charge.
+      {% endblocktrans %}
+    </li>
+    <li>
+      {% blocktrans trimmed %}
+        Independent non-profit organisations have the right to publish public legal information and the government bodies that create or control that information should provide access to it so that it can be published.
+      {% endblocktrans %}
+    </li>
+  </ul>
+  <p>
+    {% blocktrans trimmed %}
+      In the manner of the worldwide movement of legal information institutes, it was proposed that we organize to:
+    {% endblocktrans %}
+  </p>
+  <ul>
+    <li>
+      {% blocktrans trimmed %}
+        Publish via the internet primary materials including statutes from government/parliament, case law from all courts of record and treaties entered into by the government of Uganda whether ratified by parliament or not.
+      {% endblocktrans %}
+    </li>
+    <li>
+      {% blocktrans trimmed %}
+        Publish secondary legal materials like reports of the Uganda Law Reform Commission and other bodies.
+      {% endblocktrans %}
+    </li>
+    <li>
+      {% blocktrans trimmed %}
+        Provide free, full and anonymous public access to the said information.
+      {% endblocktrans %}
+    </li>
+  </ul>
+  <p>
+    {% blocktrans trimmed %}
+      Though there are no figures that show the connectivity of the legal community to the internet specifically, a significant number of offices in the judiciary, government law offices, parliament, DPP, academia and the public are connected to the internet.
+      With this access it is anticipated that legal resources which has until now been unavailable in an organized manner or at all to the public and the legal profession would become available, increasing access to law, thus access to justice and the rule of law.
+    {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">AfricanLII</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+  <a href="https://africanlii.org/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is a part of the
+  <a href="http://www.dgru.uct.ac.za/" target="_blank" rel="noreferrer noopener">Democratic
+    Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town
+  (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable
+  free access to law portals, and reach the people of Africa and beyond.
+  {% endblocktrans %}
+  </p>
+  <h2 class="mb-4">Laws.Africa</h2>
+  <p class="mb-4">
+    {% blocktrans trimmed %}
+  <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa
+  non-profit organisation that digitises African legal information for public use.
+  Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial
+  officers and civil servants to deliver services efficiently and effectively.
+  {% endblocktrans %}
+  </p>
+  <h2>{% trans 'Contact Us' %}</h2>
+  <div>Judicial Training Institute</div>
+  <div>Plot M105, Kinawataka Road</div>
+  <div>Mbuya 1, Kampala</div>
+  <div>Uganda</div>
+  <div>
+    <a href="tel:+256 (41) 4286 765"><span style="margin-right: .2rem"><i class="bi bi-telephone-fill mr-2"></i></span>+256 (41) 4286 765</a>
+  </div>
+  <div>
+    <a href="mailto:info@ulii.org"><span style="margin-right: .2rem"><i class="bi bi-envelope mr-2"></i></span>info@ulii.org</a>
+  </div>
+  <div>
+    <a href="https://facebook.com/ulii/"><span style="margin-right: .2rem"><i class="bi bi-facebook mr-2"></i></span>facebook.com/ulii</a>
+  </div>
+  <div>
+    <a href="https://twitter.com/AfricanLII/"><span style="margin-right: .2rem"><i class="bi bi-twitter mr-2"></i></span>twitter.com/AfricanLII</a>
+  </div>
 {% endblock %}
