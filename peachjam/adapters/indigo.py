@@ -263,8 +263,8 @@ class IndigoAdapter(Adapter):
             commencements_json = self.client_get(f"{url}/commencements.json").json()
             field_data["commencements_json"] = commencements_json["commencements"]
 
-        if hasattr(model, "repealed") and document["repeal"]:
-            field_data["repealed"] = True
+        if hasattr(model, "repealed"):
+            field_data["repealed"] = bool(document["repeal"])
 
         # the document may already be in the database, but not as the right document type.
         # It's unlikely, but does happen and is confusing to debug, so let's check for it explicitly.
