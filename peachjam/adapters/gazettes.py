@@ -59,6 +59,7 @@ class GazetteAPIAdapter(Adapter):
             url = f"{self.api_url}/gazettes/archived.json"
             while url:
                 res = self.client_get(url, params=params).json()
+                params = {}
                 results.extend(res["results"])
                 url = res["next"]
 
