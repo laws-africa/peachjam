@@ -22,7 +22,6 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from import_export.admin import ImportExportMixin as BaseImportExportMixin
 from languages_plus.models import Language
-from martor.utils import markdownify
 from nonrelated_inlines.admin import NonrelatedTabularInline
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
@@ -1024,7 +1023,7 @@ class BookAdmin(DocumentAdmin):
 
     def save_model(self, request, obj, form, change):
         if "content_markdown" in form.changed_data:
-            obj.content_html = markdownify(form.cleaned_data["content_markdown"])
+            obj.convert_content_markdown()
 
         resp = super().save_model(request, obj, form, change)
 

@@ -1,5 +1,6 @@
 from django.db import models
 from martor.models import MartorField
+from martor.utils import markdownify
 
 from peachjam.models import CoreDocument, DocumentNature
 
@@ -7,6 +8,15 @@ from peachjam.models import CoreDocument, DocumentNature
 class Book(CoreDocument):
     publisher = models.CharField(max_length=2048)
     content_markdown = MartorField(blank=True, null=True)
+
+    def delete_citations(self):
+        super().delete_citations()
+        # reset the HTML back to the original from markdown, because delete_citations()
+        # removes any embedded akn links
+        self.convert_content_markdown()
+
+    def convert_content_markdown(self):
+        self.content_html = markdownify(self.content_markdown)
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"
