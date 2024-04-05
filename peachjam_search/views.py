@@ -40,16 +40,9 @@ class CustomPageNumberPagination(PageNumberPagination):
 
 
 class MainSearchBackend(BaseSearchFilterBackend):
-    """Custom search backend that builds our boolean query, based on two factors: an all-field search (simple),
-    and a per-field (advanced) search. The two can also be combined.
+    """A search backend that builds the core query.
 
-    1. Simple: a SHOULD query (minimum_should_match=1), for:
-       a. all the fields (individually)
-       b. nested page content
-
-    2. Advanced: a MUST query for the specified field(s).
-
-    3. Combined simple and advanced, using both SHOULD and MUST from above.
+    It is a combination of MUST (AND) queries and SHOULD (OR) queries.
     """
 
     def get_field(self, view, field):
@@ -59,12 +52,14 @@ class MainSearchBackend(BaseSearchFilterBackend):
         return field
 
     def filter_queryset(self, request, queryset, view):
+        """Build the actual search queries."""
         must_queries = []
         must_queries.extend(self.build_per_field_queries(request, view))
         must_queries.extend(self.build_rank_feature_queries(request, view))
 
         should_queries = []
         should_queries.extend(self.build_basic_queries(request, view))
+        should_queries.extend(self.build_content_phrase_queries(request, view))
         should_queries.extend(self.build_nested_page_queries(request, view))
 
         return queryset.query(
@@ -93,8 +88,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
                 query_params[field] = query
 
         return [
-            Q(
-                "simple_query_string",
+            SimpleQueryString(
                 query=search_term,
                 fields=[self.get_field(view, field)],
                 **view.simple_query_string_options,
@@ -110,8 +104,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
         ]
         query_terms = self.get_search_query_params(request)
         queries = [
-            Q(
-                "simple_query_string",
+            SimpleQueryString(
                 query=search_term,
                 fields=[field],
                 **view.simple_query_string_options,
@@ -121,6 +114,13 @@ class MainSearchBackend(BaseSearchFilterBackend):
         ]
 
         return queries
+
+    def build_content_phrase_queries(self, request, view):
+        """Adds a best-effort phrase match query on the content field."""
+        search_term = " ".join(self.get_search_query_params(request))
+        if not search_term:
+            return []
+        return [MatchPhrase(content={"query": search_term, "slop": 2})]
 
     def build_nested_page_queries(self, request, view):
         """Does a nested page search, and includes highlights."""
