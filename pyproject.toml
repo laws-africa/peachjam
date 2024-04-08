@@ -54,7 +54,7 @@ dependencies = [
     "django-webtest>=1.9.11",
     "djangorestframework>=3.13.1",
     "drf-spectacular>=0.26.0",
-    "docpipe @ git+https://github.com/laws-africa/docpipe.git@dadd9683eb946066816ad1250c098ff96686eb5f",
+    "docpipe @ git+https://github.com/laws-africa/docpipe.git@b3242675119546057c858549cd1739f76cce399c",
     "elasticsearch>=7.17.1",
     "elasticsearch-dsl>=7.4.0",
     "google-api-python-client>=2.46.0",
