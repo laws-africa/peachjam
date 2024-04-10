@@ -262,9 +262,8 @@ class Judgment(CoreDocument):
     hearing_date = models.DateField(null=True, blank=True)
 
     auto_assign_title = models.BooleanField(
+        _("Auto-assign title"),
         help_text=_("Whether or not the system should assign the title"),
-        null=True,
-        blank=True,
         default=True,
     )
 
