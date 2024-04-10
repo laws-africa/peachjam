@@ -261,6 +261,13 @@ class Judgment(CoreDocument):
     )
     hearing_date = models.DateField(null=True, blank=True)
 
+    auto_assign_title = models.BooleanField(
+        help_text=_("Whether or not the system should assign the title"),
+        null=True,
+        blank=True,
+        default=True,
+    )
+
     CITATION_DATE_FORMAT = "(j F Y)"
 
     MNC_FORMAT = "[{year}] {author} {serial}"
@@ -384,7 +391,8 @@ class Judgment(CoreDocument):
 
         self.doc_type = "judgment"
         self.assign_mnc()
-        self.assign_title()
+        if self.auto_assign_title:
+            self.assign_title()
         super().pre_save()
 
 
