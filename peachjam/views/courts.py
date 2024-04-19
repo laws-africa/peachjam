@@ -40,6 +40,7 @@ class CourtDetailView(FilteredDocumentListView):
         context["doc_type"] = "Judgment"
         context["court"] = self.court
         context["formatted_court_name"] = self.formatted_court_name()
+        context["registry_label_plural"] = CourtRegistry.model_label_plural
         context["registries"] = self.court.registries.exclude(
             judgments__isnull=True
         )  # display registries with judgments only

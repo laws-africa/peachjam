@@ -36,7 +36,7 @@
   {% endif %}
   {% if document.registry %}
     <dt>
-      {% trans 'Court Registry' %}
+      {{ document.registry.model_label }}
     </dt>
     <dd class="text-muted">
       <a href="{% url 'court_registry' document.court.code document.registry.code %}">{{ document.registry.name }}</a>

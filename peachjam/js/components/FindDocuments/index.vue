@@ -244,6 +244,10 @@ export default {
       return labelOptions;
     };
 
+    const getTitle = (title) => {
+      return JSON.parse(document.querySelector('#data-labels').textContent)[title];
+    };
+
     const data = {
       searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
       documentLabels: JSON.parse(document.querySelector('#data-labels').textContent).documentLabels,
@@ -288,7 +292,7 @@ export default {
         optionLabels: getLabelOptionLabels(data.documentLabels)
       },
       {
-        title: JSON.parse(document.querySelector('#data-labels').textContent).author,
+        title: getTitle('author'),
         name: 'authors',
         type: 'checkboxes',
         value: [],
@@ -302,7 +306,7 @@ export default {
         options: []
       },
       {
-        title: this.$t('Court registry'),
+        title: getTitle('registry'),
         name: 'registry',
         type: 'checkboxes',
         value: [],
