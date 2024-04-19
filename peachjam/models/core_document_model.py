@@ -37,6 +37,7 @@ from peachjam.models import CitationLink, ExtractedCitation
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
+from peachjam.xmlutils import parse_html_str
 
 
 class Label(models.Model):
@@ -905,7 +906,7 @@ class DocumentContent(models.Model):
         text = ""
         if document.content_html:
             # it's html, grab the text from the html tree
-            root = html.fromstring(document.content_html)
+            root = parse_html_str(document.content_html)
             text = " ".join(root.itertext())
 
         elif hasattr(document, "source_file"):

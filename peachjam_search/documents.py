@@ -21,6 +21,7 @@ from peachjam.models import (
     OrderOutcome,
     Taxonomy,
 )
+from peachjam.xmlutils import parse_html_str
 
 log = logging.getLogger(__name__)
 
@@ -104,6 +105,16 @@ class SearchableDocument(Document):
     pages = fields.NestedField(
         properties={
             "page_num": fields.IntegerField(),
+            "body": fields.TextField(analyzer="standard", fields={"exact": Text()}),
+        }
+    )
+
+    provisions = fields.NestedField(
+        properties={
+            "title": fields.TextField(),
+            "id": fields.KeywordField(),
+            "parent_titles": fields.TextField(),
+            "parent_ids": fields.KeywordField(),
             "body": fields.TextField(analyzer="standard", fields={"exact": Text()}),
         }
     )
@@ -218,7 +229,9 @@ class SearchableDocument(Document):
 
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""
-        if instance.content_html:
+        if instance.content_html and (
+            not instance.content_html_is_akn or not instance.toc_json
+        ):
             return instance.get_content_as_text()
 
     def prepare_ranking(self, instance):
@@ -268,6 +281,49 @@ class SearchableDocument(Document):
                 if page:
                     pages.append({"page_num": i, "body": page})
             return pages
+
+    def prepare_provisions(self, instance):
+        """Text content of provisions from AKN HTML."""
+
+        def prepare_provision(item, parents):
+            provision = None
+            provision_id = item["id"] or item["type"]
+
+            # get the text of the provision
+            body = []
+            for provision_el in root.xpath(f'//*[@id="{provision_id}"]'):
+                for el in provision_el:
+                    # exclude headings so they aren't indexed twice
+                    if el.tag not in ["h1", "h2", "h3", "h4", "h5"]:
+                        body.append(" ".join(el.itertext()))
+                break
+            if body:
+                provision = {
+                    "title": item["title"],
+                    "id": provision_id,
+                    "parent_titles": [
+                        p["title"] for p in parents if p["title"] and p["id"]
+                    ],
+                    "parent_ids": [p["id"] for p in parents if p["title"] and p["id"]],
+                    "body": " ".join(body),
+                }
+                provisions.append(provision)
+
+            # recurse into children
+            if not item["basic_unit"]:
+                if provision:
+                    parents = parents + [provision]
+                for child in item["children"] or []:
+                    prepare_provision(child, parents)
+
+        if instance.content_html and instance.content_html_is_akn and instance.toc_json:
+            # index each provision separately
+            provisions = []
+            root = parse_html_str(instance.content_html)
+            for item in instance.toc_json:
+                prepare_provision(item, [])
+
+            return provisions
 
     def prepare_taxonomies(self, instance):
         """Taxonomy topics are stored as slugs of all the items in the tree down to that topic. This is easier than
