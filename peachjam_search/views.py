@@ -27,7 +27,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 
-from peachjam.models import Author, Label, pj_settings
+from peachjam.models import Author, CourtRegistry, Label, pj_settings
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.documents import SearchableDocument, get_search_indexes
 from peachjam_search.serializers import SearchableDocumentSerializer
@@ -170,6 +170,7 @@ class SearchView(TemplateView):
         }
         context["labels"] = {
             "author": Author.model_label,
+            "registry": CourtRegistry.model_label,
             "searchPlaceholder": search_placeholder_text,
             "documentLabels": LabelSerializer(Label.objects.all(), many=True).data,
         }

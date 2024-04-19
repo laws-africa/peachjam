@@ -1,6 +1,6 @@
 {% load i18n %}
 {% if registries %}
-  <h4>{% trans 'Registries' %}</h4>
+  <h4>{{ registry_label_plural }}</h4>
   <div class="row mb-4">
     {% for group in registry_groups %}
       <div class="col-sm">

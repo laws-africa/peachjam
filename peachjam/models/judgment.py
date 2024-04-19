@@ -135,6 +135,9 @@ class CourtRegistryManager(models.Manager):
 
 
 class CourtRegistry(models.Model):
+    model_label = _("Court registry")
+    model_label_plural = _("Court registries")
+
     objects = CourtRegistryManager()
     court = models.ForeignKey(
         Court,
@@ -158,7 +161,8 @@ class CourtRegistry(models.Model):
         return reverse("court_registry", args=[self.court.code, self.code])
 
     def save(self, *args, **kwargs):
-        self.code = f"{self.court.code}-{slugify(self.name)}"
+        if not self.code:
+            self.code = f"{self.court.code}-{slugify(self.name)}"
         return super().save(*args, **kwargs)
 
 
