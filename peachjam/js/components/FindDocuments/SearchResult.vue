@@ -53,6 +53,15 @@
         <span v-if="page.highlight['pages.body']" v-html="page.highlight['pages.body'].join(' ... ')" />
       </div>
     </div>
+    <div v-if="item.provisions.length">
+      <SearchResultProvision
+        v-for="provision in item.provisions"
+        :key="provision.id"
+        :item="provision"
+        :parents="provisionParents(provision)"
+        :expression-frbr-uri="item.expressionFrbrUri"
+      />
+    </div>
     <div v-else class="ms-3">
       <span
         class="snippet"
@@ -70,11 +79,13 @@
 
 <script>
 import JsonTable from './JsonTable.vue';
+import SearchResultProvision from './SearchResultProvision.vue';
 
 export default {
   name: 'SearchResult',
   components: {
-    JsonTable
+    JsonTable,
+    SearchResultProvision
   },
   props: {
     item: {
@@ -125,6 +136,15 @@ export default {
         return Array.isArray(item.authors) ? ', '.join(item.authors) : item.authors;
       }
       return '';
+    },
+    provisionParents (provision) {
+      // zip item.parent_titles and item.parent_ids
+      return provision.parent_titles.map((title, index) => {
+        return {
+          title: title,
+          id: provision.parent_ids[index]
+        };
+      });
     }
   }
 };

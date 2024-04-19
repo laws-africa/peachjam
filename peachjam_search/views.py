@@ -61,6 +61,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
         should_queries.extend(self.build_basic_queries(request, view))
         should_queries.extend(self.build_content_phrase_queries(request, view))
         should_queries.extend(self.build_nested_page_queries(request, view))
+        should_queries.extend(self.build_nested_provision_queries(request, view))
 
         return queryset.query(
             "bool",
@@ -150,6 +151,51 @@ class MainSearchBackend(BaseSearchFilterBackend):
                     "_source": ["pages.page_num"],
                     "highlight": {
                         "fields": {"pages.body": {}},
+                        "pre_tags": ["<mark>"],
+                        "post_tags": ["</mark>"],
+                        "fragment_size": 80,
+                        "number_of_fragments": 2,
+                    },
+                },
+            )
+        ]
+
+    def build_nested_provision_queries(self, request, view):
+        """Does a nested provision search, and includes highlights."""
+        search_term = " ".join(self.get_search_query_params(request))
+        if not search_term:
+            return []
+
+        return [
+            Q(
+                "nested",
+                path="provisions",
+                query=Q(
+                    "bool",
+                    should=[
+                        MatchPhrase(provisions__body={"query": search_term, "slop": 2}),
+                        SimpleQueryString(
+                            query=search_term,
+                            fields=["provisions.body"],
+                            quote_field_suffix=".exact",
+                            **view.simple_query_string_options,
+                        ),
+                        SimpleQueryString(
+                            query=search_term,
+                            fields=["provisions.title^4", "provisions.parent_titles^2"],
+                            **view.simple_query_string_options,
+                        ),
+                    ],
+                ),
+                inner_hits={
+                    "_source": [
+                        "provisions.title",
+                        "provisions.id",
+                        "provisions.parent_titles",
+                        "provisions.parent_ids",
+                    ],
+                    "highlight": {
+                        "fields": {"provisions.body": {}},
                         "pre_tags": ["<mark>"],
                         "post_tags": ["</mark>"],
                         "fragment_size": 80,
@@ -304,7 +350,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     }
 
     # TODO perhaps better to explicitly include specific fields
-    source = {"excludes": ["pages", "content", "flynote", "case_summary"]}
+    source = {"excludes": ["pages", "content", "flynote", "case_summary", "provisions"]}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -8,6 +8,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
     id = CharField(source="meta.id")
     highlight = SerializerMethodField()
     pages = SerializerMethodField()
+    provisions = SerializerMethodField()
     court = SerializerMethodField()
     nature = SerializerMethodField()
     order_outcome = SerializerMethodField()
@@ -65,6 +66,20 @@ class SearchableDocumentSerializer(DocumentSerializer):
                 )
                 pages.append(info)
         return pages
+
+    def get_provisions(self, obj):
+        """Serialize nested provision hits and highlights."""
+        provisions = []
+        if hasattr(obj.meta, "inner_hits"):
+            for provision in obj.meta.inner_hits.provisions.hits.hits:
+                info = provision._source.to_dict()
+                info["highlight"] = (
+                    provision.highlight.to_dict()
+                    if hasattr(provision, "highlight")
+                    else {}
+                )
+                provisions.append(info)
+        return provisions
 
     def get_court(self, obj):
         return obj["court" + self.language_suffix]

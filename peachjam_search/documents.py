@@ -105,7 +105,7 @@ class SearchableDocument(Document):
     pages = fields.NestedField(
         properties={
             "page_num": fields.IntegerField(),
-            "body": fields.TextField(analyzer="standard", fields={"exact": Text()}),
+            "body": fields.TextField(fields={"exact": Text()}),
         }
     )
 
@@ -115,7 +115,7 @@ class SearchableDocument(Document):
             "id": fields.KeywordField(),
             "parent_titles": fields.TextField(),
             "parent_ids": fields.KeywordField(),
-            "body": fields.TextField(analyzer="standard", fields={"exact": Text()}),
+            "body": fields.TextField(fields={"exact": Text()}),
         }
     )
 
