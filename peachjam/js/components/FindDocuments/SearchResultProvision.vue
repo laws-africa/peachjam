@@ -1,12 +1,14 @@
 <template>
-  <div class="ms-3 mb-2">
+  <div class="mb-1">
     <div v-if="parents.length">
       <a :href="`${expressionFrbrUri}#${parents[0].id}`">{{ parents[0].title }}</a>
-      <SearchResultProvision
-        :item="item"
-        :parents="parents.slice(1)"
-        :expression-frbr-uri="expressionFrbrUri"
-      />
+      <div class="ms-3">
+        <SearchResultProvision
+          :item="item"
+          :parents="parents.slice(1)"
+          :expression-frbr-uri="expressionFrbrUri"
+        />
+      </div>
     </div>
     <div v-else>
       <a :href="`${expressionFrbrUri}#${item.id}`">{{ item.title }}</a>

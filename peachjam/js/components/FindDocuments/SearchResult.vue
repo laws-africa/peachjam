@@ -1,77 +1,82 @@
 <template>
   <li class="mb-4 hit">
-    <a
-      class="h5 text-primary"
-      target="_blank"
-      rel="noreferrer"
-      :href="item.expression_frbr_uri"
-      v-html="item.highlight.title || item.title"
-    ></a>
-    <div>
-      <span v-if="showJurisdiction || item.locality" class="me-3">
-        <span v-if="showJurisdiction" v-html="getFlag(item)" class="me-1" />
-        <span v-if="showJurisdiction">
-          {{ item.jurisdiction }}
-          <span v-if="item.locality">· </span>
-        </span>
-        <span v-if="item.locality">{{ item.locality }}</span>
-      </span>
-      <span class="me-3">{{ item.date }}</span>
-      <span class="me-3">{{ item.doc_type }}</span>
-      <a
-        v-if="debug"
-        class="me-3"
-        href="#"
-        @click.prevent="$emit('explain')"
-      >{{ item._score }}</a>
-      <span
-        v-if="item.court"
-        class="me-3"
-      >{{ item.court }}</span>
-      <span
-        v-if="item.authors"
-        class="me-3"
-      >{{ authors(item) }}</span>
-    </div>
-    <div v-if="item.citation && item.citation !== item.title">
-      <i>{{ item.citation }}</i>
-    </div>
-    <div>
-      {{ item.matter_type }}
-    </div>
-    <div v-if="labels">
-      <span v-for="label in labels" :key="label.code" :class="[ `badge rounded-pill bg-${label.level}` ]">{{ label.name }}</span>
-    </div>
-    <div v-if="item.pages.length" class="ms-3">
-      <div
-        v-for="(page, index) in item.pages"
-        :key="index"
-      >
-        <span>
-          <a :href="`${item.expression_frbr_uri}#page-${page.page_num}`">Page {{ page.page_num }}</a>:
-        </span>
-        <span v-if="page.highlight['pages.body']" v-html="page.highlight['pages.body'].join(' ... ')" />
-      </div>
-    </div>
-    <div v-if="item.provisions.length">
-      <SearchResultProvision
-        v-for="provision in item.provisions"
-        :key="provision.id"
-        :item="provision"
-        :parents="provisionParents(provision)"
-        :expression-frbr-uri="item.expressionFrbrUri"
-      />
-    </div>
-    <div v-else class="ms-3">
-      <span
-        class="snippet"
-        v-html="highlights(item)"
-      />
-    </div>
-    <div v-if="debug && item.explanation" class="ms-3 mt-2">
-      <h5>Explanation</h5>
-      <div class="explanation border p-2">
-        <json-table :data="item.explanation" />
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">
+          <a
+            class="h5 text-primary"
+            target="_blank"
+            rel="noreferrer"
+            :href="item.expression_frbr_uri"
+            v-html="item.highlight.title || item.title"
+          />
+        </h5>
+        <div class="mb-1">
+          <div v-if="item.citation && item.citation !== item.title">
+            <i>{{ item.citation }}</i>
+          </div>
+          <div>
+            <span v-if="showJurisdiction || item.locality" class="me-3">
+              <span v-if="showJurisdiction" v-html="getFlag(item)" class="me-1" />
+              <span v-if="showJurisdiction">
+                {{ item.jurisdiction }}
+                <span v-if="item.locality">· </span>
+              </span>
+              <span v-if="item.locality">{{ item.locality }}</span>
+            </span>
+            <span class="me-3">{{ item.doc_type }}</span>
+            <span class="me-3">{{ item.date }}</span>
+            <span
+              v-if="item.court"
+              class="me-3"
+            >{{ item.court }}</span>
+            <span
+              v-if="item.authors"
+              class="me-3"
+            >{{ authors(item) }}</span>
+            <span v-for="label in labels" :key="label.code" :class="`me-3 badge rounded-pill bg-${label.level}`">{{ label.name }}</span>
+            <a
+              v-if="debug"
+              class="me-3"
+              href="#"
+              @click.prevent="$emit('explain')"
+            >{{ item._score }}</a>
+          </div>
+          <div>
+            {{ item.matter_type }}
+          </div>
+        </div>
+        <div v-if="item.pages.length">
+          <div
+            v-for="page in item.pages"
+            :key="page.page_num"
+            class="mb-1"
+          >
+            <a :href="`${item.expression_frbr_uri}#page-${page.page_num}`">Page {{ page.page_num }}</a>:
+            <span v-if="page.highlight['pages.body']" v-html="page.highlight['pages.body'].join(' ... ')" />
+          </div>
+        </div>
+        <div v-if="item.provisions.length">
+          <SearchResultProvision
+            v-for="provision in item.provisions"
+            :key="provision.id"
+            :item="provision"
+            :parents="provisionParents(provision)"
+            :expression-frbr-uri="item.expression_frbr_uri"
+          />
+        </div>
+        <div v-else class="ms-3">
+          <span
+            class="snippet"
+            v-html="highlights(item)"
+          />
+        </div>
+        <div v-if="debug && item.explanation" class="ms-3 mt-2">
+          <h5>Explanation</h5>
+          <div class="explanation border p-2">
+            <json-table :data="item.explanation" />
+          </div>
+        </div>
       </div>
     </div>
   </li>
