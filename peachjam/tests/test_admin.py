@@ -19,8 +19,7 @@ class TestJudgmentAdmin(WebTest):
         judgment_add_url = reverse("admin:peachjam_judgment_add")
         judgment_list_url = reverse("admin:peachjam_judgment_changelist")
 
-        response = self.app.get(judgment_add_url)
-        form = response.forms["judgment_form"]
+        form = self.app.get(judgment_add_url).forms["judgment_form"]
 
         form["jurisdiction"] = "ZA"
         form["court"] = "1"
@@ -67,7 +66,7 @@ class TestJudgmentAdmin(WebTest):
         judgment_change_url = reverse(
             "admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk}
         )
-        form2 = self.app.get(judgment_change_url).form
+        form2 = self.app.get(judgment_change_url).forms["judgment_form"]
 
         with open(
             os.path.abspath("peachjam/fixtures/source_files/gauteng_judgment.pdf"), "rb"
@@ -87,8 +86,7 @@ class TestJudgmentAdmin(WebTest):
         judgment_add_url = reverse("admin:peachjam_judgment_add")
         judgment_list_url = reverse("admin:peachjam_judgment_changelist")
 
-        response = self.app.get(judgment_add_url)
-        form = response.forms["judgment_form"]
+        form = self.app.get(judgment_add_url).forms["judgment_form"]
 
         form["jurisdiction"] = "ZA"
         form["court"] = "1"
@@ -135,7 +133,7 @@ class TestJudgmentAdmin(WebTest):
         ) as docx_file:
             docx_file_content = docx_file.read()
 
-        form2 = self.app.get(judgment_change_url).form
+        form2 = self.app.get(judgment_change_url).forms["judgment_form"]
         form2["source_file-0-file"] = Upload(
             "file.docx",
             docx_file_content,
