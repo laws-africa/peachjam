@@ -19,8 +19,8 @@ class TestJudgmentAdmin(WebTest):
         judgment_add_url = reverse("admin:peachjam_judgment_add")
         judgment_list_url = reverse("admin:peachjam_judgment_changelist")
 
-        form = self.app.get(judgment_add_url).form
-        print(form)
+        response = self.app.get(judgment_add_url)
+        form = response.forms["judgment_form"]
 
         form["jurisdiction"] = "ZA"
         form["court"] = "1"
@@ -87,8 +87,8 @@ class TestJudgmentAdmin(WebTest):
         judgment_add_url = reverse("admin:peachjam_judgment_add")
         judgment_list_url = reverse("admin:peachjam_judgment_changelist")
 
-        form = self.app.get(judgment_add_url).form
-        print(form)
+        response = self.app.get(judgment_add_url)
+        form = response.forms["judgment_form"]
 
         form["jurisdiction"] = "ZA"
         form["court"] = "1"
