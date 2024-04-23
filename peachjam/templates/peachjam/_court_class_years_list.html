@@ -1,0 +1,9 @@
+{% extends "peachjam/_court_years_list.html" %}
+{% load i18n %}
+{% block all_years_link %}
+  <a class="{% if not year %} active{% endif %}"
+     href="{% url 'court_class' court_class.slug %}">{% trans 'All years' %}</a>
+{% endblock %}
+{% block year_link %}
+  <a href="{% url "court_class_year" court_class.slug y.year %}">{{ y.year }}</a>
+{% endblock %}

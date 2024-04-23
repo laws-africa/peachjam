@@ -1,0 +1,9 @@
+{% extends "peachjam/_court_months_list.html" %}
+{% load i18n %}
+{% block all_months_link %}
+  <a class="{% if not month %} active{% endif %}"
+     href="{% url 'court_registry_year' court.code registry.code year %}">{% trans 'All months' %}</a>
+{% endblock %}
+{% block month_link %}
+  <a href="{% url "court_registry_month" court.code registry.code year m|date:'n' %}">{{ m|date:"F" }}</a>
+{% endblock %}
