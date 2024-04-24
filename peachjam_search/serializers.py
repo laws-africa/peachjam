@@ -70,7 +70,9 @@ class SearchableDocumentSerializer(DocumentSerializer):
     def get_provisions(self, obj):
         """Serialize nested provision hits and highlights."""
         provisions = []
-        if hasattr(obj.meta, "inner_hits"):
+        if hasattr(obj.meta, "inner_hits") and hasattr(
+            obj.meta.inner_hits, "provisions"
+        ):
             for provision in obj.meta.inner_hits.provisions.hits.hits:
                 info = provision._source.to_dict()
                 info["highlight"] = (

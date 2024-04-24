@@ -113,6 +113,8 @@ class SearchableDocument(Document):
         properties={
             "title": fields.TextField(),
             "id": fields.KeywordField(),
+            "num": fields.KeywordField(),
+            "type": fields.KeywordField(),
             "parent_titles": fields.TextField(),
             "parent_ids": fields.KeywordField(),
             "body": fields.TextField(fields={"exact": Text()}),
@@ -301,6 +303,8 @@ class SearchableDocument(Document):
                 provision = {
                     "title": item["title"],
                     "id": provision_id,
+                    "num": (item["num"] or "").rstrip("."),
+                    "type": item["type"],
                     "parent_titles": [
                         p["title"] for p in parents if p["title"] and p["id"]
                     ],
