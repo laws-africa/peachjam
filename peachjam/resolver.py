@@ -83,6 +83,10 @@ class RedirectResolver:
             "country_code": "zw",
             "domain": "zimlii.org",
         },
+        "kenyalaw": {
+            "country_code": "ke",
+            "domain": "kenyalaw.staging.laws.africa",
+        },
     }
 
     def __init__(self, app_name):
