@@ -1,9 +1,11 @@
 {% extends "peachjam/_court_years_list.html" %}
 {% load i18n %}
-{% block all_years_link %}
-  <a class="{% if not month %} active{% endif %}"
-     href="{% url 'court_registry' court.code registry.code %}">{% trans 'All months' %}</a>
-{% endblock %}
 {% block year_link %}
   <a href="{% url "court_registry_year" court.code registry.code y.year %}">{{ y.year }}</a>
+{% endblock %}
+{% block year_option %}
+  <option value="{% url "court_registry_year" court.code registry.code y.year %}"
+          {% if y.year == year %} selected{% endif %}>
+    {{ y.year }}
+  </option>
 {% endblock %}

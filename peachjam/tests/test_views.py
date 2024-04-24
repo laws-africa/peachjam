@@ -55,13 +55,8 @@ class PeachjamViewsTest(TestCase):
             "Ababacar and Ors vs Senegal [2018] ECOWASCJ 17 (29 June 2018)",
             documents,
         )
-        self.assertEqual(
-            response.context["years"],
-            [
-                {"url": "/judgments/ECOWASCJ/2018/", "year": 2018},
-                {"url": "/judgments/ECOWASCJ/2016/", "year": 2016},
-            ],
-        )
+        self.assertContains(response, "/judgments/ECOWASCJ/2018/")
+        self.assertContains(response, "/judgments/ECOWASCJ/2016/")
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
 
     def test_court_year_listing(self):
@@ -79,13 +74,8 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertEqual(response.context["year"], 2016)
-        self.assertEqual(
-            response.context["years"],
-            [
-                {"url": "/judgments/ECOWASCJ/2018/", "year": 2018},
-                {"url": "/judgments/ECOWASCJ/2016/", "year": 2016},
-            ],
-        )
+        self.assertContains(response, "/judgments/ECOWASCJ/2018/")
+        self.assertContains(response, "/judgments/ECOWASCJ/2016/")
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
 
     def test_judgment_detail(self):

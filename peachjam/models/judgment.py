@@ -89,6 +89,9 @@ class CourtClass(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse("court_class", args=[self.slug])
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         return super().save(*args, **kwargs)
@@ -133,6 +136,9 @@ class Court(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("court", args=[self.code])
 
 
 class CourtRegistryManager(models.Manager):

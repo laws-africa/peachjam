@@ -1,15 +1,18 @@
+from functools import cached_property
 from itertools import groupby
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils.dates import MONTHS
+from django.utils.text import gettext_lazy as _
 
 from peachjam.helpers import chunks, lowercase_alphabet
 from peachjam.models import Court, CourtClass, CourtRegistry, Judgment
 from peachjam.views.generic_views import FilteredDocumentListView
 
 
-class BaseJudgmentFilterView(FilteredDocumentListView):
+class FilteredJudgmentView(FilteredDocumentListView):
     """Base List View class for filtering judgments."""
 
     model = Judgment
@@ -17,7 +20,7 @@ class BaseJudgmentFilterView(FilteredDocumentListView):
     queryset = Judgment.objects.prefetch_related("judges", "labels")
 
     def base_view_name(self):
-        return "Judgments"
+        return _("Judgments")
 
     def page_title(self):
         return self.base_view_name()
@@ -90,10 +93,10 @@ class BaseJudgmentFilterView(FilteredDocumentListView):
         return [{"key": key, "judgments": list(group)} for key, group in groups]
 
 
-class CourtDetailView(BaseJudgmentFilterView):
+class CourtDetailView(FilteredJudgmentView):
     template_name = "peachjam/court_detail.html"
 
-    @property
+    @cached_property
     def court(self):
         return get_object_or_404(Court, code=self.kwargs.get("code"))
 
@@ -112,6 +115,7 @@ class CourtDetailView(BaseJudgmentFilterView):
             judgments__isnull=True
         )  # display registries with judgments only
         context["registry_groups"] = list(chunks(context["registries"], 2))
+        context["all_years_url"] = self.court.get_absolute_url()
         return context
 
 
@@ -144,7 +148,12 @@ class YearMixin:
 
 
 class CourtYearView(YearMixin, CourtDetailView):
-    pass
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["all_months_url"] = reverse(
+            "court_year", args=[self.court.code, self.year]
+        )
+        return context
 
 
 class MonthMixin:
@@ -181,7 +190,7 @@ class RegistryMixin:
     def base_view_name(self):
         return self.registry.name
 
-    @property
+    @cached_property
     def registry(self):
         return get_object_or_404(CourtRegistry, code=self.kwargs.get("registry_code"))
 
@@ -191,6 +200,7 @@ class RegistryMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["registry"] = self.registry
+        context["all_years_url"] = self.registry.get_absolute_url()
         return context
 
 
@@ -198,21 +208,26 @@ class CourtRegistryDetailView(RegistryMixin, CourtDetailView):
     pass
 
 
-class CourtRegistryYearView(RegistryMixin, CourtYearView):
+class CourtRegistryYearView(YearMixin, CourtRegistryDetailView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["all_months_url"] = reverse(
+            "court_registry_year", args=[self.court.code, self.registry.code, self.year]
+        )
+        return context
+
+
+class CourtRegistryMonthView(MonthMixin, CourtRegistryYearView):
     pass
 
 
-class CourtRegistryMonthView(RegistryMixin, CourtMonthView):
-    pass
-
-
-class CourtClassDetailView(BaseJudgmentFilterView):
+class CourtClassDetailView(FilteredJudgmentView):
     template_name = "peachjam/court_class_detail.html"
 
     def base_view_name(self):
         return self.court_class.name
 
-    @property
+    @cached_property
     def court_class(self):
         return get_object_or_404(CourtClass, slug=self.kwargs["court_class"])
 
@@ -227,12 +242,20 @@ class CourtClassDetailView(BaseJudgmentFilterView):
         context = super().get_context_data(**kwargs)
         context["court_class"] = self.court_class
         context["registries"] = Court.objects.filter(court_class=self.court_class)
+        context["registry_label_plural"] = _("Courts")
         context["registry_groups"] = list(chunks(context["registries"], 2))
+        context["all_years_url"] = self.court_class.get_absolute_url()
+
         return context
 
 
 class CourtClassYearView(YearMixin, CourtClassDetailView):
-    pass
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["all_months_url"] = reverse(
+            "court_class_year", args=[self.court_class.slug, self.year]
+        )
+        return context
 
 
 class CourtClassMonthView(MonthMixin, CourtClassYearView):

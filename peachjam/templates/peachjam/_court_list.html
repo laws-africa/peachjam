@@ -13,8 +13,8 @@
             {% endfor %}
           </ul>
           {% if court_class.show_listing_page %}
-            <a class="btn btn-sm btn-info"
-               href="{% url 'court_class' court_class.slug %}">View All</a>
+            <a class="btn btn-sm btn-primary"
+               href="{% url 'court_class' court_class.slug %}">{% trans 'View all' %}</a>
           {% endif %}
         {% else %}
           <div>{% trans 'No courts found.' %}</div>

@@ -3,10 +3,8 @@
   <div class="pl-0 mt-2 mb-3 align-items-center d-none d-lg-flex">
     <i class="bi bi-calendar me-2"></i>
     <div>
-      {% block all_years_link %}
-        <a class="{% if not year %} active{% endif %}"
-           href="{% url 'court' court.code %}">{% trans 'All years' %}</a>
-      {% endblock %}
+      <a class="{% if not year %} active{% endif %}"
+         href="{{ all_years_url }}">{% trans 'All years' %}</a>
     </div>
     <ul class="year-nav mb-0 ms-2">
       {% for y in years %}
@@ -28,9 +26,12 @@
       {% trans 'All years' %}
     </option>
     {% for y in years %}
-      <option value="{{ y.url }}" {% if y.year == year %} selected{% endif %}>
-        {{ y.year }}
-      </option>
+      {% block year_option %}
+        <option value="{% url "court_year" court.code y.year %}"
+                {% if y.year == year %} selected{% endif %}>
+          {{ y.year }}
+        </option>
+      {% endblock %}
     {% endfor %}
   </select>
 {% endif %}
