@@ -74,7 +74,9 @@ class MatterType(models.Model):
 class CourtClass(models.Model):
     name = models.CharField(_("name"), max_length=100, null=False, unique=True)
     description = models.TextField(_("description"), null=True, blank=True)
+    slug = models.SlugField(_("slug"), max_length=255, null=False, unique=True)
     order = models.IntegerField(_("order"), null=True, blank=True)
+    show_listing_page = models.BooleanField(null=False, default=False)
 
     class Meta:
         ordering = (
@@ -86,6 +88,13 @@ class CourtClass(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("court_class", args=[self.slug])
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
 
 
 class Court(models.Model):
@@ -127,6 +136,9 @@ class Court(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("court", args=[self.code])
 
 
 class CourtRegistryManager(models.Manager):

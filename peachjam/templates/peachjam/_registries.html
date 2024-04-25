@@ -1,15 +1,15 @@
 {% load i18n %}
 {% if registries %}
   <h4>{{ registry_label_plural }}</h4>
-  <div class="row mb-4">
+  <div class="flow-columns mb-4">
     {% for group in registry_groups %}
-      <div class="col-sm">
+      <div class="flow-columns-group mb-4">
         <ul class="list-unstyled">
           {% for r in group %}
             {% if r.code == registry.code %}
               <li>{{ r.name }}</li>
             {% else %}
-              <li class="inactive">
+              <li>
                 <a href="{{ r.get_absolute_url }}">{{ r.name }}</a>
               </li>
             {% endif %}

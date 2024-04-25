@@ -34,7 +34,7 @@ class DocumentListView(ListView):
         "nature", "work", "jurisdiction", "locality"
     )
 
-    def get_base_queryset(self):
+    def get_base_queryset(self, *args, **kwargs):
         qs = self.queryset if self.queryset is not None else self.model.objects
         return qs.filter(published=True)
 

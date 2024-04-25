@@ -1,6 +1,6 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
-{% block title %}{{ formatted_court_name }}{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
     <nav aria-label="breadcrumb">
@@ -8,9 +8,25 @@
         <li class="breadcrumb-item">
           <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
         </li>
-        <li class="breadcrumb-item">
-          <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-        </li>
+        {% if court.court_class.show_listing_page %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'court_class' court.court_class.slug %}">{{ court.court_class.name }}</a>
+          </li>
+        {% elif court_class.show_listing_page %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'court_class' court_class.slug %}">{{ court_class.name }}</a>
+          </li>
+        {% endif %}
+        {% if court %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+          </li>
+        {% endif %}
+        {% if registry %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'court_registry' court.code registry.code %}">{{ registry.name }}</a>
+          </li>
+        {% endif %}
       </ol>
     </nav>
   </div>
@@ -23,13 +39,17 @@
   {% endwith %}
 {% endblock %}
 {% block page-header %}
-  <h1 class="mt-4">{{ formatted_court_name }}</h1>
+  <h1 class="mt-4">{{ page_title }}</h1>
   {% include 'peachjam/_document_count.html' %}
-  {% include 'peachjam/_registries.html' %}
-  {% include 'peachjam/_years_list.html' %}
-  {% if months %}
-    {% include 'peachjam/_months_list.html' %}
-  {% endif %}
+  {% block court_list %}
+    {% include 'peachjam/_registries.html' %}
+  {% endblock %}
+  {% block year_list %}
+    {% include 'peachjam/_court_years_list.html' %}
+  {% endblock %}
+  {% block month_list %}
+    {% include 'peachjam/_court_months_list.html' %}
+  {% endblock %}
 {% endblock %}
 {% block content %}
   {% if grouped_documents %}
