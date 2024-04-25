@@ -70,11 +70,20 @@ class SearchableDocumentSerializer(DocumentSerializer):
     def get_provisions(self, obj):
         """Serialize nested provision hits and highlights."""
         provisions = []
+        # keep track of which provisions (including parents) we've seen, so that we don't, for
+        # example, repeat Chapter 7 if Chapter 7, Section 32 is also a hit
+        seen = set()
         if hasattr(obj.meta, "inner_hits") and hasattr(
             obj.meta.inner_hits, "provisions"
         ):
             for provision in obj.meta.inner_hits.provisions.hits.hits:
                 info = provision._source.to_dict()
+
+                if info["id"] in seen:
+                    continue
+                seen.add(info["id"])
+                seen.update(info["parent_ids"])
+
                 info["highlight"] = (
                     provision.highlight.to_dict()
                     if hasattr(provision, "highlight")
