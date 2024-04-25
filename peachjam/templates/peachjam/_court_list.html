@@ -4,6 +4,11 @@
     {% for court_class in court_classes %}
       <div class="flow-columns-group mb-4">
         <h4 class="mb-2">{{ court_class }}</h4>
+        {% if court_class.show_listing_page %}
+          <div class="mb-3">
+            <a href="{% url 'court_class' court_class.slug %}">{% trans 'All judgments' %}</a>
+          </div>
+        {% endif %}
         {% if court_class.courts.all %}
           <ul class="list-unstyled">
             {% for court in court_class.courts.all %}
@@ -12,10 +17,6 @@
               </li>
             {% endfor %}
           </ul>
-          {% if court_class.show_listing_page %}
-            <a class="btn btn-sm btn-primary"
-               href="{% url 'court_class' court_class.slug %}">{% trans 'View all' %}</a>
-          {% endif %}
         {% else %}
           <div>{% trans 'No courts found.' %}</div>
         {% endif %}
