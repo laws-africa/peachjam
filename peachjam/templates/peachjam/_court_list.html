@@ -1,8 +1,8 @@
 {% load peachjam i18n %}
 {% if court_classes %}
-  <div class="courts__column-wrapper mb-3">
+  <div class="flow-columns mb-3">
     {% for court_class in court_classes %}
-      <div class="courts__item mb-3">
+      <div class="flow-columns-group mb-4">
         <h4 class="mb-2">{{ court_class }}</h4>
         {% if court_class.courts.all %}
           <ul class="list-unstyled">
