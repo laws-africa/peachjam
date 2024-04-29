@@ -27,7 +27,7 @@ dependencies = [
     "dj-database-url>=0.5.0",
     "Django~=3.2.13",
     "django-advanced-password-validation==1.1.1",
-    "django-allauth>=0.56.0",
+    "django-allauth[socialaccount]>=0.62.0",
     "django-autocomplete-light>=3.9.7",
     "django-background-tasks>=1.2.5",
     "django-ckeditor>=6.4.2",
