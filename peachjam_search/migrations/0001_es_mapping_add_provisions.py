@@ -9,7 +9,7 @@ def forwards(apps, schema_editor):
     from django.conf import settings
     from django_elasticsearch_dsl.registries import registry
 
-    if settings.ELASTICSEARCH_DSL_AUTOSYNC and os.environ.get("ELASTICSEARCH_HOST"):
+    if not settings.DEBUG and os.environ.get("ELASTICSEARCH_HOST"):
         for ix in registry.get_indices():
             if not ix._mapping:
                 continue
