@@ -1,39 +1,46 @@
 {% load i18n static %}
-<ul class="list-inline">
-  {% if PEACHJAM_SETTINGS.facebook_link %}
-    <li class="list-inline-item">
-      <a href="{{ PEACHJAM_SETTINGS.facebook_link }}"
-         target="_blank"
-         rel="noreferrer">
-        <img src="{% static 'images/facebook.svg' %}"
-             alt="Facebook"
-             width="40"
-             height="40"/>
-      </a>
-    </li>
-  {% endif %}
-  {% if PEACHJAM_SETTINGS.twitter_link %}
-    <li class="list-inline-item">
-      <a href="{{ PEACHJAM_SETTINGS.twitter_link }}"
-         target="_blank"
-         rel="noreferrer">
-        <img src="{% static 'images/twitter.svg' %}"
-             alt="Twitter"
-             width="40"
-             height="40"/>
-      </a>
-    </li>
-  {% endif %}
-  {% if PEACHJAM_SETTINGS.linkedin_link %}
-    <li class="list-inline-item">
-      <a href="{{ PEACHJAM_SETTINGS.linkedin_link }}"
-         target="_blank"
-         rel="noreferrer">
-        <img src="{% static 'images/linkedin.svg' %}"
-             alt="LinkedIn"
-             width="40"
-             height="40"/>
-      </a>
-    </li>
-  {% endif %}
-</ul>
+<div class="row align-items-center justify-content-between">
+  <div class="col-md-auto">
+    <a class="btn btn-primary" href="{% url 'about' %}#contact">Contact us</a>
+  </div>
+  <div class="col-md-auto">
+    <ul class="list-inline">
+      {% if PEACHJAM_SETTINGS.facebook_link %}
+        <li class="list-inline-item">
+          <a href="{{ PEACHJAM_SETTINGS.facebook_link }}"
+             target="_blank"
+             rel="noreferrer">
+            <img src="{% static 'images/facebook.svg' %}"
+                 alt="Facebook"
+                 width="40"
+                 height="40"/>
+          </a>
+        </li>
+      {% endif %}
+      {% if PEACHJAM_SETTINGS.twitter_link %}
+        <li class="list-inline-item">
+          <a href="{{ PEACHJAM_SETTINGS.twitter_link }}"
+             target="_blank"
+             rel="noreferrer">
+            <img src="{% static 'images/twitter.svg' %}"
+                 alt="Twitter"
+                 width="40"
+                 height="40"/>
+          </a>
+        </li>
+      {% endif %}
+      {% if PEACHJAM_SETTINGS.linkedin_link %}
+        <li class="list-inline-item">
+          <a href="{{ PEACHJAM_SETTINGS.linkedin_link }}"
+             target="_blank"
+             rel="noreferrer">
+            <img src="{% static 'images/linkedin.svg' %}"
+                 alt="LinkedIn"
+                 width="40"
+                 height="40"/>
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+</div>

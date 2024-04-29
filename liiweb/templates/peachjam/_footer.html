@@ -21,7 +21,15 @@
       </div>
     {% endif %}
     <div>
-      <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
+      <p class="my-1">
+        <a href="{% url 'terms_of_use' %}">{% trans 'Terms of Use' %}</a>
+      </p>
+      <p class="my-1">
+        <a href="{% url 'about' %}">{% trans 'About us' %}</a>
+      </p>
+      <p class="my-1">
+        <a href="{% url 'about' %}#contact">{% trans 'Contact us' %}</a>
+      </p>
     </div>
   {% endblock %}
 {% endblock %}
