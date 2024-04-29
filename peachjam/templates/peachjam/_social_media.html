@@ -1,9 +1,9 @@
 {% load i18n static %}
 <div class="row align-items-center justify-content-between">
-  <div class="col-md-auto">
+  <div class="d-flex justify-content-center mb-4 mb-md-0 d-md-block col-md mb-2">
     <a class="btn btn-primary" href="{% url 'about' %}#contact">Contact us</a>
   </div>
-  <div class="col-md-auto">
+  <div class="d-flex justify-content-center mb-4 mb-md-0 d-md-block col-md-auto mb-2">
     <ul class="list-inline">
       {% if PEACHJAM_SETTINGS.facebook_link %}
         <li class="list-inline-item">
