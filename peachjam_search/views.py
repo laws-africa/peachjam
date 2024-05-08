@@ -25,12 +25,18 @@ from elasticsearch_dsl.connections import get_connection
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
+from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Label, pj_settings
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.documents import SearchableDocument, get_search_indexes
-from peachjam_search.serializers import SearchableDocumentSerializer
+from peachjam_search.models import SearchTrace
+from peachjam_search.serializers import (
+    SearchableDocumentSerializer,
+    SearchClickSerializer,
+)
 
 CACHE_SECS = 15 * 60
 
@@ -384,10 +390,47 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         # self.get_translatable_fields(request)
         resp = super().list(request, *args, **kwargs)
 
+        trace = self.save_search_trace(resp)
+
         # show debug information to this user?
         resp.data["can_debug"] = self.request.user.has_perm("peachjam.can_debug_search")
+        resp.data["trace_id"] = trace.id if trace else None
 
         return resp
+
+    def save_search_trace(self, response):
+        field_searches = {
+            fld: self.request.GET.get(f"search__{fld}")
+            for fld in self.search_fields.keys()
+            if f"search__{fld}" in self.request.GET
+        }
+
+        filters = {
+            fld: self.request.GET.getlist(fld)
+            for fld in self.filter_fields.keys()
+            if fld in self.request.GET
+        }
+
+        previous = None
+        if self.request.GET.get("previous"):
+            previous = SearchTrace.objects.filter(
+                pk=self.request.GET["previous"]
+            ).first()
+
+        # save the search trace
+        return SearchTrace.objects.create(
+            user=self.request.user if self.request.user.is_authenticated else None,
+            request_id=self.request.id if self.request.id != "none" else None,
+            search=self.request.GET.get("search", "")[:2048],
+            field_searches=field_searches,
+            n_results=response.data["count"],
+            page=self.paginator.page.number,
+            filters=filters,
+            ordering=self.request.GET.get("ordering"),
+            previous_search=previous,
+            ip_address=self.request.headers.get("x-forwarded-for"),
+            user_agent=self.request.headers.get("user-agent"),
+        )
 
     @action(detail=True)
     def explain(self, request, pk, *args, **kwargs):
@@ -406,3 +449,8 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     @method_decorator(cache_page(CACHE_SECS))
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
+
+
+class SearchClickViewSet(CreateModelMixin, GenericViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = SearchClickSerializer

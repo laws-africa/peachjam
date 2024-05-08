@@ -10,6 +10,7 @@ from django_elasticsearch_dsl.signals import (
 
 from peachjam.models import CoreDocument
 from peachjam_search.documents import SearchableDocument
+from peachjam_search.models import SearchTrace
 
 log = logging.getLogger(__name__)
 
@@ -56,3 +57,8 @@ def search_model_saved(model_name, pk):
         return
 
     get_processor().handle_save(model_name, instance)
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def prune_search_traces():
+    SearchTrace.prune()
