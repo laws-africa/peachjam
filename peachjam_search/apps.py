@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from django.conf import settings
 
 
 class PeachjamSearchConfig(AppConfig):
@@ -10,9 +11,11 @@ class PeachjamSearchConfig(AppConfig):
 
         import peachjam_search.signals  # noqa
         from peachjam_search.documents import setup_language_indexes
-        from peachjam_search.tasks import prune_search_traces
 
         setup_language_indexes()
 
-        # run in an hour and repeat daily
-        prune_search_traces(schedule=Task.HOURLY, repeat=Task.DAILY)
+        if not settings.DEBUG:
+            from peachjam_search.tasks import prune_search_traces
+
+            # run in an hour and repeat daily
+            prune_search_traces(schedule=Task.HOURLY, repeat=Task.DAILY)
