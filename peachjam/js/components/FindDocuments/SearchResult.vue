@@ -6,8 +6,8 @@
           <a
             class="h5 text-primary"
             target="_blank"
-            rel="noreferrer"
             :href="item.expression_frbr_uri"
+            @click="$emit('item-clicked')"
             v-html="item.highlight.title || item.title"
           />
         </h5>
@@ -52,7 +52,11 @@
             :key="page.page_num"
             class="mb-1"
           >
-            <a :href="`${item.expression_frbr_uri}#page-${page.page_num}`">Page {{ page.page_num }}</a>:
+            <a
+              :href="`${item.expression_frbr_uri}#page-${page.page_num}`"
+              target="_blank"
+              @click="$emit('item-clicked', `page-${page.page_num}`)"
+            >{{ $t('Page') }} {{ page.page_num }}</a>:
             <span v-if="page.highlight['pages.body']" v-html="page.highlight['pages.body'].join(' ... ')" />
           </div>
         </div>
@@ -63,6 +67,7 @@
             :item="provision"
             :parents="provisionParents(provision)"
             :expression-frbr-uri="item.expression_frbr_uri"
+            @item-clicked="(x) => $emit('item-clicked', x)"
           />
         </div>
         <div v-else class="ms-3">
@@ -116,6 +121,7 @@ export default {
       default: false
     }
   },
+  emits: ['explain', 'item-clicked'],
   computed: {
     labels () {
       // get documentLabels where the code is in item.labels

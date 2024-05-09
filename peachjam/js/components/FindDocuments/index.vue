@@ -175,6 +175,7 @@
                   :show-jurisdiction="showJurisdiction"
                   :document-labels="documentLabels"
                   @explain="explain(item)"
+                  @item-clicked="(e) => itemClicked(item, e)"
                 />
               </ul>
 
@@ -229,6 +230,7 @@ import HelpBtn from '../HelpBtn.vue';
 import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 import analytics from '../analytics';
+import {authHeaders, csrfToken} from '../../api';
 
 export default {
   name: 'FindDocuments',
@@ -581,6 +583,12 @@ export default {
       });
     },
 
+    formatResults () {
+      for (let i = 0; i < this.searchInfo.results.length; i++) {
+        this.searchInfo.results[i].position = i + 1;
+      }
+    },
+
     generateSearchParams () {
       const params = new URLSearchParams();
       if (this.q) params.append('search', this.q);
@@ -627,7 +635,8 @@ export default {
 
         try {
           const params = this.generateSearchParams();
-          const url = `/search/api/documents/?${params.toString()}`;
+          const previousId = this.searchInfo.trace_id || '';
+          const url = `/search/api/documents/?${params.toString()}&previous=${previousId}`;
 
           if (pushState) {
             window.history.pushState(
@@ -647,6 +656,7 @@ export default {
                 this.clearAllFilters();
               }
               this.formatFacets();
+              this.formatResults();
               this.trackSearch(params);
             } else {
               this.error = response.statusText;
@@ -685,6 +695,23 @@ export default {
       const resp = await fetch(url);
       const json = await resp.json();
       item.explanation = json;
+    },
+
+    async itemClicked (item, portion) {
+      const params = new URLSearchParams();
+      params.set('frbr_uri', item.expression_frbr_uri);
+      params.set('portion', portion || '');
+      params.set('position', item.position);
+      params.set('search_trace', this.searchInfo.trace_id);
+      try {
+        fetch('/search/api/click/', {
+          method: 'POST',
+          headers: await authHeaders(),
+          body: params
+        });
+      } catch (err) {
+        console.log(err);
+      }
     },
 
     resetAdvancedFields () {

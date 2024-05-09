@@ -1,7 +1,13 @@
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
-from rest_framework.serializers import CharField, FloatField, SerializerMethodField
+from rest_framework.serializers import (
+    CharField,
+    FloatField,
+    ModelSerializer,
+    SerializerMethodField,
+)
 
 from peachjam_search.documents import SearchableDocument
+from peachjam_search.models import SearchClick
 
 
 class SearchableDocumentSerializer(DocumentSerializer):
@@ -106,3 +112,9 @@ class SearchableDocumentSerializer(DocumentSerializer):
 
     def get_registry(self, obj):
         return obj["registry" + self.language_suffix]
+
+
+class SearchClickSerializer(ModelSerializer):
+    class Meta:
+        model = SearchClick
+        fields = ("frbr_uri", "search_trace", "portion", "position")
