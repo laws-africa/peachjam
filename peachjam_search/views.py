@@ -417,11 +417,15 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
                 pk=self.request.GET["previous"]
             ).first()
 
+        search = self.request.GET.get("search", "")[:2048]
+        # ignore nulls
+        search = search.replace("\00", " ")
+
         # save the search trace
         return SearchTrace.objects.create(
             user=self.request.user if self.request.user.is_authenticated else None,
             request_id=self.request.id if self.request.id != "none" else None,
-            search=self.request.GET.get("search", "")[:2048],
+            search=search,
             field_searches=field_searches,
             n_results=response.data["count"],
             page=self.paginator.page.number,
