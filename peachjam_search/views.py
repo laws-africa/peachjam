@@ -51,8 +51,35 @@ class MainSearchBackend(BaseSearchFilterBackend):
     It is a combination of MUST (AND) queries and SHOULD (OR) queries.
     """
 
+    pages_inner_hits = {
+        "_source": ["pages.page_num"],
+        "highlight": {
+            "fields": {"pages.body": {}},
+            "pre_tags": ["<mark>"],
+            "post_tags": ["</mark>"],
+            "fragment_size": 80,
+            "number_of_fragments": 2,
+        },
+    }
+
+    provisions_inner_hits = {
+        "_source": [
+            "provisions.title",
+            "provisions.id",
+            "provisions.parent_titles",
+            "provisions.parent_ids",
+        ],
+        "highlight": {
+            "fields": {"provisions.body": {}},
+            "pre_tags": ["<mark>"],
+            "post_tags": ["</mark>"],
+            "fragment_size": 80,
+            "number_of_fragments": 2,
+        },
+    }
+
     def get_field(self, view, field):
-        options = view.search_fields[field] or {}
+        options = view.search_fields.get(field, {}) or {}
         if "boost" in options:
             return f'{field}^{options["boost"]}'
         return field
@@ -60,8 +87,10 @@ class MainSearchBackend(BaseSearchFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """Build the actual search queries."""
         must_queries = []
-        must_queries.extend(self.build_per_field_queries(request, view))
         must_queries.extend(self.build_rank_feature_queries(request, view))
+        must_queries.extend(self.build_per_field_queries(request, view))
+        must_queries.extend(self.build_content_advanced_queries(request, view))
+        # TODO: handle "search" field for advanced queries, which must use AND semantics within each field
 
         should_queries = []
         should_queries.extend(self.build_basic_queries(request, view))
@@ -88,20 +117,24 @@ class MainSearchBackend(BaseSearchFilterBackend):
 
     def build_per_field_queries(self, request, view):
         """Supports searching across multiple fields. Specify zero or more query parameters such as search__title=foo"""
-        query_params = {}
+        queries = []
+
         for field in view.search_fields.keys():
+            if field == "content":
+                # advanced search on the "content" field (which must include pages and provisions too), is handled
+                # by the
+                continue
             query = request.query_params.get(self.search_param + "__" + field)
             if query:
-                query_params[field] = query
+                queries.append(
+                    SimpleQueryString(
+                        query=query,
+                        fields=[self.get_field(view, field)],
+                        **view.advanced_simple_query_string_options,
+                    )
+                )
 
-        return [
-            SimpleQueryString(
-                query=search_term,
-                fields=[self.get_field(view, field)],
-                **view.simple_query_string_options,
-            )
-            for field, search_term in query_params.items()
-        ]
+        return queries
 
     def build_basic_queries(self, request, view):
         """This implements a simple_query_string query across multiple fields, using AND logic for the terms
@@ -129,6 +162,49 @@ class MainSearchBackend(BaseSearchFilterBackend):
             return []
         return [MatchPhrase(content={"query": search_term, "slop": 2})]
 
+    def build_content_advanced_queries(self, request, view):
+        """Adds advanced search queries for search__content, which searches across content, pages.body and
+        provisions.body."""
+        query = request.query_params.get(self.search_param + "__content")
+        if query:
+            return [
+                Q(
+                    "bool",
+                    minimum_should_match=1,
+                    should=[
+                        # content
+                        SimpleQueryString(
+                            query=query,
+                            fields=[self.get_field(view, "pages.body")],
+                            **view.advanced_simple_query_string_options,
+                        ),
+                        # pages.body
+                        Q(
+                            "nested",
+                            path="pages",
+                            inner_hits=self.pages_inner_hits,
+                            query=SimpleQueryString(
+                                query=query,
+                                fields=[self.get_field(view, "pages.body")],
+                                **view.advanced_simple_query_string_options,
+                            ),
+                        ),
+                        # provisions.body
+                        Q(
+                            "nested",
+                            path="provisions",
+                            inner_hits=self.provisions_inner_hits,
+                            query=SimpleQueryString(
+                                query=query,
+                                fields=[self.get_field(view, "provisions.body")],
+                                **view.advanced_simple_query_string_options,
+                            ),
+                        ),
+                    ],
+                )
+            ]
+        return []
+
     def build_nested_page_queries(self, request, view):
         """Does a nested page search, and includes highlights."""
         search_term = " ".join(self.get_search_query_params(request))
@@ -139,6 +215,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
             Q(
                 "nested",
                 path="pages",
+                inner_hits=self.pages_inner_hits,
                 query=Q(
                     "bool",
                     must=[
@@ -153,16 +230,6 @@ class MainSearchBackend(BaseSearchFilterBackend):
                         MatchPhrase(pages__body={"query": search_term, "slop": 2}),
                     ],
                 ),
-                inner_hits={
-                    "_source": ["pages.page_num"],
-                    "highlight": {
-                        "fields": {"pages.body": {}},
-                        "pre_tags": ["<mark>"],
-                        "post_tags": ["</mark>"],
-                        "fragment_size": 80,
-                        "number_of_fragments": 2,
-                    },
-                },
             )
         ]
 
@@ -176,6 +243,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
             Q(
                 "nested",
                 path="provisions",
+                inner_hits=self.provisions_inner_hits,
                 query=Q(
                     "bool",
                     should=[
@@ -193,21 +261,6 @@ class MainSearchBackend(BaseSearchFilterBackend):
                         ),
                     ],
                 ),
-                inner_hits={
-                    "_source": [
-                        "provisions.title",
-                        "provisions.id",
-                        "provisions.parent_titles",
-                        "provisions.parent_ids",
-                    ],
-                    "highlight": {
-                        "fields": {"provisions.body": {}},
-                        "pre_tags": ["<mark>"],
-                        "post_tags": ["</mark>"],
-                        "fragment_size": 80,
-                        "number_of_fragments": 2,
-                    },
-                },
             )
         ]
 
@@ -259,6 +312,10 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     simple_query_string_options = {
         "default_operator": "OR",
         "minimum_should_match": "70%",
+    }
+    # how to treat queries for advanced search: AND
+    advanced_simple_query_string_options = {
+        "default_operator": "AND",
     }
 
     filter_fields = {
