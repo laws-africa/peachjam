@@ -78,6 +78,8 @@ class MainSearchBackend(BaseSearchFilterBackend):
         },
     }
 
+    query = None
+
     def get_field(self, view, field):
         options = view.search_fields.get(field, {}) or {}
         if "boost" in options:
@@ -86,6 +88,9 @@ class MainSearchBackend(BaseSearchFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         """Build the actual search queries."""
+        # the basic query for a simple search
+        self.query = " ".join(self.get_search_query_params(request))
+
         must_queries = []
         must_queries.extend(self.build_rank_feature_queries(request, view))
         must_queries.extend(self.build_per_field_queries(request, view))
@@ -139,17 +144,18 @@ class MainSearchBackend(BaseSearchFilterBackend):
     def build_basic_queries(self, request, view):
         """This implements a simple_query_string query across multiple fields, using AND logic for the terms
         in a field, but effectively OR (should) logic between the fields."""
+        if not self.query:
+            return []
+
         query_fields = [
             self.get_field(view, field) for field, options in view.search_fields.items()
         ]
-        query_terms = self.get_search_query_params(request)
         queries = [
             SimpleQueryString(
-                query=search_term,
+                query=self.query,
                 fields=[field],
                 **view.simple_query_string_options,
             )
-            for search_term in query_terms[:1]
             for field in query_fields
         ]
 
@@ -157,10 +163,9 @@ class MainSearchBackend(BaseSearchFilterBackend):
 
     def build_content_phrase_queries(self, request, view):
         """Adds a best-effort phrase match query on the content field."""
-        search_term = " ".join(self.get_search_query_params(request))
-        if not search_term:
+        if not self.query:
             return []
-        return [MatchPhrase(content={"query": search_term, "slop": 2})]
+        return [MatchPhrase(content={"query": self.query, "slop": 2})]
 
     def build_content_advanced_queries(self, request, view):
         """Adds advanced search queries for search__content, which searches across content, pages.body and
@@ -175,7 +180,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
                         # content
                         SimpleQueryString(
                             query=query,
-                            fields=[self.get_field(view, "pages.body")],
+                            fields=[self.get_field(view, "content")],
                             **view.advanced_simple_query_string_options,
                         ),
                         # pages.body
@@ -185,7 +190,8 @@ class MainSearchBackend(BaseSearchFilterBackend):
                             inner_hits=self.pages_inner_hits,
                             query=SimpleQueryString(
                                 query=query,
-                                fields=[self.get_field(view, "pages.body")],
+                                fields=["pages.body"],
+                                quote_field_suffix=".exact",
                                 **view.advanced_simple_query_string_options,
                             ),
                         ),
@@ -196,7 +202,8 @@ class MainSearchBackend(BaseSearchFilterBackend):
                             inner_hits=self.provisions_inner_hits,
                             query=SimpleQueryString(
                                 query=query,
-                                fields=[self.get_field(view, "provisions.body")],
+                                fields=["provisions.body"],
+                                quote_field_suffix=".exact",
                                 **view.advanced_simple_query_string_options,
                             ),
                         ),
@@ -207,8 +214,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
 
     def build_nested_page_queries(self, request, view):
         """Does a nested page search, and includes highlights."""
-        search_term = " ".join(self.get_search_query_params(request))
-        if not search_term:
+        if not self.query:
             return []
 
         return [
@@ -220,14 +226,14 @@ class MainSearchBackend(BaseSearchFilterBackend):
                     "bool",
                     must=[
                         SimpleQueryString(
-                            query=search_term,
+                            query=self.query,
                             fields=["pages.body"],
                             quote_field_suffix=".exact",
                             **view.simple_query_string_options,
                         )
                     ],
                     should=[
-                        MatchPhrase(pages__body={"query": search_term, "slop": 2}),
+                        MatchPhrase(pages__body={"query": self.query, "slop": 2}),
                     ],
                 ),
             )
@@ -235,8 +241,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
 
     def build_nested_provision_queries(self, request, view):
         """Does a nested provision search, and includes highlights."""
-        search_term = " ".join(self.get_search_query_params(request))
-        if not search_term:
+        if not self.query:
             return []
 
         return [
@@ -247,15 +252,15 @@ class MainSearchBackend(BaseSearchFilterBackend):
                 query=Q(
                     "bool",
                     should=[
-                        MatchPhrase(provisions__body={"query": search_term, "slop": 2}),
+                        MatchPhrase(provisions__body={"query": self.query, "slop": 2}),
                         SimpleQueryString(
-                            query=search_term,
+                            query=self.query,
                             fields=["provisions.body"],
                             quote_field_suffix=".exact",
                             **view.simple_query_string_options,
                         ),
                         SimpleQueryString(
-                            query=search_term,
+                            query=self.query,
                             fields=["provisions.title^4", "provisions.parent_titles^2"],
                             **view.simple_query_string_options,
                         ),
