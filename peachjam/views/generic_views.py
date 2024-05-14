@@ -216,22 +216,42 @@ class BaseDocumentDetailView(DetailView):
         return result
 
     def add_relationships(self, context):
-        relationships_as_subject = list(
-            Relationship.for_subject_document(context["document"])
-            .filter(object_work__documents__isnull=False)
-            .distinct("pk")
+        # sort and group by predicate
+        rels_as_subject = sorted(
+            list(
+                Relationship.for_subject_document(context["document"])
+                .filter(object_work__documents__isnull=False)
+                .distinct("pk")
+            ),
+            key=lambda r: [r.predicate.verb, r.object_work.title],
         )
+        rels_as_subject = [
+            (verb, list(group))
+            for verb, group in itertools.groupby(
+                rels_as_subject, lambda r: r.predicate.verb
+            )
+        ]
 
-        relationships_as_object = list(
-            Relationship.for_object_document(context["document"])
-            .filter(subject_work__documents__isnull=False)
-            .distinct("pk")
+        # sort and group by predicate
+        rels_as_object = sorted(
+            list(
+                Relationship.for_object_document(context["document"])
+                .filter(subject_work__documents__isnull=False)
+                .distinct("pk")
+            ),
+            key=lambda r: [r.predicate.reverse_verb, r.subject_work.title],
         )
+        rels_as_object = [
+            (verb, list(group))
+            for verb, group in itertools.groupby(
+                rels_as_object, lambda r: r.predicate.reverse_verb
+            )
+        ]
 
-        context["relationships_as_subject"] = relationships_as_subject
-        context["relationships_as_object"] = relationships_as_object
-        context["n_relationships"] = len(relationships_as_subject) + len(
-            relationships_as_object
+        context["relationships_as_subject"] = rels_as_subject
+        context["relationships_as_object"] = rels_as_object
+        context["n_relationships"] = sum(
+            len(g) for v, g in itertools.chain(rels_as_object, rels_as_subject)
         )
         context["relationship_limit"] = 4
 
