@@ -129,7 +129,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
         for field in view.search_fields.keys():
             if field == "content":
                 # advanced search on the "content" field (which must include pages and provisions too), is handled
-                # by the
+                # by build_advanced_content_queries
                 continue
             query = request.query_params.get(self.search_param + "__" + field)
             if query:
