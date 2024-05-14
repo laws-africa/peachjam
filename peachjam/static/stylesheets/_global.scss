@@ -102,6 +102,12 @@ footer {
   @include button-size(0.125rem, 0.25rem, $btn-font-size-sm, $btn-border-radius-sm);
 }
 
+.btn-shrink-sm {
+  @include media-breakpoint-down(sm) {
+    @include button-size($btn-padding-y-sm, $btn-padding-x-sm, $btn-font-size-sm, $btn-border-radius-sm);
+  }
+}
+
 //Extra utility colors
 
 .facebook-forecolor {
