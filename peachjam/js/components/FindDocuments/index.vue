@@ -609,6 +609,12 @@ export default {
         params.append('facet', facet.name);
       });
 
+      this.generateAdvancedSearchParams(params);
+
+      return params;
+    },
+
+    generateAdvancedSearchParams (params) {
       // advanced search fields, if any
       if (this.advancedSearchDateCriteria.date_from && this.advancedSearchDateCriteria.date_to) {
         const dateFrom = this.advancedSearchDateCriteria.date_from;
@@ -620,9 +626,40 @@ export default {
         params.append('date__lte', this.advancedSearchDateCriteria.date_to);
       }
 
-      this.advancedSearchCriteria.forEach(criterion => this.addAdvancedSearchParams(criterion, params));
+      // group criteria by fields and process each field separately
+      const fields = new Map();
+      for (const criterion of this.advancedSearchCriteria) {
+        if (criterion.text) {
+          for (const field of criterion.fields.length ? criterion.fields : ['']) {
+            if (!fields.has(field)) fields.set(field, []);
+            fields.get(field).push(criterion);
+          }
+        }
+      }
 
-      return params;
+      for (const [field, criteria] of fields) {
+        params.set(field === '' ? 'search': `search__${field}`, this.generateAdvancedSearchQuery(criteria));
+      }
+    },
+
+    generateAdvancedSearchQuery (criteria) {
+      let q = '';
+
+      for (const criterion of criteria) {
+        const text = criterion.exact ? `"${criterion.text}"` : criterion.text;
+
+        if (criterion.condition === 'AND') {
+          q = q + ' & ';
+        } else if (criterion.condition === 'OR') {
+          q = q + ' | ';
+        } else if (criterion.condition === 'NOT') {
+          q = q + ' -';
+        }
+
+        q = q + `(${text})`;
+      }
+
+      return q.trim();
     },
 
     async search (pushState = true) {
@@ -734,38 +771,6 @@ export default {
       };
     },
 
-    addAdvancedSearchParams (criterion, params) {
-      if (!criterion.text) return;
-
-      let q = '';
-      const text = criterion.exact ? `"${criterion.text}"` : criterion.text;
-      let splitValue = text.match(/\w+|"[^"]+"/g);
-
-      if (criterion.condition === 'AND') {
-        const tokens = [];
-
-        splitValue.forEach((value) => {
-          if (value.startsWith('"')) {
-            tokens.push(value);
-          } else {
-            tokens.push('"' + value + '"');
-          }
-        });
-
-        splitValue = tokens.join(' ');
-      } else if (criterion.condition === 'OR') {
-        splitValue = `(|${splitValue.join('|')})`;
-      } else if (criterion.condition === 'NOT') {
-        splitValue = splitValue.map((value) => `-${value}`).join(' ');
-      } else splitValue = splitValue.join(' ');
-
-      q = q + ' ' + splitValue.trim();
-
-      const fields = criterion.fields.length ? criterion.fields.map(f => `search__${f}`) : ['search'];
-      for (const field of fields) {
-        params.set(field, (params.get(field)?.trim() || '') + ' ' + q.trim());
-      }
-    }
   }
 };
 </script>
