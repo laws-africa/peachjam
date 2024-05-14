@@ -94,14 +94,16 @@ class MainSearchBackend(BaseSearchFilterBackend):
         must_queries = []
         must_queries.extend(self.build_rank_feature_queries(request, view))
         must_queries.extend(self.build_per_field_queries(request, view))
-        must_queries.extend(self.build_content_advanced_queries(request, view))
-        # TODO: handle "search" field for advanced queries, which must use AND semantics within each field
 
         should_queries = []
         should_queries.extend(self.build_basic_queries(request, view))
         should_queries.extend(self.build_content_phrase_queries(request, view))
         should_queries.extend(self.build_nested_page_queries(request, view))
         should_queries.extend(self.build_nested_provision_queries(request, view))
+
+        # these handle advanced search
+        must_queries.extend(self.build_advanced_all_queries(request, view))
+        must_queries.extend(self.build_advanced_content_queries(request, view))
 
         return queryset.query(
             "bool",
@@ -167,50 +169,96 @@ class MainSearchBackend(BaseSearchFilterBackend):
             return []
         return [MatchPhrase(content={"query": self.query, "slop": 2})]
 
-    def build_content_advanced_queries(self, request, view):
+    def build_advanced_all_queries(self, request, view):
+        """Build queries for search__all (advanced search across all fields). Similar logic to build_basic_queries,
+        but all terms are required by default."""
+        query = request.query_params.get(self.search_param + "__all")
+        if not query:
+            return []
+
+        query_fields = [
+            self.get_field(view, field) for field, options in view.search_fields.items()
+        ]
+        return [
+            Q(
+                "bool",
+                minimum_should_match=1,
+                should=[
+                    SimpleQueryString(
+                        query=query,
+                        fields=[field],
+                        **view.advanced_simple_query_string_options,
+                    )
+                    for field in query_fields
+                ]
+                + self.build_advanced_content_query(view, query),
+            )
+        ]
+
+    def build_advanced_content_queries(self, request, view):
         """Adds advanced search queries for search__content, which searches across content, pages.body and
         provisions.body."""
         query = request.query_params.get(self.search_param + "__content")
+
+        # don't allow search__content and search__all to clash, only one is needed to search content fields
+        if query and request.query_params.get(self.search_param + "__all"):
+            return []
+
         if query:
             return [
                 Q(
                     "bool",
                     minimum_should_match=1,
-                    should=[
-                        # content
-                        SimpleQueryString(
-                            query=query,
-                            fields=[self.get_field(view, "content")],
-                            **view.advanced_simple_query_string_options,
-                        ),
-                        # pages.body
-                        Q(
-                            "nested",
-                            path="pages",
-                            inner_hits=self.pages_inner_hits,
-                            query=SimpleQueryString(
-                                query=query,
-                                fields=["pages.body"],
-                                quote_field_suffix=".exact",
-                                **view.advanced_simple_query_string_options,
-                            ),
-                        ),
-                        # provisions.body
-                        Q(
-                            "nested",
-                            path="provisions",
-                            inner_hits=self.provisions_inner_hits,
-                            query=SimpleQueryString(
-                                query=query,
-                                fields=["provisions.body"],
-                                quote_field_suffix=".exact",
-                                **view.advanced_simple_query_string_options,
-                            ),
-                        ),
-                    ],
+                    should=self.build_advanced_content_query(view, query),
                 )
             ]
         return []
+
+    def build_advanced_content_query(self, view, query):
+        # TODO: negative queries don't work, because they must be applied to the whole content, not just a
+        # particular page or provision
+        return [
+            # content
+            SimpleQueryString(
+                query=query,
+                fields=["content"],
+                **view.advanced_simple_query_string_options,
+            ),
+            # pages.body
+            Q(
+                "nested",
+                path="pages",
+                inner_hits=self.pages_inner_hits,
+                query=SimpleQueryString(
+                    query=query,
+                    fields=["pages.body"],
+                    quote_field_suffix=".exact",
+                    **view.advanced_simple_query_string_options,
+                ),
+            ),
+            # provisions.body
+            Q(
+                "nested",
+                path="provisions",
+                inner_hits=self.provisions_inner_hits,
+                query=Q(
+                    "bool",
+                    should=[
+                        SimpleQueryString(
+                            query=query,
+                            fields=["provisions.body"],
+                            quote_field_suffix=".exact",
+                            **view.advanced_simple_query_string_options,
+                        ),
+                        SimpleQueryString(
+                            query=self.query,
+                            fields=["provisions.title^4", "provisions.parent_titles^2"],
+                            **view.advanced_simple_query_string_options,
+                        ),
+                    ],
+                ),
+            ),
+        ]
 
     def build_nested_page_queries(self, request, view):
         """Does a nested page search, and includes highlights."""

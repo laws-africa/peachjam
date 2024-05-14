@@ -630,7 +630,7 @@ export default {
       const fields = new Map();
       for (const criterion of this.advancedSearchCriteria) {
         if (criterion.text) {
-          for (const field of criterion.fields.length ? criterion.fields : ['']) {
+          for (const field of criterion.fields) {
             if (!fields.has(field)) fields.set(field, []);
             fields.get(field).push(criterion);
           }
@@ -638,7 +638,7 @@ export default {
       }
 
       for (const [field, criteria] of fields) {
-        params.set(field === '' ? 'search': `search__${field}`, this.generateAdvancedSearchQuery(criteria));
+        params.set(`search__${field}`, this.generateAdvancedSearchQuery(criteria));
       }
     },
 
@@ -754,13 +754,13 @@ export default {
     resetAdvancedFields () {
       this.advancedSearchCriteria = [{
         text: '',
-        fields: [],
+        fields: ['all'],
         condition: '',
         exact: false
       },
       {
         text: '',
-        fields: [],
+        fields: ['all'],
         condition: 'AND',
         exact: false
       }];
