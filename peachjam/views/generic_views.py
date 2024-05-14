@@ -177,26 +177,17 @@ class BaseDocumentDetailView(DetailView):
 
         context["notices"] = self.get_notices()
         context["taxonomies"] = doc.taxonomies.prefetch_related("topic")
+        context["labels"] = doc.labels.all()
 
-        context["cited_documents"] = self.fetch_docs(doc.work.cited_works())
-        context["documents_citing_current_doc"] = self.fetch_docs(
+        # citations
+        context["cited_documents"] = self.fetch_citation_docs(doc.work.cited_works())
+        context["documents_citing_current_doc"] = self.fetch_citation_docs(
             doc.work.works_citing_current_work()
         )
-        context["cited_documents_count"] = sum(
-            [len(doc["docs"]) for doc in context["cited_documents"]]
-        )
-        context["documents_citing_current_doc_count"] = sum(
-            [len(doc["docs"]) for doc in context["documents_citing_current_doc"]]
-        )
-        context["number_of_extracted_citations"] = (
-            context["cited_documents_count"]
-            + context["documents_citing_current_doc_count"]
-        )
-        context["labels"] = doc.labels.all()
 
         return context
 
-    def fetch_docs(self, works):
+    def fetch_citation_docs(self, works):
         docs = sorted(
             list(
                 CoreDocument.objects.prefetch_related("work")
@@ -214,7 +205,10 @@ class BaseDocumentDetailView(DetailView):
         result = [
             {
                 "doc_type": doc_type,
-                "docs": sorted(list(group), key=lambda d: d.title),
+                # sort by citations descending, then title
+                "docs": sorted(
+                    list(group), key=lambda d: [-d.work.n_citing_works, d.title]
+                ),
             }
             for doc_type, group in grouped_docs
         ]

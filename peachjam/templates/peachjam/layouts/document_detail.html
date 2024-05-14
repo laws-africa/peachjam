@@ -111,7 +111,7 @@
                         aria-selected="false">
                   <i class="bi bi-pj pj-citations"></i>
                   {% trans "Citations" %}
-                  <span class="badge bg-secondary">{{ cited_documents_count|default:"-" }} / {{ documents_citing_current_doc_count|default:"-" }}</span>
+                  <span class="badge bg-secondary">{{ document.work.n_cited_works|default:"-" }} / {{ document.work.n_citing_works|default:"-" }}</span>
                 </button>
               </li>
             {% endif %}
