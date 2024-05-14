@@ -144,16 +144,17 @@
                   {% block document-metadata-content %}
                     <dl class="document-metadata-list">
                       {% block document-metadata-content-jurisdiction %}
-                        {% if document.jurisdiction %}
+                        {% if MULTIPLE_JURISDICTIONS or document.locality %}
                           <dt>
                             {% trans 'Jurisdiction' %}
                           </dt>
                           <dd class="text-muted">
-                            {{ document.jurisdiction }}
-                            {% if document.locality %}
-                              · {{ document.locality }}
-                            </dd>
-                          {% endif %}
+                            {% if MULTIPLE_JURISDICTIONS %}
+                              {{ document.jurisdiction }}
+                              {% if document.locality %}·{% endif %}
+                            {% endif %}
+                            {{ document.locality|default_if_none:'' }}
+                          </dd>
                         {% endif %}
                       {% endblock %}
                       {% block document-metadata-content-citation %}
