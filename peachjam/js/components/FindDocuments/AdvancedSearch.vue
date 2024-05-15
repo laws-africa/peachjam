@@ -147,7 +147,7 @@ export default {
 
       // ensure there's an empty entry at the end
       if (data[data.length - 1].text) {
-        data.push({ text: '', fields: [], exact: false, condition: 'AND' });
+        data.push({ text: '', fields: ['all'], exact: false, condition: 'AND' });
       }
 
       this.$emit('update:modelValue', data);

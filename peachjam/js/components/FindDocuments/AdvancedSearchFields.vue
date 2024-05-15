@@ -50,7 +50,8 @@
           >
             <input
               :id="`advanced-${targetIndex}-fields-${field.field}`"
-              :checked="field.field === 'ANY' && criterion.fields.length === 0 || criterion.fields.indexOf(field.field) > -1"
+              :checked="this.criterion.fields.includes(field.field)"
+              :disabled="field.field === 'all' && this.criterion.fields.includes(field.field)"
               class="form-check-input"
               type="checkbox"
               @change="(e) => fieldChanged(field.field, e.target.checked)"
@@ -101,7 +102,7 @@ export default {
   data: (self) => {
     return {
       fields: [{
-        field: 'ANY',
+        field: 'all',
         label: self.$t('Any field')
       },{
         field: 'title',
@@ -126,15 +127,28 @@ export default {
       this.$emit('on-change');
     },
     fieldChanged (field, checked) {
-      if (field === 'ANY') {
-        this.criterion.fields = [];
-      } else {
+      if (field === 'all') {
         if (checked) {
-          if (!this.criterion.fields.includes(field)) {
-            this.criterion.fields.push(field);
-          }
-        } else {
-          this.criterion.fields = this.criterion.fields.filter((f) => f !== field);
+          // only 'all'
+          this.criterion.fields.splice(0, this.criterion.fields.length);
+          this.criterion.fields.push(field);
+        } else if (this.criterion.fields.includes(field) && this.criterion.fields.length > 1) {
+          // remove it
+          this.criterion.fields.splice(this.criterion.fields.indexOf(field), 1);
+        }
+      } else if (checked) {
+        // add it
+        if (!this.criterion.fields.includes(field)) {
+          this.criterion.fields.push(field);
+        }
+        if (this.criterion.fields.includes('all')) {
+          this.criterion.fields.splice(this.criterion.fields.indexOf('all'), 1);
+        }
+      } else if (this.criterion.fields.includes(field)) {
+        // remove it
+        this.criterion.fields.splice(this.criterion.fields.indexOf(field), 1);
+        if (this.criterion.fields.length === 0) {
+          this.criterion.fields.push('all');
         }
       }
       this.changed();
