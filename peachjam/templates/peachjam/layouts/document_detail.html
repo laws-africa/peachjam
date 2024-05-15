@@ -111,7 +111,7 @@
                         aria-selected="false">
                   <i class="bi bi-pj pj-citations"></i>
                   {% trans "Citations" %}
-                  <span class="badge bg-secondary">{{ cited_documents_count|default:"-" }} / {{ documents_citing_current_doc_count|default:"-" }}</span>
+                  <span class="badge bg-secondary">{{ document.work.n_cited_works|default:"-" }} / {{ document.work.n_citing_works|default:"-" }}</span>
                 </button>
               </li>
             {% endif %}
@@ -378,23 +378,27 @@
                               <a href="#related-tab" data-component="ToggleTab">{% blocktrans %}{{ n_relationships }} related documents{% endblocktrans %}</a>
                             </li>
                           {% else %}
-                            {% for rel in relationships_as_subject %}
-                              {% if rel.object_work %}
-                                <li>
-                                  {% translate rel.predicate.verb as verb %}
-                                  {{ verb|capfirst }}
-                                  <a href="{% url 'document_detail' frbr_uri=rel.object_work.frbr_uri|strip_first_character %}">{{ rel.object_work.title }}</a>
-                                </li>
-                              {% endif %}
+                            {% for verb, rels in relationships_as_subject %}
+                              {% for rel in rels %}
+                                {% if rel.object_work %}
+                                  <li>
+                                    {% translate rel.predicate.verb as verb %}
+                                    {{ verb|capfirst }}
+                                    <a href="{% url 'document_detail' frbr_uri=rel.object_work.frbr_uri|strip_first_character %}">{{ rel.object_work.title }}</a>
+                                  </li>
+                                {% endif %}
+                              {% endfor %}
                             {% endfor %}
-                            {% for rel in relationships_as_object %}
-                              {% if rel.subject_work %}
-                                <li>
-                                  {% translate rel.predicate.reverse_verb as verb %}
-                                  {{ verb|capfirst }}
-                                  <a href="{% url 'document_detail' frbr_uri=rel.subject_work.frbr_uri|strip_first_character %}">{{ rel.subject_work.title }}</a>
-                                </li>
-                              {% endif %}
+                            {% for verb, rels in relationships_as_object %}
+                              {% for rel in rels %}
+                                {% if rel.subject_work %}
+                                  <li>
+                                    {% translate rel.predicate.reverse_verb as verb %}
+                                    {{ verb|capfirst }}
+                                    <a href="{% url 'document_detail' frbr_uri=rel.subject_work.frbr_uri|strip_first_character %}">{{ rel.subject_work.title }}</a>
+                                  </li>
+                                {% endif %}
+                              {% endfor %}
                             {% endfor %}
                           {% endif %}
                         </ul>
