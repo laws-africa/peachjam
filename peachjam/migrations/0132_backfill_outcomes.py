@@ -22,7 +22,7 @@ def forwards(apps, schema_editor):
             o.name_sw = outcome.name_sw
         o.save()
 
-    for judgment in Judgment.objects.all():
+    for judgment in Judgment.objects.all().iterator(chunk_size=100):
         j_outcomes = judgment.order_outcomes.all().values_list("name", flat=True)
         outcomes = Outcome.objects.filter(name__in=j_outcomes)
         if outcomes:
