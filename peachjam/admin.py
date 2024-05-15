@@ -63,7 +63,7 @@ from peachjam.models import (
     Locality,
     LowerBench,
     MatterType,
-    OrderOutcome,
+    Outcome,
     PeachJamSettings,
     Predicate,
     Relationship,
@@ -275,6 +275,7 @@ class DocumentForm(forms.ModelForm):
     )
     flynote = forms.CharField(widget=CKEditorWidget(), required=False)
     case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
+    order = forms.CharField(widget=CKEditorWidget(), required=False)
     date = forms.DateField(widget=DateSelectorWidget())
 
     def __init__(self, data=None, *args, **kwargs):
@@ -750,14 +751,14 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         CaseNumberAdmin,
         JudgmentRelationshipStackedInline,
     ] + DocumentAdmin.inlines
-    filter_horizontal = ("judges", "attorneys", "order_outcomes")
+    filter_horizontal = ("judges", "attorneys", "outcomes")
     list_filter = (*DocumentAdmin.list_filter, "court")
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
 
     fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "registry")
     fieldsets[0][1]["fields"].insert(5, "case_name")
-    fieldsets[0][1]["fields"].insert(6, "order_outcomes")
+    fieldsets[0][1]["fields"].insert(6, "outcomes")
     fieldsets[0][1]["fields"].insert(7, "mnc")
     fieldsets[0][1]["fields"].insert(8, "serial_number_override")
     fieldsets[0][1]["fields"].insert(9, "serial_number")
@@ -765,7 +766,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets[3][1]["fields"].extend(["case_summary", "flynote"])
+    fieldsets[3][1]["fields"].extend(["case_summary", "flynote", "order"])
     readonly_fields = [
         "mnc",
         "serial_number",
@@ -1058,7 +1059,7 @@ class CourtRegistryAdmin(BaseAdmin):
     list_display = ("name", "code")
 
 
-@admin.register(OrderOutcome)
+@admin.register(Outcome)
 class OutcomeAdmin(admin.ModelAdmin):
     list_display = ("name",)
 

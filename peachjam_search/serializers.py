@@ -17,7 +17,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
     provisions = SerializerMethodField()
     court = SerializerMethodField()
     nature = SerializerMethodField()
-    order_outcome = SerializerMethodField()
+    outcome = SerializerMethodField()
     registry = SerializerMethodField()
     labels = CharField(allow_null=True)
     _score = FloatField(source="meta.score")
@@ -104,8 +104,8 @@ class SearchableDocumentSerializer(DocumentSerializer):
     def get_nature(self, obj):
         return obj["nature" + self.language_suffix]
 
-    def get_order_outcome(self, obj):
-        val = obj["order_outcome" + self.language_suffix]
+    def get_outcome(self, obj):
+        val = obj["outcome" + self.language_suffix]
         if val is not None:
             val = list(val)
         return val

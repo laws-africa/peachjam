@@ -8,6 +8,7 @@ from peachjam.models import (
     DocumentNature,
     Label,
     OrderOutcome,
+    Outcome,
     Predicate,
     Taxonomy,
 )
@@ -45,6 +46,11 @@ class LabelTranslationOptions(TranslationOptions):
 
 @register(OrderOutcome)
 class OrderOutcomeTranslationOptions(TranslationOptions):
+    fields = ("name",)
+
+
+@register(Outcome)
+class OutcomeTranslationOptions(TranslationOptions):
     fields = ("name",)
 
 

@@ -18,7 +18,7 @@ from peachjam.models import (
     ExternalDocument,
     Judge,
     Locality,
-    OrderOutcome,
+    Outcome,
     Taxonomy,
 )
 from peachjam.xmlutils import parse_html_str
@@ -82,11 +82,11 @@ class SearchableDocument(Document):
     registry_fr = fields.KeywordField()
     registry_pt = fields.KeywordField()
 
-    order_outcome = fields.KeywordField()
-    order_outcome_en = fields.KeywordField()
-    order_outcome_sw = fields.KeywordField()
-    order_outcome_fr = fields.KeywordField()
-    order_outcome_pt = fields.KeywordField()
+    outcome = fields.KeywordField()
+    outcome_en = fields.KeywordField()
+    outcome_sw = fields.KeywordField()
+    outcome_fr = fields.KeywordField()
+    outcome_pt = fields.KeywordField()
 
     # GenericDocument, LegalInstrument
     authors = fields.KeywordField()
@@ -162,7 +162,7 @@ class SearchableDocument(Document):
                 Locality,
                 Court,
                 CourtRegistry,
-                OrderOutcome,
+                Outcome,
                 Author,
                 Judge,
                 Attorney,
@@ -184,9 +184,7 @@ class SearchableDocument(Document):
         if any(isinstance(related_instance, cls) for cls in [Locality, DocumentNature]):
             return related_instance.coredocument_set.all()
 
-        if any(
-            isinstance(related_instance, cls) for cls in [CourtRegistry, OrderOutcome]
-        ):
+        if any(isinstance(related_instance, cls) for cls in [CourtRegistry, Outcome]):
             return related_instance.judgments.all()
 
         if any(isinstance(related_instance, cls) for cls in [Court, Judge, Attorney]):
@@ -253,23 +251,21 @@ class SearchableDocument(Document):
         if hasattr(instance, "nature") and instance.nature:
             return instance.nature.name
 
-    def prepare_order_outcome(self, instance):
-        if hasattr(instance, "order_outcomes") and instance.order_outcomes:
-            return [
-                order_outcome.name for order_outcome in instance.order_outcomes.all()
-            ]
+    def prepare_outcome(self, instance):
+        if hasattr(instance, "outcomes") and instance.outcomes:
+            return [outcome.name for outcome in instance.outcomes.all()]
 
-    def prepare_order_outcome_en(self, instance):
-        return get_translated_m2m_name(instance, "order_outcomes", "en")
+    def prepare_outcome_en(self, instance):
+        return get_translated_m2m_name(instance, "outcomes", "en")
 
-    def prepare_order_outcome_fr(self, instance):
-        return get_translated_m2m_name(instance, "order_outcomes", "fr")
+    def prepare_outcome_fr(self, instance):
+        return get_translated_m2m_name(instance, "outcomes", "fr")
 
-    def prepare_order_outcome_pt(self, instance):
-        return get_translated_m2m_name(instance, "order_outcomes", "pt")
+    def prepare_outcome_pt(self, instance):
+        return get_translated_m2m_name(instance, "outcomes", "pt")
 
-    def prepare_order_outcome_sw(self, instance):
-        return get_translated_m2m_name(instance, "order_outcomes", "sw")
+    def prepare_outcome_sw(self, instance):
+        return get_translated_m2m_name(instance, "outcomes", "sw")
 
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""
