@@ -73,14 +73,14 @@ class ExtractedCitation(models.Model):
         "peachjam.Work",
         null=False,
         on_delete=models.CASCADE,
-        related_name="citing_work",
+        related_name="outgoing_citations",
         verbose_name=_("citing work"),
     )
     target_work = models.ForeignKey(
         "peachjam.Work",
         null=False,
         on_delete=models.CASCADE,
-        related_name="target_work",
+        related_name="incoming_citations",
         verbose_name=_("target work"),
     )
 
@@ -99,6 +99,12 @@ class ExtractedCitation(models.Model):
             .filter(target_work=work)
             .order_by("citing_work__title")
         )
+
+    @classmethod
+    def update_counts_for_work(cls, work):
+        work.n_cited_works = cls.for_citing_works(work).count()
+        work.n_citing_works = cls.for_target_works(work).count()
+        work.save(update_fields=["n_cited_works", "n_citing_works"])
 
 
 class CitationProcessing(SingletonModel):

@@ -1,0 +1,18 @@
+{% load peachjam i18n %}
+{% for doc in docs %}
+  <tr>
+    <td>{{ start|add:forloop.counter }}.</td>
+    <td>
+      <a href="{% url 'document_detail' frbr_uri=doc.work.frbr_uri|strip_first_character %}">{{ doc.title }}</a>
+    </td>
+    <td class="text-nowrap">
+      {% if doc.work.n_citing_works %}
+        {% blocktrans trimmed count n=doc.work.n_citing_works %}
+          {{ n }} citation
+        {% plural %}
+          {{ n }} citations
+        {% endblocktrans %}
+      {% endif %}
+    </td>
+  </tr>
+{% endfor %}
