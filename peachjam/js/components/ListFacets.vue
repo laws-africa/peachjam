@@ -143,7 +143,7 @@ export default {
         {
           name: 'outcomes',
           type: 'checkboxes',
-          title: this.$t('Order')
+          title: this.$t('Outcome')
         },
         {
           name: 'jurisdictions',

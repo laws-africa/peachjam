@@ -386,7 +386,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "judges": "judges",
         "registry": "registry",
         "attorneys": "attorneys",
-        "order_outcome": "order_outcome",
+        "outcome": "outcome",
         "labels": "labels",
     }
 
@@ -440,7 +440,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "judges": {"field": "judges", "options": {"size": 100}},
         "registry": {"field": "registry", "options": {"size": 100}},
         "attorneys": {"field": "attorneys", "options": {"size": 100}},
-        "order_outcome": {"field": "order_outcome", "options": {"size": 100}},
+        "outcome": {"field": "outcome", "options": {"size": 100}},
         "labels": {"field": "labels", "options": {"size": 100}},
     }
 
@@ -486,7 +486,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             "court",
             "nature",
             "registry",
-            "order_outcome",
+            "outcome",
         ]
 
         for field in translatable_fields:
