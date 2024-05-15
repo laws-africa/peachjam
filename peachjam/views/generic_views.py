@@ -177,26 +177,17 @@ class BaseDocumentDetailView(DetailView):
 
         context["notices"] = self.get_notices()
         context["taxonomies"] = doc.taxonomies.prefetch_related("topic")
+        context["labels"] = doc.labels.all()
 
-        context["cited_documents"] = self.fetch_docs(doc.work.cited_works())
-        context["documents_citing_current_doc"] = self.fetch_docs(
+        # citations
+        context["cited_documents"] = self.fetch_citation_docs(doc.work.cited_works())
+        context["documents_citing_current_doc"] = self.fetch_citation_docs(
             doc.work.works_citing_current_work()
         )
-        context["cited_documents_count"] = sum(
-            [len(doc["docs"]) for doc in context["cited_documents"]]
-        )
-        context["documents_citing_current_doc_count"] = sum(
-            [len(doc["docs"]) for doc in context["documents_citing_current_doc"]]
-        )
-        context["number_of_extracted_citations"] = (
-            context["cited_documents_count"]
-            + context["documents_citing_current_doc_count"]
-        )
-        context["labels"] = doc.labels.all()
 
         return context
 
-    def fetch_docs(self, works):
+    def fetch_citation_docs(self, works):
         docs = sorted(
             list(
                 CoreDocument.objects.prefetch_related("work")
@@ -214,7 +205,10 @@ class BaseDocumentDetailView(DetailView):
         result = [
             {
                 "doc_type": doc_type,
-                "docs": sorted(list(group), key=lambda d: d.title),
+                # sort by citations descending, then title
+                "docs": sorted(
+                    list(group), key=lambda d: [-d.work.n_citing_works, d.title]
+                ),
             }
             for doc_type, group in grouped_docs
         ]
@@ -222,22 +216,42 @@ class BaseDocumentDetailView(DetailView):
         return result
 
     def add_relationships(self, context):
-        relationships_as_subject = list(
-            Relationship.for_subject_document(context["document"])
-            .filter(object_work__documents__isnull=False)
-            .distinct("pk")
+        # sort and group by predicate
+        rels_as_subject = sorted(
+            list(
+                Relationship.for_subject_document(context["document"])
+                .filter(object_work__documents__isnull=False)
+                .distinct("pk")
+            ),
+            key=lambda r: [r.predicate.verb, r.object_work.title],
         )
+        rels_as_subject = [
+            (verb, list(group))
+            for verb, group in itertools.groupby(
+                rels_as_subject, lambda r: r.predicate.verb
+            )
+        ]
 
-        relationships_as_object = list(
-            Relationship.for_object_document(context["document"])
-            .filter(subject_work__documents__isnull=False)
-            .distinct("pk")
+        # sort and group by predicate
+        rels_as_object = sorted(
+            list(
+                Relationship.for_object_document(context["document"])
+                .filter(subject_work__documents__isnull=False)
+                .distinct("pk")
+            ),
+            key=lambda r: [r.predicate.reverse_verb, r.subject_work.title],
         )
+        rels_as_object = [
+            (verb, list(group))
+            for verb, group in itertools.groupby(
+                rels_as_object, lambda r: r.predicate.reverse_verb
+            )
+        ]
 
-        context["relationships_as_subject"] = relationships_as_subject
-        context["relationships_as_object"] = relationships_as_object
-        context["n_relationships"] = len(relationships_as_subject) + len(
-            relationships_as_object
+        context["relationships_as_subject"] = rels_as_subject
+        context["relationships_as_object"] = rels_as_object
+        context["n_relationships"] = sum(
+            len(g) for v, g in itertools.chain(rels_as_object, rels_as_subject)
         )
         context["relationship_limit"] = 4
 

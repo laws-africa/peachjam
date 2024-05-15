@@ -169,6 +169,10 @@ class Work(models.Model):
     )
     # the rank (weight) of this work in the graph network, computer by peachjam.graph.ranker
     ranking = models.FloatField(_("ranking"), null=True, blank=False, default=0.0)
+    # number of outgoing citations
+    n_cited_works = models.IntegerField(_("number of cited works"), default=0)
+    # number of incoming citations
+    n_citing_works = models.IntegerField(_("number of incoming citations"), default=0)
 
     class Meta:
         verbose_name = _("work")
@@ -217,11 +221,11 @@ class Work(models.Model):
         return work_frbr_uris
 
     def cited_works(self):
-        """Return  Shows a list of works cited by the current work."""
+        """Returns a list of works cited by the current work."""
         return ExtractedCitation.for_citing_works(self).values("target_work")
 
     def works_citing_current_work(self):
-        """Shows a list of works that cite the current work."""
+        """Returns a list of works that cite the current work."""
         return ExtractedCitation.for_target_works(self).values("citing_work")
 
     def save(self, *args, **kwargs):

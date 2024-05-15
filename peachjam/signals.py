@@ -1,7 +1,7 @@
 from django.db.models import signals
 from django.dispatch import receiver
 
-from peachjam.models import CoreDocument, SourceFile, Work
+from peachjam.models import CoreDocument, ExtractedCitation, SourceFile, Work
 from peachjam.tasks import update_extracted_citations_for_a_work
 
 
@@ -41,3 +41,17 @@ def convert_to_pdf(sender, instance, created, **kwargs):
     """Convert a source file to PDF when it's saved"""
     if created:
         instance.ensure_file_as_pdf()
+
+
+@receiver(signals.post_save, sender=ExtractedCitation)
+def extracted_citation_saved(sender, instance, **kwargs):
+    """Update citation counts on works."""
+    ExtractedCitation.update_counts_for_work(instance.citing_work)
+    ExtractedCitation.update_counts_for_work(instance.target_work)
+
+
+@receiver(signals.post_delete, sender=ExtractedCitation)
+def extracted_citation_deleted(sender, instance, **kwargs):
+    """Update citation counts on works."""
+    ExtractedCitation.update_counts_for_work(instance.citing_work)
+    ExtractedCitation.update_counts_for_work(instance.target_work)
