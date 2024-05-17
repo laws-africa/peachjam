@@ -92,6 +92,16 @@
       </dd>
     </dl>
   {% endif %}
+  {% if document.order %}
+    <dl>
+      <dt>
+        {% trans 'Order' %}
+      </dt>
+      <dd>
+        {{ document.order|safe }}
+      </dd>
+    </dl>
+  {% endif %}
   {% if document.case_summary %}
     <dl>
       <dt>
