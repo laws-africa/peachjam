@@ -213,6 +213,9 @@ class BaseDocumentDetailView(DetailView):
             for doc_type, group in grouped_docs
         ]
 
+        # sort by size of group, descending
+        result.sort(key=lambda g: -len(g["docs"]))
+
         return result
 
     def add_relationships(self, context):
