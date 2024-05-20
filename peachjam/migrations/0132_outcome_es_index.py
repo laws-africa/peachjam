@@ -23,6 +23,7 @@ def forwards(apps, schema_editor):
                         "outcome_sw": ix._mapping["outcome_sw"].to_dict(),
                         "outcome_fr": ix._mapping["outcome_fr"].to_dict(),
                         "outcome_pt": ix._mapping["outcome_pt"].to_dict(),
+                        "order": ix._mapping["order"].to_dict(),
                     }
                 },
             )

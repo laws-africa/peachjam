@@ -73,6 +73,7 @@ class SearchableDocument(Document):
     case_name = fields.TextField(analyzer="standard")
     case_summary = fields.TextField()
     flynote = fields.TextField()
+    order = fields.TextField()
     judges = fields.KeywordField(attr="judge.name")
     attorneys = fields.KeywordField(attr="attorney.name")
 
