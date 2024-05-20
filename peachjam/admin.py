@@ -43,6 +43,7 @@ from peachjam.models import (
     CoreDocument,
     Court,
     CourtClass,
+    CourtGroup,
     CourtRegistry,
     DocumentNature,
     DocumentTopic,
@@ -1051,6 +1052,16 @@ class ExternalDocumentAdmin(DocumentAdmin):
         return form
 
 
+@admin.register(CourtClass)
+class CourtClassAdmin(admin.ModelAdmin):
+    prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(CourtGroup)
+class CourtGroupAdmin(admin.ModelAdmin):
+    prepopulated_fields = {"slug": ("name",)}
+
+
 @admin.register(CourtRegistry)
 class CourtRegistryAdmin(BaseAdmin):
     help_topic = "site-admin/add-court-registries"
@@ -1107,7 +1118,6 @@ class AttorneyAdmin(ImportExportMixin, admin.ModelAdmin):
 admin.site.register(
     [
         CitationLink,
-        CourtClass,
         AttachedFileNature,
         CitationProcessing,
     ]

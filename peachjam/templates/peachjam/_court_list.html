@@ -1,5 +1,20 @@
 {% load peachjam i18n %}
-{% if court_classes %}
+{% if court_groups %}
+  <div class="flow-columns mb-3">
+    {% for court_group in court_groups %}
+      <div class="flow-columns-group mb-4">
+        <h4 class="mb-2">{{ court_group }}</h4>
+        {% for class in court_group.classes.all %}
+          <ul class="list-unstyled">
+            <li>
+              <a href="{% url 'court_class' class.slug %}">{{ class }}</a>
+            </li>
+          </ul>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+{% elif court_classes %}
   <div class="flow-columns mb-3">
     {% for court_class in court_classes %}
       <div class="flow-columns-group mb-4">

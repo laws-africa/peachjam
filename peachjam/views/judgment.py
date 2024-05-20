@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 
-from peachjam.models import CourtClass, Judgment
+from peachjam.models import CourtClass, CourtGroup, Judgment
 from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView
 
@@ -14,6 +14,7 @@ class JudgmentListView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
+        context["court_groups"] = CourtGroup.objects.prefetch_related("classes")
         context["recent_judgments"] = Judgment.objects.exclude(
             published=False
         ).order_by("-date")[:30]

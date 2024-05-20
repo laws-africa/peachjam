@@ -71,7 +71,41 @@ class MatterType(models.Model):
         return self.name
 
 
+class CourtGroup(models.Model):
+    name = models.CharField(_("name"), max_length=100, null=False, unique=True)
+    description = models.TextField(_("description"), null=True, blank=True)
+    slug = models.SlugField(_("slug"), max_length=255, null=False, unique=True)
+    order = models.IntegerField(_("order"), null=True, blank=True)
+    show_listing_page = models.BooleanField(null=False, default=False)
+
+    class Meta:
+        ordering = (
+            "order",
+            "name",
+        )
+        verbose_name = _("court group")
+        verbose_name_plural = _("court groups")
+
+    def __str__(self):
+        return self.name
+
+    # def get_absolute_url(self):
+    #     return reverse("court_group", args=[self.slug])
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
+
+
 class CourtClass(models.Model):
+    court_group = models.ForeignKey(
+        CourtGroup,
+        related_name="classes",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("court group"),
+    )
     name = models.CharField(_("name"), max_length=100, null=False, unique=True)
     description = models.TextField(_("description"), null=True, blank=True)
     slug = models.SlugField(_("slug"), max_length=255, null=False, unique=True)
