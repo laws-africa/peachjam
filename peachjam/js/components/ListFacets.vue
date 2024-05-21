@@ -68,7 +68,7 @@ export default {
       type: Array,
       default: () => []
     },
-    order_outcomes: {
+    outcomes: {
       type: Array,
       default: () => []
     }
@@ -141,9 +141,9 @@ export default {
           title: this.$t('Judges')
         },
         {
-          name: 'order_outcomes',
+          name: 'outcomes',
           type: 'checkboxes',
-          title: this.$t('Order')
+          title: this.$t('Outcome')
         },
         {
           name: 'jurisdictions',

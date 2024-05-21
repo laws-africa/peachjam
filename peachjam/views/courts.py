@@ -62,22 +62,22 @@ class FilteredJudgmentView(FilteredDocumentListView):
             if attorney
         )
 
-        order_outcomes = list(
-            order_outcome
-            for order_outcome in self.form.filter_queryset(
-                self.get_base_queryset(), exclude="order_outcomes"
+        outcomes = list(
+            outcome
+            for outcome in self.form.filter_queryset(
+                self.get_base_queryset(), exclude="outcomes"
             )
             .order_by()
-            .values_list("order_outcomes__name", flat=True)
+            .values_list("outcomes__name", flat=True)
             .distinct()
-            if order_outcome
+            if outcome
         )
 
         context["facet_data"] = {
             "judges": judges,
             "alphabet": lowercase_alphabet(),
             "attorneys": attorneys,
-            "order_outcomes": order_outcomes,
+            "outcomes": outcomes,
         }
 
     def populate_years(self, context):

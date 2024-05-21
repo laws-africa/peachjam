@@ -56,6 +56,21 @@ class OrderOutcome(models.Model):
         return self.name
 
 
+class Outcome(models.Model):
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("outcome")
+        verbose_name_plural = _("outcomes")
+
+    def __str__(self):
+        return self.name
+
+
 class MatterType(models.Model):
     name = models.CharField(
         _("name"), max_length=1024, null=False, blank=False, unique=True
@@ -246,8 +261,14 @@ class Judgment(CoreDocument):
         blank=True,
         related_name="judgments",
     )
+    outcomes = models.ManyToManyField(
+        Outcome,
+        blank=True,
+        related_name="judgments",
+    )
     case_summary = models.TextField(_("case summary"), null=True, blank=True)
     flynote = models.TextField(_("flynote"), null=True, blank=True)
+    order = models.TextField(_("order"), null=True, blank=True)
     case_name = models.CharField(
         _("case name"),
         max_length=4096,

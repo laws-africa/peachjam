@@ -84,7 +84,7 @@ class BaseDocumentFilterForm(forms.Form):
     localities = forms.CharField(required=False)
     registries = forms.CharField(required=False)
     attorneys = forms.CharField(required=False)
-    order_outcomes = forms.CharField(required=False)
+    outcomes = forms.CharField(required=False)
 
     def __init__(self, data, *args, **kwargs):
         self.params = QueryDict(mutable=True)
@@ -103,7 +103,7 @@ class BaseDocumentFilterForm(forms.Form):
         localities = self.params.getlist("localities")
         registries = self.params.getlist("registries")
         attorneys = self.params.getlist("attorneys")
-        order_outcomes = self.params.getlist("order_outcomes")
+        outcomes = self.params.getlist("outcomes")
 
         queryset = self.order_queryset(queryset, exclude)
 
@@ -137,10 +137,8 @@ class BaseDocumentFilterForm(forms.Form):
         if attorneys and exclude != "attorneys":
             queryset = queryset.filter(attorneys__name__in=attorneys)
 
-        if order_outcomes and exclude != "order_outcomes":
-            queryset = queryset.filter(
-                order_outcomes__name__in=order_outcomes
-            ).distinct()
+        if outcomes and exclude != "outcomes":
+            queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
 
         return queryset
 

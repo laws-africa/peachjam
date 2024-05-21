@@ -48,7 +48,7 @@ from peachjam.models import (
     Judgment,
     Locality,
     MatterType,
-    OrderOutcome,
+    Outcome,
     SourceFile,
     Taxonomy,
     citations_processor,
@@ -490,10 +490,10 @@ class JudgmentResource(BaseDocumentResource):
     )
     matter_type = fields.Field(column_name="matter_type", widget=CharWidget)
 
-    order_outcome = fields.Field(
-        column_name="order_outcome",
-        attribute="order_outcome",
-        widget=ForeignKeyWidget(OrderOutcome, field="name"),
+    outcome = fields.Field(
+        column_name="outcome",
+        attribute="outcome",
+        widget=ForeignKeyWidget(Outcome, field="name"),
     )
 
     class Meta(BaseDocumentResource.Meta):
