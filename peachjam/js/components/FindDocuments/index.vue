@@ -257,6 +257,7 @@ export default {
       error: null,
       searchInfo: {},
       page: 1,
+      pageSize: 10,
       ordering: '-score',
       q: '',
       drawerOpen: false,
@@ -585,7 +586,8 @@ export default {
 
     formatResults () {
       for (let i = 0; i < this.searchInfo.results.length; i++) {
-        this.searchInfo.results[i].position = i + 1;
+        // number items from 1 consistently across pages
+        this.searchInfo.results[i].position = (this.page - 1) * this.pageSize + i + 1;
       }
     },
 

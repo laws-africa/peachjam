@@ -13,6 +13,8 @@ class SearchTrace(models.Model):
     """A search performed by a user."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # this is the name of the search configuration, for tracking changes across versions
+    config_version = models.CharField(max_length=50, null=False)
     request_id = models.CharField(max_length=1024, null=True, editable=False)
     previous_search = models.ForeignKey("self", on_delete=models.CASCADE, null=True)
 

@@ -42,6 +42,7 @@ CACHE_SECS = 15 * 60
 
 
 class CustomPageNumberPagination(PageNumberPagination):
+    # NB: if this changes, update pageSize in peachjam/js/components/FindDocuments/index.vue
     page_size = 10
 
 
@@ -339,6 +340,10 @@ class SearchView(TemplateView):
 class DocumentSearchViewSet(BaseDocumentViewSet):
     """API endpoint that allows document to be searched."""
 
+    # This identifies the search configuration, for tracking changes across versions.
+    # If a search setting changes, such as a boost or a new field, then changes this to the date of the release.
+    config_version = "2024-05-01"
+
     document = SearchableDocument
     serializer_class = SearchableDocumentSerializer
     permission_classes = (AllowAny,)
@@ -530,6 +535,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         # save the search trace
         return SearchTrace.objects.create(
             user=self.request.user if self.request.user.is_authenticated else None,
+            config_version=self.config_version,
             request_id=self.request.id if self.request.id != "none" else None,
             search=self.request.GET.get("search", "")[:2048],
             field_searches=field_searches,
