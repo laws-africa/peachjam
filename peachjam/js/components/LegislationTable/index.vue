@@ -61,7 +61,7 @@
           <div class="table-row legislation-table__row headings">
             <div class="indent" />
             <div class="table-row__content-col">
-              <div class="content">
+              <div class="content d-flex">
                 <div
                   class="content__title align-items-center"
                   role="button"
@@ -190,24 +190,39 @@
             </a>.
           </div>
         </div>
+        <div v-if="yearGroups.length" class="legislation-table">
+          <div v-for="(row, index) in yearGroups" :key="index" class="my-3">
+            <p class="h5">
+              {{ row.year }}
+            </p>
+            <LegislationRows
+              class="d-flex"
+              :filtered-data="row.documents"
+              :show-dates="showDates"
+              @handleRowClick="handleRowClick"
+            />
+          </div>
+        </div>
       </div>
     </div>
     <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
     <div v-if="false">
       {{ $t('Years') }}
       {{ $t('Taxonomies') }}
+      {{ $t('Alphabetical') }}
     </div>
   </div>
 </template>
 
 <script>
 import FilterFacets from '../FilterFacets/index.vue';
+import LegislationRows from './Row.vue';
 import debounce from 'lodash/debounce';
 
 export default {
   name: 'LegislationTable',
   components: {
-    FilterFacets
+    FilterFacets, LegislationRows
   },
   props: ['showDates'],
   data: () => ({
@@ -215,6 +230,7 @@ export default {
     facets: [],
     tableData: [],
     filteredData: [],
+    yearGroups: [],
     lockAccordion: false,
     q: '',
     windowWith: window.innerWidth,
@@ -227,6 +243,7 @@ export default {
   watch: {
     q () {
       this.filterData();
+      this.groupByYear();
     },
     sortableFields () {
       this.filterData();
@@ -234,6 +251,7 @@ export default {
     facets () {
       this.offCanvasFacets.hide();
       this.filterData();
+      this.groupByYear();
     }
   },
   beforeUnmount () {
@@ -250,6 +268,7 @@ export default {
     const tableJsonElement = document.getElementById('legislation-table');
     this.tableData = JSON.parse(tableJsonElement.textContent);
     this.filterData();
+    this.groupByYear();
     this.setFacets();
   },
 
@@ -310,8 +329,18 @@ export default {
       taxonomyOptions.sort((a, b) => a.value.localeCompare(b.value));
       // Sort descending
       yearsOptions.sort((a, b) => b.value - a.value);
-
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('').map(letter => ({
+        label: letter.toUpperCase(),
+        value: letter
+      }));
       this.facets = [
+        {
+          title: this.$t('Alphabetical'),
+          name: 'alphabetical',
+          type: 'letter-radio',
+          value: [],
+          options: alphabet
+        },
         {
           title: this.$t('Years'),
           name: 'year',
@@ -367,6 +396,9 @@ export default {
       });
       Object.keys(facetDict).forEach((key) => {
         data = data.filter((item) => {
+          if (key === 'alphabetical') {
+            return item.title.toLowerCase().startsWith(facetDict[key]);
+          }
           if (Array.isArray(facetDict[key])) {
             const arr1 = facetDict[key].map((x) => String(x));
             const arr2 = item[key].map((x) => String(x));
@@ -391,6 +423,18 @@ export default {
         }
       });
       this.filteredData = data;
+    },
+    groupByYear () {
+      const yearGroup = this.filteredData.reduce((acc, item) => {
+        let year = acc.find((group) => group.year === item.year);
+        if (!year) {
+          year = { year: item.year, documents: [] };
+          acc.push(year);
+        }
+        year.documents.push(item);
+        return acc;
+      }, []);
+      this.yearGroups = yearGroup.sort((a, b) => b.year - a.year);
     }
   }
 };
