@@ -196,6 +196,7 @@
     <div v-if="false">
       {{ $t('Years') }}
       {{ $t('Taxonomies') }}
+      {{ $t('Alphabetical') }}
     </div>
   </div>
 </template>
@@ -310,8 +311,18 @@ export default {
       taxonomyOptions.sort((a, b) => a.value.localeCompare(b.value));
       // Sort descending
       yearsOptions.sort((a, b) => b.value - a.value);
-
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('').map(letter => ({
+        label: letter.toUpperCase(),
+        value: letter
+      }));
       this.facets = [
+        {
+          title: this.$t('Alphabetical'),
+          name: 'alphabetical',
+          type: 'letter-radio',
+          value: [],
+          options: alphabet
+        },
         {
           title: this.$t('Years'),
           name: 'year',
@@ -367,6 +378,9 @@ export default {
       });
       Object.keys(facetDict).forEach((key) => {
         data = data.filter((item) => {
+          if (key === 'alphabetical') {
+            return item.title.toLowerCase().startsWith(facetDict[key]);
+          }
           if (Array.isArray(facetDict[key])) {
             const arr1 = facetDict[key].map((x) => String(x));
             const arr2 = item[key].map((x) => String(x));
