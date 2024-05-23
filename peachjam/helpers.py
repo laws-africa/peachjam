@@ -1,4 +1,3 @@
-import os
 import string
 import subprocess
 import tempfile
@@ -6,6 +5,7 @@ from datetime import date, datetime
 from functools import wraps
 
 import martor.utils
+from django.conf import settings
 from django.utils.translation import get_language_from_request
 from languages_plus.models import Language
 
@@ -46,7 +46,7 @@ def pdfjs_to_text(fname):
     """Extract text from fname using pdfjs-compatible script."""
     with tempfile.NamedTemporaryFile(suffix=".txt") as outf:
         cmd = [
-            os.path.join(os.path.dirname(__file__), "..", "bin", "pdfjs-to-text"),
+            settings.PEACHJAM["PDFJS_TO_TEXT"],
             fname,
             outf.name,
         ]
