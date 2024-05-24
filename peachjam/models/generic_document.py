@@ -103,22 +103,40 @@ class Legislation(CoreDocument):
             return 10.0
         return super().search_penalty()
 
+    @property
+    def commenced(self):
+        return bool(self.metadata_json["commencement_date"])
+
     def apply_labels(self):
+        labels = list(self.labels.all())
+
         # label to indicate that this legislation is repealed
-        label, _ = Label.objects.get_or_create(
+        repealed_label, _ = Label.objects.get_or_create(
             code="repealed",
             defaults={"name": "Repealed", "code": "repealed", "level": "danger"},
         )
-
-        labels = list(self.labels.all())
+        uncommenced_label, _ = Label.objects.get_or_create(
+            code="uncommenced",
+            defaults={
+                "name": "Uncommenced",
+                "level": "danger",
+            },
+        )
 
         # apply label if repealed
         if self.repealed:
-            if label not in labels:
-                self.labels.add(label.pk)
-        elif label in labels:
+            if repealed_label not in labels:
+                self.labels.add(repealed_label.pk)
+        elif repealed_label in labels:
             # not repealed, remove label
-            self.labels.remove(label.pk)
+            self.labels.remove(repealed_label.pk)
+
+        # apply label if not commenced
+        if not self.commenced:
+            if uncommenced_label not in labels:
+                self.labels.add(uncommenced_label.pk)
+        elif uncommenced_label in labels:
+            self.labels.remove(uncommenced_label.pk)
 
         super().apply_labels()
 
