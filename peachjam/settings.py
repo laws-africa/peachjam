@@ -130,6 +130,7 @@ PEACHJAM = {
     "SEARCH_JURISDICTION_FILTER": False,
     "MULTIPLE_JURISDICTIONS": False,
     "MULTIPLE_LOCALITIES": False,
+    "PDFJS_TO_TEXT": "bin/pdfjs-to-text",
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
