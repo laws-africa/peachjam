@@ -18,6 +18,8 @@ RUN npm i -g sass
 # install dependencies
 # copying this in first means Docker can cache this operation
 COPY pyproject.toml /app/
+# this dir is needed by pip when processing pyproject.toml
+COPY bin/pdfjs-to-text /app/bin/
 WORKDIR /app
 RUN pip install .
 
