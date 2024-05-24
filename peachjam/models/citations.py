@@ -86,18 +86,21 @@ class ExtractedCitation(models.Model):
 
     @classmethod
     def for_citing_works(cls, work):
+        # only returns works with an associated document
         return (
             cls.objects.prefetch_related("citing_work", "target_work")
-            .filter(citing_work=work)
-            .order_by("target_work__title")
+            .filter(citing_work=work, target_work__documents__isnull=False)
+            .order_by("target_work_id")
+            .distinct("target_work")
         )
 
     @classmethod
     def for_target_works(cls, work):
         return (
             cls.objects.prefetch_related("citing_work", "target_work")
-            .filter(target_work=work)
-            .order_by("citing_work__title")
+            .filter(target_work=work, citing_work__documents__isnull=False)
+            .order_by("citing_work_id")
+            .distinct("citing_work")
         )
 
     @classmethod
