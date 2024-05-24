@@ -1,6 +1,13 @@
 from django.views.generic import TemplateView
 
-from peachjam.models import Article, CourtClass, Judgment, Legislation, Taxonomy
+from peachjam.models import (
+    Article,
+    CourtClass,
+    Gazette,
+    Judgment,
+    Legislation,
+    Taxonomy,
+)
 
 
 class HomePageView(TemplateView):
@@ -16,6 +23,9 @@ class HomePageView(TemplateView):
         context["recent_legislation"] = Legislation.objects.exclude(
             published=False
         ).order_by("-date")[:10]
+        context["recent_gazettes"] = Gazette.objects.exclude(published=False).order_by(
+            "-date"
+        )[:5]
         context["taxonomies"] = Taxonomy.dump_bulk()
         context["taxonomy_url"] = "taxonomy_detail"
         context["recent_articles"] = (
