@@ -64,12 +64,13 @@ class SearchableDocumentSerializer(DocumentSerializer):
     def get_pages(self, obj):
         """Serialize nested page hits and highlights."""
         pages = []
-        if hasattr(obj.meta, "inner_hits"):
+        if hasattr(obj.meta, "inner_hits") and hasattr(obj.meta.inner_hits, "pages"):
             for page in obj.meta.inner_hits.pages.hits.hits:
                 info = page._source.to_dict()
                 info["highlight"] = (
                     page.highlight.to_dict() if hasattr(page, "highlight") else {}
                 )
+                self.merge_exact_highlights(info["highlight"])
                 pages.append(info)
         return pages
 
@@ -95,6 +96,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
                     if hasattr(provision, "highlight")
                     else {}
                 )
+                self.merge_exact_highlights(info["highlight"])
                 provisions.append(info)
         return provisions
 
@@ -114,6 +116,15 @@ class SearchableDocumentSerializer(DocumentSerializer):
 
     def get_registry(self, obj):
         return obj["registry" + self.language_suffix]
+
+    def merge_exact_highlights(self, highlight):
+        # fold .exact highlights into the main field to make life easier for the client
+        for key, value in list(highlight.items()):
+            if key.endswith(".exact"):
+                short = key[:-6]
+                if short not in highlight:
+                    highlight[short] = value
+                del highlight[key]
 
 
 class SearchClickSerializer(ModelSerializer):

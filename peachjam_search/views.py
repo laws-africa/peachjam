@@ -55,7 +55,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
     pages_inner_hits = {
         "_source": ["pages.page_num"],
         "highlight": {
-            "fields": {"pages.body": {}},
+            "fields": {"pages.body": {}, "pages.body.exact": {}},
             "pre_tags": ["<mark>"],
             "post_tags": ["</mark>"],
             "fragment_size": 80,
@@ -71,7 +71,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
             "provisions.parent_ids",
         ],
         "highlight": {
-            "fields": {"provisions.body": {}},
+            "fields": {"provisions.body": {}, "provisions.body.exact": {}},
             "pre_tags": ["<mark>"],
             "post_tags": ["</mark>"],
             "fragment_size": 80,
