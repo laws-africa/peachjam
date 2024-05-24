@@ -105,7 +105,7 @@ class Legislation(CoreDocument):
 
     @property
     def commenced(self):
-        return bool(self.metadata_json["commencement_date"])
+        return bool(self.metadata_json.get("commencement_date", None))
 
     def apply_labels(self):
         labels = list(self.labels.all())
