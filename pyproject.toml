@@ -70,3 +70,6 @@ dependencies = [
     "sentry-sdk>=1.16.0",
     "whitenoise>=6.0.0",
 ]
+
+[tool.setuptools.data-files]
+"bin" = ["bin/pdfjs-to-text"]

@@ -94,6 +94,15 @@
       </div>
       <div>
         {% block lower-row-content %}
+          {% if recent_gazettes %}
+            <section class="pb-3 pt-3">
+              {% block recent-gazettes-title %}
+                <h2 class="mb-4">{% trans 'Recent Gazettes' %}</h2>
+              {% endblock %}
+              {% trans 'View more gazettes' as text %}
+              {% include 'peachjam/_recent_document_list.html' with documents=recent_gazettes view_more_text=text view_more_url_name='gazettes' %}
+            </section>
+          {% endif %}
           <section class="pb-3 pt-3">
             <h2 class="mb-4">{% trans 'Courts' %}</h2>
             {% include 'peachjam/_court_list.html' %}
