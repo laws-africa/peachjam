@@ -796,7 +796,7 @@ class SourceFile(AttachmentAbstractModel):
         from peachjam.tasks import convert_source_file_to_pdf
 
         if self.mimetype != "application/pdf" and not self.file_as_pdf:
-            convert_source_file_to_pdf(self.id)
+            convert_source_file_to_pdf(self.id, creator=self.document)
 
     def filename_extension(self):
         return os.path.splitext(self.filename)[1][1:]

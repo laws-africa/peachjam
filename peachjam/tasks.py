@@ -124,7 +124,8 @@ def run_ingestor(ingestor_id):
         log.info("Ingestor not enabled, ignoring.")
 
 
-@background(queue="peachjam", remove_existing_tasks=True)
+# this can be slow and is not urgent, run at a lower priority
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def extract_citations(document_id):
     """Extract citations from a document in the background."""
 
