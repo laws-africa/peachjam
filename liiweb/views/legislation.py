@@ -37,6 +37,8 @@ class LegislationListView(TemplateView):
             qs = qs.exclude(parent_work=None).filter(
                 repealed=False, metadata_json__principal=True
             )
+        elif self.variant == "uncommenced":
+            qs = qs.filter(metadata_json__commenced=False)
         return qs
 
     def get_context_data(self, **kwargs):

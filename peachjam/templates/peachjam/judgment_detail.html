@@ -1,5 +1,29 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
 {% load i18n %}
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
+      </li>
+      {% if document.court.court_class.show_listing_page %}
+        <li class="breadcrumb-item">
+          <a href="{% url 'court_class' document.court.court_class.slug %}">{{ document.court.court_class.name }}</a>
+        </li>
+      {% endif %}
+      {% if document.court %}
+        <li class="breadcrumb-item">
+          <a href="{% url 'court' document.court.code %}">{{ document.court.name }}</a>
+        </li>
+      {% endif %}
+      {% if document.registry %}
+        <li class="breadcrumb-item">
+          <a href="{% url 'court_registry' document.court.code document.registry.code %}">{{ document.registry.name }}</a>
+        </li>
+      {% endif %}
+    </ol>
+  </nav>
+{% endblock %}
 {% block document-metadata-content-citation %}
   {{ block.super }}
   {% if document.mnc %}

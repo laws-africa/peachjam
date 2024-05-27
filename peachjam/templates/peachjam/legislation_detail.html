@@ -1,5 +1,6 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
 {% load i18n peachjam %}
+{% block sub-title %}<h2 class="h5 text-muted">{{ document.citation }}</h2>{% endblock %}
 {% block document-tabs %}
   {{ block.super }}
   {% if child_documents %}
