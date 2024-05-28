@@ -41,6 +41,12 @@
     </a>
   </li>
   <li class="nav-item">
+    <a class="nav-link {% if request.path == '/doc/causelist' %}active{% endif %}"
+       href="{% url 'document_nature_list' 'causelist' %}">
+      {% trans 'Causelists' %}
+    </a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link {% if request.path == '/doc/speech' %}active{% endif %}"
        href="{% url 'document_nature_list' 'speech' %}">
       {% trans 'Speeches' %}
