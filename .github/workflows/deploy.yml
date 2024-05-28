@@ -383,20 +383,3 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
           git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/civlii-peachjam'
           git_push_flags: '--force'
-
-  deploy-lii:
-    if: ${{ !cancelled() }}
-    needs: deploy-civlii
-    name: Deploy to lii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: git push to lii.laws.africa
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/liiweb'
-          git_push_flags: '--force'
