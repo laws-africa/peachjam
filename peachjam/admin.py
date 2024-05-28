@@ -2,6 +2,7 @@ import copy
 import json
 from datetime import date
 
+from background_task.models import Task
 from ckeditor.widgets import CKEditorWidget
 from dal import autocomplete
 from django import forms
@@ -9,7 +10,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.contenttypes.admin import GenericStackedInline
+from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
@@ -332,6 +333,31 @@ class ImageInline(BaseAttachmentFileInline):
     model = Image
 
 
+class BackgroundTaskInline(GenericTabularInline):
+    model = Task
+    ct_field = "creator_content_type"
+    ct_fk_field = "creator_object_id"
+    fields = ("task", "run_at", "attempts", "has_error")
+    readonly_fields = fields
+    extra = 0
+    can_delete = False
+
+    def task(self, obj):
+        return format_html(
+            '<a href="{url}">{title}</a>',
+            url=reverse(
+                "admin:background_task_task_change",
+                kwargs={
+                    "object_id": obj.pk,
+                },
+            ),
+            title=obj.task_name,
+        )
+
+    def has_error(self, obj):
+        return bool(obj.last_error)
+
+
 class DocumentAdmin(BaseAdmin):
     form = DocumentForm
     inlines = [
@@ -340,6 +366,7 @@ class DocumentAdmin(BaseAdmin):
         AlternativeNameInline,
         AttachedFilesInline,
         ImageInline,
+        BackgroundTaskInline,
     ]
     list_display = (
         "title",
@@ -527,7 +554,7 @@ class DocumentAdmin(BaseAdmin):
     def extract_citations(self, request, queryset):
         count = queryset.count()
         for doc in queryset.iterator():
-            extract_citations_task(doc.pk)
+            extract_citations_task(doc.pk, creator=doc)
         self.message_user(
             request, f"Queued tasks to extract citations from {count} documents."
         )

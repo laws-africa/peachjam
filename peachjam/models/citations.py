@@ -1,6 +1,9 @@
 import logging
+from datetime import timedelta
+from random import randint
 
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .settings import SingletonModel
@@ -128,7 +131,12 @@ class CitationProcessing(SingletonModel):
                 log.info("Updating processing date to %s", date)
                 self.processing_date = date
                 self.save()
-                re_extract_citations()
+
+                # run next saturday at a random hour, since it queues up a lot of other tasks
+                now = timezone.now()
+                at = now + timedelta(days=(5 - now.weekday()) % 7)
+                at = at.replace(hour=randint(0, 23), minute=0, second=0, microsecond=0)
+                re_extract_citations(schedule=at)
 
     def re_extract_citations(self):
         """
@@ -151,7 +159,7 @@ class CitationProcessing(SingletonModel):
                 self.processing_date,
             )
             for document in later_documents.iterator():
-                extract_citations(document.id)
+                extract_citations(document.id, creator=document)
 
             self.reset_processing_date()
 
