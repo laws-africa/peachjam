@@ -28,5 +28,7 @@ RUN pip install .
 COPY package*.json /app/
 RUN npm ci --no-audit --ignore-scripts --only=prod
 
+ENV NODE_PATH=/app/node_modules/
+
 # Copy the code
 COPY . /app
