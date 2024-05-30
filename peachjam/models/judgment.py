@@ -486,3 +486,42 @@ class CaseNumber(models.Model):
     def save(self, *args, **kwargs):
         self.string = self.get_case_number_string()
         return super().save(*args, **kwargs)
+
+
+class CaseHistory(models.Model):
+    judgment = models.ForeignKey(
+        Judgment,
+        related_name="case_histories",
+        on_delete=models.CASCADE,
+        verbose_name=_("judgment"),
+    )
+    case_number = models.CharField(
+        _("case number"), max_length=1024, null=True, blank=True
+    )
+    historical_judgment = models.ForeignKey(
+        Judgment,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("historical judgment"),
+    )
+    outcome = models.ForeignKey(
+        Outcome,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("outcome"),
+    )
+    judges = models.ManyToManyField(Judge, verbose_name=_("judges"), blank=True)
+    court = models.ForeignKey(
+        Court, on_delete=models.PROTECT, null=True, blank=True, verbose_name=_("court")
+    )
+    date = models.DateField(_("date"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["date"]
+        verbose_name = _("case history")
+        verbose_name_plural = _("case histories")
+
+    def __str__(self):
+        return f"{self.case_number}" or f"{self.judgment} - {self.date}"
