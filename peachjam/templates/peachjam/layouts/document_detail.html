@@ -114,6 +114,20 @@
                 </button>
               </li>
             {% endif %}
+            {% if document.case_histories.all|length %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#case-history-tab"
+                        type="button"
+                        role="tab"
+                        aria-controls="case-history-tab"
+                        aria-selected="false">
+                  <i class="bi bi-pj pj-case-history"></i>
+                  {% trans 'Case history' %}
+                </button>
+              </li>
+            {% endif %}
             {% if document.work.ratification.countries.all|length %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
@@ -419,6 +433,14 @@
              role="tabpanel"
              aria-labelledby="citations-tab">
           <div class="container">{% include 'peachjam/_citations.html' %}</div>
+        </div>
+      {% endif %}
+      {% if document.case_histories.all|length %}
+        <div class="tab-pane fade"
+             id="case-history-tab"
+             role="tabpanel"
+             aria-labelledby="case-history-tab">
+          <div class="container">{% include 'peachjam/_case_histories.html' %}</div>
         </div>
       {% endif %}
       {% if document.work.ratification.countries.all|length %}
