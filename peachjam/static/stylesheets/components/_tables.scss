@@ -1,4 +1,6 @@
 .doc-table {
+  margin-bottom: $spacer;
+
   .doc-table-row {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
@@ -38,6 +40,10 @@
     .cell-title {
       padding-left: 20px;
     }
+  }
+
+  .cell-date {
+    text-align: right;
   }
 
   @include media-breakpoint-down(md) {
@@ -137,6 +143,25 @@
       }
       .cell-date {
         grid-column: span 2;
+      }
+    }
+  }
+
+  // title, date
+  &.doc-table-title-date {
+    .cell-title {
+      grid-column: span 10;
+    }
+    .cell-date {
+      grid-column: span 2;
+    }
+
+    @include media-breakpoint-down(md) {
+      .cell-title {
+        grid-column: span 12;
+      }
+      .cell-date {
+        grid-column: span 12;
       }
     }
   }

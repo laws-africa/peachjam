@@ -1,21 +1,19 @@
 {% extends 'peachjam/_judgment_table.html' %}
 {% block table-body %}
-  <tbody>
-    {% for item in grouped_documents %}
-      {% if item.judgments %}
-        <tr>
-          <th colspan="2" scope="row">{{ item.key }}</th>
-        </tr>
-        <tr>
-          {% for judgment in item.judgments %}
-            <td>
-              <a href="{{ judgment.get_absolute_url }}">{{ judgment.title }}</a>
-              {% include 'peachjam/_labels.html' with labels=judgment.labels.all %}
-            </td>
-            <td style="white-space: nowrap;">{{ judgment.date }}</td>
-          </tr>
-        {% endfor %}
-      {% endif %}
-    {% endfor %}
-  </tbody>
+  {% for item in grouped_documents %}
+    {% if item.judgments %}
+      <div class="doc-table-row">
+        <div class="doc-table-cell cell-group">{{ item.key }}</div>
+      </div>
+      {% for judgment in item.judgments %}
+        <div class="doc-table-row">
+          <div class="doc-table-cell cell-title">
+            <a href="{{ judgment.get_absolute_url }}">{{ judgment.title }}</a>
+            {% include 'peachjam/_labels.html' with labels=judgment.labels.all %}
+          </div>
+          <div class="doc-table-cell cell-date" style="white-space: nowrap;">{{ judgment.date }}</div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
 {% endblock %}

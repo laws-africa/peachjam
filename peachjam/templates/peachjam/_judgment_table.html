@@ -1,24 +1,18 @@
 {% load i18n %}
-<div class="table-responsive">
-  <table class="table">
-    <thead>
-      <tr>
-        <th scope="col" style="width: 70%">{% trans 'Title' %}</th>
-        <th scope="col">{% trans 'Date' %}</th>
-      </tr>
-    </thead>
-    {% block table-body %}
-      <tbody>
-        {% for document in documents %}
-          <tr>
-            <td>
-              <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-              {% include 'peachjam/_labels.html' with labels=document.labels.all %}
-            </td>
-            <td style="white-space: nowrap;">{{ document.date }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    {% endblock %}
-  </table>
+<div class="doc-table doc-table-title-date">
+  <div class="doc-table-row doc-table-head">
+    <div class="doc-table-cell cell-title">{% trans 'Title' %}</div>
+    <div class="doc-table-cell cell-date">{% trans 'Date' %}</div>
+  </div>
+  {% block table-body %}
+    {% for document in documents %}
+      <div class="doc-table-row">
+        <div class="doc-table-cell cell-title">
+          <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+          {% include 'peachjam/_labels.html' with labels=document.labels.all %}
+        </div>
+        <div class="doc-tabl-cell cell-date" style="white-space: nowrap;">{{ document.date }}</div>
+      </div>
+    {% endfor %}
+  {% endblock %}
 </div>
