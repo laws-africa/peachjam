@@ -43,154 +43,114 @@
             Filters
           </button>
         </div>
-        <div :class="`card legislation-table ${showDates ? 'with-dates' : ''}`">
-          <div class="card-header">
-            <input
-              v-model="q"
-              type="text"
-              class="form-control"
-              placeholder="Filter legislation"
-            >
-          </div>
-          <div class="table-row legislation-table__row">
-            <div class="indent" />
-            <div>
-              {{ filteredData.length }} of {{ tableData.length }} documents
-            </div>
-          </div>
-          <div class="table-row legislation-table__row headings">
-            <div class="indent" />
-            <div class="table-row__content-col">
-              <div class="content">
-                <div
-                  class="content__title align-items-center"
-                  role="button"
-                  @click="updateSort('title')"
-                >
-                  <strong>{{ $t('Title') }}</strong>
-                  <i
-                    v-if="sortableFields.title === 'asc'"
-                    class="bi bi-sort-up ms-2"
-                  />
-                  <i
-                    v-if="sortableFields.title === 'desc'"
-                    class="bi bi-sort-down ms-2"
-                  />
-                </div>
-                <div
-                  v-if="!showDates"
-                  class="content__secondary"
-                  role="button"
-                  @click="updateSort('citation')"
-                >
-                  <strong>{{ $t('Numbered title') }}</strong>
-                  <i
-                    v-if="sortableFields.citation === 'asc'"
-                    class="bi bi-sort-up ms-2"
-                  />
-                  <i
-                    v-if="sortableFields.citation === 'desc'"
-                    class="bi bi-sort-down ms-2"
-                  />
-                </div>
-                <div
-                  v-if="showDates"
-                  class="content__secondary"
-                  role="button"
-                  @click="updateSort('date')"
-                >
-                  <strong>{{ $t('Date') }}</strong>
-                  <i
-                    v-if="sortableFields.date === 'asc'"
-                    class="bi bi-sort-up ms-2"
-                  />
-                  <i
-                    v-if="sortableFields.date === 'desc'"
-                    class="bi bi-sort-down ms-2"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <template v-if="filteredData.length">
-            <div
-              v-for="(row, index) in filteredData"
-              :key="index"
-              :class="`table-row legislation-table__row ${
-                row.children.length ? 'has-children' : ''
-              }`"
-              role="button"
-              @click="handleRowClick"
-            >
-              <div
-                v-if="row.children.length"
-                class="column-caret indent"
-              >
-                <i class="bi bi-caret-right-fill" />
-                <i class="bi bi-caret-down-fill" />
-              </div>
-              <div
-                v-else
-                class="indent"
-              />
-              <div class="table-row__content-col">
-                <div class="content">
-                  <div class="content__title">
-                    <a :href="`${row.work_frbr_uri}`">{{ row.title }}</a>
-                    <i
-                      v-if="row.languages.length > 1"
-                      class="bi bi-translate ps-2"
-                      :title="$t('Multiple languages available')"
-                    />
-                  </div>
-                  <div v-if="showDates" class="content__secondary">
-                    {{ row.date }}
-                  </div>
-                  <div v-else class="content__secondary">
-                    {{ row.citation }}
-                  </div>
-                  <div
-                    v-if="row.children.length"
-                    :id="`row-accordion-${index}`"
-                    class="accordion-collapse collapse accordion content__children"
-                    data-bs-parent=".legislation-table__row"
-                  >
-                    <div class="accordion-body p-0">
-                      <div
-                        v-for="(subleg, subleg_index) in row.children"
-                        :key="subleg_index"
-                        class="content mb-3"
-                      >
-                        <div class="content__title">
-                          <a :href="`${subleg.work_frbr_uri}`">{{ subleg.title }}</a>
-                        </div>
-                        <div v-if="showDates" class="content__secondary">
-                          {{ subleg.date }}
-                        </div>
-                        <div v-else class="content__secondary">
-                          {{ subleg.citation }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-          <div
-            v-else
-            class="p-2 text-center"
+        <div class="mb-2">
+          <input
+            v-model="q"
+            type="text"
+            class="form-control"
+            :placeholder="$t('Filter legislation')"
           >
-            {{ $t('No legislation found.') }}
-            <a
-              :href="`/search/?q=${encodeURIComponent(q)}`"
-              target="_blank"
-            >
-              {{ $t('Try searching instead') }}
-            </a>.
-          </div>
         </div>
+        <div class="mb-3">
+          {{ filteredData.length }} of {{ tableData.length }} documents
+        </div>
+        <div v-if="filteredData.length" class="doc-table doc-table-title-subtitle-date">
+          <div class="doc-table-row doc-table-header">
+            <div class="doc-table-cell cell-title">
+              <div class="indent" />
+              <div
+                class="title align-items-center"
+                role="button"
+                @click="updateSort('title')"
+              >
+                {{ $t('Title') }}
+                <i
+                  v-if="sortableFields.title === 'asc'"
+                  class="bi bi-sort-up ms-2"
+                />
+                <i
+                  v-if="sortableFields.title === 'desc'"
+                  class="bi bi-sort-down ms-2"
+                />
+              </div>
+            </div>
+            <div class="doc-table-cell cell-subtitle">
+              <div
+                role="button"
+                @click="updateSort('citation')"
+              >
+                {{ $t('Numbered title') }}
+                <i
+                  v-if="sortableFields.citation === 'asc'"
+                  class="bi bi-sort-up ms-2"
+                />
+                <i
+                  v-if="sortableFields.citation === 'desc'"
+                  class="bi bi-sort-down ms-2"
+                />
+              </div>
+            </div>
+            <div class="doc-table-cell cell-date">
+              <div
+                role="button"
+                @click="updateSort('year')"
+              >
+                {{ $t('Year') }}
+                <i
+                  v-if="sortableFields.year === 'asc'"
+                  class="bi bi-sort-up ms-2"
+                />
+                <i
+                  v-if="sortableFields.year === 'desc'"
+                  class="bi bi-sort-down ms-2"
+                />
+              </div>
+            </div>
+          </div>
+          <template
+            v-for="(row, index) in rows"
+            :key="index"
+          >
+            <template v-if="row.heading != null">
+              <div class="doc-table-row">
+                <div class="doc-table-cell cell-group">
+                  {{ row.heading }}
+                </div>
+              </div>
+            </template>
+            <table-row
+              v-else
+              :id="`row-${index}`"
+              :row="row"
+              @toggle="toggleChildren(index)"
+            />
+            <template v-if="row.children && row.children.length">
+              <div
+                :id="`children-${index}`"
+                class="doc-table-children collapse"
+              >
+                <table-row
+                  v-for="(child, childIndex) in row.children"
+                  :key="childIndex"
+                  :row="child"
+                />
+              </div>
+            </template>
+          </template>
+        </div>
+        <div
+          v-else
+          class="p-2 text-center"
+        >
+          {{ $t('No legislation found.') }}
+          <a
+            :href="`/search/?q=${encodeURIComponent(q)}`"
+            target="_blank"
+          >
+            {{ $t('Try searching instead') }}
+          </a>.
       </div>
+    </div>
     </div>
     <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
     <div v-if="false">
@@ -203,12 +163,14 @@
 
 <script>
 import FilterFacets from '../FilterFacets/index.vue';
+import TableRow from './TableRow.vue';
 import debounce from 'lodash/debounce';
 
 export default {
   name: 'LegislationTable',
   components: {
-    FilterFacets
+    FilterFacets,
+    TableRow
   },
   props: ['showDates'],
   data: () => ({
@@ -216,13 +178,14 @@ export default {
     facets: [],
     tableData: [],
     filteredData: [],
+    rows: [],
     lockAccordion: false,
     q: '',
     windowWith: window.innerWidth,
     sortableFields: {
       title: 'asc',
       citation: '',
-      date: ''
+      year: ''
     }
   }),
   watch: {
@@ -255,26 +218,13 @@ export default {
   },
 
   methods: {
-    handleRowClick (e) {
-      const parentRow = e.target.closest('.legislation-table__row');
-      if (!parentRow.classList.contains('has-children')) return;
-      if (
-        Array.from(parentRow.querySelectorAll('a')).some(
-          (a) => e.target === a || a.contains(e.target)
-        )
-      ) { return; }
-      if (this.lockAccordion) return;
-      const collapseElement = parentRow.querySelector('.collapse');
-      collapseElement.addEventListener('shown.bs.collapse', () => {
-        this.lockAccordion = false;
-      });
-      collapseElement.addEventListener('hidden.bs.collapse', () => {
-        this.lockAccordion = false;
-      });
-      this.lockAccordion = true;
-      // Async action
-      parentRow.classList.toggle('expanded');
-      return new window.bootstrap.Collapse(collapseElement);
+    toggleChildren (index) {
+      const row = document.getElementById(`row-${index}`);
+      const groupEl = document.getElementById(`children-${index}`);
+      if (row && groupEl) {
+        row.classList.toggle('expanded');
+        return new window.bootstrap.Collapse(groupEl, { toggle: true });
+      }
     },
     setWindowWidth: debounce(function () {
       this.windowWith = window.innerWidth;
@@ -352,7 +302,7 @@ export default {
         ...{
           title: '',
           citation: '',
-          date: ''
+          year: ''
         },
         [field]: newSortValue
       };
@@ -391,8 +341,10 @@ export default {
         });
       });
 
+      let sortKey = null;
       Object.keys(this.sortableFields).forEach((key) => {
         if (this.sortableFields[key]) {
+          sortKey = key;
           data.sort((a, b) => {
             const fa = a[key] ? a[key].toLowerCase() : '';
             const fb = b[key] ? b[key].toLowerCase() : '';
@@ -405,6 +357,32 @@ export default {
         }
       });
       this.filteredData = data;
+
+      this.rows = [];
+      // group rows for headings
+      function groupKey (record) {
+        const val = record[sortKey] || '';
+        if (sortKey === 'year') {
+          // return year
+          return val.substring(0, 4);
+        } else {
+          // letter
+          return (val && val.length) ? val[0].toUpperCase() : '';
+        }
+      }
+
+      let currentGroup = '';
+      this.filteredData.forEach((record) => {
+        const group = groupKey(record);
+        if (group !== currentGroup) {
+          currentGroup = group;
+          this.rows.push({
+            heading: group,
+            children: []
+          });
+        }
+        this.rows.push(record);
+      });
     }
   }
 };
@@ -450,10 +428,6 @@ export default {
   display: none;
 }
 
-.indent {
-  flex: 0 0 30px;
-}
-
 .table-row__content-col {
   flex: 1;
 }
@@ -488,7 +462,7 @@ export default {
 }
 
 .legislation-table.with-dates .content__title {
-  grid-column: span 9;
+  grid-column: span 6;
 }
 
 .legislation-table.with-dates .content__secondary {
