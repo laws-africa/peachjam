@@ -55,11 +55,11 @@
           {{ filteredData.length }} of {{ tableData.length }} documents
         </div>
         <div v-if="filteredData.length" class="doc-table doc-table-title-subtitle-date">
-          <div class="doc-table-row doc-table-header">
+          <div class="doc-table-row doc-table-head">
+            <div class="doc-table-cell cell-toggle"></div>
             <div class="doc-table-cell cell-title">
-              <div class="indent" />
               <div
-                class="title align-items-center"
+                class="align-items-center"
                 role="button"
                 @click="updateSort('title')"
               >
@@ -113,6 +113,7 @@
           >
             <template v-if="row.heading != null">
               <div class="doc-table-row">
+                <div class="doc-table-cell cell-toggle" />
                 <div class="doc-table-cell cell-group">
                   {{ row.heading }}
                 </div>
@@ -149,8 +150,8 @@
           >
             {{ $t('Try searching instead') }}
           </a>.
+        </div>
       </div>
-    </div>
     </div>
     <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
     <div v-if="false">
@@ -387,85 +388,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.legislation-table__row {
-  padding: 0.25rem;
-  border-bottom: 1px solid var(--bs-gray-200);
-  cursor: default !important;
-  transition: background-color 300ms ease-in-out;
-}
-
-.legislation-table__row.has-children {
-  cursor: pointer !important;
-}
-
-.legislation-table__row.has-children:hover {
-  background-color: var(--bs-light);
-}
-
-.legislation-table__row.headings {
-  border-bottom: 1px solid var(--bs-primary);
-}
-
-.legislation-table__row.headings i {
-  font-size: 18px;
-}
-
-.column-caret {
-  text-align: center;
-}
-
-.legislation-table__row .column-caret .bi-caret-down-fill {
-  display: none;
-}
-
-.legislation-table__row.expanded .column-caret .bi-caret-down-fill {
-  display: block;
-}
-
-.legislation-table__row.expanded .column-caret .bi-caret-right-fill {
-  display: none;
-}
-
-.table-row__content-col {
-  flex: 1;
-}
-
-.table-row {
-  display: flex;
-  width: 100%;
-  flex-wrap: wrap;
-}
-
-.table-row .content {
-  display: grid;
-  grid-gap: 1rem;
-  grid-template-columns: repeat(12, 1fr);
-}
-
-.content__children {
-  grid-column: span 12;
-  margin-top: 10px;
-}
-
-.content__children .content__title {
-  padding-left: 1rem;
-}
-
-.content__title {
-  grid-column: span 8;
-}
-
-.content__secondary {
-  grid-column: span 4;
-}
-
-.legislation-table.with-dates .content__title {
-  grid-column: span 6;
-}
-
-.legislation-table.with-dates .content__secondary {
-  grid-column: span 3;
-}
-</style>
