@@ -58,8 +58,6 @@
               <option value="-title">{{ $t('Title') }} (Z - A)</option>
               <option value="year">{{ $t('Year') }} ({{ $t('Oldest first') }})</option>
               <option value="-year">{{ $t('Year') }} ({{ $t('Newest first') }})</option>
-              <option value="citation">{{ $t('Numbered title') }} (A - Z)</option>
-              <option value="-citation">{{ $t('Numbered title') }} (Z - A)</option>
             </select>
           </div>
         </div>
@@ -81,14 +79,6 @@
               </div>
             </div>
             <div class="doc-table-cell cell-subtitle">
-              <div
-                role="button"
-                @click="updateSort('citation')"
-              >
-                {{ $t('Numbered title') }}
-                <i v-if="sort === 'citation'" class="bi bi-sort-up ms-2" />
-                <i v-if="sort === '-citation'" class="bi bi-sort-down ms-2" />
-              </div>
             </div>
             <div class="doc-table-cell cell-date">
               <div
