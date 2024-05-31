@@ -519,7 +519,7 @@ class CaseHistory(models.Model):
     date = models.DateField(_("date"), null=True, blank=True)
 
     class Meta:
-        ordering = ["date"]
+        ordering = ["-date"]
         verbose_name = _("case history")
         verbose_name_plural = _("case histories")
 

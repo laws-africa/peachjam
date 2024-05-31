@@ -114,7 +114,7 @@
                 </button>
               </li>
             {% endif %}
-            {% if document.case_histories.all|length %}
+            {% if case_histories %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
                         data-bs-toggle="tab"
@@ -435,7 +435,7 @@
           <div class="container">{% include 'peachjam/_citations.html' %}</div>
         </div>
       {% endif %}
-      {% if document.case_histories.all|length %}
+      {% if case_histories %}
         <div class="tab-pane fade"
              id="case-history-tab"
              role="tabpanel"
