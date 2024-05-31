@@ -14,6 +14,7 @@ class LegislationListView(TemplateView):
     variant = "current"
     navbar_link = "legislation"
     model = Legislation
+    extra_context = {"doc_table_citations": True}
 
     def get_queryset(self):
         qs = (

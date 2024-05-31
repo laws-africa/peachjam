@@ -1,7 +1,7 @@
 .doc-table {
   .doc-table-row {
     display: grid;
-    grid-template-columns: 15px repeat(12, 1fr);
+    grid-template-columns: repeat(12, 1fr);
     gap: 0rem 0.5rem;
     padding: 0.5rem 0;
 
@@ -40,23 +40,14 @@
     }
   }
 
-  // sizing for different groups of columns
-
-  &.doc-table-title-subtitle-date {
-    .cell-title {
-      grid-column: span 7;
-    }
-
-    .cell-subtitle {
-      grid-column: span 3;
-    }
-
-    .cell-date {
-      grid-column: span 2;
-    }
-  }
-
   @include media-breakpoint-down(md) {
+    .doc-table-head {
+      .cell-citation,
+      .cell-date {
+        display: none;
+      }
+    }
+
     .doc-table-children {
       .cell-title {
         padding-left: 0px;
@@ -67,27 +58,83 @@
         grid-template-columns: 30px repeat(12, 1fr);
       }
     }
+  }
 
-    &.doc-table-title-subtitle-date {
-      .doc-table-head {
-        .cell-subtitle,
-        .cell-date {
-          display: none;
+  // sizing for different groups of columns
+
+  // toggle, title, citation, date
+  &.doc-table-toggle-title-citation-date {
+    .doc-table-row {
+      // extra space for toggle
+      grid-template-columns: 15px repeat(12, 1fr);
+    }
+    .cell-title {
+      grid-column: span 7;
+    }
+    .cell-citation {
+      grid-column: span 3;
+    }
+    .cell-date {
+      grid-column: span 2;
+    }
+
+    @include media-breakpoint-down(md) {
+      .doc-table-children {
+        .doc-table-row {
+          // extra space for toggle
+          grid-template-columns: 30px repeat(12, 1fr);
         }
       }
 
       .cell-toggle {
         grid-row: span 2;
       }
-
       .cell-title {
         grid-column: span 12;
       }
-
-      .cell-subtitle {
+      .cell-citation {
         grid-column: span 10;
       }
+      .cell-date {
+        grid-column: span 2;
+      }
 
+      .doc-table-head {
+        .cell-citation,
+        .cell-date {
+          display: none;
+        }
+      }
+    }
+  }
+
+  // toggle, title, date
+  &.doc-table-toggle-title-date {
+    .doc-table-row {
+      // extra space for toggle
+      grid-template-columns: 15px repeat(12, 1fr);
+    }
+    .cell-title {
+      grid-column: span 10;
+    }
+    .cell-date {
+      grid-column: span 2;
+    }
+
+    @include media-breakpoint-down(md) {
+      .doc-table-children {
+        .doc-table-row {
+          // extra space for toggle
+          grid-template-columns: 30px repeat(12, 1fr);
+        }
+      }
+
+      .cell-toggle {
+        grid-row: span 2;
+      }
+      .cell-title {
+        grid-column: span 10;
+      }
       .cell-date {
         grid-column: span 2;
       }

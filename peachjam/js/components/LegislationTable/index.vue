@@ -64,7 +64,7 @@
         <div class="mb-3">
           {{ filteredData.length }} of {{ tableData.length }} documents
         </div>
-        <div v-if="filteredData.length" class="doc-table doc-table-title-subtitle-date">
+        <div v-if="filteredData.length" :class="`doc-table ${docTableClass}`">
           <div class="doc-table-row doc-table-head">
             <div class="doc-table-cell cell-toggle"/>
             <div class="doc-table-cell cell-title">
@@ -78,7 +78,7 @@
                 <i v-if="sort === '-title'" class="bi bi-sort-down ms-2" />
               </div>
             </div>
-            <div class="doc-table-cell cell-subtitle"/>
+            <div v-if="!hideCitations" class="doc-table-cell cell-citation" />
             <div class="doc-table-cell cell-date">
               <div
                 role="button"
@@ -106,6 +106,7 @@
               v-else
               :id="`row-${index}`"
               :row="row"
+              :hideCitation="hideCitations"
               @toggle="toggleChildren(index)"
             />
             <template v-if="row.children && row.children.length">
@@ -117,6 +118,7 @@
                   v-for="(child, childIndex) in row.children"
                   :key="childIndex"
                   :row="child"
+                  :hideCitation="hideCitations"
                 />
               </div>
             </template>
@@ -156,7 +158,7 @@ export default {
     FilterFacets,
     TableRow
   },
-  props: ['showDates'],
+  props: ['hideCitations'],
   data: () => ({
     offCanvasFacets: null,
     facets: [],
@@ -195,7 +197,11 @@ export default {
     this.filterData();
     this.setFacets();
   },
-
+  computed: {
+    docTableClass () {
+      return this.hideCitations ? 'doc-table-toggle-title-date' : 'doc-table-toggle-title-citation-date';
+    }
+  },
   methods: {
     toggleChildren (index) {
       const row = document.getElementById(`row-${index}`);

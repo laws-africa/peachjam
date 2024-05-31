@@ -23,7 +23,7 @@
         :title="$t('Multiple languages available')"
       />
     </div>
-    <div class="doc-table-cell cell-subtitle">
+    <div v-if="!hideCitation" class="doc-table-cell cell-citation">
       {{ row.citation }}
     </div>
     <div class="doc-table-cell cell-date">
@@ -35,7 +35,7 @@
 <script>
 export default {
   name: 'TableRow',
-  props: ['row'],
+  props: ['row', 'hideCitation'],
   emits: ['toggle']
 };
 </script>
