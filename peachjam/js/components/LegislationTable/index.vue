@@ -56,8 +56,8 @@
             <select class="form-control" v-model="sort">
               <option value="title">{{ $t('Title') }} (A - Z)</option>
               <option value="-title">{{ $t('Title') }} (Z - A)</option>
-              <option value="year">{{ $t('Year') }} ({{ $t('Oldest first') }})</option>
-              <option value="-year">{{ $t('Year') }} ({{ $t('Newest first') }})</option>
+              <option value="year">{{ $t('Year') }} ({{ $t('Newest first') }})</option>
+              <option value="-year">{{ $t('Year') }} ({{ $t('Oldest first') }})</option>
             </select>
           </div>
         </div>
@@ -66,7 +66,7 @@
         </div>
         <div v-if="filteredData.length" class="doc-table doc-table-title-subtitle-date">
           <div class="doc-table-row doc-table-head">
-            <div class="doc-table-cell cell-toggle"></div>
+            <div class="doc-table-cell cell-toggle"/>
             <div class="doc-table-cell cell-title">
               <div
                 class="align-items-center"
@@ -78,8 +78,7 @@
                 <i v-if="sort === '-title'" class="bi bi-sort-down ms-2" />
               </div>
             </div>
-            <div class="doc-table-cell cell-subtitle">
-            </div>
+            <div class="doc-table-cell cell-subtitle"/>
             <div class="doc-table-cell cell-date">
               <div
                 role="button"
@@ -315,7 +314,8 @@ export default {
       data.sort((a, b) => {
         const fa = a[sortKey] ? a[sortKey].toLowerCase() : '';
         const fb = b[sortKey] ? b[sortKey].toLowerCase() : '';
-        return fa.localeCompare(fb) * (sortAsc ? 1 : -1);
+        // year is the exception that we want to sort desc by default
+        return fa.localeCompare(fb) * (sortAsc ? 1 : -1) * (sortKey === 'year' ? -1 : 1);
       });
       this.filteredData = data;
 
