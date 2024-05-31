@@ -35,9 +35,8 @@
   }
 
   .doc-table-children {
-    .doc-table-row {
-      // extra initial padding for child rows
-      grid-template-columns: 30px repeat(12, 1fr);
+    .cell-title {
+      padding-left: 20px;
     }
   }
 
@@ -55,8 +54,21 @@
     .cell-date {
       grid-column: span 2;
     }
+  }
 
-    @include media-breakpoint-down(md) {
+  @include media-breakpoint-down(md) {
+    .doc-table-children {
+      .cell-title {
+        padding-left: 0px;
+      }
+
+      .doc-table-row {
+        // extra initial padding for child rows
+        grid-template-columns: 30px repeat(12, 1fr);
+      }
+    }
+
+    &.doc-table-title-subtitle-date {
       .doc-table-head {
         .cell-subtitle,
         .cell-date {

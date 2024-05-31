@@ -74,9 +74,15 @@ class CitationLinkSerializer(serializers.ModelSerializer):
 
 
 class ChildLegislationSerializer(serializers.ModelSerializer):
+    year = serializers.SerializerMethodField("get_year")
+
     class Meta:
         model = Legislation
-        fields = ("title", "citation", "work_frbr_uri", "repealed", "date")
+        fields = ("title", "citation", "work_frbr_uri", "repealed", "year")
+
+    def get_year(self, instance):
+        """Use the FRBR work uri, rather than the document year."""
+        return instance.frbr_uri_date.split("-")[0]
 
 
 class LegislationSerializer(serializers.ModelSerializer):
@@ -91,7 +97,6 @@ class LegislationSerializer(serializers.ModelSerializer):
             "title",
             "children",
             "citation",
-            "date",
             "work_frbr_uri",
             "repealed",
             "year",

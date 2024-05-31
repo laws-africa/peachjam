@@ -311,12 +311,10 @@ export default {
 
       const sortAsc = this.sort[0] !== '-';
       const sortKey = sortAsc ? this.sort : this.sort.substring(1);
-      data.sort((a, b) => {
-        const fa = a[sortKey] ? a[sortKey].toLowerCase() : '';
-        const fb = b[sortKey] ? b[sortKey].toLowerCase() : '';
-        // year is the exception that we want to sort desc by default
-        return fa.localeCompare(fb) * (sortAsc ? 1 : -1) * (sortKey === 'year' ? -1 : 1);
-      });
+      this.sortRows(data, sortKey, sortAsc);
+      for (const item of data) {
+        this.sortRows(item.children, sortKey, sortAsc);
+      }
       this.filteredData = data;
 
       this.rows = [];
@@ -343,6 +341,14 @@ export default {
           });
         }
         this.rows.push(record);
+      });
+    },
+    sortRows (rows, sortKey, sortAsc) {
+      rows.sort((a, b) => {
+        const fa = a[sortKey] ? a[sortKey].toLowerCase() : '';
+        const fb = b[sortKey] ? b[sortKey].toLowerCase() : '';
+        // year is the exception that we want to sort desc by default
+        return fa.localeCompare(fb) * (sortAsc ? 1 : -1) * (sortKey === 'year' ? -1 : 1);
       });
     }
   }
