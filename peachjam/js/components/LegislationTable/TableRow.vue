@@ -22,6 +22,15 @@
         class="bi bi-translate ps-2"
         :title="$t('Multiple languages available')"
       />
+      <div v-if="row.labels.length" class="d-flex align-items-center">
+        <span
+          v-for="(label, index) in row.labels"
+          :key="index"
+          :class="`badge rounded-pill bg-${label.level}`"
+        >
+          {{ label.name }}
+        </span>
+      </div>
     </div>
     <div v-if="!hideCitation" class="doc-table-cell cell-citation">
       {{ row.citation }}

@@ -73,12 +73,19 @@ class CitationLinkSerializer(serializers.ModelSerializer):
         fields = ("id", "document", "text", "url", "target_id", "target_selectors")
 
 
+class LabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Label
+        fields = ("name", "level")
+
+
 class ChildLegislationSerializer(serializers.ModelSerializer):
     year = serializers.SerializerMethodField("get_year")
+    labels = LabelSerializer(many=True, read_only=True)
 
     class Meta:
         model = Legislation
-        fields = ("title", "citation", "work_frbr_uri", "repealed", "year")
+        fields = ("title", "citation", "work_frbr_uri", "repealed", "year", "labels")
 
     def get_year(self, instance):
         """Use the FRBR work uri, rather than the document year."""
@@ -90,6 +97,7 @@ class LegislationSerializer(serializers.ModelSerializer):
     year = serializers.SerializerMethodField("get_year")
     children = ChildLegislationSerializer(many=True, read_only=True)
     languages = serializers.SerializerMethodField("get_languages")
+    labels = LabelSerializer(many=True, read_only=True)
 
     class Meta:
         model = Legislation
@@ -102,6 +110,7 @@ class LegislationSerializer(serializers.ModelSerializer):
             "year",
             "taxonomies",
             "languages",
+            "labels",
         )
 
     def get_taxonomies(self, instance):
