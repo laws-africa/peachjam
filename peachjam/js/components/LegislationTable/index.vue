@@ -43,13 +43,25 @@
             Filters
           </button>
         </div>
-        <div class="mb-2">
-          <input
-            v-model="q"
-            type="text"
-            class="form-control"
-            :placeholder="$t('Filter legislation')"
-          >
+        <div class="mb-2 d-flex">
+          <div class="flex-grow-1 me-2">
+            <input
+              v-model="q"
+              type="text"
+              class="form-control"
+              :placeholder="$t('Filter legislation')"
+            >
+          </div>
+          <div>
+            <select class="form-control" v-model="sort">
+              <option value="title">{{ $t('Title') }} (A - Z)</option>
+              <option value="-title">{{ $t('Title') }} (Z - A)</option>
+              <option value="year">{{ $t('Year') }} ({{ $t('Oldest first') }})</option>
+              <option value="-year">{{ $t('Year') }} ({{ $t('Newest first') }})</option>
+              <option value="citation">{{ $t('Numbered title') }} (A - Z)</option>
+              <option value="-citation">{{ $t('Numbered title') }} (Z - A)</option>
+            </select>
+          </div>
         </div>
         <div class="mb-3">
           {{ filteredData.length }} of {{ tableData.length }} documents
@@ -64,14 +76,8 @@
                 @click="updateSort('title')"
               >
                 {{ $t('Title') }}
-                <i
-                  v-if="sortableFields.title === 'asc'"
-                  class="bi bi-sort-up ms-2"
-                />
-                <i
-                  v-if="sortableFields.title === 'desc'"
-                  class="bi bi-sort-down ms-2"
-                />
+                <i v-if="sort === 'title'" class="bi bi-sort-up ms-2" />
+                <i v-if="sort === '-title'" class="bi bi-sort-down ms-2" />
               </div>
             </div>
             <div class="doc-table-cell cell-subtitle">
@@ -80,14 +86,8 @@
                 @click="updateSort('citation')"
               >
                 {{ $t('Numbered title') }}
-                <i
-                  v-if="sortableFields.citation === 'asc'"
-                  class="bi bi-sort-up ms-2"
-                />
-                <i
-                  v-if="sortableFields.citation === 'desc'"
-                  class="bi bi-sort-down ms-2"
-                />
+                <i v-if="sort === 'citation'" class="bi bi-sort-up ms-2" />
+                <i v-if="sort === '-citation'" class="bi bi-sort-down ms-2" />
               </div>
             </div>
             <div class="doc-table-cell cell-date">
@@ -96,14 +96,8 @@
                 @click="updateSort('year')"
               >
                 {{ $t('Year') }}
-                <i
-                  v-if="sortableFields.year === 'asc'"
-                  class="bi bi-sort-up ms-2"
-                />
-                <i
-                  v-if="sortableFields.year === 'desc'"
-                  class="bi bi-sort-down ms-2"
-                />
+                <i v-if="sort === 'year'" class="bi bi-sort-up ms-2" />
+                <i v-if="sort === '-year'" class="bi bi-sort-down ms-2" />
               </div>
             </div>
           </div>
@@ -183,17 +177,13 @@ export default {
     lockAccordion: false,
     q: '',
     windowWith: window.innerWidth,
-    sortableFields: {
-      title: 'asc',
-      citation: '',
-      year: ''
-    }
+    sort: 'title'
   }),
   watch: {
     q () {
       this.filterData();
     },
-    sortableFields () {
+    sort () {
       this.filterData();
     },
     facets () {
@@ -204,7 +194,6 @@ export default {
   beforeUnmount () {
     window.removeEventListener('resize', this.setWindowWidth);
   },
-
   mounted () {
     this.offCanvasFacets = new window.bootstrap.Offcanvas(
       this.$refs['mobile-legislation-facets-ref']
@@ -291,22 +280,11 @@ export default {
       ];
     },
     updateSort (field) {
-      let newSortValue;
-      if (this.sortableFields[field] === '') {
-        newSortValue = 'asc';
-      } else if (this.sortableFields[field] === 'asc') {
-        newSortValue = 'desc';
-      } else if (this.sortableFields[field] === 'desc') {
-        newSortValue = 'asc';
+      if (this.sort === field) {
+        this.sort = `-${field}`;
+      } else {
+        this.sort = field;
       }
-      this.sortableFields = {
-        ...{
-          title: '',
-          citation: '',
-          year: ''
-        },
-        [field]: newSortValue
-      };
     },
     filterData () {
       let data = [...this.tableData];
@@ -342,20 +320,12 @@ export default {
         });
       });
 
-      let sortKey = null;
-      Object.keys(this.sortableFields).forEach((key) => {
-        if (this.sortableFields[key]) {
-          sortKey = key;
-          data.sort((a, b) => {
-            const fa = a[key] ? a[key].toLowerCase() : '';
-            const fb = b[key] ? b[key].toLowerCase() : '';
-            if (this.sortableFields[key] === 'asc') {
-              return fa.localeCompare(fb);
-            } else if (this.sortableFields[key] === 'desc') {
-              return fb.localeCompare(fa);
-            }
-          });
-        }
+      const sortAsc = this.sort[0] !== '-';
+      const sortKey = sortAsc ? this.sort : this.sort.substring(1);
+      data.sort((a, b) => {
+        const fa = a[sortKey] ? a[sortKey].toLowerCase() : '';
+        const fb = b[sortKey] ? b[sortKey].toLowerCase() : '';
+        return fa.localeCompare(fb) * (sortAsc ? 1 : -1);
       });
       this.filteredData = data;
 
