@@ -49,6 +49,8 @@ table.doc-table {
   }
 
   .doc-table-children {
+    background-color: $gray-100;
+
     .cell-title {
       padding-left: 20px;
     }
@@ -64,8 +66,8 @@ table.doc-table {
     tr {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      gap: 0 $table-cell-padding-x;
-      padding: $table-cell-padding-x;
+      gap: 0 $table-cell-padding-x-sm;
+      padding: $table-cell-padding-x 0;
       // the row is moved to the tr, rather than the cells
       border-bottom: 1px solid $table-border-color;
     }
@@ -126,7 +128,7 @@ table.doc-table.doc-table--toggle {
 
   @include media-breakpoint-down(md) {
     tr {
-      // extra 25px for the toggle column
+      // extra space for the toggle column
       grid-template-columns: 20px repeat(12, 1fr);
     }
 

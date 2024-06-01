@@ -108,7 +108,7 @@
               v-else
               :id="`row-${index}`"
               :row="row"
-              :hideCitation="hideCitations"
+              :hide-citation="hideCitations"
               @toggle="toggleChildren(index)"
             />
             <template v-if="row.children && row.children.length">
@@ -120,7 +120,7 @@
                   v-for="(child, childIndex) in row.children"
                   :key="childIndex"
                   :row="child"
-                  :hideCitation="hideCitations"
+                  :hide-citation="hideCitations"
                 />
               </tbody>
             </template>
