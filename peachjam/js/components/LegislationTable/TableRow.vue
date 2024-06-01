@@ -1,10 +1,10 @@
 <template>
-  <div
-    :class="`doc-table-row ${row.children && row.children.length ? 'has-children' : ''}`"
+  <tr
+    :class="`${row.children && row.children.length ? 'has-children' : ''}`"
     role="button"
     @click="handleRowClick"
   >
-    <div class="doc-table-cell cell-toggle">
+    <td class="cell-toggle">
       <div
         v-if="row.children && row.children.length"
         class="indent"
@@ -14,8 +14,8 @@
         <i class="bi bi-caret-right-fill" />
         <i class="bi bi-caret-down-fill" />
       </div>
-    </div>
-    <div class="doc-table-cell cell-title">
+    </td>
+    <td class="cell-title">
       <a :href="`${row.work_frbr_uri}`">{{ row.title }}</a>
       <i
         v-if="row.languages != null && row.languages.length > 1"
@@ -31,14 +31,14 @@
           {{ label.name }}
         </span>
       </div>
-    </div>
-    <div v-if="!hideCitation" class="doc-table-cell cell-citation">
+    </td>
+    <td v-if="!hideCitation" class="cell-citation">
       {{ row.citation }}
-    </div>
-    <div class="doc-table-cell cell-date">
+    </td>
+    <td class="cell-date">
       {{ row.year }}
-    </div>
-  </div>
+    </td>
+  </tr>
 </template>
 
 <script>

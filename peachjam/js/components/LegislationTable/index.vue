@@ -64,43 +64,45 @@
         <div class="mb-3">
           {{ filteredData.length }} of {{ tableData.length }} documents
         </div>
-        <div v-if="filteredData.length" :class="`doc-table ${docTableClass}`">
-          <div class="doc-table-row doc-table-head">
-            <div class="doc-table-cell cell-toggle"/>
-            <div class="doc-table-cell cell-title">
-              <div
-                class="align-items-center"
-                role="button"
-                @click="updateSort('title')"
-              >
-                {{ $t('Title') }}
-                <i v-if="sort === 'title'" class="bi bi-sort-up ms-2" />
-                <i v-if="sort === '-title'" class="bi bi-sort-down ms-2" />
-              </div>
-            </div>
-            <div v-if="!hideCitations" class="doc-table-cell cell-citation" />
-            <div class="doc-table-cell cell-date">
-              <div
-                role="button"
-                @click="updateSort('year')"
-              >
-                {{ $t('Year') }}
-                <i v-if="sort === 'year'" class="bi bi-sort-up ms-2" />
-                <i v-if="sort === '-year'" class="bi bi-sort-down ms-2" />
-              </div>
-            </div>
-          </div>
+        <table v-if="filteredData.length" class="doc-table doc-table--toggle">
+          <thead>
+            <tr>
+              <th class="cell-toggle" />
+              <th class="cell-title">
+                <div
+                  class="align-items-center"
+                  role="button"
+                  @click="updateSort('title')"
+                >
+                  {{ $t('Title') }}
+                  <i v-if="sort === 'title'" class="bi bi-sort-up ms-2" />
+                  <i v-if="sort === '-title'" class="bi bi-sort-down ms-2" />
+                </div>
+              </th>
+              <th v-if="!hideCitations" class="cell-citation" />
+              <th class="cell-date">
+                <div
+                  role="button"
+                  @click="updateSort('year')"
+                >
+                  {{ $t('Year') }}
+                  <i v-if="sort === 'year'" class="bi bi-sort-up ms-2" />
+                  <i v-if="sort === '-year'" class="bi bi-sort-down ms-2" />
+                </div>
+              </th>
+            </tr>
+          </thead>
           <template
             v-for="(row, index) in rows"
             :key="index"
           >
             <template v-if="row.heading != null">
-              <div class="doc-table-row">
-                <div class="doc-table-cell cell-toggle" />
-                <div class="doc-table-cell cell-group">
+              <tr>
+                <td class="cell-toggle" />
+                <td class="cell-group" :colspan="hideCitations ? 2 : 3">
                   {{ row.heading }}
-                </div>
-              </div>
+                </td>
+              </tr>
             </template>
             <table-row
               v-else
@@ -110,7 +112,7 @@
               @toggle="toggleChildren(index)"
             />
             <template v-if="row.children && row.children.length">
-              <div
+              <tbody
                 :id="`children-${index}`"
                 class="doc-table-children collapse"
               >
@@ -120,10 +122,10 @@
                   :row="child"
                   :hideCitation="hideCitations"
                 />
-              </div>
+              </tbody>
             </template>
           </template>
-        </div>
+        </table>
         <div
           v-else
           class="p-2 text-center"
@@ -196,11 +198,6 @@ export default {
     this.tableData = JSON.parse(tableJsonElement.textContent);
     this.filterData();
     this.setFacets();
-  },
-  computed: {
-    docTableClass () {
-      return this.hideCitations ? 'doc-table-toggle-title-date' : 'doc-table-toggle-title-citation-date';
-    }
   },
   methods: {
     toggleChildren (index) {

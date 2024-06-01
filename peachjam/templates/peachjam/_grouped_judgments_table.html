@@ -2,17 +2,17 @@
 {% block table-body %}
   {% for item in grouped_documents %}
     {% if item.judgments %}
-      <div class="doc-table-row">
-        <div class="doc-table-cell cell-group">{{ item.key }}</div>
-      </div>
+      <tr>
+        <td class="cell-group">{{ item.key }}</td>
+      </tr>
       {% for judgment in item.judgments %}
-        <div class="doc-table-row">
-          <div class="doc-table-cell cell-title">
+        <tr>
+          <td class="cell-title">
             <a href="{{ judgment.get_absolute_url }}">{{ judgment.title }}</a>
             {% include 'peachjam/_labels.html' with labels=judgment.labels.all %}
-          </div>
-          <div class="doc-table-cell cell-date" style="white-space: nowrap;">{{ judgment.date }}</div>
-        </div>
+          </td>
+          <td class="cell-date" style="white-space: nowrap;">{{ judgment.date }}</td>
+        </tr>
       {% endfor %}
     {% endif %}
   {% endfor %}
