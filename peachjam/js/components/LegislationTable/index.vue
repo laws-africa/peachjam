@@ -160,8 +160,8 @@ export default {
     FilterFacets,
     TableRow
   },
-  props: ['hideCitations'],
-  data: () => ({
+  props: ['hideCitations', 'initialSort'],
+  data: (x) => ({
     offCanvasFacets: null,
     facets: [],
     tableData: [],
@@ -169,8 +169,8 @@ export default {
     rows: [],
     lockAccordion: false,
     q: '',
-    windowWith: window.innerWidth,
-    sort: 'title'
+    sort: x.initialSort || 'title',
+    windowWith: window.innerWidth
   }),
   watch: {
     q () {
