@@ -4,15 +4,15 @@
     {% for item in grouped_documents %}
       {% if item.judgments %}
         <tr>
-          <th colspan="2" scope="row">{{ item.key }}</th>
+          <td class="cell-group">{{ item.key }}</td>
         </tr>
-        <tr>
-          {% for judgment in item.judgments %}
-            <td>
+        {% for judgment in item.judgments %}
+          <tr>
+            <td class="cell-title">
               <a href="{{ judgment.get_absolute_url }}">{{ judgment.title }}</a>
               {% include 'peachjam/_labels.html' with labels=judgment.labels.all %}
             </td>
-            <td style="white-space: nowrap;">{{ judgment.date }}</td>
+            <td class="cell-date" style="white-space: nowrap;">{{ judgment.date }}</td>
           </tr>
         {% endfor %}
       {% endif %}

@@ -1,0 +1,156 @@
+/**
+ * This table is used for document lists and defines behavior that allows it to collapse into rows on mobile. The
+ * table acts as usual on desktop, but on mobile, each row is converted into a grid.
+ */
+table.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: $spacer;
+
+  th, td {
+    padding: $table-cell-padding-x 0;
+  }
+
+  td {
+    border-bottom: 1px solid $table-border-color;
+  }
+
+  th {
+    border-bottom: 1px solid $primary;
+    font-weight: bold;
+  }
+
+  // specific cell behaviour
+  .cell-title {
+    width: 60%;
+  }
+
+  .cell-date {
+    text-align: right;
+  }
+
+  .cell-group {
+    font-weight: bold;
+  }
+
+  // "child" rows for legislation subleg
+  .has-children .bi-caret-down-fill {
+    display: none;
+  }
+
+  .has-children.expanded {
+    .bi-caret-right-fill {
+      display: none;
+    }
+
+    .bi-caret-down-fill {
+      display: inline;
+    }
+  }
+
+  .doc-table-children {
+    background-color: $gray-100;
+
+    .cell-title {
+      padding-left: 20px;
+    }
+  }
+
+  @include media-breakpoint-down(md) {
+    /**
+     * On mobile, the table is converted into a grid. Each row is a grid with 12 columns.
+     * The title column takes up the full width, while the others take up half.
+     */
+    display: block;
+
+    tr {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 0 $table-cell-padding-x-sm;
+      padding: $table-cell-padding-x 0;
+      // the row is moved to the tr, rather than the cells
+      border-bottom: 1px solid $table-border-color;
+    }
+
+    td {
+      grid-column: span 6;
+      width: unset;
+      border-bottom: 0;
+    }
+
+    // padding moves to the rows, so that when cols wrap, there isn't extra spacing
+    th, td {
+      padding: 0 0;
+    }
+
+    thead {
+      display: contents;
+
+      // the thead border is moved to the tr, rather than the cells
+      td, th {
+        border-bottom-width: 0;
+      }
+
+      tr {
+        border-bottom: 1px solid $primary;
+      }
+
+      // hide most headings
+      th {
+        display: none;
+        width: unset;
+
+        &.cell-title {
+          display: block;
+        }
+      }
+    }
+
+    // column-specific styling
+    .cell-title,
+    .cell-group {
+      grid-column: span 12;
+      width: unset;
+    }
+
+    // when the date comes right after the title, give the date full width
+    .cell-title + .cell-date {
+      grid-column: span 12;
+    }
+  }
+}
+
+// variants
+table.doc-table.doc-table--toggle {
+  .cell-toggle {
+    width: 25px;
+  }
+
+  @include media-breakpoint-down(md) {
+    tr {
+      // extra space for the toggle column
+      grid-template-columns: 20px repeat(12, 1fr);
+    }
+
+    .cell-toggle {
+      width: unset;
+      display: block;
+    }
+
+    .cell-toggle {
+      grid-row: span 10;
+      grid-column: span 1;
+    }
+
+    // extra initial padding for child rows
+    .doc-table-children {
+      tr {
+        grid-template-columns: 30px repeat(12, 1fr);
+      }
+
+      .cell-title {
+        padding-left: 0;
+      }
+    }
+  }
+}
