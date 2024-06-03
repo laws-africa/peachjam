@@ -1,0 +1,35 @@
+{% load i18n %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>{% trans 'Date' %}</th>
+      <th>{% trans 'Case' %}</th>
+      <th>{% trans 'Court' %}</th>
+      <th>{% trans 'Judges' %}</th>
+      <th>{% trans 'Outcome' %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for history in case_histories %}
+      <tr>
+        <td>{{ history.date }}</td>
+        <td>
+          {% if history.historical_judgment %}
+            <a target="_blank"
+               href="{{ history.historical_judgment.expression_frbr_uri }}">{{ history.historical_judgment }}</a>
+          {% else %}
+            {{ history.case_number }}
+          {% endif %}
+        </td>
+        <td>{{ history.court }}</td>
+        <td>
+          {% for judge in history.judges.all %}
+            {{ judge }}
+            {% if not forloop.last %},{% endif %}
+          {% endfor %}
+        </td>
+        <td>{{ history.outcome }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

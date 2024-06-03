@@ -1,6 +1,6 @@
 from dal import autocomplete
 
-from peachjam.models import Work
+from peachjam.models import Judgment, Work
 
 
 class WorkAutocomplete(autocomplete.Select2QuerySetView):
@@ -10,6 +10,18 @@ class WorkAutocomplete(autocomplete.Select2QuerySetView):
             return Work.objects.none()
 
         qs = Work.objects.all()
+        if self.q:
+            qs = qs.filter(title__istartswith=self.q)
+
+        return qs
+
+
+class JudgmentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return Judgment.objects.none()
+
+        qs = Judgment.objects.all()
         if self.q:
             qs = qs.filter(title__istartswith=self.q)
 

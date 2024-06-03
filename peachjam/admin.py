@@ -38,6 +38,7 @@ from peachjam.models import (
     Author,
     Bench,
     Book,
+    CaseHistory,
     CaseNumber,
     CitationLink,
     CitationProcessing,
@@ -711,6 +712,26 @@ class CaseNumberAdmin(admin.StackedInline):
     fields = ["matter_type", "number", "year", "string_override"]
 
 
+class CaseHistoryInlineAdmin(admin.StackedInline):
+    model = CaseHistory
+    extra = 1
+    verbose_name = gettext_lazy("case history")
+    verbose_name_plural = gettext_lazy("case history")
+    fk_name = "judgment"
+
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(
+            request,
+            obj,
+            widgets={
+                "historical_judgment": autocomplete.ModelSelect2(
+                    url="autocomplete-judgments"
+                )
+            },
+            **kwargs,
+        )
+
+
 class BenchInline(admin.TabularInline):
     # by using an inline, the ordering of the judges is preserved
     model = Bench
@@ -776,6 +797,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         BenchInline,
         LowerBenchInline,
         CaseNumberAdmin,
+        CaseHistoryInlineAdmin,
         JudgmentRelationshipStackedInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys", "outcomes")
