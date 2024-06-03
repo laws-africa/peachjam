@@ -1,4 +1,5 @@
 from dal import autocomplete
+from django.db.models import Q
 
 from peachjam.models import Judgment, Work
 
@@ -11,7 +12,7 @@ class WorkAutocomplete(autocomplete.Select2QuerySetView):
 
         qs = Work.objects.all()
         if self.q:
-            qs = qs.filter(title__istartswith=self.q)
+            qs = qs.filter(Q(title__icontains=self.q) | Q(frbr_uri__icontains=self.q))
 
         return qs
 

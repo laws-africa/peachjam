@@ -749,13 +749,13 @@ class LowerBenchInline(admin.TabularInline):
 
 class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
     model = Relationship
-    fields = ["predicate", "subject_work"]
+    fields = ["predicate", "object_work"]
     verbose_name = "Related judgment"
     verbose_name_plural = "Related judgments"
     extra = 2
 
     def get_form_queryset(self, obj):
-        return Relationship.objects.filter(object_work=obj.work)
+        return Relationship.objects.filter(subject_work=obj.work)
 
     def save_new_instance(self, parent, instance):
         instance.object_work = parent.work
@@ -765,7 +765,7 @@ class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
             request,
             obj,
             widgets={
-                "subject_work": autocomplete.ModelSelect2(url="autocomplete-works")
+                "object_work": autocomplete.ModelSelect2(url="autocomplete-works")
             },
             **kwargs,
         )
