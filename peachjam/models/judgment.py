@@ -169,7 +169,7 @@ class CourtRegistry(models.Model):
     court = models.ForeignKey(
         Court,
         on_delete=models.CASCADE,
-        null=True,
+        null=False,
         related_name="registries",
         verbose_name=_("court"),
     )
