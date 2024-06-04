@@ -54,6 +54,6 @@ class LocalityLegislationListView(BaseLocalityLegislationListView):
             )
             self.navbar_link = "legislation/municipal"
             context["breadcrumb_link"] = reverse("municipal_legislation")
-            context["legislation_list_show_dates"] = True
+            context["doc_table_citations"] = False
 
         return context

@@ -1,22 +1,22 @@
 {% load i18n peachjam %}
 <div class="table-responsive">
-  <table class="table">
+  <table class="doc-table">
     <thead>
       <tr>
-        <th scope="col" style="width: 70%">{% trans 'Title' %}</th>
+        <th scope="col" class="cell-title">{% trans 'Title' %}</th>
         {% if MULTIPLE_JURISDICTIONS or MULTIPLE_LOCALITIES %}
           <th scope="col">{% trans 'Jurisdiction' %}</th>
         {% endif %}
         {% if doc_table_show_author %}<th scope="col"></th>{% endif %}
         {% if doc_table_show_court %}<th scope="col"></th>{% endif %}
         {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
-        <th scope="col">{% trans 'Date' %}</th>
+        <th scope="col" class="cell-date">{% trans 'Date' %}</th>
       </tr>
     </thead>
     <tbody>
       {% for document in documents %}
         <tr>
-          <td>
+          <td class="cell-title">
             <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
           </td>
           {% if MULTIPLE_JURISDICTIONS %}
@@ -30,7 +30,7 @@
           {% if doc_table_show_author %}<td>{{ document.author|default_if_none:'' }}</td>{% endif %}
           {% if doc_table_show_court %}<td>{{ document.court|default_if_none:'' }}</td>{% endif %}
           {% if doc_table_show_doc_type %}<td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>{% endif %}
-          <td style="white-space: nowrap;">{{ document.date }}</td>
+          <td style="white-space: nowrap;" class="cell-date">{{ document.date }}</td>
           <td style="white-space: nowrap;">
             {% if document.work.languages|length > 1 %}
               <span class="d-inline-block"
