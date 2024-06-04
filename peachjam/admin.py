@@ -80,6 +80,7 @@ from peachjam.plugins import plugins
 from peachjam.resources import (
     ArticleResource,
     AttorneyResource,
+    GazetteResource,
     GenericDocumentResource,
     JudgmentResource,
     UserResource,
@@ -1057,8 +1058,18 @@ class AuthorAdmin(admin.ModelAdmin):
 
 
 @admin.register(Gazette)
-class GazetteAdmin(DocumentAdmin):
-    pass
+class GazetteAdmin(ImportExportMixin, DocumentAdmin):
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(
+        [
+            "volume_number",
+            "sub_publication",
+            "supplement",
+            "supplement_number",
+            "publication",
+        ]
+    )
+    resource_class = GazetteResource
 
 
 @admin.register(Book)
