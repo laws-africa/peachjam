@@ -20,6 +20,7 @@ class Gazette(CoreDocument):
     key = models.CharField(
         _("key"), max_length=512, null=True, blank=True, db_index=True
     )
+    volume_number = models.IntegerField(_("volume number"), null=True, blank=True)
 
     class Meta(CoreDocument.Meta):
         verbose_name = _("gazette")

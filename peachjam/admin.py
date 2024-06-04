@@ -80,6 +80,7 @@ from peachjam.plugins import plugins
 from peachjam.resources import (
     ArticleResource,
     AttorneyResource,
+    GazetteResource,
     GenericDocumentResource,
     JudgmentResource,
     UserResource,
@@ -1057,8 +1058,8 @@ class AuthorAdmin(admin.ModelAdmin):
 
 
 @admin.register(Gazette)
-class GazetteAdmin(DocumentAdmin):
-    pass
+class GazetteAdmin(ImportExportMixin, DocumentAdmin):
+    resource_class = GazetteResource
 
 
 @admin.register(Book)

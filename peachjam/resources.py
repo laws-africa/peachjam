@@ -43,6 +43,7 @@ from peachjam.models import (
     CourtRegistry,
     DocumentNature,
     DocumentTopic,
+    Gazette,
     GenericDocument,
     Judge,
     Judgment,
@@ -673,6 +674,11 @@ class ArticleResource(resources.ModelResource):
     class Meta:
         model = Article
         exclude = ("slug",)
+
+
+class GazetteResource(BaseDocumentResource):
+    class Meta(BaseDocumentResource.Meta):
+        model = Gazette
 
 
 class UserResource(resources.ModelResource):
