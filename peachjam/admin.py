@@ -758,7 +758,7 @@ class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
         return Relationship.objects.filter(subject_work=obj.work)
 
     def save_new_instance(self, parent, instance):
-        instance.object_work = parent.work
+        instance.subject_work = parent.work
 
     def get_formset(self, request, obj=None, **kwargs):
         return super().get_formset(
