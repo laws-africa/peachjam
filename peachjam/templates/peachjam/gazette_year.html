@@ -72,7 +72,7 @@
                       <a href="{{ gazette.get_absolute_url }}">{{ gazette.title }}</a>
                     </td>
                     <td>
-                      <span class="d-none d-lg-block">{{ gazette.sub_publication|default:"" }}</span>
+                      <span class="d-none d-lg-block">{{ gazette.sub_publication|default:"" }} {{ gazette.volume_number|default:"" }}</span>
                     </td>
                     <td>
                       <span class="d-none d-lg-block">{{ gazette.frbr_uri_number }}</span>

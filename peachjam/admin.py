@@ -1059,6 +1059,16 @@ class AuthorAdmin(admin.ModelAdmin):
 
 @admin.register(Gazette)
 class GazetteAdmin(ImportExportMixin, DocumentAdmin):
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(
+        [
+            "volume_number",
+            "sub_publication",
+            "supplement",
+            "supplement_number",
+            "publication",
+        ]
+    )
     resource_class = GazetteResource
 
 
