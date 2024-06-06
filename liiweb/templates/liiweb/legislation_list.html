@@ -27,6 +27,14 @@
             </a>
           </li>
           <li class="nav-item">
+            <a class="nav-link {% if view.variant == 'recent' %}active{% endif %}"
+               href="{% url 'legislation_list_recent' %}">
+              {% block recent_tab_title %}
+                {% trans 'Recent legislation' %}
+              {% endblock %}
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link {% if view.variant == 'subleg' %}active{% endif %}"
                href="{% url 'legislation_list_subsidiary' %}">
               {% block sublegislation_tab_title %}{{ PEACHJAM_SETTINGS.subleg_label }}{% endblock %}
