@@ -524,4 +524,8 @@ class CaseHistory(models.Model):
         verbose_name_plural = _("case histories")
 
     def __str__(self):
-        return f"{self.case_number}" or f"{self.judgment} - {self.date}"
+        if self.judgment_work:
+            return f"{self.judgment_work}"
+        elif self.case_number:
+            return f"{self.case_number}"
+        return _("Case history")
