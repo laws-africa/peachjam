@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:54+0300\n"
+"POT-Creation-Date: 2024-06-06 15:17+0200\n"
 "PO-Revision-Date: 2023-09-19 11:54\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -17,6 +17,33 @@ msgstr ""
 "X-Crowdin-File: /main/liiweb/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 103\n"
 
+#: templates/liiweb/_donate_call_to_action.html:7
+#, python-format
+msgid ""
+"\n"
+"            Donate to %(APP_NAME)s\n"
+"          "
+msgstr ""
+
+#: templates/liiweb/_donate_call_to_action.html:12
+#, python-format
+msgid ""
+"\n"
+"            %(APP_NAME)s is an independent, self-funded organisation and needs your support.\n"
+"          "
+msgstr ""
+
+#: templates/liiweb/_donate_call_to_action.html:18
+#: templates/liiweb/donate.html:4
+msgid "Donate"
+msgstr ""
+
+#: templates/liiweb/donate.html:8
+#, fuzzy, python-format
+#| msgid "Search %(APP_NAME)s"
+msgid "Donate to %(APP_NAME)s"
+msgstr "Rechercher dans %(APP_NAME)s"
+
 #: templates/liiweb/home.html:4
 msgid "Home"
 msgstr "Accueil"
@@ -30,53 +57,61 @@ msgstr "Rechercher dans %(APP_NAME)s"
 msgid "Search"
 msgstr "Recherche"
 
-#: templates/liiweb/home.html:44
+#: templates/liiweb/home.html:45
 msgid "Advanced search"
 msgstr "Recherche avancée"
 
-#: templates/liiweb/home.html:67
+#: templates/liiweb/home.html:84
 msgid "Recent Judgments"
 msgstr "Jugements récents"
 
-#: templates/liiweb/home.html:68
+#: templates/liiweb/home.html:85
 msgid "View more judgments"
 msgstr "Voir plus de jugements"
 
-#: templates/liiweb/home.html:72
+#: templates/liiweb/home.html:89
 msgid "Recent Legislation"
 msgstr "Législation récente"
 
-#: templates/liiweb/home.html:73
+#: templates/liiweb/home.html:90
 msgid "View more legislation"
 msgstr "Voir plus de législation"
 
 #: templates/liiweb/home.html:100
-msgid "Facebook"
-msgstr "Facebook"
+#, fuzzy
+#| msgid "Recent Judgments"
+msgid "Recent Gazettes"
+msgstr "Jugements récents"
 
-#: templates/liiweb/home.html:135
+#: templates/liiweb/home.html:102
+#, fuzzy
+#| msgid "View more articles"
+msgid "View more gazettes"
+msgstr "Voir plus d'articles"
+
+#: templates/liiweb/home.html:107
 msgid "Courts"
 msgstr "Cours"
 
-#: templates/liiweb/home.html:139
+#: templates/liiweb/home.html:111
 msgid "Collections"
 msgstr "Collections"
 
-#: templates/liiweb/home.html:152
+#: templates/liiweb/home.html:124
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr "Utilisez %(APP_NAME)s lorsque vous êtes hors ligne"
 
-#: templates/liiweb/home.html:154
+#: templates/liiweb/home.html:126
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr "Pocket Law est une copie hors ligne de la jurisprudence, de la législation et d'autres documents juridiques de %(APP_NAME)s."
 
-#: templates/liiweb/home.html:166
+#: templates/liiweb/home.html:138
 msgid "Latest Articles"
 msgstr "Derniers articles"
 
-#: templates/liiweb/home.html:168
+#: templates/liiweb/home.html:140
 msgid "View more articles"
 msgstr "Voir plus d'articles"
 
@@ -85,19 +120,31 @@ msgstr "Voir plus d'articles"
 msgid "Legislation"
 msgstr "Législation"
 
-#: templates/liiweb/legislation_list.html:24
+#: templates/liiweb/legislation_list.html:25
 msgid "Current legislation"
 msgstr "Législation en vigueur"
 
-#: templates/liiweb/legislation_list.html:30
+#: templates/liiweb/legislation_list.html:33
+#, fuzzy
+#| msgid "Recent Legislation"
+msgid "Recent legislation"
+msgstr "Législation récente"
+
+#: templates/liiweb/legislation_list.html:47
+#, fuzzy
+#| msgid "Repealed legislation"
+msgid "Uncommenced legislation"
+msgstr "Législation abrogée"
+
+#: templates/liiweb/legislation_list.html:55
 msgid "Repealed legislation"
 msgstr "Législation abrogée"
 
-#: templates/liiweb/legislation_list.html:42
+#: templates/liiweb/legislation_list.html:62
 msgid "All legislation"
 msgstr "Toutes les lois"
 
-#: templates/liiweb/legislation_list.html:48
+#: templates/liiweb/legislation_list.html:68
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr "Vous consultez une législation abrogée qui n'est plus en vigueur."
 
@@ -118,15 +165,25 @@ msgstr "Utilisez %(APP_NAME)s hors ligne avec <a href=\"%(pocket_law_url)s\">Poc
 msgid "Site Statistics"
 msgstr "Statistiques du site"
 
-#: templates/peachjam/_footer.html:24
+#: templates/peachjam/_footer.html:25
 msgid "Terms of Use"
 msgstr "Termes et conditions d'utilisation"
 
-#: templates/peachjam/_footer.html:29
+#: templates/peachjam/_footer.html:28
+#, fuzzy
+#| msgid "About"
+msgid "About us"
+msgstr "À propos"
+
+#: templates/peachjam/_footer.html:31
+msgid "Contact us"
+msgstr ""
+
+#: templates/peachjam/_footer.html:37
 msgid "Our partners"
 msgstr "Nos partenaires"
 
-#: templates/peachjam/_footer.html:38
+#: templates/peachjam/_footer.html:46
 msgid "Other African Legal Information Institutions"
 msgstr "Autres Institutions Africaines d'information Juridique"
 
@@ -134,7 +191,10 @@ msgstr "Autres Institutions Africaines d'information Juridique"
 msgid "Judgments"
 msgstr "Jugements"
 
-#: views/legislation.py:110
+#: views/legislation.py:123
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Législation"
+
+#~ msgid "Facebook"
+#~ msgstr "Facebook"
