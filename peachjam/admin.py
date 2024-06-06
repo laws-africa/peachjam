@@ -23,7 +23,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from import_export.admin import ImportExportMixin as BaseImportExportMixin
 from languages_plus.models import Language
-from nonrelated_inlines.admin import NonrelatedTabularInline
+from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularInline
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
@@ -713,26 +713,6 @@ class CaseNumberAdmin(admin.StackedInline):
     fields = ["matter_type", "number", "year", "string_override"]
 
 
-class CaseHistoryInlineAdmin(admin.StackedInline):
-    model = CaseHistory
-    extra = 1
-    verbose_name = gettext_lazy("case history")
-    verbose_name_plural = gettext_lazy("case history")
-    fk_name = "judgment"
-
-    def get_formset(self, request, obj=None, **kwargs):
-        return super().get_formset(
-            request,
-            obj,
-            widgets={
-                "historical_judgment": autocomplete.ModelSelect2(
-                    url="autocomplete-judgments"
-                )
-            },
-            **kwargs,
-        )
-
-
 class BenchInline(admin.TabularInline):
     # by using an inline, the ordering of the judges is preserved
     model = Bench
@@ -767,6 +747,31 @@ class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
             obj,
             widgets={
                 "object_work": autocomplete.ModelSelect2(url="autocomplete-works")
+            },
+            **kwargs,
+        )
+
+
+class CaseHistoryInlineAdmin(NonrelatedStackedInline):
+    model = CaseHistory
+    verbose_name = verbose_name_plural = "case history"
+    exclude = ["judgment_work"]
+    extra = 1
+
+    def get_form_queryset(self, obj):
+        return CaseHistory.objects.filter(judgment_work=obj.work)
+
+    def save_new_instance(self, parent, instance):
+        instance.judgment_work = parent.work
+
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(
+            request,
+            obj,
+            widgets={
+                "historical_judgment_work": autocomplete.ModelSelect2(
+                    url="autocomplete-judgment-works"
+                )
             },
             **kwargs,
         )

@@ -34,8 +34,16 @@ class JudgmentDetailView(BaseDocumentDetailView):
                 .bench.prefetch_related("judge")
                 .values_list("judge__name", flat=True),
                 "case_histories": self.get_object()
-                .case_histories.select_related("court", "historical_judgment")
-                .prefetch_related("judges"),
+                .work.case_histories.select_related(
+                    "court", "historical_judgment_work", "outcome"
+                )
+                .prefetch_related(
+                    "judges",
+                    "historical_judgment_work__documents",
+                    "historical_judgment_work__documents__outcomes",
+                    "historical_judgment_work__documents__court",
+                    "historical_judgment_work__documents__judges",
+                ),
             }
         )
         return context
