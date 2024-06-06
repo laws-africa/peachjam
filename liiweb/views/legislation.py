@@ -1,4 +1,6 @@
+import datetime
 from collections import defaultdict
+from datetime import timedelta
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -40,6 +42,13 @@ class LegislationListView(TemplateView):
             )
         elif self.variant == "uncommenced":
             qs = qs.filter(metadata_json__commenced=False)
+        elif self.variant == "recent":
+            qs = qs.filter(
+                metadata_json__publication_date__gte=(
+                    datetime.date.today() - timedelta(days=365)
+                ).isoformat()
+            )
+
         return qs
 
     def get_context_data(self, **kwargs):
