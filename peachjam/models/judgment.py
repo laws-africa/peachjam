@@ -489,21 +489,21 @@ class CaseNumber(models.Model):
 
 
 class CaseHistory(models.Model):
-    judgment = models.ForeignKey(
-        Judgment,
+    judgment_work = models.ForeignKey(
+        "peachjam.Work",
         related_name="case_histories",
         on_delete=models.CASCADE,
-        verbose_name=_("judgment"),
+        verbose_name=_("judgment work"),
     )
     case_number = models.CharField(
         _("case number"), max_length=1024, null=True, blank=True
     )
-    historical_judgment = models.ForeignKey(
-        Judgment,
+    historical_judgment_work = models.ForeignKey(
+        "peachjam.Work",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        verbose_name=_("historical judgment"),
+        verbose_name=_("historical judgment work"),
     )
     outcome = models.ForeignKey(
         Outcome,

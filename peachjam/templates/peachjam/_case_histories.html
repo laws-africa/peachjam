@@ -11,25 +11,49 @@
   </thead>
   <tbody>
     {% for history in case_histories %}
-      <tr>
-        <td>{{ history.date }}</td>
-        <td>
-          {% if history.historical_judgment %}
-            <a target="_blank"
-               href="{{ history.historical_judgment.expression_frbr_uri }}">{{ history.historical_judgment }}</a>
-          {% else %}
-            {{ history.case_number }}
-          {% endif %}
-        </td>
-        <td>{{ history.court }}</td>
-        <td>
-          {% for judge in history.judges.all %}
-            {{ judge }}
-            {% if not forloop.last %},{% endif %}
-          {% endfor %}
-        </td>
-        <td>{{ history.outcome }}</td>
-      </tr>
+      {% if history.historical_judgment_work %}
+        {% with history.historical_judgment_work.documents.first as historical_judgment %}
+          <tr>
+            <td>{{ historical_judgment.date }}</td>
+            <td>
+              <a href="{{ historical_judgment.expression_frbr_uri }}">{{ historical_judgment.title }}</a>
+            </td>
+            <td>{{ historical_judgment.court }}</td>
+            <td>
+              {% for judge in historical_judgment.judges.all %}
+                {{ judge }}
+                {% if not forloop.last %},{% endif %}
+              {% endfor %}
+            </td>
+            <td>
+              {% for outcome in historical_judgment.outcomes.all %}
+                {{ outcome }}
+                {% if not forloop.last %},{% endif %}
+              {% endfor %}
+            </td>
+          </tr>
+        {% endwith %}
+      {% else %}
+        <tr>
+          <td>{{ history.date }}</td>
+          <td>
+            {% if history.historical_judgment %}
+              <a target="_blank"
+                 href="{{ history.historical_judgment.expression_frbr_uri }}">{{ history.historical_judgment }}</a>
+            {% else %}
+              {{ history.case_number }}
+            {% endif %}
+          </td>
+          <td>{{ history.court }}</td>
+          <td>
+            {% for judge in history.judges.all %}
+              {{ judge }}
+              {% if not forloop.last %},{% endif %}
+            {% endfor %}
+          </td>
+          <td>{{ history.outcome }}</td>
+        </tr>
+      {% endif %}
     {% endfor %}
   </tbody>
 </table>
