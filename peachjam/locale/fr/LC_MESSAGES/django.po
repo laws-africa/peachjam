@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-06 15:17+0200\n"
-"PO-Revision-Date: 2024-06-06 13:40\n"
+"PO-Revision-Date: 2024-06-06 14:41\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -51,11 +51,11 @@ msgstr "Publier les documents sélectionnés"
 
 #: admin.py:628
 msgid "Documents unpublished."
-msgstr ""
+msgstr "Documents inédits."
 
 #: admin.py:630
 msgid "Unpublish selected documents"
-msgstr ""
+msgstr "Annuler la publication des documents sélectionnés"
 
 #: admin.py:710 models/judgment.py:463 models/judgment.py:499
 msgid "case number"
@@ -92,7 +92,7 @@ msgstr "Actualisation du contenu en arrière-plan."
 
 #: admin.py:906
 msgid "Refresh content for selected ingestors"
-msgstr ""
+msgstr "Actualiser le contenu pour les ingérants sélectionnés"
 
 #: admin.py:954
 msgid "Articles published."
@@ -534,19 +534,19 @@ msgstr "Contenu du document"
 
 #: models/gazette.py:9
 msgid "publication"
-msgstr ""
+msgstr "publication"
 
 #: models/gazette.py:12
 msgid "sub publication"
-msgstr ""
+msgstr "sous-publication"
 
 #: models/gazette.py:14
 msgid "supplement"
-msgstr ""
+msgstr "supplément"
 
 #: models/gazette.py:16
 msgid "supplement number"
-msgstr ""
+msgstr "numéro de supplément"
 
 #: models/gazette.py:18
 msgid "part"
@@ -658,7 +658,7 @@ msgstr "résultat"
 
 #: models/judgment.py:68
 msgid "outcomes"
-msgstr ""
+msgstr "résultats"
 
 #: models/judgment.py:82 models/judgment.py:451
 msgid "matter type"
@@ -760,7 +760,7 @@ msgstr "Citation neutre des médias"
 
 #: models/judgment.py:302
 msgid "Auto-assign title"
-msgstr ""
+msgstr "Titre attribué automatiquement"
 
 #: models/judgment.py:303
 msgid "Whether or not the system should assign the title"
@@ -949,7 +949,7 @@ msgstr "e-mails de l'administrateur"
 
 #: models/settings.py:113
 msgid "Enter one or more email addresses separated by spaces."
-msgstr ""
+msgstr "Saisissez une ou plusieurs adresses e-mail séparées par des espaces."
 
 #: models/settings.py:116
 msgid "matomo domain"
@@ -1210,8 +1210,8 @@ msgstr "Afficher/Masquer tout"
 #, python-format
 msgid "%(n)s citation"
 msgid_plural "%(n)s citations"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(n)s citation"
+msgstr[1] "%(n)s citations"
 
 #: templates/peachjam/_court_list.html:9
 msgid "All judgments"
@@ -1288,7 +1288,7 @@ msgstr "Basculer la liste déroulante"
 
 #: templates/peachjam/_document_detail_toolbar.html:44
 msgid "Report"
-msgstr ""
+msgstr "Rapport"
 
 #: templates/peachjam/_document_detail_toolbar.html:45
 msgid "Report a problem"
@@ -1634,7 +1634,7 @@ msgstr "Si vous avez des commentaires ou des suggestions au sujet de cette polit
 
 #: templates/peachjam/_terms_of_use_content.html:248
 msgid "Date of notice: 6 June 2024"
-msgstr ""
+msgstr "Date du préavis : 6 juin 2024"
 
 #: templates/peachjam/_timeline_events.html:4
 msgid "History of this document"
@@ -1802,7 +1802,7 @@ msgstr "Citation"
 
 #: templates/peachjam/layouts/document_detail.html:127
 msgid "Case history"
-msgstr ""
+msgstr "Histoire du cas"
 
 #: templates/peachjam/layouts/document_detail.html:140
 msgid "Ratifications"
