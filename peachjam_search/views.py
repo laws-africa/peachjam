@@ -1,6 +1,7 @@
 import copy
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language_from_request
@@ -528,9 +529,13 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
         previous = None
         if self.request.GET.get("previous"):
-            previous = SearchTrace.objects.filter(
-                pk=self.request.GET["previous"]
-            ).first()
+            try:
+                previous = SearchTrace.objects.filter(
+                    pk=self.request.GET["previous"]
+                ).first()
+            except ValidationError:
+                # ignore badly formed previous search ids
+                pass
 
         # save the search trace
         return SearchTrace.objects.create(
