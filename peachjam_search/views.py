@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
+from django.utils.functional import cached_property
 from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
@@ -19,7 +20,7 @@ from django_elasticsearch_dsl_drf.filter_backends import (
 from django_elasticsearch_dsl_drf.filter_backends.search.base import (
     BaseSearchFilterBackend,
 )
-from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
+from django_elasticsearch_dsl_drf.pagination import PageNumberPagination, Paginator
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.connections import get_connection
@@ -42,9 +43,19 @@ from peachjam_search.serializers import (
 CACHE_SECS = 15 * 60
 
 
+class RobustPaginator(Paginator):
+    max_results = 10_000
+
+    @cached_property
+    def num_pages(self):
+        # clamp the page number to prevent exceeding max_results
+        return min(super().num_pages, (self.max_results - 1) // self.per_page)
+
+
 class CustomPageNumberPagination(PageNumberPagination):
     # NB: if this changes, update pageSize in peachjam/js/components/FindDocuments/index.vue
     page_size = 10
+    django_paginator_class = RobustPaginator
 
 
 class MainSearchBackend(BaseSearchFilterBackend):
