@@ -2,8 +2,10 @@ import logging
 
 import sentry_sdk
 from background_task import background
+from background_task.signals import task_error
 from background_task.tasks import DBTaskRunner, Task, logger, tasks
 from django.db.utils import OperationalError
+from django.dispatch import receiver
 from sentry_sdk.tracing import TRANSACTION_SOURCE_TASK
 
 from peachjam.models import CoreDocument, Work, citations_processor
@@ -42,6 +44,17 @@ class PatchedDBTaskRunner(DBTaskRunner):
 
 # use the patched runner
 tasks._runner = PatchedDBTaskRunner()
+
+
+@receiver(task_error)
+def on_task_error(*args, **kwargs):
+    # report the exception to Sentry
+    hub = sentry_sdk.Hub.current
+    hub.capture_exception()
+
+    # now mark the current transaction as handled, otherwise it'll be reported twice
+    if hub.scope and hub.scope.transaction:
+        hub.scope.transaction.timestamp = -1
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
