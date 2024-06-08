@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-06 15:17+0200\n"
-"PO-Revision-Date: 2024-06-06 13:41\n"
+"PO-Revision-Date: 2024-06-08 17:46\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -47,11 +47,11 @@ msgstr "Nyaraka zilizochapishwa."
 
 #: admin.py:624
 msgid "Publish selected documents"
-msgstr "Chapisha hati zilizochaguliwa"
+msgstr "Chapisha nyaraka zilizochaguliwa"
 
 #: admin.py:628
 msgid "Documents unpublished."
-msgstr "Hati ambazo hazijachapishwa."
+msgstr "Nyaraka hazijachapishwa."
 
 #: admin.py:630
 msgid "Unpublish selected documents"
