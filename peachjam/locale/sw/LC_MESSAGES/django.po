@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-06 15:17+0200\n"
-"PO-Revision-Date: 2024-06-08 17:46\n"
+"PO-Revision-Date: 2024-06-08 18:47\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -55,7 +55,7 @@ msgstr "Nyaraka hazijachapishwa."
 
 #: admin.py:630
 msgid "Unpublish selected documents"
-msgstr "Batilisha uchapishaji wa hati ulizochagua"
+msgstr "Usichapishe nyaraka zilizochaguliwa"
 
 #: admin.py:710 models/judgment.py:463 models/judgment.py:499
 msgid "case number"
@@ -92,7 +92,7 @@ msgstr "Inaonyesha upya maudhui kwa nyuma."
 
 #: admin.py:906
 msgid "Refresh content for selected ingestors"
-msgstr "Onyesha upya maudhui kwa waingizaji waliochaguliwa"
+msgstr "Onyesha upya maudhui kwa viingiza taarifa vilivyochaguliwa"
 
 #: admin.py:954
 msgid "Articles published."
@@ -112,7 +112,7 @@ msgstr "Batilisha uchapishaji wa makala uliyochagua"
 
 #: forms.py:221
 msgid "Document problem reported"
-msgstr "Tatizo la hati limeripotiwa"
+msgstr "Tatizo kuhusu nyaraka limeripotiwa"
 
 #: models/article.py:21 models/core_document_model.py:334
 #: models/judgment.py:519
@@ -349,11 +349,11 @@ msgstr "kupanga daraja"
 
 #: models/core_document_model.py:173
 msgid "number of cited works"
-msgstr "idadi ya kazi zilizotajwa"
+msgstr "idadi ya kazi zilizonukuliwa"
 
 #: models/core_document_model.py:175
 msgid "number of incoming citations"
-msgstr "idadi ya manukuu zinazoingia"
+msgstr "idadi ya nukuu zinazoingia"
 
 #: models/core_document_model.py:178 models/core_document_model.py:323
 msgid "work"
@@ -441,7 +441,7 @@ msgstr "Ruhusu hati hii kuorodheshwa na roboti za mtambo tafutizi."
 
 #: models/core_document_model.py:443
 msgid "Is this document published and visible on the website?"
-msgstr "Je, hati hii imechapishwa na kuonekana kwenye tovuti?"
+msgstr "Je, nyaraka hii imechapishwa na inaonekana kwenye tovuti?"
 
 #: models/core_document_model.py:484
 msgid "You cannot set a future date for the document"
@@ -546,7 +546,7 @@ msgstr "nyongeza"
 
 #: models/gazette.py:16
 msgid "supplement number"
-msgstr "nambari ya nyongeza"
+msgstr "namba ya nyongeza"
 
 #: models/gazette.py:18
 msgid "part"
@@ -558,7 +558,7 @@ msgstr "ufunguo"
 
 #: models/gazette.py:24
 msgid "volume number"
-msgstr "nambari ya kiasi"
+msgstr "namba ya juzuu"
 
 #: models/gazette.py:28
 msgid "gazette"
@@ -760,11 +760,11 @@ msgstr "Nukuu isiyoegemea upande wowote"
 
 #: models/judgment.py:302
 msgid "Auto-assign title"
-msgstr "Agiza kichwa kiotomatiki"
+msgstr "Weka kichwa cha habari kiotomati"
 
 #: models/judgment.py:303
 msgid "Whether or not the system should assign the title"
-msgstr "Ikiwa mfumo unapaswa kukabidhi kichwa au la"
+msgstr "Ikiwa mfumo unapaswa kuweka kichwa  cha habari au la"
 
 #: models/judgment.py:317
 msgid "judgments"
@@ -796,7 +796,7 @@ msgstr "hukumu ya kihistoria"
 
 #: models/judgment.py:524
 msgid "case histories"
-msgstr "historia ya kesi"
+msgstr "historia za kesi"
 
 #: models/profile.py:13
 msgid "about HTML"
@@ -897,7 +897,7 @@ msgstr "thamani ya kukuza cheo"
 
 #: models/settings.py:65
 msgid "pagerank pivot value"
-msgstr "thamani ya egemeo la ukurasa"
+msgstr "thamani ya msingi ya  uthabiti wa ukurasa"
 
 #: models/settings.py:68
 msgid "allowed login domains"
@@ -945,11 +945,11 @@ msgstr "kiungo cha usaidizi kwa mtumiaji"
 
 #: models/settings.py:109
 msgid "admin emails"
-msgstr "barua pepe za admin"
+msgstr "baruapepe za msimamizi"
 
 #: models/settings.py:113
 msgid "Enter one or more email addresses separated by spaces."
-msgstr "Weka barua pepe moja au zaidi zikitenganishwa na nafasi."
+msgstr "Weka baruapepe moja au zaidi zikitenganishwa na nafasi."
 
 #: models/settings.py:116
 msgid "matomo domain"
@@ -957,7 +957,7 @@ msgstr "kikoa cha matomo"
 
 #: models/settings.py:120
 msgid "Matomo domain (e.g. mysite.matomo.cloud)"
-msgstr "Kikoa cha Matomo (km mysite.matomo.cloud)"
+msgstr "Kikoa cha Matomo (k.m. mysite.matomo.cloud)"
 
 #: models/settings.py:123
 msgid "matomo site ID"
@@ -1269,7 +1269,7 @@ msgstr[1] "%(doc_count)s hati"
 
 #: templates/peachjam/_document_detail_toolbar.html:4
 msgid "Document toolbar"
-msgstr "Upau wa vidhibiti wa hati"
+msgstr "Upauzana wa nyaraka"
 
 #: templates/peachjam/_document_detail_toolbar.html:8
 msgid "Edit"
