@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-06 15:17+0200\n"
-"PO-Revision-Date: 2024-06-08 18:47\n"
+"PO-Revision-Date: 2024-06-08 19:46\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -1435,7 +1435,7 @@ msgstr "Ni lazima utumie huduma kwa kuwajibika kwa kutofanya maombi mengi. Ili k
 
 #: templates/peachjam/_terms_of_use_content.html:34
 msgid "Scraping and bulk downloading from this website is strictly prohibited. We are a donor-funded organisation and bulk and frequent scraping affects our costs, endangering the sustainability of the service. There are more efficient ways of obtaining access to our data in bulk. Please email us if you would like to access our data in bulk."
-msgstr "Kusugua na kupakua kwa wingi kutoka kwa tovuti hii ni marufuku kabisa. Sisi ni shirika linalofadhiliwa na wafadhili na uchakachuaji mara kwa mara huathiri gharama zetu, na kuhatarisha uendelevu wa huduma. Kuna njia bora zaidi za kupata ufikiaji wa data yetu kwa wingi. Tafadhali tutumie barua pepe ikiwa ungependa kufikia data yetu kwa wingi."
+msgstr "Ni marufuku kuchukua na kupakua taarifa kwa wingi katika tovuti hii. Sisi ni shirika linalofadhiliwa na wahisani na uchukuaji kwa wingi wa mara kwa mara huathiri gharama zetu, na kuhatarisha uendelevu wa huduma. Kuna njia bora zaidi za kupata  data zetu kwa wingi. Tafadhali tutumie baruapepe ikiwa ungependa kupata data zetu kwa wingi."
 
 #: templates/peachjam/_terms_of_use_content.html:40
 msgid "Crawling and indexing"
@@ -1634,7 +1634,7 @@ msgstr "Ikiwa una maoni au mapendekezo yoyote kuhusu sera hii, tafadhali wasilia
 
 #: templates/peachjam/_terms_of_use_content.html:248
 msgid "Date of notice: 6 June 2024"
-msgstr "Tarehe ya taarifa: 6 Juni 2024"
+msgstr "Tarehe ya notisi: 6 Juni 2024"
 
 #: templates/peachjam/_timeline_events.html:4
 msgid "History of this document"
