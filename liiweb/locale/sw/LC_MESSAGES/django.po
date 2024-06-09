@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-06 15:17+0200\n"
-"PO-Revision-Date: 2024-06-06 13:41\n"
+"PO-Revision-Date: 2024-06-09 08:36\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -23,7 +23,7 @@ msgid "\n"
 "            Donate to %(APP_NAME)s\n"
 "          "
 msgstr "\n"
-"            Changia %(APP_NAME)s\n"
+"            Changia kwa%(APP_NAME)s\n"
 "          "
 
 #: templates/liiweb/_donate_call_to_action.html:12
@@ -32,7 +32,7 @@ msgid "\n"
 "            %(APP_NAME)s is an independent, self-funded organisation and needs your support.\n"
 "          "
 msgstr "\n"
-"            %(APP_NAME)s ni shirika linalojitegemea, linalojifadhili na linahitaji usaidizi wako.\n"
+"            %(APP_NAME)s ni shirika linalojitegemea, linalojigharimia na linahitaji msaada wako.\n"
 "          "
 
 #: templates/liiweb/_donate_call_to_action.html:18
@@ -123,11 +123,11 @@ msgstr "Sheria za sasa"
 
 #: templates/liiweb/legislation_list.html:33
 msgid "Recent legislation"
-msgstr "Sheria ya hivi majuzi"
+msgstr "Sheria ya hivi karibuni"
 
 #: templates/liiweb/legislation_list.html:47
 msgid "Uncommenced legislation"
-msgstr "Sheria ambayo haijaanza"
+msgstr "Sheria ambayo haijaanza kutumika"
 
 #: templates/liiweb/legislation_list.html:55
 msgid "Repealed legislation"
