@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-06 15:17+0200\n"
-"PO-Revision-Date: 2023-09-19 11:54\n"
+"PO-Revision-Date: 2024-06-09 09:38\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -67,11 +67,11 @@ msgstr "Marekebisho ya Sheria"
 
 #: templates/peachjam/_header.html:40
 msgid "NPS Documents"
-msgstr ""
+msgstr "Nyaraka za NPS"
 
 #: templates/peachjam/_header.html:46
 msgid "Causelists"
-msgstr ""
+msgstr "Orodha za kesi"
 
 #: templates/peachjam/_header.html:52
 msgid "Speeches"
@@ -93,8 +93,3 @@ msgstr "Wasiliana nasi"
 msgid "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@tanzlii.org</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 msgstr "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@tanzlii.org</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 
-#~ msgid "About"
-#~ msgstr "Kuhusu"
-
-#~ msgid "About TanzLII"
-#~ msgstr "Kuhusu TanzLII"
