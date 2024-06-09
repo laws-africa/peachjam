@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-06 15:17+0200\n"
-"PO-Revision-Date: 2024-06-08 19:46\n"
+"PO-Revision-Date: 2024-06-09 10:56\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -84,7 +84,7 @@ msgstr "hakimu wa mahakama ya chini"
 
 #: admin.py:748 models/judgment.py:253
 msgid "lower court judges"
-msgstr "majaji wa mahakama ya chini"
+msgstr "majaji wa mahakama ya mwanzo"
 
 #: admin.py:903
 msgid "Refreshing content in the background."
