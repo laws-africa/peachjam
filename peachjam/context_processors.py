@@ -9,7 +9,7 @@ def general(request):
     Add some useful context to templates.
     """
     # get current language
-    language = request.LANGUAGE_CODE
+    language = getattr(request, "LANGUAGE_CODE", settings.LANGUAGE_CODE)
 
     return {
         "DEBUG": settings.DEBUG,
