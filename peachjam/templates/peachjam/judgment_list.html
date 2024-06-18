@@ -6,7 +6,12 @@
 {% block page-content %}
   <section class="pb-5">
     <div class="container">
-      <h1 class="my-4">{% trans 'Judgments' %}</h1>
+      <div class="my-4">
+        {% block judgment_heading %}
+          <h1>{% trans 'Judgments' %}</h1>
+        {% endblock %}
+        {% include "peachjam/_document_count.html" %}
+      </div>
       {% include "peachjam/_quick_search.html" %}
       {% include "peachjam/_help_button.html" with link="judgments/courts" %}
       {% include 'peachjam/_court_list.html' %}
