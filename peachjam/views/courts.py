@@ -17,7 +17,9 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
     model = Judgment
     navbar_link = "judgments"
-    queryset = Judgment.objects.prefetch_related("judges", "labels")
+    queryset = Judgment.objects.prefetch_related(
+        "judges", "labels", "attorneys", "outcomes"
+    )
 
     def base_view_name(self):
         return _("Judgments")
