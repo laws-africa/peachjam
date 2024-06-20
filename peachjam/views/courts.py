@@ -20,6 +20,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
     queryset = Judgment.objects.prefetch_related(
         "judges", "labels", "attorneys", "outcomes"
     )
+    exclude_facets = []
 
     def base_view_name(self):
         return _("Judgments")
@@ -42,45 +43,48 @@ class FilteredJudgmentView(FilteredDocumentListView):
         return context
 
     def populate_facets(self, context):
-        judges = list(
-            judge
-            for judge in self.form.filter_queryset(
-                self.get_base_queryset(), exclude="judges"
+        context["facet_data"] = {}
+        if "judges" not in self.exclude_facets:
+            judges = list(
+                judge
+                for judge in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="judges"
+                )
+                .order_by()
+                .values_list("judges__name", flat=True)
+                .distinct()
+                if judge
             )
-            .order_by()
-            .values_list("judges__name", flat=True)
-            .distinct()
-            if judge
-        )
+            context["facet_data"]["judges"] = judges
 
-        attorneys = list(
-            attorney
-            for attorney in self.form.filter_queryset(
-                self.get_base_queryset(), exclude="attorneys"
+        if "outcomes" not in self.exclude_facets:
+            outcomes = list(
+                outcome
+                for outcome in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="outcomes"
+                )
+                .order_by()
+                .values_list("outcomes__name", flat=True)
+                .distinct()
+                if outcome
             )
-            .order_by()
-            .values_list("attorneys__name", flat=True)
-            .distinct()
-            if attorney
-        )
+            context["facet_data"]["outcomes"] = outcomes
 
-        outcomes = list(
-            outcome
-            for outcome in self.form.filter_queryset(
-                self.get_base_queryset(), exclude="outcomes"
+        if "attorneys" not in self.exclude_facets:
+            attorneys = list(
+                attorney
+                for attorney in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="attorneys"
+                )
+                .order_by()
+                .values_list("attorneys__name", flat=True)
+                .distinct()
+                if attorney
             )
-            .order_by()
-            .values_list("outcomes__name", flat=True)
-            .distinct()
-            if outcome
-        )
+            context["facet_data"]["attorneys"] = attorneys
 
-        context["facet_data"] = {
-            "judges": judges,
-            "alphabet": lowercase_alphabet(),
-            "attorneys": attorneys,
-            "outcomes": outcomes,
-        }
+        if "alphabet" not in self.exclude_facets:
+            context["facet_data"]["alphabet"] = lowercase_alphabet()
 
     def populate_years(self, context):
         context["years"] = self.get_base_queryset(exclude=["year", "month"]).dates(
