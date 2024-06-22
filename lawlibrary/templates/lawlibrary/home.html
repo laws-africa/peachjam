@@ -3,35 +3,27 @@
 {% block title %}
   {% trans 'Home' %}
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to the digital Law Library of South Africa' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
-      Reliable and current access to the law of South Africa: annotated and consolidated legislation, case summaries,
-      caselaw collections by subject, and legal commentary. Read, use and share the law freely.
-    {% endblocktrans %}
-  </h4>
+{% block hero-headings-title %}
+  {% trans 'Welcome to the digital Law Library of South Africa' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  {% blocktrans trimmed %}
+    Reliable and current access to the law of South Africa: annotated and consolidated legislation, case summaries,
+    caselaw collections by subject, and legal commentary. Read, use and share the law freely.
+  {% endblocktrans %}
+{% endblock %}
+{% block hero-headings-blurb %}
+  {% blocktrans trimmed %}
+    LawLibrary.org.za is a project of the AfricanLII and Judicial Institute for Africa at the University of Cape Town.
+    Legislation digitised by Laws.Africa.
+  {% endblocktrans %}
+{% endblock %}
+{% block hero-logos %}
+  {{ block.super }}
+  <img src="{% static 'images/jifa.png' %}" alt="JIFA"/>
 {% endblock %}
 {% block after-search %}
   {% include 'liiweb/_donate_call_to_action.html' %}
-{% endblock %}
-{% block hero-logos %}
-  <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
-  <img src="{% static 'images/jifa.png' %}" alt="JIFA"/>
-  <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
-{% endblock %}
-{% block second-column-content %}
-  <p class="lead">
-    {% blocktrans trimmed %}
-      LawLibrary.org.za is a project of the AfricanLII and Judicial Institute for Africa at the University of Cape Town.
-      Legislation digitised by Laws.Africa.
-    {% endblocktrans %}
-  </p>
-  {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link or PEACHJAM_SETTINGS.linkedin_link %}
-    {% block social-media %}
-      {% include 'peachjam/_social_media.html' %}
-    {% endblock %}
-  {% endif %}
 {% endblock %}
 {% block pocketlaw %}
   {{ block.super }}

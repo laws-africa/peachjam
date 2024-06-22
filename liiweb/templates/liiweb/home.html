@@ -76,86 +76,88 @@
       </div>
     </div>
   </section>
-  {% block recent-documents %}
-    <section class="my-5">
-      <div class="container">
-        <div class="row row-cols-1 row-cols-lg-2">
-          <div class="col mb-5">
-            {% block recent-judgments %}
-              <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
-              {% trans 'View more judgments' as text %}
-              {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
-            {% endblock %}
-          </div>
-          <div class="col mb-5">
-            {% block recent-legislation %}
-              <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
-              {% trans 'View more legislation' as text %}
-              {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
-            {% endblock %}
-          </div>
-          {% if recent_gazettes %}
+  {% block main-content %}
+    {% block recent-documents %}
+      <section class="my-5">
+        <div class="container">
+          <div class="row row-cols-1 row-cols-lg-2">
             <div class="col mb-5">
-              {% block recent-gazettes %}
-                <h2 class="mb-4">{% trans 'Recent Gazettes' %}</h2>
-                {% trans 'View more gazettes' as text %}
-                {% include 'peachjam/_recent_document_list.html' with documents=recent_gazettes view_more_text=text view_more_url_name='gazettes' %}
+              {% block recent-judgments %}
+                <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
+                {% trans 'View more judgments' as text %}
+                {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
               {% endblock %}
             </div>
-          {% endif %}
-        </div>
-      </div>
-    </section>
-  {% endblock %}
-  {% block courts %}
-    <section class="my-5 bg-brand-pale py-5">
-      <div class="container">
-        <h2 class="mb-4">{% trans 'Courts' %}</h2>
-        {% include 'peachjam/_court_list.html' %}
-      </div>
-    </section>
-  {% endblock %}
-  {% block collections %}
-    <section class="my-5">
-      <div class="container">
-        <h2 class="mb-4">{% trans 'Collections' %}</h2>
-        {% include 'peachjam/_taxonomy_list.html' %}
-      </div>
-    </section>
-  {% endblock %}
-  {% block pocketlaw %}
-    {% if PEACHJAM_SETTINGS.pocket_law_repo %}
-      <section class="my-5">
-        <div class="container">
-          <div class="row">
-            <div class="col-sm-3 mb-3">
-              <img src="{% static 'images/pocketlaw-logo.png' %}"
-                   alt="Pocket Law"
-                   class="img-fluid"/>
+            <div class="col mb-5">
+              {% block recent-legislation %}
+                <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
+                {% trans 'View more legislation' as text %}
+                {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
+              {% endblock %}
             </div>
-            <div class="col-sm-9 ps-sm-5">
-              <h2 class="mb-4">{% blocktrans trimmed %}Use {{ APP_NAME }} when you're offline{% endblocktrans %}</h2>
-              <p class="lead">
-                {% blocktrans trimmed %}
-                  Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.
-                {% endblocktrans %}
-              </p>
-              <a href="{% url 'pocketlaw' %}" class="btn btn-lg btn-primary">Pocket Law</a>
-            </div>
+            {% if recent_gazettes %}
+              <div class="col mb-5">
+                {% block recent-gazettes %}
+                  <h2 class="mb-4">{% trans 'Recent Gazettes' %}</h2>
+                  {% trans 'View more gazettes' as text %}
+                  {% include 'peachjam/_recent_document_list.html' with documents=recent_gazettes view_more_text=text view_more_url_name='gazettes' %}
+                {% endblock %}
+              </div>
+            {% endif %}
           </div>
         </div>
       </section>
-    {% endif %}
-  {% endblock %}
-  {% block recent-articles %}
-    {% if recent_articles %}
-      <section class="my-5">
+    {% endblock %}
+    {% block courts %}
+      <section class="my-5 py-3 bg-brand-pale">
         <div class="container">
-          <h2 class="mb-4">{% trans 'Latest Articles' %}</h2>
-          {% include 'peachjam/_article_list.html' with articles=recent_articles %}
-          <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">{% trans "View more articles" %}</a>
+          <h2 class="mb-4">{% trans 'Courts' %}</h2>
+          {% include 'peachjam/_court_list.html' %}
         </div>
       </section>
-    {% endif %}
+    {% endblock %}
+    {% block collections %}
+      <section class="my-5">
+        <div class="container">
+          <h2 class="mb-4">{% trans 'Collections' %}</h2>
+          {% include 'peachjam/_taxonomy_list.html' %}
+        </div>
+      </section>
+    {% endblock %}
+    {% block pocketlaw %}
+      {% if PEACHJAM_SETTINGS.pocket_law_repo %}
+        <section class="my-5">
+          <div class="container">
+            <div class="row">
+              <div class="col-sm-3 mb-3">
+                <img src="{% static 'images/pocketlaw-logo.png' %}"
+                     alt="Pocket Law"
+                     class="img-fluid"/>
+              </div>
+              <div class="col-sm-9 ps-sm-5">
+                <h2 class="mb-4">{% blocktrans trimmed %}Use {{ APP_NAME }} when you're offline{% endblocktrans %}</h2>
+                <p class="lead">
+                  {% blocktrans trimmed %}
+                    Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.
+                  {% endblocktrans %}
+                </p>
+                <a href="{% url 'pocketlaw' %}" class="btn btn-lg btn-primary">Pocket Law</a>
+              </div>
+            </div>
+          </div>
+        </section>
+      {% endif %}
+    {% endblock %}
+    {% block recent-articles %}
+      {% if recent_articles %}
+        <section class="my-5">
+          <div class="container">
+            <h2 class="mb-4">{% trans 'Latest Articles' %}</h2>
+            {% include 'peachjam/_article_list.html' with articles=recent_articles %}
+            <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">{% trans "View more articles" %}</a>
+          </div>
+        </section>
+      {% endif %}
+    {% endblock %}
   {% endblock %}
 {% endblock %}
