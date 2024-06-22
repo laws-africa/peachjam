@@ -14,7 +14,8 @@
   <img src="{% static 'images/indigo-trust-logo.jpg' %}"
        alt="The Indigo Trust"/>
 {% endblock %}
-{% block after-search %}
+{% block collections %}
+  {{ block.super }}
   {% include 'liiweb/_donate_call_to_action.html' %}
 {% endblock %}
 {% block second-col-about %}

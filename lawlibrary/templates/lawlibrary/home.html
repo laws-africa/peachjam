@@ -1,8 +1,5 @@
 {% extends "liiweb/home.html" %}
 {% load static i18n %}
-{% block title %}
-  {% trans 'Home' %}
-{% endblock %}
 {% block hero-headings-title %}
   {% trans 'Welcome to the digital Law Library of South Africa' %}
 {% endblock %}
@@ -22,10 +19,8 @@
   {{ block.super }}
   <img src="{% static 'images/jifa.png' %}" alt="JIFA"/>
 {% endblock %}
-{% block after-search %}
-  {% include 'liiweb/_donate_call_to_action.html' %}
-{% endblock %}
 {% block pocketlaw %}
+  {% include 'liiweb/_donate_call_to_action.html' %}
   {{ block.super }}
   <section class="py-5">
     <div class="container">
