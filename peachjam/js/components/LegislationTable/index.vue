@@ -64,7 +64,7 @@
         <div class="mb-3">
           {{ filteredData.length }} of {{ tableData.length }} documents
         </div>
-        <table v-if="filteredData.length" class="doc-table doc-table--toggle">
+        <table v-if="filteredData.length" :class="`doc-table doc-table--toggle ${hideCitations ? '' : 'doc-table--citation'}`">
           <thead>
             <tr>
               <th class="cell-toggle" />
