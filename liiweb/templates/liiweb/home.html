@@ -81,20 +81,26 @@
       <div class="container">
         <div class="row row-cols-1 row-cols-lg-2">
           <div class="col mb-5">
-            <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
-            {% trans 'View more judgments' as text %}
-            {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
+            {% block recent-judgments %}
+              <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
+              {% trans 'View more judgments' as text %}
+              {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
+            {% endblock %}
           </div>
           <div class="col mb-5">
-            <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
-            {% trans 'View more legislation' as text %}
-            {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
+            {% block recent-legislation %}
+              <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
+              {% trans 'View more legislation' as text %}
+              {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
+            {% endblock %}
           </div>
           {% if recent_gazettes %}
             <div class="col mb-5">
-              <h2 class="mb-4">{% trans 'Recent Gazettes' %}</h2>
-              {% trans 'View more gazettes' as text %}
-              {% include 'peachjam/_recent_document_list.html' with documents=recent_gazettes view_more_text=text view_more_url_name='gazettes' %}
+              {% block recent-gazettes %}
+                <h2 class="mb-4">{% trans 'Recent Gazettes' %}</h2>
+                {% trans 'View more gazettes' as text %}
+                {% include 'peachjam/_recent_document_list.html' with documents=recent_gazettes view_more_text=text view_more_url_name='gazettes' %}
+              {% endblock %}
             </div>
           {% endif %}
         </div>
