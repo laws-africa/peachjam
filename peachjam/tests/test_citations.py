@@ -38,6 +38,7 @@ class CitationAnalyserTestCase(TestCase):
                 filename="citations.pdf",
                 file=File(f),
             )
+            doc.source_file.save()
             citation_analyser.extract_citations_from_source_file(doc)
 
         self.assertEquals(
