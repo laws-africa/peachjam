@@ -159,7 +159,7 @@ class Work(models.Model):
         null=False,
         blank=False,
     )
-    title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
+    title = models.CharField(_("title"), max_length=4096, null=False, blank=False)
     languages = ArrayField(
         models.CharField(max_length=3),
         null=False,
@@ -330,7 +330,7 @@ class CoreDocument(PolymorphicModel):
         null=False,
         blank=False,
     )
-    title = models.CharField(_("title"), max_length=1024, null=False, blank=False)
+    title = models.CharField(_("title"), max_length=4096, null=False, blank=False)
     date = models.DateField(_("date"), null=False, blank=False, db_index=True)
     source_url = models.URLField(
         _("source URL"), max_length=2048, null=True, blank=True
