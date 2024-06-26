@@ -8,7 +8,7 @@ from django.utils.dates import MONTHS
 from django.utils.text import gettext_lazy as _
 
 from peachjam.helpers import chunks, lowercase_alphabet
-from peachjam.models import Court, CourtClass, CourtRegistry, Judgment
+from peachjam.models import Court, CourtClass, CourtRegistry, Judge, Judgment
 from peachjam.views.generic_views import FilteredDocumentListView
 
 
@@ -33,6 +33,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
         context["doc_type"] = "Judgment"
         context["page_title"] = self.page_title()
+        context["labels"].update({"judge": Judge.model_label_plural})
 
         if not self.form.cleaned_data.get("alphabet"):
             context["grouped_documents"] = self.grouped_judgments(context["documents"])

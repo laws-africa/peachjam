@@ -117,13 +117,16 @@ export default {
       this.loading = true;
       this.$refs.form.submit();
     },
+    getTitle (key) {
+      return JSON.parse(document.querySelector('#data-labels').textContent)[key];
+    },
 
     getFacets () {
       const facets = [
         {
           name: 'authors',
           type: 'radio',
-          title: JSON.parse(document.querySelector('#data-labels').textContent).author
+          title: this.getTitle('author')
         },
         {
           name: 'docTypes',
@@ -138,7 +141,7 @@ export default {
         {
           name: 'judges',
           type: 'radio',
-          title: this.$t('Judges')
+          title: this.getTitle('judge')
         },
         {
           name: 'outcomes',

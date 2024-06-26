@@ -31,7 +31,7 @@ from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
-from peachjam.models import Author, CourtRegistry, Label, pj_settings
+from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.documents import SearchableDocument, get_search_indexes
 from peachjam_search.models import SearchTrace
@@ -342,6 +342,7 @@ class SearchView(TemplateView):
         context["labels"] = {
             "author": Author.model_label,
             "registry": CourtRegistry.model_label,
+            "judge": Judge.model_label_plural,
             "searchPlaceholder": search_placeholder_text,
             "documentLabels": LabelSerializer(Label.objects.all(), many=True).data,
         }

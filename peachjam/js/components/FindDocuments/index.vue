@@ -316,7 +316,7 @@ export default {
         options: []
       },
       {
-        title: this.$t('Judges'),
+        title: getTitle('judge'),
         name: 'judges',
         type: 'checkboxes',
         value: [],
