@@ -27,6 +27,9 @@ class Attorney(models.Model):
 
 
 class Judge(models.Model):
+    model_label = _("Judge")
+    model_label_plural = _("Judges")
+
     name = models.CharField(
         _("name"), max_length=1024, null=False, blank=False, unique=True
     )
