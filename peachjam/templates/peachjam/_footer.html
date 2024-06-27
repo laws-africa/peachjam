@@ -9,9 +9,7 @@
       {% endif %}
     {% endblock %}
     {% block social-media %}
-      {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link or PEACHJAM_SETTINGS.linkedin_link %}
-        {% include 'peachjam/_social_media.html' %}
-      {% endif %}
+      {% include 'peachjam/_social_media.html' %}
     {% endblock %}
     <hr/>
     <div class="row">
