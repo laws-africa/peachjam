@@ -1,46 +1,48 @@
 {% load i18n static %}
-<div class="row align-items-center justify-content-between">
-  <div class="d-flex justify-content-center mb-4 mb-md-0 d-md-block col-md mb-2">
-    <a class="btn btn-primary" href="{% url 'about' %}#contact">{% trans 'Contact us' %}</a>
+{% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link or PEACHJAM_SETTINGS.linkedin_link or PEACHJAM_SETTINGS.youtube_link %}
+  <div class="row align-items-center justify-content-between">
+    <div class="d-flex justify-content-center mb-4 mb-md-0 d-md-block col-md mb-2">
+      <a class="btn btn-primary" href="{% url 'about' %}#contact">{% trans 'Contact us' %}</a>
+    </div>
+    <div class="d-flex justify-content-center mb-4 mb-md-0 d-md-block col-md-auto mb-2">
+      <ul class="list-inline">
+        {% if PEACHJAM_SETTINGS.facebook_link %}
+          <li class="list-inline-item">
+            <a href="{{ PEACHJAM_SETTINGS.facebook_link }}"
+               target="_blank"
+               rel="noreferrer">
+              <i class="h2 facebook-forecolor bi bi-facebook"></i>
+            </a>
+          </li>
+        {% endif %}
+        {% if PEACHJAM_SETTINGS.twitter_link %}
+          <li class="list-inline-item">
+            <a href="{{ PEACHJAM_SETTINGS.twitter_link }}"
+               target="_blank"
+               rel="noreferrer">
+              <i class="h2 twitter-x-forecolor bi bi-twitter-x"></i>
+            </a>
+          </li>
+        {% endif %}
+        {% if PEACHJAM_SETTINGS.linkedin_link %}
+          <li class="list-inline-item">
+            <a href="{{ PEACHJAM_SETTINGS.linkedin_link }}"
+               target="_blank"
+               rel="noreferrer">
+              <i class="h2 linkedin-forecolor bi bi-linkedin"></i>
+            </a>
+          </li>
+        {% endif %}
+        {% if PEACHJAM_SETTINGS.youtube_link %}
+          <li class="list-inline-item">
+            <a href="{{ PEACHJAM_SETTINGS.youtube_link }}"
+               target="_blank"
+               rel="noreferrer">
+              <i class="h2 youtube-forecolor bi bi-youtube"></i>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
   </div>
-  <div class="d-flex justify-content-center mb-4 mb-md-0 d-md-block col-md-auto mb-2">
-    <ul class="list-inline">
-      {% if PEACHJAM_SETTINGS.facebook_link %}
-        <li class="list-inline-item">
-          <a href="{{ PEACHJAM_SETTINGS.facebook_link }}"
-             target="_blank"
-             rel="noreferrer">
-            <img src="{% static 'images/facebook.svg' %}"
-                 alt="Facebook"
-                 width="40"
-                 height="40"/>
-          </a>
-        </li>
-      {% endif %}
-      {% if PEACHJAM_SETTINGS.twitter_link %}
-        <li class="list-inline-item">
-          <a href="{{ PEACHJAM_SETTINGS.twitter_link }}"
-             target="_blank"
-             rel="noreferrer">
-            <img src="{% static 'images/twitter.svg' %}"
-                 alt="Twitter"
-                 width="40"
-                 height="40"/>
-          </a>
-        </li>
-      {% endif %}
-      {% if PEACHJAM_SETTINGS.linkedin_link %}
-        <li class="list-inline-item">
-          <a href="{{ PEACHJAM_SETTINGS.linkedin_link }}"
-             target="_blank"
-             rel="noreferrer">
-            <img src="{% static 'images/linkedin.svg' %}"
-                 alt="LinkedIn"
-                 width="40"
-                 height="40"/>
-          </a>
-        </li>
-      {% endif %}
-    </ul>
-  </div>
-</div>
+{% endif %}
