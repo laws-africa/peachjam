@@ -110,6 +110,10 @@ footer {
 
 //Extra utility colors
 
+.bg-brand-pale {
+  background-color: transparentize($primary, 0.90);
+}
+
 .facebook-forecolor {
   color: $facebook-color;
 }
