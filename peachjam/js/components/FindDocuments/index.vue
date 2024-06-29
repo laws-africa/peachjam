@@ -542,7 +542,7 @@ export default {
         tabTrigger.show();
       }
 
-      this.search();
+      this.search(false);
     },
 
     suggest (q) {
