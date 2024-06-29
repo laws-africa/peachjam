@@ -20,14 +20,14 @@ main {
 
 // newspaper-like dynamic columns
 .flow-columns {
-  columns: 3 auto;
+  columns: 1;
 
-  @include media-breakpoint-down(lg) {
+  @include media-breakpoint-up(md) {
     columns: 2 auto;
   }
 
-  @include media-breakpoint-down(sm) {
-    columns: 1;
+  @include media-breakpoint-up(lg) {
+    columns: 3 auto;
   }
 
   .flow-columns-group {

@@ -1,15 +1,19 @@
 {% load peachjam i18n %}
 {% if documents %}
-  {% for object in documents %}
-    <a class="mb-2 d-flex"
-       href="{% url 'document_detail' object.expression_frbr_uri|strip_first_character %}">
-      <span class="flex-grow-1">{{ object.title }}</span>
-      <span class="text-nowrap">{{ object.date }}</span>
-    </a>
-  {% endfor %}
+  <table class="doc-table">
+    {% for document in documents %}
+      <tr>
+        <td class="cell-title">
+          <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+          {% include 'peachjam/_labels.html' with labels=document.labels.all %}
+        </td>
+        <td class="cell-date" style="white-space: nowrap;">{{ document.date }}</td>
+      </tr>
+    {% endfor %}
+  </table>
   {% if view_more_url_name %}
-    <a class="mt-3 btn btn-primary" href="{% url view_more_url_name %}">{{ view_more_text }}</a>
+    <a class="btn btn-primary" href="{% url view_more_url_name %}">{{ view_more_text }}</a>
   {% endif %}
 {% else %}
-  <p>{% trans 'No documents found.' %}</p>
+  <p>{% trans 'No recent documents.' %}</p>
 {% endif %}
