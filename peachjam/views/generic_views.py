@@ -133,6 +133,7 @@ class BaseDocumentDetailView(DetailView):
     slug_field = "expression_frbr_uri"
     slug_url_kwarg = "frbr_uri"
     context_object_name = "document"
+    document_diffs_url = "https://services.lawsafrica.com"
 
     def get_object(self, *args, **kwargs):
         return get_object_or_404(
@@ -140,7 +141,9 @@ class BaseDocumentDetailView(DetailView):
         )
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(
+            document_diffs_url=self.document_diffs_url, **kwargs
+        )
 
         # citation links for a document
         doc = get_object_or_404(CoreDocument, pk=self.object.pk)

@@ -26,7 +26,7 @@ class EnrichmentsManager {
     // this is either div.content (for HTML and PDF) or la-akoma-ntoso.content (for AKN)
     this.akn = this.root.querySelector('.content');
 
-    this.docDiffsManager = this.setDocDiffs();
+    this.docDiffsManager = this.setupDocDiffs();
     this.gutterManager = new GutterEnrichmentManager(this.root);
     // @ts-ignore
     // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
@@ -42,11 +42,13 @@ class EnrichmentsManager {
     });
   }
 
-  setDocDiffs () {
+  setupDocDiffs () {
     if (!this.akn || !this.gutter) return null;
     const frbrExpressionUri = this.akn.getAttribute('frbr-expression-uri');
     if (!frbrExpressionUri) return null;
-    return new DocDiffsManager(frbrExpressionUri, this.gutter);
+    return new DocDiffsManager(
+      frbrExpressionUri, this.gutter, this.root.getAttribute('data-diffs-url') || ''
+    );
   }
 
   setupPdfCitationLinks () {
