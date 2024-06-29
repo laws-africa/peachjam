@@ -21,15 +21,19 @@
   <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
 {% endblock %}
 {% block first-column-content %}
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
-    {% trans 'View more judgments' as text %}
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
-  </section>
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
-    {% trans 'View more legislation' as text %}
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
+  <section class="py-3">
+    <div class="row row-cols-1 row-cols-lg-2">
+      <div class="col mb-5">
+        <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
+        {% trans 'View more judgments' as text %}
+        {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
+      </div>
+      <div class="col mb-5">
+        <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
+        {% trans 'View more legislation' as text %}
+        {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
+      </div>
+    </div>
   </section>
 {% endblock %}
 {% block second-column-content %}
