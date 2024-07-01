@@ -20,18 +20,6 @@
   <img src="{% static 'images/jifa.png' %}" alt="JIFA"/>
   <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
 {% endblock %}
-{% block first-column-content %}
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
-    {% trans 'View more judgments' as text %}
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
-  </section>
-  <section class="pb-3 pt-3">
-    <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
-    {% trans 'View more legislation' as text %}
-    {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
-  </section>
-{% endblock %}
 {% block second-column-content %}
   <p class="lead">
     {% blocktrans trimmed %}
@@ -48,20 +36,22 @@
 {% block pocketlaw %}
   {{ block.super }}
   <section class="py-5">
-    <div class="row">
-      <div class="col-sm-3 mb-3">
-        <img src="{% static 'images/concompass-logo.png' %}"
-             alt="Constitution Compass"
-             class="img-fluid"/>
-      </div>
-      <div class="col-sm-9 ps-sm-5">
-        <h2 class="mb-4">Constitution Compass</h2>
-        <p class="lead">
-          The Constitution App for Members of Parliament. Browse, search and understand the South African Constitution and how it applies to everyone. Continuously updated and curated Constitution, plain language guides and case summaries, and Rules of the National Assembly.
-        </p>
-        <a href="https://constitutioncompass.org.za/"
-           class="btn btn-lg btn-primary"
-           target="_blank">Constitution Compass</a>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-3 mb-3">
+          <img src="{% static 'images/concompass-logo.png' %}"
+               alt="Constitution Compass"
+               class="img-fluid"/>
+        </div>
+        <div class="col-sm-9 ps-sm-5">
+          <h2 class="mb-4">Constitution Compass</h2>
+          <p class="lead">
+            The Constitution App for Members of Parliament. Browse, search and understand the South African Constitution and how it applies to everyone. Continuously updated and curated Constitution, plain language guides and case summaries, and Rules of the National Assembly.
+          </p>
+          <a href="https://constitutioncompass.org.za/"
+             class="btn btn-lg btn-primary"
+             target="_blank">Constitution Compass</a>
+        </div>
       </div>
     </div>
   </section>

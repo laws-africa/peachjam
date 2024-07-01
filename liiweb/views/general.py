@@ -19,7 +19,7 @@ class HomePageView(TemplateView):
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["recent_judgments"] = Judgment.objects.exclude(
             published=False
-        ).order_by("-date")[:5]
+        ).order_by("-date")[:10]
         context["recent_legislation"] = Legislation.objects.exclude(
             published=False
         ).order_by("-date")[:10]

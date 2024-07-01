@@ -1,25 +1,23 @@
 {% load i18n peachjam %}
-<div>
-  {% if taxonomies|length > 0 %}
-    <div class="row">
-      {% for taxonomy in taxonomies %}
-        {% if taxonomy.children|length > 0 %}
-          <div class="col-12 col-lg-6 mb-4">
-            <div class="card">
-              <div class="card-header">{{ taxonomy.data.name }}</div>
-              <ul class="list-group list-group-flush">
-                {% for child in taxonomy.children %}
-                  <li class="list-group-item">
-                    <a href="{% url taxonomy_url taxonomy.data.slug child.data.slug %}">{{ child.data.name }}</a>
-                  </li>
-                {% endfor %}
-              </ul>
-            </div>
+{% if taxonomies|length > 0 %}
+  <div class="flow-columns">
+    {% for taxonomy in taxonomies %}
+      {% if taxonomy.children|length > 0 %}
+        <div class="flow-columns-group mb-4">
+          <div class="card">
+            <h5 class="card-header">{{ taxonomy.data.name }}</h5>
+            <ul class="list-group list-group-flush">
+              {% for child in taxonomy.children %}
+                <li class="list-group-item">
+                  <a href="{% url taxonomy_url taxonomy.data.slug child.data.slug %}">{{ child.data.name }}</a>
+                </li>
+              {% endfor %}
+            </ul>
           </div>
-        {% endif %}
-      {% endfor %}
-    </div>
-  {% else %}
-    <div>{% trans 'No taxonomies found' %}</div>
-  {% endif %}
-</div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div>{% trans 'No taxonomies found' %}</div>
+{% endif %}
