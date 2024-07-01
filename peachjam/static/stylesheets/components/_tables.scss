@@ -22,7 +22,7 @@ table.doc-table {
 
   // specific cell behaviour
   .cell-title {
-    width: 60%;
+    width: 75%;
   }
 
   .cell-date {
@@ -152,5 +152,11 @@ table.doc-table.doc-table--toggle {
         padding-left: 0;
       }
     }
+  }
+}
+
+table.doc-table.doc-table--citation {
+  .cell-title {
+    width: 60%;
   }
 }

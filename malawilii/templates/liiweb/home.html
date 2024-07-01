@@ -1,11 +1,12 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
 {% block hero-logos %}
-  <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
-  <img src="{% static 'images/gju.jpg' %}" alt="gju-logo"/>
-  <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
-  <img src="{% static 'images/ned-logo.png' %}" alt="ned-logo"/>
-  <img src="{% static 'images/indigo-logo.jpg' %}" alt="indigo-logo"/>
+  <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
+  <img src="{% static 'images/gju.jpg' %}" alt="GJU"/>
+  <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
+  <img src="{% static 'images/ned-logo.png' %}" alt="NED"/>
+  <img src="{% static 'images/indigo-trust-logo.jpg' %}"
+       alt="The Indigo Trust"/>
 {% endblock %}
 {% block hero-headings %}
   <h1 class="mb-4">{% trans 'Welcome to Malawi Legal Information Institute' %}</h1>
