@@ -168,7 +168,7 @@ CONTRIBUTORS = {
         {
             "name": "The Indigo Trust",
             "url": "https://indigotrust.org.uk/",
-            "img": "indigo-trust-logo.png",
+            "img": "indigo-trust-logo.jpg",
         },
         {
             "name": "UCT Government Publications",
