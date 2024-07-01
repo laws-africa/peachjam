@@ -28,15 +28,15 @@ jobs:
           --health-retries 3
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python Environment
       uses: actions/setup-python@v2
       with:
         python-version: "3.8"
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '18'
 
     - name: Install dependencies
       run: |

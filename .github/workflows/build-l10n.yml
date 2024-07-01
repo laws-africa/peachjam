@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Compile updated translations and commit changes
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
@@ -32,7 +32,7 @@ jobs:
         run: python manage.py compilemessages
 
       - name: Push
-        uses: EndBug/add-and-commit@v7
+        uses: EndBug/add-and-commit@v9
         with:
           add: '*/locale/*/LC_MESSAGES/*.mo'
           message: 'Update compiled translations'
