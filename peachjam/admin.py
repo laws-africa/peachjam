@@ -1072,6 +1072,7 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
             "supplement",
             "supplement_number",
             "publication",
+            "special",
         ]
     )
     resource_class = GazetteResource

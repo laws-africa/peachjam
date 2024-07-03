@@ -23,6 +23,7 @@ class Gazette(CoreDocument):
     volume_number = models.CharField(
         _("volume number"), max_length=512, null=True, blank=True
     )
+    special = models.BooleanField(_("special"), default=False)
 
     class Meta(CoreDocument.Meta):
         verbose_name = _("gazette")
