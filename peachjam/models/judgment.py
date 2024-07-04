@@ -180,6 +180,7 @@ class CourtRegistry(models.Model):
     code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
 
     class Meta:
+        ordering = ("name",)
         verbose_name = _("court registry")
         verbose_name_plural = _("court registries")
         unique_together = ("court", "name")
