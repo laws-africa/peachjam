@@ -1,5 +1,6 @@
 from functools import cached_property
 from itertools import groupby
+from math import ceil
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -118,10 +119,16 @@ class CourtDetailView(FilteredJudgmentView):
         context = super().get_context_data(**kwargs)
         context["court"] = self.court
         context["registry_label_plural"] = CourtRegistry.model_label_plural
-        context["registries"] = self.court.registries.exclude(
+        context["registries"] = registries = self.court.registries.exclude(
             judgments__isnull=True
         )  # display registries with judgments only
-        context["registry_groups"] = list(chunks(context["registries"], 2))
+        # split the list in the middle to have two columns and preserve ordering
+        split_index = ceil(registries.count() / 2)
+        context["registry_groups"] = [
+            registries[:split_index],
+            registries[split_index:],
+        ]
+
         context["all_years_url"] = self.court.get_absolute_url()
         return context
 
