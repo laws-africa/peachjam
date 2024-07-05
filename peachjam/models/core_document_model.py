@@ -700,7 +700,10 @@ def file_location(instance, filename):
     pk = instance.document.pk
     folder = instance.SAVE_FOLDER
     filename = os.path.basename(filename)
-    return f"media/{doc_type}/{pk}/{folder}/{filename}"
+    # generate a random nonce so that we never re-use an existing filename, so that we can guarantee that
+    # we don't overwrite it (which makes it easier to cache files)
+    nonce = os.urandom(8).hex()
+    return f"media/{doc_type}/{pk}/{folder}/{nonce}/{filename}"
 
 
 class AttachmentAbstractModel(models.Model):
