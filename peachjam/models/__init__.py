@@ -2,6 +2,7 @@
 from .article import *
 from .author import *
 from .citations import *
+from .collection import *
 from .core_document_model import *
 from .external_document import *
 from .gazette import *

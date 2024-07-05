@@ -1,0 +1,11 @@
+{% load static i18n %}
+<div class="modal-header">
+  <h5 id="SaveDocumentModalTitle" class="modal-title">{% trans 'Where do you want to save your document?' %}</h5>
+  <button type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"/>
+</div>
+<div class="modal-body">
+  <div id="SaveDocumentModal" data-vue-component="SaveDocumentModal"></div>
+</div>

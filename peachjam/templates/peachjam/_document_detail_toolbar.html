@@ -9,6 +9,14 @@
     {% endif %}
   {% endblock %}
   {% block download-btn %}
+    <button class="btn btn-outline-primary btn-shrink-sm ms-2"
+            data-bs-toggle="modal"
+            data-bs-target="#documentProblemModal"
+            hx-get="/collections/"
+            hx-target="#documentDetailModal"
+            hx-trigger="click">
+      Save document
+    </button>
     {% if document.source_file %}
       <div class="btn-group dropdown-center ms-2">
         <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"

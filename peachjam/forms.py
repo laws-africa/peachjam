@@ -2,6 +2,8 @@ import copy
 
 from django import forms
 from django.conf import settings
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.core.files import File
 from django.core.mail import send_mail
 from django.http import QueryDict
@@ -231,3 +233,11 @@ class DocumentProblemForm(forms.Form):
             html_message=html,
             fail_silently=False,
         )
+
+
+class SignUpForm(UserCreationForm):
+    email = forms.EmailField()
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password1", "password2"]

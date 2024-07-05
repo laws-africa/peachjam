@@ -2,7 +2,7 @@ import itertools
 
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.views.generic import DetailView, ListView, View
 from lxml import html
 
@@ -309,6 +309,9 @@ class BaseDocumentDetailView(DetailView):
                 )
 
         document.content_html = html.tostring(root, encoding="unicode")
+
+    def render_collections(self, request):
+        return render(request, "collections_list.html")
 
 
 class CSRFTokenView(View):

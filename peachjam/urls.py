@@ -36,6 +36,7 @@ from peachjam.views import (
     ArticleYearArchiveView,
     AuthorDetailView,
     BookListView,
+    CollectionListView,
     CourtClassDetailView,
     CourtClassMonthView,
     CourtClassYearView,
@@ -90,6 +91,7 @@ urlpatterns = [
         AboutPageView.as_view(),
         name="about",
     ),
+    path("collections/", CollectionListView.as_view(), name="collections"),
     # listing views
     path(
         "authors/<slug:code>/",

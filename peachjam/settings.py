@@ -146,8 +146,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 # admins must create accounts
 ACCOUNT_SIGNUP_ENABLED = False
-# sign in with email addresses
-ACCOUNT_AUTHENTICATION_METHOD = "email"
 # email addresses are required for new accounts
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_PRESERVE_USERNAME_CASING = False
@@ -156,6 +154,7 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home_page"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 
 # social logins
 SOCIALACCOUNT_PROVIDERS = {
