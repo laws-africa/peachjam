@@ -730,7 +730,10 @@ class AttachmentAbstractModel(models.Model):
 
     def delete(self, *args, **kwargs):
         if self.file:
-            self.file.delete(False)
+            try:
+                self.file.delete(False)
+            except:  # noqa
+                pass
         return super().delete(*args, **kwargs)
 
 
@@ -817,7 +820,7 @@ class SourceFile(AttachmentAbstractModel):
     def set_download_filename(self):
         """For S3-backed storages using a custom domain, set the content-disposition header to a filename suitable
         for download."""
-        if getattr(self.file.storage, "custom_domain", None):
+        if not self.source_url and getattr(self.file.storage, "custom_domain", None):
             metadata = self.file.storage.get_object_parameters(self.file.name)
             metadata[
                 "ContentDisposition"
