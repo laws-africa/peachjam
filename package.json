@@ -18,7 +18,7 @@
   "homepage": "https://github.com/laws-africa/peach-jam#readme",
   "devDependencies": {
     "@lawsafrica/indigo-akn": "^5.3.0",
-    "@lawsafrica/law-widgets": "^2.0.1",
+    "@lawsafrica/law-widgets": "^2.2.0",
     "@types/bootstrap": "^5.2.6",
     "@types/lodash": "^4.14.180",
     "@types/mark.js": "^8.11.7",
