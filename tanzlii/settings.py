@@ -21,3 +21,12 @@ LANGUAGES = [
     ("en", _("English")),
     ("sw", _("Swahili")),
 ]
+
+
+if not DEBUG:  # noqa
+    # Serve tanzlii-media files from CDN
+    DYNAMIC_STORAGE["PREFIXES"]["s3"]["buckets"] = {  # noqa
+        "tanzlii-media": {
+            "custom_domain": "media.tanzlii.org",
+        }
+    }
