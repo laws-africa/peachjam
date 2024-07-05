@@ -102,7 +102,7 @@ class DocumentSourceView(DetailView):
     def make_response(self, f, content_type, fname):
         file_bytes = f.read()
         response = HttpResponse(file_bytes, content_type=content_type)
-        response["Content-Disposition"] = f"inline; filename={fname}"
+        response["Content-Disposition"] = f"attachment; filename={fname}"
         response["Content-Length"] = str(len(file_bytes))
         return response
 
