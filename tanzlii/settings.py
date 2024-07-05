@@ -24,9 +24,13 @@ LANGUAGES = [
 
 
 if not DEBUG:  # noqa
-    # Serve tanzlii-media files from CDN
     DYNAMIC_STORAGE["PREFIXES"]["s3"]["buckets"] = {  # noqa
         "tanzlii-media": {
+            # Serve tanzlii-media files from CDN
             "custom_domain": "media.tanzlii.org",
+            # Set Cache-Control header to 1 year
+            "object_parameters": {
+                "CacheControl": "max-age=31536000",
+            },
         }
     }
