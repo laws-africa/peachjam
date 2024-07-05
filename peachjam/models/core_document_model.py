@@ -728,6 +728,11 @@ class AttachmentAbstractModel(models.Model):
             self.mimetype = magic.from_buffer(self.file.read(), mime=True)
         return super().save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete(False)
+        return super().delete(*args, **kwargs)
+
 
 class Image(AttachmentAbstractModel):
     SAVE_FOLDER = "images"

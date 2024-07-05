@@ -532,6 +532,8 @@ class DocumentAdmin(BaseAdmin):
 
         if change:
             # the source file needs to update its filename to take changes into account
+            # refresh, because the source file may have been deleted
+            form.instance.refresh_from_db()
             sf = getattr(form.instance, "source_file", None)
             if sf:
                 sf.set_download_filename()
