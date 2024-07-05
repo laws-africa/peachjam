@@ -24,13 +24,7 @@ LANGUAGES = [
 
 
 if not DEBUG:  # noqa
-    DYNAMIC_STORAGE["PREFIXES"]["s3"]["buckets"] = {  # noqa
-        "tanzlii-media": {
-            # Serve tanzlii-media files from CDN
-            "custom_domain": "media.tanzlii.org",
-            # Set Cache-Control header to 1 year
-            "object_parameters": {
-                "CacheControl": "max-age=31536000",
-            },
-        }
-    }
+    # Tanzlii media files are stored on S3 and served via a Cloudflare CDN (via copying to R2).
+    # We can therefore set long-lived cache headers and serve them from a custom domain.
+    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=31536000"}
+    AWS_S3_CUSTOM_DOMAIN = "media.tanzlii.org"

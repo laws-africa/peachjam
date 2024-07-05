@@ -530,6 +530,12 @@ class DocumentAdmin(BaseAdmin):
         super().save_related(request, form, formsets, change)
         form.instance.save()
 
+        if change:
+            # the source file needs to update its filename to take changes into account
+            sf = getattr(form.instance, "source_file", None)
+            if sf:
+                sf.set_download_filename()
+
     def get_urls(self):
         return [
             path(

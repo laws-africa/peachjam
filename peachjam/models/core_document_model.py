@@ -767,7 +767,6 @@ class SourceFile(AttachmentAbstractModel):
     source_url = models.URLField(
         _("source URL"), max_length=2048, null=True, blank=True
     )
-
     file_as_pdf = models.FileField(
         _("file as pdf"),
         upload_to=file_location,
@@ -809,6 +808,26 @@ class SourceFile(AttachmentAbstractModel):
         ext = ext or os.path.splitext(self.filename)[1]
         title = re.sub(r"[^a-zA-Z0-9() ]", "", self.document.title)
         return title + ext
+
+    def set_download_filename(self):
+        """For S3-backed storages using a custom domain, set the content-disposition header to a filename suitable
+        for download."""
+        if getattr(self.file.storage, "custom_domain", None):
+            metadata = self.file.storage.get_object_parameters(self.file.name)
+            metadata[
+                "ContentDisposition"
+            ] = f'attachment; filename="{self.filename_for_download()}"'
+            src = {"Bucket": self.file.storage.bucket_name, "Key": self.file.name}
+            self.file.storage.connection.meta.client.copy_object(
+                CopySource=src, MetadataDirective="REPLACE", **src, **metadata
+            )
+
+    def save(self, *args, **kwargs):
+        pk = self.pk
+        super().save(*args, **kwargs)
+        if not pk:
+            # first save, set the download filename
+            self.set_download_filename()
 
 
 class AttachedFileNature(models.Model):
