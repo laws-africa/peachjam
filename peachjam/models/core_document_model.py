@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import re
 import shutil
@@ -38,6 +39,8 @@ from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
 from peachjam.xmlutils import parse_html_str
+
+log = logging.getLogger(__name__)
 
 
 class Label(models.Model):
@@ -732,8 +735,8 @@ class AttachmentAbstractModel(models.Model):
         if self.file:
             try:
                 self.file.delete(False)
-            except:  # noqa
-                pass
+            except Exception as e:
+                log.warning(f"Ignoring error while deleting {self.file}", exc_info=e)
         return super().delete(*args, **kwargs)
 
 
