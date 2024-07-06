@@ -161,6 +161,11 @@ class AttachmentFormMixin:
     def save(self, commit=True):
         # clear these for changed files so they get updated
         if "file" in self.changed_data:
+            # get the old file and make sure it's deleted
+            if self.instance.pk:
+                existing = self.instance.__class__.objects.get(pk=self.instance.pk)
+                if existing.file:
+                    existing.file.delete(False)
             self.instance.size = None
             self.instance.mimetype = None
             self.instance.filename = self.instance.file.name

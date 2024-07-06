@@ -1,4 +1,5 @@
 import datetime
+import re
 import unittest.util
 from unittest.mock import ANY, Mock, call
 
@@ -13,6 +14,17 @@ from peachjam.storage import DynamicS3Boto3Storage
 # don't truncate diff strings
 # see https://stackoverflow.com/questions/43842675/how-to-prevent-truncating-of-string-in-unit-test-python
 unittest.util._MAX_LENGTH = 999999999
+
+
+class Pattern:
+    def __init__(self, p):
+        self.p = p if isinstance(p, re.Match) else re.compile(p)
+
+    def __eq__(self, other):
+        return self.p.match(other)
+
+    def __neq__(self, other):
+        return not self.p.match(other)
 
 
 class TestableStorage(DynamicS3Boto3Storage):
@@ -50,20 +62,22 @@ class DynamicS3StorageTestCase(TestCase):
             [
                 call.Bucket("fake-bucket"),
                 call.Bucket().Object(
-                    f"media/core_document/{self.doc.pk}/source_file/test.txt"
+                    Pattern(
+                        rf"media/core_document/{self.doc.pk}/source_file/[^/]+/test\.txt"
+                    )
                 ),
                 call.Bucket().Object().upload_fileobj(ANY, ExtraArgs=ANY, Config=ANY),
             ],
             self.mock.mock_calls,
         )
 
-        self.assertEqual(
-            [f"s3:fake-bucket:media/core_document/{self.doc.pk}/source_file/test.txt"],
-            list(SourceFile.objects.filter(pk=sf.pk).values_list("file", flat=True)),
+        self.assertRegex(
+            list(SourceFile.objects.filter(pk=sf.pk).values_list("file", flat=True))[0],
+            rf"s3:fake-bucket:media/core_document/{self.doc.pk}/source_file/[^/]+/test\.txt",
         )
-        self.assertEqual(
-            f"s3:fake-bucket:media/core_document/{self.doc.pk}/source_file/test.txt",
+        self.assertRegex(
             sf.file.get_raw_value(),
+            rf"s3:fake-bucket:media/core_document/{self.doc.pk}/source_file/[^/]+/test\.txt",
         )
 
         self.mock.reset_mock()
@@ -73,7 +87,9 @@ class DynamicS3StorageTestCase(TestCase):
             [
                 call.Bucket("fake-bucket"),
                 call.Bucket().Object(
-                    f"media/core_document/{self.doc.pk}/source_file/test.txt"
+                    Pattern(
+                        rf"media/core_document/{self.doc.pk}/source_file/[^/]+/test\.txt"
+                    )
                 ),
                 call.Bucket().Object().load(),
                 call.Bucket().Object().download_fileobj(ANY, ExtraArgs=ANY, Config=ANY),
@@ -89,7 +105,9 @@ class DynamicS3StorageTestCase(TestCase):
             [
                 call.Bucket("fake-bucket"),
                 call.Bucket().Object(
-                    f"media/core_document/{self.doc.pk}/source_file/test.txt"
+                    Pattern(
+                        rf"media/core_document/{self.doc.pk}/source_file/[^/]+/test\.txt"
+                    )
                 ),
                 call.Bucket().Object().load(),
                 call.Bucket().Object().download_fileobj(ANY, ExtraArgs=ANY, Config=ANY),
@@ -105,7 +123,9 @@ class DynamicS3StorageTestCase(TestCase):
             [
                 call.Bucket("fake-bucket"),
                 call.Bucket().Object(
-                    f"media/core_document/{self.doc.pk}/source_file/test.txt"
+                    Pattern(
+                        rf"media/core_document/{self.doc.pk}/source_file/[^/]+/test\.txt"
+                    )
                 ),
                 call.Bucket().Object().content_length(),
             ],
