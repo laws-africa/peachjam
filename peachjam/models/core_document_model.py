@@ -23,6 +23,7 @@ from docpipe.soffice import soffice_convert
 from docpipe.xmlutils import unwrap_element
 from languages_plus.models import Language
 from lxml import html
+from lxml.etree import ParserError
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from polymorphic.query import PolymorphicQuerySet
@@ -479,6 +480,23 @@ class CoreDocument(PolymorphicModel):
         self.pre_save()
         super().full_clean(*args, **kwargs)
 
+    def clean_content_html(self, content_html):
+        """Ensure that content_html is not just whitespace HTML. Returns the cleaned value."""
+        if not content_html:
+            return None
+
+        # return None if the HTML doesn't have any content
+        try:
+            root = parse_html_str(content_html)
+            text = "".join(root.itertext()).strip()
+            text = re.sub(r"\s", "", text)
+            if not text:
+                return None
+        except (ValueError, ParserError):
+            return None
+
+        return content_html
+
     def clean(self):
         super().clean()
 
@@ -590,7 +608,7 @@ class CoreDocument(PolymorphicModel):
 
         if self.content_html and not self.content_html_is_akn:
             # delete existing citations in html
-            root = html.fromstring(self.content_html)
+            root = parse_html_str(self.content_html)
             deleted = False
             for a in root.xpath('//a[starts-with(@href, "/akn/")]'):
                 unwrap_element(a)
@@ -612,7 +630,7 @@ class CoreDocument(PolymorphicModel):
             context = PipelineContext(word_pipeline)
             context.source_file = self.source_file.file
             word_pipeline(context)
-            self.content_html = context.html_text
+            self.content_html = self.clean_content_html(context.html_text)
 
             for img in self.images.all():
                 img.delete()
