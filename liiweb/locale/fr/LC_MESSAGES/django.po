@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-06 15:17+0200\n"
-"PO-Revision-Date: 2023-09-19 11:54\n"
+"PO-Revision-Date: 2024-06-06 13:40\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -19,30 +19,31 @@ msgstr ""
 
 #: templates/liiweb/_donate_call_to_action.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Donate to %(APP_NAME)s\n"
 "          "
-msgstr ""
+msgstr "\n"
+"            Faites un don à %(APP_NAME)s\n"
+"          "
 
 #: templates/liiweb/_donate_call_to_action.html:12
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            %(APP_NAME)s is an independent, self-funded organisation and needs your support.\n"
 "          "
-msgstr ""
+msgstr "\n"
+"            %(APP_NAME)s est une organisation indépendante et autofinancée et a besoin de votre soutien.\n"
+"          "
 
 #: templates/liiweb/_donate_call_to_action.html:18
 #: templates/liiweb/donate.html:4
 msgid "Donate"
-msgstr ""
+msgstr "Faire un don"
 
 #: templates/liiweb/donate.html:8
-#, fuzzy, python-format
-#| msgid "Search %(APP_NAME)s"
+#, python-format
 msgid "Donate to %(APP_NAME)s"
-msgstr "Rechercher dans %(APP_NAME)s"
+msgstr "Faire un don à %(APP_NAME)s"
 
 #: templates/liiweb/home.html:4
 msgid "Home"
@@ -78,16 +79,12 @@ msgid "View more legislation"
 msgstr "Voir plus de législation"
 
 #: templates/liiweb/home.html:100
-#, fuzzy
-#| msgid "Recent Judgments"
 msgid "Recent Gazettes"
-msgstr "Jugements récents"
+msgstr "Gazettes récentes"
 
 #: templates/liiweb/home.html:102
-#, fuzzy
-#| msgid "View more articles"
 msgid "View more gazettes"
-msgstr "Voir plus d'articles"
+msgstr "Voir plus de gazettes"
 
 #: templates/liiweb/home.html:107
 msgid "Courts"
@@ -125,16 +122,12 @@ msgid "Current legislation"
 msgstr "Législation en vigueur"
 
 #: templates/liiweb/legislation_list.html:33
-#, fuzzy
-#| msgid "Recent Legislation"
 msgid "Recent legislation"
 msgstr "Législation récente"
 
 #: templates/liiweb/legislation_list.html:47
-#, fuzzy
-#| msgid "Repealed legislation"
 msgid "Uncommenced legislation"
-msgstr "Législation abrogée"
+msgstr "Législation non encore adoptée"
 
 #: templates/liiweb/legislation_list.html:55
 msgid "Repealed legislation"
@@ -170,14 +163,12 @@ msgid "Terms of Use"
 msgstr "Termes et conditions d'utilisation"
 
 #: templates/peachjam/_footer.html:28
-#, fuzzy
-#| msgid "About"
 msgid "About us"
-msgstr "À propos"
+msgstr "À propos de nous"
 
 #: templates/peachjam/_footer.html:31
 msgid "Contact us"
-msgstr ""
+msgstr "Contactez-nous"
 
 #: templates/peachjam/_footer.html:37
 msgid "Our partners"
@@ -196,5 +187,3 @@ msgstr "Jugements"
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Législation"
 
-#~ msgid "Facebook"
-#~ msgstr "Facebook"
