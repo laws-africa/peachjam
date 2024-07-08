@@ -129,6 +129,10 @@ class SearchableDocument(Document):
         ("nature", "name"),
     ]
 
+    # ES's max request size is 100mb, so limit the size of the text fields to a little below that
+    # 80 MB
+    MAX_TEXT_LENGTH = 80 * 1024 * 1024
+
     def should_index_object(self, obj):
         if isinstance(obj, ExternalDocument) or not obj.published:
             return False
@@ -233,7 +237,13 @@ class SearchableDocument(Document):
         if instance.content_html and (
             not instance.content_html_is_akn or not instance.toc_json
         ):
-            return instance.get_content_as_text()
+            text = instance.get_content_as_text()
+            if text and len(text) > self.MAX_TEXT_LENGTH:
+                log.warning(
+                    f"Limiting text content of {instance} to {self.MAX_TEXT_LENGTH} (length is {len(text)})"
+                )
+                text = text[: self.MAX_TEXT_LENGTH]
+            return text
 
     def prepare_ranking(self, instance):
         if instance.work.ranking > 0:
@@ -272,6 +282,11 @@ class SearchableDocument(Document):
         """Text content of pages extracted from PDF."""
         if not instance.content_html:
             text = instance.get_content_as_text()
+            if text and len(text) > self.MAX_TEXT_LENGTH:
+                log.warning(
+                    f"Limiting text content of {instance} to {self.MAX_TEXT_LENGTH} (length is {len(text)})"
+                )
+                text = text[: self.MAX_TEXT_LENGTH]
             page_texts = text.split("\x0c")
             pages = []
             for i, page in enumerate(page_texts):
