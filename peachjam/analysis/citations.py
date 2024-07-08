@@ -5,8 +5,10 @@ import lxml.html
 import requests
 from django.conf import settings
 from docpipe.matchers import ExtractedCitation
+from lxml.etree import ParseError
 
 from peachjam.models import CitationLink
+from peachjam.xmlutils import parse_html_str
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +30,15 @@ class CitationAnalyser:
             return self.extract_citations_from_source_file(document)
 
     def extract_citations_from_html(self, document):
-        html = lxml.html.fromstring(document.content_html)
+        try:
+            html = parse_html_str(document.content_html)
+        except ParseError as e:
+            log.warning(
+                f"Could not parse HTML for document {document.expression_uri()}: {document.content_html}",
+                exc_info=e,
+            )
+            return False
+
         for matcher in self.matchers:
             # the matcher can either manipulate the html, or return a new tree
             res = matcher().markup_html_matches(document.expression_uri(), html)
