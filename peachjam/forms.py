@@ -32,6 +32,12 @@ class NewDocumentFormMixin:
         super().__init__(*args, **kwargs)
         self.fields["upload_file"] = forms.FileField(required=False)
 
+    def clean_upload_file(self):
+        if self.cleaned_data.get("upload_file"):
+            self.cleaned_data["upload_file"].name = clean_filename(
+                self.cleaned_data["upload_file"].name
+            )
+
     def _save_m2m(self):
         super()._save_m2m()
         if self.cleaned_data.get("upload_file"):
