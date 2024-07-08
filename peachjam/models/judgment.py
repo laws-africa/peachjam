@@ -366,7 +366,8 @@ class Judgment(CoreDocument):
         return super().generate_work_frbr_uri()
 
     def clean(self):
-        self.assign_mnc()
+        if self.auto_assign_details:
+            self.assign_mnc()
         super().clean()
 
     def assign_title(self):
@@ -431,8 +432,8 @@ class Judgment(CoreDocument):
                 self.locality = self.court.locality
 
         self.doc_type = "judgment"
-        self.assign_mnc()
         if self.auto_assign_details:
+            self.assign_mnc()
             self.assign_title()
         super().pre_save()
 
