@@ -342,9 +342,14 @@ class IndigoAdapter(Adapter):
             for result in image_list:
                 if result["mime_type"].startswith("image/"):
                     with NamedTemporaryFile() as file:
-                        r = self.client_get(result["url"])
+                        try:
+                            r = self.client_get(result["url"])
+                        except requests.HTTPError as error:
+                            if error.response.status_code == 404:
+                                continue
+                            else:
+                                raise error
                         file.write(r.content)
-
                         Image.objects.create(
                             document=created_document,
                             file=File(file, name=result["filename"]),
@@ -491,7 +496,13 @@ class IndigoAdapter(Adapter):
         logger.info(f"Downloading source file from {url}")
 
         with NamedTemporaryFile() as f:
-            r = self.client_get(url)
+            try:
+                r = self.client_get(url)
+            except requests.HTTPError as error:
+                if error.response.status_code == 404:
+                    return
+                else:
+                    raise error
             try:
                 # sometimes this header is not present
                 d = r.headers["Content-Disposition"]
