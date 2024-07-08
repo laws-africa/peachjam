@@ -323,7 +323,8 @@ class DocumentForm(forms.ModelForm):
         # prevent CKEditor-based editing of AKN HTML
         if self.instance.content_html_is_akn:
             return self.instance.content_html
-        return self.cleaned_data["content_html"]
+        # ensure html is clean
+        return self.instance.clean_content_html(self.cleaned_data["content_html"])
 
 
 class AttachedFilesInline(BaseAttachmentFileInline):
