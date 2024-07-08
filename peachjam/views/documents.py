@@ -88,6 +88,10 @@ class DocumentSourceView(DetailView):
             if source_file.source_url:
                 return redirect(source_file.source_url)
 
+            if getattr(source_file.file.storage, "custom_domain", None):
+                # use the storage's custom domain to serve the file
+                return redirect(source_file.file.url)
+
             return self.make_response(
                 source_file.file.open(),
                 source_file.mimetype,
@@ -98,7 +102,7 @@ class DocumentSourceView(DetailView):
     def make_response(self, f, content_type, fname):
         file_bytes = f.read()
         response = HttpResponse(file_bytes, content_type=content_type)
-        response["Content-Disposition"] = f"inline; filename={fname}"
+        response["Content-Disposition"] = f"attachment; filename={fname}"
         response["Content-Length"] = str(len(file_bytes))
         return response
 
@@ -111,6 +115,10 @@ class DocumentSourcePDFView(DocumentSourceView):
             # if the source file is remote and a pdf, just redirect there
             if source_file.source_url and source_file.mimetype == "application/pdf":
                 return redirect(source_file.source_url)
+
+            if getattr(source_file.file.storage, "custom_domain", None):
+                # use the storage's custom domain to serve the file
+                return redirect(source_file.file.url)
 
             pdf = source_file.as_pdf()
             if pdf:
@@ -135,6 +143,11 @@ class DocumentMediaView(DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         img = get_object_or_404(self.object.images, filename=self.kwargs["filename"])
+
+        if getattr(img.file.storage, "custom_domain", None):
+            # use the storage's custom domain to serve the file
+            return redirect(img.file.url)
+
         file = img.file.open()
         file_bytes = file.read()
         response = HttpResponse(file_bytes, content_type=img.mimetype)

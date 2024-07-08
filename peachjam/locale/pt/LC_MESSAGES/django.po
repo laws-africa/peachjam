@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-06 15:17+0200\n"
-"PO-Revision-Date: 2023-09-28 16:16\n"
+"PO-Revision-Date: 2024-06-06 13:40\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -42,28 +42,20 @@ msgid "Advanced"
 msgstr "Avançado"
 
 #: admin.py:622
-#, fuzzy
-#| msgid "Articles published."
 msgid "Documents published."
-msgstr "Artigos publicados."
+msgstr "Documentos publicados."
 
 #: admin.py:624
-#, fuzzy
-#| msgid "Publish selected articles"
 msgid "Publish selected documents"
-msgstr "Publique artigos selecionados"
+msgstr "Publicar documentos selecionados"
 
 #: admin.py:628
-#, fuzzy
-#| msgid "Articles unpublished."
 msgid "Documents unpublished."
-msgstr "Artigos não publicados."
+msgstr "Documentos não publicados."
 
 #: admin.py:630
-#, fuzzy
-#| msgid "Unpublish selected articles"
 msgid "Unpublish selected documents"
-msgstr "Cancelar publicação de artigos selecionados"
+msgstr "Cancelar publicação de documentos selecionados"
 
 #: admin.py:710 models/judgment.py:463 models/judgment.py:499
 msgid "case number"
@@ -74,10 +66,8 @@ msgid "case numbers"
 msgstr "números de casos"
 
 #: admin.py:719 admin.py:720 models/judgment.py:523
-#, fuzzy
-#| msgid "case summary"
 msgid "case history"
-msgstr "resumo do caso"
+msgstr "histórico de caso"
 
 #: admin.py:740 models/judgment.py:37 models/judgment.py:210
 msgid "judge"
@@ -89,24 +79,20 @@ msgid "judges"
 msgstr "juízes"
 
 #: admin.py:747
-#, fuzzy
-#| msgid "No courts found."
 msgid "lower court judge"
-msgstr "Não foram encontrados tribunais."
+msgstr "juiz de primeira instância"
 
 #: admin.py:748 models/judgment.py:253
 msgid "lower court judges"
-msgstr ""
+msgstr "juízes de primeira instância"
 
 #: admin.py:903
 msgid "Refreshing content in the background."
 msgstr "Atualizando o conteúdo em segundo plano."
 
 #: admin.py:906
-#, fuzzy
-#| msgid "Refresh content selected ingestors"
 msgid "Refresh content for selected ingestors"
-msgstr "Atualizar os ingeridores selecionados de conteúdo"
+msgstr "Atualizar conteúdo para usuários selecionados"
 
 #: admin.py:954
 msgid "Articles published."
@@ -125,10 +111,8 @@ msgid "Unpublish selected articles"
 msgstr "Cancelar publicação de artigos selecionados"
 
 #: forms.py:221
-#, fuzzy
-#| msgid "Document problem reported on %(app_name)s"
 msgid "Document problem reported"
-msgstr "Problema no documento relatado em %(app_name)s"
+msgstr "Problema no documento relatado"
 
 #: models/article.py:21 models/core_document_model.py:334
 #: models/judgment.py:519
@@ -364,14 +348,12 @@ msgid "ranking"
 msgstr "classificação"
 
 #: models/core_document_model.py:173
-#, fuzzy
-#| msgid "subject work"
 msgid "number of cited works"
-msgstr "assunto trabalho"
+msgstr "número de trabalhos citados"
 
 #: models/core_document_model.py:175
 msgid "number of incoming citations"
-msgstr ""
+msgstr "número de citações recebidas"
 
 #: models/core_document_model.py:178 models/core_document_model.py:323
 msgid "work"
@@ -459,7 +441,7 @@ msgstr "Permitir que este documento seja indexado por robôs mecanismos de busca
 
 #: models/core_document_model.py:443
 msgid "Is this document published and visible on the website?"
-msgstr ""
+msgstr "Este documento está publicado e visível no site?"
 
 #: models/core_document_model.py:484
 msgid "You cannot set a future date for the document"
@@ -551,38 +533,32 @@ msgid "document contents"
 msgstr "conteúdo documento"
 
 #: models/gazette.py:9
-#, fuzzy
-#| msgid "legislation"
 msgid "publication"
-msgstr "legislação"
+msgstr "publicação"
 
 #: models/gazette.py:12
 msgid "sub publication"
-msgstr ""
+msgstr "subpublicação"
 
 #: models/gazette.py:14
 msgid "supplement"
-msgstr ""
+msgstr "suplemento"
 
 #: models/gazette.py:16
-#, fuzzy
-#| msgid "case number"
 msgid "supplement number"
-msgstr "número do processo"
+msgstr "número do suplemento"
 
 #: models/gazette.py:18
 msgid "part"
-msgstr ""
+msgstr "papel"
 
 #: models/gazette.py:21
 msgid "key"
-msgstr ""
+msgstr "chave"
 
 #: models/gazette.py:24
-#, fuzzy
-#| msgid "case number"
 msgid "volume number"
-msgstr "número do processo"
+msgstr "número do volume"
 
 #: models/gazette.py:28
 msgid "gazette"
@@ -677,16 +653,12 @@ msgid "order outcomes"
 msgstr "resultados de pedidos"
 
 #: models/judgment.py:67 models/judgment.py:513
-#, fuzzy
-#| msgid "order outcome"
 msgid "outcome"
-msgstr "resultado do pedido"
+msgstr "resultado"
 
 #: models/judgment.py:68
-#, fuzzy
-#| msgid "order outcomes"
 msgid "outcomes"
-msgstr "resultados de pedidos"
+msgstr "resultados"
 
 #: models/judgment.py:82 models/judgment.py:451
 msgid "matter type"
@@ -709,10 +681,8 @@ msgid "court classes"
 msgstr "aulas de corte"
 
 #: models/judgment.py:134
-#, fuzzy
-#| msgid "Country"
 msgid "country"
-msgstr "País/região"
+msgstr "País"
 
 #: models/judgment.py:149 models/judgment.py:174 models/judgment.py:237
 #: models/judgment.py:517
@@ -724,16 +694,12 @@ msgid "courts"
 msgstr "Tribunais"
 
 #: models/judgment.py:165
-#, fuzzy
-#| msgid "court registry"
 msgid "Court registry"
-msgstr "tribunal de registro"
+msgstr "Registro do tribunal"
 
 #: models/judgment.py:166
-#, fuzzy
-#| msgid "court registries"
 msgid "Court registries"
-msgstr "Tribunal de registros"
+msgstr "Registros judiciais"
 
 #: models/judgment.py:180
 msgid "court registry"
@@ -750,7 +716,7 @@ msgstr "julgamento"
 
 #: models/judgment.py:227
 msgid "lower_court_judge"
-msgstr ""
+msgstr "juiz_do_tribunal_inferior"
 
 #: models/judgment.py:269
 msgid "case summary"
@@ -794,11 +760,11 @@ msgstr "Citação neutra de mídia"
 
 #: models/judgment.py:302
 msgid "Auto-assign title"
-msgstr ""
+msgstr "Atribuir título automaticamente"
 
 #: models/judgment.py:303
 msgid "Whether or not the system should assign the title"
-msgstr ""
+msgstr "Se o sistema deve ou não atribuir o título"
 
 #: models/judgment.py:317
 msgid "judgments"
@@ -826,13 +792,11 @@ msgstr "ano"
 
 #: models/judgment.py:506
 msgid "historical judgment"
-msgstr ""
+msgstr "julgamento histórico"
 
 #: models/judgment.py:524
-#, fuzzy
-#| msgid "Registries"
 msgid "case histories"
-msgstr "Registros"
+msgstr "históricos de casos"
 
 #: models/profile.py:13
 msgid "about HTML"
@@ -932,10 +896,8 @@ msgid "pagerank boost value"
 msgstr "valor de aumento de classificação de página"
 
 #: models/settings.py:65
-#, fuzzy
-#| msgid "pagerank boost value"
 msgid "pagerank pivot value"
-msgstr "valor de aumento de classificação de página"
+msgstr "valor pivô do pagerank"
 
 #: models/settings.py:68
 msgid "allowed login domains"
@@ -958,14 +920,12 @@ msgid "facebook link"
 msgstr "link do facebook"
 
 #: models/settings.py:85
-#, fuzzy
-#| msgid "citation link"
 msgid "linkedin link"
-msgstr "link de citação"
+msgstr "link do LinkedIn"
 
 #: models/settings.py:88
 msgid "contact form URL"
-msgstr ""
+msgstr "URL do formulário de contato"
 
 #: models/settings.py:91
 msgid "re-extract citations"
@@ -984,32 +944,28 @@ msgid "user help link"
 msgstr "link de ajuda do usuário"
 
 #: models/settings.py:109
-#, fuzzy
-#| msgid "Additional details"
 msgid "admin emails"
-msgstr "Detalhes adicionais"
+msgstr "e-mails de administrador"
 
 #: models/settings.py:113
-#, fuzzy
-#| msgid "Enter one or more Google Analytics IDs separated by spaces."
 msgid "Enter one or more email addresses separated by spaces."
-msgstr "Insira um ou mais IDs do Google Analytics separados por espaços."
+msgstr "Insira um ou mais endereços de e-mail separados por espaços."
 
 #: models/settings.py:116
 msgid "matomo domain"
-msgstr ""
+msgstr "domínio matomo"
 
 #: models/settings.py:120
 msgid "Matomo domain (e.g. mysite.matomo.cloud)"
-msgstr ""
+msgstr "Domínio Matomo (por exemplo, meusite.matomo.cloud)"
 
 #: models/settings.py:123
 msgid "matomo site ID"
-msgstr ""
+msgstr "ID do site matomo"
 
 #: models/settings.py:127
 msgid "Matomo site ID (e.g. 2)"
-msgstr ""
+msgstr "ID do site Matomo (por exemplo, 2)"
 
 #: models/settings.py:131
 msgid "site settings"
@@ -1096,12 +1052,10 @@ msgstr "Esqueceu-se da sua senha?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Efetuar Login com %(provider.name)s\n"
 "          "
 
@@ -1209,7 +1163,7 @@ msgstr "Data"
 
 #: templates/peachjam/_case_histories.html:6
 msgid "Case"
-msgstr ""
+msgstr "Caso"
 
 #: templates/peachjam/_case_histories.html:7
 #: templates/peachjam/judgment_detail.html:55
@@ -1223,10 +1177,8 @@ msgstr "Juízes"
 
 #: templates/peachjam/_case_histories.html:9
 #: templates/peachjam/judgment_detail.html:72
-#, fuzzy
-#| msgid "order outcome"
 msgid "Outcome"
-msgstr "resultado do pedido"
+msgstr "Resultado"
 
 #: templates/peachjam/_child_documents.html:2
 msgid "Subsidiary legislation"
@@ -1255,18 +1207,15 @@ msgid "Show/Hide all"
 msgstr "Mostrar/Ocultar tudo"
 
 #: templates/peachjam/_citations_list_items.html:10
-#, fuzzy, python-format
-#| msgid "citation"
+#, python-format
 msgid "%(n)s citation"
 msgid_plural "%(n)s citations"
-msgstr[0] "citação"
-msgstr[1] "citação"
+msgstr[0] "%(n)s citação"
+msgstr[1] "%(n)s citações"
 
 #: templates/peachjam/_court_list.html:9
-#, fuzzy
-#| msgid "judgments"
 msgid "All judgments"
-msgstr "julgamentos"
+msgstr "Todos os julgamentos"
 
 #: templates/peachjam/_court_list.html:21
 #: templates/peachjam/_court_list.html:27
@@ -1319,14 +1268,12 @@ msgstr[0] "%(doc_count)s documento"
 msgstr[1] "%(doc_count)s documentos"
 
 #: templates/peachjam/_document_detail_toolbar.html:4
-#, fuzzy
-#| msgid "Document detail"
 msgid "Document toolbar"
-msgstr "Detalhe do documento"
+msgstr "Barra de ferramentas do documento"
 
 #: templates/peachjam/_document_detail_toolbar.html:8
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 #: templates/peachjam/_document_detail_toolbar.html:17
 #: templates/peachjam/_document_detail_toolbar.html:31
@@ -1337,13 +1284,11 @@ msgstr "Descarregar"
 
 #: templates/peachjam/_document_detail_toolbar.html:25
 msgid "Toggle dropdown"
-msgstr ""
+msgstr "Alternar menu suspenso"
 
 #: templates/peachjam/_document_detail_toolbar.html:44
-#, fuzzy
-#| msgid "Import"
 msgid "Report"
-msgstr "Importar"
+msgstr "Relatório"
 
 #: templates/peachjam/_document_detail_toolbar.html:45
 msgid "Report a problem"
@@ -1438,7 +1383,7 @@ msgstr "Documentos relacionados"
 
 #: templates/peachjam/_social_media.html:4
 msgid "Contact us"
-msgstr ""
+msgstr "Contate-nos"
 
 #: templates/peachjam/_taxonomies.html:4
 #: templates/peachjam/taxonomy_detail.html:10
@@ -1489,10 +1434,8 @@ msgid "You must use the service responsibly by not making too many requests. In 
 msgstr "Você deve usar o serviço de forma responsável, não fazendo muitas solicitações. A fim de manter a integridade do serviço para todos. podemos bloquear ou desativar o uso do serviço em certos endereços IP, para fazer muitas solicitações."
 
 #: templates/peachjam/_terms_of_use_content.html:34
-#, fuzzy
-#| msgid "We are a donor-funded organisation and bulk and frequent scraping affects our costs, endangering the sustainability of the service. There are more efficient ways of obtaining access to our data in bulk. Please email us if you would like to access our data in bulk."
 msgid "Scraping and bulk downloading from this website is strictly prohibited. We are a donor-funded organisation and bulk and frequent scraping affects our costs, endangering the sustainability of the service. There are more efficient ways of obtaining access to our data in bulk. Please email us if you would like to access our data in bulk."
-msgstr "Somos uma organização financiada por doadores e a eliminação em massa e frequente afecta os nossos custos, pondo em risco a sustentabilidade do serviço. Existem formas mais eficientes de obter acesso aos nossos dados em massa. Por favor, envie-nos um e-mail se você quiser acessar os nossos dados em lote."
+msgstr "A raspagem e o download em massa deste site são estritamente proibidos. Somos uma organização financiada por doadores e a sucata em massa e frequente afecta os nossos custos, pondo em perigo a sustentabilidade do serviço. Existem formas mais eficientes de obter acesso aos nossos dados em massa. Por favor, envie-nos um e-mail se desejar acessar nossos dados em massa."
 
 #: templates/peachjam/_terms_of_use_content.html:40
 msgid "Crawling and indexing"
@@ -1504,10 +1447,8 @@ msgid "You may access the %(organisation_name)s service through the website, or 
 msgstr "Você pode acessar o serviço %(organisation_name)s através do site, ou acessar os dados através de nossas APIs."
 
 #: templates/peachjam/_terms_of_use_content.html:47
-#, fuzzy
-#| msgid "We restrict external indexing of documents by search engine robots or spiders. You must adhere to the instructions in the robots.txt file at: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
 msgid "We restrict external indexing of documents by search engine robots or spiders. You must adhere to the instructions in the <a href=\"/robots.txt\">/robots.txt</a> file."
-msgstr "Nós restringimos a indexação externa de documentos por robôs de busca ou aranhas. Você deve aderir às instruções no arquivo robots.txt em: <a href=\"/robots.txt\" target=\"_blank\">%(robots_link_text)s</a>"
+msgstr "Restringimos a indexação externa de documentos por robôs ou spiders de mecanismos de pesquisa. Você deve seguir as instruções no arquivo <a href=\"/robots.txt\">/robots.txt</a> ."
 
 #: templates/peachjam/_terms_of_use_content.html:53
 msgid "We may block or disable use of the service from certain IP addresses, if they appear to be compiling a search engine index."
@@ -1692,10 +1633,8 @@ msgid "If you have any comments or suggestions about this policy, please contact
 msgstr "Se você tiver comentários ou sugestões sobre esta política, por favor, entre em contato conosco."
 
 #: templates/peachjam/_terms_of_use_content.html:248
-#, fuzzy
-#| msgid "Date of notice: 14 November 2022"
 msgid "Date of notice: 6 June 2024"
-msgstr "Data do aviso: 14 de novembro de 2022"
+msgstr "Data do aviso: 6 de junho de 2024"
 
 #: templates/peachjam/_timeline_events.html:4
 msgid "History of this document"
@@ -1765,13 +1704,11 @@ msgid "Gazettes"
 msgstr "Gazettes"
 
 #: templates/peachjam/gazette_list.html:44
-#, fuzzy, python-format
-#| msgid "%(num_gazettes)s gazette"
-#| msgid_plural "%(num_gazettes)s gazettes"
+#, python-format
 msgid "%(counter)s gazette"
 msgid_plural "%(counter)s gazettes"
-msgstr[0] "%(num_gazettes)s azeta"
-msgstr[1] "%(num_gazettes)s olhares"
+msgstr[0] "%(counter)s azeta"
+msgstr[1] "%(counter)s olhares"
 
 #: templates/peachjam/gazette_list.html:68
 #, python-format
@@ -1781,13 +1718,11 @@ msgstr[0] "%(num_gazettes)s azeta"
 msgstr[1] "%(num_gazettes)s olhares"
 
 #: templates/peachjam/gazette_year.html:38
-#, fuzzy, python-format
-#| msgid "%(doc_count)s document"
-#| msgid_plural "%(doc_count)s documents"
+#, python-format
 msgid "%(doc_count)s gazette"
 msgid_plural "%(doc_count)s gazettes"
-msgstr[0] "%(doc_count)s documento"
-msgstr[1] "%(doc_count)s documentos"
+msgstr[0] "%(doc_count)s azeta"
+msgstr[1] "%(doc_count)s olhares"
 
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
@@ -1866,10 +1801,8 @@ msgid "Citations"
 msgstr "Citações"
 
 #: templates/peachjam/layouts/document_detail.html:127
-#, fuzzy
-#| msgid "Case summary"
 msgid "Case history"
-msgstr "Resumo do caso"
+msgstr "Histórico de caso"
 
 #: templates/peachjam/layouts/document_detail.html:140
 msgid "Ratifications"
@@ -1950,10 +1883,8 @@ msgid "Navigation"
 msgstr "Navigation"
 
 #: views/courts.py:245
-#, fuzzy
-#| msgid "Court"
 msgid "Courts"
-msgstr "Tribunal"
+msgstr "Tribunais"
 
 #: views/legislation.py:60
 #, python-format
@@ -1961,22 +1892,19 @@ msgid "This %(friendly_type)s was repealed on %(date)s by <a href=\"%(repealing_
 msgstr "Este %(friendly_type)s foi revogado em %(date)s por <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
 #: views/legislation.py:76
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+#, python-format
 msgid "This %(friendly_type)s will come into force on %(date)s."
-msgstr "Este %(friendly_type)s ainda não começou e ainda não é lei."
+msgstr "Este %(friendly_type)s entrará em vigor em %(date)s."
 
 #: views/legislation.py:91
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+#, python-format
 msgid "This %(friendly_type)s has not yet come into force in full. See the Document detail tab for more information."
-msgstr "Este %(friendly_type)s ainda não começou e ainda não é lei."
+msgstr "Este %(friendly_type)s ainda não entrou em vigor na íntegra. Consulte a guia Detalhes do documento para obter mais informações."
 
 #: views/legislation.py:102
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s has not yet commenced and is not yet law."
+#, python-format
 msgid "This %(friendly_type)s has not yet come into force."
-msgstr "Este %(friendly_type)s ainda não começou e ainda não é lei."
+msgstr "Este %(friendly_type)s ainda não entrou em vigor."
 
 #: views/legislation.py:135
 #, python-format
@@ -1994,32 +1922,11 @@ msgid "This is the version of this %(friendly_type)s as it was from %(date_from)
 msgstr "Esta é a versão deste %(friendly_type)s como era de %(date_from)s a %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Leia a versão tal como se encontrava quando foi revogada</a>."
 
 #: views/legislation.py:169
-#, fuzzy, python-format
-#| msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version currently in force</a>."
+#, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the latest available version</a>."
-msgstr "Esta é a versão deste %(friendly_type)s como era de %(date_from)s a %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Leia a versão atualmente em vigor</a>."
+msgstr "Esta é a versão deste %(friendly_type)s como era de %(date_from)s a %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Leia a última versão disponível</a>."
 
 #: views/legislation.py:224
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Existem alterações pendentes que ainda não foram aplicadas. Consulte a guia Histórico para obter mais informações."
 
-#~ msgid "Follow us on social media"
-#~ msgstr "Siga-nos nas redes sociais"
-
-#~ msgid "Court Registry"
-#~ msgstr "Registro do Tribunal"
-
-#~ msgid "Amended by"
-#~ msgstr "Alterado por"
-
-#~ msgid "Assented to"
-#~ msgstr "Assentiu em"
-
-#~ msgid "Commences"
-#~ msgstr "Commenus"
-
-#~ msgid "Published in"
-#~ msgstr "Publicado em"
-
-#~ msgid "Repealed by"
-#~ msgstr "Repetido por"

@@ -323,7 +323,8 @@ class DocumentForm(forms.ModelForm):
         # prevent CKEditor-based editing of AKN HTML
         if self.instance.content_html_is_akn:
             return self.instance.content_html
-        return self.cleaned_data["content_html"]
+        # ensure html is clean
+        return self.instance.clean_content_html(self.cleaned_data["content_html"])
 
 
 class AttachedFilesInline(BaseAttachmentFileInline):
@@ -529,6 +530,14 @@ class DocumentAdmin(BaseAdmin):
 
         super().save_related(request, form, formsets, change)
         form.instance.save()
+
+        if change:
+            # the source file needs to update its filename to take changes into account
+            # refresh, because the source file may have been deleted
+            form.instance.refresh_from_db()
+            sf = getattr(form.instance, "source_file", None)
+            if sf:
+                sf.set_download_filename()
 
     def get_urls(self):
         return [
