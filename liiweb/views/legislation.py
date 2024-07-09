@@ -8,26 +8,32 @@ from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks, get_language
 from peachjam.models import JurisdictionProfile, Legislation, Locality, pj_settings
-from peachjam_api.serializers import LegislationSerializer
+from peachjam.views import FilteredDocumentListView
 
 
-class LegislationListView(TemplateView):
-    template_name = "liiweb/legislation_list.html"
+class LegislationListView(FilteredDocumentListView):
+    template_name = "peachjam/legislation_list.html"
     variant = "current"
     navbar_link = "legislation"
     model = Legislation
+    queryset = Legislation.objects.prefetch_related(
+        "taxonomies", "taxonomies__topic", "work"
+    )
     extra_context = {"doc_table_citations": True, "legislation_list_sort": "title"}
 
     def get_queryset(self):
+        qs = super().get_queryset()
         qs = (
-            self.model.objects.exclude(published=False)
+            qs.exclude(published=False)
             .distinct("work_frbr_uri")
             .order_by("work_frbr_uri", "-date", "language__pk")
             .preferred_language(get_language(self.request))
         )
+
         return qs
 
     def filter_queryset(self, qs):
+        qs = super().filter_queryset(qs)
         if self.variant == "all":
             pass
         elif self.variant == "repealed":
@@ -53,12 +59,7 @@ class LegislationListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        qs = self.filter_queryset(self.get_queryset())
-        qs = qs.prefetch_related("taxonomies", "taxonomies__topic", "work")
-        qs = self.add_children(qs)
-
-        context["legislation_table"] = LegislationSerializer(qs, many=True).data
+        context["documents"] = self.add_children(context["documents"])
 
         site_jurisdictions = pj_settings().document_jurisdictions.all()
         if site_jurisdictions.count() == 1:
@@ -86,10 +87,9 @@ class LegislationListView(TemplateView):
             children[child.parent_work_id].append(child)
 
         # fold in children
-        qs = list(queryset)
-        for parent in qs:
+        for parent in queryset:
             parent.children = children.get(parent.work_id, [])
-        return qs
+        return queryset
 
 
 class LocalityLegislationView(TemplateView):

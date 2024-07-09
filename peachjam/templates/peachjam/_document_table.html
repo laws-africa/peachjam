@@ -41,6 +41,15 @@
             {% endif %}
           </td>
         </tr>
+        {% for d in document.children %}
+          <tr class="bg-body-secondary">
+            <td >
+              <a href="{{ d.get_absolute_url }}">{{ d.title }}</a>
+            </td>
+            <td>{{ d.citation }}</td>
+            <td>{{ d.date }}</td>
+          </tr>
+        {% endfor %}
       {% endfor %}
     </tbody>
   </table>

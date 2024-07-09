@@ -6,3 +6,51 @@
 {% block page-title %}
   <h1 class="my-4">{% trans 'Legislation' %}</h1>
 {% endblock %}
+{% block nav-tabs %}
+  <nav class="nav nav-tabs scroll-xs mb-3 border-bottom">
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
+         href="{% url 'legislation_list' %}">
+        {% block current_tab_title %}
+          {% trans 'Current legislation' %}
+        {% endblock %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'recent' %}active{% endif %}"
+         href="{% url 'legislation_list_recent' %}">
+        {% block recent_tab_title %}
+          {% trans 'Recent legislation' %}
+        {% endblock %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'subleg' %}active{% endif %}"
+         href="{% url 'legislation_list_subsidiary' %}">
+        {% block sublegislation_tab_title %}{{ PEACHJAM_SETTINGS.subleg_label }}{% endblock %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'uncommenced' %}active{% endif %}"
+         href="{% url 'legislation_list_uncommenced' %}">
+        {% block uncommenced_tab_title %}
+          {% trans 'Uncommenced legislation' %}
+        {% endblock %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
+         href="{% url 'legislation_list_repealed' %}">
+        {% block repealed_tab_title %}
+          {% trans 'Repealed legislation' %}
+        {% endblock %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
+         href="{% url 'legislation_list_all' %}">
+        {% trans 'All legislation' %}
+      </a>
+    </li>
+  </nav>
+{% endblock %}
