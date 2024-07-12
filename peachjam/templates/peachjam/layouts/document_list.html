@@ -56,6 +56,30 @@
         <div class="position-relative">
           {% block content %}
             {% if documents %}
+              {% block filter-documents %}
+                <div class="row">
+                  <div class="col">
+                    <input id="filter-input"
+                           form="filter-form"
+                           aria-label="Filter"
+                           placeholder="Filter documents"
+                           class="form-control"
+                           type="text"
+                           name="q"/>
+                  </div>
+                  <div class="col-auto ms-0 ps-0">
+                    <button hx-get=""
+                            hx-target="#doc-table"
+                            hx-replace-url="true"
+                            hx-include="#filter-form"
+                            class="btn btn-primary"
+                            type="submit"
+                            value="Filter">
+                      Filter
+                    </button>
+                  </div>
+                </div>
+              {% endblock %}
               {% include 'peachjam/_document_table.html' %}
             {% else %}
               <p>{% trans 'No documents found.' %}</p>

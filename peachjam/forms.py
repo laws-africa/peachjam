@@ -104,6 +104,7 @@ class BaseDocumentFilterForm(forms.Form):
         registries = self.params.getlist("registries")
         attorneys = self.params.getlist("attorneys")
         outcomes = self.params.getlist("outcomes")
+        q = self.params.getlist("q")
 
         queryset = self.order_queryset(queryset, exclude)
 
@@ -139,6 +140,9 @@ class BaseDocumentFilterForm(forms.Form):
 
         if outcomes and exclude != "outcomes":
             queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
+
+        if q and exclude != "q":
+            queryset = queryset.filter(title__icontains=q[0])
 
         return queryset
 

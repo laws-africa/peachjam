@@ -1,9 +1,10 @@
 {% load i18n peachjam %}
-<div class="table-responsive">
+<div class="table-responsive" id="doc-table">
   <table class="doc-table">
     <thead>
       <tr>
-        <th scope="col" class="cell-title">{% trans 'Title' %}</th>
+        <th></th>
+        <th scope="col" class="w-75">{% trans 'Title' %}</th>
         {% if MULTIPLE_JURISDICTIONS or MULTIPLE_LOCALITIES %}
           <th scope="col">{% trans 'Jurisdiction' %}</th>
         {% endif %}
@@ -16,7 +17,19 @@
     <tbody>
       {% for document in documents %}
         <tr>
-          <td class="cell-title">
+          <td>
+            {% if document.children %}
+              <button class="btn btn-sm bg-none"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target=".legchildren-{{ forloop.counter0 }}"
+                      aria-expanded="false"
+                      aria-controls="legchildren-{{ forloop.counter0 }}">
+                <i class="bi bi-caret-right-fill"></i>
+              </button>
+            {% endif %}
+          </td>
+          <td class="w-75">
             <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
           </td>
           {% if MULTIPLE_JURISDICTIONS %}
@@ -42,18 +55,19 @@
           </td>
         </tr>
         {% for d in document.children %}
-          <tr class="bg-body-secondary">
-            <td >
+          <tr class="legchildren-{{ forloop.parentloop.counter0 }} bg-body-secondary collapse ">
+            <td></td>
+            <td>
               <a href="{{ d.get_absolute_url }}">{{ d.title }}</a>
             </td>
-            <td>{{ d.citation }}</td>
+            <td>{{ d.get_doc_type_display }}</td>
             <td>{{ d.date }}</td>
           </tr>
         {% endfor %}
       {% endfor %}
     </tbody>
   </table>
+  {% if not hide_pagination %}
+    {% include 'peachjam/_pagination.html' %}
+  {% endif %}
 </div>
-{% if not hide_pagination %}
-  {% include 'peachjam/_pagination.html' %}
-{% endif %}

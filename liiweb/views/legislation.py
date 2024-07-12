@@ -25,15 +25,27 @@ class LegislationListView(FilteredDocumentListView):
         qs = super().get_queryset()
         qs = (
             qs.exclude(published=False)
-            .distinct("work_frbr_uri")
-            .order_by("work_frbr_uri", "-date", "language__pk")
+            .distinct(
+                "title",
+                "work_frbr_uri",
+            )
+            .order_by(
+                "title",
+                "work_frbr_uri",
+                "-date",
+                "language__pk",
+            )
             .preferred_language(get_language(self.request))
         )
 
         return qs
 
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["peachjam/_document_table.html"]
+        return ["peachjam/legislation_list.html"]
+
     def filter_queryset(self, qs):
-        qs = super().filter_queryset(qs)
         if self.variant == "all":
             pass
         elif self.variant == "repealed":
@@ -54,6 +66,7 @@ class LegislationListView(FilteredDocumentListView):
                     datetime.date.today() - timedelta(days=365)
                 ).isoformat()
             )
+        qs = super().filter_queryset(qs)
 
         return qs
 
@@ -79,7 +92,7 @@ class LegislationListView(FilteredDocumentListView):
         )
 
         children = defaultdict(list)
-        children_qs = self.get_queryset().filter(
+        children_qs = self.get_base_queryset().filter(
             parent_work_id__in=parents, repealed=False, metadata_json__principal=True
         )
         # group children by parent
