@@ -2,7 +2,9 @@
 {% load i18n %}
 {% block title %}{{ document.title }}{% endblock %}
 {% block page-content %}
-  {% block breadcrumbs %}{% endblock %}
+  {% block breadcrumbs %}
+    <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
+  {% endblock %}
   {% block entity-profile %}{% endblock %}
   <div class="container pb-5" data-component="DocumentList">
     <div class="offcanvas offcanvas-start"
