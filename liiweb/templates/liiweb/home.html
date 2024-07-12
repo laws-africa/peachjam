@@ -4,78 +4,61 @@
   {% trans 'Home' %}
 {% endblock %}
 {% block page-content %}
-  <section class="hero">
-    {% block hero-img %}
-      <img class="hero__background-img"
-           src="{% static 'images/banner.jpg' %}"
-           srcset="{% static 'images/banner-small.jpg' %} 770w,
-                   {% static 'images/banner.jpg' %} 1920w"
-           sizes="100vw"
-           alt="{{ APP_NAME }}"
-           height="40"/>
-    {% endblock %}
-    <div class="hero__content">
-      <div class="row">
-        <div class="col-lg-8 col-12">
-          {% block hero-content %}
-            {% block hero-headings %}<h1 class="mb-4">{{ APP_NAME }}</h1>{% endblock %}
-          {% endblock %}
-        </div>
-      </div>
-    </div>
-  </section>
-  <section class="py-5 hero-search">
-    <div class="container">
-      {% block hero-search %}
-        <div class="row justify-content-center">
-          <div class="col col-md-10 col-lg-8">
-            <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
-              <input type="text"
-                     class="form-control form-control-lg flex-grow-1"
-                     placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                     aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                     aria-describedby="button-addon2"
-                     autofocus=""
-                     name="q"/>
-              <input type="submit"
-                     class="btn btn-primary ms-2 btn-lg"
-                     value="{% trans 'Search' %}"/>
-            </form>
-            <div class="d-flex">
-              <a class="me-4" href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
-              {% include "peachjam/_help_button.html" with link="search" %}
-            </div>
-          </div>
-        </div>
+  {% block hero %}
+    <section class="hero">
+      {% block hero-img %}
+        <img class="hero__background-img"
+             src="{% static 'images/banner.jpg' %}"
+             srcset="{% static 'images/banner-small.jpg' %} 770w,
+                     {% static 'images/banner.jpg' %} 1920w"
+             sizes="100vw"
+             alt="{{ APP_NAME }}"
+             height="40"/>
       {% endblock %}
-    </div>
-  </section>
-  {% block after-search %}{% endblock %}
-  <section class="mt-2">
-    <div class="container">
-      <div class="row justify-content-between align-items-center mt-5 mb-3">
-        <div class="col-12 col-lg-6">
-          {% block second-column-content %}
-            {% block second-col-about %}{% endblock %}
-            {% block second-col-logos %}{% endblock %}
-            {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link or PEACHJAM_SETTINGS.linkedin_link %}
-              {% block social-media %}
-                {% include 'peachjam/_social_media.html' %}
-              {% endblock %}
-            {% endif %}
-          {% endblock %}
-        </div>
-        <div class="col-12 col-lg-6">
-          <div class="hero-logos row justify-content-center">
-            {% block hero-logos %}
-              <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
-              <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
+      <div class="hero__content">
+        <div class="row">
+          <div class="col-lg-8 col-12">
+            {% block hero-content %}
+              {% block hero-headings %}<h1 class="mb-4">{{ APP_NAME }}</h1>{% endblock %}
             {% endblock %}
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+    {% block hero-search %}
+      <section class="py-5 hero-search">
+        <div class="container">{% include 'liiweb/_hero_search.html' %}</div>
+      </section>
+    {% endblock %}
+  {% endblock %}
+  {% block after-search %}{% endblock %}
+  {% block about %}
+    <section class="mt-2">
+      <div class="container">
+        <div class="row justify-content-between align-items-center mt-5 mb-3">
+          <div class="col-12 col-lg-6">
+            {% block second-column-content %}
+              {% block second-col-about %}{% endblock %}
+              {% block second-col-logos %}{% endblock %}
+              {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link or PEACHJAM_SETTINGS.linkedin_link %}
+                {% block social-media %}
+                  {% include 'peachjam/_social_media.html' %}
+                {% endblock %}
+              {% endif %}
+            {% endblock %}
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="hero-logos row justify-content-center">
+              {% block hero-logos %}
+                <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
+                <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
+              {% endblock %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endblock %}
   {% block recent-documents %}
     <section class="my-5">
       <div class="container">

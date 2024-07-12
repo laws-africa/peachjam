@@ -3,22 +3,29 @@
 {% block hero-headings-title %}
   {% trans 'Welcome to the digital Law Library of South Africa' %}
 {% endblock %}
-{% block hero-headings-welcome %}
-  {% blocktrans trimmed %}
-    Reliable and current access to the law of South Africa: annotated and consolidated legislation, case summaries,
-    caselaw collections by subject, and legal commentary. Read, use and share the law freely.
-  {% endblocktrans %}
+{% block hero %}
+  {% block hero-search %}
+    <section class="pt-5 pb-3 hero-search">
+      <div class="container">{% include 'liiweb/_hero_search.html' %}</div>
+    </section>
+  {% endblock %}
+  <section class="pt-5 pt-3">
+    <div class="container">
+      <div class="row">
+        <div class="col-9">
+          <h2>Law Library South Africa</h2>
+          <p class="h4 mt-4">The most comprehensive collection of free legal information in South Africa.</p>
+        </div>
+        <div class="col-3 col-lg-2 offset-lg-1 text-center">
+          <img src="{% static 'images/hero-logo.jpg' %}"
+               class="img-fluid"
+               alt="Law Library logo"/>
+        </div>
+      </div>
+    </div>
+  </section>
 {% endblock %}
-{% block hero-headings-blurb %}
-  {% blocktrans trimmed %}
-    LawLibrary.org.za is a project of the AfricanLII and Judicial Institute for Africa at the University of Cape Town.
-    Legislation digitised by Laws.Africa.
-  {% endblocktrans %}
-{% endblock %}
-{% block hero-logos %}
-  {{ block.super }}
-  <img src="{% static 'images/jifa.png' %}" alt="JIFA"/>
-{% endblock %}
+{% block about %}{% endblock %}
 {% block pocketlaw %}
   {% include 'liiweb/_donate_call_to_action.html' %}
   {{ block.super }}
