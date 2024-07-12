@@ -12,7 +12,7 @@ from peachjam.views import FilteredDocumentListView
 
 
 class LegislationListView(FilteredDocumentListView):
-    template_name = "peachjam/legislation_list.html"
+    template_name = "liiweb/legislation_list.html"
     variant = "current"
     navbar_link = "legislation"
     model = Legislation
@@ -43,7 +43,7 @@ class LegislationListView(FilteredDocumentListView):
     def get_template_names(self):
         if self.request.htmx:
             return ["peachjam/_document_table.html"]
-        return ["peachjam/legislation_list.html"]
+        return ["liiweb/legislation_list.html"]
 
     def filter_queryset(self, qs):
         if self.variant == "all":

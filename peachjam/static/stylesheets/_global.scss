@@ -174,3 +174,8 @@ html[data-user-agent*='pocketlaw'] .pocketlaw-hidden {
     font-size: 16px !important;
   }
 }
+
+.facets-scrollable {
+  max-height: 25vh;
+  overflow-y: auto;
+}

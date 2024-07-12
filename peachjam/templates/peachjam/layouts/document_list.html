@@ -7,23 +7,6 @@
   {% endblock %}
   {% block entity-profile %}{% endblock %}
   <div class="container pb-5" data-component="DocumentList">
-    <div class="offcanvas offcanvas-start"
-         tabindex="-1"
-         id="list-facets-offcanvas"
-         aria-labelledby="offcanvasLastFacetLabel">
-      <div class="offcanvas-header justify-content-end">
-        <button type="button"
-                class="btn-close text-reset"
-                data-bs-dismiss="offcanvas"
-                aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        <div>
-          {% block mobile-taxonomy-list %}{% endblock %}
-        </div>
-        <div data-list-facets></div>
-      </div>
-    </div>
     {% block page-header %}
       {% block page-title %}
         <h1 class="mt-4">{% trans 'Documents' %}</h1>
@@ -51,7 +34,67 @@
           <div>
             {% block desktop-taxonomy-list %}{% endblock %}
           </div>
-          <div class="pocketlaw-hidden" data-list-facets></div>
+          <div class="pocketlaw-hidden">
+            <form method="get" id="filter-form">
+              <ul class="list-group">
+                <li class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center">
+                  <strong>{% trans 'Filters' %}</strong>
+                </li>
+                {% for facet_name, options in facet_data.items %}
+                  <li class="list-group-item">
+                    <div class="d-flex justify-content-between mb-2">
+                      <strong>{{ facet_name }}</strong>
+                      <div class="d-flex align-items-center">
+                        <a href="{{ request.path }}"
+                           hx-get="{{ request.path }}"
+                           hx-target="#doc-table"
+                           hx-push-url="true">Clear</a>
+                      </div>
+                    </div>
+                    {% if facet_name == "alphabet" %}
+                      <div>
+                        <div class="letter-radiobox-container">
+                          {% for option in options %}
+                            <label class="letter-radiobox" for="{{ facet_name }}_{{ forloop.counter0 }}">
+                              <input id="{{ facet_name }}_{{ forloop.counter0 }}"
+                                     name="{{ facet_name }}"
+                                     type="radio"
+                                     hx-get="{{ request.path }}"
+                                     hx-target="#doc-table"
+                                     hx-push-url="true"
+                                     hx-include="#filter-form"
+                                     value="{{ option }}"/>
+                              <span class="letter-radiobox__text">{{ option }}</span>
+                            </label>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% else %}
+                      <div class="facets-scrollable">
+                        {% for option in options %}
+                          <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-check flex-grow-1">
+                              <input id="{{ facet_name }}_{{ forloop.counter0 }}"
+                                     class="form-check-input"
+                                     name="{{ facet_name }}"
+                                     type="checkbox"
+                                     hx-get="{{ request.path }}"
+                                     hx-target="#doc-table"
+                                     hx-push-url="true"
+                                     hx-include="#filter-form"
+                                     value="{{ option }}"/>
+                              <label class="form-check-label"
+                                     for="{{ facet_name }}_{{ forloop.counter0 }}">{{ option }}</label>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </form>
+          </div>
         </div>
       {% endblock %}
       <div class="col-lg-9">
@@ -70,9 +113,9 @@
                            name="q"/>
                   </div>
                   <div class="col-auto ms-0 ps-0">
-                    <button hx-get=""
+                    <button hx-get="{{ request.path }}"
                             hx-target="#doc-table"
-                            hx-replace-url="true"
+                            hx-push-url="true"
                             hx-include="#filter-form"
                             class="btn btn-primary"
                             type="submit"
@@ -90,8 +133,6 @@
         </div>
       </div>
     </div>
-    {{ facet_data|json_script:"facet-data" }}
-    {{ labels|json_script:"data-labels" }}
     {% block taxonomy-json %}{% endblock %}
   </div>
 {% endblock %}
