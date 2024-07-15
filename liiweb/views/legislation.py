@@ -1,6 +1,7 @@
 import datetime
 from collections import defaultdict
 from datetime import timedelta
+from itertools import groupby
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -72,7 +73,7 @@ class LegislationListView(FilteredDocumentListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["documents"] = self.add_children(context["documents"])
+        self.add_children(context["documents"])
 
         site_jurisdictions = pj_settings().document_jurisdictions.all()
         if site_jurisdictions.count() == 1:
@@ -82,6 +83,14 @@ class LegislationListView(FilteredDocumentListView):
             if jurisdiction_profile:
                 context["entity_profile"] = jurisdiction_profile.entity_profile.first()
                 context["entity_profile_title"] = jurisdiction_profile.jurisdiction.name
+
+        context["doc_table_toggle"] = True
+        context["doc_table_show_doc_type"] = False
+        context["doc_table_show_court"] = False
+        context["doc_table_show_author"] = False
+        context["doc_table_show_jurisdiction"] = False
+
+        context["documents"] = self.group_documents(context["documents"])
 
         return context
 
@@ -102,7 +111,33 @@ class LegislationListView(FilteredDocumentListView):
         # fold in children
         for parent in queryset:
             parent.children = children.get(parent.work_id, [])
-        return queryset
+
+    def group_documents(self, documents):
+        # TODO: move this down into the base class
+
+        # determine what to group by
+        ordering = documents.query.order_by[0]
+        if ordering.startswith("-"):
+            ordering = ordering[1:]
+
+        def grouper(d):
+            if ordering == "date":
+                return d.date.year
+            else:
+                return d.title[0].upper()
+
+        class Group:
+            is_group = True
+
+            def __init__(self, title):
+                self.title = title
+
+        docs = []
+        for key, group in groupby(documents, grouper):
+            docs.append(Group(key))
+            docs.extend(group)
+
+        return docs
 
 
 class LocalityLegislationView(TemplateView):

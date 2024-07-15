@@ -1,12 +1,15 @@
 {% load i18n peachjam %}
 <div class="table-responsive" id="doc-table">
-  <table class="doc-table">
+  <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations %}doc-table--citation{% endif %} {{ doc_table_classes }}">
     <thead>
       <tr>
-        <th></th>
-        <th scope="col" class="w-75">{% trans 'Title' %}</th>
-        {% if MULTIPLE_JURISDICTIONS or MULTIPLE_LOCALITIES %}
-          <th scope="col">{% trans 'Jurisdiction' %}</th>
+        {% if doc_table_toggle %}<th class="cell-toggle"></th>{% endif %}
+        <th scope="col" class="cell-title">{% trans 'Title' %}</th>
+        {% if doc_table_citations %}<th scope="col" class="cell-citation"></th>{% endif %}
+        {% if doc_table_show_jurisdiction %}
+          {% if MULTIPLE_JURISDICTIONS or MULTIPLE_LOCALITIES %}
+            <th scope="col">{% trans 'Jurisdiction' %}</th>
+          {% endif %}
         {% endif %}
         {% if doc_table_show_author %}<th scope="col"></th>{% endif %}
         {% if doc_table_show_court %}<th scope="col"></th>{% endif %}
@@ -14,58 +17,17 @@
         <th scope="col" class="cell-date">{% trans 'Date' %}</th>
       </tr>
     </thead>
-    <tbody>
-      {% for document in documents %}
-        <tr>
-          <td>
-            {% if document.children %}
-              <button class="btn btn-sm bg-none"
-                      type="button"
-                      data-bs-toggle="collapse"
-                      data-bs-target=".legchildren-{{ forloop.counter0 }}"
-                      aria-expanded="false"
-                      aria-controls="legchildren-{{ forloop.counter0 }}">
-                <i class="bi bi-caret-right-fill"></i>
-              </button>
-            {% endif %}
-          </td>
-          <td class="w-75">
-            <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-          </td>
-          {% if MULTIPLE_JURISDICTIONS %}
-            <td>
-              {% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction|default_if_none:'' }}
-              {% if document.locality %}· {{ document.locality }}{% endif %}
-            </td>
-          {% elif MULTIPLE_LOCALITIES %}
-            <td>{{ document.locality|default_if_none:'' }}</td>
-          {% endif %}
-          {% if doc_table_show_author %}<td>{{ document.author|default_if_none:'' }}</td>{% endif %}
-          {% if doc_table_show_court %}<td>{{ document.court|default_if_none:'' }}</td>{% endif %}
-          {% if doc_table_show_doc_type %}<td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>{% endif %}
-          <td style="white-space: nowrap;" class="cell-date">{{ document.date }}</td>
-          <td style="white-space: nowrap;">
-            {% if document.work.languages|length > 1 %}
-              <span class="d-inline-block"
-                    data-bs-toggle="tooltip"
-                    title="{% trans 'Multiple languages available' %}">
-                <i class="bi bi-translate"></i>
-              </span>
-            {% endif %}
-          </td>
-        </tr>
-        {% for d in document.children %}
-          <tr class="legchildren-{{ forloop.parentloop.counter0 }} bg-body-secondary collapse ">
-            <td></td>
-            <td>
-              <a href="{{ d.get_absolute_url }}">{{ d.title }}</a>
-            </td>
-            <td>{{ d.get_doc_type_display }}</td>
-            <td>{{ d.date }}</td>
-          </tr>
-        {% endfor %}
-      {% endfor %}
-    </tbody>
+    {% for document in documents %}
+      {% include 'peachjam/_document_table_row.html' %}
+      {% if document.children %}
+        <tbody id="doc-table-children-{{ forloop.counter0 }}"
+               class="doc-table-children collapse">
+          {% for d in document.children %}
+            {% include 'peachjam/_document_table_row.html' with document=d %}
+          {% endfor %}
+        </tbody>
+      {% endif %}
+    {% endfor %}
   </table>
   {% if not hide_pagination %}
     {% include 'peachjam/_pagination.html' %}

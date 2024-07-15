@@ -9,7 +9,6 @@ import TermsOfUse from './terms-of-use';
 
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
-import LegislationTable from './LegislationTable/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
 
 const components: Record<string, any> = {
@@ -26,7 +25,6 @@ const components: Record<string, any> = {
   // Vue components
   DocumentProblemModal,
   FindDocuments,
-  LegislationTable,
   PocketLawDownload
 };
 
