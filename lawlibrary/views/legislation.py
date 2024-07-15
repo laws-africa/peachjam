@@ -10,8 +10,8 @@ from peachjam.models import Locality
 
 
 class LegislationListView(BaseLegislationListView):
-    def get_queryset(self):
-        return super().get_queryset().filter(locality=None)
+    def get_base_queryset(self):
+        return super().get_base_queryset().filter(locality=None)
 
 
 class LocalityLegislationView(BaseLocalityLegislationView):
