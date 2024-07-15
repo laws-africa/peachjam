@@ -157,11 +157,8 @@ class BaseDocumentFilterForm(forms.Form):
         return queryset
 
     def order_queryset(self, queryset, exclude=None):
-        if self.cleaned_data.get("alphabet") and exclude != "alphabet":
-            queryset = queryset.order_by("title")
-        else:
-            sort = self.cleaned_data.get("sort") or "-date"
-            queryset = queryset.order_by(sort, "title")
+        sort = self.cleaned_data.get("sort") or "-date"
+        queryset = queryset.order_by(sort, "title")
         return queryset
 
 
