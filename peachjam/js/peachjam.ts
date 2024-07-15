@@ -48,7 +48,6 @@ class PeachJam {
     this.setupPopovers();
     this.scrollNavTabs();
     this.clearGACookies();
-    this.setupCollapseToggle();
   }
 
   setupConfig () {
@@ -185,37 +184,6 @@ class PeachJam {
         }
       }
     }
-  }
-
-  setupCollapseToggle () {
-    const handleCollapse = new Set();
-    document.addEventListener('show.bs.collapse', (e) => {
-      const target = e.target as HTMLElement;
-      const trigger = `[data-bs-target=".${target.classList[0]}"`;
-      if (handleCollapse.has(trigger)) {
-        return;
-      }
-      const button = document.querySelector(trigger) as HTMLElement;
-      const i = button.querySelector('.bi-caret-right-fill');
-      if (i) {
-        i.classList.remove('bi-caret-right-fill');
-        i.classList.add('bi-caret-down-fill');
-      }
-      handleCollapse.add(trigger);
-    });
-    document.addEventListener('hidden.bs.collapse', (e) => {
-      const target = e.target as HTMLElement;
-      const trigger = `[data-bs-target=".${target.classList[0]}"`;
-      if (handleCollapse.has(trigger)) {
-        const button = document.querySelector(trigger) as HTMLElement;
-        const i = button.querySelector('.bi-caret-down-fill');
-        if (i) {
-          i.classList.remove('bi-caret-down-fill');
-          i.classList.add('bi-caret-right-fill');
-        }
-        handleCollapse.delete(trigger);
-      }
-    });
   }
 }
 

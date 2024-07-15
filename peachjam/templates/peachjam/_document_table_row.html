@@ -1,15 +1,15 @@
 {% load i18n peachjam %}
-<tr class="{% if row.children %}has-children{% endif %}">
+<tr class="{% if document.children %}has-children{% endif %}">
   {% if doc_table_toggle %}
     <td class="cell-toggle">
       {% if document.children %}
-        <button class="btn btn-sm bg-none"
+        <button class="btn btn-sm bg-none collapsed"
                 type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#doc-table-children-{{ forloop.counter0 }}"
                 aria-expanded="false"
                 aria-controls="doc-table-children-{{ forloop.counter0 }}">
-          <i class="bi bi-caret-right-fill"></i>
+          <i class="bi"></i>
         </button>
       {% endif %}
     </td>
