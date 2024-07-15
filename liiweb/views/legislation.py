@@ -24,7 +24,7 @@ class LegislationListView(FilteredDocumentListView):
 
     def get_template_names(self):
         if self.request.htmx:
-            return ["peachjam/_document_table.html"]
+            return ["peachjam/faceted_doc_table.html"]
         return ["liiweb/legislation_list.html"]
 
     def filter_queryset(self, qs):

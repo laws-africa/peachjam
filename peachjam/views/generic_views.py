@@ -4,6 +4,7 @@ from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.utils.dates import MONTHS
+from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, View
 from lxml import html
 
@@ -157,10 +158,30 @@ class FilteredDocumentListView(DocumentListView):
         context["doc_table_show_author"] = bool(authors)
         context["doc_table_show_doc_type"] = bool(natures)
         context["facet_data"] = {
-            "years": years,
-            "authors": authors,
-            "alphabet": lowercase_alphabet(),
-            "natures": natures,
+            "years": {
+                "label": _("Years"),
+                "type": "checkbox",
+                "options": [str(y) for y in sorted(years, reverse=True)],
+                "values": self.request.GET.getlist("years"),
+            },
+            "authors": {
+                "label": _("Authors"),
+                "type": "checkbox",
+                "options": authors,
+                "values": self.request.GET.getlist("authors"),
+            },
+            "natures": {
+                "label": _("Document nature"),
+                "type": "radio",
+                "options": natures,
+                "values": self.request.GET.getlist("natures"),
+            },
+            "alphabet": {
+                "label": _("Alphabet"),
+                "type": "radio",
+                "options": lowercase_alphabet(),
+                "values": self.request.GET.get("alphabet"),
+            },
         }
 
     def group_documents(self, documents, group_by=None):
