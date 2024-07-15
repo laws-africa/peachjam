@@ -110,7 +110,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
 
         should_queries = []
         if self.is_advanced_search(request, view):
-            # these handle advanced search, and can't be combined with advanced search because they both
+            # these handle advanced search, and can't be combined with normal search because they both
             # build queries to return nested content, and ES complains if multiple queries try to return the
             # same nested content fields
             must_queries.extend(self.build_advanced_all_queries(request, view))
