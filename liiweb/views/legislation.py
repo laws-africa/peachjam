@@ -83,6 +83,12 @@ class LegislationListView(FilteredDocumentListView):
                 context["entity_profile"] = jurisdiction_profile.entity_profile.first()
                 context["entity_profile_title"] = jurisdiction_profile.jurisdiction.name
 
+        context["doc_table_toggle"] = True
+        context["doc_table_show_doc_type"] = False
+        context["doc_table_show_court"] = False
+        context["doc_table_show_author"] = False
+        context["doc_table_show_jurisdiction"] = False
+
         return context
 
     def add_children(self, queryset):

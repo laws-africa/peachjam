@@ -1,0 +1,42 @@
+{% load i18n peachjam %}
+<tr class="{% if row.children %}has-children{% endif %}">
+  {% if doc_table_toggle %}
+    <td class="cell-toggle">
+      {% if document.children %}
+        <button class="btn btn-sm bg-none"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#doc-table-children-{{ forloop.counter0 }}"
+                aria-expanded="false"
+                aria-controls="doc-table-children-{{ forloop.counter0 }}">
+          <i class="bi bi-caret-right-fill"></i>
+        </button>
+      {% endif %}
+    </td>
+  {% endif %}
+  <td class="cell-title">
+    <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+    {% if document.work.languages|length > 1 %}
+      <span class="d-inline-block"
+            data-bs-toggle="tooltip"
+            title="{% trans 'Multiple languages available' %}">
+        <i class="bi bi-translate"></i>
+      </span>
+    {% endif %}
+  </td>
+  {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}
+  {% if doc_table_show_jurisdiction %}
+    {% if MULTIPLE_JURISDICTIONS %}
+      <td>
+        {% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction|default_if_none:'' }}
+        {% if document.locality %}· {{ document.locality }}{% endif %}
+      </td>
+    {% elif MULTIPLE_LOCALITIES %}
+      <td>{{ document.locality|default_if_none:'' }}</td>
+    {% endif %}
+  {% endif %}
+  {% if doc_table_show_author %}<td>{{ document.author|default_if_none:'' }}</td>{% endif %}
+  {% if doc_table_show_court %}<td>{{ document.court|default_if_none:'' }}</td>{% endif %}
+  {% if doc_table_show_doc_type %}<td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>{% endif %}
+  <td style="white-space: nowrap;" class="cell-date">{{ document.date }}</td>
+</tr>
