@@ -11,6 +11,7 @@ import '@lawsafrica/law-widgets/dist/components/la-table-of-contents-controller'
 import '@lawsafrica/law-widgets/dist/components/la-decorate-external-refs';
 import '@lawsafrica/law-widgets/dist/components/la-decorate-internal-refs';
 import '@lawsafrica/law-widgets/dist/components/la-decorate-terms';
+import 'htmx.org';
 
 export interface PeachJamConfig {
   appName: string;

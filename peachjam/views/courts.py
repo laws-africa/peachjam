@@ -1,5 +1,4 @@
 from functools import cached_property
-from itertools import groupby
 from math import ceil
 
 from django.http import Http404
@@ -22,6 +21,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
         "judges", "labels", "attorneys", "outcomes"
     )
     exclude_facets = []
+    group_by_date = "month-year"
 
     def base_view_name(self):
         return _("Judgments")
@@ -35,12 +35,12 @@ class FilteredJudgmentView(FilteredDocumentListView):
         context["doc_type"] = "Judgment"
         context["page_title"] = self.page_title()
         context["labels"].update({"judge": Judge.model_label_plural})
-
-        if not self.form.cleaned_data.get("alphabet"):
-            context["grouped_documents"] = self.grouped_judgments(context["documents"])
+        context["doc_table_show_jurisdiction"] = False
 
         self.populate_years(context)
         self.populate_facets(context)
+
+        context["documents"] = self.group_documents(context["documents"])
 
         return context
 
@@ -92,13 +92,6 @@ class FilteredJudgmentView(FilteredDocumentListView):
         context["years"] = self.get_base_queryset(exclude=["year", "month"]).dates(
             "date", "year", order="DESC"
         )
-
-    def grouped_judgments(self, documents):
-        """Group the judgments by month and return a list of dicts with the month name and judgments for that month"""
-        # Group documents by month
-        groups = groupby(documents, lambda d: f"{MONTHS[d.date.month]} {d.date.year}")
-
-        return [{"key": key, "judgments": list(group)} for key, group in groups]
 
 
 class CourtDetailView(FilteredJudgmentView):

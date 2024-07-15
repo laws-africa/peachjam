@@ -51,14 +51,3 @@
     {% include 'peachjam/_court_months_list.html' %}
   {% endblock %}
 {% endblock %}
-{% block content %}
-  {% if grouped_documents %}
-    {% include 'peachjam/_grouped_judgments_table.html' %}
-    {% include 'peachjam/_pagination.html' %}
-  {% elif documents %}
-    {% include 'peachjam/_judgment_table.html' %}
-    {% include 'peachjam/_pagination.html' %}
-  {% else %}
-    <p>{% trans 'No documents found.' %}</p>
-  {% endif %}
-{% endblock %}

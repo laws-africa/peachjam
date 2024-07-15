@@ -1,13 +1,12 @@
 import datetime
 from collections import defaultdict
 from datetime import timedelta
-from itertools import groupby
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
-from peachjam.helpers import chunks, get_language
+from peachjam.helpers import chunks
 from peachjam.models import JurisdictionProfile, Legislation, Locality, pj_settings
 from peachjam.views import FilteredDocumentListView
 
@@ -20,26 +19,8 @@ class LegislationListView(FilteredDocumentListView):
     queryset = Legislation.objects.prefetch_related(
         "taxonomies", "taxonomies__topic", "work"
     )
+    latest_expression_only = True
     extra_context = {"doc_table_citations": True, "legislation_list_sort": "title"}
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        qs = (
-            qs.exclude(published=False)
-            .distinct(
-                "title",
-                "work_frbr_uri",
-            )
-            .order_by(
-                "title",
-                "work_frbr_uri",
-                "-date",
-                "language__pk",
-            )
-            .preferred_language(get_language(self.request))
-        )
-
-        return qs
 
     def get_template_names(self):
         if self.request.htmx:
@@ -111,33 +92,6 @@ class LegislationListView(FilteredDocumentListView):
         # fold in children
         for parent in queryset:
             parent.children = children.get(parent.work_id, [])
-
-    def group_documents(self, documents):
-        # TODO: move this down into the base class
-
-        # determine what to group by
-        ordering = documents.query.order_by[0]
-        if ordering.startswith("-"):
-            ordering = ordering[1:]
-
-        def grouper(d):
-            if ordering == "date":
-                return d.date.year
-            else:
-                return d.title[0].upper()
-
-        class Group:
-            is_group = True
-
-            def __init__(self, title):
-                self.title = title
-
-        docs = []
-        for key, group in groupby(documents, grouper):
-            docs.append(Group(key))
-            docs.extend(group)
-
-        return docs
 
 
 class LocalityLegislationView(TemplateView):
