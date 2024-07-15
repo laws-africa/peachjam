@@ -1,5 +1,6 @@
 <template>
   <form
+    id="filter-form"
     ref="form"
     method="get"
   >
