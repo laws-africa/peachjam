@@ -1,10 +1,19 @@
 {% load i18n peachjam %}
-<div class="table-responsive" id="doc-table">
+<div class="table-responsive"
+     id="doc-table"
+     data-component="DocumentTable">
   <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations %}doc-table--citation{% endif %} {{ doc_table_classes }}">
     <thead>
       <tr>
         {% if doc_table_toggle %}<th class="cell-toggle"></th>{% endif %}
-        <th scope="col" class="cell-title">{% trans 'Title' %}</th>
+        <th scope="col" class="cell-title">
+          <div class="align-items-center"
+               role="button"
+               data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
+            {% trans 'Title' %}
+            <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-up{% endif %} {% if form.sort.value == "-title" %}bi-sort-down{% endif %}"></i>
+          </div>
+        </th>
         {% if doc_table_citations %}<th scope="col" class="cell-citation"></th>{% endif %}
         {% if doc_table_show_jurisdiction %}
           {% if MULTIPLE_JURISDICTIONS or MULTIPLE_LOCALITIES %}
@@ -14,7 +23,14 @@
         {% if doc_table_show_author %}<th scope="col"></th>{% endif %}
         {% if doc_table_show_court %}<th scope="col"></th>{% endif %}
         {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
-        <th scope="col" class="cell-date">{% trans 'Date' %}</th>
+        <th scope="col" class="cell-date">
+          <div class="align-items-center"
+               role="button"
+               data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
+            {% trans 'Date' %}
+            <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-up{% endif %} {% if form.sort.value == "date" %}bi-sort-down{% endif %}"></i>
+          </div>
+        </th>
       </tr>
     </thead>
     {% for document in documents %}

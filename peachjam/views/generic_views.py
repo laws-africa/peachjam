@@ -77,6 +77,12 @@ class DocumentListView(ListView):
 
         return docs
 
+    def get_template_names(self):
+        if self.request.htmx:
+            # TODO render all filters
+            return ["peachjam/_document_table.html"]
+        return super().get_template_names()
+
 
 class FilteredDocumentListView(DocumentListView):
     """Generic list view for filtered document lists."""
