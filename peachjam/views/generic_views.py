@@ -80,9 +80,9 @@ class DocumentListView(ListView):
 
     def get_template_names(self):
         if self.request.htmx:
-            # TODO render all filters
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/_document_table.html"]
             return ["peachjam/faceted_doc_table.html"]
-            return ["peachjam/_document_table.html"]
         return super().get_template_names()
 
 
