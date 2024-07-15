@@ -3,6 +3,7 @@ import itertools
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
+from django.utils.dates import MONTHS
 from django.views.generic import DetailView, ListView, View
 from lxml import html
 
@@ -34,6 +35,9 @@ class DocumentListView(ListView):
         "nature", "work", "jurisdiction", "locality"
     )
 
+    # when grouping by date, group by year, or month and year? ("year" and "month-year" are the only options)
+    group_by_date = "year"
+
     def get_base_queryset(self, *args, **kwargs):
         qs = self.queryset if self.queryset is not None else self.model.objects
         return qs.filter(published=True)
@@ -46,6 +50,32 @@ class DocumentListView(ListView):
         return super().get_context_data(
             doc_table_show_jurisdiction=True, *args, **kwargs
         )
+
+    def group_documents(self, documents, group_by):
+        if not group_by:
+            return documents
+
+        def grouper(d):
+            if group_by == "date":
+                if self.group_by_date == "month-year":
+                    return f"{MONTHS[d.date.month]} {d.date.year}"
+                else:
+                    return d.date.year
+            elif group_by == "title":
+                return d.title[0].upper()
+
+        class Group:
+            is_group = True
+
+            def __init__(self, title):
+                self.title = title
+
+        docs = []
+        for key, group in itertools.groupby(documents, grouper):
+            docs.append(Group(key))
+            docs.extend(group)
+
+        return docs
 
 
 class FilteredDocumentListView(DocumentListView):
@@ -132,6 +162,15 @@ class FilteredDocumentListView(DocumentListView):
             "alphabet": lowercase_alphabet(),
             "natures": natures,
         }
+
+    def group_documents(self, documents, group_by=None):
+        # determine what to group by
+        if group_by is None:
+            group_by = documents.query.order_by[0]
+            if group_by.startswith("-"):
+                group_by = group_by[1:]
+
+        return super().group_documents(documents, group_by)
 
 
 class BaseDocumentDetailView(DetailView):

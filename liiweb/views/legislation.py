@@ -1,7 +1,6 @@
 import datetime
 from collections import defaultdict
 from datetime import timedelta
-from itertools import groupby
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -111,33 +110,6 @@ class LegislationListView(FilteredDocumentListView):
         # fold in children
         for parent in queryset:
             parent.children = children.get(parent.work_id, [])
-
-    def group_documents(self, documents):
-        # TODO: move this down into the base class
-
-        # determine what to group by
-        ordering = documents.query.order_by[0]
-        if ordering.startswith("-"):
-            ordering = ordering[1:]
-
-        def grouper(d):
-            if ordering == "date":
-                return d.date.year
-            else:
-                return d.title[0].upper()
-
-        class Group:
-            is_group = True
-
-            def __init__(self, title):
-                self.title = title
-
-        docs = []
-        for key, group in groupby(documents, grouper):
-            docs.append(Group(key))
-            docs.extend(group)
-
-        return docs
 
 
 class LocalityLegislationView(TemplateView):
