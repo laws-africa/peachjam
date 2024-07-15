@@ -109,20 +109,31 @@ class MainSearchBackend(BaseSearchFilterBackend):
         must_queries.extend(self.build_per_field_queries(request, view))
 
         should_queries = []
-        should_queries.extend(self.build_basic_queries(request, view))
-        should_queries.extend(self.build_content_phrase_queries(request, view))
-        should_queries.extend(self.build_nested_page_queries(request, view))
-        should_queries.extend(self.build_nested_provision_queries(request, view))
-
-        # these handle advanced search
-        must_queries.extend(self.build_advanced_all_queries(request, view))
-        must_queries.extend(self.build_advanced_content_queries(request, view))
+        if self.is_advanced_search(request, view):
+            # these handle advanced search, and can't be combined with normal search because they both
+            # build queries to return nested content, and ES complains if multiple queries try to return the
+            # same nested content fields
+            must_queries.extend(self.build_advanced_all_queries(request, view))
+            must_queries.extend(self.build_advanced_content_queries(request, view))
+        else:
+            # these handle basic search
+            should_queries.extend(self.build_basic_queries(request, view))
+            should_queries.extend(self.build_content_phrase_queries(request, view))
+            should_queries.extend(self.build_nested_page_queries(request, view))
+            should_queries.extend(self.build_nested_provision_queries(request, view))
 
         return queryset.query(
             "bool",
             must=must_queries,
             should=should_queries,
             minimum_should_match=1 if should_queries else 0,
+        )
+
+    def is_advanced_search(self, request, view):
+        # it's an advanced search if any of the search__* query parameters are present
+        return any(
+            request.query_params.get(self.search_param + "__" + field)
+            for field in list(view.search_fields.keys()) + ["all"]
         )
 
     def build_rank_feature_queries(self, request, view):
