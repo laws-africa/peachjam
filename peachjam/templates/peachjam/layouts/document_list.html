@@ -102,17 +102,22 @@
           {% block content %}
             {% if documents %}
               {% block filter-documents %}
-                <div class="row">
-                  <div class="col">
+                <div class="mb-2 d-flex">
+                  <div class="flex-grow-1 me-2">
                     <input id="filter-input"
                            form="filter-form"
-                           aria-label="Filter"
-                           placeholder="Filter documents"
+                           aria-label="{% trans "Filter documents" %}"
+                           placeholder="{% trans "Filter documents" %}"
                            class="form-control"
                            type="text"
                            name="q"/>
                   </div>
-                  <div class="col-auto ms-0 ps-0">
+                  <div class="me-2">
+                    <select class="form-control" name="sort" form="filter-form">
+                      {% for opt in form.sort %}{{ opt }}{% endfor %}
+                    </select>
+                  </div>
+                  <div>
                     <button hx-get="{{ request.path }}"
                             hx-target="#doc-table"
                             hx-push-url="true"

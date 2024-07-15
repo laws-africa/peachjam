@@ -114,7 +114,7 @@ class FilteredDocumentListView(DocumentListView):
         return self.form.filter_queryset(qs)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(form=self.form, **kwargs)
 
         self.add_facets(context)
         context["doc_count"] = context["paginator"].count
