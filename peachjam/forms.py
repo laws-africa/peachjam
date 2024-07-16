@@ -139,7 +139,7 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(doc_type__in=doc_type)
 
         if judges and exclude != "judges":
-            queryset = queryset.filter(judges__name__in=judges)
+            queryset = queryset.filter(judges__name__in=judges).distinct()
 
         if natures and exclude != "natures":
             queryset = queryset.filter(nature__name__in=natures)
@@ -151,7 +151,7 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(registry__name__in=registries)
 
         if attorneys and exclude != "attorneys":
-            queryset = queryset.filter(attorneys__name__in=attorneys)
+            queryset = queryset.filter(attorneys__name__in=attorneys).distinct()
 
         if outcomes and exclude != "outcomes":
             queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
