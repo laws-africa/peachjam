@@ -16,9 +16,7 @@ class LegislationListView(FilteredDocumentListView):
     variant = "current"
     navbar_link = "legislation"
     model = Legislation
-    queryset = Legislation.objects.prefetch_related(
-        "taxonomies", "taxonomies__topic", "work", "labels"
-    )
+    queryset = Legislation.objects.prefetch_related("work", "labels")
     latest_expression_only = True
     form_defaults = None
 
