@@ -167,6 +167,13 @@ class FilteredDocumentListView(DocumentListView):
             .values_list("date__year", flat=True)
             .distinct()
         )
+        taxonomies = list(
+            self.form.filter_queryset(self.get_base_queryset(), exclude="taxonomies")
+            .filter(taxonomies__topic__isnull=False)
+            .order_by()
+            .values_list("taxonomies__topic__name", flat=True)
+            .distinct()
+        )
 
         context["doc_table_show_author"] = bool(authors)
         context["doc_table_show_doc_type"] = bool(natures)
@@ -194,6 +201,12 @@ class FilteredDocumentListView(DocumentListView):
                 "type": "radio",
                 "options": lowercase_alphabet(),
                 "values": self.request.GET.get("alphabet"),
+            },
+            "taxonomies": {
+                "label": _("Topics"),
+                "type": "checkbox",
+                "options": taxonomies,
+                "values": self.request.GET.getlist("taxonomies"),
             },
         }
 

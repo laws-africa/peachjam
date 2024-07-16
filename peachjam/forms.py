@@ -85,6 +85,7 @@ class BaseDocumentFilterForm(forms.Form):
     registries = forms.CharField(required=False)
     attorneys = forms.CharField(required=False)
     outcomes = forms.CharField(required=False)
+    taxonomies = forms.CharField(required=False)
     q = forms.CharField(required=False)
 
     sort = forms.ChoiceField(
@@ -117,6 +118,7 @@ class BaseDocumentFilterForm(forms.Form):
         registries = self.params.getlist("registries")
         attorneys = self.params.getlist("attorneys")
         outcomes = self.params.getlist("outcomes")
+        taxonomies = self.params.getlist("taxonomies")
         q = self.params.get("q")
 
         queryset = self.order_queryset(queryset, exclude)
@@ -153,6 +155,9 @@ class BaseDocumentFilterForm(forms.Form):
 
         if outcomes and exclude != "outcomes":
             queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
+
+        if taxonomies and exclude != "taxonomies":
+            queryset = queryset.filter(taxonomies__topic__name__in=taxonomies)
 
         if filter_q and q and exclude != "q":
             queryset = queryset.filter(title__icontains=q)
