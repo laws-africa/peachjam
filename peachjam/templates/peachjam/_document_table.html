@@ -11,7 +11,7 @@
                role="button"
                data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
             {% trans 'Title' %}
-            <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-up{% endif %} {% if form.sort.value == "-title" %}bi-sort-down{% endif %}"></i>
+            <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-down{% endif %} {% if form.sort.value == "-title" %}bi-sort-up{% endif %}"></i>
           </div>
         </th>
         {% if doc_table_citations %}<th scope="col" class="cell-citation"></th>{% endif %}
@@ -28,7 +28,7 @@
                role="button"
                data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
             {% trans 'Date' %}
-            <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-up{% endif %} {% if form.sort.value == "date" %}bi-sort-down{% endif %}"></i>
+            <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"></i>
           </div>
         </th>
       </tr>

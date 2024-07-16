@@ -20,7 +20,12 @@ class LegislationListView(FilteredDocumentListView):
         "taxonomies", "taxonomies__topic", "work"
     )
     latest_expression_only = True
-    extra_context = {"doc_table_citations": True, "legislation_list_sort": "title"}
+    form_defaults = {"sort": "title"}
+
+    def get_form(self):
+        if self.variant == "recent":
+            self.form_defaults["sort"] = "-date"
+        return super().get_form()
 
     def filter_queryset(self, qs, filter_q=False):
         if self.variant == "all":
@@ -60,7 +65,9 @@ class LegislationListView(FilteredDocumentListView):
                 context["entity_profile"] = jurisdiction_profile.entity_profile.first()
                 context["entity_profile_title"] = jurisdiction_profile.jurisdiction.name
 
+        context["doc_type"] = "legislation"  # for quick search
         context["doc_table_toggle"] = True
+        context["doc_table_citations"] = True
         context["doc_table_show_doc_type"] = False
         context["doc_table_show_court"] = False
         context["doc_table_show_author"] = False

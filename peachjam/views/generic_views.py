@@ -94,11 +94,16 @@ class FilteredDocumentListView(DocumentListView):
     # This is a bit more expensive and so is opt-in. It is only necessary for document types
     # that have multiple points-in-time (dated expressions), such as Legislation.
     latest_expression_only = False
+    # default values to pre-populate the form with
+    form_defaults = None
 
     def get(self, request, *args, **kwargs):
-        self.form = self.form_class(request.GET)
+        self.form = self.get_form()
         self.form.is_valid()
         return super().get(request, *args, **kwargs)
+
+    def get_form(self):
+        return self.form_class(self.form_defaults, self.request.GET)
 
     def get_queryset(self):
         qs = super().get_queryset()
