@@ -1,6 +1,8 @@
 {% extends 'peachjam/layouts/main.html' %}
 {% load i18n %}
-{% block title %}{{ document.title }}{% endblock %}
+{% block title %}
+  {% trans "Documents" %}
+{% endblock %}
 {% block page-content %}
   {% block breadcrumbs %}{% endblock %}
   {% block entity-profile %}{% endblock %}
@@ -9,12 +11,9 @@
       {% block page-title %}
         <h1 class="mt-4">{% trans 'Documents' %}</h1>
       {% endblock %}
-      {% block document-count %}
-        {% include 'peachjam/_document_count.html' %}
+      {% block count-and-search %}
+        {% include 'peachjam/_count_and_search.html' %}
       {% endblock %}
-    {% endblock %}
-    {% block quick-search %}
-      {% include 'peachjam/_quick_search.html' %}
     {% endblock %}
     {% block nav-tabs %}{% endblock %}
     <div class="d-block d-lg-none my-2">
