@@ -196,17 +196,17 @@ class FilteredDocumentListView(DocumentListView):
                 "options": natures,
                 "values": self.request.GET.getlist("natures"),
             },
-            "alphabet": {
-                "label": _("Alphabet"),
-                "type": "radio",
-                "options": lowercase_alphabet(),
-                "values": self.request.GET.get("alphabet"),
-            },
             "taxonomies": {
                 "label": _("Topics"),
                 "type": "checkbox",
                 "options": taxonomies,
                 "values": self.request.GET.getlist("taxonomies"),
+            },
+            "alphabet": {
+                "label": _("Alphabet"),
+                "type": "radio",
+                "options": lowercase_alphabet(),
+                "values": self.request.GET.get("alphabet"),
             },
         }
 
