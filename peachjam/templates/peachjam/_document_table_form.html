@@ -23,6 +23,7 @@
                   <div class="d-flex align-items-center">
                     <a href="{{ request.path }}"
                        hx-get="{{ request.path }}"
+                       hx-params="not {{ facet_name }}"
                        hx-push-url="true">Clear</a>
                   </div>
                 </div>
