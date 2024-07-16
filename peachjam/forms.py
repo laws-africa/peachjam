@@ -99,6 +99,7 @@ class BaseDocumentFilterForm(forms.Form):
 
     def __init__(self, defaults, data, *args, **kwargs):
         self.params = QueryDict(mutable=True)
+        self.params.update({"sort": "title"})
         self.params.update(defaults or {})
         self.params.update(data)
 
