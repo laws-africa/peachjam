@@ -26,7 +26,12 @@ class LegislationListView(FilteredDocumentListView):
             self.form_defaults = {"sort": "-date"}
         return super().get_form()
 
-    def filter_queryset(self, qs, filter_q=False):
+    def get_base_queryset(self, *args, **kwargs):
+        qs = super().get_base_queryset(*args, **kwargs)
+        qs = self.get_variant_queryset(qs)
+        return qs
+
+    def get_variant_queryset(self, qs):
         if self.variant == "all":
             pass
         elif self.variant == "repealed":
@@ -47,8 +52,6 @@ class LegislationListView(FilteredDocumentListView):
                     datetime.date.today() - timedelta(days=365)
                 ).isoformat()
             )
-        qs = super().filter_queryset(qs, filter_q=filter_q)
-
         return qs
 
     def get_context_data(self, **kwargs):
