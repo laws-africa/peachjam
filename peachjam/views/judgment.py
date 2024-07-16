@@ -19,6 +19,7 @@ class JudgmentListView(TemplateView):
         ).order_by("-date")[:30]
         context["doc_type"] = "Judgment"
         context["doc_count"] = Judgment.objects.filter(published=True).count()
+        context["help_link"] = "judgments/courts"
         return context
 
 

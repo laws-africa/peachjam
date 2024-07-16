@@ -73,6 +73,7 @@ class LegislationListView(FilteredDocumentListView):
         context["doc_table_show_court"] = False
         context["doc_table_show_author"] = False
         context["doc_table_show_jurisdiction"] = False
+        context["help_link"] = "legislation/"
 
         context["documents"] = self.group_documents(context["documents"])
 
