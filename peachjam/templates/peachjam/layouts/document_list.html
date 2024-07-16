@@ -16,15 +16,6 @@
       {% endblock %}
     {% endblock %}
     {% block nav-tabs %}{% endblock %}
-    <div class="d-block d-lg-none my-2">
-      <button class="btn btn-primary"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#-facets-offcanvas"
-              aria-controls="list-facets-offcanvas">
-        {% trans 'Filters' %}
-      </button>
-    </div>
     {% include "peachjam/_document_table_form.html" %}
     {% block taxonomy-json %}{% endblock %}
   </div>
