@@ -1,6 +1,11 @@
 {% load i18n %}
-<form method="get" id="filter-form" hx-include="#filter-form">
-  <div class="row" id="faceted-table">
+<form method="get"
+      id="filter-form"
+      hx-include="#filter-form"
+      hx-indicator=".htmx-progress"
+      hx-target="#filter-form"
+      hx-swap="outerHTML">
+  <div class="row">
     <div class="col-lg-3 d-none d-lg-block">
       <div>
         {% block desktop-taxonomy-list %}{% endblock %}
@@ -18,7 +23,6 @@
                   <div class="d-flex align-items-center">
                     <a href="{{ request.path }}"
                        hx-get="{{ request.path }}"
-                       hx-target="#faceted-table"
                        hx-push-url="true">Clear</a>
                   </div>
                 </div>
@@ -31,7 +35,6 @@
                                  name="{{ facet_name }}"
                                  type="{{ facet.type }}"
                                  hx-get="{{ request.path }}"
-                                 hx-target="#faceted-table"
                                  hx-push-url="true"
                                  {% if option == facet.values %}checked{% endif %}
                                  hx-include="#filter-form"
@@ -51,7 +54,6 @@
                                  name="{{ facet_name }}"
                                  type="{{ facet.type }}"
                                  hx-get="{{ request.path }}"
-                                 hx-target="#faceted-table"
                                  hx-push-url="true"
                                  {% if option in facet.values %}checked{% endif %}
                                  hx-include="#filter-form"
@@ -72,37 +74,37 @@
     <div class="col-lg-9">
       <div class="position-relative">
         {% block content %}
-          {% if documents %}
-            {% block filter-documents %}
-              <div class="mb-2 d-flex" hx-target="#doc-table" hx-push-url="true">
-                <div class="flex-grow-1 me-3">
-                  <input id="filter-input"
-                         hx-get="{{ request.path }}"
-                         hx-trigger="keyup changed delay:300ms"
-                         aria-label="{% trans "Filter documents" %}"
-                         placeholder="{% trans "Filter documents" %}"
-                         class="form-control"
-                         type="text"
-                         name="q"/>
-                </div>
-                <div class="me-2 d-flex align-items-center">
-                  <div class="d-none d-md-block me-2 text-nowrap">{% trans "Sort by" %}:</div>
-                  <select class="form-control" hx-get="{{ request.path }}" name="sort">
-                    {% for opt in form.sort %}{{ opt }}{% endfor %}
-                  </select>
-                </div>
-                <div>
-                  <button class="btn btn-primary"
-                          hx-get="{{ request.path }}"
-                          type="submit"
-                          value="Filter">Filter</button>
-                </div>
+          {% block filter-documents %}
+            <div class="mb-2 d-flex" hx-target="#doc-table" hx-push-url="true">
+              <div class="flex-grow-1 me-3">
+                <input id="filter-input"
+                       hx-get="{{ request.path }}"
+                       hx-trigger="keyup changed delay:300ms"
+                       aria-label="{% trans "Filter documents" %}"
+                       placeholder="{% trans "Filter documents" %}"
+                       class="form-control"
+                       type="text"
+                       value="{{ form.q.value|default_if_none:'' }}"
+                       name="q"/>
               </div>
-            {% endblock %}
-            {% include 'peachjam/_document_table.html' %}
-          {% else %}
-            <p>{% trans 'No documents found.' %}</p>
-          {% endif %}
+              <div class="me-2 d-flex align-items-center">
+                <div class="d-none d-md-block me-2 text-nowrap">{% trans "Sort by" %}:</div>
+                <select class="form-control" hx-get="{{ request.path }}" name="sort">
+                  {% for opt in form.sort %}{{ opt }}{% endfor %}
+                </select>
+              </div>
+              <div>
+                <button class="btn btn-primary"
+                        hx-get="{{ request.path }}"
+                        type="submit"
+                        value="Filter">Filter</button>
+              </div>
+            </div>
+          {% endblock %}
+          <div class="htmx-progress progress mb-2">
+            <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+          </div>
+          {% include 'peachjam/_document_table.html' %}
         {% endblock %}
       </div>
     </div>

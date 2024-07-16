@@ -1,0 +1,17 @@
+<div class="row mb-4">
+  <div class="col-12 col-sm-6 col-lg-8 mb-2">
+    {% block document-count %}
+      {% include 'peachjam/_document_count.html' %}
+    {% endblock %}
+    {% block help %}
+      {% if link %}
+        {% include "peachjam/_help_button.html" %}
+      {% endif %}
+    {% endblock %}
+  </div>
+  <div class="col-12 col-sm-6 col-lg-4 mb-2">
+    {% block quick-search %}
+      {% include 'peachjam/_quick_search.html' %}
+    {% endblock %}
+  </div>
+</div>
