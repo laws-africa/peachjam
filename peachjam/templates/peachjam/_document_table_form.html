@@ -1,83 +1,102 @@
 {% load i18n %}
 <form method="get"
       id="filter-form"
+      data-component="DocumentFilterForm"
       hx-include="#filter-form"
       hx-indicator=".htmx-progress"
       hx-target="#filter-form"
       hx-swap="outerHTML">
+  <div class="d-block d-lg-none my-2">
+    <a class="btn btn-primary"
+       href="#document-list-filters-offcanvas"
+       data-bs-toggle="offcanvas"
+       aria-controls="document-list-filters-offcanvas">
+      {% trans 'Filters' %}
+    </a>
+  </div>
+  <div class="offcanvas offcanvas-start"
+       tabindex="-1"
+       id="document-list-filters-offcanvas"
+       aria-labelledby="document-list-filters-offcanvas-title">
+    <div class="offcanvas-header">
+      <button type="button"
+              class="btn-close ms-auto"
+              data-bs-dismiss="offcanvas"
+              aria-label="{% trans "Close" %}"></button>
+    </div>
+    <div class="offcanvas-body"></div>
+  </div>
   <div class="row">
-    <div class="col-lg-3 d-none d-lg-block">
+    <div class="col-lg-3 d-none d-lg-block document-list-facets-wrapper">
       <div>
         {% block desktop-taxonomy-list %}{% endblock %}
       </div>
-      <div class="pocketlaw-hidden">
-        <ul class="list-group">
-          <li class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center">
-            <strong>{% trans 'Filters' %}</strong>
-          </li>
-          {% for facet_name, facet in facet_data.items %}
-            {% if facet.options %}
-              <li class="list-group-item">
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ facet.label }}</strong>
-                  <div class="d-flex align-items-center">
-                    <a href="{{ request.path }}"
-                       hx-get="{{ request.path }}"
-                       hx-params="not {{ facet_name }}"
-                       hx-push-url="true">Clear</a>
-                  </div>
+      <ul class="list-group document-list-facets pocketlaw-hidden">
+        <li class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center">
+          <strong id="document-list-filters-offcanvas-title">{% trans 'Filters' %}</strong>
+        </li>
+        {% for facet_name, facet in facet_data.items %}
+          {% if facet.options %}
+            <li class="list-group-item">
+              <div class="d-flex justify-content-between mb-2">
+                <strong>{{ facet.label }}</strong>
+                <div class="d-flex align-items-center">
+                  <a href="{{ request.path }}"
+                     hx-get="{{ request.path }}"
+                     hx-params="not {{ facet_name }}"
+                     hx-push-url="true">Clear</a>
                 </div>
-                {% if facet_name == "alphabet" %}
-                  <div>
-                    <div class="letter-radiobox-container">
-                      {% for option in facet.options %}
-                        <label class="letter-radiobox" for="{{ facet_name }}_{{ forloop.counter0 }}">
-                          <input id="{{ facet_name }}_{{ forloop.counter0 }}"
-                                 name="{{ facet_name }}"
-                                 type="{{ facet.type }}"
-                                 hx-get="{{ request.path }}"
-                                 hx-push-url="true"
-                                 {% if option == facet.values %}checked{% endif %}
-                                 hx-include="#filter-form"
-                                 value="{{ option }}"/>
-                          <span class="letter-radiobox__text">{{ option }}</span>
-                        </label>
-                      {% endfor %}
-                    </div>
-                  </div>
-                {% else %}
-                  <div class="facets-scrollable">
+              </div>
+              {% if facet_name == "alphabet" %}
+                <div>
+                  <div class="letter-radiobox-container">
                     {% for option in facet.options %}
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div class="form-check flex-grow-1">
-                          <input id="{{ facet_name }}_{{ forloop.counter0 }}"
-                                 class="form-check-input"
-                                 name="{{ facet_name }}"
-                                 type="{{ facet.type }}"
-                                 hx-get="{{ request.path }}"
-                                 hx-push-url="true"
-                                 {% if option in facet.values %}checked{% endif %}
-                                 hx-include="#filter-form"
-                                 value="{{ option }}"/>
-                          <label class="form-check-label"
-                                 for="{{ facet_name }}_{{ forloop.counter0 }}">{{ option }}</label>
-                        </div>
-                      </div>
+                      <label class="letter-radiobox" for="{{ facet_name }}_{{ forloop.counter0 }}">
+                        <input id="{{ facet_name }}_{{ forloop.counter0 }}"
+                               name="{{ facet_name }}"
+                               type="{{ facet.type }}"
+                               hx-get="{{ request.path }}"
+                               hx-push-url="true"
+                               {% if option == facet.values %}checked{% endif %}
+                               hx-include="#filter-form"
+                               value="{{ option }}"/>
+                        <span class="letter-radiobox__text">{{ option }}</span>
+                      </label>
                     {% endfor %}
                   </div>
-                {% endif %}
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      </div>
+                </div>
+              {% else %}
+                <div class="facets-scrollable">
+                  {% for option in facet.options %}
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="form-check flex-grow-1">
+                        <input id="{{ facet_name }}_{{ forloop.counter0 }}"
+                               class="form-check-input"
+                               name="{{ facet_name }}"
+                               type="{{ facet.type }}"
+                               hx-get="{{ request.path }}"
+                               hx-push-url="true"
+                               {% if option in facet.values %}checked{% endif %}
+                               hx-include="#filter-form"
+                               value="{{ option }}"/>
+                        <label class="form-check-label"
+                               for="{{ facet_name }}_{{ forloop.counter0 }}">{{ option }}</label>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
     </div>
     <div class="col-lg-9">
       <div class="position-relative">
         {% block content %}
           {% block filter-documents %}
             <div class="mb-2 d-flex" hx-target="#doc-table" hx-push-url="true">
-              <div class="flex-grow-1 me-3">
+              <div class="flex-grow-1 me-2">
                 <input id="filter-input"
                        hx-get="{{ request.path }}"
                        hx-trigger="keyup changed delay:300ms"
@@ -88,13 +107,13 @@
                        value="{{ form.q.value|default_if_none:'' }}"
                        name="q"/>
               </div>
-              <div class="me-2 d-flex align-items-center">
-                <div class="d-none d-md-block me-2 text-nowrap">{% trans "Sort by" %}:</div>
+              <div class="d-flex align-items-center">
+                <div class="d-none d-md-block ms-3 me-2 text-nowrap">{% trans "Sort by" %}:</div>
                 <select class="form-control" hx-get="{{ request.path }}" name="sort">
                   {% for opt in form.sort %}{{ opt }}{% endfor %}
                 </select>
               </div>
-              <div>
+              <div class="d-none d-md-block ms-2">
                 <button class="btn btn-primary"
                         hx-get="{{ request.path }}"
                         type="submit"
