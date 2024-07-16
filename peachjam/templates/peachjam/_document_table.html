@@ -45,7 +45,10 @@
       {% endif %}
     {% endfor %}
   </table>
-  {% if not hide_pagination %}
+  {% if not documents %}
+    <p>{% trans 'No documents found.' %}</p>
+  {% endif %}
+  {% if documents and not hide_pagination %}
     {% include 'peachjam/_pagination.html' %}
   {% endif %}
 </div>

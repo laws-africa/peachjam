@@ -102,7 +102,8 @@ class FilteredDocumentListView(DocumentListView):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        filtered_qs = self.filter_queryset(qs)
+        # filter the queryset, including filtering on the form's query string
+        filtered_qs = self.filter_queryset(qs, filter_q=True)
 
         if self.latest_expression_only:
             # Getting only the latest expression requires ordering on the work, which breaks the actual ordering
@@ -118,8 +119,8 @@ class FilteredDocumentListView(DocumentListView):
 
         return filtered_qs
 
-    def filter_queryset(self, qs):
-        return self.form.filter_queryset(qs)
+    def filter_queryset(self, qs, filter_q=False):
+        return self.form.filter_queryset(qs, filter_q=filter_q)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(form=self.form, **kwargs)

@@ -22,7 +22,7 @@ class LegislationListView(FilteredDocumentListView):
     latest_expression_only = True
     extra_context = {"doc_table_citations": True, "legislation_list_sort": "title"}
 
-    def filter_queryset(self, qs):
+    def filter_queryset(self, qs, filter_q=False):
         if self.variant == "all":
             pass
         elif self.variant == "repealed":
@@ -43,7 +43,7 @@ class LegislationListView(FilteredDocumentListView):
                     datetime.date.today() - timedelta(days=365)
                 ).isoformat()
             )
-        qs = super().filter_queryset(qs)
+        qs = super().filter_queryset(qs, filter_q=filter_q)
 
         return qs
 

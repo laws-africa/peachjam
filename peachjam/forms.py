@@ -85,6 +85,7 @@ class BaseDocumentFilterForm(forms.Form):
     registries = forms.CharField(required=False)
     attorneys = forms.CharField(required=False)
     outcomes = forms.CharField(required=False)
+    q = forms.CharField(required=False)
 
     sort = forms.ChoiceField(
         required=False,
@@ -102,7 +103,7 @@ class BaseDocumentFilterForm(forms.Form):
 
         super().__init__(self.params, *args, **kwargs)
 
-    def filter_queryset(self, queryset, exclude=None):
+    def filter_queryset(self, queryset, exclude=None, filter_q=False):
         years = self.params.getlist("years")
         alphabet = self.cleaned_data.get("alphabet")
         authors = self.params.getlist("authors")
@@ -151,7 +152,7 @@ class BaseDocumentFilterForm(forms.Form):
         if outcomes and exclude != "outcomes":
             queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
 
-        if q and exclude != "q":
+        if filter_q and q and exclude != "q":
             queryset = queryset.filter(title__icontains=q[0])
 
         return queryset
