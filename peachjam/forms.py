@@ -86,6 +86,16 @@ class BaseDocumentFilterForm(forms.Form):
     attorneys = forms.CharField(required=False)
     outcomes = forms.CharField(required=False)
 
+    sort = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("title", _("Title") + " (A - Z)"),
+            ("-title", _("Title") + " (Z - A)"),
+            ("-date", _("Date") + " " + _("(Newest first)")),
+            ("date", _("Date") + " " + _("(Oldest first)")),
+        ],
+    )
+
     def __init__(self, data, *args, **kwargs):
         self.params = QueryDict(mutable=True)
         self.params.update(data)
@@ -147,10 +157,8 @@ class BaseDocumentFilterForm(forms.Form):
         return queryset
 
     def order_queryset(self, queryset, exclude=None):
-        if self.cleaned_data.get("alphabet") and exclude != "alphabet":
-            queryset = queryset.order_by("title")
-        else:
-            queryset = queryset.order_by("-date", "title")
+        sort = self.cleaned_data.get("sort") or "-date"
+        queryset = queryset.order_by(sort, "title")
         return queryset
 
 

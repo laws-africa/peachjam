@@ -22,11 +22,6 @@ class LegislationListView(FilteredDocumentListView):
     latest_expression_only = True
     extra_context = {"doc_table_citations": True, "legislation_list_sort": "title"}
 
-    def get_template_names(self):
-        if self.request.htmx:
-            return ["peachjam/faceted_doc_table.html"]
-        return ["liiweb/legislation_list.html"]
-
     def filter_queryset(self, qs):
         if self.variant == "all":
             pass

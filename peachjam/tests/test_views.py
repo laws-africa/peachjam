@@ -101,7 +101,8 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertEqual(
-            [1969, 2005, 2010, 2020], sorted(response.context["facet_data"]["years"])
+            ["1969", "2005", "2010", "2020"],
+            sorted(response.context["facet_data"]["years"]["options"]),
         )
 
     def test_legislation_detail(self):
@@ -126,7 +127,7 @@ class PeachjamViewsTest(TestCase):
             "African Charter on Democracy, Elections and Governance",
             documents,
         )
-        self.assertEqual(response.context["facet_data"]["years"], [2007])
+        self.assertEqual(response.context["facet_data"]["years"]["options"], ["2007"])
 
     def test_legal_instrument_detail(self):
         response = self.client.get(
@@ -150,7 +151,7 @@ class PeachjamViewsTest(TestCase):
             "Activity Report of the Pan-African Parliament, July 2016 to June 2017",
             documents,
         )
-        self.assertEqual(response.context["facet_data"]["years"], [2017])
+        self.assertEqual(response.context["facet_data"]["years"]["options"], ["2017"])
 
     def test_generic_document_detail(self):
         response = self.client.get(

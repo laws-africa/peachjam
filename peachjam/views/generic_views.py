@@ -78,6 +78,13 @@ class DocumentListView(ListView):
 
         return docs
 
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/_document_table.html"]
+            return ["peachjam/faceted_doc_table.html"]
+        return super().get_template_names()
+
 
 class FilteredDocumentListView(DocumentListView):
     """Generic list view for filtered document lists."""
@@ -115,7 +122,7 @@ class FilteredDocumentListView(DocumentListView):
         return self.form.filter_queryset(qs)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(form=self.form, **kwargs)
 
         self.add_facets(context)
         context["doc_count"] = context["paginator"].count

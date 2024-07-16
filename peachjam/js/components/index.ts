@@ -1,6 +1,7 @@
 import { CopyToClipboard } from './clipboard';
 import { RelationshipEnrichments } from './RelationshipEnrichment';
 import DocumentList from './document-list';
+import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
 import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
@@ -15,6 +16,7 @@ const components: Record<string, any> = {
   // Data components
   CopyToClipboard,
   DocumentContent,
+  DocumentTable,
   DocumentList,
   NavigationSelect,
   RelationshipEnrichments,
