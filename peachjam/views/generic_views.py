@@ -142,7 +142,7 @@ class FilteredDocumentListView(DocumentListView):
         natures = list(
             doc_n
             for doc_n in self.form.filter_queryset(
-                self.get_base_queryset(), exclude="natures"
+                self.get_queryset(), exclude="natures"
             )
             .order_by()
             .values_list("nature__name", flat=True)
@@ -153,7 +153,7 @@ class FilteredDocumentListView(DocumentListView):
             authors = list(
                 a
                 for a in self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="authors"
+                    self.get_queryset(), exclude="authors"
                 )
                 .order_by()
                 .values_list("authors__name", flat=True)
@@ -162,13 +162,13 @@ class FilteredDocumentListView(DocumentListView):
             )
 
         years = list(
-            self.form.filter_queryset(self.get_base_queryset(), exclude="years")
+            self.form.filter_queryset(self.get_queryset(), exclude="years")
             .order_by()
             .values_list("date__year", flat=True)
             .distinct()
         )
         taxonomies = list(
-            self.form.filter_queryset(self.get_base_queryset(), exclude="taxonomies")
+            self.form.filter_queryset(self.get_queryset(), exclude="taxonomies")
             .filter(taxonomies__topic__isnull=False)
             .order_by()
             .values_list("taxonomies__topic__name", flat=True)
