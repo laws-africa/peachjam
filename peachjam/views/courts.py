@@ -57,7 +57,12 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if judge
             )
-            context["facet_data"]["judges"] = judges
+            context["facet_data"]["judges"] = {
+                "label": _("Judges"),
+                "type": "checkbox",
+                "options": judges,
+                "values": self.request.GET.getlist("judges"),
+            }
 
         if "outcomes" not in self.exclude_facets:
             outcomes = list(
@@ -70,7 +75,12 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if outcome
             )
-            context["facet_data"]["outcomes"] = outcomes
+            context["facet_data"]["outcomes"] = {
+                "label": _("Outcomes"),
+                "type": "checkbox",
+                "options": outcomes,
+                "values": self.request.GET.getlist("outcomes"),
+            }
 
         if "attorneys" not in self.exclude_facets:
             attorneys = list(
@@ -83,10 +93,20 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if attorney
             )
-            context["facet_data"]["attorneys"] = attorneys
+            context["facet_data"]["attorneys"] = {
+                "label": _("Attorneys"),
+                "type": "checkbox",
+                "options": attorneys,
+                "values": self.request.GET.getlist("attorneys"),
+            }
 
         if "alphabet" not in self.exclude_facets:
-            context["facet_data"]["alphabet"] = lowercase_alphabet()
+            context["facet_data"]["alphabet"] = {
+                "label": _("Alphabet"),
+                "type": "radio",
+                "options": lowercase_alphabet(),
+                "values": self.request.GET.get("alphabet"),
+            }
 
     def populate_years(self, context):
         context["years"] = self.get_base_queryset(exclude=["year", "month"]).dates(

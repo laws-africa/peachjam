@@ -82,7 +82,7 @@ class DocumentListView(ListView):
         if self.request.htmx:
             if self.request.htmx.target == "doc-table":
                 return ["peachjam/_document_table.html"]
-            return ["peachjam/faceted_doc_table.html"]
+            return ["peachjam/_document_table_form.html"]
         return super().get_template_names()
 
 
