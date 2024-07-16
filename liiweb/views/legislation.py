@@ -20,11 +20,12 @@ class LegislationListView(FilteredDocumentListView):
         "taxonomies", "taxonomies__topic", "work"
     )
     latest_expression_only = True
-    form_defaults = {"sort": "title"}
+    form_defaults = None
 
     def get_form(self):
+        self.form_defaults = {"sort": "title"}
         if self.variant == "recent":
-            self.form_defaults["sort"] = "-date"
+            self.form_defaults = {"sort": "-date"}
         return super().get_form()
 
     def filter_queryset(self, qs, filter_q=False):
