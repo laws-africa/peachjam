@@ -39,6 +39,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
         self.populate_years(context)
         self.populate_facets(context)
+        self.show_facet_clear_all(context)
 
         context["documents"] = self.group_documents(context["documents"])
 

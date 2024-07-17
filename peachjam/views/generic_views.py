@@ -134,6 +134,7 @@ class FilteredDocumentListView(DocumentListView):
         context = super().get_context_data(form=self.form, **kwargs)
 
         self.add_facets(context)
+        self.show_facet_clear_all(context)
         context["doc_count"] = context["paginator"].count
         context["labels"] = {"author": Author.model_label}
 
@@ -212,6 +213,11 @@ class FilteredDocumentListView(DocumentListView):
                 "values": self.request.GET.get("alphabet"),
             },
         }
+
+    def show_facet_clear_all(self, context):
+        context["show_clear_all"] = any(
+            [f["values"] for f in context["facet_data"].values()]
+        )
 
     def group_documents(self, documents, group_by=None):
         # determine what to group by
