@@ -165,7 +165,7 @@ footer {
 }
 
 html[data-user-agent*='pocketlaw'] .pocketlaw-hidden {
-  display: none;
+  display: none !important;
 }
 
 // force font size on mobile to 16 px

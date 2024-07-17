@@ -27,8 +27,8 @@
     <div class="offcanvas-body"></div>
   </div>
   <div class="row">
-    <div class="col-lg-3 d-none d-lg-block document-list-facets-wrapper">
-      <ul class="list-group document-list-facets pocketlaw-hidden">
+    <div class="col-lg-3 d-none d-lg-block document-list-facets-wrapper pocketlaw-hidden">
+      <ul class="list-group document-list-facets">
         {% if taxonomy_tree|length > 0 and not is_leaf_node %}
           <div class="mb-2">{% include "peachjam/_taxonomy_tree_facet.html" %}</div>
         {% endif %}
@@ -101,11 +101,13 @@
         {% endfor %}
       </ul>
     </div>
-    <div class="col-lg-9">
+    <div class="col">
       <div class="position-relative">
         {% block content %}
           {% block filter-documents %}
-            <div class="mb-2 d-flex" hx-target="#doc-table" hx-push-url="true">
+            <div class="mb-2 d-flex pocketlaw-hidden"
+                 hx-target="#doc-table"
+                 hx-push-url="true">
               <div class="flex-grow-1 me-2">
                 <input id="filter-input"
                        hx-get="{{ request.path }}"
