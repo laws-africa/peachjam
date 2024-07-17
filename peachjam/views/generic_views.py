@@ -33,8 +33,11 @@ class DocumentListView(ListView):
     paginate_by = 50
     model = CoreDocument
     queryset = CoreDocument.objects.select_related(
-        "nature", "work", "jurisdiction", "locality", "labels"
-    )
+        "nature",
+        "work",
+        "jurisdiction",
+        "locality",
+    ).prefetch_related("labels")
 
     # when grouping by date, group by year, or month and year? ("year" and "month-year" are the only options)
     group_by_date = "year"
