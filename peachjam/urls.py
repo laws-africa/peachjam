@@ -36,7 +36,6 @@ from peachjam.views import (
     ArticleYearArchiveView,
     AuthorDetailView,
     BookListView,
-    CollectionListView,
     CourtClassDetailView,
     CourtClassMonthView,
     CourtClassYearView,
@@ -66,6 +65,7 @@ from peachjam.views import (
     PlaceDetailView,
     PocketLawResources,
     RobotsView,
+    SaveDocumentView,
     TaxonomyDetailView,
     TaxonomyFirstLevelView,
     TaxonomyListView,
@@ -91,7 +91,7 @@ urlpatterns = [
         AboutPageView.as_view(),
         name="about",
     ),
-    path("collections/", CollectionListView.as_view(), name="collections"),
+    path("save-document/", SaveDocumentView.as_view(), name="save_document"),
     # listing views
     path(
         "authors/<slug:code>/",

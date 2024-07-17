@@ -41,9 +41,7 @@ class SavedDocument(models.Model):
         related_name="saved_documents",
     )
     collection = models.ForeignKey(
-        Collection,
-        on_delete=models.CASCADE,
-        verbose_name=_("collection"),
+        Collection, on_delete=models.CASCADE, verbose_name=_("collection"), null=True
     )
 
     class Meta:

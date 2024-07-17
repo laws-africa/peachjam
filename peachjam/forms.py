@@ -2,15 +2,21 @@ import copy
 
 from django import forms
 from django.conf import settings
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 from django.core.files import File
 from django.core.mail import send_mail
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 
-from peachjam.models import AttachedFiles, CoreDocument, SourceFile, pj_settings
+from peachjam.models import (
+    AttachedFiles,
+    Collection,
+    CoreDocument,
+    SavedDocument,
+    SourceFile,
+    UserProfile,
+    pj_settings,
+)
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
 
@@ -235,9 +241,46 @@ class DocumentProblemForm(forms.Form):
         )
 
 
-class SignUpForm(UserCreationForm):
-    email = forms.EmailField()
+class SaveDocumentForm(forms.ModelForm):
+    collection = forms.ModelChoiceField(queryset=Collection.objects, required=False)
+    user_profile = forms.ModelChoiceField(
+        queryset=UserProfile.objects, widget=forms.HiddenInput()
+    )
+    document = forms.ModelChoiceField(
+        queryset=CoreDocument.objects, widget=forms.HiddenInput()
+    )
 
     class Meta:
-        model = User
-        fields = ["username", "email", "password1", "password2"]
+        model = SavedDocument
+        fields = "__all__"
+
+    def __init__(self, *args, document=None, user_profile=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if document is not None and user_profile is not None:
+            self.document = document
+            self.user_profile = user_profile
+            self.fields["document"].initial = self.document
+            self.fields["user_profile"].initial = self.user_profile
+
+    def save(self, commit=True):
+        return super().save()
+
+
+class CollectionForm(forms.ModelForm):
+    name = forms.CharField(max_length=255, required=True)
+    user_profile = forms.ModelChoiceField(
+        queryset=UserProfile.objects, widget=forms.HiddenInput()
+    )
+
+    class Meta:
+        model = Collection
+        fields = "__all__"
+
+    def __init__(self, *args, user_profile=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user_profile is not None:
+            self.user_profile = user_profile
+            self.fields["user_profile"].initial = self.user_profile
+
+    def save(self, commit=True):
+        return super().save()

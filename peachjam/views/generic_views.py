@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views.generic import DetailView, ListView, View
 from lxml import html
 
-from peachjam.forms import BaseDocumentFilterForm
+from peachjam.forms import BaseDocumentFilterForm, SaveDocumentForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
     Author,
@@ -16,6 +16,8 @@ from peachjam.models import (
     LegalInstrument,
     Predicate,
     Relationship,
+    SavedDocument,
+    UserProfile,
 )
 from peachjam_api.serializers import (
     CitationLinkSerializer,
@@ -186,6 +188,16 @@ class BaseDocumentDetailView(DetailView):
         context["cited_documents"] = self.fetch_citation_docs(doc.work.cited_works())
         context["documents_citing_current_doc"] = self.fetch_citation_docs(
             doc.work.works_citing_current_work()
+        )
+        user_profile = UserProfile.objects.filter(user=self.request.user).first()
+        instance = SavedDocument.objects.filter(
+            document=self.get_object(), user_profile=user_profile
+        ).first()
+        context["save_document_form"] = SaveDocumentForm(
+            instance=instance,
+            document=self.get_object(),
+            user_profile=user_profile,
+            initial={"document": self.get_object(), "user_profile": user_profile},
         )
 
         return context

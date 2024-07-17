@@ -42,6 +42,7 @@ from peachjam.models import (
     CaseNumber,
     CitationLink,
     CitationProcessing,
+    Collection,
     CoreDocument,
     Court,
     CourtClass,
@@ -69,6 +70,7 @@ from peachjam.models import (
     PeachJamSettings,
     Predicate,
     Relationship,
+    SavedDocument,
     SourceFile,
     Taxonomy,
     UserProfile,
@@ -1177,6 +1179,8 @@ admin.site.register(
         CourtClass,
         AttachedFileNature,
         CitationProcessing,
+        Collection,
+        SavedDocument,
     ]
 )
 admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)

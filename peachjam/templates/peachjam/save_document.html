@@ -1,0 +1,35 @@
+<form id="collections-form" hx-post="{% url 'save_document' %}">
+  {% if new %}
+    <h4>Document Saved</h4>
+  {% else %}
+    <h2 class="h4">Choose Collection</h2>
+  {% endif %}
+  <p class="h6">{{ saved_document }}</p>
+  {{ save_document_form.document }}
+  {{ save_document_form.user_profile }}
+  <label class="form-label"
+         for="{{ save_document_form.collection.id_for_label }}">
+    {{ save_document_form.collection.label }}
+  </label>
+  <select id="{{ save_document_form.collection.id_for_label }}"
+          class="form-select"
+          name="{{ save_document_form.collection.name }}">
+    {% for value, name in save_document_form.fields.collection.choices %}
+      <option value="{{ value }}"
+              {% if save_document_form.fields.collection.value == x %} selected{% endif %}>
+        {{ name }}
+      </option>
+    {% endfor %}
+  </select>
+  <div class="d-inline-flex justify-content-between">
+    <div>
+      <button type="button"
+              class="btn btn-outline-secondary btn-shrink-sm ms-2"
+              data-bs-toggle="modal"
+              data-bs-target="#addCollection">
+        Add collection
+      </button>
+    </div>
+    <button class="btn btn-primary" type="submit">Done</button>
+  </div>
+</form>

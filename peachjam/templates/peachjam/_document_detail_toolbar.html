@@ -9,14 +9,31 @@
     {% endif %}
   {% endblock %}
   {% block download-btn %}
-    <button class="btn btn-outline-primary btn-shrink-sm ms-2"
-            data-bs-toggle="modal"
-            data-bs-target="#documentProblemModal"
-            hx-get="/collections/"
-            hx-target="#documentDetailModal"
-            hx-trigger="click">
-      Save document
-    </button>
+    <div class="dropdown">
+      <button class="btn btn-outline-primary btn-shrink-sm ms-2 dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              hx-post="{% url 'save_document' %}"
+              hx-target="#saveDocument"
+              hx-include="#collections-form">
+        Save document
+      </button>
+      <div id="saveDocument" class="dropdown-menu p-2">{% include "peachjam/save_document.html" %}</div>
+      <div class="modal fade"
+           id="addCollection"
+           tabindex="-1"
+           aria-labelledby="addCollection"
+           aria-hidden="true">
+        <div class="modal-dialog" id="testing">
+          <div class="modal-content">
+            <div class="modal-header">
+              <p class="h5 modal-title">Add new collection</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     {% if document.source_file %}
       <div class="btn-group dropdown-center ms-2">
         <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
