@@ -99,6 +99,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "django.middleware.cache.FetchFromCacheMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
+    "peachjam.middleware.VaryOnHxHeadersMiddleware",
 ]
 
 ROOT_URLCONF = "peachjam.urls"

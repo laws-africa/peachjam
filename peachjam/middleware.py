@@ -1,6 +1,6 @@
 from django.middleware.cache import UpdateCacheMiddleware
 from django.shortcuts import redirect
-from django.utils.cache import get_max_age
+from django.utils.cache import get_max_age, patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
 
 
@@ -94,3 +94,10 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
         return getattr(request, "user", None) is not None and (
             request.user.is_anonymous or not request.user.is_staff
         )
+
+
+class VaryOnHxHeadersMiddleware(MiddlewareMixin):
+    def process_response(self, request, response):
+        if "Cache-Control" in request.headers:
+            patch_vary_headers(response, ["HX-Request", "HX-Target"])
+        return response
