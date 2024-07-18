@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, TemplateView
 from elasticsearch_dsl.faceted_search import FacetedSearch, TermsFacet
 
@@ -91,7 +92,7 @@ class DocIndexDetailView(TaxonomyDetailView):
         return search
 
     def get_queryset(self):
-        search = self.filter_queryset(self.get_base_queryset())
+        search = self.filter_queryset(self.get_base_queryset(), filter_q=True)
         if self.latest_expression_only:
             search = search.filter("term", is_most_recent=True)
         return search
@@ -121,9 +122,26 @@ class DocIndexDetailView(TaxonomyDetailView):
         res._faceted_search = faceted
 
         context["facet_data"] = {
-            "alphabet": lowercase_alphabet(),
-            "years": [y for y, n, x in res.facets.year],
-            "jurisdictions": [j for j, n, x in res.facets.jurisdiction],
+            "jurisdictions": {
+                "label": _("Judrisdictions"),
+                "type": "checkbox",
+                "options": [j for j, n, x in res.facets.jurisdiction],
+                "values": self.request.GET.getlist("jurisdictions"),
+            },
+            "years": {
+                "label": _("Years"),
+                "type": "checkbox",
+                "options": [
+                    str(y) for y, n, x in sorted(res.facets.year, reverse=True)
+                ],
+                "values": self.request.GET.getlist("years"),
+            },
+            "alphabet": {
+                "label": _("Alphabet"),
+                "type": "radio",
+                "options": lowercase_alphabet(),
+                "values": self.request.GET.get("alphabet"),
+            },
         }
 
 

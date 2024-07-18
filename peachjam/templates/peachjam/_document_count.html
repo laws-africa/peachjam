@@ -1,8 +1,8 @@
-{% load i18n %}
-<p class="text-muted mb-4">
-  {% blocktrans trimmed count doc_count=doc_count %}
-    {{ doc_count }} document
+{% load i18n humanize %}
+<div class="text-muted mb-2">
+  {% blocktrans trimmed with n_docs=doc_count|intcomma count counter=doc_count %}
+    {{ n_docs }} document
   {% plural %}
-    {{ doc_count }} documents
+    {{ n_docs }} documents
   {% endblocktrans %}
-</p>
+</div>
