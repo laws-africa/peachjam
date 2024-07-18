@@ -1,4 +1,4 @@
-{% extends 'africanlii/au_institution_detail.html' %}
+{% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
 {% block title %}{{ rec }}{% endblock %}
 {% block breadcrumbs %}
@@ -25,8 +25,16 @@
     {% endif %}
   {% endwith %}
 {% endblock %}
-{% block page-title %}<h1 class="mt-4">{{ rec }}</h1>{% endblock %}
 {% block page-header %}
-  {{ block.super }}
+  <h1 class="mt-4">{{ rec }}</h1>
+  {% include 'peachjam/_document_count.html' %}
   {% include 'peachjam/_years_list.html' with showallyears=True %}
+{% endblock %}
+{% block content %}
+  {% if documents %}
+    {% include 'peachjam/_judgment_table.html' %}
+    {% include 'peachjam/_pagination.html' %}
+  {% else %}
+    <p>{% trans 'No documents found.' %}</p>
+  {% endif %}
 {% endblock %}

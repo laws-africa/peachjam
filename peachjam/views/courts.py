@@ -1,4 +1,5 @@
 from functools import cached_property
+from itertools import groupby
 from math import ceil
 
 from django.http import Http404
@@ -21,7 +22,6 @@ class FilteredJudgmentView(FilteredDocumentListView):
         "judges", "labels", "attorneys", "outcomes"
     )
     exclude_facets = []
-    group_by_date = "month-year"
 
     def base_view_name(self):
         return _("Judgments")
@@ -35,13 +35,12 @@ class FilteredJudgmentView(FilteredDocumentListView):
         context["doc_type"] = "Judgment"
         context["page_title"] = self.page_title()
         context["labels"].update({"judge": Judge.model_label_plural})
-        context["doc_table_show_jurisdiction"] = False
+
+        if not self.form.cleaned_data.get("alphabet"):
+            context["grouped_documents"] = self.grouped_judgments(context["documents"])
 
         self.populate_years(context)
         self.populate_facets(context)
-        self.show_facet_clear_all(context)
-
-        context["documents"] = self.group_documents(context["documents"])
 
         return context
 
@@ -58,12 +57,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if judge
             )
-            context["facet_data"]["judges"] = {
-                "label": _("Judges"),
-                "type": "checkbox",
-                "options": judges,
-                "values": self.request.GET.getlist("judges"),
-            }
+            context["facet_data"]["judges"] = judges
 
         if "outcomes" not in self.exclude_facets:
             outcomes = list(
@@ -76,12 +70,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if outcome
             )
-            context["facet_data"]["outcomes"] = {
-                "label": _("Outcomes"),
-                "type": "checkbox",
-                "options": outcomes,
-                "values": self.request.GET.getlist("outcomes"),
-            }
+            context["facet_data"]["outcomes"] = outcomes
 
         if "attorneys" not in self.exclude_facets:
             attorneys = list(
@@ -94,25 +83,22 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if attorney
             )
-            context["facet_data"]["attorneys"] = {
-                "label": _("Attorneys"),
-                "type": "checkbox",
-                "options": attorneys,
-                "values": self.request.GET.getlist("attorneys"),
-            }
+            context["facet_data"]["attorneys"] = attorneys
 
         if "alphabet" not in self.exclude_facets:
-            context["facet_data"]["alphabet"] = {
-                "label": _("Alphabet"),
-                "type": "radio",
-                "options": lowercase_alphabet(),
-                "values": self.request.GET.get("alphabet"),
-            }
+            context["facet_data"]["alphabet"] = lowercase_alphabet()
 
     def populate_years(self, context):
         context["years"] = self.get_base_queryset(exclude=["year", "month"]).dates(
             "date", "year", order="DESC"
         )
+
+    def grouped_judgments(self, documents):
+        """Group the judgments by month and return a list of dicts with the month name and judgments for that month"""
+        # Group documents by month
+        groups = groupby(documents, lambda d: f"{MONTHS[d.date.month]} {d.date.year}")
+
+        return [{"key": key, "judgments": list(group)} for key, group in groups]
 
 
 class CourtDetailView(FilteredJudgmentView):

@@ -17,7 +17,7 @@
       <div class="pt-4 pb-5">
         <h1 class="mb-4">{{ taxonomy }}</h1>
         {% if help_link %}
-          {% include "peachjam/_help_button.html" %}
+          {% include "peachjam/_help_button.html" with link=help_link %}
         {% endif %}
         {% if taxonomy.get_children|length > 0 %}
           <ul>

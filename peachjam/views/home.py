@@ -16,26 +16,18 @@ class HomePageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        recent_judgments = (
-            Judgment.objects.exclude(published=False)
-            .prefetch_related("labels")
-            .order_by("-date")[:5]
-        )
-        recent_documents = (
-            GenericDocument.objects.exclude(published=False)
-            .prefetch_related("labels")
-            .order_by("-date")[:5]
-        )
-        recent_instruments = (
-            LegalInstrument.objects.exclude(published=False)
-            .prefetch_related("labels")
-            .order_by("-date")[:5]
-        )
-        recent_legislation = (
-            Legislation.objects.exclude(published=False)
-            .prefetch_related("labels")
-            .order_by("-date")[:5]
-        )
+        recent_judgments = Judgment.objects.exclude(published=False).order_by("-date")[
+            :5
+        ]
+        recent_documents = GenericDocument.objects.exclude(published=False).order_by(
+            "-date"
+        )[:5]
+        recent_instruments = LegalInstrument.objects.exclude(published=False).order_by(
+            "-date"
+        )[:5]
+        recent_legislation = Legislation.objects.exclude(published=False).order_by(
+            "-date"
+        )[:5]
         documents_count = CoreDocument.objects.exclude(published=False).count()
 
         authors = Author.objects.exclude(

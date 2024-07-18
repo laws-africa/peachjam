@@ -1,0 +1,22 @@
+{% load i18n %}
+<table class="doc-table">
+  <thead>
+    <tr>
+      <th class="cell-title">{% trans 'Title' %}</th>
+      <th class="cell-date">{% trans 'Date' %}</th>
+    </tr>
+  </thead>
+  {% block table-body %}
+    <tbody>
+      {% for document in documents %}
+        <tr>
+          <td class="cell-title">
+            <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+            {% include 'peachjam/_labels.html' with labels=document.labels.all %}
+          </td>
+          <td class="cell-date" style="white-space: nowrap;">{{ document.date }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  {% endblock %}
+</table>

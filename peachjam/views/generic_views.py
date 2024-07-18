@@ -3,8 +3,6 @@ import itertools
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
-from django.utils.dates import MONTHS
-from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, View
 from lxml import html
 
@@ -33,14 +31,8 @@ class DocumentListView(ListView):
     paginate_by = 50
     model = CoreDocument
     queryset = CoreDocument.objects.select_related(
-        "nature",
-        "work",
-        "jurisdiction",
-        "locality",
-    ).prefetch_related("labels")
-
-    # when grouping by date, group by year, or month and year? ("year" and "month-year" are the only options)
-    group_by_date = "year"
+        "nature", "work", "jurisdiction", "locality"
+    )
 
     def get_base_queryset(self, *args, **kwargs):
         qs = self.queryset if self.queryset is not None else self.model.objects
@@ -49,44 +41,6 @@ class DocumentListView(ListView):
     def get_queryset(self):
         qs = self.get_base_queryset()
         return qs.preferred_language(get_language(self.request))
-
-    def get_context_data(self, *args, **kwargs):
-        return super().get_context_data(
-            doc_table_show_jurisdiction=True, *args, **kwargs
-        )
-
-    def group_documents(self, documents, group_by):
-        if not group_by:
-            return documents
-
-        def grouper(d):
-            if group_by == "date":
-                if self.group_by_date == "month-year":
-                    return f"{MONTHS[d.date.month]} {d.date.year}"
-                else:
-                    return d.date.year
-            elif group_by == "title":
-                return d.title[0].upper()
-
-        class Group:
-            is_group = True
-
-            def __init__(self, title):
-                self.title = title
-
-        docs = []
-        for key, group in itertools.groupby(documents, grouper):
-            docs.append(Group(key))
-            docs.extend(group)
-
-        return docs
-
-    def get_template_names(self):
-        if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/_document_table.html"]
-            return ["peachjam/_document_table_form.html"]
-        return super().get_template_names()
 
 
 class FilteredDocumentListView(DocumentListView):
@@ -97,21 +51,15 @@ class FilteredDocumentListView(DocumentListView):
     # This is a bit more expensive and so is opt-in. It is only necessary for document types
     # that have multiple points-in-time (dated expressions), such as Legislation.
     latest_expression_only = False
-    # default values to pre-populate the form with
-    form_defaults = None
 
     def get(self, request, *args, **kwargs):
-        self.form = self.get_form()
+        self.form = self.form_class(request.GET)
         self.form.is_valid()
         return super().get(request, *args, **kwargs)
 
-    def get_form(self):
-        return self.form_class(self.form_defaults, self.request.GET)
-
     def get_queryset(self):
         qs = super().get_queryset()
-        # filter the queryset, including filtering on the form's query string
-        filtered_qs = self.filter_queryset(qs, filter_q=True)
+        filtered_qs = self.filter_queryset(qs)
 
         if self.latest_expression_only:
             # Getting only the latest expression requires ordering on the work, which breaks the actual ordering
@@ -127,14 +75,13 @@ class FilteredDocumentListView(DocumentListView):
 
         return filtered_qs
 
-    def filter_queryset(self, qs, filter_q=False):
-        return self.form.filter_queryset(qs, filter_q=filter_q)
+    def filter_queryset(self, qs):
+        return self.form.filter_queryset(qs)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(form=self.form, **kwargs)
+        context = super().get_context_data(**kwargs)
 
         self.add_facets(context)
-        self.show_facet_clear_all(context)
         context["doc_count"] = context["paginator"].count
         context["labels"] = {"author": Author.model_label}
 
@@ -171,62 +118,15 @@ class FilteredDocumentListView(DocumentListView):
             .values_list("date__year", flat=True)
             .distinct()
         )
-        taxonomies = list(
-            self.form.filter_queryset(self.get_base_queryset(), exclude="taxonomies")
-            .filter(taxonomies__topic__isnull=False)
-            .order_by()
-            .values_list("taxonomies__topic__name", flat=True)
-            .distinct()
-        )
 
         context["doc_table_show_author"] = bool(authors)
         context["doc_table_show_doc_type"] = bool(natures)
         context["facet_data"] = {
-            "years": {
-                "label": _("Years"),
-                "type": "checkbox",
-                "options": [str(y) for y in sorted(years, reverse=True)],
-                "values": self.request.GET.getlist("years"),
-            },
-            "authors": {
-                "label": _("Authors"),
-                "type": "checkbox",
-                "options": authors,
-                "values": self.request.GET.getlist("authors"),
-            },
-            "natures": {
-                "label": _("Document nature"),
-                "type": "radio",
-                "options": natures,
-                "values": self.request.GET.getlist("natures"),
-            },
-            "taxonomies": {
-                "label": _("Topics"),
-                "type": "checkbox",
-                "options": taxonomies,
-                "values": self.request.GET.getlist("taxonomies"),
-            },
-            "alphabet": {
-                "label": _("Alphabet"),
-                "type": "radio",
-                "options": lowercase_alphabet(),
-                "values": self.request.GET.get("alphabet"),
-            },
+            "years": years,
+            "authors": authors,
+            "alphabet": lowercase_alphabet(),
+            "natures": natures,
         }
-
-    def show_facet_clear_all(self, context):
-        context["show_clear_all"] = any(
-            [f["values"] for f in context["facet_data"].values()]
-        )
-
-    def group_documents(self, documents, group_by=None):
-        # determine what to group by
-        if group_by is None:
-            group_by = documents.query.order_by[0]
-            if group_by.startswith("-"):
-                group_by = group_by[1:]
-
-        return super().group_documents(documents, group_by)
 
 
 class BaseDocumentDetailView(DetailView):

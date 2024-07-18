@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 09:40+0200\n"
+"POT-Creation-Date: 2024-06-06 15:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,11 +77,11 @@ msgstr ""
 msgid "View more legislation"
 msgstr ""
 
-#: templates/liiweb/home.html:95
+#: templates/liiweb/home.html:100
 msgid "Recent Gazettes"
 msgstr ""
 
-#: templates/liiweb/home.html:96
+#: templates/liiweb/home.html:102
 msgid "View more gazettes"
 msgstr ""
 
@@ -89,54 +89,54 @@ msgstr ""
 msgid "Courts"
 msgstr ""
 
-#: templates/liiweb/home.html:115
+#: templates/liiweb/home.html:111
 msgid "Collections"
 msgstr ""
 
-#: templates/liiweb/home.html:131
+#: templates/liiweb/home.html:124
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr ""
 
-#: templates/liiweb/home.html:133
+#: templates/liiweb/home.html:126
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr ""
 
-#: templates/liiweb/home.html:148
+#: templates/liiweb/home.html:138
 msgid "Latest Articles"
 msgstr ""
 
-#: templates/liiweb/home.html:150
+#: templates/liiweb/home.html:140
 msgid "View more articles"
 msgstr ""
 
 #: templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:7 templates/peachjam/_header.html:17
+#: templates/liiweb/legislation_list.html:16 templates/peachjam/_header.html:17
 msgid "Legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:15
+#: templates/liiweb/legislation_list.html:25
 msgid "Current legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:23
+#: templates/liiweb/legislation_list.html:33
 msgid "Recent legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:37
+#: templates/liiweb/legislation_list.html:47
 msgid "Uncommenced legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:45
+#: templates/liiweb/legislation_list.html:55
 msgid "Repealed legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:52
+#: templates/liiweb/legislation_list.html:62
 msgid "All legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:57
+#: templates/liiweb/legislation_list.html:68
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr ""
 
@@ -181,7 +181,7 @@ msgstr ""
 msgid "Judgments"
 msgstr ""
 
-#: views/legislation.py:130
+#: views/legislation.py:123
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr ""

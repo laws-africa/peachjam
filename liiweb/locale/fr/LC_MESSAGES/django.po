@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 09:40+0200\n"
+"POT-Creation-Date: 2024-06-06 15:17+0200\n"
 "PO-Revision-Date: 2024-06-06 13:40\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -19,23 +19,19 @@ msgstr ""
 
 #: templates/liiweb/_donate_call_to_action.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Donate to %(APP_NAME)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Faites un don à %(APP_NAME)s\n"
 "          "
 
 #: templates/liiweb/_donate_call_to_action.html:12
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            %(APP_NAME)s is an independent, self-funded organisation and needs your support.\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            %(APP_NAME)s est une organisation indépendante et autofinancée et a besoin de votre soutien.\n"
 "          "
 
@@ -82,11 +78,11 @@ msgstr "Législation récente"
 msgid "View more legislation"
 msgstr "Voir plus de législation"
 
-#: templates/liiweb/home.html:95
+#: templates/liiweb/home.html:100
 msgid "Recent Gazettes"
 msgstr "Gazettes récentes"
 
-#: templates/liiweb/home.html:96
+#: templates/liiweb/home.html:102
 msgid "View more gazettes"
 msgstr "Voir plus de gazettes"
 
@@ -94,54 +90,54 @@ msgstr "Voir plus de gazettes"
 msgid "Courts"
 msgstr "Cours"
 
-#: templates/liiweb/home.html:115
+#: templates/liiweb/home.html:111
 msgid "Collections"
 msgstr "Collections"
 
-#: templates/liiweb/home.html:131
+#: templates/liiweb/home.html:124
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr "Utilisez %(APP_NAME)s lorsque vous êtes hors ligne"
 
-#: templates/liiweb/home.html:133
+#: templates/liiweb/home.html:126
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr "Pocket Law est une copie hors ligne de la jurisprudence, de la législation et d'autres documents juridiques de %(APP_NAME)s."
 
-#: templates/liiweb/home.html:148
+#: templates/liiweb/home.html:138
 msgid "Latest Articles"
 msgstr "Derniers articles"
 
-#: templates/liiweb/home.html:150
+#: templates/liiweb/home.html:140
 msgid "View more articles"
 msgstr "Voir plus d'articles"
 
 #: templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:7 templates/peachjam/_header.html:17
+#: templates/liiweb/legislation_list.html:16 templates/peachjam/_header.html:17
 msgid "Legislation"
 msgstr "Législation"
 
-#: templates/liiweb/legislation_list.html:15
+#: templates/liiweb/legislation_list.html:25
 msgid "Current legislation"
 msgstr "Législation en vigueur"
 
-#: templates/liiweb/legislation_list.html:23
+#: templates/liiweb/legislation_list.html:33
 msgid "Recent legislation"
 msgstr "Législation récente"
 
-#: templates/liiweb/legislation_list.html:37
+#: templates/liiweb/legislation_list.html:47
 msgid "Uncommenced legislation"
 msgstr "Législation non encore adoptée"
 
-#: templates/liiweb/legislation_list.html:45
+#: templates/liiweb/legislation_list.html:55
 msgid "Repealed legislation"
 msgstr "Législation abrogée"
 
-#: templates/liiweb/legislation_list.html:52
+#: templates/liiweb/legislation_list.html:62
 msgid "All legislation"
 msgstr "Toutes les lois"
 
-#: templates/liiweb/legislation_list.html:57
+#: templates/liiweb/legislation_list.html:68
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr "Vous consultez une législation abrogée qui n'est plus en vigueur."
 
@@ -186,7 +182,8 @@ msgstr "Autres Institutions Africaines d'information Juridique"
 msgid "Judgments"
 msgstr "Jugements"
 
-#: views/legislation.py:130
+#: views/legislation.py:123
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Législation"
+
