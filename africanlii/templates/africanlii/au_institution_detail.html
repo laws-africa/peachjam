@@ -25,11 +25,15 @@
     {% endif %}
   {% endwith %}
 {% endblock %}
-{% block page-title %}<h1 class="mt-4">{{ obj }}</h1>{% endblock %}
 {% block page-header %}
-  {{ block.super }}
+  <h1 class="mt-4">{{ obj }}</h1>
+  {% include 'peachjam/_document_count.html' %}
   {% include 'peachjam/_years_list.html' with showallyears=True %}
 {% endblock %}
 {% block content %}
-  {% include 'peachjam/_document_table.html' %}
+  {% if documents %}
+    {% include 'peachjam/_document_table.html' %}
+  {% else %}
+    <p>{% trans 'No documents found.' %}</p>
+  {% endif %}
 {% endblock %}

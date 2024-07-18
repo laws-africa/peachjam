@@ -1,4 +1,4 @@
-{% extends 'africanlii/au_institution_detail.html' %}
+{% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
 {% block title %}{{ member_state }}{% endblock %}
 {% block breadcrumbs %}
@@ -25,10 +25,10 @@
     {% endif %}
   {% endwith %}
 {% endblock %}
-{% block page-title %}<h1 class="mt-4">{{ member_state }}</h1>{% endblock %}
 {% block page-header %}
-  {{ block.super }}
-  <div class="mb-3">{% include 'africanlii/_lii_info.html' %}</div>
+  <h1 class="mt-4">{{ member_state }}</h1>
+  {% include 'africanlii/_lii_info.html' %}
+  {% include 'peachjam/_document_count.html' %}
 {% endblock %}
 {% block page-list-facets %}{% endblock %}
 {% block content %}

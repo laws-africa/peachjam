@@ -6,32 +6,28 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
-from peachjam.helpers import chunks
+from peachjam.helpers import chunks, get_language
 from peachjam.models import JurisdictionProfile, Legislation, Locality, pj_settings
-from peachjam.views import FilteredDocumentListView
+from peachjam_api.serializers import LegislationSerializer
 
 
-class LegislationListView(FilteredDocumentListView):
+class LegislationListView(TemplateView):
     template_name = "liiweb/legislation_list.html"
     variant = "current"
     navbar_link = "legislation"
     model = Legislation
-    queryset = Legislation.objects.prefetch_related("work", "labels")
-    latest_expression_only = True
-    form_defaults = None
+    extra_context = {"doc_table_citations": True, "legislation_list_sort": "title"}
 
-    def get_form(self):
-        self.form_defaults = {"sort": "title"}
-        if self.variant == "recent":
-            self.form_defaults = {"sort": "-date"}
-        return super().get_form()
-
-    def get_base_queryset(self, *args, **kwargs):
-        qs = super().get_base_queryset(*args, **kwargs)
-        qs = self.get_variant_queryset(qs)
+    def get_queryset(self):
+        qs = (
+            self.model.objects.exclude(published=False)
+            .distinct("work_frbr_uri")
+            .order_by("work_frbr_uri", "-date", "language__pk")
+            .preferred_language(get_language(self.request))
+        )
         return qs
 
-    def get_variant_queryset(self, qs):
+    def filter_queryset(self, qs):
         if self.variant == "all":
             pass
         elif self.variant == "repealed":
@@ -52,11 +48,17 @@ class LegislationListView(FilteredDocumentListView):
                     datetime.date.today() - timedelta(days=365)
                 ).isoformat()
             )
+
         return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        self.add_children(context["documents"])
+
+        qs = self.filter_queryset(self.get_queryset())
+        qs = qs.prefetch_related("taxonomies", "taxonomies__topic", "work")
+        qs = self.add_children(qs)
+
+        context["legislation_table"] = LegislationSerializer(qs, many=True).data
 
         site_jurisdictions = pj_settings().document_jurisdictions.all()
         if site_jurisdictions.count() == 1:
@@ -67,17 +69,6 @@ class LegislationListView(FilteredDocumentListView):
                 context["entity_profile"] = jurisdiction_profile.entity_profile.first()
                 context["entity_profile_title"] = jurisdiction_profile.jurisdiction.name
 
-        context["doc_type"] = "legislation"  # for quick search
-        context["doc_table_toggle"] = True
-        context["doc_table_citations"] = True
-        context["doc_table_show_doc_type"] = False
-        context["doc_table_show_court"] = False
-        context["doc_table_show_author"] = False
-        context["doc_table_show_jurisdiction"] = False
-        context["help_link"] = "legislation/"
-
-        context["documents"] = self.group_documents(context["documents"])
-
         return context
 
     def add_children(self, queryset):
@@ -87,7 +78,7 @@ class LegislationListView(FilteredDocumentListView):
         )
 
         children = defaultdict(list)
-        children_qs = self.get_base_queryset().filter(
+        children_qs = self.get_queryset().filter(
             parent_work_id__in=parents, repealed=False, metadata_json__principal=True
         )
         # group children by parent
@@ -95,8 +86,10 @@ class LegislationListView(FilteredDocumentListView):
             children[child.parent_work_id].append(child)
 
         # fold in children
-        for parent in queryset:
+        qs = list(queryset)
+        for parent in qs:
             parent.children = children.get(parent.work_id, [])
+        return qs
 
 
 class LocalityLegislationView(TemplateView):

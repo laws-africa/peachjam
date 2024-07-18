@@ -65,7 +65,6 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.humanize",
     "django.contrib.messages",
     "django.contrib.sites",
     "django.contrib.staticfiles",
@@ -79,7 +78,6 @@ INSTALLED_APPS = [
     "django_advanced_password_validation",
     "martor",
     "corsheaders",
-    "django_htmx",
 ]
 
 MIDDLEWARE = [
@@ -98,7 +96,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django.middleware.cache.FetchFromCacheMiddleware",
-    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = "peachjam.urls"

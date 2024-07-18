@@ -1,5 +1,6 @@
-{% extends 'africanlii/au_institution_detail.html' %}
+{% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
+{% block title %}{{ author }}{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
     <nav aria-label="breadcrumb">
@@ -23,4 +24,16 @@
       <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
     {% endif %}
   {% endwith %}
+{% endblock %}
+{% block page-header %}
+  <h1 class="mt-4">{{ obj }}</h1>
+  {% include 'peachjam/_document_count.html' %}
+  {% include 'peachjam/_years_list.html' with showallyears=True %}
+{% endblock %}
+{% block content %}
+  {% if documents %}
+    {% include 'peachjam/_document_table.html' %}
+  {% else %}
+    <p>{% trans 'No documents found.' %}</p>
+  {% endif %}
 {% endblock %}

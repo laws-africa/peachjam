@@ -25,4 +25,14 @@
     {% endwith %}
   {% endif %}
 {% endblock %}
+{% block mobile-taxonomy-list %}
+  {% if taxonomy_tree|length > 0 and not is_leaf_node %}
+    <div class="mb-2">{% include "peachjam/_taxonomy_tree_facet.html" %}</div>
+  {% endif %}
+{% endblock %}
+{% block desktop-taxonomy-list %}
+  {% if taxonomy_tree|length > 0 and not is_leaf_node %}
+    <div class="mb-2">{% include "peachjam/_taxonomy_tree_facet.html" %}</div>
+  {% endif %}
+{% endblock %}
 {% block taxonomy-json %}{{ taxonomy_tree|json_script:"taxonomy_tree" }}{% endblock %}

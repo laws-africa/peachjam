@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 09:40+0200\n"
+"POT-Creation-Date: 2023-10-31 08:54+0300\n"
 "PO-Revision-Date: 2024-06-06 13:40\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -133,7 +133,7 @@ msgid "For more information, visit the <a href=\"https://au.int/\" target=\"_bla
 msgstr "Pour plus d'informations, visitez le <a href=\"https://au.int/\" target=\"_blank\" rel=\"noreferrer noopener\">site officiel de l'Union africaine</a> et le <a href=\"https://au.int/agenda2063/overview\">portail de l'Agenda 2063.</a>"
 
 #: templates/africanlii/au_detail_page.html:39
-#: templates/africanlii/au_organ_detail.html:11
+#: templates/africanlii/au_organ_detail.html:12
 #: templates/peachjam/_header.html:78 templates/peachjam/home.html:64
 msgid "African Union Organs"
 msgstr "Organes de l'Union africaine"
@@ -157,11 +157,18 @@ msgid "Member States"
 msgstr "États membres"
 
 #: templates/africanlii/au_institution_detail.html:9
-#: templates/africanlii/au_organ_detail.html:8
+#: templates/africanlii/au_organ_detail.html:9
 #: templates/africanlii/member_state_detail.html:9
 #: templates/africanlii/regional_economic_community_detail.html:9
 msgid "African Union"
 msgstr "Union africaine"
+
+#: templates/africanlii/au_institution_detail.html:37
+#: templates/africanlii/au_organ_detail.html:37
+#: templates/africanlii/member_state_detail.html:38
+#: templates/africanlii/regional_economic_community_detail.html:38
+msgid "No documents found."
+msgstr "Aucun document trouvé."
 
 #: templates/africanlii/doc_index_detail.html:8
 #: templates/africanlii/doc_index_first_level.html:7
@@ -170,11 +177,8 @@ msgstr "Union africaine"
 msgid "Indexes"
 msgstr "Index"
 
-#: templates/africanlii/member_state_detail.html:38
-msgid "No documents found."
-msgstr "Aucun document trouvé."
-
 #: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:123
+#: templates/peachjam/about.html:4
 msgid "About"
 msgstr "À propos"
 
@@ -198,11 +202,11 @@ msgstr "Statistiques du site"
 msgid "With support from"
 msgstr "Avec le support de"
 
-#: templates/peachjam/_footer.html:44 templates/peachjam/_footer.html:144
+#: templates/peachjam/_footer.html:44 templates/peachjam/_footer.html:138
 msgid "European Union"
 msgstr "Union européenne"
 
-#: templates/peachjam/_footer.html:49 templates/peachjam/_footer.html:157
+#: templates/peachjam/_footer.html:49 templates/peachjam/_footer.html:151
 #: templates/peachjam/_header.html:19
 msgid "Open Law Africa"
 msgstr "Droit Ouvert Afrique"
@@ -211,7 +215,7 @@ msgstr "Droit Ouvert Afrique"
 msgid "Other African Legal Information Institutions"
 msgstr "Autres Institutions Africaines d'information Juridique"
 
-#: templates/peachjam/_footer.html:124
+#: templates/peachjam/_footer.html:118
 msgid "University of Cape Town"
 msgstr "Université du Cap"
 
@@ -284,63 +288,63 @@ msgstr "Articles"
 msgid "Help"
 msgstr "Aide"
 
-#: templates/peachjam/about.html:4
+#: templates/peachjam/about.html:9
 msgid "About the platform"
 msgstr "À propos de la plateforme"
 
-#: templates/peachjam/about.html:8
+#: templates/peachjam/about.html:11
 msgid "This Pan-African platform serves as an information clearinghouse on all aspects of the African Governance Architecture (AGA) agenda, including charters, protocols, communications, relevant legal decisions, policy, implementation, monitoring, and related material. The overall objective is to build effective collaboration between African citizens and civil society organisations on the one hand, and AGA members on the other, to strengthen implementation of the AGA platform’s agenda with respect to democracy, governance, and human rights. Our specific goals are to:"
 msgstr "Cette plate-forme panafricaine sert de centre d’information sur tous les aspects du programme de l’architecture africaine de gouvernance (AGA). y compris les chartes, les protocoles, les communications, les décisions juridiques pertinentes, la politique, la mise en œuvre, la surveillance et les documents connexes. L'objectif global est de construire une collaboration efficace entre les citoyens africains et les organisations de la société civile, d'une part, et les membres de l’AGA de l’autre, pour renforcer la mise en œuvre du programme de la plate-forme AGA en matière de démocratie, de gouvernance et de droits de l’homme. Nos objectifs spécifiques sont :"
 
-#: templates/peachjam/about.html:19
+#: templates/peachjam/about.html:22
 msgid "Increase overall awareness of the AGA agenda and popular perceptions about democracy, governance and human rights among civil society organisations (CSOs) and AGA members"
 msgstr "Accroître la sensibilisation générale au programme de l'AGA et aux perceptions populaires de la démocratie, de la gouvernance et des droits de l'homme parmi les organisations de la société civile (OSC) et les membres de l'AGA"
 
-#: templates/peachjam/about.html:25
+#: templates/peachjam/about.html:28
 msgid "Supply complete, accurate and re-usable AGA information to allow AGA and CSOs to work towards shared goals"
 msgstr "Fournir des informations complètes, précises et réutilisables sur l'AGA pour permettre à l'AGA et aux OSC de travailler à des objectifs communs"
 
-#: templates/peachjam/about.html:30
+#: templates/peachjam/about.html:33
 msgid "Capacitate civil society on all levels to access, interpret and effectively use AGA information"
 msgstr "Donner à la société civile, à tous les niveaux, les moyens d'accéder aux informations de l'AGA, de les interpréter et de les utiliser efficacement"
 
-#: templates/peachjam/about.html:35
+#: templates/peachjam/about.html:38
 msgid "Strengthen monitoring, develop insights, and improve national-level implementation by developing linkages between regional and member-states’ law and policy."
 msgstr "Renforcer le suivi, développer des idées et améliorer la mise en œuvre au niveau national en établissant des liens entre le droit et la politique des États membres et les lois régionales."
 
-#: templates/peachjam/about.html:42
+#: templates/peachjam/about.html:45
 msgid "This platform is developed and maintained jointly by <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> with funds from the European Union, the Indigo Trust and the Sigrid Rausing Trust. The initial phase of the project runs from 2021 to 2024."
 msgstr "Cette plate-forme est développée et maintenue conjointement par <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\"> Laws.Africa </a> avec les fonds de l'Union européenne, de l'Indigo Trust et de la Sigrid Rausing Trust. La phase initiale du projet est de 2021 à 2024."
 
-#: templates/peachjam/about.html:48
+#: templates/peachjam/about.html:51
 msgid "Platform developers"
 msgstr "Développeurs de plateformes"
 
-#: templates/peachjam/about.html:50
+#: templates/peachjam/about.html:53
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University of Cape Town. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> helps governments, academia and non-profit organisations publish the law of African countries for sustainable open access. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> hosts curated collections on various subjects of African law, such as human rights, the environment, commercial law and finance."
 msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> est un programme de l’Unité de la gouvernance démocratique et des droits du Département de droit public, Université du Cap. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> aide les gouvernements, les universitaires et les organisations à but non lucratif à publier la loi des pays africains pour un accès ouvert et durable. <a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> accueille des collections conservées sur divers sujets du droit africain, tels que les droits de l'homme, l'environnement, le droit commercial et la finance."
 
-#: templates/peachjam/about.html:58
+#: templates/peachjam/about.html:61
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> convenes a network of 16 African LIIs - a collaborative group of governments, organizations, and individuals in Africa, dedicated to free access to law on our continent."
 msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> réunit un réseau de 16 LIIs africaines - un groupe collaboratif de gouvernements, d'organisations et d'individus en Afrique, qui se consacre au libre accès au droit sur notre continent."
 
-#: templates/peachjam/about.html:64
+#: templates/peachjam/about.html:67
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> helps African governments to sustainably digitise their legal information for public use, through open law software, capacity-building, training, partnerships and support. <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa’s</a> Open Law Technology solutions lower the cost of digitisation, archival and publication of primary legal information, and create opportunities for rich interactivity, advanced research and justice sector innovation."
 msgstr "<a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> soutient les gouvernements africains à numériser durablement leurs informations juridiques à usage public, par le biais de logiciels de droit ouvert, de renforcement des capacités, de formation, de partenariats et de soutien. L'Open Law Technology de <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa's</a> réduit le coût de la numérisation, de l’archivage et de la publication d’informations juridiques primaires, et créer des opportunités pour la riche interactivité, la recherche avancée et l'innovation dans le secteur de la justice."
 
-#: templates/peachjam/about.html:72
+#: templates/peachjam/about.html:75
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> and <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborate in unlocking the value of African digital legal information in support of the rule of law, access to justice, and innovation."
 msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\">AfricanLII</a> et <a href=\"https://laws.africa/\" target=\"_blank\">Laws.Africa</a> collaborent pour libérer la valeur de l'information juridique numérique africaine afin de renforcer l'État de droit, l'accès à la justice et l'innovation."
 
-#: templates/peachjam/about.html:77
+#: templates/peachjam/about.html:80
 msgid "Find out more"
 msgstr "En savoir plus"
 
-#: templates/peachjam/about.html:79
+#: templates/peachjam/about.html:82
 msgid "Visit <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a> or contact us on <a href=\"mailto:info@laws.africa\">info@laws.africa</a> for more information."
 msgstr "Visitez <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawafrica.org</a> ou contactez-nous à <a href=\"mailto:info@laws.africa\">info@laws.africa</a> pour plus d'informations."
 
-#: templates/peachjam/about.html:86
+#: templates/peachjam/about.html:92
 msgid "Our partners"
 msgstr "Nos partenaires"
 
@@ -438,15 +442,15 @@ msgstr "Explorez la législation nationale africaine et les jugements des tribun
 msgid "Search African legal information"
 msgstr "Rechercher des informations juridiques africaines"
 
-#: templates/peachjam/home.html:190
+#: templates/peachjam/home.html:188
 msgid "Latest Commentary"
 msgstr "Dernier commentaire"
 
-#: templates/peachjam/home.html:193
+#: templates/peachjam/home.html:191
 msgid "View more commentary"
 msgstr "Voir plus de commentaires"
 
-#: templates/peachjam/home.html:199
+#: templates/peachjam/home.html:197
 msgid "Collections"
 msgstr "Collections"
 
@@ -458,3 +462,4 @@ msgstr "Rapports et tutoriels"
 #: templates/peachjam_search/search.html:5
 msgid "Search regional and national African legal information."
 msgstr "Rechercher des informations juridiques africaines régionales et nationales."
+
