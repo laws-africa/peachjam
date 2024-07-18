@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-07-17 09:40+0200\n"
-"PO-Revision-Date: 2024-06-06 13:40\n"
+"PO-Revision-Date: 2024-07-18 08:46\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -119,11 +119,11 @@ msgstr "Data"
 
 #: forms.py:96
 msgid "(Newest first)"
-msgstr ""
+msgstr "(Os mais novos primeiro)"
 
 #: forms.py:97
 msgid "(Oldest first)"
-msgstr ""
+msgstr "(Mais velhos primeiro)"
 
 #: forms.py:246
 msgid "Document problem reported"
@@ -577,7 +577,7 @@ msgstr "número do volume"
 
 #: models/gazette.py:26
 msgid "special"
-msgstr ""
+msgstr "especial"
 
 #: models/gazette.py:29
 msgid "gazette"
@@ -664,10 +664,8 @@ msgid "attorneys"
 msgstr "advogados"
 
 #: models/judgment.py:30
-#, fuzzy
-#| msgid "Judges"
 msgid "Judge"
-msgstr "Juízes"
+msgstr "Juiz"
 
 #: models/judgment.py:31 templates/peachjam/_case_histories.html:8
 #: templates/peachjam/layouts/document_detail.html:243 views/courts.py:61
@@ -788,16 +786,12 @@ msgid "Media neutral citation"
 msgstr "Citação neutra de mídia"
 
 #: models/judgment.py:306
-#, fuzzy
-#| msgid "Auto-assign title"
 msgid "Auto-assign details"
-msgstr "Atribuir título automaticamente"
+msgstr "Atribuir detalhes automaticamente"
 
 #: models/judgment.py:307
-#, fuzzy
-#| msgid "Whether or not the system should assign the title"
 msgid "Whether or not the system should assign the details"
-msgstr "Se o sistema deve ou não atribuir o título"
+msgstr "Se o sistema deve ou não atribuir os detalhes"
 
 #: models/judgment.py:321
 msgid "judgments"
@@ -824,16 +818,12 @@ msgid "year"
 msgstr "ano"
 
 #: models/judgment.py:502
-#, fuzzy
-#| msgid "judgment"
 msgid "judgment work"
-msgstr "julgamento"
+msgstr "trabalho de julgamento"
 
 #: models/judgment.py:512
-#, fuzzy
-#| msgid "historical judgment"
 msgid "historical judgment work"
-msgstr "julgamento histórico"
+msgstr "trabalho de julgamento histórico"
 
 #: models/judgment.py:529
 msgid "case history"
@@ -974,7 +964,7 @@ msgstr "link do LinkedIn"
 
 #: models/settings.py:88
 msgid "youtube link"
-msgstr ""
+msgstr "link do youtube"
 
 #: models/settings.py:91
 msgid "contact form URL"
@@ -1105,12 +1095,10 @@ msgstr "Esqueceu-se da sua senha?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Efetuar Login com %(provider.name)s\n"
 "          "
 
@@ -1298,13 +1286,11 @@ msgid "To the top"
 msgstr "Para o topo"
 
 #: templates/peachjam/_document_count.html:3
-#, fuzzy, python-format
-#| msgid "%(doc_count)s document"
-#| msgid_plural "%(doc_count)s documents"
+#, python-format
 msgid "%(n_docs)s document"
 msgid_plural "%(n_docs)s documents"
-msgstr[0] "%(doc_count)s documento"
-msgstr[1] "%(doc_count)s documentos"
+msgstr[0] "%(n_docs)s documento"
+msgstr[1] "%(n_docs)s documentos"
 
 #: templates/peachjam/_document_detail_toolbar.html:4
 msgid "Document toolbar"
@@ -1349,18 +1335,16 @@ msgstr "Filtros"
 
 #: templates/peachjam/_document_table_form.html:25
 msgid "Close"
-msgstr ""
+msgstr "FECHAR"
 
 #: templates/peachjam/_document_table_form.html:103
 #: templates/peachjam/_document_table_form.html:104
-#, fuzzy
-#| msgid "Cited documents"
 msgid "Filter documents"
-msgstr "Documentos citados"
+msgstr "Filtrar documentos"
 
 #: templates/peachjam/_document_table_form.html:111
 msgid "Sort by"
-msgstr ""
+msgstr "Classificar por"
 
 #: templates/peachjam/_document_table_row.html:25
 #: templates/peachjam/layouts/document_detail.html:297
@@ -1433,10 +1417,8 @@ msgid "Deposit Date"
 msgstr "Data do Depósito"
 
 #: templates/peachjam/_recent_document_list.html:18
-#, fuzzy
-#| msgid "No documents found."
 msgid "No recent documents."
-msgstr "Nenhum documento encontrado."
+msgstr "Nenhum documento recente."
 
 #: templates/peachjam/_related_documents.html:4
 #: templates/peachjam/layouts/document_detail.html:97
@@ -1789,7 +1771,7 @@ msgstr[1] "%(doc_count)s olhares"
 
 #: templates/peachjam/gazette_year.html:77
 msgid "Special"
-msgstr ""
+msgstr "Especial"
 
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
@@ -1943,14 +1925,12 @@ msgid "Navigation"
 msgstr "Navigation"
 
 #: views/courts.py:79
-#, fuzzy
-#| msgid "Outcome"
 msgid "Outcomes"
-msgstr "Resultado"
+msgstr "Resultados"
 
 #: views/courts.py:105 views/generic_views.py:209
 msgid "Alphabet"
-msgstr ""
+msgstr "Alfabeto"
 
 #: views/courts.py:272
 msgid "Courts"
@@ -1958,19 +1938,15 @@ msgstr "Tribunais"
 
 #: views/generic_views.py:185
 msgid "Years"
-msgstr ""
+msgstr "anos"
 
 #: views/generic_views.py:197
-#, fuzzy
-#| msgid "document nature"
 msgid "Document nature"
-msgstr "natureza do documento"
+msgstr "Natureza do documento"
 
 #: views/generic_views.py:203
-#, fuzzy
-#| msgid "topics"
 msgid "Topics"
-msgstr "tópicos"
+msgstr "Disciplinas"
 
 #: views/legislation.py:61
 #, python-format
@@ -2015,3 +1991,4 @@ msgstr "Esta é a versão deste %(friendly_type)s como era de %(date_from)s a %(
 #: views/legislation.py:225
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Existem alterações pendentes que ainda não foram aplicadas. Consulte a guia Histórico para obter mais informações."
+
