@@ -25,16 +25,19 @@ class HomePageView(BaseHomePageView):
         context["recent_soft_law"] = (
             GenericDocument.objects.exclude(published=False)
             .exclude(frbr_uri_doctype="doc")
+            .prefetch_related("labels")
             .order_by("-date")[:5]
         )
         context["recent_reports_guides"] = (
             GenericDocument.objects.exclude(published=False)
             .filter(frbr_uri_doctype="doc")
+            .prefetch_related("labels")
             .order_by("-date")[:5]
         )
         context["recent_legal_instruments"] = (
             CoreDocument.objects.exclude(published=False)
             .filter(frbr_uri_doctype="act")
+            .prefetch_related("labels")
             .order_by("-date")[:5]
         )
         context["au_organs"] = AfricanUnionOrgan.objects.prefetch_related("author")
