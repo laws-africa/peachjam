@@ -22,12 +22,12 @@ class CreateCollectionView(TemplateView):
             return self.render_to_response(
                 {
                     "saved_document": instance,
-                    "add_new_collection_form": form,
+                    "collection_form": form,
                     **context,
                 }
             )
 
-        return self.render_to_response({"add_new_collection_form": form, **context})
+        return self.render_to_response({"collection_form": form, **context})
 
 
 class SaveDocumentView(TemplateView):

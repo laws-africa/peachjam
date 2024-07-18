@@ -1,4 +1,4 @@
-<form id="collections-form" hx-post="{% url 'save_document' %}">
+<form id="save_document-form" hx-post="{% url 'save_document' %}">
   {% if new %}
     <h4>Document Saved</h4>
   {% else %}
@@ -26,7 +26,10 @@
       <button type="button"
               class="btn btn-outline-secondary btn-shrink-sm ms-2"
               data-bs-toggle="modal"
-              data-bs-target="#addCollection">
+              data-bs-target="#addCollection"
+              hx-post="{% url 'collections' %}"
+              hx-target="#addCollection"
+              hx-include="#collections-form">
         Add collection
       </button>
     </div>

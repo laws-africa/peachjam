@@ -16,7 +16,7 @@
               aria-expanded="false"
               hx-post="{% url 'save_document' %}"
               hx-target="#saveDocument"
-              hx-include="#collections-form">
+              hx-include="#save_document-form">
         Save document
       </button>
       <div id="saveDocument" class="dropdown-menu p-2">{% include "peachjam/save_document.html" %}</div>
@@ -25,13 +25,7 @@
            tabindex="-1"
            aria-labelledby="addCollection"
            aria-hidden="true">
-        <div class="modal-dialog" id="testing">
-          <div class="modal-content">
-            <div class="modal-header">
-              <p class="h5 modal-title">Add new collection</p>
-            </div>
-          </div>
-        </div>
+        {% include "peachjam/collections_list.html" %}
       </div>
     </div>
     {% if document.source_file %}

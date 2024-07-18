@@ -2,6 +2,31 @@
   <div class="modal-content">
     <div class="modal-header">
       <p class="h5 modal-title">Add new collection</p>
+      <button type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <form id="collections-form" hx-post="{% url 'collections' %}">
+        {{ collection_form.user_profile }}
+        <label class="form-label" for="{{ collection_form.name.id_for_label }}">{{ collection_form.name.label }}</label>
+        <input type="text"
+               class="form-control"
+               name="{{ collection_form.name.name }}"
+               id="{{ collection_form.name.id_for_label }}"
+               required
+               autofocus
+               placeholder="New collection"/>
+        {% if collection_form.name.errors %}
+          <div class="text-danger">
+            {% for error in collection_form.name.errors %}<p>{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+        <div class="modal-footer">
+          <button class="btn btn-primary" type="submit" data-bs-dismiss="modal">Confirm</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
