@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-07-17 09:40+0200\n"
-"PO-Revision-Date: 2024-06-06 13:41\n"
+"PO-Revision-Date: 2024-07-18 08:46\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -458,3 +458,4 @@ msgstr "Relatórios e guias"
 #: templates/peachjam_search/search.html:5
 msgid "Search regional and national African legal information."
 msgstr "Pesquise informações legais africanas regionais e nacionais."
+
