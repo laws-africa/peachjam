@@ -112,6 +112,7 @@
                 <input id="filter-input"
                        hx-get="{{ request.path }}"
                        hx-trigger="keyup changed delay:300ms"
+                       hx-sync="this:replace"
                        aria-label="{% trans "Filter documents" %}"
                        placeholder="{% trans "Filter documents" %}"
                        class="form-control"
@@ -128,8 +129,11 @@
               <div class="d-none d-md-block ms-2">
                 <button class="btn btn-primary"
                         hx-get="{{ request.path }}"
+                        hx-sync="#filter-input:replace"
                         type="submit"
-                        value="Filter">Filter</button>
+                        value="Filter">
+                  Filter
+                </button>
               </div>
             </div>
           {% endblock %}
