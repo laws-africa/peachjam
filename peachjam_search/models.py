@@ -1,9 +1,11 @@
 import logging
 import uuid
 from datetime import timedelta
+from urllib.parse import urlencode
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.shortcuts import reverse
 from django.utils.timezone import now
 
 log = logging.getLogger(__name__)
@@ -42,6 +44,16 @@ class SearchTrace(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
+
+    def get_search_url(self):
+        """Re-build a search URL for this trace."""
+        params = {"q": self.search}
+        params.update(
+            {k: v for k, v in (self.filters.items() or {}) if k != "is_most_recent"}
+        )
+        params.update({"page": self.page})
+        params.update({"ordering": self.ordering})
+        return reverse("search:search") + "?" + urlencode(params, doseq=True)
 
 
 class SearchClick(models.Model):

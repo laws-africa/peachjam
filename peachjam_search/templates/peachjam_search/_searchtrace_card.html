@@ -4,7 +4,10 @@
     <h5 class="flex-grow-1 m-0">
       {{ n }}.
       {{ trace.search|default:trace.field_searches }}
-      <small class="text-muted">- <a href="{% url "search:search_trace" pk=trace.pk %}">{{ trace.pk }}</a></small>
+      <small class="text-muted">
+        <a href="{% url "search:search_trace" pk=trace.pk %}" class="ms-3">{{ trace.pk }}</a>
+        <a href="{{ trace.get_search_url }}" target="_blank" class="ms-3">{% trans "Try it" %}<i class="ms-1 bi bi-box-arrow-up-right"></i></a>
+      </small>
     </h5>
     <div>
       {% if trace.previous_search %}
