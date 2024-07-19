@@ -1,9 +1,10 @@
 {% load i18n humanize %}
-<div class="card">
+<div class="card" id="{{ trace.pk }}">
   <div class="card-header d-flex">
-    <h5 class="flex-grow-1">
+    <h5 class="flex-grow-1 m-0">
+      {{ n }}.
       {{ trace.search|default:trace.field_searches }}
-      <small class="text-muted">- {{ trace.pk }}</small>
+      <small class="text-muted">- <a href="{% url "search:search_trace" pk=trace.pk %}">{{ trace.pk }}</a></small>
     </h5>
     <div>
       {% if trace.previous_search %}
@@ -17,30 +18,24 @@
     <tr>
       <th>{% trans "Search" %}</th>
       <td>{{ trace.search }}</td>
-    </tr>
-    <tr>
       <th>{% trans "Advanced search" %}</th>
       <td>{{ trace.field_searches }}</td>
     </tr>
     <tr>
       <th>{% trans "Filters" %}</th>
       <td>{{ trace.filters }}</td>
-    </tr>
-    <tr>
       <th>{% trans "Ordering" %}</th>
       <td>{{ trace.ordering }}</td>
     </tr>
     <tr>
       <th>{% trans "Page" %}</th>
       <td>{{ trace.page }}</td>
-    </tr>
-    <tr>
       <th>{% trans "Number of results" %}</th>
       <td>{{ trace.n_results }}</td>
     </tr>
     <tr>
       <th>{% trans "User" %}</th>
-      <td>
+      <td colspan="3">
         {{ trace.ip_address|default_if_none:'?' }}
         <br/>
         {{ trace.user_agent }}
@@ -56,8 +51,6 @@
     <tr>
       <th>{% trans "Config version" %}</th>
       <td>{{ trace.config_version }}</td>
-    </tr>
-    <tr>
       <th>{% trans "Request ID" %}</th>
       <td>{{ trace.request_id }}</td>
     </tr>
@@ -84,3 +77,15 @@
     {% endif %}
   {% endwith %}
 </div>
+{% with trace.next_searches.all as next_searches %}
+  {% if next_searches %}
+    <div class="row">
+      {% for next_trace in trace.next_searches.all %}
+        <div class="col">
+          <div class="my-3 text-center h1">↓</div>
+          {% include 'peachjam_search/_searchtrace_card.html' with trace=next_trace n=n|add:1 %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

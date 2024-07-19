@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http.response import JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.translation import get_language_from_request
@@ -632,7 +632,22 @@ class SearchTraceListView(ListView, PermissionRequiredMixin):
 
 class SearchTraceDetailView(DetailView, PermissionRequiredMixin):
     model = SearchTrace
+    queryset = SearchTrace.objects.prefetch_related("previous_search", "next_searches")
     context_object_name = "trace"
+
+    def get(self, request, *args, **kwargs):
+        trace = self.get_object()
+        # walk the previous searches chain to find the first one
+        if trace.previous_search:
+            original_trace = trace
+            while trace.previous_search:
+                trace = trace.previous_search
+            url = (
+                reverse("search:search_trace", kwargs={"pk": trace.pk})
+                + f"#{original_trace.pk}"
+            )
+            return redirect(url, pk=trace.pk)
+        return super().get(request, *args, **kwargs)
 
     def has_permission(self):
         return self.request.user.is_authenticated and self.request.user.is_staff

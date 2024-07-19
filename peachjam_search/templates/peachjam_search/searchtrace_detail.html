@@ -14,18 +14,6 @@
       </div>
       <div class="col">{% include 'peachjam_search/_searchtrace_form.html' %}</div>
     </div>
-    {% include 'peachjam_search/_searchtrace_card.html' %}
-    {% with trace.next_searches.all as next_searches %}
-      {% if next_searches %}
-        <div class="row">
-          {% for next_trace in trace.next_searches.all %}
-            <div class="col">
-              <div class="my-3 text-center h1">↓</div>
-              {% include 'peachjam_search/_searchtrace_card.html' with trace=next_trace %}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+    {% include 'peachjam_search/_searchtrace_card.html' with n=1 %}
   </div>
 {% endblock %}
