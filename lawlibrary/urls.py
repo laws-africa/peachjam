@@ -3,7 +3,6 @@ from django.urls import include, path
 from lawlibrary import views
 
 urlpatterns = [
-    path("", views.HomePageView.as_view(), name="home_page"),
     path("legislation/", views.LegislationListView.as_view(), name="legislation_list"),
     path(
         "legislation/provincial",
