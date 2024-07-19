@@ -1,0 +1,82 @@
+{% load i18n humanize %}
+<div class="card">
+  <h5 class="card-header">
+    {{ trace.search|default:trace.field_searches }}
+    <small class="text-muted">- {{ trace.pk }}</small>
+  </h5>
+  <table class="table table-condensed mb-3">
+    <tr>
+      <th>{% trans "Created at" %}</th>
+      <td>{{ trace.created_at }}</td>
+    </tr>
+    <tr>
+      <th>{% trans "Search" %}</th>
+      <td>{{ trace.search }}</td>
+    </tr>
+    <tr>
+      <th>{% trans "Advanced search" %}</th>
+      <td>{{ trace.field_searches }}</td>
+    </tr>
+    <tr>
+      <th>{% trans "Filters" %}</th>
+      <td>{{ trace.filters }}</td>
+    </tr>
+    <tr>
+      <th>{% trans "Ordering" %}</th>
+      <td>{{ trace.ordering }}</td>
+    </tr>
+    <tr>
+      <th>{% trans "Page" %}</th>
+      <td>{{ trace.page }}</td>
+    </tr>
+    <tr>
+      <th>{% trans "Number of results" %}</th>
+      <td>{{ trace.n_results }}</td>
+    </tr>
+    <tr>
+      <th>{% trans "User" %}</th>
+      <td>
+        {{ trace.ip_address|default_if_none:'?' }}
+        <br/>
+        {{ trace.user_agent }}
+        {% if trace.user %}
+          <br/>
+          {{ trace.user }}
+          {% if trace.staff %}
+            ({% trans "staff" %})
+          {% endif %}
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>{% trans "Config version" %}</th>
+      <td>{{ trace.config_version }}</td>
+    </tr>
+    <tr>
+      <th>{% trans "Request ID" %}</th>
+      <td>{{ trace.request_id }}</td>
+    </tr>
+  </table>
+  {% with trace.clicks.all as clicks %}
+    {% if clicks %}
+      <div class="card-body">
+        <h5>{% trans "Clicks" %}</h5>
+        <table class="table table-condensed">
+          {% for click in clicks %}
+            <tr>
+              <td>#{{ click.position }}</td>
+              <td>
+                <a href="{{ click.frbr_uri }}" target="_blank">{{ click.frbr_uri }}</a>
+              </td>
+              <td>{{ click.portion }}</td>
+              <td>
+                {% trans "after" %}
+                <span title="{{ click.created_at }}">{{ trace.created_at|timesince:click.created_at }}</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    {% endif %}
+  {% endwith %}
+</div>

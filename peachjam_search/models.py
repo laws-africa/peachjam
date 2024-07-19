@@ -45,7 +45,9 @@ class SearchTrace(models.Model):
 class SearchClick(models.Model):
     """A click on a search result."""
 
-    search_trace = models.ForeignKey(SearchTrace, on_delete=models.CASCADE)
+    search_trace = models.ForeignKey(
+        SearchTrace, on_delete=models.CASCADE, related_name="clicks"
+    )
     frbr_uri = models.CharField(max_length=2048)
     portion = models.CharField(max_length=2048, null=True)
     position = models.IntegerField()

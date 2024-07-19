@@ -41,7 +41,7 @@
             <td>
               <a href="{% url 'search:search_trace' pk=trace.id %}">{{ trace.id }}</a>
             </td>
-            <td>{{ trace.search }}</td>
+            <td>{{ trace.search|default:trace.field_searches }}</td>
             <td>{{ trace.n_results }}</td>
             <td>{{ trace.page }}</td>
             <td>{{ trace.created_at }}</td>
