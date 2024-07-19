@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-06 15:17+0200\n"
-"PO-Revision-Date: 2024-07-18 09:49\n"
+"POT-Creation-Date: 2024-07-17 09:40+0200\n"
+"PO-Revision-Date: 2024-07-19 09:44\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -78,11 +78,11 @@ msgstr "Legislação recente"
 msgid "View more legislation"
 msgstr "Ver mais legislação"
 
-#: templates/liiweb/home.html:100
+#: templates/liiweb/home.html:95
 msgid "Recent Gazettes"
 msgstr "Diários recentes"
 
-#: templates/liiweb/home.html:102
+#: templates/liiweb/home.html:96
 msgid "View more gazettes"
 msgstr "Veja mais jornais"
 
@@ -90,54 +90,54 @@ msgstr "Veja mais jornais"
 msgid "Courts"
 msgstr "Tribunais"
 
-#: templates/liiweb/home.html:111
+#: templates/liiweb/home.html:115
 msgid "Collections"
 msgstr "Coleções"
 
-#: templates/liiweb/home.html:124
+#: templates/liiweb/home.html:131
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr "Use %(APP_NAME)s quando estiver off-line"
 
-#: templates/liiweb/home.html:126
+#: templates/liiweb/home.html:133
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr "Pocket Law é uma cópia offline da jurisprudência, legislação e outros materiais jurídicos de %(APP_NAME)s."
 
-#: templates/liiweb/home.html:138
+#: templates/liiweb/home.html:148
 msgid "Latest Articles"
 msgstr "Artigos mais Recentes"
 
-#: templates/liiweb/home.html:140
+#: templates/liiweb/home.html:150
 msgid "View more articles"
 msgstr "Ver mais artigos"
 
 #: templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:16 templates/peachjam/_header.html:17
+#: templates/liiweb/legislation_list.html:7 templates/peachjam/_header.html:17
 msgid "Legislation"
 msgstr "Legislação"
 
-#: templates/liiweb/legislation_list.html:25
+#: templates/liiweb/legislation_list.html:15
 msgid "Current legislation"
 msgstr "Legislação atual"
 
-#: templates/liiweb/legislation_list.html:33
+#: templates/liiweb/legislation_list.html:23
 msgid "Recent legislation"
 msgstr "Legislação recente"
 
-#: templates/liiweb/legislation_list.html:47
+#: templates/liiweb/legislation_list.html:37
 msgid "Uncommenced legislation"
 msgstr "Legislação não iniciada"
 
-#: templates/liiweb/legislation_list.html:55
+#: templates/liiweb/legislation_list.html:45
 msgid "Repealed legislation"
 msgstr "Legislação repetida"
 
-#: templates/liiweb/legislation_list.html:62
+#: templates/liiweb/legislation_list.html:52
 msgid "All legislation"
 msgstr "Toda a legislação"
 
-#: templates/liiweb/legislation_list.html:68
+#: templates/liiweb/legislation_list.html:57
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr "Estão a ver legislação revogada, que já não está em vigor."
 
@@ -182,7 +182,7 @@ msgstr "Outras Instituições Jurídicas Africanas"
 msgid "Judgments"
 msgstr "Julgamentos"
 
-#: views/legislation.py:123
+#: views/legislation.py:130
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Legislação"
