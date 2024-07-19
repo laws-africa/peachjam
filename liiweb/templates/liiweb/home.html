@@ -19,7 +19,14 @@
         <div class="row">
           <div class="col-lg-8 col-12">
             {% block hero-content %}
-              {% block hero-headings %}<h1 class="mb-4">{{ APP_NAME }}</h1>{% endblock %}
+              {% block hero-headings %}
+                <h1 class="mb-4">
+                  {% block hero-headings-title %}{{ APP_NAME }}{% endblock %}
+                </h1>
+              {% endblock %}
+              <h4 class="mb-4">
+                {% block hero-headings-welcome %}{% endblock %}
+              </h4>
             {% endblock %}
           </div>
         </div>
