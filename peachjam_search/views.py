@@ -1,15 +1,18 @@
 import copy
 
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http.response import JsonResponse
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
-from django.views.generic import TemplateView
+from django.views.generic import DetailView, ListView, TemplateView
 from django_elasticsearch_dsl_drf.filter_backends import (
     DefaultOrderingFilterBackend,
     FacetedFilterSearchFilterBackend,
@@ -602,3 +605,34 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 class SearchClickViewSet(CreateModelMixin, GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = SearchClickSerializer
+
+
+class SearchTraceListView(ListView, PermissionRequiredMixin):
+    model = SearchTrace
+    paginate_by = 50
+    context_object_name = "traces"
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get("id"):
+            # try to find this trace and redirect to the detail view if it exists,
+            # otherwise show the list
+            try:
+                trace = SearchTrace.objects.filter(pk=request.GET["id"]).first()
+                if trace:
+                    return redirect("search:search_trace", pk=trace.pk)
+            except ValidationError:
+                pass
+            messages.warning(request, _("Search trace not found"))
+            return redirect("search:search_traces")
+        return super().get(request, *args, **kwargs)
+
+    def has_permission(self):
+        return self.request.user.is_authenticated and self.request.user.is_staff
+
+
+class SearchTraceDetailView(DetailView, PermissionRequiredMixin):
+    model = SearchTrace
+    context_object_name = "trace"
+
+    def has_permission(self):
+        return self.request.user.is_authenticated and self.request.user.is_staff

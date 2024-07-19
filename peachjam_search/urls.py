@@ -12,4 +12,8 @@ router.register("click", views.SearchClickViewSet, basename="search_click")
 urlpatterns = [
     path("api/", include(router.urls)),
     path("", views.SearchView.as_view(), name="search"),
+    path("traces", views.SearchTraceListView.as_view(), name="search_traces"),
+    path(
+        "traces/<uuid:pk>", views.SearchTraceDetailView.as_view(), name="search_trace"
+    ),
 ]

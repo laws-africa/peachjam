@@ -1,0 +1,58 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n %}
+{% block title %}
+  {% trans "Search traces" %}
+{% endblock %}
+{% block page-content %}
+  <div class="container py-3">
+    {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show"
+               role="alert">
+            {{ message }}
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div class="row mb-3">
+      <div class="col-md-9">
+        <h1>{% trans "Search traces" %}</h1>
+      </div>
+      <div class="col">{% include 'peachjam_search/_searchtrace_form.html' %}</div>
+    </div>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>{% trans "ID" %}</th>
+          <th>{% trans "Search" %}</th>
+          <th>{% trans "Number of Results" %}</th>
+          <th>{% trans "Page" %}</th>
+          <th>{% trans "Created At" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for trace in traces %}
+          <tr>
+            <td>
+              <a href="{% url 'search:search_trace' pk=trace.id %}">{{ trace.id }}</a>
+            </td>
+            <td>{{ trace.search }}</td>
+            <td>{{ trace.n_results }}</td>
+            <td>{{ trace.page }}</td>
+            <td>{{ trace.created_at }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">{% trans "No search traces found." %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include 'peachjam/_pagination.html' %}
+  </div>
+{% endblock %}
