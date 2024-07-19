@@ -98,8 +98,5 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
 
 class VaryOnHxHeadersMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
-        if any(
-            header in request.headers for header in ["Cache-Control", "Hx-Request"]
-        ) or response.has_header("Cache-Control"):
-            patch_vary_headers(response, ["Hx-Request", "Hx-Target"])
+        patch_vary_headers(response, ["Hx-Request", "Hx-Target"])
         return response

@@ -83,6 +83,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "peachjam.middleware.VaryOnHxHeadersMiddleware",
     "peachjam.middleware.GeneralUpdateCacheMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
     "peachjam.middleware.RedirectWWWMiddleware",
@@ -99,7 +100,6 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "django.middleware.cache.FetchFromCacheMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
-    "peachjam.middleware.VaryOnHxHeadersMiddleware",
 ]
 
 ROOT_URLCONF = "peachjam.urls"
