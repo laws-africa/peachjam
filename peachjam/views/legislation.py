@@ -18,7 +18,7 @@ class LegislationListView(FilteredDocumentListView):
     template_name = "peachjam/legislation_list.html"
     navbar_link = "legislation"
     queryset = Legislation.objects.prefetch_related("work")
-    extra_context = {"doc_type": "legislation"}
+    extra_context = {"doc_type": "Legislation"}
     form_defaults = {"sort": "title"}
 
 
