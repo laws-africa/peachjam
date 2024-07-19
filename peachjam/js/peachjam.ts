@@ -11,6 +11,8 @@ import '@lawsafrica/law-widgets/dist/components/la-table-of-contents-controller'
 import '@lawsafrica/law-widgets/dist/components/la-decorate-external-refs';
 import '@lawsafrica/law-widgets/dist/components/la-decorate-internal-refs';
 import '@lawsafrica/law-widgets/dist/components/la-decorate-terms';
+// @ts-ignore
+import htmx from 'htmx.org';
 
 export interface PeachJamConfig {
   appName: string;
@@ -42,8 +44,10 @@ class PeachJam {
     this.setupConfig();
     // add the current user agent to the root HTML element for use with pocketlaw
     document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
+    this.setupHtmx();
     this.setupSentry();
-    this.createComponents();
+    this.createComponents(document.body);
+    this.createVueComponents(document.body);
     this.setupTooltips();
     this.setupPopovers();
     this.scrollNavTabs();
@@ -57,32 +61,64 @@ class PeachJam {
     }
   }
 
-  createComponents () {
-    document.querySelectorAll('[data-component]').forEach((el) => {
-      const name: string | null = el.getAttribute('data-component');
-      if (name && components[name]) {
-        // create the component and attached it to the HTML element
-        (el as any).component = new components[name](el);
-        this.components.push((el as any).component);
+  setupHtmx () {
+    window.htmx = htmx;
+    // htmx:load is fired both when the page loads (weird) and when new content is loaded. We only care about the latter
+    // case. See https://github.com/bigskysoftware/htmx/issues/1500
+    const htmxHelper = { firstLoad: true};
+    document.body.addEventListener('htmx:load', (e) => {
+      if (htmxHelper.firstLoad) {
+        htmxHelper.firstLoad = false;
+        return;
       }
+      // mount components on new elements
+      this.createComponents(e.target as HTMLElement);
+      this.createVueComponents(e.target as HTMLElement);
     });
+  }
 
+  createComponents (root: HTMLElement) {
+    if (root.getAttribute('data-component')) {
+      this.createComponent(root);
+    }
+    // @ts-ignore
+    for (const element of root.querySelectorAll('[data-component]')) {
+      this.createComponent(element);
+    }
+  }
+
+  createVueComponents (root: HTMLElement) {
     // create vue-based components
-    document.querySelectorAll('[data-vue-component]').forEach((el) => {
-      const name = el.getAttribute('data-vue-component');
-      if (name && components[name]) {
-        const vueComp = components[name];
-        createAndMountApp({
-          component: vueComp,
-          // pass in the element's data attributes as props
-          props: { ...(el as HTMLElement).dataset },
-          use: [vueI18n],
-          mountTarget: el as HTMLElement
-        });
-        (el as any).component = vueComp;
-        this.components.push(vueComp);
-      }
-    });
+    // @ts-ignore
+    for (const element of root.querySelectorAll('[data-vue-component]')) {
+      this.createVueComponent(element);
+    }
+  }
+
+  createComponent (el: HTMLElement) {
+    const name: string | null = el.getAttribute('data-component');
+    if (name && components[name]) {
+      // create the component and attached it to the HTML element
+      (el as any).component = new components[name](el);
+      this.components.push((el as any).component);
+    }
+  }
+
+  createVueComponent (el: HTMLElement) {
+    // create vue-based components
+    const name = el.getAttribute('data-vue-component');
+    if (name && components[name]) {
+      const vueComp = components[name];
+      createAndMountApp({
+        component: vueComp,
+        // pass in the element's data attributes as props
+        props: { ...(el as HTMLElement).dataset },
+        use: [vueI18n],
+        mountTarget: el as HTMLElement
+      });
+      (el as any).component = vueComp;
+      this.components.push(vueComp);
+    }
   }
 
   setupSentry () {
