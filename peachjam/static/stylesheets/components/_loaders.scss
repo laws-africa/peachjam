@@ -19,3 +19,12 @@
   100% {
     transform: rotate(360deg); }
 }
+
+.htmx-progress {
+  opacity: 0;
+  height: 0.3rem;
+}
+
+.htmx-progress.htmx-request {
+  opacity: 1;
+}

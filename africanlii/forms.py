@@ -4,15 +4,15 @@ from peachjam.forms import BaseDocumentFilterForm
 class ESDocumentFilterForm(BaseDocumentFilterForm):
     """Form for filtering documents in Elasticsearch. Only applies a subset of filters."""
 
-    def filter_queryset(self, search, exclude=None):
+    def filter_queryset(self, search, exclude=None, filter_q=False):
         alphabet = self.cleaned_data.get("alphabet")
         jurisdictions = self.params.getlist("jurisdictions")
         years = self.params.getlist("years")
+        q = self.params.get("q")
         if not isinstance(exclude, list):
             exclude = [exclude]
 
-        # Order by title then date descending
-        search = search.sort("title_keyword", "-date")
+        search = self.order_queryset(search, exclude)
 
         if alphabet and "alphabet" not in exclude:
             search = search.filter(
@@ -25,7 +25,19 @@ class ESDocumentFilterForm(BaseDocumentFilterForm):
         if years and "years" not in exclude:
             search = search.filter("terms", year=years)
 
+        if filter_q and q and "q" not in exclude:
+            search = search.query("match", title=q)
+
         return search
+
+    def order_queryset(self, queryset, exclude=None):
+        sort = self.cleaned_data.get("sort") or "-date"
+        if sort == "title":
+            sort = "title_keyword"
+        elif sort == "-title":
+            sort = "-title_keyword"
+        queryset = queryset.sort(sort, "title_keyword")
+        return queryset
 
     def filter_faceted_search(self, search):
         """Add filters to a faceted search object, which is a bit different to adding them to the normal search

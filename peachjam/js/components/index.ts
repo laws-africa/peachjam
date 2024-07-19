@@ -1,6 +1,7 @@
 import { CopyToClipboard } from './clipboard';
 import { RelationshipEnrichments } from './RelationshipEnrichment';
-import DocumentList from './document-list';
+import DocumentFilterForm from './document-filter-form';
+import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
 import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
@@ -9,14 +10,14 @@ import TermsOfUse from './terms-of-use';
 
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
-import LegislationTable from './LegislationTable/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
 
 const components: Record<string, any> = {
   // Data components
   CopyToClipboard,
   DocumentContent,
-  DocumentList,
+  DocumentFilterForm,
+  DocumentTable,
   NavigationSelect,
   RelationshipEnrichments,
   ToggleTab,
@@ -26,7 +27,6 @@ const components: Record<string, any> = {
   // Vue components
   DocumentProblemModal,
   FindDocuments,
-  LegislationTable,
   PocketLawDownload
 };
 

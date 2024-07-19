@@ -34,18 +34,12 @@ table.doc-table {
   }
 
   // "child" rows for legislation subleg
-  .has-children .bi-caret-down-fill {
-    display: none;
+  .cell-toggle i::before {
+    content: "\f229";
   }
 
-  .has-children.expanded {
-    .bi-caret-right-fill {
-      display: none;
-    }
-
-    .bi-caret-down-fill {
-      display: inline;
-    }
+  .cell-toggle .collapsed i::before {
+    content: "\f231";
   }
 
   .doc-table-children {
