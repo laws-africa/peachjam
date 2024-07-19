@@ -67,7 +67,7 @@ class LegislationListView(FilteredDocumentListView):
                 context["entity_profile"] = jurisdiction_profile.entity_profile.first()
                 context["entity_profile_title"] = jurisdiction_profile.jurisdiction.name
 
-        context["doc_type"] = "legislation"  # for quick search
+        context["doc_type"] = "Legislation"  # for quick search
         context["doc_table_toggle"] = True
         context["doc_table_citations"] = True
         context["doc_table_show_doc_type"] = False
