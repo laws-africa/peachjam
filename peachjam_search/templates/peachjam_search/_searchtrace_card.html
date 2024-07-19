@@ -1,14 +1,19 @@
 {% load i18n humanize %}
 <div class="card">
-  <h5 class="card-header">
-    {{ trace.search|default:trace.field_searches }}
-    <small class="text-muted">- {{ trace.pk }}</small>
-  </h5>
+  <div class="card-header d-flex">
+    <h5 class="flex-grow-1">
+      {{ trace.search|default:trace.field_searches }}
+      <small class="text-muted">- {{ trace.pk }}</small>
+    </h5>
+    <div>
+      {% if trace.previous_search %}
+        <span title="{{ trace.created_at }}">+ {{ trace.previous_search.created_at|timesince:trace.created_at }}</span>
+      {% else %}
+        {{ trace.created_at }}
+      {% endif %}
+    </div>
+  </div>
   <table class="table table-condensed mb-3">
-    <tr>
-      <th>{% trans "Created at" %}</th>
-      <td>{{ trace.created_at }}</td>
-    </tr>
     <tr>
       <th>{% trans "Search" %}</th>
       <td>{{ trace.search }}</td>
@@ -70,8 +75,7 @@
               </td>
               <td>{{ click.portion }}</td>
               <td>
-                {% trans "after" %}
-                <span title="{{ click.created_at }}">{{ trace.created_at|timesince:click.created_at }}</span>
+                + <span title="{{ click.created_at }}">{{ trace.created_at|timesince:click.created_at }}</span>
               </td>
             </tr>
           {% endfor %}

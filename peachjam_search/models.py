@@ -16,7 +16,9 @@ class SearchTrace(models.Model):
     # this is the name of the search configuration, for tracking changes across versions
     config_version = models.CharField(max_length=50, null=False)
     request_id = models.CharField(max_length=1024, null=True, editable=False)
-    previous_search = models.ForeignKey("self", on_delete=models.CASCADE, null=True)
+    previous_search = models.ForeignKey(
+        "self", on_delete=models.CASCADE, null=True, related_name="next_searches"
+    )
 
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     ip_address = models.CharField(max_length=1024, null=True)
