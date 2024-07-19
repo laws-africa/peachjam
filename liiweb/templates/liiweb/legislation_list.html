@@ -6,6 +6,11 @@
 {% block page-title %}
   <h1 class="my-4">{% trans 'Legislation' %}</h1>
 {% endblock %}
+{% block alerts %}
+  {% if view.variant == 'repealed' %}
+    <div class="alert alert-danger">{% trans 'You are viewing repealed legislation which is no longer in force.' %}</div>
+  {% endif %}
+{% endblock %}
 {% block nav-tabs %}
   <nav class="nav nav-tabs scroll-xs mb-3 border-bottom">
     <li class="nav-item">
@@ -53,7 +58,4 @@
       </a>
     </li>
   </nav>
-  {% if view.variant == 'repealed' %}
-    <div class="alert alert-danger">{% trans 'You are viewing repealed legislation which is no longer in force.' %}</div>
-  {% endif %}
 {% endblock %}

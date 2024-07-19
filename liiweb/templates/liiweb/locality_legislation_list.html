@@ -13,11 +13,7 @@
     </nav>
   </div>
 {% endblock %}
-{% block page-heading %}
-  <h1 class="my-4">{{ page_heading }}</h1>
-  {% include 'lawlibrary/_legislation_alert.html' %}
-{% endblock %}
-{% block legislation-nav %}
+{% block nav-tabs %}
   <nav class="nav nav-tabs mb-3 border-bottom">
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
