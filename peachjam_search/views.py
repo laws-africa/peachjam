@@ -607,7 +607,7 @@ class SearchClickViewSet(CreateModelMixin, GenericViewSet):
     serializer_class = SearchClickSerializer
 
 
-class SearchTraceListView(ListView, PermissionRequiredMixin):
+class SearchTraceListView(PermissionRequiredMixin, ListView):
     model = SearchTrace
     paginate_by = 50
     context_object_name = "traces"
@@ -630,7 +630,7 @@ class SearchTraceListView(ListView, PermissionRequiredMixin):
         return self.request.user.is_authenticated and self.request.user.is_staff
 
 
-class SearchTraceDetailView(DetailView, PermissionRequiredMixin):
+class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
     model = SearchTrace
     queryset = SearchTrace.objects.prefetch_related("previous_search", "next_searches")
     context_object_name = "trace"
