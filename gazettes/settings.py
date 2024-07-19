@@ -3,7 +3,6 @@ from peachjam.settings import *  # noqa
 # Application definition
 INSTALLED_APPS = [
     "gazettes",
-    "django.contrib.humanize",
 ] + INSTALLED_APPS  # noqa
 
 
