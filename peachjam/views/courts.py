@@ -23,6 +23,10 @@ class FilteredJudgmentView(FilteredDocumentListView):
     exclude_facets = []
     group_by_date = "month-year"
 
+    def get_form(self):
+        self.form_defaults = {"sort": "-date"}
+        return super().get_form()
+
     def base_view_name(self):
         return _("Judgments")
 
