@@ -8,7 +8,7 @@ from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, View
 from lxml import html
 
-from peachjam.forms import BaseDocumentFilterForm, SaveDocumentForm
+from peachjam.forms import BaseDocumentFilterForm, FolderForm, SaveDocumentForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
     Author,
@@ -299,6 +299,12 @@ class BaseDocumentDetailView(DetailView):
             user_profile=user_profile,
             initial={"document": self.get_object(), "user_profile": user_profile},
         )
+        context["saved"] = user_profile.saved_documents.filter(
+            document=self.get_object()
+        )
+        context["folder_form"] = FolderForm(
+            user_profile=user_profile, initial={"user_profile": user_profile}
+        )
 
         return context
 
@@ -423,7 +429,7 @@ class BaseDocumentDetailView(DetailView):
         document.content_html = html.tostring(root, encoding="unicode")
 
     def render_collections(self, request):
-        return render(request, "collections_list.html")
+        return render(request, "folders_list.html")
 
 
 class CSRFTokenView(View):

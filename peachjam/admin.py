@@ -42,7 +42,6 @@ from peachjam.models import (
     CaseNumber,
     CitationLink,
     CitationProcessing,
-    Collection,
     CoreDocument,
     Court,
     CourtClass,
@@ -51,6 +50,7 @@ from peachjam.models import (
     DocumentTopic,
     EntityProfile,
     ExternalDocument,
+    Folder,
     Gazette,
     GenericDocument,
     Image,
@@ -1188,7 +1188,7 @@ admin.site.register(
         CourtClass,
         AttachedFileNature,
         CitationProcessing,
-        Collection,
+        Folder,
         SavedDocument,
     ]
 )

@@ -1,38 +1,82 @@
-<form id="save_document-form" hx-post="{% url 'save_document' %}">
-  {% if new %}
-    <h4>Document Saved</h4>
-  {% else %}
-    <h2 class="h4">Choose Collection</h2>
-  {% endif %}
-  <p class="h6">{{ saved_document }}</p>
-  {{ save_document_form.document }}
-  {{ save_document_form.user_profile }}
-  <label class="form-label"
-         for="{{ save_document_form.collection.id_for_label }}">
-    {{ save_document_form.collection.label }}
-  </label>
-  <select id="{{ save_document_form.collection.id_for_label }}"
-          class="form-select"
-          name="{{ save_document_form.collection.name }}">
-    {% for value, name in save_document_form.fields.collection.choices %}
-      <option value="{{ value }}"
-              {% if save_document_form.fields.collection.value == x %} selected{% endif %}>
-        {{ name }}
-      </option>
-    {% endfor %}
-  </select>
-  <div class="d-inline-flex justify-content-between">
-    <div>
+<div class="modal-dialog" id="testing">
+  <div class="modal-content">
+    <div class="modal-header">
+      <p class="h5 modal-title">Choose Folder</p>
       <button type="button"
-              class="btn btn-outline-secondary btn-shrink-sm ms-2"
-              data-bs-toggle="modal"
-              data-bs-target="#addCollection"
-              hx-post="{% url 'collections' %}"
-              hx-target="#addCollection"
-              hx-include="#collections-form">
-        Add collection
-      </button>
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"></button>
     </div>
-    <button class="btn btn-primary" type="submit">Done</button>
+    <div class="modal-body">
+      {% if updated %}
+        <div class="alert alert-success">
+          {{ document }} has been saved
+          {% if saved_document.folder %}to the {{ saved_document.folder }} folder.{% endif %}
+        </div>
+      {% endif %}
+      {% if deleted %}<div class="alert alert-danger">{{ document }} has been deleted successfully</div>{% endif %}
+      <form id="save_document-form"
+            hx-post="{% url 'save_document' %}"
+            hx-target="#saveDocument">
+        <label class="form-label"
+               for="{{ save_document_form.document.id_for_label }}">
+          {{ save_document_form.document.label }}:
+        </label>
+        <p class="h5">{{ document }}</p>
+        {{ save_document_form.document }}
+        {{ save_document_form.user_profile }}
+        <label class="form-label" for="{{ save_document_form.folder.id_for_label }}">
+          {{ save_document_form.folder.label }}:
+        </label>
+        <select id="{{ save_document_form.folder.id_for_label }}"
+                class="form-select"
+                name="{{ save_document_form.folder.name }}">
+          {% for value, name in save_document_form.fields.folder.choices %}
+            <option value="{{ value }}"
+                    {% if save_document_form.folder.value == value %} selected{% endif %}>
+              {{ name }}
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+    <div class="modal-footer d-flex justify-content-between">
+      <button class="btn btn-danger"
+              type="button"
+              hx-target="#saveDocument"
+              {% if not saved_document %} disabled{% endif %}
+              hx-include="#save_document-form"
+              hx-delete="{% url 'save_document' %}?id={{ saved_document.id }}"
+              hx-confirm="Are you sure you want to unsave this document?">
+        Unsave
+      </button>
+      <div>
+        <button type="button"
+                class="btn btn-outline-secondary btn-shrink-sm ms-2"
+                data-bs-toggle="modal"
+                data-bs-target="#addFolder"
+                hx-get="{% url 'folders' %}"
+                hx-target="#addFolder">
+          New Folder
+        </button>
+        <button class="btn btn-primary ms-1" type="submit" form="save_document-form">Done</button>
+      </div>
+    </div>
   </div>
-</form>
+</div>
+<button id="saveDocumentButton"
+        class="btn {% if updated %}btn-primary{% else %}btn-outline-primary{% endif %} btn-shrink-sm ms-2"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#saveDocument"
+        aria-expanded="false"
+        hx-post="{% url 'save_document' %}"
+        hx-target="#saveDocument"
+        hx-include="#save_document-form"
+        hx-swap-oob="true">
+  {% if deleted %}
+    Save document
+  {% else %}
+    Document saved <i class="bi bi-check-circle"></i>
+  {% endif %}
+</button>

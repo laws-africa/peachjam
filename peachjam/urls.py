@@ -45,7 +45,7 @@ from peachjam.views import (
     CourtRegistryMonthView,
     CourtRegistryYearView,
     CourtYearView,
-    CreateCollectionView,
+    CreateFolderView,
     DocumentDetailViewResolver,
     DocumentListView,
     DocumentMediaView,
@@ -92,7 +92,7 @@ urlpatterns = [
         AboutPageView.as_view(),
         name="about",
     ),
-    path("collections/", CreateCollectionView.as_view(), name="collections"),
+    path("folders/", CreateFolderView.as_view(), name="folders"),
     path("save-document/", SaveDocumentView.as_view(), name="save_document"),
     # listing views
     path(

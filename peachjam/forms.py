@@ -10,8 +10,8 @@ from django.utils.translation import gettext as _
 
 from peachjam.models import (
     AttachedFiles,
-    Collection,
     CoreDocument,
+    Folder,
     SavedDocument,
     SourceFile,
     UserProfile,
@@ -274,7 +274,7 @@ class DocumentProblemForm(forms.Form):
 
 
 class SaveDocumentForm(forms.ModelForm):
-    collection = forms.ModelChoiceField(queryset=Collection.objects, required=False)
+    folder = forms.ModelChoiceField(queryset=Folder.objects, required=False)
     user_profile = forms.ModelChoiceField(
         queryset=UserProfile.objects, widget=forms.HiddenInput()
     )
@@ -294,18 +294,18 @@ class SaveDocumentForm(forms.ModelForm):
             self.fields["document"].initial = self.document
             self.fields["user_profile"].initial = self.user_profile
 
-    def save(self, commit=True):
-        return super().save()
+    # def save(self, commit=True):
+    #     return super().save()
 
 
-class CollectionForm(forms.ModelForm):
+class FolderForm(forms.ModelForm):
     name = forms.CharField(max_length=255, required=True)
     user_profile = forms.ModelChoiceField(
         queryset=UserProfile.objects, widget=forms.HiddenInput()
     )
 
     class Meta:
-        model = Collection
+        model = Folder
         fields = "__all__"
 
     def __init__(self, *args, user_profile=None, **kwargs):

@@ -9,23 +9,29 @@
     {% endif %}
   {% endblock %}
   {% block download-btn %}
-    <div class="dropdown">
-      <button class="btn btn-outline-primary btn-shrink-sm ms-2 dropdown-toggle"
+    <div>
+      <button id="saveDocumentButton"
+              class="btn {% if saved %}btn-primary{% else %}btn-outline-primary{% endif %} btn-shrink-sm ms-2"
               type="button"
-              data-bs-toggle="dropdown"
+              data-bs-toggle="modal"
+              data-bs-target="#saveDocument"
               aria-expanded="false"
               hx-post="{% url 'save_document' %}"
               hx-target="#saveDocument"
               hx-include="#save_document-form">
-        Save document
+        {% if saved %}
+          Document saved <i class="bi bi-check-circle"></i>
+        {% else %}
+          Save document
+        {% endif %}
       </button>
-      <div id="saveDocument" class="dropdown-menu p-2">{% include "peachjam/save_document.html" %}</div>
+      <div id="saveDocument" class="modal fade">{% include "peachjam/save_document.html" %}</div>
       <div class="modal fade"
-           id="addCollection"
+           id="addFolder"
            tabindex="-1"
-           aria-labelledby="addCollection"
+           aria-labelledby="addFolder"
            aria-hidden="true">
-        {% include "peachjam/collections_list.html" %}
+        {% include "peachjam/folders_list.html" %}
       </div>
     </div>
     {% if document.source_file %}
