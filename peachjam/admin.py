@@ -643,7 +643,6 @@ class DocumentAdmin(BaseAdmin):
 
 class TaxonomyForm(MoveNodeForm):
     def save(self, commit=True):
-        self.clean()
         super().save(commit=commit)
         # save all children so that the slugs take into account the potentially updated parent
         for node in self.instance.get_descendants():
