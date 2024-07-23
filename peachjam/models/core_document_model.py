@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import re
 import shutil
@@ -22,6 +23,7 @@ from docpipe.soffice import soffice_convert
 from docpipe.xmlutils import unwrap_element
 from languages_plus.models import Language
 from lxml import html
+from lxml.etree import ParserError
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from polymorphic.query import PolymorphicQuerySet
@@ -38,6 +40,8 @@ from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.storage import DynamicStorageFileField
 from peachjam.xmlutils import parse_html_str
+
+log = logging.getLogger(__name__)
 
 
 class Label(models.Model):
@@ -476,6 +480,23 @@ class CoreDocument(PolymorphicModel):
         self.pre_save()
         super().full_clean(*args, **kwargs)
 
+    def clean_content_html(self, content_html):
+        """Ensure that content_html is not just whitespace HTML. Returns the cleaned value."""
+        if not content_html:
+            return None
+
+        # return None if the HTML doesn't have any content
+        try:
+            root = parse_html_str(content_html)
+            text = "".join(root.itertext()).strip()
+            text = re.sub(r"\s", "", text)
+            if not text:
+                return None
+        except (ValueError, ParserError):
+            return None
+
+        return content_html
+
     def clean(self):
         super().clean()
 
@@ -587,7 +608,7 @@ class CoreDocument(PolymorphicModel):
 
         if self.content_html and not self.content_html_is_akn:
             # delete existing citations in html
-            root = html.fromstring(self.content_html)
+            root = parse_html_str(self.content_html)
             deleted = False
             for a in root.xpath('//a[starts-with(@href, "/akn/")]'):
                 unwrap_element(a)
@@ -609,7 +630,7 @@ class CoreDocument(PolymorphicModel):
             context = PipelineContext(word_pipeline)
             context.source_file = self.source_file.file
             word_pipeline(context)
-            self.content_html = context.html_text
+            self.content_html = self.clean_content_html(context.html_text)
 
             for img in self.images.all():
                 img.delete()
@@ -700,7 +721,10 @@ def file_location(instance, filename):
     pk = instance.document.pk
     folder = instance.SAVE_FOLDER
     filename = os.path.basename(filename)
-    return f"media/{doc_type}/{pk}/{folder}/{filename}"
+    # generate a random nonce so that we never re-use an existing filename, so that we can guarantee that
+    # we don't overwrite it (which makes it easier to cache files)
+    nonce = os.urandom(8).hex()
+    return f"media/{doc_type}/{pk}/{folder}/{nonce}/{filename}"
 
 
 class AttachmentAbstractModel(models.Model):
@@ -724,6 +748,14 @@ class AttachmentAbstractModel(models.Model):
             self.file.seek(0)
             self.mimetype = magic.from_buffer(self.file.read(), mime=True)
         return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.file:
+            try:
+                self.file.delete(False)
+            except Exception as e:
+                log.warning(f"Ignoring error while deleting {self.file}", exc_info=e)
+        return super().delete(*args, **kwargs)
 
 
 class Image(AttachmentAbstractModel):
@@ -764,7 +796,6 @@ class SourceFile(AttachmentAbstractModel):
     source_url = models.URLField(
         _("source URL"), max_length=2048, null=True, blank=True
     )
-
     file_as_pdf = models.FileField(
         _("file as pdf"),
         upload_to=file_location,
@@ -806,6 +837,26 @@ class SourceFile(AttachmentAbstractModel):
         ext = ext or os.path.splitext(self.filename)[1]
         title = re.sub(r"[^a-zA-Z0-9() ]", "", self.document.title)
         return title + ext
+
+    def set_download_filename(self):
+        """For S3-backed storages using a custom domain, set the content-disposition header to a filename suitable
+        for download."""
+        if not self.source_url and getattr(self.file.storage, "custom_domain", None):
+            metadata = self.file.storage.get_object_parameters(self.file.name)
+            metadata[
+                "ContentDisposition"
+            ] = f'attachment; filename="{self.filename_for_download()}"'
+            src = {"Bucket": self.file.storage.bucket_name, "Key": self.file.name}
+            self.file.storage.connection.meta.client.copy_object(
+                CopySource=src, MetadataDirective="REPLACE", **src, **metadata
+            )
+
+    def save(self, *args, **kwargs):
+        pk = self.pk
+        super().save(*args, **kwargs)
+        if not pk:
+            # first save, set the download filename
+            self.set_download_filename()
 
 
 class AttachedFileNature(models.Model):

@@ -1,28 +1,25 @@
 {% extends "liiweb/home.html" %}
 {% load static i18n %}
 {% block hero-logos %}
-  <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
-  <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
   <img src="{% static 'images/judiciary_of_tanzania.png' %}"
        alt="judiciary-of-tanzania-logo"/>
   <img src="{% static 'images/cooperation-logo-ger-ger-giz.jpg' %}"
        alt="GIZ logo"/>
+  {{ block.super }}
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Karibu Katika Mfumo wa Taarifa za Maamuzi, Sheria na Kanuni za Tanzania' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
-      TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni.
-      TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya
-      Afrika ya LIIs.
-    {% endblocktrans %}
-  </h4>
+{% block hero-headings-title %}
+  {% trans 'Karibu Katika Mfumo wa Taarifa za Maamuzi, Sheria na Kanuni za Tanzania' %}
 {% endblock %}
-{% block second-col-about %}
-  <p class="lead">
-    {% blocktrans trimmed %}
-      TanzLII is a project of the Tanzanian Judiciary.
-      We aim to support the rule of law by publishing the law of Tanzania for free online access.
-    {% endblocktrans %}
-  </p>
+{% block hero-headings-welcome %}
+  {% blocktrans trimmed %}
+    TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni.
+    TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya
+    Afrika ya LIIs.
+  {% endblocktrans %}
+{% endblock %}
+{% block hero-headings-blurb %}
+  {% blocktrans trimmed %}
+    TanzLII is a project of the Tanzanian Judiciary.
+    We aim to support the rule of law by publishing the law of Tanzania for free online access.
+  {% endblocktrans %}
 {% endblock %}

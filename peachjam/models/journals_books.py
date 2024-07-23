@@ -13,10 +13,11 @@ class Book(CoreDocument):
         super().delete_citations()
         # reset the HTML back to the original from markdown, because delete_citations()
         # removes any embedded akn links
-        self.convert_content_markdown()
+        if self.content_markdown:
+            self.convert_content_markdown()
 
     def convert_content_markdown(self):
-        self.content_html = markdownify(self.content_markdown)
+        self.content_html = markdownify(self.content_markdown or "")
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"

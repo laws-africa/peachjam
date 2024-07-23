@@ -13,6 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: Compile javascript and commit changes
+    # avoid circular build commits
+    if: ${{ !contains(github.event.head_commit.message, 'nobuild') }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -28,9 +30,11 @@ jobs:
 
       - name: Build
         run: npx webpack --mode production
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Push
         uses: EndBug/add-and-commit@v9
         with:
           add: 'peachjam/static/js/*app-prod.js peachjam/static/js/pdf.worker-prod.js --force'
-          message: 'Update compiled javascript'
+          message: 'Update compiled javascript [nobuild]'

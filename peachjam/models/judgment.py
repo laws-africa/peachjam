@@ -302,9 +302,9 @@ class Judgment(CoreDocument):
     )
     hearing_date = models.DateField(null=True, blank=True)
 
-    auto_assign_title = models.BooleanField(
-        _("Auto-assign title"),
-        help_text=_("Whether or not the system should assign the title"),
+    auto_assign_details = models.BooleanField(
+        _("Auto-assign details"),
+        help_text=_("Whether or not the system should assign the details"),
         default=True,
     )
 
@@ -358,14 +358,16 @@ class Judgment(CoreDocument):
 
     def generate_work_frbr_uri(self):
         # enforce certain defaults for judgment FRBR URIs
-        self.frbr_uri_doctype = "judgment"
-        self.frbr_uri_actor = self.court.code.lower() if self.court else None
-        self.frbr_uri_date = str(self.date.year) if self.date else ""
-        self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
+        if self.auto_assign_details:
+            self.frbr_uri_doctype = "judgment"
+            self.frbr_uri_actor = self.court.code.lower() if self.court else None
+            self.frbr_uri_date = str(self.date.year) if self.date else ""
+            self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
         return super().generate_work_frbr_uri()
 
     def clean(self):
-        self.assign_mnc()
+        if self.auto_assign_details:
+            self.assign_mnc()
         super().clean()
 
     def assign_title(self):
@@ -430,8 +432,8 @@ class Judgment(CoreDocument):
                 self.locality = self.court.locality
 
         self.doc_type = "judgment"
-        self.assign_mnc()
-        if self.auto_assign_title:
+        if self.auto_assign_details:
+            self.assign_mnc()
             self.assign_title()
         super().pre_save()
 

@@ -107,3 +107,12 @@ ZAGPPHC 1063</a>.</p>
         journal.save()
         self.assertEqual("doc", journal.frbr_uri_doctype)
         self.assertEqual("journal", journal.frbr_uri_subtype)
+
+    def test_clean_content_html(self):
+        doc = CoreDocument()
+        self.assertIsNone(doc.clean_content_html(""""""))
+        self.assertIsNone(doc.clean_content_html("""<aoeu"""))
+        self.assertIsNone(doc.clean_content_html("""<div>   \n&nbsp;  \n</div>"""))
+        self.assertEqual(
+            doc.clean_content_html("""<div>test</div>"""), """<div>test</div>"""
+        )

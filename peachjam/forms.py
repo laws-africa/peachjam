@@ -40,6 +40,13 @@ class NewDocumentFormMixin:
         super().__init__(*args, **kwargs)
         self.fields["upload_file"] = forms.FileField(required=False)
 
+    def clean_upload_file(self):
+        if self.cleaned_data["upload_file"]:
+            self.cleaned_data["upload_file"].name = clean_filename(
+                self.cleaned_data["upload_file"].name
+            )
+        return self.cleaned_data["upload_file"]
+
     def _save_m2m(self):
         super()._save_m2m()
         if self.cleaned_data.get("upload_file"):
@@ -93,14 +100,28 @@ class BaseDocumentFilterForm(forms.Form):
     registries = forms.CharField(required=False)
     attorneys = forms.CharField(required=False)
     outcomes = forms.CharField(required=False)
+    taxonomies = forms.CharField(required=False)
+    q = forms.CharField(required=False)
 
-    def __init__(self, data, *args, **kwargs):
+    sort = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("title", _("Title") + " (A - Z)"),
+            ("-title", _("Title") + " (Z - A)"),
+            ("-date", _("Date") + " " + _("(Newest first)")),
+            ("date", _("Date") + " " + _("(Oldest first)")),
+        ],
+    )
+
+    def __init__(self, defaults, data, *args, **kwargs):
         self.params = QueryDict(mutable=True)
+        self.params.update({"sort": "title"})
+        self.params.update(defaults or {})
         self.params.update(data)
 
         super().__init__(self.params, *args, **kwargs)
 
-    def filter_queryset(self, queryset, exclude=None):
+    def filter_queryset(self, queryset, exclude=None, filter_q=False):
         years = self.params.getlist("years")
         alphabet = self.cleaned_data.get("alphabet")
         authors = self.params.getlist("authors")
@@ -112,6 +133,8 @@ class BaseDocumentFilterForm(forms.Form):
         registries = self.params.getlist("registries")
         attorneys = self.params.getlist("attorneys")
         outcomes = self.params.getlist("outcomes")
+        taxonomies = self.params.getlist("taxonomies")
+        q = self.params.get("q")
 
         queryset = self.order_queryset(queryset, exclude)
 
@@ -131,7 +154,7 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(doc_type__in=doc_type)
 
         if judges and exclude != "judges":
-            queryset = queryset.filter(judges__name__in=judges)
+            queryset = queryset.filter(judges__name__in=judges).distinct()
 
         if natures and exclude != "natures":
             queryset = queryset.filter(nature__name__in=natures)
@@ -143,18 +166,22 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(registry__name__in=registries)
 
         if attorneys and exclude != "attorneys":
-            queryset = queryset.filter(attorneys__name__in=attorneys)
+            queryset = queryset.filter(attorneys__name__in=attorneys).distinct()
 
         if outcomes and exclude != "outcomes":
             queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
 
+        if taxonomies and exclude != "taxonomies":
+            queryset = queryset.filter(taxonomies__topic__name__in=taxonomies)
+
+        if filter_q and q and exclude != "q":
+            queryset = queryset.filter(title__icontains=q)
+
         return queryset
 
     def order_queryset(self, queryset, exclude=None):
-        if self.cleaned_data.get("alphabet") and exclude != "alphabet":
-            queryset = queryset.order_by("title")
-        else:
-            queryset = queryset.order_by("-date", "title")
+        sort = self.cleaned_data.get("sort") or "-date"
+        queryset = queryset.order_by(sort, "title")
         return queryset
 
 
@@ -169,6 +196,11 @@ class AttachmentFormMixin:
     def save(self, commit=True):
         # clear these for changed files so they get updated
         if "file" in self.changed_data:
+            # get the old file and make sure it's deleted
+            if self.instance.pk:
+                existing = self.instance.__class__.objects.get(pk=self.instance.pk)
+                if existing.file:
+                    existing.file.delete(False)
             self.instance.size = None
             self.instance.mimetype = None
             self.instance.filename = self.instance.file.name

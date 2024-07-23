@@ -1,0 +1,19 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n %}
+{% block title %}
+  {% trans "Search trace" %} {{ trace.pk }}
+{% endblock %}
+{% block page-content %}
+  <div class="container py-3">
+    <div class="breadcrumbs mb-3">
+      <a href="{% url 'search:search_traces' %}">{% trans "Search traces" %}</a>
+    </div>
+    <div class="row mb-3">
+      <div class="col-md-9">
+        <h1>{% trans "Search trace" %}: {{ trace.id }}</h1>
+      </div>
+      <div class="col">{% include 'peachjam_search/_searchtrace_form.html' %}</div>
+    </div>
+    {% include 'peachjam_search/_searchtrace_card.html' with n=1 %}
+  </div>
+{% endblock %}
