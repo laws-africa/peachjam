@@ -28,6 +28,8 @@ jobs:
 
       - name: Build
         run: npx webpack --mode production
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Push
         uses: EndBug/add-and-commit@v9

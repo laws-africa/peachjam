@@ -1,4 +1,5 @@
 const { VueLoaderPlugin } = require('vue-loader');
+const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 
 const peachJamConfig = {
   mode: 'development',
@@ -49,8 +50,15 @@ const peachJamConfig = {
     filename: '[name]-prod.js',
     path: __dirname + '/peachjam/static/js'
   },
+  devtool: 'source-map',
   plugins: [
-    new VueLoaderPlugin()
+    new VueLoaderPlugin(),
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: 'lawsafrica',
+      project: 'lii',
+      telemetry: false
+    })
   ]
 };
 
