@@ -62,9 +62,11 @@
     {% block head-css %}{% endblock %}
     {% block head-js %}{% endblock %}
   </head>
-  <body class="{% block body-class %}{% endblock %}">
+  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        class="{% block body-class %}{% endblock %}">
     {% block header %}{% endblock %}
     {% block body-content %}{% endblock %}
     {% block footer %}{% endblock %}
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
   </body>
 </html>

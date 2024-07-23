@@ -8,7 +8,15 @@ from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 
-from peachjam.models import AttachedFiles, CoreDocument, SourceFile, pj_settings
+from peachjam.models import (
+    AttachedFiles,
+    CoreDocument,
+    Folder,
+    SavedDocument,
+    SourceFile,
+    UserProfile,
+    pj_settings,
+)
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
 
@@ -263,3 +271,48 @@ class DocumentProblemForm(forms.Form):
             html_message=html,
             fail_silently=False,
         )
+
+
+class SaveDocumentForm(forms.ModelForm):
+    folder = forms.ModelChoiceField(queryset=Folder.objects, required=False)
+    user_profile = forms.ModelChoiceField(
+        queryset=UserProfile.objects, widget=forms.HiddenInput()
+    )
+    document = forms.ModelChoiceField(
+        queryset=CoreDocument.objects, widget=forms.HiddenInput()
+    )
+
+    class Meta:
+        model = SavedDocument
+        fields = "__all__"
+
+    def __init__(self, *args, document=None, user_profile=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if document is not None and user_profile is not None:
+            self.document = document
+            self.user_profile = user_profile
+            self.fields["document"].initial = self.document
+            self.fields["user_profile"].initial = self.user_profile
+
+    # def save(self, commit=True):
+    #     return super().save()
+
+
+class FolderForm(forms.ModelForm):
+    name = forms.CharField(max_length=255, required=True)
+    user_profile = forms.ModelChoiceField(
+        queryset=UserProfile.objects, widget=forms.HiddenInput()
+    )
+
+    class Meta:
+        model = Folder
+        fields = "__all__"
+
+    def __init__(self, *args, user_profile=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user_profile is not None:
+            self.user_profile = user_profile
+            self.fields["user_profile"].initial = self.user_profile
+
+    def save(self, commit=True):
+        return super().save()

@@ -24,8 +24,8 @@
       </div>
     {% endif %}
     <div class="form-group">
-      <label for="{{ form.login.id_for_label }}">{% trans 'Email address' %}</label>
-      <input type="email"
+      <label for="{{ form.login.id_for_label }}">{% trans 'Email address or username' %}</label>
+      <input type="text"
              class="form-control"
              name="{{ form.login.name }}"
              id="{{ form.login.id_for_label }}"
@@ -47,6 +47,7 @@
              required/>
       <div class="my-2">
         <a href="{% url 'account_reset_password' %}">{% trans 'Forgot your password?' %}</a>
+        <a href="{% url 'account_signup' %}">{% trans 'Sign up' %}</a>
       </div>
       {% if form.password.errors %}
         <div class="text-danger">

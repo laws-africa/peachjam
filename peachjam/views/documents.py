@@ -6,7 +6,7 @@ from django.utils.translation import get_language
 from django.views.generic import DetailView, View
 
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, UserProfile
 from peachjam.registry import registry
 from peachjam.resolver import resolver
 
@@ -38,6 +38,12 @@ class DocumentDetailViewResolver(View):
         obj, exact = CoreDocument.objects.best_for_frbr_uri(
             uri_to_search, get_language()
         )
+
+        user_profile = get_object_or_404(UserProfile, user=self.request.user)
+
+        if user_profile:
+            obj.saved = obj in user_profile.saved_documents.all()
+        print(user_profile.saved_documents.filter(id=obj.id).exists())
 
         if not obj:
             url = resolver.get_url_for_frbr_uri(parsed_frbr_uri, frbr_uri)
