@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
 from peachjam.forms import FolderForm, SaveDocumentForm
-from peachjam.models import CoreDocument, SavedDocument, UserProfile
+from peachjam.models import CoreDocument, Folder, SavedDocument, UserProfile
 
 User = get_user_model()
 
@@ -55,7 +55,14 @@ class SaveDocumentView(TemplateView):
         form = SaveDocumentForm(post_data, instance=instance)
         context = self.get_context_data()
         if form.is_valid():
-            instance = form.save()
+            if post_data["new_folder"]:
+                instance = form.save(commit=False)
+                instance.folder = Folder.objects.get_or_create(
+                    name=post_data["new_folder"], user_profile=instance.user_profile
+                )[0]
+                instance.save()
+            else:
+                instance = form.save()
             form = SaveDocumentForm(
                 document=instance.document,
                 user_profile=instance.user_profile,

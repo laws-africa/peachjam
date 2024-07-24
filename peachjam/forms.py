@@ -275,6 +275,7 @@ class DocumentProblemForm(forms.Form):
 
 class SaveDocumentForm(forms.ModelForm):
     folder = forms.ModelChoiceField(queryset=Folder.objects, required=False)
+    new_folder = forms.CharField(max_length=255, required=False)
     user_profile = forms.ModelChoiceField(
         queryset=UserProfile.objects, widget=forms.HiddenInput()
     )
@@ -284,7 +285,7 @@ class SaveDocumentForm(forms.ModelForm):
 
     class Meta:
         model = SavedDocument
-        fields = "__all__"
+        fields = ["user_profile", "document", "folder", "new_folder"]
 
     def __init__(self, *args, document=None, user_profile=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -294,8 +295,8 @@ class SaveDocumentForm(forms.ModelForm):
             self.fields["document"].initial = self.document
             self.fields["user_profile"].initial = self.user_profile
 
-    # def save(self, commit=True):
-    #     return super().save()
+    def save(self, commit=True):
+        return super().save()
 
 
 class FolderForm(forms.ModelForm):

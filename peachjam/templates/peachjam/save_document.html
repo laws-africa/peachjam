@@ -8,13 +8,6 @@
               aria-label="Close"></button>
     </div>
     <div class="modal-body">
-      {% if updated %}
-        <div class="alert alert-success">
-          {{ document }} has been saved
-          {% if saved_document.folder %}to the {{ saved_document.folder }} folder.{% endif %}
-        </div>
-      {% endif %}
-      {% if deleted %}<div class="alert alert-danger">{{ document }} has been deleted successfully</div>{% endif %}
       <form id="save_document-form"
             hx-post="{% url 'save_document' %}"
             hx-target="#saveDocument">
@@ -38,13 +31,29 @@
             </option>
           {% endfor %}
         </select>
+        <button type="button"
+                class="btn btn-link ps-0"
+                data-bs-toggle="collapse"
+                data-bs-target="#addFolder"
+                aria-expanded="false"
+                aria-controls="addFolder">
+          <i class="bi bi-plus-circle"></i> New folder
+        </button>
+        <div class="collapse" id="addFolder">
+          <label class="form-label"
+                 for="{{ save_document_form.new_folder.id_for_label }}">Give your new folder a name:</label>
+          <input class="form-control"
+                 id="{{ save_document_form.new_folder.id_for_label }}"
+                 name="{{ save_document_form.new_folder.name }}"
+                 type="text"/>
+        </div>
       </form>
     </div>
     <div class="modal-footer d-flex justify-content-between">
       <button class="btn btn-danger"
               type="button"
+              data-bs-dismiss="modal"
               hx-target="#saveDocument"
-              {% if not saved_document %} disabled{% endif %}
               hx-include="#save_document-form"
               hx-delete="{% url 'save_document' %}?id={{ saved_document.id }}"
               hx-confirm="Are you sure you want to unsave this document?">
@@ -53,13 +62,11 @@
       <div>
         <button type="button"
                 class="btn btn-outline-secondary btn-shrink-sm ms-2"
-                data-bs-toggle="modal"
-                data-bs-target="#addFolder"
-                hx-get="{% url 'folders' %}"
-                hx-target="#addFolder">
-          New Folder
-        </button>
-        <button class="btn btn-primary ms-1" type="submit" form="save_document-form">Done</button>
+                data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary ms-1"
+                type="submit"
+                form="save_document-form"
+                data-bs-dismiss="modal">Save</button>
       </div>
     </div>
   </div>

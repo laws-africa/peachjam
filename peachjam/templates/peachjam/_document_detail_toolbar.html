@@ -26,13 +26,6 @@
         {% endif %}
       </button>
       <div id="saveDocument" class="modal fade">{% include "peachjam/save_document.html" %}</div>
-      <div class="modal fade"
-           id="addFolder"
-           tabindex="-1"
-           aria-labelledby="addFolder"
-           aria-hidden="true">
-        {% include "peachjam/folders_list.html" %}
-      </div>
     </div>
     {% if document.source_file %}
       <div class="btn-group dropdown-center ms-2">
