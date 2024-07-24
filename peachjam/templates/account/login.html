@@ -10,75 +10,83 @@
         rel="stylesheet"/>
 {% endblock %}
 {% block content %}
-  <h1 class="mb-3">{% trans 'Log in' %}</h1>
-  <form method="post" action="{% url 'account_login' %}" id="email-login">
-    {% csrf_token %}
-    {% if redirect_field_value %}
-      <input type="hidden"
-             name="{{ redirect_field_name }}"
-             value="{{ redirect_field_value }}"/>
-    {% endif %}
-    {% if form.non_field_errors %}
-      <div class="text-danger">
-        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
-      </div>
-    {% endif %}
-    <div class="form-group">
-      <label for="{{ form.login.id_for_label }}">{% trans 'Email address or username' %}</label>
-      <input type="text"
-             class="form-control"
-             name="{{ form.login.name }}"
-             id="{{ form.login.id_for_label }}"
-             required
-             autofocus
-             placeholder="you@example.com"/>
-      {% if form.login.errors %}
+  <div class="mb-4 card-header border-bottom m-4 bg-white">
+    <h1>{% trans 'Log in' %}</h1>
+    <p class="text-muted">
+      Dont have an account? <a href="{% url 'account_signup' %}">{% trans 'Sign up here' %}.</a>
+    </p>
+  </div>
+  <div class="card-body mx-4">
+    <form method="post" action="{% url 'account_login' %}" id="email-login">
+      {% csrf_token %}
+      {% if redirect_field_value %}
+        <input type="hidden"
+               name="{{ redirect_field_name }}"
+               value="{{ redirect_field_value }}"/>
+      {% endif %}
+      {% if form.non_field_errors %}
         <div class="text-danger">
-          {% for error in form.login.errors %}<p>{{ error }}</p>{% endfor %}
+          {% for error in form.non_field_errors %}<p class="m-1">{{ error }}</p>{% endfor %}
         </div>
       {% endif %}
-    </div>
-    <div class="form-group">
-      <label for="{{ form.password.id_for_label }}">{% trans 'Password' %}</label>
-      <input type="password"
-             class="form-control"
-             name="{{ form.password.name }}"
-             id="{{ form.password.id_for_label }}"
-             required/>
-      <div class="my-2">
-        <a href="{% url 'account_reset_password' %}">{% trans 'Forgot your password?' %}</a>
-        <a href="{% url 'account_signup' %}">{% trans 'Sign up' %}</a>
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.login.id_for_label }}">{% trans 'Email address' %}</label>
+        <input type="text"
+               class="form-control"
+               name="{{ form.login.name }}"
+               id="{{ form.login.id_for_label }}"
+               required
+               autofocus
+               placeholder="you@example.com"/>
+        {% if form.login.errors %}
+          <div class="text-danger">
+            {% for error in form.login.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
       </div>
-      {% if form.password.errors %}
-        <div class="text-danger">
-          {% for error in form.password.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-      {% endif %}
-    </div>
-    <div class="my-2">
-      <button class="btn btn-success btn-block mb-3" type="submit">{% trans 'Log in' %}</button>
-    </div>
-  </form>
-  {% get_providers as socialaccount_providers %}
-  {% if socialaccount_providers %}<hr class="my-2"/>{% endif %}
-  <div class="row">
-    <div class="col-lg-8 mx-auto">
-      {% for provider in socialaccount_providers %}
-        <a class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{ provider.id }}"
-           href="{% provider_login_url provider.id process='login' %}">
-          {% if provider.name == "Google" %}
-            <img alt="google-logo"
-                 src="{% static 'images/google-logo.png' %}"
-                 style="height: 20px;
-                        margin-right: 5px"/>
-          {% else %}
-            <i class="fab fa-fw fa-{{ provider.id }}"></i>
-          {% endif %}
-          {% blocktrans %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.password.id_for_label }}">{% trans 'Password' %}</label>
+        <input type="password"
+               class="form-control"
+               name="{{ form.password.name }}"
+               id="{{ form.password.id_for_label }}"
+               required/>
+        {% if form.password.errors %}
+          <div class="text-danger">
+            {% for error in form.password.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="mb-4">
+        <button class="btn btn-primary" type="submit">{% trans 'Log in' %}</button>
+      </div>
+      <div class="mb-3">
+        <p class="mb-1">
+          <a href="{% url 'account_reset_password' %}">{% trans 'Forgot your password?' %}</a>
+        </p>
+      </div>
+    </form>
+    {% get_providers as socialaccount_providers %}
+    {% if socialaccount_providers %}<hr class="my-2"/>{% endif %}
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        {% for provider in socialaccount_providers %}
+          <a class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{ provider.id }}"
+             href="{% provider_login_url provider.id process='login' %}">
+            {% if provider.name == "Google" %}
+              <img alt="google-logo"
+                   src="{% static 'images/google-logo.png' %}"
+                   style="height: 20px;
+                          margin-right: 5px"/>
+            {% else %}
+              <i class="fab fa-fw fa-{{ provider.id }}"></i>
+            {% endif %}
+            {% blocktrans %}
             Log in with {{ provider.name }}
           {% endblocktrans %}
-        </a>
-      {% endfor %}
+          </a>
+        {% endfor %}
+      </div>
     </div>
   </div>
 {% endblock %}
