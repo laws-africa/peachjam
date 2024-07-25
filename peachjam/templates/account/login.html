@@ -68,20 +68,22 @@
     </form>
     {{ social_apps }}
     {% get_providers as socialaccount_providers %}
-    {% if socialaccount_providers %}<hr/>{% endif %}
-    {% for provider in socialaccount_providers %}
-      <a class="btn btn-block btn-outline-primary socialaccount_provider {{ provider.id }}"
-         href="{% provider_login_url provider.id process='login' %}">
-        {% if provider.name == "Google" %}
-          <img alt="google-logo"
-               src="{% static 'images/google-logo.png' %}"
-               style="height: 16px;
-                      margin-right: 5px"/>
-        {% else %}
-          <i class="bi bi-{{ provider.id }}"></i>
-        {% endif %}
-        {% trans 'Login with ' %}{{ provider.name }}
-      </a>
-    {% endfor %}
+    {% if socialaccount_providers %}
+      <hr/>
+      {% for provider in socialaccount_providers %}
+        <a class="btn btn-block btn-outline-primary socialaccount_provider {{ provider.id }}"
+           href="{% provider_login_url provider.id process='login' %}">
+          {% if provider.name == "Google" %}
+            <img alt="google-logo"
+                 src="{% static 'images/google-logo.png' %}"
+                 style="height: 16px;
+                        margin-right: 5px"/>
+          {% else %}
+            <i class="bi bi-{{ provider.id }}"></i>
+          {% endif %}
+          {% trans 'Login with ' %}{{ provider.name }}
+        </a>
+      {% endfor %}
+    {% endif %}
   </div>
 {% endblock %}
