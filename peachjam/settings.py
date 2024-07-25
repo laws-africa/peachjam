@@ -18,6 +18,7 @@ from urllib.parse import urlparse
 
 import dj_database_url
 import sentry_sdk
+from django.contrib.messages import constants as messages
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -155,7 +156,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_PRESERVE_USERNAME_CASING = False
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http" if DEBUG else "https"
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home_page"
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
@@ -623,3 +624,7 @@ MARTOR_ALTERNATIVE_CSS_FILE_THEME = "martor/css/peachjam.css"
 # CORS
 # disable regex matches, we do matching using signals
 CORS_URLS_REGEX = r"^$"
+
+MESSAGE_TAGS = {
+    messages.ERROR: "danger",
+}

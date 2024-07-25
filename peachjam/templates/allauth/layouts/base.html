@@ -3,6 +3,7 @@
 {% load i18n %}
 {% block title %}{{ title }}{% endblock %}
 {% block page-content %}
+  {% include "peachjam/_messages.html" %}
   <div class="card allauth-box">
     <div class="m-4">
       {% block content %}{% endblock %}
