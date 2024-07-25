@@ -5,13 +5,13 @@
   {% trans 'Sign Up' %}
 {% endblock %}
 {% block content %}
-  <div class="mb-4 card-header bg-white m-4">
+  <div class="mb-4 card-header bg-white">
     <h1>{% trans 'Sign up' %}</h1>
     <p class="text-muted">
       Already have an account? <a href="{% url 'account_login' %}">Login here</a>.
     </p>
   </div>
-  <div class="card-body mx-4">
+  <div class="card-body">
     <form method="post">
       {% csrf_token %}
       {% if form.non_field_errors %}
@@ -74,7 +74,7 @@
         {% endif %}
       </div>
       <div class="my-2">
-        <button class="btn btn-primary mb-3" type="submit">{% trans 'Sign up' %}</button>
+        <button class="btn btn-primary px-4 mb-3" type="submit">{% trans 'Sign up' %}</button>
       </div>
     </form>
   </div>

@@ -10,13 +10,13 @@
         rel="stylesheet"/>
 {% endblock %}
 {% block content %}
-  <div class="mb-4 card-header border-bottom m-4 bg-white">
+  <div class="mb-4 card-header border-bottom bg-white">
     <h1>{% trans 'Log in' %}</h1>
     <p class="text-muted">
       Dont have an account? <a href="{% url 'account_signup' %}">{% trans 'Sign up here' %}.</a>
     </p>
   </div>
-  <div class="card-body mx-4">
+  <div class="card-body">
     <form method="post" action="{% url 'account_login' %}" id="email-login">
       {% csrf_token %}
       {% if redirect_field_value %}
@@ -58,7 +58,7 @@
         {% endif %}
       </div>
       <div class="mb-4">
-        <button class="btn btn-primary" type="submit">{% trans 'Log in' %}</button>
+        <button class="btn btn-primary px-4" type="submit">{% trans 'Log in' %}</button>
       </div>
       <div class="mb-3">
         <p class="mb-1">
@@ -66,27 +66,22 @@
         </p>
       </div>
     </form>
+    {{ social_apps }}
     {% get_providers as socialaccount_providers %}
-    {% if socialaccount_providers %}<hr class="my-2"/>{% endif %}
-    <div class="row">
-      <div class="col-lg-8 mx-auto">
-        {% for provider in socialaccount_providers %}
-          <a class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{ provider.id }}"
-             href="{% provider_login_url provider.id process='login' %}">
-            {% if provider.name == "Google" %}
-              <img alt="google-logo"
-                   src="{% static 'images/google-logo.png' %}"
-                   style="height: 20px;
-                          margin-right: 5px"/>
-            {% else %}
-              <i class="fab fa-fw fa-{{ provider.id }}"></i>
-            {% endif %}
-            {% blocktrans %}
-            Log in with {{ provider.name }}
-          {% endblocktrans %}
-          </a>
-        {% endfor %}
-      </div>
-    </div>
+    {% if socialaccount_providers %}<hr/>{% endif %}
+    {% for provider in socialaccount_providers %}
+      <a class="btn btn-block btn-outline-primary socialaccount_provider {{ provider.id }}"
+         href="{% provider_login_url provider.id process='login' %}">
+        {% if provider.name == "Google" %}
+          <img alt="google-logo"
+               src="{% static 'images/google-logo.png' %}"
+               style="height: 16px;
+                      margin-right: 5px"/>
+        {% else %}
+          <i class="bi bi-{{ provider.id }}"></i>
+        {% endif %}
+        {% trans 'Login with ' %}{{ provider.name }}
+      </a>
+    {% endfor %}
   </div>
 {% endblock %}
