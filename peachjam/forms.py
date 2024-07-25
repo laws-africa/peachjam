@@ -295,6 +295,15 @@ class SaveDocumentForm(forms.ModelForm):
             self.fields["document"].initial = self.document
             self.fields["user_profile"].initial = self.user_profile
 
+    def clean(self):
+        if self.cleaned_data.get("new_folder"):
+            folder, _ = Folder.objects.get_or_create(
+                name=self.cleaned_data["new_folder"],
+                user_profile=self.cleaned_data["user_profile"],
+            )
+            self.cleaned_data["folder"] = folder
+        return self.cleaned_data
+
     def save(self, commit=True):
         return super().save()
 
