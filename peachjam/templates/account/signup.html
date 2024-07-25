@@ -4,76 +4,78 @@
 {% block title %}
   {% trans 'Sign Up' %}
 {% endblock %}
-{% block head-css %}
-  {{ block.super }}
-  <link href="https://fonts.googleapis.com/css?family=Roboto"
-        rel="stylesheet"/>
-{% endblock %}
 {% block content %}
-  <h1 class="mb-3">{% trans 'Sign up' %}</h1>
-  <form method="post">
-    {% csrf_token %}
-    {% if form.non_field_errors %}
-      <div class="text-danger">
-        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+  <div class="mb-4 card-header bg-white">
+    <h1>{% trans 'Sign up' %}</h1>
+    <p class="text-muted">
+      {% trans 'Already have an account?' %} <a href="{% url 'account_login' %}">{% trans 'Login here' %}</a>.
+    </p>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="text-danger">
+          {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.username.id_for_label }}">{% trans 'Username' %}</label>
+        <input type="text"
+               class="form-control"
+               name="{{ form.username.name }}"
+               id="{{ form.username.id_for_label }}"
+               required
+               autofocus/>
+        {% if form.username.errors %}
+          <div class="text-danger">
+            {% for error in form.username.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
       </div>
-    {% endif %}
-    <div class="form-group">
-      <label for="{{ form.username.id_for_label }}">{% trans 'Username' %}</label>
-      <input type="text"
-             class="form-control"
-             name="{{ form.username.name }}"
-             id="{{ form.username.id_for_label }}"
-             required
-             autofocus/>
-      {% if form.username.errors %}
-        <div class="text-danger">
-          {% for error in form.username.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-      {% endif %}
-    </div>
-    <div class="form-group">
-      <label for="{{ form.email.id_for_label }}">{% trans 'Email address' %}</label>
-      <input type="email"
-             class="form-control"
-             name="{{ form.email.name }}"
-             id="{{ form.email.id_for_label }}"
-             required
-             placeholder="you@example.com"/>
-      {% if form.email.errors %}
-        <div class="text-danger">
-          {% for error in form.email.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-      {% endif %}
-    </div>
-    <div class="form-group">
-      <label for="{{ form.password1.id_for_label }}">{% trans 'Password' %}</label>
-      <input type="password"
-             class="form-control"
-             name="{{ form.password1.name }}"
-             id="{{ form.password1.id_for_label }}"
-             required/>
-      {% if form.password1.errors %}
-        <div class="text-danger">
-          {% for error in form.password1.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-      {% endif %}
-    </div>
-    <div class="form-group">
-      <label for="{{ form.password2.id_for_label }}">{% trans 'Confirm Password' %}</label>
-      <input type="password"
-             class="form-control"
-             name="{{ form.password2.name }}"
-             id="{{ form.password2.id_for_label }}"
-             required/>
-      {% if form.password2.errors %}
-        <div class="text-danger">
-          {% for error in form.password2.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-      {% endif %}
-    </div>
-    <div class="my-2">
-      <button class="btn btn-success btn-block mb-3" type="submit">{% trans 'Sign up' %}</button>
-    </div>
-  </form>
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.email.id_for_label }}">{% trans 'Email address' %}</label>
+        <input type="{{ form.email.type }}"
+               class="form-control"
+               name="{{ form.email.name }}"
+               id="{{ form.email.id_for_label }}"
+               required
+               placeholder="you@example.com"/>
+        {% if form.email.errors %}
+          <div class="text-danger">
+            {% for error in form.email.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.password1.id_for_label }}">{% trans 'Password' %}</label>
+        <input type="password"
+               class="form-control"
+               name="{{ form.password1.name }}"
+               id="{{ form.password1.id_for_label }}"
+               required/>
+        {% if form.password1.errors %}
+          <div class="text-danger">
+            {% for error in form.password1.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.password2.id_for_label }}">{% trans 'Confirm Password' %}</label>
+        <input type="password"
+               class="form-control"
+               name="{{ form.password2.name }}"
+               id="{{ form.password2.id_for_label }}"
+               required/>
+        {% if form.password2.errors %}
+          <div class="text-danger">
+            {% for error in form.password2.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="my-2">
+        <button class="btn btn-primary px-4 mb-3" type="submit">{% trans 'Sign up' %}</button>
+      </div>
+    </form>
+  </div>
 {% endblock %}

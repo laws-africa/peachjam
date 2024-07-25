@@ -2,7 +2,7 @@ import itertools
 
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.utils.dates import MONTHS
 from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, View
@@ -289,22 +289,23 @@ class BaseDocumentDetailView(DetailView):
         context["documents_citing_current_doc"] = self.fetch_citation_docs(
             doc.work.works_citing_current_work()
         )
-        user_profile = UserProfile.objects.filter(user=self.request.user).first()
-        instance = SavedDocument.objects.filter(
-            document=self.get_object(), user_profile=user_profile
-        ).first()
-        context["save_document_form"] = SaveDocumentForm(
-            instance=instance,
-            document=self.get_object(),
-            user_profile=user_profile,
-            initial={"document": self.get_object(), "user_profile": user_profile},
-        )
-        context["saved"] = user_profile.saved_documents.filter(
-            document=self.get_object()
-        )
-        context["folder_form"] = FolderForm(
-            user_profile=user_profile, initial={"user_profile": user_profile}
-        )
+        if self.request.user.is_authenticated:
+            user_profile = UserProfile.objects.filter(user=self.request.user).first()
+            instance = SavedDocument.objects.filter(
+                document=self.get_object(), user_profile=user_profile
+            ).first()
+            context["save_document_form"] = SaveDocumentForm(
+                instance=instance,
+                document=self.get_object(),
+                user_profile=user_profile,
+                initial={"document": self.get_object(), "user_profile": user_profile},
+            )
+            context["saved"] = user_profile.saved_documents.filter(
+                document=self.get_object()
+            )
+            context["folder_form"] = FolderForm(
+                user_profile=user_profile, initial={"user_profile": user_profile}
+            )
 
         return context
 
@@ -427,9 +428,6 @@ class BaseDocumentDetailView(DetailView):
                 )
 
         document.content_html = html.tostring(root, encoding="unicode")
-
-    def render_collections(self, request):
-        return render(request, "folders_list.html")
 
 
 class CSRFTokenView(View):
