@@ -2,6 +2,7 @@ import copy
 
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
 from django.http import QueryDict
@@ -77,12 +78,29 @@ class NewDocumentFormMixin:
         return [f for f in fields if f != "upload_file"]
 
 
+class PermissiveTypedMultipleChoiceField(forms.TypedMultipleChoiceField):
+    def _coerce(self, value):
+        """Validate that the values can be coerced to the right type, and ignore anything dodgy."""
+        if value == self.empty_value or value in self.empty_values:
+            return self.empty_value
+        new_value = []
+        for choice in value:
+            try:
+                new_value.append(self.coerce(choice))
+            except (ValueError, TypeError, ValidationError):
+                pass
+        return new_value
+
+    def valid_value(self, value):
+        return True
+
+
 class BaseDocumentFilterForm(forms.Form):
     """This is the main form used for filtering Document ListViews,
     using facets such as year and alphabetical title.
     """
 
-    years = forms.CharField(required=False)
+    years = PermissiveTypedMultipleChoiceField(coerce=int)
     alphabet = forms.CharField(required=False)
     authors = forms.CharField(required=False)
     doc_type = forms.CharField(required=False)
@@ -114,7 +132,7 @@ class BaseDocumentFilterForm(forms.Form):
         super().__init__(self.params, *args, **kwargs)
 
     def filter_queryset(self, queryset, exclude=None, filter_q=False):
-        years = self.params.getlist("years")
+        years = self.cleaned_data.get("years", [])
         alphabet = self.cleaned_data.get("alphabet")
         authors = self.params.getlist("authors")
         courts = self.params.getlist("courts")
