@@ -1,5 +1,35 @@
+# This content is made available subject to our Terms of Use at /terms-of-use/
+
 User-agent: *
 Allow: /
 Disallow: /search/
 Disallow: /api/
 {{ disallowed_content }}
+
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
