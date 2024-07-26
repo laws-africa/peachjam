@@ -216,6 +216,10 @@ class ManyToOneWidget(ManyToManyWidget):
         values = [v.strip() for v in value.split(self.separator)]
         return [self.model(**{self.field: v}) for v in values if v]
 
+    def render(self, value, obj=None):
+        if obj.pk:
+            return super().render(value, obj)
+
 
 class StripHtmlWidget(CharWidget):
     def clean(self, value, row=None, **kwargs):
@@ -386,7 +390,8 @@ class BaseDocumentResource(resources.ModelResource):
                 self.download_attachment(url, instance, "Other documents")
 
     def dehydrate_taxonomies(self, instance):
-        return "|".join(t.topic.slug for t in instance.taxonomies.all())
+        if instance.pk:
+            return "|".join(t.topic.slug for t in instance.taxonomies.all())
 
 
 class DocumentNatureWidget(ForeignKeyWidget):
@@ -564,11 +569,12 @@ class JudgmentResource(BaseDocumentResource):
 
     def get_case_number_attributes(self, judgment, attribute):
         values = []
-        for case_number in judgment.case_numbers.all().order_by(
-            "year", "number", "string_override"
-        ):
-            val = getattr(case_number, attribute)
-            values.append(f"{val or ''}")
+        if judgment.pk:
+            for case_number in judgment.case_numbers.all().order_by(
+                "year", "number", "string_override"
+            ):
+                val = getattr(case_number, attribute)
+                values.append(f"{val or ''}")
 
         return "|".join(values)
 
@@ -583,13 +589,14 @@ class JudgmentResource(BaseDocumentResource):
 
     def dehydrate_matter_type(self, judgment):
         values = []
-        for case_number in judgment.case_numbers.all().order_by(
-            "year", "number", "string_override"
-        ):
-            if getattr(case_number, "matter_type"):
-                values.append(case_number.matter_type.name)
-            else:
-                values.append("")
+        if judgment.pk:
+            for case_number in judgment.case_numbers.all().order_by(
+                "year", "number", "string_override"
+            ):
+                if getattr(case_number, "matter_type"):
+                    values.append(case_number.matter_type.name)
+                else:
+                    values.append("")
 
         return "|".join(values)
 
