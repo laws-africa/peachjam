@@ -57,6 +57,7 @@ class RelationshipSerializer(serializers.ModelSerializer):
             "subject_work",
             "subject_work_id",
             "subject_target_id",
+            "subject_selectors",
             "object_work",
             "object_work_id",
             "object_target_id",

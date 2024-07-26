@@ -103,7 +103,7 @@ class DocumentContent {
       };
       this.pdfRenderer.onPdfLoaded = () => {
         if (this.enrichmentsManager) {
-          this.enrichmentsManager.setupPdfCitationLinks();
+          this.enrichmentsManager.addPdfEnrichments();
         }
         this.setupPopups();
 
