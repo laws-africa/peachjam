@@ -107,7 +107,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                     self.get_base_queryset(), exclude="taxonomies"
                 )
                 .filter(taxonomies__topic__isnull=False)
-                .order_by()
+                .order_by("taxonomies__topic__name")
                 .values_list("taxonomies__topic__name", flat=True)
                 .distinct()
             )
