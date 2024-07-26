@@ -385,9 +385,11 @@ class Judgment(CoreDocument):
         if self.case_name:
             parts.append(self.case_name)
 
-        case_number = "; ".join(n.string for n in self.case_numbers.all())
-        if case_number:
-            parts.append("(" + case_number + ")")
+        # can't lookup foreign keys without being saved
+        if self.pk:
+            case_number = "; ".join(n.string for n in self.case_numbers.all())
+            if case_number:
+                parts.append("(" + case_number + ")")
 
         if self.mnc:
             parts.append(self.mnc)
