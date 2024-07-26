@@ -2,6 +2,7 @@ import copy
 
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
 from django.http import QueryDict
@@ -77,22 +78,46 @@ class NewDocumentFormMixin:
         return [f for f in fields if f != "upload_file"]
 
 
+class PermissiveTypedListField(forms.TypedMultipleChoiceField):
+    """Field that accepts multiple values and coerces its values to the right type, ignoring any that can't be coerced.
+    Defaults to raw form data, which is strings for querystring-based forms."""
+
+    def _coerce(self, value):
+        """Validate that the values can be coerced to the right type, and ignore anything dodgy."""
+        if value == self.empty_value or value in self.empty_values:
+            return self.empty_value
+        new_value = []
+        for choice in value:
+            try:
+                new_value.append(self.coerce(choice))
+            except (ValueError, TypeError, ValidationError):
+                pass
+        return new_value
+
+    def valid_value(self, value):
+        return True
+
+
+def remove_nulls(value):
+    return value.replace("\x00", "") if value else value
+
+
 class BaseDocumentFilterForm(forms.Form):
     """This is the main form used for filtering Document ListViews,
     using facets such as year and alphabetical title.
     """
 
-    years = forms.CharField(required=False)
-    alphabet = forms.CharField(required=False)
-    authors = forms.CharField(required=False)
-    doc_type = forms.CharField(required=False)
-    judges = forms.CharField(required=False)
-    natures = forms.CharField(required=False)
-    localities = forms.CharField(required=False)
-    registries = forms.CharField(required=False)
-    attorneys = forms.CharField(required=False)
-    outcomes = forms.CharField(required=False)
-    taxonomies = forms.CharField(required=False)
+    years = PermissiveTypedListField(coerce=int, required=False)
+    alphabet = PermissiveTypedListField(required=False)
+    authors = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    doc_type = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    judges = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    natures = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    localities = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    registries = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    attorneys = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    outcomes = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    taxonomies = PermissiveTypedListField(coerce=remove_nulls, required=False)
     q = forms.CharField(required=False)
 
     sort = forms.ChoiceField(
@@ -114,19 +139,19 @@ class BaseDocumentFilterForm(forms.Form):
         super().__init__(self.params, *args, **kwargs)
 
     def filter_queryset(self, queryset, exclude=None, filter_q=False):
-        years = self.params.getlist("years")
-        alphabet = self.cleaned_data.get("alphabet")
-        authors = self.params.getlist("authors")
-        courts = self.params.getlist("courts")
-        doc_type = self.params.getlist("doc_type")
-        judges = self.params.getlist("judges")
-        natures = self.params.getlist("natures")
-        localities = self.params.getlist("localities")
-        registries = self.params.getlist("registries")
-        attorneys = self.params.getlist("attorneys")
-        outcomes = self.params.getlist("outcomes")
-        taxonomies = self.params.getlist("taxonomies")
-        q = self.params.get("q")
+        years = self.cleaned_data.get("years", [])
+        alphabet = self.cleaned_data.get("alphabet", [])
+        authors = self.cleaned_data.get("authors", [])
+        courts = self.cleaned_data.get("courts", [])
+        doc_type = self.cleaned_data.get("doc_type", [])
+        judges = self.cleaned_data.get("judges", [])
+        natures = self.cleaned_data.get("natures", [])
+        localities = self.cleaned_data.get("localities", [])
+        registries = self.cleaned_data.get("registries", [])
+        attorneys = self.cleaned_data.get("attorneys", [])
+        outcomes = self.cleaned_data.get("outcomes", [])
+        taxonomies = self.cleaned_data.get("taxonomies", [])
+        q = self.cleaned_data.get("q")
 
         queryset = self.order_queryset(queryset, exclude)
 
