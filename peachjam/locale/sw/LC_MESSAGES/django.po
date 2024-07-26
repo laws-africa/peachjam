@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-07-17 09:40+0200\n"
-"PO-Revision-Date: 2024-06-09 10:56\n"
+"PO-Revision-Date: 2024-07-19 09:44\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -119,11 +119,11 @@ msgstr "Tarehe"
 
 #: forms.py:96
 msgid "(Newest first)"
-msgstr ""
+msgstr "(Mpya zaidi kwanza)"
 
 #: forms.py:97
 msgid "(Oldest first)"
-msgstr ""
+msgstr "(Ya zamani kwanza)"
 
 #: forms.py:246
 msgid "Document problem reported"
@@ -577,7 +577,7 @@ msgstr "namba ya juzuu"
 
 #: models/gazette.py:26
 msgid "special"
-msgstr ""
+msgstr "Maalum"
 
 #: models/gazette.py:29
 msgid "gazette"
@@ -664,10 +664,8 @@ msgid "attorneys"
 msgstr "mawakili"
 
 #: models/judgment.py:30
-#, fuzzy
-#| msgid "Judges"
 msgid "Judge"
-msgstr "Majaji"
+msgstr "Hakimu"
 
 #: models/judgment.py:31 templates/peachjam/_case_histories.html:8
 #: templates/peachjam/layouts/document_detail.html:243 views/courts.py:61
@@ -788,16 +786,12 @@ msgid "Media neutral citation"
 msgstr "Nukuu isiyoegemea upande wowote"
 
 #: models/judgment.py:306
-#, fuzzy
-#| msgid "Auto-assign title"
 msgid "Auto-assign details"
-msgstr "Weka kichwa cha habari kiotomati"
+msgstr "Agiza maelezo kiotomatiki"
 
 #: models/judgment.py:307
-#, fuzzy
-#| msgid "Whether or not the system should assign the title"
 msgid "Whether or not the system should assign the details"
-msgstr "Ikiwa mfumo unapaswa kuweka kichwa  cha habari au la"
+msgstr "Ikiwa mfumo unapaswa kutoa maelezo au la"
 
 #: models/judgment.py:321
 msgid "judgments"
@@ -824,16 +818,12 @@ msgid "year"
 msgstr "mwaka"
 
 #: models/judgment.py:502
-#, fuzzy
-#| msgid "judgment"
 msgid "judgment work"
-msgstr "hukumu"
+msgstr "kazi ya hukumu"
 
 #: models/judgment.py:512
-#, fuzzy
-#| msgid "historical judgment"
 msgid "historical judgment work"
-msgstr "hukumu ya kihistoria"
+msgstr "kazi ya hukumu ya kihistoria"
 
 #: models/judgment.py:529
 msgid "case history"
@@ -974,7 +964,7 @@ msgstr "kiungo kilichounganishwa"
 
 #: models/settings.py:88
 msgid "youtube link"
-msgstr ""
+msgstr "kiungo cha youtube"
 
 #: models/settings.py:91
 msgid "contact form URL"
@@ -1105,12 +1095,10 @@ msgstr "Umesahau nenosiri lako?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Ingia na %(provider.name)s\n"
 "          "
 
@@ -1298,13 +1286,11 @@ msgid "To the top"
 msgstr "Hadi juu"
 
 #: templates/peachjam/_document_count.html:3
-#, fuzzy, python-format
-#| msgid "%(doc_count)s document"
-#| msgid_plural "%(doc_count)s documents"
+#, python-format
 msgid "%(n_docs)s document"
 msgid_plural "%(n_docs)s documents"
-msgstr[0] "%(doc_count)s hati"
-msgstr[1] "%(doc_count)s hati"
+msgstr[0] "%(n_docs)s hati"
+msgstr[1] "%(n_docs)s hati"
 
 #: templates/peachjam/_document_detail_toolbar.html:4
 msgid "Document toolbar"
@@ -1349,18 +1335,16 @@ msgstr "Vichujio"
 
 #: templates/peachjam/_document_table_form.html:25
 msgid "Close"
-msgstr ""
+msgstr "Funga"
 
 #: templates/peachjam/_document_table_form.html:103
 #: templates/peachjam/_document_table_form.html:104
-#, fuzzy
-#| msgid "Cited documents"
 msgid "Filter documents"
-msgstr "Nyaraka zilizonukuliwa"
+msgstr "Chuja hati"
 
 #: templates/peachjam/_document_table_form.html:111
 msgid "Sort by"
-msgstr ""
+msgstr "Ainisha kwa"
 
 #: templates/peachjam/_document_table_row.html:25
 #: templates/peachjam/layouts/document_detail.html:297
@@ -1433,10 +1417,8 @@ msgid "Deposit Date"
 msgstr "Tarehe ya Kuweka"
 
 #: templates/peachjam/_recent_document_list.html:18
-#, fuzzy
-#| msgid "No documents found."
 msgid "No recent documents."
-msgstr "Hakuna nyaraka zilizopatikana."
+msgstr "Hakuna hati za hivi majuzi."
 
 #: templates/peachjam/_related_documents.html:4
 #: templates/peachjam/layouts/document_detail.html:97
@@ -1789,7 +1771,7 @@ msgstr[1] "%(doc_count)s magazeti ya serikali"
 
 #: templates/peachjam/gazette_year.html:77
 msgid "Special"
-msgstr ""
+msgstr "Maalum"
 
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
@@ -1943,14 +1925,12 @@ msgid "Navigation"
 msgstr "Urambazaji"
 
 #: views/courts.py:79
-#, fuzzy
-#| msgid "Outcome"
 msgid "Outcomes"
 msgstr "Matokeo"
 
 #: views/courts.py:105 views/generic_views.py:209
 msgid "Alphabet"
-msgstr ""
+msgstr "Alfabeti"
 
 #: views/courts.py:272
 msgid "Courts"
@@ -1958,19 +1938,15 @@ msgstr "Mahakama"
 
 #: views/generic_views.py:185
 msgid "Years"
-msgstr ""
+msgstr "Miaka"
 
 #: views/generic_views.py:197
-#, fuzzy
-#| msgid "document nature"
 msgid "Document nature"
-msgstr "asili ya hati"
+msgstr "Asili ya hati"
 
 #: views/generic_views.py:203
-#, fuzzy
-#| msgid "topics"
 msgid "Topics"
-msgstr "mada"
+msgstr "Mada"
 
 #: views/legislation.py:61
 #, python-format
@@ -2015,3 +1991,4 @@ msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa kutoka %(date_from)s 
 #: views/legislation.py:225
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Kuna marekebisho ambayo hayajatekelezwa ambayo bado hayajatekelezwa. Tazama kichupo cha Historia kwa habari zaidi."
+
