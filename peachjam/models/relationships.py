@@ -32,6 +32,9 @@ class Relationship(models.Model):
     subject_target_id = models.CharField(
         _("subject target ID"), max_length=1024, null=True, blank=True
     )
+    subject_selectors = models.JSONField(
+        verbose_name=_("subject selectors"), null=True, blank=False
+    )
 
     object_work = models.ForeignKey(
         "peachjam.Work",
