@@ -159,7 +159,7 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(date__year__in=years)
 
         if alphabet and exclude != "alphabet":
-            queryset = queryset.filter(title__istartswith=alphabet)
+            queryset = queryset.filter(title__istartswith=alphabet[0])
 
         if authors and exclude != "authors":
             queryset = queryset.filter(authors__name__in=authors)
