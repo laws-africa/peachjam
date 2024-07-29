@@ -108,7 +108,7 @@ class BaseDocumentFilterForm(forms.Form):
     """
 
     years = PermissiveTypedListField(coerce=int, required=False)
-    alphabet = PermissiveTypedListField(required=False)
+    alphabet = forms.CharField(required=False)
     authors = PermissiveTypedListField(coerce=remove_nulls, required=False)
     doc_type = PermissiveTypedListField(coerce=remove_nulls, required=False)
     judges = PermissiveTypedListField(coerce=remove_nulls, required=False)
@@ -140,7 +140,7 @@ class BaseDocumentFilterForm(forms.Form):
 
     def filter_queryset(self, queryset, exclude=None, filter_q=False):
         years = self.cleaned_data.get("years", [])
-        alphabet = self.cleaned_data.get("alphabet", [])
+        alphabet = self.cleaned_data.get("alphabet")
         authors = self.cleaned_data.get("authors", [])
         courts = self.cleaned_data.get("courts", [])
         doc_type = self.cleaned_data.get("doc_type", [])
@@ -159,7 +159,7 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(date__year__in=years)
 
         if alphabet and exclude != "alphabet":
-            queryset = queryset.filter(title__istartswith=alphabet[0])
+            queryset = queryset.filter(title__istartswith=alphabet)
 
         if authors and exclude != "authors":
             queryset = queryset.filter(authors__name__in=authors)
