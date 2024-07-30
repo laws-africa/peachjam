@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
@@ -9,7 +10,8 @@ from peachjam.models import CoreDocument, SavedDocument, UserProfile
 User = get_user_model()
 
 
-class CreateFolderView(TemplateView):
+class CreateFolderView(PermissionRequiredMixin, TemplateView):
+    permission_required = "peachjam.add_folder"
     template_name = "peachjam/folders_list.html"
 
     def post(self, request: HttpRequest):
@@ -36,7 +38,8 @@ class CreateFolderView(TemplateView):
         return self.render_to_response({"folder_form": form})
 
 
-class SaveDocumentView(TemplateView):
+class SaveDocumentView(PermissionRequiredMixin, TemplateView):
+    permission_required = "peachjam.add_saveddocument"
     template_name = "peachjam/save_document.html"
 
     def get_context_data(self, *args, **kwargs):

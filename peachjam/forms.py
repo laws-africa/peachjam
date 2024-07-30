@@ -1,5 +1,6 @@
 import copy
 
+from allauth.account.forms import LoginForm, SignupForm
 from django import forms
 from django.conf import settings
 from django.core.files import File
@@ -7,6 +8,8 @@ from django.core.mail import send_mail
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from peachjam.models import (
     AttachedFiles,
@@ -326,3 +329,11 @@ class FolderForm(forms.ModelForm):
 
     def save(self, commit=True):
         return super().save()
+
+
+class PeachjamSignupForm(SignupForm):
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+
+
+class PeachjamLoginForm(LoginForm):
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)

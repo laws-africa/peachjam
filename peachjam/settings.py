@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "martor",
     "corsheaders",
     "django_htmx",
+    "django_recaptcha",
 ]
 
 MIDDLEWARE = [
@@ -160,6 +161,11 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http" if DEBUG else "https"
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home_page"
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_FORMS = {
+    "signup": "peachjam.forms.PeachjamSignupForm",
+    "login": "peachjam.forms.PeachjamLoginForm",
+}
 
 # social logins
 SOCIALACCOUNT_PROVIDERS = {
@@ -175,6 +181,13 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 SOCIALACCOUNT_ADAPTER = "peachjam.auth.SocialAccountAdapter"
+
+# Recaptcha
+RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY", "")
+RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY", "")
+if DEBUG:
+    SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
+
 
 if DEBUG:
     INSTALLED_APPS.append("debug_toolbar")

@@ -9,7 +9,6 @@ from .document_nature import *
 from .document_problem import *
 from .documents import *
 from .external_document import *
-from .folder import *
 from .gazette import *
 from .generic_document import *
 from .home import *
@@ -20,6 +19,7 @@ from .login import *
 from .place import *
 from .pocketlaw import *
 from .robots import *
+from .save_document import *
 from .taxonomy import *
 from .terms_of_use import *
 from .widgets import *
