@@ -182,6 +182,7 @@ if DEBUG:
     INSTALLED_APPS.append("elastic_panel")
     MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
     INTERNAL_IPS = ["127.0.0.1"]
+    import peachjam.debugging  # noqa
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
