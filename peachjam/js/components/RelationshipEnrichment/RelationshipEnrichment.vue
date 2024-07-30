@@ -76,6 +76,7 @@ export default {
     viewRoot: HTMLElement,
     gutter: HTMLElement,
     editable: Boolean,
+    useSelectors: Boolean,
     thisWorkFrbrUri: {
       type: String,
       default: ''
@@ -147,7 +148,10 @@ export default {
     markAndAnchor () {
       this.unmark();
       const target = {
-        anchor_id: this.isForwards ? this.enrichment.subject_target_id : this.enrichment.object_target_id
+        anchor_id: this.isForwards ? this.enrichment.subject_target_id : this.enrichment.object_target_id,
+        selectors: this.useSelectors ? (
+          this.isForwards ? this.enrichment.subject_selectors : this.enrichment.target_selectors
+        ) : null
       };
       const range = targetToRange(target, this.viewRoot);
       if (!range) return;
