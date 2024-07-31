@@ -39,18 +39,13 @@ jobs:
       # has changed, but ignore the bits that sentry adds
       - name: Check for compiled JS changes
         id: check_js_changed
+        # this exits with 10 (ie "error") if there IS a change
+        run: scripts/check-js-changed.sh
         continue-on-error: true
-        run: |
-          scripts/check-js-changed.sh
-          if [ $? -eq 10 ]; then
-            echo "CHANGED=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "CHANGED=false" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Push
         uses: EndBug/add-and-commit@v9
-        if: steps.check_js_changed.outputs.CHANGED == 'true'
+        if: steps.check_js_changed.result == 'failure'
         with:
           # this must be a string, so we need the | at the start
           # see https://github.com/EndBug/add-and-commit?tab=readme-ov-file#array-inputs
