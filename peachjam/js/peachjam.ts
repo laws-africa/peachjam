@@ -27,7 +27,7 @@ export interface PeachJamConfig {
 class PeachJam {
   private components: any[];
   public config: PeachJamConfig = {
-    appName: 'Peach Jam',
+    appName: 'Peach Jam xxx',
     pdfWorker: '/static/js/pdf.worker-prod.js',
     userHelpLink: '',
     sentry: {
