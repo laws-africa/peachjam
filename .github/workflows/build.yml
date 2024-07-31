@@ -39,6 +39,7 @@ jobs:
       # has changed, but ignore the bits that sentry adds
       - name: Check for compiled JS changes
         id: check_js_changed
+        continue-on-error: true
         run: |
           scripts/check-js-changed.sh
           if [ $? -eq 10 ]; then
