@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - js-build
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -33,8 +34,22 @@ jobs:
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
+      # sentry's webpack plugin will always update the compiled javascript, even if nothing has changed, which makes
+      # caching a bit useless. So, we must compare the compiled javascript to the previous commit to see if anything
+      # has changed, but ignore the bits that sentry adds
+      - name: Check for compiled JS changes
+        id: check_js_changed
+        run: |
+          scripts/check-js-changed.sh
+          if [ $? -eq 10 ]; then
+            echo "CHANGED=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "CHANGED=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Push
         uses: EndBug/add-and-commit@v9
+        if: steps.check_js_changed.outputs.CHANGED == 'true'
         with:
           # this must be a string, so we need the | at the start
           # see https://github.com/EndBug/add-and-commit?tab=readme-ov-file#array-inputs
