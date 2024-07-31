@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - js-build
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
