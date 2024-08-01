@@ -1,7 +1,14 @@
 {% load static i18n %}
 <header>
+  {% block skip-links %}
+    <div id="skip-links">
+      <a href="#top">Go to page content</a>
+      <a href="#main-nav">Go to main menu</a>
+      <a href="#search">Go to the search field</a>
+    </div>
+  {% endblock %}
   {% block top-bar %}<div>Top bar content</div>{% endblock %}
-  <nav class="navbar navbar-expand-lg shadow-sm">
+  <nav id="main-nav" class="navbar navbar-expand-lg shadow-sm">
     <div class="container">
       <a class="navbar-brand" href="{% url 'home_page' %}">
         {% block navbar-logo %}Logo image{% endblock %}

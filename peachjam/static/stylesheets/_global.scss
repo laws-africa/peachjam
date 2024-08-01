@@ -179,3 +179,14 @@ html[data-user-agent*='pocketlaw'] .pocketlaw-hidden {
   max-height: 25vh;
   overflow-y: auto;
 }
+
+#skip-links li {
+  list-style-type: none;
+}
+#skip-links a {
+  position: absolute;
+  top: -201px;
+}
+#skip-links a:focus {
+  top: -1px;
+}
