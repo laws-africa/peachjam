@@ -138,7 +138,6 @@ class FilteredDocumentListView(DocumentListView):
         self.add_facets(context)
         self.show_facet_clear_all(context)
         context["doc_count"] = context["paginator"].count
-        context["labels"] = {"author": Author.model_label}
 
         return context
 
@@ -176,7 +175,7 @@ class FilteredDocumentListView(DocumentListView):
         taxonomies = list(
             self.form.filter_queryset(self.get_base_queryset(), exclude="taxonomies")
             .filter(taxonomies__topic__isnull=False)
-            .order_by()
+            .order_by("taxonomies__topic__name")
             .values_list("taxonomies__topic__name", flat=True)
             .distinct()
         )
@@ -191,7 +190,7 @@ class FilteredDocumentListView(DocumentListView):
                 "values": self.request.GET.getlist("years"),
             },
             "authors": {
-                "label": _("Authors"),
+                "label": Author.model_label_plural,
                 "type": "checkbox",
                 "options": authors,
                 "values": self.request.GET.getlist("authors"),

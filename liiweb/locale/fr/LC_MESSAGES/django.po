@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-07-17 09:40+0200\n"
-"PO-Revision-Date: 2024-06-06 13:40\n"
+"PO-Revision-Date: 2024-07-19 09:44\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -19,23 +19,19 @@ msgstr ""
 
 #: templates/liiweb/_donate_call_to_action.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Donate to %(APP_NAME)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Faites un don à %(APP_NAME)s\n"
 "          "
 
 #: templates/liiweb/_donate_call_to_action.html:12
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            %(APP_NAME)s is an independent, self-funded organisation and needs your support.\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            %(APP_NAME)s est une organisation indépendante et autofinancée et a besoin de votre soutien.\n"
 "          "
 
@@ -190,3 +186,4 @@ msgstr "Jugements"
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Législation"
+

@@ -16,10 +16,12 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   workFrbrUri: string;
   workId: string;
   editable: boolean;
+  displayType: string; // html, pdf or akn
 
-  constructor (root: HTMLElement, manager: GutterEnrichmentManager) {
+  constructor (root: HTMLElement, manager: GutterEnrichmentManager, displayType: string) {
     this.root = root;
     this.manager = manager;
+    this.displayType = displayType;
     this.gutter = root.querySelector('la-gutter');
     this.akn = root.querySelector('la-akoma-ntoso');
     this.workFrbrUri = root.dataset.workFrbrUri || '';
@@ -41,6 +43,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
         viewRoot: this.root,
         enrichments: this.enrichments,
         editable: this.editable,
+        useSelectors: this.displayType === 'pdf',
         thisWorkFrbrUri: this.workFrbrUri
       },
       use: [vueI18n],
@@ -80,6 +83,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
         frbr_uri: this.workFrbrUri
       },
       subject_target_id: target.anchor_id,
+      subject_selectors: target.selectors,
       subject_documents: [],
 
       object_work: {},

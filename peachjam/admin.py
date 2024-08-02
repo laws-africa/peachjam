@@ -11,6 +11,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
+from django.core.exceptions import ValidationError
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
@@ -19,6 +20,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.dates import MONTHS
 from django.utils.html import format_html
+from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from import_export.admin import ImportExportMixin as BaseImportExportMixin
@@ -648,6 +650,31 @@ class TaxonomyForm(MoveNodeForm):
         for node in self.instance.get_descendants():
             node.save()
         return self.instance
+
+    def clean(self):
+        ref_node = self.cleaned_data["_ref_node_id"]
+        position = self.cleaned_data["_position"]
+        name = self.cleaned_data["name"]
+        parent = None
+        if ref_node:
+            node = self.instance.__class__.objects.filter(
+                pk=self.cleaned_data["_ref_node_id"]
+            ).first()
+            if position == "sorted-child":
+                parent = node
+            else:
+                parent = node.get_parent()
+        slug = (f"{parent.slug}-" if parent else "") + slugify(name)
+        qs = self.instance.__class__.objects.filter(slug=slug)
+        if hasattr(self.instance, "pk"):
+            qs = qs.exclude(pk=self.instance.pk)
+        exists = qs.exists()
+        if exists:
+            raise ValidationError(
+                _('Taxonomy with slug "%(value)s" already exists.'),
+                params={"value": slug},
+                code="duplicate",
+            )
 
 
 class TaxonomyAdmin(TreeAdmin):

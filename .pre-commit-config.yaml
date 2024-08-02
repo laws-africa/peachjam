@@ -14,7 +14,7 @@ repos:
     -   id: check-case-conflict
     -   id: check-yaml
     -   id: end-of-file-fixer
-        exclude_types: [pofile, javascript]
+        exclude_types: [pofile, javascript, map]
     -   id: trailing-whitespace
     -   id: mixed-line-ending
         language_version: python3

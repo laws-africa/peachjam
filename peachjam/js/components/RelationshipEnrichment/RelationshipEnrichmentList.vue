@@ -8,6 +8,7 @@
       :view-root="viewRoot"
       :gutter="gutter"
       :editable="editable"
+      :use-selectors="useSelectors"
       :this-work-frbr-uri="thisWorkFrbrUri"
       @delete="deleteEnrichment(enrichment)"
     />
@@ -40,6 +41,7 @@ export default {
     viewRoot: HTMLElement,
     gutter: HTMLElement,
     editable: Boolean,
+    useSelectors: Boolean,
     thisWorkFrbrUri: {
       type: String,
       default: ''

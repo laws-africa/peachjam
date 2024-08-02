@@ -19,7 +19,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
     navbar_link = "judgments"
     queryset = Judgment.objects.prefetch_related(
         "judges", "labels", "attorneys", "outcomes"
-    )
+    ).select_related("work")
     exclude_facets = []
     group_by_date = "month-year"
 
@@ -38,18 +38,14 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
         context["doc_type"] = "Judgment"
         context["page_title"] = self.page_title()
-        context["labels"].update({"judge": Judge.model_label_plural})
         context["doc_table_show_jurisdiction"] = False
 
         self.populate_years(context)
-        self.populate_facets(context)
-        self.show_facet_clear_all(context)
-
         context["documents"] = self.group_documents(context["documents"])
 
         return context
 
-    def populate_facets(self, context):
+    def add_facets(self, context):
         context["facet_data"] = {}
         if "judges" not in self.exclude_facets:
             judges = list(
@@ -63,7 +59,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 if judge
             )
             context["facet_data"]["judges"] = {
-                "label": _("Judges"),
+                "label": Judge.model_label_plural,
                 "type": "checkbox",
                 "options": judges,
                 "values": self.request.GET.getlist("judges"),
@@ -103,6 +99,24 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 "type": "checkbox",
                 "options": attorneys,
                 "values": self.request.GET.getlist("attorneys"),
+            }
+
+        if "taxonomy" not in self.exclude_facets:
+            taxonomies = list(
+                self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="taxonomies"
+                )
+                .filter(taxonomies__topic__isnull=False)
+                .order_by("taxonomies__topic__name")
+                .values_list("taxonomies__topic__name", flat=True)
+                .distinct()
+            )
+
+            context["facet_data"]["taxonomies"] = {
+                "label": _("Topics"),
+                "type": "checkbox",
+                "options": taxonomies,
+                "values": self.request.GET.getlist("taxonomies"),
             }
 
         if "alphabet" not in self.exclude_facets:
