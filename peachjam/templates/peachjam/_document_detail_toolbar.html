@@ -12,7 +12,7 @@
     <div>
       {% if request.user.is_authenticated %}
         <button id="saveDocumentButton"
-                class="btn {% if saved %}btn-primary{% else %}btn-outline-primary{% endif %} btn-shrink-sm ms-2"
+                class="btn btn-outline-primary btn-shrink-sm ms-2"
                 type="button"
                 data-bs-toggle="modal"
                 data-bs-target="#saveDocument"
@@ -20,8 +20,10 @@
                 hx-post="{% url 'save_document' %}"
                 hx-target="#saveDocument"
                 hx-include="#save_document-form">
-          {% if saved %}
-            Document saved <i class="bi bi-check-circle"></i>
+          {% if saved.folder %}
+            <i class="bi bi-star-fill"></i> Saved to {{ saved.folder }}
+          {% elif saved %}
+            <i class="bi bi-star-fill"></i> Saved
           {% else %}
             Save document
           {% endif %}

@@ -17,7 +17,6 @@ class Folder(models.Model):
         ordering = ("name",)
         verbose_name = _("folder")
         verbose_name_plural = _("folders")
-        unique_together = ("name", "user_profile")
 
     def __str__(self):
         return f"{self.name}"
@@ -32,7 +31,11 @@ class SavedDocument(models.Model):
         related_name="saved_documents",
     )
     folder = models.ForeignKey(
-        Folder, on_delete=models.CASCADE, verbose_name=_("folder"), null=True
+        Folder,
+        on_delete=models.CASCADE,
+        verbose_name=_("folder"),
+        null=True,
+        related_name="saved_documents",
     )
 
     class Meta:
@@ -42,4 +45,7 @@ class SavedDocument(models.Model):
         unique_together = ("document", "folder")
 
     def __str__(self):
-        return f"{self.document.title}"
+        message = f"{self.document.title} has been saved"
+        if self.folder:
+            message += f" to the '{self.folder.name}' folder"
+        return _("Document has been saved")

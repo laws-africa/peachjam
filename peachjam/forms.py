@@ -294,6 +294,7 @@ class SaveDocumentForm(forms.ModelForm):
             self.user_profile = user_profile
             self.fields["document"].initial = self.document
             self.fields["user_profile"].initial = self.user_profile
+            self.fields["folder"].queryset = user_profile.folders.all()
 
     def clean(self):
         if self.cleaned_data.get("new_folder"):

@@ -300,9 +300,7 @@ class BaseDocumentDetailView(DetailView):
                 user_profile=user_profile,
                 initial={"document": self.get_object(), "user_profile": user_profile},
             )
-            context["saved"] = user_profile.saved_documents.filter(
-                document=self.get_object()
-            )
+            context["saved"] = instance
             context["folder_form"] = FolderForm(
                 user_profile=user_profile, initial={"user_profile": user_profile}
             )
