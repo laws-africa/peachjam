@@ -19,7 +19,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
     navbar_link = "judgments"
     queryset = Judgment.objects.prefetch_related(
         "judges", "labels", "attorneys", "outcomes"
-    )
+    ).select_related("work")
     exclude_facets = []
     group_by_date = "month-year"
 

@@ -6,7 +6,6 @@ from peachjam.views.generic_views import BaseDocumentDetailView
 
 
 class JudgmentListView(TemplateView):
-    model = Judgment
     template_name = "peachjam/judgment_list.html"
     navbar_link = "judgments"
 
@@ -14,9 +13,12 @@ class JudgmentListView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
-        context["recent_judgments"] = Judgment.objects.exclude(
-            published=False
-        ).order_by("-date")[:30]
+        context["recent_judgments"] = (
+            Judgment.objects.select_related("work")
+            .prefetch_related("labels")
+            .exclude(published=False)
+            .order_by("-date")[:30]
+        )
         context["doc_type"] = "Judgment"
         context["doc_count"] = Judgment.objects.filter(published=True).count()
         context["help_link"] = "judgments/courts"
