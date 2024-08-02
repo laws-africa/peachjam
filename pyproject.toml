@@ -48,6 +48,7 @@ dependencies = [
     "django-nonrelated-inlines>=0.2",
     "django-modeltranslation>=0.18.10",
     "django-polymorphic==3.1.0",
+    "django-recaptcha>=4.0.0",
     "django-sass-processor>=1.1",
     "django-sass-processor-dart-sass>=0.1.0",
     "django-storages>=1.12.3",

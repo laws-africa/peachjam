@@ -73,8 +73,16 @@
           </div>
         {% endif %}
       </div>
-      <div class="my-2">
-        <button class="btn btn-primary px-4 mb-3" type="submit">{% trans 'Sign up' %}</button>
+      <div class="mb-4">
+        {{ form.captcha }}
+        {% if form.captcha.errors %}
+          <div class="text-danger">
+            {% for error in form.captcha.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div>
+        <button class="btn btn-primary px-4" type="submit">{% trans 'Sign up' %}</button>
       </div>
     </form>
   </div>

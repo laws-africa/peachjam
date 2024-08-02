@@ -11,7 +11,6 @@ import TermsOfUse from './terms-of-use';
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
-import SaveDocumentModal from './SaveDocumentModal.vue';
 
 const components: Record<string, any> = {
   // Data components
@@ -26,7 +25,6 @@ const components: Record<string, any> = {
   TermsOfUse,
 
   // Vue components
-  SaveDocumentModal,
   DocumentProblemModal,
   FindDocuments,
   PocketLawDownload

@@ -129,6 +129,11 @@ class PeachJamSettings(SingletonModel):
         blank=True,
         help_text=_("Matomo site ID (e.g. 2)"),
     )
+    allow_save_documents = models.BooleanField(
+        verbose_name=_("allow save documents"),
+        default=False,
+        help_text=_("Allow documents to be saved."),
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")

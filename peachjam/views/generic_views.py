@@ -20,6 +20,7 @@ from peachjam.models import (
     Relationship,
     SavedDocument,
     UserProfile,
+    pj_settings,
 )
 from peachjam_api.serializers import (
     CitationLinkSerializer,
@@ -241,6 +242,13 @@ class BaseDocumentDetailView(DetailView):
             self.model, expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri"))
         )
 
+    def show_save_doc_button(self):
+        if pj_settings().allow_save_documents and self.request.user.has_perm(
+            "peachjam.add_saveddocument"
+        ):
+            return True
+        return False
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
             document_diffs_url=self.document_diffs_url, **kwargs
@@ -288,6 +296,7 @@ class BaseDocumentDetailView(DetailView):
         context["documents_citing_current_doc"] = self.fetch_citation_docs(
             doc.work.works_citing_current_work()
         )
+        context["show_save_doc_button"] = self.show_save_doc_button()
         if self.request.user.is_authenticated:
             user_profile = UserProfile.objects.filter(user=self.request.user).first()
             instance = SavedDocument.objects.filter(
