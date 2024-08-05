@@ -39,6 +39,8 @@ class FilteredJudgmentView(FilteredDocumentListView):
         context["doc_type"] = "Judgment"
         context["page_title"] = self.page_title()
         context["doc_table_show_jurisdiction"] = False
+        context["doc_table_title_label"] = _("Case citation")
+        context["doc_table_date_label"] = _("Judgment date")
 
         self.populate_years(context)
         context["documents"] = self.group_documents(context["documents"])

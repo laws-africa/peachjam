@@ -136,6 +136,8 @@ class FilteredDocumentListView(DocumentListView):
         self.add_facets(context)
         self.show_facet_clear_all(context)
         context["doc_count"] = context["paginator"].count
+        context["doc_table_title_label"] = _("Title")
+        context["doc_table_date_label"] = _("Date")
 
         return context
 
