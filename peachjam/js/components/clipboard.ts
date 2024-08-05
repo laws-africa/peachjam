@@ -10,8 +10,23 @@ export class CopyToClipboard {
 
   async copy () {
     try {
+      const text = this.root.dataset.value;
+      const html = this.root.dataset.valueHtml;
+
       if (navigator && navigator.clipboard) {
-        await navigator.clipboard.writeText(this.root.dataset.value || '');
+        const items: Record<string, Blob> = {};
+
+        if (text) {
+          const type = 'text/plain';
+          items[type] = new Blob([text], { type });
+        }
+
+        if (html) {
+          const type = 'text/html';
+          items[type] = new Blob([html], { type });
+        }
+
+        await navigator.clipboard.write([new ClipboardItem(items)]);
 
         this.root.innerText = this.root.dataset.confirmation || 'Copied!';
         setTimeout(() => {
