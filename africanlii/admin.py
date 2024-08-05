@@ -1,6 +1,7 @@
 from countries_plus.models import Country
 from django.contrib import admin
 
+from africanlii.forms import RatificationForm
 from africanlii.models import (
     AfricanUnionInstitution,
     AfricanUnionOrgan,
@@ -26,6 +27,7 @@ class RatificationCountryAdmin(admin.TabularInline):
 @admin.register(Ratification)
 class RatificationAdmin(ImportExportMixin, admin.ModelAdmin):
     inlines = (RatificationCountryAdmin,)
+    form = RatificationForm
     resource_class = RatificationResource
 
 
