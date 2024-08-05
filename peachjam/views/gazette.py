@@ -7,6 +7,7 @@ from django.utils.dates import MONTHS
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
+from peachjam.forms import GazetteFilterForm
 from peachjam.helpers import chunks
 from peachjam.models import Gazette, Locality, get_country_and_locality_or_404
 from peachjam.registry import registry
@@ -113,6 +114,7 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
     queryset = Gazette.objects.prefetch_related("source_file", "labels").select_related(
         "work"
     )
+    form_class = GazetteFilterForm
     template_name = "peachjam/gazette_year.html"
     paginate_by = 0
     navbar_link = "gazettes"
@@ -176,12 +178,12 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
         )
 
         context["facet_data"] = {
-            "sub_publication": {
+            "sub_publications": {
                 "label": _("Sub-publication"),
                 "type": "checkbox",
                 "options": sub_publications,
                 "values": self.request.GET.getlist("sub_publications"),
-            },
+            }
         }
 
 
