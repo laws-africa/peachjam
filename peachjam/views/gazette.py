@@ -4,10 +4,10 @@ from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.urls import reverse
 from django.utils.dates import MONTHS
-from django.utils.text import gettext_lazy as _
+from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
-from peachjam.helpers import chunks, lowercase_alphabet
+from peachjam.helpers import chunks
 from peachjam.models import Gazette, Locality, get_country_and_locality_or_404
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
@@ -141,27 +141,47 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
 
         context["year"] = int(self.kwargs["year"])
         context["years"] = year_and_month_aggs(
-            self.get_base_queryset(), self.kwargs.get("code")
+            self.get_base_queryset(exclude=["year"]), self.kwargs.get("code")
         )
         context["all_years_url"] = (
             reverse("gazettes")
             if not self.kwargs.get("code")
             else reverse("gazettes_by_locality", args=[self.kwargs["code"]])
         )
-        context["doc_type"] = "Gazette"
-        context["doc_count"] = len(self.object_list)
+
+        for gazette in context["documents"]:
+            # fold "special issue" into the sub-publication
+            if gazette.special:
+                gazette.sub_publication = " ".join(
+                    [x for x in [gazette.sub_publication, _("Special issue")] if x]
+                )
+
         context["documents"] = self.group_documents(context["documents"])
+        context["doc_type"] = "Gazette"
+        context["doc_table_show_jurisdiction"] = False
+        context["doc_table_show_frbr_uri_number"] = True
+        context["doc_table_show_sub_publication"] = True
 
         return context
 
     def add_facets(self, context):
+        sub_publications = list(
+            self.form.filter_queryset(
+                self.get_base_queryset(), exclude="sub_publication"
+            )
+            .filter(sub_publication__isnull=False)
+            .order_by("sub_publication")
+            .values_list("sub_publication", flat=True)
+            .distinct()
+        )
+
         context["facet_data"] = {
-            "alphabet": {
-                "label": _("Alphabet"),
-                "type": "radio",
-                "options": lowercase_alphabet(),
-                "values": self.request.GET.get("alphabet"),
-            }
+            "sub_publication": {
+                "label": _("Sub-publication"),
+                "type": "checkbox",
+                "options": sub_publications,
+                "values": self.request.GET.getlist("sub_publications"),
+            },
         }
 
 

@@ -36,7 +36,7 @@
   {{ block.super }}
 {% endblock %}
 {% block nav-tabs %}
-  <div class="row">
+  <div class="row mb-3">
     <div class="col col-md-4 my-3">
       {% for y in years %}
         {% if y.year == year %}
@@ -45,39 +45,4 @@
       {% endfor %}
     </div>
   </div>
-{% endblock %}
-{% block old %}
-  <table class="table table-borderless table-sm">
-    {% for month, items in gazettes %}
-      {% if items %}
-        <tr>
-          <td>
-            <h2 class="mt-3" id="{{ forloop.counter }}">{{ month }} {{ year }}</h2>
-          </td>
-        </tr>
-        {% for gazette in items %}
-          {% block gazette-item %}
-            <tr>
-              <td>
-                <a href="{{ gazette.get_absolute_url }}">{{ gazette.title }}</a>
-              </td>
-              <td>
-                <span class="d-none d-lg-block">{{ gazette.sub_publication|default:"" }}
-                  {% if gazette.special %}
-                    {% trans 'Special' %}
-                  {% endif %}
-                </span>
-              </td>
-              <td>
-                <span class="d-none d-lg-block">{{ gazette.frbr_uri_number }}</span>
-              </td>
-              <td>
-                <span class="d-none d-lg-block">{{ gazette.date }}</span>
-              </td>
-            </tr>
-          {% endblock %}
-        {% endfor %}
-      {% endif %}
-    {% endfor %}
-  </table>
 {% endblock %}
