@@ -17,7 +17,9 @@
     {% endblock %}
     {% block alerts %}{% endblock %}
     {% block nav-tabs %}{% endblock %}
-    {% include "peachjam/_document_table_form.html" %}
+    {% block document-table %}
+      {% include "peachjam/_document_table_form.html" %}
+    {% endblock %}
     {% block taxonomy-json %}{% endblock %}
   </div>
 {% endblock %}
