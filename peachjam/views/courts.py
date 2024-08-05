@@ -9,7 +9,7 @@ from django.utils.text import gettext_lazy as _
 
 from peachjam.helpers import chunks, lowercase_alphabet
 from peachjam.models import Court, CourtClass, CourtRegistry, Judge, Judgment
-from peachjam.views.generic_views import FilteredDocumentListView
+from peachjam.views.generic_views import FilteredDocumentListView, YearMixin
 
 
 class FilteredJudgmentView(FilteredDocumentListView):
@@ -163,34 +163,6 @@ class CourtDetailView(FilteredJudgmentView):
 
         context["all_years_url"] = self.court.get_absolute_url()
         return context
-
-
-class YearMixin:
-    @property
-    def year(self):
-        return self.kwargs["year"]
-
-    def page_title(self):
-        return f"{super().page_title()} - {self.year}"
-
-    def get_base_queryset(self, exclude=None):
-        qs = super().get_base_queryset()
-        if exclude is None:
-            exclude = []
-        if "year" not in exclude:
-            qs = qs.filter(date__year=self.kwargs["year"])
-        return qs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["year"] = self.year
-        self.populate_months(context)
-        return context
-
-    def populate_months(self, context):
-        context["months"] = self.get_base_queryset(exclude=["month"]).dates(
-            "date", "month", order="ASC"
-        )
 
 
 class CourtYearView(YearMixin, CourtDetailView):

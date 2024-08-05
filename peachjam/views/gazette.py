@@ -4,12 +4,17 @@ from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.urls import reverse
 from django.utils.dates import MONTHS
+from django.utils.text import gettext_lazy as _
 from django.views.generic import TemplateView
 
-from peachjam.helpers import chunks
+from peachjam.helpers import chunks, lowercase_alphabet
 from peachjam.models import Gazette, Locality, get_country_and_locality_or_404
 from peachjam.registry import registry
-from peachjam.views.generic_views import BaseDocumentDetailView, DocumentListView
+from peachjam.views.generic_views import (
+    BaseDocumentDetailView,
+    FilteredDocumentListView,
+    YearMixin,
+)
 
 
 def year_and_month_aggs(queryset, place_code=None):
@@ -103,36 +108,37 @@ class GazetteListView(TemplateView):
         return []
 
 
-class GazetteYearView(DocumentListView):
+class GazetteYearView(YearMixin, FilteredDocumentListView):
     model = Gazette
-    queryset = Gazette.objects.prefetch_related("source_file").order_by(
-        "date", "frbr_uri_number"
+    queryset = Gazette.objects.prefetch_related("source_file", "labels").select_related(
+        "work"
     )
     template_name = "peachjam/gazette_year.html"
     paginate_by = 0
     navbar_link = "gazettes"
     locality = None
+    group_by_date = "month-year"
+
+    def get_form(self):
+        self.form_defaults = {"sort": "-date"}
+        return super().get_form()
 
     def get(self, request, code=None, *args, **kwargs):
         self.country, self.locality = get_country_and_locality_or_404(code)
         self.place = self.locality or self.country
         return super().get(request, *args, **kwargs)
 
-    def get_base_queryset(self):
-        qs = super().get_base_queryset().filter(locality=self.locality)
+    def get_base_queryset(self, exclude=None):
+        qs = super().get_base_queryset(exclude=exclude).filter(locality=self.locality)
         if self.country:
             qs = qs.filter(jurisdiction=self.country)
         return qs
-
-    def get_queryset(self):
-        return super().get_queryset().filter(date__year=self.kwargs["year"])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
             place=self.place, country=self.country, locality=self.locality, **kwargs
         )
 
-        context["gazettes"] = self.group_gazettes(list(self.object_list))
         context["year"] = int(self.kwargs["year"])
         context["years"] = year_and_month_aggs(
             self.get_base_queryset(), self.kwargs.get("code")
@@ -144,21 +150,19 @@ class GazetteYearView(DocumentListView):
         )
         context["doc_type"] = "Gazette"
         context["doc_count"] = len(self.object_list)
+        context["documents"] = self.group_documents(context["documents"])
 
         return context
 
-    def group_gazettes(self, gazettes):
-        months = {m: [] for m in range(1, 13)}
-
-        for month, group in groupby(gazettes, key=lambda g: g.date.month):
-            months[month] = list(group)
-
-        # (month number, [list of gazettes]) tuples
-        months = [(m, v) for m, v in months.items()]
-        months.sort(key=lambda x: x[0])
-        months = [(MONTHS[m], v) for m, v in months]
-
-        return months
+    def add_facets(self, context):
+        context["facet_data"] = {
+            "alphabet": {
+                "label": _("Alphabet"),
+                "type": "radio",
+                "options": lowercase_alphabet(),
+                "values": self.request.GET.get("alphabet"),
+            }
+        }
 
 
 @registry.register_doc_type("gazette")
