@@ -3,3 +3,7 @@ $primary: #EE7845;
 :root {
   --primary: #{$primary};
 }
+
+a:visited {
+  color: #A13F1D;
+}

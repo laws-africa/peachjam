@@ -1,4 +1,8 @@
-$primary: #5a9d1c;
+$primary: #4a8c16;
+
+a:visited {
+  color: #234008;
+}
 
 :root {
   --primary: #{$primary};
