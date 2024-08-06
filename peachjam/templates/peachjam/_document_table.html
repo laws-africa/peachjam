@@ -2,7 +2,7 @@
 <div class="table-responsive"
      id="doc-table"
      data-component="DocumentTable">
-  <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations %}doc-table--citation{% endif %} {{ doc_table_classes }}">
+  <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {{ doc_table_classes }}">
     <thead>
       <tr>
         {% if doc_table_toggle %}<th class="cell-toggle"></th>{% endif %}

@@ -104,7 +104,7 @@ table.doc-table {
     .cell-title,
     .cell-group {
       grid-column: span 12;
-      width: unset;
+      width: unset !important;
     }
 
     // when the date comes right after the title, give the date full width
@@ -115,6 +115,12 @@ table.doc-table {
 }
 
 // variants
+table.doc-table.doc-table--citation {
+  .cell-title {
+    width: 60%;
+  }
+}
+
 table.doc-table.doc-table--toggle {
   .cell-toggle {
     width: 25px;
@@ -146,11 +152,5 @@ table.doc-table.doc-table--toggle {
         padding-left: 0;
       }
     }
-  }
-}
-
-table.doc-table.doc-table--citation {
-  .cell-title {
-    width: 60%;
   }
 }

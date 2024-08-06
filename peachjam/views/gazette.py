@@ -165,6 +165,7 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
         context["doc_table_show_jurisdiction"] = False
         context["doc_table_show_frbr_uri_number"] = True
         context["doc_table_show_sub_publication"] = True
+        context["doc_table_many_cols"] = True
         context["doc_count_noun"] = _("gazette")
         context["doc_count_noun_plural"] = _("gazettes")
 
@@ -173,7 +174,7 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
     def add_facets(self, context):
         sub_publications = list(
             self.form.filter_queryset(
-                self.get_base_queryset(), exclude="sub_publication"
+                self.get_base_queryset(), exclude="sub_publications"
             )
             .filter(sub_publication__isnull=False)
             .order_by("sub_publication")
