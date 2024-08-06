@@ -1,3 +1,4 @@
+from django.utils.text import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.models import CourtClass, Judgment
@@ -21,6 +22,8 @@ class JudgmentListView(TemplateView):
         )
         context["doc_type"] = "Judgment"
         context["doc_count"] = Judgment.objects.filter(published=True).count()
+        context["doc_count_noun"] = _("judgment")
+        context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
         return context
 

@@ -49,72 +49,90 @@ table.doc-table {
       padding-left: 20px;
     }
   }
+}
 
-  @include media-breakpoint-down(md) {
-    /**
-     * On mobile, the table is converted into a grid. Each row is a grid with 12 columns.
-     * The title column takes up the full width, while the others take up half.
-     */
-    display: block;
+@mixin doc-table-collapse {
+  /**
+   * On mobile, the table is converted into a grid. Each row is a grid with 12 columns.
+   * The title column takes up the full width, while the others take up half.
+   */
+  display: block;
+
+  tr {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 0 $table-cell-padding-x-sm;
+    padding: $table-cell-padding-x 0;
+    // the row is moved to the tr, rather than the cells
+    border-bottom: 1px solid $table-border-color;
+  }
+
+  td {
+    grid-column: span 6;
+    width: unset;
+    border-bottom: 0;
+  }
+
+  // padding moves to the rows, so that when cols wrap, there isn't extra spacing
+  th, td {
+    padding: 0 0;
+  }
+
+  thead {
+    display: contents;
+
+    // the thead border is moved to the tr, rather than the cells
+    td, th {
+      border-bottom-width: 0;
+    }
 
     tr {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 0 $table-cell-padding-x-sm;
-      padding: $table-cell-padding-x 0;
-      // the row is moved to the tr, rather than the cells
-      border-bottom: 1px solid $table-border-color;
+      border-bottom: 1px solid $primary;
     }
 
-    td {
-      grid-column: span 6;
+    // hide most headings
+    th {
+      display: none;
       width: unset;
-      border-bottom: 0;
-    }
 
-    // padding moves to the rows, so that when cols wrap, there isn't extra spacing
-    th, td {
-      padding: 0 0;
-    }
-
-    thead {
-      display: contents;
-
-      // the thead border is moved to the tr, rather than the cells
-      td, th {
-        border-bottom-width: 0;
-      }
-
-      tr {
-        border-bottom: 1px solid $primary;
-      }
-
-      // hide most headings
-      th {
-        display: none;
-        width: unset;
-
-        &.cell-title {
-          display: block;
-        }
+      &.cell-title {
+        display: block;
       }
     }
+  }
 
-    // column-specific styling
-    .cell-title,
-    .cell-group {
-      grid-column: span 12;
-      width: unset;
-    }
+  // column-specific styling
+  .cell-title,
+  .cell-group {
+    grid-column: span 12;
+    width: unset !important;
+  }
 
-    // when the date comes right after the title, give the date full width
-    .cell-title + .cell-date {
-      grid-column: span 12;
-    }
+  // when the date comes right after the title, give the date full width
+  .cell-title + .cell-date {
+    grid-column: span 12;
+  }
+}
+
+table.doc-table {
+  // collapse on mobile
+  @include media-breakpoint-down(md) {
+    @include doc-table-collapse;
+  }
+
+  // collapse if the table has the --collapse modifier
+  &.doc-table--collapse {
+    @include doc-table-collapse;
   }
 }
 
 // variants
+table.doc-table.doc-table--citation {
+  .cell-title {
+    width: 60%;
+  }
+}
+
 table.doc-table.doc-table--toggle {
   .cell-toggle {
     width: 25px;
@@ -146,11 +164,5 @@ table.doc-table.doc-table--toggle {
         padding-left: 0;
       }
     }
-  }
-}
-
-table.doc-table.doc-table--citation {
-  .cell-title {
-    width: 60%;
   }
 }
