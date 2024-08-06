@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-06 10:12+0200\n"
-"PO-Revision-Date: 2024-07-19 09:44\n"
+"PO-Revision-Date: 2024-08-06 08:53\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -460,15 +460,14 @@ msgid "Search regional and national African legal information."
 msgstr "Rechercher des informations juridiques africaines régionales et nationales."
 
 #: views/taxonomy.py:126
-#, fuzzy
-#| msgid "ratifications"
 msgid "Judrisdictions"
-msgstr "ratifications"
+msgstr "Juridictions"
 
 #: views/taxonomy.py:132
 msgid "Years"
-msgstr ""
+msgstr "Années"
 
 #: views/taxonomy.py:140
 msgid "Alphabet"
-msgstr ""
+msgstr "Alphabet"
+

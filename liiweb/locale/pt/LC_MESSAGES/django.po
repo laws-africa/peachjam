@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-06 10:12+0200\n"
-"PO-Revision-Date: 2024-07-19 09:44\n"
+"PO-Revision-Date: 2024-08-06 08:54\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -26,7 +26,7 @@ msgstr "Doe para %(APP_NAME)s"
 #: templates/liiweb/_donate_call_to_action.html:8
 #, python-format
 msgid "%(APP_NAME)s relies on donations to keep our platform free. Help us maintain and expand our resources. Donate today and support."
-msgstr ""
+msgstr "%(APP_NAME)s depende de doações para manter nossa plataforma gratuita. Ajude-nos a manter e expandir nossos recursos. Doe hoje e apoie."
 
 #: templates/liiweb/_donate_call_to_action.html:14
 #: templates/liiweb/donate.html:4
@@ -175,22 +175,3 @@ msgstr "Julgamentos"
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Legislação"
 
-#, python-format
-#~ msgid ""
-#~ "\n"
-#~ "            Donate to %(APP_NAME)s\n"
-#~ "          "
-#~ msgstr ""
-#~ "\n"
-#~ "            Doe para %(APP_NAME)s\n"
-#~ "          "
-
-#, python-format
-#~ msgid ""
-#~ "\n"
-#~ "            %(APP_NAME)s is an independent, self-funded organisation and needs your support.\n"
-#~ "          "
-#~ msgstr ""
-#~ "\n"
-#~ "            %(APP_NAME)s é uma organização independente e autofinanciada e precisa do seu apoio.\n"
-#~ "          "

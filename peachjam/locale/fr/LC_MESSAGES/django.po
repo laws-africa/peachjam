@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-06 10:12+0200\n"
-"PO-Revision-Date: 2024-07-19 09:44\n"
+"PO-Revision-Date: 2024-08-06 08:53\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -60,7 +60,7 @@ msgstr "Annuler la publication des documents sélectionnés"
 #: admin.py:672
 #, python-format
 msgid "Taxonomy with slug \"%(value)s\" already exists."
-msgstr ""
+msgstr "La taxonomie avec le slug \"%(value)s\" existe déjà."
 
 #: admin.py:746 models/judgment.py:471 models/judgment.py:507
 msgid "case number"
@@ -902,10 +902,8 @@ msgid "subject target ID"
 msgstr "ID cible du sujet"
 
 #: models/relationships.py:36
-#, fuzzy
-#| msgid "target selectors"
 msgid "subject selectors"
-msgstr "sélecteurs de cible"
+msgstr "sélecteurs de sujets"
 
 #: models/relationships.py:44
 msgid "object work"
@@ -1108,12 +1106,10 @@ msgstr "Mot de passe oublié ?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            Connectez-vous à %(provider.name)s\n"
 "          "
 
@@ -1301,10 +1297,8 @@ msgid "To the top"
 msgstr "En haut"
 
 #: templates/peachjam/_document_count.html:14 views/generic_views.py:57
-#, fuzzy
-#| msgid "document"
 msgid "documents"
-msgstr "document"
+msgstr "documents"
 
 #: templates/peachjam/_document_detail_toolbar.html:4
 msgid "Document toolbar"
@@ -1352,14 +1346,12 @@ msgid "Close"
 msgstr "Fermer"
 
 #: templates/peachjam/_document_table_form.html:42
-#, fuzzy
-#| msgid "Collapse all"
 msgid "Clear all"
-msgstr "Réduire tout"
+msgstr "Effacer tout"
 
 #: templates/peachjam/_document_table_form.html:56
 msgid "Clear"
-msgstr ""
+msgstr "Nettoyer"
 
 #: templates/peachjam/_document_table_form.html:116
 #: templates/peachjam/_document_table_form.html:117
@@ -1371,10 +1363,8 @@ msgid "Sort by"
 msgstr "Trier par"
 
 #: templates/peachjam/_document_table_form.html:134
-#, fuzzy
-#| msgid "Filters"
 msgid "Filter"
-msgstr "Filtres"
+msgstr "Filtre"
 
 #: templates/peachjam/_document_table_row.html:25
 #: templates/peachjam/layouts/document_detail.html:299
@@ -1423,10 +1413,8 @@ msgid "Next"
 msgstr "Suivant"
 
 #: templates/peachjam/_quick_search.html:17
-#, fuzzy
-#| msgid "Advanced"
 msgid "Advanced search"
-msgstr "Avancé"
+msgstr "Recherche avancée"
 
 #: templates/peachjam/_ratifications.html:5
 msgid "Source"
@@ -1959,16 +1947,12 @@ msgid "Courts"
 msgstr "Cours"
 
 #: views/gazette.py:160
-#, fuzzy
-#| msgid "Special"
 msgid "Special issue"
-msgstr "Spécial"
+msgstr "Probleme special"
 
 #: views/gazette.py:187
-#, fuzzy
-#| msgid "sub publication"
 msgid "Sub-publication"
-msgstr "sous-publication"
+msgstr "Sous-publication"
 
 #: views/generic_views.py:195
 msgid "Years"
@@ -2022,20 +2006,3 @@ msgstr "C'est la version de ce %(friendly_type)s telle qu'elle était de %(date_
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Il existe des amendements en suspens qui n’ont pas encore été appliqués. Voir l'onglet Historique pour plus d'informations."
 
-#, python-format
-#~ msgid "%(n_docs)s document"
-#~ msgid_plural "%(n_docs)s documents"
-#~ msgstr[0] "%(n_docs)s Document"
-#~ msgstr[1] "%(n_docs)s Documents"
-
-#, python-format
-#~ msgid "%(counter)s gazette"
-#~ msgid_plural "%(counter)s gazettes"
-#~ msgstr[0] "%(counter)s journal officiel"
-#~ msgstr[1] "%(counter)s Journal Officiel"
-
-#, python-format
-#~ msgid "%(doc_count)s gazette"
-#~ msgid_plural "%(doc_count)s gazettes"
-#~ msgstr[0] "%(doc_count)s journal officiel"
-#~ msgstr[1] "%(doc_count)s Journal Officiel"
