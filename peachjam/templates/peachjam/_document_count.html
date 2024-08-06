@@ -1,8 +1,9 @@
-{% load i18n humanize %}
+{% load humanize %}
 <div class="text-muted mb-2">
-  {% blocktrans trimmed with n_docs=doc_count|intcomma count counter=doc_count %}
-    {{ n_docs }} document
-  {% plural %}
-    {{ n_docs }} documents
-  {% endblocktrans %}
+  {{ doc_count|intcomma }}
+  {% if doc_count == 1 %}
+    {{ doc_count_noun|default:"document" }}
+  {% else %}
+    {{ doc_count_noun_plural|default:"documents" }}
+  {% endif %}
 </div>

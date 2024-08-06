@@ -93,6 +93,8 @@ class GazetteListView(TemplateView):
         queryset = self.get_queryset()
         context["years"] = year_and_month_aggs(queryset, self.kwargs.get("code"))
         context["doc_count"] = queryset.count()
+        context["doc_count_noun"] = _("gazette")
+        context["doc_count_noun_plural"] = _("gazettes")
         context["doc_type"] = "Gazette"
 
         return context
@@ -163,6 +165,8 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
         context["doc_table_show_jurisdiction"] = False
         context["doc_table_show_frbr_uri_number"] = True
         context["doc_table_show_sub_publication"] = True
+        context["doc_count_noun"] = _("gazette")
+        context["doc_count_noun_plural"] = _("gazettes")
 
         return context
 

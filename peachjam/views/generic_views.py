@@ -52,7 +52,11 @@ class DocumentListView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         return super().get_context_data(
-            doc_table_show_jurisdiction=True, *args, **kwargs
+            doc_table_show_jurisdiction=True,
+            doc_count_noun=_("document"),
+            doc_count_noun_plural=_("documents"),
+            *args,
+            **kwargs,
         )
 
     def group_documents(self, documents, group_by):

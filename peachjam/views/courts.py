@@ -39,6 +39,8 @@ class FilteredJudgmentView(FilteredDocumentListView):
         context["doc_type"] = "Judgment"
         context["page_title"] = self.page_title()
         context["doc_table_show_jurisdiction"] = False
+        context["doc_count_noun"] = _("judgment")
+        context["doc_count_noun_plural"] = _("judgments")
 
         self.populate_years(context)
         context["documents"] = self.group_documents(context["documents"])
