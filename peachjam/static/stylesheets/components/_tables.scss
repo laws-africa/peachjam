@@ -8,7 +8,7 @@ table.doc-table {
   margin-bottom: $spacer;
 
   th, td {
-    padding: $table-cell-padding-x 0;
+    padding: $table-cell-padding-x $table-cell-padding-y-sm $table-cell-padding-x 0;
   }
 
   td {
