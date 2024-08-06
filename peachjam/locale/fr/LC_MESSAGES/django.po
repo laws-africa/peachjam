@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 09:40+0200\n"
+"POT-Creation-Date: 2024-08-06 10:12+0200\n"
 "PO-Revision-Date: 2024-07-19 09:44\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -17,120 +17,125 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 99\n"
 
-#: admin.py:125
+#: admin.py:127
 msgid "Import"
 msgstr "Importer"
 
-#: admin.py:408
+#: admin.py:410
 msgid "Key details"
 msgstr "Détails essentiels"
 
-#: admin.py:421
+#: admin.py:423
 msgid "Additional details"
 msgstr "Détails supplémentaires"
 
-#: admin.py:434 admin.py:874
+#: admin.py:436 admin.py:901
 msgid "Work identification"
 msgstr "Identification de travail"
 
-#: admin.py:447
+#: admin.py:449
 msgid "Content"
 msgstr "Contenus"
 
-#: admin.py:455 admin.py:873
+#: admin.py:457 admin.py:900
 msgid "Advanced"
 msgstr "Avancé"
 
-#: admin.py:631
+#: admin.py:633
 msgid "Documents published."
 msgstr "Documents publiés."
 
-#: admin.py:633
+#: admin.py:635
 msgid "Publish selected documents"
 msgstr "Publier les documents sélectionnés"
 
-#: admin.py:637
+#: admin.py:639
 msgid "Documents unpublished."
 msgstr "Documents inédits."
 
-#: admin.py:639
+#: admin.py:641
 msgid "Unpublish selected documents"
 msgstr "Annuler la publication des documents sélectionnés"
 
-#: admin.py:719 models/judgment.py:469 models/judgment.py:505
+#: admin.py:672
+#, python-format
+msgid "Taxonomy with slug \"%(value)s\" already exists."
+msgstr ""
+
+#: admin.py:746 models/judgment.py:471 models/judgment.py:507
 msgid "case number"
 msgstr "numéro de dossier"
 
-#: admin.py:720 models/judgment.py:470
+#: admin.py:747 models/judgment.py:472
 msgid "case numbers"
 msgstr "numéros de dossier"
 
-#: admin.py:729 models/judgment.py:40 models/judgment.py:214
+#: admin.py:756 models/judgment.py:40 models/judgment.py:214
 msgid "judge"
 msgstr "juge"
 
-#: admin.py:730 models/judgment.py:41 models/judgment.py:251
-#: models/judgment.py:521
+#: admin.py:757 models/judgment.py:41 models/judgment.py:251
+#: models/judgment.py:523
 msgid "judges"
 msgstr "juges"
 
-#: admin.py:736
+#: admin.py:763
 msgid "lower court judge"
 msgstr "juge du tribunal inférieur"
 
-#: admin.py:737 models/judgment.py:257
+#: admin.py:764 models/judgment.py:257
 msgid "lower court judges"
 msgstr "juges des tribunaux inférieurs"
 
-#: admin.py:917
+#: admin.py:944
 msgid "Refreshing content in the background."
 msgstr "Actualisation du contenu en arrière-plan."
 
-#: admin.py:920
+#: admin.py:947
 msgid "Refresh content for selected ingestors"
 msgstr "Actualiser le contenu pour les ingérants sélectionnés"
 
-#: admin.py:968
+#: admin.py:995
 msgid "Articles published."
 msgstr "Articles publiés."
 
-#: admin.py:970
+#: admin.py:997
 msgid "Publish selected articles"
 msgstr "Publier les articles sélectionnés"
 
-#: admin.py:974
+#: admin.py:1001
 msgid "Articles unpublished."
 msgstr "Articles inédits."
 
-#: admin.py:976
+#: admin.py:1003
 msgid "Unpublish selected articles"
 msgstr "Annuler la publication des articles sélectionnés"
 
-#: forms.py:94 forms.py:95 templates/peachjam/_child_documents.html:7
-#: templates/peachjam/_document_table.html:13
+#: forms.py:126 forms.py:127 templates/peachjam/_child_documents.html:7
+#: views/generic_views.py:147
 msgid "Title"
 msgstr "Titre"
 
-#: forms.py:96 forms.py:97 templates/peachjam/_case_histories.html:5
-#: templates/peachjam/_document_table.html:30
-#: templates/peachjam/layouts/document_detail.html:261
+#: forms.py:128 forms.py:129 templates/peachjam/_case_histories.html:5
+#: templates/peachjam/layouts/document_detail.html:263
+#: views/generic_views.py:148
 msgid "Date"
 msgstr "Date"
 
-#: forms.py:96
+#: forms.py:128
 msgid "(Newest first)"
 msgstr "(Le plus récent d'abord)"
 
-#: forms.py:97
+#: forms.py:129
 msgid "(Oldest first)"
 msgstr "(le plus ancien en premier)"
 
-#: forms.py:246
+#: forms.py:291
 msgid "Document problem reported"
 msgstr "Problème de document signalé"
 
 #: models/article.py:21 models/core_document_model.py:338
-#: models/judgment.py:525
+#: models/judgment.py:527
 msgid "date"
 msgstr "date"
 
@@ -200,7 +205,7 @@ msgstr "profils des utilisateurs"
 msgid "Author"
 msgstr "Auteur"
 
-#: models/author.py:8 views/generic_views.py:191
+#: models/author.py:8
 msgid "Authors"
 msgstr "Auteurs"
 
@@ -234,7 +239,8 @@ msgstr "auteurs"
 #: models/citations.py:19 models/core_document_model.py:768
 #: models/core_document_model.py:794 models/core_document_model.py:880
 #: models/core_document_model.py:909 models/core_document_model.py:935
-#: models/judgment.py:464 models/taxonomies.py:52
+#: models/judgment.py:466 models/taxonomies.py:52
+#: templates/peachjam/_document_count.html:8 views/generic_views.py:56
 msgid "document"
 msgstr "document"
 
@@ -579,11 +585,11 @@ msgstr "numéro de tome"
 msgid "special"
 msgstr "spécial"
 
-#: models/gazette.py:29
+#: models/gazette.py:29 views/gazette.py:96 views/gazette.py:169
 msgid "gazette"
 msgstr "Journal Officiel"
 
-#: models/gazette.py:30
+#: models/gazette.py:30 views/gazette.py:97 views/gazette.py:170
 msgid "gazettes"
 msgstr "journal officiel"
 
@@ -668,7 +674,7 @@ msgid "Judge"
 msgstr "Juge"
 
 #: models/judgment.py:31 templates/peachjam/_case_histories.html:8
-#: templates/peachjam/layouts/document_detail.html:243 views/courts.py:61
+#: templates/peachjam/layouts/document_detail.html:245
 msgid "Judges"
 msgstr "Juges"
 
@@ -680,7 +686,7 @@ msgstr "Résultat de la commande"
 msgid "order outcomes"
 msgstr "Résultats de la commande"
 
-#: models/judgment.py:70 models/judgment.py:519
+#: models/judgment.py:70 models/judgment.py:521
 msgid "outcome"
 msgstr "résultat"
 
@@ -688,7 +694,7 @@ msgstr "résultat"
 msgid "outcomes"
 msgstr "résultats"
 
-#: models/judgment.py:85 models/judgment.py:457
+#: models/judgment.py:85 models/judgment.py:459
 msgid "matter type"
 msgstr "type de matière"
 
@@ -713,7 +719,7 @@ msgid "country"
 msgstr "Pays"
 
 #: models/judgment.py:152 models/judgment.py:177 models/judgment.py:241
-#: models/judgment.py:523
+#: models/judgment.py:525
 msgid "court"
 msgstr "cour"
 
@@ -738,6 +744,7 @@ msgid "court registries"
 msgstr "Registres judiciaires"
 
 #: models/judgment.py:212 models/judgment.py:228 models/judgment.py:320
+#: views/courts.py:44 views/judgment.py:25
 msgid "judgment"
 msgstr "jugement"
 
@@ -793,47 +800,47 @@ msgstr "Détails d'attribution automatique"
 msgid "Whether or not the system should assign the details"
 msgstr "Si le système doit ou non attribuer les détails"
 
-#: models/judgment.py:321
+#: models/judgment.py:321 views/courts.py:45 views/judgment.py:26
 msgid "judgments"
 msgstr "jugements"
 
-#: models/judgment.py:443
+#: models/judgment.py:445
 msgid "Full case number as printed on judgment"
 msgstr "Numéro complet du dossier tel qu'imprimé sur le jugement"
 
-#: models/judgment.py:447
+#: models/judgment.py:449
 msgid "Override for full case number string"
 msgstr "Remplacer pour la chaîne de numéro de cas complet"
 
-#: models/judgment.py:449
+#: models/judgment.py:451
 msgid "string"
 msgstr "chaîne de caractères"
 
-#: models/judgment.py:450
+#: models/judgment.py:452
 msgid "number"
 msgstr "nombre"
 
-#: models/judgment.py:451
+#: models/judgment.py:453
 msgid "year"
 msgstr "année"
 
-#: models/judgment.py:502
+#: models/judgment.py:504
 msgid "judgment work"
 msgstr "travail de jugement"
 
-#: models/judgment.py:512
+#: models/judgment.py:514
 msgid "historical judgment work"
 msgstr "travail de jugement historique"
 
-#: models/judgment.py:529
+#: models/judgment.py:531
 msgid "case history"
 msgstr "histoire de cas"
 
-#: models/judgment.py:530
+#: models/judgment.py:532
 msgid "case histories"
 msgstr "histoires de cas"
 
-#: models/judgment.py:537 templates/peachjam/layouts/document_detail.html:127
+#: models/judgment.py:539 templates/peachjam/layouts/document_detail.html:127
 msgid "Case history"
 msgstr "Histoire du cas"
 
@@ -877,12 +884,12 @@ msgstr "inverse du verbe"
 msgid "Reversed verbal form of the relationship"
 msgstr "Forme verbale inversée de la relation"
 
-#: models/relationships.py:17 models/relationships.py:48
-#: models/relationships.py:59
+#: models/relationships.py:17 models/relationships.py:51
+#: models/relationships.py:62
 msgid "predicate"
 msgstr "predicate"
 
-#: models/relationships.py:18 models/relationships.py:60
+#: models/relationships.py:18 models/relationships.py:63
 msgid "predicates"
 msgstr "prédicats"
 
@@ -894,11 +901,17 @@ msgstr "travail du sujet"
 msgid "subject target ID"
 msgstr "ID cible du sujet"
 
-#: models/relationships.py:41
+#: models/relationships.py:36
+#, fuzzy
+#| msgid "target selectors"
+msgid "subject selectors"
+msgstr "sélecteurs de cible"
+
+#: models/relationships.py:44
 msgid "object work"
 msgstr "travail d'objet"
 
-#: models/relationships.py:44
+#: models/relationships.py:47
 msgid "object target ID"
 msgstr "ID de la cible de l'objet"
 
@@ -1030,19 +1043,19 @@ msgstr "sujet du document"
 msgid "document topics"
 msgstr "sujets du document"
 
-#: settings.py:251
+#: settings.py:254
 msgid "English"
 msgstr "Anglais"
 
-#: settings.py:252
+#: settings.py:255
 msgid "French"
 msgstr "Français"
 
-#: settings.py:253
+#: settings.py:256
 msgid "Portuguese"
 msgstr "Portugais"
 
-#: settings.py:254
+#: settings.py:257
 msgid "Swahili"
 msgstr "Swahili"
 
@@ -1095,10 +1108,12 @@ msgstr "Mot de passe oublié ?"
 
 #: templates/account/login.html:76
 #, python-format
-msgid "\n"
+msgid ""
+"\n"
 "            Log in with %(provider.name)s\n"
 "          "
-msgstr "\n"
+msgstr ""
+"\n"
 "            Connectez-vous à %(provider.name)s\n"
 "          "
 
@@ -1202,12 +1217,12 @@ msgid "Case"
 msgstr "Cas"
 
 #: templates/peachjam/_case_histories.html:7
-#: templates/peachjam/judgment_detail.html:55
+#: templates/peachjam/judgment_detail.html:56
 msgid "Court"
 msgstr "Cour"
 
 #: templates/peachjam/_case_histories.html:9
-#: templates/peachjam/judgment_detail.html:72
+#: templates/peachjam/judgment_detail.html:73
 msgid "Outcome"
 msgstr "Résultat"
 
@@ -1268,29 +1283,28 @@ msgstr "Table des matières"
 msgid "Pages"
 msgstr "Pages"
 
-#: templates/peachjam/_document_content.html:141
+#: templates/peachjam/_document_content.html:142
 msgid "Loading PDF..."
 msgstr "Chargement du PDF..."
 
-#: templates/peachjam/_document_content.html:151
+#: templates/peachjam/_document_content.html:152
 #, python-format
 msgid "This document is %(filesize)s. Do you want to load it?"
 msgstr "Ce document est %(filesize)s. Voulez-vous le charger ?"
 
-#: templates/peachjam/_document_content.html:155
+#: templates/peachjam/_document_content.html:156
 msgid "Load document"
 msgstr "Charger le document"
 
-#: templates/peachjam/_document_content.html:164
+#: templates/peachjam/_document_content.html:165
 msgid "To the top"
 msgstr "En haut"
 
-#: templates/peachjam/_document_count.html:3
-#, python-format
-msgid "%(n_docs)s document"
-msgid_plural "%(n_docs)s documents"
-msgstr[0] "%(n_docs)s Document"
-msgstr[1] "%(n_docs)s Documents"
+#: templates/peachjam/_document_count.html:14 views/generic_views.py:57
+#, fuzzy
+#| msgid "document"
+msgid "documents"
+msgstr "document"
 
 #: templates/peachjam/_document_detail_toolbar.html:4
 msgid "Document toolbar"
@@ -1303,7 +1317,7 @@ msgstr "Modifier"
 #: templates/peachjam/_document_detail_toolbar.html:17
 #: templates/peachjam/_document_detail_toolbar.html:31
 #: templates/peachjam/article_detail.html:61
-#: templates/peachjam/layouts/document_detail.html:346
+#: templates/peachjam/layouts/document_detail.html:348
 msgid "Download"
 msgstr "Télécharger"
 
@@ -1324,7 +1338,7 @@ msgstr "Signaler un problème"
 msgid "Jurisdiction"
 msgstr "Juridiction"
 
-#: templates/peachjam/_document_table.html:49
+#: templates/peachjam/_document_table.html:51
 msgid "No documents found."
 msgstr "Aucun document trouvé."
 
@@ -1337,17 +1351,33 @@ msgstr "Filtres"
 msgid "Close"
 msgstr "Fermer"
 
-#: templates/peachjam/_document_table_form.html:103
-#: templates/peachjam/_document_table_form.html:104
+#: templates/peachjam/_document_table_form.html:42
+#, fuzzy
+#| msgid "Collapse all"
+msgid "Clear all"
+msgstr "Réduire tout"
+
+#: templates/peachjam/_document_table_form.html:56
+msgid "Clear"
+msgstr ""
+
+#: templates/peachjam/_document_table_form.html:116
+#: templates/peachjam/_document_table_form.html:117
 msgid "Filter documents"
 msgstr "Filtrer les documents"
 
-#: templates/peachjam/_document_table_form.html:111
+#: templates/peachjam/_document_table_form.html:124
 msgid "Sort by"
 msgstr "Trier par"
 
+#: templates/peachjam/_document_table_form.html:134
+#, fuzzy
+#| msgid "Filters"
+msgid "Filter"
+msgstr "Filtres"
+
 #: templates/peachjam/_document_table_row.html:25
-#: templates/peachjam/layouts/document_detail.html:297
+#: templates/peachjam/layouts/document_detail.html:299
 msgid "Multiple languages available"
 msgstr "Plusieurs langues disponibles"
 
@@ -1392,6 +1422,12 @@ msgstr "Précédent"
 msgid "Next"
 msgstr "Suivant"
 
+#: templates/peachjam/_quick_search.html:17
+#, fuzzy
+#| msgid "Advanced"
+msgid "Advanced search"
+msgstr "Avancé"
+
 #: templates/peachjam/_ratifications.html:5
 msgid "Source"
 msgstr "Source"
@@ -1416,13 +1452,13 @@ msgstr "Date de ratification"
 msgid "Deposit Date"
 msgstr "Date de dépôt"
 
-#: templates/peachjam/_recent_document_list.html:18
+#: templates/peachjam/_recent_document_list.html:19
 msgid "No recent documents."
 msgstr "Aucun document récent."
 
 #: templates/peachjam/_related_documents.html:4
 #: templates/peachjam/layouts/document_detail.html:97
-#: templates/peachjam/layouts/document_detail.html:366
+#: templates/peachjam/layouts/document_detail.html:368
 msgid "Related documents"
 msgstr "Documents connexes"
 
@@ -1734,7 +1770,7 @@ msgstr "Livres"
 #: templates/peachjam/court_detail.html:9
 #: templates/peachjam/judgment_detail.html:7
 #: templates/peachjam/judgment_list.html:4
-#: templates/peachjam/judgment_list.html:11 views/courts.py:27
+#: templates/peachjam/judgment_list.html:11 views/courts.py:31
 msgid "Judgments"
 msgstr "Jugements"
 
@@ -1743,35 +1779,17 @@ msgstr "Jugements"
 #: templates/peachjam/gazette_list.html:14
 #: templates/peachjam/gazette_list.html:33
 #: templates/peachjam/gazette_year.html:4
-#: templates/peachjam/gazette_year.html:13
-#: templates/peachjam/gazette_year.html:32
+#: templates/peachjam/gazette_year.html:11
+#: templates/peachjam/gazette_year.html:31
 msgid "Gazettes"
 msgstr "Journaux officiels"
 
-#: templates/peachjam/gazette_list.html:44
-#, python-format
-msgid "%(counter)s gazette"
-msgid_plural "%(counter)s gazettes"
-msgstr[0] "%(counter)s journal officiel"
-msgstr[1] "%(counter)s Journal Officiel"
-
-#: templates/peachjam/gazette_list.html:68
+#: templates/peachjam/gazette_list.html:63
 #, python-format
 msgid "%(num_gazettes)s gazette"
 msgid_plural "%(num_gazettes)s gazettes"
 msgstr[0] "%(num_gazettes)s journal officiel"
 msgstr[1] "%(num_gazettes)s Journal Officiel"
-
-#: templates/peachjam/gazette_year.html:38
-#, python-format
-msgid "%(doc_count)s gazette"
-msgid_plural "%(doc_count)s gazettes"
-msgstr[0] "%(doc_count)s journal officiel"
-msgstr[1] "%(doc_count)s Journal Officiel"
-
-#: templates/peachjam/gazette_year.html:77
-msgid "Special"
-msgstr "Spécial"
 
 #: templates/peachjam/generic_document_list.html:4
 #: templates/peachjam/generic_document_list.html:7
@@ -1793,43 +1811,43 @@ msgstr "Référence médiatique neutre"
 
 #: templates/peachjam/judgment_detail.html:37
 #: templates/peachjam/layouts/document_detail.html:184
-#: templates/peachjam/layouts/document_detail.html:211
+#: templates/peachjam/layouts/document_detail.html:212
 msgid "Copy to clipboard"
 msgstr "Copier dans le presse-papiers"
 
-#: templates/peachjam/judgment_detail.html:40
-#: templates/peachjam/layouts/document_detail.html:187
-#: templates/peachjam/layouts/document_detail.html:214
+#: templates/peachjam/judgment_detail.html:41
+#: templates/peachjam/layouts/document_detail.html:188
+#: templates/peachjam/layouts/document_detail.html:216
 msgid "Copied!"
 msgstr "Copié !"
 
-#: templates/peachjam/judgment_detail.html:41
-#: templates/peachjam/layouts/document_detail.html:188
-#: templates/peachjam/layouts/document_detail.html:215
+#: templates/peachjam/judgment_detail.html:42
+#: templates/peachjam/layouts/document_detail.html:189
+#: templates/peachjam/layouts/document_detail.html:217
 msgid "Copy"
 msgstr "Copie"
 
-#: templates/peachjam/judgment_detail.html:47
+#: templates/peachjam/judgment_detail.html:48
 msgid "Hearing date"
 msgstr "Date de l'audience"
 
-#: templates/peachjam/judgment_detail.html:85
+#: templates/peachjam/judgment_detail.html:86
 msgid "Case number"
 msgstr "Numéro de cas"
 
-#: templates/peachjam/judgment_detail.html:98 views/courts.py:97
+#: templates/peachjam/judgment_detail.html:99 views/courts.py:102
 msgid "Attorneys"
 msgstr "Avocats"
 
-#: templates/peachjam/judgment_detail.html:112
+#: templates/peachjam/judgment_detail.html:113
 msgid "Flynote"
 msgstr "Mot-clé"
 
-#: templates/peachjam/judgment_detail.html:122
+#: templates/peachjam/judgment_detail.html:123
 msgid "Order"
 msgstr "Commande"
 
-#: templates/peachjam/judgment_detail.html:132
+#: templates/peachjam/judgment_detail.html:133
 msgid "Case summary"
 msgstr "Résumé du cas"
 
@@ -1853,31 +1871,31 @@ msgstr "Citation"
 msgid "Ratifications"
 msgstr "Ratifications"
 
-#: templates/peachjam/layouts/document_detail.html:178
+#: templates/peachjam/layouts/document_detail.html:178 views/courts.py:42
 msgid "Citation"
 msgstr "Référence"
 
-#: templates/peachjam/layouts/document_detail.html:198
+#: templates/peachjam/layouts/document_detail.html:199
 msgid "Law report citations"
 msgstr "Citations de rapports de droit"
 
-#: templates/peachjam/layouts/document_detail.html:202
+#: templates/peachjam/layouts/document_detail.html:203
 msgid "Alternative names"
 msgstr "Noms alternatifs"
 
-#: templates/peachjam/layouts/document_detail.html:257
+#: templates/peachjam/layouts/document_detail.html:259 views/courts.py:43
 msgid "Judgment date"
 msgstr "Date du jugement"
 
-#: templates/peachjam/layouts/document_detail.html:293
+#: templates/peachjam/layouts/document_detail.html:295
 msgid "Language"
 msgstr "Langue"
 
-#: templates/peachjam/layouts/document_detail.html:333
+#: templates/peachjam/layouts/document_detail.html:335
 msgid "Type"
 msgstr "Type"
 
-#: templates/peachjam/layouts/document_detail.html:371
+#: templates/peachjam/layouts/document_detail.html:373
 #, python-format
 msgid "%(n_relationships)s related documents"
 msgstr "%(n_relationships)s documents connexes"
@@ -1924,29 +1942,41 @@ msgstr "Termes et conditions d'utilisation"
 msgid "Navigation"
 msgstr "Navigation"
 
-#: views/courts.py:79
+#: views/courts.py:84
 msgid "Outcomes"
 msgstr "Résultats"
 
-#: views/courts.py:105 views/generic_views.py:209
+#: views/courts.py:120 views/generic_views.py:213
+msgid "Topics"
+msgstr "Sujets"
+
+#: views/courts.py:128 views/generic_views.py:219
 msgid "Alphabet"
 msgstr "Alphabet"
 
-#: views/courts.py:272
+#: views/courts.py:267
 msgid "Courts"
 msgstr "Cours"
 
-#: views/generic_views.py:185
+#: views/gazette.py:160
+#, fuzzy
+#| msgid "Special"
+msgid "Special issue"
+msgstr "Spécial"
+
+#: views/gazette.py:187
+#, fuzzy
+#| msgid "sub publication"
+msgid "Sub-publication"
+msgstr "sous-publication"
+
+#: views/generic_views.py:195
 msgid "Years"
 msgstr "Années"
 
-#: views/generic_views.py:197
+#: views/generic_views.py:207
 msgid "Document nature"
 msgstr "Type de document"
-
-#: views/generic_views.py:203
-msgid "Topics"
-msgstr "Sujets"
 
 #: views/legislation.py:61
 #, python-format
@@ -1992,3 +2022,20 @@ msgstr "C'est la version de ce %(friendly_type)s telle qu'elle était de %(date_
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Il existe des amendements en suspens qui n’ont pas encore été appliqués. Voir l'onglet Historique pour plus d'informations."
 
+#, python-format
+#~ msgid "%(n_docs)s document"
+#~ msgid_plural "%(n_docs)s documents"
+#~ msgstr[0] "%(n_docs)s Document"
+#~ msgstr[1] "%(n_docs)s Documents"
+
+#, python-format
+#~ msgid "%(counter)s gazette"
+#~ msgid_plural "%(counter)s gazettes"
+#~ msgstr[0] "%(counter)s journal officiel"
+#~ msgstr[1] "%(counter)s Journal Officiel"
+
+#, python-format
+#~ msgid "%(doc_count)s gazette"
+#~ msgid_plural "%(doc_count)s gazettes"
+#~ msgstr[0] "%(doc_count)s journal officiel"
+#~ msgstr[1] "%(doc_count)s Journal Officiel"

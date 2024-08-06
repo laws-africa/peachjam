@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 09:40+0200\n"
+"POT-Creation-Date: 2024-08-06 10:12+0200\n"
 "PO-Revision-Date: 2024-07-19 09:44\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -17,98 +17,86 @@ msgstr ""
 "X-Crowdin-File: /main/liiweb/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 103\n"
 
-#: templates/liiweb/_donate_call_to_action.html:7
-#, python-format
-msgid "\n"
-"            Donate to %(APP_NAME)s\n"
-"          "
-msgstr "\n"
-"            Faites un don à %(APP_NAME)s\n"
-"          "
-
-#: templates/liiweb/_donate_call_to_action.html:12
-#, python-format
-msgid "\n"
-"            %(APP_NAME)s is an independent, self-funded organisation and needs your support.\n"
-"          "
-msgstr "\n"
-"            %(APP_NAME)s est une organisation indépendante et autofinancée et a besoin de votre soutien.\n"
-"          "
-
-#: templates/liiweb/_donate_call_to_action.html:18
-#: templates/liiweb/donate.html:4
-msgid "Donate"
-msgstr "Faire un don"
-
+#: templates/liiweb/_donate_call_to_action.html:6
 #: templates/liiweb/donate.html:8
 #, python-format
 msgid "Donate to %(APP_NAME)s"
 msgstr "Faire un don à %(APP_NAME)s"
 
-#: templates/liiweb/home.html:4
-msgid "Home"
-msgstr "Accueil"
+#: templates/liiweb/_donate_call_to_action.html:8
+#, python-format
+msgid "%(APP_NAME)s relies on donations to keep our platform free. Help us maintain and expand our resources. Donate today and support."
+msgstr ""
 
-#: templates/liiweb/home.html:35 templates/liiweb/home.html:36
+#: templates/liiweb/_donate_call_to_action.html:14
+#: templates/liiweb/donate.html:4
+msgid "Donate"
+msgstr "Faire un don"
+
+#: templates/liiweb/_hero_search.html:7 templates/liiweb/_hero_search.html:8
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr "Rechercher dans %(APP_NAME)s"
 
-#: templates/liiweb/home.html:42
+#: templates/liiweb/_hero_search.html:13
 msgid "Search"
 msgstr "Recherche"
 
-#: templates/liiweb/home.html:45
+#: templates/liiweb/_hero_search.html:16
 msgid "Advanced search"
 msgstr "Recherche avancée"
 
-#: templates/liiweb/home.html:84
+#: templates/liiweb/home.html:4
+msgid "Home"
+msgstr "Accueil"
+
+#: templates/liiweb/home.html:75
 msgid "Recent Judgments"
 msgstr "Jugements récents"
 
-#: templates/liiweb/home.html:85
+#: templates/liiweb/home.html:76
 msgid "View more judgments"
 msgstr "Voir plus de jugements"
 
-#: templates/liiweb/home.html:89
+#: templates/liiweb/home.html:82
 msgid "Recent Legislation"
 msgstr "Législation récente"
 
-#: templates/liiweb/home.html:90
+#: templates/liiweb/home.html:83
 msgid "View more legislation"
 msgstr "Voir plus de législation"
 
-#: templates/liiweb/home.html:95
+#: templates/liiweb/home.html:90
 msgid "Recent Gazettes"
 msgstr "Gazettes récentes"
 
-#: templates/liiweb/home.html:96
+#: templates/liiweb/home.html:91
 msgid "View more gazettes"
 msgstr "Voir plus de gazettes"
 
-#: templates/liiweb/home.html:107
+#: templates/liiweb/home.html:103
 msgid "Courts"
 msgstr "Cours"
 
-#: templates/liiweb/home.html:115
+#: templates/liiweb/home.html:111
 msgid "Collections"
 msgstr "Collections"
 
-#: templates/liiweb/home.html:131
+#: templates/liiweb/home.html:127
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr "Utilisez %(APP_NAME)s lorsque vous êtes hors ligne"
 
-#: templates/liiweb/home.html:133
+#: templates/liiweb/home.html:129
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr "Pocket Law est une copie hors ligne de la jurisprudence, de la législation et d'autres documents juridiques de %(APP_NAME)s."
 
-#: templates/liiweb/home.html:148
+#: templates/liiweb/home.html:144
 msgid "Latest Articles"
 msgstr "Derniers articles"
 
-#: templates/liiweb/home.html:150
+#: templates/liiweb/home.html:146
 msgid "View more articles"
 msgstr "Voir plus d'articles"
 
@@ -117,29 +105,29 @@ msgstr "Voir plus d'articles"
 msgid "Legislation"
 msgstr "Législation"
 
-#: templates/liiweb/legislation_list.html:15
+#: templates/liiweb/legislation_list.html:11
+msgid "You are viewing repealed legislation which is no longer in force."
+msgstr "Vous consultez une législation abrogée qui n'est plus en vigueur."
+
+#: templates/liiweb/legislation_list.html:20
 msgid "Current legislation"
 msgstr "Législation en vigueur"
 
-#: templates/liiweb/legislation_list.html:23
+#: templates/liiweb/legislation_list.html:28
 msgid "Recent legislation"
 msgstr "Législation récente"
 
-#: templates/liiweb/legislation_list.html:37
+#: templates/liiweb/legislation_list.html:42
 msgid "Uncommenced legislation"
 msgstr "Législation non encore adoptée"
 
-#: templates/liiweb/legislation_list.html:45
+#: templates/liiweb/legislation_list.html:50
 msgid "Repealed legislation"
 msgstr "Législation abrogée"
 
-#: templates/liiweb/legislation_list.html:52
+#: templates/liiweb/legislation_list.html:57
 msgid "All legislation"
 msgstr "Toutes les lois"
-
-#: templates/liiweb/legislation_list.html:57
-msgid "You are viewing repealed legislation which is no longer in force."
-msgstr "Vous consultez une législation abrogée qui n'est plus en vigueur."
 
 #: templates/liiweb/pocketlaw.html:7
 msgid "Pocket Law"
@@ -187,3 +175,22 @@ msgstr "Jugements"
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Législation"
 
+#, python-format
+#~ msgid ""
+#~ "\n"
+#~ "            Donate to %(APP_NAME)s\n"
+#~ "          "
+#~ msgstr ""
+#~ "\n"
+#~ "            Faites un don à %(APP_NAME)s\n"
+#~ "          "
+
+#, python-format
+#~ msgid ""
+#~ "\n"
+#~ "            %(APP_NAME)s is an independent, self-funded organisation and needs your support.\n"
+#~ "          "
+#~ msgstr ""
+#~ "\n"
+#~ "            %(APP_NAME)s est une organisation indépendante et autofinancée et a besoin de votre soutien.\n"
+#~ "          "

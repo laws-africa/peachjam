@@ -112,7 +112,7 @@ export default {
         label: self.$t('Citation')
       }, {
         field: 'judges_text',
-        label: self.$t('Judicial officers')
+        label: self.$t('Judges')
       }, {
         field: 'case_number',
         label: self.$t('Case number')

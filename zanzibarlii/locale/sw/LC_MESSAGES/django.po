@@ -81,4 +81,3 @@ msgstr "Wasiliana nasi"
 #: templates/peachjam/about.html:31
 msgid "Contact us on <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> for more information."
 msgstr "Wasiliana nasi kwa <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> kwa maelezo zaidi."
-
