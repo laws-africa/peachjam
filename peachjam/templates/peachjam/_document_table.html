@@ -10,7 +10,7 @@
           <div class="align-items-center"
                role="button"
                data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
-            {% trans 'Title' %}
+            {{ doc_table_title_label|default_if_none:"Title" }}
             <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-down{% endif %} {% if form.sort.value == "-title" %}bi-sort-up{% endif %}"></i>
           </div>
         </th>
@@ -29,7 +29,7 @@
           <div class="align-items-center"
                role="button"
                data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
-            {% trans 'Date' %}
+            {{ doc_table_date_label|default_if_none:"Date" }}
             <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"></i>
           </div>
         </th>

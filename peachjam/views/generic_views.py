@@ -144,6 +144,8 @@ class FilteredDocumentListView(DocumentListView):
             if context["paginator"]
             else context["object_list"].count()
         )
+        context["doc_table_title_label"] = _("Title")
+        context["doc_table_date_label"] = _("Date")
 
         return context
 

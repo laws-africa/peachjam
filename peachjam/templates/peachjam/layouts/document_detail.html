@@ -183,7 +183,8 @@
                                     class="btn btn-outline-secondary btn-xs ms-2"
                                     title="{% trans "Copy to clipboard" %}"
                                     data-component="CopyToClipboard"
-                                    data-value="{{ document.citation }}"
+                                    data-value='{{ document.citation }}'
+                                    data-value-html='<a href="https://{{ request.site.domain }}{{ document.get_absolute_url }}">{{ document.citation }}</a>'
                                     data-confirmation="{% trans "Copied!" %}">
                               {% trans "Copy" %}
                             </button>
@@ -210,7 +211,8 @@
                                           class="btn btn-outline-secondary btn-xs ms-2"
                                           title="{% trans "Copy to clipboard" %}"
                                           data-component="CopyToClipboard"
-                                          data-value="{{ alternative_name.title }}"
+                                          data-value='{{ alternative_name.title }}'
+                                          data-value-html='<a href="https://{{ request.site.domain }}{{ document.get_absolute_url }}">{{ alternative_name.title }}</a>'
                                           data-confirmation="{% trans "Copied!" %}">
                                     {% trans "Copy" %}
                                   </button>

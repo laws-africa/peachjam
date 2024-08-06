@@ -431,6 +431,8 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "content": None,
         "court": None,
         "alternative_names": {"boost": 4},
+        "case_number": None,
+        "case_name": None,
     }
 
     faceted_search_fields = {
