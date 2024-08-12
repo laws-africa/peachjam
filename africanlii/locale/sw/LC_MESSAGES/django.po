@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-06 10:12+0200\n"
-"PO-Revision-Date: 2024-07-19 09:44\n"
+"PO-Revision-Date: 2024-08-06 08:54\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -460,15 +460,14 @@ msgid "Search regional and national African legal information."
 msgstr "Tafuta taarifa za kisheria za kikanda na kitaifa za Afrika."
 
 #: views/taxonomy.py:126
-#, fuzzy
-#| msgid "ratifications"
 msgid "Judrisdictions"
-msgstr "uridhiaji"
+msgstr "Hukumu"
 
 #: views/taxonomy.py:132
 msgid "Years"
-msgstr ""
+msgstr "Miaka"
 
 #: views/taxonomy.py:140
 msgid "Alphabet"
-msgstr ""
+msgstr "Alfabeti"
+
