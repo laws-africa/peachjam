@@ -62,8 +62,7 @@
     {% block head-css %}{% endblock %}
     {% block head-js %}{% endblock %}
   </head>
-  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-        class="{% block body-class %}{% endblock %}">
+  <body class="{% block body-class %}{% endblock %}">
     {% block header %}{% endblock %}
     {% block body-content %}{% endblock %}
     {% block footer %}{% endblock %}

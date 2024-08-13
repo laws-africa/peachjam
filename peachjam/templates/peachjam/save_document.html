@@ -1,20 +1,21 @@
-<div class="modal-dialog" id="testing">
+{% load i18n %}
+<div class="modal-dialog">
   <div class="modal-content">
     <div class="modal-header">
-      <p class="h5 modal-title">Save document</p>
+      <p class="h5 modal-title">{% trans 'Save document' %}</p>
       <button type="button"
               class="btn-close"
               data-bs-dismiss="modal"
               aria-label="Close"></button>
     </div>
     <div class="modal-body">
-      {% if updated %}<div class="alert alert-success">{{ saved_document }}</div>{% endif %}
+      {% if updated %}<div class="alert alert-success">Document has been saved</div>{% endif %}
       <form id="save_document-form"
             hx-post="{% url 'save_document' %}"
             hx-target="#saveDocument">
+        {% csrf_token %}
         <p class="h5">{{ document }}</p>
         {{ save_document_form.document }}
-        {{ save_document_form.user_profile }}
         <label class="form-label" for="{{ save_document_form.folder.id_for_label }}">
           {{ save_document_form.folder.label }}
         </label>
@@ -34,11 +35,11 @@
                 data-bs-target="#addFolder"
                 aria-expanded="false"
                 aria-controls="addFolder">
-          New folder...
+          {% trans 'New folder' %}...
         </button>
         <div class="collapse" id="addFolder">
           <label class="form-label"
-                 for="{{ save_document_form.new_folder.id_for_label }}">New folder name</label>
+                 for="{{ save_document_form.new_folder.id_for_label }}">{% trans 'New folder name' %}</label>
           <input class="form-control"
                  id="{{ save_document_form.new_folder.id_for_label }}"
                  name="{{ save_document_form.new_folder.name }}"
@@ -46,7 +47,7 @@
         </div>
         <p class="mt-3">
           <a class="icon-link icon-link-hover link-underline link-underline-opacity-0"
-             href="{% url 'saved_document_list' %}">View saved documents</a>
+             href="{% url 'saved_document_list' %}">{% trans 'View saved documents' %}</a>
         </p>
       </form>
     </div>
@@ -58,16 +59,20 @@
               hx-include="#save_document-form"
               hx-delete="{% url 'save_document' %}?id={{ saved_document.id }}"
               hx-confirm="Are you sure you want to unsave this document?">
-        Unsave
+        {% trans 'Unsave' %}
       </button>
       <div>
         <button type="button"
                 class="btn btn-outline-secondary btn-shrink-sm ms-2"
-                data-bs-dismiss="modal">Close</button>
+                data-bs-dismiss="modal">
+          {% trans 'Close' %}
+        </button>
         <button class="btn btn-primary ms-1"
                 type="submit"
                 form="save_document-form"
-                data-bs-dismiss="modal">Save</button>
+                data-bs-dismiss="modal">
+          {% trans 'Save' %}
+        </button>
       </div>
     </div>
   </div>
@@ -83,10 +88,10 @@
         hx-include="#save_document-form"
         hx-swap-oob="true">
   {% if deleted %}
-    Save document
+    {% trans 'Save document' %}
   {% elif saved_document.folder %}
-    <i class="bi bi-star-fill"></i> Saved to {{ saved_document.folder }}
+    <i class="bi bi-star-fill"></i> {% trans 'Saved to' %} {{ saved_document.folder }}
   {% else %}
-    <i class="bi bi-star-fill"></i> Saved
+    <i class="bi bi-star-fill"></i> {% trans 'Saved' %}
   {% endif %}
 </button>

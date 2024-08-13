@@ -48,4 +48,4 @@ class SavedDocument(models.Model):
         message = f"{self.document.title} has been saved"
         if self.folder:
             message += f" to the '{self.folder.name}' folder"
-        return _("Document has been saved")
+        return message

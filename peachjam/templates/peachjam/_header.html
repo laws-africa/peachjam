@@ -58,9 +58,7 @@
                       <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
                     {% endif %}
                     <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
-                    <a class="dropdown-item"
-                       href="{% url 'saved_document_list' %}"
-                       target="_blank">{% trans 'Saved documents' %}</a>
+                    <a class="dropdown-item" href="{% url 'saved_document_list' %}">{% trans 'Saved documents' %}</a>
                   </li>
                 </ul>
               </li>

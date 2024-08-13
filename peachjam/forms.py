@@ -304,9 +304,7 @@ class DocumentProblemForm(forms.Form):
 class SaveDocumentForm(forms.ModelForm):
     folder = forms.ModelChoiceField(queryset=Folder.objects, required=False)
     new_folder = forms.CharField(max_length=255, required=False)
-    user_profile = forms.ModelChoiceField(
-        queryset=UserProfile.objects, widget=forms.HiddenInput()
-    )
+    user_profile = forms.ModelChoiceField(queryset=UserProfile.objects, required=False)
     document = forms.ModelChoiceField(
         queryset=CoreDocument.objects, widget=forms.HiddenInput()
     )
@@ -317,14 +315,15 @@ class SaveDocumentForm(forms.ModelForm):
 
     def __init__(self, *args, document=None, user_profile=None, **kwargs):
         super().__init__(*args, **kwargs)
-        if document is not None and user_profile is not None:
+        self.user_profile = user_profile
+        if document is not None:
             self.document = document
-            self.user_profile = user_profile
             self.fields["document"].initial = self.document
             self.fields["user_profile"].initial = self.user_profile
             self.fields["folder"].queryset = user_profile.folders.all()
 
     def clean(self):
+        self.cleaned_data["user_profile"] = self.user_profile
         if self.cleaned_data.get("new_folder"):
             folder, _ = Folder.objects.get_or_create(
                 name=self.cleaned_data["new_folder"],
@@ -332,26 +331,6 @@ class SaveDocumentForm(forms.ModelForm):
             )
             self.cleaned_data["folder"] = folder
         return self.cleaned_data
-
-    def save(self, commit=True):
-        return super().save()
-
-
-class FolderForm(forms.ModelForm):
-    name = forms.CharField(max_length=255, required=True)
-    user_profile = forms.ModelChoiceField(
-        queryset=UserProfile.objects, widget=forms.HiddenInput()
-    )
-
-    class Meta:
-        model = Folder
-        fields = "__all__"
-
-    def __init__(self, *args, user_profile=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        if user_profile is not None:
-            self.user_profile = user_profile
-            self.fields["user_profile"].initial = self.user_profile
 
     def save(self, commit=True):
         return super().save()

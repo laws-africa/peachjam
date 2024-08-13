@@ -78,17 +78,18 @@ class SaveDocumentView(PermissionRequiredMixin, TemplateView):
 
     def post(self, request: HttpRequest):
         post_data = request.POST
+        user_profile = get_object_or_404(UserProfile, user=self.request.user)
         instance = SavedDocument.objects.filter(
             document=post_data.get("document"),
-            user_profile=post_data.get("user_profile"),
+            user_profile=user_profile,
         ).first()
-        form = SaveDocumentForm(post_data, instance=instance)
+        form = SaveDocumentForm(post_data, user_profile=user_profile, instance=instance)
         context = self.get_context_data()
         if form.is_valid():
             instance = form.save()
             form = SaveDocumentForm(
                 document=instance.document,
-                user_profile=instance.user_profile,
+                user_profile=user_profile,
                 instance=instance,
             )
             return self.render_to_response(

@@ -1,6 +1,6 @@
 <template>
   <div class="modal-dialog">
-    <div id="documentDetailModal" class="modal-content">
+    <div class="modal-content">
       <div class="modal-header">
         <h5 id="documentProblemModalTitle" class="modal-title">
           {{ $t('Is there something wrong with this document?') }}
