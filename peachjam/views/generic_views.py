@@ -52,7 +52,11 @@ class DocumentListView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         return super().get_context_data(
-            doc_table_show_jurisdiction=True, *args, **kwargs
+            doc_table_show_jurisdiction=True,
+            doc_count_noun=_("document"),
+            doc_count_noun_plural=_("documents"),
+            *args,
+            **kwargs,
         )
 
     def group_documents(self, documents, group_by):
@@ -135,7 +139,13 @@ class FilteredDocumentListView(DocumentListView):
 
         self.add_facets(context)
         self.show_facet_clear_all(context)
-        context["doc_count"] = context["paginator"].count
+        context["doc_count"] = (
+            context["paginator"].count
+            if context["paginator"]
+            else context["object_list"].count()
+        )
+        context["doc_table_title_label"] = _("Title")
+        context["doc_table_date_label"] = _("Date")
 
         return context
 
@@ -415,3 +425,31 @@ class CSRFTokenView(View):
 
     def get(self, request, *args, **kwargs):
         return HttpResponse(get_token(request), content_type="text/plain")
+
+
+class YearMixin:
+    @property
+    def year(self):
+        return self.kwargs["year"]
+
+    def page_title(self):
+        return f"{super().page_title()} - {self.year}"
+
+    def get_base_queryset(self, exclude=None):
+        qs = super().get_base_queryset()
+        if exclude is None:
+            exclude = []
+        if "year" not in exclude:
+            qs = qs.filter(date__year=self.kwargs["year"])
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["year"] = self.year
+        self.populate_months(context)
+        return context
+
+    def populate_months(self, context):
+        context["months"] = self.get_base_queryset(exclude=["month"]).dates(
+            "date", "month", order="ASC"
+        )

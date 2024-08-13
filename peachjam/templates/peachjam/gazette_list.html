@@ -36,20 +36,15 @@
           {% trans 'Gazettes' %}
         </h1>
       {% endblock %}
-      {% include 'peachjam/_quick_search.html' %}
-      {% block localities %}
-        {% if localities %}
-          {% include 'peachjam/_gazette_localities.html' %}
-        {% endif %}
+      {% block count-and-search %}
+        {% block localities %}
+          {% if localities %}
+            {% include 'peachjam/_gazette_localities.html' %}
+          {% endif %}
+        {% endblock %}
+        {% include 'peachjam/_count_and_search.html' %}
       {% endblock %}
       {% if doc_count %}
-        <h4 class="text-muted my-3">
-          {% blocktrans trimmed count counter=doc_count %}
-            {{ counter }} gazette
-          {% plural %}
-            {{ counter }} gazettes
-          {% endblocktrans %}
-        </h4>
         {% block years-list %}
           <div class="row mt-5">
             {% for year in years %}

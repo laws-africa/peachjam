@@ -74,7 +74,8 @@ class SearchableDocument(Document):
     case_summary = fields.TextField()
     flynote = fields.TextField()
     order = fields.TextField()
-    judges = fields.KeywordField(attr="judge.name")
+    judges = fields.KeywordField()
+    judges_text = fields.TextField()
     attorneys = fields.KeywordField(attr="attorney.name")
 
     registry = fields.KeywordField(attr="registry.name")
@@ -223,6 +224,9 @@ class SearchableDocument(Document):
     def prepare_judges(self, instance):
         if instance.doc_type == "judgment":
             return [j.name for j in instance.judges.all()]
+
+    def prepare_judges_text(self, instance):
+        return self.prepare_judges(instance)
 
     def prepare_attorneys(self, instance):
         if instance.doc_type == "judgment":

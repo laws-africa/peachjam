@@ -39,7 +39,8 @@
               class="btn btn-outline-secondary btn-xs ms-2"
               title="{% trans "Copy to clipboard" %}"
               data-component="CopyToClipboard"
-              data-value="{{ document.mnc }}"
+              data-value='{{ document.mnc }}'
+              data-value-html='<a href="https://{{ request.site.domain }}{{ document.get_absolute_url }}">{{ document.mnc }}</a>'
               data-confirmation="{% trans "Copied!" %}">
         {% trans "Copy" %}
       </button>

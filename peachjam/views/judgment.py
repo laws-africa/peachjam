@@ -1,3 +1,4 @@
+from django.utils.text import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.models import CourtClass, Judgment
@@ -6,7 +7,6 @@ from peachjam.views.generic_views import BaseDocumentDetailView
 
 
 class JudgmentListView(TemplateView):
-    model = Judgment
     template_name = "peachjam/judgment_list.html"
     navbar_link = "judgments"
 
@@ -14,11 +14,16 @@ class JudgmentListView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
-        context["recent_judgments"] = Judgment.objects.exclude(
-            published=False
-        ).order_by("-date")[:30]
+        context["recent_judgments"] = (
+            Judgment.objects.select_related("work")
+            .prefetch_related("labels")
+            .exclude(published=False)
+            .order_by("-date")[:30]
+        )
         context["doc_type"] = "Judgment"
         context["doc_count"] = Judgment.objects.filter(published=True).count()
+        context["doc_count_noun"] = _("judgment")
+        context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
         return context
 
