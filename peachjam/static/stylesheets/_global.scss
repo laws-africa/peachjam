@@ -180,6 +180,10 @@ html[data-user-agent*='pocketlaw'] .pocketlaw-hidden {
   overflow-y: auto;
 }
 
+a:visited {
+  color: $visited-link;
+}
+
 #skip-links li {
   list-style-type: none;
 }
