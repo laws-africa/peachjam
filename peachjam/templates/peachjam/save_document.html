@@ -57,6 +57,7 @@
               data-bs-dismiss="modal"
               hx-target="#saveDocument"
               hx-include="#save_document-form"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
               hx-delete="{% url 'save_document' %}?id={{ saved_document.id }}"
               hx-confirm="Are you sure you want to unsave this document?">
         {% trans 'Unsave' %}
