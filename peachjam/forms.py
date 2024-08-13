@@ -213,6 +213,19 @@ class BaseDocumentFilterForm(forms.Form):
         return queryset
 
 
+class GazetteFilterForm(BaseDocumentFilterForm):
+    sub_publications = PermissiveTypedListField(coerce=remove_nulls, required=False)
+
+    def filter_queryset(self, queryset, exclude=None, filter_q=False):
+        queryset = super().filter_queryset(queryset, exclude, filter_q)
+
+        sub_publications = self.cleaned_data.get("sub_publications", [])
+        if sub_publications and exclude != "sub_publications":
+            queryset = queryset.filter(sub_publication__in=sub_publications)
+
+        return queryset
+
+
 class AttachmentFormMixin:
     """Admin form for editing models that extend from AbstractAttachmentModel."""
 

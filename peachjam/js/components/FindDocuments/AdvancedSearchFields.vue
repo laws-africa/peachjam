@@ -104,12 +104,21 @@ export default {
       fields: [{
         field: 'all',
         label: self.$t('Any field')
-      },{
+      }, {
         field: 'title',
         label: self.$t('Title')
       }, {
-        field: 'judges',
+        field: 'citation',
+        label: self.$t('Citation')
+      }, {
+        field: 'judges_text',
         label: self.$t('Judges')
+      }, {
+        field: 'case_number',
+        label: self.$t('Case number')
+      }, {
+        field: 'case_name',
+        label: self.$t('Case parties')
       }, {
         field: 'case_summary',
         label: self.$t('Case summary')

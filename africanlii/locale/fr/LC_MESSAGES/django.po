@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 09:40+0200\n"
+"POT-Creation-Date: 2024-08-06 10:12+0200\n"
 "PO-Revision-Date: 2024-07-19 09:44\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -170,7 +170,7 @@ msgstr "Union africaine"
 msgid "Indexes"
 msgstr "Index"
 
-#: templates/africanlii/member_state_detail.html:38
+#: templates/africanlii/member_state_detail.html:37
 msgid "No documents found."
 msgstr "Aucun document trouvé."
 
@@ -459,3 +459,16 @@ msgstr "Rapports et tutoriels"
 msgid "Search regional and national African legal information."
 msgstr "Rechercher des informations juridiques africaines régionales et nationales."
 
+#: views/taxonomy.py:126
+#, fuzzy
+#| msgid "ratifications"
+msgid "Judrisdictions"
+msgstr "ratifications"
+
+#: views/taxonomy.py:132
+msgid "Years"
+msgstr ""
+
+#: views/taxonomy.py:140
+msgid "Alphabet"
+msgstr ""

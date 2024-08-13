@@ -97,7 +97,11 @@ class MainSearchBackend(BaseSearchFilterBackend):
     query = None
 
     def get_field(self, view, field):
-        options = view.search_fields.get(field, {}) or {}
+        options = (
+            view.search_fields.get(field, {})
+            or view.advanced_search_fields.get(field, {})
+            or {}
+        )
         if "boost" in options:
             return f'{field}^{options["boost"]}'
         return field
@@ -136,7 +140,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
         # it's an advanced search if any of the search__* query parameters are present
         return any(
             request.query_params.get(self.search_param + "__" + field)
-            for field in list(view.search_fields.keys()) + ["all"]
+            for field in list(view.advanced_search_fields.keys()) + ["all"]
         )
 
     def build_rank_feature_queries(self, request, view):
@@ -153,7 +157,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
         """Supports searching across multiple fields. Specify zero or more query parameters such as search__title=foo"""
         queries = []
 
-        for field in view.search_fields.keys():
+        for field in view.advanced_search_fields.keys():
             if field == "content":
                 # advanced search on the "content" field (which must include pages and provisions too), is handled
                 # by build_advanced_content_queries
@@ -204,7 +208,8 @@ class MainSearchBackend(BaseSearchFilterBackend):
             return []
 
         query_fields = [
-            self.get_field(view, field) for field, options in view.search_fields.items()
+            self.get_field(view, field)
+            for field, options in view.advanced_search_fields.items()
         ]
         return [
             Q(
@@ -425,13 +430,17 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     search_fields = {
         "title": {"boost": 8},
         "title_expanded": {"boost": 4},
-        "authors": None,
         "citation": {"boost": 4},
-        "judges": None,
         "content": None,
-        "court": None,
         "alternative_names": {"boost": 4},
     }
+
+    advanced_search_fields = {
+        "case_number": None,
+        "case_name": None,
+        "judges_text": None,
+    }
+    advanced_search_fields.update(search_fields)
 
     faceted_search_fields = {
         "doc_type": {
@@ -543,7 +552,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     def save_search_trace(self, response):
         field_searches = {
             fld: self.request.GET.get(f"search__{fld}")
-            for fld in self.search_fields.keys()
+            for fld in self.advanced_search_fields.keys()
             if f"search__{fld}" in self.request.GET
         }
 

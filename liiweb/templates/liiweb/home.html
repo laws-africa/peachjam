@@ -81,7 +81,7 @@
             {% block recent-legislation %}
               <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
               {% trans 'View more legislation' as text %}
-              {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
+              {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation collapse=True with_citations=True view_more_text=text view_more_url_name='legislation_list' %}
             {% endblock %}
           </div>
           {% if recent_gazettes %}
