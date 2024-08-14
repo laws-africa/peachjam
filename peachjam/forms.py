@@ -3,6 +3,7 @@ import copy
 from allauth.account.forms import LoginForm, SignupForm
 from django import forms
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
@@ -18,11 +19,12 @@ from peachjam.models import (
     Folder,
     SavedDocument,
     SourceFile,
-    UserProfile,
     pj_settings,
 )
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
+
+User = get_user_model()
 
 
 def work_choices():
@@ -317,30 +319,30 @@ class DocumentProblemForm(forms.Form):
 class SaveDocumentForm(forms.ModelForm):
     folder = forms.ModelChoiceField(queryset=Folder.objects, required=False)
     new_folder = forms.CharField(max_length=255, required=False)
-    user_profile = forms.ModelChoiceField(queryset=UserProfile.objects, required=False)
+    user = forms.ModelChoiceField(queryset=User.objects, required=False)
     document = forms.ModelChoiceField(
         queryset=CoreDocument.objects, widget=forms.HiddenInput()
     )
 
     class Meta:
         model = SavedDocument
-        fields = ["user_profile", "document", "folder", "new_folder"]
+        fields = ["user", "document", "folder", "new_folder"]
 
-    def __init__(self, *args, document=None, user_profile=None, **kwargs):
+    def __init__(self, *args, document=None, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.user_profile = user_profile
+        self.user = user
         if document is not None:
             self.document = document
             self.fields["document"].initial = self.document
-            self.fields["user_profile"].initial = self.user_profile
-            self.fields["folder"].queryset = user_profile.folders.all()
+            self.fields["user"].initial = self.user
+            self.fields["folder"].queryset = user.folders.all()
 
     def clean(self):
-        self.cleaned_data["user_profile"] = self.user_profile
+        self.cleaned_data["user"] = self.user
         if self.cleaned_data.get("new_folder"):
             folder, _ = Folder.objects.get_or_create(
                 name=self.cleaned_data["new_folder"],
-                user_profile=self.cleaned_data["user_profile"],
+                user=self.cleaned_data["user"],
             )
             self.cleaned_data["folder"] = folder
         return self.cleaned_data

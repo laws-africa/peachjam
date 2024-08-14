@@ -19,7 +19,6 @@ from peachjam.models import (
     Predicate,
     Relationship,
     SavedDocument,
-    UserProfile,
     pj_settings,
 )
 from peachjam_api.serializers import (
@@ -253,11 +252,11 @@ class BaseDocumentDetailView(DetailView):
         )
 
     def show_save_doc_button(self):
-        if pj_settings().allow_save_documents and self.request.user.has_perm(
-            "peachjam.add_saveddocument"
-        ):
-            return True
-        return False
+        return (
+            pj_settings().allow_save_documents
+            and self.request.user.has_perm("peachjam.add_saveddocument")
+            and self.request.user.has_perm("peachjam.add_folder")
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
@@ -308,15 +307,14 @@ class BaseDocumentDetailView(DetailView):
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
         if self.request.user.is_authenticated:
-            user_profile = UserProfile.objects.filter(user=self.request.user).first()
             instance = SavedDocument.objects.filter(
-                document=self.get_object(), user_profile=user_profile
+                document=self.get_object(), user=self.request.user
             ).first()
             context["save_document_form"] = SaveDocumentForm(
                 instance=instance,
                 document=self.get_object(),
-                user_profile=user_profile,
-                initial={"document": self.get_object(), "user_profile": user_profile},
+                user=self.request.user,
+                initial={"document": self.get_object(), "user": self.request.user},
             )
             context["saved"] = instance
 

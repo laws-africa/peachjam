@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
 from peachjam.forms import SaveDocumentForm
-from peachjam.models import CoreDocument, Folder, SavedDocument, UserProfile
+from peachjam.models import CoreDocument, Folder, SavedDocument
 
 User = get_user_model()
 
@@ -16,11 +16,10 @@ class SavedDocumentListView(TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_profile = get_object_or_404(UserProfile, user=self.request.user)
-        context["ungrouped_saved_documents"] = user_profile.saved_documents.filter(
+        context["ungrouped_saved_documents"] = self.request.user.saved_documents.filter(
             folder__isnull=True
         )
-        context["folders"] = user_profile.folders.all()
+        context["folders"] = self.request.user.folders.all()
         return context
 
     def get_template_names(self):
@@ -59,8 +58,7 @@ class SavedDocumentListView(TemplateView):
     def post(self, request: HttpRequest, *args, **kwargs):
         if request.htmx:
             folder_name = request.htmx.prompt
-            user_profile = get_object_or_404(UserProfile, user=self.request.user)
-            Folder.objects.create(user_profile=user_profile, name=folder_name)
+            Folder.objects.create(user=self.request.user, name=folder_name)
         context = self.get_context_data(*args, **kwargs)
         return self.render_to_response(context)
 
@@ -71,25 +69,23 @@ class SaveDocumentView(PermissionRequiredMixin, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_profile = get_object_or_404(UserProfile, user=self.request.user)
-        folders = user_profile.folders.all()
+        folders = self.request.user.folders.all()
         context["folders"] = folders
         return context
 
     def post(self, request: HttpRequest):
         post_data = request.POST
-        user_profile = get_object_or_404(UserProfile, user=self.request.user)
         instance = SavedDocument.objects.filter(
             document=post_data.get("document"),
-            user_profile=user_profile,
+            user=self.request.user,
         ).first()
-        form = SaveDocumentForm(post_data, user_profile=user_profile, instance=instance)
+        form = SaveDocumentForm(post_data, user=self.request.user, instance=instance)
         context = self.get_context_data()
         if form.is_valid():
             instance = form.save()
             form = SaveDocumentForm(
                 document=instance.document,
-                user_profile=user_profile,
+                user=self.request.user,
                 instance=instance,
             )
             return self.render_to_response(
@@ -106,10 +102,9 @@ class SaveDocumentView(PermissionRequiredMixin, TemplateView):
 
     def delete(self, request: HttpRequest):
         data = request.GET
-        user_profile = get_object_or_404(UserProfile, user=self.request.user)
         if data.get("document"):
             document = get_object_or_404(CoreDocument, pk=data["document"])
-            form = SaveDocumentForm(document=document, user_profile=user_profile)
+            form = SaveDocumentForm(document=document, user=self.request.user)
 
             if data.get("id"):
                 instance = SavedDocument.objects.filter(pk=data.get("id")).first()

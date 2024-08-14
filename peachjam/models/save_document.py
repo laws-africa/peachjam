@@ -1,13 +1,16 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .core_document_model import CoreDocument
 
+User = get_user_model()
+
 
 class Folder(models.Model):
     name = models.CharField(_("name"), max_length=1024)
-    user_profile = models.ForeignKey(
-        "peachjam.UserProfile",
+    user = models.ForeignKey(
+        User,
         on_delete=models.CASCADE,
         verbose_name=_("user_profile"),
         related_name="folders",
@@ -24,8 +27,8 @@ class Folder(models.Model):
 
 class SavedDocument(models.Model):
     document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
-    user_profile = models.ForeignKey(
-        "peachjam.UserProfile",
+    user = models.ForeignKey(
+        User,
         on_delete=models.CASCADE,
         verbose_name=_("user_profile"),
         related_name="saved_documents",
