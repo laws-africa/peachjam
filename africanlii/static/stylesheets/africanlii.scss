@@ -31,3 +31,8 @@ iframe.video {
     display: block;
   }
 }
+
+.btn.btn-primary,
+.btn.btn-outline-primary:hover {
+  color: $black;
+}

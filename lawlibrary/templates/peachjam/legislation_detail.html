@@ -4,6 +4,9 @@
   <nav aria-label="breadcrumb">
     {% if document.locality %}
       <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
         {% if document.locality.code in PROVINCIAL_CODES %}
           <li class="breadcrumb-item">
             <a href="{% url 'locality_legislation' %}">{% trans 'Provincial Legislation' %}</a>
