@@ -32,6 +32,7 @@ iframe.video {
   }
 }
 
-a:visited {
-  color: $visited-link;
+.btn.btn-primary,
+.btn.btn-outline-primary:hover {
+  color: $black;
 }
