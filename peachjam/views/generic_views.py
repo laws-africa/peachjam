@@ -307,17 +307,15 @@ class BaseDocumentDetailView(DetailView):
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
         if self.request.user.is_authenticated:
-            instance = SavedDocument.objects.filter(
+            context["saved"] = saved_doc = SavedDocument.objects.filter(
                 document=self.get_object(), user=self.request.user
             ).first()
             context["save_document_form"] = SaveDocumentForm(
-                instance=instance,
+                instance=saved_doc,
                 document=self.get_object(),
                 user=self.request.user,
                 initial={"document": self.get_object(), "user": self.request.user},
             )
-            context["saved"] = instance
-
         return context
 
     def fetch_citation_docs(self, works):

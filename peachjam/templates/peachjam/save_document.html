@@ -9,7 +9,7 @@
               aria-label="Close"></button>
     </div>
     <div class="modal-body">
-      {% if updated %}<div class="alert alert-success">Document has been saved</div>{% endif %}
+      {% if updated %}<div class="alert alert-success">Document saved</div>{% endif %}
       <form id="save_document-form"
             hx-post="{% url 'save_document' %}"
             hx-target="#saveDocument">
