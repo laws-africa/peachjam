@@ -1,18 +1,20 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse
 from django.utils.functional import cached_property
-from django.views.generic import CreateView, DeleteView, TemplateView, UpdateView
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 from django.views.generic.edit import ModelFormMixin
 
 from peachjam.forms import SaveDocumentForm
-from peachjam.models import Folder, SavedDocument
+from peachjam.models import CoreDocument, Folder, SavedDocument
 
 User = get_user_model()
 
 
 class BaseSavedDocumentView(PermissionRequiredMixin):
+    model = Folder
+
     def get_template_names(self):
         if self.request.htmx:
             return ["peachjam/_folders_list.html"]
@@ -27,21 +29,26 @@ class BaseSavedDocumentView(PermissionRequiredMixin):
         return context
 
 
-class SavedDocumentListView(BaseSavedDocumentView, TemplateView):
+class SavedDocumentListView(BaseSavedDocumentView, ListView):
     permission_required = "peachjam.view_folder"
-    context_object_name = "folders"
+
+
+class CreateFolderView(BaseSavedDocumentView, CreateView):
+    permission_required = "peachjam.add_folder"
+    fields = ["name"]
 
     def post(self, request: HttpRequest, *args, **kwargs):
         if request.htmx:
             folder_name = request.htmx.prompt
-            Folder.objects.create(user=self.request.user, name=folder_name)
+            self.object = Folder.objects.create(
+                user=self.request.user, name=folder_name
+            )
         context = self.get_context_data(*args, **kwargs)
         return self.render_to_response(context)
 
 
-class SavedDocumentUpdateFolderView(BaseSavedDocumentView, UpdateView):
+class UpdateFolderView(BaseSavedDocumentView, UpdateView):
     permission_required = "peachjam.update_folder"
-    model = Folder
     fields = ["name"]
 
     def post(self, request: HttpRequest, *args, **kwargs):
@@ -53,24 +60,16 @@ class SavedDocumentUpdateFolderView(BaseSavedDocumentView, UpdateView):
         return self.render_to_response(self.get_context_data(*args, **kwargs))
 
 
-class SavedDocumentDeleteDocumentView(BaseSavedDocumentView, DeleteView):
-    permission_required = "peachjam.delete_saveddocument"
-    model = SavedDocument
-
-    def post(self, *args, **kwargs):
-        self.object = self.get_object()
-        self.object.delete()
-        return self.render_to_response(self.get_context_data(**kwargs))
-
-
-class SavedDocumentDeleteFolderView(BaseSavedDocumentView, DeleteView):
+class DeleteFolderView(BaseSavedDocumentView, DeleteView):
     permission_required = "peachjam.delete_folder"
     model = Folder
 
     def post(self, *args, **kwargs):
         self.object = self.get_object()
         self.object.delete()
-        return self.render_to_response(self.get_context_data(**kwargs))
+        response = HttpResponse("saved document deleted")
+        response["HX-Refresh"] = "true"
+        return response
 
 
 class BaseSaveDocumentView(PermissionRequiredMixin, ModelFormMixin):
@@ -81,8 +80,6 @@ class BaseSaveDocumentView(PermissionRequiredMixin, ModelFormMixin):
 
     @cached_property
     def document(self):
-        from peachjam.models import CoreDocument
-
         return CoreDocument.objects.filter(pk=self.kwargs["doc_id"]).first()
 
     def get_form_kwargs(self, *args, **kwargs):
@@ -118,3 +115,10 @@ class UnSaveDocumentView(BaseSaveDocumentView, DeleteView):
 
     def get_success_url(self):
         return reverse("save_document", kwargs={"doc_id": self.document.pk})
+
+    def post(self, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete()
+        response = HttpResponse("saved document deleted")
+        response["HX-Refresh"] = "true"
+        return response
