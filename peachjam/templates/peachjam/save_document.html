@@ -52,16 +52,18 @@
       </form>
     </div>
     <div class="modal-footer d-flex justify-content-between">
-      <button class="btn btn-danger"
-              type="button"
-              data-bs-dismiss="modal"
-              hx-target="#saveDocument"
-              hx-include="#save_document-form"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              hx-delete="{% url 'save_document' %}?id={{ saved_document.id }}"
-              hx-confirm="Are you sure you want to unsave this document?">
-        {% trans 'Unsave' %}
-      </button>
+      {% if saved_document %}
+        <button class="btn btn-danger"
+                type="button"
+                data-bs-dismiss="modal"
+                hx-target="#saveDocument"
+                hx-include="#save_document-form"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                hx-post="{% url 'unsave_document' saved_document.id %}"
+                hx-confirm="Are you sure you want to unsave this document?">
+          {% trans 'Unsave' %}
+        </button>
+      {% endif %}
       <div>
         <button type="button"
                 class="btn btn-outline-secondary btn-shrink-sm ms-2"

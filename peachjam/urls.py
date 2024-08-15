@@ -65,12 +65,16 @@ from peachjam.views import (
     PlaceDetailView,
     PocketLawResources,
     RobotsView,
+    SavedDocumentDeleteDocumentView,
+    SavedDocumentDeleteFolderView,
     SavedDocumentListView,
+    SavedDocumentUpdateFolderView,
     SaveDocumentView,
     TaxonomyDetailView,
     TaxonomyFirstLevelView,
     TaxonomyListView,
     TermsOfUsePageView,
+    UnSaveDocumentView,
     UserProfileDetailView,
     WorkAutocomplete,
 )
@@ -92,10 +96,6 @@ urlpatterns = [
         AboutPageView.as_view(),
         name="about",
     ),
-    path(
-        "saved-documents/", SavedDocumentListView.as_view(), name="saved_document_list"
-    ),
-    path("save-document/", SaveDocumentView.as_view(), name="save_document"),
     # listing views
     path(
         "authors/<slug:code>/",
@@ -284,6 +284,31 @@ urlpatterns = [
         "document-problem/",
         DocumentProblemView.as_view(),
         name="document_problem",
+    ),
+    # Saved Documents
+    path("save-document/", SaveDocumentView.as_view(), name="save_document"),
+    path(
+        "save-document/<int:pk>/delete/",
+        UnSaveDocumentView.as_view(),
+        name="unsave_document",
+    ),
+    path(
+        "saved-documents/", SavedDocumentListView.as_view(), name="saved_document_list"
+    ),
+    path(
+        "saved-documents/folder/<int:pk>/update/",
+        SavedDocumentUpdateFolderView.as_view(),
+        name="saved_document_update_folder",
+    ),
+    path(
+        "saved-documents/folder/<int:pk>/delete/",
+        SavedDocumentDeleteFolderView.as_view(),
+        name="saved_document_delete_folder",
+    ),
+    path(
+        "saved-documents/doc/<int:pk>/delete/",
+        SavedDocumentDeleteDocumentView.as_view(),
+        name="saved_document_delete_document",
     ),
     # django-markdown-editor
     path("martor/", include("martor.urls")),
