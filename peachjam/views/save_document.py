@@ -1,7 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpRequest
-from django.views.generic import DeleteView, TemplateView, UpdateView
+from django.urls import reverse
+from django.utils.functional import cached_property
+from django.views.generic import CreateView, DeleteView, TemplateView, UpdateView
+from django.views.generic.edit import ModelFormMixin
 
 from peachjam.forms import SaveDocumentForm
 from peachjam.models import Folder, SavedDocument
@@ -70,48 +73,48 @@ class SavedDocumentDeleteFolderView(BaseSavedDocumentView, DeleteView):
         return self.render_to_response(self.get_context_data(**kwargs))
 
 
-class SaveDocumentView(PermissionRequiredMixin, TemplateView):
-    permission_required = "peachjam.add_saveddocument"
+class BaseSaveDocumentView(PermissionRequiredMixin, ModelFormMixin):
     template_name = "peachjam/save_document.html"
-
-    def post(self, request: HttpRequest):
-        post_data = request.POST
-        instance = SavedDocument.objects.filter(
-            document=post_data.get("document"),
-            user=self.request.user,
-        ).first()
-        form = SaveDocumentForm(post_data, user=self.request.user, instance=instance)
-        context = self.get_context_data()
-        if form.is_valid():
-            instance = form.save()
-            form = SaveDocumentForm(
-                document=instance.document,
-                user=self.request.user,
-                instance=instance,
-            )
-            return self.render_to_response(
-                {
-                    "saved_document": instance,
-                    "document": instance.document,
-                    "save_document_form": form,
-                    "updated": True,
-                    **context,
-                }
-            )
-
-        return self.render_to_response({"save_document_form": form, **context})
-
-
-class UnSaveDocumentView(PermissionRequiredMixin, DeleteView):
-    permission_required = "peachjam.delete_saveddocument"
-    template_name = "peachjam/save_document.html"
+    form_class = SaveDocumentForm
+    context_object_name = "saved_document"
     model = SavedDocument
 
-    def post(self, request: HttpRequest, *args, **kwargs):
-        self.object = self.get_object()
-        document = self.object.document
-        self.object.delete()
-        form = SaveDocumentForm(document=document, user=self.request.user)
-        return self.render_to_response(
-            {"save_document_form": form, "deleted": True, "document": document}
+    @cached_property
+    def document(self):
+        from peachjam.models import CoreDocument
+
+        return CoreDocument.objects.filter(pk=self.kwargs["doc_id"]).first()
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({"user": self.request.user, "document": self.document})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["document"] = self.document
+        return context
+
+    def get_success_url(self):
+        return reverse(
+            "saved_document_update",
+            kwargs={
+                "doc_id": self.document.pk,
+                "pk": self.object.pk,
+            },
         )
+
+
+class SaveDocumentView(BaseSaveDocumentView, CreateView):
+    permission_required = "peachjam.add_saveddocument"
+
+
+class UpdateSavedDocumentView(BaseSaveDocumentView, UpdateView):
+    permission_required = "peachjam.update_saveddocument"
+
+
+class UnSaveDocumentView(BaseSaveDocumentView, DeleteView):
+    permission_required = "peachjam.delete_saveddocument"
+
+    def get_success_url(self):
+        return reverse("save_document", kwargs={"doc_id": self.document.pk})

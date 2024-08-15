@@ -75,6 +75,7 @@ from peachjam.views import (
     TaxonomyListView,
     TermsOfUsePageView,
     UnSaveDocumentView,
+    UpdateSavedDocumentView,
     UserProfileDetailView,
     WorkAutocomplete,
 )
@@ -286,9 +287,18 @@ urlpatterns = [
         name="document_problem",
     ),
     # Saved Documents
-    path("save-document/", SaveDocumentView.as_view(), name="save_document"),
     path(
-        "save-document/<int:pk>/delete/",
+        "save-document/<int:doc_id>/new",
+        SaveDocumentView.as_view(),
+        name="save_document",
+    ),
+    path(
+        "save-document/<int:doc_id>/update/<int:pk>",
+        UpdateSavedDocumentView.as_view(),
+        name="saved_document_update",
+    ),
+    path(
+        "save-document/<int:doc_id>/delete/<int:pk>",
         UnSaveDocumentView.as_view(),
         name="unsave_document",
     ),

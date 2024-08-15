@@ -321,24 +321,22 @@ class SaveDocumentForm(forms.ModelForm):
     new_folder = forms.CharField(max_length=255, required=False)
     user = forms.ModelChoiceField(queryset=User.objects, required=False)
     document = forms.ModelChoiceField(
-        queryset=CoreDocument.objects, widget=forms.HiddenInput()
+        queryset=CoreDocument.objects, widget=forms.HiddenInput(), required=False
     )
 
     class Meta:
         model = SavedDocument
         fields = ["user", "document", "folder", "new_folder"]
 
-    def __init__(self, *args, document=None, user=None, **kwargs):
+    def __init__(self, *args, user=None, document=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
-        if document is not None:
-            self.document = document
-            self.fields["document"].initial = self.document
-            self.fields["user"].initial = self.user
-            self.fields["folder"].queryset = user.folders.all()
+        self.document = document
+        self.fields["folder"].queryset = self.user.folders.all()
 
     def clean(self):
         self.cleaned_data["user"] = self.user
+        self.cleaned_data["document"] = self.document
         if self.cleaned_data.get("new_folder"):
             folder, _ = Folder.objects.get_or_create(
                 name=self.cleaned_data["new_folder"],
@@ -346,9 +344,6 @@ class SaveDocumentForm(forms.ModelForm):
             )
             self.cleaned_data["folder"] = folder
         return self.cleaned_data
-
-    def save(self, commit=True):
-        return super().save()
 
 
 class PeachjamSignupForm(SignupForm):

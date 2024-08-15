@@ -307,14 +307,13 @@ class BaseDocumentDetailView(DetailView):
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
         if self.request.user.is_authenticated:
-            context["saved"] = saved_doc = SavedDocument.objects.filter(
+            context["saved_document"] = saved_doc = SavedDocument.objects.filter(
                 document=self.get_object(), user=self.request.user
             ).first()
             context["save_document_form"] = SaveDocumentForm(
                 instance=saved_doc,
-                document=self.get_object(),
                 user=self.request.user,
-                initial={"document": self.get_object(), "user": self.request.user},
+                document=self.get_object(),
             )
         return context
 

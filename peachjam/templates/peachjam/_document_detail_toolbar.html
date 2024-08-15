@@ -18,19 +18,17 @@
                   data-bs-toggle="modal"
                   data-bs-target="#saveDocument"
                   aria-expanded="false"
-                  hx-post="{% url 'save_document' %}"
-                  hx-target="#saveDocument"
-                  hx-include="#save_document-form">
-            {% if saved.folder %}
-              <i class="bi bi-star-fill"></i> {% trans 'Saved to' %} {{ saved.folder }}
-            {% elif saved %}
+                  {% if not saved_document %} hx-post="{% url 'save_document' document.id %}" hx-target="#saveDocument" hx-include="#save_document-form" {% endif %}>
+            {% if saved_document.folder %}
+              <i class="bi bi-star-fill"></i> {% trans 'Saved to' %} {{ saved_document.folder }}
+            {% elif saved_document %}
               <i class="bi bi-star-fill"></i> {% trans 'Saved' %}
             {% else %}
               {% trans 'Save document' %}
             {% endif %}
           </button>
           <div id="saveDocument" class="modal fade" tabindex="-1" aria-hidden="true">
-            {% include "peachjam/save_document.html" %}
+            {% include "peachjam/save_document.html" with form=save_document_form %}
           </div>
         {% else %}
           <button class="btn btn-outline-primary ms-2"
