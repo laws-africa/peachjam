@@ -1,15 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group
 from django.db.models import signals
 from django.dispatch import receiver
 
-from peachjam.models import (
-    CoreDocument,
-    ExtractedCitation,
-    SourceFile,
-    Work,
-    pj_settings,
-)
+from peachjam.models import CoreDocument, ExtractedCitation, SourceFile, Work
 from peachjam.tasks import update_extracted_citations_for_a_work
 
 User = get_user_model()
@@ -69,18 +63,6 @@ def extracted_citation_deleted(sender, instance, **kwargs):
 
 @receiver(signals.post_save, sender=User)
 def add_saved_document_permissions(sender, instance, created, **kwargs):
-    if pj_settings().allow_save_documents and created:
-        permissions = Permission.objects.filter(
-            codename__in=[
-                "add_saveddocument",
-                "view_saveddocument",
-                "change_saveddocument",
-                "delete_saveddocument",
-                "add_folder",
-                "view_folder",
-                "change_folder",
-                "delete_folder",
-            ]
-        )
-        for p in permissions:
-            instance.user_permissions.add(p)
+    if created:
+        all_users_group, _ = Group.objects.get_or_create(name="AllUsers")
+        instance.groups.add(all_users_group)

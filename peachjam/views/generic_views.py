@@ -253,7 +253,10 @@ class BaseDocumentDetailView(DetailView):
         )
 
     def show_save_doc_button(self):
-        return pj_settings().allow_save_documents
+        return pj_settings().allow_save_documents and (
+            not self.request.user.is_authenticated
+            or self.request.user.has_perm("peachjam.add_saveddocument")
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
