@@ -11,58 +11,22 @@
   {% block download-btn %}
     <div>
       {% if show_save_doc_button %}
-        {% if request.user.is_authenticated %}
-          <button id="saveDocumentButton"
-                  class="btn btn-outline-primary btn-shrink-sm ms-2"
-                  type="button"
-                  data-bs-toggle="modal"
-                  data-bs-target="#saveDocument"
-                  aria-expanded="false"
-                  {% if not saved_document %} hx-post="{% url 'save_document' document.id %}" hx-target="#saveDocument" hx-include="#save_document-form" {% endif %}>
-            {% if saved_document.folder %}
-              <i class="bi bi-star-fill"></i> {% trans 'Saved to' %} {{ saved_document.folder }}
-            {% elif saved_document %}
-              <i class="bi bi-star-fill"></i> {% trans 'Saved' %}
-            {% else %}
-              {% trans 'Save document' %}
-            {% endif %}
-          </button>
-          <div id="saveDocument" class="modal fade" tabindex="-1" aria-hidden="true">
-            {% include "peachjam/save_document.html" with form=save_document_form %}
-          </div>
-        {% else %}
-          <button class="btn btn-outline-primary ms-2"
-                  data-bs-toggle="modal"
-                  type="button"
-                  data-bs-target="#loginprompt">
-            {% trans 'Save document' %}
-          </button>
-          <div id="loginprompt" class="modal fade">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">{% trans 'Login' %}</h5>
-                  <button type="button"
-                          class="btn-close"
-                          data-bs-dismiss="modal"
-                          aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <p>
-                    <strong>{% trans 'You are not logged in' %}.</strong>
-                  </p>
-                  <p>{% trans 'To save a document you need to be logged in' %}.</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
-                  <a href="{% url 'account_login' %}?next={{ document.get_absolute_url }}"
-                     class="btn btn-primary">{% trans 'Login' %}</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        {% endif %}
+        <div hx-get="{{ save_doc_url }}" hx-trigger="load"></div>
+        <button id="saveDocumentButton"
+                class="btn btn-outline-primary btn-shrink-sm ms-2"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#saveDocumentModal"
+                aria-expanded="false">
+          {% trans 'Save document' %}
+        </button>
       {% endif %}
+      <div id="saveDocumentModal"
+           class="modal fade"
+           tabindex="-1"
+           aria-hidden="true">
+        <div id="saveDocumentModalDialog" class="modal-dialog"></div>
+      </div>
     </div>
     {% if document.source_file %}
       <div class="btn-group dropdown-center ms-2">

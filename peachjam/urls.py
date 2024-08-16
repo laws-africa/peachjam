@@ -68,6 +68,7 @@ from peachjam.views import (
     PocketLawResources,
     RobotsView,
     SavedDocumentListView,
+    SaveDocumentAuthView,
     SaveDocumentView,
     TaxonomyDetailView,
     TaxonomyFirstLevelView,
@@ -287,6 +288,11 @@ urlpatterns = [
         name="document_problem",
     ),
     # Saved Documents
+    path(
+        "save-document/<int:doc_id>/auth",
+        SaveDocumentAuthView.as_view(),
+        name="save_document_auth",
+    ),
     path(
         "save-document/<int:doc_id>/new",
         SaveDocumentView.as_view(),

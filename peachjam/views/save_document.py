@@ -3,7 +3,13 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse
 from django.utils.functional import cached_property
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 from django.views.generic.edit import ModelFormMixin
 
 from peachjam.forms import SaveDocumentForm
@@ -72,25 +78,30 @@ class DeleteFolderView(BaseSavedDocumentView, DeleteView):
         return response
 
 
-class BaseSaveDocumentView(PermissionRequiredMixin, ModelFormMixin):
+class BaseSaveDocumentView:
     template_name = "peachjam/save_document.html"
-    form_class = SaveDocumentForm
-    context_object_name = "saved_document"
-    model = SavedDocument
 
     @cached_property
     def document(self):
         return CoreDocument.objects.filter(pk=self.kwargs["doc_id"]).first()
 
-    def get_form_kwargs(self, *args, **kwargs):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({"user": self.request.user, "document": self.document})
-        return kwargs
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["document"] = self.document
         return context
+
+
+class SaveDocumentFormView(
+    BaseSaveDocumentView, ModelFormMixin, PermissionRequiredMixin
+):
+    form_class = SaveDocumentForm
+    context_object_name = "saved_document"
+    model = SavedDocument
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({"user": self.request.user, "document": self.document})
+        return kwargs
 
     def get_success_url(self):
         return reverse(
@@ -102,15 +113,19 @@ class BaseSaveDocumentView(PermissionRequiredMixin, ModelFormMixin):
         )
 
 
-class SaveDocumentView(BaseSaveDocumentView, CreateView):
+class SaveDocumentAuthView(BaseSaveDocumentView, TemplateView):
+    template_name = "peachjam/save_document.html"
+
+
+class SaveDocumentView(SaveDocumentFormView, CreateView):
     permission_required = "peachjam.add_saveddocument"
 
 
-class UpdateSavedDocumentView(BaseSaveDocumentView, UpdateView):
+class UpdateSavedDocumentView(SaveDocumentFormView, UpdateView):
     permission_required = "peachjam.update_saveddocument"
 
 
-class UnSaveDocumentView(BaseSaveDocumentView, DeleteView):
+class UnSaveDocumentView(SaveDocumentFormView, DeleteView):
     permission_required = "peachjam.delete_saveddocument"
 
     def get_success_url(self):

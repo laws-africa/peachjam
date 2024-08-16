@@ -3,12 +3,13 @@ import itertools
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, View
 from lxml import html
 
-from peachjam.forms import BaseDocumentFilterForm, SaveDocumentForm
+from peachjam.forms import BaseDocumentFilterForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
     Author,
@@ -252,11 +253,7 @@ class BaseDocumentDetailView(DetailView):
         )
 
     def show_save_doc_button(self):
-        return (
-            pj_settings().allow_save_documents
-            and self.request.user.has_perm("peachjam.add_saveddocument")
-            and self.request.user.has_perm("peachjam.add_folder")
-        )
+        return pj_settings().allow_save_documents
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
@@ -306,15 +303,21 @@ class BaseDocumentDetailView(DetailView):
             doc.work.works_citing_current_work()
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
+        context["save_doc_url"] = reverse(
+            "save_document_auth", kwargs={"doc_id": self.object.pk}
+        )
         if self.request.user.is_authenticated:
-            context["saved_document"] = saved_doc = SavedDocument.objects.filter(
-                document=self.get_object(), user=self.request.user
-            ).first()
-            context["save_document_form"] = SaveDocumentForm(
-                instance=saved_doc,
-                user=self.request.user,
-                document=self.get_object(),
+            context["save_doc_url"] = reverse(
+                "save_document", kwargs={"doc_id": self.object.pk}
             )
+            saved_doc = SavedDocument.objects.filter(
+                document=self.object, user=self.request.user
+            ).first()
+            if saved_doc:
+                context["save_doc_url"] = reverse(
+                    "saved_document_update",
+                    kwargs={"doc_id": self.object.pk, "pk": saved_doc.pk},
+                )
         return context
 
     def fetch_citation_docs(self, works):
