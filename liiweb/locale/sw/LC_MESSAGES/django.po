@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-06 10:12+0200\n"
-"PO-Revision-Date: 2024-08-06 08:54\n"
+"PO-Revision-Date: 2024-08-17 14:56\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -26,7 +26,7 @@ msgstr "Changia %(APP_NAME)s"
 #: templates/liiweb/_donate_call_to_action.html:8
 #, python-format
 msgid "%(APP_NAME)s relies on donations to keep our platform free. Help us maintain and expand our resources. Donate today and support."
-msgstr "%(APP_NAME)s hutegemea michango ili kuweka jukwaa letu bila malipo. Tusaidie kudumisha na kupanua rasilimali zetu. Changia leo na uunge mkono."
+msgstr "%(APP_NAME)s hutegemea michango ili kuendelea kutoa huduma katika jukwaa letu bila malipo. Tusaidie kudumisha na kuongeza rasilimali zetu. Changia leo na uunge mkono."
 
 #: templates/liiweb/_donate_call_to_action.html:14
 #: templates/liiweb/donate.html:4
