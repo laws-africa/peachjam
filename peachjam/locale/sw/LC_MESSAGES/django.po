@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-06 10:12+0200\n"
-"PO-Revision-Date: 2024-08-06 08:54\n"
+"PO-Revision-Date: 2024-08-17 13:56\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -60,7 +60,7 @@ msgstr "Usichapishe nyaraka zilizochaguliwa"
 #: admin.py:672
 #, python-format
 msgid "Taxonomy with slug \"%(value)s\" already exists."
-msgstr "Taxonomia yenye koa \"%(value)s\" tayari ipo."
+msgstr "Mfumo wa kupanga maudhui wenye  slug \"%(value)s\" tayari upo."
 
 #: admin.py:746 models/judgment.py:471 models/judgment.py:507
 msgid "case number"
@@ -128,7 +128,7 @@ msgstr "(Mpya zaidi kwanza)"
 
 #: forms.py:129
 msgid "(Oldest first)"
-msgstr "(Ya zamani kwanza)"
+msgstr "(Ya zamani zaidi kwanza)"
 
 #: forms.py:291
 msgid "Document problem reported"
