@@ -5,7 +5,7 @@
     <button class="btn btn-primary"
             hx-target="#folders-list"
             hx-prompt="Give your folder a name:"
-            hx-post="{% url 'saved_document_new_folder' %}">
+            hx-post="{% url 'folder_new' %}">
       {% trans 'New Folder' %}
     </button>
   </div>
@@ -27,7 +27,7 @@
                       {{ saved_doc.document.date }}
                       <a class="ms-3"
                          type="button"
-                         hx-post="{% url 'unsave_document' saved_doc.document.id saved_doc.id %}"
+                         hx-post="{% url 'saved_document_delete' saved_doc.id %}"
                          hx-target="#folders-list"
                          hx-confirm="Are you sure you want to remove this document?">
                         <i class="bi bi-trash"></i>
@@ -44,14 +44,14 @@
         <div class="card-footer text-end">
           <button class="btn btn-outline-danger me-2"
                   type="button"
-                  hx-post="{% url 'saved_document_delete_folder' folder.id %}"
+                  hx-post="{% url 'folder_delete' folder.id %}"
                   hx-target="#folders-list"
                   hx-confirm="Are you sure you want to delete this folder? All saved documents in this folder will also be deleted.">
             {% trans 'Delete' %}
           </button>
           <button class="btn btn-secondary"
                   type="button"
-                  hx-post="{% url 'saved_document_update_folder' folder.id %}"
+                  hx-post="{% url 'folder_update' folder.id %}"
                   hx-target="#folders-list"
                   hx-prompt="Edit folder name">
             {% trans 'Rename' %}
@@ -74,7 +74,7 @@
                   {{ saved_doc.document.date }}
                   <a class="ms-3"
                      type="button"
-                     hx-post="{% url 'unsave_document' saved_doc.document.id saved_doc.id %}"
+                     hx-post="{% url 'saved_document_delete' saved_doc.id %}"
                      hx-target="#folders-list"
                      hx-confirm="Are you sure you want to remove this document?">
                     <i class="bi bi-trash"></i>

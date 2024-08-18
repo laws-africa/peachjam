@@ -3,7 +3,6 @@ import itertools
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, View
@@ -19,7 +18,6 @@ from peachjam.models import (
     LegalInstrument,
     Predicate,
     Relationship,
-    SavedDocument,
     pj_settings,
 )
 from peachjam_api.serializers import (
@@ -306,21 +304,6 @@ class BaseDocumentDetailView(DetailView):
             doc.work.works_citing_current_work()
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
-        context["save_doc_url"] = reverse(
-            "save_document_auth", kwargs={"doc_id": self.object.pk}
-        )
-        if self.request.user.is_authenticated:
-            context["save_doc_url"] = reverse(
-                "save_document", kwargs={"doc_id": self.object.pk}
-            )
-            saved_doc = SavedDocument.objects.filter(
-                document=self.object, user=self.request.user
-            ).first()
-            if saved_doc:
-                context["save_doc_url"] = reverse(
-                    "saved_document_update",
-                    kwargs={"doc_id": self.object.pk, "pk": saved_doc.pk},
-                )
         return context
 
     def fetch_citation_docs(self, works):

@@ -46,9 +46,3 @@ class SavedDocument(models.Model):
         verbose_name = _("saved document")
         verbose_name_plural = _("saved documents")
         unique_together = ("document", "folder")
-
-    def __str__(self):
-        message = f"{self.document.title} has been saved"
-        if self.folder:
-            message += f" to the '{self.folder.name}' folder"
-        return message

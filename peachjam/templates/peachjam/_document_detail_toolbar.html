@@ -11,22 +11,15 @@
   {% block download-btn %}
     <div>
       {% if show_save_doc_button %}
-        <div hx-get="{{ save_doc_url }}" hx-trigger="load"></div>
-        <button id="saveDocumentButton"
-                class="btn btn-outline-primary btn-shrink-sm ms-2"
-                type="button"
-                data-bs-toggle="modal"
-                data-bs-target="#saveDocumentModal"
-                aria-expanded="false">
-          {% trans 'Save document' %}
-        </button>
+        <div hx-get="{% url 'save_document_button' document.id %}"
+             hx-trigger="load"></div>
+        <div id="saveDocumentModal"
+             class="modal fade"
+             tabindex="-1"
+             aria-hidden="true">
+          <div id="saveDocumentModalDialog" class="modal-dialog"></div>
+        </div>
       {% endif %}
-      <div id="saveDocumentModal"
-           class="modal fade"
-           tabindex="-1"
-           aria-hidden="true">
-        <div id="saveDocumentModalDialog" class="modal-dialog"></div>
-      </div>
     </div>
     {% if document.source_file %}
       <div class="btn-group dropdown-center ms-2">

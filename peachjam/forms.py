@@ -328,15 +328,15 @@ class SaveDocumentForm(forms.ModelForm):
         model = SavedDocument
         fields = ["user", "document", "folder", "new_folder"]
 
-    def __init__(self, *args, user=None, document=None, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
-        self.document = document
-        self.fields["folder"].queryset = self.user.folders.all()
+        self.fields["folder"].queryset = Folder.objects.none()
+        if hasattr(self.user, "folders"):
+            self.fields["folder"].queryset = self.user.folders.all()
 
     def clean(self):
         self.cleaned_data["user"] = self.user
-        self.cleaned_data["document"] = self.document
         if self.cleaned_data.get("new_folder"):
             folder, _ = Folder.objects.get_or_create(
                 name=self.cleaned_data["new_folder"],
