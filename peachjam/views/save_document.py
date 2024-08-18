@@ -64,24 +64,30 @@ class FolderDeleteView(BaseFolderFormView, DeleteView):
 
 
 class SavedDocumentButtonView(TemplateView):
+    template_name = "peachjam/saved_document_login.html"
+
     def get(self, *args, **kwargs):
         document = CoreDocument.objects.filter(pk=self.kwargs["doc_id"]).first()
-        saved_doc = SavedDocument.objects.filter(
-            document=document, user=self.request.user
-        ).first()
-        if saved_doc:
+        if self.request.user.is_authenticated:
+            saved_doc = SavedDocument.objects.filter(
+                document=document, user=self.request.user
+            ).first()
+            if saved_doc:
+                return HttpResponseRedirect(
+                    reverse("saved_document_update", kwargs={"pk": saved_doc.pk})
+                )
             return HttpResponseRedirect(
-                reverse("saved_document_update", kwargs={"pk": saved_doc.pk})
+                reverse("saved_document_create") + f"?doc_id={document.pk}"
             )
-        return HttpResponseRedirect(
-            reverse("saved_document_create") + f"?doc_id={document.pk}"
-        )
+        context = self.get_context_data()
+        context["document"] = document
+        return self.render_to_response(context)
 
 
 class BaseSavedDocumentFormView(
     FormMixin,
 ):
-    template_name = "peachjam/save_document.html"
+    template_name = "peachjam/saved_document.html"
     form_class = SaveDocumentForm
     context_object_name = "saved_document"
     model = SavedDocument
@@ -91,8 +97,12 @@ class BaseSavedDocumentFormView(
         kwargs["user"] = self.request.user
         doc_id = self.request.GET.get("doc_id")
         if doc_id:
-            document = CoreDocument.objects.filter(pk=doc_id).first()
-            kwargs.update({"initial": {"document": document}})
+            try:
+                doc_id = int(doc_id)
+                document = CoreDocument.objects.filter(pk=doc_id).first()
+                kwargs.update({"initial": {"document": document}})
+            except ValueError:
+                pass
         return kwargs
 
     def get_success_url(self):
