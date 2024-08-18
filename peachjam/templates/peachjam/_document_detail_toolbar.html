@@ -11,7 +11,7 @@
   {% block download-btn %}
     <div>
       {% if show_save_doc_button %}
-        <div hx-get="{% url 'save_document_button' document.id %}"
+        <div hx-get="{% url 'saved_document_button' document.id %}"
              hx-trigger="load"></div>
         <div id="saveDocumentModal"
              class="modal fade"

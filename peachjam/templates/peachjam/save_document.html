@@ -7,7 +7,7 @@
             data-bs-toggle="modal"
             data-bs-target="#saveDocumentModal"
             aria-expanded="false"
-            {% if not saved_document %} hx-post="{% url 'save_document_new' %}" hx-target="#saveDocumentWrapper" hx-include="#save_document-form" {% endif %}>
+            {% if not saved_document %} hx-post="{% url 'saved_document_new' %}" hx-target="#saveDocumentWrapper" hx-include="#save-document-form" {% endif %}>
       {% if saved_document %}
         <i class="bi bi-star-fill"></i>
         {% if saved_document.folder %}
@@ -29,8 +29,8 @@
                   aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="save_document-form"
-                {% if saved_document %} hx-post="{% url 'saved_document_update' saved_document.id %}" {% else %} hx-post="{% url 'save_document_new' %}" {% endif %}
+          <form id="save-document-form"
+                {% if saved_document %} hx-post="{% url 'saved_document_update' saved_document.id %}" {% else %} hx-post="{% url 'saved_document_new' %}" {% endif %}
                 hx-target="#saveDocumentWrapper">
             {% csrf_token %}
             {{ form.document }}
@@ -73,7 +73,7 @@
                     type="button"
                     data-bs-dismiss="modal"
                     hx-target="#saveDocumentWrapper"
-                    hx-include="#save_document-form"
+                    hx-include="#save-document-form"
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                     hx-post="{% url 'saved_document_delete' saved_document.id %}"
                     hx-confirm="Are you sure you want to unsave this document?">
@@ -88,7 +88,7 @@
             </button>
             <button class="btn btn-primary ms-1"
                     type="submit"
-                    form="save_document-form"
+                    form="save-document-form"
                     data-bs-dismiss="modal">
               {% trans 'Save' %}
             </button>

@@ -136,7 +136,7 @@ class SavedDocumentDeleteView(
     PermissionRequiredMixin, SaveDocumentFormView, DeleteView
 ):
     permission_required = "peachjam.delete_saveddocument"
-    success_url = reverse_lazy("save_document_new")
+    success_url = reverse_lazy("saved_document_new")
 
     def post(self, *args, **kwargs):
         self.object = self.get_object()

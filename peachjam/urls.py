@@ -291,12 +291,12 @@ urlpatterns = [
     path(
         "saved-documents/button/<int:doc_id>",
         SavedDocumentButtonView.as_view(),
-        name="save_document_button",
+        name="saved_document_button",
     ),
     path(
         "saved-documents/new",
         SavedDocumentCreateView.as_view(),
-        name="save_document_new",
+        name="saved_document_new",
     ),
     path(
         "saved-documents/<int:pk>/update",
