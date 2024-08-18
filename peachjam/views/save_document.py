@@ -24,7 +24,7 @@ class BaseFolderView(PermissionRequiredMixin):
     def get_template_names(self):
         if self.request.htmx:
             return ["peachjam/_folders_list.html"]
-        return ["peachjam/saved_document_list.html"]
+        return ["peachjam/folders_list.html"]
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)

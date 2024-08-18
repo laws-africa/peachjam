@@ -308,9 +308,7 @@ urlpatterns = [
         SavedDocumentDeleteView.as_view(),
         name="saved_document_delete",
     ),
-    path(
-        "saved-documents/folders/", FolderListView.as_view(), name="saved_document_list"
-    ),
+    path("saved-documents/folders/", FolderListView.as_view(), name="folder_list"),
     path(
         "saved-documents/folders/new",
         FolderCreateView.as_view(),
