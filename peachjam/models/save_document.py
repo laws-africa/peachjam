@@ -8,11 +8,11 @@ User = get_user_model()
 
 
 class Folder(models.Model):
-    name = models.CharField(_("name"), max_length=1024)
+    name = models.CharField(_("name"), max_length=100)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name=_("user_profile"),
+        verbose_name=_("user"),
         related_name="folders",
     )
 
@@ -30,7 +30,7 @@ class SavedDocument(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name=_("user_profile"),
+        verbose_name=_("user"),
         related_name="saved_documents",
     )
     folder = models.ForeignKey(
@@ -38,6 +38,7 @@ class SavedDocument(models.Model):
         on_delete=models.CASCADE,
         verbose_name=_("folder"),
         null=True,
+        blank=True,
         related_name="saved_documents",
     )
 

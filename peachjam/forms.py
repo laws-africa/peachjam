@@ -316,27 +316,40 @@ class DocumentProblemForm(forms.Form):
         )
 
 
+class FolderForm(forms.ModelForm):
+    class Meta:
+        model = Folder
+        fields = ["name", "user"]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+
+        if self.is_bound and self.request:
+            self.data = self.data.copy()
+            self.data["user"] = User.objects.get(pk=self.request.user.pk)
+            if not self.data.get("name") and self.request.htmx:
+                self.data["name"] = self.request.htmx.prompt
+
+
 class SaveDocumentForm(forms.ModelForm):
-    folder = forms.ModelChoiceField(queryset=Folder.objects, required=False)
     new_folder = forms.CharField(max_length=255, required=False)
-    user = forms.ModelChoiceField(queryset=User.objects, required=False)
-    document = forms.ModelChoiceField(
-        queryset=CoreDocument.objects, widget=forms.HiddenInput(), required=False
-    )
 
     class Meta:
         model = SavedDocument
         fields = ["user", "document", "folder", "new_folder"]
+        widgets = {"document": forms.HiddenInput()}
 
-    def __init__(self, *args, user=None, **kwargs):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
-        self.user = user
-        self.fields["folder"].queryset = Folder.objects.none()
-        if hasattr(self.user, "folders"):
-            self.fields["folder"].queryset = self.user.folders.all()
+
+        self.fields["folder"].queryset = self.user.folders.all()
+        if self.is_bound and self.user:
+            self.data = self.data.copy()
+            self.data["user"] = User.objects.get(pk=self.user.pk)
 
     def clean(self):
-        self.cleaned_data["user"] = self.user
         if self.cleaned_data.get("new_folder"):
             folder, _ = Folder.objects.get_or_create(
                 name=self.cleaned_data["new_folder"],
