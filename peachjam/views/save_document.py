@@ -95,14 +95,6 @@ class BaseSavedDocumentFormView(
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
-        doc_id = self.request.GET.get("doc_id")
-        if doc_id:
-            try:
-                doc_id = int(doc_id)
-                document = CoreDocument.objects.filter(pk=doc_id).first()
-                kwargs.update({"initial": {"document": document}})
-            except ValueError:
-                pass
         return kwargs
 
     def get_success_url(self):
@@ -118,6 +110,18 @@ class SavedDocumentCreateView(
     PermissionRequiredMixin, BaseSavedDocumentFormView, CreateView
 ):
     permission_required = "peachjam.add_saveddocument"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        doc_id = self.request.GET.get("doc_id")
+        if doc_id:
+            try:
+                doc_id = int(doc_id)
+                document = CoreDocument.objects.filter(pk=doc_id).first()
+                kwargs.update({"initial": {"document": document}})
+            except ValueError:
+                pass
+        return kwargs
 
 
 class SavedDocumentUpdateView(
