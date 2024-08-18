@@ -294,9 +294,9 @@ urlpatterns = [
         name="saved_document_button",
     ),
     path(
-        "saved-documents/new",
+        "saved-documents/create",
         SavedDocumentCreateView.as_view(),
-        name="saved_document_new",
+        name="saved_document_create",
     ),
     path(
         "saved-documents/<int:pk>/update",
@@ -310,9 +310,9 @@ urlpatterns = [
     ),
     path("saved-documents/folders/", FolderListView.as_view(), name="folder_list"),
     path(
-        "saved-documents/folders/new",
+        "saved-documents/folders/create",
         FolderCreateView.as_view(),
-        name="folder_new",
+        name="folder_create",
     ),
     path(
         "saved-documents/folders/<int:pk>/update",
