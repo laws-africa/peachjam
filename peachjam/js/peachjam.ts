@@ -13,6 +13,7 @@ import '@lawsafrica/law-widgets/dist/components/la-decorate-internal-refs';
 import '@lawsafrica/law-widgets/dist/components/la-decorate-terms';
 // @ts-ignore
 import htmx from 'htmx.org';
+import { csrfToken } from './api';
 
 export interface PeachJamConfig {
   appName: string;
@@ -65,15 +66,23 @@ class PeachJam {
     window.htmx = htmx;
     // htmx:load is fired both when the page loads (weird) and when new content is loaded. We only care about the latter
     // case. See https://github.com/bigskysoftware/htmx/issues/1500
-    const htmxHelper = { firstLoad: true};
-    document.body.addEventListener('htmx:load', (e) => {
+    const htmxHelper = { firstLoad: true };
+    let token: string = '';
+    document.body.addEventListener('htmx:load', async (e) => {
       if (htmxHelper.firstLoad) {
         htmxHelper.firstLoad = false;
+        token = await csrfToken();
         return;
       }
       // mount components on new elements
       this.createComponents(e.target as HTMLElement);
       this.createVueComponents(e.target as HTMLElement);
+    });
+
+    htmx.on('htmx:configRequest', (e: any) => {
+      if (e.detail.verb === 'post') {
+        e.detail.headers['X-CSRFToken'] = token;
+      }
     });
   }
 

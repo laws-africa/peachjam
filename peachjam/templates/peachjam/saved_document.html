@@ -31,7 +31,6 @@
         <form id="save-document-form"
               {% if saved_document %} hx-post="{% url 'saved_document_update' saved_document.id %}" {% else %} hx-post="{% url 'saved_document_create' %}" {% endif %}
               hx-target="#saveDocumentWrapper">
-          {% csrf_token %}
           {{ form.document }}
           <p class="h5">{{ saved_document.document }}</p>
           <label class="form-label" for="{{ form.folder.id_for_label }}">{{ form.folder.label }}</label>
