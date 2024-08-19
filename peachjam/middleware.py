@@ -70,6 +70,7 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
         "/admin/",
         "/accounts/",
         "/api/",
+        "/saved-documents/",
         "/_",
     ]
 
