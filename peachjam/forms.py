@@ -319,7 +319,7 @@ class DocumentProblemForm(forms.Form):
 class FolderForm(forms.ModelForm):
     class Meta:
         model = Folder
-        fields = ["name", "user"]
+        fields = ["name"]
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
@@ -327,7 +327,6 @@ class FolderForm(forms.ModelForm):
 
         if self.is_bound and self.request:
             self.data = self.data.copy()
-            self.data["user"] = User.objects.get(pk=self.request.user.pk)
             if not self.data.get("name") and self.request.htmx:
                 self.data["name"] = self.request.htmx.prompt
 
@@ -337,23 +336,18 @@ class SaveDocumentForm(forms.ModelForm):
 
     class Meta:
         model = SavedDocument
-        fields = ["user", "document", "folder", "new_folder"]
+        fields = ["document", "folder", "new_folder"]
         widgets = {"document": forms.HiddenInput()}
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
-
-        self.fields["folder"].queryset = self.user.folders.all()
-        if self.is_bound and self.user:
-            self.data = self.data.copy()
-            self.data["user"] = User.objects.get(pk=self.user.pk)
+        self.fields["folder"].queryset = self.instance.user.folders.all()
 
     def clean(self):
         if self.cleaned_data.get("new_folder"):
             folder, _ = Folder.objects.get_or_create(
                 name=self.cleaned_data["new_folder"],
-                user=self.cleaned_data["user"],
+                user=self.instance.user,
             )
             self.cleaned_data["folder"] = folder
         return self.cleaned_data
