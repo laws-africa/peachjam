@@ -26,8 +26,8 @@ class LegislationListView(FilteredDocumentListView):
             self.form_defaults = {"sort": "-date"}
         return super().get_form()
 
-    def get_base_queryset(self, *args, **kwargs):
-        qs = super().get_base_queryset(*args, **kwargs)
+    def get_queryset(self):
+        qs = super().get_queryset()
         qs = self.get_variant_queryset(qs)
         return qs
 
