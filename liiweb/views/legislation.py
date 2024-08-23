@@ -26,8 +26,8 @@ class LegislationListView(FilteredDocumentListView):
             self.form_defaults = {"sort": "-date"}
         return super().get_form()
 
-    def get_queryset(self):
-        qs = super().get_queryset()
+    def get_base_queryset(self, *args, **kwargs):
+        qs = super().get_base_queryset(*args, *kwargs)
         qs = self.get_variant_queryset(qs)
         return qs
 
@@ -87,7 +87,7 @@ class LegislationListView(FilteredDocumentListView):
         )
 
         children = defaultdict(list)
-        children_qs = self.get_base_queryset().filter(
+        children_qs = Legislation.objects.filter(
             parent_work_id__in=parents, repealed=False, metadata_json__principal=True
         )
         # group children by parent
