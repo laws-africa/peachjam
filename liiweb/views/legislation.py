@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
-from peachjam.helpers import chunks
+from peachjam.helpers import chunks, get_language
 from peachjam.models import JurisdictionProfile, Legislation, Locality, pj_settings
 from peachjam.views import FilteredDocumentListView
 
@@ -27,7 +27,7 @@ class LegislationListView(FilteredDocumentListView):
         return super().get_form()
 
     def get_base_queryset(self, *args, **kwargs):
-        qs = super().get_base_queryset(*args, *kwargs)
+        qs = super().get_base_queryset(*args, **kwargs)
         qs = self.get_variant_queryset(qs)
         return qs
 
@@ -90,6 +90,7 @@ class LegislationListView(FilteredDocumentListView):
         children_qs = Legislation.objects.filter(
             parent_work_id__in=parents, repealed=False, metadata_json__principal=True
         )
+        children_qs = children_qs.preferred_language(get_language(self.request))
         # group children by parent
         for child in children_qs:
             children[child.parent_work_id].append(child)
