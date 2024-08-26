@@ -1103,6 +1103,7 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
     resource_class = GazetteResource
     inlines = [SourceFileInline]
     prepopulated_fields = {}
+    readonly_fields = ("expression_frbr_uri",)
 
     fieldsets = [
         (
@@ -1127,6 +1128,7 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
             gettext_lazy("Advanced"),
             {
                 "fields": [
+                    "expression_frbr_uri",
                     "allow_robots",
                     "published",
                 ]
