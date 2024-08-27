@@ -10,9 +10,8 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
-from django.views.generic.edit import FormMixin
 
-from peachjam.forms import FolderForm, SaveDocumentForm
+from peachjam.forms import SaveDocumentForm
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
 
 User = get_user_model()
@@ -39,6 +38,10 @@ class BaseFolderView(
     def get_queryset(self):
         return self.request.user.folders.all()
 
+
+class FolderListView(BaseFolderView, ListView):
+    permission_required = "peachjam.view_folder"
+
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context["ungrouped_saved_documents"] = self.request.user.saved_documents.filter(
@@ -48,21 +51,20 @@ class BaseFolderView(
         return context
 
 
-class FolderListView(BaseFolderView, ListView):
-    permission_required = "peachjam.view_folder"
-
-
-class BaseFolderFormView(BaseFolderView, FormMixin):
+class BaseFolderFormMixin(BaseFolderView):
     success_url = reverse_lazy("folder_list")
-    form_class = FolderForm
+    fields = ["name"]
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
+        if self.request.htmx and self.request.htmx.prompt:
+            data = kwargs["data"].copy()
+            data["name"] = self.request.htmx.prompt
+            kwargs["data"] = data
         return kwargs
 
 
-class FolderCreateView(BaseFolderFormView, CreateView):
+class FolderCreateView(BaseFolderFormMixin, CreateView):
     permission_required = "peachjam.add_folder"
 
     def get_form_kwargs(self):
@@ -73,11 +75,12 @@ class FolderCreateView(BaseFolderFormView, CreateView):
         return kwargs
 
 
-class FolderUpdateView(BaseFolderFormView, UpdateView):
+class FolderUpdateView(BaseFolderFormMixin, UpdateView):
     permission_required = "peachjam.change_folder"
 
 
-class FolderDeleteView(BaseFolderFormView, DeleteView):
+class FolderDeleteView(BaseFolderView, DeleteView):
+    success_url = reverse_lazy("folder_list")
     permission_required = "peachjam.delete_folder"
 
 
@@ -127,14 +130,14 @@ class SavedDocumentCreateView(BaseSavedDocumentFormView, CreateView):
         kwargs = super().get_form_kwargs()
         instance = SavedDocument()
         instance.user = self.request.user
-        kwargs["instance"] = instance
         doc_id = self.request.GET.get("doc_id")
         if doc_id:
             try:
                 document = get_object_or_404(CoreDocument, pk=int(doc_id))
-                kwargs.update({"initial": {"document": document}})
+                instance.document = document
             except ValueError:
                 pass
+        kwargs["instance"] = instance
         return kwargs
 
 

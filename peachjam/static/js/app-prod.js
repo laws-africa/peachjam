@@ -61590,22 +61590,25 @@ var PeachJam = /** @class */ (function () {
         var token = '';
         document.body.addEventListener('htmx:load', function (e) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!htmxHelper.firstLoad) return [3 /*break*/, 2];
-                        htmxHelper.firstLoad = false;
-                        return [4 /*yield*/, (0,_api__WEBPACK_IMPORTED_MODULE_11__.csrfToken)()];
-                    case 1:
-                        token = _a.sent();
-                        return [2 /*return*/];
-                    case 2:
-                        // mount components on new elements
-                        this.createComponents(e.target);
-                        this.createVueComponents(e.target);
-                        return [2 /*return*/];
+                if (htmxHelper.firstLoad) {
+                    htmxHelper.firstLoad = false;
+                    return [2 /*return*/];
                 }
+                // mount components on new elements
+                this.createComponents(e.target);
+                this.createVueComponents(e.target);
+                return [2 /*return*/];
             });
         }); });
+        htmx_org__WEBPACK_IMPORTED_MODULE_10__["default"].on('htmx:confirm', function (e) {
+            if (e.detail.verb === 'post') {
+                e.preventDefault();
+                (0,_api__WEBPACK_IMPORTED_MODULE_11__.csrfToken)().then(function (t) {
+                    token = t;
+                    e.detail.issueRequest();
+                });
+            }
+        });
         htmx_org__WEBPACK_IMPORTED_MODULE_10__["default"].on('htmx:configRequest', function (e) {
             if (e.detail.verb === 'post') {
                 e.detail.headers['X-CSRFToken'] = token;

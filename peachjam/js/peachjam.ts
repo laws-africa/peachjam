@@ -71,12 +71,21 @@ class PeachJam {
     document.body.addEventListener('htmx:load', async (e) => {
       if (htmxHelper.firstLoad) {
         htmxHelper.firstLoad = false;
-        token = await csrfToken();
         return;
       }
       // mount components on new elements
       this.createComponents(e.target as HTMLElement);
       this.createVueComponents(e.target as HTMLElement);
+    });
+
+    htmx.on('htmx:confirm', (e:any) => {
+      if (e.detail.verb === 'post') {
+        e.preventDefault();
+        csrfToken().then((t) => {
+          token = t;
+          e.detail.issueRequest();
+        });
+      }
     });
 
     htmx.on('htmx:configRequest', (e: any) => {

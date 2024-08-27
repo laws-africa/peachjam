@@ -316,21 +316,6 @@ class DocumentProblemForm(forms.Form):
         )
 
 
-class FolderForm(forms.ModelForm):
-    class Meta:
-        model = Folder
-        fields = ["name"]
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
-        super().__init__(*args, **kwargs)
-
-        if self.is_bound and self.request:
-            self.data = self.data.copy()
-            if not self.data.get("name") and self.request.htmx:
-                self.data["name"] = self.request.htmx.prompt
-
-
 class SaveDocumentForm(forms.ModelForm):
     new_folder = forms.CharField(max_length=255, required=False)
 
