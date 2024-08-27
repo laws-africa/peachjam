@@ -1100,18 +1100,36 @@ class AuthorAdmin(admin.ModelAdmin):
 
 @admin.register(Gazette)
 class GazetteAdmin(ImportExportMixin, DocumentAdmin):
+    resource_class = GazetteResource
+    inlines = [
+        SourceFileInline,
+        BackgroundTaskInline,
+    ]
+    prepopulated_fields = {}
+
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[2][1]["fields"].remove("frbr_uri_number")
     fieldsets[0][1]["fields"].extend(
         [
+            "frbr_uri_number",
             "volume_number",
-            "sub_publication",
             "supplement",
             "supplement_number",
-            "publication",
             "special",
         ]
     )
-    resource_class = GazetteResource
+    fieldsets[1][1]["fields"].remove("citation")
+    fieldsets[1][1]["fields"].remove("source_url")
+    fieldsets[4][1]["fields"].remove("toc_json")
+    fieldsets[4][1]["fields"].remove("content_html_is_akn")
+    fieldsets[4][1]["fields"].extend(["publication", "sub_publication"])
+    # remove content fieldset
+    fieldsets.pop(3)
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields["frbr_uri_number"].label = gettext_lazy("Gazette number")
+        return form
 
 
 @admin.register(Book)
