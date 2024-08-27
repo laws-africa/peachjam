@@ -1101,40 +1101,30 @@ class AuthorAdmin(admin.ModelAdmin):
 @admin.register(Gazette)
 class GazetteAdmin(ImportExportMixin, DocumentAdmin):
     resource_class = GazetteResource
-    inlines = [SourceFileInline]
-    prepopulated_fields = {}
-    readonly_fields = ("expression_frbr_uri",)
-
-    fieldsets = [
-        (
-            gettext_lazy("Key details"),
-            {
-                "fields": [
-                    "title",
-                    "jurisdiction",
-                    "language",
-                    "date",
-                    "volume_number",
-                    "frbr_uri_number",
-                    "sub_publication",
-                    "supplement",
-                    "supplement_number",
-                    "publication",
-                    "special",
-                ]
-            },
-        ),
-        (
-            gettext_lazy("Advanced"),
-            {
-                "fields": [
-                    "expression_frbr_uri",
-                    "allow_robots",
-                    "published",
-                ]
-            },
-        ),
+    inlines = [
+        SourceFileInline,
+        BackgroundTaskInline,
     ]
+    prepopulated_fields = {}
+
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[2][1]["fields"].remove("frbr_uri_number")
+    fieldsets[0][1]["fields"].extend(
+        [
+            "frbr_uri_number",
+            "volume_number",
+            "supplement",
+            "supplement_number",
+            "special",
+        ]
+    )
+    fieldsets[1][1]["fields"].remove("citation")
+    fieldsets[1][1]["fields"].remove("source_url")
+    fieldsets[4][1]["fields"].remove("toc_json")
+    fieldsets[4][1]["fields"].remove("content_html_is_akn")
+    fieldsets[4][1]["fields"].extend(["publication", "sub_publication"])
+    # remove content fieldset
+    fieldsets.pop(3)
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
