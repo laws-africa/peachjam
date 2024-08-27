@@ -39,21 +39,19 @@
 {% block after-header %}
   <div class="bg-primary py-4">
     <div class="container">
-      <!-- row -->
       <div class="row align-items-center g-0">
         <div class="col-xl-6 col-lg-6 col-md-12">
-          <!-- heading -->
           <div>
-            <h1 class="text-white fw-bold pe-lg-8">Take the MalawiLII Survey</h1>
-            <!-- text -->
+            <h1 class="text-white fw-bold pe-lg-8">{% trans 'Take the MalawiLII Survey' %}</h1>
+            {% blocktrans %}
             <p class="text-white mb-4 h5 fw-bold">
               Help us make Malawi legal information more freely accessible to everyone.
               Take this short 5 minute survey on your usage of the platform and your general experience using the site.
               All information shared is confidential.
             </p>
+            {% endblocktrans %}
           </div>
         </div>
-        <!-- img -->
         <div class=" col-xl-6 col-lg-6 col-md-12 text-center pt-6">
           <a target="_blank"
              href="https://forms.gle/3KQZrVQZNvt7xJj78"
