@@ -6,7 +6,7 @@
         <div>
           {% blocktrans %}
             <p class="text-white m-lg-0 fw-bold">
-             Help us make {{ APP_NAME }} better. Take this short 5 minute survey and tell us about how you use {{ APP_NAME }} and how we can improve it. All information shared is confidential
+             Help us make {{ APP_NAME }} better. Take this short 5 minute survey and tell us about how you use {{ APP_NAME }} and how we can improve it. All information shared is confidential.
             </p>
           {% endblocktrans %}
         </div>
@@ -14,7 +14,7 @@
       <div class=" col-xl-6 col-lg-6 col-md-12 text-lg-center pt-6">
         <a target="_blank"
            href="{{ PEACHJAM_SETTINGS.survey_link }}"
-           class="text-white btn btn-danger"><span class="fw-bold">Take the survey</span></a>
+           class="text-white btn btn-danger"><span class="fw-bold">{% trans 'Take the survey' %}</span></a>
       </div>
     </div>
   </div>
