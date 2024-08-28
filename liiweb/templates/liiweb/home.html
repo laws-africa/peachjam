@@ -3,6 +3,7 @@
 {% block title %}
   {% trans 'Home' %}
 {% endblock %}
+{% block survey-banner %}{% endblock %}
 {% block page-content %}
   {% block hero %}
     <section class="hero">
@@ -39,6 +40,9 @@
     {% endblock %}
   {% endblock %}
   {% block after-search %}{% endblock %}
+  {% if PEACHJAM_SETTINGS.survey_link %}
+    {% include "peachjam/_survey_banner_lg.html" %}
+  {% endif %}
   {% block about %}
     <section class="mt-2">
       <div class="container">

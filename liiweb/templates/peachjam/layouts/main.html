@@ -5,3 +5,10 @@
         href="{% sass_src 'stylesheets/liiweb.scss' %}"
         type="text/css"/>
 {% endblock %}
+{% block before-content %}
+  {% block survey-banner %}
+    {% if PEACHJAM_SETTINGS.survey_link %}
+      {% include "peachjam/_survey_banner_sm.html" %}
+    {% endif %}
+  {% endblock %}
+{% endblock %}
