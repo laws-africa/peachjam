@@ -61,6 +61,7 @@
   {% include 'peachjam/_header.html' %}
 {% endblock %}
 {% block body-content %}
+  {% block before-content %}{% endblock %}
   <main id="top">
     {% block page-content %}{% endblock %}
   </main>
