@@ -2,7 +2,7 @@ from django.test import TestCase
 
 
 class BaseDocumentFilterFormTestCase(TestCase):
-    fixtures = ["documents/sample_documents", "tests/countries", "tests/languages"]
+    fixtures = ["tests/countries", "documents/sample_documents", "tests/languages"]
     maxDiff = None
 
     def test_years_filter_with_single_year(self):

@@ -6,7 +6,7 @@ from peachjam.models import Book, CoreDocument, Country, Journal, Language
 
 
 class CoreDocumentTestCase(TestCase):
-    fixtures = ["documents/sample_documents"]
+    fixtures = ["tests/countries", "documents/sample_documents"]
 
     def test_document_text_from_html(self):
         doc = CoreDocument.objects.get(

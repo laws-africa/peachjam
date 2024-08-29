@@ -586,7 +586,8 @@ class CoreDocument(PolymorphicModel):
 
     def set_nature(self):
         # provide a default nature if it's not already set
-        if not self.nature:
+        # use hasattr() because otherwise we'd get a DoesNotExist exception
+        if not hasattr(self, "nature"):
             code, name = self.default_nature
             self.nature = DocumentNature.objects.get_or_create(
                 code=code, defaults={"name": name}

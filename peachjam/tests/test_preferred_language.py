@@ -5,7 +5,7 @@ from peachjam.models import Legislation
 
 
 class TestPreferredLanguage(TestCase):
-    fixtures = ["documents/sample_documents", "tests/countries", "tests/languages"]
+    fixtures = ["tests/countries", "documents/sample_documents", "tests/languages"]
     maxDiff = None
 
     def test_preferred_language(self):

@@ -2,7 +2,7 @@ from django.test import TestCase
 
 
 class PeachjamViewsTest(TestCase):
-    fixtures = ["documents/sample_documents"]
+    fixtures = ["tests/countries", "documents/sample_documents"]
 
     def test_login_page(self):
         response = self.client.get("/accounts/login/")
