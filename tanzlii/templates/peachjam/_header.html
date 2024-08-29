@@ -61,7 +61,10 @@
     </a>
     <ul class="dropdown-menu">
       <li class="dropdown-item">
-        <a class=" nav-link px-0" href="">{% trans 'Digital Case Digests' %}</a>
+        <a class=" nav-link px-0 {% if request.path == 'taxonomy/case-indexes/case-indexes-tanzlii-case-digest' %}active{% endif %}"
+           href="{% url 'taxonomy_detail' 'case-indexes' 'case-indexes-tanzlii-case-digest' %}">
+          {% trans 'TanzLII Case Digest' %}
+        </a>
       </li>
       <li class="dropdown-item">
         <a class="nav-link px-0 {% if request.path == '/authors/TZLRC/' %}active{% endif %}"
