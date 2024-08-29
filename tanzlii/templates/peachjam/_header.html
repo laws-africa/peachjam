@@ -19,37 +19,78 @@
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'gazettes' %}active{% endif %}"
        href="{% url 'gazettes' %}">
-      {% trans 'Gazettes' %}
+      {% trans 'Government Gazette' %}
     </a>
   </li>
-  <li class="nav-item">
-    <a class="nav-link {% if request.path == '/doc/jot-documents-and-guidelines' %}active{% endif %}"
-       href="{% url 'document_nature_list' 'jot-documents-and-guidelines' %}">
-      {% trans 'JOT Documents and Guidelines' %}
+  <li class="nav-item dropdown main-nav">
+    <a class="nav-link dropdown-toggle"
+       href="#"
+       role="button"
+       data-bs-toggle="dropdown"
+       aria-expanded="false">
+      {% trans 'Practice Essentials' %}
     </a>
+    <ul class="dropdown-menu">
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if request.path == '/doc/jot-documents-and-guidelines' %}active{% endif %}"
+           href="{% url 'document_nature_list' 'jot-documents-and-guidelines' %}">
+          {% trans 'Judiciary Guidelines & Procedures' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link px-0 {% if request.path == '/authors/TZNPS/' %}active{% endif %}"
+           href="{% url 'author' 'TZNPS' %}">
+          {% trans 'National Prosecution Service Guidelines & Manuals' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if request.path == '/authors/TLS/' %}active{% endif %}"
+           href="{% url 'author' 'TLS' %}">
+          {% trans 'Tanganyika Law Society Guidelines & Manuals' %}
+        </a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown main-nav">
+    <a class="nav-link dropdown-toggle"
+       href="#"
+       role="button"
+       data-bs-toggle="dropdown"
+       aria-expanded="false">
+      {% trans 'Research Hub' %}
+    </a>
+    <ul class="dropdown-menu">
+      <li class="dropdown-item">
+        <a class=" nav-link px-0" href="">{% trans 'Digital Case Digests' %}</a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link px-0 {% if request.path == '/authors/TZLRC/' %}active{% endif %}"
+           href="{% url 'author' 'TZLRC' %}">
+          {% trans 'Law Reform Commission Reports' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if view.navbar_link == 'journals' %}active{% endif %}"
+           href="{% url 'journal_list' %}">{% trans 'Legal Journals' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if view.navbar_link == 'articles' %}active{% endif %}"
+           href="{% url 'article_list' %}">
+          {% trans 'Articles' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if request.path == '/doc/speech' %}active{% endif %}"
+           href="{% url 'document_nature_list' 'speech' %}">{% trans 'Notable Speeches' %}
+        </a>
+      </li>
+    </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if request.path == '/authors/TZLRC/' %}active{% endif %}"
-       href="{% url 'author' 'TZLRC' %}">
-      {% trans 'Law Reform' %}
-    </a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {% if request.path == '/authors/TZNPS/' %}active{% endif %}"
-       href="{% url 'author' 'TZNPS' %}">
-      {% trans 'NPS Documents' %}
-    </a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {% if request.path == '/doc/causelist' %}active{% endif %}"
-       href="{% url 'document_nature_list' 'causelist' %}">
-      {% trans 'Causelists' %}
-    </a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {% if request.path == '/doc/speech' %}active{% endif %}"
-       href="{% url 'document_nature_list' 'speech' %}">
-      {% trans 'Speeches' %}
+    <a class="nav-link {% if request.path == '/taxonomy/law-in-plain-language' %}active{% endif %}"
+       href="{% url 'first_level_taxonomy_list' 'law-in-plain-language' %}">
+      {% trans 'Street Law' %}
     </a>
   </li>
 {% endblock %}
