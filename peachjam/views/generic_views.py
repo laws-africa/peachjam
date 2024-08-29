@@ -14,10 +14,12 @@ from peachjam.models import (
     Author,
     CitationLink,
     CoreDocument,
+    DocumentNature,
     GenericDocument,
     LegalInstrument,
     Predicate,
     Relationship,
+    Taxonomy,
 )
 from peachjam.xmlutils import parse_html_str
 from peachjam_api.serializers import (
@@ -151,18 +153,16 @@ class FilteredDocumentListView(DocumentListView):
         return context
 
     def add_facets(self, context):
-        authors = []
-        # Initialize facet data values
-        natures = list(
-            doc_n
-            for doc_n in self.form.filter_queryset(
+        natures = DocumentNature.objects.filter(
+            pk__in=self.form.filter_queryset(
                 self.get_base_queryset(), exclude="natures"
             )
             .order_by()
-            .values_list("nature__name", flat=True)
+            .values_list("nature_id", flat=True)
             .distinct()
-            if doc_n
         )
+
+        authors = []
         if self.model in [GenericDocument, LegalInstrument]:
             authors = list(
                 a
@@ -181,11 +181,14 @@ class FilteredDocumentListView(DocumentListView):
             .values_list("date__year", flat=True)
             .distinct()
         )
-        taxonomies = list(
-            self.form.filter_queryset(self.get_base_queryset(), exclude="taxonomies")
+
+        taxonomies = Taxonomy.objects.filter(
+            pk__in=self.form.filter_queryset(
+                self.get_base_queryset(), exclude="taxonomies"
+            )
             .filter(taxonomies__topic__isnull=False)
-            .order_by("taxonomies__topic__name")
-            .values_list("taxonomies__topic__name", flat=True)
+            .order_by("taxonomies__topic__id")
+            .values_list("taxonomies__topic__id", flat=True)
             .distinct()
         )
 
@@ -195,31 +198,33 @@ class FilteredDocumentListView(DocumentListView):
             "years": {
                 "label": _("Years"),
                 "type": "checkbox",
-                "options": [str(y) for y in sorted(years, reverse=True)],
+                # these are (value, label) tuples
+                "options": [(str(y), y) for y in sorted(years, reverse=True)],
                 "values": self.request.GET.getlist("years"),
             },
             "authors": {
                 "label": Author.model_label_plural,
                 "type": "checkbox",
-                "options": authors,
+                "options": [(a, a) for a in authors],
                 "values": self.request.GET.getlist("authors"),
             },
             "natures": {
                 "label": _("Document nature"),
                 "type": "radio",
-                "options": natures,
+                # this ensures we get the translated name
+                "options": [(n.code, n.name) for n in natures],
                 "values": self.request.GET.getlist("natures"),
             },
             "taxonomies": {
                 "label": _("Topics"),
                 "type": "checkbox",
-                "options": taxonomies,
+                "options": [(t.slug, t.name) for t in taxonomies],
                 "values": self.request.GET.getlist("taxonomies"),
             },
             "alphabet": {
                 "label": _("Alphabet"),
                 "type": "radio",
-                "options": lowercase_alphabet(),
+                "options": [(a, a) for a in lowercase_alphabet()],
                 "values": self.request.GET.get("alphabet"),
             },
         }

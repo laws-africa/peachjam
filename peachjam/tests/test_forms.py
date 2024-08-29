@@ -8,7 +8,9 @@ class BaseDocumentFilterFormTestCase(TestCase):
     def test_years_filter_with_single_year(self):
         response = self.client.get("/legal_instruments/?years=2007")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["facet_data"]["years"]["options"], ["2007"])
+        self.assertEqual(
+            response.context["facet_data"]["years"]["options"], [("2007", 2007)]
+        )
 
     def test_alphabet_filter(self):
         response = self.client.get("/legal_instruments/?alphabet=a")
