@@ -306,6 +306,17 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
 
 
 class CoreDocument(PolymorphicModel):
+    # There are three ways of indicating a document's type:
+    #
+    # 1. doc_type: This is historical and not widely used, since PolymorphicModel does the bulk of the work for us.
+    #              It is used where we need to know the django Model to use for the document. There is a chance
+    #              we could remove this and rely on PolymorphicModel.
+    #
+    # 2. frbr_uri_doctype: the doc type used in the FRBR URI. There is a list of allowed values. Usually, each
+    #                      value has a concrete django Model, such as act -> Legislation.
+    #
+    # 3. nature: a human-friendly label for the document type, which can be more specific than the other two.
+
     DOC_TYPE_CHOICES = (
         ("core_document", "Core Document"),
         ("gazette", "Gazette"),
@@ -316,6 +327,10 @@ class CoreDocument(PolymorphicModel):
         ("book", "Book"),
         ("journal", "Journal"),
     )
+
+    # The name of the default nature to use for this type of document, if one is not set. This allows us to ensure
+    # that all documents have a nature.
+    default_nature = ("document", "Document")
 
     objects = CoreDocumentManager.from_queryset(CoreDocumentQuerySet)()
 
@@ -367,8 +382,8 @@ class CoreDocument(PolymorphicModel):
     nature = models.ForeignKey(
         DocumentNature,
         on_delete=models.PROTECT,
-        null=True,
-        blank=True,
+        null=False,
+        blank=False,
         verbose_name=_("nature"),
     )
 
@@ -562,10 +577,24 @@ class CoreDocument(PolymorphicModel):
         return frbr_uri.work_uri(work_component=False)
 
     def set_frbr_uri_subtype(self):
-        self.frbr_uri_subtype = self.nature.code if self.nature else None
+        # default the subtype to the nature code, unless the nature is the default nature
+        self.frbr_uri_subtype = (
+            self.nature.code
+            if self.nature and self.nature.code != self.default_nature[0]
+            else None
+        )
+
+    def set_nature(self):
+        # provide a default nature if it's not already set
+        if not self.nature:
+            code, name = self.default_nature
+            self.nature = DocumentNature.objects.get_or_create(
+                code=code, defaults={"name": name}
+            )[0]
 
     def pre_save(self):
         """Pre-populate various fields before saving or running full_clean."""
+        self.set_nature()
         self.set_frbr_uri_subtype()
         self.assign_frbr_uri()
         self.expression_frbr_uri = self.generate_expression_frbr_uri()
@@ -712,6 +741,12 @@ class CoreDocument(PolymorphicModel):
         """Optionally provide a penalty for this document in search results. This cannot be zero or None."""
         # provide a very small number instead of zero
         return 0.0000001
+
+    def get_doc_type_display(self):
+        """Human-friendly type of this document."""
+        if self.nature:
+            return self.nature.name
+        return super().get_doc_type_display()
 
 
 def file_location(instance, filename):

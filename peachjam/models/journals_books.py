@@ -2,12 +2,13 @@ from django.db import models
 from martor.models import MartorField
 from martor.utils import markdownify
 
-from peachjam.models import CoreDocument, DocumentNature
+from peachjam.models import CoreDocument
 
 
 class Book(CoreDocument):
     publisher = models.CharField(max_length=2048)
     content_markdown = MartorField(blank=True, null=True)
+    default_nature = ("book", "Book")
 
     def delete_citations(self):
         super().delete_citations()
@@ -21,22 +22,15 @@ class Book(CoreDocument):
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"
-        if not self.nature:
-            self.nature = DocumentNature.objects.get_or_create(
-                code="book", defaults={"name": "Book"}
-            )[0]
         self.doc_type = "book"
         return super().pre_save()
 
 
 class Journal(CoreDocument):
     publisher = models.CharField(max_length=2048)
+    default_nature = ("journal", "Journal")
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"
-        if not self.nature:
-            self.nature = DocumentNature.objects.get_or_create(
-                code="journal", defaults={"name": "Journal"}
-            )[0]
         self.doc_type = "journal"
         return super().pre_save()

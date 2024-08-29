@@ -315,6 +315,8 @@ class Judgment(CoreDocument):
 
     frbr_uri_doctypes = ["judgment"]
 
+    default_nature = ("judgment", "Judgment")
+
     class Meta(CoreDocument.Meta):
         ordering = ["title"]
         verbose_name = _("judgment")
