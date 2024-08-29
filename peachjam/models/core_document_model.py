@@ -578,11 +578,8 @@ class CoreDocument(PolymorphicModel):
 
     def set_frbr_uri_subtype(self):
         # default the subtype to the nature code, unless the nature is the default nature
-        self.frbr_uri_subtype = (
-            self.nature.code
-            if self.nature and self.nature.code != self.default_nature[0]
-            else None
-        )
+        if self.nature and self.nature.code != self.default_nature[0]:
+            self.frbr_uri_subtype = self.nature.code
 
     def set_nature(self):
         # provide a default nature if it's not already set
