@@ -10,7 +10,7 @@ def forwards(apps, schema_editor):
     DOC_TYPES = [
         ("core_document", "document", "Document"),
         ("gazette", "gazette", "Gazette"),
-        ("generic_document", "document", "document"),
+        ("generic_document", "document", "Document"),
         ("judgment", "judgment", "Judgment"),
         ("legal_instrument", "legal-instrument", "Legal Instrument"),
         ("legislation", "act", "Act"),
@@ -19,7 +19,7 @@ def forwards(apps, schema_editor):
     ]
     for doc_type, nature, name in DOC_TYPES:
         nature = DocumentNature.objects.get_or_create(
-            code=nature, defaults={"name": nature}
+            code=nature, defaults={"name": name}
         )[0]
 
         # run raw SQL to do the update for this doc_type and nature id
