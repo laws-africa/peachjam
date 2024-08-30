@@ -9,6 +9,7 @@ from africanlii.models import (
     RatificationCountry,
     RegionalEconomicCommunity,
 )
+from peachjam.models import CourtClass
 from peachjam.views import AuthorDetailView, CoreDocument, PlaceDetailView
 
 
@@ -28,6 +29,7 @@ class AfricanUnionDetailPageView(TemplateView):
         context["au_institutions"] = AfricanUnionInstitution.objects.prefetch_related(
             "author"
         )
+        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["liis"] = LIIS
         return context
 
