@@ -142,9 +142,10 @@ class PeachJam {
             }
 
             const frames = event.exception.values[0].stacktrace.frames;
-            // if all frames are anonymous, don't send this event
+
+            // if first frame is anonymous, don't send this event
             // see https://github.com/getsentry/sentry-javascript/issues/3147
-            if (frames && frames.length > 0 && frames.every((f: any) => f.filename === '<anonymous>')) {
+            if (frames && frames.length > 0 && frames[0].filename === '<anonymous>') {
               return null;
             }
           } catch (e) {
