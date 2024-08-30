@@ -213,9 +213,6 @@ class SearchableDocument(Document):
             ]
             return CoreDocument.objects.filter(taxonomies__topic__in=topics).distinct()
 
-    def prepare_doc_type(self, instance):
-        return instance.get_doc_type_display()
-
     def prepare_case_number(self, instance):
         if hasattr(instance, "case_numbers"):
             return [c.get_case_number_string() for c in instance.case_numbers.all()]

@@ -213,7 +213,6 @@
       {{ $t('Jurisdiction') }}
       {{ $t('Locality') }}
       {{ $t('Matter type') }}
-      {{ $t('Document nature') }}
       {{ $t('Language') }}
       {{ $t('Year') }}
     </div>
@@ -281,7 +280,7 @@ export default {
     const facets = [
       {
         title: this.$t('Document type'),
-        name: 'doc_type',
+        name: 'nature',
         type: 'checkboxes',
         value: [],
         options: []
@@ -346,13 +345,6 @@ export default {
       {
         title: this.$t('Matter type'),
         name: 'matter_type',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Document nature'),
-        name: 'nature',
         type: 'checkboxes',
         value: [],
         options: []
