@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
-from peachjam.helpers import chunks
+from peachjam.helpers import chunks, get_language
 from peachjam.models import JurisdictionProfile, Legislation, Locality, pj_settings
 from peachjam.views import FilteredDocumentListView
 
@@ -22,7 +22,7 @@ class LegislationListView(FilteredDocumentListView):
 
     def get_form(self):
         self.form_defaults = {"sort": "title"}
-        if self.variant == "recent":
+        if self.variant in ["recent", "subleg"]:
             self.form_defaults = {"sort": "-date"}
         return super().get_form()
 
@@ -87,9 +87,10 @@ class LegislationListView(FilteredDocumentListView):
         )
 
         children = defaultdict(list)
-        children_qs = self.get_base_queryset().filter(
+        children_qs = Legislation.objects.filter(
             parent_work_id__in=parents, repealed=False, metadata_json__principal=True
-        )
+        ).order_by("-date")
+        children_qs = children_qs.preferred_language(get_language(self.request))
         # group children by parent
         for child in children_qs:
             children[child.parent_work_id].append(child)

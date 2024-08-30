@@ -129,6 +129,11 @@ class PeachJamSettings(SingletonModel):
         blank=True,
         help_text=_("Matomo site ID (e.g. 2)"),
     )
+    survey_link = models.URLField(
+        _("survey link"),
+        null=True,
+        blank=True,
+    )
     allow_save_documents = models.BooleanField(
         verbose_name=_("allow save documents"),
         default=False,
