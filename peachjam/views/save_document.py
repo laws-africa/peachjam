@@ -106,7 +106,7 @@ class SavedDocumentButtonView(AllowSavedDocumentMixin, TemplateView):
 
 
 class BaseSavedDocumentFormView(AllowSavedDocumentMixin, LoginRequiredMixin):
-    template_name = "peachjam/saved_document.html"
+    template_name = "peachjam/saved_document_update.html"
     form_class = SaveDocumentForm
     context_object_name = "saved_document"
     model = SavedDocument
@@ -124,6 +124,7 @@ class BaseSavedDocumentFormView(AllowSavedDocumentMixin, LoginRequiredMixin):
 
 
 class SavedDocumentCreateView(BaseSavedDocumentFormView, CreateView):
+    template_name = "peachjam/saved_document_create.html"
     permission_required = "peachjam.add_saveddocument"
 
     def get_form_kwargs(self):

@@ -327,15 +327,18 @@ class SaveDocumentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["folder"].queryset = self.instance.user.folders.all()
+        self.fields["document"].required = False
 
     def clean(self):
-        if self.cleaned_data.get("new_folder"):
+        cleaned_data = super().clean()
+        cleaned_data["document"] = self.instance.document
+        if cleaned_data.get("new_folder"):
             folder, _ = Folder.objects.get_or_create(
-                name=self.cleaned_data["new_folder"],
+                name=cleaned_data["new_folder"],
                 user=self.instance.user,
             )
-            self.cleaned_data["folder"] = folder
-        return self.cleaned_data
+            cleaned_data["folder"] = folder
+        return cleaned_data
 
 
 class PeachjamSignupForm(SignupForm):

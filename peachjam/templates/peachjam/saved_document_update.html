@@ -5,17 +5,12 @@
           type="button"
           data-bs-toggle="modal"
           data-bs-target="#saveDocumentModal"
-          aria-expanded="false"
-          {% if not saved_document %} hx-post="{% url 'saved_document_create' %}" hx-target="#saveDocumentWrapper" hx-include="#save-document-form" {% endif %}>
-    {% if saved_document %}
-      <i class="bi bi-star-fill"></i>
-      {% if saved_document.folder %}
-        {% trans 'Saved to' %} {{ saved_document.folder }}
-      {% else %}
-        {% trans 'Saved' %}
-      {% endif %}
+          aria-expanded="false">
+    <i class="bi bi-star-fill"></i>
+    {% if saved_document.folder %}
+      {% trans 'Saved to' %} {{ saved_document.folder }}
     {% else %}
-      {% trans 'Save document' %}
+      {% trans 'Saved' %}
     {% endif %}
   </button>
   <div hx-swap-oob="true" id="saveDocumentModalDialog" class="modal-dialog">
@@ -29,7 +24,7 @@
       </div>
       <div class="modal-body">
         <form id="save-document-form"
-              {% if saved_document %} hx-post="{% url 'saved_document_update' saved_document.id %}" {% else %} hx-post="{% url 'saved_document_create' %}" {% endif %}
+              hx-post="{% url 'saved_document_update' saved_document.id %}"
               hx-target="#saveDocumentWrapper">
           {{ form.document }}
           <p class="h5">{{ saved_document.document }}</p>
@@ -66,18 +61,16 @@
         </form>
       </div>
       <div class="modal-footer d-flex justify-content-between">
-        {% if saved_document %}
-          <button class="btn btn-danger"
-                  type="button"
-                  data-bs-dismiss="modal"
-                  hx-target="#saveDocumentWrapper"
-                  hx-include="#save-document-form"
-                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                  hx-post="{% url 'saved_document_delete' saved_document.id %}"
-                  hx-confirm="Are you sure you want to unsave this document?">
-            {% trans 'Unsave' %}
-          </button>
-        {% endif %}
+        <button class="btn btn-danger"
+                type="button"
+                data-bs-dismiss="modal"
+                hx-target="#saveDocumentWrapper"
+                hx-include="#save-document-form"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                hx-post="{% url 'saved_document_delete' saved_document.id %}"
+                hx-confirm="Are you sure you want to unsave this document?">
+          {% trans 'Unsave' %}
+        </button>
         <div>
           <button type="button"
                   class="btn btn-outline-secondary btn-shrink-sm ms-2"
