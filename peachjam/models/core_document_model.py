@@ -488,6 +488,10 @@ class CoreDocument(PolymorphicModel):
         # return None if the HTML doesn't have any content
         try:
             root = parse_html_str(content_html)
+            iframes = root.xpath("//iframe")
+            if iframes:
+                return content_html
+
             text = "".join(root.itertext()).strip()
             text = re.sub(r"\s", "", text)
             if not text:
