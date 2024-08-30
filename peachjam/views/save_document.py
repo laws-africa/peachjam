@@ -25,7 +25,7 @@ class AllowSavedDocumentMixin:
         return super().dispatch(*args, **kwargs)
 
 
-class BaseFolderView(
+class BaseFolderMixin(
     AllowSavedDocumentMixin, LoginRequiredMixin, PermissionRequiredMixin
 ):
     model = Folder
@@ -39,7 +39,7 @@ class BaseFolderView(
         return self.request.user.folders.all()
 
 
-class FolderListView(BaseFolderView, ListView):
+class FolderListView(BaseFolderMixin, ListView):
     permission_required = "peachjam.view_folder"
 
     def get_context_data(self, *args, **kwargs):
@@ -51,7 +51,7 @@ class FolderListView(BaseFolderView, ListView):
         return context
 
 
-class BaseFolderFormMixin(BaseFolderView):
+class BaseFolderFormMixin(BaseFolderMixin):
     success_url = reverse_lazy("folder_list")
     fields = ["name"]
 
@@ -79,7 +79,7 @@ class FolderUpdateView(BaseFolderFormMixin, UpdateView):
     permission_required = "peachjam.change_folder"
 
 
-class FolderDeleteView(BaseFolderView, DeleteView):
+class FolderDeleteView(BaseFolderMixin, DeleteView):
     success_url = reverse_lazy("folder_list")
     permission_required = "peachjam.delete_folder"
 
