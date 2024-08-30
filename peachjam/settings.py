@@ -526,7 +526,8 @@ if DEBUG:
 CKEDITOR_CONFIGS = {
     # The rest of this config is defined in ckeditor.configs.DEFAULT_CONFIG
     "default": {
-        "removePlugins": ["image"],
+        "removePlugins": ["image", "iframe"],
+        "extraAllowedContent": "iframe[*];",
         "toolbar_Full": [
             [
                 "Styles",
@@ -543,7 +544,7 @@ CKEDITOR_CONFIGS = {
                 "Redo",
             ],
             ["Link", "Unlink", "Anchor"],
-            ["Image", "Flash", "Table", "HorizontalRule"],
+            ["Image", "Flash", "Table", "HorizontalRule", "Iframe"],
             ["TextColor", "BGColor"],
             ["Smiley", "SpecialChar", "LaAkn"],
             ["Source"],
