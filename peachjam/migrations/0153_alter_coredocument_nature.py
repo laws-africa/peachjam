@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0151_backfill_natures"),
+        ("peachjam", "0152_backfill_natures"),
     ]
 
     operations = [
