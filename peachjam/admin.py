@@ -52,6 +52,7 @@ from peachjam.models import (
     DocumentTopic,
     EntityProfile,
     ExternalDocument,
+    Folder,
     Gazette,
     GenericDocument,
     Image,
@@ -71,6 +72,7 @@ from peachjam.models import (
     PeachJamSettings,
     Predicate,
     Relationship,
+    SavedDocument,
     SourceFile,
     Taxonomy,
     UserProfile,
@@ -1231,6 +1233,8 @@ admin.site.register(
         CourtClass,
         AttachedFileNature,
         CitationProcessing,
+        Folder,
+        SavedDocument,
     ]
 )
 admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)

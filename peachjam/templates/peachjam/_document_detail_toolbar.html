@@ -9,6 +9,18 @@
     {% endif %}
   {% endblock %}
   {% block download-btn %}
+    <div>
+      {% if show_save_doc_button %}
+        <div hx-get="{% url 'saved_document_button' document.id %}"
+             hx-trigger="load"></div>
+        <div id="saveDocumentModal"
+             class="modal fade"
+             tabindex="-1"
+             aria-hidden="true">
+          <div id="saveDocumentModalDialog" class="modal-dialog"></div>
+        </div>
+      {% endif %}
+    </div>
     {% if document.source_file %}
       <div class="btn-group dropdown-center ms-2">
         <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"

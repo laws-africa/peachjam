@@ -1,0 +1,97 @@
+{% load i18n %}
+<div>
+  <div class="d-flex justify-content-between align-items-center">
+    <h1 class="mb-4">{% trans 'Saved documents' %}</h1>
+    <button class="btn btn-primary"
+            hx-target="#folders-list"
+            hx-prompt="Give your folder a name:"
+            hx-post="{% url 'folder_create' %}">
+      {% trans 'New Folder' %}
+    </button>
+  </div>
+  {% if folders or ungrouped_saved_documents %}
+    {% for folder in folders %}
+      <div class="card mb-5">
+        <h3 class="card-header">{{ folder }}</h3>
+        <div class="card-body">
+          <div>
+            {% if folder.saved_documents.all %}
+              <table class="doc-table">
+                {% for saved_doc in folder.saved_documents.all %}
+                  <tr>
+                    <td class="cell-title">
+                      <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
+                      {% include 'peachjam/_labels.html' with labels=saved_doc.document.labels.all %}
+                    </td>
+                    <td class="cell-date" style="white-space: nowrap;">
+                      {{ saved_doc.document.date }}
+                      <a class="ms-3"
+                         type="button"
+                         hx-post="{% url 'saved_document_delete' saved_doc.id %}"
+                         hx-target="#folders-list"
+                         hx-confirm="Are you sure you want to remove this document?">
+                        <i class="bi bi-trash"></i>
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </table>
+            {% else %}
+              <p>{% trans 'No saved documents.' %}</p>
+            {% endif %}
+          </div>
+        </div>
+        <div class="card-footer text-end">
+          <input id="folder_{{ forloop.counter }}"
+                 type="hidden"
+                 name="name"
+                 value="{{ folder.name }}"/>
+          <button class="btn btn-outline-danger me-2"
+                  type="button"
+                  hx-post="{% url 'folder_delete' folder.id %}"
+                  hx-target="#folders-list"
+                  hx-include="#folder_{{ forloop.counter }}"
+                  hx-confirm="Are you sure you want to delete this folder? All saved documents in this folder will also be deleted.">
+            {% trans 'Delete' %}
+          </button>
+          <button class="btn btn-secondary"
+                  type="button"
+                  hx-post="{% url 'folder_update' folder.id %}"
+                  hx-target="#folders-list"
+                  hx-prompt="Edit folder name">
+            {% trans 'Rename' %}
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+    {% if ungrouped_saved_documents %}
+      <div class="card">
+        <h3 class="card-header">{% trans 'Ungrouped documents' %}</h3>
+        <div class="card-body">
+          <table class="doc-table">
+            {% for saved_doc in ungrouped_saved_documents %}
+              <tr>
+                <td class="cell-title">
+                  <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
+                  {% include 'peachjam/_labels.html' with labels=saved_doc.document.labels.all %}
+                </td>
+                <td class="cell-date" style="white-space: nowrap;">
+                  {{ saved_doc.document.date }}
+                  <a class="ms-3"
+                     type="button"
+                     hx-post="{% url 'saved_document_delete' saved_doc.id %}"
+                     hx-target="#folders-list"
+                     hx-confirm="Are you sure you want to remove this document?">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  {% else %}
+    <p>You have no saved documents.</p>
+  {% endif %}
+</div>

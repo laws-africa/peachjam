@@ -1,17 +1,30 @@
 import copy
 
+from allauth.account.forms import LoginForm, SignupForm
 from django import forms
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Invisible
 
-from peachjam.models import AttachedFiles, CoreDocument, SourceFile, pj_settings
+from peachjam.models import (
+    AttachedFiles,
+    CoreDocument,
+    Folder,
+    SavedDocument,
+    SourceFile,
+    pj_settings,
+)
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
+
+User = get_user_model()
 
 
 def work_choices():
@@ -301,3 +314,36 @@ class DocumentProblemForm(forms.Form):
             html_message=html,
             fail_silently=False,
         )
+
+
+class SaveDocumentForm(forms.ModelForm):
+    new_folder = forms.CharField(max_length=255, required=False)
+
+    class Meta:
+        model = SavedDocument
+        fields = ["document", "folder", "new_folder"]
+        widgets = {"document": forms.HiddenInput()}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["folder"].queryset = self.instance.user.folders.all()
+        self.fields["document"].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_data["document"] = self.instance.document
+        if cleaned_data.get("new_folder"):
+            folder, _ = Folder.objects.get_or_create(
+                name=cleaned_data["new_folder"],
+                user=self.instance.user,
+            )
+            cleaned_data["folder"] = folder
+        return cleaned_data
+
+
+class PeachjamSignupForm(SignupForm):
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+
+
+class PeachjamLoginForm(LoginForm):
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)

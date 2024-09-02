@@ -61,13 +61,18 @@
                 </a>
                 <ul class="dropdown-menu">
                   <li>
-                    <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
+                    {% if user.is_superuser %}
+                      <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
+                    {% endif %}
                     <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
+                    <a class="dropdown-item" href="{% url 'folder_list' %}">{% trans 'Saved documents' %}</a>
                   </li>
                 </ul>
               </li>
             {% endblock %}
           </ul>
+        {% else %}
+          <a class="btn btn-primary ms-3" href="{% url 'account_login' %}">Log in</a>
         {% endif %}
         {% include 'peachjam/_set_language.html' %}
       </div>
