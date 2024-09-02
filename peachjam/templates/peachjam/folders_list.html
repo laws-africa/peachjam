@@ -1,0 +1,8 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Saved Documents' %}
+{% endblock %}
+{% block page-content %}
+  <div id="folders-list" class="container mt-4">{% include 'peachjam/_folders_list.html' %}</div>
+{% endblock %}

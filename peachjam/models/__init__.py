@@ -11,5 +11,6 @@ from .journals_books import *
 from .judgment import *
 from .profile import *
 from .relationships import *
+from .save_document import *
 from .settings import *
 from .taxonomies import *

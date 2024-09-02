@@ -19,6 +19,7 @@ from .login import *
 from .place import *
 from .pocketlaw import *
 from .robots import *
+from .save_document import *
 from .taxonomy import *
 from .terms_of_use import *
 from .widgets import *

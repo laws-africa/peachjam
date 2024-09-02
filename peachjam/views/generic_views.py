@@ -20,6 +20,7 @@ from peachjam.models import (
     Predicate,
     Relationship,
     Taxonomy,
+    pj_settings,
 )
 from peachjam.xmlutils import parse_html_str
 from peachjam_api.serializers import (
@@ -255,6 +256,12 @@ class BaseDocumentDetailView(DetailView):
             self.model, expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri"))
         )
 
+    def show_save_doc_button(self):
+        return pj_settings().allow_save_documents and (
+            not self.request.user.is_authenticated
+            or self.request.user.has_perm("peachjam.add_saveddocument")
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
             document_diffs_url=self.document_diffs_url, **kwargs
@@ -301,7 +308,7 @@ class BaseDocumentDetailView(DetailView):
         context["documents_citing_current_doc"] = self.fetch_citation_docs(
             doc.work.works_citing_current_work()
         )
-
+        context["show_save_doc_button"] = self.show_save_doc_button()
         return context
 
     def fetch_citation_docs(self, works):

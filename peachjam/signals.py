@@ -1,8 +1,12 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.db.models import signals
 from django.dispatch import receiver
 
 from peachjam.models import CoreDocument, ExtractedCitation, SourceFile, Work
 from peachjam.tasks import update_extracted_citations_for_a_work
+
+User = get_user_model()
 
 
 @receiver(signals.post_save)
@@ -55,3 +59,10 @@ def extracted_citation_deleted(sender, instance, **kwargs):
     """Update citation counts on works."""
     ExtractedCitation.update_counts_for_work(instance.citing_work)
     ExtractedCitation.update_counts_for_work(instance.target_work)
+
+
+@receiver(signals.post_save, sender=User)
+def add_saved_document_permissions(sender, instance, created, **kwargs):
+    if created:
+        all_users_group, _ = Group.objects.get_or_create(name="AllUsers")
+        instance.groups.add(all_users_group)
