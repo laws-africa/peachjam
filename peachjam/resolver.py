@@ -85,7 +85,7 @@ class RedirectResolver:
         },
         "kenyalaw": {
             "country_code": "ke",
-            "domain": "kenyalaw.staging.laws.africa",
+            "domain": "new.kenyalaw.org",
         },
     }
 
