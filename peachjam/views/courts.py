@@ -89,7 +89,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
             context["facet_data"]["outcomes"] = {
                 "label": _("Outcomes"),
                 "type": "checkbox",
-                "options": [(outcome.code, outcome.name) for outcome in outcomes],
+                "options": [(outcome.name, outcome.name) for outcome in outcomes],
                 "values": self.request.GET.getlist("outcomes"),
             }
 
