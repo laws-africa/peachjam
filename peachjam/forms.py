@@ -146,7 +146,7 @@ class BaseDocumentFilterForm(forms.Form):
     def __init__(self, defaults, data, *args, **kwargs):
         self.secondary_sort = "title"
         if defaults is not None:
-            self.secondary_sort = defaults.get("secondary_sort")
+            self.secondary_sort = defaults.get("secondary_sort", "title")
         self.params = QueryDict(mutable=True)
         self.params.update({"sort": "-date"})
         self.params.update(defaults or {})
