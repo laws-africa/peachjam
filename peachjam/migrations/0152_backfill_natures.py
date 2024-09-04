@@ -18,9 +18,11 @@ def forwards(apps, schema_editor):
         ("journal", "journal", "Journal"),
     ]
     for doc_type, nature, name in DOC_TYPES:
-        nature = DocumentNature.objects.get_or_create(
-            code=nature, defaults={"name": name}
-        )[0]
+        nature = DocumentNature.objects.get_or_create(code=nature)[0]
+        # get_or_create with defaults={name: name} doesn't seem to work
+        if not nature.name:
+            nature.name = name
+            nature.save()
 
         # run raw SQL to do the update for this doc_type and nature id
         with schema_editor.connection.cursor() as cursor:
