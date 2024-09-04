@@ -20,10 +20,6 @@ class DocumentListView(FilteredDocumentListView):
         context["doc_count"] = self.get_queryset().count()
         return context
 
-    def get_queryset(self):
-        queryset = super(DocumentListView, self).get_queryset()
-        return queryset.order_by("title")
-
 
 @registry.register_doc_type("generic_document")
 class DocumentDetailView(BaseDocumentDetailView):
