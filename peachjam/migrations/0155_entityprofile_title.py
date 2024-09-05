@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0151_folder_peachjamsettings_allow_save_documents_and_more"),
+        ("peachjam", "0154_backfill_nature_elasticsearch"),
     ]
 
     operations = [
