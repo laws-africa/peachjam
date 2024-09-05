@@ -190,7 +190,7 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
             "sub_publications": {
                 "label": _("Sub-publication"),
                 "type": "checkbox",
-                "options": sub_publications,
+                "options": [(s, s) for s in sub_publications],
                 "values": self.request.GET.getlist("sub_publications"),
             },
             "special": {

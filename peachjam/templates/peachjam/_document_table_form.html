@@ -60,24 +60,24 @@
               {% if facet_name == "alphabet" %}
                 <div>
                   <div class="letter-radiobox-container">
-                    {% for option in facet.options %}
+                    {% for value, label in facet.options %}
                       <label class="letter-radiobox" for="{{ facet_name }}_{{ forloop.counter0 }}">
                         <input id="{{ facet_name }}_{{ forloop.counter0 }}"
                                name="{{ facet_name }}"
                                type="{{ facet.type }}"
                                hx-get="{{ request.path }}"
                                hx-push-url="true"
-                               {% if option == facet.values %}checked{% endif %}
+                               {% if value == facet.values %}checked{% endif %}
                                hx-include="#filter-form"
-                               value="{{ option }}"/>
-                        <span class="letter-radiobox__text">{{ option }}</span>
+                               value="{{ value }}"/>
+                        <span class="letter-radiobox__text">{{ label }}</span>
                       </label>
                     {% endfor %}
                   </div>
                 </div>
               {% else %}
                 <div class="facets-scrollable">
-                  {% for option in facet.options %}
+                  {% for value, label in facet.options %}
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="form-check flex-grow-1">
                         <input id="{{ facet_name }}_{{ forloop.counter0 }}"
@@ -86,11 +86,11 @@
                                type="{{ facet.type }}"
                                hx-get="{{ request.path }}"
                                hx-push-url="true"
+                               {% if value in facet.values %}checked{% endif %}
                                hx-include="#filter-form"
-                               value="{{ option.value|default:option }}"
-                               {% if option.value|default:option in facet.values %}checked{% endif %}/>
+                               value="{{ value }}"/>
                         <label class="form-check-label"
-                               for="{{ facet_name }}_{{ forloop.counter0 }}">{{ option.name|default:option }}</label>
+                               for="{{ facet_name }}_{{ forloop.counter0 }}">{{ label }}</label>
                       </div>
                     </div>
                   {% endfor %}

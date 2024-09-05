@@ -21,17 +21,14 @@ class GenericDocument(CoreDocument):
 
     frbr_uri_doctypes = ["doc", "statement"]
 
+    default_nature = ("document", "Document")
+
     class Meta(CoreDocument.Meta):
         verbose_name = _("generic document")
         verbose_name_plural = _("generic documents")
 
     def __str__(self):
         return self.title
-
-    def get_doc_type_display(self):
-        if not self.nature:
-            return super().get_doc_type_display()
-        return self.nature.name
 
     def pre_save(self):
         self.doc_type = "generic_document"
@@ -47,15 +44,14 @@ class LegalInstrument(CoreDocument):
 
     frbr_uri_doctypes = [x for x in FRBR_URI_DOCTYPES if x != "judgment"]
 
+    default_nature = ("legal-instrument", "Legal Instrument")
+
     class Meta(CoreDocument.Meta):
         verbose_name = _("legal instrument")
         verbose_name_plural = _("legal instruments")
 
     def __str__(self):
         return self.title
-
-    def get_doc_type_display(self):
-        return self.nature.name
 
     def pre_save(self):
         self.doc_type = "legal_instrument"
@@ -88,6 +84,8 @@ class Legislation(CoreDocument):
     )
 
     frbr_uri_doctypes = ["act"]
+
+    default_nature = ("act", "Act")
 
     class Meta(CoreDocument.Meta):
         verbose_name = _("legislation")
