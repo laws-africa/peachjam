@@ -86,11 +86,11 @@
                                type="{{ facet.type }}"
                                hx-get="{{ request.path }}"
                                hx-push-url="true"
-                               {% if option in facet.values %}checked{% endif %}
                                hx-include="#filter-form"
-                               value="{{ option }}"/>
+                               value="{{ option.value|default:option }}"
+                               {% if option.value|default:option in facet.values %}checked{% endif %}/>
                         <label class="form-check-label"
-                               for="{{ facet_name }}_{{ forloop.counter0 }}">{{ option }}</label>
+                               for="{{ facet_name }}_{{ forloop.counter0 }}">{{ option.name|default:option }}</label>
                       </div>
                     </div>
                   {% endfor %}

@@ -122,6 +122,10 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
     navbar_link = "gazettes"
     locality = None
     group_by_date = "month-year"
+    special_facet_labels = [
+        {"name": _("Special Issue"), "value": "special"},
+        {"name": _("Regular Issue"), "value": "not_special"},
+    ]
 
     def get_form(self):
         self.form_defaults = {"sort": "-date", "secondary_sort": "-frbr_uri_number"}
@@ -188,7 +192,13 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
                 "type": "checkbox",
                 "options": sub_publications,
                 "values": self.request.GET.getlist("sub_publications"),
-            }
+            },
+            "special": {
+                "label": _("Issue"),
+                "type": "checkbox",
+                "options": self.special_facet_labels,
+                "values": self.request.GET.getlist("special"),
+            },
         }
 
 
