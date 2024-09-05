@@ -22,6 +22,7 @@ def forwards(apps, schema_editor):
         # get_or_create with defaults={name: name} doesn't seem to work
         if not nature.name:
             nature.name = name
+            nature.name_en = name
             nature.save()
 
         # run raw SQL to do the update for this doc_type and nature id
