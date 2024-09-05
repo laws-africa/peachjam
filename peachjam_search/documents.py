@@ -37,6 +37,8 @@ class RankField(fields.DEDField, RankFeature):
 
 @registry.register_document
 class SearchableDocument(Document):
+    # NB: This is a legacy field; use nature for an accurate human-friendly value. This field is a mixture of doc_type
+    # and nature unless the search index has been updated since nature became required.
     doc_type = fields.KeywordField()
     title = fields.TextField()
     # title field for sorting and alphabetical listing
@@ -211,9 +213,6 @@ class SearchableDocument(Document):
             ]
             return CoreDocument.objects.filter(taxonomies__topic__in=topics).distinct()
 
-    def prepare_doc_type(self, instance):
-        return instance.get_doc_type_display()
-
     def prepare_case_number(self, instance):
         if hasattr(instance, "case_numbers"):
             return [c.get_case_number_string() for c in instance.case_numbers.all()]
@@ -261,10 +260,6 @@ class SearchableDocument(Document):
     def prepare_registry(self, instance):
         if hasattr(instance, "registry") and instance.registry:
             return instance.registry.name
-
-    def prepare_nature(self, instance):
-        if hasattr(instance, "nature") and instance.nature:
-            return instance.nature.name
 
     def prepare_outcome(self, instance):
         if hasattr(instance, "outcomes") and instance.outcomes:

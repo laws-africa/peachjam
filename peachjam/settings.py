@@ -641,6 +641,13 @@ MARTOR_ALTERNATIVE_CSS_FILE_THEME = "martor/css/peachjam.css"
 # disable regex matches, we do matching using signals
 CORS_URLS_REGEX = r"^$"
 
+
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
+
+
+# allow injection of a custom test runner for github actions
+TEST_RUNNER = os.environ.get("TEST_RUNNER", "django.test.runner.DiscoverRunner")
+# only used by xmlrunner https://github.com/xmlrunner/unittest-xml-reporting#django-support
+TEST_OUTPUT_DIR = "./test-reports"
