@@ -2,7 +2,9 @@
 {% load i18n %}
 {% block title %}{{ author }}{% endblock %}
 {% block page-title %}
-  <h1 class="mt-4">{% blocktrans %} Documents by {{ author }} {% endblocktrans %}</h1>
+  {% if not entity_profile %}
+    <h1 class="mt-4">{% blocktrans %} Documents by {{ author }} {% endblocktrans %}</h1>
+  {% endif %}
 {% endblock %}
 {% block entity-profile %}
   {% with entity_profile_title=author entity_profile=author.entity_profile.first %}

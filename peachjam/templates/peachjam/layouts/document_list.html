@@ -13,7 +13,9 @@
   <div class="container pb-5" data-component="DocumentList">
     {% block page-header %}
       {% block page-title %}
-        <h1 class="mt-4">{% trans 'Documents' %}</h1>
+        {% if not entity_profile %}
+          <h1 class="mt-4">{% trans 'Documents' %}</h1>
+        {% endif %}
       {% endblock %}
       {% block count-and-search %}
         {% include 'peachjam/_count_and_search.html' %}

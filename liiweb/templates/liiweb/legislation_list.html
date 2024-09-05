@@ -4,7 +4,9 @@
   {% trans 'Legislation' %}
 {% endblock %}
 {% block page-title %}
-  <h1 class="my-4">{% trans 'Legislation' %}</h1>
+  {% if not entity_profile %}
+    <h1 class="my-4">{% trans 'Legislation' %}</h1>
+  {% endif %}
 {% endblock %}
 {% block alerts %}
   {% if view.variant == 'repealed' %}

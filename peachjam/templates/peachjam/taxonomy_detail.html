@@ -1,7 +1,9 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load peachjam i18n %}
 {% block title %}{{ taxonomy.name }}{% endblock %}
-{% block page-title %}<h1 class="mt-4">{{ taxonomy.name }}</h1>{% endblock %}
+{% block page-title %}
+  {% if not entity_profile %}<h1 class="mt-4">{{ taxonomy.name }}</h1>{% endif %}
+{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
     <nav aria-label="breadcrumb">
