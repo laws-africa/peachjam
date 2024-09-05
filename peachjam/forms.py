@@ -144,8 +144,11 @@ class BaseDocumentFilterForm(forms.Form):
     )
 
     def __init__(self, defaults, data, *args, **kwargs):
+        self.secondary_sort = "title"
+        if defaults is not None:
+            self.secondary_sort = defaults.get("secondary_sort", "title")
         self.params = QueryDict(mutable=True)
-        self.params.update({"sort": "title"})
+        self.params.update({"sort": "-date"})
         self.params.update(defaults or {})
         self.params.update(data)
 
@@ -211,7 +214,7 @@ class BaseDocumentFilterForm(forms.Form):
 
     def order_queryset(self, queryset, exclude=None):
         sort = self.cleaned_data.get("sort") or "-date"
-        queryset = queryset.order_by(sort, "title")
+        queryset = queryset.order_by(sort, self.secondary_sort)
         return queryset
 
 

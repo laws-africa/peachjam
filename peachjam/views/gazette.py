@@ -124,7 +124,7 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
     group_by_date = "month-year"
 
     def get_form(self):
-        self.form_defaults = {"sort": "-date"}
+        self.form_defaults = {"sort": "-date", "secondary_sort": "-frbr_uri_number"}
         return super().get_form()
 
     def get(self, request, code=None, *args, **kwargs):
