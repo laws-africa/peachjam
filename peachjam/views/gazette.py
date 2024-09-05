@@ -4,7 +4,7 @@ from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.urls import reverse
 from django.utils.dates import MONTHS
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.forms import GazetteFilterForm
