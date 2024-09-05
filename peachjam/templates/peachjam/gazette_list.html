@@ -4,26 +4,28 @@
   {{ place|default_if_none:"" }} {% trans 'Gazettes' %} {{ year }}
 {% endblock %}
 {% block breadcrumbs %}
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
-      </li>
-      <li class="breadcrumb-item">
-        <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
-      </li>
-      {% if country %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
         <li class="breadcrumb-item">
-          <a href="{% url 'gazettes_by_locality' country.pk.lower %}">{{ country }}</a>
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
         </li>
-      {% endif %}
-      {% if locality %}
         <li class="breadcrumb-item">
-          <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality }}</a>
+          <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
         </li>
-      {% endif %}
-    </ol>
-  </nav>
+        {% if country %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'gazettes_by_locality' country.pk.lower %}">{{ country }}</a>
+          </li>
+        {% endif %}
+        {% if locality %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality }}</a>
+          </li>
+        {% endif %}
+      </ol>
+    </nav>
+  </div>
 {% endblock %}
 {% block page-title %}
   {% if not entity_profile %}
