@@ -123,8 +123,8 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
     locality = None
     group_by_date = "month-year"
     special_facet_options = [
-        {"name": _("Special Issue"), "value": "special"},
-        {"name": _("Regular Issue"), "value": "not_special"},
+        ("special", _("Special Issue")),
+        ("not_special", _("Regular Issue")),
     ]
 
     def get_form(self):
