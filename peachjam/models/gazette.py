@@ -25,6 +25,8 @@ class Gazette(CoreDocument):
     )
     special = models.BooleanField(_("special"), default=False)
 
+    default_nature = ("gazette", "Gazette")
+
     class Meta(CoreDocument.Meta):
         verbose_name = _("gazette")
         verbose_name_plural = _("gazettes")

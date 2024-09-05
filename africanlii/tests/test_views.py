@@ -2,7 +2,7 @@ from django.test import TestCase
 
 
 class AfricanliiViewsTest(TestCase):
-    fixtures = ["documents/sample_documents"]
+    fixtures = ["tests/countries", "documents/sample_documents"]
 
     def test_homepage(self):
         response = self.client.get("/")

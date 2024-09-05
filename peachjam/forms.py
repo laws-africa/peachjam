@@ -190,7 +190,7 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(judges__name__in=judges).distinct()
 
         if natures and exclude != "natures":
-            queryset = queryset.filter(nature__name__in=natures)
+            queryset = queryset.filter(nature__code__in=natures)
 
         if localities and exclude != "localities":
             queryset = queryset.filter(locality__name__in=localities)
@@ -202,10 +202,10 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(attorneys__name__in=attorneys).distinct()
 
         if outcomes and exclude != "outcomes":
-            queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
+            queryset = queryset.filter(outcomes__code__in=outcomes).distinct()
 
         if taxonomies and exclude != "taxonomies":
-            queryset = queryset.filter(taxonomies__topic__name__in=taxonomies)
+            queryset = queryset.filter(taxonomies__topic__slug__in=taxonomies)
 
         if filter_q and q and exclude != "q":
             queryset = queryset.filter(title__icontains=q)

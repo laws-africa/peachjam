@@ -2,7 +2,7 @@ from django.test import TestCase
 
 
 class PeachjamViewsTest(TestCase):
-    fixtures = ["documents/sample_documents"]
+    fixtures = ["tests/countries", "documents/sample_documents"]
 
     def test_login_page(self):
         response = self.client.get("/accounts/login/")
@@ -101,7 +101,7 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertEqual(
-            ["1969", "2005", "2010", "2020"],
+            [("1969", 1969), ("2005", 2005), ("2010", 2010), ("2020", 2020)],
             sorted(response.context["facet_data"]["years"]["options"]),
         )
 
@@ -127,7 +127,10 @@ class PeachjamViewsTest(TestCase):
             "African Charter on Democracy, Elections and Governance",
             documents,
         )
-        self.assertEqual(response.context["facet_data"]["years"]["options"], ["2007"])
+        self.assertEqual(
+            [("2007", 2007)],
+            response.context["facet_data"]["years"]["options"],
+        )
 
     def test_legal_instrument_detail(self):
         response = self.client.get(
@@ -151,7 +154,10 @@ class PeachjamViewsTest(TestCase):
             "Activity Report of the Pan-African Parliament, July 2016 to June 2017",
             documents,
         )
-        self.assertEqual(response.context["facet_data"]["years"]["options"], ["2017"])
+        self.assertEqual(
+            [("2017", 2017)],
+            response.context["facet_data"]["years"]["options"],
+        )
 
     def test_generic_document_detail(self):
         response = self.client.get(

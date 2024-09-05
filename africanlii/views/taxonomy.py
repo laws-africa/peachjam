@@ -125,21 +125,21 @@ class DocIndexDetailView(TaxonomyDetailView):
             "jurisdictions": {
                 "label": _("Judrisdictions"),
                 "type": "checkbox",
-                "options": [j for j, n, x in res.facets.jurisdiction],
+                "options": [(j, j) for j, n, x in res.facets.jurisdiction],
                 "values": self.request.GET.getlist("jurisdictions"),
             },
             "years": {
                 "label": _("Years"),
                 "type": "checkbox",
                 "options": [
-                    str(y) for y, n, x in sorted(res.facets.year, reverse=True)
+                    (str(y), y) for y, n, x in sorted(res.facets.year, reverse=True)
                 ],
                 "values": self.request.GET.getlist("years"),
             },
             "alphabet": {
                 "label": _("Alphabet"),
                 "type": "radio",
-                "options": lowercase_alphabet(),
+                "options": [(a, a) for a in lowercase_alphabet()],
                 "values": self.request.GET.get("alphabet"),
             },
         }

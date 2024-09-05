@@ -5,7 +5,7 @@ from peachjam_search.documents import SearchableDocument
 
 
 class SearchableDocumentTestCase(TestCase):
-    fixtures = ["documents/sample_documents"]
+    fixtures = ["tests/countries", "documents/sample_documents"]
 
     def test_translated_field(self):
         doc = CoreDocument.objects.filter(nature__code="activity-report").first()
