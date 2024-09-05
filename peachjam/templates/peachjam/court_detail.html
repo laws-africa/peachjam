@@ -37,7 +37,7 @@
 {% block entity-profile %}
   {% with entity_profile=court.entity_profile.first entity_profile_title=court.name %}
     {% if entity_profile %}
-      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
+      {% include 'peachjam/_entity_profile.html' %}
     {% endif %}
   {% endwith %}
 {% endblock %}

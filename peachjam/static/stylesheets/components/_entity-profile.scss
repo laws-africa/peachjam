@@ -1,7 +1,6 @@
 .entity-profile {
   @extend .bg-light;
-
-  margin-top: -1rem;
+  margin-bottom: 1rem;
 
   &.has-background-photo {
     background-color: transparent !important;
