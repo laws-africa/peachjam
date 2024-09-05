@@ -73,7 +73,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
             context["facet_data"]["judges"] = {
                 "label": Judge.model_label_plural,
                 "type": "checkbox",
-                "options": [(j, j) for j in judges],
+                "options": sorted([(j, j) for j in judges]),
                 "values": self.request.GET.getlist("judges"),
             }
 
@@ -89,7 +89,9 @@ class FilteredJudgmentView(FilteredDocumentListView):
             context["facet_data"]["outcomes"] = {
                 "label": _("Outcomes"),
                 "type": "checkbox",
-                "options": [(outcome.name, outcome.name) for outcome in outcomes],
+                "options": sorted(
+                    [(outcome.name, outcome.name) for outcome in outcomes]
+                ),
                 "values": self.request.GET.getlist("outcomes"),
             }
 
@@ -107,7 +109,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
             context["facet_data"]["attorneys"] = {
                 "label": _("Attorneys"),
                 "type": "checkbox",
-                "options": [(a, a) for a in attorneys],
+                "options": sorted([(a, a) for a in attorneys]),
                 "values": self.request.GET.getlist("attorneys"),
             }
 
@@ -125,7 +127,9 @@ class FilteredJudgmentView(FilteredDocumentListView):
             context["facet_data"]["taxonomies"] = {
                 "label": _("Topics"),
                 "type": "checkbox",
-                "options": [(t.slug, t.name) for t in taxonomies],
+                "options": sorted(
+                    [(t.slug, t.name) for t in taxonomies], key=lambda x: x[1]
+                ),
                 "values": self.request.GET.getlist("taxonomies"),
             }
 

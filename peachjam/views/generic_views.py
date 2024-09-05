@@ -206,20 +206,24 @@ class FilteredDocumentListView(DocumentListView):
             "authors": {
                 "label": Author.model_label_plural,
                 "type": "checkbox",
-                "options": [(a, a) for a in authors],
+                "options": sorted([(a, a) for a in authors]),
                 "values": self.request.GET.getlist("authors"),
             },
             "natures": {
                 "label": _("Document nature"),
                 "type": "radio",
                 # this ensures we get the translated name
-                "options": [(n.code, n.name) for n in natures],
+                "options": sorted(
+                    [(n.code, n.name) for n in natures], key=lambda x: x[1]
+                ),
                 "values": self.request.GET.getlist("natures"),
             },
             "taxonomies": {
                 "label": _("Topics"),
                 "type": "checkbox",
-                "options": [(t.slug, t.name) for t in taxonomies],
+                "options": sorted(
+                    [(t.slug, t.name) for t in taxonomies], key=lambda x: x[1]
+                ),
                 "values": self.request.GET.getlist("taxonomies"),
             },
             "alphabet": {
