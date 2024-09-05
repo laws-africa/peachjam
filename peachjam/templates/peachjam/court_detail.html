@@ -34,13 +34,6 @@
     </nav>
   </div>
 {% endblock %}
-{% block entity-profile %}
-  {% with entity_profile=court.entity_profile.first entity_profile_title=court.name %}
-    {% if entity_profile %}
-      {% include 'peachjam/_entity_profile.html' %}
-    {% endif %}
-  {% endwith %}
-{% endblock %}
 {% block page-title %}
   {% if not entity_profile %}<h1 class="mt-4">{{ page_title }}</h1>{% endif %}
 {% endblock %}

@@ -168,6 +168,10 @@ class CourtDetailView(FilteredJudgmentView):
         context["all_years_url"] = self.court.get_absolute_url()
         return context
 
+    def add_entity_profile(self, context):
+        context["entity_profile"] = self.court.entity_profile.first()
+        context["entity_profile_title"] = self.court.name
+
 
 class CourtYearView(YearMixin, CourtDetailView):
     def get_context_data(self, **kwargs):
