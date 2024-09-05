@@ -157,7 +157,7 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
             # fold "special issue" into the sub-publication
             if gazette.special:
                 gazette.sub_publication = " ".join(
-                    [x for x in [gazette.sub_publication, _("Special issue")] if x]
+                    [x for x in [gazette.sub_publication, _("Special Issue")] if x]
                 )
 
         context["documents"] = self.group_documents(context["documents"])
