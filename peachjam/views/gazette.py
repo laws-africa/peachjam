@@ -128,7 +128,7 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
     group_by_date = "month-year"
 
     def get_form(self):
-        self.form_defaults = {"sort": "-date"}
+        self.form_defaults = {"sort": "-date", "secondary_sort": "-frbr_uri_number"}
         return super().get_form()
 
     def get(self, request, code=None, *args, **kwargs):
@@ -161,7 +161,7 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
             # fold "special issue" into the sub-publication
             if gazette.special:
                 gazette.sub_publication = " ".join(
-                    [x for x in [gazette.sub_publication, _("Special issue")] if x]
+                    [x for x in [gazette.sub_publication, _("Special Issue")] if x]
                 )
 
         context["documents"] = self.group_documents(context["documents"])

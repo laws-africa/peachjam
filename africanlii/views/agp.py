@@ -27,6 +27,7 @@ class AGPSoftLawListView(DocumentListView):
 class AGPReportsGuidesListView(DocumentListView):
     template_name = "peachjam/reports_guides_list.html"
     navbar_link = "reports_guides"
+    form_defaults = {"sort": "title"}
 
     def get_base_queryset(self):
         return super().get_base_queryset().filter(frbr_uri_doctype="doc")
