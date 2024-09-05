@@ -222,11 +222,13 @@ class BaseDocumentFilterForm(forms.Form):
 class GazetteFilterForm(BaseDocumentFilterForm):
     sub_publications = PermissiveTypedListField(coerce=remove_nulls, required=False)
     special = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    supplement = forms.BooleanField(required=False)
 
     def filter_queryset(self, queryset, exclude=None, filter_q=False):
         queryset = super().filter_queryset(queryset, exclude, filter_q)
         sub_publications = self.cleaned_data.get("sub_publications", [])
         special = self.cleaned_data.get("special", [])
+        supplement = self.cleaned_data.get("supplement", False)
 
         if sub_publications and exclude != "sub_publications":
             queryset = queryset.filter(sub_publication__in=sub_publications)
@@ -238,6 +240,9 @@ class GazetteFilterForm(BaseDocumentFilterForm):
             if "not_special" in special:
                 special_qs |= Q(special=False)
             queryset = queryset.filter(special_qs)
+
+        if supplement and exclude != "supplement":
+            queryset = queryset.filter(supplement=True)
 
         return queryset
 
