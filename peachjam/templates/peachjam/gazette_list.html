@@ -7,28 +7,26 @@
   <section class="pb-5">
     <div class="container">
       {% block breadcrumbs %}
-        {% if place %}
-          <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+            </li>
+            <li class="breadcrumb-item">
+              <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
+            </li>
+            {% if country %}
               <li class="breadcrumb-item">
-                <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+                <a href="{% url 'gazettes_by_locality' country.pk.lower %}">{{ country }}</a>
               </li>
+            {% endif %}
+            {% if locality %}
               <li class="breadcrumb-item">
-                <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
+                <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality }}</a>
               </li>
-              {% if country %}
-                <li class="breadcrumb-item">
-                  <a href="{% url 'gazettes_by_locality' country.pk.lower %}">{{ country }}</a>
-                </li>
-              {% endif %}
-              {% if locality %}
-                <li class="breadcrumb-item">
-                  <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality }}</a>
-                </li>
-              {% endif %}
-            </ol>
-          </nav>
-        {% endif %}
+            {% endif %}
+          </ol>
+        </nav>
       {% endblock %}
       {% block page-title %}
         <h1 class="my-4">
