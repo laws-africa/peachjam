@@ -5,7 +5,11 @@
 {% endblock %}
 {% block page-content %}
   {% block breadcrumbs %}{% endblock %}
-  {% block entity-profile %}{% endblock %}
+  {% block entity-profile %}
+    {% if entity_profile %}
+      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
+    {% endif %}
+  {% endblock %}
   <div class="container pb-5" data-component="DocumentList">
     {% block page-header %}
       {% block page-title %}
