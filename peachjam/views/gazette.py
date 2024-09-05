@@ -122,7 +122,7 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
     navbar_link = "gazettes"
     locality = None
     group_by_date = "month-year"
-    special_facet_labels = [
+    special_facet_options = [
         {"name": _("Special Issue"), "value": "special"},
         {"name": _("Regular Issue"), "value": "not_special"},
     ]
@@ -196,7 +196,7 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
             "special": {
                 "label": _("Issue"),
                 "type": "checkbox",
-                "options": self.special_facet_labels,
+                "options": self.special_facet_options,
                 "values": self.request.GET.getlist("special"),
             },
         }
