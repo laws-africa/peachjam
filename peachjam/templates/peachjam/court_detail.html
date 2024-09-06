@@ -34,14 +34,9 @@
     </nav>
   </div>
 {% endblock %}
-{% block entity-profile %}
-  {% with entity_profile=court.entity_profile.first entity_profile_title=court.name %}
-    {% if entity_profile %}
-      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
-    {% endif %}
-  {% endwith %}
+{% block page-title %}
+  {% if not entity_profile %}<h1 class="mt-4">{{ page_title }}</h1>{% endif %}
 {% endblock %}
-{% block page-title %}<h1 class="mt-4">{{ page_title }}</h1>{% endblock %}
 {% block page-header %}
   {{ block.super }}
   {% block court_list %}

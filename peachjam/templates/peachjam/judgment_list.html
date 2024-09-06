@@ -1,28 +1,19 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends "peachjam/layouts/document_list.html" %}
 {% load i18n %}
 {% block title %}
   {% trans 'Judgments' %}
 {% endblock %}
-{% block page-content %}
-  <section class="pb-5">
-    <div class="container">
-      {% block page-header %}
-        {% block page-title %}
-          <h1 class="mt-4">{% trans 'Judgments' %}</h1>
-        {% endblock %}
-        {% block count-and-search %}
-          {% include 'peachjam/_count_and_search.html' %}
-        {% endblock %}
-      {% endblock %}
-      {% include 'peachjam/_court_list.html' %}
-      <h4 class="mb-2 mt-4">
-        {% if title %}
-          {{ title }}
-        {% else %}
-          {% trans 'Recent judgments' %}
-        {% endif %}
-      </h4>
-      {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments %}
-    </div>
-  </section>
+{% block page-title %}
+  <h1 class="mt-4">{% trans 'Judgments' %}</h1>
+{% endblock %}
+{% block document-table %}
+  {% include 'peachjam/_court_list.html' %}
+  <h4 class="mb-2 mt-4">
+    {% if title %}
+      {{ title }}
+    {% else %}
+      {% trans 'Recent judgments' %}
+    {% endif %}
+  </h4>
+  {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments %}
 {% endblock %}

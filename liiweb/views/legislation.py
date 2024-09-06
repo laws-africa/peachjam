@@ -7,16 +7,13 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks, get_language
-from peachjam.models import JurisdictionProfile, Legislation, Locality, pj_settings
-from peachjam.views import FilteredDocumentListView
+from peachjam.models import JurisdictionProfile, Locality, pj_settings
+from peachjam.views import LegislationListView as BaseLegislationListView
 
 
-class LegislationListView(FilteredDocumentListView):
+class LegislationListView(BaseLegislationListView):
     template_name = "liiweb/legislation_list.html"
     variant = "current"
-    navbar_link = "legislation"
-    model = Legislation
-    queryset = Legislation.objects.prefetch_related("work", "labels")
     latest_expression_only = True
     form_defaults = None
 
@@ -58,6 +55,18 @@ class LegislationListView(FilteredDocumentListView):
         context = super().get_context_data(**kwargs)
         self.add_children(context["documents"])
 
+        context["doc_table_toggle"] = True
+        context["doc_table_citations"] = True
+        context["doc_table_show_doc_type"] = False
+        context["doc_table_show_court"] = False
+        context["doc_table_show_author"] = False
+        context["doc_table_show_jurisdiction"] = False
+
+        context["documents"] = self.group_documents(context["documents"])
+
+        return context
+
+    def add_entity_profile(self, context):
         site_jurisdictions = pj_settings().document_jurisdictions.all()
         if site_jurisdictions.count() == 1:
             jurisdiction_profile = JurisdictionProfile.objects.filter(
@@ -67,19 +76,6 @@ class LegislationListView(FilteredDocumentListView):
                 context["entity_profile"] = jurisdiction_profile.entity_profile.first()
                 context["entity_profile_title"] = jurisdiction_profile.jurisdiction.name
 
-        context["doc_type"] = "Legislation"  # for quick search
-        context["doc_table_toggle"] = True
-        context["doc_table_citations"] = True
-        context["doc_table_show_doc_type"] = False
-        context["doc_table_show_court"] = False
-        context["doc_table_show_author"] = False
-        context["doc_table_show_jurisdiction"] = False
-        context["help_link"] = "legislation/"
-
-        context["documents"] = self.group_documents(context["documents"])
-
-        return context
-
     def add_children(self, queryset):
         # pull in children (subleg)
         parents = list(
@@ -87,7 +83,7 @@ class LegislationListView(FilteredDocumentListView):
         )
 
         children = defaultdict(list)
-        children_qs = Legislation.objects.filter(
+        children_qs = self.queryset.filter(
             parent_work_id__in=parents, repealed=False, metadata_json__principal=True
         ).order_by("-date")
         children_qs = children_qs.preferred_language(get_language(self.request))

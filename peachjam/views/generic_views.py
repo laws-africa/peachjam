@@ -55,13 +55,18 @@ class DocumentListView(ListView):
         return qs.preferred_language(get_language(self.request))
 
     def get_context_data(self, *args, **kwargs):
-        return super().get_context_data(
+        context = super().get_context_data(
             doc_table_show_jurisdiction=True,
             doc_count_noun=_("document"),
             doc_count_noun_plural=_("documents"),
             *args,
             **kwargs,
         )
+        self.add_entity_profile(context)
+        return context
+
+    def add_entity_profile(self, context):
+        pass
 
     def group_documents(self, documents, group_by):
         if not group_by:

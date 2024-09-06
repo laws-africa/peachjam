@@ -24,7 +24,7 @@
 {% block entity-profile %}
   {% with entity_profile=rec.entity_profile.first entity_profile_title=rec.name %}
     {% if entity_profile %}
-      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
+      {% include 'peachjam/_entity_profile.html' %}
     {% endif %}
   {% endwith %}
 {% endblock %}

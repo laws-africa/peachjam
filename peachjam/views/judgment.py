@@ -25,7 +25,11 @@ class JudgmentListView(TemplateView):
         context["doc_count_noun"] = _("judgment")
         context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
+        self.add_entity_profile(context)
         return context
+
+    def add_entity_profile(self, context):
+        pass
 
 
 @registry.register_doc_type("judgment")

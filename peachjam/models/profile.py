@@ -10,6 +10,7 @@ def entity_profile_photo_filename(instance, filename):
 
 
 class EntityProfile(models.Model):
+    title = models.CharField(_("Title"), max_length=1024, null=True, blank=True)
     about_html = models.TextField(_("about HTML"), null=True, blank=True)
     website_url = models.URLField(_("website URL"), null=True, blank=True)
     address = models.TextField(_("address"), null=True, blank=True)

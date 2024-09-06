@@ -96,6 +96,7 @@ class GazetteListView(TemplateView):
         context["doc_count_noun"] = _("gazette")
         context["doc_count_noun_plural"] = _("gazettes")
         context["doc_type"] = "Gazette"
+        self.add_entity_profile(context)
 
         return context
 
@@ -109,6 +110,9 @@ class GazetteListView(TemplateView):
             )
             return Locality.objects.filter(pk__in=locality_ids)
         return []
+
+    def add_entity_profile(self, context):
+        pass
 
 
 class GazetteYearView(YearMixin, FilteredDocumentListView):
