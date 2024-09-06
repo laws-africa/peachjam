@@ -11,8 +11,11 @@ class RobotsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         disallowed_content = [
-            "Disallow: " + doc.expression_frbr_uri
-            for doc in CoreDocument.objects.exclude(allow_robots=True)
+            f"Disallow: {frbr_uri}/"
+            for frbr_uri in CoreDocument.objects.filter(allow_robots=False)
+            .values_list("work_frbr_uri", flat=True)
+            .order_by()
+            .distinct()
         ]
         context["disallowed_content"] = "\n".join(disallowed_content)
 
