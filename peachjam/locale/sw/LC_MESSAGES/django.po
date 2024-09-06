@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-06 10:12+0200\n"
-"PO-Revision-Date: 2024-08-06 08:54\n"
+"PO-Revision-Date: 2024-08-17 14:56\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -60,7 +60,7 @@ msgstr "Usichapishe nyaraka zilizochaguliwa"
 #: admin.py:672
 #, python-format
 msgid "Taxonomy with slug \"%(value)s\" already exists."
-msgstr "Taxonomia yenye koa \"%(value)s\" tayari ipo."
+msgstr "Mfumo wa kupanga maudhui wenye  slug \"%(value)s\" tayari upo."
 
 #: admin.py:746 models/judgment.py:471 models/judgment.py:507
 msgid "case number"
@@ -128,7 +128,7 @@ msgstr "(Mpya zaidi kwanza)"
 
 #: forms.py:129
 msgid "(Oldest first)"
-msgstr "(Ya zamani kwanza)"
+msgstr "(Ya zamani zaidi kwanza)"
 
 #: forms.py:291
 msgid "Document problem reported"
@@ -671,7 +671,7 @@ msgstr "mawakili"
 
 #: models/judgment.py:30
 msgid "Judge"
-msgstr "Hakimu"
+msgstr "Jaji"
 
 #: models/judgment.py:31 templates/peachjam/_case_histories.html:8
 #: templates/peachjam/layouts/document_detail.html:245
@@ -794,11 +794,11 @@ msgstr "Nukuu isiyoegemea upande wowote"
 
 #: models/judgment.py:306
 msgid "Auto-assign details"
-msgstr "Agiza maelezo kiotomatiki"
+msgstr "Weka maelezo kiotomatiki"
 
 #: models/judgment.py:307
 msgid "Whether or not the system should assign the details"
-msgstr "Ikiwa mfumo unapaswa kutoa maelezo au la"
+msgstr "Ikiwa mfumo unapaswa kuweka maelezo au la"
 
 #: models/judgment.py:321 views/courts.py:45 views/judgment.py:26
 msgid "judgments"
@@ -903,7 +903,7 @@ msgstr "utambulisho wa  jambo lengwa "
 
 #: models/relationships.py:36
 msgid "subject selectors"
-msgstr "wateuzi wa mada"
+msgstr "viteua wa mada"
 
 #: models/relationships.py:44
 msgid "object work"
@@ -1356,7 +1356,7 @@ msgstr "Wazi"
 #: templates/peachjam/_document_table_form.html:116
 #: templates/peachjam/_document_table_form.html:117
 msgid "Filter documents"
-msgstr "Chuja hati"
+msgstr "Pembua nyaraka"
 
 #: templates/peachjam/_document_table_form.html:124
 msgid "Sort by"
@@ -1364,7 +1364,7 @@ msgstr "Ainisha kwa"
 
 #: templates/peachjam/_document_table_form.html:134
 msgid "Filter"
-msgstr "Chuja"
+msgstr "Pembua"
 
 #: templates/peachjam/_document_table_row.html:25
 #: templates/peachjam/layouts/document_detail.html:299
@@ -1442,7 +1442,7 @@ msgstr "Tarehe ya Kuweka"
 
 #: templates/peachjam/_recent_document_list.html:19
 msgid "No recent documents."
-msgstr "Hakuna hati za hivi majuzi."
+msgstr "Hakuna nyaraka za hivi karibuni"
 
 #: templates/peachjam/_related_documents.html:4
 #: templates/peachjam/layouts/document_detail.html:97
