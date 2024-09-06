@@ -5,6 +5,7 @@ from django.db.models.functions import ExtractMonth, ExtractYear
 from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as __
 from django.views.generic import TemplateView
 
 from peachjam.forms import GazetteFilterForm
@@ -126,6 +127,10 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
     navbar_link = "gazettes"
     locality = None
     group_by_date = "month-year"
+    special_facet_options = [
+        ("special", __("Special Issue")),
+        ("not_special", __("Regular Issue")),
+    ]
 
     def get_form(self):
         self.form_defaults = {"sort": "-date", "secondary_sort": "-frbr_uri_number"}
@@ -192,7 +197,19 @@ class GazetteYearView(YearMixin, FilteredDocumentListView):
                 "type": "checkbox",
                 "options": [(s, s) for s in sub_publications],
                 "values": self.request.GET.getlist("sub_publications"),
-            }
+            },
+            "special": {
+                "label": _("Issue"),
+                "type": "checkbox",
+                "options": self.special_facet_options,
+                "values": self.request.GET.getlist("special"),
+            },
+            "supplement": {
+                "label": _("Supplement"),
+                "type": "checkbox",
+                "options": [("true", _("Supplement"))],
+                "values": self.request.GET.getlist("supplement"),
+            },
         }
 
 
