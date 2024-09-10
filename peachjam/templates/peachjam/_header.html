@@ -61,17 +61,19 @@
                 </a>
                 <ul class="dropdown-menu">
                   <li>
-                    {% if user.is_superuser %}
+                    {% if user.is_staff %}
                       <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
                     {% endif %}
+                    {% if PEACHJAM_SETTINGS.allow_save_documents %}
+                      <a class="dropdown-item" href="{% url 'folder_list' %}">{% trans 'Saved documents' %}</a>
+                    {% endif %}
                     <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
-                    <a class="dropdown-item" href="{% url 'folder_list' %}">{% trans 'Saved documents' %}</a>
                   </li>
                 </ul>
               </li>
             {% endblock %}
           </ul>
-        {% else %}
+        {% elif PEACHJAM_SETTINGS.allow_save_documents %}
           <a class="btn btn-primary ms-3" href="{% url 'account_login' %}">Log in</a>
         {% endif %}
         {% include 'peachjam/_set_language.html' %}
