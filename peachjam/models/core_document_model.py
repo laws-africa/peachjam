@@ -896,6 +896,42 @@ class SourceFile(AttachmentAbstractModel):
             self.set_download_filename()
 
 
+class PublicationFile(SourceFile):
+    SAVE_FOLDER = "publication_file"
+
+    document = models.OneToOneField(
+        CoreDocument,
+        related_name="publication_file",
+        on_delete=models.CASCADE,
+        verbose_name=_("document"),
+    )
+    trusted_url = models.URLField(
+        _("trusted URL"), max_length=2048, null=True, blank=True
+    )
+
+    class Meta:
+        verbose_name = _("publication file")
+        verbose_name_plural = _("publication files")
+
+    def as_pdf(self):
+        # assume the publication file is a PDF; if not, ignore it
+        if self.mimetype == "application/pdf":
+            return self.file
+        return None
+
+    def convert_to_pdf(self):
+        # don't convert anything
+        pass
+
+    def ensure_file_as_pdf(self):
+        # don't convert anything
+        pass
+
+    def filename_for_download(self, ext=None):
+        filename = super().filename_for_download(ext=ext)
+        return "Publication file: " + filename
+
+
 class AttachedFileNature(models.Model):
     name = models.CharField(
         _("name"), max_length=1024, null=False, blank=False, unique=True
