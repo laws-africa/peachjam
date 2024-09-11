@@ -191,6 +191,18 @@
                           </dd>
                         {% endif %}
                       {% endblock %}
+                      {% block document-metadata-content-publication %}
+                        {# TODO #}
+                        {% if document.publication_file %}
+                          <dt>
+                            {% trans 'Publication' %}
+                          </dt>
+                          <dd class="text-muted">
+                            <a href="{% url 'document_publication' document.expression_frbr_uri|strip_first_character %}"
+                               target="_blank">{% trans "View" %}</a>
+                          </dd>
+                        {% endif %}
+                      {% endblock %}
                       {% block document-metadata-content-alternative-names %}
                         {% with document.alternative_names.all as alternative_names %}
                           {% if alternative_names %}
