@@ -135,6 +135,13 @@ class DocumentPublicationView(DocumentSourceView):
         # TODO: review all of this
         if hasattr(self.object, "publication_file"):
             publication_file = self.object.publication_file
+            if publication_file.use_source_file:
+                return redirect(
+                    reverse(
+                        "document_source",
+                        kwargs={"frbr_uri": self.object.expression_frbr_uri[1:]},
+                    )
+                )
             # don't do anything if it's not a PDF
             if publication_file.mimetype == "application/pdf":
                 # if the publication file is remote, just redirect there

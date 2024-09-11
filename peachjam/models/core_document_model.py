@@ -911,6 +911,13 @@ class PublicationFile(AttachmentAbstractModel):
     trusted_url = models.URLField(
         _("trusted URL"), max_length=2048, null=True, blank=True
     )
+    use_source_file = models.BooleanField(
+        _("use source file"),
+        default=False,
+        help_text=_(
+            "Set to True if the source file on the same document can be used instead"
+        ),
+    )
 
     class Meta:
         verbose_name = _("publication file")
