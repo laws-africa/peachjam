@@ -899,7 +899,7 @@ class SourceFile(AttachmentAbstractModel):
 class PublicationFile(AttachmentAbstractModel):
     SAVE_FOLDER = "publication_file"
 
-    document = models.ForeignKey(
+    document = models.OneToOneField(
         CoreDocument,
         related_name="publication_file",
         on_delete=models.CASCADE,
