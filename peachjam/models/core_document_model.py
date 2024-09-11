@@ -461,6 +461,7 @@ class CoreDocument(PolymorphicModel):
         db_index=True,
         help_text=_("Is this document published and visible on the website?"),
     )
+    metadata_json = models.JSONField(_("metadata JSON"), null=True, blank=True)
 
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES

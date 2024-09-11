@@ -71,7 +71,7 @@ class LegislationManager(CoreDocumentManager):
 class Legislation(CoreDocument):
     objects = LegislationManager.from_queryset(CoreDocumentQuerySet)()
 
-    metadata_json = models.JSONField(_("metadata JSON"), null=False, blank=False)
+    old_metadata_json = models.JSONField(_("metadata JSON"), null=False, blank=False)
     timeline_json = models.JSONField(
         _("timeline JSON"), null=False, blank=False, default=list
     )
@@ -82,6 +82,7 @@ class Legislation(CoreDocument):
     parent_work = models.ForeignKey(
         Work, null=True, on_delete=models.PROTECT, verbose_name=_("parent work")
     )
+    principal = models.BooleanField(_("principal"), default=False, null=False)
 
     frbr_uri_doctypes = ["act"]
 
