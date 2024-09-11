@@ -18,9 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="coredocument",
             name="metadata_json",
-            field=models.JSONField(
-                blank=True, null=True, verbose_name="new metadata JSON"
-            ),
+            field=models.JSONField(blank=True, null=True, verbose_name="metadata JSON"),
         ),
         migrations.AddField(
             model_name="legislation",
