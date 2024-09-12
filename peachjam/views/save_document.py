@@ -38,10 +38,6 @@ class BaseFolderMixin(
     def get_queryset(self):
         return self.request.user.folders.all()
 
-
-class FolderListView(BaseFolderMixin, ListView):
-    permission_required = "peachjam.view_folder"
-
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context["ungrouped_saved_documents"] = self.request.user.saved_documents.filter(
@@ -49,6 +45,10 @@ class FolderListView(BaseFolderMixin, ListView):
         )
         context["folders"] = self.get_queryset()
         return context
+
+
+class FolderListView(BaseFolderMixin, ListView):
+    permission_required = "peachjam.view_folder"
 
 
 class BaseFolderFormMixin(BaseFolderMixin):
