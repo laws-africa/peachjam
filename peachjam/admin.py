@@ -29,7 +29,12 @@ from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularI
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
-from peachjam.forms import AttachedFilesForm, NewDocumentFormMixin, SourceFileForm
+from peachjam.forms import (
+    AttachedFilesForm,
+    NewDocumentFormMixin,
+    PublicationFileForm,
+    SourceFileForm,
+)
 from peachjam.models import (
     AlternativeName,
     Article,
@@ -71,6 +76,7 @@ from peachjam.models import (
     Outcome,
     PeachJamSettings,
     Predicate,
+    PublicationFile,
     Relationship,
     SavedDocument,
     SourceFile,
@@ -203,6 +209,12 @@ class BaseAttachmentFileInline(admin.StackedInline):
 class SourceFileInline(BaseAttachmentFileInline):
     model = SourceFile
     form = SourceFileForm
+    readonly_fields = (*BaseAttachmentFileInline.readonly_fields, "source_url")
+
+
+class PublicationFileInline(BaseAttachmentFileInline):
+    model = PublicationFile
+    form = PublicationFileForm
     readonly_fields = (*BaseAttachmentFileInline.readonly_fields, "source_url")
 
 
@@ -370,6 +382,7 @@ class DocumentAdmin(BaseAdmin):
     inlines = [
         DocumentTopicInline,
         SourceFileInline,
+        PublicationFileInline,
         AlternativeNameInline,
         AttachedFilesInline,
         ImageInline,
