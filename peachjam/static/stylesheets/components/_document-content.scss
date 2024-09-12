@@ -374,7 +374,6 @@
   }
 
   margin-bottom: 0px;
-  display: flex;
   flex-wrap: wrap;
 
   dt {
@@ -383,7 +382,6 @@
   }
   dd {
     padding-left: 0.5rem;
-    width: calc(100% - var(--dt-width));
     flex: 0 0 calc(100% - var(--dt-width));
   }
 
