@@ -908,9 +908,6 @@ class PublicationFile(AttachmentAbstractModel):
     source_url = models.URLField(
         _("source URL"), max_length=2048, null=True, blank=True
     )
-    trusted_url = models.URLField(
-        _("trusted URL"), max_length=2048, null=True, blank=True
-    )
     use_source_file = models.BooleanField(
         _("use source file"),
         default=False,
