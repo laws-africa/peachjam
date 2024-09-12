@@ -64,7 +64,7 @@ class LegislationManager(CoreDocumentManager):
         return (
             super()
             .get_queryset()
-            .defer("metadata_json", "timeline_json", "commencements_json")
+            .defer("old_metadata_json", "timeline_json", "commencements_json")
         )
 
 

@@ -254,7 +254,7 @@ class Work(models.Model):
 class CoreDocumentManager(PolymorphicManager):
     def get_queryset(self):
         # defer expensive fields
-        return super().get_queryset().defer("content_html", "toc_json")
+        return super().get_queryset().defer("content_html", "toc_json", "metadata_json")
 
     def get_qs_no_defer(self):
         return super().get_queryset()
