@@ -208,6 +208,7 @@ class IndigoAdapter(Adapter):
             "toc_json": toc_json,
             "content_html": self.get_content_html(document),
             "citation": document["numbered_title"],
+            "principal": document["principal"],
         }
 
         frbr_uri_data = {

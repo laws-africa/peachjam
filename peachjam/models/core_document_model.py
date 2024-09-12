@@ -254,7 +254,7 @@ class Work(models.Model):
 class CoreDocumentManager(PolymorphicManager):
     def get_queryset(self):
         # defer expensive fields
-        return super().get_queryset().defer("content_html", "toc_json")
+        return super().get_queryset().defer("content_html", "toc_json", "metadata_json")
 
     def get_qs_no_defer(self):
         return super().get_queryset()
@@ -461,6 +461,7 @@ class CoreDocument(PolymorphicModel):
         db_index=True,
         help_text=_("Is this document published and visible on the website?"),
     )
+    metadata_json = models.JSONField(_("metadata JSON"), null=True, blank=True)
 
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES

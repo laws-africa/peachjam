@@ -665,29 +665,31 @@ class TaxonomyForm(MoveNodeForm):
         return self.instance
 
     def clean(self):
-        ref_node = self.cleaned_data["_ref_node_id"]
-        position = self.cleaned_data["_position"]
-        name = self.cleaned_data["name"]
-        parent = None
-        if ref_node:
-            node = self.instance.__class__.objects.filter(
-                pk=self.cleaned_data["_ref_node_id"]
-            ).first()
-            if position == "sorted-child":
-                parent = node
-            else:
-                parent = node.get_parent()
-        slug = (f"{parent.slug}-" if parent else "") + slugify(name)
-        qs = self.instance.__class__.objects.filter(slug=slug)
-        if hasattr(self.instance, "pk"):
-            qs = qs.exclude(pk=self.instance.pk)
-        exists = qs.exists()
-        if exists:
-            raise ValidationError(
-                _('Taxonomy with slug "%(value)s" already exists.'),
-                params={"value": slug},
-                code="duplicate",
-            )
+        if not self.errors:
+            ref_node = self.cleaned_data["_ref_node_id"]
+            position = self.cleaned_data["_position"]
+            name = self.cleaned_data["name"]
+            parent = None
+            if ref_node:
+                node = self.instance.__class__.objects.filter(
+                    pk=self.cleaned_data["_ref_node_id"]
+                ).first()
+                if position == "sorted-child":
+                    parent = node
+                else:
+                    parent = node.get_parent()
+            slug = (f"{parent.slug}-" if parent else "") + slugify(name)
+            qs = self.instance.__class__.objects.filter(slug=slug)
+            if hasattr(self.instance, "pk"):
+                qs = qs.exclude(pk=self.instance.pk)
+            exists = qs.exists()
+            if exists:
+                raise ValidationError(
+                    _('Taxonomy with slug "%(value)s" already exists.'),
+                    params={"value": slug},
+                    code="duplicate",
+                )
+        return self.cleaned_data
 
 
 class TaxonomyAdmin(TreeAdmin):
