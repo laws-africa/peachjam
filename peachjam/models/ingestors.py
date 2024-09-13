@@ -18,9 +18,6 @@ class IngestorSetting(models.Model):
         "peachjam.Ingestor", on_delete=models.CASCADE, verbose_name=_("ingestor")
     )
 
-    repeat = models.BigIntegerField(choices=Task.REPEAT_CHOICES, default=Task.NEVER)
-    schedule = models.BigIntegerField(choices=Task.REPEAT_CHOICES, default=Task.NEVER)
-
     class Meta:
         verbose_name = _("ingestor setting")
         verbose_name_plural = _("ingestor settings")
@@ -36,6 +33,9 @@ class Ingestor(models.Model):
     )
     name = models.CharField(_("name"), max_length=255)
     enabled = models.BooleanField(_("enabled"), default=True)
+
+    repeat = models.BigIntegerField(choices=Task.REPEAT_CHOICES, default=Task.NEVER)
+    schedule = models.BigIntegerField(choices=Task.REPEAT_CHOICES, default=Task.NEVER)
 
     class Meta:
         verbose_name = _("ingestor")

@@ -928,14 +928,26 @@ class IngestorForm(forms.ModelForm):
 
     class Meta:
         model = Ingestor
-        fields = ("adapter", "name", "last_refreshed_at", "enabled")
+        fields = (
+            "adapter",
+            "name",
+            "last_refreshed_at",
+            "repeat",
+            "schedule",
+            "enabled",
+        )
 
 
 @admin.register(Ingestor)
 class IngestorAdmin(admin.ModelAdmin):
     inlines = [IngestorSettingInline]
     actions = ["refresh_all_content"]
-    list_display = ("name", "adapter", "last_refreshed_at", "enabled")
+    list_display = (
+        "name",
+        "adapter",
+        "last_refreshed_at",
+        "enabled",
+    )
     form = IngestorForm
 
     def refresh_all_content(self, request, queryset):
