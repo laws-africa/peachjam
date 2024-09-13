@@ -113,7 +113,9 @@ def run_ingestors():
 
     for ingestor in Ingestor.objects.all():
         if ingestor.enabled:
-            run_ingestor(ingestor.pk)
+            run_ingestor(
+                ingestor.pk, repeat=ingestor.repeat, schedule=ingestor.schedule
+            )
 
     log.info("Done")
 

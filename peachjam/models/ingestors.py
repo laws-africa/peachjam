@@ -1,5 +1,6 @@
 import logging
 
+from background_task.models import Task
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -16,6 +17,9 @@ class IngestorSetting(models.Model):
     ingestor = models.ForeignKey(
         "peachjam.Ingestor", on_delete=models.CASCADE, verbose_name=_("ingestor")
     )
+
+    repeat = models.BigIntegerField(choices=Task.REPEAT_CHOICES, default=Task.NEVER)
+    schedule = models.BigIntegerField(choices=Task.REPEAT_CHOICES, default=Task.NEVER)
 
     class Meta:
         verbose_name = _("ingestor setting")
