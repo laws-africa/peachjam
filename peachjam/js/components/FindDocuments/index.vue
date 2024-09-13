@@ -407,9 +407,16 @@ export default {
   },
 
   methods: {
-    sortGenericBuckets (items, reverse = false) {
+    sortBuckets (items, reverse = false, byCount = false) {
       const buckets = [...items];
-      buckets.sort((a, b) => a.key.localeCompare(b.key));
+      function keyFn (a, b) {
+        if (byCount) {
+          // sort by count, then by key
+          return a.doc_count === b.doc_count ? a.key.localeCompare(b.key) : b.doc_count - a.doc_count;
+        }
+        return a.key.localeCompare(b.key);
+      }
+      buckets.sort(keyFn);
       if (reverse) {
         buckets.reverse();
       }
@@ -554,9 +561,8 @@ export default {
       this.facets.forEach((facet) => {
         if (facet.name === 'year') {
           facet.options = generateOptions(
-            this.sortGenericBuckets(
-              this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
-                .buckets,
+            this.sortBuckets(
+              this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
               true
             ),
             facet.optionLabels
@@ -564,9 +570,11 @@ export default {
         } else {
           if (this.searchInfo.facets[`_filter_${facet.name}`]) {
             facet.options = generateOptions(
-              this.sortGenericBuckets(
-                this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
-                  .buckets
+              this.sortBuckets(
+                this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
+               false,
+                // sort nature by descending count, everything else alphabetically
+                facet.name === 'nature'
               ),
               facet.optionLabels
             );
