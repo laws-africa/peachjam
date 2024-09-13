@@ -110,34 +110,30 @@
   {% endwith %}
 {% endblock %}
 {% block extra-metadata %}
-  {% if document.flynote %}
-    <dl>
+  <dl class="document-metadata-list d-md-flex">
+    {% if document.flynote %}
       <dt>
         {% trans 'Flynote' %}
       </dt>
       <dd>
         {{ document.flynote|safe }}
       </dd>
-    </dl>
-  {% endif %}
-  {% if document.order %}
-    <dl>
-      <dt>
-        {% trans 'Order' %}
-      </dt>
-      <dd>
-        {{ document.order|safe }}
-      </dd>
-    </dl>
-  {% endif %}
-  {% if document.case_summary %}
-    <dl>
+    {% endif %}
+    {% if document.case_summary %}
       <dt>
         {% trans 'Case summary' %}
       </dt>
       <dd>
         {{ document.case_summary|safe }}
       </dd>
-    </dl>
-  {% endif %}
+    {% endif %}
+    {% if document.order %}
+      <dt>
+        {% trans 'Order' %}
+      </dt>
+      <dd>
+        {{ document.order|safe }}
+      </dd>
+    {% endif %}
+  </dl>
 {% endblock %}
