@@ -99,10 +99,10 @@ class DocumentSourceView(DetailView):
             )
         raise Http404
 
-    def make_response(self, f, content_type, fname):
+    def make_response(self, f, content_type, fname, disposition="attachment"):
         file_bytes = f.read()
         response = HttpResponse(file_bytes, content_type=content_type)
-        response["Content-Disposition"] = f"attachment; filename={fname}"
+        response["Content-Disposition"] = f"{disposition}; filename={fname}"
         response["Content-Length"] = str(len(file_bytes))
         return response
 
@@ -158,6 +158,7 @@ class DocumentPublicationView(DocumentSourceView):
                     publication_file.file.open(),
                     publication_file.mimetype,
                     publication_file.filename,
+                    disposition="inline",
                 )
         raise Http404
 
