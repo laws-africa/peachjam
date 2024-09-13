@@ -27,6 +27,17 @@ class IngestorSetting(models.Model):
 
 
 class Ingestor(models.Model):
+
+    ONE_MINUTE = (60, "one minute")
+    FIVE_MINUTES = (5 * 60, "five minutes")
+    THIRTY_MINUTES = (30 * 60, "thirty minutes")
+    INGESTOR_REPEAT_CHOICES = (
+        ONE_MINUTE,
+        FIVE_MINUTES,
+        THIRTY_MINUTES,
+        *Task.REPEAT_CHOICES,
+    )
+
     adapter = models.CharField(_("adapter"), max_length=2048)
     last_refreshed_at = models.DateTimeField(
         _("last refreshed at"), null=True, blank=True
@@ -34,8 +45,10 @@ class Ingestor(models.Model):
     name = models.CharField(_("name"), max_length=255)
     enabled = models.BooleanField(_("enabled"), default=True)
 
-    repeat = models.BigIntegerField(choices=Task.REPEAT_CHOICES, default=Task.NEVER)
-    schedule = models.BigIntegerField(choices=Task.REPEAT_CHOICES, default=Task.NEVER)
+    repeat = models.BigIntegerField(choices=INGESTOR_REPEAT_CHOICES, default=Task.NEVER)
+    schedule = models.BigIntegerField(
+        choices=INGESTOR_REPEAT_CHOICES, default=Task.NEVER
+    )
 
     class Meta:
         verbose_name = _("ingestor")
