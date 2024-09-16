@@ -928,6 +928,43 @@ class PublicationFile(AttachmentAbstractModel):
         verbose_name = _("publication file")
         verbose_name_plural = _("publication files")
 
+    def clean(self):
+        """Prefer use_source_file, then url, then file if we must.
+        Raise a ValidationError if they're all missing.
+        """
+        super().clean()
+
+        # if use_source_file was chosen, check that there is one to use
+        if self.use_source_file and hasattr(self.document, "source_file"):
+            source_file = self.document.source_file
+            self.filename = source_file.filename
+            self.mimetype = source_file.mimetype
+            self.size = source_file.size
+            self.url = None
+        elif self.use_source_file:
+            self.use_source_file = False
+
+        if self.url and not (self.filename and self.mimetype and self.size):
+            raise ValidationError(
+                _(
+                    "When you use a URL, you need to provide the filename, the mimetype, and the size too."
+                )
+            )
+
+        # final check: we need at least one of these
+        if not (self.use_source_file or self.url or self.file):
+            raise ValidationError(
+                _(
+                    "You need to provide a URL or a file, or if you checked 'Use source file' there must be one to use."
+                )
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        if self.file and (self.use_source_file or self.url):
+            self.file.delete()
+        return super().save(*args, **kwargs)
+
 
 class AttachedFileNature(models.Model):
     name = models.CharField(

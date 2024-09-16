@@ -201,9 +201,11 @@ class IndigoAdapter(Adapter):
             "created_at": document["created_at"],
             "updated_at": document["updated_at"],
             "content_html_is_akn": True,
-            "source_url": document["publication_document"]["url"]
-            if document["publication_document"]
-            else None,
+            "source_url": (
+                document["publication_document"]["url"]
+                if document["publication_document"]
+                else None
+            ),
             "language": language,
             "toc_json": toc_json,
             "content_html": self.get_content_html(document),
@@ -296,6 +298,10 @@ class IndigoAdapter(Adapter):
         else:
             # the source file is the PDF version
             self.download_source_file(f"{url}.pdf", created_doc, title)
+
+        self.create_publication_file(
+            document["publication_document"], created_doc, title, stub=document["stub"]
+        )
 
         if self.taxonomy_topic_root:
             # clear any existing taxonomies
@@ -486,6 +492,15 @@ class IndigoAdapter(Adapter):
             remove_subparagraph(i)
         return toc_json
 
+    def get_filename(self, resp, title):
+        try:
+            # sometimes this header is not present
+            d = resp.headers["Content-Disposition"]
+            filename = re.findall("filename=(.+)", d)[0]
+        except KeyError:
+            filename = f"{slugify(title)}.pdf"
+        return filename
+
     def download_source_file(self, url, doc, title):
         from peachjam.models import SourceFile
 
@@ -493,13 +508,7 @@ class IndigoAdapter(Adapter):
 
         with NamedTemporaryFile() as f:
             r = self.client_get(url)
-            try:
-                # sometimes this header is not present
-                d = r.headers["Content-Disposition"]
-                filename = re.findall("filename=(.+)", d)[0]
-            except KeyError:
-                filename = f"{slugify(title)}.pdf"
-
+            filename = self.get_filename(r, title)
             f.write(r.content)
 
             SourceFile.objects.update_or_create(
@@ -509,6 +518,71 @@ class IndigoAdapter(Adapter):
                     "mimetype": magic.from_file(f.name, mime=True),
                 },
             )
+
+    def create_publication_file(self, publication_document, doc, title, stub=False):
+        from peachjam.models import PublicationFile
+
+        logger.info(f"Creating / updating a publication file for {title}")
+
+        # first delete any existing PublicationFile file: a new one will be saved if needed
+        # TODO: only delete it if something has changed? (how to know that a file has changed?)
+        if hasattr(doc, "publication_file"):
+            if doc.publication_file.file:
+                logger.info(
+                    f"  Deleting existing PublicationFile file on {doc.work_frbr_uri}"
+                )
+                doc.publication_file.file.delete()
+
+        if stub:
+            if hasattr(doc, "source_file"):
+                logger.info("  Stub: Using the source file")
+                PublicationFile.objects.update_or_create(
+                    document=doc,
+                    defaults={
+                        "use_source_file": True,
+                    },
+                )
+            else:
+                if hasattr(doc, "publication_file"):
+                    logger.info(
+                        "  Stub: No source file, deleting existing publication file"
+                    )
+                    doc.publication_file.delete()
+                else:
+                    logger.info("  Stub: No source file, skipping")
+        else:
+            url = publication_document["url"]
+            with NamedTemporaryFile() as f:
+                r = self.client_get(url)
+                filename = self.get_filename(r, f"Publication: {title}")
+                f.write(r.content)
+                mimetype = magic.from_file(f.name, mime=True)
+
+                if publication_document.get("has_trusted_url"):
+                    logger.info(f"  Using publication file from trusted URL {url}")
+                    PublicationFile.objects.update_or_create(
+                        document=doc,
+                        defaults={
+                            "filename": filename,
+                            "mimetype": mimetype,
+                            "size": f.size,
+                            "url": url,
+                            "use_source_file": False,
+                        },
+                    )
+                else:
+                    logger.info(f"  Downloading publication file from {url}")
+                    PublicationFile.objects.update_or_create(
+                        document=doc,
+                        defaults={
+                            "filename": filename,
+                            "mimetype": mimetype,
+                            "size": f.size,
+                            "file": File(f, name=filename),
+                            "url": None,
+                            "use_source_file": False,
+                        },
+                    )
 
     def delete_document(self, expression_frbr_uri):
         url = f"{self.api_url}{expression_frbr_uri}"
