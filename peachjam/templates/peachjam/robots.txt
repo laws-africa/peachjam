@@ -44,6 +44,5 @@ Disallow: /
 User-agent: meta-externalagent
 Disallow: /
 
-# https://www.semrush.com/bot/
-User-agent: SiteAuditBot
+User-agent: SemrushBot
 Disallow: /
