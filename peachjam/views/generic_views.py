@@ -1,5 +1,6 @@
 import itertools
 
+from django.http import Http404
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
@@ -449,6 +450,16 @@ class CSRFTokenView(View):
 
 
 class YearMixin:
+    def dispatch(self, request, *args, **kwargs):
+        # validate year
+        try:
+            year = int(kwargs["year"])
+            if year < 1 or year > 9999:
+                raise ValueError()
+        except ValueError:
+            raise Http404()
+        return super().dispatch(request, *args, **kwargs)
+
     @property
     def year(self):
         return self.kwargs["year"]
