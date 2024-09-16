@@ -132,34 +132,25 @@ class DocumentSourcePDFView(DocumentSourceView):
 
 class DocumentPublicationView(DocumentSourceView):
     def render_to_response(self, context, **response_kwargs):
-        # TODO: review all of this
         if hasattr(self.object, "publication_file"):
             publication_file = self.object.publication_file
             if publication_file.use_source_file:
+                # TODO: change document_source to display inline?
                 return redirect(
                     reverse(
                         "document_source",
                         kwargs={"frbr_uri": self.object.expression_frbr_uri[1:]},
                     )
                 )
-            # don't do anything if it's not a PDF
-            if publication_file.mimetype == "application/pdf":
-                # if the publication file is remote, just redirect there
-                if publication_file.source_url:
-                    return redirect(publication_file.source_url)
+            if publication_file.url:
+                return redirect(publication_file.url)
 
-                if hasattr(publication_file, "file") and getattr(
-                    publication_file.file.storage, "custom_domain", None
-                ):
-                    # use the storage's custom domain to serve the file
-                    return redirect(publication_file.file.url)
-
-                return self.make_response(
-                    publication_file.file.open(),
-                    publication_file.mimetype,
-                    publication_file.filename,
-                    disposition="inline",
-                )
+            return self.make_response(
+                publication_file.file.open(),
+                publication_file.mimetype,
+                publication_file.filename,
+                disposition="inline",
+            )
         raise Http404
 
 
