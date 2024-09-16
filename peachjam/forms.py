@@ -252,8 +252,11 @@ class AttachmentFormMixin:
     """Admin form for editing models that extend from AbstractAttachmentModel."""
 
     def clean_file(self):
-        # dynamic storage files don't like colons in filenames
-        self.cleaned_data["file"].name = clean_filename(self.cleaned_data["file"].name)
+        if self.cleaned_data["file"]:
+            # dynamic storage files don't like colons in filenames
+            self.cleaned_data["file"].name = clean_filename(
+                self.cleaned_data["file"].name
+            )
         return self.cleaned_data["file"]
 
     def save(self, commit=True):
