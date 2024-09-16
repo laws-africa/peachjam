@@ -126,6 +126,7 @@ class DocumentSourcePDFView(DocumentSourceView):
                         pdf,
                         "application/pdf",
                         source_file.filename_for_download(".pdf"),
+                        disposition="inline",
                     )
         raise Http404()
 
