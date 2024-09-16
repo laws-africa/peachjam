@@ -900,14 +900,21 @@ class SourceFile(AttachmentAbstractModel):
 class PublicationFile(AttachmentAbstractModel):
     SAVE_FOLDER = "publication_file"
 
+    file = models.FileField(
+        _("file"), upload_to=file_location, max_length=1024, blank=True, null=True
+    )
     document = models.OneToOneField(
         CoreDocument,
         related_name="publication_file",
         on_delete=models.CASCADE,
         verbose_name=_("document"),
     )
-    source_url = models.URLField(
-        _("source URL"), max_length=2048, null=True, blank=True
+    url = models.URLField(
+        _("URL"),
+        max_length=2048,
+        null=True,
+        blank=True,
+        help_text=_("The external URL (e.g. on gazettes.africa) where this file lives"),
     )
     use_source_file = models.BooleanField(
         _("use source file"),
