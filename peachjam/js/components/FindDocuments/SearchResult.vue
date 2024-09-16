@@ -1,6 +1,6 @@
 <template>
-  <li class="mb-4 hit">
-    <div class="card">
+  <li :class="`mb-4 hit ${item.best_match ? 'best-match' : ''}`">
+    <div class="card" :data-best-match="$t('Best match')">
       <div class="card-body">
         <h5 class="card-title">
           <a
@@ -174,5 +174,20 @@ export default {
 .hit .explanation {
   max-height: 50vh;
   overflow-y: auto;
+}
+
+.hit.best-match .card {
+  box-shadow: 0px 0px 5px 2px gold;
+}
+
+.hit.best-match .card::before {
+  content: attr(data-best-match);
+  position: absolute;
+  background: gold;
+  padding: 0.25rem 0.25rem;
+  right: -1px;
+  top: -1px;
+  font-size: smaller;
+  border-top-right-radius: 6px;
 }
 </style>

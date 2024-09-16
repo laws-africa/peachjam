@@ -581,6 +581,12 @@ export default {
         // number items from 1 consistently across pages
         this.searchInfo.results[i].position = (this.page - 1) * this.pageSize + i + 1;
       }
+
+      // determine best match: is the first result's score significantly better than the next?
+      if (this.page === 1 && this.searchInfo.results.length > 1 &&
+          this.searchInfo.results[0]._score / this.searchInfo.results[1]._score >= 1.2) {
+        this.searchInfo.results[0].best_match = true;
+      }
     },
 
     generateSearchParams () {
