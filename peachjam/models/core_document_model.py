@@ -896,6 +896,18 @@ class SourceFile(AttachmentAbstractModel):
             # first save, set the download filename
             self.set_download_filename()
 
+    def delete(self, *args, **kwargs):
+        if (
+            hasattr(self.document, "publication_file")
+            and self.document.publication_file.use_source_file
+        ):
+            raise ValidationError(
+                _(
+                    "You cannot delete this source document while 'Use source file' is checked on the publication file"
+                )
+            )
+        return super().delete(*args, **kwargs)
+
 
 class PublicationFile(AttachmentAbstractModel):
     SAVE_FOLDER = "publication_file"
