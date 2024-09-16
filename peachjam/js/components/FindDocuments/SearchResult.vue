@@ -15,6 +15,14 @@
           <div v-if="item.citation && item.citation !== item.title">
             <i>{{ item.citation }}</i>
           </div>
+          <div v-if="item.alternative_names.length">
+            <i>
+              <span v-for="(name, i) in item.highlight.alternative_names || item.alternative_names" :key="i">
+                <span v-if="i > 0">; </span>
+                <span v-html="name" />
+              </span>
+            </i>
+          </div>
           <div>
             <span v-if="showJurisdiction || item.locality" class="me-3">
               <span v-if="showJurisdiction" v-html="getFlag(item)" class="me-1" />
@@ -24,7 +32,7 @@
               </span>
               <span v-if="item.locality">{{ item.locality }}</span>
             </span>
-            <span class="me-3">{{ item.doc_type }}</span>
+            <span class="me-3">{{ item.nature }}</span>
             <span class="me-3">{{ item.date }}</span>
             <span
               v-if="item.court"

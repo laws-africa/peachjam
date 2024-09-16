@@ -588,8 +588,6 @@ export default {
       if (this.q) params.append('search', this.q);
       params.append('page', this.page);
       params.append('ordering', this.ordering);
-      params.append('highlight', 'content');
-      params.append('highlight', 'title');
       params.append('is_most_recent', 'true');
 
       this.facets.forEach((facet) => {
