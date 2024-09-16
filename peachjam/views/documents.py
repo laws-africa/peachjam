@@ -1,6 +1,6 @@
 from cobalt import FrbrUri
 from django.http import Http404, HttpResponse
-from django.shortcuts import get_object_or_404, redirect, reverse
+from django.shortcuts import get_list_or_404, redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.generic import DetailView, View
@@ -142,7 +142,9 @@ class DocumentMediaView(DetailView):
     slug_url_kwarg = "frbr_uri"
 
     def render_to_response(self, context, **response_kwargs):
-        img = get_object_or_404(self.object.images, filename=self.kwargs["filename"])
+        # there should only be one, but until we enforce uniqueness of filenames, get the first in the list
+        # see https://github.com/laws-africa/peachjam/issues/2024
+        img = get_list_or_404(self.object.images, filename=self.kwargs["filename"])[0]
 
         if getattr(img.file.storage, "custom_domain", None):
             # use the storage's custom domain to serve the file
