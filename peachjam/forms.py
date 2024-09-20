@@ -203,7 +203,7 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(attorneys__name__in=attorneys).distinct()
 
         if outcomes and exclude != "outcomes":
-            queryset = queryset.filter(outcomes__code__in=outcomes).distinct()
+            queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
 
         if taxonomies and exclude != "taxonomies":
             queryset = queryset.filter(taxonomies__topic__slug__in=taxonomies)

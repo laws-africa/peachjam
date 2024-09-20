@@ -90,7 +90,6 @@ class GazetteAPIAdapter(Adapter):
             "frbr_uri_actor": frbr_uri.actor,
             "frbr_uri_number": frbr_uri.number,
             "frbr_uri_date": frbr_uri.date,
-            "nature": None,  # see https://github.com/laws-africa/gazettemachine/issues/172
             "language": language,
             "date": date.fromisoformat(document["date"]),
             "title": document["name"],

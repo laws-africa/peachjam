@@ -487,22 +487,34 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     highlight_fields = {
         "title": {
+            "enabled": True,
             "options": {
                 "pre_tags": ["<mark>"],
                 "post_tags": ["</mark>"],
                 "fragment_size": 0,
                 "number_of_fragments": 0,
                 "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-            }
+            },
+        },
+        "alternative_names": {
+            "enabled": True,
+            "options": {
+                "pre_tags": ["<mark>"],
+                "post_tags": ["</mark>"],
+                "fragment_size": 0,
+                "number_of_fragments": 0,
+                "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
+            },
         },
         "content": {
+            "enabled": True,
             "options": {
                 "pre_tags": ["<mark>"],
                 "post_tags": ["</mark>"],
                 "fragment_size": 80,
                 "number_of_fragments": 2,
                 "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-            }
+            },
         },
     }
 
