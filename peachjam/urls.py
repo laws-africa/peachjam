@@ -331,12 +331,18 @@ urlpatterns = [
     ),
     # django-markdown-editor
     path("martor/", include("martor.urls")),
-    # comments
-    path("comments/", include("django_comments.urls")),
     path(
-        "comments/form/<str:app_label>/<str:model_name>/<int:pk>",
-        comment_form_view,
-        name="comment_form",
+        "comments/",
+        include(
+            [
+                path("", include("django_comments.urls")),
+                path(
+                    "form/<str:app_label>/<str:model_name>/<int:pk>",
+                    comment_form_view,
+                    name="comment_form",
+                ),
+            ]
+        ),
     ),
 ]
 
