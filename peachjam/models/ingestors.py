@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from peachjam.plugins import plugins
-from peachjam.tasks import delete_document, update_document
+from peachjam.tasks import delete_document, run_ingestor, update_document
 
 log = logging.getLogger(__name__)
 
@@ -91,3 +91,8 @@ class Ingestor(models.Model):
         ingestor_settings = IngestorSetting.objects.filter(ingestor=self)
         settings = {s.name: s.value for s in ingestor_settings}
         return klass(self, settings)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.enabled:
+            run_ingestor(self.id, repeat=self.repeat, schedule=self.schedule)
