@@ -8,16 +8,20 @@
        class="btn btn-block btn-info">{% trans 'Help' %}</a>
   {% endif %}
   {% block comments %}
-    <hr/>
-    <!-- actual comments, this is updated with hx-swap when a comment is posted -->
-    <div id="comments-list">{% include 'admin/_comments_list.html' with object=original %}</div>
+    {% if original %}
+      <hr/>
+      <!-- actual comments, this is updated with hx-swap when a comment is posted -->
+      <div id="comments-list">{% include 'admin/_comments_list.html' with object=original %}</div>
+    {% endif %}
   {% endblock %}
 {% endblock %}
 {% block content %}
   <script defer src="{% static 'js/app-prod.js' %}"></script>
   {{ block.super }}
-  <!-- actual comment form, outside of main form; this will be updated with hx-oob-swap when a comment is posted -->
-  <div id="comments-form-wrapper">
-    {% include 'admin/_comments_form.html' with object=original app_label=opts.app_label model_name=opts.model_name %}
-  </div>
+  {% if original %}
+    <!-- actual comment form, outside of main form; this will be updated with hx-oob-swap when a comment is posted -->
+    <div id="comments-form-wrapper">
+      {% include 'admin/_comments_form.html' with object=original app_label=opts.app_label model_name=opts.model_name %}
+    </div>
+  {% endif %}
 {% endblock %}
