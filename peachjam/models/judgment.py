@@ -1,8 +1,5 @@
-from tempfile import NamedTemporaryFile
-
 from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
-from django.core.files import File
 from django.db import models
 from django.db.models import Max
 from django.template.defaultfilters import date as format_date
@@ -10,9 +7,8 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
-from docpipe.soffice import soffice_convert
 
-from peachjam.models import CoreDocument, Label, Locality, SourceFile
+from peachjam.models import CoreDocument, Label, Locality
 
 
 class Attorney(models.Model):
@@ -444,22 +440,6 @@ class Judgment(CoreDocument):
             self.assign_mnc()
             self.assign_title()
         super().pre_save()
-
-    def convert_html_to_pdf(self):
-        with NamedTemporaryFile(suffix=".html") as html_file:
-            html_file.write(self.content_html.encode("utf-8"))
-            html_file.flush()
-            html_file.seek(0)
-
-            pdf, _ = soffice_convert(html_file, "html", "pdf")
-            filename = slugify(self.case_name)
-            SourceFile.objects.update_or_create(
-                document=self,
-                defaults={
-                    "file": File(pdf, name=f"{filename}.pdf"),
-                    "mimetype": "application/pdf",
-                },
-            )
 
 
 class CaseNumber(models.Model):
