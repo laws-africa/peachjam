@@ -1,0 +1,16 @@
+{% load comments %}
+{% get_comment_form for object as comment_form %}
+<form action="{% comment_form_target %}"
+      method="post"
+      id="comment-form"
+      hx-post="{% comment_form_target %}"
+      hx-target="#comments-list">
+  {% csrf_token %}
+  <input type="hidden"
+         name="next"
+         value="{% url 'comment_form' app_label model_name object.pk %}"/>
+  {{ comment_form.content_type }}
+  {{ comment_form.object_pk }}
+  {{ comment_form.timestamp }}
+  {{ comment_form.security_hash }}
+</form>

@@ -1,5 +1,5 @@
 {% extends "admin/change_form.html" %}
-{% load i18n comments humanize %}
+{% load i18n comments humanize static %}
 {% block extra_actions %}
   {{ block.super }}
   {% if PEACHJAM_SETTINGS.editor_help_link and adminform.model_admin.help_topic %}
@@ -9,37 +9,15 @@
   {% endif %}
   {% block comments %}
     <hr/>
-    {% get_comment_list for original as comment_list %}
-    <ol class="list-unstyled">
-      {% for comment in comment_list %}
-        <li class="mb-3">
-          <div>
-            <b>{{ comment.user }}</b> {{ comment.submit_date|naturaltime }}:
-          </div>
-          <div>{{ comment.comment|linebreaks }}</div>
-        </li>
-      {% endfor %}
-    </ol>
-    {% get_comment_form for original as comment_form %}
-    <textarea name="{{ comment_form.comment.html_name }}"
-              rows="3"
-              maxlength="3000"
-              required
-              class="form-control mt-3 mb-2"
-              form="comment-form"></textarea>
-    <button type="submit" class="btn btn-primary" form="comment-form">{% trans "Add comment" %}</button>
+    <!-- actual comments, this is updated with hx-swap when a comment is posted -->
+    <div id="comments-list">{% include 'admin/_comments_list.html' with object=original %}</div>
   {% endblock %}
 {% endblock %}
 {% block content %}
+  <script defer src="{% static 'js/app-prod.js' %}"></script>
   {{ block.super }}
-  <!-- actual comment form, outside of main form -->
-  {% get_comment_form for original as comment_form %}
-  <form action="{% comment_form_target %}" method="post" id="comment-form">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ request.get_full_path }}" />
-    {{ comment_form.content_type }}
-    {{ comment_form.object_pk }}
-    {{ comment_form.timestamp }}
-    {{ comment_form.security_hash }}
-  </form>
+  <!-- actual comment form, outside of main form; this will be updated with hx-oob-swap when a comment is posted -->
+  <div id="comments-form-wrapper">
+    {% include 'admin/_comments_form.html' with object=original app_label=opts.app_label model_name=opts.model_name %}
+  </div>
 {% endblock %}
