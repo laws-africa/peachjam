@@ -330,6 +330,8 @@ urlpatterns = [
     ),
     # django-markdown-editor
     path("martor/", include("martor.urls")),
+    # comments
+    path("comments/", include("django_comments.urls")),
 ]
 
 if settings.DEBUG:
