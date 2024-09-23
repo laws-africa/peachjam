@@ -207,15 +207,15 @@ def convert_source_file_to_pdf(source_file_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def convert_html_to_pdf(judgment_id):
-    from peachjam.models import Judgment
+def convert_html_to_pdf(doc_id):
+    from peachjam.models import CoreDocument
 
-    judgment = Judgment.objects.filter(id=judgment_id).first()
-    logger.info(f"Creating PDF from HTML for judgment {judgment_id}")
-    if not judgment:
-        logger.warning("Judgment not found")
+    doc = CoreDocument.objects.filter(id=doc_id).first()
+    logger.info(f"Creating PDF from HTML for document {doc_id}")
+    if not doc:
+        logger.warning("Document not found")
         return
-    judgment.convert_html_to_pdf()
+    doc.convert_html_to_pdf()
     logger.info("Done")
 
 
