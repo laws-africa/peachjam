@@ -946,12 +946,10 @@ class IngestorAdmin(admin.ModelAdmin):
     form = IngestorForm
 
     def refresh_all_content(self, request, queryset):
-        from peachjam.tasks import run_ingestor
-
         queryset.update(last_refreshed_at=None)
         for ing in queryset:
             # queue up the background ingestor update task
-            run_ingestor(ing.pk, repeat=ing.repeat, schedule=ing.schedule)
+            ing.queue_task()
         self.message_user(
             request,
             _("Refreshing all content for selected ingestors in the background."),
@@ -962,10 +960,8 @@ class IngestorAdmin(admin.ModelAdmin):
     )
 
     def update_latest_content(self, request, queryset):
-        from peachjam.tasks import run_ingestor
-
         for ing in queryset:
-            run_ingestor(ing.pk, repeat=ing.repeat, schedule=ing.schedule)
+            ing.queue_task()
         self.message_user(
             request, _("Getting content since last update in background.")
         )

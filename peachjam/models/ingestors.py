@@ -92,7 +92,10 @@ class Ingestor(models.Model):
         settings = {s.name: s.value for s in ingestor_settings}
         return klass(self, settings)
 
+    def queue_task(self):
+        run_ingestor(self.id, repeat=self.repeat, schedule=self.schedule)
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.enabled:
-            run_ingestor(self.id, repeat=self.repeat, schedule=self.schedule)
+            self.queue_task()
