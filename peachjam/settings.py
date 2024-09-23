@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_htmx",
     "django_recaptcha",
+    "django_comments",
 ]
 
 MIDDLEWARE = [
