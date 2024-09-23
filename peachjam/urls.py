@@ -80,6 +80,7 @@ from peachjam.views import (
     UserProfileDetailView,
     WorkAutocomplete,
 )
+from peachjam.views.comments import comment_form_view
 from peachjam.views.generic_views import CSRFTokenView
 from peachjam.views.metabase_stats import MetabaseStatsView
 
@@ -330,6 +331,19 @@ urlpatterns = [
     ),
     # django-markdown-editor
     path("martor/", include("martor.urls")),
+    path(
+        "comments/",
+        include(
+            [
+                path("", include("django_comments.urls")),
+                path(
+                    "form/<str:app_label>/<str:model_name>/<int:pk>",
+                    comment_form_view,
+                    name="comment_form",
+                ),
+            ]
+        ),
+    ),
 ]
 
 if settings.DEBUG:

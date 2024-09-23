@@ -1,0 +1,19 @@
+{% load comments i18n humanize %}
+<ol class="list-unstyled">
+  {% get_comment_list for object as comment_list %}
+  {% for comment in comment_list %}
+    <li class="mb-3">
+      <div>
+        <b>{{ comment.user }}</b> {{ comment.submit_date|naturaltime }}:
+      </div>
+      <div>{{ comment.comment|linebreaks }}</div>
+    </li>
+  {% endfor %}
+</ol>
+<textarea name="comment"
+          rows="3"
+          maxlength="3000"
+          required
+          class="form-control mt-3 mb-2"
+          form="comment-form"></textarea>
+<button type="submit" class="btn btn-primary" form="comment-form">{% trans "Add comment" %}</button>
