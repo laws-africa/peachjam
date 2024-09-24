@@ -937,6 +937,11 @@ class IngestorForm(forms.ModelForm):
             "enabled",
         )
 
+    def save(self, *args, **kwargs):
+        instance = super().save(*args, **kwargs)
+        instance.queue_task()
+        return instance
+
 
 @admin.register(Ingestor)
 class IngestorAdmin(admin.ModelAdmin):

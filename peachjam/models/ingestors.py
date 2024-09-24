@@ -93,9 +93,7 @@ class Ingestor(models.Model):
         return klass(self, settings)
 
     def queue_task(self):
-        run_ingestor(self.id, repeat=self.repeat, schedule=self.schedule)
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
         if self.enabled:
-            self.queue_task()
+            run_ingestor(self.id, repeat=self.repeat, schedule=self.schedule)
+        else:
+            log.info(f"ingestor {self.name} disabled, ignoring")

@@ -112,8 +112,7 @@ def run_ingestors():
     log.info("Setting up background tasks to run ingestors...")
 
     for ingestor in Ingestor.objects.all():
-        if ingestor.enabled:
-            ingestor.queue_task()
+        ingestor.queue_task()
 
     log.info("Done")
 
