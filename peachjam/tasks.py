@@ -207,6 +207,19 @@ def convert_source_file_to_pdf(source_file_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+def convert_html_to_pdf(doc_id):
+    from peachjam.models import CoreDocument
+
+    doc = CoreDocument.objects.filter(id=doc_id).first()
+    logger.info(f"Creating PDF from HTML for document {doc_id}")
+    if not doc:
+        logger.warning("Document not found")
+        return
+    doc.convert_html_to_pdf()
+    logger.info("Done")
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
 def rank_works():
     from peachjam.graph.ranker import GraphRanker
 
