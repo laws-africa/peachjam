@@ -345,7 +345,7 @@
                           </dt>
                           <dd class="text-muted">
                             <a href="{% url 'document_publication' document.expression_frbr_uri|strip_first_character %}"
-                               target="_blank">{% trans "View" %} {{ document.publication_file.filename_extension|upper }}</a>
+                               target="_blank">{% trans "Download" %} {{ document.publication_file.filename_extension|upper }}</a>
                             ({{ document.publication_file.size|filesizeformat }})
                           </dd>
                         {% endif %}

@@ -99,10 +99,10 @@ class DocumentSourceView(DetailView):
             )
         raise Http404
 
-    def make_response(self, f, content_type, fname, disposition="attachment"):
+    def make_response(self, f, content_type, fname):
         file_bytes = f.read()
         response = HttpResponse(file_bytes, content_type=content_type)
-        response["Content-Disposition"] = f"{disposition}; filename={fname}"
+        response["Content-Disposition"] = f"attachment; filename={fname}"
         response["Content-Length"] = str(len(file_bytes))
         return response
 
@@ -126,7 +126,6 @@ class DocumentSourcePDFView(DocumentSourceView):
                         pdf,
                         "application/pdf",
                         source_file.filename_for_download(".pdf"),
-                        disposition="inline",
                     )
         raise Http404()
 
@@ -136,7 +135,6 @@ class DocumentPublicationView(DocumentSourceView):
         if hasattr(self.object, "publication_file"):
             publication_file = self.object.publication_file
             if publication_file.use_source_file:
-                # TODO: change document_source to display inline?
                 return redirect(
                     reverse(
                         "document_source",
@@ -150,7 +148,6 @@ class DocumentPublicationView(DocumentSourceView):
                 publication_file.file.open(),
                 publication_file.mimetype,
                 publication_file.filename,
-                disposition="inline",
             )
         raise Http404
 
