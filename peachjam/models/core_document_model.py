@@ -965,6 +965,9 @@ class PublicationFile(AttachmentAbstractModel):
             self.file.delete()
         return super().save(*args, **kwargs)
 
+    def filename_extension(self):
+        return os.path.splitext(self.filename)[1][1:]
+
 
 class AttachedFileNature(models.Model):
     name = models.CharField(
