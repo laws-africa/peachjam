@@ -9,7 +9,7 @@ import peachjam.models.core_document_model
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0158_alter_legislation_old_metadata_json"),
+        ("peachjam", "0160_ingestor_repeat_ingestor_schedule"),
     ]
 
     operations = [
