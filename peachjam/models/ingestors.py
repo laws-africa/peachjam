@@ -45,9 +45,9 @@ class Ingestor(models.Model):
     name = models.CharField(_("name"), max_length=255)
     enabled = models.BooleanField(_("enabled"), default=True)
 
-    repeat = models.BigIntegerField(choices=INGESTOR_REPEAT_CHOICES, default=Task.NEVER)
+    repeat = models.BigIntegerField(choices=INGESTOR_REPEAT_CHOICES, default=Task.DAILY)
     schedule = models.BigIntegerField(
-        choices=INGESTOR_REPEAT_CHOICES, default=Task.NEVER
+        choices=INGESTOR_REPEAT_CHOICES, default=Task.HOURLY
     )
 
     class Meta:

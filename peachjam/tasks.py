@@ -105,19 +105,6 @@ def delete_document(ingestor_id, expression_frbr_uri):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def run_ingestors():
-    """Queues up background tasks to run ingestors."""
-    from peachjam.models import Ingestor
-
-    log.info("Setting up background tasks to run ingestors...")
-
-    for ingestor in Ingestor.objects.all():
-        ingestor.queue_task()
-
-    log.info("Done")
-
-
-@background(queue="peachjam", remove_existing_tasks=True)
 def run_ingestor(ingestor_id):
     """Run an ingestor."""
     from peachjam.models import Ingestor
