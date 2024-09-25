@@ -944,27 +944,51 @@ class IngestorForm(forms.ModelForm):
 
     class Meta:
         model = Ingestor
-        fields = ("adapter", "name", "last_refreshed_at", "enabled")
+        fields = (
+            "adapter",
+            "name",
+            "last_refreshed_at",
+            "repeat",
+            "schedule",
+            "enabled",
+        )
+
+    def save(self, *args, **kwargs):
+        instance = super().save(*args, **kwargs)
+        instance.queue_task()
+        return instance
 
 
 @admin.register(Ingestor)
 class IngestorAdmin(admin.ModelAdmin):
     inlines = [IngestorSettingInline]
-    actions = ["refresh_all_content"]
+    actions = ["refresh_all_content", "update_latest_content"]
     list_display = ("name", "adapter", "last_refreshed_at", "enabled")
     form = IngestorForm
 
     def refresh_all_content(self, request, queryset):
-        from peachjam.tasks import run_ingestor
-
         queryset.update(last_refreshed_at=None)
         for ing in queryset:
             # queue up the background ingestor update task
-            run_ingestor(ing.pk)
-        self.message_user(request, _("Refreshing content in the background."))
+            ing.queue_task()
+        self.message_user(
+            request,
+            _("Refreshing all content for selected ingestors in the background."),
+        )
 
     refresh_all_content.short_description = gettext_lazy(
-        "Refresh content for selected ingestors"
+        "Refresh all content for selected ingestors - Full update"
+    )
+
+    def update_latest_content(self, request, queryset):
+        for ing in queryset:
+            ing.queue_task()
+        self.message_user(
+            request, _("Getting content since last update in background.")
+        )
+
+    update_latest_content.short_description = gettext_lazy(
+        "Update content for selected ingestors - Latest updates"
     )
 
 

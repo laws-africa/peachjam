@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_htmx",
     "django_recaptcha",
+    "django_comments",
 ]
 
 MIDDLEWARE = [
@@ -208,7 +209,6 @@ default_db_config = dj_database_url.config(default=default_db_url)
 gazette_db_config = dj_database_url.config(
     default=gazette_db_url, env="GAZETTES_DATABASE_URL"
 )
-default_db_config["ATOMIC_REQUESTS"] = True
 
 DATABASES = {
     "default": default_db_config,

@@ -4,8 +4,12 @@ User-agent: *
 Allow: /
 Disallow: /search/
 Disallow: /api/
+Crawl-delay: 5
 {{ disallowed_content }}
 
+
+User-Agent: AhrefsBot
+Disallow: /
 
 User-agent: Amazonbot
 Disallow: /
@@ -34,5 +38,11 @@ Disallow: /
 User-agent: GPTBot
 Disallow: /
 
+User-Agent: ImagesiftBot
+Disallow: /
+
 User-agent: meta-externalagent
+Disallow: /
+
+User-agent: SemrushBot
 Disallow: /

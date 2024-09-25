@@ -78,6 +78,12 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "/judgments/ECOWASCJ/2016/")
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
 
+    def test_court_year_listing_bad_year(self):
+        self.assertEqual(self.client.get("/judgments/ECOWASCJ/0/").status_code, 404)
+        self.assertEqual(
+            self.client.get("/judgments/ECOWASCJ/999999/").status_code, 404
+        )
+
     def test_judgment_detail(self):
         response = self.client.get(
             "/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"

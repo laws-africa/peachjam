@@ -681,6 +681,25 @@ class CoreDocument(PolymorphicModel):
 
         return result
 
+    def prepare_content_html_for_pdf(self):
+        return self.content_html.encode("utf-8")
+
+    def convert_html_to_pdf(self):
+        with tempfile.NamedTemporaryFile(suffix=".html") as html_file:
+            html_file.write(self.prepare_content_html_for_pdf())
+            html_file.flush()
+            html_file.seek(0)
+
+            pdf, _ = soffice_convert(html_file, "html", "pdf")
+            filename = slugify(self.case_name)
+            SourceFile.objects.update_or_create(
+                document=self,
+                defaults={
+                    "file": File(pdf, name=f"{filename}.pdf"),
+                    "mimetype": "application/pdf",
+                },
+            )
+
     def is_most_recent(self):
         """Is this the most recent document for this work?
 

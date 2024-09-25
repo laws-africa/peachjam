@@ -374,7 +374,6 @@
   }
 
   margin-bottom: 0px;
-  display: flex;
   flex-wrap: wrap;
 
   dt {
@@ -383,7 +382,6 @@
   }
   dd {
     padding-left: 0.5rem;
-    width: calc(100% - var(--dt-width));
     flex: 0 0 calc(100% - var(--dt-width));
   }
 
@@ -394,4 +392,14 @@
   right: 10px;
   bottom: 10px;
   z-index: 10;
+}
+
+// give remarks a background colour
+la-akoma-ntoso .akn-remark {
+  background-color: var(--bs-primary-bg-subtle);
+}
+
+// except in jurisdictions where they are already styled differently
+la-akoma-ntoso[frbr-country="na"] .akn-remark {
+  background-color: inherit;
 }

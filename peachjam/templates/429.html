@@ -1,0 +1,25 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Too many requests (Error 429)' %}
+{% endblock %}
+{% block page-content %}
+  <section class="py-5">
+    <div class="container">
+      <h1 class="mb-4">{% trans 'Too many requests (Error 429)' %}</h1>
+      <p>
+        {% blocktrans trimmed %}
+          You've made too many requests in a short period. Please try again later.
+        {% endblocktrans %}
+      </p>
+      <ul>
+        <li>
+          <a href="{% url 'home_page' %}">{% trans "Go to the homepage." %}</a>
+        </li>
+        <li>
+          <a href="{% url 'search:search' %}">{% trans "Try searching for what you're looking for." %}</a>
+        </li>
+      </ul>
+    </div>
+  </section>
+{% endblock %}

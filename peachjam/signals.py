@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db.models import signals
 from django.dispatch import receiver
+from django_comments.models import Comment
+from django_comments.signals import comment_will_be_posted
 
 from peachjam.models import CoreDocument, ExtractedCitation, SourceFile, Work
 from peachjam.tasks import update_extracted_citations_for_a_work
@@ -66,3 +68,10 @@ def add_saved_document_permissions(sender, instance, created, **kwargs):
     if created:
         all_users_group, _ = Group.objects.get_or_create(name="AllUsers")
         instance.groups.add(all_users_group)
+
+
+@receiver(comment_will_be_posted, sender=Comment)
+def before_comment_posted(sender, comment, request, **kwargs):
+    # prevent unauthorized comments
+    if not comment.user or not comment.user.is_staff:
+        return False

@@ -407,9 +407,16 @@ export default {
   },
 
   methods: {
-    sortGenericBuckets (items, reverse = false) {
+    sortBuckets (items, reverse = false, byCount = false) {
       const buckets = [...items];
-      buckets.sort((a, b) => a.key.localeCompare(b.key));
+      function keyFn (a, b) {
+        if (byCount) {
+          // sort by count, then by key
+          return a.doc_count === b.doc_count ? a.key.localeCompare(b.key) : b.doc_count - a.doc_count;
+        }
+        return a.key.localeCompare(b.key);
+      }
+      buckets.sort(keyFn);
       if (reverse) {
         buckets.reverse();
       }
@@ -554,9 +561,8 @@ export default {
       this.facets.forEach((facet) => {
         if (facet.name === 'year') {
           facet.options = generateOptions(
-            this.sortGenericBuckets(
-              this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
-                .buckets,
+            this.sortBuckets(
+              this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
               true
             ),
             facet.optionLabels
@@ -564,9 +570,11 @@ export default {
         } else {
           if (this.searchInfo.facets[`_filter_${facet.name}`]) {
             facet.options = generateOptions(
-              this.sortGenericBuckets(
-                this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
-                  .buckets
+              this.sortBuckets(
+                this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
+               false,
+                // sort nature by descending count, everything else alphabetically
+                facet.name === 'nature'
               ),
               facet.optionLabels
             );
@@ -581,6 +589,12 @@ export default {
         // number items from 1 consistently across pages
         this.searchInfo.results[i].position = (this.page - 1) * this.pageSize + i + 1;
       }
+
+      // determine best match: is the first result's score significantly better than the next?
+      if (this.page === 1 && this.searchInfo.results.length > 1 &&
+          this.searchInfo.results[0]._score / this.searchInfo.results[1]._score >= 1.2) {
+        this.searchInfo.results[0].best_match = true;
+      }
     },
 
     generateSearchParams () {
@@ -588,8 +602,6 @@ export default {
       if (this.q) params.append('search', this.q);
       params.append('page', this.page);
       params.append('ordering', this.ordering);
-      params.append('highlight', 'content');
-      params.append('highlight', 'title');
       params.append('is_most_recent', 'true');
 
       this.facets.forEach((facet) => {

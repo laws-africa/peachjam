@@ -27,7 +27,7 @@ class TaxonomyTree {
     }
 
     tocController.expanded = expanded;
-    tocController.items = data[0].children.map((item: TOCItemType) => formatItem(item));
+    tocController.items = data.length ? data[0].children.map((item: TOCItemType) => formatItem(item)) : [];
     tocController.expandAllBtnText = i18next.t('Expand all');
     tocController.collapseAllBtnText = i18next.t('Collapse all');
     tocController.titleFilterPlaceholder = i18next.t('Search');
