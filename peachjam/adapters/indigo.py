@@ -525,7 +525,6 @@ class IndigoAdapter(Adapter):
         logger.info(f"Creating / updating a publication file for {title}")
 
         # first delete any existing PublicationFile file: a new one will be saved if needed
-        # TODO: only delete it if something has changed? (how to know that a file has changed?)
         if hasattr(doc, "publication_file"):
             if doc.publication_file.file:
                 logger.info(
