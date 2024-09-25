@@ -32,7 +32,9 @@
         </ul>
         {% if request.path == '/' %}
         {% else %}
-          <form method="get" action="{% url 'search:search' %}">
+          <form method="get"
+                action="{% url 'search:search' %}"
+                class="mb-2 mb-lg-0 me-2">
             {% block search-form %}
               <div class="input-group">
                 <input type="text"
@@ -49,7 +51,7 @@
           </form>
         {% endif %}
         {% if user.is_authenticated %}
-          <ul class="navbar-nav">
+          <ul class="navbar-nav me-2">
             {% block navbar-user-menu %}
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle"
@@ -74,7 +76,11 @@
             {% endblock %}
           </ul>
         {% elif PEACHJAM_SETTINGS.allow_save_documents %}
-          <a class="btn btn-primary ms-3" href="{% url 'account_login' %}">Log in</a>
+          <ul class="navbar-nav me-2">
+            <li class="nav-item">
+              <a class="btn btn-primary" href="{% url 'account_login' %}">Log in</a>
+            </li>
+          </ul>
         {% endif %}
         {% include 'peachjam/_set_language.html' %}
       </div>
