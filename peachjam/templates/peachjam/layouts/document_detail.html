@@ -191,17 +191,6 @@
                           </dd>
                         {% endif %}
                       {% endblock %}
-                      {% block document-metadata-content-publication %}
-                        {% if document.publication_file %}
-                          <dt>
-                            {% trans 'Publication' %}
-                          </dt>
-                          <dd class="text-muted">
-                            <a href="{% url 'document_publication' document.expression_frbr_uri|strip_first_character %}"
-                               target="_blank">{% trans "View" %}</a>
-                          </dd>
-                        {% endif %}
-                      {% endblock %}
                       {% block document-metadata-content-alternative-names %}
                         {% with document.alternative_names.all as alternative_names %}
                           {% if alternative_names %}
@@ -348,6 +337,18 @@
                         <dd class="text-muted">
                           {% trans document.get_doc_type_display %}
                         </dd>
+                      {% endblock %}
+                      {% block document-metadata-content-publication %}
+                        {% if document.publication_file %}
+                          <dt>
+                            {% trans 'Publication' %}
+                          </dt>
+                          <dd class="text-muted">
+                            <a href="{% url 'document_publication' document.expression_frbr_uri|strip_first_character %}"
+                               target="_blank">{% trans "View" %} {{ document.publication_file.filename_extension|upper }}</a>
+                            ({{ document.publication_file.size|filesizeformat }})
+                          </dd>
+                        {% endif %}
                       {% endblock %}
                       {% block document-metadata-media-summary-download %}
                         {% if document.attachedfiles_set %}
