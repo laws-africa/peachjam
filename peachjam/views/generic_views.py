@@ -1,10 +1,12 @@
 import itertools
 
+from django.core.paginator import Paginator
 from django.http import Http404
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.utils.dates import MONTHS
+from django.utils.functional import cached_property
 from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, View
 from lxml import html
@@ -31,11 +33,29 @@ from peachjam_api.serializers import (
 )
 
 
+class ClampedPaginator(Paginator):
+    """A paginator that clamps the maximum number of pages. This is useful when dealing with very large datasets,
+    because PostgreSQL's OFFSET-based pagination is very slow for large datasets.
+
+    See:
+
+    * https://readyset.io/blog/optimizing-sql-pagination-in-postgres
+    * https://github.com/photocrowd/django-cursor-pagination
+    """
+
+    max_num_pages = 10
+
+    @cached_property
+    def num_pages(self):
+        return min(super().num_pages, self.max_num_pages)
+
+
 class DocumentListView(ListView):
     """Generic list view for document lists."""
 
     context_object_name = "documents"
     paginate_by = 50
+    paginator_class = ClampedPaginator
     model = CoreDocument
     queryset = CoreDocument.objects.select_related(
         "nature",

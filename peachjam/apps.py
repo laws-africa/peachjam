@@ -17,13 +17,12 @@ class PeachJamConfig(AppConfig):
         if not settings.DEBUG:
             from background_task.models import Task
 
-            from peachjam.tasks import rank_works, run_ingestors
+            from peachjam.models import Ingestor
+            from peachjam.tasks import rank_works
 
-            # run tomorrow at 2am and then daily after that
-            run_at = (timezone.now() + timezone.timedelta(days=1)).replace(
-                hour=2, minute=0, second=0
-            )
-            run_ingestors(schedule=run_at, repeat=Task.DAILY)
+            # always queue up ingestor tasks on application start
+            for ingestor in Ingestor.objects.all():
+                ingestor.queue_task()
 
             # run on sunday at 3am and then weekly after that
             run_at = timezone.now()

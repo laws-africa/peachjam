@@ -105,20 +105,6 @@ def delete_document(ingestor_id, expression_frbr_uri):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def run_ingestors():
-    """Queues up background tasks to run ingestors."""
-    from peachjam.models import Ingestor
-
-    log.info("Setting up background tasks to run ingestors...")
-
-    for ingestor in Ingestor.objects.all():
-        if ingestor.enabled:
-            run_ingestor(ingestor.pk)
-
-    log.info("Done")
-
-
-@background(queue="peachjam", remove_existing_tasks=True)
 def run_ingestor(ingestor_id):
     """Run an ingestor."""
     from peachjam.models import Ingestor
@@ -204,6 +190,19 @@ def convert_source_file_to_pdf(source_file_id):
         raise e
 
     log.info("Conversion to PDF done")
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def convert_html_to_pdf(doc_id):
+    from peachjam.models import CoreDocument
+
+    doc = CoreDocument.objects.filter(id=doc_id).first()
+    logger.info(f"Creating PDF from HTML for document {doc_id}")
+    if not doc:
+        logger.warning("Document not found")
+        return
+    doc.convert_html_to_pdf()
+    logger.info("Done")
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
