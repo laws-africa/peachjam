@@ -201,9 +201,11 @@ class IndigoAdapter(Adapter):
             "created_at": document["created_at"],
             "updated_at": document["updated_at"],
             "content_html_is_akn": True,
-            "source_url": document["publication_document"]["url"]
-            if document["publication_document"]
-            else None,
+            "source_url": (
+                document["publication_document"]["url"]
+                if document["publication_document"]
+                else None
+            ),
             "language": language,
             "toc_json": toc_json,
             "content_html": self.get_content_html(document),
@@ -296,6 +298,10 @@ class IndigoAdapter(Adapter):
         else:
             # the source file is the PDF version
             self.download_source_file(f"{url}.pdf", created_doc, title)
+
+        self.create_publication_file(
+            document["publication_document"], created_doc, title, stub=document["stub"]
+        )
 
         if self.taxonomy_topic_root:
             # clear any existing taxonomies
@@ -499,7 +505,6 @@ class IndigoAdapter(Adapter):
                 filename = re.findall("filename=(.+)", d)[0]
             except KeyError:
                 filename = f"{slugify(title)}.pdf"
-
             f.write(r.content)
 
             SourceFile.objects.update_or_create(
@@ -509,6 +514,89 @@ class IndigoAdapter(Adapter):
                     "mimetype": magic.from_file(f.name, mime=True),
                 },
             )
+
+    def get_size_from_url(self, url):
+        logger.info("  Getting the file size ...")
+        r = self.client_get(url)
+        return len(r.content)
+
+    def create_publication_file(self, publication_document, doc, title, stub=False):
+        from peachjam.models import PublicationFile
+
+        logger.info(f"Creating / updating a publication file for {title}")
+
+        # first delete any existing PublicationFile file: a new one will be saved if needed
+        if hasattr(doc, "publication_file"):
+            if doc.publication_file.file:
+                logger.info(
+                    f"  Deleting existing PublicationFile file on {doc.work_frbr_uri}"
+                )
+                doc.publication_file.file.delete()
+
+        if stub:
+            if hasattr(doc, "source_file"):
+                logger.info("  Stub: Using the source file")
+                source_file = doc.source_file
+                PublicationFile.objects.update_or_create(
+                    document=doc,
+                    defaults={
+                        "use_source_file": True,
+                        "filename": source_file.filename,
+                        "mimetype": source_file.mimetype,
+                        "size": source_file.size,
+                        "url": None,
+                    },
+                )
+            else:
+                if hasattr(doc, "publication_file"):
+                    logger.info(
+                        "  Stub: No source file, deleting existing publication file"
+                    )
+                    doc.publication_file.delete()
+                else:
+                    logger.info("  Stub: No source file, skipping")
+        else:
+            url = publication_document["url"]
+            filename = (
+                publication_document["filename"]
+                or f"{slugify('Publication: ' + title)}.pdf"
+            )
+            if publication_document.get("has_trusted_url"):
+                logger.info(f"  Using publication file from trusted URL {url}")
+                mimetype = publication_document["mime_type"] or "application/pdf"
+                size = publication_document["size"] or self.get_size_from_url(url)
+                logger.info(f"  Size is {size}")
+                PublicationFile.objects.update_or_create(
+                    document=doc,
+                    defaults={
+                        "filename": filename,
+                        "mimetype": mimetype,
+                        "size": size,
+                        "url": url,
+                        "use_source_file": False,
+                    },
+                )
+
+            else:
+                logger.info(f"  Downloading publication file from {url}")
+                with NamedTemporaryFile() as f:
+                    r = self.client_get(url)
+                    f.write(r.content)
+                    mimetype = publication_document["mime_type"] or magic.from_file(
+                        f.name, mime=True
+                    )
+                    file = File(f, name=filename)
+                    PublicationFile.objects.update_or_create(
+                        document=doc,
+                        defaults={
+                            "filename": filename,
+                            "mimetype": mimetype,
+                            "size": file.size,
+                            "file": file,
+                            "url": None,
+                            "use_source_file": False,
+                        },
+                    )
 
     def delete_document(self, expression_frbr_uri):
         url = f"{self.api_url}{expression_frbr_uri}"

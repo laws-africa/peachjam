@@ -916,6 +916,41 @@ class SourceFile(AttachmentAbstractModel):
             self.set_download_filename()
 
 
+class PublicationFile(AttachmentAbstractModel):
+    SAVE_FOLDER = "publication_file"
+
+    file = models.FileField(
+        _("file"), upload_to=file_location, max_length=1024, blank=True, null=True
+    )
+    document = models.OneToOneField(
+        CoreDocument,
+        related_name="publication_file",
+        on_delete=models.CASCADE,
+        verbose_name=_("document"),
+    )
+    url = models.URLField(
+        _("URL"),
+        max_length=2048,
+        null=True,
+        blank=True,
+        help_text=_("The external URL (e.g. on gazettes.africa) where this file lives"),
+    )
+    use_source_file = models.BooleanField(
+        _("use source file"),
+        default=False,
+        help_text=_(
+            "Set to True if the source file on the same document can be used instead"
+        ),
+    )
+
+    class Meta:
+        verbose_name = _("publication file")
+        verbose_name_plural = _("publication files")
+
+    def filename_extension(self):
+        return os.path.splitext(self.filename)[1][1:]
+
+
 class AttachedFileNature(models.Model):
     name = models.CharField(
         _("name"), max_length=1024, null=False, blank=False, unique=True

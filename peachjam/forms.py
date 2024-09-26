@@ -18,6 +18,7 @@ from peachjam.models import (
     AttachedFiles,
     CoreDocument,
     Folder,
+    PublicationFile,
     SavedDocument,
     SourceFile,
     pj_settings,
@@ -251,8 +252,11 @@ class AttachmentFormMixin:
     """Admin form for editing models that extend from AbstractAttachmentModel."""
 
     def clean_file(self):
-        # dynamic storage files don't like colons in filenames
-        self.cleaned_data["file"].name = clean_filename(self.cleaned_data["file"].name)
+        if self.cleaned_data["file"]:
+            # dynamic storage files don't like colons in filenames
+            self.cleaned_data["file"].name = clean_filename(
+                self.cleaned_data["file"].name
+            )
         return self.cleaned_data["file"]
 
     def save(self, commit=True):
@@ -284,6 +288,12 @@ class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
                 # if the file is changed, we need delete the existing pdf and re-generate
                 self.instance.file_as_pdf.delete()
                 self.instance.ensure_file_as_pdf()
+
+
+class PublicationFileForm(AttachmentFormMixin, forms.ModelForm):
+    class Meta:
+        model = PublicationFile
+        fields = "__all__"
 
 
 class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):

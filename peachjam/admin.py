@@ -29,7 +29,12 @@ from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularI
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
-from peachjam.forms import AttachedFilesForm, NewDocumentFormMixin, SourceFileForm
+from peachjam.forms import (
+    AttachedFilesForm,
+    NewDocumentFormMixin,
+    PublicationFileForm,
+    SourceFileForm,
+)
 from peachjam.models import (
     AlternativeName,
     Article,
@@ -71,6 +76,7 @@ from peachjam.models import (
     Outcome,
     PeachJamSettings,
     Predicate,
+    PublicationFile,
     Relationship,
     SavedDocument,
     SourceFile,
@@ -186,16 +192,14 @@ class BaseAttachmentFileInline(admin.StackedInline):
     extra = 0
     readonly_fields = ("filename", "mimetype", "attachment_link", "size")
 
+    def attachment_url(self, obj):
+        return reverse("admin:peachjam_source_file", kwargs={"pk": obj.pk})
+
     def attachment_link(self, obj):
         if obj.pk:
             return format_html(
-                '<a href="{url}">{title}</a>',
-                url=reverse(
-                    "admin:peachjam_source_file",
-                    kwargs={
-                        "pk": obj.pk,
-                    },
-                ),
+                '<a href="{url}" target="_blank">{title}</a>',
+                url=self.attachment_url(obj),
                 title=obj.filename,
             )
 
@@ -204,6 +208,17 @@ class SourceFileInline(BaseAttachmentFileInline):
     model = SourceFile
     form = SourceFileForm
     readonly_fields = (*BaseAttachmentFileInline.readonly_fields, "source_url")
+
+
+class PublicationFileInline(BaseAttachmentFileInline):
+    model = PublicationFile
+    form = PublicationFileForm
+
+    def attachment_url(self, obj):
+        return reverse(
+            "document_publication",
+            kwargs={"frbr_uri": obj.document.expression_frbr_uri[1:]},
+        )
 
 
 class TopicChoiceField(forms.ModelChoiceField):
@@ -370,6 +385,7 @@ class DocumentAdmin(BaseAdmin):
     inlines = [
         DocumentTopicInline,
         SourceFileInline,
+        PublicationFileInline,
         AlternativeNameInline,
         AttachedFilesInline,
         ImageInline,

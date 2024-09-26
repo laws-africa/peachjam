@@ -130,6 +130,28 @@ class DocumentSourcePDFView(DocumentSourceView):
         raise Http404()
 
 
+class DocumentPublicationView(DocumentSourceView):
+    def render_to_response(self, context, **response_kwargs):
+        if hasattr(self.object, "publication_file"):
+            publication_file = self.object.publication_file
+            if publication_file.use_source_file:
+                return redirect(
+                    reverse(
+                        "document_source",
+                        kwargs={"frbr_uri": self.object.expression_frbr_uri[1:]},
+                    )
+                )
+            if publication_file.url:
+                return redirect(publication_file.url)
+
+            return self.make_response(
+                publication_file.file.open(),
+                publication_file.mimetype,
+                publication_file.filename,
+            )
+        raise Http404
+
+
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 class DocumentMediaView(DetailView):
     """Serve an image file, such as

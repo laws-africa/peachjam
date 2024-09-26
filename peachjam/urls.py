@@ -51,6 +51,7 @@ from peachjam.views import (
     DocumentNatureListView,
     DocumentPopupView,
     DocumentProblemView,
+    DocumentPublicationView,
     DocumentSourcePDFView,
     DocumentSourceView,
     FolderCreateView,
@@ -191,6 +192,11 @@ urlpatterns = [
         r"^(?P<frbr_uri>akn/.*)/source$",
         cache_page(CACHE_DURATION)(DocumentSourceView.as_view()),
         name="document_source",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/publication$",
+        cache_page(CACHE_DURATION)(DocumentPublicationView.as_view()),
+        name="document_publication",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/source.pdf$",
