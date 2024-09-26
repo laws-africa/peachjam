@@ -552,33 +552,45 @@ class IndigoAdapter(Adapter):
                     logger.info("  Stub: No source file, skipping")
         else:
             url = publication_document["url"]
-            with NamedTemporaryFile() as f:
-                r = self.client_get(url)
-                filename = self.get_filename(r, f"Publication: {title}")
-                f.write(r.content)
-                mimetype = magic.from_file(f.name, mime=True)
+            filename = publication_document.get(
+                "filename", f"{slugify('Publication: ' + title)}.pdf"
+            )
+            if publication_document.get("has_trusted_url"):
+                logger.info(f"  Using publication file from trusted URL {url}")
+                mimetype = publication_document.get("mime_type", "application/pdf")
+                size = publication_document.get("size")
+                if not size:
+                    logger.info("  Getting the file size ...")
+                    r = self.client_get(url)
+                    size = len(r.content)
+                logger.info(f"  Size is {size}")
+                PublicationFile.objects.update_or_create(
+                    document=doc,
+                    defaults={
+                        "filename": filename,
+                        "mimetype": mimetype,
+                        "size": size,
+                        "url": url,
+                        "use_source_file": False,
+                    },
+                )
 
-                if publication_document.get("has_trusted_url"):
-                    logger.info(f"  Using publication file from trusted URL {url}")
-                    PublicationFile.objects.update_or_create(
-                        document=doc,
-                        defaults={
-                            "filename": filename,
-                            "mimetype": mimetype,
-                            "size": f.size,
-                            "url": url,
-                            "use_source_file": False,
-                        },
+            else:
+                logger.info(f"  Downloading publication file from {url}")
+                with NamedTemporaryFile() as f:
+                    r = self.client_get(url)
+                    f.write(r.content)
+                    mimetype = publication_document.get(
+                        "mime_type", magic.from_file(f.name, mime=True)
                     )
-                else:
-                    logger.info(f"  Downloading publication file from {url}")
+                    file = File(f, name=filename)
                     PublicationFile.objects.update_or_create(
                         document=doc,
                         defaults={
                             "filename": filename,
                             "mimetype": mimetype,
-                            "size": f.size,
-                            "file": File(f, name=filename),
+                            "size": file.size,
+                            "file": file,
                             "url": None,
                             "use_source_file": False,
                         },
