@@ -531,10 +531,15 @@ class IndigoAdapter(Adapter):
         if stub:
             if hasattr(doc, "source_file"):
                 logger.info("  Stub: Using the source file")
+                source_file = doc.source_file
                 PublicationFile.objects.update_or_create(
                     document=doc,
                     defaults={
                         "use_source_file": True,
+                        "filename": source_file.filename,
+                        "mimetype": source_file.mimetype,
+                        "size": source_file.size,
+                        "url": None,
                     },
                 )
             else:
