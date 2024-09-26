@@ -492,15 +492,6 @@ class IndigoAdapter(Adapter):
             remove_subparagraph(i)
         return toc_json
 
-    def get_filename(self, resp, title):
-        try:
-            # sometimes this header is not present
-            d = resp.headers["Content-Disposition"]
-            filename = re.findall("filename=(.+)", d)[0]
-        except KeyError:
-            filename = f"{slugify(title)}.pdf"
-        return filename
-
     def download_source_file(self, url, doc, title):
         from peachjam.models import SourceFile
 
@@ -508,7 +499,12 @@ class IndigoAdapter(Adapter):
 
         with NamedTemporaryFile() as f:
             r = self.client_get(url)
-            filename = self.get_filename(r, title)
+            try:
+                # sometimes this header is not present
+                d = r.headers["Content-Disposition"]
+                filename = re.findall("filename=(.+)", d)[0]
+            except KeyError:
+                filename = f"{slugify(title)}.pdf"
             f.write(r.content)
 
             SourceFile.objects.update_or_create(
