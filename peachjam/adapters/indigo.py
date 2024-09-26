@@ -552,8 +552,9 @@ class IndigoAdapter(Adapter):
                     logger.info("  Stub: No source file, skipping")
         else:
             url = publication_document["url"]
-            filename = publication_document.get(
-                "filename", f"{slugify('Publication: ' + title)}.pdf"
+            filename = (
+                publication_document["filename"]
+                or f"{slugify('Publication: ' + title)}.pdf"
             )
             if publication_document.get("has_trusted_url"):
                 logger.info(f"  Using publication file from trusted URL {url}")
