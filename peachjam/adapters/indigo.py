@@ -515,6 +515,11 @@ class IndigoAdapter(Adapter):
                 },
             )
 
+    def get_size_from_url(self, url):
+        logger.info("  Getting the file size ...")
+        r = self.client_get(url)
+        return len(r.content)
+
     def create_publication_file(self, publication_document, doc, title, stub=False):
         from peachjam.models import PublicationFile
 
@@ -558,12 +563,8 @@ class IndigoAdapter(Adapter):
             )
             if publication_document.get("has_trusted_url"):
                 logger.info(f"  Using publication file from trusted URL {url}")
-                mimetype = publication_document.get("mime_type", "application/pdf")
-                size = publication_document.get("size")
-                if not size:
-                    logger.info("  Getting the file size ...")
-                    r = self.client_get(url)
-                    size = len(r.content)
+                mimetype = publication_document["mime_type"] or "application/pdf"
+                size = publication_document["size"] or self.get_size_from_url(url)
                 logger.info(f"  Size is {size}")
                 PublicationFile.objects.update_or_create(
                     document=doc,
@@ -581,8 +582,8 @@ class IndigoAdapter(Adapter):
                 with NamedTemporaryFile() as f:
                     r = self.client_get(url)
                     f.write(r.content)
-                    mimetype = publication_document.get(
-                        "mime_type", magic.from_file(f.name, mime=True)
+                    mimetype = publication_document["mime_type"] or magic.from_file(
+                        f.name, mime=True
                     )
                     file = File(f, name=filename)
                     PublicationFile.objects.update_or_create(
