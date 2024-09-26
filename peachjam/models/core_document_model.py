@@ -829,6 +829,7 @@ class Image(AttachmentAbstractModel):
     class Meta:
         verbose_name = _("image")
         verbose_name_plural = _("images")
+        unique_together = ("document", "filename")
 
     @classmethod
     def from_docpipe_attachment(cls, attachment):

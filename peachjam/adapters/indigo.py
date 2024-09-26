@@ -339,9 +339,16 @@ class IndigoAdapter(Adapter):
         Image.objects.filter(document=created_document).delete()
 
         image_list = self.list_images_from_content_api(document)
+        # we ignore duplicate filenames
+        filenames = set()
         if image_list:
             for result in image_list:
-                if result["mime_type"].startswith("image/"):
+                filename = result["filename"]
+                if (
+                    result["mime_type"].startswith("image/")
+                    and filename not in filenames
+                ):
+                    filenames.add(filename)
                     with NamedTemporaryFile() as file:
                         r = self.client_get(result["url"])
                         file.write(r.content)
