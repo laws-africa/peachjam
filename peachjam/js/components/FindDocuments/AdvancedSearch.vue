@@ -50,8 +50,16 @@
       </div>
       <div class="card-footer d-flex justify-content-end">
         <HelpBtn page="search/advanced-search" />
+        <button
+          type="button"
+          class="btn btn-secondary me-1 d-lg-none"
+          v-if="searchInfo.count"
+          @click="$emit('show-facets')"
+        >
+          {{ $t("Filters") }} <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
+        </button>
         <button type="submit" class="btn btn-primary">
-          {{ $t('Search') }}
+          {{ $t("Search") }}
         </button>
       </div>
     </div>
@@ -78,10 +86,18 @@ export default {
     globalSearchValue: {
       type: String,
       default: ''
+    },
+    selectedFacetsCount: {
+      type: Number,
+      default: 0
+    },
+    searchInfo: {
+      type: Object,
+      default: () => ({})
     }
   },
 
-  emits: ['submit', 'update:modelValue', 'global-search-change', 'date-change'],
+  emits: ['submit', 'update:modelValue', 'global-search-change', 'date-change', 'show-facets'],
 
   computed: {
     invalidDates () {

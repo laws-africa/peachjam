@@ -73,7 +73,7 @@
               class="btn btn-secondary ms-1 d-lg-none text-nowrap"
               @click="() => drawerOpen = true"
             >
-              Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
+              {{ $t("Filters") }} <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
             </button>
           </form>
           <div class="my-2">
@@ -90,9 +90,12 @@
             v-model="advancedSearchCriteria"
             :advanced-search-date-criteria="advancedSearchDateCriteria"
             :global-search-value="q"
+            :selected-facets-count="selectedFacetsCount"
+            :search-info="searchInfo"
             @global-search-change="value => q = value"
             @date-change="value => advancedSearchDateCriteria = {...value}"
             @submit="advancedSearch"
+            @show-facets="() => drawerOpen = true"
           />
         </div>
       </div>
