@@ -200,7 +200,7 @@ class DocumentCitationsView(DetailView):
             raise Http404
 
         try:
-            offset = int(self.request.GET.get("offset", 0))
+            offset = max(0, int(self.request.GET.get("offset", 0)))
         except ValueError:
             raise Http404
 
