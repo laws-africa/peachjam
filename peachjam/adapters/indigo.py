@@ -290,18 +290,21 @@ class IndigoAdapter(Adapter):
 
         logger.info(f"New document: {new}")
 
+        pubdoc = document["publication_document"] or {}
+        pubdoc_url = pubdoc.get("url")
         if document["stub"]:
             # for stub documents, use the publication document as the source file
-            pubdoc = document["publication_document"]
-            if pubdoc and pubdoc["url"]:
-                self.download_source_file(pubdoc["url"], created_doc, title)
+            if pubdoc_url:
+                self.download_source_file(pubdoc_url, created_doc, title)
         else:
             # the source file is the PDF version
             self.download_source_file(f"{url}.pdf", created_doc, title)
 
-        self.create_publication_file(
-            document["publication_document"], created_doc, title, stub=document["stub"]
-        )
+        # the publication file is always the publication file -- it will use the source file where relevant
+        if pubdoc:
+            self.create_publication_file(
+                pubdoc, created_doc, title, stub=document["stub"]
+            )
 
         if self.taxonomy_topic_root:
             # clear any existing taxonomies
