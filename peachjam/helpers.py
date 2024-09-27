@@ -108,7 +108,7 @@ martor.utils.markdownify = markdownify
 
 
 def get_update_or_create(model, defaults, **kwargs):
-    # helper function to get or create  or update model
+    # helper function to get or create or update model
     obj, created = model.objects.get_or_create(defaults=defaults, **kwargs)
     updated = False
     if not created:
