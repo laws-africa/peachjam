@@ -343,7 +343,7 @@ urlpatterns = [
             [
                 path("", include("django_comments.urls")),
                 path(
-                    "form/<str:app_label>/<str:model_name>/<int:pk>",
+                    "form/<str:app_label>/<str:model_name>/<slug:pk>",
                     comment_form_view,
                     name="comment_form",
                 ),
