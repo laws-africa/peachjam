@@ -1,7 +1,7 @@
 {% load peachjam i18n %}
-{% for item in citations %}
+{% for citation_group in citations %}
   <h5 class="mt-4">
-    {{ item.doc_type }} <span class="badge bg-secondary">{{ item.docs|length }}</span>
+    {{ citation_group.nature.name }} <span class="badge bg-secondary">{{ citation_group.n_docs }}</span>
   </h5>
   <table class="table table-striped table-borderless table-sm mb-0">
     <colgroup>
@@ -9,23 +9,11 @@
       <col style="width: 100%"/>
       <col />
     </colgroup>
-    <tbody>
-      {% include 'peachjam/_citations_list_items.html' with start=0 docs=item.docs|slice:":10" %}
+    <tbody id="citation-tbody-{{ direction }}-{{ citation_group.nature.pk }}">
+      {% include 'peachjam/_citations_list_items.html' with start=0 docs=citation_group.docs %}
     </tbody>
-    {% if item.docs|length > 10 %}
-      <tbody class="collapse {{ group }}-{{ forloop.counter }}">
-        {% include 'peachjam/_citations_list_items.html' with start=10 docs=item.docs|slice:"10:" %}
-      </tbody>
-    {% endif %}
   </table>
-  {% if item.docs|length > 10 %}
-    <button class="btn btn-link"
-            data-bs-toggle="collapse"
-            data-bs-target=".{{ group }}-{{ forloop.counter }}"
-            role="button"
-            aria-expanded="false"
-            aria-controls="{{ item.doc_type }}">
-      {% trans 'Show/Hide all' %}
-    </button>
+  {% if citation_group.docs|length < citation_group.n_docs %}
+    {% include 'peachjam/_citations_list_more_button.html' with nature=citation_group.nature offset=0 %}
   {% endif %}
 {% endfor %}

@@ -1,8 +1,7 @@
 import itertools
 
 from django.core.paginator import Paginator
-from django.db.models import Count, F, Window
-from django.db.models.functions import RowNumber
+from django.db.models import Count
 from django.http import Http404
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
@@ -20,6 +19,7 @@ from peachjam.models import (
     CitationLink,
     CoreDocument,
     DocumentNature,
+    ExtractedCitation,
     GenericDocument,
     LegalInstrument,
     Predicate,
@@ -347,44 +347,24 @@ class BaseDocumentDetailView(DetailView):
         """Fetch documents for the given works, grouped by nature and ordered by the most incoming citations."""
         # count the number of unique works, grouping by nature
         counts = {
-            r["nature__name"]: r["n"]
+            r["nature"]: r["n"]
             for r in CoreDocument.objects.filter(work__in=works)
-            .values("nature__name")
+            .values("nature")
             .annotate(n=Count("work_frbr_uri", distinct=True))
         }
 
-        # get the top n_per_group documents for each nature, ordering by the number of incoming citations
-        n_per_group = 10
-        docs = (
-            CoreDocument.objects.prefetch_related("work")
-            .select_related("nature")
-            .filter(work__in=works)
-            .distinct("work_frbr_uri")
-            # we're fetching documents, so we want the most recent one for each work
-            .order_by("work_frbr_uri", "-date")
-            .preferred_language(get_language(self.request))
-            # use a window function to apply a row number within each nature group, ordering by number of citations
-            .annotate(
-                row_number=Window(
-                    expression=RowNumber(),
-                    partition_by=[F("nature__name")],
-                    order_by=F("work__n_citing_works").desc(),
-                )
-            )
-            .filter(row_number__lte=n_per_group)
+        # get the top 10 documents for each nature, ordering by the number of incoming citations
+        docs, truncated = ExtractedCitation.fetch_grouped_citation_docs(
+            works, get_language(self.request)
         )
-        docs = sorted(docs, key=lambda d: d.nature.name)
-
         result = [
             {
-                "doc_type": doc_type,
-                "n_docs": counts.get(doc_type, 0),
-                # sort by citations descending, then title
-                "docs": sorted(
-                    list(group), key=lambda d: [-d.work.n_citing_works, d.title]
-                ),
+                "nature": nature,
+                "n_docs": counts.get(nature.pk, 0),
+                "docs": list(group),
             }
-            for doc_type, group in itertools.groupby(docs, lambda d: d.nature.name)
+            # the docs are already sorted by nature
+            for nature, group in itertools.groupby(docs, lambda d: d.nature)
         ]
 
         # sort by size of group, descending

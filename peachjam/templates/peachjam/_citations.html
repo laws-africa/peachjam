@@ -6,13 +6,13 @@
         <i class="bi bi-pj pj-citations"></i>
         {% translate 'Cited documents' %} <span class="badge bg-secondary">{{ document.work.n_cited_works }}</span>
       </h4>
-      {% include 'peachjam/_citations_list.html' with citations=cited_documents group="outgoing" %}
+      {% include 'peachjam/_citations_list.html' with citations=cited_documents direction="outgoing" %}
     </div>
     <div class="col-lg">
       <h4 class="mb-3">
         {% translate 'Documents citing this one' %} <span class="badge bg-secondary">{{ document.work.n_citing_works }}</span>
       </h4>
-      {% include 'peachjam/_citations_list.html' with citations=documents_citing_current_doc group="incoming" %}
+      {% include 'peachjam/_citations_list.html' with citations=documents_citing_current_doc direction="incoming" %}
     </div>
   </div>
 </div>

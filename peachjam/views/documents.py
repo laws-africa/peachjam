@@ -1,12 +1,13 @@
 from cobalt import FrbrUri
 from django.http import Http404, HttpResponse
-from django.shortcuts import get_list_or_404, redirect, reverse
+from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.generic import DetailView, View
 
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
-from peachjam.models import CoreDocument
+from peachjam.helpers import get_language as get_language_from_request
+from peachjam.models import CoreDocument, DocumentNature, ExtractedCitation
 from peachjam.registry import registry
 from peachjam.resolver import resolver
 
@@ -177,3 +178,51 @@ class DocumentMediaView(DetailView):
         response = HttpResponse(file_bytes, content_type=img.mimetype)
         response["Content-Length"] = str(len(file_bytes))
         return response
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+class DocumentCitationsView(DetailView):
+    model = CoreDocument
+    slug_field = "expression_frbr_uri"
+    slug_url_kwarg = "frbr_uri"
+    context_object_name = "document"
+    template_name = "peachjam/_citations_list_items.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        direction = self.request.GET.get("direction", "incoming")
+
+        try:
+            nature = int(self.request.GET.get("nature"))
+            nature = get_object_or_404(DocumentNature, pk=nature)
+        except ValueError:
+            raise Http404
+
+        try:
+            offset = int(self.request.GET.get("offset", 0))
+        except ValueError:
+            raise Http404
+
+        doc = self.get_object()
+        works = (
+            doc.work.works_citing_current_work()
+            if direction == "incoming"
+            else doc.work.cited_works()
+        )
+
+        (
+            context["docs"],
+            context["truncated"],
+        ) = ExtractedCitation.fetch_grouped_citation_docs(
+            works,
+            get_language_from_request(self.request),
+            nature=nature,
+            offset=offset,
+        )
+        context["start"] = offset
+        context["offset"] = offset + len(context["docs"])
+        context["nature"] = nature
+        context["direction"] = direction
+
+        return context
