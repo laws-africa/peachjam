@@ -128,20 +128,6 @@
                 </button>
               </li>
             {% endif %}
-            {% if document.work.ratification.countries.all|length %}
-              <li class="nav-item" role="presentation">
-                <button class="nav-link"
-                        data-bs-toggle="tab"
-                        data-bs-target="#ratifications-tab"
-                        type="button"
-                        role="tab"
-                        aria-controls="ratifications-tab"
-                        aria-selected="false">
-                  {% trans "Ratifications" %}
-                  <span class="badge bg-secondary">{{ document.work.ratification.countries.all|length }}</span>
-                </button>
-              </li>
-            {% endif %}
           {% endblock %}
         </ul>
       </div>
@@ -440,31 +426,23 @@
             <div class="container">{% include 'peachjam/_related_documents.html' %}</div>
           </div>
         {% endif %}
+        {% if cited_documents or documents_citing_current_doc %}
+          <div class="tab-pane fade"
+               id="citations-tab"
+               role="tabpanel"
+               aria-labelledby="citations-tab">
+            <div class="container">{% include 'peachjam/_citations.html' %}</div>
+          </div>
+        {% endif %}
+        {% if case_histories %}
+          <div class="tab-pane fade"
+               id="case-history-tab"
+               role="tabpanel"
+               aria-labelledby="case-history-tab">
+            <div class="container">{% include 'peachjam/_case_histories.html' %}</div>
+          </div>
+        {% endif %}
       {% endblock %}
-      {% if cited_documents or documents_citing_current_doc %}
-        <div class="tab-pane fade"
-             id="citations-tab"
-             role="tabpanel"
-             aria-labelledby="citations-tab">
-          <div class="container">{% include 'peachjam/_citations.html' %}</div>
-        </div>
-      {% endif %}
-      {% if case_histories %}
-        <div class="tab-pane fade"
-             id="case-history-tab"
-             role="tabpanel"
-             aria-labelledby="case-history-tab">
-          <div class="container">{% include 'peachjam/_case_histories.html' %}</div>
-        </div>
-      {% endif %}
-      {% if document.work.ratification.countries.all|length %}
-        <div class="tab-pane fade"
-             id="ratifications-tab"
-             role="tabpanel"
-             aria-labelledby="ratifications-tab">
-          <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
-        </div>
-      {% endif %}
     </div>
     {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
