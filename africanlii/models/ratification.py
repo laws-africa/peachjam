@@ -1,5 +1,6 @@
 from countries_plus.models import Country
 from django.db import models
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from peachjam.models import Work
@@ -20,6 +21,18 @@ class Ratification(models.Model):
     class Meta:
         verbose_name = _("ratification")
         verbose_name_plural = _("ratifications")
+
+    @cached_property
+    def n_ratified(self):
+        return self.countries.filter(ratification_date__isnull=False).count()
+
+    @cached_property
+    def n_signed(self):
+        return self.countries.filter(signature_date__isnull=False).count()
+
+    @cached_property
+    def n_deposited(self):
+        return self.countries.filter(deposit_date__isnull=False).count()
 
     def __str__(self):
         return f"{self.work}"
