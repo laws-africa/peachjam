@@ -105,3 +105,17 @@ def markdownify(text):
 
 # override martor's markownify to use pandoc, so that we get alpha-numbered list support
 martor.utils.markdownify = markdownify
+
+
+def get_update_or_create(model, defaults, **kwargs):
+    # helper function to get or create  or update model
+    obj, created = model.objects.get_or_create(defaults=defaults, **kwargs)
+    updated = False
+    if not created:
+        for k, v in defaults.items():
+            if getattr(obj, k) != v:
+                setattr(obj, k, v)
+                updated = True
+        if updated:
+            obj.save()
+    return obj, (created or updated)

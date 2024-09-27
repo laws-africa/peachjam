@@ -15,6 +15,7 @@ from django.utils.text import slugify
 from languages_plus.models import Language
 
 from peachjam.adapters.base import Adapter
+from peachjam.helpers import get_update_or_create
 from peachjam.models import (
     AlternativeName,
     Author,
@@ -243,9 +244,10 @@ class IndigoAdapter(Adapter):
                 document_nature_name = " ".join(
                     [name for name in document["subtype"].split("-")]
                 ).capitalize()
-            field_data["nature"] = DocumentNature.objects.update_or_create(
+            field_data["nature"] = get_update_or_create(
+                DocumentNature,
+                {"name": document_nature_name},
                 code=slugify(document["subtype"]),
-                defaults={"name": document_nature_name},
             )[0]
 
         if hasattr(model, "author") and frbr_uri.actor:
