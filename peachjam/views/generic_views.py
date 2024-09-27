@@ -1,6 +1,7 @@
 import itertools
 
 from django.core.paginator import Paginator
+from django.db.models import Count
 from django.http import Http404
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
@@ -18,6 +19,7 @@ from peachjam.models import (
     CitationLink,
     CoreDocument,
     DocumentNature,
+    ExtractedCitation,
     GenericDocument,
     LegalInstrument,
     Predicate,
@@ -342,33 +344,31 @@ class BaseDocumentDetailView(DetailView):
         return context
 
     def fetch_citation_docs(self, works):
-        docs = sorted(
-            list(
-                CoreDocument.objects.prefetch_related("work")
-                .select_related("nature")
-                .filter(work__in=works)
-                .distinct("work_frbr_uri")
-                .order_by("work_frbr_uri", "-date")
-                .preferred_language(get_language(self.request))
-            ),
-            key=lambda d: d.get_doc_type_display(),
+        """Fetch documents for the given works, grouped by nature and ordered by the most incoming citations."""
+        # count the number of unique works, grouping by nature
+        counts = {
+            r["nature"]: r["n"]
+            for r in CoreDocument.objects.filter(work__in=works)
+            .values("nature")
+            .annotate(n=Count("work_frbr_uri", distinct=True))
+        }
+
+        # get the top 10 documents for each nature, ordering by the number of incoming citations
+        docs, truncated = ExtractedCitation.fetch_grouped_citation_docs(
+            works, get_language(self.request)
         )
-
-        grouped_docs = itertools.groupby(docs, lambda d: d.get_doc_type_display())
-
         result = [
             {
-                "doc_type": doc_type,
-                # sort by citations descending, then title
-                "docs": sorted(
-                    list(group), key=lambda d: [-d.work.n_citing_works, d.title]
-                ),
+                "nature": nature,
+                "n_docs": counts.get(nature.pk, 0),
+                "docs": list(group),
             }
-            for doc_type, group in grouped_docs
+            # the docs are already sorted by nature
+            for nature, group in itertools.groupby(docs, lambda d: d.nature)
         ]
 
         # sort by size of group, descending
-        result.sort(key=lambda g: -len(g["docs"]))
+        result.sort(key=lambda g: -g["n_docs"])
 
         return result
 

@@ -765,10 +765,8 @@ class CoreDocument(PolymorphicModel):
         return 0.0000001
 
     def get_doc_type_display(self):
-        """Human-friendly type of this document."""
-        if self.nature:
-            return self.nature.name
-        return super().get_doc_type_display()
+        """Human-friendly type of this document, which is always the nature, since that cannot be null."""
+        return self.nature.name
 
 
 def file_location(instance, filename):

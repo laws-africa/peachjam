@@ -45,6 +45,7 @@ from peachjam.views import (
     CourtRegistryMonthView,
     CourtRegistryYearView,
     CourtYearView,
+    DocumentCitationsView,
     DocumentDetailViewResolver,
     DocumentListView,
     DocumentMediaView,
@@ -207,6 +208,11 @@ urlpatterns = [
         r"^(?P<frbr_uri>akn/.*)/media/(?P<filename>.+)$",
         cache_page(CACHE_DURATION)(DocumentMediaView.as_view()),
         name="document_media",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/citations$",
+        cache_page(CACHE_DURATION)(DocumentCitationsView.as_view()),
+        name="document_citations",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/?.*)$",
