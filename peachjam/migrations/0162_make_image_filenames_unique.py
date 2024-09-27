@@ -27,9 +27,7 @@ def remove_duplicate_images(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam", "0160_ingestor_repeat_ingestor_schedule"),
-    ]
+    dependencies = [("peachjam", "0161_publicationfile")]
 
     operations = [
         migrations.RunPython(remove_duplicate_images),
