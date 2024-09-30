@@ -364,13 +364,17 @@ class IndigoAdapter(Adapter):
                         r = self.client_get(result["url"])
                         file.write(r.content)
 
-                        Image.objects.create(
+                        img, new_img = Image.objects.get_or_create(
                             document=created_document,
-                            file=File(file, name=result["filename"]),
-                            mimetype=result["mime_type"],
                             filename=result["filename"],
-                            size=result["size"],
+                            defaults={
+                                "file": File(file, name=result["filename"]),
+                                "mimetype": result["mime_type"],
+                                "size": result["size"],
+                            },
                         )
+                        if not new_img:
+                            logger.info(f"image {img.filename} already exists")
 
             logger.info(f"Downloaded image(s) for {created_document}")
 
