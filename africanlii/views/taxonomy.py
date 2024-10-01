@@ -1,3 +1,5 @@
+import datetime
+
 from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.text import gettext_lazy as _
@@ -80,6 +82,10 @@ class DocIndexDetailView(TaxonomyDetailView):
         documents = list(documents)
         for r in documents:
             r["get_absolute_url"] = r["expression_frbr_uri"]
+            if isinstance(r["date"], datetime.datetime):
+                r["date"] = r["date"].date()
+            else:
+                r["date"] = datetime.datetime.strptime(r["date"], "%Y-%m-%d").date()
         return documents
 
     def get_base_queryset(self):
