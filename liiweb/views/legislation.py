@@ -20,7 +20,7 @@ class LegislationListView(BaseLegislationListView):
     def get_form(self):
         self.form_defaults = {"sort": "title"}
         if self.variant in ["recent", "subleg"]:
-            self.form_defaults = {"sort": "-date"}
+            self.form_defaults = {"sort": "-date", "secondary_sort": "-frbr_uri_number"}
         return super().get_form()
 
     def get_base_queryset(self, *args, **kwargs):
