@@ -216,6 +216,10 @@ class BaseDocumentFilterForm(forms.Form):
 
     def order_queryset(self, queryset, exclude=None):
         sort = self.cleaned_data.get("sort") or "-date"
+        if sort == "-date" and "frbr_uri_number" in self.secondary_sort:
+            self.secondary_sort = "-frbr_uri_number"
+        elif sort == "date" and "frbr_uri_number" in self.secondary_sort:
+            self.secondary_sort = "frbr_uri_number"
         queryset = queryset.order_by(sort, self.secondary_sort)
         return queryset
 
