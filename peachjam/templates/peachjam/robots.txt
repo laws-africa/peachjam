@@ -6,6 +6,7 @@ Disallow: /search/
 Disallow: /api/
 Crawl-delay: 5
 {{ disallowed_content }}
+{{ extra_content }}
 
 
 User-Agent: AhrefsBot

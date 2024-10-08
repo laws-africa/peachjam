@@ -139,6 +139,9 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow documents to be saved."),
     )
+    robots_txt = models.TextField(
+        null=True, blank=True, help_text=_("Additional robots.txt rules.")
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
