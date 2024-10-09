@@ -534,7 +534,7 @@ class IndigoAdapter(Adapter):
                 logger.info(
                     f"  Deleting existing PublicationFile file on {doc.work_frbr_uri}"
                 )
-                doc.publication_file.file.delete()
+                doc.publication_file.file.delete(save=False)
 
         if stub:
             if hasattr(doc, "source_file"):
