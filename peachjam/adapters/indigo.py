@@ -212,6 +212,7 @@ class IndigoAdapter(Adapter):
             "content_html": self.get_content_html(document),
             "citation": document["numbered_title"],
             "principal": document["principal"],
+            "ingestor": self.ingestor,
         }
 
         frbr_uri_data = {
@@ -652,3 +653,7 @@ class IndigoAdapter(Adapter):
             "expression_frbr_uri"
         ):
             delete_document(self.ingestor.pk, data["data"]["expression_frbr_uri"])
+
+    def get_edit_url(self, document):
+        if self.settings.get("indigo_url"):
+            return f"{self.settings['indigo_url']}/works{document.work_frbr_uri}"

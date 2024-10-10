@@ -4,8 +4,25 @@
      aria-label="{% trans "Document toolbar" %}">
   {% block edit-btn %}
     {% if perms.peachjam.change_coredocument or perms.peachjam.can_edit_own_document %}
-      <a class="btn btn-outline-secondary btn-shrink-sm"
-         href="{{ document|admin_url:'change' }}">{% trans "Edit" %}</a>
+      {% if document.ingestor_edit_url %}
+        <div class="btn-group">
+          <a class="btn btn-outline-secondary btn-shrink-sm"
+             href="{{ document.ingestor_edit_url }}"
+             target="_blank">{% trans "Edit" %}</a>
+          <button type="button"
+                  class="btn btn-outline-secondary btn-shrink-sm dropdown-toggle dropdown-toggle-split"
+                  data-bs-toggle="dropdown">
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="{{ document|admin_url:'change' }}">{% trans "Edit in admin area" %}</a>
+            </li>
+          </ul>
+        </div>
+      {% else %}
+        <a class="btn btn-outline-secondary btn-shrink-sm"
+           href="{{ document|admin_url:'change' }}">{% trans "Edit" %}</a>
+      {% endif %}
     {% endif %}
   {% endblock %}
   {% block download-btn %}
