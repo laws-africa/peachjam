@@ -1,0 +1,19 @@
+{% extends 'user_account/layout.html' %}
+{% load i18n %}
+{% block title %}
+  {% trans "Edit Profile" %} {{ block.super }}
+{% endblock %}
+{% block account-tabs %}
+  {% include 'user_account/_tabs.html' with active='profile' %}
+{% endblock %}
+{% block account-content %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="card mb-5">
+      <div class="card-body">{% include 'user_account/_profile_form.html' %}</div>
+      <div class="card-footer text-end">
+        <button type="submit" class="btn btn-success">{% trans "Save" %}</button>
+      </div>
+    </div>
+  </form>
+{% endblock %}

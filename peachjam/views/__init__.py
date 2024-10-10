@@ -1,5 +1,6 @@
 # flake8: noqa
 from .about import *
+from .accounts import *
 from .article import *
 from .authors import *
 from .autocomplete import *
