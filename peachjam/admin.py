@@ -87,6 +87,7 @@ from peachjam.models import (
     citations_processor,
     pj_settings,
 )
+from peachjam.models.activity import EditActivity
 from peachjam.plugins import plugins
 from peachjam.resources import (
     ArticleResource,
@@ -287,6 +288,8 @@ class DateSelectorWidget(forms.MultiWidget):
 
 
 class DocumentForm(forms.ModelForm):
+    # to track edit activity
+    edit_activity_start = forms.DateTimeField(widget=forms.HiddenInput(), required=True)
     content_html = forms.CharField(
         widget=CKEditorWidget(
             extra_plugins=["lawwidgets"],
@@ -338,6 +341,8 @@ class DocumentForm(forms.ModelForm):
 
         if self.instance and self.instance.content_html_is_akn:
             self.fields["content_html"].widget.attrs["readonly"] = True
+
+        self.fields["edit_activity_start"].initial = timezone.now()
 
     def clean_content_html(self):
         # prevent CKEditor-based editing of AKN HTML
@@ -527,6 +532,15 @@ class DocumentAdmin(BaseAdmin):
             obj.created_by = request.user
 
         super().save_model(request, obj, form, change)
+
+        # update the edit activity end time
+        EditActivity.objects.create(
+            document=obj,
+            user=request.user,
+            stage="corrections" if change else "initial",
+            start=form.cleaned_data["edit_activity_start"],
+            end=timezone.now(),
+        )
 
     def save_related(self, request, form, formsets, change):
         # after saving related models, also save this model again so that it can update fields based on related changes
