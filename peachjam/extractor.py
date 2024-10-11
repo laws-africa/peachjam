@@ -18,7 +18,7 @@ class ExtractorError(Exception):
 
 class ExtractorService:
     def __init__(self):
-        self.api_token = settings.PEACHJAM["EXTRACTOR_API_TOKEN"]
+        self.api_token = settings.PEACHJAM["LAWSAFRICA_API_KEY"]
         self.api_url = settings.PEACHJAM["EXTRACTOR_API"]
 
     def enabled(self):
