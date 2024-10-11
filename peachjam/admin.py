@@ -952,11 +952,8 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         return custom_urls + urls
 
     def upload_view(self, request):
-        settings = pj_settings()
-        form = JudgmentUploadForm(
-            initial={"jurisdiction": settings.default_document_jurisdiction}
-        )
-        if not settings.lawsafrica_extractor_enabled():
+        extractor = ExtractorService()
+        if not extractor.enabled():
             messages.error(
                 request,
                 _(
@@ -965,6 +962,10 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             )
             return redirect("admin:peachjam_judgment_changelist")
 
+        form = JudgmentUploadForm(
+            initial={"jurisdiction": settings.default_document_jurisdiction}
+        )
+
         # Custom logic for the upload view
         if request.method == "POST":
             form = JudgmentUploadForm(
@@ -972,7 +973,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                 request.FILES,
             )
             if form.is_valid():
-                extractor = ExtractorService()
                 try:
                     doc = extractor.extract_judgment_from_file(
                         jurisdiction=form.cleaned_data["jurisdiction"],

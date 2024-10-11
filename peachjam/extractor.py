@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 import requests
+from django.conf import settings
 from django.core.files import File
 from languages_plus.models import Language
 
@@ -17,10 +18,14 @@ class ExtractorError(Exception):
 
 class ExtractorService:
     def __init__(self):
-        self.settings = pj_settings()
+        self.api_token = settings.PEACHJAM["EXTRACTOR_API_TOKEN"]
+        self.api_url = settings.PEACHJAM["EXTRACTOR_API"]
+
+    def enabled(self):
+        return self.api_token and self.api_url
 
     def extract_judgment_details(self, jurisdiction, file):
-        if not self.settings.lawsafrica_extractor_enabled():
+        if not self.enabled():
             raise ExtractorError("Extractor service not configured")
 
         data = {
@@ -29,7 +34,7 @@ class ExtractorService:
         }
         headers = self.get_headers()
         resp = requests.post(
-            self.settings.lawsafrica_extractor_url + "judgment",
+            self.api_url + "judgment",
             files={"file": file},
             data=data,
             headers=headers,
@@ -43,7 +48,7 @@ class ExtractorService:
         return data["extracted"]
 
     def get_headers(self):
-        return {"Authorization": "Token " + self.settings.lawsafrica_api_token}
+        return {"Authorization": "Token " + self.api_token}
 
     def extract_judgment_from_file(self, jurisdiction, file):
         details = self.extract_judgment_details(jurisdiction, file)
