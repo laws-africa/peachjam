@@ -539,3 +539,21 @@ class CaseHistory(models.Model):
         elif self.case_number:
             return f"{self.case_number}"
         return _("Case history")
+
+
+class CauseList(CoreDocument):
+    frbr_uri_doctypes = ["doc"]
+    default_nature = ("causelist", "Cause list")
+    court = models.ForeignKey(
+        Court,
+        on_delete=models.PROTECT,
+        null=True,
+        verbose_name=_("court"),
+        related_name="causelists",
+    )
+    judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
+
+    def pre_save(self):
+        self.frbr_uri_doctype = "doc"
+        self.doc_type = "causelist"
+        super().pre_save()

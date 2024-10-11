@@ -47,6 +47,7 @@ from peachjam.models import (
     Book,
     CaseHistory,
     CaseNumber,
+    CauseList,
     CitationLink,
     CitationProcessing,
     CoreDocument,
@@ -923,6 +924,13 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             ]
 
         return fieldsets
+
+
+@admin.register(CauseList)
+class CauseListAdmin(DocumentAdmin):
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].insert(3, "court")
+    fieldsets[0][1]["fields"].insert(3, "judges")
 
 
 @admin.register(Predicate)
