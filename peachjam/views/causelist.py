@@ -9,8 +9,9 @@ from django.views.generic import TemplateView
 from peachjam.helpers import lowercase_alphabet
 from peachjam.models import CauseList, Court, CourtClass, Judge, Taxonomy
 from peachjam.registry import registry
-from peachjam.views import BaseDocumentDetailView, FilteredDocumentListView, YearMixin
+from peachjam.views import BaseDocumentDetailView, FilteredDocumentListView
 from peachjam.views.courts import MonthMixin
+from peachjam.views.generic_views import YearMixin
 
 
 @registry.register_doc_type("causelist")
