@@ -382,10 +382,7 @@ class PeachjamLoginForm(LoginForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
 
 
-class UserEditorForm(forms.ModelForm):
-    first_name = forms.CharField(label=_("First name"))
-    last_name = forms.CharField(label=_("Last name"))
-
+class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["first_name", "last_name"]
