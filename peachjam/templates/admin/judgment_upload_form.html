@@ -1,0 +1,48 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block content %}
+  <div class="col">
+    <h2>{% trans "Upload judgment" %}</h2>
+    <form method="post"
+          enctype="multipart/form-data"
+          action="{% url 'admin:judgment_upload' %}">
+      {% csrf_token %}
+      {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+          <ul>
+            {% for field, error in form.errors.items %}
+              <li>
+                {% if field != "__all__" %}{{ field }}:{% endif %}
+                {{ error }}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label">{% trans "Jurisdiction" %}</label>
+            <select name="{{ form.jurisdiction.html_name }}"
+                    required
+                    class="form-control">
+              {% for opt in form.jurisdiction %}{{ opt }}{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label">{% trans "File" %}</label>
+            <div>
+              <input type="file"
+                     name="{{ form.file.html_name }}"
+                     required
+                     accept=".pdf,.doc,.docx"/>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">{% trans "Upload" %}</button>
+    </form>
+  </div>
+{% endblock %}

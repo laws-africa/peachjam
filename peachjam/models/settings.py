@@ -142,6 +142,18 @@ class PeachJamSettings(SingletonModel):
     robots_txt = models.TextField(
         null=True, blank=True, help_text=_("Additional robots.txt rules.")
     )
+    lawsafrica_extractor_url = models.URLField(
+        _("Laws.Africa extractor URL"),
+        null=True,
+        blank=True,
+        help_text=_("Laws.Africa extractor service API URL"),
+    )
+    lawsafrica_api_token = models.CharField(
+        _("Laws.Africa API token"),
+        null=True,
+        blank=True,
+        help_text=_("Laws.Africa API token"),
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
@@ -151,6 +163,9 @@ class PeachJamSettings(SingletonModel):
 
     def __str__(self):
         return "Settings"
+
+    def lawsafrica_extractor_enabled(self):
+        return self.lawsafrica_extractor_url and self.lawsafrica_api_token
 
 
 def pj_settings():

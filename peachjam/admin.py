@@ -7,13 +7,13 @@ from ckeditor.widgets import CKEditorWidget
 from dal import autocomplete
 from django import forms
 from django.conf import settings
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.core.exceptions import ValidationError
 from django.http.response import FileResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils import timezone
@@ -29,8 +29,10 @@ from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularI
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
+from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
+    JudgmentUploadForm,
     NewDocumentFormMixin,
     PublicationFileForm,
     SourceFileForm,
@@ -937,6 +939,56 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             ]
 
         return fieldsets
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "upload/",
+                self.admin_site.admin_view(self.upload_view),
+                name="judgment_upload",
+            ),
+        ]
+        return custom_urls + urls
+
+    def upload_view(self, request):
+        settings = pj_settings()
+        form = JudgmentUploadForm(
+            initial={"jurisdiction": settings.default_document_jurisdiction}
+        )
+        if not settings.lawsafrica_extractor_enabled():
+            messages.error(
+                request,
+                _(
+                    "The Laws.Africa extractor is not enabled. Please check your settings."
+                ),
+            )
+            return redirect("admin:peachjam_judgment_changelist")
+
+        # Custom logic for the upload view
+        if request.method == "POST":
+            form = JudgmentUploadForm(
+                request.POST,
+                request.FILES,
+            )
+            if form.is_valid():
+                extractor = ExtractorService()
+                try:
+                    doc = extractor.extract_judgment_from_file(
+                        jurisdiction=form.cleaned_data["jurisdiction"],
+                        file=form.cleaned_data["file"],
+                    )
+                    messages.success(
+                        request, _("Judgment uploaded. Please check details carefully.")
+                    )
+                    return redirect("admin:peachjam_judgment_change", doc.pk)
+                except ExtractorError as e:
+                    form.add_error(None, str(e))
+
+        context = {
+            "form": form,
+        }
+        return render(request, "admin/judgment_upload_form.html", context)
 
 
 @admin.register(Predicate)
