@@ -290,7 +290,8 @@ class DateSelectorWidget(forms.MultiWidget):
 
 class DocumentForm(forms.ModelForm):
     # to track edit activity
-    edit_activity_start = forms.DateTimeField(widget=forms.HiddenInput(), required=True)
+    edit_activity_start = forms.DateTimeField(widget=forms.HiddenInput())
+    edit_activity_stage = forms.CharField(widget=forms.HiddenInput())
     content_html = forms.CharField(
         widget=CKEditorWidget(
             extra_plugins=["lawwidgets"],
@@ -344,6 +345,9 @@ class DocumentForm(forms.ModelForm):
             self.fields["content_html"].widget.attrs["readonly"] = True
 
         self.fields["edit_activity_start"].initial = timezone.now()
+        self.fields["edit_activity_stage"].initial = (
+            "corrections" if self.instance.pk else "initial"
+        )
 
     def clean_content_html(self):
         # prevent CKEditor-based editing of AKN HTML
@@ -528,6 +532,14 @@ class DocumentAdmin(BaseAdmin):
 
         return super().get_form(request, obj, **kwargs)
 
+    def render_change_form(self, request, context, *args, **kwargs):
+        # this is our only chance to inject a pre-filled field from the querystring for both add and change
+        if request.GET.get("stage"):
+            context["adminform"].form.fields[
+                "edit_activity_stage"
+            ].initial = request.GET["stage"]
+        return super().render_change_form(request, context, *args, **kwargs)
+
     def save_model(self, request, obj, form, change):
         if not change:
             obj.created_by = request.user
@@ -538,7 +550,7 @@ class DocumentAdmin(BaseAdmin):
         EditActivity.objects.create(
             document=obj,
             user=request.user,
-            stage="corrections" if change else "initial",
+            stage=form.cleaned_data["edit_activity_stage"],
             start=form.cleaned_data["edit_activity_start"],
             end=timezone.now(),
         )
@@ -981,7 +993,11 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                     messages.success(
                         request, _("Judgment uploaded. Please check details carefully.")
                     )
-                    return redirect("admin:peachjam_judgment_change", doc.pk)
+                    url = (
+                        reverse("admin:peachjam_judgment_change", args=[doc.pk])
+                        + "?stage=after-extraction"
+                    )
+                    return redirect(url)
                 except ExtractorError as e:
                     form.add_error(None, str(e))
 
