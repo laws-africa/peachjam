@@ -137,7 +137,7 @@ class CauseListCourtDetailView(FilteredCauseListView):
         return get_object_or_404(Court, code=self.kwargs["code"])
 
     def base_view_name(self):
-        return self.court.name
+        return f"{self.court.name} {_('Cause Lists')}"
 
     def get_base_queryset(self, exclude=None):
         qs = super().get_base_queryset(exclude=exclude).filter(court=self.court)
@@ -170,7 +170,7 @@ class CauseListCourtClassView(FilteredCauseListView):
     template_name = "peachjam/causelist_court_class_detail.html"
 
     def base_view_name(self):
-        return self.court_class.name
+        return f"{self.court_class.name} {_('Cause Lists')}"
 
     @cached_property
     def court_class(self):
