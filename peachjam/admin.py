@@ -440,9 +440,9 @@ class DocumentAdmin(BaseAdmin):
             {
                 "fields": [
                     "work_link",
+                    "title",
                     "jurisdiction",
                     "locality",
-                    "title",
                     "date",
                     "language",
                 ]
@@ -897,11 +897,12 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "registry")
     fieldsets[0][1]["fields"].insert(5, "case_name")
-    fieldsets[0][1]["fields"].insert(6, "outcomes")
-    fieldsets[0][1]["fields"].insert(7, "mnc")
-    fieldsets[0][1]["fields"].insert(8, "serial_number_override")
-    fieldsets[0][1]["fields"].insert(9, "serial_number")
+    fieldsets[0][1]["fields"].append("mnc")
+    fieldsets[0][1]["fields"].append("serial_number_override")
+    fieldsets[0][1]["fields"].append("serial_number")
     fieldsets[0][1]["fields"].append("hearing_date")
+    fieldsets[0][1]["fields"].append("outcomes")
+
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
