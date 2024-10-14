@@ -87,7 +87,7 @@ class CitatorMatcher:
     """Matcher that delegates to the Citator service."""
 
     citator_url = settings.PEACHJAM["CITATOR_API"]
-    citator_key = settings.PEACHJAM["CITATOR_API_KEY"]
+    citator_key = settings.PEACHJAM["LAWSAFRICA_API_KEY"]
     max_text_size = 1024 * 1024 * 2
 
     def __init__(self):
