@@ -2,6 +2,12 @@
 {% load i18n %}
 {% block object-tools-items %}
   {{ block.super }}
+  {% if can_upload_document %}
+    <a class="btn btn-success" href="{{ upload_url }}">
+      <i class="fa fa-upload"></i>
+      {% trans 'Upload' %}
+    </a>
+  {% endif %}
   {% if PEACHJAM_SETTINGS.editor_help_link and help_topic %}
     <a class="btn btn-info"
        target="_blank"

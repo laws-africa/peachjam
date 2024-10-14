@@ -934,6 +934,12 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     class Media:
         js = ("js/judgment_duplicates.js",)
 
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["can_upload_document"] = ExtractorService().enabled()
+        extra_context["upload_url"] = reverse("admin:peachjam_judgment_upload")
+        return super().changelist_view(request, extra_context)
+
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
 
@@ -958,7 +964,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             path(
                 "upload/",
                 self.admin_site.admin_view(self.upload_view),
-                name="judgment_upload",
+                name="peachjam_judgment_upload",
             ),
         ]
         return custom_urls + urls
@@ -975,7 +981,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             return redirect("admin:peachjam_judgment_changelist")
 
         form = JudgmentUploadForm(
-            initial={"jurisdiction": settings.default_document_jurisdiction}
+            initial={"jurisdiction": pj_settings().default_document_jurisdiction}
         )
 
         # Custom logic for the upload view

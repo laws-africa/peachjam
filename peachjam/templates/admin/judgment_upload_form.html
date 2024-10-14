@@ -5,7 +5,7 @@
     <h2>{% trans "Upload judgment" %}</h2>
     <form method="post"
           enctype="multipart/form-data"
-          action="{% url 'admin:judgment_upload' %}">
+          action="{% url 'admin:peachjam_judgment_upload' %}">
       {% csrf_token %}
       {% if form.errors %}
         <div class="alert alert-danger" role="alert">
