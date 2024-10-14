@@ -6,7 +6,8 @@
           type="button"
           aria-expanded="false"
           data-bs-target="#saveDocumentModal">
-    {% trans 'Save document' %}
+    <span class="d-sm-none">{% trans 'Save' %}</span>
+    <span class="d-none d-sm-inline">{% trans 'Save document' %}</span>
   </button>
   <div hx-swap-oob="true" id="saveDocumentModalDialog" class="modal-dialog">
     <div class="modal-content">
