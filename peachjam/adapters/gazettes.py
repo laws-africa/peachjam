@@ -101,6 +101,7 @@ class GazetteAPIAdapter(Adapter):
             "key": document["key"],
             "created_at": document["created_at"],
             "updated_at": document["updated_at"],
+            "ingestor": self.ingestor,
         }
         gazette, new = Gazette.objects.update_or_create(
             expression_frbr_uri=document["expression_frbr_uri"],

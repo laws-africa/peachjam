@@ -7,13 +7,13 @@ from ckeditor.widgets import CKEditorWidget
 from dal import autocomplete
 from django import forms
 from django.conf import settings
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.core.exceptions import ValidationError
 from django.http.response import FileResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils import timezone
@@ -29,8 +29,10 @@ from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularI
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
+from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
+    JudgmentUploadForm,
     NewDocumentFormMixin,
     PublicationFileForm,
     SourceFileForm,
@@ -86,6 +88,7 @@ from peachjam.models import (
     citations_processor,
     pj_settings,
 )
+from peachjam.models.activity import EditActivity
 from peachjam.plugins import plugins
 from peachjam.resources import (
     ArticleResource,
@@ -286,6 +289,9 @@ class DateSelectorWidget(forms.MultiWidget):
 
 
 class DocumentForm(forms.ModelForm):
+    # to track edit activity
+    edit_activity_start = forms.DateTimeField(widget=forms.HiddenInput())
+    edit_activity_stage = forms.CharField(widget=forms.HiddenInput())
     content_html = forms.CharField(
         widget=CKEditorWidget(
             extra_plugins=["lawwidgets"],
@@ -337,6 +343,11 @@ class DocumentForm(forms.ModelForm):
 
         if self.instance and self.instance.content_html_is_akn:
             self.fields["content_html"].widget.attrs["readonly"] = True
+
+        self.fields["edit_activity_start"].initial = timezone.now()
+        self.fields["edit_activity_stage"].initial = (
+            "corrections" if self.instance.pk else "initial"
+        )
 
     def clean_content_html(self):
         # prevent CKEditor-based editing of AKN HTML
@@ -429,9 +440,9 @@ class DocumentAdmin(BaseAdmin):
             {
                 "fields": [
                     "work_link",
+                    "title",
                     "jurisdiction",
                     "locality",
-                    "title",
                     "date",
                     "language",
                 ]
@@ -521,11 +532,28 @@ class DocumentAdmin(BaseAdmin):
 
         return super().get_form(request, obj, **kwargs)
 
+    def render_change_form(self, request, context, *args, **kwargs):
+        # this is our only chance to inject a pre-filled field from the querystring for both add and change
+        if request.GET.get("stage"):
+            context["adminform"].form.fields[
+                "edit_activity_stage"
+            ].initial = request.GET["stage"]
+        return super().render_change_form(request, context, *args, **kwargs)
+
     def save_model(self, request, obj, form, change):
         if not change:
             obj.created_by = request.user
 
         super().save_model(request, obj, form, change)
+
+        # update the edit activity end time
+        EditActivity.objects.create(
+            document=obj,
+            user=request.user,
+            stage=form.cleaned_data["edit_activity_stage"],
+            start=form.cleaned_data["edit_activity_start"],
+            end=timezone.now(),
+        )
 
     def save_related(self, request, form, formsets, change):
         # after saving related models, also save this model again so that it can update fields based on related changes
@@ -869,14 +897,15 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "registry")
     fieldsets[0][1]["fields"].insert(5, "case_name")
-    fieldsets[0][1]["fields"].insert(6, "outcomes")
-    fieldsets[0][1]["fields"].insert(7, "mnc")
-    fieldsets[0][1]["fields"].insert(8, "serial_number_override")
-    fieldsets[0][1]["fields"].insert(9, "serial_number")
+    fieldsets[0][1]["fields"].append("mnc")
     fieldsets[0][1]["fields"].append("hearing_date")
+    fieldsets[0][1]["fields"].append("outcomes")
+
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
+    fieldsets[2][1]["fields"].append("serial_number")
+    fieldsets[2][1]["fields"].append("serial_number_override")
     fieldsets[3][1]["fields"].extend(["case_summary", "flynote", "order"])
     readonly_fields = [
         "mnc",
@@ -906,6 +935,12 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     class Media:
         js = ("js/judgment_duplicates.js",)
 
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["can_upload_document"] = ExtractorService().enabled()
+        extra_context["upload_url"] = reverse("admin:peachjam_judgment_upload")
+        return super().changelist_view(request, extra_context)
+
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
 
@@ -923,6 +958,60 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             ]
 
         return fieldsets
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "upload/",
+                self.admin_site.admin_view(self.upload_view),
+                name="peachjam_judgment_upload",
+            ),
+        ]
+        return custom_urls + urls
+
+    def upload_view(self, request):
+        extractor = ExtractorService()
+        if not extractor.enabled():
+            messages.error(
+                request,
+                _(
+                    "The Laws.Africa extractor is not enabled. Please check your settings."
+                ),
+            )
+            return redirect("admin:peachjam_judgment_changelist")
+
+        form = JudgmentUploadForm(
+            initial={"jurisdiction": pj_settings().default_document_jurisdiction}
+        )
+
+        # Custom logic for the upload view
+        if request.method == "POST":
+            form = JudgmentUploadForm(
+                request.POST,
+                request.FILES,
+            )
+            if form.is_valid():
+                try:
+                    doc = extractor.extract_judgment_from_file(
+                        jurisdiction=form.cleaned_data["jurisdiction"],
+                        file=form.cleaned_data["file"],
+                    )
+                    messages.success(
+                        request, _("Judgment uploaded. Please check details carefully.")
+                    )
+                    url = (
+                        reverse("admin:peachjam_judgment_change", args=[doc.pk])
+                        + "?stage=after-extraction"
+                    )
+                    return redirect(url)
+                except ExtractorError as e:
+                    form.add_error(None, str(e))
+
+        context = {
+            "form": form,
+        }
+        return render(request, "admin/judgment_upload_form.html", context)
 
 
 @admin.register(Predicate)

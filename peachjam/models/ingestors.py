@@ -97,3 +97,6 @@ class Ingestor(models.Model):
             run_ingestor(self.id, repeat=self.repeat, schedule=self.schedule)
         else:
             log.info(f"ingestor {self.name} disabled, ignoring")
+
+    def get_edit_url(self, document):
+        return self.get_adapter().get_edit_url(document)

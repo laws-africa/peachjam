@@ -1,5 +1,7 @@
 from django.test import TestCase
 
+from peachjam.models import PeachJamSettings
+
 
 class PeachjamViewsTest(TestCase):
     fixtures = ["tests/countries", "documents/sample_documents"]
@@ -177,3 +179,22 @@ class PeachjamViewsTest(TestCase):
             "/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03",
         )
         self.assertTrue(hasattr(response.context["document"], "authors"))
+
+    def test_robots_txt(self):
+        response = self.client.get("/robots.txt")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "User-agent")
+
+        settings = PeachJamSettings.load()
+        settings.robots_txt = None
+        settings.save()
+
+        response = self.client.get("/robots.txt")
+        self.assertContains(response, "User-agent")
+        self.assertNotContains(response, "None")
+
+        settings.robots_txt = "foo\nbar"
+        settings.save()
+
+        response = self.client.get("/robots.txt")
+        self.assertContains(response, "foo\nbar")

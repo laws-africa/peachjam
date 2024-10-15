@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, PeachJamSettings
 
 
 class RobotsView(TemplateView):
@@ -18,5 +18,6 @@ class RobotsView(TemplateView):
             .distinct()
         ]
         context["disallowed_content"] = "\n".join(disallowed_content)
+        context["extra_content"] = PeachJamSettings.load().robots_txt or ""
 
         return context
