@@ -2,6 +2,7 @@ import copy
 
 from allauth.account.forms import LoginForm, SignupForm
 from countries_plus.models import Country
+from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -21,6 +22,7 @@ from peachjam.models import (
     Folder,
     PeachJamSettings,
     PublicationFile,
+    Ratification,
     SavedDocument,
     SourceFile,
     pj_settings,
@@ -393,3 +395,10 @@ class JudgmentUploadForm(forms.Form):
         self.fields[
             "jurisdiction"
         ].queryset = PeachJamSettings.load().document_jurisdictions.all()
+
+
+class RatificationForm(forms.ModelForm):
+    class Meta:
+        model = Ratification
+        fields = "__all__"
+        widgets = {"work": autocomplete.ModelSelect2(url="autocomplete-works")}

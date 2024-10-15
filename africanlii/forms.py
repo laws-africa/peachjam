@@ -1,8 +1,4 @@
-from dal import autocomplete
-from django import forms
-
 from peachjam.forms import BaseDocumentFilterForm
-from peachjam.models import Ratification
 
 
 class ESDocumentFilterForm(BaseDocumentFilterForm):
@@ -56,10 +52,3 @@ class ESDocumentFilterForm(BaseDocumentFilterForm):
             search.add_filter("jurisdiction", jurisdictions)
 
         return search
-
-
-class RatificationForm(forms.ModelForm):
-    class Meta:
-        model = Ratification
-        fields = "__all__"
-        widgets = {"work": autocomplete.ModelSelect2(url="autocomplete-works")}
