@@ -52,6 +52,7 @@ class Migration(migrations.Migration):
                     options={
                         "verbose_name": "ratification",
                         "verbose_name_plural": "ratifications",
+                        "db_table": "africanlii_ratification",
                     },
                 ),
                 migrations.CreateModel(
@@ -106,6 +107,7 @@ class Migration(migrations.Migration):
                         "verbose_name": "ratification country",
                         "verbose_name_plural": "ratification countries",
                         "ordering": ["country__name"],
+                        "db_table": "africanlii_ratificationcountry",
                     },
                 ),
                 migrations.AddConstraint(

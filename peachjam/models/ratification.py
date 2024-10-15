@@ -17,6 +17,7 @@ class Ratification(models.Model):
     )
     source_url = models.URLField(_("source URL"), null=True, blank=True)
     last_updated = models.DateField(_("last updated"), null=True, blank=True)
+    updated_at = models.DateTimeField(_("updated at"), auto_now=True)
 
     class Meta:
         verbose_name = _("ratification")
