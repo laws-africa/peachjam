@@ -3,8 +3,8 @@ import datetime
 from countries_plus.models import Country
 from django.test import TestCase
 
-from africanlii.adapters import RatificationsAdapter
-from peachjam.models import Ratification, RatificationCountry, Work, pj_settings
+from peachjam.adapters import RatificationsAdapter
+from peachjam.models import Ratification, RatificationCountry, Work
 
 
 class TestRatificationsAdapter(TestCase):
@@ -22,7 +22,6 @@ class TestRatificationsAdapter(TestCase):
             frbr_uri_date="2000",
             frbr_uri_number="1",
         )
-        pj_settings().document_jurisdictions.add(Country.objects.get(pk="ZA"))
         self.data = [
             {
                 "work": "/akn/za/act/2000/1",
@@ -93,3 +92,43 @@ class TestRatificationsAdapter(TestCase):
             [datetime.date(2023, 9, 1)],
             [c.signature_date for c in ratification.countries.all()],
         )
+
+    def test_create_ratifications_include_countries_without_country(self):
+        self.adapter.include_countries = ["na"]
+        self.adapter.update_ratifications(self.data)
+        self.assertEqual(
+            ["/akn/za/act/2000/1"],
+            [r.work.frbr_uri for r in Ratification.objects.all()],
+        )
+        ratification = Ratification.objects.first()
+        self.assertEqual([], [c.country.pk for c in ratification.countries.all()])
+
+    def test_create_ratifications_include_countries_with_country(self):
+        self.adapter.include_countries = ["za"]
+        self.adapter.update_ratifications(self.data)
+        self.assertEqual(
+            ["/akn/za/act/2000/1"],
+            [r.work.frbr_uri for r in Ratification.objects.all()],
+        )
+        ratification = Ratification.objects.first()
+        self.assertEqual(["ZA"], [c.country.pk for c in ratification.countries.all()])
+
+    def test_create_ratifications_exclude_countries_without_country(self):
+        self.adapter.exclude_countries = ["na"]
+        self.adapter.update_ratifications(self.data)
+        self.assertEqual(
+            ["/akn/za/act/2000/1"],
+            [r.work.frbr_uri for r in Ratification.objects.all()],
+        )
+        ratification = Ratification.objects.first()
+        self.assertEqual(["ZA"], [c.country.pk for c in ratification.countries.all()])
+
+    def test_create_ratifications_exclude_countries_with_country(self):
+        self.adapter.exclude_countries = ["za"]
+        self.adapter.update_ratifications(self.data)
+        self.assertEqual(
+            ["/akn/za/act/2000/1"],
+            [r.work.frbr_uri for r in Ratification.objects.all()],
+        )
+        ratification = Ratification.objects.first()
+        self.assertEqual([], [c.country.pk for c in ratification.countries.all()])

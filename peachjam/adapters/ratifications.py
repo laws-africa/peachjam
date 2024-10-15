@@ -1,7 +1,9 @@
 import logging
 
+from countries_plus.models import Country
+
 from peachjam.adapters import RequestsAdapter
-from peachjam.models import Ratification, RatificationCountry, Work, pj_settings
+from peachjam.models import Ratification, RatificationCountry, Work
 from peachjam.plugins import plugins
 
 log = logging.getLogger(__name__)
@@ -11,9 +13,11 @@ log = logging.getLogger(__name__)
 class RatificationsAdapter(RequestsAdapter):
     """Fetches (update-only) ratifications from different LII websites.
 
-    settings required:
+    settings:
     - api_url
     - token
+    - exclude_countries - space-separated list of country codes to exclude
+    - include_countries - space-separated list of country codes to include
     """
 
     def __init__(self, *args, **kwargs):
@@ -23,6 +27,12 @@ class RatificationsAdapter(RequestsAdapter):
             {
                 "Authorization": f"Token {self.settings['token']}",
             }
+        )
+        self.exclude_countries = (
+            self.settings.get("exclude_countries", "").lower().split()
+        )
+        self.include_countries = (
+            self.settings.get("include_countries", "").lower().split()
         )
 
     def check_for_updates(self, last_refreshed):
@@ -42,8 +52,6 @@ class RatificationsAdapter(RequestsAdapter):
         return results
 
     def update_ratifications(self, ratifications):
-        jurisdictions = {j.pk: j for j in pj_settings().document_jurisdictions.all()}
-
         for ratification_data in ratifications:
             log.info(f"Updating ratification: {ratification_data}")
             work_frbr_uri = ratification_data["work"]
@@ -56,15 +64,34 @@ class RatificationsAdapter(RequestsAdapter):
             ratification, _ = Ratification.objects.update_or_create(work=work)
 
             for country_data in countries_data:
-                if country_data["country"] not in jurisdictions:
+                if (
+                    self.include_countries
+                    and country_data["country"].lower() not in self.include_countries
+                ):
                     log.warning(
-                        f"Country {country_data['country']} not found in jurisdictions, skipping"
+                        f"Ignoring country {country_data['country']} not in include_countries"
+                    )
+                    continue
+
+                if (
+                    self.exclude_countries
+                    and country_data["country"].lower() in self.exclude_countries
+                ):
+                    log.warning(
+                        f"Ignoring country {country_data['country']} in exclude_countries"
+                    )
+                    continue
+
+                country = Country.objects.filter(pk=country_data["country"]).first()
+                if not country:
+                    log.warning(
+                        f"Country {country_data['country']} not found, skipping"
                     )
                     continue
 
                 RatificationCountry.objects.update_or_create(
                     ratification=ratification,
-                    country=jurisdictions[country_data["country"]],
+                    country=country,
                     defaults={
                         "ratification_date": country_data["ratification_date"],
                         "deposit_date": country_data["deposit_date"],
