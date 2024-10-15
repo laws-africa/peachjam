@@ -12,111 +12,99 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.SeparateDatabaseAndState(
-            database_operations=[],
-            state_operations=[
-                migrations.CreateModel(
-                    name="Ratification",
-                    fields=[
-                        (
-                            "id",
-                            models.BigAutoField(
-                                auto_created=True,
-                                primary_key=True,
-                                serialize=False,
-                                verbose_name="ID",
-                            ),
-                        ),
-                        (
-                            "source_url",
-                            models.URLField(
-                                blank=True, null=True, verbose_name="source URL"
-                            ),
-                        ),
-                        (
-                            "last_updated",
-                            models.DateField(
-                                blank=True, null=True, verbose_name="last updated"
-                            ),
-                        ),
-                        (
-                            "work",
-                            models.OneToOneField(
-                                on_delete=django.db.models.deletion.CASCADE,
-                                related_name="ratification",
-                                to="peachjam.work",
-                                verbose_name="work",
-                            ),
-                        ),
-                    ],
-                    options={
-                        "verbose_name": "ratification",
-                        "verbose_name_plural": "ratifications",
-                        "db_table": "africanlii_ratification",
-                    },
+        migrations.CreateModel(
+            name="Ratification",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
                 ),
-                migrations.CreateModel(
-                    name="RatificationCountry",
-                    fields=[
-                        (
-                            "id",
-                            models.BigAutoField(
-                                auto_created=True,
-                                primary_key=True,
-                                serialize=False,
-                                verbose_name="ID",
-                            ),
-                        ),
-                        (
-                            "ratification_date",
-                            models.DateField(
-                                blank=True, null=True, verbose_name="ratification date"
-                            ),
-                        ),
-                        (
-                            "deposit_date",
-                            models.DateField(
-                                blank=True, null=True, verbose_name="deposit date"
-                            ),
-                        ),
-                        (
-                            "signature_date",
-                            models.DateField(
-                                blank=True, null=True, verbose_name="signature date"
-                            ),
-                        ),
-                        (
-                            "country",
-                            models.ForeignKey(
-                                on_delete=django.db.models.deletion.CASCADE,
-                                to="countries_plus.country",
-                                verbose_name="country",
-                            ),
-                        ),
-                        (
-                            "ratification",
-                            models.ForeignKey(
-                                on_delete=django.db.models.deletion.CASCADE,
-                                related_name="countries",
-                                to="peachjam.ratification",
-                                verbose_name="ratification",
-                            ),
-                        ),
-                    ],
-                    options={
-                        "verbose_name": "ratification country",
-                        "verbose_name_plural": "ratification countries",
-                        "ordering": ["country__name"],
-                        "db_table": "africanlii_ratificationcountry",
-                    },
+                (
+                    "source_url",
+                    models.URLField(blank=True, null=True, verbose_name="source URL"),
                 ),
-                migrations.AddConstraint(
-                    model_name="ratificationcountry",
-                    constraint=models.UniqueConstraint(
-                        fields=("ratification", "country"),
-                        name="unique_ratification_country",
+                (
+                    "last_updated",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="last updated"
+                    ),
+                ),
+                (
+                    "work",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="ratification",
+                        to="peachjam.work",
+                        verbose_name="work",
                     ),
                 ),
             ],
-        )
+            options={
+                "verbose_name": "ratification",
+                "verbose_name_plural": "ratifications",
+            },
+        ),
+        migrations.CreateModel(
+            name="RatificationCountry",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "ratification_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="ratification date"
+                    ),
+                ),
+                (
+                    "deposit_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="deposit date"
+                    ),
+                ),
+                (
+                    "signature_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="signature date"
+                    ),
+                ),
+                (
+                    "country",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="countries_plus.country",
+                        verbose_name="country",
+                    ),
+                ),
+                (
+                    "ratification",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="countries",
+                        to="peachjam.ratification",
+                        verbose_name="ratification",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "ratification country",
+                "verbose_name_plural": "ratification countries",
+                "ordering": ["country__name"],
+            },
+        ),
+        migrations.AlterUniqueTogether(
+            name="ratificationcountry",
+            unique_together={("ratification", "country")},
+        ),
     ]
