@@ -21,6 +21,7 @@ class Ratification(models.Model):
     class Meta:
         verbose_name = _("ratification")
         verbose_name_plural = _("ratifications")
+        db_table = "africanlii_ratification"
 
     @cached_property
     def n_ratified(self):
@@ -62,6 +63,7 @@ class RatificationCountry(models.Model):
         verbose_name = _("ratification country")
         verbose_name_plural = _("ratification countries")
         ordering = ["country__name"]
+        db_table = "africanlii_ratificationcountry"
 
         constraints = [
             models.UniqueConstraint(

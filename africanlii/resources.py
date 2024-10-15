@@ -1,8 +1,7 @@
 from countries_plus.models import Country
 from import_export import fields, resources, widgets
 
-from africanlii.models import Ratification, RatificationCountry
-from peachjam.models import Work
+from peachjam.models import Ratification, RatificationCountry, Work
 
 
 class RatificationField(widgets.ForeignKeyWidget):

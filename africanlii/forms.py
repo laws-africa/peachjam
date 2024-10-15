@@ -1,8 +1,8 @@
 from dal import autocomplete
 from django import forms
 
-from africanlii.models import Ratification
 from peachjam.forms import BaseDocumentFilterForm
+from peachjam.models import Ratification
 
 
 class ESDocumentFilterForm(BaseDocumentFilterForm):

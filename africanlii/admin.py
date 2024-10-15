@@ -6,12 +6,11 @@ from africanlii.models import (
     AfricanUnionInstitution,
     AfricanUnionOrgan,
     MemberState,
-    Ratification,
-    RatificationCountry,
     RegionalEconomicCommunity,
 )
 from africanlii.resources import RatificationResource
 from peachjam.admin import EntityProfileInline, ImportExportMixin
+from peachjam.models import Ratification, RatificationCountry
 
 
 class RatificationCountryAdmin(admin.TabularInline):
