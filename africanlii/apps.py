@@ -9,6 +9,7 @@ class AfricanliiConfig(AppConfig):
     def ready(self):
         from docpipe.citations import AchprResolutionMatcher, ActMatcher
 
+        import africanlii.adapters  # noqa
         from liiweb.citations import MncMatcher
         from peachjam.analysis.citations import citation_analyser
         from peachjam.models import Author

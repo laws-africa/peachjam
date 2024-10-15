@@ -14,7 +14,7 @@ from django.db.models import Q
 from django.utils.text import slugify
 from languages_plus.models import Language
 
-from peachjam.adapters.base import Adapter
+from peachjam.adapters.base import RequestsAdapter
 from peachjam.helpers import get_update_or_create
 from peachjam.models import (
     AlternativeName,
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 @plugins.register("ingestor-adapter")
-class IndigoAdapter(Adapter):
+class IndigoAdapter(RequestsAdapter):
     """Adapter that pulls data from the Indigo API.
 
     Settings:
@@ -50,13 +50,11 @@ class IndigoAdapter(Adapter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.client = requests.session()
         self.client.headers.update(
             {
                 "Authorization": f"Token {self.settings['token']}",
             }
         )
-        self.api_url = self.settings["api_url"]
         self.taxonomy_topic_root = self.settings.get("taxonomy_topic_root")
 
     def check_for_updates(self, last_refreshed):
@@ -484,12 +482,6 @@ class IndigoAdapter(Adapter):
             predicate=predicate,
         )
         logger.info(f"{self.predicates[slug]['name']} relationship created")
-
-    def client_get(self, url):
-        logger.debug(f"GET {url}")
-        r = self.client.get(url)
-        r.raise_for_status()
-        return r
 
     def get_content_html(self, document):
         if document["stub"]:
