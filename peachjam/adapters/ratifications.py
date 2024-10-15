@@ -64,29 +64,23 @@ class RatificationsAdapter(RequestsAdapter):
             ratification, _ = Ratification.objects.update_or_create(work=work)
 
             for country_data in countries_data:
+                country_code = country_data["country"].lower()
                 if (
                     self.include_countries
-                    and country_data["country"].lower() not in self.include_countries
+                    and country_code not in self.include_countries
                 ):
                     log.warning(
-                        f"Ignoring country {country_data['country']} not in include_countries"
+                        f"Ignoring country {country_code} not in include_countries"
                     )
                     continue
 
-                if (
-                    self.exclude_countries
-                    and country_data["country"].lower() in self.exclude_countries
-                ):
-                    log.warning(
-                        f"Ignoring country {country_data['country']} in exclude_countries"
-                    )
+                if self.exclude_countries and country_code in self.exclude_countries:
+                    log.warning(f"Ignoring country {country_code} in exclude_countries")
                     continue
 
-                country = Country.objects.filter(pk=country_data["country"]).first()
+                country = Country.objects.filter(pk=country_code.upper()).first()
                 if not country:
-                    log.warning(
-                        f"Country {country_data['country']} not found, skipping"
-                    )
+                    log.warning(f"Country {country_code} not found, skipping")
                     continue
 
                 RatificationCountry.objects.update_or_create(
