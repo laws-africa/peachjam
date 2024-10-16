@@ -384,6 +384,12 @@ class PeachjamLoginForm(LoginForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
 
 
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name"]
+
+
 class JudgmentUploadForm(forms.Form):
     jurisdiction = forms.ModelChoiceField(Country.objects)
     file = forms.FileField()
