@@ -19,6 +19,11 @@ class CauseListDetailView(BaseDocumentDetailView):
     model = CauseList
     template_name = "peachjam/causelist_detail.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["judges"] = self.get_object().judges.values_list("name", flat=True)
+        return context
+
 
 class CauseListListView(TemplateView):
     template_name = "peachjam/causelist_list.html"
