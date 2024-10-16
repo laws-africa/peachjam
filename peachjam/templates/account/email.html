@@ -6,7 +6,7 @@
 {% endblock %}
 {% block account-content %}
   <div class="card mb-5">
-    <h5 class="card-header">Email addresses</h5>
+    <h5 class="card-header">{% trans "Email addresses" %}</h5>
     <div class="card-body">
       {% with user.emailaddress_set.all as emails %}
         {% if emails %}
