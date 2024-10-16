@@ -67,6 +67,11 @@ class PeachJamSettings(SingletonModel):
     allowed_login_domains = models.CharField(
         verbose_name=_("allowed login domains"), max_length=1024, null=True, blank=True
     )
+    allow_social_logins = models.BooleanField(
+        verbose_name=_("allow social logins"),
+        default=False,
+        help_text=_("Allow signups via social accounts"),
+    )
 
     metabase_dashboard_link = models.URLField(
         verbose_name=_("metabase dashboard link"), null=True, blank=True

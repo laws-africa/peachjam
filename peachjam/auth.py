@@ -39,4 +39,4 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                     perform_login(request, user, email_verification="none")
 
     def is_open_for_signup(self, request, sociallogin):
-        return False
+        return pj_settings().allow_social_logins
