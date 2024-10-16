@@ -67,6 +67,7 @@
                 </a>
                 <ul class="dropdown-menu">
                   <li>
+                    <a class="dropdown-item" href="{% url 'edit_account' %}">{% trans 'My account' %}</a>
                     {% if user.is_staff %}
                       <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
                     {% endif %}
