@@ -65,8 +65,6 @@ class FilteredCauseListView(FilteredDocumentListView):
         context["doc_type"] = "Judgment"
         context["page_title"] = self.page_title()
         context["doc_table_show_jurisdiction"] = False
-        context["doc_table_title_label"] = _("Citation")
-        context["doc_table_date_label"] = _("Judgment date")
         context["doc_count_noun"] = _("cause list")
         context["doc_count_noun_plural"] = _("cause lists")
 
