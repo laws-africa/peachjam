@@ -12,6 +12,5 @@
   {% if registry %}<input type="hidden" name="registry" value="{{ registry }}"/>{% endif %}
   {% if MULTIPLE_JURISDICTIONS and country %}<input type="hidden" name="jurisdiction" value="{{ country }}"/>{% endif %}
   {% if locality %}<input type="hidden" name="locality" value="{{ locality }}"/>{% endif %}
-  {% if doc_type %}<input type="hidden" name="doc_type" value="{{ doc_type }}"/>{% endif %}
 </form>
-<a href="{% url 'search:search' %}?show-advanced-tab=1&doc_type={{ doc_type }}">{% trans "Advanced search" %}</a>
+<a href="{% url 'search:search' %}?show-advanced-tab=1&nature={{ nature }}">{% trans "Advanced search" %}</a>

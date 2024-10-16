@@ -44,7 +44,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["doc_type"] = "Judgment"
+        context["nature"] = "Judgment"
         context["page_title"] = self.page_title()
         context["doc_table_show_jurisdiction"] = False
         context["doc_table_title_label"] = _("Citation")
