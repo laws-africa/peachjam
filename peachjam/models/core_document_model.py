@@ -468,6 +468,11 @@ class CoreDocument(PolymorphicModel):
     frbr_uri_doctypes = FRBR_URI_DOCTYPES
     labels = models.ManyToManyField(Label, verbose_name=_("labels"), blank=True)
 
+    # ingestor responsible for managing this document
+    ingestor = models.ForeignKey(
+        "peachjam.Ingestor", on_delete=models.SET_NULL, null=True, blank=True
+    )
+
     class Meta:
         ordering = ["doc_type", "title"]
         permissions = [
@@ -768,6 +773,10 @@ class CoreDocument(PolymorphicModel):
     def get_doc_type_display(self):
         """Human-friendly type of this document, which is always the nature, since that cannot be null."""
         return self.nature.name
+
+    def ingestor_edit_url(self):
+        if self.ingestor:
+            return self.ingestor.get_edit_url(self)
 
 
 def file_location(instance, filename):

@@ -34,6 +34,10 @@ class Adapter:
         """Handle webhook from a remote server."""
         pass
 
+    def get_edit_url(self, document):
+        """Get an adapter-specific edit URL for this document."""
+        pass
+
     @classmethod
     def name(cls):
         return cls.__name__

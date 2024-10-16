@@ -1,6 +1,7 @@
 import copy
 
 from allauth.account.forms import LoginForm, SignupForm
+from countries_plus.models import Country
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -18,6 +19,7 @@ from peachjam.models import (
     AttachedFiles,
     CoreDocument,
     Folder,
+    PeachJamSettings,
     PublicationFile,
     SavedDocument,
     SourceFile,
@@ -380,3 +382,14 @@ class PeachjamSignupForm(SignupForm):
 
 class PeachjamLoginForm(LoginForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+
+
+class JudgmentUploadForm(forms.Form):
+    jurisdiction = forms.ModelChoiceField(Country.objects)
+    file = forms.FileField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields[
+            "jurisdiction"
+        ].queryset = PeachJamSettings.load().document_jurisdictions.all()

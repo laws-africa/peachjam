@@ -2,7 +2,8 @@
 {% load i18n comments humanize static %}
 {% block form_top %}
   {{ block.super }}
-  {% if adminform.form.edit_activity_start %}{{ adminform.form.edit_activity_start.as_hidden }}{% endif %}
+  {% if adminform.form.edit_activity_start %}{{ adminform.form.edit_activity_start }}{% endif %}
+  {% if adminform.form.edit_activity_stage %}{{ adminform.form.edit_activity_stage }}{% endif %}
 {% endblock %}
 {% block extra_actions %}
   {{ block.super }}
