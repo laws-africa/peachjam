@@ -41,6 +41,9 @@ from peachjam.views import (
     CauseListCourtClassYearView,
     CauseListCourtDetailView,
     CauseListCourtMonthView,
+    CauseListCourtRegistryDetailView,
+    CauseListCourtRegistryMonthView,
+    CauseListCourtRegistryYearView,
     CauseListCourtYearView,
     CauseListListView,
     CourtClassDetailView,
@@ -167,16 +170,6 @@ urlpatterns = [
         name="causelist_court",
     ),
     path(
-        "causelists/<str:code>/<int:year>/",
-        CauseListCourtYearView.as_view(),
-        name="causelist_court_year",
-    ),
-    path(
-        "causelists/<str:code>/<int:year>/<int:month>/",
-        CauseListCourtMonthView.as_view(),
-        name="causelist_court_month",
-    ),
-    path(
         "causelists/court-class/<str:court_class>/",
         CauseListCourtClassView.as_view(),
         name="causelist_court_class",
@@ -190,6 +183,31 @@ urlpatterns = [
         "causelists/court-class/<str:court_class>/<int:year>/<int:month>/",
         CauseListCourtClassMonthView.as_view(),
         name="causelist_court_class_month",
+    ),
+    path(
+        "causelists/<str:code>/<int:year>/",
+        CauseListCourtYearView.as_view(),
+        name="causelist_court_year",
+    ),
+    path(
+        "causelists/<str:code>/<int:year>/<int:month>/",
+        CauseListCourtMonthView.as_view(),
+        name="causelist_court_month",
+    ),
+    path(
+        "causelists/<str:code>/<str:registry_code>/",
+        CauseListCourtRegistryDetailView.as_view(),
+        name="causelist_court_registry",
+    ),
+    path(
+        "causelists/<str:code>/<str:registry_code>/<int:year>/",
+        CauseListCourtRegistryYearView.as_view(),
+        name="causelist_court_registry_year",
+    ),
+    path(
+        "causelists/<str:code>/<str:registry_code>/<int:year>/<int:month>/",
+        CauseListCourtRegistryMonthView.as_view(),
+        name="causelist_court_registry_month",
     ),
     path("place/<str:code>", PlaceDetailView.as_view(), name="place"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),

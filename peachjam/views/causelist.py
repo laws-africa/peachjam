@@ -7,10 +7,10 @@ from django.utils.text import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.helpers import lowercase_alphabet
-from peachjam.models import CauseList, Court, CourtClass, Judge, Taxonomy
+from peachjam.models import CauseList, Court, CourtClass, CourtRegistry, Judge, Taxonomy
 from peachjam.registry import registry
 from peachjam.views import BaseDocumentDetailView, FilteredDocumentListView
-from peachjam.views.courts import MonthMixin
+from peachjam.views.courts import MonthMixin, RegistryMixin
 from peachjam.views.generic_views import YearMixin
 
 
@@ -146,24 +146,62 @@ class CauseListCourtDetailView(FilteredCauseListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["court"] = self.court
-        context["all_years_url"] = reverse("causelist_court", args=[self.court.code])
+        context["registry_label_plural"] = CourtRegistry.model_label_plural
+        registries = self.court.registries.exclude(causelists__isnull=True)
+        split_index = ceil(registries.count() / 2)
+        for r in registries:
+            r.get_absolute_url = reverse(
+                "causelist_court_registry", args=[self.court.code, r.code]
+            )
 
+        context["registries"] = registries
+        context["registry_groups"] = [
+            registries[:split_index],
+            registries[split_index:],
+        ]
+        context["all_years_url"] = reverse("causelist_court", args=[self.court.code])
         return context
 
 
 class CauseListCourtYearView(YearMixin, CauseListCourtDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["year"] = self.year
+        context["all_months_url"] = reverse(
+            "causelist_court_year", args=[self.court.code, self.year]
+        )
         return context
 
 
 class CauseListCourtMonthView(MonthMixin, CauseListCourtYearView):
+    pass
+
+
+class CauseListCourtRegistryDetailView(RegistryMixin, CauseListCourtDetailView):
+    template_name = "peachjam/causelist_court_registry_detail.html"
+
+    def base_view_name(self):
+        return f'{super().base_view_name()} {_("Cause Lists")}'
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["month"] = self.month
-
+        context["all_years_url"] = reverse(
+            "causelist_court_registry", args=[self.court.code, self.registry.code]
+        )
         return context
+
+
+class CauseListCourtRegistryYearView(YearMixin, CauseListCourtRegistryDetailView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["all_months_url"] = reverse(
+            "causelist_court_registry_year",
+            args=[self.court.code, self.registry.code, self.year],
+        )
+        return context
+
+
+class CauseListCourtRegistryMonthView(MonthMixin, CauseListCourtRegistryYearView):
+    pass
 
 
 class CauseListCourtClassView(FilteredCauseListView):
@@ -203,7 +241,9 @@ class CauseListCourtClassView(FilteredCauseListView):
             registries[:split_index],
             registries[split_index:],
         ]
-        context["all_years_url"] = self.court_class.get_absolute_url()
+        context["all_years_url"] = reverse(
+            "causelist_court_class", args=[self.court_class.slug]
+        )
 
         return context
 

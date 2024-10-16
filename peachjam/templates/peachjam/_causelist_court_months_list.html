@@ -6,6 +6,5 @@
 {% block month_option %}
   <option value="{% url "causelist_court_month" court.code year m|date:'n' %}"
           {% if m|date:"F" == month %} selected{% endif %}>
-    {{ m|date:"F" }}
   </option>
 {% endblock %}
