@@ -35,6 +35,10 @@ class CauseListListView(TemplateView):
             .order_by("-date")[:30]
         )
         context["doc_type"] = "CauseList"
+
+        context["doc_count"] = CauseList.objects.filter(published=True).count()
+        context["doc_count_noun"] = _("cause list")
+        context["doc_count_noun_plural"] = _("cause lists")
         return context
 
 
