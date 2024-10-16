@@ -49,7 +49,7 @@
           >
             <input
               v-model="q"
-              type="text"
+              type="search"
               class="form-control"
               :placeholder="searchPlaceholder"
               :aria-label="$t('Search documents')"
@@ -58,7 +58,7 @@
             >
             <button
               type="submit"
-              class="btn btn-primary ms-1"
+              class="btn btn-primary ms-2"
               :disabled="loading"
             >
               <span
@@ -78,6 +78,10 @@
           </form>
           <div class="my-2">
             <HelpBtn page="search/" />
+          </div>
+          <div v-if="searchTip" class="alert alert-primary">
+            {{ searchTip.prompt }}
+            <a href="#" @click.stop.prevent="useSearchTip()">{{ searchTip.q }}</a>
           </div>
         </div>
         <div
@@ -263,6 +267,7 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
+      searchTip: null,
       advancedSearchCriteria: [{
         text: '',
         fields: [],
@@ -552,6 +557,11 @@ export default {
       this.search();
     },
 
+    useSearchTip () {
+      this.q = this.searchTip.q;
+      this.search();
+    },
+
     formatFacets () {
       const generateOptions = (buckets, labels) => {
         return buckets.map((bucket) => ({
@@ -672,12 +682,22 @@ export default {
     },
 
     async search (pushState = true) {
+      this.searchTip = null;
+
       // if one of the search fields is true perform search
       if (this.q || (Array.isArray(this.advancedSearchCriteria) && this.advancedSearchCriteria.some(f => f.text))) {
         this.loadingCount = this.loadingCount + 1;
 
         // scroll to put the search box at the top of the window
         scrollToElement(this.$refs['search-box']);
+
+        // search tip
+        if (this.q && this.q.indexOf('"') === -1) {
+          this.searchTip = {
+            prompt: this.$t('Try using quotes to search for an exact phrase: '),
+            q: `"${this.q}"`
+          };
+        }
 
         try {
           const params = this.generateSearchParams();
@@ -778,7 +798,7 @@ export default {
         date_to: null,
         date_from: null
       };
-    },
+    }
 
   }
 };
