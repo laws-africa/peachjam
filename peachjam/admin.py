@@ -55,6 +55,7 @@ from peachjam.models import (
     CoreDocument,
     Court,
     CourtClass,
+    CourtDivision,
     CourtRegistry,
     DocumentNature,
     DocumentTopic,
@@ -1370,6 +1371,7 @@ admin.site.register(
     [
         CitationLink,
         CourtClass,
+        CourtDivision,
         AttachedFileNature,
         CitationProcessing,
         Folder,

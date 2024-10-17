@@ -128,7 +128,7 @@ class CourtDivision(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.code:
-            self.code = f"{slugify(self.name)}"
+            self.code = slugify(self.name)
         return super().save(*args, **kwargs)
 
 
