@@ -1,0 +1,53 @@
+{% extends 'peachjam/layouts/document_detail.html' %}
+{% load i18n %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'causelist_list' %}">{% trans 'Cause Lists' %}</a>
+        </li>
+        {% if document.court.court_class.show_listing_page %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'causelist_court_class' document.court.court_class.slug %}">{{ document.court.court_class.name }}</a>
+          </li>
+        {% endif %}
+        {% if document.court %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'causelist_court' document.court.code %}">{{ document.court.name }}</a>
+          </li>
+        {% endif %}
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block document-metadata-content-citation %}
+  {{ block.super }}
+  {% if document.court %}
+    <dt>
+      {% trans 'Court' %}
+    </dt>
+    <dd class="text-muted">
+      <a href="{% url 'causelist_court' document.court.code %}">{{ document.court.name }}</a>
+    </dd>
+  {% endif %}
+  {% if document.registry %}
+    <dt>
+      {{ document.registry.model_label }}
+    </dt>
+    <dd class="text-muted">
+      <a href="{% url 'causelist_court_registry' document.court.code document.registry.code %}">{{ document.registry.name }}</a>
+    </dd>
+  {% endif %}
+  {% if document.division %}
+    <dt>
+      {% trans 'Division' %}
+    </dt>
+    <dd class="text-muted">
+      {{ document.division.name }}
+    </dd>
+  {% endif %}
+{% endblock %}

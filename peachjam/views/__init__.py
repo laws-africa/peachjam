@@ -5,6 +5,7 @@ from .article import *
 from .authors import *
 from .autocomplete import *
 from .books import *
+from .causelist import *
 from .courts import *
 from .document_nature import *
 from .document_problem import *

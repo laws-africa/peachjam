@@ -1,0 +1,19 @@
+{% extends "peachjam/layouts/document_list.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Cause Lists' %}
+{% endblock %}
+{% block page-title %}
+  <h1 class="mt-4">{% trans 'Cause Lists' %}</h1>
+{% endblock %}
+{% block document-table %}
+  {% include 'peachjam/_causelist_court_list.html' %}
+  <h4 class="mb-2 mt-4">
+    {% if title %}
+      {{ title }}
+    {% else %}
+      {% trans 'Recent Cause Lists' %}
+    {% endif %}
+  </h4>
+  {% include 'peachjam/_recent_document_list.html' with documents=recent_causelists %}
+{% endblock %}

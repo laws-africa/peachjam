@@ -6,14 +6,18 @@
         <h4 class="mb-2">{{ court_class }}</h4>
         {% if court_class.show_listing_page %}
           <div class="mb-3">
-            <a href="{% url 'court_class' court_class.slug %}">{% trans 'All judgments' %}</a>
+            {% block court_class_link %}
+              <a href="{% url 'court_class' court_class.slug %}">{% trans 'All judgments' %}</a>
+            {% endblock %}
           </div>
         {% endif %}
         {% if court_class.courts.all %}
           <ul class="list-unstyled">
             {% for court in court_class.courts.all %}
               <li>
-                <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+                {% block court_link %}
+                  <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+                {% endblock %}
               </li>
             {% endfor %}
           </ul>

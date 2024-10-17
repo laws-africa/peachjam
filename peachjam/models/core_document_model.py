@@ -326,6 +326,7 @@ class CoreDocument(PolymorphicModel):
         ("legislation", "Legislation"),
         ("book", "Book"),
         ("journal", "Journal"),
+        ("causelist", "Cause List"),
     )
 
     # The name of the default nature to use for this type of document, if one is not set. This allows us to ensure
