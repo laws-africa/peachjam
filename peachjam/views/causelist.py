@@ -7,7 +7,15 @@ from django.utils.text import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.helpers import lowercase_alphabet
-from peachjam.models import CauseList, Court, CourtClass, CourtRegistry, Judge, Taxonomy
+from peachjam.models import (
+    CauseList,
+    Court,
+    CourtClass,
+    CourtRegistry,
+    DocumentNature,
+    Judge,
+    Taxonomy,
+)
 from peachjam.registry import registry
 from peachjam.views import BaseDocumentDetailView, FilteredDocumentListView
 from peachjam.views.courts import MonthMixin, RegistryMixin
@@ -84,6 +92,25 @@ class FilteredCauseListView(FilteredDocumentListView):
 
     def add_facets(self, context):
         context["facet_data"] = {}
+
+        if "natures" not in self.exclude_facets:
+            natures = DocumentNature.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="natures"
+                )
+                .order_by()
+                .values_list("nature_id", flat=True)
+                .distinct()
+            )
+            context["facet_data"]["natures"] = {
+                "label": _("Document nature"),
+                "type": "radio",
+                "options": sorted(
+                    [(n.code, n.name) for n in natures], key=lambda x: x[1]
+                ),
+                "values": self.request.GET.getlist("natures"),
+            }
+
         if "judges" not in self.exclude_facets:
             judges = list(
                 judge
