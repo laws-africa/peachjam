@@ -9,6 +9,8 @@ from peachjam.models import (
     Label,
     Legislation,
     Predicate,
+    Ratification,
+    RatificationCountry,
     Relationship,
     Work,
 )
@@ -205,4 +207,23 @@ class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):
             "updated_at",
             "url",
             "work_frbr_uri",
+        )
+
+
+class RatificationCountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RatificationCountry
+        exclude = ["id", "ratification"]
+
+
+class RatificationSerializer(serializers.ModelSerializer):
+    countries = RatificationCountrySerializer(many=True)
+    work = serializers.CharField(source="work.frbr_uri")
+
+    class Meta:
+        model = Ratification
+        fields = (
+            "work",
+            "last_updated",
+            "countries",
         )

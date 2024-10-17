@@ -14,6 +14,11 @@ router.register(
     public_views.GazettesViewSet,
     basename="gazettes",
 )
+router.register(
+    r"ratifications",
+    public_views.RatificationsViewSet,
+    basename="ratifications",
+)
 
 urlpatterns = [
     # public-facing API

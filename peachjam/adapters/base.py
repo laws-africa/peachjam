@@ -1,3 +1,10 @@
+import logging
+
+import requests
+
+logger = logging.getLogger(__name__)
+
+
 class Adapter:
     def __init__(self, ingestor, settings):
         self.ingestor = ingestor
@@ -41,3 +48,16 @@ class Adapter:
     @classmethod
     def name(cls):
         return cls.__name__
+
+
+class RequestsAdapter(Adapter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.client = requests.session()
+        self.api_url = self.settings["api_url"]
+
+    def client_get(self, url, **kwargs):
+        logger.debug(f"GET {url} kwargs={kwargs}")
+        r = self.client.get(url, **kwargs)
+        r.raise_for_status()
+        return r

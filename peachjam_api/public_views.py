@@ -4,8 +4,12 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission, DjangoModelPermissions
 
-from peachjam.models import Gazette, Judgment
-from peachjam_api.serializers import GazetteSerializer, JudgmentSerializer
+from peachjam.models import Gazette, Judgment, Ratification
+from peachjam_api.serializers import (
+    GazetteSerializer,
+    JudgmentSerializer,
+    RatificationSerializer,
+)
 
 
 class JudgmentAPIPermission(BasePermission):
@@ -97,3 +101,15 @@ class JudgmentsViewSet(BaseDocumentViewSet):
         .all()
     )
     serializer_class = JudgmentSerializer
+
+
+class RatificationsViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [DjangoModelPermissions]
+    queryset = (
+        Ratification.objects.select_related("work").prefetch_related("countries").all()
+    )
+    serializer_class = RatificationSerializer
+    filterset_fields = {
+        "updated_at": ["exact", "gte", "lte"],
+    }
+    ordering = ["updated_at"]
