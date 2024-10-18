@@ -11,6 +11,7 @@ from peachjam.models import (
     CauseList,
     Court,
     CourtClass,
+    CourtDivision,
     CourtRegistry,
     DocumentNature,
     Judge,
@@ -109,6 +110,23 @@ class FilteredCauseListView(FilteredDocumentListView):
                     [(n.code, n.name) for n in natures], key=lambda x: x[1]
                 ),
                 "values": self.request.GET.getlist("natures"),
+            }
+
+        if "divisions" not in self.exclude_facets:
+            divisions = CourtDivision.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="divisions"
+                )
+                .order_by()
+                .values_list("division_id", flat=True)
+                .distinct()
+            )
+
+            context["facet_data"]["divisions"] = {
+                "label": _("Court divisions"),
+                "type": "checkbox",
+                "options": sorted([(d.code, d.name) for d in divisions]),
+                "values": self.request.GET.getlist("divisions"),
             }
 
         if "judges" not in self.exclude_facets:
