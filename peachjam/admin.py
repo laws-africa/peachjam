@@ -4,6 +4,7 @@ from datetime import date
 
 from background_task.models import Task
 from ckeditor.widgets import CKEditorWidget
+from countries_plus.models import Country
 from dal import autocomplete
 from django import forms
 from django.conf import settings
@@ -35,6 +36,7 @@ from peachjam.forms import (
     JudgmentUploadForm,
     NewDocumentFormMixin,
     PublicationFileForm,
+    RatificationForm,
     SourceFileForm,
 )
 from peachjam.models import (
@@ -81,6 +83,8 @@ from peachjam.models import (
     PeachJamSettings,
     Predicate,
     PublicationFile,
+    Ratification,
+    RatificationCountry,
     Relationship,
     SavedDocument,
     SourceFile,
@@ -98,6 +102,7 @@ from peachjam.resources import (
     GazetteResource,
     GenericDocumentResource,
     JudgmentResource,
+    RatificationResource,
     UserResource,
 )
 from peachjam.tasks import extract_citations as extract_citations_task
@@ -1365,6 +1370,23 @@ class MatterTypeAdmin(BaseAdmin):
 class AttorneyAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_class = AttorneyResource
     list_display = ("name", "description")
+
+
+class RatificationCountryAdmin(admin.StackedInline):
+    model = RatificationCountry
+    extra = 1
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "country":
+            kwargs["queryset"] = Country.objects.filter(continent="AF")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+@admin.register(Ratification)
+class RatificationAdmin(ImportExportMixin, admin.ModelAdmin):
+    inlines = (RatificationCountryAdmin,)
+    form = RatificationForm
+    resource_class = RatificationResource
 
 
 admin.site.register(
