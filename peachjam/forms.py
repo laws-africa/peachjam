@@ -134,6 +134,7 @@ class BaseDocumentFilterForm(forms.Form):
     natures = PermissiveTypedListField(coerce=remove_nulls, required=False)
     localities = PermissiveTypedListField(coerce=remove_nulls, required=False)
     registries = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    divisions = PermissiveTypedListField(coerce=remove_nulls, required=False)
     attorneys = PermissiveTypedListField(coerce=remove_nulls, required=False)
     outcomes = PermissiveTypedListField(coerce=remove_nulls, required=False)
     taxonomies = PermissiveTypedListField(coerce=remove_nulls, required=False)
@@ -170,6 +171,7 @@ class BaseDocumentFilterForm(forms.Form):
         natures = self.cleaned_data.get("natures", [])
         localities = self.cleaned_data.get("localities", [])
         registries = self.cleaned_data.get("registries", [])
+        divisions = self.cleaned_data.get("divisions", [])
         attorneys = self.cleaned_data.get("attorneys", [])
         outcomes = self.cleaned_data.get("outcomes", [])
         taxonomies = self.cleaned_data.get("taxonomies", [])
@@ -203,6 +205,9 @@ class BaseDocumentFilterForm(forms.Form):
 
         if registries and exclude != "registries":
             queryset = queryset.filter(registry__name__in=registries)
+
+        if divisions and exclude != "divisions":
+            queryset = queryset.filter(division__code__in=divisions)
 
         if attorneys and exclude != "attorneys":
             queryset = queryset.filter(attorneys__name__in=attorneys).distinct()
@@ -384,6 +389,12 @@ class PeachjamSignupForm(SignupForm):
 
 class PeachjamLoginForm(LoginForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name"]
 
 
 class JudgmentUploadForm(forms.Form):

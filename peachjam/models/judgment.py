@@ -115,6 +115,23 @@ class CourtClass(models.Model):
         return super().save(*args, **kwargs)
 
 
+class CourtDivision(models.Model):
+    name = models.CharField(_("name"), max_length=255, null=False, unique=True)
+    code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
+    order = models.IntegerField(_("order"), null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = slugify(self.name)
+        return super().save(*args, **kwargs)
+
+
 class Court(models.Model):
     name = models.CharField(_("name"), max_length=255, null=False, unique=True)
     code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
@@ -539,3 +556,45 @@ class CaseHistory(models.Model):
         elif self.case_number:
             return f"{self.case_number}"
         return _("Case history")
+
+
+class CauseList(CoreDocument):
+    frbr_uri_doctypes = ["doc"]
+    default_nature = ("causelist", "Cause list")
+    court = models.ForeignKey(
+        Court,
+        on_delete=models.PROTECT,
+        null=True,
+        verbose_name=_("court"),
+        related_name="causelists",
+    )
+    registry = models.ForeignKey(
+        CourtRegistry,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="causelists",
+        blank=True,
+    )
+    division = models.ForeignKey(
+        CourtDivision,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="causelists",
+        blank=True,
+    )
+    judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
+
+    def assign_title(self):
+        court_name = self.registry.name if self.registry else ""
+        if not self.registry:
+            court_name = self.court.name if self.court else ""
+        nature_name = self.nature.name if self.nature else ""
+        date_str = self.date.strftime("%d %B %Y")
+
+        self.title = f"{court_name} - {nature_name} - {date_str}"
+
+    def pre_save(self):
+        self.assign_title()
+        self.frbr_uri_doctype = "doc"
+        self.doc_type = "causelist"
+        super().pre_save()
