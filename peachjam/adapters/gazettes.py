@@ -8,23 +8,21 @@ from languages_plus.models import Language
 from peachjam.models import Gazette, SourceFile, get_country_and_locality
 from peachjam.plugins import plugins
 
-from .base import Adapter
+from .base import RequestsAdapter
 
 logger = logging.getLogger(__name__)
 
 
 @plugins.register("ingestor-adapter")
-class GazetteAPIAdapter(Adapter):
+class GazetteAPIAdapter(RequestsAdapter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.jurisdiction = self.settings.get("jurisdiction")
-        self.client = requests.session()
         self.client.headers.update(
             {
                 "Authorization": f"Token {self.settings['token']}",
             }
         )
-        self.api_url = self.settings["api_url"]
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -156,9 +154,3 @@ class GazetteAPIAdapter(Adapter):
         if data.get("action") == "deleted" and data.get("gazette", {}).get("frbr_uri"):
             logger.info("Will delete document")
             delete_document(self.ingestor.pk, data["gazette"]["frbr_uri"])
-
-    def client_get(self, url, **kwargs):
-        logger.debug(f"GET {url} kwargs={kwargs}")
-        r = self.client.get(url, **kwargs)
-        r.raise_for_status()
-        return r

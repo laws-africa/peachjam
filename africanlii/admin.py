@@ -1,34 +1,12 @@
-from countries_plus.models import Country
 from django.contrib import admin
 
-from africanlii.forms import RatificationForm
 from africanlii.models import (
     AfricanUnionInstitution,
     AfricanUnionOrgan,
     MemberState,
-    Ratification,
-    RatificationCountry,
     RegionalEconomicCommunity,
 )
-from africanlii.resources import RatificationResource
-from peachjam.admin import EntityProfileInline, ImportExportMixin
-
-
-class RatificationCountryAdmin(admin.TabularInline):
-    model = RatificationCountry
-    extra = 1
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "country":
-            kwargs["queryset"] = Country.objects.filter(continent="AF")
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-
-@admin.register(Ratification)
-class RatificationAdmin(ImportExportMixin, admin.ModelAdmin):
-    inlines = (RatificationCountryAdmin,)
-    form = RatificationForm
-    resource_class = RatificationResource
+from peachjam.admin import EntityProfileInline
 
 
 @admin.register(AfricanUnionOrgan)

@@ -6,10 +6,9 @@ from africanlii.models import (
     AfricanUnionInstitution,
     AfricanUnionOrgan,
     MemberState,
-    RatificationCountry,
     RegionalEconomicCommunity,
 )
-from peachjam.models import CourtClass
+from peachjam.models import CourtClass, RatificationCountry
 from peachjam.views import AuthorDetailView, CoreDocument, PlaceDetailView
 
 

@@ -17,6 +17,7 @@ class Ratification(models.Model):
     )
     source_url = models.URLField(_("source URL"), null=True, blank=True)
     last_updated = models.DateField(_("last updated"), null=True, blank=True)
+    updated_at = models.DateTimeField(_("updated at"), auto_now=True)
 
     class Meta:
         verbose_name = _("ratification")
@@ -62,12 +63,7 @@ class RatificationCountry(models.Model):
         verbose_name = _("ratification country")
         verbose_name_plural = _("ratification countries")
         ordering = ["country__name"]
-
-        constraints = [
-            models.UniqueConstraint(
-                fields=["ratification", "country"], name="unique_ratification_country"
-            )
-        ]
+        unique_together = [["ratification", "country"]]
 
     def __str__(self):
         return f"{self.country} - {self.ratification.work}"
