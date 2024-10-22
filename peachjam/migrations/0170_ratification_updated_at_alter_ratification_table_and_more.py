@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0167_ratification_ratificationcountry_and_more"),
+        ("peachjam", "0169_ratification_ratificationcountry_and_more"),
     ]
 
     operations = [
