@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("africanlii", "0008_africanunioninstitution"),
-        ("peachjam", "0167_ratification_ratificationcountry_and_more"),
+        ("peachjam", "0169_ratification_ratificationcountry_and_more"),
     ]
 
     operations = [
