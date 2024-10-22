@@ -64,7 +64,7 @@ class ExtractorService:
 
         if details.get("court"):
             try:
-                court = Court.objects.filter(name=details["court"]).first()
+                court = Court.objects.get(name=details["court"])
             except Court.DoesNotExist:
                 raise ExtractorError(f"Could not find court: {details['court']}")
         else:
