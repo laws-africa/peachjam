@@ -399,17 +399,14 @@ class DocumentForm(forms.ModelForm):
 
     def create_topics(self, instance):
         topics = self.cleaned_data.get("topics", [])
-        if not instance.pk:
-            instance.save()
-            instance.refresh_from_db()
+        if instance.pk:
+            for topic in topics:
+                DocumentTopic.objects.get_or_create(document=instance, topic=topic)
 
-        for topic in topics:
-            DocumentTopic.objects.get_or_create(document=instance, topic=topic)
-
-        # remove any topics that are no longer selected
-        DocumentTopic.objects.filter(document=instance).exclude(
-            topic__in=topics
-        ).delete()
+            # remove any topics that are no longer selected
+            DocumentTopic.objects.filter(document=instance).exclude(
+                topic__in=topics
+            ).delete()
         return instance
 
     def _save_m2m(self):
