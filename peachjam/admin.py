@@ -319,9 +319,6 @@ class TopicTreeWidget(forms.CheckboxSelectMultiple):
 class TopicSelectField(forms.ModelMultipleChoiceField):
     widget = TopicTreeWidget
 
-    def clean(self, value):
-        return super().clean(value)
-
 
 class DocumentForm(forms.ModelForm):
     # to track edit activity
@@ -415,10 +412,9 @@ class DocumentForm(forms.ModelForm):
         ).delete()
         return instance
 
-    def save(self, *args, **kwargs):
-        instance = super().save(commit=False)
-        self.create_topics(instance)
-        return instance
+    def _save_m2m(self):
+        super()._save_m2m()
+        self.create_topics(self.instance)
 
 
 class AttachedFilesInline(BaseAttachmentFileInline):
