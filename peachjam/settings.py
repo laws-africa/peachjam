@@ -547,7 +547,7 @@ CKEDITOR_CONFIGS = {
     # The rest of this config is defined in ckeditor.configs.DEFAULT_CONFIG
     "default": {
         "removePlugins": ["image", "iframe"],
-        "extraAllowedContent": "iframe[*];",
+        "extraAllowedContent": "iframe[*];*[id]",
         "toolbar_Full": [
             [
                 "Styles",

@@ -5,80 +5,9 @@
      data-display-type="{{ display_type }}"
      data-title="{{ document.title }}"
      {% if document.frbr_uri_subtype == 'book' %} data-toc-show-active-item-only{% endif %}>
-  <!--
-  contents of #navigation-content will be placed in [data-offcanvas-body] for tablet/mobile screensize
-  and #navigation-column for desktop screensize.
--->
-  <div id="navigation-content" class="d-none">
-    <div class="navigation__inner">
-      <nav>
-        <div class="nav nav-tabs" id="navigation-tab" role="tablist">
-          {% if display_type == 'akn' or display_type == 'html' %}
-            <button class="nav-link d-none"
-                    id="toc-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#toc"
-                    type="button"
-                    role="tab"
-                    aria-controls="nav-toc"
-                    aria-selected="true">
-              {% trans 'Table of contents' %}
-            </button>
-          {% endif %}
-          {% if display_type == 'pdf' %}
-            <button class="nav-link"
-                    id="pdf-previews-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#pdf-previews"
-                    type="button"
-                    role="tab"
-                    aria-controls="nav-toc"
-                    aria-selected="true">
-              {% trans 'Pages' %}
-            </button>
-          {% endif %}
-          <button class="nav-link"
-                  id="navigation-search-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#navigation-search"
-                  type="button"
-                  role="tab"
-                  aria-controls="nav-search"
-                  aria-selected="false">
-            {% trans 'Search' %}
-          </button>
-        </div>
-      </nav>
-      <div class="tab-content"
-           id="navigation-tab-content"
-           data-preview-scroll-container>
-        <div class="tab-pane fade h-100"
-             id="navigation-search"
-             role="tabpanel"
-             aria-labelledby="nav-search-tab">
-          <div data-doc-search class="h-100"></div>
-        </div>
-        {% if display_type == 'akn' or display_type == 'html' %}
-          <div class="tab-pane fade h-100"
-               id="toc"
-               role="tabpanel"
-               aria-labelledby="toc-tab">
-            <aside class="toc">
-            </aside>
-          </div>
-        {% endif %}
-        {% if display_type == 'pdf' %}
-          <div class="tab-pane fade pdf-previews-pane"
-               id="pdf-previews"
-               role="tabpanel"
-               aria-labelledby="pdf-previews">
-            <div class="pdf-previews"></div>
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-  {{ document.toc_json|json_script:"akn_toc_json" }}
+  {% if show_sidebar %}
+    {% include 'peachjam/_document_content_sidebar.html' %}
+  {% endif %}
   {% if display_type == 'pdf' %}
     <div data-pdf="{% url 'document_source_pdf' document.expression_frbr_uri|strip_first_character %}"
          data-pdf-size="{{ document.source_file.size }}"
@@ -86,29 +15,8 @@
          data-pdf-standby>
     </div>
   {% endif %}
-  <div class="document-content__toggle">
-    <button class="btn btn-primary"
-            type="button"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#navigation-offcanvas"
-            aria-controls="navigation-offcanvas">
-      Navigate document
-    </button>
-  </div>
-  <div class="offcanvas offcanvas-start document-content__offcanvas"
-       tabindex="-1"
-       id="navigation-offcanvas"
-       aria-labelledby="navigation-offcanvasLabel">
-    <div class="offcanvas-header justify-content-end">
-      <button type="button"
-              class="btn-close text-reset"
-              data-bs-dismiss="offcanvas"
-              aria-label="Close"></button>
-    </div>
-    <div class="navigation" data-offcanvas-body></div>
-  </div>
   <div class="document-content__inner">
-    <div class="navigation" id="navigation-column"></div>
+    {% if show_sidebar %}<div class="navigation" id="navigation-column"></div>{% endif %}
     <div class="content-and-enrichments"
          data-work-id="{{ document.work_id }}"
          data-work-frbr-uri="{{ document.work_frbr_uri }}"
@@ -122,7 +30,8 @@
           <la-akoma-ntoso
           frbr-expression-uri="{{ document.expression_frbr_uri }}"
           class="flash-target content content__akn"
-          lang="{{ document.language.iso }}">
+          lang="{{ document.language.iso }}"
+          >
           <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
           <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
           {{ document.content_html|safe }}
@@ -162,4 +71,3 @@
     </div>
   </div>
 </div>
-<a href="#top" class="btn btn-sm btn-secondary to-the-top">▲ {% trans "To the top" %}</a>
