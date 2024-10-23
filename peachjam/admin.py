@@ -301,7 +301,7 @@ class TopicTreeWidget(forms.CheckboxSelectMultiple):
     def get_context(self, name, selected, attrs):
         context = super().get_context(name, selected, attrs)
         context["topics"] = self.get_tree()
-        context["selected"] = " ".join(selected)
+        context["selected"] = " ".join(selected) if selected else ""
         return context
 
     def get_tree(self):
@@ -402,24 +402,22 @@ class DocumentForm(forms.ModelForm):
 
     def create_topics(self, instance):
         topics = self.cleaned_data.get("topics", [])
-        if instance.pk:
-            for topic in topics:
-                DocumentTopic.objects.get_or_create(document=instance, topic=topic)
+        if not instance.pk:
+            instance.save()
+            instance.refresh_from_db()
 
-            # remove any topics that are no longer selected
-            DocumentTopic.objects.filter(document=instance).exclude(
-                topic__in=topics
-            ).delete()
-        else:
-            # if new instance and topics are provided, create them
-            if topics:
-                for topic in topics:
-                    DocumentTopic.objects.create(document=instance, topic=topic)
+        for topic in topics:
+            DocumentTopic.objects.get_or_create(document=instance, topic=topic)
+
+        # remove any topics that are no longer selected
+        DocumentTopic.objects.filter(document=instance).exclude(
+            topic__in=topics
+        ).delete()
         return instance
 
     def save(self, *args, **kwargs):
-        instance = super().save(*args, **kwargs)
-        instance = self.create_topics(instance)
+        instance = super().save(commit=False)
+        self.create_topics(instance)
         return instance
 
 
