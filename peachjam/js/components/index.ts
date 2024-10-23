@@ -11,6 +11,7 @@ import TermsOfUse from './terms-of-use';
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
+import TaxonomyTopics from './TaxonomyTopics.vue';
 
 const components: Record<string, any> = {
   // Data components
@@ -27,7 +28,8 @@ const components: Record<string, any> = {
   // Vue components
   DocumentProblemModal,
   FindDocuments,
-  PocketLawDownload
+  PocketLawDownload,
+  TaxonomyTopics
 };
 
 export default components;

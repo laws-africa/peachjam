@@ -295,8 +295,41 @@ class DateSelectorWidget(forms.MultiWidget):
         return "{}-{}-{}".format(year, month, day)
 
 
+class TopicTreeWidget(forms.CheckboxSelectMultiple):
+    template_name = "admin/taxonomy_topic_tree.html"
+
+    def get_context(self, name, selected, attrs):
+        context = super().get_context(name, selected, attrs)
+        context["topics"] = self.get_tree()
+        context["selected"] = " ".join(selected)
+        return context
+
+    def get_tree(self):
+        def fixup(item):
+            item["title"] = item["data"]["name"]
+            for kid in item.get("children", []):
+                fixup(kid)
+
+        tree = Taxonomy.dump_bulk()
+        for x in tree:
+            fixup(x)
+        return tree
+
+
+class TopicSelectField(forms.ModelMultipleChoiceField):
+    widget = TopicTreeWidget
+
+    def clean(self, value):
+        return super().clean(value)
+
+
 class DocumentForm(forms.ModelForm):
     # to track edit activity
+    topics = TopicSelectField(
+        required=False,
+        queryset=Taxonomy.objects.all(),
+        to_field_name="slug",
+    )
     edit_activity_start = forms.DateTimeField(widget=forms.HiddenInput())
     edit_activity_stage = forms.CharField(widget=forms.HiddenInput())
     content_html = forms.CharField(
@@ -355,6 +388,10 @@ class DocumentForm(forms.ModelForm):
         self.fields["edit_activity_stage"].initial = (
             "corrections" if self.instance.pk else "initial"
         )
+        if self.instance.pk:
+            self.fields["topics"].initial = self.instance.taxonomies.values_list(
+                "topic__slug", flat=True
+            )
 
     def clean_content_html(self):
         # prevent CKEditor-based editing of AKN HTML
@@ -362,6 +399,28 @@ class DocumentForm(forms.ModelForm):
             return self.instance.content_html
         # ensure html is clean
         return self.instance.clean_content_html(self.cleaned_data["content_html"])
+
+    def create_topics(self, instance):
+        topics = self.cleaned_data.get("topics", [])
+        if instance.pk:
+            for topic in topics:
+                DocumentTopic.objects.get_or_create(document=instance, topic=topic)
+
+            # remove any topics that are no longer selected
+            DocumentTopic.objects.filter(document=instance).exclude(
+                topic__in=topics
+            ).delete()
+        else:
+            # if new instance and topics are provided, create them
+            if topics:
+                for topic in topics:
+                    DocumentTopic.objects.create(document=instance, topic=topic)
+        return instance
+
+    def save(self, *args, **kwargs):
+        instance = super().save(*args, **kwargs)
+        instance = self.create_topics(instance)
+        return instance
 
 
 class AttachedFilesInline(BaseAttachmentFileInline):
@@ -401,7 +460,6 @@ class BackgroundTaskInline(GenericTabularInline):
 class DocumentAdmin(BaseAdmin):
     form = DocumentForm
     inlines = [
-        DocumentTopicInline,
         SourceFileInline,
         PublicationFileInline,
         AlternativeNameInline,
@@ -499,6 +557,14 @@ class DocumentAdmin(BaseAdmin):
                     "allow_robots",
                     "published",
                 ],
+            },
+        ),
+        (
+            gettext_lazy("Taxonomies"),
+            {
+                "fields": [
+                    "topics",
+                ]
             },
         ),
     ]
