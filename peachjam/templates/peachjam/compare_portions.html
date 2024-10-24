@@ -7,11 +7,11 @@
         <h1>
           <span class="h3 my-3">Comparison of</span>
           <br/>
-          {{ doc_a.title }}
+          <a href="{{ doc_a.get_absolute_url }}">{{ doc_a.title }}</a>
           <br/>
           <span class="h3 my-3">and</span>
           <br/>
-          {{ doc_b.title }}
+          <a href="{{ doc_b.get_absolute_url }}">{{ doc_b.title }}</a>
         </h1>
       </div>
     </div>

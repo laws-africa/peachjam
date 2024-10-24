@@ -100,39 +100,6 @@ export function generateHtmlTocItems (content: HTMLElement): TOCItemType[] {
   return items;
 }
 
-/**
- * Ensure the HTML covered by these TOC items are wrapped in nested divs.
- */
-export function wrapTocItems (root: HTMLElement, items: TOCItemType[]) {
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    const nextItem = i + 1 < items.length ? items[i + 1] : null;
-    const nextId: string | null = nextItem ? nextItem.id : null;
-    const el: HTMLElement | null = document.getElementById(item.id);
-
-    if (el) {
-      const wrapper = document.createElement('div');
-      wrapper.id = item.id;
-      el.removeAttribute('id');
-      el.parentElement?.insertBefore(wrapper, el);
-
-      // wrap all content from this heading to the next in a div
-      // keep going until we run out of elements, or we hit the next TOC item
-      let node: Node | null = el;
-      // eslint-disable-next-line no-unmodified-loop-condition
-      while (node && !(node instanceof HTMLElement && nextId != null && (node as HTMLElement).id === nextId)) {
-        const nextEl: Node | null = node.nextSibling;
-        wrapper.appendChild(node);
-        node = nextEl;
-      }
-
-      if (item.children) {
-        wrapTocItems(wrapper, item.children);
-      }
-    }
-  }
-}
-
 export const createTocController = (items: [] = []) => {
   const laTocController = document.createElement('la-table-of-contents-controller');
   laTocController.items = items;

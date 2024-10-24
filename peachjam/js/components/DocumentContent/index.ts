@@ -3,7 +3,7 @@ import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { vueI18n } from '../../i18n';
-import { createTocController, generateHtmlTocItems, wrapTocItems } from '../../utils/function';
+import { createTocController } from '../../utils/function';
 import EnrichmentsManager from './enrichments-manager';
 import i18next from 'i18next';
 
@@ -212,17 +212,10 @@ class DocumentContent {
   getTocItems = () => {
     let items = [];
 
-    if (this.displayType === 'akn') {
-      const tocElement: HTMLElement | null = this.root.querySelector('#akn_toc_json');
-      if (tocElement) {
-        items = JSON.parse(tocElement.textContent as string) || [];
-      }
-    } else if (this.displayType === 'html') {
-      const content: HTMLElement | null = this.root.querySelector('.content__html');
-      if (content) {
-        items = generateHtmlTocItems(content);
-        wrapTocItems(content, items);
-      }
+    const tocElement: HTMLElement | null = this.root.querySelector('#akn_toc_json');
+    // use the injected TOC if available
+    if (tocElement && tocElement.textContent) {
+      items = JSON.parse(tocElement.textContent) || [];
     }
 
     if (this.tocShowActiveItemOnly) {
