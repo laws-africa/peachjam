@@ -420,7 +420,8 @@
           </div>
           <div class="container-fluid">
             {% block content %}
-              {% include 'peachjam/_document_content.html' with document=document %}
+              {% include 'peachjam/_document_content.html' with show_sidebar=True %}
+              <a href="#top" class="btn btn-sm btn-secondary to-the-top">▲ {% trans "To the top" %}</a>
             {% endblock %}
           </div>
         </div>

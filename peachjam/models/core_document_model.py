@@ -28,6 +28,7 @@ from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from polymorphic.query import PolymorphicQuerySet
 
+from peachjam.analysis.html import generate_toc_json_from_html, wrap_toc_entries_in_divs
 from peachjam.frbr_uri import (
     FRBR_URI_DOCTYPE_CHOICES,
     FRBR_URI_DOCTYPES,
@@ -502,6 +503,22 @@ class CoreDocument(PolymorphicModel):
         self.pre_save()
         super().full_clean(*args, **kwargs)
 
+    def set_content_html(self, content_html):
+        """Update the content HTML for this document. This cleans the HTML and generates a TOC if necessary. This is
+        the preferred way of setting the content_html field."""
+        if not self.content_html_is_akn:
+            self.content_html = self.clean_content_html(content_html)
+            self.update_toc_json_from_html()
+
+    def update_toc_json_from_html(self):
+        if self.content_html:
+            root = parse_html_str(self.content_html)
+            self.toc_json = generate_toc_json_from_html(root)
+            wrap_toc_entries_in_divs(root, self.toc_json)
+            self.content_html = html.tostring(root, encoding="unicode")
+        else:
+            self.toc_json = []
+
     def clean_content_html(self, content_html):
         """Ensure that content_html is not just whitespace HTML. Returns the cleaned value."""
         if not content_html:
@@ -668,7 +685,7 @@ class CoreDocument(PolymorphicModel):
             context = PipelineContext(word_pipeline)
             context.source_file = self.source_file.file
             word_pipeline(context)
-            self.content_html = self.clean_content_html(context.html_text)
+            self.set_content_html(context.html_text)
 
             for img in self.images.all():
                 img.delete()

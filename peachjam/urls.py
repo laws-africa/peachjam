@@ -46,6 +46,7 @@ from peachjam.views import (
     CauseListCourtRegistryYearView,
     CauseListCourtYearView,
     CauseListListView,
+    ComparePortionsView,
     CourtClassDetailView,
     CourtClassMonthView,
     CourtClassYearView,
@@ -398,6 +399,11 @@ urlpatterns = [
         "saved-documents/folders/<int:pk>/delete",
         FolderDeleteView.as_view(),
         name="folder_delete",
+    ),
+    path(
+        "compare",
+        ComparePortionsView.as_view(),
+        name="compare_portions",
     ),
     # django-markdown-editor
     path("martor/", include("martor.urls")),

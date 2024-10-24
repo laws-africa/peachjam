@@ -1,0 +1,49 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% block title %}Comparison{% endblock %}
+{% block page-content %}
+  <div class="pb-5">
+    <div class="bg-light">
+      <div class="container py-3 mb-5">
+        <h1>
+          <span class="h3 my-3">Comparison of</span>
+          <br/>
+          <a href="{{ doc_a.get_absolute_url }}">{{ doc_a.title }}</a>
+          <br/>
+          <span class="h3 my-3">and</span>
+          <br/>
+          <a href="{{ doc_b.get_absolute_url }}">{{ doc_b.title }}</a>
+        </h1>
+      </div>
+    </div>
+    <div class="container-fluid">
+      <div class="document-content"
+           data-component="DocumentContent"
+           data-display-type="{{ display_type }}">
+        {% include 'peachjam/_document_content_sidebar.html' with document=doc_a %}
+        <div class="document-content__inner">
+          <div class="navigation" id="navigation-column"></div>
+          <div class="content-and-enrichments">
+            <div class="row">
+              <div class="col border-end">
+                <div class="content-and-enrichments__inner">
+                  <div class="content content__html frbr-doctype-{{ doc_a.frbr_uri_doctype }} frbr-subtype-{{ doc_a.frbr_uri_subtype }}"
+                       lang="{{ doc_a.language.iso }}">
+                    {{ doc_a.content_html|safe }}
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="content-and-enrichments__inner">
+                  <div class="content content__html frbr-doctype-{{ doc_b.frbr_uri_doctype }} frbr-subtype-{{ doc_b.frbr_uri_subtype }}"
+                       lang="{{ doc_b.language.iso }}">
+                    {{ doc_b.content_html|safe }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
