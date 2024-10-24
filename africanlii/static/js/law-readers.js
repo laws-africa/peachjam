@@ -22,4 +22,4 @@ function setupLawReaderComparison () {
   }
 }
 
-window.addEventListener('load', setupLawReaderComparison);
+window.addEventListener('peachjam.before-setup', setupLawReaderComparison);

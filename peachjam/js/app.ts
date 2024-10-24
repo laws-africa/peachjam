@@ -9,5 +9,7 @@ declare global {
 window.bootstrap = bootstrap;
 
 (() => {
+  // @ts-ignore
+  window.peachjam = peachJam;
   peachJam.setup();
 })();
