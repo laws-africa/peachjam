@@ -3,7 +3,7 @@ import PdfRenderer from './pdf-renderer';
 import debounce from 'lodash/debounce';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { vueI18n } from '../../i18n';
-import { createTocController } from '../../utils/function';
+import { createTocController, generateHtmlTocItems, wrapTocItems } from '../../utils/function';
 import EnrichmentsManager from './enrichments-manager';
 import i18next from 'i18next';
 
@@ -216,6 +216,14 @@ class DocumentContent {
     // use the injected TOC if available
     if (tocElement && tocElement.textContent) {
       items = JSON.parse(tocElement.textContent) || [];
+    }
+
+    if (!items.length && this.displayType === 'html') {
+      const content: HTMLElement | null = this.root.querySelector('.content__html');
+      if (content) {
+        items = generateHtmlTocItems(content);
+        wrapTocItems(content, items);
+      }
     }
 
     if (this.tocShowActiveItemOnly) {
