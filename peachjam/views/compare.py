@@ -29,6 +29,9 @@ class ComparePortionsView(TemplateView):
         doc_a.content_html = self.get_portion_html(doc_a, portion_a)
         doc_b.content_html = self.get_portion_html(doc_b, portion_b)
 
+        # root the primary document's TOC at portion-a
+        doc_a.toc_json = [t for t in doc_a.toc_json if t["id"] == portion_a]
+
         context["display_type"] = "html"
 
         return context
