@@ -716,7 +716,7 @@ class IndigoTopicAdapter(IndigoAdapter):
     def attach_taxonomy_topics(self, document, created_document):
         super().attach_taxonomy_topics(document, created_document)
         if self.add_topics:
-            taxonomies = Taxonomy.objects.filter(slug__in=self.add_topics)
+            taxonomies = list(Taxonomy.objects.filter(slug__in=self.add_topics))
             for taxonomy in taxonomies:
                 DocumentTopic.objects.get_or_create(
                     document=created_document,
