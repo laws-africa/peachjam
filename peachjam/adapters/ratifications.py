@@ -42,6 +42,8 @@ class RatificationsAdapter(RequestsAdapter):
         # now ensure that our ratifications are up-to-date
         self.update_ratifications(ratifications)
 
+        return [], []
+
     def get_ratifications(self):
         results = []
         url = f"{self.api_url}/ratifications.json"
@@ -60,8 +62,9 @@ class RatificationsAdapter(RequestsAdapter):
             work = Work.objects.filter(frbr_uri=work_frbr_uri).first()
             if not work:
                 log.info(f"Work {work_frbr_uri} not found, skipping ratification")
+                continue
 
-            ratification, _ = Ratification.objects.update_or_create(work=work)
+            ratification, _ = Ratification.objects.get_or_create(work=work)
 
             for country_data in countries_data:
                 country_code = country_data["country"].lower()
