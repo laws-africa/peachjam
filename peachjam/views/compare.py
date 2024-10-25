@@ -29,6 +29,9 @@ class ComparePortionsView(TemplateView):
         doc_a.content_html = self.get_portion_html(doc_a, portion_a)
         doc_b.content_html = self.get_portion_html(doc_b, portion_b)
 
+        if not doc_a.content_html or not doc_b.content_html:
+            raise Http404()
+
         # root the primary document's TOC at portion-a
         doc_a.toc_json = [t for t in doc_a.toc_json if t["id"] == portion_a]
 
@@ -39,6 +42,8 @@ class ComparePortionsView(TemplateView):
     def get_portion_html(self, doc, portion):
         if doc.content_html:
             root = parse_html_str(doc.content_html)
-            el = root.get_element_by_id(portion)
-            if el is not None:
+            try:
+                el = root.get_element_by_id(portion)
                 return lxml.html.tostring(el, encoding="unicode")
+            except KeyError:
+                return None
