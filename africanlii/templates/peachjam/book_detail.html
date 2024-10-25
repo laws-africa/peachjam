@@ -1,0 +1,32 @@
+{% extends 'peachjam/book_detail.html' %}
+{% load static africanlii %}
+{% block head-js %}
+  {% for doc_topic in taxonomies %}
+    {% if doc_topic.topic.slug == "law-readers-refugee-law-readers" %}
+      <script src="{% static 'js/law-readers.js' %}"></script>
+      <template id="law-reader-template">
+        <div class="alert alert-primary d-flex">
+          <div class="flex-grow-1">Compare this section with a Refugee Law Reader from another country.</div>
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown">Compare to...</button>
+            <ul class="dropdown-menu">
+              {% law_reader_options as readers %}
+              {% for reader in readers %}
+                {% if reader != document %}
+                  <li>
+                    <a class="dropdown-item"
+                       target="_blank"
+                       href="{% url 'compare_portions' %}?uri-a={{ document.expression_frbr_uri }}&uri-b={{ reader.expression_frbr_uri }}&PORTION">{{ reader.jurisdiction }}</a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </template>
+    {% endif %}
+  {% endfor %}
+  {{ block.super }}
+{% endblock %}

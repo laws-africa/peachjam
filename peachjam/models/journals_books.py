@@ -18,7 +18,7 @@ class Book(CoreDocument):
             self.convert_content_markdown()
 
     def convert_content_markdown(self):
-        self.content_html = markdownify(self.content_markdown or "")
+        self.set_content_html(markdownify(self.content_markdown or ""))
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"

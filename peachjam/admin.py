@@ -390,12 +390,17 @@ class DocumentForm(forms.ModelForm):
                 "topic__slug", flat=True
             )
 
+    def full_clean(self):
+        super().full_clean()
+        if "content_html" in self.changed_data:
+            # if the content_html has changed, set it and update related attributes
+            self.instance.set_content_html(self.instance.content_html)
+
     def clean_content_html(self):
         # prevent CKEditor-based editing of AKN HTML
         if self.instance.content_html_is_akn:
             return self.instance.content_html
-        # ensure html is clean
-        return self.instance.clean_content_html(self.cleaned_data["content_html"])
+        return self.cleaned_data["content_html"]
 
     def create_topics(self, instance):
         topics = self.cleaned_data.get("topics", [])

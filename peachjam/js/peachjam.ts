@@ -42,6 +42,7 @@ class PeachJam {
   }
 
   setup () {
+    window.dispatchEvent(new Event('peachjam.before-setup'));
     this.setupConfig();
     // add the current user agent to the root HTML element for use with pocketlaw
     document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
@@ -53,6 +54,7 @@ class PeachJam {
     this.setupPopovers();
     this.scrollNavTabs();
     this.clearGACookies();
+    window.dispatchEvent(new Event('peachjam.after-setup'));
   }
 
   setupConfig () {
@@ -103,6 +105,7 @@ class PeachJam {
     for (const element of root.querySelectorAll('[data-component]')) {
       this.createComponent(element);
     }
+    window.dispatchEvent(new Event('peachjam.components-created'));
   }
 
   createVueComponents (root: HTMLElement) {
@@ -111,6 +114,7 @@ class PeachJam {
     for (const element of root.querySelectorAll('[data-vue-component]')) {
       this.createVueComponent(element);
     }
+    window.dispatchEvent(new Event('peachjam.vue-components-created'));
   }
 
   createComponent (el: HTMLElement) {
