@@ -52,7 +52,7 @@ class Ingestor(models.Model):
 
     class Meta:
         verbose_name = _("ingestor")
-        verbose_name_plural = _("ingestor")
+        verbose_name_plural = _("ingestors")
 
     def __str__(self):
         return self.name
