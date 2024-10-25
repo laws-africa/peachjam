@@ -5,7 +5,7 @@ function setupLawReaderComparison () {
   function addComparisonButton (wrapper, item) {
     const heading = wrapper.querySelector('h1, h2, h3, h4, h5, h6');
     if (heading) {
-      const html = template.innerHTML.replace('PORTION', 'portion-a=' + item.id + '&portion-b=' + item.id);
+      const html = template.innerHTML.replaceAll('PORTION', 'portion-a=' + item.id + '&portion-b=' + item.id);
       // add it after element
       heading.insertAdjacentHTML('afterend', html);
     }
