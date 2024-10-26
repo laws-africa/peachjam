@@ -474,7 +474,7 @@ class DocumentAdmin(BaseAdmin):
         "language",
         "date",
     )
-    list_filter = ("jurisdiction", "locality", "language", "created_by")
+    list_filter = ("jurisdiction", "locality", "nature", "language", "created_by")
     search_fields = ("title", "date")
     readonly_fields = (
         "expression_frbr_uri",
