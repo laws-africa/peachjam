@@ -9,8 +9,8 @@ class TestPreferredLanguage(TestCase):
     maxDiff = None
 
     def test_preferred_language(self):
-        response = self.client.get("/legal_instruments/")
-        assert response.context.get("documents").count() == 2
+        response = self.client.get("/legislation/")
+        self.assertEqual(4, response.context.get("documents").count())
 
     def test_update_work_languages(self):
         doc = Legislation.objects.get(
