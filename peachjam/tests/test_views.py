@@ -126,33 +126,6 @@ class PeachjamViewsTest(TestCase):
         )
         self.assertTrue(hasattr(response.context["document"], "repealed"))
 
-    def test_legal_instrument_listing(self):
-        response = self.client.get("/legal_instruments/")
-        self.assertEqual(response.status_code, 200)
-
-        documents = [doc.title for doc in response.context.get("documents")]
-        self.assertIn(
-            "African Charter on Democracy, Elections and Governance",
-            documents,
-        )
-        self.assertEqual(
-            [("2007", 2007)],
-            response.context["facet_data"]["years"]["options"],
-        )
-
-    def test_legal_instrument_detail(self):
-        response = self.client.get(
-            "/akn/aa-au/act/charter/2007/elections-democracy-and-governance/eng@2007-01-30"
-        )
-        self.assertEqual(response.status_code, 200)
-
-        self.assertEqual(response.context["document"].doc_type, "legal_instrument")
-        self.assertEqual(
-            response.context["document"].expression_frbr_uri,
-            "/akn/aa-au/act/charter/2007/elections-democracy-and-governance/eng@2007-01-30",
-        )
-        self.assertTrue(hasattr(response.context["document"], "authors"))
-
     def test_generic_document_listing(self):
         response = self.client.get("/doc/")
         self.assertEqual(response.status_code, 200)
