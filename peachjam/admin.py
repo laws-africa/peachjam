@@ -1455,6 +1455,7 @@ class RatificationAdmin(ImportExportMixin, admin.ModelAdmin):
     inlines = (RatificationCountryAdmin,)
     form = RatificationForm
     resource_class = RatificationResource
+    search_fields = ("work__title",)
 
 
 admin.site.register(
