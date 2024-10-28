@@ -11,7 +11,10 @@ urlpatterns = [
     ),
     path(
         "legal-instruments/",
-        views.AGPLegalInstrumentListView.as_view(),
+        RedirectView.as_view(
+            permanent=True,
+            url="/taxonomy/african-union-collections/african-union-collections-legal-instruments",
+        ),
         name="agp_legal_instrument_list",
     ),
     path("au/", views.AfricanUnionDetailPageView.as_view(), name="au_detail_page"),

@@ -24,7 +24,6 @@ from peachjam.feeds import (
     CoreDocumentAtomSiteNewsFeed,
     GenericDocumentAtomSiteNewsFeed,
     JudgmentAtomSiteNewsFeed,
-    LegalInstrumentAtomSiteNewsFeed,
     LegislationAtomSiteNewsFeed,
 )
 from peachjam.helpers import ISODateConverter
@@ -77,7 +76,6 @@ from peachjam.views import (
     JournalListView,
     JudgmentListView,
     JudgmentWorksAutocomplete,
-    LegalInstrumentListView,
     LegislationListView,
     PeachjamAdminLoginView,
     PlaceDetailView,
@@ -213,11 +211,6 @@ urlpatterns = [
     ),
     path("place/<str:code>", PlaceDetailView.as_view(), name="place"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
-    path(
-        "legal_instruments/",
-        LegalInstrumentListView.as_view(),
-        name="legal_instrument_list",
-    ),
     path("gazettes", GazetteListView.as_view(), name="gazettes"),
     path(
         "gazettes/<str:code>/", GazetteListView.as_view(), name="gazettes_by_locality"
@@ -283,11 +276,6 @@ urlpatterns = [
         "feeds/generic_documents.xml",
         GenericDocumentAtomSiteNewsFeed(),
         name="generic_document_feed",
-    ),
-    path(
-        "feeds/legal_instruments.xml",
-        LegalInstrumentAtomSiteNewsFeed(),
-        name="legal_instrument_feed",
     ),
     path(
         "feeds/legislation.xml", LegislationAtomSiteNewsFeed(), name="legislation_feed"

@@ -470,7 +470,6 @@ JAZZMIN_SETTINGS = {
         "liiweb.CourtClass": "fa fa-building",
         "liiweb.CourtDetail": "fa fa-list-alt",
         "peachjam.GenericDocument": "fa fa-copy",
-        "peachjam.LegalInstrument": "fa fa-briefcase",
         "peachjam.Locality": "fa fa-map",
         "peachjam.Ingestor": "fa fa-download",
         "peachjam.Image": "fa fa-file-image",

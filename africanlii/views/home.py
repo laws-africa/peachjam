@@ -7,7 +7,7 @@ from africanlii.models import (
     MemberState,
     RegionalEconomicCommunity,
 )
-from peachjam.models import Article, CoreDocument, CourtClass, GenericDocument, Taxonomy
+from peachjam.models import Article, CourtClass, GenericDocument, Legislation, Taxonomy
 from peachjam.views import HomePageView as BaseHomePageView
 
 
@@ -35,8 +35,10 @@ class HomePageView(BaseHomePageView):
             .order_by("-date")[:5]
         )
         context["recent_legal_instruments"] = (
-            CoreDocument.objects.exclude(published=False)
-            .filter(frbr_uri_doctype="act")
+            Legislation.objects.exclude(published=False)
+            .filter(
+                taxonomies__topic__slug="african-union-collections-legal-instruments"
+            )
             .prefetch_related("labels")
             .order_by("-date")[:5]
         )
