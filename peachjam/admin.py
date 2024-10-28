@@ -172,6 +172,10 @@ class PeachJamSettingsAdmin(admin.ModelAdmin):
         "document_jurisdictions",
     )
 
+    def changelist_view(self, request, extra_context=None):
+        # redirect to edit the singleton
+        return redirect("admin:peachjam_peachjamsettings_change", pj_settings().pk)
+
 
 class SourceFileFilter(admin.SimpleListFilter):
     title = "by document type"
@@ -470,7 +474,7 @@ class DocumentAdmin(BaseAdmin):
         "language",
         "date",
     )
-    list_filter = ("jurisdiction", "locality", "language", "created_by")
+    list_filter = ("jurisdiction", "locality", "nature", "language", "created_by")
     search_fields = ("title", "date")
     readonly_fields = (
         "expression_frbr_uri",
@@ -1233,6 +1237,20 @@ class RelationshipInline(admin.TabularInline):
         )
 
 
+class DocumentInline(admin.TabularInline):
+    model = CoreDocument
+    fields = ("link", "language")
+    readonly_fields = fields
+    can_delete = False
+    extra = 0
+
+    def link(self, obj):
+        url = reverse("admin:peachjam_coredocument_change", args=[obj.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.title)
+
+    link.short_description = "Document"
+
+
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):
     fields = (
@@ -1260,7 +1278,7 @@ class WorkAdmin(admin.ModelAdmin):
     )
     list_display = ("title", "frbr_uri", "languages", "ranking")
     readonly_fields = fields
-    inlines = [RelationshipInline]
+    inlines = [RelationshipInline, DocumentInline]
     actions = ["update_extracted_citations", "update_languages"]
 
     def has_add_permission(self, request):

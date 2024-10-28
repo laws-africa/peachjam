@@ -64,12 +64,10 @@ class MemberStateDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context[
-            "ratification_countries"
-        ] = ratification_countries = RatificationCountry.objects.prefetch_related(
-            "ratification", "country"
-        ).filter(
-            country=self.get_object().country
+        context["ratification_countries"] = ratification_countries = (
+            RatificationCountry.objects.prefetch_related("ratification", "country")
+            .filter(country=self.get_object().country)
+            .order_by("ratification__work__title")
         )
         context["doc_count"] = ratification_countries.count()
         context["liis"] = LIIS

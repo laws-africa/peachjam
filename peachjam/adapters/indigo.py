@@ -24,7 +24,6 @@ from peachjam.models import (
     DocumentTopic,
     GenericDocument,
     Image,
-    LegalInstrument,
     Legislation,
     Locality,
     Predicate,
@@ -46,6 +45,14 @@ class IndigoAdapter(RequestsAdapter):
     * token: API token
     * api_url: URL to API base (no ending slash)
     * places: space-separate list of place codes, such as: bw za-*
+    * taxonomy_topic_root: the root of a taxonomy topic tree that must be copied from the server into our database
+    * include_doctypes: space-separate list of document types to include
+    * exclude_doctypes: space-separate list of document types to exclude
+    * include_subtypes: space-separate list of sub types to include
+    * exclude_subtypes: space-separate list of sub types to exclude
+    * include_actors: space-separate list of actors to include
+    * exclude_actors: space-separate list of actors to exclude
+    * add_topics: space-separate list of topic slugs to add to documents once ingested
     """
 
     def __init__(self, *args, **kwargs):
@@ -56,6 +63,13 @@ class IndigoAdapter(RequestsAdapter):
             }
         )
         self.taxonomy_topic_root = self.settings.get("taxonomy_topic_root")
+        self.include_doctypes = self.settings.get("include_doctypes", "").split()
+        self.exclude_doctypes = self.settings.get("exclude_doctypes", "").split()
+        self.include_subtypes = self.settings.get("include_subtypes", "").split()
+        self.exclude_subtypes = self.settings.get("exclude_subtypes", "").split()
+        self.include_actors = self.settings.get("include_actors", "").split()
+        self.exclude_actors = self.settings.get("exclude_actors", "").split()
+        self.add_topics = self.settings.get("add_topics", "").split()
 
     def check_for_updates(self, last_refreshed):
         """Checks for documents updated since last_refreshed (which may be None), and returns a list
@@ -81,22 +95,8 @@ class IndigoAdapter(RequestsAdapter):
                         logger.warning(f"Ignoring 404 for {url}")
                         break
                     raise e
-
-                # ignore bills
-                # TODO: later, make this configurable
-                res["results"] = [r for r in res["results"] if r["nature"] != "bill"]
-
-                # Filter by actor, if setting is present
-                actor = self.settings.get("actor", None)
-                if actor:
-                    results_filtered_by_actor = [
-                        result for result in res["results"] if result["actor"] == actor
-                    ]
-                    results.extend(results_filtered_by_actor)
-                    url = res["next"]
-                else:
-                    results.extend(res["results"])
-                    url = res["next"]
+                results.extend(self.filter_document_list(res["results"]))
+                url = res["next"]
 
         return results
 
@@ -130,6 +130,28 @@ class IndigoAdapter(RequestsAdapter):
         """Get place information from server as a dict from code to place info."""
         places = self.client_get(f"{self.api_url}/countries.json").json()["results"]
         return {p["code"]: p for p in places}
+
+    def filter_document_list(self, documents):
+        if self.include_doctypes:
+            documents = [d for d in documents if d["nature"] in self.include_doctypes]
+        if self.exclude_doctypes:
+            documents = [
+                d for d in documents if d["nature"] not in self.exclude_doctypes
+            ]
+
+        if self.include_subtypes:
+            documents = [d for d in documents if d["subtype"] in self.include_subtypes]
+        if self.exclude_subtypes:
+            documents = [
+                d for d in documents if d["subtype"] not in self.exclude_subtypes
+            ]
+
+        if self.include_actors:
+            documents = [d for d in documents if d["actor"] in self.include_actors]
+        if self.exclude_actors:
+            documents = [d for d in documents if d["actor"] not in self.exclude_actors]
+
+        return documents
 
     def check_for_deleted(self, docs):
         uris = {d["expression_frbr_uri"] for d in docs}
@@ -291,45 +313,8 @@ class IndigoAdapter(RequestsAdapter):
 
         logger.info(f"New document: {new}")
 
-        pubdoc = document["publication_document"] or {}
-        pubdoc_url = pubdoc.get("url")
-        if document["stub"]:
-            # for stub documents, use the publication document as the source file
-            if pubdoc_url:
-                self.download_source_file(pubdoc_url, created_doc, title)
-        else:
-            # the source file is the PDF version
-            self.download_source_file(f"{url}.pdf", created_doc, title)
-
-        # the publication file is always the publication file -- it will use the source file where relevant
-        if pubdoc:
-            self.create_publication_file(
-                pubdoc, created_doc, title, stub=document["stub"]
-            )
-
-        if self.taxonomy_topic_root:
-            # clear any existing taxonomies
-            created_doc.taxonomies.filter(
-                topic__slug__startswith=self.taxonomy_topic_root
-            ).delete()
-
-            if document["taxonomy_topics"]:
-                # get topics beginning with "subject-areas"
-                topics = [
-                    t
-                    for t in document["taxonomy_topics"]
-                    if t.startswith(self.taxonomy_topic_root)
-                ]
-                if topics:
-                    taxonomies = Taxonomy.objects.filter(slug__in=topics)
-                    for taxonomy in taxonomies:
-                        DocumentTopic.objects.create(
-                            document=created_doc,
-                            topic=taxonomy,
-                        )
-                    logger.info(f"Added {len(taxonomies)} taxonomies to {created_doc}")
-
-        # fetch associated aliases
+        self.attach_source_and_publication_file(url, document, created_doc)
+        self.attach_taxonomy_topics(document, created_doc)
         self.fetch_and_create_aliases(document, created_doc)
         self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
@@ -379,14 +364,6 @@ class IndigoAdapter(RequestsAdapter):
 
     def get_model(self, document):
         if document["nature"] == "act":
-            if document["subtype"] in [
-                "charter",
-                "protocol",
-                "convention",
-                "treaty",
-                "recommendation",
-            ]:
-                return LegalInstrument
             return Legislation
         return GenericDocument
 
@@ -633,6 +610,61 @@ class IndigoAdapter(RequestsAdapter):
 
             logger.info(f"Fetching of aliases for {created_document} is complete!")
 
+    def attach_source_and_publication_file(self, url, document, created_document):
+        pubdoc = document["publication_document"] or {}
+        pubdoc_url = pubdoc.get("url")
+        if document["stub"]:
+            # for stub documents, use the publication document as the source file
+            if pubdoc_url:
+                self.download_source_file(
+                    pubdoc_url, created_document, document["title"]
+                )
+        else:
+            # the source file is the PDF version
+            self.download_source_file(f"{url}.pdf", created_document, document["title"])
+
+        # the publication file is always the publication file -- it will use the source file where relevant
+        if pubdoc:
+            self.create_publication_file(
+                pubdoc, created_document, document["title"], stub=document["stub"]
+            )
+
+    def attach_taxonomy_topics(self, document, created_document):
+        if self.taxonomy_topic_root:
+            # clear any existing taxonomies
+            created_document.taxonomies.filter(
+                topic__slug__startswith=self.taxonomy_topic_root
+            ).delete()
+
+            if document["taxonomy_topics"]:
+                # get topics beginning with "subject-areas"
+                topics = [
+                    t
+                    for t in document["taxonomy_topics"]
+                    if t.startswith(self.taxonomy_topic_root)
+                ]
+                if topics:
+                    taxonomies = Taxonomy.objects.filter(slug__in=topics)
+                    for taxonomy in taxonomies:
+                        DocumentTopic.objects.create(
+                            document=created_document,
+                            topic=taxonomy,
+                        )
+                    logger.info(
+                        f"Added {len(taxonomies)} imported taxonomies to {created_document}"
+                    )
+
+        if self.add_topics:
+            taxonomies = list(Taxonomy.objects.filter(slug__in=self.add_topics))
+            for taxonomy in taxonomies:
+                DocumentTopic.objects.get_or_create(
+                    document=created_document,
+                    topic=taxonomy,
+                )
+            logger.info(
+                f"Added {len(taxonomies)} local taxonomies to {created_document}"
+            )
+
     def handle_webhook(self, data):
         from peachjam.tasks import delete_document, update_document
 
@@ -649,3 +681,56 @@ class IndigoAdapter(RequestsAdapter):
     def get_edit_url(self, document):
         if self.settings.get("indigo_url"):
             return f"{self.settings['indigo_url']}/works{document.work_frbr_uri}"
+
+
+@plugins.register("ingestor-adapter")
+class IndigoTopicAdapter(IndigoAdapter):
+    """Specialises the Indigo adapter to be topic driven, rather than place driven.
+
+    Settings:
+
+    * token: API token
+    * api_url: URL to API base (no ending slash)
+    * topics: space-separate list of topic slugs to fetch documents for (required)
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.topics = self.settings.get("topics", "").split()
+
+    def get_doc_list(self):
+        results = []
+
+        for topic in self.topics:
+            logger.info(f"Getting document list for topic {topic}")
+            url = f"{self.api_url}/taxonomy-topics/{topic}/work-expressions.json"
+            while url:
+                try:
+                    res = self.client_get(url).json()
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        logger.warning(f"Ignoring 404 for {url}")
+                        break
+                    raise e
+
+                results.extend(self.filter_document_list(res["results"]))
+                url = res["next"]
+
+        return results
+
+    def check_for_deleted(self, docs):
+        """Check for documents this ingestor owns that have been deleted on the server and should be deleted
+        locally.
+
+        We rely on checking the documents this ingestor owns, because our local topics may not match the server's.
+        """
+        uris = {d["expression_frbr_uri"] for d in docs}
+        for doc in docs:
+            for pit in doc["points_in_time"]:
+                for expr in pit["expressions"]:
+                    uris.add(expr["expression_frbr_uri"])
+
+        qs = Legislation.objects.filter(ingestor=self.ingestor)
+        return qs.exclude(expression_frbr_uri__in=list(uris)).values_list(
+            "expression_frbr_uri", flat=True
+        )
