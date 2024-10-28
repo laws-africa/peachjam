@@ -22,6 +22,7 @@ class Ratification(models.Model):
     class Meta:
         verbose_name = _("ratification")
         verbose_name_plural = _("ratifications")
+        permissions = [("api_ratification", "API ratification access")]
 
     @cached_property
     def n_ratified(self):

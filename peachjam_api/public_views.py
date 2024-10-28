@@ -28,6 +28,10 @@ class GazetteAPIPermission(JudgmentAPIPermission):
     permission_name = "peachjam.api_gazette"
 
 
+class RatificationAPIPermission(JudgmentAPIPermission):
+    permission_name = "peachjam.api_ratification"
+
+
 class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [DjangoModelPermissions]
     filterset_fields = {
@@ -104,7 +108,10 @@ class JudgmentsViewSet(BaseDocumentViewSet):
 
 
 class RatificationsViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [DjangoModelPermissions]
+    permission_classes = [
+        RatificationAPIPermission,
+        DjangoModelPermissions,
+    ]
     queryset = (
         Ratification.objects.select_related("work").prefetch_related("countries").all()
     )
