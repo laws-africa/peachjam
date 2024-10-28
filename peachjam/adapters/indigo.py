@@ -24,7 +24,6 @@ from peachjam.models import (
     DocumentTopic,
     GenericDocument,
     Image,
-    LegalInstrument,
     Legislation,
     Locality,
     Predicate,
@@ -365,14 +364,6 @@ class IndigoAdapter(RequestsAdapter):
 
     def get_model(self, document):
         if document["nature"] == "act":
-            if document["subtype"] in [
-                "charter",
-                "protocol",
-                "convention",
-                "treaty",
-                "recommendation",
-            ]:
-                return LegalInstrument
             return Legislation
         return GenericDocument
 
