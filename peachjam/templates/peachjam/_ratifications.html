@@ -33,7 +33,7 @@
     </tr>
   </thead>
   <tbody>
-    {% for ratification in ratification.countries.all %}
+    {% for ratification in ratification.countries_list %}
       <tr>
         <td>{{ ratification.country.name }}</td>
         <td>{{ ratification.signature_date.isoformat }}</td>
