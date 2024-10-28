@@ -16,7 +16,6 @@ from .gazette import *
 from .generic_document import *
 from .home import *
 from .judgment import *
-from .legal_instrument import *
 from .legislation import *
 from .login import *
 from .place import *

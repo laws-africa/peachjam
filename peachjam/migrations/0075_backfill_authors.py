@@ -4,16 +4,6 @@ from django.db import migrations
 
 
 def backfill_authors(apps, schema_editor):
-    LegalInstrument = apps.get_model("peachjam", "LegalInstrument")
-    for legal_instrument in (
-        LegalInstrument.objects.only("author")
-        .exclude(author=None)
-        .all()
-        .iterator(chunk_size=100)
-    ):
-        legal_instrument.authors.set([legal_instrument.author])
-        legal_instrument.save()
-
     GenericDocument = apps.get_model("peachjam", "GenericDocument")
     for generic_document in (
         GenericDocument.objects.only("author")

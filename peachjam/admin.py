@@ -74,7 +74,6 @@ from peachjam.models import (
     Judgment,
     JurisdictionProfile,
     Label,
-    LegalInstrument,
     Legislation,
     Locality,
     LowerBench,
@@ -839,17 +838,6 @@ class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
         return qs
 
 
-class LegalInstrumentAdmin(ImportExportMixin, DocumentAdmin):
-    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
-    filter_horizontal = ("authors",)
-    fieldsets[0][1]["fields"].extend(["authors", "nature"])
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        qs = qs.prefetch_related("authors", "nature")
-        return qs
-
-
 class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["nature"])
@@ -1485,7 +1473,6 @@ admin.site.register(Taxonomy, TaxonomyAdmin)
 admin.site.register(CoreDocument, CoreDocumentAdmin)
 admin.site.register(GenericDocument, GenericDocumentAdmin)
 admin.site.register(Legislation, LegislationAdmin)
-admin.site.register(LegalInstrument, LegalInstrumentAdmin)
 admin.site.register(Judgment, JudgmentAdmin)
 
 admin.site.unregister(User)

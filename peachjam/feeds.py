@@ -9,7 +9,6 @@ from peachjam.models import (
     CoreDocument,
     GenericDocument,
     Judgment,
-    LegalInstrument,
     Legislation,
 )
 
@@ -50,17 +49,6 @@ class GenericDocumentFeed(BaseFeed):
 
 class GenericDocumentAtomSiteNewsFeed(GenericDocumentFeed, BaseAtomFeed):
     subtitle = GenericDocumentFeed.description
-
-
-class LegalInstrumentFeed(BaseFeed):
-    model = LegalInstrument
-    title = "Legal Instruments"
-    link = "/legal_instruments/"
-    description = "Updates on changes and additions to Legal Instruments"
-
-
-class LegalInstrumentAtomSiteNewsFeed(LegalInstrumentFeed, BaseAtomFeed):
-    subtitle = LegalInstrumentFeed.description
 
 
 class LegislationFeed(BaseFeed):

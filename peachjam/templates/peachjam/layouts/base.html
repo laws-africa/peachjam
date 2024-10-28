@@ -25,12 +25,6 @@
               title="AU Documents Atom RSS Feed"
               href="{% url 'generic_document_feed' %}"/>
       {% endif %}
-      {% if request.path == '/legal_instruments/' %}
-        <link rel="alternate"
-              type="application/atom+xml"
-              title="Legal Instruments Atom RSS Feed"
-              href="{% url 'legal_instrument_feed' %}"/>
-      {% endif %}
       {% if request.path == '/legislation/' %}
         <link rel="alternate"
               type="application/atom+xml"

@@ -21,7 +21,6 @@ from peachjam.models import (
     DocumentNature,
     ExtractedCitation,
     GenericDocument,
-    LegalInstrument,
     Predicate,
     Relationship,
     Taxonomy,
@@ -192,7 +191,7 @@ class FilteredDocumentListView(DocumentListView):
         )
 
         authors = []
-        if self.model in [GenericDocument, LegalInstrument]:
+        if self.model in [GenericDocument]:
             authors = list(
                 a
                 for a in self.form.filter_queryset(

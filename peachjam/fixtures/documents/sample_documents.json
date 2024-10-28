@@ -399,7 +399,7 @@
             "nature": 3,
             "polymorphic_ctype": [
                 "peachjam",
-                "legalinstrument"
+                "legislation"
             ],
             "source_url": "https://api.laws.africa/v2/akn/aa-au/act/charter/2007/elections-democracy-and-governance/media/publication/aa-au-act-charter-2007-elections-democracy-and-governance-publication-document.pdf",
             "title": "African Charter on Elections, Democracy and Governance",
@@ -2623,7 +2623,7 @@
             "nature": 3,
             "polymorphic_ctype": [
                 "peachjam",
-                "legalinstrument"
+                "legislation"
             ],
             "source_url": "https://api.laws.africa/v2/akn/aa-au/act/charter/2007/democracy-elections-and-governance/media/publication/aa-au-act-charter-2007-democracy-elections-and-governance-publication-document.pdf",
             "title": "African Charter on Democracy, Elections and Governance",
@@ -4826,20 +4826,6 @@
         },
         "model": "peachjam.work",
         "pk": 2191
-    },
-    {
-        "fields": {
-            "authors": []
-        },
-        "model": "peachjam.legalinstrument",
-        "pk": 5519
-    },
-    {
-        "fields": {
-            "authors": []
-        },
-        "model": "peachjam.legalinstrument",
-        "pk": 2071
     },
     {
         "fields": {

@@ -92,7 +92,7 @@ class SearchableDocument(Document):
     outcome_fr = fields.KeywordField()
     outcome_pt = fields.KeywordField()
 
-    # GenericDocument, LegalInstrument
+    # GenericDocument
     authors = fields.KeywordField()
 
     nature = fields.KeywordField(attr="nature.name")
@@ -199,13 +199,9 @@ class SearchableDocument(Document):
             return related_instance.judgment_set.all()
 
         if isinstance(related_instance, Author):
-            generic = CoreDocument.objects.filter(
+            return CoreDocument.objects.filter(
                 genericdocument__authors=related_instance
             )
-            legal = CoreDocument.objects.filter(
-                legalinstrument__authors=related_instance
-            )
-            return generic | legal
 
         if isinstance(related_instance, Taxonomy):
             topics = [related_instance] + [

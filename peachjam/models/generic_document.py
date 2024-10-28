@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.frbr_uri import FRBR_URI_DOCTYPES
 from peachjam.models import (
     CoreDocument,
     CoreDocumentManager,
@@ -32,29 +31,6 @@ class GenericDocument(CoreDocument):
 
     def pre_save(self):
         self.doc_type = "generic_document"
-        super().pre_save()
-
-
-class LegalInstrument(CoreDocument):
-    authors = models.ManyToManyField(
-        Author,
-        blank=True,
-        verbose_name=_("authors"),
-    )
-
-    frbr_uri_doctypes = [x for x in FRBR_URI_DOCTYPES if x != "judgment"]
-
-    default_nature = ("legal-instrument", "Legal Instrument")
-
-    class Meta(CoreDocument.Meta):
-        verbose_name = _("legal instrument")
-        verbose_name_plural = _("legal instruments")
-
-    def __str__(self):
-        return self.title
-
-    def pre_save(self):
-        self.doc_type = "legal_instrument"
         super().pre_save()
 
 
