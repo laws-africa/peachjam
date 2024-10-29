@@ -1,7 +1,7 @@
 from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
-from django.db.models import Max
+from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
 from django.utils.text import slugify
@@ -113,6 +113,19 @@ class CourtClass(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         return super().save(*args, **kwargs)
+
+    @classmethod
+    def get_court_classes_with_cause_lists(cls):
+        return (
+            cls.objects.filter(courts__causelists__isnull=False)
+            .prefetch_related(
+                Prefetch(
+                    "courts",
+                    queryset=Court.objects.filter(causelists__isnull=False).distinct(),
+                )
+            )
+            .distinct()
+        )
 
 
 class CourtDivision(models.Model):
