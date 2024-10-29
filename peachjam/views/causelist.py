@@ -1,6 +1,7 @@
 from functools import cached_property
 from math import ceil
 
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.text import gettext_lazy as _
@@ -40,8 +41,18 @@ class CauseListListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # get only court classes and courts that have causelists
+        context["court_classes"] = (
+            CourtClass.objects.filter(courts__causelists__isnull=False)
+            .prefetch_related(
+                Prefetch(
+                    "courts",
+                    queryset=Court.objects.filter(causelists__isnull=False).distinct(),
+                )
+            )
+            .distinct()
+        )
 
-        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["recent_causelists"] = (
             CauseList.objects.select_related("work")
             .prefetch_related("labels")
