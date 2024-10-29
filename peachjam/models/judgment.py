@@ -583,15 +583,20 @@ class CauseList(CoreDocument):
         blank=True,
     )
     judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
+    end_date = models.DateField(_("end date"), null=True, blank=True)
 
     def assign_title(self):
-        court_name = self.registry.name if self.registry else ""
-        if not self.registry:
-            court_name = self.court.name if self.court else ""
-        nature_name = self.nature.name if self.nature else ""
-        date_str = self.date.strftime("%d %B %Y")
-
-        self.title = f"{court_name} - {nature_name} - {date_str}"
+        if not self.title:
+            court_name = f"{self.registry.name} –" if self.registry else ""
+            if not self.registry:
+                court_name = f" {self.court.name} –" if self.court else ""
+            division = f" {self.division.name} Division –" if self.division else ""
+            nature_name = f" {self.nature.name} –" if self.nature else ""
+            date_str = f' {self.date.strftime("%d %B %Y")}'
+            end_date = (
+                f' to {self.end_date.strftime("%d %B %Y")}' if self.end_date else ""
+            )
+            self.title = f"{court_name}{division}{nature_name}{date_str}{end_date}"
 
     def pre_save(self):
         self.assign_title()

@@ -51,3 +51,23 @@
     </dd>
   {% endif %}
 {% endblock %}
+{% block document-metadata-content-date %}
+  <dt>
+    {% if document.end_date %}
+      {% trans 'Start date' %}
+    {% else %}
+      {% trans 'Date' %}
+    {% endif %}
+  </dt>
+  <dd class="text-muted">
+    {{ document.date }}
+  </dd>
+  {% if document.end_date %}
+    <dt>
+      {% trans 'End date' %}
+    </dt>
+    <dd class="text-muted">
+      {{ document.end_date }}
+    </dd>
+  {% endif %}
+{% endblock %}
