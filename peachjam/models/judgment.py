@@ -586,14 +586,19 @@ class CauseList(CoreDocument):
     end_date = models.DateField(_("end date"), null=True, blank=True)
 
     def assign_title(self):
-        court_name = f"{self.registry.name} –" if self.registry else ""
+        court_name = f"{self.registry.name}" if self.registry else ""
         if not self.registry:
-            court_name = f" {self.court.name} –" if self.court else ""
-        division = f" {self.division.name} Division –" if self.division else ""
-        nature_name = f" {self.nature.name} –" if self.nature else ""
-        date_str = f' {self.date.strftime("%d %B %Y")}'
-        end_date = f' to {self.end_date.strftime("%d %B %Y")}' if self.end_date else ""
-        self.title = f"{court_name}{division}{nature_name}{date_str}{end_date}"
+            court_name = f"{self.court.name}" if self.court else ""
+        division = f"{self.division.name} Division" if self.division else ""
+        nature_name = f"{self.nature.name}" if self.nature else ""
+
+        start_date = self.date.strftime("%d %B %Y")
+        end_date = self.end_date.strftime("%d %B %Y") if self.end_date else ""
+        date_str = " to ".join([x for x in [start_date, end_date] if x])
+
+        self.title = " – ".join(
+            [x for x in [court_name, division, nature_name, date_str] if x]
+        )
 
     def pre_save(self):
         self.assign_title()
