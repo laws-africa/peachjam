@@ -4,7 +4,7 @@
       <nav>
         <div
           id="nav-tab"
-          class="nav nav-tabs mb-3"
+          class="nav nav-tabs mb-3 border-bottom"
           role="tablist"
         >
           <button
@@ -30,6 +30,19 @@
             aria-selected="false"
           >
             {{ $t('Advanced search') }}
+          </button>
+          <button
+            v-if="showGoogle"
+            id="google-search-tab"
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#nav-google-search"
+            type="button"
+            role="tab"
+            aria-controls="nav-google-search"
+            aria-selected="false"
+          >
+            {{ $t('Search with Google') }}
           </button>
         </div>
       </nav>
@@ -101,6 +114,15 @@
             @submit="advancedSearch"
             @show-facets="() => drawerOpen = true"
           />
+        </div>
+        <div
+          v-if="showGoogle"
+          id="nav-google-search"
+          class="tab-pane fade"
+          role="tabpanel"
+          aria-labelledby="google-search-tab"
+        >
+          <div class="gcse-search" />
         </div>
       </div>
 
@@ -236,12 +258,12 @@ import HelpBtn from '../HelpBtn.vue';
 import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 import analytics from '../analytics';
-import {authHeaders, csrfToken} from '../../api';
+import { authHeaders } from '../../api';
 
 export default {
   name: 'FindDocuments',
   components: { FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
-  props: ['showJurisdiction'],
+  props: ['showJurisdiction', 'showGoogle'],
   data () {
     const getLabelOptionLabels = (labels) => {
       // the function name is a bit confusing but this gets labels for the options in Labels facet
