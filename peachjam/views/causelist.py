@@ -23,8 +23,6 @@ from peachjam.views import BaseDocumentDetailView, FilteredDocumentListView
 from peachjam.views.courts import MonthMixin, RegistryMixin
 from peachjam.views.generic_views import YearMixin
 
-CACHE_DURATION = 60 * 30  # 30 minutes
-
 
 @registry.register_doc_type("causelist")
 class CauseListDetailView(BaseDocumentDetailView):
@@ -47,7 +45,6 @@ class CauseListListView(TemplateView):
         court_classes_with_cause_lists = cache.get_or_set(
             "court_classes_with_causelists",
             CourtClass.get_court_classes_with_cause_lists(),
-            CACHE_DURATION,
         )
         context["court_classes"] = court_classes_with_cause_lists
         context["recent_causelists"] = (
