@@ -119,12 +119,12 @@
           role="tabpanel"
           aria-labelledby="google-search-tab"
         >
-          <div class="gcse-search" />
+          <div class="gcse-search" data-autoSearchOnLoad="false" />
         </div>
       </div>
     </div>
     <div class="mt-3" v-if="!googleActive">
-      <FacetBadges v-model="facets" />
+      <FacetBadges v-model="facets" :permissive="searchInfo.count === 0" />
       <div
         v-if="error"
         class="mt-3 alert alert-warning"
@@ -166,7 +166,7 @@
             <div class="search-results">
               <div v-if="searchInfo.count">
                 <div class="mb-3 sort-body row">
-                  <div class="col-md-3 order-md-2 mb-2 sort__inner d-flex align-items-center">
+                  <div class="col-md-4 order-md-2 mb-2 sort__inner d-flex align-items-center">
                     <div style="width: 6em">
                       {{ $t('Sort') }}
                     </div>
@@ -185,7 +185,7 @@
                       </option>
                     </select>
                   </div>
-                  <div class="col-md order-md-1">
+                  <div class="col-md order-md-1 align-self-center">
                     <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
                     <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
                   </div>
@@ -458,10 +458,6 @@ export default {
     },
 
     getUrlParamValue (key, options) {
-      const queryString = window.location.search;
-      const urlParams = new URLSearchParams(queryString);
-      const availableOptions = options.map(option => option.value);
-      return urlParams.getAll(key).filter(value => availableOptions.includes(value));
     },
 
     handlePageChange (newPage) {
@@ -589,6 +585,9 @@ export default {
     },
 
     formatFacets () {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+
       const generateOptions = (buckets, labels) => {
         return buckets.map((bucket) => ({
           label: labels ? labels[bucket.key] : bucket.key,
@@ -619,7 +618,14 @@ export default {
             );
           }
         }
-        facet.value = this.getUrlParamValue(facet.name, facet.options);
+
+        // If we have results, then sanity check chosen options against those that are available.
+        // If there are no results, we trust any options given so that we can show the facet buttons
+        // and allow the user to remove the facets to try to find results.
+        if (this.searchInfo.count > 0) {
+          const availableOptions = facet.options.map(option => option.value);
+          facet.value = urlParams.getAll(facet.name).filter(value => availableOptions.includes(value));
+        }
       });
     },
 
@@ -744,9 +750,6 @@ export default {
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
-              if (this.searchInfo.count === 0) {
-                this.clearAllFilters();
-              }
               this.formatFacets();
               this.formatResults();
               this.trackSearch(params);
@@ -849,9 +852,6 @@ export default {
 @media screen and (max-width: 400px) {
   .sort-body {
     flex-direction: column;
-  }
-  .sort__inner {
-    margin-top: 10px;
   }
 }
 
