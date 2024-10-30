@@ -23,6 +23,8 @@ from peachjam.views import BaseDocumentDetailView, FilteredDocumentListView
 from peachjam.views.courts import MonthMixin, RegistryMixin
 from peachjam.views.generic_views import YearMixin
 
+CACHE_DURATION = 60 * 60 * 24
+
 
 @registry.register_doc_type("causelist")
 class CauseListDetailView(BaseDocumentDetailView):
@@ -45,6 +47,7 @@ class CauseListListView(TemplateView):
         court_classes_with_cause_lists = cache.get_or_set(
             "court_classes_with_causelists",
             CourtClass.get_court_classes_with_cause_lists(),
+            CACHE_DURATION,
         )
         context["court_classes"] = court_classes_with_cause_lists
         context["recent_causelists"] = (
@@ -53,12 +56,15 @@ class CauseListListView(TemplateView):
             .exclude(published=False)
             .order_by("-date")[:30]
         )
+        self.add_entity_profile(context)
         context["doc_type"] = "CauseList"
-
         context["doc_count"] = CauseList.objects.filter(published=True).count()
         context["doc_count_noun"] = _("cause list")
         context["doc_count_noun_plural"] = _("cause lists")
         return context
+
+    def add_entity_profile(self, context):
+        pass
 
 
 class FilteredCauseListView(FilteredDocumentListView):
