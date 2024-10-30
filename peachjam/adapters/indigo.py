@@ -201,6 +201,7 @@ class IndigoAdapter(RequestsAdapter):
             document = self.client_get(f"{url}.json").json()
         except requests.HTTPError as error:
             if error.response.status_code == 404:
+                logger.info(f"Document not found: {url}")
                 return
             else:
                 raise error
@@ -209,6 +210,7 @@ class IndigoAdapter(RequestsAdapter):
         if document["stub"]:
             pubdoc = document["publication_document"]
             if not pubdoc or not pubdoc["url"]:
+                logger.info("Skipping stub document without publication document")
                 return
 
         frbr_uri = FrbrUri.parse(document["frbr_uri"])
