@@ -3,7 +3,6 @@
     <div class="mb-4">
       <nav>
         <div
-          id="nav-tab"
           class="nav nav-tabs mb-3 border-bottom"
           role="tablist"
         >
@@ -46,10 +45,7 @@
           </button>
         </div>
       </nav>
-      <div
-        id="nav-tabContent"
-        class="tab-content"
-      >
+      <div class="tab-content">
         <div
           id="nav-search"
           class="tab-pane fade show active"
@@ -89,10 +85,11 @@
               {{ $t("Filters") }} <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
             </button>
           </form>
-          <div class="my-2">
+          <div class="my-2 text-end">
             <HelpBtn page="search/" />
           </div>
-          <div v-if="searchTip" class="alert alert-primary">
+          <div v-if="searchTip" class="my-2">
+            <i class="bi bi-info-circle" />
             {{ searchTip.prompt }}
             <a href="#" @click.stop.prevent="useSearchTip()">{{ searchTip.q }}</a>
           </div>
@@ -125,7 +122,9 @@
           <div class="gcse-search" />
         </div>
       </div>
-
+    </div>
+    <div class="mt-3" v-if="!googleActive">
+      <FacetBadges v-model="facets" />
       <div
         v-if="error"
         class="mt-3 alert alert-warning"
@@ -138,96 +137,95 @@
       >
         {{ $t("No documents match your search.") }}
       </div>
-    </div>
-    <div ref="filters-results-container">
-      <div class="row">
-        <div class="col col-lg-3">
-          <MobileFacetsDrawer
-            :open="drawerOpen"
-            @outside-drawer-click="() => drawerOpen = false"
-          >
-            <FilterFacets
-              v-if="searchInfo.count"
-              v-model="facets"
-              :loading="loading"
+      <div ref="filters-results-container">
+        <div class="row">
+          <div class="col col-lg-3">
+            <MobileFacetsDrawer
+              :open="drawerOpen"
+              @outside-drawer-click="() => drawerOpen = false"
             >
-              <template #header-title>
-                <button
-                  type="button"
-                  class="btn-close d-lg-none"
-                  :aria-label="$t('Close')"
-                  @click="() => drawerOpen = false"
-                />
-                <strong class="filter-facet-title">{{ $t("Filters") }}</strong>
-              </template>
-            </FilterFacets>
-          </MobileFacetsDrawer>
-        </div>
-
-        <div class="col-md-12 col-lg-9 position-relative">
-          <div class="search-results">
-            <div v-if="searchInfo.count">
-              <FacetBadges v-model="facets" />
-              <div class="mb-3 sort-body row">
-                <div class="col-md-3 order-md-2 mb-2 sort__inner d-flex align-items-center">
-                  <div style="width: 65px;">
-                    {{ $t('Sort by') }}
-                  </div>
-                  <select
-                    v-model="ordering"
-                    class="ms-2 form-select"
-                  >
-                    <option value="-score">
-                      {{ $t('Relevance') }}
-                    </option>
-                    <option value="date">
-                      {{ $t('Date (oldest first)') }}
-                    </option>
-                    <option value="-date">
-                      {{ $t('Date (newest first)') }}
-                    </option>
-                  </select>
-                </div>
-                <div class="col-md order-md-1">
-                  <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
-                  <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
-                </div>
-              </div>
-
-              <ul class="list-unstyled">
-                <SearchResult
-                  v-for="item in searchInfo.results"
-                  :key="item.key"
-                  :item="item"
-                  :query="q"
-                  :debug="searchInfo.can_debug"
-                  :show-jurisdiction="showJurisdiction"
-                  :document-labels="documentLabels"
-                  @explain="explain(item)"
-                  @item-clicked="(e) => itemClicked(item, e)"
-                />
-              </ul>
-
-              <SearchPagination
-                :search="searchInfo"
-                :page="page"
-                @changed="handlePageChange"
-              />
-            </div>
+              <FilterFacets
+                v-if="searchInfo.count"
+                v-model="facets"
+                :loading="loading"
+              >
+                <template #header-title>
+                  <button
+                    type="button"
+                    class="btn-close d-lg-none"
+                    :aria-label="$t('Close')"
+                    @click="() => drawerOpen = false"
+                  />
+                  <strong class="filter-facet-title">{{ $t("Filters") }}</strong>
+                </template>
+              </FilterFacets>
+            </MobileFacetsDrawer>
           </div>
-          <div
-            v-if="loading && searchInfo.count"
-            class="overlay"
-          />
-        </div>
-      </div>
 
-      <a
-        href="#search"
-        class="to-the-top btn btn-secondary d-block d-lg-none"
-      >
-        ▲ {{ $t('To the top') }}
-      </a>
+          <div class="col-md-12 col-lg-9 position-relative">
+            <div class="search-results">
+              <div v-if="searchInfo.count">
+                <div class="mb-3 sort-body row">
+                  <div class="col-md-3 order-md-2 mb-2 sort__inner d-flex align-items-center">
+                    <div style="width: 6em">
+                      {{ $t('Sort') }}
+                    </div>
+                    <select
+                      v-model="ordering"
+                      class="ms-2 form-select"
+                    >
+                      <option value="-score">
+                        {{ $t('Relevance') }}
+                      </option>
+                      <option value="date">
+                        {{ $t('Date (oldest first)') }}
+                      </option>
+                      <option value="-date">
+                        {{ $t('Date (newest first)') }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="col-md order-md-1">
+                    <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
+                    <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
+                  </div>
+                </div>
+
+                <ul class="list-unstyled">
+                  <SearchResult
+                    v-for="item in searchInfo.results"
+                    :key="item.key"
+                    :item="item"
+                    :query="q"
+                    :debug="searchInfo.can_debug"
+                    :show-jurisdiction="showJurisdiction"
+                    :document-labels="documentLabels"
+                    @explain="explain(item)"
+                    @item-clicked="(e) => itemClicked(item, e)"
+                  />
+                </ul>
+
+                <SearchPagination
+                  :search="searchInfo"
+                  :page="page"
+                  @changed="handlePageChange"
+                />
+              </div>
+            </div>
+            <div
+              v-if="loading && searchInfo.count"
+              class="overlay"
+            />
+          </div>
+        </div>
+
+        <a
+          href="#search"
+          class="to-the-top btn btn-secondary d-block d-lg-none"
+        >
+          ▲ {{ $t('To the top') }}
+        </a>
+      </div>
     </div>
 
     <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
@@ -305,7 +303,8 @@ export default {
       advancedSearchDateCriteria: {
         date_to: null,
         date_from: null
-      }
+      },
+      googleActive: false
     };
     const facets = [
       {
@@ -434,9 +433,14 @@ export default {
   mounted () {
     this.loadState();
     window.addEventListener('popstate', () => this.loadState());
+    this.$el.addEventListener('show.bs.tab', this.tabChanged);
   },
 
   methods: {
+    tabChanged (e) {
+      this.googleActive = e.target.id === 'google-search-tab';
+    },
+
     sortBuckets (items, reverse = false, byCount = false) {
       const buckets = [...items];
       function keyFn (a, b) {
@@ -714,9 +718,9 @@ export default {
         scrollToElement(this.$refs['search-box']);
 
         // search tip
-        if (this.q && this.q.indexOf('"') === -1) {
+        if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(" ") > -1) {
           this.searchTip = {
-            prompt: this.$t('Try using quotes to search for an exact phrase: '),
+            prompt: this.$t('Tip: Try using quotes to search for an exact phrase: '),
             q: `"${this.q}"`
           };
         }

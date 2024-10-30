@@ -1,9 +1,9 @@
 <template>
-  <div class="d-none d-md-block">
+  <div class="d-none d-md-block mb-3">
     <button
       v-for="option in activeOptions"
       :key="option.value"
-      class="btn btn-outline-primary me-2 mb-2 btn-sm"
+      class="btn btn-outline-primary me-2 btn-sm"
       type="button"
       :title="$t('Remove')"
       @click="updateModel(option.value)"
