@@ -2,16 +2,10 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from lawlibrary.constants import MUNICIPAL_CODES, PROVINCIAL_CODES
-from liiweb.views import LegislationListView as BaseLegislationListView
 from liiweb.views import LocalityLegislationListView as BaseLocalityLegislationListView
 from liiweb.views import LocalityLegislationView as BaseLocalityLegislationView
 from peachjam.helpers import chunks
 from peachjam.models import Locality
-
-
-class LegislationListView(BaseLegislationListView):
-    def get_base_queryset(self):
-        return super().get_base_queryset().filter(locality=None)
 
 
 class LocalityLegislationView(BaseLocalityLegislationView):

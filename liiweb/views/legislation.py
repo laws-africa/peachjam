@@ -16,6 +16,7 @@ class LegislationListView(BaseLegislationListView):
     variant = "current"
     latest_expression_only = True
     form_defaults = None
+    national_only = True
 
     def get_form(self):
         self.form_defaults = {"sort": "title"}
@@ -25,6 +26,12 @@ class LegislationListView(BaseLegislationListView):
 
     def get_base_queryset(self, *args, **kwargs):
         qs = super().get_base_queryset(*args, **kwargs)
+        if self.national_only:
+            # only show national legislation, for the default country (if set)
+            qs = qs.filter(locality=None)
+            country = pj_settings().default_document_jurisdiction
+            if country:
+                qs = qs.filter(jurisdiction=country)
         qs = self.get_variant_queryset(qs)
         return qs
 
@@ -106,6 +113,7 @@ class LocalityLegislationView(TemplateView):
 class LocalityLegislationListView(LegislationListView):
     template_name = "liiweb/locality_legislation_list.html"
     navbar_link = "legislation/locality"
+    national_only = False
 
     def get(self, *args, **kwargs):
         self.locality = get_object_or_404(Locality, code=kwargs["code"])
