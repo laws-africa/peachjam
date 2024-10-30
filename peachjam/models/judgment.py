@@ -1,7 +1,7 @@
 from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
-from django.db.models import Max
+from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
 from django.utils.text import slugify
@@ -113,6 +113,19 @@ class CourtClass(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         return super().save(*args, **kwargs)
+
+    @classmethod
+    def get_court_classes_with_cause_lists(cls):
+        return (
+            cls.objects.filter(courts__causelists__isnull=False)
+            .prefetch_related(
+                Prefetch(
+                    "courts",
+                    queryset=Court.objects.filter(causelists__isnull=False).distinct(),
+                )
+            )
+            .distinct()
+        )
 
 
 class CourtDivision(models.Model):
@@ -585,23 +598,7 @@ class CauseList(CoreDocument):
     judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
     end_date = models.DateField(_("end date"), null=True, blank=True)
 
-    def assign_title(self):
-        court_name = f"{self.registry.name}" if self.registry else ""
-        if not self.registry:
-            court_name = f"{self.court.name}" if self.court else ""
-        division = f"{self.division.name} Division" if self.division else ""
-        nature_name = f"{self.nature.name}" if self.nature else ""
-
-        start_date = self.date.strftime("%d %B %Y")
-        end_date = self.end_date.strftime("%d %B %Y") if self.end_date else ""
-        date_str = " to ".join([x for x in [start_date, end_date] if x])
-
-        self.title = " – ".join(
-            [x for x in [court_name, division, nature_name, date_str] if x]
-        )
-
     def pre_save(self):
-        self.assign_title()
         self.frbr_uri_doctype = "doc"
         self.doc_type = "causelist"
         super().pre_save()

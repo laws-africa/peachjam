@@ -1,6 +1,7 @@
 from functools import cached_property
 from math import ceil
 
+from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.text import gettext_lazy as _
@@ -40,20 +41,27 @@ class CauseListListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
+        # get only court classes and courts that have cause lists, and cache the result
+        court_classes_with_cause_lists = cache.get_or_set(
+            "court_classes_with_causelists",
+            CourtClass.get_court_classes_with_cause_lists(),
+        )
+        context["court_classes"] = court_classes_with_cause_lists
         context["recent_causelists"] = (
             CauseList.objects.select_related("work")
             .prefetch_related("labels")
             .exclude(published=False)
             .order_by("-date")[:30]
         )
+        self.add_entity_profile(context)
         context["doc_type"] = "CauseList"
-
         context["doc_count"] = CauseList.objects.filter(published=True).count()
         context["doc_count_noun"] = _("cause list")
         context["doc_count_noun_plural"] = _("cause lists")
         return context
+
+    def add_entity_profile(self, context):
+        pass
 
 
 class FilteredCauseListView(FilteredDocumentListView):

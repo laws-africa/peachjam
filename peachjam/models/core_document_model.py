@@ -1,4 +1,3 @@
-import datetime
 import logging
 import os
 import re
@@ -542,12 +541,6 @@ class CoreDocument(PolymorphicModel):
 
     def clean(self):
         super().clean()
-
-        if self.date and self.date > datetime.date.today():
-            raise ValidationError(
-                {"date": _("You cannot set a future date for the document")}
-            )
-
         try:
             FrbrUri.parse(self.work_frbr_uri)
         except ValueError:
@@ -618,12 +611,15 @@ class CoreDocument(PolymorphicModel):
                 code=code, defaults={"name": name}
             )[0]
 
-    def pre_save(self):
-        """Pre-populate various fields before saving or running full_clean."""
+    def prepare_and_set_expression_frbr_uri(self):
         self.set_nature()
         self.set_frbr_uri_subtype()
         self.assign_frbr_uri()
         self.expression_frbr_uri = self.generate_expression_frbr_uri()
+
+    def pre_save(self):
+        """Pre-populate various fields before saving or running full_clean."""
+        self.prepare_and_set_expression_frbr_uri()
 
         # ensure a matching work exists
         if not hasattr(self, "work") or self.work.frbr_uri != self.work_frbr_uri:
