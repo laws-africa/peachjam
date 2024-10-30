@@ -147,6 +147,12 @@ class PeachJamSettings(SingletonModel):
     robots_txt = models.TextField(
         null=True, blank=True, help_text=_("Additional robots.txt rules.")
     )
+    google_search_engine_id = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_("ID of a Google custom search engine."),
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
