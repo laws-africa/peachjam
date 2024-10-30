@@ -23,7 +23,7 @@ from peachjam.views import BaseDocumentDetailView, FilteredDocumentListView
 from peachjam.views.courts import MonthMixin, RegistryMixin
 from peachjam.views.generic_views import YearMixin
 
-CACHE_DURATION = 60 * 60 * 24
+CACHE_DURATION = 60 * 30  # 30 minutes
 
 
 @registry.register_doc_type("causelist")
