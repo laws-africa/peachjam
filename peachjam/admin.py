@@ -1153,6 +1153,22 @@ class ArticleAttachmentInline(BaseAttachmentFileInline):
     model = ArticleAttachment
     extra = 1
 
+    def attachment_url(self, obj):
+        return reverse(
+            "article_attachment",
+            kwargs={
+                "date": obj.document.date.strftime("%Y-%m-%d"),
+                "author": obj.document.author.username,
+                "slug": obj.document.slug,
+                "pk": obj.pk,
+                "filename": obj.filename,
+            },
+        )
+
+    def attachment_link(self, obj):
+        if obj.pk:
+            return self.attachment_url(obj)
+
 
 class ArticleForm(forms.ModelForm):
     body = forms.CharField(widget=CKEditorWidget())

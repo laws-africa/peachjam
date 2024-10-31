@@ -1,10 +1,11 @@
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.views.generic import DetailView, ListView
 from django.views.generic.dates import YearArchiveView
 
-from peachjam.models import Article, Taxonomy, UserProfile
+from peachjam.models import Article, ArticleAttachment, Taxonomy, UserProfile
 
 
 class ArticleListView(ListView):
@@ -77,6 +78,23 @@ class ArticleDetailView(DetailView):
             .order_by("-date")[:5]
         )
         return context
+
+
+class ArticleAttachmentDetailView(DetailView):
+    model = ArticleAttachment
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            ArticleAttachment,
+            document__date=self.kwargs["date"],
+            document__slug=self.kwargs["slug"],
+            document__author__username=self.kwargs["author"],
+            pk=self.kwargs["pk"],
+            filename=self.kwargs["filename"],
+        )
+
+    def render_to_response(self, context, **response_kwargs):
+        return FileResponse(self.object.file, filename=self.object.filename)
 
 
 class UserProfileDetailView(DetailView):
