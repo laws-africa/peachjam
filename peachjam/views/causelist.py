@@ -185,7 +185,7 @@ class FilteredCauseListView(FilteredDocumentListView):
             }
 
     def populate_years(self, context):
-        cache_key = f"years_{slugify(self.base_view_name())}"
+        cache_key = f"causelist_years_{slugify(self.base_view_name())}"
         years = cache.get(cache_key)
         if years is None:
             years = self.get_base_queryset(exclude=["year", "month"]).dates(
