@@ -577,9 +577,10 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
         filters = {
             fld: self.request.GET.getlist(fld)
-            for fld in self.filter_fields.keys()
+            for fld in sorted(self.filter_fields.keys())
             if fld in self.request.GET
         }
+        filters_string = "; ".join(f"{k}={v}" for k, v in filters.items())
 
         previous = None
         if self.request.GET.get("previous"):
@@ -605,6 +606,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             n_results=response.data["count"],
             page=self.paginator.page.number,
             filters=filters,
+            filters_string=filters_string,
             ordering=self.request.GET.get("ordering"),
             previous_search=previous,
             ip_address=self.request.headers.get("x-forwarded-for"),
