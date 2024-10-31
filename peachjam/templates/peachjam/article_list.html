@@ -1,8 +1,5 @@
 {% extends 'peachjam/layouts/articles.html' %}
 {% load i18n peachjam %}
-{% block breadcrumb-items %}
-  {% if grouped_articles %}<li class="breadcrumb-item active" aria-current="page">{{ year }}</li>{% endif %}
-{% endblock %}
 {% block article-header %}
   {% if year %}
     <h1 class="my-4">{% trans "Articles" %} - {{ year }}</h1>

@@ -14,7 +14,7 @@ class ArticleViewMixin:
         )
         context["recent_articles"] = Article.objects.filter(published=True).order_by(
             "-date"
-        )[:5]
+        )[:8]
         return context
 
 
@@ -33,20 +33,19 @@ class ArticleListView(ArticleViewMixin, ListView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        self.populate_years(context)
+        return context
+
+    def populate_years(self, context):
         years = (
-            self.model.objects.filter(published=True)
-            .dates("date", "year", order="DESC")
+            self.queryset.dates("date", "year", order="DESC")
             .values_list("date__year", flat=True)
             .distinct()
         )
-
         context["years"] = [
             {"url": reverse("article_year_archive", args=[y]), "year": y} for y in years
         ]
-
         context["all_years_url"] = reverse("article_list")
-
-        return context
 
 
 class ArticleYearView(YearMixin, ArticleListView):
@@ -67,13 +66,23 @@ class ArticleTopicView(ArticleListView):
     def get_context_data(self, **kwargs):
         return super().get_context_data(topic=self.topic, **kwargs)
 
+    def populate_years(self, context):
+        years = (
+            self.queryset.filter(topics=self.topic)
+            .dates("date", "year", order="DESC")
+            .values_list("date__year", flat=True)
+            .distinct()
+        )
+        context["years"] = [
+            {"url": reverse("article_topic_year", args=[self.topic.slug, y]), "year": y}
+            for y in years
+        ]
+        context["all_years_url"] = reverse("article_topic", args=[self.topic.slug])
+
 
 class ArticleTopicYearView(YearMixin, ArticleTopicView):
     def get_queryset(self):
         return super().get_queryset().filter(date__year=self.kwargs["year"])
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(year=self.kwargs["year"])
 
 
 class ArticleDetailView(ArticleViewMixin, DetailView):

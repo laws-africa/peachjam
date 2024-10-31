@@ -1,6 +1,17 @@
 {% extends 'peachjam/article_list.html' %}
 {% load i18n peachjam %}
-{% block title %}
-  {{ topic }}
-{% endblock title %}
-{% block article-header %}<h1 class="my-4">{{ topic }}</h1>{% endblock %}
+{% block title %}{{ topic }}{% endblock %}
+{% block breadcrumb-items %}
+  {% if year %}
+    <li class="breadcrumb-item">
+      <a href="{% url 'article_topic' topic.slug %}">{{ topic }}</a>
+    </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
+{% block article-header %}
+  <h1 class="my-4">
+    {{ topic }}
+    {% if year %}- {{ year }}{% endif %}
+  </h1>
+{% endblock %}
