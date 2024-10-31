@@ -27,7 +27,7 @@ from django_elasticsearch_dsl_drf.pagination import PageNumberPagination, Pagina
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.connections import get_connection
-from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
+from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString, Term
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import CreateModelMixin
@@ -111,7 +111,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
         # the basic query for a simple search
         self.query = " ".join(self.get_search_query_params(request))
 
-        must_queries = []
+        must_queries = [Term(is_most_recent=True)]
         must_queries.extend(self.build_rank_feature_queries(request, view))
         must_queries.extend(self.build_per_field_queries(request, view))
 
@@ -421,7 +421,6 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "court": "court",
         "date": "date",
         "doc_type": "doc_type",
-        "is_most_recent": "is_most_recent",
         "jurisdiction": "jurisdiction",
         "language": "language",
         "locality": "locality",
