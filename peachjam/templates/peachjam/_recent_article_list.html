@@ -22,7 +22,7 @@
           </li>
           {% for topic in article.topics.all %}
             <li class="list-inline-item">
-              <a href="{% url 'article_topic_list' topic.slug %}">{{ topic }}</a>
+              <a href="{% url 'article_topic' topic.slug %}">{{ topic }}</a>
             </li>
           {% endfor %}
         </ul>

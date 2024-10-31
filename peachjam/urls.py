@@ -305,21 +305,28 @@ urlpatterns = [
     path("accounts/profile/", EditAccountView.as_view(), name="edit_account"),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
-    path("articles/", ArticleListView.as_view(), name="article_list"),
     path(
-        "articles/<slug:topic>",
-        ArticleTopicListView.as_view(),
-        name="article_topic_list",
-    ),
-    path(
-        "articles/<isodate:date>/<str:author>/<slug:slug>",
-        ArticleDetailView.as_view(),
-        name="article_detail",
-    ),
-    path(
-        "articles/<int:year>/",
-        ArticleYearArchiveView.as_view(),
-        name="article_year_archive",
+        "articles/",
+        include(
+            [
+                path("", ArticleListView.as_view(), name="article_list"),
+                path(
+                    "<slug:topic>",
+                    ArticleTopicListView.as_view(),
+                    name="article_topic",
+                ),
+                path(
+                    "<isodate:date>/<str:author>/<slug:slug>",
+                    ArticleDetailView.as_view(),
+                    name="article_detail",
+                ),
+                path(
+                    "<int:year>/",
+                    ArticleYearArchiveView.as_view(),
+                    name="article_year_archive",
+                ),
+            ]
+        ),
     ),
     path("users/<username>", UserProfileDetailView.as_view(), name="user_profile"),
     path(

@@ -7,7 +7,19 @@ from django.views.generic.dates import YearArchiveView
 from peachjam.models import Article, Taxonomy, UserProfile
 
 
-class ArticleListView(ListView):
+class ArticleViewMixin:
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context["article_tags"] = sorted(
+            Article.get_article_tags_root().get_descendants(), key=lambda x: x.name
+        )
+        context["recent_articles"] = Article.objects.filter(published=True).order_by(
+            "-date"
+        )[:5]
+        return context
+
+
+class ArticleListView(ArticleViewMixin, ListView):
     model = Article
     queryset = (
         Article.objects.filter(published=True)
@@ -39,7 +51,7 @@ class ArticleListView(ListView):
 
 
 class ArticleTopicListView(ArticleListView):
-    template_name = "peachjam/article_topic_list.html"
+    template_name = "peachjam/article_topic_detail.html"
 
     def get(self, *args, **kwargs):
         self.topic = get_object_or_404(Taxonomy.objects.filter(slug=kwargs["topic"]))
@@ -52,7 +64,7 @@ class ArticleTopicListView(ArticleListView):
         return super().get_context_data(topic=self.topic, **kwargs)
 
 
-class ArticleDetailView(DetailView):
+class ArticleDetailView(ArticleViewMixin, DetailView):
     model = Article
     queryset = Article.objects.filter(published=True)
     template_name = "peachjam/article_detail.html"
@@ -68,13 +80,6 @@ class ArticleDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["user_profile"] = get_object_or_404(
             UserProfile, user__pk=self.object.author.pk
-        )
-        context["more_articles"] = (
-            Article.objects.filter(author=self.object.author, published=True)
-            .select_related("author")
-            .prefetch_related("topics")
-            .exclude(pk=self.object.pk)
-            .order_by("-date")[:5]
         )
         return context
 
@@ -95,7 +100,7 @@ class UserProfileDetailView(DetailView):
         return context
 
 
-class ArticleYearArchiveView(YearArchiveView):
+class ArticleYearArchiveView(ArticleViewMixin, YearArchiveView):
     queryset = (
         Article.objects.select_related("author")
         .prefetch_related("topics")
