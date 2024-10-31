@@ -105,17 +105,42 @@ class ArticleDetailView(ArticleViewMixin, DetailView):
         return context
 
 
-class UserProfileDetailView(DetailView):
-    model = UserProfile
-    template_name = "peachjam/user_profile.html"
-    context_object_name = "user_profile"
+class ArticleAuthorDetailView(ArticleListView):
+    template_name = "peachjam/article_author.html"
 
-    def get_object(self, queryset=None):
-        return get_object_or_404(UserProfile, user__username=self.kwargs["username"])
+    def dispatch(self, *args, **kwargs):
+        self.user_profile = get_object_or_404(
+            UserProfile, user__username=kwargs["username"]
+        )
+        return super().dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(author=self.user_profile.user)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["articles"] = (
-            context["object"].user.articles.filter(published=True).order_by("-date")
+        return super().get_context_data(**kwargs, user_profile=self.user_profile)
+
+    def populate_years(self, context):
+        years = (
+            self.queryset.filter(author=self.user_profile.user)
+            .dates("date", "year", order="DESC")
+            .values_list("date__year", flat=True)
+            .distinct()
         )
-        return context
+        context["years"] = [
+            {
+                "url": reverse(
+                    "article_author_year", args=[self.user_profile.user.username, y]
+                ),
+                "year": y,
+            }
+            for y in years
+        ]
+        context["all_years_url"] = reverse(
+            "article_author", args=[self.user_profile.user.username]
+        )
+
+
+class ArticleAuthorYearDetailView(YearMixin, ArticleAuthorDetailView):
+    def get_queryset(self):
+        return super().get_queryset().filter(date__year=self.kwargs["year"])

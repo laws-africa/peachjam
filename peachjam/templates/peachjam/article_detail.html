@@ -21,7 +21,7 @@
         <div class="flex-grow-1">
           {{ article.date }}
           ·
-          <a href={% url 'user_profile' article.author.username %}>{% user_name article.author %}</a>
+          <a href={% url 'article_author' article.author.username %}>{% user_name article.author %}</a>
         </div>
         {% if perms.peachjam.change_article %}
           <a class="btn btn-outline-secondary"
@@ -77,7 +77,7 @@
     {% endif %}
     <div class="card-body">
       <h5 class="card-title">
-        <a href="{% url 'user_profile' article.author.username %}">{% user_name article.author %}</a>
+        <a href="{% url 'article_author' article.author.username %}">{% user_name article.author %}</a>
       </h5>
       <p class="card-text">{{ user_profile.profile_description|truncatewords:6 }}</p>
     </div>

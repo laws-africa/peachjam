@@ -29,6 +29,8 @@ from peachjam.feeds import (
 from peachjam.helpers import ISODateConverter
 from peachjam.views import (
     AboutPageView,
+    ArticleAuthorDetailView,
+    ArticleAuthorYearDetailView,
     ArticleDetailView,
     ArticleListView,
     ArticleTopicView,
@@ -90,7 +92,6 @@ from peachjam.views import (
     TaxonomyFirstLevelView,
     TaxonomyListView,
     TermsOfUsePageView,
-    UserProfileDetailView,
     WorkAutocomplete,
 )
 from peachjam.views.comments import comment_form_view
@@ -312,6 +313,21 @@ urlpatterns = [
             [
                 path("", ArticleListView.as_view(), name="article_list"),
                 path(
+                    "authors/<username>",
+                    ArticleAuthorDetailView.as_view(),
+                    name="article_author",
+                ),
+                path(
+                    "authors/<username>/<int:year>",
+                    ArticleAuthorYearDetailView.as_view(),
+                    name="article_author_year",
+                ),
+                path(
+                    "<int:year>",
+                    ArticleYearView.as_view(),
+                    name="article_year_archive",
+                ),
+                path(
                     "<slug:topic>",
                     ArticleTopicView.as_view(),
                     name="article_topic",
@@ -326,15 +342,9 @@ urlpatterns = [
                     ArticleDetailView.as_view(),
                     name="article_detail",
                 ),
-                path(
-                    "<int:year>/",
-                    ArticleYearView.as_view(),
-                    name="article_year_archive",
-                ),
             ]
         ),
     ),
-    path("users/<username>", UserProfileDetailView.as_view(), name="user_profile"),
     path(
         "robots.txt",
         RobotsView.as_view(

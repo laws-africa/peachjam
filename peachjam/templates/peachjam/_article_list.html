@@ -18,7 +18,7 @@
         <ul class="text-muted list-inline text-muted">
           <li class="list-inline-item">{{ article.date }}</li>
           <li class="list-inline-item">
-            <a href={% url 'user_profile' article.author.username %}>{% user_name article.author %}</a>
+            <a href={% url 'article_author' article.author.username %}>{% user_name article.author %}</a>
           </li>
           {% for topic in article.topics.all %}
             <li class="list-inline-item">
