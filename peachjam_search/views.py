@@ -192,6 +192,14 @@ class MainSearchBackend(BaseSearchFilterBackend):
             for field in query_fields
         ]
 
+        if " " in self.query:
+            # do optimistic match-phrase queries for multi-word queries
+            for field, options in view.search_fields.items():
+                query = {"query": self.query, "slop": 2}
+                if "boost" in (options or {}):
+                    query["boost"] = options["boost"]
+                queries.append(MatchPhrase(**{field: query}))
+
         return queries
 
     def build_content_phrase_queries(self, request, view):
@@ -374,7 +382,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     # This identifies the search configuration, for tracking changes across versions.
     # If a search setting changes, such as a boost or a new field, then changes this to the date of the release.
-    config_version = "2024-05-01"
+    config_version = "2024-10-31"
 
     document = SearchableDocument
     serializer_class = SearchableDocumentSerializer
