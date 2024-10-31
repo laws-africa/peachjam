@@ -195,7 +195,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
         if " " in self.query:
             # do optimistic match-phrase queries for multi-word queries
             for field, options in view.search_fields.items():
-                query = {"query": self.query, "slop": 2}
+                query = {"query": self.query, "slop": 0}
                 if "boost" in (options or {}):
                     query["boost"] = options["boost"]
                 queries.append(MatchPhrase(**{field: query}))
@@ -437,10 +437,10 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     search_fields = {
         "title": {"boost": 8},
-        "title_expanded": {"boost": 4},
-        "citation": {"boost": 4},
-        "content": None,
+        "title_expanded": {"boost": 3},
+        "citation": {"boost": 2},
         "alternative_names": {"boost": 4},
+        "content": None,
     }
 
     advanced_search_fields = {
