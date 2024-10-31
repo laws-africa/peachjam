@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.text import gettext_lazy as _
+from django.utils.text import slugify
 from django.views.generic import TemplateView
 
 from peachjam.helpers import lowercase_alphabet
@@ -184,9 +185,14 @@ class FilteredCauseListView(FilteredDocumentListView):
             }
 
     def populate_years(self, context):
-        context["years"] = self.get_base_queryset(exclude=["year", "month"]).dates(
-            "date", "year", order="DESC"
-        )
+        cache_key = f"causelist_years_{slugify(self.base_view_name())}"
+        years = cache.get(cache_key)
+        if years is None:
+            years = self.get_base_queryset(exclude=["year", "month"]).dates(
+                "date", "year", order="DESC"
+            )
+            cache.set(cache_key, years)
+        context["years"] = years
 
 
 class CauseListCourtDetailView(FilteredCauseListView):
