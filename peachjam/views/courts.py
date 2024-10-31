@@ -1,11 +1,13 @@
 from functools import cached_property
 from math import ceil
 
+from django.core.cache import cache
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.utils.text import gettext_lazy as _
+from django.utils.text import slugify
 
 from peachjam.helpers import chunks, lowercase_alphabet
 from peachjam.models import (
@@ -142,9 +144,14 @@ class FilteredJudgmentView(FilteredDocumentListView):
             }
 
     def populate_years(self, context):
-        context["years"] = self.get_base_queryset(exclude=["year", "month"]).dates(
-            "date", "year", order="DESC"
-        )
+        cache_key = f"years_{slugify(self.base_view_name())}"
+        years = cache.get(cache_key)
+        if years is None:
+            years = self.get_base_queryset(exclude=["year", "month"]).dates(
+                "date", "year", order="DESC"
+            )
+            cache.set(cache_key, years)
+        context["years"] = years
 
 
 class CourtDetailView(FilteredJudgmentView):
