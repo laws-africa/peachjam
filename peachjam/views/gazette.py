@@ -15,7 +15,7 @@ from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
-    YearMixin,
+    YearListMixin,
 )
 
 
@@ -116,7 +116,7 @@ class GazetteListView(TemplateView):
         pass
 
 
-class GazetteYearView(YearMixin, FilteredDocumentListView):
+class GazetteYearView(YearListMixin, FilteredDocumentListView):
     model = Gazette
     queryset = Gazette.objects.prefetch_related("source_file", "labels").select_related(
         "work"

@@ -4,7 +4,7 @@
   {% if grouped_articles %}<li class="breadcrumb-item active" aria-current="page">{{ year }}</li>{% endif %}
 {% endblock %}
 {% block article-header %}
-  {% if grouped_articles %}
+  {% if year %}
     <h1 class="my-4">{% trans "Articles" %} - {{ year }}</h1>
   {% else %}
     <h1 class="my-4">{% trans "Latest Articles" %}</h1>
@@ -13,11 +13,7 @@
 {% block article-content %}
   {% include 'peachjam/_years_list.html' with showallyears=True %}
   {% block article-list %}
-    {% if grouped_articles %}
-      {% include 'peachjam/_grouped_article_list.html' %}
-    {% else %}
-      {% include "peachjam/_article_list.html" %}
-    {% endif %}
+    {% include "peachjam/_article_list.html" %}
   {% endblock %}
   {% include 'peachjam/_pagination.html' %}
 {% endblock %}

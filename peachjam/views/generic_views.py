@@ -483,6 +483,11 @@ class YearMixin:
     def year(self):
         return self.kwargs["year"]
 
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(year=self.year, **kwargs)
+
+
+class YearListMixin(YearMixin):
     def page_title(self):
         return f"{super().page_title()} - {self.year}"
 
@@ -496,7 +501,6 @@ class YearMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["year"] = self.year
         self.populate_months(context)
         return context
 
