@@ -419,7 +419,9 @@ class MultiLanguageIndexManager:
     }
 
     # analyzer and filters for synonyms
-    SYNONYM_ANALYZERS = {
+    SEARCH_ANALYZERS = {
+        # Re-implement the built-in English analyzer, but include English synonyms
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/7.17/analysis-lang-analyzer.html#english-analyzer
         "eng": CustomAnalyzer(
             "english_synonym",
             tokenizer="standard",
@@ -482,10 +484,10 @@ class MultiLanguageIndexManager:
 
         for lang, index in self.language_indexes.items():
             search_analyzer = None
-            if lang in self.SYNONYM_ANALYZERS:
+            if lang in self.SEARCH_ANALYZERS:
                 # setup synonyms
-                index.analyzer(self.SYNONYM_ANALYZERS[lang])
-                search_analyzer = self.SYNONYM_ANALYZERS[lang]._name
+                index.analyzer(self.SEARCH_ANALYZERS[lang])
+                search_analyzer = self.SEARCH_ANALYZERS[lang]._name
 
             if index.exists():
                 is_new = False
