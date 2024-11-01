@@ -1,6 +1,7 @@
 import logging
 import uuid
 from datetime import timedelta
+from math import exp
 from urllib.parse import urlencode
 
 from django.contrib.auth.models import User
@@ -31,6 +32,7 @@ class SearchTrace(models.Model):
     n_results = models.IntegerField()
     page = models.IntegerField()
     filters = models.JSONField(null=True)
+    filters_string = models.CharField(max_length=2048, null=True)
     ordering = models.CharField(max_length=1024, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -65,8 +67,13 @@ class SearchClick(models.Model):
     frbr_uri = models.CharField(max_length=2048)
     portion = models.CharField(max_length=2048, null=True)
     position = models.IntegerField()
+    score = models.FloatField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ("-created_at",)
+
+    def save(self, *args, **kwargs):
+        self.score = exp(-0.1733 * (self.position - 1))
+        super().save(*args, **kwargs)
