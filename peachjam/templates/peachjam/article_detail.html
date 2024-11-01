@@ -58,10 +58,10 @@
     </header>
     {% if article.summary %}<p class="lead">{{ article.summary }}</p>{% endif %}
     <div class="article-body">{{ article.body|safe }}</div>
-    {% if article.attachments %}
-      {% for attachment in article.attachments.all %}
+    {% if attachments %}
+      {% for attachment in attachments %}
         <p>
-          <a href="{{ attachment.file.url }}" target="_blank">{% trans "Download" %} {{ attachment.filename }}</a>
+          <a href="{{ attachment.get_absolute_url }}" target="_blank">{% trans "Download" %} {{ attachment.filename }}</a>
           ({{ attachment.size|filesizeformat }})
         </p>
       {% endfor %}

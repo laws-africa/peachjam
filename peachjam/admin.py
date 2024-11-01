@@ -1153,6 +1153,33 @@ class ArticleAttachmentInline(BaseAttachmentFileInline):
     model = ArticleAttachment
     extra = 1
 
+    def attachment_url(self, obj):
+        return obj.get_absolute_url()
+
+    def attachment_link(self, obj):
+        if obj.pk:
+            return format_html(
+                '<a href="{url}" target="_blank">{url}</a>',
+                url=self.attachment_url(obj),
+            )
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+
+        original_init = formset.form.__init__
+
+        def new_init(self, *args, **kwargs):
+            original_init(self, *args, **kwargs)
+            instance = kwargs.get("instance", None)
+
+            if instance and instance.file:
+                # Make the file field readonly by making it disabled in the widget
+                self.fields["file"].widget.attrs["readonly"] = True
+                self.fields["file"].widget.attrs["disabled"] = "disabled"
+
+        formset.form.__init__ = new_init
+        return formset
+
 
 class ArticleForm(forms.ModelForm):
     body = forms.CharField(widget=CKEditorWidget())
@@ -1166,6 +1193,7 @@ class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ("title", "author", "date", "published")
     list_display_links = ("title",)
     list_filter = ("published", "author")
+    search_fields = ("title", "body")
     date_hierarchy = "date"
     fields = (
         "title",

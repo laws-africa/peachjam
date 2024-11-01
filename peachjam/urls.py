@@ -29,6 +29,7 @@ from peachjam.feeds import (
 from peachjam.helpers import ISODateConverter
 from peachjam.views import (
     AboutPageView,
+    ArticleAttachmentDetailView,
     ArticleAuthorDetailView,
     ArticleAuthorYearDetailView,
     ArticleDetailView,
@@ -341,6 +342,11 @@ urlpatterns = [
                     "<isodate:date>/<str:author>/<slug:slug>",
                     ArticleDetailView.as_view(),
                     name="article_detail",
+                ),
+                path(
+                    "<isodate:date>/<str:author>/<slug:slug>/attachment/<int:pk>/<str:filename>",
+                    ArticleAttachmentDetailView.as_view(),
+                    name="article_attachment",
                 ),
             ]
         ),

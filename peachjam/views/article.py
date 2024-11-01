@@ -1,8 +1,9 @@
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import DetailView, ListView
 
-from peachjam.models import Article, Taxonomy, UserProfile
+from peachjam.models import Article, ArticleAttachment, Taxonomy, UserProfile
 from peachjam.views.generic_views import YearMixin
 
 
@@ -102,6 +103,9 @@ class ArticleDetailView(ArticleViewMixin, DetailView):
         context["user_profile"] = get_object_or_404(
             UserProfile, user__pk=self.object.author.pk
         )
+        context["attachments"] = self.object.attachments.exclude(
+            mimetype__icontains="image"
+        )
         return context
 
 
@@ -144,3 +148,22 @@ class ArticleAuthorDetailView(ArticleListView):
 class ArticleAuthorYearDetailView(YearMixin, ArticleAuthorDetailView):
     def get_queryset(self):
         return super().get_queryset().filter(date__year=self.kwargs["year"])
+
+
+class ArticleAttachmentDetailView(DetailView):
+    model = ArticleAttachment
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            ArticleAttachment,
+            document__date=self.kwargs["date"],
+            document__slug=self.kwargs["slug"],
+            document__author__username=self.kwargs["author"],
+            pk=self.kwargs["pk"],
+            filename=self.kwargs["filename"],
+        )
+
+    def render_to_response(self, context, **response_kwargs):
+        response = FileResponse(self.object.file, filename=self.object.filename)
+        response["Cache-Control"] = "max-age=31536000"
+        return response
