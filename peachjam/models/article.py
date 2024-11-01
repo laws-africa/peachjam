@@ -67,6 +67,15 @@ class Article(models.Model):
 
         return super().save(*args, **kwargs)
 
+    @classmethod
+    def get_article_tags_root(cls):
+        from peachjam.models import Taxonomy
+
+        root = Taxonomy.objects.filter(name__iexact="Article tags").first()
+        if not root:
+            root = Taxonomy.add_root(name="Article tags")
+        return root
+
 
 class UserProfile(models.Model):
     SAVE_FOLDER = "user_profiles"

@@ -19,7 +19,7 @@ from peachjam.models import (
     Outcome,
     Taxonomy,
 )
-from peachjam.views.generic_views import FilteredDocumentListView, YearMixin
+from peachjam.views.generic_views import FilteredDocumentListView, YearListMixin
 
 
 class FilteredJudgmentView(FilteredDocumentListView):
@@ -190,7 +190,7 @@ class CourtDetailView(FilteredJudgmentView):
         context["entity_profile_title"] = self.court.name
 
 
-class CourtYearView(YearMixin, CourtDetailView):
+class CourtYearView(YearListMixin, CourtDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["all_months_url"] = reverse(
@@ -251,7 +251,7 @@ class CourtRegistryDetailView(RegistryMixin, CourtDetailView):
     pass
 
 
-class CourtRegistryYearView(YearMixin, CourtRegistryDetailView):
+class CourtRegistryYearView(YearListMixin, CourtRegistryDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["all_months_url"] = reverse(
@@ -292,7 +292,7 @@ class CourtClassDetailView(FilteredJudgmentView):
         return context
 
 
-class CourtClassYearView(YearMixin, CourtClassDetailView):
+class CourtClassYearView(YearListMixin, CourtClassDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["all_months_url"] = reverse(

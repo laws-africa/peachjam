@@ -29,10 +29,13 @@ from peachjam.feeds import (
 from peachjam.helpers import ISODateConverter
 from peachjam.views import (
     AboutPageView,
+    ArticleAuthorDetailView,
+    ArticleAuthorYearDetailView,
     ArticleDetailView,
     ArticleListView,
-    ArticleTopicListView,
-    ArticleYearArchiveView,
+    ArticleTopicView,
+    ArticleTopicYearView,
+    ArticleYearView,
     AuthorDetailView,
     BookListView,
     CauseListCourtClassMonthView,
@@ -89,7 +92,6 @@ from peachjam.views import (
     TaxonomyFirstLevelView,
     TaxonomyListView,
     TermsOfUsePageView,
-    UserProfileDetailView,
     WorkAutocomplete,
 )
 from peachjam.views.comments import comment_form_view
@@ -305,23 +307,44 @@ urlpatterns = [
     path("accounts/profile/", EditAccountView.as_view(), name="edit_account"),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
-    path("articles/", ArticleListView.as_view(), name="article_list"),
     path(
-        "articles/<slug:topic>",
-        ArticleTopicListView.as_view(),
-        name="article_topic_list",
+        "articles/",
+        include(
+            [
+                path("", ArticleListView.as_view(), name="article_list"),
+                path(
+                    "authors/<username>",
+                    ArticleAuthorDetailView.as_view(),
+                    name="article_author",
+                ),
+                path(
+                    "authors/<username>/<int:year>",
+                    ArticleAuthorYearDetailView.as_view(),
+                    name="article_author_year",
+                ),
+                path(
+                    "<int:year>",
+                    ArticleYearView.as_view(),
+                    name="article_year_archive",
+                ),
+                path(
+                    "<slug:topic>",
+                    ArticleTopicView.as_view(),
+                    name="article_topic",
+                ),
+                path(
+                    "<slug:topic>/<int:year>",
+                    ArticleTopicYearView.as_view(),
+                    name="article_topic_year",
+                ),
+                path(
+                    "<isodate:date>/<str:author>/<slug:slug>",
+                    ArticleDetailView.as_view(),
+                    name="article_detail",
+                ),
+            ]
+        ),
     ),
-    path(
-        "articles/<isodate:date>/<str:author>/<slug:slug>",
-        ArticleDetailView.as_view(),
-        name="article_detail",
-    ),
-    path(
-        "articles/<int:year>/",
-        ArticleYearArchiveView.as_view(),
-        name="article_year_archive",
-    ),
-    path("users/<username>", UserProfileDetailView.as_view(), name="user_profile"),
     path(
         "robots.txt",
         RobotsView.as_view(

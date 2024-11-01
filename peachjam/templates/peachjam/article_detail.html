@@ -1,92 +1,86 @@
-{% extends 'peachjam/layouts/main.html' %}
+{% extends 'peachjam/layouts/articles.html' %}
 {% load i18n peachjam %}
 {% block title %}{{ article.title }}{% endblock %}
-{% block page-content %}
-  <div class="container pb-5">
-    <nav aria-label="breadcrumb" class="mb-3">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-          <a href={% url 'article_list' %}>{% trans "Articles" %}</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">{{ article.title }}</li>
-      </ol>
-    </nav>
-    <div class="row">
-      <div class="col-lg-8 mb-5">
-        <article class="article">
-          <header class="mb-4">
-            {% if article.image %}
-              <figure class="mb-4">
-                <img alt="article image"
-                     class="img-fluid rounded"
-                     src="{{ article.image.url }}"/>
-              </figure>
-            {% endif %}
-            <h1>{{ article.title }}</h1>
-            <div class="text-muted mb-2">
-              {{ article.date }}
-              ·
-              <a href={% url 'user_profile' article.author.username %}>{% user_name article.author %}</a>
-            </div>
-            <ul class="text-muted list-inline">
-              {% for topic in article.topics.all %}
-                <li class="list-inline-item">
-                  <a href="{% url 'article_topic_list' topic.slug %}">{{ topic }}</a>
-                </li>
-              {% endfor %}
-            </ul>
-            <div class="d-flex align-items-center">
-              <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
-                 class="btn btn-link share-link"
-                 target="_blank">
-                <i class="bi bi-whatsapp whatsapp-forecolor share-icon"></i>
-              </a>
-              <a href="https://twitter.com/intent/tweet?text={{ request.build_absolute_uri }}"
-                 class="btn btn-link share-link"
-                 target="_blank">
-                <i class="bi bi-twitter twitter-forecolor share-icon"></i>
-              </a>
-              <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
-                 class="btn btn-link share-link"
-                 target="_blank">
-                <i class="bi bi-facebook facebook-forecolor share-icon"></i>
-              </a>
-            </div>
-          </header>
-          {% if article.summary %}<p class="lead">{{ article.summary }}</p>{% endif %}
-          <div class="article-body">{{ article.body|safe }}</div>
-          {% if article.attachments %}
-            {% for attachment in article.attachments.all %}
-              <p>
-                <a href="{{ attachment.file.url }}" target="_blank">{% trans "Download" %} {{ attachment.filename }}</a>
-                ({{ attachment.size|filesizeformat }})
-              </p>
-            {% endfor %}
-          {% endif %}
-        </article>
-      </div>
-      <div class="col-lg-3">
-        <div class="card mb-3">
-          {% if user_profile.photo %}
-            <img class="user-profile-photo mt-3"
-                 src="{{ user_profile.photo.url }}"
-                 alt="User profile photo"/>
-          {% endif %}
-          <div class="card-body">
-            <h5 class="card-title">
-              <a href="{% url 'user_profile' article.author.username %}">{% user_name article.author %}</a>
-            </h5>
-            <p class="card-text">{{ user_profile.profile_description|truncatewords:6 }}</p>
-            <a href="{% url 'user_profile' article.author.username %}"
-               class="btn btn-primary">{% trans "About the author" %}</a>
-          </div>
+{% block breadcrumb-items %}
+  <li class="breadcrumb-item">
+    <a href={% url 'article_year_archive' article.date.year %}>{{ article.date.year }}</a>
+  </li>
+{% endblock %}
+{% block article-content %}
+  <article class="article">
+    <header class="mb-4">
+      {% if article.image %}
+        <figure class="mb-4">
+          <img alt="article image"
+               class="img-fluid rounded"
+               src="{{ article.image.url }}"/>
+        </figure>
+      {% endif %}
+      <h1>{{ article.title }}</h1>
+      <div class="text-muted mb-2 d-flex">
+        <div class="flex-grow-1">
+          {{ article.date }}
+          ·
+          <a href={% url 'article_author' article.author.username %}>{% user_name article.author %}</a>
         </div>
-        {% if more_articles %}
-          {% user_name article.author as username %}
-          <h4>{% blocktrans trimmed %}Recent articles by {{ username }}{% endblocktrans %}</h4>
-          {% include 'peachjam/_recent_article_list.html' with articles=more_articles %}
+        {% if perms.peachjam.change_article %}
+          <a class="btn btn-outline-secondary"
+             href="{{ article|admin_url:'change' }}">{% trans "Edit" %}</a>
         {% endif %}
       </div>
+      <div class="d-flex">
+        <ul class="text-muted list-inline flex-grow-1 me-3">
+          {% for topic in article.topics.all %}
+            <li class="list-inline-item">
+              <i class="bi bi-tag"></i>
+              <a href="{% url 'article_topic' topic.slug %}">{{ topic }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+        <div class="d-flex align-items-center justify-content-end">
+          <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
+             class="btn btn-link share-link"
+             target="_blank">
+            <i class="bi bi-whatsapp whatsapp-forecolor share-icon"></i>
+          </a>
+          <a href="https://twitter.com/intent/tweet?text={{ request.build_absolute_uri }}"
+             class="btn btn-link share-link"
+             target="_blank">
+            <i class="bi bi-twitter-x twitter-x-forecolor share-icon"></i>
+          </a>
+          <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+             class="btn btn-link share-link"
+             target="_blank">
+            <i class="bi bi-facebook facebook-forecolor share-icon"></i>
+          </a>
+        </div>
+      </div>
+    </header>
+    {% if article.summary %}<p class="lead">{{ article.summary }}</p>{% endif %}
+    <div class="article-body">{{ article.body|safe }}</div>
+    {% if article.attachments %}
+      {% for attachment in article.attachments.all %}
+        <p>
+          <a href="{{ attachment.file.url }}" target="_blank">{% trans "Download" %} {{ attachment.filename }}</a>
+          ({{ attachment.size|filesizeformat }})
+        </p>
+      {% endfor %}
+    {% endif %}
+  </article>
+{% endblock %}
+{% block article-sidebar %}
+  <div class="card mb-3">
+    {% if user_profile.photo %}
+      <img class="user-profile-photo mt-3"
+           src="{{ user_profile.photo.url }}"
+           alt="User profile photo"/>
+    {% endif %}
+    <div class="card-body">
+      <h5 class="card-title">
+        <a href="{% url 'article_author' article.author.username %}">{% user_name article.author %}</a>
+      </h5>
+      <p class="card-text">{{ user_profile.profile_description|truncatewords:6 }}</p>
     </div>
   </div>
-{% endblock page-content %}
+  {{ block.super }}
+{% endblock %}
