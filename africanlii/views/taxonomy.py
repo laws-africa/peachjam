@@ -10,7 +10,7 @@ from africanlii.forms import ESDocumentFilterForm
 from peachjam.helpers import lowercase_alphabet
 from peachjam.models import Taxonomy
 from peachjam.views import TaxonomyDetailView, TaxonomyFirstLevelView
-from peachjam_search.documents import SearchableDocument, get_search_indexes
+from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
 from peachjam_search.views import DocumentSearchViewSet
 
 
@@ -89,9 +89,9 @@ class DocIndexDetailView(TaxonomyDetailView):
         return documents
 
     def get_base_queryset(self):
-        index = get_search_indexes(SearchableDocument._index._name)
+        indexes = MultiLanguageIndexManager.get_instance().get_all_search_index_names()
         search = (
-            SearchableDocument.search(index=index)
+            SearchableDocument.search(index=indexes)
             .source(exclude=DocumentSearchViewSet.source["excludes"])
             .filter("term", taxonomies=self.taxonomy.slug)
         )
@@ -106,7 +106,9 @@ class DocIndexDetailView(TaxonomyDetailView):
     def add_facets(self, context):
         """Add a limited set of facets pulled from ES."""
         faceted = FacetedSearch()
-        faceted.index = get_search_indexes(SearchableDocument._index._name)
+        faceted.index = (
+            MultiLanguageIndexManager.get_instance().get_all_search_index_names()
+        )
         faceted.facets = {
             "year": TermsFacet(field="year", size=100),
             "jurisdiction": TermsFacet(field="jurisdiction", size=100),

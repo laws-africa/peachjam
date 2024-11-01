@@ -36,7 +36,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
 from peachjam_api.serializers import LabelSerializer
-from peachjam_search.documents import SearchableDocument, get_search_indexes
+from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
 from peachjam_search.models import SearchTrace
 from peachjam_search.serializers import (
     SearchableDocumentSerializer,
@@ -558,7 +558,9 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # search multiple language indexes
-        self.index = get_search_indexes(self.document._index._name)
+        self.index = (
+            MultiLanguageIndexManager.get_instance().get_all_search_index_names()
+        )
         self.search = self.search.index(self.index)
 
     def get_translatable_fields(self, request):

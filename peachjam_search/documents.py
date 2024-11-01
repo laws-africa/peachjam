@@ -5,7 +5,8 @@ from django.conf import settings
 from django.utils.functional import classproperty
 from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
-from elasticsearch_dsl import RankFeature
+from elasticsearch_dsl import RankFeature, token_filter
+from elasticsearch_dsl.analysis import CustomAnalyzer
 from elasticsearch_dsl.index import Index
 
 from peachjam.models import (
@@ -357,15 +358,12 @@ class SearchableDocument(Document):
         parts.extend([a.title for a in instance.alternative_names.all()])
         return " ".join(parts)
 
-    def get_index_for_language(self, lang):
-        if lang in ANALYZERS:
-            return f"{self._index._name}_{lang}"
-        return self._index._name
-
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
         log.info(f"Prepared document #{object_instance.pk} for indexing")
-        info["_index"] = self.get_index_for_language(
+        info[
+            "_index"
+        ] = MultiLanguageIndexManager.get_instance().get_index_for_language(
             object_instance.language.iso_639_2T
         )
         return info
@@ -406,45 +404,129 @@ for field, attr in SearchableDocument.translated_fields:
             make_prepare(field, attr, lang),
         )
 
-# These are the language-specific indexes we create and their associated analyzers for text fields.
-# Documents in other languages are stored in a general index with the "standard" analyzer
-ANALYZERS = {
-    "ara": "arabic",
-    "eng": "english",
-    "fra": "french",
-    "por": "portuguese",
-}
 
+class MultiLanguageIndexManager:
+    """Helper that creates multi-language indexes from the main search index definition.
+    and ensures the text fields use the correct language variant analyzers."""
 
-def get_search_indexes(base_index):
-    return (
-        [base_index]
-        + [f"{base_index}_{lang}" for lang in ANALYZERS.keys()]
-        + [
-            f"{i}_{lang}"
-            for i in settings.PEACHJAM["EXTRA_SEARCH_INDEXES"]
-            for lang in ANALYZERS.keys()
-        ]
-    )
+    # These are the language-specific indexes we create and their associated analyzers for text fields.
+    # Documents in other languages are stored in a general index with the "standard" analyzer
+    ANALYZERS = {
+        "ara": "arabic",
+        "eng": "english",
+        "fra": "french",
+        "por": "portuguese",
+    }
 
+    # analyzer and filters for synonyms
+    SYNONYM_ANALYZERS = {
+        "eng": CustomAnalyzer(
+            "english_synonym",
+            tokenizer="standard",
+            filter=[
+                token_filter(
+                    "english_synonym_filter",
+                    type="synonym_graph",
+                    synonyms=[
+                        # Any occurrence of one of these words will be expanded to all the others.
+                        # All the terms will then go through the normal filters, such as lowercasing and stemming.
+                        # NB: synonyms are case-sensitive
+                        "Anor, Another",
+                        "AU, African Union",
+                        "au, African Union",
+                        "Ors, Others",
+                        "ors, others",
+                        "R, Republic",
+                        "S, State",
+                        "v, vs, versus",
+                        "V, Vs, Versus",
+                    ],
+                ),
+                token_filter(
+                    "english_possessive_stemmer",
+                    type="stemmer",
+                    language="possessive_english",
+                ),
+                "lowercase",
+                token_filter("english_stop", type="stop", stopwords="_english_"),
+                token_filter("english_stemmer", type="stemmer", language="english"),
+            ],
+        )
+    }
 
-def setup_language_indexes():
-    """Setup multi-language indexes."""
-    main_index = SearchableDocument._index
-    mappings = main_index.to_dict()["mappings"]
+    def __init__(self):
+        self.main_index = SearchableDocument._index
+        self.setup_language_indexes()
 
-    def set_analyzer(fields, analyzer):
-        """Recursively set analyzer for text fields."""
+    @classmethod
+    def get_instance(cls):
+        if not hasattr(cls, "_instance"):
+            cls._instance = cls()
+        return cls._instance
+
+    def setup_language_indexes(self):
+        """Setup multi-language indexes."""
+        self.language_indexes = []
+        mappings = self.main_index.to_dict()["mappings"]
+
+        for lang, analyzer in self.ANALYZERS.items():
+            index = Index(name=f"{self.main_index._name}_{lang}")
+            index._settings = copy.deepcopy(self.main_index._settings)
+
+            search_analyzer = None
+            if lang in self.SYNONYM_ANALYZERS:
+                # setup synonyms
+                index.analyzer(self.SYNONYM_ANALYZERS[lang])
+                search_analyzer = self.SYNONYM_ANALYZERS[lang]._name
+
+            # update and store mappings
+            new_mappings = copy.deepcopy(mappings)
+            self.set_text_field_analyzer(
+                new_mappings["properties"].values(), analyzer, search_analyzer
+            )
+            index.get_or_create_mapping()._update_from_dict(new_mappings)
+
+            self.language_indexes.append(index)
+
+    def set_text_field_analyzer(self, fields, analyzer, search_analyzer):
+        """Recursively set analyzers for text fields."""
         for fld in fields:
             if fld["type"] == "text":
                 fld["analyzer"] = analyzer
+                if search_analyzer:
+                    fld["search_analyzer"] = search_analyzer
             elif fld["type"] == "nested":
-                set_analyzer(fld["properties"].values(), analyzer)
+                self.set_text_field_analyzer(
+                    fld["properties"].values(), analyzer, search_analyzer
+                )
 
-    for lang, analyzer in ANALYZERS.items():
-        new_mappings = copy.deepcopy(mappings)
-        set_analyzer(new_mappings["properties"].values(), analyzer)
-        index = Index(name=f"{main_index._name}_{lang}")
-        index.get_or_create_mapping()._update_from_dict(new_mappings)
-        index._settings = main_index._settings
-        registry.register(index, SearchableDocument)
+    def register_indexes(self):
+        for index in self.language_indexes:
+            registry.register(index, SearchableDocument)
+
+    def get_all_search_index_names(self):
+        """The names of all indexes to use for a search."""
+        names = [self.main_index._name] + [ix._name for ix in self.language_indexes]
+        # fold in language variants of the extra search indexes, if any
+        return names + [
+            f"{i}_{lang}"
+            for i in settings.PEACHJAM["EXTRA_SEARCH_INDEXES"]
+            for lang in self.ANALYZERS.keys()
+        ]
+
+    def get_index_for_language(self, lang):
+        if lang in self.ANALYZERS:
+            return f"{self.main_index._name}_{lang}"
+        return self.main_index._name
+
+    def update_index_settings(self):
+        for index in self.language_indexes:
+            log.info(f"Updating index settings for {index._name}")
+            index.close()
+            log.info("Index closed")
+            try:
+                index.save()
+                log.info("Index updated")
+            finally:
+                index.open()
+                log.info("Index re-opened")
