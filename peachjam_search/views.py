@@ -195,9 +195,11 @@ class MainSearchBackend(BaseSearchFilterBackend):
         if " " in self.query:
             # do optimistic match-phrase queries for multi-word queries
             for field, options in view.search_fields.items():
-                query = {"query": self.query, "slop": 0}
+                query = {"query": self.query, "slop": view.optimistic_phrase_match_slop}
                 if "boost" in (options or {}):
                     query["boost"] = options["boost"]
+                if field == "content":
+                    query["boost"] = view.optimistic_phrase_match_content_boost
                 queries.append(MatchPhrase(**{field: query}))
 
         return queries
@@ -206,7 +208,15 @@ class MainSearchBackend(BaseSearchFilterBackend):
         """Adds a best-effort phrase match query on the content field."""
         if not self.query:
             return []
-        return [MatchPhrase(content={"query": self.query, "slop": 2})]
+        return [
+            MatchPhrase(
+                content={
+                    "query": self.query,
+                    "slop": view.optimistic_phrase_match_slop,
+                    "boost": view.optimistic_phrase_match_content_boost,
+                }
+            )
+        ]
 
     def build_advanced_all_queries(self, request, view):
         """Build queries for search__all (advanced search across all fields). Similar logic to build_basic_queries,
@@ -321,7 +331,13 @@ class MainSearchBackend(BaseSearchFilterBackend):
                         )
                     ],
                     should=[
-                        MatchPhrase(pages__body={"query": self.query, "slop": 2}),
+                        MatchPhrase(
+                            pages__body={
+                                "query": self.query,
+                                "slop": view.optimistic_phrase_match_slop,
+                                "boost": view.optimistic_phrase_match_content_boost,
+                            }
+                        ),
                     ],
                 ),
             )
@@ -340,7 +356,13 @@ class MainSearchBackend(BaseSearchFilterBackend):
                 query=Q(
                     "bool",
                     should=[
-                        MatchPhrase(provisions__body={"query": self.query, "slop": 2}),
+                        MatchPhrase(
+                            provisions__body={
+                                "query": self.query,
+                                "slop": view.optimistic_phrase_match_slop,
+                                "boost": view.optimistic_phrase_match_content_boost,
+                            }
+                        ),
                         SimpleQueryString(
                             query=self.query,
                             fields=["provisions.body"],
@@ -441,6 +463,10 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "alternative_names": {"boost": 4},
         "content": None,
     }
+
+    # when doing a SHOULD phrase match on content fields, what should we boost by?
+    optimistic_phrase_match_content_boost = 4
+    optimistic_phrase_match_slop = 0
 
     advanced_search_fields = {
         "case_number": None,
