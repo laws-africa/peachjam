@@ -431,7 +431,8 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     # this means that at least 70% of terms must appear in ANY of the searched fields
     simple_query_string_options = {
         "default_operator": "OR",
-        "minimum_should_match": "70%",
+        # all for 1-4 terms, 5 or more requires at 80% to match
+        "minimum_should_match": "4<80%",
     }
     # how to treat queries for advanced search: AND
     advanced_simple_query_string_options = {
