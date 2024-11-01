@@ -153,13 +153,8 @@ class IndigoAdapter(RequestsAdapter):
 
         return documents
 
-    def check_for_deleted(self, docs):
-        uris = {d["expression_frbr_uri"] for d in docs}
-        for doc in docs:
-            for pit in doc["points_in_time"]:
-                for expr in pit["expressions"]:
-                    uris.add(expr["expression_frbr_uri"])
-
+    def filter_queryset(self, qs):
+        """Filter a queryset using the same filters as filter_document_list."""
         # filter by place/locality codes
         places = []
         for code in self.place_codes:
@@ -171,8 +166,33 @@ class IndigoAdapter(RequestsAdapter):
             else:
                 places.append(Q(jurisdiction__iso=code.upper(), locality__code=None))
         # combine the place queries with OR
-        qs = Legislation.objects.filter(reduce(lambda a, b: a | b, places))
+        qs = qs.filter(reduce(lambda a, b: a | b, places))
 
+        if self.include_doctypes:
+            qs = qs.filter(frbr_uri_doctype__in=self.include_doctypes)
+        if self.exclude_doctypes:
+            qs = qs.exclude(frbr_uri_doctype__in=self.exclude_doctypes)
+
+        if self.include_subtypes:
+            qs = qs.filter(frbr_uri_subtype__in=self.include_subtypes)
+        if self.exclude_subtypes:
+            qs = qs.exclude(frbr_uri_subtype__in=self.exclude_subtypes)
+
+        if self.include_actors:
+            qs = qs.filter(frbr_uri_actor__in=self.include_actors)
+        if self.exclude_actors:
+            qs = qs.exclude(frbr_uri_actor__in=self.exclude_actors)
+
+        return qs
+
+    def check_for_deleted(self, docs):
+        uris = {d["expression_frbr_uri"] for d in docs}
+        for doc in docs:
+            for pit in doc["points_in_time"]:
+                for expr in pit["expressions"]:
+                    uris.add(expr["expression_frbr_uri"])
+
+        qs = self.filter_queryset(Legislation.objects)
         return qs.exclude(expression_frbr_uri__in=list(uris)).values_list(
             "expression_frbr_uri", flat=True
         )
