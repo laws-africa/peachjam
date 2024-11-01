@@ -1,0 +1,20 @@
+{% extends 'peachjam/article_list.html' %}
+{% load i18n peachjam %}
+{% block title %}
+  {% user_name user_profile.user %}
+{% endblock title %}
+{% block article-header %}
+  <div class="row">
+    <div class="col-lg-3">
+      {% if user_profile.photo %}
+        <img class="user-profile-photo mx-auto mb-3"
+             src="{{ user_profile.photo.url }}"
+             alt="User profile photo"/>
+      {% endif %}
+    </div>
+    <div class="col-lg-9">
+      <h1 class="my-4">{% user_name user_profile.user %}</h1>
+      <p class="card-text">{{ user_profile.profile_description }}</p>
+    </div>
+  </div>
+{% endblock %}

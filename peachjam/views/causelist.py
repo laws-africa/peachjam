@@ -22,7 +22,7 @@ from peachjam.models import (
 from peachjam.registry import registry
 from peachjam.views import BaseDocumentDetailView, FilteredDocumentListView
 from peachjam.views.courts import MonthMixin, RegistryMixin
-from peachjam.views.generic_views import YearMixin
+from peachjam.views.generic_views import YearListMixin
 
 
 @registry.register_doc_type("causelist")
@@ -229,7 +229,7 @@ class CauseListCourtDetailView(FilteredCauseListView):
         return context
 
 
-class CauseListCourtYearView(YearMixin, CauseListCourtDetailView):
+class CauseListCourtYearView(YearListMixin, CauseListCourtDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["all_months_url"] = reverse(
@@ -256,7 +256,7 @@ class CauseListCourtRegistryDetailView(RegistryMixin, CauseListCourtDetailView):
         return context
 
 
-class CauseListCourtRegistryYearView(YearMixin, CauseListCourtRegistryDetailView):
+class CauseListCourtRegistryYearView(YearListMixin, CauseListCourtRegistryDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["all_months_url"] = reverse(
@@ -314,7 +314,7 @@ class CauseListCourtClassView(FilteredCauseListView):
         return context
 
 
-class CauseListCourtClassYearView(YearMixin, CauseListCourtClassView):
+class CauseListCourtClassYearView(YearListMixin, CauseListCourtClassView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["all_months_url"] = reverse(

@@ -643,11 +643,7 @@ class PublishedWidget(BooleanWidget):
 class TopicsWidget(ManyToManyWidget):
     def clean(self, value, row=None, **kwargs):
         if value:
-            article_tag_root = Taxonomy.objects.filter(
-                name__iexact="Article tags"
-            ).first()
-            if not article_tag_root:
-                article_tag_root = Taxonomy.add_root(name="Article tags")
+            article_tag_root = Article.get_article_tags_root()
 
             taxonomies = [
                 " ".join(t.split()).capitalize() for t in value.split(self.separator)

@@ -27,7 +27,7 @@ from django_elasticsearch_dsl_drf.pagination import PageNumberPagination, Pagina
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from elasticsearch_dsl import DateHistogramFacet
 from elasticsearch_dsl.connections import get_connection
-from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString
+from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString, Term
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import CreateModelMixin
@@ -111,7 +111,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
         # the basic query for a simple search
         self.query = " ".join(self.get_search_query_params(request))
 
-        must_queries = []
+        must_queries = [Term(is_most_recent=True)]
         must_queries.extend(self.build_rank_feature_queries(request, view))
         must_queries.extend(self.build_per_field_queries(request, view))
 
@@ -192,13 +192,31 @@ class MainSearchBackend(BaseSearchFilterBackend):
             for field in query_fields
         ]
 
+        if " " in self.query:
+            # do optimistic match-phrase queries for multi-word queries
+            for field, options in view.search_fields.items():
+                query = {"query": self.query, "slop": view.optimistic_phrase_match_slop}
+                if "boost" in (options or {}):
+                    query["boost"] = options["boost"]
+                if field == "content":
+                    query["boost"] = view.optimistic_phrase_match_content_boost
+                queries.append(MatchPhrase(**{field: query}))
+
         return queries
 
     def build_content_phrase_queries(self, request, view):
         """Adds a best-effort phrase match query on the content field."""
         if not self.query:
             return []
-        return [MatchPhrase(content={"query": self.query, "slop": 2})]
+        return [
+            MatchPhrase(
+                content={
+                    "query": self.query,
+                    "slop": view.optimistic_phrase_match_slop,
+                    "boost": view.optimistic_phrase_match_content_boost,
+                }
+            )
+        ]
 
     def build_advanced_all_queries(self, request, view):
         """Build queries for search__all (advanced search across all fields). Similar logic to build_basic_queries,
@@ -313,7 +331,13 @@ class MainSearchBackend(BaseSearchFilterBackend):
                         )
                     ],
                     should=[
-                        MatchPhrase(pages__body={"query": self.query, "slop": 2}),
+                        MatchPhrase(
+                            pages__body={
+                                "query": self.query,
+                                "slop": view.optimistic_phrase_match_slop,
+                                "boost": view.optimistic_phrase_match_content_boost,
+                            }
+                        ),
                     ],
                 ),
             )
@@ -332,7 +356,13 @@ class MainSearchBackend(BaseSearchFilterBackend):
                 query=Q(
                     "bool",
                     should=[
-                        MatchPhrase(provisions__body={"query": self.query, "slop": 2}),
+                        MatchPhrase(
+                            provisions__body={
+                                "query": self.query,
+                                "slop": view.optimistic_phrase_match_slop,
+                                "boost": view.optimistic_phrase_match_content_boost,
+                            }
+                        ),
                         SimpleQueryString(
                             query=self.query,
                             fields=["provisions.body"],
@@ -374,7 +404,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     # This identifies the search configuration, for tracking changes across versions.
     # If a search setting changes, such as a boost or a new field, then changes this to the date of the release.
-    config_version = "2024-05-01"
+    config_version = "2024-10-31"
 
     document = SearchableDocument
     serializer_class = SearchableDocumentSerializer
@@ -413,7 +443,6 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "court": "court",
         "date": "date",
         "doc_type": "doc_type",
-        "is_most_recent": "is_most_recent",
         "jurisdiction": "jurisdiction",
         "language": "language",
         "locality": "locality",
@@ -429,11 +458,15 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
     search_fields = {
         "title": {"boost": 8},
-        "title_expanded": {"boost": 4},
-        "citation": {"boost": 4},
-        "content": None,
+        "title_expanded": {"boost": 3},
+        "citation": {"boost": 2},
         "alternative_names": {"boost": 4},
+        "content": None,
     }
+
+    # when doing a SHOULD phrase match on content fields, what should we boost by?
+    optimistic_phrase_match_content_boost = 4
+    optimistic_phrase_match_slop = 0
 
     advanced_search_fields = {
         "case_number": None,
@@ -570,9 +603,10 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
 
         filters = {
             fld: self.request.GET.getlist(fld)
-            for fld in self.filter_fields.keys()
+            for fld in sorted(self.filter_fields.keys())
             if fld in self.request.GET
         }
+        filters_string = "; ".join(f"{k}={v}" for k, v in filters.items())
 
         previous = None
         if self.request.GET.get("previous"):
@@ -598,6 +632,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             n_results=response.data["count"],
             page=self.paginator.page.number,
             filters=filters,
+            filters_string=filters_string,
             ordering=self.request.GET.get("ordering"),
             previous_search=previous,
             ip_address=self.request.headers.get("x-forwarded-for"),
