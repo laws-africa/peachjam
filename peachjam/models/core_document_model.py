@@ -15,6 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.db import models
 from django.http import Http404
+from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
@@ -1013,6 +1014,18 @@ class ArticleAttachment(AttachmentAbstractModel):
 
     def __str__(self):
         return self.file.name
+
+    def get_absolute_url(self):
+        return reverse(
+            "article_attachment",
+            kwargs={
+                "date": self.document.date.strftime("%Y-%m-%d"),
+                "author": self.document.author.username,
+                "slug": self.document.slug,
+                "pk": self.pk,
+                "filename": self.filename,
+            },
+        )
 
 
 class AlternativeName(models.Model):

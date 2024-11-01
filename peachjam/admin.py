@@ -1154,16 +1154,14 @@ class ArticleAttachmentInline(BaseAttachmentFileInline):
     extra = 1
 
     def attachment_url(self, obj):
-        return reverse(
-            "article_attachment",
-            kwargs={
-                "date": obj.document.date.strftime("%Y-%m-%d"),
-                "author": obj.document.author.username,
-                "slug": obj.document.slug,
-                "pk": obj.pk,
-                "filename": obj.filename,
-            },
-        )
+        return obj.get_absolute_url()
+
+    def attachment_link(self, obj):
+        if obj.pk:
+            return format_html(
+                '<a href="{url}" target="_blank">{url}</a>',
+                url=self.attachment_url(obj),
+            )
 
     def get_formset(self, request, obj=None, **kwargs):
         formset = super().get_formset(request, obj, **kwargs)
@@ -1181,10 +1179,6 @@ class ArticleAttachmentInline(BaseAttachmentFileInline):
 
         formset.form.__init__ = new_init
         return formset
-
-    def attachment_link(self, obj):
-        if obj.pk:
-            return self.attachment_url(obj)
 
 
 class ArticleForm(forms.ModelForm):

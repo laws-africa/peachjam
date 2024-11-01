@@ -77,6 +77,9 @@ class ArticleDetailView(DetailView):
             .exclude(pk=self.object.pk)
             .order_by("-date")[:5]
         )
+        context["attachments"] = self.object.attachments.exclude(
+            mimetype__icontains="image"
+        )
         return context
 
 
