@@ -1199,6 +1199,7 @@ class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ("title", "author", "date", "published")
     list_display_links = ("title",)
     list_filter = ("published", "author")
+    search_fields = ("title", "body")
     date_hierarchy = "date"
     fields = (
         "title",
