@@ -456,7 +456,7 @@ class MultiLanguageIndexManager:
 
     def __init__(self):
         self.main_index = SearchableDocument._index
-        self.setup_language_indexes()
+        self.language_indexes = self.create_language_indexes()
 
     @classmethod
     def get_instance(cls):
@@ -464,49 +464,84 @@ class MultiLanguageIndexManager:
             cls._instance = cls()
         return cls._instance
 
-    def setup_language_indexes(self):
-        """Setup multi-language indexes."""
-        self.language_indexes = []
-        mappings = self.main_index.to_dict()["mappings"]
+    def create_language_indexes(self):
+        """Create basic multi-language indexes. They are not fully configured with mapping details, because that
+        requires an elasticsearch connection."""
+        indexes = {}
 
         for lang, analyzer in self.ANALYZERS.items():
             index = Index(name=f"{self.main_index._name}_{lang}")
             index._settings = copy.deepcopy(self.main_index._settings)
+            indexes[lang] = index
 
+        return indexes
+
+    def load_language_index_settings(self):
+        """Configure mappings etc for the language indexes. Requires an elasticsearch connection."""
+        main_mappings = self.main_index.to_dict()["mappings"]
+
+        for lang, index in self.language_indexes.items():
             search_analyzer = None
             if lang in self.SYNONYM_ANALYZERS:
                 # setup synonyms
                 index.analyzer(self.SYNONYM_ANALYZERS[lang])
                 search_analyzer = self.SYNONYM_ANALYZERS[lang]._name
 
-            # update and store mappings
-            new_mappings = copy.deepcopy(mappings)
+            if index.exists():
+                is_new = False
+                index.load_mappings()
+                new_mappings = index.get_or_create_mapping().to_dict()
+            else:
+                is_new = True
+                new_mappings = copy.deepcopy(main_mappings)
+
+            # update analyzers store mappings
             self.set_text_field_analyzer(
-                new_mappings["properties"].values(), analyzer, search_analyzer
+                new_mappings["properties"],
+                self.ANALYZERS[lang],
+                search_analyzer,
+                is_new,
             )
             index.get_or_create_mapping()._update_from_dict(new_mappings)
 
-            self.language_indexes.append(index)
-
-    def set_text_field_analyzer(self, fields, analyzer, search_analyzer):
+    def set_text_field_analyzer(self, fields, analyzer, search_analyzer, is_new):
         """Recursively set analyzers for text fields."""
-        for fld in fields:
+        # these fields weren't initialised correctly and we can't change the mappings
+        for name, fld in fields.items():
             if fld["type"] == "text":
-                fld["analyzer"] = analyzer
+                # this can always change
                 if search_analyzer:
                     fld["search_analyzer"] = search_analyzer
+
+                # the analyzer can't change once it is set
+                if is_new:
+                    fld["analyzer"] = analyzer
             elif fld["type"] == "nested":
                 self.set_text_field_analyzer(
-                    fld["properties"].values(), analyzer, search_analyzer
+                    fld["properties"], analyzer, search_analyzer, is_new
                 )
 
+    def update_language_index_settings(self):
+        for index in self.language_indexes.values():
+            log.info(f"Updating index settings for {index._name}")
+            index.close()
+            log.info("Index closed")
+            try:
+                index.save()
+                log.info("Index updated")
+            finally:
+                index.open()
+                log.info("Index re-opened")
+
     def register_indexes(self):
-        for index in self.language_indexes:
+        for index in self.language_indexes.values():
             registry.register(index, SearchableDocument)
 
     def get_all_search_index_names(self):
         """The names of all indexes to use for a search."""
-        names = [self.main_index._name] + [ix._name for ix in self.language_indexes]
+        names = [self.main_index._name] + [
+            ix._name for ix in self.language_indexes.values()
+        ]
         # fold in language variants of the extra search indexes, if any
         return names + [
             f"{i}_{lang}"
@@ -518,15 +553,3 @@ class MultiLanguageIndexManager:
         if lang in self.ANALYZERS:
             return f"{self.main_index._name}_{lang}"
         return self.main_index._name
-
-    def update_index_settings(self):
-        for index in self.language_indexes:
-            log.info(f"Updating index settings for {index._name}")
-            index.close()
-            log.info("Index closed")
-            try:
-                index.save()
-                log.info("Index updated")
-            finally:
-                index.open()
-                log.info("Index re-opened")

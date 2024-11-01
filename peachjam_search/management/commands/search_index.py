@@ -46,7 +46,8 @@ class Command(OriginalCommand):
     def _update_mappings(self, options):
         """Updating mappings and settings for indexes."""
         manager = MultiLanguageIndexManager.get_instance()
-        manager.update_index_settings()
+        manager.load_language_index_settings()
+        manager.update_language_index_settings()
 
     def handle(self, *args, **options):
         if options.get("action") == "update_indexes":
