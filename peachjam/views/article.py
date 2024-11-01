@@ -94,7 +94,9 @@ class ArticleAttachmentDetailView(DetailView):
         )
 
     def render_to_response(self, context, **response_kwargs):
-        return FileResponse(self.object.file, filename=self.object.filename)
+        response = FileResponse(self.object.file, filename=self.object.filename)
+        response["Cache-Control"] = "max-age=31536000"
+        return response
 
 
 class UserProfileDetailView(DetailView):
