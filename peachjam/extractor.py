@@ -4,9 +4,10 @@ from datetime import datetime
 import requests
 from django.conf import settings
 from django.core.files import File
+from django.db.models.functions import Lower
 from languages_plus.models import Language
 
-from peachjam.models import CaseNumber, Court, Judgment, SourceFile, pj_settings
+from peachjam.models import CaseNumber, Court, Judge, Judgment, SourceFile, pj_settings
 from peachjam.storage import clean_filename
 
 log = logging.getLogger(__name__)
@@ -96,6 +97,12 @@ class ExtractorService:
 
         doc.save()
 
+        if details.get("judges"):
+            judges = Judge.objects.annotate(name_lower=Lower("name")).filter(
+                name_lower__in=[s.lower() for s in details["judges"]]
+            )
+            doc.judges.set(judges)
+
         # attach source file
         file.seek(0)
         SourceFile(
@@ -114,7 +121,7 @@ class ExtractorService:
         # case numbers
         for case_number in details.get("case_numbers", []):
             # TODO: matter type
-            CaseNumber(
+            CaseNumber.objects.create(
                 document=doc,
                 number=case_number["number"],
                 year=case_number["year"],
