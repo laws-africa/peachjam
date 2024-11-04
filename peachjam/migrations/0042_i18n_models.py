@@ -316,7 +316,7 @@ class Migration(migrations.Migration):
             name="file",
             field=peachjam.storage.DynamicStorageFileField(
                 max_length=1024,
-                upload_to=peachjam.models.core_document_model.file_location,
+                upload_to=peachjam.models.attachments.file_location,
                 verbose_name="file",
             ),
         ),
@@ -767,7 +767,7 @@ class Migration(migrations.Migration):
             name="file",
             field=models.ImageField(
                 max_length=1024,
-                upload_to=peachjam.models.core_document_model.file_location,
+                upload_to=peachjam.models.attachments.file_location,
                 verbose_name="file",
             ),
         ),
@@ -1092,7 +1092,7 @@ class Migration(migrations.Migration):
             name="file",
             field=peachjam.storage.DynamicStorageFileField(
                 max_length=1024,
-                upload_to=peachjam.models.core_document_model.file_location,
+                upload_to=peachjam.models.attachments.file_location,
                 verbose_name="file",
             ),
         ),

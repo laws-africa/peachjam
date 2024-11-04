@@ -120,7 +120,7 @@ class ExtractedCitation(models.Model):
     ):
         """Fetch documents for the given works, grouped by nature and ordered by the most incoming citations.
         Returns a list of documents ordered by nature, -citing works, title."""
-        from .core_document_model import CoreDocument
+        from .core_document import CoreDocument
 
         # get the best documents for these works
         docs = (

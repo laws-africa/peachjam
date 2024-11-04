@@ -1,8 +1,9 @@
 # flake8: noqa
 from .article import *
+from .attachments import *
 from .author import *
 from .citations import *
-from .core_document_model import *
+from .core_document import *
 from .external_document import *
 from .gazette import *
 from .generic_document import *
