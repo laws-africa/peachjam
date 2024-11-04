@@ -10,6 +10,7 @@ from .generic_document import *
 from .ingestors import *
 from .journals_books import *
 from .judgment import *
+from .partner import *
 from .profile import *
 from .ratification import *
 from .relationships import *

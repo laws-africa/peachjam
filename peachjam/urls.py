@@ -81,6 +81,7 @@ from peachjam.views import (
     JudgmentListView,
     JudgmentWorksAutocomplete,
     LegislationListView,
+    PartnerLogoView,
     PeachjamAdminLoginView,
     PlaceDetailView,
     PocketLawResources,
@@ -350,6 +351,11 @@ urlpatterns = [
                 ),
             ]
         ),
+    ),
+    path(
+        "partners/<int:pk>/logo/<int:logo_pk>",
+        PartnerLogoView.as_view(),
+        name="partner_logo",
     ),
     path(
         "robots.txt",

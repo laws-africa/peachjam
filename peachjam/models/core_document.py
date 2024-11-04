@@ -175,6 +175,14 @@ class Work(models.Model):
     n_cited_works = models.IntegerField(_("number of cited works"), default=0)
     # number of incoming citations
     n_citing_works = models.IntegerField(_("number of incoming citations"), default=0)
+    partner = models.ForeignKey(
+        "peachjam.Partner",
+        null=True,
+        blank=True,
+        verbose_name=_("partner"),
+        help_text=_("Publication partner"),
+        on_delete=models.SET_NULL,
+    )
 
     class Meta:
         verbose_name = _("work")
