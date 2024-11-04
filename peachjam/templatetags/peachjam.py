@@ -83,7 +83,7 @@ def user_name(user):
 @register.simple_tag
 def build_taxonomy_url(item, prefix="taxonomy"):
     items = []
-    root = item.get_root()
+    root = item.root if hasattr(item, "root") else item.get_root()
     if root != item:
         items.append(root.slug)
     items.append(item.slug)

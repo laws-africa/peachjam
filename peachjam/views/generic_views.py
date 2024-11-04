@@ -331,7 +331,11 @@ class BaseDocumentDetailView(DetailView):
             context["display_type"] = None
 
         context["notices"] = self.get_notices()
-        context["taxonomies"] = doc.taxonomies.prefetch_related("topic")
+        context["taxonomies"] = Taxonomy.get_tree_for_items(
+            Taxonomy.objects.filter(
+                pk__in=doc.taxonomies.values_list("topic__pk", flat=True)
+            )
+        )
         context["labels"] = doc.labels.all()
 
         # citations

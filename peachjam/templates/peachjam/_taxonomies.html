@@ -3,13 +3,4 @@
   <i class="bi bi-pj bi-tags-fill"></i>
   {% translate 'Taxonomies' %}
 </h5>
-<ul class="list-unstyled">
-  {% for taxonomy in taxonomies %}
-    <li>
-      {% for item in taxonomy.topic.get_ancestors %}
-        <a href="{% build_taxonomy_url item %}">{{ item }}</a> &gt;
-      {% endfor %}
-      <a href="{% build_taxonomy_url taxonomy.topic %}">{{ taxonomy.topic }}</a>
-    </li>
-  {% endfor %}
-</ul>
+{% include 'peachjam/_taxonomies_tree.html' with root=True %}

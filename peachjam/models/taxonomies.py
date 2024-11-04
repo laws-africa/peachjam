@@ -43,6 +43,27 @@ class Taxonomy(MP_Node):
             for child in self.get_children():
                 child.save()
 
+    @classmethod
+    def get_tree_for_items(cls, items):
+        """Get a tree of taxonomies for a list of items, which can be leaf or intermediate nodes. The path
+        from the root to each item is calculated and merged with the others."""
+        tree = {}
+        paths = [list(item.get_ancestors()) + [item] for item in items]
+
+        for path in paths:
+            current_level = tree
+            for i, node in enumerate(path):
+                # stash the root for use when building urls
+                if i == 0:
+                    root = node
+                else:
+                    node.root = root
+                if node not in current_level:
+                    current_level[node] = {}
+                current_level = current_level[node]
+
+        return tree
+
 
 class DocumentTopic(models.Model):
     document = models.ForeignKey(
