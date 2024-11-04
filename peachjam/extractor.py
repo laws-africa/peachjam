@@ -121,10 +121,20 @@ class ExtractorService:
         # case numbers
         for case_number in details.get("case_numbers", []):
             # TODO: matter type
+            try:
+                number = int(case_number["number"])
+            except ValueError:
+                number = None
+
+            try:
+                year = int(case_number["year"])
+            except ValueError:
+                year = None
+
             CaseNumber.objects.create(
                 document=doc,
-                number=case_number["number"],
-                year=case_number["year"],
+                number=number,
+                year=year,
                 string_override=case_number["case_number_string"],
             )
 
