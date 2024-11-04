@@ -13,6 +13,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.http.response import FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
@@ -1056,10 +1057,11 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             )
             if form.is_valid():
                 try:
-                    doc = extractor.extract_judgment_from_file(
-                        jurisdiction=form.cleaned_data["jurisdiction"],
-                        file=form.cleaned_data["file"],
-                    )
+                    with transaction.atomic():
+                        doc = extractor.extract_judgment_from_file(
+                            jurisdiction=form.cleaned_data["jurisdiction"],
+                            file=form.cleaned_data["file"],
+                        )
                     messages.success(
                         request, _("Judgment uploaded. Please check details carefully.")
                     )
