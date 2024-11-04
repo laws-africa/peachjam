@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-import peachjam.models.core_document_model
+import peachjam.models.attachments
 
 
 class Migration(migrations.Migration):
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
             name="file",
             field=models.FileField(
                 max_length=1024,
-                upload_to=peachjam.models.core_document_model.file_location,
+                upload_to=peachjam.models.attachments.file_location,
             ),
         ),
     ]

@@ -1,4 +1,4 @@
-from .core_document_model import CoreDocument
+from .core_document import CoreDocument
 
 
 class ExternalDocument(CoreDocument):
