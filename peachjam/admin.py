@@ -79,6 +79,8 @@ from peachjam.models import (
     LowerBench,
     MatterType,
     Outcome,
+    Partner,
+    PartnerLogo,
     PeachJamSettings,
     Predicate,
     PublicationFile,
@@ -1281,6 +1283,7 @@ class WorkAdmin(admin.ModelAdmin):
         "frbr_uri_actor",
         "frbr_uri_date",
         "frbr_uri_number",
+        "partner",
     )
     search_fields = (
         "title",
@@ -1293,7 +1296,7 @@ class WorkAdmin(admin.ModelAdmin):
         "frbr_uri_actor",
     )
     list_display = ("title", "frbr_uri", "languages", "ranking")
-    readonly_fields = fields
+    readonly_fields = [f for f in fields if f != "partner"]
     inlines = [RelationshipInline, DocumentInline]
     actions = ["update_extracted_citations", "update_languages"]
 
@@ -1484,6 +1487,45 @@ class RatificationAdmin(ImportExportMixin, admin.ModelAdmin):
     form = RatificationForm
     resource_class = RatificationResource
     search_fields = ("work__title",)
+
+
+class PartnerForm(forms.ModelForm):
+    document_blurb_html = forms.CharField(
+        widget=CKEditorWidget(),
+        required=False,
+    )
+
+    class Meta:
+        model = Partner
+        exclude = []
+
+
+class PartnerLogoInline(BaseAttachmentFileInline):
+    model = PartnerLogo
+    extra = 1
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+
+        original_init = formset.form.__init__
+
+        def new_init(self, *args, **kwargs):
+            original_init(self, *args, **kwargs)
+            instance = kwargs.get("instance", None)
+
+            if instance and instance.file:
+                # Make the file field readonly by making it disabled in the widget
+                self.fields["file"].widget.attrs["readonly"] = True
+                self.fields["file"].widget.attrs["disabled"] = "disabled"
+
+        formset.form.__init__ = new_init
+        return formset
+
+
+@admin.register(Partner)
+class PartnerAdmin(admin.ModelAdmin):
+    inlines = [PartnerLogoInline]
+    form = PartnerForm
 
 
 admin.site.register(

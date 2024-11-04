@@ -366,8 +366,13 @@
                     </dl>
                   {% endblock %}
                 </div>
-                {% if n_relationships or taxonomies %}
+                {% if n_relationships or taxonomies or document.work.partner %}
                   <div class="col-md">
+                    {% block document-partner %}
+                      {% if document.work.partner %}
+                        {% include "peachjam/_document_partner.html" %}
+                      {% endif %}
+                    {% endblock %}
                     {% block document-taxonomies %}
                       {% if taxonomies %}
                         {% include "peachjam/_taxonomies.html" %}
