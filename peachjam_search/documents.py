@@ -436,6 +436,7 @@ class MultiLanguageIndexManager:
                         "Anor, Another",
                         "AU, African Union",
                         "au, African Union",
+                        "delict, tort",
                         "Ors, Others",
                         "ors, others",
                         "R, Republic",
