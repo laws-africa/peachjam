@@ -121,51 +121,58 @@ urlpatterns = [
         AuthorDetailView.as_view(),
         name="author",
     ),
-    path("judgments/", JudgmentListView.as_view(), name="judgment_list"),
     path(
-        "judgments/court-class/<str:court_class>/",
-        CourtClassDetailView.as_view(),
-        name="court_class",
-    ),
-    path(
-        "judgments/court-class/<str:court_class>/<int:year>/",
-        CourtClassYearView.as_view(),
-        name="court_class_year",
-    ),
-    path(
-        "judgments/court-class/<str:court_class>/<int:year>/<int:month>/",
-        CourtClassMonthView.as_view(),
-        name="court_class_month",
-    ),
-    path(
-        "judgments/<str:code>/",
-        CourtDetailView.as_view(),
-        name="court",
-    ),
-    path(
-        "judgments/<str:code>/<int:year>/",
-        CourtYearView.as_view(),
-        name="court_year",
-    ),
-    path(
-        "judgments/<str:code>/<int:year>/<int:month>/",
-        CourtMonthView.as_view(),
-        name="court_month",
-    ),
-    path(
-        "judgments/<str:code>/<str:registry_code>/",
-        CourtRegistryDetailView.as_view(),
-        name="court_registry",
-    ),
-    path(
-        "judgments/<str:code>/<str:registry_code>/<int:year>/",
-        CourtRegistryYearView.as_view(),
-        name="court_registry_year",
-    ),
-    path(
-        "judgments/<str:code>/<str:registry_code>/<int:year>/<int:month>/",
-        CourtRegistryMonthView.as_view(),
-        name="court_registry_month",
+        "judgments/",
+        include(
+            [
+                path("", JudgmentListView.as_view(), name="judgment_list"),
+                path(
+                    "court-class/<str:court_class>/",
+                    CourtClassDetailView.as_view(),
+                    name="court_class",
+                ),
+                path(
+                    "court-class/<str:court_class>/<int:year>/",
+                    CourtClassYearView.as_view(),
+                    name="court_class_year",
+                ),
+                path(
+                    "court-class/<str:court_class>/<int:year>/<int:month>/",
+                    CourtClassMonthView.as_view(),
+                    name="court_class_month",
+                ),
+                path(
+                    "<str:code>/",
+                    CourtDetailView.as_view(),
+                    name="court",
+                ),
+                path(
+                    "<str:code>/<int:year>/",
+                    CourtYearView.as_view(),
+                    name="court_year",
+                ),
+                path(
+                    "<str:code>/<int:year>/<int:month>/",
+                    CourtMonthView.as_view(),
+                    name="court_month",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/",
+                    CourtRegistryDetailView.as_view(),
+                    name="court_registry",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/<int:year>/",
+                    CourtRegistryYearView.as_view(),
+                    name="court_registry_year",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/<int:year>/<int:month>/",
+                    CourtRegistryMonthView.as_view(),
+                    name="court_registry_month",
+                ),
+            ]
+        ),
     ),
     path("causelists/", CauseListListView.as_view(), name="causelist_list"),
     path(
