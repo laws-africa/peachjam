@@ -7,7 +7,7 @@
           <div class="card-body">
             <h4 class="mb-2">{{ court_class }}</h4>
             {% if court_class.courts.all %}
-              <ul class="list-unstyled">
+              <ul class="list-unstyled mb-0">
                 {% for court in court_class.courts.all %}
                   <li>
                     {% block court_link %}
