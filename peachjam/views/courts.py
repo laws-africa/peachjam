@@ -178,7 +178,7 @@ class CourtDetailView(FilteredJudgmentView):
     @cached_property
     def court(self):
         if self.kwargs.get("code") == "all":
-            return Court(name="All courts", code="all")
+            return Court(name=_("All courts"), code="all")
         return get_object_or_404(Court, code=self.kwargs.get("code"))
 
     def base_view_name(self):
