@@ -86,6 +86,38 @@ class PeachjamViewsTest(TestCase):
             self.client.get("/judgments/ECOWASCJ/999999/").status_code, 404
         )
 
+    def test_all_judgments_listing(self):
+        response = self.client.get("/judgments/all/")
+        self.assertEqual(response.status_code, 200)
+
+        documents = [doc.title for doc in response.context.get("documents")]
+        self.assertIn(
+            "Ababacar and Ors vs Senegal [2018] ECOWASCJ 17 (29 June 2018)",
+            documents,
+        )
+        self.assertContains(response, "/judgments/all/2018/")
+        self.assertContains(response, "/judgments/all/2016/")
+        self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
+
+    def test_all_judgments_year_listing(self):
+        response = self.client.get("/judgments/all/2016/")
+        self.assertEqual(response.status_code, 200)
+
+        documents = [doc.title for doc in response.context.get("documents")]
+
+        self.assertIn(
+            "Obi vs Federal Republic of Nigeria [2016] ECOWASCJ 52 (09 November 2016)",
+            documents,
+        )
+        self.assertNotIn(
+            "Ababacar and Ors vs Senegal [2018] ECOWASCJ 17 (29 June 2018)",
+            documents,
+        )
+        self.assertEqual(response.context["year"], 2016)
+        self.assertContains(response, "/judgments/all/2018/")
+        self.assertContains(response, "/judgments/all/2016/")
+        self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
+
     def test_judgment_detail(self):
         response = self.client.get(
             "/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
