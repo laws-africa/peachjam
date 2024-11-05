@@ -3,27 +3,31 @@
   <div class="flow-columns mb-3">
     {% for court_class in court_classes %}
       <div class="flow-columns-group mb-4">
-        <h4 class="mb-2">{{ court_class }}</h4>
-        {% if court_class.show_listing_page %}
-          <div class="mb-3">
-            {% block court_class_link %}
-              <a href="{% url 'court_class' court_class.slug %}">{% trans 'All judgments' %}</a>
-            {% endblock %}
+        <div class="card">
+          <div class="card-body">
+            <h4 class="mb-2">{{ court_class }}</h4>
+            {% if court_class.courts.all %}
+              <ul class="list-unstyled">
+                {% for court in court_class.courts.all %}
+                  <li>
+                    {% block court_link %}
+                      <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+                    {% endblock %}
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div>{% trans 'No courts found.' %}</div>
+            {% endif %}
           </div>
-        {% endif %}
-        {% if court_class.courts.all %}
-          <ul class="list-unstyled">
-            {% for court in court_class.courts.all %}
-              <li>
-                {% block court_link %}
-                  <a href="{% url 'court' court.code %}">{{ court.name }}</a>
-                {% endblock %}
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <div>{% trans 'No courts found.' %}</div>
-        {% endif %}
+          {% if court_class.show_listing_page %}
+            <div class="card-footer">
+              {% block court_class_link %}
+                <a href="{% url 'court_class' court_class.slug %}">{% blocktrans with court=court_class %}Explore {{ court }}{% endblocktrans %} →</a>
+              {% endblock %}
+            </div>
+          {% endif %}
+        </div>
       </div>
     {% endfor %}
   </div>
