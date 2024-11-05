@@ -79,6 +79,24 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 "values": self.request.GET.getlist("judges"),
             }
 
+        if "labels" not in self.exclude_facets:
+            labels = list(
+                label
+                for label in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="labels"
+                )
+                .order_by()
+                .values_list("labels__name", flat=True)
+                .distinct()
+                if label
+            )
+            context["facet_data"]["labels"] = {
+                "label": _("Labels"),
+                "type": "checkbox",
+                "options": sorted([(x, x) for x in labels]),
+                "values": self.request.GET.getlist("labels"),
+            }
+
         if "outcomes" not in self.exclude_facets:
             outcomes = Outcome.objects.filter(
                 pk__in=self.form.filter_queryset(

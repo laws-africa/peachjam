@@ -138,6 +138,7 @@ class BaseDocumentFilterForm(forms.Form):
     attorneys = PermissiveTypedListField(coerce=remove_nulls, required=False)
     outcomes = PermissiveTypedListField(coerce=remove_nulls, required=False)
     taxonomies = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    labels = PermissiveTypedListField(coerce=remove_nulls, required=False)
     q = forms.CharField(required=False)
 
     sort = forms.ChoiceField(
@@ -174,6 +175,7 @@ class BaseDocumentFilterForm(forms.Form):
         divisions = self.cleaned_data.get("divisions", [])
         attorneys = self.cleaned_data.get("attorneys", [])
         outcomes = self.cleaned_data.get("outcomes", [])
+        labels = self.cleaned_data.get("labels", [])
         taxonomies = self.cleaned_data.get("taxonomies", [])
         q = self.cleaned_data.get("q")
 
@@ -214,6 +216,9 @@ class BaseDocumentFilterForm(forms.Form):
 
         if outcomes and exclude != "outcomes":
             queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
+
+        if labels and exclude != "labels":
+            queryset = queryset.filter(labels__name__in=labels).distinct()
 
         if taxonomies and exclude != "taxonomies":
             queryset = queryset.filter(taxonomies__topic__slug__in=taxonomies)
