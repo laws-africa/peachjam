@@ -1187,9 +1187,10 @@ class ArticleAttachmentInline(BaseAttachmentFileInline):
 
 class ArticleForm(forms.ModelForm):
     body = forms.CharField(widget=CKEditorWidget())
-    topics = forms.ModelMultipleChoiceField(
-        queryset=Article.get_article_tags_root().get_children()
-    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["topics"].queryset = Article.get_article_tags_root().get_children()
 
 
 @admin.register(Article)
