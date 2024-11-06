@@ -21,6 +21,14 @@ class LegislationListView(FilteredDocumentListView):
     extra_context = {"nature": "Act", "help_link": "legislation/"}
     form_defaults = {"sort": "title"}
 
+    def add_facets(self, context):
+        super().add_facets(context)
+        # move the alphabet facet first, it's highly used on the legislation page for some LIIs
+        facets = {"alphabet": context["facet_data"].pop("alphabet")}
+        for k, v in context["facet_data"].items():
+            facets[k] = v
+        context["facet_data"] = facets
+
 
 @registry.register_doc_type("legislation")
 class LegislationDetailView(BaseDocumentDetailView):
