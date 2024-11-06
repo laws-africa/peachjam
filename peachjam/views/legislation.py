@@ -277,12 +277,14 @@ class LegislationDetailView(BaseDocumentDetailView):
         return timeline
 
     def get_child_documents(self):
-        docs = (
+        docs_ids = (
             self.model.objects.filter(parent_work=self.object.work)
             .distinct("work_frbr_uri")
-            .order_by("work_frbr_uri", "-date")
+            .order_by("work_frbr_uri")
         )
         # now sort by title
+        docs = self.model.objects.filter(pk__in=docs_ids).order_by(
+            "-date", "-frbr_uri_number"
+        )
         # TODO: we're not guaranteed to get documents in the same language, here
-        docs = sorted(docs, key=lambda d: d.title)
         return docs
