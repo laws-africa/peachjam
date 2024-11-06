@@ -307,9 +307,66 @@ export default {
       googleActive: false
     };
     const facets = [
+      // most frequently used facets first, based on user data
       {
         title: this.$t('Document type'),
         name: 'nature',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Court'),
+        name: 'court',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Year'),
+        name: 'year',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: getTitle('registry'),
+        name: 'registry',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Locality'),
+        name: 'locality',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Outcome'),
+        name: 'outcome',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: getTitle('judge'),
+        name: 'judges',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: getTitle('author'),
+        name: 'authors',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Language'),
+        name: 'language',
         type: 'checkboxes',
         value: [],
         options: []
@@ -323,50 +380,8 @@ export default {
         optionLabels: getLabelOptionLabels(data.documentLabels)
       },
       {
-        title: getTitle('author'),
-        name: 'authors',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Court'),
-        name: 'court',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: getTitle('registry'),
-        name: 'registry',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: getTitle('judge'),
-        name: 'judges',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
         title: this.$t('Attorneys'),
         name: 'attorneys',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Outcome'),
-        name: 'outcome',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Locality'),
-        name: 'locality',
         type: 'checkboxes',
         value: [],
         options: []
@@ -377,25 +392,11 @@ export default {
         type: 'checkboxes',
         value: [],
         options: []
-      },
-      {
-        title: this.$t('Language'),
-        name: 'language',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Year'),
-        name: 'year',
-        type: 'checkboxes',
-        value: [],
-        options: []
       }
     ];
 
     if (this.showJurisdiction) {
-      facets.splice(0, 0, {
+      facets.splice(1, 0, {
         title: this.$t('Jurisdiction'),
         name: 'jurisdiction',
         type: 'checkboxes',
