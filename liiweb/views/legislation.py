@@ -80,23 +80,26 @@ class LegislationListView(BaseLegislationListView):
                 context["entity_profile_title"] = jurisdiction_profile.jurisdiction.name
 
     def add_children(self, queryset):
-        # pull in children (subleg)
-        parents = list(
-            {r.work_id for r in queryset.only("work_id", "polymorphic_ctype_id")}
-        )
+        if self.variant != "all":
+            # pull in children (subleg)
+            parents = list(
+                {r.work_id for r in queryset.only("work_id", "polymorphic_ctype_id")}
+            )
 
-        children = defaultdict(list)
-        children_qs = self.queryset.filter(
-            parent_work_id__in=parents, repealed=False, metadata_json__principal=True
-        ).latest_expression()
-        children_qs = children_qs.preferred_language(get_language(self.request))
-        # group children by parent
-        for child in children_qs:
-            children[child.parent_work_id].append(child)
+            children = defaultdict(list)
+            children_qs = self.queryset.filter(
+                parent_work_id__in=parents,
+                repealed=False,
+                metadata_json__principal=True,
+            ).latest_expression()
+            children_qs = children_qs.preferred_language(get_language(self.request))
+            # group children by parent
+            for child in children_qs:
+                children[child.parent_work_id].append(child)
 
-        # fold in children
-        for parent in queryset:
-            parent.children = children.get(parent.work_id, [])
+            # fold in children
+            for parent in queryset:
+                parent.children = children.get(parent.work_id, [])
 
 
 class LocalityLegislationView(TemplateView):

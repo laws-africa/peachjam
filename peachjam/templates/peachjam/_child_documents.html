@@ -1,22 +1,3 @@
 {% load peachjam i18n %}
 <h4>{% trans "Subsidiary legislation" %}</h4>
-<div class="table-responsive">
-  <table class="table">
-    <thead>
-      <tr>
-        <th scope="col" style="width: 70%">{% trans 'Title' %}</th>
-        <th scope="col">{% trans 'Numbered title' %}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for document in child_documents %}
-        <tr>
-          <td>
-            <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-          </td>
-          <td>{{ document.citation }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+{% include "peachjam/_document_table.html" with documents=child_documents doc_table_citations=True doc_table_title_label="Title" doc_table_date_label="Date" %}
