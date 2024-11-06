@@ -1205,6 +1205,10 @@ class ArticleAttachmentInline(BaseAttachmentFileInline):
 class ArticleForm(forms.ModelForm):
     body = forms.CharField(widget=CKEditorWidget())
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["topics"].queryset = Article.get_article_tags_root().get_children()
+
 
 @admin.register(Article)
 class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
