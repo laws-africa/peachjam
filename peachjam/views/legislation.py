@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.contrib import messages
+from django.db.models import CharField, Func, Value
 from django.template.defaultfilters import date as format_date
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
@@ -277,14 +278,25 @@ class LegislationDetailView(BaseDocumentDetailView):
         return timeline
 
     def get_child_documents(self):
-        docs_ids = (
-            self.model.objects.filter(parent_work=self.object.work)
-            .distinct("work_frbr_uri")
-            .order_by("work_frbr_uri")
-        )
+        docs_ids = self.model.objects.filter(
+            parent_work=self.object.work
+        ).latest_expression()
+
         # now sort by title
-        docs = self.model.objects.filter(pk__in=docs_ids).order_by(
-            "-date", "-work__frbr_uri_date"
+        docs = (
+            self.model.objects.filter(pk__in=docs_ids)
+            .annotate(
+                padded_frbr_uri_number=Func(
+                    "frbr_uri_number",
+                    Value(10),
+                    Value("0"),
+                    function="LPAD",
+                    output_field=CharField(),
+                )
+            )
+            .order_by("-date", "-frbr_uri_date", "-padded_frbr_uri_number")
+            .select_related("work")
+            .prefetch_related("labels")
         )
         # TODO: we're not guaranteed to get documents in the same language, here
         return docs
