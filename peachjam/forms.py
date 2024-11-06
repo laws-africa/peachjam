@@ -224,7 +224,7 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(taxonomies__topic__slug__in=taxonomies)
 
         if filter_q and q and exclude != "q":
-            queryset = queryset.filter(title__icontains=q)
+            queryset = queryset.filter(Q(title__icontains=q) | Q(citation__icontains=q))
 
         return queryset
 
