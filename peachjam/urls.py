@@ -78,6 +78,7 @@ from peachjam.views import (
     GazetteYearView,
     HomePageView,
     JournalListView,
+    JudgesAutocomplete,
     JudgmentListView,
     JudgmentWorksAutocomplete,
     LegislationListView,
@@ -300,18 +301,30 @@ urlpatterns = [
         PeachjamAdminLoginView.as_view(),
         name="login",
     ),
-    # autocomplete for admin area
     path(
-        "admin/autocomplete/works",
-        WorkAutocomplete.as_view(),
-        name="autocomplete-works",
+        "admin/",
+        include(
+            [
+                # autocomplete for admin area
+                path(
+                    "autocomplete/works",
+                    WorkAutocomplete.as_view(),
+                    name="autocomplete-works",
+                ),
+                path(
+                    "autocomplete/judges",
+                    JudgesAutocomplete.as_view(),
+                    name="autocomplete-judges",
+                ),
+                path(
+                    "autocomplete/judgments",
+                    JudgmentWorksAutocomplete.as_view(),
+                    name="autocomplete-judgment-works",
+                ),
+                path("", admin.site.urls),
+            ]
+        ),
     ),
-    path(
-        "admin/autocomplete/judgments",
-        JudgmentWorksAutocomplete.as_view(),
-        name="autocomplete-judgment-works",
-    ),
-    path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("accounts/profile/", EditAccountView.as_view(), name="edit_account"),
     path("api/", include("peachjam_api.urls")),
