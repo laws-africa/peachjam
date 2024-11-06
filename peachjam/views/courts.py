@@ -79,6 +79,24 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 "values": self.request.GET.getlist("judges"),
             }
 
+        if "labels" not in self.exclude_facets:
+            labels = list(
+                label
+                for label in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="labels"
+                )
+                .order_by()
+                .values_list("labels__name", flat=True)
+                .distinct()
+                if label
+            )
+            context["facet_data"]["labels"] = {
+                "label": _("Labels"),
+                "type": "checkbox",
+                "options": sorted([(x, x) for x in labels]),
+                "values": self.request.GET.getlist("labels"),
+            }
+
         if "outcomes" not in self.exclude_facets:
             outcomes = Outcome.objects.filter(
                 pk__in=self.form.filter_queryset(
@@ -159,28 +177,33 @@ class CourtDetailView(FilteredJudgmentView):
 
     @cached_property
     def court(self):
+        if self.kwargs.get("code") == "all":
+            return Court(name=_("All courts"), code="all")
         return get_object_or_404(Court, code=self.kwargs.get("code"))
 
     def base_view_name(self):
         return self.court.name
 
     def get_base_queryset(self, exclude=None):
-        qs = super().get_base_queryset(exclude=exclude).filter(court=self.court)
+        qs = super().get_base_queryset(exclude=exclude)
+        if self.court.code != "all":
+            qs = qs.filter(court=self.court)
         return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["court"] = self.court
         context["registry_label_plural"] = CourtRegistry.model_label_plural
-        context["registries"] = registries = self.court.registries.exclude(
-            judgments__isnull=True
-        )  # display registries with judgments only
-        # split the list in the middle to have two columns and preserve ordering
-        split_index = ceil(registries.count() / 2)
-        context["registry_groups"] = [
-            registries[:split_index],
-            registries[split_index:],
-        ]
+        if self.court.code != "all":
+            context["registries"] = registries = self.court.registries.exclude(
+                judgments__isnull=True
+            )  # display registries with judgments only
+            # split the list in the middle to have two columns and preserve ordering
+            split_index = ceil(registries.count() / 2)
+            context["registry_groups"] = [
+                registries[:split_index],
+                registries[split_index:],
+            ]
 
         context["all_years_url"] = self.court.get_absolute_url()
         return context
