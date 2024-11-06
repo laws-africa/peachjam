@@ -868,12 +868,28 @@ class BenchInline(admin.TabularInline):
     verbose_name = gettext_lazy("judge")
     verbose_name_plural = gettext_lazy("judges")
 
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(
+            request,
+            obj,
+            widgets={"judge": autocomplete.ModelSelect2(url="autocomplete-judges")},
+            **kwargs,
+        )
+
 
 class LowerBenchInline(admin.TabularInline):
     model = LowerBench
     extra = 3
     verbose_name = gettext_lazy("lower court judge")
     verbose_name_plural = gettext_lazy("lower court judges")
+
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(
+            request,
+            obj,
+            widgets={"judge": autocomplete.ModelSelect2(url="autocomplete-judges")},
+            **kwargs,
+        )
 
 
 class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
@@ -919,7 +935,8 @@ class CaseHistoryInlineAdmin(NonrelatedStackedInline):
             widgets={
                 "historical_judgment_work": autocomplete.ModelSelect2(
                     url="autocomplete-judgment-works"
-                )
+                ),
+                "judges": autocomplete.ModelSelect2Multiple(url="autocomplete-judges"),
             },
             **kwargs,
         )
