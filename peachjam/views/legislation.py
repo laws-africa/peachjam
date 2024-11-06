@@ -284,7 +284,7 @@ class LegislationDetailView(BaseDocumentDetailView):
         )
         # now sort by title
         docs = self.model.objects.filter(pk__in=docs_ids).order_by(
-            "-date", "-frbr_uri_number"
+            "-date", "-work__frbr_uri_date"
         )
         # TODO: we're not guaranteed to get documents in the same language, here
         return docs
