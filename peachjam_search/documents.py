@@ -126,6 +126,9 @@ class SearchableDocument(Document):
         }
     )
 
+    # for typeahed
+    suggest = fields.CompletionField()
+
     # this will be used to build prepare_xxx_xx fields for each of these
     translated_fields = [
         ("court", "name"),

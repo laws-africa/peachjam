@@ -57,6 +57,7 @@
             @submit.prevent="simpleSearch"
           >
             <input
+              ref="searchInput"
               v-model="q"
               type="search"
               class="form-control"
@@ -64,6 +65,7 @@
               :aria-label="$t('Search documents')"
               aria-describedby="basic-addon2"
               required
+              @typeahead="onTypeahead"
             >
             <button
               type="submit"
@@ -257,6 +259,7 @@ import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 import analytics from '../analytics';
 import { authHeaders } from '../../api';
+import SearchTypeahead from '../search-typeahead';
 
 export default {
   name: 'FindDocuments',
@@ -432,6 +435,7 @@ export default {
   },
 
   mounted () {
+    new SearchTypeahead(this.$refs.searchInput, true);
     this.loadState();
     window.addEventListener('popstate', () => this.loadState());
     this.$el.addEventListener('show.bs.tab', this.tabChanged);
@@ -440,6 +444,11 @@ export default {
   methods: {
     tabChanged (e) {
       this.googleActive = e.target.id === 'google-search-tab';
+    },
+
+    onTypeahead (e) {
+      this.q = this.$refs.searchInput._typeaheadItem.value;
+      this.simpleSearch();
     },
 
     sortBuckets (items, reverse = false, byCount = false) {

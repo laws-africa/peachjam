@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.views.generic import DetailView, ListView, TemplateView
+from django_elasticsearch_dsl.search import Search
 from django_elasticsearch_dsl_drf.filter_backends import (
     DefaultOrderingFilterBackend,
     FacetedFilterSearchFilterBackend,
@@ -654,6 +655,35 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         es = get_connection(self.search._using)
         resp = es.explain(index, pk, {"query": query})
         return JsonResponse(resp)
+
+    @action(detail=False)
+    @method_decorator(cache_page(CACHE_SECS))
+    def suggest(self, request, *args, **kwargs):
+        # TODO: which indexes?
+        q = request.GET.get("q")
+        suggestions = []
+        if q:
+            s = Search().index("suggest_test").source("")
+            s = s.source("").suggest(
+                "suggestions",
+                request.GET.get("q"),
+                completion={
+                    "field": "suggest",
+                    "size": 5,
+                    "skip_duplicates": True,
+                },
+            )
+            s._suggest["suggestions"]["prefix"] = s._suggest["suggestions"].pop("text")
+            suggestions = s.execute().suggest.suggestions
+            if suggestions:
+                suggestions = suggestions[0].to_dict()
+                # remove suggestions that exactly match the query
+                q = q.lower()
+                suggestions["options"] = [
+                    x for x in suggestions["options"] if x["text"].lower() != q
+                ]
+
+        return JsonResponse({"suggestions": {"prefix": suggestions}})
 
     @vary_on_cookie
     @method_decorator(cache_page(CACHE_SECS))
