@@ -23,6 +23,8 @@ export default class SearchTypeahead {
     // searches without suggestions; if the input has one of these as a prefix, we know we don't want to
     // call the server again
     this.noSuggestions = new Set();
+    // don't call the server if the value is longer than this
+    this.maxValueLength = 20;
 
     this.autocomplete = CustomAutocomplete.getOrCreateInstance(this.input, {
       liveServer: true,
@@ -63,6 +65,11 @@ export default class SearchTypeahead {
 
   shouldLoadFromServer () {
     const value = this.input.value.toLowerCase();
+
+    if (value.length > this.maxValueLength) {
+      return false;
+    }
+
     if (value.length) {
       for (const prefix of this.noSuggestions) {
         if (value.startsWith(prefix) || value === prefix) {

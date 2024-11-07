@@ -76,7 +76,14 @@
                 v-if="loading"
                 class="circle-loader--lt"
               />
-              <span v-else>{{ $t("Search") }}</span>
+              <span v-else>
+                <span class="d-none d-md-inline">
+                {{ $t("Search") }}
+                </span>
+                <span class="d-md-none">
+                  <i class="bi bi-search text-white"></i>
+                </span>
+              </span>
             </button>
             <button
               v-if="searchInfo.count"
@@ -742,7 +749,7 @@ export default {
         // search tip
         if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(' ') > -1) {
           this.searchTip = {
-            prompt: this.$t('Tip: Try using quotes to search for an exact phrase: '),
+            prompt: this.$t('Tip: Use quotes to search for an exact phrase: '),
             q: `"${this.q}"`
           };
         }
