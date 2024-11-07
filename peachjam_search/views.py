@@ -13,7 +13,6 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.views.generic import DetailView, ListView, TemplateView
-from django_elasticsearch_dsl.search import Search
 from django_elasticsearch_dsl_drf.filter_backends import (
     DefaultOrderingFilterBackend,
     FacetedFilterSearchFilterBackend,
@@ -665,8 +664,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         q = request.GET.get("q")
         suggestions = []
         if q:
-            s = Search().index("suggest_test").source("")
-            s = s.source("").suggest(
+            s = self.search.source("").suggest(
                 "suggestions",
                 request.GET.get("q"),
                 completion={

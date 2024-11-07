@@ -361,6 +361,17 @@ class SearchableDocument(Document):
         parts.extend([a.title for a in instance.alternative_names.all()])
         return " ".join(parts)
 
+    def prepare_suggest(self, instance):
+        suggestions = [instance.title]
+
+        if instance.citation and instance.citation != instance.title:
+            suggestions.append(instance.citation)
+
+        for name in instance.alternative_names.all():
+            suggestions.append(name.title)
+
+        return suggestions
+
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
         log.info(f"Prepared document #{object_instance.pk} for indexing")
@@ -463,6 +474,7 @@ class MultiLanguageIndexManager:
     def __init__(self):
         self.main_index = SearchableDocument._index
         self.language_indexes = self.create_language_indexes()
+        self.load_language_index_settings(from_server=False)
 
     @classmethod
     def get_instance(cls):
@@ -482,7 +494,7 @@ class MultiLanguageIndexManager:
 
         return indexes
 
-    def load_language_index_settings(self):
+    def load_language_index_settings(self, from_server=True):
         """Configure mappings etc for the language indexes. Requires an elasticsearch connection."""
         main_mappings = self.main_index.to_dict()["mappings"]
 
@@ -493,10 +505,16 @@ class MultiLanguageIndexManager:
                 index.analyzer(self.SEARCH_ANALYZERS[lang])
                 search_analyzer = self.SEARCH_ANALYZERS[lang]._name
 
-            if index.exists():
+            if from_server and index.exists():
                 is_new = False
                 index.load_mappings()
                 new_mappings = index.get_or_create_mapping().to_dict()
+                # merge in new fields
+                for fld in main_mappings["properties"]:
+                    if fld not in new_mappings["properties"]:
+                        new_mappings["properties"][fld] = main_mappings["properties"][
+                            fld
+                        ]
             else:
                 is_new = True
                 new_mappings = copy.deepcopy(main_mappings)
