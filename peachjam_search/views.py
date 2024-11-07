@@ -639,6 +639,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             filters_string=filters_string,
             ordering=self.request.GET.get("ordering"),
             previous_search=previous,
+            suggestion=self.request.GET.get("suggestion"),
             ip_address=self.request.headers.get("x-forwarded-for"),
             user_agent=self.request.headers.get("user-agent"),
         )

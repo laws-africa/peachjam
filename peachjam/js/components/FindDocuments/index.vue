@@ -291,6 +291,7 @@ export default {
       q: '',
       drawerOpen: false,
       searchTip: null,
+      suggestion: null,
       advancedSearchCriteria: [{
         text: '',
         fields: [],
@@ -447,7 +448,8 @@ export default {
     },
 
     onTypeahead (e) {
-      this.q = this.$refs.searchInput._typeaheadItem.value;
+      this.suggestion = this.$refs.searchInput._typeaheadItem;
+      this.q = this.suggestion.value;
       this.simpleSearch();
     },
 
@@ -671,6 +673,11 @@ export default {
 
       this.generateAdvancedSearchParams(params);
 
+      // record suggestion details for statistics
+      if (this.suggestion) {
+        params.append('suggestion', this.suggestion.type);
+      }
+
       return params;
     },
 
@@ -733,7 +740,7 @@ export default {
         scrollToElement(this.$refs['search-box']);
 
         // search tip
-        if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(" ") > -1) {
+        if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(' ') > -1) {
           this.searchTip = {
             prompt: this.$t('Tip: Try using quotes to search for an exact phrase: '),
             q: `"${this.q}"`
@@ -756,6 +763,8 @@ export default {
 
           // check that the search state hasn't changed since we sent the request
           if (params.toString() === this.generateSearchParams().toString()) {
+            // clear the suggestion flag
+            this.suggestion = null;
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();

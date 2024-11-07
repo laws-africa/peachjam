@@ -21,7 +21,8 @@ export default class SearchTypeahead {
         const suggestions = data.suggestions.prefix.options.map((option) => {
           return {
             value: option.text,
-            label: option.text
+            label: option.text,
+            type: "prefix"
           };
         });
         return suggestions;
