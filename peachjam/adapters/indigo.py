@@ -520,6 +520,7 @@ class IndigoAdapter(RequestsAdapter):
                 defaults={
                     "file": File(f, name=filename),
                     "mimetype": magic.from_file(f.name, mime=True),
+                    "size": len(r.content),
                 },
             )
 
@@ -599,7 +600,7 @@ class IndigoAdapter(RequestsAdapter):
                         defaults={
                             "filename": filename,
                             "mimetype": mimetype,
-                            "size": file.size,
+                            "size": len(r.content),
                             "file": file,
                             "url": None,
                             "use_source_file": False,
