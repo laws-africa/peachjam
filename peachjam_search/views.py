@@ -45,6 +45,7 @@ from peachjam_search.serializers import (
 )
 
 CACHE_SECS = 15 * 60
+SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
 
 
 class RobustPaginator(Paginator):
@@ -658,7 +659,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         return JsonResponse(resp)
 
     @action(detail=False)
-    @method_decorator(cache_page(CACHE_SECS))
+    @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
     def suggest(self, request, *args, **kwargs):
         # TODO: which indexes?
         q = request.GET.get("q")
