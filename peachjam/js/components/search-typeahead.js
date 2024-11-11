@@ -32,6 +32,7 @@ export default class SearchTypeahead {
       queryParam: 'q',
       fixed: true,
       fullWidth: true,
+      showAllSuggestions: true,
       // 3 chars before suggestions are shown
       suggestionsThreshold: 3,
       noCache: false,
@@ -43,12 +44,18 @@ export default class SearchTypeahead {
         const suggestions = data.suggestions.prefix.options.map((option) => {
           return {
             value: option.text,
-            label: option.text,
+            label: option.text + ' (prefix)',
             type: 'prefix'
           };
-        });
+        }).concat(data.suggestions.phrase.options.map((option) => {
+          return {
+            value: option.text,
+            label: option.text + ' (phrase)',
+            type: 'phrase'
+          };
+        }));
         if (!suggestions.length) {
-          this.noSuggestions.add(this.input.value.toLowerCase());
+          //this.noSuggestions.add(this.input.value.toLowerCase());
         }
         return suggestions;
       },
@@ -65,6 +72,7 @@ export default class SearchTypeahead {
 
   shouldLoadFromServer () {
     const value = this.input.value.toLowerCase();
+    return true;
 
     if (value.length > this.maxValueLength) {
       return false;

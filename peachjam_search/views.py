@@ -660,30 +660,45 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     @action(detail=False)
     @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
     def suggest(self, request, *args, **kwargs):
-        # TODO: which indexes?
         q = request.GET.get("q")
         suggestions = []
         if q:
-            s = self.search.source("").suggest(
-                "suggestions",
-                request.GET.get("q"),
-                completion={
-                    "field": "suggest",
-                    "size": 5,
-                    "skip_duplicates": True,
-                },
+            s = (
+                self.search.source("")
+                .suggest(
+                    "prefix",
+                    q,
+                    completion={
+                        "field": "suggest",
+                        "size": 5,
+                        "skip_duplicates": True,
+                    },
+                )
+                .suggest(
+                    "phrase",
+                    q,
+                    phrase={
+                        "field": "suggest_phrase",
+                        "size": 5,
+                        "direct_generator": [
+                            {"field": "suggest_phrase", "suggest_mode": "popular"}
+                        ],
+                        "highlight": {"pre_tag": "<em>", "post_tag": "</em>"},
+                    },
+                )
             )
-            s._suggest["suggestions"]["prefix"] = s._suggest["suggestions"].pop("text")
-            suggestions = s.execute().suggest.suggestions
-            if suggestions:
-                suggestions = suggestions[0].to_dict()
-                # remove suggestions that exactly match the query
-                q = q.lower()
-                suggestions["options"] = [
-                    x for x in suggestions["options"] if x["text"].lower() != q
-                ]
+            s._suggest["prefix"]["prefix"] = s._suggest["prefix"].pop("text")
+            suggestions = s.execute().suggest.to_dict()
+            suggestions["phrase"] = suggestions["phrase"][0]
+            suggestions["prefix"] = suggestions["prefix"][0]
 
-        return JsonResponse({"suggestions": {"prefix": suggestions}})
+            # remove phrase suggestions that exactly match the query
+            q = q.lower()
+            suggestions["phrase"]["options"] = [
+                x for x in suggestions["phrase"]["options"] if x["text"].lower() != q
+            ]
+
+        return JsonResponse({"suggestions": suggestions})
 
     @vary_on_cookie
     @method_decorator(cache_page(CACHE_SECS))

@@ -7,7 +7,6 @@ from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import RankFeature, token_filter
 from elasticsearch_dsl.analysis import CustomAnalyzer
-from elasticsearch_dsl.index import Index
 
 from peachjam.models import (
     Attorney,
@@ -34,6 +33,21 @@ TRANSLATED_FIELD_LANGS = ["en", "fr", "pt", "sw"]
 
 class RankField(fields.DEDField, RankFeature):
     pass
+
+
+suggest_phrase_analyzer = CustomAnalyzer(
+    "shingle_analyzer",
+    tokenizer="standard",
+    filter=[
+        "lowercase",
+        token_filter(
+            "shingle_filter",
+            type="shingle",
+            min_shingle_size=2,
+            max_shingle_size=3,
+        ),
+    ],
+)
 
 
 @registry.register_document
@@ -128,6 +142,7 @@ class SearchableDocument(Document):
 
     # for typeahed
     suggest = fields.CompletionField()
+    suggest_phrase = fields.TextField(analyzer=suggest_phrase_analyzer)
 
     # this will be used to build prepare_xxx_xx fields for each of these
     translated_fields = [
@@ -148,6 +163,7 @@ class SearchableDocument(Document):
     class Index:
         name = settings.PEACHJAM["ES_INDEX"]
         settings = {"index.mapping.nested_objects.limit": 50000}
+        analyzers = [suggest_phrase_analyzer]
 
     class Django:
         # Because CoreDocument's default manager is a polymorphic manager, the actual instances
@@ -372,6 +388,15 @@ class SearchableDocument(Document):
 
         return suggestions
 
+    def prepare_suggest_phrase(self, instance):
+        text = instance.get_content_as_text()
+        if text and len(text) > self.MAX_TEXT_LENGTH:
+            log.warning(
+                f"Limiting text content of {instance} to {self.MAX_TEXT_LENGTH} (length is {len(text)})"
+            )
+            text = text[: self.MAX_TEXT_LENGTH]
+        return text
+
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
         log.info(f"Prepared document #{object_instance.pk} for indexing")
@@ -485,14 +510,10 @@ class MultiLanguageIndexManager:
     def create_language_indexes(self):
         """Create basic multi-language indexes. They are not fully configured with mapping details, because that
         requires an elasticsearch connection."""
-        indexes = {}
-
-        for lang, analyzer in self.ANALYZERS.items():
-            index = Index(name=f"{self.main_index._name}_{lang}")
-            index._settings = copy.deepcopy(self.main_index._settings)
-            indexes[lang] = index
-
-        return indexes
+        return {
+            lang: self.main_index.clone(f"{self.main_index._name}_{lang}")
+            for lang in self.ANALYZERS.keys()
+        }
 
     def load_language_index_settings(self, from_server=True):
         """Configure mappings etc for the language indexes. Requires an elasticsearch connection."""
@@ -533,13 +554,15 @@ class MultiLanguageIndexManager:
         # these fields weren't initialised correctly and we can't change the mappings
         for name, fld in fields.items():
             if fld["type"] == "text":
-                # this can always change
-                if search_analyzer:
-                    fld["search_analyzer"] = search_analyzer
-
-                # the analyzer can't change once it is set
-                if is_new:
+                if is_new and "analyzer" not in fld:
+                    # the analyzer can't change once it is set
                     fld["analyzer"] = analyzer
+
+                if search_analyzer and (
+                    is_new and fld.get("analyzer") == analyzer or "analyzer" not in fld
+                ):
+                    # this can always change
+                    fld["search_analyzer"] = search_analyzer
             elif fld["type"] == "nested":
                 self.set_text_field_analyzer(
                     fld["properties"], analyzer, search_analyzer, is_new
