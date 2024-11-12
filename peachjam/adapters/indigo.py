@@ -13,6 +13,7 @@ from django.core.files import File
 from django.db.models import Q
 from django.utils.text import slugify
 from languages_plus.models import Language
+from requests import HTTPError
 
 from peachjam.adapters.base import RequestsAdapter
 from peachjam.helpers import get_update_or_create
@@ -506,23 +507,27 @@ class IndigoAdapter(RequestsAdapter):
         logger.info(f"Downloading source file from {url}")
 
         with NamedTemporaryFile() as f:
-            r = self.client_get(url)
             try:
-                # sometimes this header is not present
-                d = r.headers["Content-Disposition"]
-                filename = re.findall("filename=(.+)", d)[0]
-            except KeyError:
-                filename = f"{slugify(title)}.pdf"
-            f.write(r.content)
+                r = self.client_get(url)
+                try:
+                    # sometimes this header is not present
+                    d = r.headers["Content-Disposition"]
+                    filename = re.findall("filename=(.+)", d)[0]
+                except KeyError:
+                    filename = f"{slugify(title)}.pdf"
+                f.write(r.content)
 
-            SourceFile.objects.update_or_create(
-                document=doc,
-                defaults={
-                    "file": File(f, name=filename),
-                    "mimetype": magic.from_file(f.name, mime=True),
-                    "size": len(r.content),
-                },
-            )
+                SourceFile.objects.update_or_create(
+                    document=doc,
+                    defaults={
+                        "file": File(f, name=filename),
+                        "mimetype": magic.from_file(f.name, mime=True),
+                        "size": len(r.content),
+                    },
+                )
+            except HTTPError as e:
+                logger.warning(f"  SKIPPING downloading source file for {title}:")
+                logger.warning(f"  {e}")
 
     def get_size_from_url(self, url):
         logger.info("  Getting the file size ...")
