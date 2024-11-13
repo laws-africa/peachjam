@@ -4,6 +4,7 @@ from .accounts import *
 from .article import *
 from .authors import *
 from .autocomplete import *
+from .bills import *
 from .books import *
 from .causelist import *
 from .compare import *

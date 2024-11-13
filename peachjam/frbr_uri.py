@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
 # TODO: get these from cobalt
-FRBR_URI_DOCTYPES = ["act", "doc", "judgment", "statement", "officialGazette"]
+FRBR_URI_DOCTYPES = ["act", "bill", "doc", "judgment", "statement", "officialGazette"]
 FRBR_URI_DOCTYPE_CHOICES = ((x, x) for x in FRBR_URI_DOCTYPES)
 
 validate_frbr_uri_component = RegexValidator(

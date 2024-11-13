@@ -38,6 +38,7 @@ from peachjam.models import (
     AttachedFiles,
     Attorney,
     Author,
+    Bill,
     CaseNumber,
     Court,
     CourtRegistry,
@@ -789,3 +790,8 @@ class RatificationResource(resources.ModelResource):
             "work",
             "country",
         )
+
+
+class BillResource(BaseDocumentResource):
+    class Meta(BaseDocumentResource.Meta):
+        model = Bill

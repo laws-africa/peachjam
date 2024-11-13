@@ -10,6 +10,7 @@ from .generic_document import *
 from .ingestors import *
 from .journals_books import *
 from .judgment import *
+from .legislation import *
 from .partner import *
 from .profile import *
 from .ratification import *
@@ -17,3 +18,5 @@ from .relationships import *
 from .save_document import *
 from .settings import *
 from .taxonomies import *
+
+from .bill import *  # isort:skip
