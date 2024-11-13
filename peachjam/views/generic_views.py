@@ -62,7 +62,7 @@ class DocumentListView(ListView):
     # when grouping by date, group by year, or month and year? ("year" and "month-year" are the only options)
     group_by_date = "year"
 
-    def get_base_queryset(self, *args, **kwargs):
+    def get_model_queryset(self):
         qs = self.queryset if self.queryset is not None else self.model.objects
         return (
             qs.filter(published=True)
@@ -74,6 +74,9 @@ class DocumentListView(ListView):
             )
             .prefetch_related("labels")
         )
+
+    def get_base_queryset(self, *args, **kwargs):
+        return self.get_model_queryset()
 
     def get_queryset(self):
         qs = self.get_base_queryset()

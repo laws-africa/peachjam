@@ -14,6 +14,8 @@ class BillListView(FilteredDocumentListView):
 
 
 class PlaceBillListView(BillListView):
+    template_name = "peachjam/place_bill_list.html"
+
     def get(self, *args, **kwargs):
         self.jurisdiction, self.locality = get_country_and_locality_or_404(
             kwargs["code"]

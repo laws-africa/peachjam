@@ -1,0 +1,21 @@
+{% extends 'peachjam/bill_list.html' %}
+{% load i18n %}
+{% block title %}{{ place }} - {{ block.super }}{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url "home_page" %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'bill_list' %}">{% trans 'Bills' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ place.name }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-title %}
+  <h1 class="my-4">{% blocktrans with place=place.name %}{{ place }} Bills{% endblocktrans %}</h1>
+{% endblock %}
