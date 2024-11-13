@@ -5,8 +5,8 @@ import tablib
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from peachjam.models import Judgment, Taxonomy
-from peachjam.resources import JudgmentResource
+from peachjam.models import GenericDocument, Judgment, Taxonomy
+from peachjam.resources import GenericDocumentResource, JudgmentResource
 
 judgment_import_headers = [
     "skip",
@@ -118,6 +118,25 @@ class JudgmentBulkImportTestCase(TestCase):
         dataset = tablib.Dataset(data, headers=headers, depth=0)
         result = JudgmentResource().import_data(dataset=dataset, dry_run=False)
         self.assertFalse(result.has_errors())
+        self.assertEqual([], result.invalid_rows)
         j = Judgment.objects.first()
         self.assertEqual(len(j.taxonomies.all()), 2)
+
+    def test_generic_document_import(self):
+        headers = [
+            "skip",
+            "jurisdiction",
+            "date",
+            "language",
+            "nature",
+            "title",
+            "frbr_uri_doctype",
+        ]
+        row = ["", "ZA", "2022-09-14", "eng", "thing", "a test", "doc"]
+
+        dataset = tablib.Dataset(row, headers=headers)
+        result = GenericDocumentResource().import_data(dataset=dataset, dry_run=False)
+        self.assertEqual([], result.invalid_rows)
         self.assertFalse(result.has_errors())
+        d = GenericDocument.objects.first()
+        self.assertEqual("/akn/za/doc/thing/2022-09-14/a-test", d.work_frbr_uri)
