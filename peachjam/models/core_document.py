@@ -80,6 +80,7 @@ class DocumentNature(models.Model):
     class Meta:
         verbose_name = _("document nature")
         verbose_name_plural = _("document natures")
+        ordering = ["name"]
 
     def __str__(self):
         return self.name

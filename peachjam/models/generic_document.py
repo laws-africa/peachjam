@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from peachjam.models import (
@@ -31,6 +32,7 @@ class GenericDocument(CoreDocument):
 
     def pre_save(self):
         self.doc_type = "generic_document"
+        self.frbr_uri_number = self.frbr_uri_number or slugify(self.title or "")
         super().pre_save()
 
 
