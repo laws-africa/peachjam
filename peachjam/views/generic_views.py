@@ -287,6 +287,9 @@ class BaseDocumentDetailView(DetailView):
             self.model, expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri"))
         )
 
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related("custom_properties")
+
     def show_save_doc_button(self):
         return pj_settings().allow_save_documents and (
             not self.request.user.is_authenticated

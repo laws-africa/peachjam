@@ -61,6 +61,8 @@ from peachjam.models import (
     CourtClass,
     CourtDivision,
     CourtRegistry,
+    CustomProperty,
+    CustomPropertyLabel,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -464,6 +466,10 @@ class BackgroundTaskInline(GenericTabularInline):
         return bool(obj.last_error)
 
 
+class CustomPropertyInline(admin.TabularInline):
+    model = CustomProperty
+
+
 class DocumentAdmin(BaseAdmin):
     form = DocumentForm
     inlines = [
@@ -472,6 +478,7 @@ class DocumentAdmin(BaseAdmin):
         AlternativeNameInline,
         AttachedFilesInline,
         ImageInline,
+        CustomPropertyInline,
         BackgroundTaskInline,
     ]
     list_display = (
@@ -1576,11 +1583,12 @@ class PartnerAdmin(admin.ModelAdmin):
 
 admin.site.register(
     [
+        AttachedFileNature,
         CitationLink,
+        CitationProcessing,
         CourtClass,
         CourtDivision,
-        AttachedFileNature,
-        CitationProcessing,
+        CustomPropertyLabel,
         Folder,
         SavedDocument,
     ]
