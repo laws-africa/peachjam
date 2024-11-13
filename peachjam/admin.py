@@ -172,9 +172,7 @@ class EntityProfileInline(GenericStackedInline):
     form = EntityProfileForm
 
 
-admin.site.register(PeachJamSettings)
-
-
+@admin.register(PeachJamSettings)
 class PeachJamSettingsAdmin(admin.ModelAdmin):
     filter_horizontal = (
         "document_languages",
@@ -810,9 +808,7 @@ class TaxonomyForm(MoveNodeForm):
         return self.cleaned_data
 
 
-admin.site.register(Taxonomy)
-
-
+@admin.register(Taxonomy)
 class TaxonomyAdmin(TreeAdmin):
     form = movenodeform_factory(Taxonomy, TaxonomyForm)
     readonly_fields = ("slug",)
@@ -838,9 +834,7 @@ class TaxonomyAdmin(TreeAdmin):
         return resp
 
 
-admin.site.register(CoreDocument)
-
-
+@admin.register(CoreDocument)
 class CoreDocumentAdmin(DocumentAdmin):
     pass
 
@@ -860,9 +854,7 @@ class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
         return qs
 
 
-admin.site.register(Legislation)
-
-
+@admin.register(Legislation)
 class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["nature"])
@@ -987,9 +979,7 @@ class JudgmentAdminForm(DocumentForm):
         return super().save(*args, **kwargs)
 
 
-admin.site.register(Judgment)
-
-
+@admin.register(Judgment)
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
     form = JudgmentAdminForm
