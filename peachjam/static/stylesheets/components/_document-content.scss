@@ -6,8 +6,8 @@
   }
 
   .content.content__html {
-    // reset line height so html documents use their default, rather than bootstrap's adjusted line height
-    line-height: normal;
+    // reset line height to a reasonable default for text documents, rather than bootstrap's adjusted line height
+    line-height: 1.3;
     font-size: 15px;
 
     // style embedded la-akoma-ntoso content
