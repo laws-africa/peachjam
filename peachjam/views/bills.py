@@ -1,4 +1,4 @@
-from peachjam.models import Bill
+from peachjam.models import Bill, pj_settings
 from peachjam.models.core_document import get_country_and_locality_or_404
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
@@ -11,10 +11,20 @@ class BillListView(FilteredDocumentListView):
     model = Bill
     template_name = "peachjam/bill_list.html"
     navbar_link = "bills"
+    default_jurisdiction_only = True
+
+    def get_base_queryset(self, *args, **kwargs):
+        qs = super().get_base_queryset(*args, **kwargs)
+        if self.default_jurisdiction_only:
+            juri = pj_settings().default_document_jurisdiction
+            if juri:
+                qs = qs.filter(jurisdiction=juri, locality=None)
+        return qs
 
 
 class PlaceBillListView(BillListView):
     template_name = "peachjam/place_bill_list.html"
+    default_jurisdiction_only = False
 
     def get(self, *args, **kwargs):
         self.jurisdiction, self.locality = get_country_and_locality_or_404(
