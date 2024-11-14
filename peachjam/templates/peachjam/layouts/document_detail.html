@@ -363,6 +363,16 @@
                           {% endfor %}
                         {% endif %}
                       {% endblock %}
+                      {% block document-metadata-custom-properties %}
+                        {% for prop in document.custom_properties.all %}
+                          <dt>
+                            {{ prop.label }}
+                          </dt>
+                          <dd class="text-muted">
+                            {{ prop.value }}
+                          </dd>
+                        {% endfor %}
+                      {% endblock %}
                     </dl>
                   {% endblock %}
                 </div>

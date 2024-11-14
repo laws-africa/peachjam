@@ -38,6 +38,7 @@ from peachjam.views import (
     ArticleTopicYearView,
     ArticleYearView,
     AuthorDetailView,
+    BillListView,
     BookListView,
     CauseListCourtClassMonthView,
     CauseListCourtClassView,
@@ -84,6 +85,7 @@ from peachjam.views import (
     LegislationListView,
     PartnerLogoView,
     PeachjamAdminLoginView,
+    PlaceBillListView,
     PlaceDetailView,
     PocketLawResources,
     RobotsView,
@@ -175,63 +177,88 @@ urlpatterns = [
             ]
         ),
     ),
-    path("causelists/", CauseListListView.as_view(), name="causelist_list"),
     path(
-        "causelists/<str:code>/",
-        CauseListCourtDetailView.as_view(),
-        name="causelist_court",
-    ),
-    path(
-        "causelists/court-class/<str:court_class>/",
-        CauseListCourtClassView.as_view(),
-        name="causelist_court_class",
-    ),
-    path(
-        "causelists/court-class/<str:court_class>/<int:year>/",
-        CauseListCourtClassYearView.as_view(),
-        name="causelist_court_class_year",
-    ),
-    path(
-        "causelists/court-class/<str:court_class>/<int:year>/<int:month>/",
-        CauseListCourtClassMonthView.as_view(),
-        name="causelist_court_class_month",
-    ),
-    path(
-        "causelists/<str:code>/<int:year>/",
-        CauseListCourtYearView.as_view(),
-        name="causelist_court_year",
-    ),
-    path(
-        "causelists/<str:code>/<int:year>/<int:month>/",
-        CauseListCourtMonthView.as_view(),
-        name="causelist_court_month",
-    ),
-    path(
-        "causelists/<str:code>/<str:registry_code>/",
-        CauseListCourtRegistryDetailView.as_view(),
-        name="causelist_court_registry",
-    ),
-    path(
-        "causelists/<str:code>/<str:registry_code>/<int:year>/",
-        CauseListCourtRegistryYearView.as_view(),
-        name="causelist_court_registry_year",
-    ),
-    path(
-        "causelists/<str:code>/<str:registry_code>/<int:year>/<int:month>/",
-        CauseListCourtRegistryMonthView.as_view(),
-        name="causelist_court_registry_month",
+        "causelists/",
+        include(
+            [
+                path("", CauseListListView.as_view(), name="causelist_list"),
+                path(
+                    "<str:code>/",
+                    CauseListCourtDetailView.as_view(),
+                    name="causelist_court",
+                ),
+                path(
+                    "court-class/<str:court_class>/",
+                    CauseListCourtClassView.as_view(),
+                    name="causelist_court_class",
+                ),
+                path(
+                    "court-class/<str:court_class>/<int:year>/",
+                    CauseListCourtClassYearView.as_view(),
+                    name="causelist_court_class_year",
+                ),
+                path(
+                    "court-class/<str:court_class>/<int:year>/<int:month>/",
+                    CauseListCourtClassMonthView.as_view(),
+                    name="causelist_court_class_month",
+                ),
+                path(
+                    "<str:code>/<int:year>/",
+                    CauseListCourtYearView.as_view(),
+                    name="causelist_court_year",
+                ),
+                path(
+                    "<str:code>/<int:year>/<int:month>/",
+                    CauseListCourtMonthView.as_view(),
+                    name="causelist_court_month",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/",
+                    CauseListCourtRegistryDetailView.as_view(),
+                    name="causelist_court_registry",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/<int:year>/",
+                    CauseListCourtRegistryYearView.as_view(),
+                    name="causelist_court_registry_year",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/<int:year>/<int:month>/",
+                    CauseListCourtRegistryMonthView.as_view(),
+                    name="causelist_court_registry_month",
+                ),
+            ]
+        ),
     ),
     path("place/<str:code>", PlaceDetailView.as_view(), name="place"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
-    path("gazettes", GazetteListView.as_view(), name="gazettes"),
     path(
-        "gazettes/<str:code>/", GazetteListView.as_view(), name="gazettes_by_locality"
+        "bills/",
+        include(
+            [
+                path("", BillListView.as_view(), name="bill_list"),
+                path("<str:code>", PlaceBillListView.as_view(), name="place_bill_list"),
+            ]
+        ),
     ),
-    path("gazettes/<int:year>", GazetteYearView.as_view(), name="gazettes_by_year"),
     path(
-        "gazettes/<str:code>/<int:year>",
-        GazetteYearView.as_view(),
-        name="gazettes_by_year",
+        "gazettes/",
+        include(
+            [
+                path("", GazetteListView.as_view(), name="gazettes"),
+                path(
+                    "<str:code>/",
+                    GazetteListView.as_view(),
+                    name="gazettes_by_locality",
+                ),
+                path("<int:year>", GazetteYearView.as_view(), name="gazettes_by_year"),
+                path(
+                    "<str:code>/<int:year>",
+                    GazetteYearView.as_view(),
+                    name="gazettes_by_year",
+                ),
+            ]
+        ),
     ),
     path(
         "doc/",
@@ -240,16 +267,23 @@ urlpatterns = [
     ),
     path("books/", BookListView.as_view(), name="book_list"),
     path("journals/", JournalListView.as_view(), name="journal_list"),
-    path("taxonomy/", TaxonomyListView.as_view(), name="top_level_taxonomy_list"),
     path(
-        "taxonomy/<slug:topic>",
-        TaxonomyFirstLevelView.as_view(),
-        name="first_level_taxonomy_list",
-    ),
-    path(
-        "taxonomy/<slug:topic>/<slug:child>",
-        TaxonomyDetailView.as_view(),
-        name="taxonomy_detail",
+        "taxonomy/",
+        include(
+            [
+                path("", TaxonomyListView.as_view(), name="top_level_taxonomy_list"),
+                path(
+                    "<slug:topic>",
+                    TaxonomyFirstLevelView.as_view(),
+                    name="first_level_taxonomy_list",
+                ),
+                path(
+                    "<slug:topic>/<slug:child>",
+                    TaxonomyDetailView.as_view(),
+                    name="taxonomy_detail",
+                ),
+            ]
+        ),
     ),
     # document detail views
     re_path(

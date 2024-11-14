@@ -49,6 +49,7 @@ from peachjam.models import (
     Attorney,
     Author,
     Bench,
+    Bill,
     Book,
     CaseHistory,
     CaseNumber,
@@ -60,6 +61,8 @@ from peachjam.models import (
     CourtClass,
     CourtDivision,
     CourtRegistry,
+    CustomProperty,
+    CustomPropertyLabel,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -101,6 +104,7 @@ from peachjam.plugins import plugins
 from peachjam.resources import (
     ArticleResource,
     AttorneyResource,
+    BillResource,
     GazetteResource,
     GenericDocumentResource,
     JudgmentResource,
@@ -168,6 +172,7 @@ class EntityProfileInline(GenericStackedInline):
     form = EntityProfileForm
 
 
+@admin.register(PeachJamSettings)
 class PeachJamSettingsAdmin(admin.ModelAdmin):
     filter_horizontal = (
         "document_languages",
@@ -459,6 +464,10 @@ class BackgroundTaskInline(GenericTabularInline):
         return bool(obj.last_error)
 
 
+class CustomPropertyInline(admin.TabularInline):
+    model = CustomProperty
+
+
 class DocumentAdmin(BaseAdmin):
     form = DocumentForm
     inlines = [
@@ -467,6 +476,7 @@ class DocumentAdmin(BaseAdmin):
         AlternativeNameInline,
         AttachedFilesInline,
         ImageInline,
+        CustomPropertyInline,
         BackgroundTaskInline,
     ]
     list_display = (
@@ -798,6 +808,7 @@ class TaxonomyForm(MoveNodeForm):
         return self.cleaned_data
 
 
+@admin.register(Taxonomy)
 class TaxonomyAdmin(TreeAdmin):
     form = movenodeform_factory(Taxonomy, TaxonomyForm)
     readonly_fields = ("slug",)
@@ -823,10 +834,12 @@ class TaxonomyAdmin(TreeAdmin):
         return resp
 
 
+@admin.register(CoreDocument)
 class CoreDocumentAdmin(DocumentAdmin):
     pass
 
 
+@admin.register(GenericDocument)
 class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
     resource_class = GenericDocumentResource
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
@@ -841,6 +854,7 @@ class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
         return qs
 
 
+@admin.register(Legislation)
 class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["nature"])
@@ -850,6 +864,11 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[2][1]["classes"] = ("collapse",)
     fieldsets[4][1]["fields"].extend(["parent_work"])
     readonly_fields = ["parent_work"] + list(DocumentAdmin.readonly_fields)
+
+
+@admin.register(Bill)
+class BillAdmin(ImportExportMixin, DocumentAdmin):
+    resource_class = BillResource
 
 
 class CaseNumberAdmin(admin.StackedInline):
@@ -960,6 +979,7 @@ class JudgmentAdminForm(DocumentForm):
         return super().save(*args, **kwargs)
 
 
+@admin.register(Judgment)
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
     form = JudgmentAdminForm
@@ -1553,22 +1573,16 @@ class PartnerAdmin(admin.ModelAdmin):
 
 admin.site.register(
     [
+        AttachedFileNature,
         CitationLink,
+        CitationProcessing,
         CourtClass,
         CourtDivision,
-        AttachedFileNature,
-        CitationProcessing,
+        CustomPropertyLabel,
         Folder,
         SavedDocument,
     ]
 )
-admin.site.register(PeachJamSettings, PeachJamSettingsAdmin)
-admin.site.register(Taxonomy, TaxonomyAdmin)
-admin.site.register(CoreDocument, CoreDocumentAdmin)
-admin.site.register(GenericDocument, GenericDocumentAdmin)
-admin.site.register(Legislation, LegislationAdmin)
-admin.site.register(Judgment, JudgmentAdmin)
-
 admin.site.unregister(User)
 admin.site.register(User, UserAdminCustom)
 
