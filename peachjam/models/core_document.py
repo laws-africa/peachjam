@@ -33,8 +33,8 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_date,
 )
 from peachjam.helpers import pdfjs_to_text
-from peachjam.models import CitationLink, ExtractedCitation
 from peachjam.models.attachments import Image, SourceFile
+from peachjam.models.citations import CitationLink, ExtractedCitation
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -80,6 +80,7 @@ class DocumentNature(models.Model):
     class Meta:
         verbose_name = _("document nature")
         verbose_name_plural = _("document natures")
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
@@ -325,6 +326,7 @@ class CoreDocument(PolymorphicModel):
 
     DOC_TYPE_CHOICES = (
         ("core_document", "Core Document"),
+        ("bill", "Bill"),
         ("gazette", "Gazette"),
         ("generic_document", "Generic Document"),
         ("judgment", "Judgment"),
@@ -608,6 +610,11 @@ class CoreDocument(PolymorphicModel):
         if self.nature and self.nature.code != self.default_nature[0]:
             self.frbr_uri_subtype = self.nature.code
 
+    def set_frbr_uri_number(self):
+        # default the number to a slugified title
+        if not self.frbr_uri_number and self.title:
+            self.frbr_uri_number = slugify(self.title)
+
     def set_nature(self):
         # provide a default nature if it's not already set
         # use hasattr() because otherwise we'd get a DoesNotExist exception
@@ -620,6 +627,7 @@ class CoreDocument(PolymorphicModel):
     def prepare_and_set_expression_frbr_uri(self):
         self.set_nature()
         self.set_frbr_uri_subtype()
+        self.set_frbr_uri_number()
         self.assign_frbr_uri()
         self.expression_frbr_uri = self.generate_expression_frbr_uri()
 

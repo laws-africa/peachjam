@@ -8,6 +8,7 @@ from peachjam.models import (
     CoreDocument,
     Country,
     Gazette,
+    GenericDocument,
     Journal,
     Language,
     get_country_and_locality,
@@ -150,3 +151,14 @@ ZAGPPHC 1063</a>.</p>
             }
         )
         self.assertEqual(frbr_uri.expression_uri(), gazette.expression_frbr_uri)
+
+    def test_generic_document(self):
+        doc = GenericDocument(
+            jurisdiction=Country.objects.get(pk="ZM"),
+            date=date(2020, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="My Test",
+        )
+        doc.save()
+        self.assertEqual("my-test", doc.frbr_uri_number)

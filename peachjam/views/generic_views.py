@@ -58,19 +58,25 @@ class DocumentListView(ListView):
     paginate_by = 50
     paginator_class = ClampedPaginator
     model = CoreDocument
-    queryset = CoreDocument.objects.select_related(
-        "nature",
-        "work",
-        "jurisdiction",
-        "locality",
-    ).prefetch_related("labels")
 
     # when grouping by date, group by year, or month and year? ("year" and "month-year" are the only options)
     group_by_date = "year"
 
-    def get_base_queryset(self, *args, **kwargs):
+    def get_model_queryset(self):
         qs = self.queryset if self.queryset is not None else self.model.objects
-        return qs.filter(published=True)
+        return (
+            qs.filter(published=True)
+            .select_related(
+                "nature",
+                "work",
+                "jurisdiction",
+                "locality",
+            )
+            .prefetch_related("labels")
+        )
+
+    def get_base_queryset(self, *args, **kwargs):
+        return self.get_model_queryset()
 
     def get_queryset(self):
         qs = self.get_base_queryset()
@@ -286,6 +292,9 @@ class BaseDocumentDetailView(DetailView):
         return get_object_or_404(
             self.model, expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri"))
         )
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related("custom_properties")
 
     def show_save_doc_button(self):
         return pj_settings().allow_save_documents and (

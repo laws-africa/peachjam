@@ -38,9 +38,12 @@ from peachjam.models import (
     AttachedFiles,
     Attorney,
     Author,
+    Bill,
     CaseNumber,
     Court,
     CourtRegistry,
+    CustomProperty,
+    CustomPropertyLabel,
     DocumentNature,
     DocumentTopic,
     Gazette,
@@ -197,6 +200,23 @@ class TaxonomiesWidget(ManyToManyWidget):
         return [self.model(**{self.field: t}) for t in taxonomies]
 
 
+class CustomPropertiesWidget(ManyToManyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        """Parse newline separate key: value pairs."""
+        properties = []
+        for prop in (value or "").strip().splitlines():
+            prop = prop.strip()
+            if not prop or ":" not in prop:
+                continue
+            key, value = prop.split(":", 1)
+            if key and value:
+                label = CustomPropertyLabel.objects.get_or_create(
+                    name__iexact=key, defaults={"name": key}
+                )[0]
+                properties.append(CustomProperty(label=label, value=value.strip()))
+        return properties
+
+
 class ManyToManyField(fields.Field):
     """Handles many-to-many relationships."""
 
@@ -258,11 +278,17 @@ class BaseDocumentResource(resources.ModelResource):
         attribute="alternative_names",
         widget=ManyToOneWidget(AlternativeName, separator="|", field="title"),
     )
-
+    custom_properties = ManyToManyField(
+        attribute="custom_properties", widget=CustomPropertiesWidget(CustomProperty)
+    )
     download_url = fields.Field(readonly=True)
 
     def get_queryset(self):
-        return self._meta.model.objects.get_qs_no_defer()
+        return (
+            self._meta.model.objects.get_qs_no_defer()
+            .select_related("jurisdiction", "locality", "language")
+            .prefetch_related("custom_properties", "taxonomies")
+        )
 
     def dehydrate_download_url(self, obj):
         domain = Site.objects.get_current().domain
@@ -273,6 +299,13 @@ class BaseDocumentResource(resources.ModelResource):
             scheme = "https"
             return f"{scheme}://{domain}{download_source}"
         return ""
+
+    def dehydrate_custom_properties(self, obj):
+        if obj.pk:
+            return "\n".join(
+                f"{prop.label.name}: {prop.value}"
+                for prop in obj.custom_properties.all()
+            )
 
     class Meta:
         exclude = (
@@ -789,3 +822,8 @@ class RatificationResource(resources.ModelResource):
             "work",
             "country",
         )
+
+
+class BillResource(BaseDocumentResource):
+    class Meta(BaseDocumentResource.Meta):
+        model = Bill

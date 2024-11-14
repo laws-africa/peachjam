@@ -83,15 +83,24 @@ class LegislationListView(BaseLegislationListView):
         if self.variant != "all":
             # pull in children (subleg)
             parents = list(
-                {r.work_id for r in queryset.only("work_id", "polymorphic_ctype_id")}
+                {
+                    r.work_id
+                    for r in queryset.prefetch_related()
+                    .select_related()
+                    .only("work_id", "polymorphic_ctype_id")
+                }
             )
 
             children = defaultdict(list)
-            children_qs = self.queryset.filter(
-                parent_work_id__in=parents,
-                repealed=False,
-                metadata_json__principal=True,
-            ).latest_expression()
+            children_qs = (
+                self.get_model_queryset()
+                .filter(
+                    parent_work_id__in=parents,
+                    repealed=False,
+                    metadata_json__principal=True,
+                )
+                .latest_expression()
+            )
             children_qs = children_qs.preferred_language(get_language(self.request))
             # group children by parent
             for child in children_qs:
