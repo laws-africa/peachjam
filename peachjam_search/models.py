@@ -6,8 +6,10 @@ from urllib.parse import urlencode
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.http import QueryDict
 from django.shortcuts import reverse
 from django.utils.timezone import now
+from rest_framework.test import APIRequestFactory
 
 log = logging.getLogger(__name__)
 
@@ -77,3 +79,40 @@ class SearchClick(models.Model):
     def save(self, *args, **kwargs):
         self.score = exp(-0.1733 * (self.position - 1))
         super().save(*args, **kwargs)
+
+
+class SavedSearch(models.Model):
+    q = models.CharField(max_length=4098)
+    filters = models.CharField(max_length=4098)
+    note = models.TextField(null=True, blank=True)
+    n_search_results = models.IntegerField(default=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateField(auto_now_add=True)
+    last_alert = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.q
+
+    def update_and_alert(self):
+        hits = self.find_new_hits()
+        if hits:
+            self.send_alert(hits)
+            self.last_alert = now()
+            self.save()
+
+    def find_new_hits(self):
+        from peachjam_search.views import DocumentSearchViewSet
+
+        factory = APIRequestFactory()
+        request = factory.get("/api/documents/")
+        request.user = self.user
+        params = f"q={self.q}&{self.filters}"
+        request.GET = QueryDict(params)
+        view = DocumentSearchViewSet.as_view({"get": "list"})
+        response = view(request)
+        hits = response.data["results"]
+        return hits
+
+    def send_alert(self, hits):
+        # send an email or other alert to the user
+        pass
