@@ -541,6 +541,16 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
                 "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
             },
         },
+        "citation": {
+            "enabled": True,
+            "options": {
+                "pre_tags": ["<mark>"],
+                "post_tags": ["</mark>"],
+                "fragment_size": 0,
+                "number_of_fragments": 0,
+                "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
+            },
+        },
         "content": {
             "enabled": True,
             "options": {
