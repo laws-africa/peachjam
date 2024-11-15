@@ -665,7 +665,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         if q:
             s = self.search.source("").suggest(
                 "prefix",
-                request.GET.get("q"),
+                q,
                 completion={
                     "field": "suggest",
                     "size": 5,
