@@ -2,6 +2,7 @@
 <div id="search" class="row justify-content-center">
   <div class="col col-md-10 col-lg-8">
     <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
+      <input type="hidden" name="suggestion"/>
       <input type="text"
              class="form-control form-control-lg flex-grow-1"
              placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"

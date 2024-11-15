@@ -561,6 +561,8 @@ export default {
       this.page = parseInt(params.get('page')) || this.page;
       this.ordering = params.get('ordering') || this.ordering;
 
+      if (params.has('suggestion')) this.suggestion = { type: params.get('suggestion') };
+
       this.facets.forEach((facet) => {
         if (params.has(facet.name)) {
           facet.value = params.getAll(facet.name);

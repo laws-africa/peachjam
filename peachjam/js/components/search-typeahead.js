@@ -58,6 +58,10 @@ export default class SearchTypeahead {
         if (this.forVue) {
           this.input.dispatchEvent(new CustomEvent('typeahead', { detail: { suggestion: item } }));
         } else {
+          if (this.input.form.suggestion) {
+            // record the type of suggestion
+            this.input.form.suggestion.value = item.type;
+          }
           this.input.form.submit();
         }
       }
