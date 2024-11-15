@@ -814,10 +814,15 @@ class TaxonomyForm(MoveNodeForm):
 @admin.register(Taxonomy)
 class TaxonomyAdmin(TreeAdmin):
     form = movenodeform_factory(Taxonomy, TaxonomyForm)
-    readonly_fields = ("slug",)
+    readonly_fields = ("slug", "path_name")
     inlines = [EntityProfileInline]
     # prevent pagination
     list_per_page = 1_000_000
+
+    def get_readonly_fields(self, request, obj=None):
+        return list(super().get_readonly_fields(request, obj)) + [
+            a.name for a in Taxonomy._meta.fields if a.name.startswith("path_name_")
+        ]
 
     def changelist_view(self, request, extra_context=None):
         resp = super().changelist_view(request, extra_context)

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils.text import slugify
@@ -9,6 +10,7 @@ from peachjam.models import CoreDocument
 
 class Taxonomy(MP_Node):
     name = models.CharField(_("name"), max_length=255)
+    path_name = models.CharField(_("path name"), max_length=4096, blank=True)
     slug = models.SlugField(_("slug"), max_length=10 * 1024, unique=True)
     node_order_by = ["name"]
     entity_profile = GenericRelation(
@@ -40,13 +42,47 @@ class Taxonomy(MP_Node):
             return None
         return self.get_parent().get_entity_profile()
 
-    def save(self, *args, **kwargs):
+    def update_slug(self):
         old_slug = self.slug
         parent = self.get_parent()
         self.slug = (f"{parent.slug}-" if parent else "") + slugify(self.name)
+        return old_slug != self.slug
+
+    def update_path_name(self):
+        changed = False
+
+        # we need to do this for each language field suffix
+        suffixes = [""] + [f"_{x[0]}" for x in settings.LANGUAGES]
+        for suffix in suffixes:
+            name = getattr(self, f"name{suffix}", None)
+            path_name_attr = f"path_name{suffix}"
+
+            if name:
+                old_path_name = getattr(self, path_name_attr)
+                parts = [name]
+                if not self.is_root() and not self.get_parent().is_root():
+                    parent_path_name = (
+                        getattr(self.get_parent(), path_name_attr, None)
+                        or self.get_parent().path_name
+                    )
+                    parts.insert(0, parent_path_name)
+                setattr(self, path_name_attr, " — ".join(parts))
+
+                changed = changed or old_path_name != getattr(self, path_name_attr)
+            elif getattr(self, path_name_attr):
+                # the name has been cleared, so clear the path name
+                setattr(self, path_name_attr, "")
+                changed = True
+
+        return changed
+
+    def save(self, *args, **kwargs):
+        changed = self.update_slug()
+        changed = self.update_path_name() or changed
+
         super().save(*args, **kwargs)
 
-        if old_slug != self.slug:
+        if changed:
             # update all our children to use the new slug
             for child in self.get_children():
                 child.save()
