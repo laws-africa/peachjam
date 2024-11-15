@@ -457,7 +457,7 @@ export default {
     },
 
     onTypeahead (e) {
-      this.suggestion = this.$refs.searchInput._typeaheadItem;
+      this.suggestion = e.detail.suggestion;
       this.q = this.suggestion.value;
       this.simpleSearch();
     },

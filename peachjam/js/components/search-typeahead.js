@@ -54,8 +54,7 @@ export default class SearchTypeahead {
       },
       onSelectItem: (item) => {
         if (this.forVue) {
-          this.input._typeaheadItem = item;
-          this.input.dispatchEvent(new Event('typeahead'));
+          this.input.dispatchEvent(new CustomEvent('typeahead', { detail: { suggestion: item } }));
         } else {
           this.input.form.submit();
         }
