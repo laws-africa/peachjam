@@ -9,7 +9,9 @@ class CustomAutocomplete extends Autocomplete {
 
   _loadFromServer (show) {
     if (this.shouldLoadFromServer && !this.shouldLoadFromServer()) {
-      // TODO: hide suggestions?
+      // hide any existing suggestion
+      this.setData([]);
+      this.hideSuggestions();
       return false;
     }
     super._loadFromServer(show);
