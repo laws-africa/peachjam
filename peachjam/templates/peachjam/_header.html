@@ -26,6 +26,7 @@
         <form method="get"
               action="{% url 'search:search' %}"
               class="my-2 my-lg-0 ms-auto">
+          <input type="hidden" name="suggestion"/>
           {% block search-form %}
             <div class="input-group">
               <input type="text"
@@ -33,6 +34,7 @@
                      placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                      aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                      aria-describedby="search-addon"
+                     {% if SEARCH_SUGGESTIONS %}data-component="SearchTypeahead"{% endif %}
                      name="q"/>
               <button class="btn btn-primary" type="submit" id="search-addon">
                 <i class="bi bi-search text-white"></i>

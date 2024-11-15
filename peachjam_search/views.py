@@ -44,6 +44,7 @@ from peachjam_search.serializers import (
 )
 
 CACHE_SECS = 15 * 60
+SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
 
 
 class RobustPaginator(Paginator):
@@ -540,6 +541,16 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
                 "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
             },
         },
+        "citation": {
+            "enabled": True,
+            "options": {
+                "pre_tags": ["<mark>"],
+                "post_tags": ["</mark>"],
+                "fragment_size": 0,
+                "number_of_fragments": 0,
+                "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
+            },
+        },
         "content": {
             "enabled": True,
             "options": {
@@ -638,6 +649,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             filters_string=filters_string,
             ordering=self.request.GET.get("ordering"),
             previous_search=previous,
+            suggestion=self.request.GET.get("suggestion"),
             ip_address=self.request.headers.get("x-forwarded-for"),
             user_agent=self.request.headers.get("user-agent"),
         )
@@ -654,6 +666,33 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         es = get_connection(self.search._using)
         resp = es.explain(index, pk, {"query": query})
         return JsonResponse(resp)
+
+    @action(detail=False)
+    @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
+    def suggest(self, request, *args, **kwargs):
+        q = request.GET.get("q")
+        suggestions = []
+        if q and settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
+            s = self.search.source("").suggest(
+                "prefix",
+                q,
+                completion={
+                    "field": "suggest",
+                    "size": 5,
+                    "skip_duplicates": True,
+                },
+            )
+            # change it from a text query into a prefix query
+            s._suggest["prefix"]["prefix"] = s._suggest["prefix"].pop("text")
+            suggestions = s.execute().suggest.to_dict()
+            suggestions["prefix"] = suggestions["prefix"][0]
+            # remove suggestions that exactly match the query
+            q = q.lower()
+            suggestions["prefix"]["options"] = [
+                x for x in suggestions["prefix"]["options"] if x["text"].lower() != q
+            ]
+
+        return JsonResponse({"suggestions": suggestions})
 
     @vary_on_cookie
     @method_decorator(cache_page(CACHE_SECS))

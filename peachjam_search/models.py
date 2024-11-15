@@ -34,6 +34,7 @@ class SearchTrace(models.Model):
     filters = models.JSONField(null=True)
     filters_string = models.CharField(max_length=2048, null=True)
     ordering = models.CharField(max_length=1024, null=True)
+    suggestion = models.CharField(max_length=20, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 

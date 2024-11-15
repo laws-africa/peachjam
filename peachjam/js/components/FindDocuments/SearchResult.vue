@@ -13,7 +13,7 @@
         </h5>
         <div class="mb-1">
           <div v-if="item.citation && item.citation !== item.title">
-            <i>{{ item.citation }}</i>
+            <i v-html="item.highlight.citation || item.citation" />
           </div>
           <div v-if="item.alternative_names.length">
             <i>

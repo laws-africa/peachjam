@@ -7,7 +7,6 @@ from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import RankFeature, token_filter
 from elasticsearch_dsl.analysis import CustomAnalyzer
-from elasticsearch_dsl.index import Index
 
 from peachjam.models import (
     Attorney,
@@ -125,6 +124,9 @@ class SearchableDocument(Document):
             "body": fields.TextField(fields={"exact": Text()}),
         }
     )
+
+    # for typeahed
+    suggest = fields.CompletionField()
 
     # this will be used to build prepare_xxx_xx fields for each of these
     translated_fields = [
@@ -358,6 +360,21 @@ class SearchableDocument(Document):
         parts.extend([a.title for a in instance.alternative_names.all()])
         return " ".join(parts)
 
+    def prepare_suggest(self, instance):
+        # don't provide suggestions for gazettes
+        if instance.frbr_uri_doctype == "officialGazette":
+            return None
+
+        suggestions = [instance.title]
+
+        if instance.citation and instance.citation != instance.title:
+            suggestions.append(instance.citation)
+
+        for name in instance.alternative_names.all():
+            suggestions.append(name.title)
+
+        return suggestions
+
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
         log.info(f"Prepared document #{object_instance.pk} for indexing")
@@ -460,6 +477,7 @@ class MultiLanguageIndexManager:
     def __init__(self):
         self.main_index = SearchableDocument._index
         self.language_indexes = self.create_language_indexes()
+        self.load_language_index_settings(from_server=False)
 
     @classmethod
     def get_instance(cls):
@@ -470,16 +488,12 @@ class MultiLanguageIndexManager:
     def create_language_indexes(self):
         """Create basic multi-language indexes. They are not fully configured with mapping details, because that
         requires an elasticsearch connection."""
-        indexes = {}
+        return {
+            lang: self.main_index.clone(f"{self.main_index._name}_{lang}")
+            for lang in self.ANALYZERS.keys()
+        }
 
-        for lang, analyzer in self.ANALYZERS.items():
-            index = Index(name=f"{self.main_index._name}_{lang}")
-            index._settings = copy.deepcopy(self.main_index._settings)
-            indexes[lang] = index
-
-        return indexes
-
-    def load_language_index_settings(self):
+    def load_language_index_settings(self, from_server=True):
         """Configure mappings etc for the language indexes. Requires an elasticsearch connection."""
         main_mappings = self.main_index.to_dict()["mappings"]
 
@@ -490,10 +504,16 @@ class MultiLanguageIndexManager:
                 index.analyzer(self.SEARCH_ANALYZERS[lang])
                 search_analyzer = self.SEARCH_ANALYZERS[lang]._name
 
-            if index.exists():
+            if from_server and index.exists():
                 is_new = False
                 index.load_mappings()
                 new_mappings = index.get_or_create_mapping().to_dict()
+                # merge in new fields
+                for fld in main_mappings["properties"]:
+                    if fld not in new_mappings["properties"]:
+                        new_mappings["properties"][fld] = main_mappings["properties"][
+                            fld
+                        ]
             else:
                 is_new = True
                 new_mappings = copy.deepcopy(main_mappings)
@@ -512,8 +532,14 @@ class MultiLanguageIndexManager:
         # these fields weren't initialised correctly and we can't change the mappings
         for name, fld in fields.items():
             if fld["type"] == "text":
-                # this can always change
-                if search_analyzer:
+                if is_new and "analyzer" not in fld:
+                    # the analyzer can't change once it is set
+                    fld["analyzer"] = analyzer
+
+                if search_analyzer and (
+                    is_new and fld.get("analyzer") == analyzer or "analyzer" not in fld
+                ):
+                    # this can always change
                     fld["search_analyzer"] = search_analyzer
 
                 # the analyzer can't change once it is set
