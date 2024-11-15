@@ -30,8 +30,9 @@ from elasticsearch_dsl.connections import get_connection
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString, Term
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.generics import CreateAPIView
 from rest_framework.mixins import CreateModelMixin
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
@@ -39,6 +40,7 @@ from peachjam_api.serializers import LabelSerializer
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
 from peachjam_search.models import SearchTrace
 from peachjam_search.serializers import (
+    SavedSearchSerializer,
     SearchableDocumentSerializer,
     SearchClickSerializer,
 )
@@ -443,6 +445,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "authors": "authors",
         "court": "court",
         "date": "date",
+        "created_at": "created_at",
         "doc_type": "doc_type",
         "jurisdiction": "jurisdiction",
         "language": "language",
@@ -710,3 +713,11 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
 
     def has_permission(self):
         return self.request.user.is_authenticated and self.request.user.is_staff
+
+
+class SavedSearchCreateView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SavedSearchSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

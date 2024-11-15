@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Search Alert</title>
+  </head>
+  <body>
+    <p>Hi {{ saved_search.user }}</p>
+    <p>We have found new documents that match your search for:</p>
+    <p>
+      <strong>{{ saved_search.q }}</strong>
+    </p>
+    <p>Here are the new documents:</p>
+    {% for doc in hits %}
+      <h3>
+        <a href="{{ site.domain }}{{ doc.expression_frbr_uri }}">{{ doc.title }}</a>
+      </h3>
+    {% endfor %}
+    <p>Best regards.</p>
+  </body>
+</html>

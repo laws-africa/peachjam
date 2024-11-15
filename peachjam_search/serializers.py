@@ -7,7 +7,7 @@ from rest_framework.serializers import (
 )
 
 from peachjam_search.documents import SearchableDocument
-from peachjam_search.models import SearchClick
+from peachjam_search.models import SavedSearch, SearchClick
 
 
 class SearchableDocumentSerializer(DocumentSerializer):
@@ -132,3 +132,9 @@ class SearchClickSerializer(ModelSerializer):
     class Meta:
         model = SearchClick
         fields = ("frbr_uri", "search_trace", "portion", "position")
+
+
+class SavedSearchSerializer(ModelSerializer):
+    class Meta:
+        model = SavedSearch
+        fields = ("q", "filters", "note", "user", "last_alert")

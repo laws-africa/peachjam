@@ -11,6 +11,9 @@ router.register("click", views.SearchClickViewSet, basename="search_click")
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path("api/", include(router.urls)),
+    path(
+        "api/saved-searches", views.SavedSearchCreateView.as_view(), name="saved_search"
+    ),
     path("", views.SearchView.as_view(), name="search"),
     path("traces", views.SearchTraceListView.as_view(), name="search_traces"),
     path(

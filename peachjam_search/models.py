@@ -4,11 +4,16 @@ from datetime import timedelta
 from math import exp
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from django.core.mail import send_mail
 from django.db import models
 from django.http import QueryDict
 from django.shortcuts import reverse
+from django.template.loader import render_to_string
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 from rest_framework.test import APIRequestFactory
 
 log = logging.getLogger(__name__)
@@ -85,7 +90,6 @@ class SavedSearch(models.Model):
     q = models.CharField(max_length=4098)
     filters = models.CharField(max_length=4098)
     note = models.TextField(null=True, blank=True)
-    n_search_results = models.IntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
     last_alert = models.DateTimeField(null=True, blank=True)
@@ -104,9 +108,9 @@ class SavedSearch(models.Model):
         from peachjam_search.views import DocumentSearchViewSet
 
         factory = APIRequestFactory()
-        request = factory.get("/api/documents/")
+        request = factory.get("/search/api/documents/")
         request.user = self.user
-        params = f"q={self.q}&{self.filters}"
+        params = f"q={self.q}&{self.filters}&created_at__gte={self.last_alert}"
         request.GET = QueryDict(params)
         view = DocumentSearchViewSet.as_view({"get": "list"})
         response = view(request)
@@ -115,4 +119,21 @@ class SavedSearch(models.Model):
 
     def send_alert(self, hits):
         # send an email or other alert to the user
-        pass
+        hits = hits[:10]
+        context = {
+            "hits": hits,
+            "saved_search": self,
+            "site": Site.objects.get_current(),
+        }
+        html = render_to_string("peachjam_search/emails/search_alert.html", context)
+        plain_txt = render_to_string("peachjam_search/emails/search_alert.txt", context)
+
+        subject = settings.EMAIL_SUBJECT_PREFIX + _("New hits for search ") + self.q
+        send_mail(
+            subject=subject,
+            message=plain_txt,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[self.user.email],
+            html_message=html,
+            fail_silently=False,
+        )

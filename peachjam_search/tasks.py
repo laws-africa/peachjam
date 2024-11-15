@@ -75,7 +75,7 @@ def update_saved_search(saved_search_id):
         )
         return
 
-    saved_search.update_search_results()
+    saved_search.update_and_alert()
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
