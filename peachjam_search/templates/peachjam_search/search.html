@@ -16,6 +16,7 @@
       {% block lead-text %}{% endblock %}
       <div data-vue-component="FindDocuments"
            {% if show_jurisdiction %}data-show-jurisdiction="true"{% endif %}
+           {% if SEARCH_SUGGESTIONS %}data-show-suggestions="true"{% endif %}
            {% if PEACHJAM_SETTINGS.google_search_engine_id %}data-show-google="true"{% endif %}>
       </div>
       {{ labels|json_script:"data-labels" }}

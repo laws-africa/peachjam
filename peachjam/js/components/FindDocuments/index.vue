@@ -271,7 +271,7 @@ import SearchTypeahead from '../search-typeahead';
 export default {
   name: 'FindDocuments',
   components: { FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
-  props: ['showJurisdiction', 'showGoogle'],
+  props: ['showJurisdiction', 'showGoogle', 'showSuggestions'],
   data () {
     const getLabelOptionLabels = (labels) => {
       // the function name is a bit confusing but this gets labels for the options in Labels facet
@@ -443,7 +443,9 @@ export default {
   },
 
   mounted () {
-    new SearchTypeahead(this.$refs.searchInput, true);
+    if (this.showSuggestions) {
+      new SearchTypeahead(this.$refs.searchInput, true);
+    }
     this.loadState();
     window.addEventListener('popstate', () => this.loadState());
     this.$el.addEventListener('show.bs.tab', this.tabChanged);

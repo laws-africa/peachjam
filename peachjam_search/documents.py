@@ -361,6 +361,10 @@ class SearchableDocument(Document):
         return " ".join(parts)
 
     def prepare_suggest(self, instance):
+        # don't provide suggestions for gazettes
+        if instance.frbr_uri_doctype == "officialGazette":
+            return None
+
         suggestions = [instance.title]
 
         if instance.citation and instance.citation != instance.title:
