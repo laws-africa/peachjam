@@ -14,6 +14,14 @@ class Taxonomy(MP_Node):
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
+    show_in_document_listing = models.BooleanField(
+        _("show in document listing"),
+        default=False,
+        null=False,
+        help_text=_(
+            "Show this taxonomy in the document listing page? Cascades to descendents."
+        ),
+    )
 
     class Meta:
         verbose_name = _("taxonomies")

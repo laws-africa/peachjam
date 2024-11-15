@@ -805,6 +805,11 @@ class CoreDocument(PolymorphicModel):
         if self.ingestor:
             return self.ingestor.get_edit_url(self)
 
+    def listing_taxonomies(self):
+        """Get a list of DocumentTopic objects to display in the document listing view. Assumes that the taxonomies
+        have been pre-fetched."""
+        return [t for t in self.taxonomies.all() if t.topic.show_in_document_listing]
+
 
 class AlternativeName(models.Model):
     document = models.ForeignKey(

@@ -26,7 +26,8 @@
           <i class="bi bi-translate"></i>
         </span>
       {% endif %}
-      {% include 'peachjam/_labels.html' with labels=document.labels.all %}
+      {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
+      {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
     </td>
   {% endif %}
   {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}

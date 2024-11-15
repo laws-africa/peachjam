@@ -777,6 +777,9 @@ class TaxonomyForm(MoveNodeForm):
         super().save(commit=commit)
         # save all children so that the slugs take into account the potentially updated parent
         for node in self.instance.get_descendants():
+            if "show_in_document_listing" in self.changed_data:
+                # if the show_in_document_listing field has changed, update all children to match
+                node.show_in_document_listing = self.instance.show_in_document_listing
             node.save()
         return self.instance
 

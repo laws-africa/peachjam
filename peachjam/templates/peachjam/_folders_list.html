@@ -21,7 +21,7 @@
                   <tr>
                     <td class="cell-title">
                       <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
-                      {% include 'peachjam/_labels.html' with labels=saved_doc.document.labels.all %}
+                      {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
                     </td>
                     <td class="cell-date" style="white-space: nowrap;">
                       {{ saved_doc.document.date }}
@@ -73,7 +73,7 @@
               <tr>
                 <td class="cell-title">
                   <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
-                  {% include 'peachjam/_labels.html' with labels=saved_doc.document.labels.all %}
+                  {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
                 </td>
                 <td class="cell-date" style="white-space: nowrap;">
                   {{ saved_doc.document.date }}

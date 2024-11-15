@@ -5,7 +5,7 @@
       <tr>
         <td class="cell-title">
           <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-          {% include 'peachjam/_labels.html' with labels=document.labels.all %}
+          {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
         </td>
         {% if with_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}
         <td class="cell-date" style="white-space: nowrap;">{{ document.date }}</td>

@@ -28,7 +28,7 @@
             <div>
               <h1>{{ document.title }}</h1>
               {% block sub-title %}{% endblock %}
-              {% include 'peachjam/_labels.html' %}
+              {% include 'peachjam/_document_labels.html' %}
             </div>
             <div class="d-flex align-items-center">
               <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
