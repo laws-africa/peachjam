@@ -53,6 +53,9 @@
           <div>
             {{ item.matter_type }}
           </div>
+          <div v-if="item.topic_path_names" class="text-muted fst-italic mt-1">
+            {{ item.topic_path_names.join(' · ') }}
+          </div>
         </div>
         <div v-if="item.pages.length">
           <div
