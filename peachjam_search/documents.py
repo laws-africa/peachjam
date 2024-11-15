@@ -35,21 +35,6 @@ class RankField(fields.DEDField, RankFeature):
     pass
 
 
-suggest_phrase_analyzer = CustomAnalyzer(
-    "shingle_analyzer",
-    tokenizer="standard",
-    filter=[
-        "lowercase",
-        token_filter(
-            "shingle_filter",
-            type="shingle",
-            min_shingle_size=2,
-            max_shingle_size=3,
-        ),
-    ],
-)
-
-
 @registry.register_document
 class SearchableDocument(Document):
     # NB: This is a legacy field; use nature for an accurate human-friendly value. This field is a mixture of doc_type
@@ -142,7 +127,6 @@ class SearchableDocument(Document):
 
     # for typeahed
     suggest = fields.CompletionField()
-    suggest_phrase = fields.TextField(analyzer=suggest_phrase_analyzer)
 
     # this will be used to build prepare_xxx_xx fields for each of these
     translated_fields = [
@@ -163,7 +147,6 @@ class SearchableDocument(Document):
     class Index:
         name = settings.PEACHJAM["ES_INDEX"]
         settings = {"index.mapping.nested_objects.limit": 50000}
-        analyzers = [suggest_phrase_analyzer]
 
     class Django:
         # Because CoreDocument's default manager is a polymorphic manager, the actual instances
@@ -388,15 +371,6 @@ class SearchableDocument(Document):
 
         return suggestions
 
-    def prepare_suggest_phrase(self, instance):
-        text = instance.get_content_as_text()
-        if text and len(text) > self.MAX_TEXT_LENGTH:
-            log.warning(
-                f"Limiting text content of {instance} to {self.MAX_TEXT_LENGTH} (length is {len(text)})"
-            )
-            text = text[: self.MAX_TEXT_LENGTH]
-        return text
-
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
         log.info(f"Prepared document #{object_instance.pk} for indexing")
@@ -563,6 +537,10 @@ class MultiLanguageIndexManager:
                 ):
                     # this can always change
                     fld["search_analyzer"] = search_analyzer
+
+                # the analyzer can't change once it is set
+                if is_new:
+                    fld["analyzer"] = analyzer
             elif fld["type"] == "nested":
                 self.set_text_field_analyzer(
                     fld["properties"], analyzer, search_analyzer, is_new

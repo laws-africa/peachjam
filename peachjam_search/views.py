@@ -663,39 +663,23 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         q = request.GET.get("q")
         suggestions = []
         if q:
-            s = (
-                self.search.source("")
-                .suggest(
-                    "prefix",
-                    q,
-                    completion={
-                        "field": "suggest",
-                        "size": 5,
-                        "skip_duplicates": True,
-                    },
-                )
-                .suggest(
-                    "phrase",
-                    q,
-                    phrase={
-                        "field": "suggest_phrase",
-                        "size": 5,
-                        "direct_generator": [
-                            {"field": "suggest_phrase", "suggest_mode": "popular"}
-                        ],
-                        "highlight": {"pre_tag": "<em>", "post_tag": "</em>"},
-                    },
-                )
+            s = self.search.source("").suggest(
+                "prefix",
+                request.GET.get("q"),
+                completion={
+                    "field": "suggest",
+                    "size": 5,
+                    "skip_duplicates": True,
+                },
             )
+            # change it from a text query into a prefix query
             s._suggest["prefix"]["prefix"] = s._suggest["prefix"].pop("text")
             suggestions = s.execute().suggest.to_dict()
-            suggestions["phrase"] = suggestions["phrase"][0]
             suggestions["prefix"] = suggestions["prefix"][0]
-
-            # remove phrase suggestions that exactly match the query
+            # remove suggestions that exactly match the query
             q = q.lower()
-            suggestions["phrase"]["options"] = [
-                x for x in suggestions["phrase"]["options"] if x["text"].lower() != q
+            suggestions["prefix"]["options"] = [
+                x for x in suggestions["prefix"]["options"] if x["text"].lower() != q
             ]
 
         return JsonResponse({"suggestions": suggestions})
