@@ -662,7 +662,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     def suggest(self, request, *args, **kwargs):
         q = request.GET.get("q")
         suggestions = []
-        if q:
+        if q and settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
             s = self.search.source("").suggest(
                 "prefix",
                 q,
