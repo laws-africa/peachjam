@@ -110,8 +110,9 @@ class SavedSearch(models.Model):
         factory = APIRequestFactory()
         request = factory.get("/search/api/documents/")
         request.user = self.user
-        params = f"q={self.q}&{self.filters}&created_at__gte={self.last_alert}"
+        params = f"q={self.q}&{self.filters}&created_at__gte={self.last_alert.replace(tzinfo=None).isoformat()}"
         request.GET = QueryDict(params)
+        request.id = "none"
         view = DocumentSearchViewSet.as_view({"get": "list"})
         response = view(request)
         hits = response.data["results"]

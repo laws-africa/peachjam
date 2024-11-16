@@ -85,8 +85,15 @@
               {{ $t("Filters") }} <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
             </button>
           </form>
-          <div class="my-2 text-end">
-            <HelpBtn page="search/" />
+          <div class="d-md-flex justify-content-between">
+            <div
+              id="saved-search-button"
+              hx-trigger="load"
+              hx-get="/search/saved-searches/create"
+            />
+            <div class="my-2 text-end">
+              <HelpBtn page="search/" />
+            </div>
           </div>
           <div v-if="searchTip" class="my-2">
             <i class="bi bi-info-circle" />

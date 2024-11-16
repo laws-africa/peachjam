@@ -8,11 +8,12 @@ from django.http.response import JsonResponse
 from django.shortcuts import redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
+from django.utils.timezone import now
 from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import CreateView, DetailView, ListView, TemplateView
 from django_elasticsearch_dsl_drf.filter_backends import (
     DefaultOrderingFilterBackend,
     FacetedFilterSearchFilterBackend,
@@ -30,17 +31,16 @@ from elasticsearch_dsl.connections import get_connection
 from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString, Term
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.generics import CreateAPIView
 from rest_framework.mixins import CreateModelMixin
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
-from peachjam_search.models import SearchTrace
+from peachjam_search.forms import SavedSearchForm
+from peachjam_search.models import SavedSearch, SearchTrace
 from peachjam_search.serializers import (
-    SavedSearchSerializer,
     SearchableDocumentSerializer,
     SearchClickSerializer,
 )
@@ -715,9 +715,16 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
         return self.request.user.is_authenticated and self.request.user.is_staff
 
 
-class SavedSearchCreateView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = SavedSearchSerializer
+class SavedSearchCreateView(CreateView):
+    template_name = "peachjam_search/saved_search_modal.html"
+    model = SavedSearch
+    form_class = SavedSearchForm
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.user.is_authenticated:
+            instance = SavedSearch()
+            instance.user = self.request.user
+            instance.last_alert = now()
+            kwargs["instance"] = instance
+        return kwargs

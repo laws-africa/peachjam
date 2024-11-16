@@ -12,7 +12,9 @@ router.register("click", views.SearchClickViewSet, basename="search_click")
 urlpatterns = [
     path("api/", include(router.urls)),
     path(
-        "api/saved-searches", views.SavedSearchCreateView.as_view(), name="saved_search"
+        "saved-searches/create",
+        views.SavedSearchCreateView.as_view(),
+        name="saved_search_create",
     ),
     path("", views.SearchView.as_view(), name="search"),
     path("traces", views.SearchTraceListView.as_view(), name="search_traces"),
