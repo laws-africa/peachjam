@@ -207,8 +207,10 @@ class CitationProcessing(SingletonModel):
                 later_documents.count(),
                 self.processing_date,
             )
-            for document in later_documents.iterator():
-                extract_citations(document.id, creator=document)
+
+            if later_documents.count():
+                for document in later_documents.iterator():
+                    extract_citations(document.id, creator=document)
 
             self.reset_processing_date()
 
