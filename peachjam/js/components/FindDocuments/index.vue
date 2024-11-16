@@ -444,7 +444,7 @@ export default {
 
   mounted () {
     if (this.showSuggestions) {
-      new SearchTypeahead(this.$refs.searchInput, true);
+      this.searchTypeahead = new SearchTypeahead(this.$refs.searchInput, true);
     }
     this.loadState();
     window.addEventListener('popstate', () => this.loadState());
@@ -742,6 +742,9 @@ export default {
 
     async search (pushState = true) {
       this.searchTip = null;
+      if (this.searchTypeahead) {
+        this.searchTypeahead.autocomplete.hideSuggestions();
+      }
 
       // if one of the search fields is true perform search
       if (this.q || (Array.isArray(this.advancedSearchCriteria) && this.advancedSearchCriteria.some(f => f.text))) {

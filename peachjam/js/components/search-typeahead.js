@@ -35,6 +35,7 @@ export default class SearchTypeahead {
       fixed: true,
       fullWidth: true,
       showAllSuggestions: true,
+      ignoreEnter: true,
       // 3 chars before suggestions are shown
       suggestionsThreshold: 3,
       noCache: false,
