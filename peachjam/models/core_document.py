@@ -13,6 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.db import models
 from django.http import Http404
+from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from docpipe.pipeline import PipelineContext
@@ -805,6 +806,7 @@ class CoreDocument(PolymorphicModel):
         if self.ingestor:
             return self.ingestor.get_edit_url(self)
 
+    @cached_property
     def listing_taxonomies(self):
         """Get a list of DocumentTopic objects to display in the document listing view. Assumes that the taxonomies
         have been pre-fetched."""
