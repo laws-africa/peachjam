@@ -564,7 +564,16 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
     }
 
     # TODO perhaps better to explicitly include specific fields
-    source = {"excludes": ["pages", "content", "flynote", "case_summary", "provisions"]}
+    source = {
+        "excludes": [
+            "pages",
+            "content",
+            "flynote",
+            "case_summary",
+            "provisions",
+            "suggest",
+        ]
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -686,11 +695,6 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             s._suggest["prefix"]["prefix"] = s._suggest["prefix"].pop("text")
             suggestions = s.execute().suggest.to_dict()
             suggestions["prefix"] = suggestions["prefix"][0]
-            # remove suggestions that exactly match the query
-            q = q.lower()
-            suggestions["prefix"]["options"] = [
-                x for x in suggestions["prefix"]["options"] if x["text"].lower() != q
-            ]
 
         return JsonResponse({"suggestions": suggestions})
 

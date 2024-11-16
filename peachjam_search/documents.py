@@ -125,8 +125,8 @@ class SearchableDocument(Document):
         }
     )
 
-    # for typeahed
-    suggest = fields.CompletionField()
+    # for typeahead suggestions
+    suggest = fields.CompletionField(analyzer="standard")
 
     # this will be used to build prepare_xxx_xx fields for each of these
     translated_fields = [
@@ -543,7 +543,7 @@ class MultiLanguageIndexManager:
                     fld["search_analyzer"] = search_analyzer
 
                 # the analyzer can't change once it is set
-                if is_new:
+                if is_new and "analyzer" not in fld:
                     fld["analyzer"] = analyzer
             elif fld["type"] == "nested":
                 self.set_text_field_analyzer(
