@@ -34,6 +34,7 @@ export default class SearchTypeahead {
       queryParam: 'q',
       fixed: true,
       fullWidth: true,
+      showAllSuggestions: true,
       // 3 chars before suggestions are shown
       suggestionsThreshold: 3,
       noCache: false,
