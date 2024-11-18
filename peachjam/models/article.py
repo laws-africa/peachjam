@@ -71,9 +71,9 @@ class Article(models.Model):
     def get_article_tags_root(cls):
         from peachjam.models import Taxonomy
 
-        root = Taxonomy.objects.filter(name__iexact="Article tags").first()
+        root = Taxonomy.objects.filter(name_en__iexact="Article tags").first()
         if not root:
-            root = Taxonomy.add_root(name="Article tags")
+            root = Taxonomy.add_root(name_en="Article tags")
         return root
 
 
