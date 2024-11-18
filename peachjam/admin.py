@@ -1231,7 +1231,7 @@ class ArticleAttachmentInline(BaseAttachmentFileInline):
 
 
 class ArticleForm(forms.ModelForm):
-    body = forms.CharField(widget=CKEditorWidget())
+    body = forms.CharField(widget=CKEditorWidget("article"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -569,7 +569,32 @@ CKEDITOR_CONFIGS = {
             ["Smiley", "SpecialChar", "LaAkn"],
             ["Source"],
         ],
-    }
+    },
+    "article": {
+        "removePlugins": ["iframe"],
+        "extraAllowedContent": "*[id];*{*}",
+        "toolbar_Full": [
+            [
+                "Styles",
+                "Format",
+                "Bold",
+                "Italic",
+                "Underline",
+                "Strike",
+                "Blockquote",
+                "Superscript",
+                "Subscript",
+                "SpellChecker",
+                "Undo",
+                "Redo",
+            ],
+            ["Link", "Unlink", "Anchor"],
+            ["Image", "Flash", "Table", "HorizontalRule", "Iframe"],
+            ["TextColor", "BGColor"],
+            ["Smiley", "SpecialChar", "LaAkn"],
+            ["Source"],
+        ],
+    },
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
