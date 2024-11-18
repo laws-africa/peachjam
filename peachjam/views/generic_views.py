@@ -72,7 +72,7 @@ class DocumentListView(ListView):
                 "jurisdiction",
                 "locality",
             )
-            .prefetch_related("labels")
+            .prefetch_related("labels", "taxonomies", "taxonomies__topic")
         )
 
     def get_base_queryset(self, *args, **kwargs):

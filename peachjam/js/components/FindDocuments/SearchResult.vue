@@ -13,7 +13,7 @@
         </h5>
         <div class="mb-1">
           <div v-if="item.citation && item.citation !== item.title">
-            <i>{{ item.citation }}</i>
+            <i v-html="item.highlight.citation || item.citation" />
           </div>
           <div v-if="item.alternative_names.length">
             <i>
@@ -52,6 +52,9 @@
           </div>
           <div>
             {{ item.matter_type }}
+          </div>
+          <div v-if="item.topic_path_names" class="text-muted fst-italic mt-1">
+            {{ item.topic_path_names.join(' · ') }}
           </div>
         </div>
         <div v-if="item.pages.length">

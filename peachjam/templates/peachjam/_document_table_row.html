@@ -26,7 +26,12 @@
           <i class="bi bi-translate"></i>
         </span>
       {% endif %}
-      {% include 'peachjam/_labels.html' with labels=document.labels.all %}
+      {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
+      {% if document.listing_taxonomies %}
+        <div class="d-none d-md-block">
+          {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
+        </div>
+      {% endif %}
     </td>
   {% endif %}
   {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}
@@ -46,4 +51,9 @@
   {% if doc_table_show_frbr_uri_number %}<td>{{ document.frbr_uri_number }}</td>{% endif %}
   {% if doc_table_show_doc_type %}<td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>{% endif %}
   <td style="white-space: nowrap;" class="cell-date">{{ document.date|default_if_none:'' }}</td>
+  {% if document.listing_taxonomies %}
+    <td class="cell-taxonomies">
+      {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
+    </td>
+  {% endif %}
 </tr>

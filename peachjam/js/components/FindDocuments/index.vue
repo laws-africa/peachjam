@@ -57,6 +57,7 @@
             @submit.prevent="simpleSearch"
           >
             <input
+              ref="searchInput"
               v-model="q"
               type="search"
               class="form-control"
@@ -64,6 +65,7 @@
               :aria-label="$t('Search documents')"
               aria-describedby="basic-addon2"
               required
+              @typeahead="onTypeahead"
             >
             <button
               type="submit"
@@ -74,7 +76,14 @@
                 v-if="loading"
                 class="circle-loader--lt"
               />
-              <span v-else>{{ $t("Search") }}</span>
+              <span v-else>
+                <span class="d-none d-md-inline">
+                {{ $t("Search") }}
+                </span>
+                <span class="d-md-none">
+                  <i class="bi bi-search text-white"></i>
+                </span>
+              </span>
             </button>
             <button
               v-if="searchInfo.count"
@@ -264,11 +273,12 @@ import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 import analytics from '../analytics';
 import { authHeaders } from '../../api';
+import SearchTypeahead from '../search-typeahead';
 
 export default {
   name: 'FindDocuments',
   components: { FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
-  props: ['showJurisdiction', 'showGoogle'],
+  props: ['showJurisdiction', 'showGoogle', 'showSuggestions'],
   data () {
     const getLabelOptionLabels = (labels) => {
       // the function name is a bit confusing but this gets labels for the options in Labels facet
@@ -295,6 +305,7 @@ export default {
       q: '',
       drawerOpen: false,
       searchTip: null,
+      suggestion: null,
       advancedSearchCriteria: [{
         text: '',
         fields: [],
@@ -439,6 +450,9 @@ export default {
   },
 
   mounted () {
+    if (this.showSuggestions) {
+      this.searchTypeahead = new SearchTypeahead(this.$refs.searchInput, true);
+    }
     this.loadState();
     window.addEventListener('popstate', () => this.loadState());
     this.$el.addEventListener('show.bs.tab', this.tabChanged);
@@ -447,6 +461,12 @@ export default {
   methods: {
     tabChanged (e) {
       this.googleActive = e.target.id === 'google-search-tab';
+    },
+
+    onTypeahead (e) {
+      this.suggestion = e.detail.suggestion;
+      this.q = this.suggestion.value;
+      this.simpleSearch();
     },
 
     sortBuckets (items, reverse = false, byCount = false) {
@@ -547,6 +567,8 @@ export default {
       this.q = params.get('q') || '';
       this.page = parseInt(params.get('page')) || this.page;
       this.ordering = params.get('ordering') || this.ordering;
+
+      if (params.has('suggestion')) this.suggestion = { type: params.get('suggestion') };
 
       this.facets.forEach((facet) => {
         if (params.has(facet.name)) {
@@ -669,6 +691,11 @@ export default {
 
       this.generateAdvancedSearchParams(params);
 
+      // record suggestion details for statistics
+      if (this.suggestion) {
+        params.append('suggestion', this.suggestion.type);
+      }
+
       return params;
     },
 
@@ -722,6 +749,9 @@ export default {
 
     async search (pushState = true) {
       this.searchTip = null;
+      if (this.searchTypeahead) {
+        this.searchTypeahead.autocomplete.hideSuggestions();
+      }
 
       // if one of the search fields is true perform search
       if (this.q || (Array.isArray(this.advancedSearchCriteria) && this.advancedSearchCriteria.some(f => f.text))) {
@@ -731,9 +761,9 @@ export default {
         scrollToElement(this.$refs['search-box']);
 
         // search tip
-        if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(" ") > -1) {
+        if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(' ') > -1) {
           this.searchTip = {
-            prompt: this.$t('Tip: Try using quotes to search for an exact phrase: '),
+            prompt: this.$t('Tip: Use quotes to search for an exact phrase: '),
             q: `"${this.q}"`
           };
         }
@@ -754,6 +784,8 @@ export default {
 
           // check that the search state hasn't changed since we sent the request
           if (params.toString() === this.generateSearchParams().toString()) {
+            // clear the suggestion flag
+            this.suggestion = null;
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();

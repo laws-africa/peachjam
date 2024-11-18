@@ -64,7 +64,6 @@ export default {
         if (this.form) {
           checkbox.setAttribute('form', this.form);
         }
-        checkbox.addEventListener('change', (e) => this.checkboxChanged(e, tocItem));
         label.insertBefore(checkbox, label.firstChild);
       }
 
@@ -79,14 +78,6 @@ export default {
         action.appendChild(count);
       }
     });
-  },
-  methods: {
-    checkboxChanged (e, tocItem) {
-      // toggle all children
-      for (const checkbox of tocItem.querySelectorAll('input[type="checkbox"]')) {
-        checkbox.checked = e.target.checked;
-      }
-    }
   }
 };
 </script>

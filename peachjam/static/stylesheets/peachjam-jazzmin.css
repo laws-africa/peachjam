@@ -9223,5 +9223,12 @@ a.text-dark:hover, a.text-dark:focus {
 .theme-peachjam .main-sidebar .brand-link .brand-image {
   display: none;
 }
+.theme-peachjam form .form-group .col-sm-7 {
+  flex: 0 0 75%;
+  max-width: 75%;
+}
+.theme-peachjam form la-toc-item label {
+  font-weight: normal !important;
+}
 
 /*# sourceMappingURL=peachjam-jazzmin.css.map */

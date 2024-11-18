@@ -7,6 +7,7 @@ import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
 import TaxonomyTree from './taxonomy-tree';
 import TermsOfUse from './terms-of-use';
+import SearchTypeahead from './search-typeahead';
 
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
@@ -21,6 +22,7 @@ const components: Record<string, any> = {
   DocumentTable,
   NavigationSelect,
   RelationshipEnrichments,
+  SearchTypeahead,
   ToggleTab,
   TaxonomyTree,
   TermsOfUse,
