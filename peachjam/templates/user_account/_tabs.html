@@ -34,5 +34,11 @@
         {% trans "Saved documents" %}
       </a>
     </li>
+    <li class="nav-item">
+      <a href="{% url 'search:saved_search_list' %}"
+         class="nav-link {% if active == 'saved_searches' %}active{% endif %}">
+        {% trans "Saved searches" %}
+      </a>
+    </li>
   {% endblock %}
 </ul>

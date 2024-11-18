@@ -26,6 +26,11 @@ urlpatterns = [
         views.SavedSearchUpdateView.as_view(),
         name="saved_search_update",
     ),
+    path(
+        "saved-searches/",
+        views.SavedSearchListView.as_view(),
+        name="saved_search_list",
+    ),
     path("", views.SearchView.as_view(), name="search"),
     path("traces", views.SearchTraceListView.as_view(), name="search_traces"),
     path(

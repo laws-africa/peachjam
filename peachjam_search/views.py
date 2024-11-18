@@ -818,3 +818,13 @@ class SavedSearchUpdateView(UpdateView):
 
     def get_success_url(self):
         return reverse("search:saved_search_update", kwargs={"pk": self.object.pk})
+
+
+class SavedSearchListView(ListView):
+    permission_classes = (IsAuthenticated,)
+    model = SavedSearch
+    context_object_name = "saved_searches"
+    template_name = "peachjam_search/saved_search_list.html"
+
+    def get_queryset(self):
+        return self.request.user.saved_searches.all()
