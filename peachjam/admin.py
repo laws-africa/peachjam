@@ -777,6 +777,9 @@ class TaxonomyForm(MoveNodeForm):
         super().save(commit=commit)
         # save all children so that the slugs take into account the potentially updated parent
         for node in self.instance.get_descendants():
+            if "show_in_document_listing" in self.changed_data:
+                # if the show_in_document_listing field has changed, update all children to match
+                node.show_in_document_listing = self.instance.show_in_document_listing
             node.save()
         return self.instance
 
@@ -811,10 +814,15 @@ class TaxonomyForm(MoveNodeForm):
 @admin.register(Taxonomy)
 class TaxonomyAdmin(TreeAdmin):
     form = movenodeform_factory(Taxonomy, TaxonomyForm)
-    readonly_fields = ("slug",)
+    readonly_fields = ("slug", "path_name")
     inlines = [EntityProfileInline]
     # prevent pagination
     list_per_page = 1_000_000
+
+    def get_readonly_fields(self, request, obj=None):
+        return list(super().get_readonly_fields(request, obj)) + [
+            a.name for a in Taxonomy._meta.fields if a.name.startswith("path_name_")
+        ]
 
     def changelist_view(self, request, extra_context=None):
         resp = super().changelist_view(request, extra_context)

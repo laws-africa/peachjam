@@ -49,6 +49,10 @@ table.doc-table {
       padding-left: 20px;
     }
   }
+
+  .cell-taxonomies {
+    display: none;
+  }
 }
 
 @mixin doc-table-collapse {
@@ -110,6 +114,12 @@ table.doc-table {
 
   // when the date comes right after the title, give the date full width
   .cell-title + .cell-date {
+    grid-column: span 12;
+  }
+
+  // show the extra taxonomies cell on mobile
+  .cell-taxonomies {
+    display: block;
     grid-column: span 12;
   }
 }

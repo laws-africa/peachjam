@@ -62,7 +62,7 @@ class PredicateTranslationOptions(TranslationOptions):
 
 @register(Taxonomy)
 class TaxonomyTranslationOptions(TranslationOptions):
-    fields = ("name",)
+    fields = ("name", "path_name")
 
 
 @register(CustomPropertyLabel)
