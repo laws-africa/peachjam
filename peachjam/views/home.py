@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.views.generic import TemplateView
 
-from peachjam.models import Author, CoreDocument, GenericDocument, Judgment, Legislation
+from peachjam.models import Author, GenericDocument, Judgment, Legislation
 
 
 class HomePageView(TemplateView):
@@ -24,7 +24,6 @@ class HomePageView(TemplateView):
             .prefetch_related("labels")
             .order_by("-date")[:5]
         )
-        documents_count = CoreDocument.objects.exclude(published=False).count()
 
         authors = Author.objects.exclude(
             Q(genericdocument__isnull=True),
@@ -33,7 +32,6 @@ class HomePageView(TemplateView):
         context["recent_judgments"] = recent_judgments
         context["recent_documents"] = recent_documents
         context["recent_legislation"] = recent_legislation
-        context["documents_count"] = documents_count
         context["authors"] = authors
 
         return context

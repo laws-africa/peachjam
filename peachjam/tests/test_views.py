@@ -14,9 +14,6 @@ class PeachjamViewsTest(TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
 
-        # documents
-        self.assertEqual(10, response.context.get("documents_count"))
-
         recent_judgments = [
             r_j.title for r_j in response.context.get("recent_judgments")
         ]

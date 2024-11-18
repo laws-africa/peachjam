@@ -40,6 +40,7 @@ class Article(models.Model):
     class Meta:
         verbose_name = _("article")
         verbose_name_plural = _("articles")
+        ordering = ("-date",)
 
     def __str__(self):
         return self.title

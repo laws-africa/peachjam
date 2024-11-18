@@ -8,9 +8,10 @@ from peachjam.models import (
     Legislation,
     Taxonomy,
 )
+from peachjam.views import HomePageView as PJHomePageView
 
 
-class HomePageView(TemplateView):
+class HomePageView(PJHomePageView):
     template_name = "liiweb/home.html"
 
     def get_context_data(self, **kwargs):
