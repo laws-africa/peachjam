@@ -91,7 +91,9 @@ class SavedSearch(models.Model):
     q = models.CharField(max_length=4098)
     filters = models.CharField(max_length=4098)
     note = models.TextField(null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="saved_searches"
+    )
     created_at = models.DateField(auto_now_add=True)
     last_alert = models.DateTimeField(null=True, blank=True)
 

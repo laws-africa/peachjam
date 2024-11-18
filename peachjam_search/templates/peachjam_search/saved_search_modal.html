@@ -1,92 +1,31 @@
 {% load i18n %}
 <button class="btn btn-link"
+        id="saved-search-modal-button"
         data-bs-toggle="modal"
         data-bs-target="#savedSearchModal">
   <i class="bi bi-search-heart"></i>
   {% trans 'Get alerts for this search' %}
 </button>
 <!-- Search Alert Modal -->
-<div id="savedSearchModal"
-     class="modal fade"
-     tabindex="-1"
-     aria-labelledby="savedSearchModalLabel"
-     aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 id="savedSearchModalLabel" class="modal-title fs-5">Search alert</h1>
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        {% if not request.user.is_authenticated %}
-          You are not logged in. Please log in to save your search and receive alerts.
-        {% else %}
-          <form id="saved-search-form"
-                hx-post="{% url 'search:saved_search_create' %}">
-            <div class="mb-3">
-              <label class="form-label" for="{{ form.q.id_for_label }}">{% trans 'Search term' %}</label>
-              <input type="text"
-                     class="form-control"
-                     id="{{ form.q.id_for_label }}"
-                     name="{{ form.q.name }}"
-                     disabled/>
-              {% if form.q.errors %}
-                <div class="text-danger">
-                  {% for error in form.q.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
-                </div>
-              {% endif %}
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="{{ form.filters.id_for_label }}">{{ form.filters.label }}</label>
-              <input type="text"
-                     class="form-control"
-                     id="{{ form.filters.id_for_label }}"
-                     name="{{ form.filters.name }}"
-                     disabled/>
-              {% if form.filters.errors %}
-                <div class="text-danger">
-                  {% for error in form.filters.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
-                </div>
-              {% endif %}
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
-              <textarea type="text" class="form-control" id="{{ form.note.id_for_label }}" name="{{ form.note.name }}">
-              </textarea>
-              {% if form.note.errors %}
-                <div class="text-danger">
-                  {% for error in form.note.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
-                </div>
-              {% endif %}
-            </div>
-          </form>
-        {% endif %}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        {% if not request.user.is_authenticated %}
-          <a href="{% url 'account_login' %}" class="btn btn-primary">Login</a>
-        {% else %}
-          <button type="submit" form="saved-search-form" class="btn btn-primary">Save changes</button>
-        {% endif %}
-      </div>
+<div hx-swap-oob="true" id="savedSearchModalDialog" class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h1 id="savedSearchModalLabel" class="modal-title fs-5">{% trans 'Search alert' %}</h1>
+      <button type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"></button>
+    </div>
+    <div hx-swap-oob="true" id="search-modal-body" class="modal-body">
+      You are not logged in. Please log in to save your search and receive alerts.
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      {% if not request.user.is_authenticated %}
+        <a href="{% url 'account_login' %}" class="btn btn-primary">Login</a>
+      {% else %}
+        <button type="submit" form="saved-search-form" class="btn btn-primary">Save changes</button>
+      {% endif %}
     </div>
   </div>
 </div>
-<script>
-    console.log("hello");
-      console.log("content loaded")
-    const savedSearchModal = document.getElementById('savedSearchModal');
-      console.log(savedSearchModal);
-    savedSearchModal.addEventListener('show.bs.modal', function(event) {
-      const filters = this.querySelector('input[name="filters"]');
-      const q = this.querySelector('input[name="q"]');
-      const search = new URLSearchParams(window.location.search);
-      q.value = search.get('q');
-      search.delete('q')
-      filters.value = search.toString();
-    });
-</script>

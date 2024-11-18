@@ -97,9 +97,19 @@
           <div class="d-md-flex justify-content-between">
             <div
               id="saved-search-button"
-              hx-trigger="load"
-              hx-get="/search/saved-searches/create"
             />
+            <div
+              id="savedSearchModal"
+              class="modal fade"
+              tabindex="-1"
+              aria-labelledby="savedSearchModalLabel"
+              aria-hidden="true"
+            >
+              <div
+                id="savedSearchModalDialog"
+                class="modal-dialog"
+              />
+            </div>
             <div class="my-2 text-end">
               <HelpBtn page="search/" />
             </div>
@@ -274,6 +284,7 @@ import FacetBadges from './FacetBadges.vue';
 import analytics from '../analytics';
 import { authHeaders } from '../../api';
 import SearchTypeahead from '../search-typeahead';
+import htmx from 'htmx.org';
 
 export default {
   name: 'FindDocuments',
@@ -792,6 +803,7 @@ export default {
               this.formatFacets();
               this.formatResults();
               this.trackSearch(params);
+              this.savedSearchModal();
             } else {
               this.error = response.statusText;
             }
@@ -866,8 +878,10 @@ export default {
         date_to: null,
         date_from: null
       };
+    },
+    savedSearchModal () {
+      htmx.ajax('GET', '/search/saved-searches/modal', {target: '#saved-search-button'})
     }
-
   }
 };
 </script>

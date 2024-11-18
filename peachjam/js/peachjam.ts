@@ -52,6 +52,7 @@ class PeachJam {
     this.createVueComponents(document.body);
     this.setupTooltips();
     this.setupPopovers();
+    this.setupSavedSearchModal();
     this.scrollNavTabs();
     this.clearGACookies();
     window.dispatchEvent(new Event('peachjam.after-setup'));
@@ -215,6 +216,18 @@ class PeachJam {
         };
         document.addEventListener('click', clickListener);
       });
+    });
+  }
+
+  setupSavedSearchModal () {
+    const savedSearchModal = document.getElementById('savedSearchModal');
+    savedSearchModal.addEventListener('show.bs.modal', function(event) {
+      const filters = this.querySelector('input[name="filters"]');
+      const q = this.querySelector('input[name="q"]');
+      const search = new URLSearchParams(window.location.search);
+      q.value = search.get('q');
+      search.delete('q');
+      filters.value = search.toString();
     });
   }
 

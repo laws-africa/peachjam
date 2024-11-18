@@ -1,9 +1,11 @@
 import copy
+from urllib.parse import parse_qs, urlencode, urlparse
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import ValidationError
+from django.http import HttpResponseRedirect
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, reverse
 from django.utils.decorators import method_decorator
@@ -13,7 +15,13 @@ from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
-from django.views.generic import CreateView, DetailView, ListView, TemplateView
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 from django_elasticsearch_dsl_drf.filter_backends import (
     DefaultOrderingFilterBackend,
     FacetedFilterSearchFilterBackend,
@@ -32,7 +40,7 @@ from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString, Term
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import CreateModelMixin
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
@@ -758,8 +766,30 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
         return self.request.user.is_authenticated and self.request.user.is_staff
 
 
-class SavedSearchCreateView(CreateView):
+class SavedSearchModalView(TemplateView):
     template_name = "peachjam_search/saved_search_modal.html"
+
+    def get(self, *args, **kwargs):
+        if self.request.user.is_authenticated and self.request.htmx:
+            params = parse_qs(urlparse(self.request.htmx.current_url_abs_path).query)
+            q = params.pop("q", "")[0] if "q" in params else ""
+            filters = urlencode(params, doseq=True)
+            saved_search = SavedSearch.objects.filter(
+                user=self.request.user, q=q, filters=filters
+            ).first()
+            if saved_search:
+                return HttpResponseRedirect(
+                    reverse(
+                        "search:saved_search_update", kwargs={"pk": saved_search.pk}
+                    )
+                )
+            return HttpResponseRedirect(reverse("search:saved_search_create"))
+        context = super().get_context_data(**kwargs)
+        return self.render_to_response(context)
+
+
+class SavedSearchCreateView(CreateView):
+    template_name = "peachjam_search/saved_search_form.html"
     model = SavedSearch
     form_class = SavedSearchForm
 
@@ -771,3 +801,20 @@ class SavedSearchCreateView(CreateView):
             instance.last_alert = now()
             kwargs["instance"] = instance
         return kwargs
+
+    def get_success_url(self):
+        return reverse("search:saved_search_update", kwargs={"pk": self.object.pk})
+
+
+class SavedSearchUpdateView(UpdateView):
+    permission_classes = (IsAuthenticated,)
+    model = SavedSearch
+    form_class = SavedSearchForm
+    template_name = "peachjam_search/saved_search_form.html"
+    context_object_name = "saved_search"
+
+    def get_queryset(self):
+        return self.request.user.saved_searches.all()
+
+    def get_success_url(self):
+        return reverse("search:saved_search_update", kwargs={"pk": self.object.pk})
