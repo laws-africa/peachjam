@@ -15,55 +15,35 @@
 <div hx-swap-oob="true" id="savedSearchModalDialog" class="modal-dialog">
   <div class="modal-content">
     <div class="modal-header">
-      <h1 id="savedSearchModalLabel" class="modal-title fs-5">Search alert</h1>
+      <h1 id="savedSearchModalLabel" class="modal-title fs-5">{% trans "Search alert" %}</h1>
       <button type="button"
               class="btn-close"
               data-bs-dismiss="modal"
-              aria-label="Close"></button>
+              aria-label="{% trans "Close" %}"></button>
     </div>
     <div id="search-modal-body" class="modal-body">
+      <p class="alert alert-primary">
+        <i class="bi bi-bell"></i>
+        {% trans "We'll email you when new documents are found for this search." %}
+      </p>
       {% if saved_search.pk %}<p class="text-success">Search alert saved!</p>{% endif %}
       <form id="saved-search-form"
             hx-target="#saved-search-button"
             {% if saved_search.pk %} hx-post="{% url 'search:saved_search_update' saved_search.pk %}" {% else %} hx-post="{% url 'search:saved_search_create' %}" {% endif %}>
         <div class="mb-3">
-          <label class="form-label" for="{{ form.q.id_for_label }}">{% trans 'Search term' %}</label>
-          <input type="text"
-                 class="form-control"
-                 id="{{ form.q.id_for_label }}"
-                 value="{{ form.q.value }}"
-                 name="{{ form.q.name }}"
-                 readonly/>
-          {% if form.q.errors %}
-            <div class="text-danger">
-              {% for error in form.q.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
-            </div>
-          {% endif %}
+          <label class="form-label">{% trans "Search" %}</label>
+          <div>{{ saved_search.q }}</div>
         </div>
-        <div class="mb-3">
-          <label class="form-label" for="{{ form.filters.id_for_label }}">{{ form.filters.label }}</label>
-          <input type="text"
-                 class="form-control"
-                 id="{{ form.filters.id_for_label }}"
-                 name="{{ form.filters.name }}"
-                 value="{{ form.filters.value }}"
-                 readonly/>
-          {% if form.filters.errors %}
-            <div class="text-danger">
-              {% for error in form.filters.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
-            </div>
-          {% endif %}
+        <div>
+          <p>{{ saved_search.filters }}</p>
         </div>
-        <div class="mb-3">
-          <label class="form-label" for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
+        <div>
+          <label class="form-label" for="{{ form.note.id_for_label }}">
+            {{ form.note.label }} - {% trans "A note to yourself about this search" %}
+          </label>
           <textarea class="form-control"
                     id="{{ form.note.id_for_label }}"
                     name="{{ form.note.name }}">{{ form.note.value|default_if_none:'' }}</textarea>
-          {% if form.note.errors %}
-            <div class="text-danger">
-              {% for error in form.note.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
-            </div>
-          {% endif %}
         </div>
       </form>
     </div>
