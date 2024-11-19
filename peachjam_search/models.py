@@ -100,6 +100,14 @@ class SavedSearch(models.Model):
     def __str__(self):
         return self.q
 
+    def get_filters_dict(self):
+        return dict(QueryDict(self.filters).lists())
+
+    def get_absolute_url(self):
+        filters = self.get_filters_dict()
+        filters["q"] = [self.q]
+        return reverse("search:search") + "?" + urlencode(filters, doseq=True)
+
     def update_and_alert(self):
         hits = self.find_new_hits()
         if hits:

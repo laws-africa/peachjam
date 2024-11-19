@@ -27,6 +27,11 @@ urlpatterns = [
         name="saved_search_update",
     ),
     path(
+        "saved-searches/<int:pk>/delete",
+        views.SavedSearchDeleteView.as_view(),
+        name="saved_search_delete",
+    ),
+    path(
         "saved-searches/",
         views.SavedSearchListView.as_view(),
         name="saved_search_list",

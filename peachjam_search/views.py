@@ -6,8 +6,9 @@ from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
-from django.http.response import JsonResponse
+from django.http.response import HttpResponse, JsonResponse
 from django.shortcuts import redirect, reverse
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.timezone import now
@@ -17,6 +18,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.views.generic import (
     CreateView,
+    DeleteView,
     DetailView,
     ListView,
     TemplateView,
@@ -771,7 +773,10 @@ class SavedSearchModalView(TemplateView):
 
     def get(self, *args, **kwargs):
         if self.request.user.is_authenticated and self.request.htmx:
-            params = parse_qs(urlparse(self.request.htmx.current_url_abs_path).query)
+            params = parse_qs(
+                urlparse(self.request.htmx.current_url_abs_path).query,
+                keep_blank_values=True,
+            )
             q = params.pop("q", "")[0] if "q" in params else ""
             filters = urlencode(params, doseq=True)
             saved_search = SavedSearch.objects.filter(
@@ -828,3 +833,24 @@ class SavedSearchListView(ListView):
 
     def get_queryset(self):
         return self.request.user.saved_searches.all()
+
+
+class SavedSearchDeleteView(DeleteView):
+    permission_classes = (IsAuthenticated,)
+    model = SavedSearch
+    success_url = reverse_lazy("search:saved_search_list")
+
+    def get_queryset(self):
+        return self.request.user.saved_searches.all()
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["peachjam_search/_saved_search_list.html"]
+        return ["peachjam_search/saved_search_list.html"]
+
+    def post(self, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete()
+        response = HttpResponse("saved search deleted")
+        response["HX-Refresh"] = "true"
+        return response
