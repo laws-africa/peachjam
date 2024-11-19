@@ -223,7 +223,6 @@ class PeachJam {
     const savedSearchModal = document.getElementById('savedSearchModal') as HTMLElement | null;
 
     if (!savedSearchModal) {
-      console.error('Saved search modal not found');
       return;
     }
 

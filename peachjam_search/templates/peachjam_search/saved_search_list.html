@@ -14,22 +14,33 @@
     <div class="mb-4">
       {% blocktrans trimmed %}We'll email you when new documents are found for your search alerts.{% endblocktrans %}
     </div>
-    {% if saved_searches %}
-      <div class="card">
+    <div class="card">
+      {% if saved_searches %}
         <ul class="list-group list-group-flush">
           {% for search in saved_searches %}
             <li class="list-group-item d-flex">
               <div class="flex-grow-1 row">
                 <div class="col-md-6">
-                  <a href="{{ search.get_search_url }}">{{ search }}</a>
+                  <a href="{{ search.get_absolute_url }}">{{ search }}</a>
                   <br/>
                   <span class="text-muted">{{ search.note }}</span>
                 </div>
-                <div class="col-md-6">{{ search.filters }}</div>
+                <div class="col-md-6">
+                  {% for key, values in search.get_filters_dict.items %}
+                    <strong>{{ key }}:</strong>
+                    {% for value in values %}
+                      {{ value }}
+                      {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                    {% if not forloop.last %},{% endif %}
+                    <br/>
+                  {% endfor %}
+                </div>
               </div>
               <div>
                 <button class="btn btn-outline-danger me-2"
                         type="button"
+                        hx-post="{% url 'search:saved_search_delete' search.pk %}"
                         hx-confirm="{% trans "Delete this search alert?" %}">
                   {% trans 'Delete' %}
                 </button>
@@ -37,11 +48,11 @@
             </li>
           {% endfor %}
         </ul>
-      </div>
-    {% else %}
-      <p>
-        {% trans "You don't have any search alerts. Get started by searching for a document and clicking the search alert button." %}
-      </p>
-    {% endif %}
+      {% else %}
+        <div class="card-body">
+          {% trans "You don't have any search alerts. Get started by searching for a document and clicking the search alert button." %}
+        </div>
+      {% endif %}
+    </div>
   </div>
 {% endblock %}
