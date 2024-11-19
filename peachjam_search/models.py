@@ -157,7 +157,9 @@ class SavedSearch(models.Model):
         html = render_to_string("peachjam_search/emails/search_alert.html", context)
         plain_txt = render_to_string("peachjam_search/emails/search_alert.txt", context)
 
-        subject = settings.EMAIL_SUBJECT_PREFIX + _("New hits for search ") + self.q
+        subject = (
+            settings.EMAIL_SUBJECT_PREFIX + _("New matches for your search ") + self.q
+        )
         send_mail(
             subject=subject,
             message=plain_txt,
