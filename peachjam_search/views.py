@@ -42,7 +42,7 @@ from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString, Term
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import CreateModelMixin
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
@@ -802,6 +802,7 @@ class SavedSearchModalView(TemplateView):
 
 
 class SavedSearchCreateView(CreateView):
+    permission_required = "peachjam_search.add_savedsearch"
     template_name = "peachjam_search/saved_search_form.html"
     model = SavedSearch
     form_class = SavedSearchForm
@@ -823,10 +824,10 @@ class SavedSearchCreateView(CreateView):
 
 
 class SavedSearchUpdateView(UpdateView):
-    permission_classes = (IsAuthenticated,)
+    permission_required = "peachjam_search.change_savedsearch"
+    template_name = "peachjam_search/saved_search_form.html"
     model = SavedSearch
     form_class = SavedSearchForm
-    template_name = "peachjam_search/saved_search_form.html"
     context_object_name = "saved_search"
 
     def get_queryset(self):
@@ -837,17 +838,17 @@ class SavedSearchUpdateView(UpdateView):
 
 
 class SavedSearchListView(ListView):
-    permission_classes = (IsAuthenticated,)
+    permission_required = "peachjam_search.view_savedsearch"
+    template_name = "peachjam_search/saved_search_list.html"
     model = SavedSearch
     context_object_name = "saved_searches"
-    template_name = "peachjam_search/saved_search_list.html"
 
     def get_queryset(self):
         return self.request.user.saved_searches.all()
 
 
 class SavedSearchDeleteView(DeleteView):
-    permission_classes = (IsAuthenticated,)
+    permission_required = "peachjam_search.delete_savedsearch"
     model = SavedSearch
     success_url = reverse_lazy("search:saved_search_list")
 
