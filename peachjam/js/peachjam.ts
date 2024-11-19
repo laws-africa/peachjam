@@ -52,7 +52,6 @@ class PeachJam {
     this.createVueComponents(document.body);
     this.setupTooltips();
     this.setupPopovers();
-    this.setupSavedSearchModal();
     this.scrollNavTabs();
     this.clearGACookies();
     window.dispatchEvent(new Event('peachjam.after-setup'));
@@ -216,29 +215,6 @@ class PeachJam {
         };
         document.addEventListener('click', clickListener);
       });
-    });
-  }
-
-  setupSavedSearchModal (): void {
-    const savedSearchModal = document.getElementById('savedSearchModal') as HTMLElement | null;
-
-    if (!savedSearchModal) {
-      return;
-    }
-
-    savedSearchModal.addEventListener('show.bs.modal', (event: Event) => {
-      const filters = savedSearchModal.querySelector('input[name="filters"]') as HTMLInputElement | null;
-      const q = savedSearchModal.querySelector('input[name="q"]') as HTMLInputElement | null;
-
-      if (!filters || !q) {
-        console.error('Filters or query input not found');
-        return;
-      }
-
-      const search = new URLSearchParams(window.location.search);
-      q.value = search.get('q') || ''; // Default to an empty string if 'q' is null
-      search.delete('q');
-      filters.value = search.toString();
     });
   }
 

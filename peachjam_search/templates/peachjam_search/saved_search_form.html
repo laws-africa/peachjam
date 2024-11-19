@@ -3,6 +3,7 @@
   <button class="btn btn-link"
           id="saved-search-modal-button"
           data-bs-toggle="modal"
+          {% if not saved_search.pk %} hx-post="{% url 'search:saved_search_create' %}" hx-include="#saved-search-form" {% endif %}
           data-bs-target="#savedSearchModal">
     <i class="bi bi-search-heart"></i>
     {% if saved_search.pk %}
