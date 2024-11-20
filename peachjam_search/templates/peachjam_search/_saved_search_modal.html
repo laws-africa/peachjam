@@ -18,7 +18,11 @@
                 hx-target="#saved-search-button"
                 hx-post="{% url 'search:saved_search_update' saved_search.pk %}">
             <div class="mb-3">{{ saved_search.q }}</div>
-            <div class="mb-3">{{ saved_search.filters }}</div>
+            <div class="mb-3">
+              {# djLint:off #}
+              {% for values in saved_search.get_filters_dict.values %}{% if not forloop.first %},{% endif %}{{ values|join:", " }}{% endfor %}
+              {# djLint:on #}
+            </div>
             <div>
               <label class="form-label" for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
               <textarea class="form-control"

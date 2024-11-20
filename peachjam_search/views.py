@@ -777,10 +777,13 @@ class SavedSearchButtonView(TemplateView):
 
     def get(self, *args, **kwargs):
         if self.request.user.is_authenticated and self.request.htmx:
-            # TODO: remove fields?
             params = dict(
                 QueryDict(urlparse(self.request.htmx.current_url_abs_path).query)
             )
+            # these are fields we don't want to store
+            params.pop("suggestion", None)
+            params.pop("page", None)
+
             q = params.pop("q", "")
             q = q[0] if q else ""
             filters = SavedSearch(
