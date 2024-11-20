@@ -24,9 +24,9 @@
                   <span class="text-muted">{{ search.note }}</span>
                 </div>
                 <div class="col-md-6">
-                  {# djLint:off #}
-                  {% for values in search.get_filters_dict.values %}{% if not forloop.first %},{% endif %}{{ values|join:", " }}{% endfor %}
-                  {# djLint:on #}
+                  {# djlint:off #}
+                  {% for values in search.get_filters_dict.values %}{% if not forloop.first %},&nbsp;{% endif %}{{ values|join:", " }}{% endfor %}
+                  {# djlint:on #}
                 </div>
               </div>
               <div>
