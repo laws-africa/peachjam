@@ -22,15 +22,15 @@
   <nav class="nav nav-tabs mb-3 border-bottom">
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
-         href="{% url 'municipal_by_laws' locality.code %}">Current legislation</a>
+         href="{% url 'municipal_by_laws' locality.place_code %}">Current legislation</a>
     </li>
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
-         href="{% url 'municipal_by_laws_legislation_list_repealed' locality.code %}">Repealed legislation</a>
+         href="{% url 'municipal_by_laws_legislation_list_repealed' locality.place_code %}">Repealed legislation</a>
     </li>
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
-         href="{% url 'municipal_by_laws_legislation_list_all' locality.code %}">All legislation</a>
+         href="{% url 'municipal_by_laws_legislation_list_all' locality.place_code %}">All legislation</a>
     </li>
   </nav>
 {% endblock %}

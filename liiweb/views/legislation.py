@@ -127,7 +127,7 @@ class LocalityLegislationView(TemplateView):
         localities = self.get_localities()
         if not localities:
             raise Http404()
-        context["locality_groups"] = chunks(localities, 2)
+        context["locality_groups"] = chunks(localities, 3)
         return context
 
     def get_localities(self):

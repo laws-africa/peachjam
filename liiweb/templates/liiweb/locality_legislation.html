@@ -6,9 +6,9 @@
   <section class="pb-5">
     <div class="container">
       <h1 class="my-4">{{ locality_legislation_title }}</h1>
-      <div class="row">
+      <div class="flow-columns mb-3">
         {% for group in locality_groups %}
-          <div class="col-lg">
+          <div class="flow-columns-group">
             <ul class="list-unstyled mb-0">
               {% for locality in group %}
                 <li>

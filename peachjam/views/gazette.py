@@ -90,7 +90,7 @@ class GazetteListView(TemplateView):
         )
 
         context["localities"] = self.get_localities(context)
-        context["locality_groups"] = list(chunks(context["localities"], 2))
+        context["locality_groups"] = chunks(context["localities"], 3)
         queryset = self.get_queryset()
         context["years"] = year_and_month_aggs(queryset, self.kwargs.get("code"))
         context["doc_count"] = queryset.count()
