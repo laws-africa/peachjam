@@ -1,0 +1,15 @@
+{% load i18n %}
+{% if request.user.is_authenticated %}
+  <form id="saved-search-button"
+        hx-post="{% url 'search:saved_search_create' %}">
+    <input type="hidden" name="q" value="{{ saved_search.q }}"/>
+    <input type="hidden" name="filters" value="{{ saved_search.filters }}"/>
+  {% endif %}
+  <button class="btn btn-outline-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#saved-search-modal">
+    <i class="bi bi-bell"></i>
+    {% trans 'Get alerts for this search' %}
+  </button>
+  {% if request.user.is_authenticated %}</form>{% endif %}
+  {% include 'peachjam_search/_saved_search_modal.html' %}

@@ -1,60 +1,10 @@
 {% load i18n %}
 <div id="saved-search-button">
-  <button class="btn btn-link"
-          id="saved-search-modal-button"
+  <button class="btn btn-outline-primary"
           data-bs-toggle="modal"
-          {% if not saved_search.pk %} hx-post="{% url 'search:saved_search_create' %}" hx-include="#saved-search-form" {% endif %}
-          data-bs-target="#savedSearchModal">
-    <i class="bi bi-search-heart"></i>
-    {% if saved_search.pk %}
-      {% trans 'Update this search alert' %}
-    {% else %}
-      {% trans 'Get alerts for this search' %}
-    {% endif %}
+          data-bs-target="#saved-search-modal">
+    <i class="bi bi-bell"></i>
+    {% trans 'Update this search alert' %}
   </button>
 </div>
-<div hx-swap-oob="true" id="savedSearchModalDialog" class="modal-dialog">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h1 id="savedSearchModalLabel" class="modal-title fs-5">{% trans 'Search alert' %}</h1>
-      <button type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="{% trans "Close" %}"></button>
-    </div>
-    <div id="search-modal-body" class="modal-body">
-      <p class="alert alert-primary">
-        <i class="bi bi-bell"></i>
-        {% trans "We'll email you when new documents are found for this search." %}
-      </p>
-      {% if saved_search.pk %}<p class="text-success">Search alert saved!</p>{% endif %}
-      <form id="saved-search-form"
-            hx-target="#saved-search-button"
-            {% if saved_search.pk %} hx-post="{% url 'search:saved_search_update' saved_search.pk %}" {% else %} hx-post="{% url 'search:saved_search_create' %}" {% endif %}>
-        <div class="mb-3">
-          <label class="form-label">{% trans "Search" %}</label>
-          <div>{{ saved_search.q }}</div>
-        </div>
-        <div>
-          <p>{{ saved_search.filters }}</p>
-        </div>
-        <div>
-          <label class="form-label" for="{{ form.note.id_for_label }}">
-            {{ form.note.label }} - {% trans "A note to yourself about this search" %}
-          </label>
-          <textarea class="form-control"
-                    id="{{ form.note.id_for_label }}"
-                    name="{{ form.note.name }}">{{ form.note.value|default_if_none:'' }}</textarea>
-        </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
-      {% if not request.user.is_authenticated %}
-        <a href="{% url 'account_login' %}" class="btn btn-primary">{% trans 'Login' %}</a>
-      {% else %}
-        <button type="submit" form="saved-search-form" class="btn btn-primary">{% trans 'Save changes' %}</button>
-      {% endif %}
-    </div>
-  </div>
-</div>
+{% include 'peachjam_search/_saved_search_modal.html' %}

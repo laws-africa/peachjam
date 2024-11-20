@@ -8,9 +8,7 @@
 {% endblock %}
 {% block account-content %}
   <div class="container mt-4">
-    <h2>
-      {% trans 'Search alerts' %} <i class="bi bi-bell"></i>
-    </h2>
+    <h2>{% trans 'Search alerts' %}</h2>
     <div class="mb-4">
       {% blocktrans trimmed %}We'll email you when new documents are found for your search alerts.{% endblocktrans %}
     </div>
@@ -38,12 +36,15 @@
                 </div>
               </div>
               <div>
-                <button class="btn btn-outline-danger me-2"
-                        type="button"
-                        hx-post="{% url 'search:saved_search_delete' search.pk %}"
-                        hx-confirm="{% trans "Delete this search alert?" %}">
-                  {% trans 'Delete' %}
-                </button>
+                <form action="{% url 'search:saved_search_delete' search.pk %}?next={{ request.get_full_path }}"
+                      method="post">
+                  {% csrf_token %}
+                  <button class="btn btn-outline-danger me-2"
+                          type="submit"
+                          data-confirm="{% trans "Are you sure?" %}">
+                    {% trans 'Delete' %}
+                  </button>
+                </form>
               </div>
             </li>
           {% endfor %}
