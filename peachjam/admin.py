@@ -1253,6 +1253,7 @@ class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
         "slug",
         "date",
         "published",
+        "featured",
         "image",
         "topics",
         "summary",
