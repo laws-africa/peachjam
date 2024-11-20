@@ -113,7 +113,6 @@ class IndigoAdapter(RequestsAdapter):
         for code in self.settings["places"].split():
             if code.endswith("-*"):
                 place = code.split("-", 1)[0]
-                codes.append(place)
                 # get all localities for this place
                 for loc in self.places[place]["localities"]:
                     # ignore playgrounds when expanding wildcards
@@ -123,7 +122,7 @@ class IndigoAdapter(RequestsAdapter):
             else:
                 codes.append(code)
 
-        return codes
+        return list(set(codes))
 
     @cached_property
     def places(self):
