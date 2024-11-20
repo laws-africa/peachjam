@@ -43,4 +43,11 @@ urlpatterns = [
         ),
     ),
     path("", include("liiweb.urls")),
+    # this is duplicated here because it overrides the liiweb url with the same name, and django uses the
+    # last occurrence when looking up a url, but the first when dispatching
+    path(
+        "legislation/provincial",
+        views.LocalityLegislationView.as_view(variant="provincial"),
+        name="locality_legislation",
+    ),
 ]

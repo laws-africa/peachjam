@@ -4,6 +4,16 @@ from django.test import TestCase
 class LegislationViewsTest(TestCase):
     fixtures = ["tests/countries", "documents/sample_documents"]
 
+    def test_legislation_locality(self):
+        response = self.client.get("/legislation/localities")
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.get("/legislation/provincial")
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get("/legislation/municipal")
+        self.assertEqual(response.status_code, 200)
+
     def test_legislation_listing_locality_redirect(self):
         response = self.client.get("/legislation/au/all")
         self.assertEqual(response.status_code, 302)
