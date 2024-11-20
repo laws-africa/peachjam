@@ -76,6 +76,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
             "post_tags": ["</mark>"],
             "fragment_size": 80,
             "number_of_fragments": 2,
+            "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
         },
     }
 
@@ -92,6 +93,7 @@ class MainSearchBackend(BaseSearchFilterBackend):
             "post_tags": ["</mark>"],
             "fragment_size": 80,
             "number_of_fragments": 2,
+            "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
         },
     }
 
