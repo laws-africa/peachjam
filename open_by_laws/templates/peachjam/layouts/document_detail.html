@@ -6,7 +6,7 @@
         <a href="{% url 'home_page' %}">Municipalities</a>
       </li>
       <li class="breadcrumb-item">
-        <a href="{% url 'municipal_by_laws' code=document.locality.code %}">{{ document.locality.name }}</a>
+        <a href="{% url 'locality_legislation_list' code=document.locality.place_code %}">{{ document.locality.name }}</a>
       </li>
     </ol>
   </nav>
