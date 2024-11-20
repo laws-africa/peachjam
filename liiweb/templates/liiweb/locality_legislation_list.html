@@ -22,7 +22,11 @@
   <nav class="nav nav-tabs mb-3 border-bottom">
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
-         href="{% url 'locality_legislation_list' locality.code %}">{% trans "Current legislation" %}</a>
+         href="{% url 'locality_legislation_list' locality.code %}">
+        {% block current_tab_title %}
+          {% trans "Current legislation" %}
+        {% endblock %}
+      </a>
     </li>
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
@@ -39,4 +43,7 @@
          href="{% url 'locality_legislation_list_all' locality.code %}">{% trans "All legislation" %}</a>
     </li>
   </nav>
+{% endblock %}
+{% block page-title %}
+  {% if not entity_profile %}<h1 class="my-4">{{ page_heading }}</h1>{% endif %}
 {% endblock %}
