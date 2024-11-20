@@ -19,6 +19,7 @@ class LegislationViewsTest(TestCase):
     def test_legislation_locality(self):
         response = self.client.get("/legislation/localities")
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/legislation/provincial")
 
         response = self.client.get("/legislation/provincial")
         self.assertEqual(response.status_code, 200)
