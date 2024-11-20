@@ -1,8 +1,20 @@
+from countries_plus.models import Country
 from django.test import TestCase
+
+from peachjam.models import Locality
 
 
 class LegislationViewsTest(TestCase):
     fixtures = ["tests/countries", "documents/sample_documents"]
+
+    def setUp(self):
+        za = Country.objects.get(pk="ZA")
+        Locality.objects.get_or_create(
+            code="gp", jurisdiction=za, defaults={"name": "Gauteng"}
+        )
+        Locality.objects.get_or_create(
+            code="cpt", jurisdiction=za, defaults={"name": "Cape Town"}
+        )
 
     def test_legislation_locality(self):
         response = self.client.get("/legislation/localities")
