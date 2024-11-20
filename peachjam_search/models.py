@@ -89,7 +89,7 @@ class SearchClick(models.Model):
 
 class SavedSearch(models.Model):
     q = models.CharField(max_length=4098)
-    filters = models.CharField(max_length=4098)
+    filters = models.CharField(max_length=4098, null=True, blank=True)
     note = models.TextField(null=True, blank=True)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="saved_searches"
@@ -101,11 +101,25 @@ class SavedSearch(models.Model):
         return self.q
 
     def get_filters_dict(self):
-        return dict(QueryDict(self.filters).lists())
+        filters = dict(QueryDict(self.filters).lists())
+        filters.pop("q", None)
+        filters.pop("page", None)
+        return filters
+
+    def get_sorted_filters_string(self):
+        return urlencode(sorted(self.get_filters_dict().items()), doseq=True)
+
+    def clean(self):
+        # sort params alphabetically so that the lookup is consistent
+        self.filters = self.get_sorted_filters_string()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         filters = self.get_filters_dict()
-        filters["q"] = [self.q]
+        filters["q"] = self.q
         return reverse("search:search") + "?" + urlencode(filters, doseq=True)
 
     def update_and_alert(self):
@@ -121,9 +135,12 @@ class SavedSearch(models.Model):
         factory = APIRequestFactory()
         request = factory.get("/search/api/documents/")
         request.user = self.user
-        params = f"q={self.q}&{self.filters}&created_at__gte={self.last_alert.replace(tzinfo=None).isoformat()}"
+        params = self.get_filters_dict()
+        params["q"] = self.q
+        params["created_at__gte"] = self.last_alert.replace(tzinfo=None).isoformat()
+        params = urlencode(params, doseq=True)
         request.GET = QueryDict(params)
-        request.id = "none"
+        request.id = "search-alert-" + str(self.pk)
         view = DocumentSearchViewSet.as_view({"get": "list"})
         response = view(request)
         hits = response.data["results"]
@@ -140,7 +157,9 @@ class SavedSearch(models.Model):
         html = render_to_string("peachjam_search/emails/search_alert.html", context)
         plain_txt = render_to_string("peachjam_search/emails/search_alert.txt", context)
 
-        subject = settings.EMAIL_SUBJECT_PREFIX + _("New hits for search ") + self.q
+        subject = (
+            settings.EMAIL_SUBJECT_PREFIX + _("New matches for your search ") + self.q
+        )
         send_mail(
             subject=subject,
             message=plain_txt,
