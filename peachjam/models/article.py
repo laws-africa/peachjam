@@ -36,6 +36,11 @@ class Article(models.Model):
     topics = models.ManyToManyField(
         "peachjam.Taxonomy", verbose_name=_("topics"), blank=True
     )
+    featured = models.BooleanField(
+        _("featured"),
+        default=False,
+        help_text=_("Featured articles will be displayed on the homepage."),
+    )
 
     class Meta:
         verbose_name = _("article")
