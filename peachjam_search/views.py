@@ -812,7 +812,7 @@ class SavedSearchCreateView(CreateView):
         if self.request.user.is_authenticated:
             instance = SavedSearch()
             instance.user = self.request.user
-            instance.last_alert = now()
+            instance.last_alerted_at = now()
             instance.q = self.request.GET.get("q", "")
             instance.filters = self.request.GET.urlencode()
             instance.filters = instance.get_sorted_filters_string()

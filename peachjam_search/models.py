@@ -94,8 +94,8 @@ class SavedSearch(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="saved_searches"
     )
-    created_at = models.DateField(auto_now_add=True)
-    last_alert = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_alerted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.q
@@ -126,7 +126,7 @@ class SavedSearch(models.Model):
         hits = self.find_new_hits()
         if hits:
             self.send_alert(hits)
-            self.last_alert = now()
+            self.last_alerted_at = now()
             self.save()
 
     def find_new_hits(self):
@@ -137,7 +137,9 @@ class SavedSearch(models.Model):
         request.user = self.user
         params = self.get_filters_dict()
         params["q"] = self.q
-        params["created_at__gte"] = self.last_alert.replace(tzinfo=None).isoformat()
+        params["created_at__gte"] = self.last_alerted_at.replace(
+            tzinfo=None
+        ).isoformat()
         params = urlencode(params, doseq=True)
         request.GET = QueryDict(params)
         request.id = "search-alert-" + str(self.pk)
