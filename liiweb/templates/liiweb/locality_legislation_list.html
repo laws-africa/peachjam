@@ -8,9 +8,11 @@
         <li class="breadcrumb-item">
           <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
         </li>
-        <li class="breadcrumb-item">
-          <a href="{% url 'locality_legislation' %}">{{ locality_legislation_title }}</a>
-        </li>
+        {% block breadcrumbs-locality %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'locality_legislation' %}">{{ locality_legislation_title }}</a>
+          </li>
+        {% endblock %}
         <li class="breadcrumb-item active" aria-current="page">{{ locality.name }}</li>
       </ol>
     </nav>
@@ -20,11 +22,11 @@
   <nav class="nav nav-tabs mb-3 border-bottom">
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
-         href="{% url 'locality_legislation_list' locality.code %}">Current legislation</a>
+         href="{% url 'locality_legislation_list' locality.code %}">{% trans "Current legislation" %}</a>
     </li>
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
-         href="{% url 'locality_legislation_list_repealed' locality.code %}">Repealed legislation</a>
+         href="{% url 'locality_legislation_list_repealed' locality.code %}">{% trans "Repealed legislation" %}</a>
     </li>
     {% if show_subleg %}
       <li class="nav-item">
@@ -34,7 +36,7 @@
     {% endif %}
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
-         href="{% url 'locality_legislation_list_all' locality.code %}">All legislation</a>
+         href="{% url 'locality_legislation_list_all' locality.code %}">{% trans "All legislation" %}</a>
     </li>
   </nav>
 {% endblock %}

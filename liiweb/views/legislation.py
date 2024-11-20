@@ -2,6 +2,7 @@ import datetime
 from collections import defaultdict
 from datetime import timedelta
 
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
@@ -114,17 +115,28 @@ class LegislationListView(BaseLegislationListView):
 class LocalityLegislationView(TemplateView):
     template_name = "liiweb/locality_legislation.html"
     navbar_link = "legislation/locality"
+    extra_context = {"locality_legislation_title": "Local Legislation"}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        localities = Locality.objects.all()
-        context["locality_groups"] = list(chunks(localities, 2))
+        localities = self.get_localities()
+        if not localities:
+            raise Http404()
+        context["locality_groups"] = chunks(localities, 2)
         return context
+
+    def get_localities(self):
+        return Locality.objects.all()
 
 
 class LocalityLegislationListView(LegislationListView):
     template_name = "liiweb/locality_legislation_list.html"
     navbar_link = "legislation/locality"
+    extra_context = {
+        "locality_legislation_title": LocalityLegislationView.extra_context[
+            "locality_legislation_title"
+        ]
+    }
     national_only = False
 
     def get(self, *args, **kwargs):
@@ -139,7 +151,6 @@ class LocalityLegislationListView(LegislationListView):
         context.update(
             {
                 "locality": self.locality,
-                "locality_legislation_title": "Provincial Legislation",
                 "page_heading": _("%(locality)s Legislation")
                 % {"locality": self.locality},
                 "entity_profile": self.locality.entity_profile.first(),
