@@ -1,4 +1,5 @@
 import copy
+import logging
 
 from django.conf import settings
 from django.contrib import messages
@@ -46,6 +47,8 @@ from peachjam_search.serializers import (
 CACHE_SECS = 15 * 60
 SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
 
+log = logging.getLogger(__name__)
+
 
 class RobustPaginator(Paginator):
     max_results = 10_000
@@ -54,6 +57,12 @@ class RobustPaginator(Paginator):
     def num_pages(self):
         # clamp the page number to prevent exceeding max_results
         return min(super().num_pages, (self.max_results - 1) // self.per_page)
+
+    def _get_page(self, response, *args, **kwargs):
+        # this is the only place we get access to the response from ES, so we can check for errors
+        if response._shards.failed:
+            log.warning(f"ES query failed: {response._shards.failures}")
+        return super()._get_page(response, *args, **kwargs)
 
 
 class CustomPageNumberPagination(PageNumberPagination):
