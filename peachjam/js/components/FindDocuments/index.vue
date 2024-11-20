@@ -94,30 +94,23 @@
               {{ $t("Filters") }} <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
             </button>
           </form>
-          <div class="d-md-flex justify-content-between">
-            <div
-              id="saved-search-button"
-            />
-            <div
-              id="savedSearchModal"
-              class="modal fade"
-              tabindex="-1"
-              aria-labelledby="savedSearchModalLabel"
-              aria-hidden="true"
-            >
-              <div
-                id="savedSearchModalDialog"
-                class="modal-dialog"
-              />
-            </div>
-            <div class="my-2 text-end">
-              <HelpBtn page="search/" />
-            </div>
+          <div class="my-2 text-end">
+            <HelpBtn page="search/" />
           </div>
-          <div v-if="searchTip" class="my-2">
+          <div v-if="searchTip" class="mt-2 mb-3">
             <i class="bi bi-info-circle" />
             {{ searchTip.prompt }}
             <a href="#" @click.stop.prevent="useSearchTip()">{{ searchTip.q }}</a>
+          </div>
+          <div id="saved-search-button" />
+          <div
+            id="saved-search-modal"
+            class="modal fade"
+            tabindex="-1"
+            aria-labelledby="saved-search-modal-label"
+            aria-hidden="true"
+          >
+            <div id="saved-search-modal-dialog" class="modal-dialog" />
           </div>
         </div>
         <div
@@ -880,7 +873,7 @@ export default {
       };
     },
     savedSearchModal () {
-      htmx.ajax('GET', '/search/saved-searches/modal', {target: '#saved-search-button'})
+      htmx.ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });
     }
   }
 };

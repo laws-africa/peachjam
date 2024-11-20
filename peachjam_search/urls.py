@@ -12,9 +12,9 @@ router.register("click", views.SearchClickViewSet, basename="search_click")
 urlpatterns = [
     path("api/", include(router.urls)),
     path(
-        "saved-searches/modal",
-        views.SavedSearchModalView.as_view(),
-        name="saved_search_modal",
+        "saved-searches/button",
+        views.SavedSearchButtonView.as_view(),
+        name="saved_search_button",
     ),
     path(
         "saved-searches/create",

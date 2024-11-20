@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, QueryDict
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import JsonResponse
 from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
@@ -48,7 +48,7 @@ from rest_framework.viewsets import GenericViewSet
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
-from peachjam_search.forms import SavedSearchForm
+from peachjam_search.forms import SavedSearchCreateForm, SavedSearchUpdateForm
 from peachjam_search.models import SavedSearch, SearchTrace
 from peachjam_search.serializers import (
     SearchableDocumentSerializer,
@@ -772,14 +772,18 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
         return self.request.user.is_authenticated and self.request.user.is_staff
 
 
-class SavedSearchModalView(TemplateView):
-    template_name = "peachjam_search/saved_search_modal.html"
+class SavedSearchButtonView(TemplateView):
+    template_name = "peachjam_search/saved_search_button.html"
 
     def get(self, *args, **kwargs):
         if self.request.user.is_authenticated and self.request.htmx:
             params = dict(
                 QueryDict(urlparse(self.request.htmx.current_url_abs_path).query)
             )
+            # these are fields we don't want to store
+            params.pop("suggestion", None)
+            params.pop("page", None)
+
             q = params.pop("q", "")
             q = q[0] if q else ""
             filters = SavedSearch(
@@ -789,34 +793,38 @@ class SavedSearchModalView(TemplateView):
                 user=self.request.user, q=q, filters=filters
             ).first()
             if saved_search:
+                # already exists, the update view handles editing
                 return HttpResponseRedirect(
                     reverse(
                         "search:saved_search_update", kwargs={"pk": saved_search.pk}
                     )
                 )
-            return HttpResponseRedirect(
-                reverse("search:saved_search_create") + f"?q={q}&{filters}"
-            )
-        context = super().get_context_data(**kwargs)
-        return self.render_to_response(context)
+            else:
+                self.extra_context = {
+                    "saved_search": SavedSearch(
+                        user=self.request.user,
+                        q=q,
+                        filters=filters,
+                    )
+                }
+        return super().get(*args, **kwargs)
 
 
 class SavedSearchCreateView(CreateView):
     permission_required = "peachjam_search.add_savedsearch"
     template_name = "peachjam_search/saved_search_form.html"
     model = SavedSearch
-    form_class = SavedSearchForm
+    form_class = SavedSearchCreateForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if self.request.user.is_authenticated:
-            instance = SavedSearch()
-            instance.user = self.request.user
-            instance.last_alerted_at = now()
-            instance.q = self.request.GET.get("q", "")
-            instance.filters = self.request.GET.urlencode()
-            instance.filters = instance.get_sorted_filters_string()
-            kwargs["instance"] = instance
+        instance = SavedSearch()
+        instance.user = self.request.user
+        instance.last_alerted_at = now()
+        instance.q = self.request.GET.get("q", "")
+        instance.filters = self.request.GET.urlencode()
+        instance.filters = instance.get_sorted_filters_string()
+        kwargs["instance"] = instance
         return kwargs
 
     def get_success_url(self):
@@ -827,7 +835,7 @@ class SavedSearchUpdateView(UpdateView):
     permission_required = "peachjam_search.change_savedsearch"
     template_name = "peachjam_search/saved_search_form.html"
     model = SavedSearch
-    form_class = SavedSearchForm
+    form_class = SavedSearchUpdateForm
     context_object_name = "saved_search"
 
     def get_queryset(self):
@@ -855,14 +863,5 @@ class SavedSearchDeleteView(DeleteView):
     def get_queryset(self):
         return self.request.user.saved_searches.all()
 
-    def get_template_names(self):
-        if self.request.htmx:
-            return ["peachjam_search/_saved_search_list.html"]
-        return ["peachjam_search/saved_search_list.html"]
-
-    def post(self, *args, **kwargs):
-        self.object = self.get_object()
-        self.object.delete()
-        response = HttpResponse("saved search deleted")
-        response["HX-Refresh"] = "true"
-        return response
+    def get_success_url(self):
+        return self.request.GET.get("next", None) or reverse("search:saved_search_list")

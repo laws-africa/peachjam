@@ -1,13 +1,16 @@
-Search Alert
- Hi {{ saved_search.user }}
-We have found new documents that match your search for:
+{{ saved_search.user }},
+
+We have found new documents that match your search alert:
+
 {{ saved_search.q }}
-Here are the new documents:
+
+{{ site.domain }}{{ saved_search.get_absolute_url }}
 
 {% for doc in hits %}
-  TITLE: {{ doc.title }}
-  URL: {{ site.domain }}{{ doc.expression_frbr_uri }}
-  ========================
+  Title: {{ doc.title }}
+  {{ site.domain }}{{ doc.expression_frbr_uri }}
+
 {% endfor %}
 
-Best regards.
+
+Manage your search alerts: {{ site.domain }}{% url "search:saved_search_list" %}
