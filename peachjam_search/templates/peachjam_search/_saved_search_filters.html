@@ -1,0 +1,3 @@
+{# djlint:off #}
+{% for values in saved_search.get_filters_dict.values %}{% if not forloop.first %},&nbsp;{% endif %}{{ values|join:", " }}{% endfor %}
+{# djlint:on #}

@@ -23,11 +23,7 @@
                   <br/>
                   <span class="text-muted">{{ search.note }}</span>
                 </div>
-                <div class="col-md-6">
-                  {# djlint:off #}
-                  {% for values in search.get_filters_dict.values %}{% if not forloop.first %},&nbsp;{% endif %}{{ values|join:", " }}{% endfor %}
-                  {# djlint:on #}
-                </div>
+                <div class="col-md-6">{% include 'peachjam_search/_saved_search_filters.html' with saved_search=search %}</div>
               </div>
               <div>
                 <form action="{% url 'search:saved_search_delete' search.pk %}?next={{ request.get_full_path }}"
