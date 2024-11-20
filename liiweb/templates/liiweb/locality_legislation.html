@@ -12,7 +12,7 @@
             <ul class="list-unstyled mb-0">
               {% for locality in group %}
                 <li>
-                  <a href="{% url 'locality_legislation_list' locality.code %}">{{ locality.name }}</a>
+                  <a href="{% url 'locality_legislation_list' locality.place_code %}">{{ locality.name }}</a>
                 </li>
               {% endfor %}
             </ul>

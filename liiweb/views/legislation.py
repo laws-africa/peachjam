@@ -3,12 +3,17 @@ from collections import defaultdict
 from datetime import timedelta
 
 from django.http import Http404
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks, get_language
-from peachjam.models import JurisdictionProfile, Locality, pj_settings
+from peachjam.models import (
+    JurisdictionProfile,
+    Locality,
+    get_country_and_locality_or_404,
+    pj_settings,
+)
 from peachjam.views import LegislationListView as BaseLegislationListView
 
 
@@ -140,7 +145,13 @@ class LocalityLegislationListView(LegislationListView):
     national_only = False
 
     def get(self, *args, **kwargs):
-        self.locality = get_object_or_404(Locality, code=kwargs["code"])
+        code = kwargs["code"]
+        if "-" not in code:
+            # redirect from <code> to <country>-<code>
+            locality = get_object_or_404(Locality, code=code)
+            return redirect("locality_legislation_list", code=locality.place_code())
+
+        self.jurisdiction, self.locality = get_country_and_locality_or_404(code)
         return super().get(*args, **kwargs)
 
     def get_base_queryset(self):

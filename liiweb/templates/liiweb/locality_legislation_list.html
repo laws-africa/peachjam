@@ -22,7 +22,7 @@
   <nav class="nav nav-tabs mb-3 border-bottom">
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
-         href="{% url 'locality_legislation_list' locality.code %}">
+         href="{% url 'locality_legislation_list' locality.place_code %}">
         {% block current_tab_title %}
           {% trans "Current legislation" %}
         {% endblock %}
@@ -30,17 +30,17 @@
     </li>
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
-         href="{% url 'locality_legislation_list_repealed' locality.code %}">{% trans "Repealed legislation" %}</a>
+         href="{% url 'locality_legislation_list_repealed' locality.place_code %}">{% trans "Repealed legislation" %}</a>
     </li>
     {% if show_subleg %}
       <li class="nav-item">
         <a class="nav-link {% if view.variant == 'subleg' %}active{% endif %}"
-           href="{% url 'locality_legislation_list_subsidiary' locality.code %}">{{ PEACHJAM_SETTINGS.subleg_label }}</a>
+           href="{% url 'locality_legislation_list_subsidiary' locality.place_code %}">{{ PEACHJAM_SETTINGS.subleg_label }}</a>
       </li>
     {% endif %}
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
-         href="{% url 'locality_legislation_list_all' locality.code %}">{% trans "All legislation" %}</a>
+         href="{% url 'locality_legislation_list_all' locality.place_code %}">{% trans "All legislation" %}</a>
     </li>
   </nav>
 {% endblock %}
