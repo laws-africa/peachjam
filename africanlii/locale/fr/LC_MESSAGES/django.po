@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-11-21 09:48+0200\n"
-"PO-Revision-Date: 2024-08-06 08:53\n"
+"PO-Revision-Date: 2024-11-21 08:50\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -415,50 +415,3 @@ msgstr "Années"
 msgid "Alphabet"
 msgstr "Alphabet"
 
-#~ msgid "work"
-#~ msgstr "travail"
-
-#~ msgid "source URL"
-#~ msgstr "URL source"
-
-#~ msgid "last updated"
-#~ msgstr "Dernière mise à jour"
-
-#~ msgid "ratification"
-#~ msgstr "ratification"
-
-#~ msgid "ratifications"
-#~ msgstr "ratifications"
-
-#~ msgid "ratification date"
-#~ msgstr "Date de ratification"
-
-#~ msgid "deposit date"
-#~ msgstr "Date de dépôt"
-
-#~ msgid "signature date"
-#~ msgstr "Date de signature"
-
-#~ msgid "ratification country"
-#~ msgstr "Pays de ratification"
-
-#~ msgid "ratification countries"
-#~ msgstr "Pays de ratification"
-
-#~ msgid "Ratified documents"
-#~ msgstr "Documents ratifiés"
-
-#~ msgid "Title"
-#~ msgstr "Titre"
-
-#~ msgid "Signature Date"
-#~ msgstr "Date de signature"
-
-#~ msgid "Ratification Date"
-#~ msgstr "Date de ratification"
-
-#~ msgid "Deposit Date"
-#~ msgstr "Date de dépôt"
-
-#~ msgid "Topics"
-#~ msgstr "Sujets"
