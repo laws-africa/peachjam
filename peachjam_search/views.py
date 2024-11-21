@@ -61,7 +61,10 @@ class RobustPaginator(Paginator):
     def _get_page(self, response, *args, **kwargs):
         # this is the only place we get access to the response from ES, so we can check for errors
         if response._shards.failed:
-            log.warning(f"ES query failed: {response._shards.failures}")
+            # it's better to fail here than to silently return partial (or no) results
+            log.error(f"ES query failed: {response._shards.failures}")
+            if settings.ELASTICSEARCH_FAIL_ON_SHARD_FAILURE:
+                raise Exception(f"ES query failed: {response._shards.failures}")
         return super()._get_page(response, *args, **kwargs)
 
 
