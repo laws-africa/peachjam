@@ -21,6 +21,18 @@ class BillListView(FilteredDocumentListView):
                 qs = qs.filter(jurisdiction=juri, locality=None)
         return qs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["doc_table_show_doc_type"] = False
+        context["doc_table_show_court"] = False
+        context["doc_table_show_author"] = False
+        context["doc_table_show_jurisdiction"] = False
+
+        del context["facet_data"]["natures"]
+
+        return context
+
 
 class PlaceBillListView(BillListView):
     template_name = "peachjam/place_bill_list.html"
