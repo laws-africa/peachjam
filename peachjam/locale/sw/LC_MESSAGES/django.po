@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-11-21 09:48+0200\n"
-"PO-Revision-Date: 2024-08-17 14:56\n"
+"PO-Revision-Date: 2024-11-21 08:50\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -97,35 +97,27 @@ msgstr "majaji wa mahakama ya mwanzo"
 
 #: admin.py:1088
 msgid "The Laws.Africa extractor is not enabled. Please check your settings."
-msgstr ""
+msgstr "Kichuna cha Laws.Africa hakijawezeshwa. Tafadhali angalia mipangilio yako."
 
 #: admin.py:1111
 msgid "Judgment uploaded. Please check details carefully."
-msgstr ""
+msgstr "Hukumu imepakiwa. Tafadhali angalia maelezo kwa makini."
 
 #: admin.py:1182
-#, fuzzy
-#| msgid "Refresh content for selected ingestors"
 msgid "Refreshing all content for selected ingestors in the background."
-msgstr "Onyesha upya maudhui kwa viingiza taarifa vilivyochaguliwa"
+msgstr "Inaonyesha upya maudhui yote kwa waingizaji waliochaguliwa chinichini."
 
 #: admin.py:1186
-#, fuzzy
-#| msgid "Refresh content for selected ingestors"
 msgid "Refresh all content for selected ingestors - Full update"
-msgstr "Onyesha upya maudhui kwa viingiza taarifa vilivyochaguliwa"
+msgstr "Onyesha upya maudhui yote kwa waingizaji waliochaguliwa - Sasisho kamili"
 
 #: admin.py:1193
-#, fuzzy
-#| msgid "Refreshing content in the background."
 msgid "Getting content since last update in background."
-msgstr "Inaonyesha upya maudhui kwa nyuma."
+msgstr "Kupata maudhui tangu sasisho la mwisho chinichini."
 
 #: admin.py:1197
-#, fuzzy
-#| msgid "Refresh content for selected ingestors"
 msgid "Update content for selected ingestors - Latest updates"
-msgstr "Onyesha upya maudhui kwa viingiza taarifa vilivyochaguliwa"
+msgstr "Sasisha yaliyomo kwa waingizaji waliochaguliwa - Masasisho ya hivi punde"
 
 #: admin.py:1278
 msgid "Articles published."
@@ -144,10 +136,8 @@ msgid "Unpublish selected articles"
 msgstr "Batilisha uchapishaji wa makala uliyochagua"
 
 #: admin.py:1429
-#, fuzzy
-#| msgid "case number"
 msgid "Gazette number"
-msgstr "namba ya kesi"
+msgstr "Nambari ya Gazeti"
 
 #: forms.py:147 forms.py:148 models/profile.py:13
 #: templates/peachjam/_ratification_table.html:6 views/generic_views.py:184
@@ -211,14 +201,12 @@ msgid "topics"
 msgstr "mada"
 
 #: models/article.py:40
-#, fuzzy
-#| msgid "nature"
 msgid "featured"
-msgstr "asili"
+msgstr "iliyoangaziwa"
 
 #: models/article.py:42
 msgid "Featured articles will be displayed on the homepage."
-msgstr ""
+msgstr "Makala yaliyoangaziwa yataonyeshwa kwenye ukurasa wa nyumbani."
 
 #: models/article.py:46
 msgid "article"
@@ -295,33 +283,27 @@ msgstr "mafaili ya chanzo"
 
 #: models/attachments.py:176
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: models/attachments.py:180
 msgid "The external URL (e.g. on gazettes.africa) where this file lives"
-msgstr ""
+msgstr "URL ya nje (km kwenye gazettes.africa) ambapo faili hii inaishi"
 
 #: models/attachments.py:183
-#, fuzzy
-#| msgid "source file"
 msgid "use source file"
-msgstr "faili la chanzo"
+msgstr "tumia faili ya chanzo"
 
 #: models/attachments.py:186
 msgid "Set to True if the source file on the same document can be used instead"
-msgstr ""
+msgstr "Weka kuwa Kweli ikiwa faili chanzo kwenye hati sawa inaweza kutumika badala yake"
 
 #: models/attachments.py:191
-#, fuzzy
-#| msgid "publication"
 msgid "publication file"
-msgstr "uchapishaji"
+msgstr "faili ya uchapishaji"
 
 #: models/attachments.py:192
-#, fuzzy
-#| msgid "publication"
 msgid "publication files"
-msgstr "uchapishaji"
+msgstr "faili za uchapishaji"
 
 #: models/attachments.py:200 models/author.py:10 models/core_document.py:48
 #: models/core_document.py:76 models/core_document.py:91 models/ingestors.py:15
@@ -385,11 +367,11 @@ msgstr "waandishi"
 
 #: models/bill.py:11
 msgid "bill"
-msgstr ""
+msgstr "muswada"
 
 #: models/bill.py:12
 msgid "bills"
-msgstr ""
+msgstr "bili"
 
 #: models/citations.py:23
 msgid "text"
@@ -517,16 +499,12 @@ msgid "number of incoming citations"
 msgstr "idadi ya nukuu zinazoingia"
 
 #: models/core_document.py:184 models/partner.py:38
-#, fuzzy
-#| msgid "part"
 msgid "partner"
-msgstr "sehemu"
+msgstr "mshirika"
 
 #: models/core_document.py:185
-#, fuzzy
-#| msgid "publication"
 msgid "Publication partner"
-msgstr "uchapishaji"
+msgstr "Mshirika wa uchapishaji"
 
 #: models/core_document.py:190 models/core_document.py:352
 #: models/ratification.py:16
@@ -652,21 +630,19 @@ msgstr "maudhui ya hati"
 
 #: models/custom_property.py:9
 msgid "custom property label"
-msgstr ""
+msgstr "lebo ya mali maalum"
 
 #: models/custom_property.py:10
 msgid "custom property labels"
-msgstr ""
+msgstr "lebo za mali maalum"
 
 #: models/custom_property.py:29
 msgid "custom property"
-msgstr ""
+msgstr "mali maalum"
 
 #: models/custom_property.py:30
-#, fuzzy
-#| msgid "user profiles"
 msgid "custom properties"
-msgstr "wasifu wa mtumiaji"
+msgstr "mali maalum"
 
 #: models/gazette.py:9
 msgid "publication"
@@ -745,10 +721,8 @@ msgid "enabled"
 msgstr "wezeshwa"
 
 #: models/ingestors.py:55
-#, fuzzy
-#| msgid "ingestor"
 msgid "ingestors"
-msgstr "kisomadata"
+msgstr "waingizaji"
 
 #: models/judgment.py:22
 msgid "attorney"
@@ -935,10 +909,8 @@ msgid "Case history"
 msgstr "Historia ya kesi"
 
 #: models/judgment.py:599
-#, fuzzy
-#| msgid "Hearing date"
 msgid "end date"
-msgstr "Tarehe ya kusikilizwa"
+msgstr "tarehe ya mwisho"
 
 #: models/legislation.py:23
 msgid "timeline JSON"
@@ -958,25 +930,23 @@ msgstr "kazi ya mzazi"
 
 #: models/legislation.py:32
 msgid "principal"
-msgstr ""
+msgstr "mkuu"
 
 #: models/legislation.py:39 models/legislation.py:40
 msgid "legislation"
 msgstr "sheria"
 
 #: models/partner.py:22
-#, fuzzy
-#| msgid "document nature"
 msgid "document blurb"
-msgstr "asili ya hati"
+msgstr "blur ya hati"
 
 #: models/partner.py:43
 msgid "logo"
-msgstr ""
+msgstr "nembo"
 
 #: models/partner.py:44
 msgid "logos"
-msgstr ""
+msgstr "nembo"
 
 #: models/profile.py:14
 msgid "about HTML"
@@ -1007,52 +977,36 @@ msgid "jurisdiction profiles"
 msgstr "maelezo ya mamlaka"
 
 #: models/ratification.py:19
-#, fuzzy
-#| msgid "Last updated"
 msgid "last updated"
-msgstr "Ilisasishwa mara ya mwisho"
+msgstr "ilisasishwa mara ya mwisho"
 
 #: models/ratification.py:23 models/ratification.py:58
-#, fuzzy
-#| msgid "Ratifications"
 msgid "ratification"
-msgstr "Uridhiaji"
+msgstr "uridhiaji"
 
 #: models/ratification.py:24
-#, fuzzy
-#| msgid "Ratifications"
 msgid "ratifications"
-msgstr "Uridhiaji"
+msgstr "uridhiaji"
 
 #: models/ratification.py:67
-#, fuzzy
-#| msgid "Ratification Date"
 msgid "ratification date"
-msgstr "Tarehe ya Kuridhiwa"
+msgstr "tarehe ya uridhiaji"
 
 #: models/ratification.py:68
-#, fuzzy
-#| msgid "Deposit Date"
 msgid "deposit date"
-msgstr "Tarehe ya Kuweka"
+msgstr "tarehe ya kuweka"
 
 #: models/ratification.py:69
-#, fuzzy
-#| msgid "Signature Date"
 msgid "signature date"
-msgstr "Tarehe ya Saini"
+msgstr "tarehe ya saini"
 
 #: models/ratification.py:72
-#, fuzzy
-#| msgid "Ratification Date"
 msgid "ratification country"
-msgstr "Tarehe ya Kuridhiwa"
+msgstr "nchi iliyoridhia"
 
 #: models/ratification.py:73
-#, fuzzy
-#| msgid "Ratification Date"
 msgid "ratification countries"
-msgstr "Tarehe ya Kuridhiwa"
+msgstr "nchi zilizoridhia"
 
 #: models/relationships.py:8
 msgid "verb"
@@ -1097,23 +1051,19 @@ msgstr "utambulisho wa kipengele lengwa"
 
 #: models/save_document.py:21 models/save_document.py:39
 msgid "folder"
-msgstr ""
+msgstr "folda"
 
 #: models/save_document.py:22
 msgid "folders"
-msgstr ""
+msgstr "folda"
 
 #: models/save_document.py:47
-#, fuzzy
-#| msgid "Load document"
 msgid "saved document"
-msgstr "Pakia hati"
+msgstr "hati iliyohifadhiwa"
 
 #: models/save_document.py:48
-#, fuzzy
-#| msgid "Related documents"
 msgid "saved documents"
-msgstr "Nyaraka zinazohusiana"
+msgstr "hati zilizohifadhiwa"
 
 #: models/settings.py:28
 msgid "default document language"
@@ -1156,14 +1106,12 @@ msgid "allowed login domains"
 msgstr "vikoa vya kuingia vinavyoruhusiwa"
 
 #: models/settings.py:71
-#, fuzzy
-#| msgid "allowed login domains"
 msgid "allow social logins"
-msgstr "vikoa vya kuingia vinavyoruhusiwa"
+msgstr "ruhusu kuingia kwa jamii"
 
 #: models/settings.py:73
 msgid "Allow signups via social accounts"
-msgstr ""
+msgstr "Ruhusu kujisajili kupitia akaunti za kijamii"
 
 #: models/settings.py:77
 msgid "metabase dashboard link"
@@ -1234,52 +1182,40 @@ msgid "Matomo site ID (e.g. 2)"
 msgstr "Kitambulisho cha tovuti ya Matomo (km 2)"
 
 #: models/settings.py:138
-#, fuzzy
-#| msgid "user help link"
 msgid "survey link"
-msgstr "kiungo cha usaidizi kwa mtumiaji"
+msgstr "kiungo cha uchunguzi"
 
 #: models/settings.py:143
-#, fuzzy
-#| msgid "Related documents"
 msgid "allow save documents"
-msgstr "Nyaraka zinazohusiana"
+msgstr "ruhusu kuhifadhi hati"
 
 #: models/settings.py:145
-#, fuzzy
-#| msgid "No documents found."
 msgid "Allow documents to be saved."
-msgstr "Hakuna nyaraka zilizopatikana."
+msgstr "Ruhusu hati zihifadhiwe."
 
 #: models/settings.py:148
-#, fuzzy
-#| msgid "Additional details"
 msgid "Additional robots.txt rules."
-msgstr "Maelezo ya ziada"
+msgstr "Sheria za ziada za robots.txt."
 
 #: models/settings.py:154
 msgid "ID of a Google custom search engine."
-msgstr ""
+msgstr "Kitambulisho cha injini ya utafutaji maalum ya Google."
 
 #: models/settings.py:158
 msgid "site settings"
 msgstr "mipangilio ya tovuti"
 
 #: models/taxonomies.py:13
-#, fuzzy
-#| msgid "case name"
 msgid "path name"
-msgstr "jina la kesi"
+msgstr "jina la njia"
 
 #: models/taxonomies.py:20
-#, fuzzy
-#| msgid "document jurisdictions"
 msgid "show in document listing"
-msgstr "mamlaka ya kisheria ya hati"
+msgstr "onyesha katika orodha ya hati"
 
 #: models/taxonomies.py:24
 msgid "Show this taxonomy in the document listing page? Cascades to descendents."
-msgstr ""
+msgstr "Onyesha kanuni hii katika ukurasa wa kuorodhesha hati? Inateleza kwa wazao."
 
 #: models/taxonomies.py:29 models/taxonomies.py:30
 msgid "taxonomies"
@@ -1331,11 +1267,11 @@ msgstr "Jaribu kutafuta kile unachokihitaji."
 
 #: templates/429.html:4 templates/429.html:9
 msgid "Too many requests (Error 429)"
-msgstr ""
+msgstr "Maombi mengi sana (Hitilafu 429)"
 
 #: templates/429.html:11
 msgid "You've made too many requests in a short period. Please try again later."
-msgstr ""
+msgstr "Umetuma maombi mengi sana kwa muda mfupi. Tafadhali jaribu tena baadaye."
 
 #: templates/500.html:4 templates/500.html:9
 msgid "Something went wrong (Error 500)"
@@ -1346,80 +1282,68 @@ msgid "Something went wrong. Please try again in a short while."
 msgstr "Hitilafu imetokea. Tafadhali jaribu tena baada ya muda mfupi."
 
 #: templates/account/email.html:9 templates/user_account/_tabs.html:19
-#, fuzzy
-#| msgid "Email address"
 msgid "Email addresses"
-msgstr "Anwani ya baruapepe"
+msgstr "Anwani za barua pepe"
 
 #: templates/account/email.html:13
 msgid "You can use any of these email addresses to log in."
-msgstr ""
+msgstr "Unaweza kutumia mojawapo ya anwani hizi za barua pepe kuingia."
 
 #: templates/account/email.html:15
 msgid "Note:"
-msgstr ""
+msgstr "Kumbuka:"
 
 #: templates/account/email.html:16
 msgid "We only send email notifications to your <strong>primary</strong> email address."
-msgstr ""
+msgstr "Tunatuma arifa za barua pepe kwa <strong>msingi</strong> barua pepe yako pekee."
 
 #: templates/account/email.html:26 templates/account/signup.html:37
 msgid "Email address"
 msgstr "Anwani ya baruapepe"
 
 #: templates/account/email.html:27
-#, fuzzy
-#| msgid "Statistics"
 msgid "Status"
-msgstr "Takwimu"
+msgstr "Hali"
 
 #: templates/account/email.html:36
 msgid "verified"
-msgstr ""
+msgstr "imethibitishwa"
 
 #: templates/account/email.html:39
 msgid "unverified"
-msgstr ""
+msgstr "haijathibitishwa"
 
 #: templates/account/email.html:42
-#, fuzzy
-#| msgid "Primary work"
 msgid "primary"
-msgstr "Kazi ya msingi"
+msgstr "msingi"
 
 #: templates/account/email.html:50
-#, fuzzy
-#| msgid "Ratifications"
 msgid "Re-send verification"
-msgstr "Uridhiaji"
+msgstr "Tuma tena uthibitishaji"
 
 #: templates/account/email.html:56
 msgid "Make primary"
-msgstr ""
+msgstr "Fanya msingi"
 
 #: templates/account/email.html:62
 msgid "Remove"
-msgstr ""
+msgstr "Ondoa"
 
 #: templates/account/email.html:72
 msgid "Warning:"
-msgstr ""
+msgstr "Onyo:"
 
 #: templates/account/email.html:72
 msgid "You currently do not have any e-mail address set up. You should really add an e-mail address so you can receive notifications, reset your password, etc."
-msgstr ""
+msgstr "Kwa sasa huna anwani yoyote ya barua pepe iliyosanidiwa. Unapaswa kuongeza anwani ya barua pepe ili uweze kupokea arifa, kuweka upya nenosiri lako, nk."
 
 #: templates/account/email.html:76
-#, fuzzy
-#| msgid "Email address"
 msgid "Add an email address"
-msgstr "Anwani ya baruapepe"
+msgstr "Ongeza anwani ya barua pepe"
 
 #: templates/account/email.html:91
-#, fuzzy
-#| msgid "admin emails"
 msgid "Add email"
-msgstr "baruapepe za msimamizi"
+msgstr "Ongeza barua pepe"
 
 #: templates/account/login.html:5
 msgid "Log In"
@@ -1434,11 +1358,11 @@ msgstr "Ingia"
 
 #: templates/account/login.html:11
 msgid "Don't have an account?"
-msgstr ""
+msgstr "Je, huna akaunti?"
 
 #: templates/account/login.html:11
 msgid "Sign up here"
-msgstr ""
+msgstr "Jisajili hapa"
 
 #: templates/account/login.html:68 templates/account/password_reset.html:18
 msgid "Forgot your password?"
@@ -1446,7 +1370,7 @@ msgstr "Umesahau nenosiri lako?"
 
 #: templates/account/login.html:87
 msgid "Login with "
-msgstr ""
+msgstr "Ingia na "
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:16
@@ -1463,16 +1387,12 @@ msgid "Change Password"
 msgstr "Badilisha Nenosiri"
 
 #: templates/account/password_change.html:15
-#, fuzzy
-#| msgid "Change Password"
 msgid "Change your password"
-msgstr "Badilisha Nenosiri"
+msgstr "Badilisha nenosiri lako"
 
 #: templates/account/password_change.html:62
-#, fuzzy
-#| msgid "Change Password"
 msgid "Change password"
-msgstr "Badilisha Nenosiri"
+msgstr "Badilisha nenosiri"
 
 #: templates/account/password_reset.html:4
 #: templates/account/password_reset.html:8
@@ -1481,13 +1401,11 @@ msgstr "Weka upya nenosiri lako"
 
 #: templates/account/password_reset.html:10
 msgid "Back to Login"
-msgstr ""
+msgstr "Rudi kwa Ingia"
 
 #: templates/account/password_reset.html:19
-#, fuzzy
-#| msgid "Forgotten your password? Enter your e-mail address below, and we'll send you an e-mail allowing you to reset it."
 msgid "Enter your e-mail address below, and we will send you a link to reset it."
-msgstr "Umesahau nenosiri lako? Ingiza anwani yako ya barua pepe hapa chini, na tutakutumia barua pepe kukuruhusu kuiweka upya."
+msgstr "Ingiza anwani yako ya barua pepe hapa chini, na tutakutumia kiungo ili kuiweka upya."
 
 #: templates/account/password_reset.html:37
 #: templates/account/password_reset_from_key.html:58
@@ -1526,55 +1444,45 @@ msgid "Your password has been reset."
 msgstr "Nenosiri lako limewekwa upya."
 
 #: templates/account/password_set.html:4
-#, fuzzy
-#| msgid "Reset Password"
 msgid "Set Password"
-msgstr "Weka upya nenosiri"
+msgstr "Weka Nenosiri"
 
 #: templates/account/password_set.html:15
 #: templates/account/password_set.html:47
-#, fuzzy
-#| msgid "Reset password"
 msgid "Set password"
-msgstr "Weka upya nenosiri"
+msgstr "Weka nenosiri"
 
 #: templates/account/signup.html:5
 msgid "Sign Up"
-msgstr ""
+msgstr "Jisajili"
 
 #: templates/account/signup.html:9 templates/account/signup.html:85
 msgid "Sign up"
-msgstr ""
+msgstr "Jisajili"
 
 #: templates/account/signup.html:11
 msgid "Already have an account?"
-msgstr ""
+msgstr "Je, tayari una akaunti?"
 
 #: templates/account/signup.html:11
 msgid "Login here"
-msgstr ""
+msgstr "Ingia hapa"
 
 #: templates/account/signup.html:23
-#, fuzzy
-#| msgid "case name"
 msgid "Username"
-msgstr "jina la kesi"
+msgstr "Jina la mtumiaji"
 
 #: templates/account/signup.html:51 templates/user_account/_tabs.html:13
 msgid "Password"
 msgstr "Nenosiri"
 
 #: templates/account/signup.html:64
-#, fuzzy
-#| msgid "Change Password"
 msgid "Confirm Password"
-msgstr "Badilisha Nenosiri"
+msgstr "Thibitisha Nenosiri"
 
 #: templates/admin/_comments_list.html:19
-#, fuzzy
-#| msgid "document"
 msgid "Add comment"
-msgstr "hati"
+msgstr "Ongeza maoni"
 
 #: templates/admin/change_form.html:13 templates/admin/change_list.html:16
 #: templates/peachjam/_help_button.html:6
@@ -1584,13 +1492,11 @@ msgstr "Msaada"
 #: templates/admin/change_list.html:8
 #: templates/admin/judgment_upload_form.html:46
 msgid "Upload"
-msgstr ""
+msgstr "Pakia"
 
 #: templates/admin/judgment_upload_form.html:5
-#, fuzzy
-#| msgid "All judgments"
 msgid "Upload judgment"
-msgstr "Hukumu zote"
+msgstr "Pakia hukumu"
 
 #: templates/admin/judgment_upload_form.html:26
 #: templates/peachjam/_document_table.html:20
@@ -1600,7 +1506,7 @@ msgstr "Mamlaka ya kisheria"
 
 #: templates/admin/judgment_upload_form.html:36
 msgid "File"
-msgstr ""
+msgstr "Faili"
 
 #: templates/admin/login.html:20
 msgid "Please correct the error below."
@@ -1634,7 +1540,7 @@ msgstr "Panua zote"
 
 #: templates/allauth/layouts/base.html:13
 msgid "Need help? Please email"
-msgstr ""
+msgstr "Je, unahitaji usaidizi? Tafadhali tuma barua pepe"
 
 #: templates/peachjam/_case_histories.html:6
 msgid "Case"
@@ -1653,7 +1559,7 @@ msgstr "Matokeo"
 
 #: templates/peachjam/_causelist_court_list.html:4
 msgid "All causelists"
-msgstr ""
+msgstr "Orodha zote za sababu"
 
 #: templates/peachjam/_child_documents.html:2
 msgid "Subsidiary legislation"
@@ -1676,7 +1582,7 @@ msgstr[1] "%(n)s nukuu"
 
 #: templates/peachjam/_citations_list_more_button.html:8
 msgid "More..."
-msgstr ""
+msgstr "Zaidi..."
 
 #: templates/peachjam/_court_list.html:20
 #: templates/peachjam/_court_list.html:35
@@ -1686,7 +1592,7 @@ msgstr "Hakuna mahakama zilizopatikana."
 #: templates/peachjam/_court_list.html:26
 #, python-format
 msgid "Explore %(court)s"
-msgstr ""
+msgstr "Gundua %(court)s"
 
 #: templates/peachjam/_court_months_list.html:8
 #: templates/peachjam/_court_months_list.html:27
@@ -1723,10 +1629,8 @@ msgid "Pages"
 msgstr "Kurasa"
 
 #: templates/peachjam/_document_content_sidebar.html:81
-#, fuzzy
-#| msgid "Cited documents"
 msgid "Navigate document"
-msgstr "Nyaraka zilizonukuliwa"
+msgstr "Nenda kwenye hati"
 
 #: templates/peachjam/_document_count.html:14 views/generic_views.py:89
 msgid "documents"
@@ -1744,7 +1648,7 @@ msgstr "Hariri"
 
 #: templates/peachjam/_document_detail_toolbar.html:18
 msgid "Edit in admin area"
-msgstr ""
+msgstr "Badilisha katika eneo la msimamizi"
 
 #: templates/peachjam/_document_detail_toolbar.html:46
 #: templates/peachjam/_document_detail_toolbar.html:60
@@ -1817,54 +1721,44 @@ msgstr "Fungua tovuti"
 
 #: templates/peachjam/_folders_list.html:4 templates/peachjam/_header.html:77
 #: templates/user_account/_tabs.html:34
-#, fuzzy
-#| msgid "Related documents"
 msgid "Saved documents"
-msgstr "Nyaraka zinazohusiana"
+msgstr "Hati zilizohifadhiwa"
 
 #: templates/peachjam/_folders_list.html:9
 msgid "New Folder"
-msgstr ""
+msgstr "Folda Mpya"
 
 #: templates/peachjam/_folders_list.html:40
-#, fuzzy
-#| msgid "No recent documents."
 msgid "No saved documents."
-msgstr "Hakuna nyaraka za hivi karibuni"
+msgstr "Hakuna hati zilizohifadhiwa."
 
 #: templates/peachjam/_folders_list.html:55
 msgid "Delete"
-msgstr ""
+msgstr "Futa"
 
 #: templates/peachjam/_folders_list.html:62
-#, fuzzy
-#| msgid "name"
 msgid "Rename"
-msgstr "jina"
+msgstr "Badilisha jina"
 
 #: templates/peachjam/_folders_list.html:69
-#, fuzzy
-#| msgid "Cited documents"
 msgid "Ungrouped documents"
-msgstr "Nyaraka zilizonukuliwa"
+msgstr "Hati zisizojumuishwa"
 
 #: templates/peachjam/_header.html:5
 msgid "Go to page content"
-msgstr ""
+msgstr "Nenda kwa yaliyomo kwenye ukurasa"
 
 #: templates/peachjam/_header.html:6
 msgid "Go to main menu"
-msgstr ""
+msgstr "Nenda kwenye menyu kuu"
 
 #: templates/peachjam/_header.html:7
 msgid "Go to search"
-msgstr ""
+msgstr "Nenda kwenye utafutaji"
 
 #: templates/peachjam/_header.html:22
-#, fuzzy
-#| msgid "Navigation"
 msgid "Toggle navigation"
-msgstr "Urambazaji"
+msgstr "Geuza urambazaji"
 
 #: templates/peachjam/_header.html:34 templates/peachjam/_header.html:35
 #, python-format
@@ -1873,7 +1767,7 @@ msgstr "Tafuta %(APP_NAME)s"
 
 #: templates/peachjam/_header.html:72 templates/user_account/layout.html:5
 msgid "My account"
-msgstr ""
+msgstr "Akaunti yangu"
 
 #: templates/peachjam/_header.html:74
 msgid "Admin"
@@ -1908,10 +1802,8 @@ msgid "Advanced search"
 msgstr "Utafutaji wa kina"
 
 #: templates/peachjam/_ratification_table.html:2
-#, fuzzy
-#| msgid "Related documents"
 msgid "Ratified documents"
-msgstr "Nyaraka zinazohusiana"
+msgstr "Hati/nyaraka zilizoidhinishwa"
 
 #: templates/peachjam/_ratification_table.html:7
 #: templates/peachjam/_ratifications.html:22
@@ -1956,8 +1848,7 @@ msgstr "Wasiliana nasi"
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Take the %(APP_NAME)s Survey</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Help us make %(APP_NAME)s better.\n"
@@ -1965,22 +1856,32 @@ msgid ""
 "               All information shared is confidential.\n"
 "              </p>\n"
 "            "
-msgstr ""
+msgstr "\n"
+"              <h1 class=\"text-white fw-bold pe-lg-8\">Chukua %(APP_NAME)s Utafiti</h1>\n"
+"              <p class=\"text-white mb-4 h5 fw-bold\">\n"
+"               Tusaidie kufanya %(APP_NAME)s bora zaidi.\n"
+"               Chukua utafiti huu mfupi wa dakika 5 na utuambie jinsi unavyotumia %(APP_NAME)s na jinsi tunavyoweza kuuboresha.\n"
+"               Taarifa zote zinazoshirikiwa ni za siri.\n"
+"              </p>\n"
+"            "
 
 #: templates/peachjam/_survey_banner_lg.html:20
 #: templates/peachjam/_survey_banner_sm.html:17
 msgid "Take the survey"
-msgstr ""
+msgstr "Chukua uchunguzi"
 
 #: templates/peachjam/_survey_banner_sm.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Help us make %(APP_NAME)s better. Take this short 5 minute survey and tell us about how you use %(APP_NAME)s and how we can improve it. All information shared is confidential.\n"
 "            </p>\n"
 "          "
-msgstr ""
+msgstr "\n"
+"            <p class=\"text-white m-lg-0 fw-bold\">\n"
+"             Tusaidie kufanya %(APP_NAME)s bora zaidi. Chukua utafiti huu mfupi wa dakika 5 na utuambie jinsi unavyotumia %(APP_NAME)s na jinsi tunavyoweza kuuboresha. Taarifa zote zinazoshirikiwa ni siri.\n"
+"            </p>\n"
+"          "
 
 #: templates/peachjam/_taxonomy_list.html:22
 #: templates/peachjam/taxonomy_first_level_detail.html:34
@@ -2264,7 +2165,7 @@ msgstr " Nyaraka za %(author)s "
 #: templates/peachjam/bill_list.html:4 templates/peachjam/bill_list.html:7
 #: templates/peachjam/place_bill_list.html:12
 msgid "Bills"
-msgstr ""
+msgstr "Bili"
 
 #: templates/peachjam/book_list.html:4 templates/peachjam/book_list.html:7
 msgid "Books"
@@ -2287,31 +2188,23 @@ msgstr "Nyumbani"
 #: templates/peachjam/causelist_detail.html:11
 #: templates/peachjam/causelist_list.html:4
 msgid "Cause Lists"
-msgstr ""
+msgstr "Orodha za Sababu"
 
 #: templates/peachjam/causelist_detail.html:47
-#, fuzzy
-#| msgid "this version"
 msgid "Division"
-msgstr "toleo hili"
+msgstr "Mgawanyiko"
 
 #: templates/peachjam/causelist_detail.html:57
-#, fuzzy
-#| msgid "Hearing date"
 msgid "Start date"
-msgstr "Tarehe ya kusikilizwa"
+msgstr "Tarehe ya kuanza"
 
 #: templates/peachjam/causelist_detail.html:67
-#, fuzzy
-#| msgid "date"
 msgid "End date"
-msgstr "tarehe"
+msgstr "Tarehe ya mwisho"
 
 #: templates/peachjam/causelist_list.html:12
-#, fuzzy
-#| msgid "Recent judgments"
 msgid "Recent Cause Lists"
-msgstr "Hukumu za hivi karibuni"
+msgstr "Orodha za Sababu za Hivi Punde"
 
 #: templates/peachjam/court_detail.html:12
 #: templates/peachjam/judgment_detail.html:10
@@ -2321,10 +2214,8 @@ msgid "Judgments"
 msgstr "Hukumu"
 
 #: templates/peachjam/folders_list.html:4
-#, fuzzy
-#| msgid "Documents"
 msgid "Saved Documents"
-msgstr "Nyaraka"
+msgstr "Nyaraka Zilizohifadhiwa"
 
 #: templates/peachjam/gazette_detail.html:10
 #: templates/peachjam/gazette_list.html:4
@@ -2400,34 +2291,28 @@ msgid "Order"
 msgstr "Agizo"
 
 #: templates/peachjam/judgment_list.html:11 views/courts.py:181
-#, fuzzy
-#| msgid "courts"
 msgid "All courts"
-msgstr "mahakama"
+msgstr "Mahakama zote"
 
 #: templates/peachjam/judgment_list.html:13
 msgid "Explore judgments from all courts."
-msgstr ""
+msgstr "Chunguza hukumu kutoka kwa mahakama zote."
 
 #: templates/peachjam/judgment_list.html:14
 msgid "Explore all courts"
-msgstr ""
+msgstr "Chunguza mahakama zote"
 
 #: templates/peachjam/judgment_list.html:22
 msgid "Recent judgments"
 msgstr "Hukumu za hivi karibuni"
 
 #: templates/peachjam/layouts/articles.html:24
-#, fuzzy
-#| msgid "Recent judgments"
 msgid "Recent news"
-msgstr "Hukumu za hivi karibuni"
+msgstr "Habari za hivi punde"
 
 #: templates/peachjam/layouts/articles.html:34
-#, fuzzy
-#| msgid "Court registries"
 msgid "Categories"
-msgstr "Masjala za mahakama"
+msgstr "Kategoria"
 
 #: templates/peachjam/layouts/document_detail.html:70
 msgid "Document detail"
@@ -2470,10 +2355,8 @@ msgid "Type"
 msgstr "Aina"
 
 #: templates/peachjam/layouts/document_detail.html:344
-#, fuzzy
-#| msgid "publication"
 msgid "Publication"
-msgstr "uchapishaji"
+msgstr "Uchapishaji"
 
 #: templates/peachjam/layouts/document_detail.html:400
 #, python-format
@@ -2509,73 +2392,65 @@ msgstr "Takwimu"
 #: templates/peachjam/place_bill_list.html:20
 #, python-format
 msgid "%(place)s Bills"
-msgstr ""
+msgstr "%(place)s Bili"
 
 #: templates/peachjam/saved_document_create.html:11
 #: templates/peachjam/saved_document_login.html:9
 #: templates/peachjam/saved_document_update.html:82
 #: templates/user_account/edit.html:45
 msgid "Save"
-msgstr ""
+msgstr "Hifadhi"
 
 #: templates/peachjam/saved_document_create.html:12
 #: templates/peachjam/saved_document_create.html:17
 #: templates/peachjam/saved_document_login.html:10
-#, fuzzy
-#| msgid "Load document"
 msgid "Save document"
-msgstr "Pakia hati"
+msgstr "Hifadhi hati"
 
 #: templates/peachjam/saved_document_create.html:23
 msgid "Saving..."
-msgstr ""
+msgstr "Inahifadhi..."
 
 #: templates/peachjam/saved_document_login.html:15
 #: templates/peachjam/saved_document_login.html:30
 msgid "Login"
-msgstr ""
+msgstr "Ingia"
 
 #: templates/peachjam/saved_document_login.html:23
 msgid "You are not logged in"
-msgstr ""
+msgstr "Hujaingia"
 
 #: templates/peachjam/saved_document_login.html:25
 msgid "To save a document you need to be logged in"
-msgstr ""
+msgstr "Ili kuhifadhi hati unahitaji kuingia"
 
 #: templates/peachjam/saved_document_update.html:11
 msgid "Saved to"
-msgstr ""
+msgstr "Imehifadhiwa kwa"
 
 #: templates/peachjam/saved_document_update.html:13
 msgid "Saved"
-msgstr ""
+msgstr "Imehifadhiwa"
 
 #: templates/peachjam/saved_document_update.html:19
-#, fuzzy
-#| msgid "Documents"
 msgid "Document saved"
-msgstr "Nyaraka"
+msgstr "Hati imehifadhiwa"
 
 #: templates/peachjam/saved_document_update.html:48
 msgid "New folder..."
-msgstr ""
+msgstr "Folda mpya..."
 
 #: templates/peachjam/saved_document_update.html:51
-#, fuzzy
-#| msgid "filename"
 msgid "New folder name"
-msgstr "jina la faili"
+msgstr "Jina la folda mpya"
 
 #: templates/peachjam/saved_document_update.html:58
-#, fuzzy
-#| msgid "Related documents"
 msgid "View saved documents"
-msgstr "Nyaraka zinazohusiana"
+msgstr "Tazama hati zilizohifadhiwa"
 
 #: templates/peachjam/saved_document_update.html:70
 msgid "Unsave"
-msgstr ""
+msgstr "Usihifadhi"
 
 #: templates/peachjam/terms_of_use.html:4
 #: templates/peachjam/terms_of_use.html:29
@@ -2592,69 +2467,63 @@ msgstr "Urambazaji"
 #: templates/socialaccount/connections.html:11
 #: templates/user_account/_tabs.html:27
 msgid "Social accounts"
-msgstr ""
+msgstr "Akaunti za kijamii"
 
 #: templates/socialaccount/connections.html:14
 msgid "You can sign in to your account using any of these third party accounts:"
-msgstr ""
+msgstr "Unaweza kuingia katika akaunti yako kwa kutumia mojawapo ya akaunti hizi za wahusika wengine:"
 
 #: templates/socialaccount/connections.html:34
 msgid "Really remove this social account?"
-msgstr ""
+msgstr "Je, ungependa kuondoa akaunti hii ya kijamii?"
 
 #: templates/socialaccount/connections.html:35
 msgid "Disconnect"
-msgstr ""
+msgstr "Tenganisha"
 
 #: templates/socialaccount/connections.html:44
 msgid "You currently have no social network accounts connected to this account."
-msgstr ""
+msgstr "Kwa sasa huna akaunti za mtandao wa kijamii zilizounganishwa kwenye akaunti hii."
 
 #: templates/socialaccount/connections.html:48
 msgid "Connect a social account"
-msgstr ""
+msgstr "Unganisha akaunti ya kijamii"
 
 #: templates/socialaccount/connections.html:49
 msgid "Connecting to a social account allows you to use it to login to Indigo."
-msgstr ""
+msgstr "Kuunganisha kwa akaunti ya kijamii hukuruhusu kuitumia kuingia kwa Indigo."
 
 #: templates/socialaccount/connections.html:58
 msgid "Connect to"
-msgstr ""
+msgstr "Unganisha kwa"
 
 #: templates/user_account/_tabs.html:7 templates/user_account/edit.html:15
-#, fuzzy
-#| msgid "profile"
 msgid "Profile"
-msgstr "wasifu"
+msgstr "Wasifu"
 
 #: templates/user_account/edit.html:4
-#, fuzzy
-#| msgid "profile"
 msgid "Edit Profile"
-msgstr "wasifu"
+msgstr "Badilisha Wasifu"
 
 #: views/causelist.py:60 views/causelist.py:95
 msgid "cause list"
-msgstr ""
+msgstr "orodha ya sababu"
 
 #: views/causelist.py:61 views/causelist.py:96
 msgid "cause lists"
-msgstr ""
+msgstr "kusababisha orodha"
 
 #: views/causelist.py:80
 msgid "CauseList"
-msgstr ""
+msgstr "Orodha ya Sababu"
 
 #: views/causelist.py:116 views/generic_views.py:246
 msgid "Document nature"
 msgstr "Asili ya hati"
 
 #: views/causelist.py:135
-#, fuzzy
-#| msgid "Court registries"
 msgid "Court divisions"
-msgstr "Masjala za mahakama"
+msgstr "Mgawanyiko wa mahakama"
 
 #: views/causelist.py:171 views/courts.py:148 views/generic_views.py:255
 msgid "Topics"
@@ -2669,20 +2538,16 @@ msgid "Courts"
 msgstr "Mahakama"
 
 #: views/courts.py:94
-#, fuzzy
-#| msgid "labels"
 msgid "Labels"
-msgstr "lebo"
+msgstr "Lebo"
 
 #: views/courts.py:110
 msgid "Outcomes"
 msgstr "Matokeo"
 
 #: views/gazette.py:169
-#, fuzzy
-#| msgid "Special issue"
 msgid "Special Issue"
-msgstr "Suala maalum"
+msgstr "Suala Maalum"
 
 #: views/gazette.py:196
 msgid "Sub-publication"
@@ -2690,13 +2555,11 @@ msgstr "Uchapishaji mdogo"
 
 #: views/gazette.py:202
 msgid "Issue"
-msgstr ""
+msgstr "Suala"
 
 #: views/gazette.py:208 views/gazette.py:210
-#, fuzzy
-#| msgid "supplement"
 msgid "Supplement"
-msgstr "nyongeza"
+msgstr "Nyongeza"
 
 #: views/generic_views.py:233
 msgid "Years"
@@ -2746,43 +2609,3 @@ msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa kutoka %(date_from)s 
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Kuna marekebisho ambayo hayajatekelezwa ambayo bado hayajatekelezwa. Tazama kichupo cha Historia kwa habari zaidi."
 
-#~ msgid "You cannot set a future date for the document"
-#~ msgstr "Huwezi kuweka tarehe ya baadaye kwa ajili ya hati"
-
-#~ msgid "legal instrument"
-#~ msgstr "hati ya kisheria"
-
-#~ msgid "legal instruments"
-#~ msgstr "hati za kisheria"
-
-#, python-format
-#~ msgid ""
-#~ "\n"
-#~ "            Log in with %(provider.name)s\n"
-#~ "          "
-#~ msgstr ""
-#~ "\n"
-#~ "            Ingia na %(provider.name)s\n"
-#~ "          "
-
-#~ msgid "Need help? Please email <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
-#~ msgstr "Je, unahitaji msaada? Tafadhali tuma barua pepe <a href=\"mailto:{{ SUPPORT_EMAIL }}\">{{ SUPPORT_EMAIL }}</a>."
-
-#~ msgid "Numbered title"
-#~ msgstr "Jina lenye namba"
-
-#~ msgid "Show/Hide all"
-#~ msgstr "Onyesha/Ficha yote"
-
-#~ msgid "About the author"
-#~ msgstr "Kuhusu mwandishi"
-
-#, python-format
-#~ msgid "Recent articles by %(username)s"
-#~ msgstr "Nakala za hivi karibuni na %(username)s"
-
-#~ msgid "Legal Instruments"
-#~ msgstr "Hati za Kisheria"
-
-#~ msgid "Taxonomy"
-#~ msgstr "Taksonomia"
