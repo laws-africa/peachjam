@@ -179,6 +179,9 @@ class PeachJamSettingsAdmin(admin.ModelAdmin):
         "document_jurisdictions",
     )
 
+    def has_add_permission(self, request):
+        return False
+
     def changelist_view(self, request, extra_context=None):
         # redirect to edit the singleton
         return redirect("admin:peachjam_peachjamsettings_change", pj_settings().pk)
