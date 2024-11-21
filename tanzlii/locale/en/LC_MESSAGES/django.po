@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-06 10:12+0200\n"
+"POT-Creation-Date: 2024-11-21 09:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,23 +26,23 @@ msgstr ""
 msgid "Swahili"
 msgstr ""
 
-#: templates/liiweb/home.html:11
+#: templates/liiweb/home.html:12
 msgid "Karibu Katika Mfumo wa Taarifa za Maamuzi, Sheria na Kanuni za Tanzania"
 msgstr ""
 
-#: templates/liiweb/home.html:14
-msgid "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
+#: templates/liiweb/home.html:15
+msgid "TanzLII ni tovuti ya Serikali ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 msgstr ""
 
-#: templates/liiweb/home.html:21 templates/peachjam/about.html:5
+#: templates/liiweb/home.html:22 templates/peachjam/about.html:5
 msgid "TanzLII is a project of the Tanzanian Judiciary. We aim to support the rule of law by publishing the law of Tanzania for free online access."
 msgstr ""
 
 #: templates/peachjam/_footer.html:5
-msgid "TanzLII is based at the Judiciary of Tanzania and publishes the law of Tanzania for free online access for all. Free Access to the law supports the rule of law and access to justice. TanzLII partners with African Legal Information Institute (AfricanLII) and <a href=\"http://laws.africa/\">Laws.Africa</a> NPO, who provide it with technical support."
+msgid "TanzLII is operated by the Judiciary of Tanzania and the Office of the Attorney General, Chief Parliamentary Draftsman, and publishes the law of Tanzania for free online access for all. Free Access to the law supports the rule of law and access to justice. TanzLII partners with <a href=\"https://africanlii.org/\">African Legal Information Institute</a> and <a href=\"http://laws.africa/\">Laws.Africa</a>, who provide it with technical support."
 msgstr ""
 
-#: templates/peachjam/_footer.html:13
+#: templates/peachjam/_footer.html:11
 msgid "Our partners"
 msgstr ""
 
@@ -55,27 +55,51 @@ msgid "Legislation"
 msgstr ""
 
 #: templates/peachjam/_header.html:22
-msgid "Gazettes"
+msgid "Government Gazette"
 msgstr ""
 
-#: templates/peachjam/_header.html:28
-msgid "JOT Documents and Guidelines"
+#: templates/peachjam/_header.html:31
+msgid "Practice Essentials"
 msgstr ""
 
-#: templates/peachjam/_header.html:34
-msgid "Law Reform"
+#: templates/peachjam/_header.html:37
+msgid "Judiciary Guidelines & Procedures"
 msgstr ""
 
-#: templates/peachjam/_header.html:40
-msgid "NPS Documents"
+#: templates/peachjam/_header.html:43
+msgid "National Prosecution Service Guidelines & Manuals"
 msgstr ""
 
-#: templates/peachjam/_header.html:46
-msgid "Causelists"
+#: templates/peachjam/_header.html:49
+msgid "Tanganyika Law Society Guidelines & Manuals"
 msgstr ""
 
-#: templates/peachjam/_header.html:52
-msgid "Speeches"
+#: templates/peachjam/_header.html:60
+msgid "Research Hub"
+msgstr ""
+
+#: templates/peachjam/_header.html:66
+msgid "TanzLII Case Digest"
+msgstr ""
+
+#: templates/peachjam/_header.html:72
+msgid "Law Reform Commission Reports"
+msgstr ""
+
+#: templates/peachjam/_header.html:77
+msgid "Legal Journals"
+msgstr ""
+
+#: templates/peachjam/_header.html:83
+msgid "Articles"
+msgstr ""
+
+#: templates/peachjam/_header.html:88
+msgid "Notable Speeches"
+msgstr ""
+
+#: templates/peachjam/_header.html:96
+msgid "Street Law"
 msgstr ""
 
 #: templates/peachjam/about.html:11
