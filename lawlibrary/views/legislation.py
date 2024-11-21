@@ -4,7 +4,6 @@ from django.utils.translation import gettext_lazy as _
 from lawlibrary.constants import MUNICIPAL_CODES, PROVINCIAL_CODES
 from liiweb.views import LocalityLegislationListView as BaseLocalityLegislationListView
 from liiweb.views import LocalityLegislationView as BaseLocalityLegislationView
-from peachjam.helpers import chunks
 from peachjam.models import Locality
 
 
@@ -16,26 +15,23 @@ class LocalityLegislationView(BaseLocalityLegislationView):
 
         if self.variant == "provincial":
             context["locality_legislation_title"] = "Provincial Legislation"
-            localities = Locality.objects.filter(code__in=PROVINCIAL_CODES)
-            context["locality_groups"] = list(chunks(localities, 2))
 
         if self.variant == "municipal":
             context["locality_legislation_title"] = "Municipal By-laws"
-            localities = Locality.objects.filter(code__in=MUNICIPAL_CODES)
-            context["locality_groups"] = list(chunks(localities, 2))
             self.navbar_link = "legislation/municipal"
 
         return context
+
+    def get_localities(self):
+        if self.variant == "municipal":
+            return Locality.objects.filter(code__in=MUNICIPAL_CODES)
+        else:
+            return Locality.objects.filter(code__in=PROVINCIAL_CODES)
 
 
 class LocalityLegislationListView(BaseLocalityLegislationListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        context["locality"] = self.locality
-        context["page_heading"] = _(
-            "%(locality)s Legislation" % {"locality": self.locality}
-        )
 
         if self.locality.code in PROVINCIAL_CODES:
             context["locality_legislation_title"] = "Provincial Legislation"

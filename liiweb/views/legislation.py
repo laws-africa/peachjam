@@ -2,12 +2,18 @@ import datetime
 from collections import defaultdict
 from datetime import timedelta
 
-from django.shortcuts import get_object_or_404
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks, get_language
-from peachjam.models import JurisdictionProfile, Locality, pj_settings
+from peachjam.models import (
+    JurisdictionProfile,
+    Locality,
+    get_country_and_locality_or_404,
+    pj_settings,
+)
 from peachjam.views import LegislationListView as BaseLegislationListView
 
 
@@ -114,21 +120,38 @@ class LegislationListView(BaseLegislationListView):
 class LocalityLegislationView(TemplateView):
     template_name = "liiweb/locality_legislation.html"
     navbar_link = "legislation/locality"
+    extra_context = {"locality_legislation_title": "Local Legislation"}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        localities = Locality.objects.all()
-        context["locality_groups"] = list(chunks(localities, 2))
+        localities = self.get_localities()
+        if not localities:
+            raise Http404()
+        context["locality_groups"] = chunks(localities, 3)
         return context
+
+    def get_localities(self):
+        return Locality.objects.all()
 
 
 class LocalityLegislationListView(LegislationListView):
     template_name = "liiweb/locality_legislation_list.html"
     navbar_link = "legislation/locality"
+    extra_context = {
+        "locality_legislation_title": LocalityLegislationView.extra_context[
+            "locality_legislation_title"
+        ]
+    }
     national_only = False
 
     def get(self, *args, **kwargs):
-        self.locality = get_object_or_404(Locality, code=kwargs["code"])
+        code = kwargs["code"]
+        if "-" not in code:
+            # redirect from <code> to <country>-<code>
+            locality = get_object_or_404(Locality, code=code)
+            return redirect("locality_legislation_list", code=locality.place_code())
+
+        self.jurisdiction, self.locality = get_country_and_locality_or_404(code)
         return super().get(*args, **kwargs)
 
     def get_base_queryset(self):
@@ -139,7 +162,6 @@ class LocalityLegislationListView(LegislationListView):
         context.update(
             {
                 "locality": self.locality,
-                "locality_legislation_title": "Provincial Legislation",
                 "page_heading": _("%(locality)s Legislation")
                 % {"locality": self.locality},
                 "entity_profile": self.locality.entity_profile.first(),

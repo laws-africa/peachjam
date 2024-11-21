@@ -2,7 +2,7 @@ import os.path
 
 from django.test import TestCase
 
-from peachjam.helpers import pdfjs_to_text
+from peachjam.helpers import chunks, pdfjs_to_text
 
 
 class HelpersTestCase(TestCase):
@@ -26,3 +26,13 @@ Expanding the Mandate of the Special Rapporteur on Prisons and Conditions of
 Detention in Africa to include issues relating to policing and human rights;""",
             text,
         )
+
+    def test_chunks(self):
+        self.assertEqual(
+            chunks([1, 2, 3, 4, 5, 6, 7, 8, 9], 3), [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        )
+        self.assertEqual(
+            chunks([1, 2, 3, 4, 5, 6, 7, 8], 3), [[1, 2, 3], [4, 5, 6], [7, 8]]
+        )
+        self.assertEqual(chunks([], 3), [])
+        self.assertEqual(chunks([1, 2], 2), [[1, 2]])

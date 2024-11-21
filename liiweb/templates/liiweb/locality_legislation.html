@@ -2,16 +2,17 @@
 {% load i18n %}
 {% block title %}{{ locality_legislation_title }}{% endblock %}
 {% block page-content %}
+  {% block breadcrumbs %}{% endblock %}
   <section class="pb-5">
     <div class="container">
       <h1 class="my-4">{{ locality_legislation_title }}</h1>
-      <div class="row">
+      <div class="flow-columns mb-3">
         {% for group in locality_groups %}
-          <div class="col-lg">
+          <div class="flow-columns-group">
             <ul class="list-unstyled mb-0">
               {% for locality in group %}
                 <li>
-                  <a href="{% url 'locality_legislation_list' locality.code %}">{{ locality.name }}</a>
+                  <a href="{% url 'locality_legislation_list' locality.place_code %}">{{ locality.name }}</a>
                 </li>
               {% endfor %}
             </ul>
