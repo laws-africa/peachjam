@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-06 10:12+0200\n"
+"POT-Creation-Date: 2024-11-21 09:48+0200\n"
 "PO-Revision-Date: 2024-08-17 14:56\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -33,99 +33,103 @@ msgstr "%(APP_NAME)s hutegemea michango ili kuendelea kutoa huduma katika jukwaa
 msgid "Donate"
 msgstr "Changia"
 
-#: templates/liiweb/_hero_search.html:7 templates/liiweb/_hero_search.html:8
+#: templates/liiweb/_hero_search.html:8 templates/liiweb/_hero_search.html:9
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr "Tafuta %(APP_NAME)s"
 
-#: templates/liiweb/_hero_search.html:13
+#: templates/liiweb/_hero_search.html:14
 msgid "Search"
 msgstr "Tafuta"
 
-#: templates/liiweb/_hero_search.html:16
+#: templates/liiweb/_hero_search.html:17
 msgid "Advanced search"
 msgstr "Utafutaji wa kina"
 
 #: templates/liiweb/home.html:4
+#: templates/liiweb/locality_legislation_list.html:9
 msgid "Home"
 msgstr "Nyumbani"
 
-#: templates/liiweb/home.html:75
+#: templates/liiweb/home.html:79
 msgid "Recent Judgments"
 msgstr "Hukumu za Hivi Karibuni"
 
-#: templates/liiweb/home.html:76
+#: templates/liiweb/home.html:80
 msgid "View more judgments"
 msgstr "Tazama hukumu zaidi"
 
-#: templates/liiweb/home.html:82
+#: templates/liiweb/home.html:86
 msgid "Recent Legislation"
 msgstr "Sheria ya Hivi Karibuni"
 
-#: templates/liiweb/home.html:83
+#: templates/liiweb/home.html:87
 msgid "View more legislation"
 msgstr "Tazama sheria zaidi"
 
-#: templates/liiweb/home.html:90
+#: templates/liiweb/home.html:94
 msgid "Recent Gazettes"
 msgstr "Magazeti ya Hivi Punde"
 
-#: templates/liiweb/home.html:91
+#: templates/liiweb/home.html:95
 msgid "View more gazettes"
 msgstr "Tazama magazeti zaidi"
 
-#: templates/liiweb/home.html:103
+#: templates/liiweb/home.html:107
 msgid "Courts"
 msgstr "Mahakama"
 
-#: templates/liiweb/home.html:111
+#: templates/liiweb/home.html:115
 msgid "Collections"
 msgstr "Makusanyo"
 
-#: templates/liiweb/home.html:127
+#: templates/liiweb/home.html:131
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr "Tumia %(APP_NAME)s ukiwa nje ya mtandao"
 
-#: templates/liiweb/home.html:129
+#: templates/liiweb/home.html:133
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr "Pocket Law ni nakala ya nje ya mtandao ya sheria ya kesi, sheria na nyaraka nyingine za kisheria kutoka %(APP_NAME)s."
 
-#: templates/liiweb/home.html:144
+#: templates/liiweb/home.html:148
 msgid "Latest Articles"
 msgstr "Makala za Hivi Karibuni"
 
-#: templates/liiweb/home.html:146
+#: templates/liiweb/home.html:150
 msgid "View more articles"
 msgstr "Tazama makala zaidi"
 
 #: templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:7 templates/peachjam/_header.html:17
+#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:17
 msgid "Legislation"
 msgstr "Sheria"
 
-#: templates/liiweb/legislation_list.html:11
+#: templates/liiweb/legislation_list.html:13
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr "Unatazama sheria iliyobatilishwa ambayo haitumiki tena."
 
-#: templates/liiweb/legislation_list.html:20
+#: templates/liiweb/legislation_list.html:22
+#: templates/liiweb/locality_legislation_list.html:27
 msgid "Current legislation"
 msgstr "Sheria za sasa"
 
-#: templates/liiweb/legislation_list.html:28
+#: templates/liiweb/legislation_list.html:30
 msgid "Recent legislation"
 msgstr "Sheria ya hivi karibuni"
 
-#: templates/liiweb/legislation_list.html:42
+#: templates/liiweb/legislation_list.html:44
 msgid "Uncommenced legislation"
 msgstr "Sheria ambayo haijaanza kutumika"
 
-#: templates/liiweb/legislation_list.html:50
+#: templates/liiweb/legislation_list.html:52
+#: templates/liiweb/locality_legislation_list.html:33
 msgid "Repealed legislation"
 msgstr "Sheria iliyofutwa"
 
-#: templates/liiweb/legislation_list.html:57
+#: templates/liiweb/legislation_list.html:59
+#: templates/liiweb/locality_legislation_list.html:43
 msgid "All legislation"
 msgstr "Sheria zote"
 
@@ -170,8 +174,7 @@ msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 msgid "Judgments"
 msgstr "Hukumu"
 
-#: views/legislation.py:130
+#: views/legislation.py:165
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Sheria"
-

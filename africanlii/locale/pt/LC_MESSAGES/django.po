@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-06 10:12+0200\n"
+"POT-Creation-Date: 2024-11-21 09:48+0200\n"
 "PO-Revision-Date: 2024-08-06 08:54\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -41,74 +41,14 @@ msgstr "localidade"
 msgid "Regional economic communities"
 msgstr "Comunidades econômicas regionais"
 
-#: models/au.py:72 models/ratification.py:42
+#: models/au.py:72
 msgid "country"
 msgstr "País"
-
-#: models/ratification.py:15
-msgid "work"
-msgstr "Trabalho"
-
-#: models/ratification.py:17
-msgid "source URL"
-msgstr "URL fonte"
-
-#: models/ratification.py:18
-msgid "last updated"
-msgstr "última atualização"
-
-#: models/ratification.py:21 models/ratification.py:35
-msgid "ratification"
-msgstr "ratificação"
-
-#: models/ratification.py:22
-msgid "ratifications"
-msgstr "ratificações"
-
-#: models/ratification.py:44
-msgid "ratification date"
-msgstr "data da ratificação"
-
-#: models/ratification.py:45
-msgid "deposit date"
-msgstr "data do depósito"
-
-#: models/ratification.py:46
-msgid "signature date"
-msgstr "data da assinatura"
-
-#: models/ratification.py:49
-msgid "ratification country"
-msgstr "país de ratificação"
-
-#: models/ratification.py:50
-msgid "ratification countries"
-msgstr "países ratificados"
 
 #: templates/africanlii/_lii_info.html:5
 #, python-format
 msgid "Visit %(lii_name)s for more legal information."
 msgstr "Visite %(lii_name)s para obter mais informações legais."
-
-#: templates/africanlii/_ratification_table.html:2
-msgid "Ratified documents"
-msgstr "Documentos ratificados"
-
-#: templates/africanlii/_ratification_table.html:6
-msgid "Title"
-msgstr "Título"
-
-#: templates/africanlii/_ratification_table.html:7
-msgid "Signature Date"
-msgstr "Data da Assinatura"
-
-#: templates/africanlii/_ratification_table.html:8
-msgid "Ratification Date"
-msgstr "Data de ratificação"
-
-#: templates/africanlii/_ratification_table.html:9
-msgid "Deposit Date"
-msgstr "Data do Depósito"
 
 #: templates/africanlii/au_detail_page.html:4
 #: templates/africanlii/au_detail_page.html:11
@@ -133,44 +73,54 @@ msgid "For more information, visit the <a href=\"https://au.int/\" target=\"_bla
 msgstr "Para mais informações, visite o <a href=\"https://au.int/\" target=\"_blank\" rel=\"noreferrer noopener\">site oficial da União Africana</a> e o <a href=\"https://au.int/agenda2063/overview\">portal da Agenda 2063.</a>"
 
 #: templates/africanlii/au_detail_page.html:39
-#: templates/africanlii/au_organ_detail.html:11
+#: templates/africanlii/au_organ_detail.html:14
 #: templates/peachjam/_header.html:78 templates/peachjam/home.html:64
 msgid "African Union Organs"
 msgstr "Órgãos da União Africana"
 
 #: templates/africanlii/au_detail_page.html:49
-#: templates/africanlii/regional_economic_community_detail.html:12
+#: templates/africanlii/regional_economic_community_detail.html:15
 #: templates/peachjam/home.html:86
 msgid "Regional Economic Communities"
 msgstr "Comunidades Económicas Regionais"
 
 #: templates/africanlii/au_detail_page.html:61
-#: templates/africanlii/au_institution_detail.html:12
+#: templates/africanlii/au_institution_detail.html:15
 #: templates/peachjam/_header.html:91 templates/peachjam/home.html:74
 msgid "African Union Institutions"
 msgstr "Instituições da União Africana"
 
-#: templates/africanlii/au_detail_page.html:79
-#: templates/africanlii/member_state_detail.html:12
+#: templates/africanlii/au_detail_page.html:92
+#: templates/africanlii/member_state_detail.html:15
 #: templates/peachjam/home.html:110
 msgid "Member States"
 msgstr "Estados Membros"
 
 #: templates/africanlii/au_institution_detail.html:9
 #: templates/africanlii/au_organ_detail.html:8
+#: templates/africanlii/doc_index_detail.html:8
+#: templates/africanlii/doc_index_first_level.html:7
 #: templates/africanlii/member_state_detail.html:9
 #: templates/africanlii/regional_economic_community_detail.html:9
+#: templates/peachjam/home.html:4
+msgid "Home"
+msgstr "Página inicial"
+
+#: templates/africanlii/au_institution_detail.html:12
+#: templates/africanlii/au_organ_detail.html:11
+#: templates/africanlii/member_state_detail.html:12
+#: templates/africanlii/regional_economic_community_detail.html:12
 msgid "African Union"
 msgstr "União Africana"
 
-#: templates/africanlii/doc_index_detail.html:8
-#: templates/africanlii/doc_index_first_level.html:7
+#: templates/africanlii/doc_index_detail.html:11
+#: templates/africanlii/doc_index_first_level.html:10
 #: templates/africanlii/doc_indexes.html:4
 #: templates/africanlii/doc_indexes.html:8
 msgid "Indexes"
 msgstr "Índices"
 
-#: templates/africanlii/member_state_detail.html:37
+#: templates/africanlii/member_state_detail.html:40
 msgid "No documents found."
 msgstr "Nenhum documento encontrado."
 
@@ -268,9 +218,11 @@ msgstr "Instituições da União Africana (UA)"
 msgid "Member states"
 msgstr "Estados membros"
 
-#: templates/peachjam/_header.html:106
-msgid "Topics"
-msgstr "Disciplinas"
+#: templates/peachjam/_header.html:106 templates/peachjam/home.html:199
+#: templates/peachjam/taxonomy_list.html:4
+#: templates/peachjam/taxonomy_list.html:7
+msgid "Collections"
+msgstr "Coleções"
 
 #: templates/peachjam/_header.html:111
 msgid "Reports & Guides"
@@ -343,10 +295,6 @@ msgstr "Visite <a href=\"https://openlawafrica.org/\" target=\"_blank\">openlawa
 #: templates/peachjam/about.html:86
 msgid "Our partners"
 msgstr "Nossos parceiros"
-
-#: templates/peachjam/home.html:4
-msgid "Home"
-msgstr "Página inicial"
 
 #: templates/peachjam/home.html:11
 msgid "Legal research across African borders"
@@ -446,10 +394,6 @@ msgstr "Comentário mais recente"
 msgid "View more commentary"
 msgstr "Ver mais comentários"
 
-#: templates/peachjam/home.html:199
-msgid "Collections"
-msgstr "Coleções"
-
 #: templates/peachjam/reports_guides_list.html:4
 #: templates/peachjam/reports_guides_list.html:7
 msgid "Reports and Guides"
@@ -459,15 +403,62 @@ msgstr "Relatórios e guias"
 msgid "Search regional and national African legal information."
 msgstr "Pesquise informações legais africanas regionais e nacionais."
 
-#: views/taxonomy.py:126
+#: views/taxonomy.py:134
 msgid "Judrisdictions"
 msgstr "Jurisdições"
 
-#: views/taxonomy.py:132
+#: views/taxonomy.py:140
 msgid "Years"
 msgstr "anos"
 
-#: views/taxonomy.py:140
+#: views/taxonomy.py:148
 msgid "Alphabet"
 msgstr "Alfabeto"
 
+#~ msgid "work"
+#~ msgstr "Trabalho"
+
+#~ msgid "source URL"
+#~ msgstr "URL fonte"
+
+#~ msgid "last updated"
+#~ msgstr "última atualização"
+
+#~ msgid "ratification"
+#~ msgstr "ratificação"
+
+#~ msgid "ratifications"
+#~ msgstr "ratificações"
+
+#~ msgid "ratification date"
+#~ msgstr "data da ratificação"
+
+#~ msgid "deposit date"
+#~ msgstr "data do depósito"
+
+#~ msgid "signature date"
+#~ msgstr "data da assinatura"
+
+#~ msgid "ratification country"
+#~ msgstr "país de ratificação"
+
+#~ msgid "ratification countries"
+#~ msgstr "países ratificados"
+
+#~ msgid "Ratified documents"
+#~ msgstr "Documentos ratificados"
+
+#~ msgid "Title"
+#~ msgstr "Título"
+
+#~ msgid "Signature Date"
+#~ msgstr "Data da Assinatura"
+
+#~ msgid "Ratification Date"
+#~ msgstr "Data de ratificação"
+
+#~ msgid "Deposit Date"
+#~ msgstr "Data do Depósito"
+
+#~ msgid "Topics"
+#~ msgstr "Disciplinas"

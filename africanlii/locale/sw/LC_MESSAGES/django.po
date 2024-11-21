@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-06 10:12+0200\n"
+"POT-Creation-Date: 2024-11-21 09:48+0200\n"
 "PO-Revision-Date: 2024-08-17 14:56\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -41,74 +41,14 @@ msgstr "eneo"
 msgid "Regional economic communities"
 msgstr "Jumuiya za kiuchumi za kikanda"
 
-#: models/au.py:72 models/ratification.py:42
+#: models/au.py:72
 msgid "country"
 msgstr "nchi"
-
-#: models/ratification.py:15
-msgid "work"
-msgstr "kazi"
-
-#: models/ratification.py:17
-msgid "source URL"
-msgstr "chanzo cha URL"
-
-#: models/ratification.py:18
-msgid "last updated"
-msgstr "ilisasishwa mara ya mwisho"
-
-#: models/ratification.py:21 models/ratification.py:35
-msgid "ratification"
-msgstr "uridhiaji"
-
-#: models/ratification.py:22
-msgid "ratifications"
-msgstr "uridhiaji"
-
-#: models/ratification.py:44
-msgid "ratification date"
-msgstr "tarehe ya uridhiaji"
-
-#: models/ratification.py:45
-msgid "deposit date"
-msgstr "tarehe ya kuweka"
-
-#: models/ratification.py:46
-msgid "signature date"
-msgstr "tarehe ya saini"
-
-#: models/ratification.py:49
-msgid "ratification country"
-msgstr "nchi iliyoridhia"
-
-#: models/ratification.py:50
-msgid "ratification countries"
-msgstr "nchi zilizoridhia"
 
 #: templates/africanlii/_lii_info.html:5
 #, python-format
 msgid "Visit %(lii_name)s for more legal information."
 msgstr "Tembelea %(lii_name)s kupata taarifa zaidi za kisheria."
-
-#: templates/africanlii/_ratification_table.html:2
-msgid "Ratified documents"
-msgstr "Hati/nyaraka zilizoidhinishwa"
-
-#: templates/africanlii/_ratification_table.html:6
-msgid "Title"
-msgstr "Mada"
-
-#: templates/africanlii/_ratification_table.html:7
-msgid "Signature Date"
-msgstr "Tarehe ya Saini"
-
-#: templates/africanlii/_ratification_table.html:8
-msgid "Ratification Date"
-msgstr "Tarehe ya Kuridhiwa"
-
-#: templates/africanlii/_ratification_table.html:9
-msgid "Deposit Date"
-msgstr "Tarehe ya Kuweka"
 
 #: templates/africanlii/au_detail_page.html:4
 #: templates/africanlii/au_detail_page.html:11
@@ -133,44 +73,54 @@ msgid "For more information, visit the <a href=\"https://au.int/\" target=\"_bla
 msgstr "Kwa taarifa zaidi, tembelea tovuti rasmi <a href=\"https://au.int/\" target=\"_blank\" rel=\"noreferrer noopener\">ya Umoja wa Afrika</a> na programu ya Ajenda <a href=\"https://au.int/agenda2063/overview\">ya 2063.</a>"
 
 #: templates/africanlii/au_detail_page.html:39
-#: templates/africanlii/au_organ_detail.html:11
+#: templates/africanlii/au_organ_detail.html:14
 #: templates/peachjam/_header.html:78 templates/peachjam/home.html:64
 msgid "African Union Organs"
 msgstr "Mashirika ya Umoja wa Afrika"
 
 #: templates/africanlii/au_detail_page.html:49
-#: templates/africanlii/regional_economic_community_detail.html:12
+#: templates/africanlii/regional_economic_community_detail.html:15
 #: templates/peachjam/home.html:86
 msgid "Regional Economic Communities"
 msgstr "Jumuiya za Kiuchumi za Kanda"
 
 #: templates/africanlii/au_detail_page.html:61
-#: templates/africanlii/au_institution_detail.html:12
+#: templates/africanlii/au_institution_detail.html:15
 #: templates/peachjam/_header.html:91 templates/peachjam/home.html:74
 msgid "African Union Institutions"
 msgstr "Taasisi za Umoja wa Afrika"
 
-#: templates/africanlii/au_detail_page.html:79
-#: templates/africanlii/member_state_detail.html:12
+#: templates/africanlii/au_detail_page.html:92
+#: templates/africanlii/member_state_detail.html:15
 #: templates/peachjam/home.html:110
 msgid "Member States"
 msgstr "Nchi Wanachama"
 
 #: templates/africanlii/au_institution_detail.html:9
 #: templates/africanlii/au_organ_detail.html:8
+#: templates/africanlii/doc_index_detail.html:8
+#: templates/africanlii/doc_index_first_level.html:7
 #: templates/africanlii/member_state_detail.html:9
 #: templates/africanlii/regional_economic_community_detail.html:9
+#: templates/peachjam/home.html:4
+msgid "Home"
+msgstr "Nyumbani"
+
+#: templates/africanlii/au_institution_detail.html:12
+#: templates/africanlii/au_organ_detail.html:11
+#: templates/africanlii/member_state_detail.html:12
+#: templates/africanlii/regional_economic_community_detail.html:12
 msgid "African Union"
 msgstr "Umoja wa Afrika"
 
-#: templates/africanlii/doc_index_detail.html:8
-#: templates/africanlii/doc_index_first_level.html:7
+#: templates/africanlii/doc_index_detail.html:11
+#: templates/africanlii/doc_index_first_level.html:10
 #: templates/africanlii/doc_indexes.html:4
 #: templates/africanlii/doc_indexes.html:8
 msgid "Indexes"
 msgstr "Faharasa"
 
-#: templates/africanlii/member_state_detail.html:37
+#: templates/africanlii/member_state_detail.html:40
 msgid "No documents found."
 msgstr "Hakuna nyaraka zilizopatikana."
 
@@ -268,9 +218,11 @@ msgstr "Taasisi za Umoja wa Afrika (AU)."
 msgid "Member states"
 msgstr "Nchi wanachama"
 
-#: templates/peachjam/_header.html:106
-msgid "Topics"
-msgstr "Mada"
+#: templates/peachjam/_header.html:106 templates/peachjam/home.html:199
+#: templates/peachjam/taxonomy_list.html:4
+#: templates/peachjam/taxonomy_list.html:7
+msgid "Collections"
+msgstr "Makusanyo"
 
 #: templates/peachjam/_header.html:111
 msgid "Reports & Guides"
@@ -343,10 +295,6 @@ msgstr "Tembelea <a href=\"https://openlawafrica.org/\" target=\"_blank\">openla
 #: templates/peachjam/about.html:86
 msgid "Our partners"
 msgstr "Washirika wetu"
-
-#: templates/peachjam/home.html:4
-msgid "Home"
-msgstr "Nyumbani"
 
 #: templates/peachjam/home.html:11
 msgid "Legal research across African borders"
@@ -446,10 +394,6 @@ msgstr "Maoni ya Hivi Karibuni"
 msgid "View more commentary"
 msgstr "Tazama maoni zaidi"
 
-#: templates/peachjam/home.html:199
-msgid "Collections"
-msgstr "Makusanyo"
-
 #: templates/peachjam/reports_guides_list.html:4
 #: templates/peachjam/reports_guides_list.html:7
 msgid "Reports and Guides"
@@ -459,15 +403,62 @@ msgstr "Ripoti na Miongozo"
 msgid "Search regional and national African legal information."
 msgstr "Tafuta taarifa za kisheria za kikanda na kitaifa za Afrika."
 
-#: views/taxonomy.py:126
+#: views/taxonomy.py:134
 msgid "Judrisdictions"
 msgstr "Mamlaka"
 
-#: views/taxonomy.py:132
+#: views/taxonomy.py:140
 msgid "Years"
 msgstr "Miaka"
 
-#: views/taxonomy.py:140
+#: views/taxonomy.py:148
 msgid "Alphabet"
 msgstr "Alfabeti"
 
+#~ msgid "work"
+#~ msgstr "kazi"
+
+#~ msgid "source URL"
+#~ msgstr "chanzo cha URL"
+
+#~ msgid "last updated"
+#~ msgstr "ilisasishwa mara ya mwisho"
+
+#~ msgid "ratification"
+#~ msgstr "uridhiaji"
+
+#~ msgid "ratifications"
+#~ msgstr "uridhiaji"
+
+#~ msgid "ratification date"
+#~ msgstr "tarehe ya uridhiaji"
+
+#~ msgid "deposit date"
+#~ msgstr "tarehe ya kuweka"
+
+#~ msgid "signature date"
+#~ msgstr "tarehe ya saini"
+
+#~ msgid "ratification country"
+#~ msgstr "nchi iliyoridhia"
+
+#~ msgid "ratification countries"
+#~ msgstr "nchi zilizoridhia"
+
+#~ msgid "Ratified documents"
+#~ msgstr "Hati/nyaraka zilizoidhinishwa"
+
+#~ msgid "Title"
+#~ msgstr "Mada"
+
+#~ msgid "Signature Date"
+#~ msgstr "Tarehe ya Saini"
+
+#~ msgid "Ratification Date"
+#~ msgstr "Tarehe ya Kuridhiwa"
+
+#~ msgid "Deposit Date"
+#~ msgstr "Tarehe ya Kuweka"
+
+#~ msgid "Topics"
+#~ msgstr "Mada"
