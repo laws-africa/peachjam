@@ -38,7 +38,7 @@
     "flag-icons": "^6.6.6",
     "htmx.org": "^2.0.1",
     "i18next": "^22.0.6",
-    "i18next-parser": "^6.5.0",
+    "i18next-parser": "^9.0.2",
     "lodash.debounce": "^4.0.8",
     "mark.js": "^8.11.1",
     "sass": "^1.53.0",
