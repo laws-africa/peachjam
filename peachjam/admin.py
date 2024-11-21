@@ -844,7 +844,9 @@ class TaxonomyAdmin(TreeAdmin):
 
 @admin.register(CoreDocument)
 class CoreDocumentAdmin(DocumentAdmin):
-    pass
+    def has_add_permission(self, request):
+        # this is prevented because there is no view that handles a CoreDocument
+        return False
 
 
 @admin.register(GenericDocument)
