@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-11-21 09:48+0200\n"
-"PO-Revision-Date: 2024-08-17 14:56\n"
+"PO-Revision-Date: 2024-11-21 08:51\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -415,50 +415,3 @@ msgstr "Miaka"
 msgid "Alphabet"
 msgstr "Alfabeti"
 
-#~ msgid "work"
-#~ msgstr "kazi"
-
-#~ msgid "source URL"
-#~ msgstr "chanzo cha URL"
-
-#~ msgid "last updated"
-#~ msgstr "ilisasishwa mara ya mwisho"
-
-#~ msgid "ratification"
-#~ msgstr "uridhiaji"
-
-#~ msgid "ratifications"
-#~ msgstr "uridhiaji"
-
-#~ msgid "ratification date"
-#~ msgstr "tarehe ya uridhiaji"
-
-#~ msgid "deposit date"
-#~ msgstr "tarehe ya kuweka"
-
-#~ msgid "signature date"
-#~ msgstr "tarehe ya saini"
-
-#~ msgid "ratification country"
-#~ msgstr "nchi iliyoridhia"
-
-#~ msgid "ratification countries"
-#~ msgstr "nchi zilizoridhia"
-
-#~ msgid "Ratified documents"
-#~ msgstr "Hati/nyaraka zilizoidhinishwa"
-
-#~ msgid "Title"
-#~ msgstr "Mada"
-
-#~ msgid "Signature Date"
-#~ msgstr "Tarehe ya Saini"
-
-#~ msgid "Ratification Date"
-#~ msgstr "Tarehe ya Kuridhiwa"
-
-#~ msgid "Deposit Date"
-#~ msgstr "Tarehe ya Kuweka"
-
-#~ msgid "Topics"
-#~ msgstr "Mada"
