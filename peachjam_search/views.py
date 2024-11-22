@@ -782,7 +782,7 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
     def has_permission(self):
-        return self.request.user.is_authenticated and self.request.user.is_staffo
+        return self.request.user.is_authenticated and self.request.user.is_staff
 
 
 class AllowSavedSearchesMixin:
