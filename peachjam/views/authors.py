@@ -12,7 +12,7 @@ class AuthorDetailView(FilteredDocumentListView):
         return (
             super()
             .get_base_queryset()
-            .filter(genericdocument__authors__in=[self.author])
+            .filter(genericdocument__author__in=[self.author])
             .select_related("locality")
         )
 

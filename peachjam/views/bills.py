@@ -14,7 +14,7 @@ class BillListView(FilteredDocumentListView):
     default_jurisdiction_only = True
 
     def get_base_queryset(self, *args, **kwargs):
-        qs = super().get_base_queryset(*args, **kwargs)
+        qs = super().get_base_queryset(*args, **kwargs).select_related("author")
         if self.default_jurisdiction_only:
             juri = pj_settings().default_document_jurisdiction
             if juri:
@@ -26,7 +26,6 @@ class BillListView(FilteredDocumentListView):
 
         context["doc_table_show_doc_type"] = False
         context["doc_table_show_court"] = False
-        context["doc_table_show_author"] = False
         context["doc_table_show_jurisdiction"] = False
 
         del context["facet_data"]["natures"]

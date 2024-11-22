@@ -857,13 +857,13 @@ class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
     resource_class = GenericDocumentResource
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     list_display = list(DocumentAdmin.list_display) + ["nature"]
-    list_filter = list(DocumentAdmin.list_filter) + ["nature", "authors"]
-    filter_horizontal = ("authors",)
-    fieldsets[0][1]["fields"].extend(["authors", "nature"])
+    list_filter = list(DocumentAdmin.list_filter) + ["nature", "author"]
+    filter_horizontal = ("author",)
+    fieldsets[0][1]["fields"].extend(["author", "nature"])
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        qs = qs.prefetch_related("authors", "nature")
+        qs = qs.prefetch_related("author", "nature")
         return qs
 
 
@@ -882,6 +882,8 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
 @admin.register(Bill)
 class BillAdmin(ImportExportMixin, DocumentAdmin):
     resource_class = BillResource
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["author"])
 
 
 class CaseNumberAdmin(admin.StackedInline):

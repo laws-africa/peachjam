@@ -11,7 +11,7 @@ class DocumentListView(FilteredDocumentListView):
     model = GenericDocument
     navbar_link = "doc"
     queryset = GenericDocument.objects.prefetch_related(
-        "authors", "nature", "work", "locality"
+        "author", "nature", "work", "locality"
     )
 
     def get_context_data(self, **kwargs):

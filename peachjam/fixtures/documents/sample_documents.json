@@ -367,14 +367,14 @@
     },
     {
         "fields": {
-            "authors": []
+            "author": []
         },
         "model": "peachjam.genericdocument",
         "pk": 5389
     },
     {
         "fields": {
-            "authors": []
+            "author": []
         },
         "model": "peachjam.genericdocument",
         "pk": 4124

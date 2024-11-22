@@ -1,12 +1,12 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
 {% block title %}
-  {% trans 'Taxonomies' %}
+  {% trans 'Collections' %}
 {% endblock %}
 {% block page-content %}
   <section class="container pt-4 pb-5">
     {% block page-heading %}
-      <h1 class="mb-4">{% trans 'Taxonomies' %}</h1>
+      <h1 class="mb-4">{% trans 'Collections' %}</h1>
     {% endblock %}
     {% include 'peachjam/_taxonomy_list.html' %}
   </section>
