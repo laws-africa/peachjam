@@ -188,7 +188,7 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(title__istartswith=alphabet)
 
         if authors and exclude != "authors":
-            queryset = queryset.filter(authors__name__in=authors)
+            queryset = queryset.filter(author__name__in=authors)
 
         if courts and exclude != "courts":
             queryset = queryset.filter(court__name__in=courts)

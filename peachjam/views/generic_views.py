@@ -20,7 +20,6 @@ from peachjam.models import (
     CoreDocument,
     DocumentNature,
     ExtractedCitation,
-    GenericDocument,
     Predicate,
     Relationship,
     Taxonomy,
@@ -197,17 +196,20 @@ class FilteredDocumentListView(DocumentListView):
         )
 
         authors = []
-        if self.model in [GenericDocument]:
+        authors_label = Author.model_label_plural
+        if hasattr(self.model, "author"):
             authors = list(
                 a
                 for a in self.form.filter_queryset(
                     self.get_base_queryset(), exclude="authors"
                 )
                 .order_by()
-                .values_list("authors__name", flat=True)
+                .values_list("author__name", flat=True)
                 .distinct()
                 if a
             )
+            # customise the authors label?
+            authors_label = getattr(self.model, "author_label_plural", authors_label)
 
         years = list(
             self.form.filter_queryset(self.get_base_queryset(), exclude="years")
@@ -237,7 +239,7 @@ class FilteredDocumentListView(DocumentListView):
                 "values": self.request.GET.getlist("years"),
             },
             "authors": {
-                "label": Author.model_label_plural,
+                "label": authors_label,
                 "type": "checkbox",
                 "options": sorted([(a, a) for a in authors]),
                 "values": self.request.GET.getlist("authors"),

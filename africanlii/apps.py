@@ -11,11 +11,13 @@ class AfricanliiConfig(AppConfig):
 
         from liiweb.citations import MncMatcher
         from peachjam.analysis.citations import citation_analyser
-        from peachjam.models import Author
+        from peachjam.models import Author, GenericDocument
 
         citation_analyser.matchers.append(AchprResolutionMatcher)
         citation_analyser.matchers.append(ActMatcher)
         citation_analyser.matchers.append(MncMatcher)
 
-        Author.model_label = _("Regional Body / Author")
-        Author.model_label_plural = _("Regional Bodies / Authors")
+        GenericDocument.author_label = Author.model_label = _("Regional Body / Author")
+        GenericDocument.author_label_plural = Author.model_label_plural = _(
+            "Regional Bodies / Authors"
+        )
