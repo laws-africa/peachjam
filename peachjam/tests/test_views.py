@@ -1,10 +1,11 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 from peachjam.models import PeachJamSettings
 
 
 class PeachjamViewsTest(TestCase):
-    fixtures = ["tests/countries", "documents/sample_documents"]
+    fixtures = ["tests/countries", "documents/sample_documents", "tests/users"]
 
     def test_login_page(self):
         response = self.client.get("/accounts/login/")
@@ -200,3 +201,14 @@ class PeachjamViewsTest(TestCase):
 
         response = self.client.get("/robots.txt")
         self.assertContains(response, "foo\nbar")
+
+    def test_account_profile(self):
+        response = self.client.get("/accounts/profile/")
+        self.assertEqual(response.status_code, 302)
+
+        # now log in and try again
+        self.client._login(
+            User.objects.first(), "django.contrib.auth.backends.ModelBackend"
+        )
+        response = self.client.get("/accounts/profile/")
+        self.assertEqual(response.status_code, 200)
