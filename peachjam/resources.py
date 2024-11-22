@@ -473,9 +473,9 @@ class GenericDocumentResource(BaseDocumentResource):
         attribute="nature",
         widget=DocumentNatureWidget(DocumentNature, field="code"),
     )
-    authors = fields.Field(
-        column_name="authors",
-        attribute="authors",
+    author = fields.Field(
+        column_name="author",
+        attribute="author",
         widget=ManyToManyRequiredWidget(Author, separator="|", field="code"),
     )
 
@@ -825,5 +825,11 @@ class RatificationResource(resources.ModelResource):
 
 
 class BillResource(BaseDocumentResource):
+    author = fields.Field(
+        column_name="author",
+        attribute="author",
+        widget=ForeignKeyWidget(Author, field="code"),
+    )
+
     class Meta(BaseDocumentResource.Meta):
         model = Bill

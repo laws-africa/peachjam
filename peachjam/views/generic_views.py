@@ -20,7 +20,6 @@ from peachjam.models import (
     CoreDocument,
     DocumentNature,
     ExtractedCitation,
-    GenericDocument,
     Predicate,
     Relationship,
     Taxonomy,
@@ -197,14 +196,14 @@ class FilteredDocumentListView(DocumentListView):
         )
 
         authors = []
-        if self.model in [GenericDocument]:
+        if hasattr(self.model, "author"):
             authors = list(
                 a
                 for a in self.form.filter_queryset(
                     self.get_base_queryset(), exclude="authors"
                 )
                 .order_by()
-                .values_list("authors__name", flat=True)
+                .values_list("author__name", flat=True)
                 .distinct()
                 if a
             )

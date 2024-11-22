@@ -6,7 +6,7 @@ from peachjam.models.author import Author
 
 
 class GenericDocument(CoreDocument):
-    authors = models.ManyToManyField(
+    author = models.ManyToManyField(
         Author,
         blank=True,
         verbose_name=_("authors"),
