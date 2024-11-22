@@ -179,6 +179,9 @@ class PeachJamSettingsAdmin(admin.ModelAdmin):
         "document_jurisdictions",
     )
 
+    def has_add_permission(self, request):
+        return False
+
     def changelist_view(self, request, extra_context=None):
         # redirect to edit the singleton
         return redirect("admin:peachjam_peachjamsettings_change", pj_settings().pk)
@@ -844,7 +847,9 @@ class TaxonomyAdmin(TreeAdmin):
 
 @admin.register(CoreDocument)
 class CoreDocumentAdmin(DocumentAdmin):
-    pass
+    def has_add_permission(self, request):
+        # this is prevented because there is no view that handles a CoreDocument
+        return False
 
 
 @admin.register(GenericDocument)
@@ -1231,7 +1236,7 @@ class ArticleAttachmentInline(BaseAttachmentFileInline):
 
 
 class ArticleForm(forms.ModelForm):
-    body = forms.CharField(widget=CKEditorWidget())
+    body = forms.CharField(widget=CKEditorWidget("article"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1253,6 +1258,7 @@ class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
         "slug",
         "date",
         "published",
+        "featured",
         "image",
         "topics",
         "summary",

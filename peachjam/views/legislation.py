@@ -238,18 +238,7 @@ class LegislationDetailView(BaseDocumentDetailView):
 
     def get_timeline(self):
         timeline = self.object.timeline_json
-        publication_url = None
-        work = self.object.metadata_json
         points_in_time = self.get_points_in_time()
-
-        # set publication_url
-        publication_date = work.get("publication_date")
-        if publication_date:
-            api_url = "https://api.laws.africa/v3/"
-            commons_url = "https://commons.laws.africa/"
-            publication_url = (work.get("publication_document") or {}).get("url")
-            if publication_url and api_url in publication_url:
-                publication_url = publication_url.replace(api_url, commons_url)
 
         # prepare for setting contains_unapplied_amendment flag
         point_in_time_dates = [p["date"] for p in points_in_time]
@@ -272,9 +261,6 @@ class LegislationDetailView(BaseDocumentDetailView):
             # add expression_frbr_uri
             for event in entry["events"]:
                 entry["expression_frbr_uri"] = expression_uris.get(entry["date"])
-                # add publication_url to publication event
-                if event["type"] == "publication":
-                    event["link_url"] = publication_url
                 # add contains_unapplied_amendment flag
                 if event["type"] == "amendment":
                     entry["contains_unapplied_amendment"] = (

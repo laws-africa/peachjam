@@ -56,9 +56,8 @@ def pdfjs_to_text(fname):
 
 
 def chunks(lst, n):
-    """Yield successive n-sized chunks from list."""
-    for i in range(n):
-        yield lst[i::n]
+    """Break lst into n-sized chunks."""
+    return [lst[i : i + n] for i in range(0, len(lst), n)]
 
 
 class ISODateConverter:

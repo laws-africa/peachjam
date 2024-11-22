@@ -9,6 +9,6 @@ class RedirectHomeView(RedirectView):
             raise Http404()
 
         return reverse(
-            "municipal_by_laws",
-            kwargs={"code": self.request.microsite["locality"].code},
+            "locality_legislation_list",
+            kwargs={"code": self.request.microsite["locality"].place_code()},
         )

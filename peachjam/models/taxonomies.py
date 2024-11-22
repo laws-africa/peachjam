@@ -45,7 +45,9 @@ class Taxonomy(MP_Node):
     def update_slug(self):
         old_slug = self.slug
         parent = self.get_parent()
-        self.slug = (f"{parent.slug}-" if parent else "") + slugify(self.name)
+        self.slug = (f"{parent.slug}-" if parent else "") + slugify(
+            self.name_en or self.name
+        )
         return old_slug != self.slug
 
     def update_path_name(self):

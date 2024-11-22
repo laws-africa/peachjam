@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import UpdateView
 
@@ -7,7 +8,7 @@ from peachjam.forms import UserForm
 User = get_user_model()
 
 
-class EditAccountView(UpdateView):
+class EditAccountView(LoginRequiredMixin, UpdateView):
     authentication_required = True
     model = User
     template_name = "user_account/edit.html"

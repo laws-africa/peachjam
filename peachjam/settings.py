@@ -319,12 +319,14 @@ ELASTICSEARCH_DSL = {
 }
 
 ELASTICSEARCH_MAX_ANALYZED_OFFSET = os.environ.get(
-    "ELASTICSEARCH_MAX_ANALYZED_OFFSET", 2000000
+    "ELASTICSEARCH_MAX_ANALYZED_OFFSET", 999999
 )
 
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
     "peachjam_search.tasks.BackgroundTaskSearchProcessor"
 )
+
+ELASTICSEARCH_FAIL_ON_SHARD_FAILURE = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -569,7 +571,32 @@ CKEDITOR_CONFIGS = {
             ["Smiley", "SpecialChar", "LaAkn"],
             ["Source"],
         ],
-    }
+    },
+    "article": {
+        "removePlugins": ["iframe"],
+        "extraAllowedContent": "*[id];*{*}",
+        "toolbar_Full": [
+            [
+                "Styles",
+                "Format",
+                "Bold",
+                "Italic",
+                "Underline",
+                "Strike",
+                "Blockquote",
+                "Superscript",
+                "Subscript",
+                "SpellChecker",
+                "Undo",
+                "Redo",
+            ],
+            ["Link", "Unlink", "Anchor"],
+            ["Image", "Flash", "Table", "HorizontalRule", "Iframe"],
+            ["TextColor", "BGColor"],
+            ["Smiley", "SpecialChar", "LaAkn"],
+            ["Source"],
+        ],
+    },
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"

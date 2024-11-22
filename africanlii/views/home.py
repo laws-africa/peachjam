@@ -7,7 +7,14 @@ from africanlii.models import (
     MemberState,
     RegionalEconomicCommunity,
 )
-from peachjam.models import Article, CourtClass, GenericDocument, Legislation, Taxonomy
+from peachjam.models import (
+    Article,
+    CoreDocument,
+    CourtClass,
+    GenericDocument,
+    Legislation,
+    Taxonomy,
+)
 from peachjam.views import HomePageView as BaseHomePageView
 
 
@@ -51,6 +58,9 @@ class HomePageView(BaseHomePageView):
         context["taxonomies"] = Taxonomy.dump_bulk()
         context["taxonomy_url"] = "taxonomy_detail"
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
+        context["documents_count"] = CoreDocument.objects.exclude(
+            published=False
+        ).count()
 
         context["liis"] = LIIS
 

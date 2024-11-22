@@ -8,6 +8,9 @@ class AfricanliiViewsTest(TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
 
+        # documents
+        self.assertEqual(10, response.context.get("documents_count"))
+
         court_classes = [
             court_class.name for court_class in response.context.get("court_classes")
         ]

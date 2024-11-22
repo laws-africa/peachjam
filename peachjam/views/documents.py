@@ -64,6 +64,10 @@ class DocumentDetailViewResolver(View):
 
             return view.dispatch(request, *args, **kwargs)
 
+        raise Exception(
+            f"The document type {obj.doc_type} does not have a view registered."
+        )
+
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 class DocumentSourceView(DetailView):
