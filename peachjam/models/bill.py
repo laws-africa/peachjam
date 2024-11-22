@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.models import CoreDocument
+from peachjam.models import Author, CoreDocument
 
 
 class Bill(CoreDocument):
@@ -11,9 +11,15 @@ class Bill(CoreDocument):
         "peachjam.Author", null=True, on_delete=models.CASCADE, verbose_name=_("author")
     )
 
+    author_label = Author.model_label
+    author_label_plural = Author.model_label_plural
+
     class Meta(CoreDocument.Meta):
         verbose_name = _("bill")
         verbose_name_plural = _("bills")
+
+    def author_list(self):
+        return [self.author] if self.author else []
 
     def prepare_and_set_expression_frbr_uri(self):
         self.frbr_uri_actor = self.author.code if self.author else None

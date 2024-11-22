@@ -223,19 +223,20 @@
                         {% endwith %}
                       {% endblock %}
                       {% block document-metadata-content-author %}
-                        {% with document.authors.all as authors %}
+                        {% with document.author_list as authors %}
                           {% if authors %}
                             <dt>
                               {% if authors|length > 1 %}
-                                {{ authors.first.model_label_plural }}
+                                {{ document.author_label_plural }}
                               {% else %}
-                                {{ authors.first.model_label }}
+                                {{ document.author_label }}
                               {% endif %}
                             </dt>
                             <dd class="text-muted">
                               {% for author in authors %}
-                                <a href="{% url 'author' author.code %}">{{ author.name }}</a>
-                                {% if not forloop.last %},{% endif %}
+                                {# djlint:off #}
+                                <a href="{% url 'author' author.code %}">{{ author.name }}</a>{% if not forloop.last %},{% endif %}
+                                {# djlint:on #}
                               {% endfor %}
                             </dd>
                           {% endif %}

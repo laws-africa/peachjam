@@ -196,6 +196,7 @@ class FilteredDocumentListView(DocumentListView):
         )
 
         authors = []
+        authors_label = Author.model_label_plural
         if hasattr(self.model, "author"):
             authors = list(
                 a
@@ -207,6 +208,8 @@ class FilteredDocumentListView(DocumentListView):
                 .distinct()
                 if a
             )
+            # customise the authors label?
+            authors_label = getattr(self.model, "author_label_plural", authors_label)
 
         years = list(
             self.form.filter_queryset(self.get_base_queryset(), exclude="years")
@@ -236,7 +239,7 @@ class FilteredDocumentListView(DocumentListView):
                 "values": self.request.GET.getlist("years"),
             },
             "authors": {
-                "label": Author.model_label_plural,
+                "label": authors_label,
                 "type": "checkbox",
                 "options": sorted([(a, a) for a in authors]),
                 "values": self.request.GET.getlist("authors"),
