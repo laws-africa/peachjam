@@ -109,6 +109,10 @@ class DocumentListView(ListView):
             def __init__(self, title):
                 self.title = title
 
+                if group_by == "date":
+                    months_list = list(MONTHS.values())
+                    self.group_id = months_list.index(title.split(" ")[0])
+
         docs = []
         for key, group in itertools.groupby(documents, grouper):
             docs.append(Group(key))
