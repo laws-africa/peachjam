@@ -231,8 +231,8 @@ class SearchableDocument(Document):
             return [a.name for a in instance.attorneys.all()]
 
     def prepare_authors(self, instance):
-        if hasattr(instance, "authors"):
-            return [a.name for a in instance.authors.all()]
+        if hasattr(instance, "author"):
+            return [a.name for a in instance.author_list]
 
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""
