@@ -232,7 +232,7 @@ class SearchableDocument(Document):
 
     def prepare_authors(self, instance):
         if hasattr(instance, "author"):
-            return [a.name for a in instance.author_list]
+            return [a.name for a in instance.author_list()]
 
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""
