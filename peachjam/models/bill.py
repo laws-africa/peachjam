@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.models import Author, CoreDocument
+from peachjam.models import CoreDocument
 
 
 class Bill(CoreDocument):
@@ -11,8 +11,8 @@ class Bill(CoreDocument):
         "peachjam.Author", null=True, on_delete=models.CASCADE, verbose_name=_("author")
     )
 
-    author_label = Author.model_label
-    author_label_plural = Author.model_label_plural
+    author_label = _("Chamber")
+    author_label_plural = _("Chambers")
 
     class Meta(CoreDocument.Meta):
         verbose_name = _("bill")
