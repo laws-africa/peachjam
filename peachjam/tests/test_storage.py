@@ -58,15 +58,19 @@ class DynamicS3StorageTestCase(TestCase):
         sf.mimetype = "text/plain"
         sf.file = ContentFile(b"test data", "test.txt")
         sf.save()
+        key = Pattern(rf"media/core_document/{self.doc.pk}/source_file/[^/]+/test\.txt")
         self.assertEqual(
             [
                 call.Bucket("fake-bucket"),
-                call.Bucket().Object(
-                    Pattern(
-                        rf"media/core_document/{self.doc.pk}/source_file/[^/]+/test\.txt"
-                    )
-                ),
+                call.Bucket().Object(key),
                 call.Bucket().Object().upload_fileobj(ANY, ExtraArgs=ANY, Config=ANY),
+                call.meta.client.copy_object(
+                    CopySource={"Bucket": "fake-bucket", "Key": key},
+                    MetadataDirective="REPLACE",
+                    Bucket="fake-bucket",
+                    Key=key,
+                    ContentDisposition='attachment; filename="test document.txt"',
+                ),
             ],
             self.mock.mock_calls,
         )

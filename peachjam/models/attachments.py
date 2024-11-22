@@ -140,9 +140,9 @@ class SourceFile(AttachmentAbstractModel):
         return title + ext
 
     def set_download_filename(self):
-        """For S3-backed storages using a custom domain, set the content-disposition header to a filename suitable
-        for download."""
-        if not self.source_url and getattr(self.file.storage, "custom_domain", None):
+        """For S3-backed storages, set the content-disposition header to a filename suitable for download. This is
+        only when serving the file from S3 or some other CDN backed by S3 (including CloudFront and CloudFlare)."""
+        if not self.source_url and getattr(self.file.storage, "bucket_name", None):
             metadata = self.file.storage.get_object_parameters(self.file.name)
             metadata[
                 "ContentDisposition"
