@@ -3,12 +3,11 @@ from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, QueryDict
-from django.http.response import JsonResponse
+from django.http.response import Http404, JsonResponse
 from django.shortcuts import redirect, reverse
-from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.timezone import now
@@ -769,10 +768,18 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
     def has_permission(self):
-        return self.request.user.is_authenticated and self.request.user.is_staff
+        return self.request.user.is_authenticated and self.request.user.is_staffo
 
 
-class SavedSearchButtonView(TemplateView):
+class AllowSavedSearchesMixin:
+    def dispatch(self, *args, **kwargs):
+        if not pj_settings().allow_save_searches:
+
+            raise Http404("Saving searches is not allowed.")
+        return super().dispatch(*args, **kwargs)
+
+
+class SavedSearchButtonView(AllowSavedSearchesMixin, TemplateView):
     template_name = "peachjam_search/saved_search_button.html"
 
     def get(self, *args, **kwargs):
@@ -810,10 +817,27 @@ class SavedSearchButtonView(TemplateView):
         return super().get(*args, **kwargs)
 
 
-class SavedSearchCreateView(CreateView):
+class BaseSavedSearchFormView(
+    AllowSavedSearchesMixin, LoginRequiredMixin, PermissionRequiredMixin
+):
+    model = SavedSearch
+    context_object_name = "saved_search"
+
+    def get_queryset(self):
+        return self.request.user.saved_searches.all()
+
+    def get_success_url(self):
+        return reverse(
+            "search:saved_search_update",
+            kwargs={
+                "pk": self.object.pk,
+            },
+        )
+
+
+class SavedSearchCreateView(BaseSavedSearchFormView, CreateView):
     permission_required = "peachjam_search.add_savedsearch"
     template_name = "peachjam_search/saved_search_form.html"
-    model = SavedSearch
     form_class = SavedSearchCreateForm
 
     def get_form_kwargs(self):
@@ -827,41 +851,21 @@ class SavedSearchCreateView(CreateView):
         kwargs["instance"] = instance
         return kwargs
 
-    def get_success_url(self):
-        return reverse("search:saved_search_update", kwargs={"pk": self.object.pk})
 
-
-class SavedSearchUpdateView(UpdateView):
+class SavedSearchUpdateView(BaseSavedSearchFormView, UpdateView):
     permission_required = "peachjam_search.change_savedsearch"
     template_name = "peachjam_search/saved_search_form.html"
-    model = SavedSearch
     form_class = SavedSearchUpdateForm
-    context_object_name = "saved_search"
-
-    def get_queryset(self):
-        return self.request.user.saved_searches.all()
-
-    def get_success_url(self):
-        return reverse("search:saved_search_update", kwargs={"pk": self.object.pk})
 
 
-class SavedSearchListView(ListView):
+class SavedSearchListView(BaseSavedSearchFormView, ListView):
     permission_required = "peachjam_search.view_savedsearch"
     template_name = "peachjam_search/saved_search_list.html"
-    model = SavedSearch
     context_object_name = "saved_searches"
 
-    def get_queryset(self):
-        return self.request.user.saved_searches.all()
 
-
-class SavedSearchDeleteView(DeleteView):
+class SavedSearchDeleteView(BaseSavedSearchFormView, DeleteView):
     permission_required = "peachjam_search.delete_savedsearch"
-    model = SavedSearch
-    success_url = reverse_lazy("search:saved_search_list")
-
-    def get_queryset(self):
-        return self.request.user.saved_searches.all()
 
     def get_success_url(self):
         return self.request.GET.get("next", None) or reverse("search:saved_search_list")

@@ -70,12 +70,23 @@
                 <ul class="dropdown-menu">
                   <li>
                     <a class="dropdown-item" href="{% url 'edit_account' %}">{% trans 'My account' %}</a>
-                    {% if user.is_staff %}
+                  </li>
+                  {% if user.is_staff %}
+                    <li>
                       <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
-                    {% endif %}
-                    {% if PEACHJAM_SETTINGS.allow_save_documents %}
+                    </li>
+                  {% endif %}
+                  {% if PEACHJAM_SETTINGS.allow_save_documents %}
+                    <li>
                       <a class="dropdown-item" href="{% url 'folder_list' %}">{% trans 'Saved documents' %}</a>
-                    {% endif %}
+                    </li>
+                  {% endif %}
+                  {% if PEACHJAM_SETTINGS.allow_save_searches %}
+                    <li>
+                      <a class="dropdown-item" href="{% url 'search:saved_search_list' %}">{% trans 'Search alerts' %}</a>
+                    </li>
+                  {% endif %}
+                  <li>
                     <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
                   </li>
                 </ul>

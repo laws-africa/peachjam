@@ -144,6 +144,11 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow documents to be saved."),
     )
+    allow_save_searches = models.BooleanField(
+        verbose_name=_("allow save searches"),
+        default=False,
+        help_text=_("Allow searches to be saved."),
+    )
     robots_txt = models.TextField(
         null=True, blank=True, help_text=_("Additional robots.txt rules.")
     )
