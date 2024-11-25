@@ -104,7 +104,7 @@ class DocumentListView(ListView):
                 if self.group_by_date == "month-year":
                     return f"{d.date.month} {d.date.year}"
                 else:
-                    return d.date.year
+                    return f"{d.date.year}"
             elif group_by == "title":
                 return d.title[0].upper()
 
