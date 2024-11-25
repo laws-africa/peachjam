@@ -15,7 +15,8 @@
     </td>
   {% endif %}
   {% if document.is_group %}
-    <td class="cell-group">{{ document.title }}</td>
+    <td id="{% if document.group_id %}{{ document.group_id }}{% endif %}"
+        class="cell-group">{{ document.title }}</td>
   {% else %}
     <td class="cell-title">
       <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>

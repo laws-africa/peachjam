@@ -102,7 +102,7 @@ class DocumentListView(ListView):
         def grouper(d):
             if group_by == "date":
                 if self.group_by_date == "month-year":
-                    return f"{MONTHS[d.date.month]} {d.date.year}"
+                    return f"{d.date.month} {d.date.year}"
                 else:
                     return d.date.year
             elif group_by == "title":
@@ -113,6 +113,11 @@ class DocumentListView(ListView):
 
             def __init__(self, title):
                 self.title = title
+                if group_by == "date":
+                    title = title.split()
+                    if len(title) == 2:
+                        self.group_id = title[0]
+                        self.title = f"{MONTHS[int(title[0])]} {title[1]}"
 
         docs = []
         for key, group in itertools.groupby(documents, grouper):
