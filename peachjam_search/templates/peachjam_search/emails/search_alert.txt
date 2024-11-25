@@ -1,0 +1,16 @@
+{{ saved_search.user }},
+
+We have found new documents that match your search alert:
+
+{{ saved_search.q }}
+
+{{ site.domain }}{{ saved_search.get_absolute_url }}
+
+{% for doc in hits %}
+  Title: {{ doc.title }}
+  {{ site.domain }}{{ doc.expression_frbr_uri }}
+
+{% endfor %}
+
+
+Manage your search alerts: {{ site.domain }}{% url "search:saved_search_list" %}

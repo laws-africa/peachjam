@@ -1,19 +1,29 @@
 import copy
 import logging
+from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import ValidationError
-from django.http.response import JsonResponse
+from django.http import HttpResponseRedirect, QueryDict
+from django.http.response import Http404, JsonResponse
 from django.shortcuts import redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
+from django.utils.timezone import now
 from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 from django_elasticsearch_dsl_drf.filter_backends import (
     DefaultOrderingFilterBackend,
     FacetedFilterSearchFilterBackend,
@@ -38,7 +48,8 @@ from rest_framework.viewsets import GenericViewSet
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
-from peachjam_search.models import SearchTrace
+from peachjam_search.forms import SavedSearchCreateForm, SavedSearchUpdateForm
+from peachjam_search.models import SavedSearch, SearchTrace
 from peachjam_search.serializers import (
     SearchableDocumentSerializer,
     SearchClickSerializer,
@@ -458,6 +469,7 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         "authors": "authors",
         "court": "court",
         "date": "date",
+        "created_at": "created_at",
         "doc_type": "doc_type",
         "jurisdiction": "jurisdiction",
         "language": "language",
@@ -632,6 +644,10 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
         return resp
 
     def save_search_trace(self, response):
+        # don't save search traces for alerts
+        if "search-alert" in self.request.id:
+            return
+
         field_searches = {
             fld: self.request.GET.get(f"search__{fld}")
             for fld in self.advanced_search_fields.keys()
@@ -767,3 +783,102 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
 
     def has_permission(self):
         return self.request.user.is_authenticated and self.request.user.is_staff
+
+
+class AllowSavedSearchesMixin:
+    def dispatch(self, *args, **kwargs):
+        if not pj_settings().allow_save_searches:
+            raise Http404("Saving searches is not allowed.")
+        return super().dispatch(*args, **kwargs)
+
+
+class SavedSearchButtonView(AllowSavedSearchesMixin, TemplateView):
+    template_name = "peachjam_search/saved_search_button.html"
+
+    def get(self, *args, **kwargs):
+        if self.request.user.is_authenticated and self.request.htmx:
+            params = dict(
+                QueryDict(urlparse(self.request.htmx.current_url_abs_path).query)
+            )
+            # these are fields we don't want to store
+            params.pop("suggestion", None)
+            params.pop("page", None)
+
+            q = params.pop("q", "")
+            q = q[0] if q else ""
+            filters = SavedSearch(
+                filters=urlencode(params, doseq=True)
+            ).get_sorted_filters_string()
+            saved_search = SavedSearch.objects.filter(
+                user=self.request.user, q=q, filters=filters
+            ).first()
+            if saved_search:
+                # already exists, the update view handles editing
+                return HttpResponseRedirect(
+                    reverse(
+                        "search:saved_search_update", kwargs={"pk": saved_search.pk}
+                    )
+                )
+            else:
+                self.extra_context = {
+                    "saved_search": SavedSearch(
+                        user=self.request.user,
+                        q=q,
+                        filters=filters,
+                    )
+                }
+        return super().get(*args, **kwargs)
+
+
+class BaseSavedSearchFormView(
+    AllowSavedSearchesMixin, LoginRequiredMixin, PermissionRequiredMixin
+):
+    model = SavedSearch
+    context_object_name = "saved_search"
+
+    def get_queryset(self):
+        return self.request.user.saved_searches.all()
+
+    def get_success_url(self):
+        return reverse(
+            "search:saved_search_update",
+            kwargs={
+                "pk": self.object.pk,
+            },
+        )
+
+
+class SavedSearchCreateView(BaseSavedSearchFormView, CreateView):
+    permission_required = "peachjam_search.add_savedsearch"
+    template_name = "peachjam_search/saved_search_form.html"
+    form_class = SavedSearchCreateForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        instance = SavedSearch()
+        instance.user = self.request.user
+        instance.last_alerted_at = now()
+        instance.q = self.request.GET.get("q", "")
+        instance.filters = self.request.GET.urlencode()
+        instance.filters = instance.get_sorted_filters_string()
+        kwargs["instance"] = instance
+        return kwargs
+
+
+class SavedSearchUpdateView(BaseSavedSearchFormView, UpdateView):
+    permission_required = "peachjam_search.change_savedsearch"
+    template_name = "peachjam_search/saved_search_form.html"
+    form_class = SavedSearchUpdateForm
+
+
+class SavedSearchListView(BaseSavedSearchFormView, ListView):
+    permission_required = "peachjam_search.view_savedsearch"
+    template_name = "peachjam_search/saved_search_list.html"
+    context_object_name = "saved_searches"
+
+
+class SavedSearchDeleteView(BaseSavedSearchFormView, DeleteView):
+    permission_required = "peachjam_search.delete_savedsearch"
+
+    def get_success_url(self):
+        return self.request.GET.get("next", None) or reverse("search:saved_search_list")

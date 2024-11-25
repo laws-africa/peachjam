@@ -28,11 +28,22 @@
         </a>
       </li>
     {% endif %}
-    <li class="nav-item">
-      <a href="{% url 'folder_list' %}"
-         class="nav-link {% if active == 'folders' %}active{% endif %}">
-        {% trans "Saved documents" %}
-      </a>
-    </li>
+    {% if PEACHJAM_SETTINGS.allow_save_documents %}
+      <li class="nav-item">
+        <a href="{% url 'folder_list' %}"
+           class="nav-link {% if active == 'folders' %}active{% endif %}">
+          {% trans "Saved documents" %}
+        </a>
+      </li>
+    {% endif %}
+    {% if PEACHJAM_SETTINGS.allow_save_searches %}
+      <li class="nav-item">
+        <a href="{% url 'search:saved_search_list' %}"
+           class="nav-link {% if active == 'saved_searches' %}active{% endif %}">
+          <i class="bi bi-bell"></i>
+          {% trans "Search alerts" %}
+        </a>
+      </li>
+    {% endif %}
   {% endblock %}
 </ul>

@@ -1,0 +1,49 @@
+{% extends "user_account/layout.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Search Alerts' %}
+{% endblock %}
+{% block account-tabs %}
+  {% include 'user_account/_tabs.html' with active='saved_searches' %}
+{% endblock %}
+{% block account-content %}
+  <div class="container mt-4">
+    <h2>{% trans 'Search alerts' %}</h2>
+    <div class="mb-4">
+      {% blocktrans trimmed %}We'll email you when new documents are found for your search alerts.{% endblocktrans %}
+    </div>
+    <div class="card">
+      {% if saved_searches %}
+        <ul class="list-group list-group-flush">
+          {% for search in saved_searches %}
+            <li class="list-group-item d-flex">
+              <div class="flex-grow-1 row">
+                <div class="col-md-6">
+                  <a href="{{ search.get_absolute_url }}">{{ search }}</a>
+                  <br/>
+                  <span class="text-muted">{{ search.note }}</span>
+                </div>
+                <div class="col-md-6">{% include 'peachjam_search/_saved_search_filters.html' with saved_search=search %}</div>
+              </div>
+              <div>
+                <form action="{% url 'search:saved_search_delete' search.pk %}?next={{ request.get_full_path }}"
+                      method="post">
+                  {% csrf_token %}
+                  <button class="btn btn-outline-danger me-2"
+                          type="submit"
+                          data-confirm="{% trans "Are you sure?" %}">
+                    {% trans 'Delete' %}
+                  </button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="card-body">
+          {% trans "You don't have any search alerts. Get started by searching for a document and clicking the search alert button." %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

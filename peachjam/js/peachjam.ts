@@ -54,6 +54,7 @@ class PeachJam {
     this.setupPopovers();
     this.scrollNavTabs();
     this.clearGACookies();
+    this.setupConfirm();
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
 
@@ -247,6 +248,23 @@ class PeachJam {
         }
       }
     }
+  }
+
+  setupConfirm () {
+    // On buttons and links with a data-confirm="message" attribute, show a message and stop everything if the user
+    // doesn't confirm.
+    document.body.addEventListener('click', function (e) {
+      if (e.target && e.target instanceof HTMLElement && e.target.matches('a[data-confirm], button[data-confirm], input[data-confirm]')) {
+        const message = e.target.getAttribute('data-confirm');
+        if (message) {
+          if (!confirm(message)) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+          }
+        }
+      }
+    });
   }
 }
 

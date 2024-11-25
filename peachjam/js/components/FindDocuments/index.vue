@@ -97,10 +97,20 @@
           <div class="my-2 text-end">
             <HelpBtn page="search/" />
           </div>
-          <div v-if="searchTip" class="my-2">
+          <div v-if="searchTip" class="mt-2 mb-3">
             <i class="bi bi-info-circle" />
             {{ searchTip.prompt }}
             <a href="#" @click.stop.prevent="useSearchTip()">{{ searchTip.q }}</a>
+          </div>
+          <div id="saved-search-button" />
+          <div
+            id="saved-search-modal"
+            class="modal fade"
+            tabindex="-1"
+            aria-labelledby="saved-search-modal-label"
+            aria-hidden="true"
+          >
+            <div id="saved-search-modal-dialog" class="modal-dialog" />
           </div>
         </div>
         <div
@@ -267,6 +277,7 @@ import FacetBadges from './FacetBadges.vue';
 import analytics from '../analytics';
 import { authHeaders } from '../../api';
 import SearchTypeahead from '../search-typeahead';
+import htmx from 'htmx.org';
 
 export default {
   name: 'FindDocuments',
@@ -785,6 +796,7 @@ export default {
               this.formatFacets();
               this.formatResults();
               this.trackSearch(params);
+              this.savedSearchModal();
             } else {
               this.error = response.statusText;
             }
@@ -859,8 +871,10 @@ export default {
         date_to: null,
         date_from: null
       };
+    },
+    savedSearchModal () {
+      htmx.ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });
     }
-
   }
 };
 </script>

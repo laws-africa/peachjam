@@ -71,6 +71,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "author",
             "nature",
             "matter_type",
+            "created_at",
             "case_number_string",
             "court",
             "judges",

@@ -16,7 +16,8 @@ class PeachjamSearchConfig(AppConfig):
         manager.register_indexes()
 
         if not settings.DEBUG:
-            from peachjam_search.tasks import prune_search_traces
+            from peachjam_search.tasks import prune_search_traces, update_saved_searches
 
             # run in an hour and repeat daily
             prune_search_traces(schedule=Task.HOURLY, repeat=Task.DAILY)
+            update_saved_searches(schedule=Task.HOURLY, repeat=Task.DAILY)

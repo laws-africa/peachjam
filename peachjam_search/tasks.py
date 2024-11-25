@@ -62,3 +62,25 @@ def search_model_saved(model_name, pk):
 @background(queue="peachjam", remove_existing_tasks=True)
 def prune_search_traces():
     SearchTrace.prune()
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def update_saved_search(saved_search_id):
+    from peachjam_search.models import SavedSearch
+
+    saved_search = SavedSearch.objects.filter(pk=saved_search_id).first()
+    if not saved_search:
+        log.info(
+            f"SavedSearch with pk {saved_search_id} does not exist. Ignoring task."
+        )
+        return
+
+    saved_search.update_and_alert()
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def update_saved_searches():
+    from peachjam_search.models import SavedSearch
+
+    for saved_search in SavedSearch.objects.all():
+        update_saved_search(saved_search.id)
