@@ -208,9 +208,12 @@ class CitationProcessing(SingletonModel):
                 self.processing_date,
             )
 
-            if later_documents.count():
-                for document in later_documents.iterator():
+            for document in later_documents.values_list("pk", flat=True):
+                try:
+                    document = CoreDocument.objects.get(pk=document)
                     extract_citations(document.id, creator=document)
+                except CoreDocument.DoesNotExist:
+                    log.warning(f"Document {document} does not exist.")
 
             self.reset_processing_date()
 
