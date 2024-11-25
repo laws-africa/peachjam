@@ -209,11 +209,7 @@ class CitationProcessing(SingletonModel):
             )
 
             for pk in later_documents.values_list("pk", flat=True):
-                try:
-                    document = CoreDocument.objects.get(pk=pk)
-                    extract_citations(document.id, creator=document)
-                except CoreDocument.DoesNotExist:
-                    log.warning(f"Document {pk} does not exist.")
+                extract_citations(pk, creator=CoreDocument(pk=pk))
 
             self.reset_processing_date()
 
