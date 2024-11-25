@@ -9,16 +9,19 @@ def generate_toc_json_from_html(root):
     """
     items = []
     stack = []
-    ids = defaultdict(int)
+    counts = defaultdict(int)
+    ids = set()
 
     for heading in root.xpath("//h1 | //h2 | //h3 | //h4 | //h5"):
         if not heading.text_content():
             continue
 
-        if "id" not in heading.attrib:
+        # no id, or it's a dup
+        if "id" not in heading.attrib or heading.attrib["id"] in ids:
             tag_name = heading.tag
-            ids[tag_name] += 1
-            heading.attrib["id"] = f"{tag_name}_{ids[tag_name]}"
+            counts[tag_name] += 1
+            heading.attrib["id"] = f"{tag_name}_{counts[tag_name]}"
+            ids.add(heading.attrib["id"])
 
         item = {
             "type": heading.tag,
@@ -41,7 +44,8 @@ def generate_toc_json_from_html(root):
 
 
 def wrap_toc_entries_in_divs(root, toc):
-    """Ensure the HTML covered by these TOC items are wrapped in nested divs."""
+    """Ensure the HTML covered by these TOC items are wrapped in nested divs. This may be run multiple times as a
+    document gets edited, and so we want to handle the case where the divs are already present."""
 
     def wrap_items(items):
         for i, item in enumerate(items):
@@ -49,7 +53,7 @@ def wrap_toc_entries_in_divs(root, toc):
             next_id = next_item["id"] if next_item else None
             el = root.get_element_by_id(item["id"])
 
-            if el is not None:
+            if el is not None and el.tag != "div":
                 wrapper = html.Element("div", id=item["id"])
                 el.attrib.pop("id", None)
                 el.addprevious(wrapper)
