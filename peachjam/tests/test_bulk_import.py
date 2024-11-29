@@ -140,3 +140,45 @@ class JudgmentBulkImportTestCase(TestCase):
         self.assertFalse(result.has_errors())
         d = GenericDocument.objects.first()
         self.assertEqual("/akn/za/doc/thing/2022-09-14/a-test", d.work_frbr_uri)
+
+    def test_frbr_uri_date(self):
+        headers = [
+            "skip",
+            "jurisdiction",
+            "date",
+            "language",
+            "nature",
+            "title",
+            "frbr_uri_doctype",
+            "frbr_uri_date",
+        ]
+        row = ["", "ZA", "2022-09-14", "eng", "thing", "a test", "doc", 2019]
+
+        dataset = tablib.Dataset(row, headers=headers)
+        result = GenericDocumentResource().import_data(dataset=dataset, dry_run=False)
+        self.assertEqual([], result.invalid_rows)
+        self.assertFalse(result.has_errors())
+        d = GenericDocument.objects.first()
+        self.assertEqual("/akn/za/doc/thing/2019/a-test", d.work_frbr_uri)
+
+    def test_empty_row(self):
+        headers = [
+            "skip",
+            "jurisdiction",
+            "date",
+            "language",
+            "nature",
+            "title",
+            "frbr_uri_doctype",
+            "frbr_uri_date",
+        ]
+        row = ["", "", "", "", "", None, "", None]
+
+        dataset = tablib.Dataset(row, headers=headers)
+        result = GenericDocumentResource().import_data(dataset=dataset, dry_run=False)
+        self.assertEqual([], result.invalid_rows)
+        self.assertFalse(result.has_errors())
+        self.assertEqual(0, result.totals["new"])
+        self.assertEqual(0, result.totals["update"])
+        self.assertEqual(1, result.totals["skip"])
+        self.assertIsNone(GenericDocument.objects.first())
