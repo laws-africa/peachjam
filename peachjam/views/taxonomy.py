@@ -33,6 +33,9 @@ class TaxonomyDetailView(FilteredDocumentListView):
     # taxonomies may include legislation, so we want to show the latest expression only
     latest_expression_only = True
 
+    def page_title(self):
+        return self.taxonomy.name
+
     def get(self, request, *args, **kwargs):
         self.taxonomy = self.get_taxonomy()
         return super().get(request, *args, **kwargs)

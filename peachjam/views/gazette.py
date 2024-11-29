@@ -132,6 +132,9 @@ class GazetteYearView(YearListMixin, FilteredDocumentListView):
         ("not_special", __("Regular Issue")),
     ]
 
+    def page_title(self):
+        return _("%(year)s gazettes") % {"year": self.kwargs["year"]}
+
     def get_form(self):
         self.form_defaults = {"sort": "-date", "secondary_sort": "-frbr_uri_number"}
         return super().get_form()

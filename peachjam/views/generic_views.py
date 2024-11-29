@@ -205,12 +205,24 @@ class FilteredDocumentListView(DocumentListView):
     def filter_queryset(self, qs, filter_q=False):
         return self.form.filter_queryset(qs, filter_q=filter_q)
 
+    def doc_count(self, context):
+        if context["paginator"]:
+            count = context["paginator"].count
+        else:
+            cache_key = f"doc_count_{slugify(self.page_title())}"
+            count = cache.get(cache_key)
+            if count is None:
+                count = context["object_list"].count()
+                cache.set(cache_key, count)
+
+        context["doc_count"] = count
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(form=self.form, **kwargs)
 
         self.add_facets(context)
         self.show_facet_clear_all(context)
-        context["doc_count"] = context["paginator"].count
+        self.doc_count(context)
         context["doc_table_title_label"] = _("Title")
         context["doc_table_date_label"] = _("Date")
 
