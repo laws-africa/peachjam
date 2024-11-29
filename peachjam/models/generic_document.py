@@ -24,7 +24,7 @@ class GenericDocument(CoreDocument):
         verbose_name_plural = _("generic documents")
 
     def __str__(self):
-        return self.title
+        return self.title or ""
 
     def author_list(self):
         return list(self.author.all())

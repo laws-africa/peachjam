@@ -82,6 +82,7 @@ class SourceFileWidget(CharWidget):
             return value
 
         source_url = self.get_best_source_url(value)
+        source_url = source_url.replace(" ", "%20")
         try:
             with TemporaryDirectory() as dir:
                 with NamedTemporaryFile(dir=dir) as file:
@@ -255,6 +256,10 @@ class StripHtmlWidget(CharWidget):
 
 
 class BaseDocumentResource(resources.ModelResource):
+    frbr_uri_date = fields.Field(
+        attribute="frbr_uri_date",
+        widget=CharWidget(coerce_to_string=True, allow_blank=True),
+    )
     date = fields.Field(attribute="date", widget=DateWidget(name="date"))
     language = fields.Field(
         attribute="language",
@@ -368,7 +373,7 @@ class BaseDocumentResource(resources.ModelResource):
             logger.info(f"Importing row: {row}")
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
-        return row["skip"]
+        return row["skip"] or all(not x for x in row.values())
 
     def save_m2m(self, instance, row, using_transactions, dry_run):
         super().save_m2m(instance, row, using_transactions, dry_run)
