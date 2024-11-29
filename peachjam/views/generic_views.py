@@ -1,5 +1,6 @@
 import itertools
 
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import Http404
@@ -9,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.dates import MONTHS
 from django.utils.functional import cached_property
 from django.utils.text import gettext_lazy as _
+from django.utils.text import slugify
 from django.views.generic import DetailView, ListView, View
 from lxml import html
 
@@ -43,11 +45,24 @@ class ClampedPaginator(Paginator):
     * https://github.com/photocrowd/django-cursor-pagination
     """
 
+    def __init__(self, *args, **kwargs):
+        self.page_title = kwargs.pop("page_title")
+        super().__init__(*args, **kwargs)
+
     max_num_pages = 10
 
     @cached_property
     def num_pages(self):
         return min(super().num_pages, self.max_num_pages)
+
+    @cached_property
+    def count(self):
+        cache_key = f"paginator_count_{slugify(self.page_title)}"
+        doc_count = cache.get(cache_key)
+        if doc_count is None:
+            doc_count = super().count
+            cache.set(cache_key, doc_count)
+        return doc_count
 
 
 class DocumentListView(ListView):
@@ -60,6 +75,21 @@ class DocumentListView(ListView):
 
     # when grouping by date, group by year, or month and year? ("year" and "month-year" are the only options)
     group_by_date = "year"
+
+    def page_title(self):
+        return _("Documents")
+
+    def get_paginator(
+        self, queryset, per_page, orphans=0, allow_empty_first_page=True, **kwargs
+    ):
+        return self.paginator_class(
+            queryset,
+            per_page,
+            orphans=orphans,
+            allow_empty_first_page=allow_empty_first_page,
+            page_title=self.page_title(),
+            **kwargs,
+        )
 
     def get_model_queryset(self):
         qs = self.queryset if self.queryset is not None else self.model.objects
@@ -180,11 +210,7 @@ class FilteredDocumentListView(DocumentListView):
 
         self.add_facets(context)
         self.show_facet_clear_all(context)
-        context["doc_count"] = (
-            context["paginator"].count
-            if context["paginator"]
-            else context["object_list"].count()
-        )
+        context["doc_count"] = context["paginator"].count
         context["doc_table_title_label"] = _("Title")
         context["doc_table_date_label"] = _("Date")
 
