@@ -83,7 +83,9 @@ class DocumentPopupView(DetailView):
         else:
             uri = self.frbr_uri.work_uri()
 
-        obj = self.model.objects.best_for_frbr_uri(uri, get_language())[0]
+        obj = self.model.objects.prefetch_related("labels").best_for_frbr_uri(
+            uri, get_language()
+        )[0]
         if not obj:
             raise Http404()
         return obj

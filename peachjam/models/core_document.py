@@ -291,7 +291,7 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
             return obj, True
 
         # try looking based on the work URI instead, and use the latest expression
-        qs = CoreDocument.objects.filter(work_frbr_uri=frbr_uri)
+        qs = CoreDocument.objects.filter(work__frbr_uri=frbr_uri)
 
         # first, look for one in the user's preferred language
         if lang:
