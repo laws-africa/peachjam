@@ -5,39 +5,43 @@
 {% endblock %}
 {% block survey-banner %}{% endblock %}
 {% block page-content %}
-  {% block hero %}
-    <section class="hero">
-      {% block hero-img %}
-        <img class="hero__background-img"
-             src="{% static 'images/banner.jpg' %}"
-             srcset="{% static 'images/banner-small.jpg' %} 770w,
-                     {% static 'images/banner.jpg' %} 1920w"
-             sizes="100vw"
-             alt="{{ APP_NAME }}"
-             height="40"/>
-      {% endblock %}
-      <div class="hero__content">
+  {% block hero-search %}
+    <section class="pt-5 pb-3 hero-search">
+      <div class="container">{% include 'liiweb/_hero_search.html' %}</div>
+    </section>
+  {% endblock %}
+  {% block hero-content %}
+    <section class="pt-5">
+      <div class="container">
         <div class="row">
-          <div class="col-lg-8 col-12">
-            {% block hero-content %}
-              {% block hero-headings %}
-                <h1 class="mb-4">
-                  {% block hero-headings-title %}{{ APP_NAME }}{% endblock %}
-                </h1>
-              {% endblock %}
-              <h4 class="mb-4">
-                {% block hero-headings-welcome %}{% endblock %}
-              </h4>
-            {% endblock %}
+          <div class="col-9">
+            {% block hero-blurb %}{% endblock %}
+          </div>
+          <div class="col-3 col-lg-2 offset-lg-1 text-center">
+            {% block hero-images %}{% endblock %}
           </div>
         </div>
       </div>
     </section>
-    {% block hero-search %}
-      <section class="py-5 hero-search">
-        <div class="container">{% include 'liiweb/_hero_search.html' %}</div>
-      </section>
-    {% endblock %}
+  {% endblock %}
+  {% block frequently-used %}
+    <div class="container pt-2">
+      <div class="mt-3 d-lg-none row row-cols-2">
+        <div class="col mb-2">
+          <a href="{% url 'judgment_list' %}" class="btn btn-primary d-block">Judgments</a>
+        </div>
+        <div class="col mb-2">
+          <a href="{% url 'legislation_list' %}" class="btn btn-primary d-block">National Legislation</a>
+        </div>
+        <div class="col mb-2">
+          <a href="{% url 'locality_legislation' %}"
+             class="btn btn-primary d-block">Provincial Legislation</a>
+        </div>
+        <div class="col mb-2">
+          <a href="{% url 'gazettes' %}" class="btn btn-primary d-block">Gazettes</a>
+        </div>
+      </div>
+    </div>
   {% endblock %}
   {% block after-search %}{% endblock %}
   {% if PEACHJAM_SETTINGS.survey_link %}
