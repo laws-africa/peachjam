@@ -24,9 +24,6 @@ class LegislationListView(BaseLegislationListView):
     form_defaults = None
     national_only = True
 
-    def page_title(self):
-        return _("%(variant)s legislation") % {"variant": self.variant}
-
     def get_form(self):
         self.form_defaults = {"sort": "title"}
         if self.variant in ["recent", "subleg"]:
@@ -146,10 +143,6 @@ class LocalityLegislationListView(LegislationListView):
         ]
     }
     national_only = False
-
-    def page_title(self):
-        name = super().page_title()
-        return f"{self.locality.name} {name}"
 
     def get(self, *args, **kwargs):
         code = kwargs["code"]

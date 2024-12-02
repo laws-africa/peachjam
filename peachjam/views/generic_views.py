@@ -10,7 +10,6 @@ from django.shortcuts import get_object_or_404
 from django.utils.dates import MONTHS
 from django.utils.functional import cached_property
 from django.utils.text import gettext_lazy as _
-from django.utils.text import slugify
 from django.views.generic import DetailView, ListView, View
 from lxml import html
 
@@ -46,7 +45,8 @@ class ClampedPaginator(Paginator):
     """
 
     def __init__(self, *args, **kwargs):
-        self.page_title = kwargs.pop("page_title")
+        cache_key_prefix = kwargs.pop("cache_key_prefix")
+        self.cache_key = f"{cache_key_prefix}_doc_count"
         super().__init__(*args, **kwargs)
 
     max_num_pages = 10
@@ -57,11 +57,10 @@ class ClampedPaginator(Paginator):
 
     @cached_property
     def count(self):
-        cache_key = f"paginator_count_{slugify(self.page_title)}"
-        doc_count = cache.get(cache_key)
+        doc_count = cache.get(self.cache_key)
         if doc_count is None:
             doc_count = super().count
-            cache.set(cache_key, doc_count)
+            cache.set(self.cache_key, doc_count)
         return doc_count
 
 
@@ -87,9 +86,13 @@ class DocumentListView(ListView):
             per_page,
             orphans=orphans,
             allow_empty_first_page=allow_empty_first_page,
-            page_title=self.page_title(),
+            cache_key_prefix=self.cache_key_prefix,
             **kwargs,
         )
+
+    @cached_property
+    def cache_key_prefix(self):
+        return self.request.get_full_path()
 
     def get_model_queryset(self):
         qs = self.queryset if self.queryset is not None else self.model.objects
@@ -206,14 +209,13 @@ class FilteredDocumentListView(DocumentListView):
         return self.form.filter_queryset(qs, filter_q=filter_q)
 
     def doc_count(self, context):
-        if context["paginator"]:
-            count = context["paginator"].count
-        else:
-            cache_key = f"doc_count_{slugify(self.page_title())}"
-            count = cache.get(cache_key)
-            if count is None:
+        count = cache.get(f"{self.cache_key_prefix}_doc_count")
+        if count is None:
+            if context["paginator"]:
+                count = context["paginator"].count
+            else:
                 count = context["object_list"].count()
-                cache.set(cache_key, count)
+                cache.set(f"{self.cache_key_prefix}_doc_count", count)
 
         context["doc_count"] = count
 

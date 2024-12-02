@@ -1,5 +1,3 @@
-from django.utils.translation import gettext as _
-
 from peachjam.models import GenericDocument
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
@@ -15,9 +13,6 @@ class DocumentListView(FilteredDocumentListView):
     queryset = GenericDocument.objects.prefetch_related(
         "author", "nature", "work", "locality"
     )
-
-    def page_title(self):
-        return _("General Documents")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

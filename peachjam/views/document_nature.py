@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.utils.translation import gettext as _
 
 from peachjam.models import DocumentNature, GenericDocument
 from peachjam.views.generic_views import FilteredDocumentListView
@@ -9,9 +8,6 @@ class DocumentNatureListView(FilteredDocumentListView):
     template_name = "peachjam/document_nature_list.html"
     model = GenericDocument
     queryset = GenericDocument.objects.prefetch_related("author", "nature", "work")
-
-    def page_title(self):
-        return _("%(nature)s document list") % {"nature": self.document_nature.name}
 
     def get(self, *args, **kwargs):
         self.document_nature = get_object_or_404(
