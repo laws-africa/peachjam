@@ -1,5 +1,6 @@
 import itertools
 
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import Http404
@@ -43,11 +44,24 @@ class ClampedPaginator(Paginator):
     * https://github.com/photocrowd/django-cursor-pagination
     """
 
+    def __init__(self, *args, **kwargs):
+        cache_key_prefix = kwargs.pop("cache_key_prefix")
+        self.cache_key = f"{cache_key_prefix}_doc_count"
+        super().__init__(*args, **kwargs)
+
     max_num_pages = 10
 
     @cached_property
     def num_pages(self):
         return min(super().num_pages, self.max_num_pages)
+
+    @cached_property
+    def count(self):
+        doc_count = cache.get(self.cache_key)
+        if doc_count is None:
+            doc_count = super().count
+            cache.set(self.cache_key, doc_count)
+        return doc_count
 
 
 class DocumentListView(ListView):
@@ -60,6 +74,21 @@ class DocumentListView(ListView):
 
     # when grouping by date, group by year, or month and year? ("year" and "month-year" are the only options)
     group_by_date = "year"
+
+    def get_paginator(
+        self, queryset, per_page, orphans=0, allow_empty_first_page=True, **kwargs
+    ):
+        return self.paginator_class(
+            queryset,
+            per_page,
+            orphans=orphans,
+            allow_empty_first_page=allow_empty_first_page,
+            cache_key_prefix=self.cache_key_prefix(),
+            **kwargs,
+        )
+
+    def cache_key_prefix(self):
+        return self.request.get_full_path()
 
     def get_model_queryset(self):
         qs = self.queryset if self.queryset is not None else self.model.objects
@@ -175,16 +204,23 @@ class FilteredDocumentListView(DocumentListView):
     def filter_queryset(self, qs, filter_q=False):
         return self.form.filter_queryset(qs, filter_q=filter_q)
 
+    def doc_count(self, context):
+        if context["paginator"]:
+            count = context["paginator"].count
+        else:
+            key = f"{self.cache_key_prefix()}_doc_count"
+            count = cache.get(key)
+            if count is None:
+                count = context["object_list"].count()
+                cache.set(key, count)
+        context["doc_count"] = count
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(form=self.form, **kwargs)
 
         self.add_facets(context)
         self.show_facet_clear_all(context)
-        context["doc_count"] = (
-            context["paginator"].count
-            if context["paginator"]
-            else context["object_list"].count()
-        )
+        self.doc_count(context)
         context["doc_table_title_label"] = _("Title")
         context["doc_table_date_label"] = _("Date")
 
