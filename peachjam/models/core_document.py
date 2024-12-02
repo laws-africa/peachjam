@@ -286,20 +286,18 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
         """Get the best object for this FRBR URI, which could be an expression or a work URI.
         Returns an (object, exact) tuple, where exact is a boolean indicating if the match was an exact one,
         or a guess."""
-        obj = self.filter(expression_frbr_uri=frbr_uri).first()
-        if obj:
+        if "@" in frbr_uri:
+            obj = self.filter(expression_frbr_uri=frbr_uri).first()
             return obj, True
 
         # try looking based on the work URI instead, and use the latest expression
-        qs = CoreDocument.objects.filter(work_frbr_uri=frbr_uri)
+        qs = CoreDocument.objects.filter(work__frbr_uri=frbr_uri)
 
         # first, look for one in the user's preferred language
         if lang:
-            lang = Language.objects.filter(pk=lang).first()
-            if lang:
-                obj = qs.filter(language=lang).latest_expression().first()
-                if obj:
-                    return obj, False
+            obj = qs.filter(language__pk=lang).latest_expression().first()
+            if obj:
+                return obj, False
 
         # try the default site language
         lang = pj_settings().default_document_language

@@ -12,9 +12,7 @@
         {% block title %}
           <b>{{ document.title }}</b>
           {% block title-badges %}
-            {% if document.metadata_json.repealed %}
-              <span class="badge bg-danger">{% trans 'repealed' %}</span>
-            {% endif %}
+            {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
           {% endblock %}
         {% endblock %}
       </div>
