@@ -75,9 +75,6 @@ class DocumentListView(ListView):
     # when grouping by date, group by year, or month and year? ("year" and "month-year" are the only options)
     group_by_date = "year"
 
-    def page_title(self):
-        return _("Documents")
-
     def get_paginator(
         self, queryset, per_page, orphans=0, allow_empty_first_page=True, **kwargs
     ):
@@ -86,11 +83,10 @@ class DocumentListView(ListView):
             per_page,
             orphans=orphans,
             allow_empty_first_page=allow_empty_first_page,
-            cache_key_prefix=self.cache_key_prefix,
+            cache_key_prefix=self.cache_key_prefix(),
             **kwargs,
         )
 
-    @cached_property
     def cache_key_prefix(self):
         return self.request.get_full_path()
 
@@ -209,14 +205,14 @@ class FilteredDocumentListView(DocumentListView):
         return self.form.filter_queryset(qs, filter_q=filter_q)
 
     def doc_count(self, context):
-        count = cache.get(f"{self.cache_key_prefix}_doc_count")
-        if count is None:
-            if context["paginator"]:
-                count = context["paginator"].count
-            else:
+        if context["paginator"]:
+            count = context["paginator"].count
+        else:
+            key = f"{self.cache_key_prefix()}_doc_count"
+            count = cache.get(key)
+            if count is None:
                 count = context["object_list"].count()
-                cache.set(f"{self.cache_key_prefix}_doc_count", count)
-
+                cache.set(key, count)
         context["doc_count"] = count
 
     def get_context_data(self, **kwargs):
