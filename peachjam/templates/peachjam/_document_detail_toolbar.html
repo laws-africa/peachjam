@@ -3,7 +3,7 @@
      role="toolbar"
      aria-label="{% trans "Document toolbar" %}">
   {% block edit-btn %}
-    {% if perms.peachjam.change_coredocument or perms.peachjam.can_edit_own_document %}
+    {% if user.is_staff %}
       {% if document.ingestor_edit_url %}
         <div class="btn-group">
           <a class="btn btn-outline-secondary btn-shrink-sm"
