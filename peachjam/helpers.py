@@ -56,8 +56,24 @@ def pdfjs_to_text(fname):
 
 
 def chunks(lst, n):
-    """Break lst into n-sized chunks."""
-    return [lst[i : i + n] for i in range(0, len(lst), n)]
+    """Split a list into n chunks, with the first chunk absorbing any rounding. If the list is shorter
+    than n, only len(n) chunks will be returned."""
+    if not lst:
+        return []
+
+    n = min(n, len(lst))
+    avg = len(lst) // n
+    remainder = len(lst) % n
+    result = []
+    start = 0
+
+    for i in range(n):
+        # Add the remainder to the first chunk
+        size = avg + (1 if i < remainder else 0)
+        result.append(lst[start : start + size])
+        start += size
+
+    return result
 
 
 class ISODateConverter:
