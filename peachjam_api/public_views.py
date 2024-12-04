@@ -105,6 +105,12 @@ class JudgmentsViewSet(BaseDocumentViewSet):
         .all()
     )
     serializer_class = JudgmentSerializer
+    filterset_fields = BaseDocumentViewSet.filterset_fields.copy()
+    filterset_fields.update(
+        {
+            "court__code": ["exact"],
+        }
+    )
 
 
 class RatificationsViewSet(viewsets.ReadOnlyModelViewSet):

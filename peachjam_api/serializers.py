@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from peachjam.models import (
+    CaseNumber,
     CitationLink,
     CoreDocument,
     Court,
@@ -8,6 +9,7 @@ from peachjam.models import (
     Judgment,
     Label,
     Legislation,
+    Locality,
     Predicate,
     Ratification,
     RatificationCountry,
@@ -150,6 +152,20 @@ class CourtSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "code"]
 
 
+class CaseNumbersSerializer(serializers.ModelSerializer):
+    matter_type = serializers.CharField(source="matter_type.name")
+
+    class Meta:
+        model = CaseNumber
+        fields = ["string_override", "matter_type", "year", "string", "number"]
+
+
+class LocalitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Locality
+        fields = ["name", "code"]
+
+
 class BaseSerializerMixin:
     def get_url(self, instance):
         # TODO: check https
@@ -160,12 +176,15 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
     court = CourtSerializer(read_only=True)
     url = serializers.SerializerMethodField()
     judges = serializers.SerializerMethodField()
-    case_numbers = serializers.SerializerMethodField()
+    case_numbers = CaseNumbersSerializer(many=True, read_only=True)
+    locality = LocalitySerializer(read_only=True)
+    topics = serializers.SerializerMethodField()
 
     class Meta:
         model = Judgment
         fields = (
             "case_numbers",
+            "case_name",
             "citation",
             "court",
             "created_at",
@@ -181,13 +200,14 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
             "updated_at",
             "url",
             "work_frbr_uri",
+            "topics",
         )
 
     def get_judges(self, instance):
         return [j.name for j in instance.judges.all()]
 
-    def get_case_numbers(self, instance):
-        return [str(c) for c in instance.case_numbers.all()]
+    def get_topics(self, instance):
+        return [t.topic.name for t in instance.taxonomies.all()]
 
 
 class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):

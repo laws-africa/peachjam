@@ -23,4 +23,9 @@ router.register(
 urlpatterns = [
     # public-facing API
     path("", include(router.urls)),
+    path(
+        "judgments/<path:expression_frbr_uri>",
+        public_views.JudgmentsViewSet.as_view({"get": "retrieve"}),
+        name="judgments-detail",
+    ),
 ]
