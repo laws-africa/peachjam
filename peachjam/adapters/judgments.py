@@ -31,14 +31,14 @@ class JudgmentAdapter(RequestsAdapter):
                 "Authorization": f"Token {self.settings['token']}",
             }
         )
-        self.court_codes = self.settings["court_code"].split()
         self.filters = {}
         for pair in (self.settings.get("filters") or "").split():
             if "=" in pair:
                 key, value = pair.split("=")
                 self.filters[key] = value
-                for code in self.court_codes:
-                    self.filters["court__code"] = code
+        self.court_codes = self.settings["court_code"].split()
+        for code in self.court_codes:
+            self.filters["court__code"].append(code)
 
     def check_for_updates(self, last_refreshed):
         docs = self.get_judgments_list()

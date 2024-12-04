@@ -153,7 +153,7 @@ class CourtSerializer(serializers.ModelSerializer):
 
 
 class CaseNumbersSerializer(serializers.ModelSerializer):
-    matter_type = serializers.CharField(source="matter_type.name")
+    matter_type = serializers.CharField(source="matter_type.name", allow_null=True)
 
     class Meta:
         model = CaseNumber
