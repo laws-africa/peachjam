@@ -9,18 +9,18 @@
     <p>{{ saved_search.user }},</p>
     <p>{% trans "We have found new documents that match your search alert:" %}</p>
     <p>
-      <strong><a href="{{ site.domain }}{{ saved_search.get_absolute_url }}">{{ saved_search.q }}</a></strong>
+      <strong><a href="https://{{ site.domain }}{{ saved_search.get_absolute_url }}">{{ saved_search.q }}</a></strong>
     </p>
     <p>{% include 'peachjam_search/_saved_search_filters.html' %}</p>
     <ul>
       {% for doc in hits %}
         <li>
-          <a href="{{ site.domain }}{{ doc.expression_frbr_uri }}">{{ doc.title }}</a>
+          <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}">{{ doc.title }}</a>
         </li>
       {% endfor %}
     </ul>
     <p>
-      <a href="{{ site.domain }}{% url "search:saved_search_list" %}">{% trans "Manage your search alerts" %}</a>
+      <a href="https://{{ site.domain }}{% url "search:saved_search_list" %}">{% trans "Manage your search alerts" %}</a>
     </p>
   </body>
 </html>
