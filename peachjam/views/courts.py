@@ -1,5 +1,4 @@
 from functools import cached_property
-from math import ceil
 
 from django.core.cache import cache
 from django.http import Http404
@@ -198,12 +197,7 @@ class CourtDetailView(FilteredJudgmentView):
             context["registries"] = registries = self.court.registries.exclude(
                 judgments__isnull=True
             )  # display registries with judgments only
-            # split the list in the middle to have two columns and preserve ordering
-            split_index = ceil(registries.count() / 2)
-            context["registry_groups"] = [
-                registries[:split_index],
-                registries[split_index:],
-            ]
+            context["registry_groups"] = chunks(registries, 3)
 
         context["all_years_url"] = self.court.get_absolute_url()
         return context
