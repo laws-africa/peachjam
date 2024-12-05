@@ -261,3 +261,11 @@ class RatificationSerializer(serializers.ModelSerializer):
             "last_updated",
             "countries",
         )
+
+
+class BatchValidateFrbrUrisRequestSerializer(serializers.Serializer):
+    expression_frbr_uris = serializers.ListField(child=serializers.CharField())
+
+
+class BatchValidateFrbrUrisResponseSerializer(serializers.Serializer):
+    invalid_expression_frbr_uris = serializers.ListField(child=serializers.CharField())

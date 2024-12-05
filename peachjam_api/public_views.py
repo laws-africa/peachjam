@@ -1,11 +1,19 @@
 from django.http import Http404, HttpResponse
 from drf_spectacular.utils import OpenApiTypes, extend_schema
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import BasePermission, DjangoModelPermissions
+from rest_framework.permissions import (
+    BasePermission,
+    DjangoModelPermissions,
+    IsAuthenticated,
+)
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from peachjam.models import Gazette, Judgment, Ratification
 from peachjam_api.serializers import (
+    BatchValidateFrbrUrisRequestSerializer,
+    BatchValidateFrbrUrisResponseSerializer,
     GazetteSerializer,
     JudgmentSerializer,
     RatificationSerializer,
@@ -152,3 +160,31 @@ class RatificationsViewSet(viewsets.ReadOnlyModelViewSet):
         "updated_at": ["exact", "gte", "lte"],
     }
     ordering = ["updated_at"]
+
+
+class ValidateExpressionFrbrUrisView(APIView):
+    """Validates a list of decision expression FRBR URIs and returns those that aren't valid."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = BatchValidateFrbrUrisRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        frbr_uris = serializer.validated_data["expression_frbr_uris"]
+
+        # Check which URIs are not valid in bulk
+        invalid_uris = self.get_invalid_uris(frbr_uris)
+
+        response_serializer = BatchValidateFrbrUrisResponseSerializer(
+            data={"invalid_expression_frbr_uris": list(invalid_uris)}
+        )
+        response_serializer.is_valid(raise_exception=True)
+
+        # Return the invalid URIs
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    def get_invalid_uris(self, frbr_uris):
+        valid_uris = Judgment.objects.filter(
+            expression_frbr_uri__in=frbr_uris
+        ).values_list("expression_frbr_uri", flat=True)
+        return set(frbr_uris) - set(valid_uris)

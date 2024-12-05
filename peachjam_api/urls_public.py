@@ -48,4 +48,9 @@ urlpatterns = [
         public_views.JudgmentsViewSet.as_view({"get": "retrieve"}),
         name="api_judgment_detail",
     ),
+    path(
+        "validate-expression-frbr-uris",
+        public_views.ValidateExpressionFrbrUrisView.as_view(),
+        name="validate_expression_frbr_uris",
+    ),
 ]
