@@ -67,7 +67,7 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
         content = obj.content_html
         if not content:
             raise Http404()
-        return HttpResponse(content.content_text, content_type="text/html")
+        return HttpResponse(content, content_type="text/html")
 
     @extend_schema(responses={(200, "application/pdf"): OpenApiTypes.BINARY})
     @action(detail=True, url_path="source.pdf")
@@ -81,6 +81,22 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
             raise Http404()
 
         if not source_file.file or source_file.mimetype != "application/pdf":
+            raise Http404()
+
+        return self.make_response(
+            source_file.file, source_file.mimetype, source_file.filename_for_download()
+        )
+
+    @extend_schema(responses={(200, "application/octet-stream"): OpenApiTypes.BINARY})
+    @action(detail=True, url_path="source.file")
+    def source_file(self, request, expression_frbr_uri=None):
+        obj = self.get_object()
+        try:
+            source_file = getattr(obj, "source_file")
+        except AttributeError:
+            raise Http404()
+
+        if not source_file.file:
             raise Http404()
 
         return self.make_response(

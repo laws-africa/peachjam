@@ -1,4 +1,5 @@
 import logging
+from mimetypes import guess_extension
 from tempfile import NamedTemporaryFile
 
 import magic
@@ -184,7 +185,9 @@ class JudgmentAdapter(RequestsAdapter):
                     )
 
     def attach_source_file(self, doc, created_doc):
-        source_file_url = f"{self.api_url}{doc['expression_frbr_uri']}/source.pdf"
+        source_file_url = (
+            f"{self.api_url}/judgments{doc['expression_frbr_uri']}/source.file"
+        )
         try:
             r = self.client_get(source_file_url)
         except requests.exceptions.HTTPError as e:
@@ -197,9 +200,10 @@ class JudgmentAdapter(RequestsAdapter):
             f.write(r.content)
             f.flush()
             mimetype = magic.from_file(f.name, mime=True)
-            filename = slugify(doc.title)
+            ext = guess_extension(mimetype) or ""
+            filename = f"{slugify(doc['title'])[:512]}{ext}"
 
-            sf = SourceFile.objects.update_or_create(
+            sf, _ = SourceFile.objects.update_or_create(
                 document=created_doc,
                 defaults={
                     "file": File(f, filename),
