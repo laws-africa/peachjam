@@ -213,7 +213,7 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             f.flush()
             mimetype = magic.from_file(f.name, mime=True)
             ext = guess_extension(mimetype) or ""
-            filename = f"{slugify(doc['title'])[:512]}{ext}"
+            filename = f"{slugify(doc['title'])[:200]}{ext}"
 
             sf, _ = SourceFile.objects.update_or_create(
                 document=created_doc,
