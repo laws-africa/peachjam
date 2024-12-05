@@ -34,5 +34,7 @@ Detention in Africa to include issues relating to policing and human rights;""",
         self.assertEqual(
             chunks([1, 2, 3, 4, 5, 6, 7, 8], 3), [[1, 2, 3], [4, 5, 6], [7, 8]]
         )
+        self.assertEqual(chunks([1, 2, 3, 4], 3), [[1, 2], [3], [4]])
+        self.assertEqual(chunks([1, 2], 5), [[1], [2]])
+        self.assertEqual(chunks([1, 2], 2), [[1], [2]])
         self.assertEqual(chunks([], 3), [])
-        self.assertEqual(chunks([1, 2], 2), [[1, 2]])

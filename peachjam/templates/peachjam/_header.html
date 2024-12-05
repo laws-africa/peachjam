@@ -59,38 +59,7 @@
         {% if user.is_authenticated %}
           <ul class="navbar-nav">
             {% block navbar-user-menu %}
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle"
-                   href="#"
-                   role="button"
-                   data-bs-toggle="dropdown"
-                   aria-expanded="false">
-                  {{ user }}
-                </a>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a class="dropdown-item" href="{% url 'edit_account' %}">{% trans 'My account' %}</a>
-                  </li>
-                  {% if user.is_staff %}
-                    <li>
-                      <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
-                    </li>
-                  {% endif %}
-                  {% if PEACHJAM_SETTINGS.allow_save_documents %}
-                    <li>
-                      <a class="dropdown-item" href="{% url 'folder_list' %}">{% trans 'Saved documents' %}</a>
-                    </li>
-                  {% endif %}
-                  {% if PEACHJAM_SETTINGS.allow_save_searches %}
-                    <li>
-                      <a class="dropdown-item" href="{% url 'search:saved_search_list' %}">{% trans 'Search alerts' %}</a>
-                    </li>
-                  {% endif %}
-                  <li>
-                    <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
-                  </li>
-                </ul>
-              </li>
+              {% include "peachjam/_user_menu.html" %}
             {% endblock %}
           </ul>
         {% elif PEACHJAM_SETTINGS.allow_save_documents %}
