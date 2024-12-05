@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework import routers
 
 from . import public_views
@@ -23,8 +23,18 @@ router.register(
 urlpatterns = [
     # public-facing API
     path("", include(router.urls)),
-    path(
-        "judgments/<path:expression_frbr_uri>",
+    re_path(
+        r"^judgments(?P<expression_frbr_uri>/akn/.*)/source.txt$",
+        public_views.JudgmentsViewSet.as_view({"get": "source_txt"}),
+        name="judgments-detail",
+    ),
+    re_path(
+        r"^judgments(?P<expression_frbr_uri>/akn/.*)/source.pdf$",
+        public_views.JudgmentsViewSet.as_view({"get": "source_pdf"}),
+        name="judgments-detail",
+    ),
+    re_path(
+        r"^judgments(?P<expression_frbr_uri>/akn/.*)$",
         public_views.JudgmentsViewSet.as_view({"get": "retrieve"}),
         name="judgments-detail",
     ),

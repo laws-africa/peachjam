@@ -33,6 +33,7 @@ class RatificationAPIPermission(JudgmentAPIPermission):
 
 
 class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
+    lookup_field = "expression_frbr_uri"
     permission_classes = [DjangoModelPermissions]
     filterset_fields = {
         "jurisdiction": ["exact"],
@@ -47,7 +48,7 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
 
     @extend_schema(responses={(200, "text/plain"): OpenApiTypes.STR})
     @action(detail=True, url_path="source.txt")
-    def source_txt(self, request, pk=None):
+    def source_txt(self, request, expression_frbr_uri=None):
         """Source document in text form (if available)."""
         obj = self.get_object()
         # we only allow certain formats
@@ -59,9 +60,18 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
         # return content.content_text as a normal drf response object
         return HttpResponse(content.content_text, content_type="text/plain")
 
+    @extend_schema(responses={(200, "text/html"): OpenApiTypes.STR})
+    @action(detail=True, url_path=".html")
+    def content_html(self, request, expression_frbr_uri=None):
+        obj = self.get_object()
+        content = obj.content_html
+        if not content:
+            raise Http404()
+        return HttpResponse(content.content_text, content_type="text/html")
+
     @extend_schema(responses={(200, "application/pdf"): OpenApiTypes.BINARY})
     @action(detail=True, url_path="source.pdf")
-    def source_pdf(self, request, pk=None):
+    def source_pdf(self, request, expression_frbr_uri=None):
         """Source document in PDF form (if available)."""
         obj = self.get_object()
         # we only allow certain formats

@@ -5,6 +5,7 @@ from peachjam.models import (
     CitationLink,
     CoreDocument,
     Court,
+    CourtRegistry,
     Gazette,
     Judgment,
     Label,
@@ -152,6 +153,12 @@ class CourtSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "code"]
 
 
+class CourtRegistrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourtRegistry
+        fields = ["id", "name", "code"]
+
+
 class CaseNumbersSerializer(serializers.ModelSerializer):
     matter_type = serializers.CharField(source="matter_type.name", allow_null=True)
 
@@ -174,6 +181,7 @@ class BaseSerializerMixin:
 
 class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
     court = CourtSerializer(read_only=True)
+    registry = CourtRegistrySerializer(read_only=True)
     url = serializers.SerializerMethodField()
     judges = serializers.SerializerMethodField()
     case_numbers = CaseNumbersSerializer(many=True, read_only=True)
@@ -187,6 +195,7 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
             "case_name",
             "citation",
             "court",
+            "registry",
             "created_at",
             "date",
             "expression_frbr_uri",
@@ -195,6 +204,8 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
             "language",
             "locality",
             "mnc",
+            "serial_number",
+            "serial_number_override",
             "id",
             "title",
             "updated_at",
