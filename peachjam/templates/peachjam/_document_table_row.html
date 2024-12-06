@@ -46,7 +46,7 @@
       <td>{{ document.locality|default_if_none:'' }}</td>
     {% endif %}
   {% endif %}
-  {% if doc_table_show_author %}<td>{{ document.author|default_if_none:'' }}</td>{% endif %}
+  {% if doc_table_show_author %}<td>{{ document.author.first|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_court %}<td>{{ document.court|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_sub_publication %}<td>{{ document.sub_publication|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_frbr_uri_number %}<td>{{ document.frbr_uri_number }}</td>{% endif %}
