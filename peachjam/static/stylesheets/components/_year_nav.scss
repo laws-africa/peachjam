@@ -8,3 +8,13 @@
     width: 3em;
   }
 }
+
+.month-nav {
+  list-style-type: none;
+  padding-left: 0px;
+
+  li {
+    display: inline;
+    margin-right: 5px;
+  }
+}
