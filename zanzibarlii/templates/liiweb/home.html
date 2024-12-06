@@ -1,19 +1,18 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-content %}{% endblock %}
 {% block hero-logos %}
   <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
   <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
   <img src="{% static 'images/zanzibar-judiciary.png' %}"
        alt="zanzibar-judiciary-logo"/>
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Karibu kwenye Zanzibar Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
+{% block hero-headings-title %}
+  {% trans 'Karibu kwenye Zanzibar Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  {% blocktrans trimmed %}
       ZanzibarLII ni tovuti ya Mahakama ya Zanzibar inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. ZanzibarLII provides free access to the law of Zanzibar and is a member of the African LII community.
     {% endblocktrans %}
-  </h4>
 {% endblock %}
 {% block second-col-about %}
   <p class="lead">

@@ -1,6 +1,5 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-content %}{% endblock %}
 {% block hero-logos %}
   <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
   <img src="{% static 'images/gju.jpg' %}" alt="GJU"/>
@@ -9,13 +8,11 @@
   <img src="{% static 'images/indigo-trust-logo.jpg' %}"
        alt="The Indigo Trust"/>
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to Malawi Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
+{% block hero-headings-title %}
+  {% trans 'Welcome to Malawi Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
   Free access to the law of Malawi. MalawiLII is a member of the community of African LIIs and of the Free Access to Law Movement.
-  {% endblocktrans %}
-  </h4>
 {% endblock %}
 {% block second-col-about %}
   <p class="lead">

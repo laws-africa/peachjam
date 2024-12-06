@@ -15,10 +15,21 @@
       <div class="container">
         <div class="row">
           <div class="col-9">
-            {% block hero-blurb %}{% endblock %}
+            {% block hero-headings %}
+              <h2>
+                {% block hero-headings-title %}{% endblock %}
+              </h2>
+              <p class="h4 mt-4">
+                {% block hero-headings-welcome %}{% endblock %}
+              </p>
+            {% endblock %}
           </div>
           <div class="col-3 col-lg-2 offset-lg-1 text-center">
-            {% block hero-images %}{% endblock %}
+            {% block hero-images %}
+              <img src="{% static 'images/logo.png' %}"
+                   class="img-fluid"
+                   alt="{{ APP_NAME }} logo"/>
+            {% endblock %}
           </div>
         </div>
       </div>
@@ -63,7 +74,7 @@
             {% endblock %}
           </div>
           <div class="col-12 col-lg-6">
-            <div class="hero-logos row justify-content-center">
+            <div class="hero-logos row justify-content-center justify-content-lg-end">
               {% block hero-logos %}
                 <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
                 <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>

@@ -1,11 +1,8 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-content %}{% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to Mauritius Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
+{% block hero-headings-title %}
+  {% trans 'Welcome to Mauritius Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
   Free access to the law of Mauritius. MauritiusLII is a member of the community of African LIIs and of the Free Access to Law Movement.
-  {% endblocktrans %}
-  </h4>
 {% endblock %}

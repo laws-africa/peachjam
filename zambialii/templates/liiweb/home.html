@@ -1,6 +1,5 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-content %}{% endblock %}
 {% block hero-logos %}
   <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
   <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
@@ -9,13 +8,11 @@
   <img src="{% static 'images/indigo-trust-logo.jpg' %}"
        alt="The Indigo Trust"/>
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to the Zambia Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
-      ZambiaLII publishes the law of Zambia for free access to all. We are a member of the international free access to law movement. Read, use, and share the law freely.
-    {% endblocktrans %}
-  </h4>
+{% block hero-headings-title %}
+  {% trans 'Welcome to the Zambia Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  ZambiaLII publishes the law of Zambia for free access to all. We are a member of the international free access to law movement. Read, use, and share the law freely.
 {% endblock %}
 {% block second-col-about %}
   <p class="lead">

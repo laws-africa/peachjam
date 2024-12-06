@@ -1,6 +1,5 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-content %}{% endblock %}
 {% block hero-logos %}
   <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
   <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
@@ -8,14 +7,10 @@
        src="{% static 'images/jsco_logo.png' %}"
        alt="jsco-logo"/>
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to the Sierra Leone Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
-      SierraLII publishes the law of Sierra Leone for free online access.
-    {% endblocktrans %}
-  </h4>
+{% block hero-headings-title %}
+  {% trans 'Welcome to the Sierra Leone Legal Information Institute' %}
 {% endblock %}
+{% block hero-headings-welcome %}SierraLII publishes the law of Sierra Leone for free online access.{% endblock %}
 {% block second-col-about %}
   <p class="lead">
     {% blocktrans trimmed %}

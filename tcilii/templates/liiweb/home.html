@@ -1,14 +1,13 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-content %}{% endblock %}
 {% block hero-logos %}{% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to the Turks and Caicos Islands LII' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
+{% block hero-headings-title %}
+  {% trans 'Welcome to the Turks and Caicos Islands LII' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  {% blocktrans trimmed %}
       TCILII is a website of the Judiciary and publishes judgments from the Turks and Caicos Islands for free online access.
     {% endblocktrans %}
-  </h4>
 {% endblock %}
 {% block second-col-about %}
   <p class="lead">

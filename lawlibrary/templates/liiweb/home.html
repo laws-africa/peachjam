@@ -1,11 +1,8 @@
 {% extends "liiweb/home.html" %}
 {% load static i18n %}
-{% block hero-headings-title %}
-  {% trans 'Welcome to the digital Law Library of South Africa' %}
-{% endblock %}
-{% block hero-blurb %}
-  <h2>Law Library South Africa</h2>
-  <p class="h4 mt-4">The most comprehensive collection of free legal information in South Africa.</p>
+{% block hero-headings-title %}Law Library South Africa{% endblock %}
+{% block hero-headings-welcome %}
+  The most comprehensive collection of free legal information in South Africa.
 {% endblock %}
 {% block hero-images %}
   <img src="{% static 'images/hero-logo.jpg' %}"

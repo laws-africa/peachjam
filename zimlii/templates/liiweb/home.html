@@ -1,18 +1,17 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-content %}{% endblock %}
 {% block hero-logos %}
   <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
   <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
   <img src="{% static 'images/lrf_logo.png' %}" alt="lrf-logo"/>
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to the Zimbabwe Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
+{% block hero-headings-title %}
+  {% trans 'Welcome to the Zimbabwe Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  {% blocktrans trimmed %}
     ZimLII publishes the law of Zimbabwe for free access to all
-    {% endblocktrans %}
-  </h4>
+  {% endblocktrans %}
 {% endblock %}
 {% block second-col-about %}
   <p class="lead">

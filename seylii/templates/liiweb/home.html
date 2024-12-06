@@ -1,11 +1,10 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-content %}{% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to the Seychelles Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% trans 'SeyLII is a non-profit organisation and publishes the law of the Seychelles for free online access.' %}
-  </h4>
+{% block hero-headings-title %}
+  {% trans 'Welcome to the Seychelles Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  {% trans 'SeyLII is a non-profit organisation and publishes the law of the Seychelles for free online access.' %}
 {% endblock %}
 {% block hero-logos %}
   <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>

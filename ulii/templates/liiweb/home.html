@@ -1,19 +1,18 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-content %}{% endblock %}
 {% block hero-logos %}
   <img src="{% static 'images/africanlii-logo.svg' %}" alt="africanlii-logo"/>
   <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
   <img src="{% static 'images/judiciary_uganda_logo.png' %}"
        alt="judiciary_of_uganda_logo"/>
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to the Uganda Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
+{% block hero-headings-title %}
+  {% trans 'Welcome to the Uganda Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  {% blocktrans trimmed %}
       ULII is a free legal information service provided by the Law Reporting Unit of the Uganda Judiciary and a member of the global Free Access to Law community.
     {% endblocktrans %}
-  </h4>
 {% endblock %}
 {% block second-col-about %}
   <p class="lead">

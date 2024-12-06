@@ -1,6 +1,5 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-content %}{% endblock %}
 {% block hero-logos %}
   <img class="me-4"
        src="{% static 'images/africanlii-logo.svg' %}"
@@ -10,13 +9,11 @@
        alt="judiciary-logo"/>
   <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to eSwatini Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
-    Free access to the law of eSwatini. eSwatiniLII is operated by the Judiciary of eSwatini and is a member of the community of African LIIs and of the Free Access to Law Movement.
-  {% endblocktrans %}
-  </h4>
+{% block hero-headings-title %}
+  {% trans 'Welcome to eSwatini Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  Free access to the law of eSwatini. eSwatiniLII is operated by the Judiciary of eSwatini and is a member of the community of African LIIs and of the Free Access to Law Movement.
 {% endblock %}
 {% block second-col-about %}
   <p class="lead">
