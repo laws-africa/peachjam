@@ -7,7 +7,7 @@
       <a class="{% if not month %} active{% endif %}"
          href="{{ all_months_url }}">{% trans 'All months' %}</a>
     </div>
-    <ul class="year-nav mb-0 ms-2">
+    <ul class="month-nav mb-0 ms-2">
       {% for m in months %}
         <li>
           {% if m|date:"F" == month %}
