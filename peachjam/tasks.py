@@ -210,3 +210,16 @@ def rank_works():
     from peachjam.graph.ranker import GraphRanker
 
     GraphRanker().rank_and_publish()
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def get_deleted_documents(ingestor_id, range_start, range_end):
+    from peachjam.models import Ingestor
+
+    ingestor = Ingestor.objects.get(pk=ingestor_id)
+    if not ingestor.enabled:
+        log.info(f"ingestor {ingestor.name} disabled, ignoring")
+        return
+
+    adapter = ingestor.get_adapter()
+    adapter.get_deleted_documents(range_start, range_end)
