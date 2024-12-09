@@ -308,6 +308,10 @@ class CourtClassDetailView(FilteredJudgmentView):
 
         return context
 
+    def add_entity_profile(self, context):
+        context["entity_profile"] = self.court_class.entity_profile.first()
+        context["entity_profile_title"] = self.court_class.name
+
 
 class CourtClassYearView(YearListMixin, CourtClassDetailView):
     def get_context_data(self, **kwargs):
