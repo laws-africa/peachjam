@@ -200,7 +200,7 @@ class DocumentCitationsView(DetailView):
         try:
             nature = int(self.request.GET.get("nature"))
             nature = get_object_or_404(DocumentNature, pk=nature)
-        except ValueError:
+        except (TypeError, ValueError):
             raise Http404
 
         try:
