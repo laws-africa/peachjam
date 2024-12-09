@@ -367,6 +367,45 @@ class DocumentProblemForm(forms.Form):
         )
 
 
+class ContactUsForm(forms.Form):
+    name = forms.CharField(max_length=255, required=True)
+    email = forms.EmailField(required=True)
+    message = forms.CharField(widget=forms.Textarea, required=True)
+
+    def send_email(self):
+        name = self.cleaned_data["name"]
+        email = self.cleaned_data["email"]
+        message = self.cleaned_data["message"]
+
+        context = {
+            "name": name,
+            "email": email,
+            "message": message,
+        }
+
+        html = render_to_string(
+            "peachjam/emails/contact_us_email.html", context=context
+        )
+        plain_txt_msg = render_to_string(
+            "peachjam/emails/contact_us_email.txt",
+            context=context,
+        )
+
+        subject = settings.EMAIL_SUBJECT_PREFIX + _("Contact us message")
+
+        default_admin_emails = [email for name, email in settings.ADMINS]
+        site_admin_emails = (pj_settings().admin_emails or "").split()
+
+        send_mail(
+            subject=subject,
+            message=plain_txt_msg,
+            from_email=None,
+            recipient_list=default_admin_emails + site_admin_emails,
+            html_message=html,
+            fail_silently=False,
+        )
+
+
 class SaveDocumentForm(forms.ModelForm):
     new_folder = forms.CharField(max_length=255, required=False)
 
