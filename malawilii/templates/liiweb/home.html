@@ -16,6 +16,25 @@
     Free access to the law of Malawi. MalawiLII is a member of the community of African LIIs and of the Free Access to Law Movement.
   {% endblocktrans %}
 {% endblock %}
+{% block frequently-used %}
+  <div class="container pt-2">
+    <div class="mt-3 d-lg-none row row-cols-2">
+      <div class="col mb-2">
+        <a href="{% url 'judgment_list' %}" class="btn btn-primary d-block">Judgments</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'legislation_list' %}" class="btn btn-primary d-block">National Legislation</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'gazettes' %}" class="btn btn-primary d-block">Gazettes</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'document_nature_list' 'bill' %}"
+           class="btn btn-primary d-block">Bills</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
 {% block second-col-about %}
   <p class="lead">
     {% blocktrans trimmed %}

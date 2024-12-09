@@ -9,6 +9,24 @@
       TCILII is a website of the Judiciary and publishes judgments from the Turks and Caicos Islands for free online access.
     {% endblocktrans %}
 {% endblock %}
+{% block frequently-used %}
+  <div class="container pt-2">
+    <div class="mt-3 d-lg-none row row-cols-2">
+      <div class="col mb-2">
+        <a href="{% url 'judgment_list' %}" class="btn btn-primary d-block">Judgments</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'legislation_list' %}" class="btn btn-primary d-block">Laws of TCI</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'court' 'TCACA' %}" class="btn btn-primary d-block">Court of Appeal</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'court' 'TCASC' %}" class="btn btn-primary d-block">Supreme Court</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
 {% block second-col-about %}
   <p class="lead">
     {% blocktrans trimmed %}
