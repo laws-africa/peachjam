@@ -2,7 +2,9 @@
 {% load static i18n %}
 {% block hero-headings-title %}Law Library South Africa{% endblock %}
 {% block hero-headings-welcome %}
-  The most comprehensive collection of free legal information in South Africa.
+  {% blocktrans trimmed %}
+    The most comprehensive collection of free legal information in South Africa.
+  {% endblocktrans %}
 {% endblock %}
 {% block hero-images %}
   <img src="{% static 'images/hero-logo.jpg' %}"

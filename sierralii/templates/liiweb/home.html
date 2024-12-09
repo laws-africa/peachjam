@@ -10,7 +10,11 @@
 {% block hero-headings-title %}
   {% trans 'Welcome to the Sierra Leone Legal Information Institute' %}
 {% endblock %}
-{% block hero-headings-welcome %}SierraLII publishes the law of Sierra Leone for free online access.{% endblock %}
+{% block hero-headings-welcome %}
+  {% blocktrans trimmed %}
+    SierraLII publishes the law of Sierra Leone for free online access.
+  {% endblocktrans %}
+{% endblock %}
 {% block second-col-about %}
   <p class="lead">
     {% blocktrans trimmed %}
