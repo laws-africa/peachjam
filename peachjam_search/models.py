@@ -136,7 +136,7 @@ class SavedSearch(models.Model):
         request = factory.get("/search/api/documents/")
         request.user = self.user
         params = self.get_filters_dict()
-        params["q"] = self.q
+        params["search"] = self.q
         params["created_at__gte"] = self.last_alerted_at.replace(
             tzinfo=None
         ).isoformat()
