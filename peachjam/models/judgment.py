@@ -95,6 +95,9 @@ class CourtClass(models.Model):
     slug = models.SlugField(_("slug"), max_length=255, null=False, unique=True)
     order = models.IntegerField(_("order"), null=True, blank=True)
     show_listing_page = models.BooleanField(null=False, default=False)
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
 
     class Meta:
         ordering = (

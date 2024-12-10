@@ -1398,6 +1398,13 @@ class CourtAdmin(admin.ModelAdmin):
     search_fields = ("name", "code")
 
 
+@admin.register(CourtClass)
+class CourtClassAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
+    list_display = ("name", "slug")
+    search_fields = ("name", "slug")
+
+
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]
@@ -1592,7 +1599,6 @@ admin.site.register(
         AttachedFileNature,
         CitationLink,
         CitationProcessing,
-        CourtClass,
         CourtDivision,
         CustomPropertyLabel,
         Folder,
