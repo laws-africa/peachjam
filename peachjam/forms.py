@@ -1,4 +1,5 @@
 import copy
+import logging
 
 from allauth.account.forms import LoginForm, SignupForm
 from countries_plus.models import Country
@@ -29,6 +30,8 @@ from peachjam.models import (
 )
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
+
+log = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -372,15 +375,24 @@ class ContactUsForm(forms.Form):
     email = forms.EmailField(required=True)
     message = forms.CharField(widget=forms.Textarea, required=True)
 
+    # this is a honeypot field to catch spam bots
+    comment = forms.CharField(required=False)
+
     def send_email(self):
         name = self.cleaned_data["name"]
         email = self.cleaned_data["email"]
         message = self.cleaned_data["message"]
+        comment = self.cleaned_data["comment"]
+
+        if comment:
+            log.info("sending email aborted, likely spam bot ")
+            return
 
         context = {
             "name": name,
             "email": email,
             "message": message,
+            "APP_NAME": settings.PEACHJAM["APP_NAME"],
         }
 
         html = render_to_string(

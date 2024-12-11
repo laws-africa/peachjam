@@ -2,4 +2,4 @@
 A {{ APP_NAME }} user has sent a message through the contact form:
 Message:
 {{ message }}
-Sent by: {{ email_address }}
+Sent by:{{name}} {{ email }}
