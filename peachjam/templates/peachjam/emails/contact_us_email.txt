@@ -1,0 +1,5 @@
+{{ APP_NAME }} Contact Form Message
+A {{ APP_NAME }} user has sent a message through the contact form:
+Message:
+{{ message }}
+Sent by:{{name}} {{ email }}

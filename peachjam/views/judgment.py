@@ -13,7 +13,6 @@ class JudgmentListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["recent_judgments"] = (
             Judgment.objects.select_related("work")
             .prefetch_related("labels")
@@ -26,7 +25,11 @@ class JudgmentListView(TemplateView):
         context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
         self.add_entity_profile(context)
+        self.get_court_classes(context)
         return context
+
+    def get_court_classes(self, context):
+        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
 
     def add_entity_profile(self, context):
         pass
