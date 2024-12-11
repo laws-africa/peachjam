@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from rest_framework.reverse import reverse_lazy
 
@@ -13,5 +14,5 @@ class AboutPageView(FormView):
 
     def form_valid(self, form):
         form.send_email()
-        messages.success(self.request, "Your message has been sent. Thank you!")
+        messages.success(self.request, _("Your message has been sent. Thank you!"))
         return super().form_valid(form)
