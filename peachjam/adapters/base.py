@@ -56,8 +56,14 @@ class RequestsAdapter(Adapter):
         self.client = requests.session()
         self.api_url = self.settings["api_url"]
 
-    def client_get(self, url, **kwargs):
-        logger.debug(f"GET {url} kwargs={kwargs}")
-        r = self.client.get(url, **kwargs)
+    def client_request(self, method, url, **kwargs):
+        logger.debug(f"{method.upper()} {url} kwargs={kwargs}")
+        r = getattr(self.client, method)(url, **kwargs)
         r.raise_for_status()
         return r
+
+    def client_get(self, url, **kwargs):
+        return self.client_request("get", url, **kwargs)
+
+    def client_post(self, url, **kwargs):
+        return self.client_request("post", url, **kwargs)

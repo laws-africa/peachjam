@@ -47,11 +47,20 @@ class BaseJudgmentAdapter(RequestsAdapter):
         for code in self.court_codes:
             self.filters["court__code"].append(code)
 
-    def client_request(self, method, url, **kwargs):
-        log.info(f"{method.upper()} {url}")
-        r = getattr(self.client, method)(url, **kwargs)
-        r.raise_for_status()
-        return r
+    def delete_document(self, expression_frbr_uri):
+        url = f"{self.api_url}/judgment{expression_frbr_uri}"
+        try:
+            self.client_get(url)
+        except requests.exceptions.RequestException as e:
+            if e.response.status_code == 404:
+                document = Judgment.objects.filter(
+                    expression_frbr_uri=expression_frbr_uri
+                ).first()
+                if document:
+                    log.info(f"deleting document {expression_frbr_uri}")
+                    document.delete()
+            else:
+                raise e
 
 
 @plugins.register("ingestor-adapter")
@@ -234,21 +243,6 @@ class JudgmentAdapter(BaseJudgmentAdapter):
                 return ""
             raise e
 
-    def delete_document(self, expression_frbr_uri):
-        url = f"{self.api_url}/judgments{expression_frbr_uri}"
-
-        try:
-            self.client_get(url)
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 404:
-                document = Judgment.objects.filter(
-                    expression_frbr_uri=expression_frbr_uri
-                ).first()
-                if document:
-                    document.delete()
-            else:
-                raise e
-
 
 @plugins.register("ingestor-adapter")
 class JudgmentDeleteAdapter(BaseJudgmentAdapter):
@@ -256,7 +250,9 @@ class JudgmentDeleteAdapter(BaseJudgmentAdapter):
         from peachjam.tasks import get_deleted_documents
 
         # kick of bg tasks in batches
-        judgments_count = Judgment.objects.count()
+        judgments_count = Judgment.objects.filter(
+            court__code__in=self.court_codes
+        ).count()
         log.info(f"Judgments count: {judgments_count}")
         batch_range = self.settings.get("batch_range") or 10000
         batch_range = int(batch_range)
@@ -278,32 +274,11 @@ class JudgmentDeleteAdapter(BaseJudgmentAdapter):
             .values_list("expression_frbr_uri", flat=True)[range_start:range_end]
         )
         url = f"{self.api_url}/validate-expression-frbr-uris"
-        result = self.client_request(
-            "post", url, json={"expression_frbr_uris": list(expression_frbr_uris)}
+        result = self.client_post(
+            url, json={"expression_frbr_uris": list(expression_frbr_uris)}
         ).json()
         invalid_frbr_uris = result["invalid_expression_frbr_uris"]
         log.info(f"found {len(invalid_frbr_uris)} documents to delete")
 
-        qs = Judgment.objects.filter(court__code__in=self.court_codes).values_list(
-            "expression_frbr_uri", flat=True
-        )
-        # find invalid_frbr_uris that exist in the queryset
-        existing = set(invalid_frbr_uris) & set(qs)
-
-        for frbr_uri in list(existing):
+        for frbr_uri in invalid_frbr_uris:
             delete_document(self.ingestor.id, frbr_uri)
-
-    def delete_document(self, expression_frbr_uri):
-        url = f"{self.api_url}/judgment{expression_frbr_uri}"
-        try:
-            document = self.client_request("get", url)
-        except requests.exceptions.RequestException as e:
-            if e.response.status_code == 404:
-                document = Judgment.objects.filter(
-                    expression_frbr_uri=expression_frbr_uri
-                ).first()
-                if document:
-                    log.info(f"deleting document {expression_frbr_uri}")
-                    document.delete()
-            else:
-                raise e
