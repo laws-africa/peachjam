@@ -1,13 +1,16 @@
 from rest_framework import serializers
 
 from peachjam.models import (
+    CaseNumber,
     CitationLink,
     CoreDocument,
     Court,
+    CourtRegistry,
     Gazette,
     Judgment,
     Label,
     Legislation,
+    Locality,
     Predicate,
     Ratification,
     RatificationCountry,
@@ -150,6 +153,26 @@ class CourtSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "code"]
 
 
+class CourtRegistrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourtRegistry
+        fields = ["id", "name", "code"]
+
+
+class CaseNumbersSerializer(serializers.ModelSerializer):
+    matter_type = serializers.CharField(source="matter_type.name", allow_null=True)
+
+    class Meta:
+        model = CaseNumber
+        fields = ["string_override", "matter_type", "year", "string", "number"]
+
+
+class LocalitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Locality
+        fields = ["name", "code"]
+
+
 class BaseSerializerMixin:
     def get_url(self, instance):
         # TODO: check https
@@ -158,16 +181,21 @@ class BaseSerializerMixin:
 
 class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
     court = CourtSerializer(read_only=True)
+    registry = CourtRegistrySerializer(read_only=True)
     url = serializers.SerializerMethodField()
     judges = serializers.SerializerMethodField()
-    case_numbers = serializers.SerializerMethodField()
+    case_numbers = CaseNumbersSerializer(many=True, read_only=True)
+    locality = LocalitySerializer(read_only=True)
+    topics = serializers.SerializerMethodField()
 
     class Meta:
         model = Judgment
         fields = (
             "case_numbers",
+            "case_name",
             "citation",
             "court",
+            "registry",
             "created_at",
             "date",
             "expression_frbr_uri",
@@ -176,18 +204,24 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
             "language",
             "locality",
             "mnc",
+            "serial_number",
+            "serial_number_override",
+            "content_html_is_akn",
+            "allow_robots",
+            "published",
             "id",
             "title",
             "updated_at",
             "url",
             "work_frbr_uri",
+            "topics",
         )
 
     def get_judges(self, instance):
         return [j.name for j in instance.judges.all()]
 
-    def get_case_numbers(self, instance):
-        return [str(c) for c in instance.case_numbers.all()]
+    def get_topics(self, instance):
+        return [t.topic.name for t in instance.taxonomies.all()]
 
 
 class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):
@@ -227,3 +261,11 @@ class RatificationSerializer(serializers.ModelSerializer):
             "last_updated",
             "countries",
         )
+
+
+class BatchValidateFrbrUrisRequestSerializer(serializers.Serializer):
+    expression_frbr_uris = serializers.ListField(child=serializers.CharField())
+
+
+class BatchValidateFrbrUrisResponseSerializer(serializers.Serializer):
+    invalid_expression_frbr_uris = serializers.ListField(child=serializers.CharField())
