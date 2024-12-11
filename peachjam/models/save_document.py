@@ -15,6 +15,7 @@ class Folder(models.Model):
         verbose_name=_("user"),
         related_name="folders",
     )
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
         ordering = ("name",)
@@ -41,6 +42,7 @@ class SavedDocument(models.Model):
         blank=True,
         related_name="saved_documents",
     )
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
         ordering = ("document__title",)
