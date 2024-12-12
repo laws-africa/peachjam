@@ -20,7 +20,7 @@
                   marginheight="0"
                   marginwidth="0">Loading…
           </iframe>
-        {% else %}
+        {% elif PEACHJAM_SETTINGS.show_contact_form %}
           {% include "peachjam/_contact_form.html" %}
         {% endif %}
       {% endblock %}

@@ -149,6 +149,11 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow searches to be saved."),
     )
+    show_contact_form = models.BooleanField(
+        verbose_name=_("show contact form"),
+        default=False,
+        help_text=_("Show the contact form."),
+    )
     robots_txt = models.TextField(
         null=True, blank=True, help_text=_("Additional robots.txt rules.")
     )

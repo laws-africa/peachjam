@@ -374,19 +374,12 @@ class ContactUsForm(forms.Form):
     name = forms.CharField(max_length=255, required=True)
     email = forms.EmailField(required=True)
     message = forms.CharField(widget=forms.Textarea, required=True)
-
-    # this is a honeypot field to catch spam bots
-    comment = forms.CharField(required=False)
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
 
     def send_email(self):
         name = self.cleaned_data["name"]
         email = self.cleaned_data["email"]
         message = self.cleaned_data["message"]
-        comment = self.cleaned_data["comment"]
-
-        if comment:
-            log.info("sending email aborted, likely spam bot ")
-            return
 
         context = {
             "name": name,

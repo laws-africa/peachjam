@@ -1,7 +1,6 @@
 {% load i18n %}
 <section id="contact" class="row my-4">
   <div class="col-lg-6">
-    <h3 class="my-3">{% trans 'Contact Us' %}</h3>
     <p class="lead">{% trans 'Send us a message us with any questions and comments.' %}</p>
     <form method="post">
       {% csrf_token %}
@@ -11,6 +10,7 @@
                class="form-control"
                id="{{ form.name.id_for_label }}"
                name="{{ form.name.name }}"
+               value="{{ form.name.value|default:'' }}"
                required/>
         <div class="text-danger">
           {% for error in form.name.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
@@ -22,6 +22,7 @@
                class="form-control"
                id="{{ form.email.id_for_label }}"
                name="{{ form.email.name }}"
+               value="{{ form.email.value|default:'' }}"
                required/>
         <div class="text-danger">
           {% for error in form.email.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
@@ -38,14 +39,10 @@
           {% for error in form.message.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
         </div>
       </div>
-      <div style="position:absolute; bottom:0; z-index:-10000; opacity:0">
+      <div>
+        {{ form.captcha }}
         <div class="text-danger">
-          <input type="text"
-                 class="form-control"
-                 id="{{ form.comment.id_for_label }}"
-                 name="{{ form.comment.name }}"
-                 autocomplete="off"/>
-          {% for error in form.comment.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          {% for error in form.captcha.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
         </div>
       </div>
       <button type="submit" class="btn btn-primary">{% trans 'Submit' %}</button>
