@@ -18,17 +18,17 @@
   <div class="container pt-2">
     <div class="mt-3 d-lg-none row row-cols-2">
       <div class="col mb-2">
-        <a href="{% url 'judgment_list' %}" class="btn btn-primary d-block">Judgments</a>
+        <a href="{% url 'judgment_list' %}" class="btn btn-primary d-block">{% trans 'Judgments' %}</a>
       </div>
       <div class="col mb-2">
-        <a href="{% url 'legislation_list' %}" class="btn btn-primary d-block">Legislation</a>
+        <a href="{% url 'legislation_list' %}" class="btn btn-primary d-block">{% trans 'Legislation' %}</a>
       </div>
       <div class="col mb-2">
-        <a href="{% url 'gazettes' %}" class="btn btn-primary d-block">Gazettes</a>
+        <a href="{% url 'gazettes' %}" class="btn btn-primary d-block">{% trans 'Gazettes' %}</a>
       </div>
       <div class="col mb-2">
         <a href="{% url 'first_level_taxonomy_list' 'speeches-and-presentations' %}"
-           class="btn btn-primary d-block">Speeches and Presentations</a>
+           class="btn btn-primary d-block">{% trans 'Speeches and Presentations' %}</a>
       </div>
     </div>
   </div>
