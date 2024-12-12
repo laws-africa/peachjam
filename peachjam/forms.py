@@ -1,4 +1,5 @@
 import copy
+import logging
 
 from allauth.account.forms import LoginForm, SignupForm
 from countries_plus.models import Country
@@ -29,6 +30,8 @@ from peachjam.models import (
 )
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
+
+log = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -353,6 +356,54 @@ class DocumentProblemForm(forms.Form):
         )
 
         subject = settings.EMAIL_SUBJECT_PREFIX + _("Document problem reported")
+
+        default_admin_emails = [email for name, email in settings.ADMINS]
+        site_admin_emails = (pj_settings().admin_emails or "").split()
+
+        send_mail(
+            subject=subject,
+            message=plain_txt_msg,
+            from_email=None,
+            recipient_list=default_admin_emails + site_admin_emails,
+            html_message=html,
+            fail_silently=False,
+        )
+
+
+class ContactUsForm(forms.Form):
+    name = forms.CharField(max_length=255, required=True)
+    email = forms.EmailField(required=True)
+    message = forms.CharField(widget=forms.Textarea, required=True)
+
+    # this is a honeypot field to catch spam bots
+    comment = forms.CharField(required=False)
+
+    def send_email(self):
+        name = self.cleaned_data["name"]
+        email = self.cleaned_data["email"]
+        message = self.cleaned_data["message"]
+        comment = self.cleaned_data["comment"]
+
+        if comment:
+            log.info("sending email aborted, likely spam bot ")
+            return
+
+        context = {
+            "name": name,
+            "email": email,
+            "message": message,
+            "APP_NAME": settings.PEACHJAM["APP_NAME"],
+        }
+
+        html = render_to_string(
+            "peachjam/emails/contact_us_email.html", context=context
+        )
+        plain_txt_msg = render_to_string(
+            "peachjam/emails/contact_us_email.txt",
+            context=context,
+        )
+
+        subject = settings.EMAIL_SUBJECT_PREFIX + _("Contact us message")
 
         default_admin_emails = [email for name, email in settings.ADMINS]
         site_admin_emails = (pj_settings().admin_emails or "").split()

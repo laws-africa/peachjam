@@ -29,6 +29,7 @@
         "pk": 2,
         "fields": {
             "name": "High Court",
+            "slug": "high-court",
             "description": ""
         }
     },
