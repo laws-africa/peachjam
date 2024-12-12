@@ -7,13 +7,31 @@
        src="{% static 'images/jsco_logo.png' %}"
        alt="jsco-logo"/>
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to the Sierra Leone Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
-      SierraLII publishes the law of Sierra Leone for free online access.
-    {% endblocktrans %}
-  </h4>
+{% block hero-headings-title %}
+  {% trans 'Welcome to the Sierra Leone Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  {% blocktrans trimmed %}
+    SierraLII publishes the law of Sierra Leone for free online access.
+  {% endblocktrans %}
+{% endblock %}
+{% block frequently-used %}
+  <div class="container pt-2">
+    <div class="mt-3 d-lg-none row row-cols-2">
+      <div class="col mb-2">
+        <a href="{% url 'judgment_list' %}" class="btn btn-primary d-block">{% trans 'Judgments' %}</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'legislation_list' %}" class="btn btn-primary d-block">{% trans 'Legislation' %}</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'gazettes' %}" class="btn btn-primary d-block">{% trans 'Gazettes' %}</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'article_list' %}" class="btn btn-primary d-block">{% trans 'Articles' %}</a>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 {% block second-col-about %}
   <p class="lead">

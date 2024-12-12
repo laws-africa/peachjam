@@ -9,13 +9,32 @@
        alt="judiciary-logo"/>
   <img src="{% static 'images/laws-africa-logo.png' %}" alt="laws-logo"/>
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">{% trans 'Welcome to eSwatini Legal Information Institute' %}</h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
+{% block hero-headings-title %}
+  {% trans 'Welcome to eSwatini Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  {% blocktrans trimmed %}
     Free access to the law of eSwatini. eSwatiniLII is operated by the Judiciary of eSwatini and is a member of the community of African LIIs and of the Free Access to Law Movement.
   {% endblocktrans %}
-  </h4>
+{% endblock %}
+{% block frequently-used %}
+  <div class="container pt-2">
+    <div class="mt-3 d-lg-none row row-cols-2">
+      <div class="col mb-2">
+        <a href="{% url 'judgment_list' %}" class="btn btn-primary d-block">{% trans 'Judgments' %}</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'legislation_list' %}" class="btn btn-primary d-block">{% trans 'Legislation' %}</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'gazettes' %}" class="btn btn-primary d-block">{% trans 'Gazettes' %}</a>
+      </div>
+      <div class="col mb-2">
+        <a href="{% url 'document_nature_list' 'court-roll' %}"
+           class="btn btn-primary d-block">{% trans 'Court Rolls' %}</a>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 {% block second-col-about %}
   <p class="lead">
