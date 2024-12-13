@@ -143,6 +143,7 @@ class JudgmentsViewSet(BaseDocumentViewSet):
     filterset_fields.update(
         {
             "court__code": ["exact"],
+            "registry__code": ["exact"],
         }
     )
 
