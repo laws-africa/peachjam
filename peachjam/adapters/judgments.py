@@ -43,7 +43,7 @@ class BaseJudgmentAdapter(RequestsAdapter):
                 key, value = pair.split("=")
                 self.filters[key] = value
         self.court_code = self.settings["court_code"].strip()
-        self.registry_code = self.settings.get("registry_code", "").split()
+        self.registry_code = self.settings.get("registry_code", "").strip()
         self.filters["court__code"] = self.court_code
         if self.registry_code:
             self.filters["registry__code"] = self.registry_code
