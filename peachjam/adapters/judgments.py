@@ -250,7 +250,7 @@ class JudgmentDeleteAdapter(BaseJudgmentAdapter):
     def queryset(self):
         qs = Judgment.objects.filter(court__code=self.court_code)
         if self.registry_code:
-            qs = qs.filter(registry__code__in=self.registry_code)
+            qs = qs.filter(registry__code=self.registry_code)
         return qs
 
     def check_for_updates(self, last_refreshed):
