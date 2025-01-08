@@ -42,10 +42,11 @@ class BaseJudgmentAdapter(RequestsAdapter):
             if "=" in pair:
                 key, value = pair.split("=")
                 self.filters[key] = value
-        self.court_codes = self.settings["court_code"].split()
-        self.filters["court__code"] = []
-        for code in self.court_codes:
-            self.filters["court__code"].append(code)
+        self.court_code = self.settings["court_code"].strip()
+        self.registry_code = self.settings.get("registry_code", "").strip()
+        self.filters["court__code"] = self.court_code
+        if self.registry_code:
+            self.filters["registry__code"] = self.registry_code
 
     def delete_document(self, expression_frbr_uri):
         url = f"{self.api_url}/judgment{expression_frbr_uri}"
@@ -246,13 +247,17 @@ class JudgmentAdapter(BaseJudgmentAdapter):
 
 @plugins.register("ingestor-adapter")
 class JudgmentDeleteAdapter(BaseJudgmentAdapter):
+    def queryset(self):
+        qs = Judgment.objects.filter(court__code=self.court_code)
+        if self.registry_code:
+            qs = qs.filter(registry__code=self.registry_code)
+        return qs
+
     def check_for_updates(self, last_refreshed):
         from peachjam.tasks import get_deleted_documents
 
         # kick of bg tasks in batches
-        judgments_count = Judgment.objects.filter(
-            court__code__in=self.court_codes
-        ).count()
+        judgments_count = self.queryset().count()
         log.info(f"Judgments count: {judgments_count}")
         batch_range = self.settings.get("batch_range") or 10000
         batch_range = int(batch_range)
@@ -269,7 +274,7 @@ class JudgmentDeleteAdapter(BaseJudgmentAdapter):
 
         log.info(f"checking range {range_start} - {range_end}")
         expression_frbr_uris = (
-            Judgment.objects.filter(court__code__in=self.court_codes)
+            self.queryset()
             .order_by("pk")
             .values_list("expression_frbr_uri", flat=True)[range_start:range_end]
         )
