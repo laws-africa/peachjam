@@ -298,10 +298,13 @@ class CourtClassDetailView(FilteredJudgmentView):
             .filter(court__court_class=self.court_class)
         )
 
+    def get_registries(self):
+        return Court.objects.filter(court_class=self.court_class)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["court_class"] = self.court_class
-        context["registries"] = Court.objects.filter(court_class=self.court_class)
+        context["registries"] = self.get_registries()
         context["registry_label_plural"] = _("Courts")
         context["registry_groups"] = chunks(context["registries"], 3)
         context["all_years_url"] = self.court_class.get_absolute_url()
