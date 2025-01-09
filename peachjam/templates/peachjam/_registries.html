@@ -6,7 +6,7 @@
       <div class="flow-columns-group">
         <ul class="list-unstyled">
           {% for r in group %}
-            {% if r.code == registry.code %}
+            {% if r.code and r.code == registry.code %}
               <li>{{ r.name }}</li>
             {% else %}
               <li>
