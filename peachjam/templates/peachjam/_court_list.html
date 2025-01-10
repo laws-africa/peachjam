@@ -23,7 +23,7 @@
           {% if court_class.show_listing_page %}
             <div class="card-footer">
               {% block court_class_link %}
-                <a href="{% url 'court_class' court_class.slug %}">{% blocktrans with court=court_class %}Explore {{ court }}{% endblocktrans %} →</a>
+                <a href="{% url 'court_class' court_class.slug %}">{% blocktrans with court=court_class.name %}Explore {{ court }}{% endblocktrans %} →</a>
               {% endblock %}
             </div>
           {% endif %}
