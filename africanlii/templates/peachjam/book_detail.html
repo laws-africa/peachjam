@@ -1,7 +1,7 @@
 {% extends 'peachjam/book_detail.html' %}
 {% load static africanlii %}
 {% block head-js %}
-  {% for doc_topic in taxonomies %}
+  {% for doc_topic in document.taxonomies.all %}
     {% if doc_topic.topic.slug == "african-law-compendiums-refugee-law-readers" %}
       <script src="{% static 'js/law-readers.js' %}"></script>
       <template id="law-reader-template">
