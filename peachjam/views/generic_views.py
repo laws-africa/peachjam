@@ -337,7 +337,11 @@ class BaseDocumentDetailView(DetailView):
         )
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related("custom_properties")
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related("custom_properties", "taxonomies__topic")
+        )
 
     def show_save_doc_button(self):
         return pj_settings().allow_save_documents and (

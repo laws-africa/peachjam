@@ -69,7 +69,7 @@ class ExtractorService:
             except Court.DoesNotExist:
                 raise ExtractorError(f"Could not find court: {details['court']}")
         else:
-            raise ExtractorError("No language detected")
+            raise ExtractorError("No court detected")
 
         if details.get("date"):
             try:
