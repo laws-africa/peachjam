@@ -8,6 +8,6 @@ register = template.Library()
 @register.simple_tag
 def law_reader_options():
     law_readers = Book.objects.filter(
-        taxonomies__topic__slug="law-readers-refugee-law-readers"
+        taxonomies__topic__slug="african-law-compendiums-refugee-law-readers"
     )
     return list(law_readers.all())
