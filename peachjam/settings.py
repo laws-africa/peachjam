@@ -689,3 +689,6 @@ MESSAGE_TAGS = {
 TEST_RUNNER = os.environ.get("TEST_RUNNER", "django.test.runner.DiscoverRunner")
 # only used by xmlrunner https://github.com/xmlrunner/unittest-xml-reporting#django-support
 TEST_OUTPUT_DIR = "./test-reports"
+
+# django-guardian
+ANONYMOUS_USER_NAME = None
