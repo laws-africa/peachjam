@@ -1,9 +1,10 @@
 from cobalt import FrbrUri
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.generic import DetailView, View
+from guardian.shortcuts import get_groups_with_perms
 
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
@@ -55,6 +56,18 @@ class DocumentDetailViewResolver(View):
             if portion:
                 url = url + "#" + portion
             return redirect(url)
+
+        if obj.restricted:
+            if not request.user.is_authenticated:
+                # TODO: redirect to "paywall" page
+                return HttpResponseForbidden()
+
+            if not request.user.is_superuser or not request.user.is_staff:
+                # check if user belongs to a group that has access to the document
+                doc_groups = get_groups_with_perms(obj)
+                user_groups = request.user.groups.all()
+                if not doc_groups.intersection(user_groups):
+                    return HttpResponseForbidden()
 
         view_class = registry.views.get(obj.doc_type)
 

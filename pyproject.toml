@@ -42,6 +42,7 @@ dependencies = [
     "django-extensions>=3.1.5",
     "django-filter>=22.1",
     "django-htmx>=1.18.0",
+    "django-guardian>=2.4.0",
     "django-import-export<4.0",
     "django-jazzmin>=2.5.0",
     "django-languages-plus>=1.1.1",

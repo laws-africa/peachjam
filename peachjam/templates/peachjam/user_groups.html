@@ -1,0 +1,16 @@
+{% extends "user_account/layout.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'My Groups' %}
+{% endblock %}
+{% block account-tabs %}
+  {% include 'user_account/_tabs.html' with active='user_groups' %}
+{% endblock %}
+{% block account-content %}
+  <h2>{% trans 'My Groups' %}</h2>
+  {% for group in groups %}
+    <a href="{% url 'group_documents' group.slug %}">
+      <h5 class="card-header">{{ group.group }}</h5>
+    </a>
+  {% endfor %}
+{% endblock %}

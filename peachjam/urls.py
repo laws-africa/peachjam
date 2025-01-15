@@ -102,6 +102,7 @@ from peachjam.views import (
 from peachjam.views.comments import comment_form_view
 from peachjam.views.generic_views import CSRFTokenView
 from peachjam.views.metabase_stats import MetabaseStatsView
+from peachjam.views.restricted_documents import GroupDocumentListView, UserGroupListView
 
 register_converter(ISODateConverter, "isodate")
 
@@ -476,6 +477,17 @@ urlpatterns = [
         "saved-documents/folders/<int:pk>/delete",
         FolderDeleteView.as_view(),
         name="folder_delete",
+    ),
+    # Restricted Documents
+    path(
+        "user-groups",
+        UserGroupListView.as_view(),
+        name="user_groups",
+    ),
+    path(
+        "group/<slug:slug>",
+        GroupDocumentListView.as_view(),
+        name="group_documents",
     ),
     path(
         "compare",

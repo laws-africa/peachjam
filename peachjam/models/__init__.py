@@ -14,6 +14,7 @@ from .judgment import *
 from .legislation import *
 from .partner import *
 from .profile import *
+from .public_groups import *
 from .ratification import *
 from .relationships import *
 from .save_document import *
