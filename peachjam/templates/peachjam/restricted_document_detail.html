@@ -1,0 +1,27 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n %}
+{% block title %}{{ document.title }}{% endblock %}
+{% block page-content %}
+  <div class="pb-5">
+    <div class="bg-light">
+      <div class="container">
+        <div class="d-md-flex justify-content-md-between py-5">
+          <div>
+            <h1>{{ document.title }}</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container py-4">
+      <h2 class="mb-4">
+        <i class="bi bi-lock-fill"></i> {% trans "Permission denied" %}
+      </h2>
+      {% if request.user.is_authenticated %}
+        <p class="lead">{% trans "You don't have permission to view this document." %}</p>
+      {% else %}
+        <p class="lead">{% trans "You must be logged in to view this document." %}</p>
+        <a class="btn btn-success" href="{% url 'account_login' %}">{% trans "Log in" %}</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
