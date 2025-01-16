@@ -53,6 +53,11 @@
              target="_blank">
             <i class="bi bi-facebook facebook-forecolor share-icon"></i>
           </a>
+          <a href="mailto:?subject={% trans 'Take a look at this article from' %} {{ APP_NAME }}: {{ article.title|truncatewords:7|escape }}&body={{ request.build_absolute_uri }}"
+             class="btn btn-link share-link"
+             target="_blank">
+            <i class="bi bi-envelope-at-fill envelope-at-fill-forecolor share-icon"></i>
+          </a>
         </div>
       </div>
     </header>

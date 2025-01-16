@@ -53,6 +53,13 @@
               @click="modal.hide()"
             ><i class="bi bi-linkedin linkedin-forecolor share-icon" />
             </a>
+            <a
+              :href="`mailto:?subject=${$t('Take a look at this text from') + ' ' + truncatedText}&body=${text}%0A%0ASee more at ${encodeURIComponent(url) }`"
+              class="btn btn-link"
+              target="_blank"
+              @click="modal.hide()"
+            ><i class="bi bi-envelope-at-fill envelope-at-fill-forecolor share-icon" />
+            </a>
           </div>
         </div>
       </div>
@@ -69,6 +76,10 @@ export default {
   computed: {
     combined () {
       return encodeURIComponent(`${this.text} ${this.url}`)
+    },
+    truncatedText () {
+      const title = document.querySelector('.document-content')?.dataset?.title || '';
+      return title.split(' ').splice(0, 8).join(' ') + '...';
     }
   },
 
