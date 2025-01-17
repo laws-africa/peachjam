@@ -54,7 +54,7 @@
             ><i class="bi bi-linkedin linkedin-forecolor share-icon" />
             </a>
             <a
-              :href="`mailto:?subject=${$t('Take a look at this text from') + ' ' + truncatedText}&body=${text}%0A%0ASee more at ${encodeURIComponent(url) }`"
+              :href="`mailto:?subject=${emailSubject}&body=${combined}`"
               class="btn btn-link"
               target="_blank"
               @click="modal.hide()"
@@ -75,11 +75,14 @@ export default {
 
   computed: {
     combined () {
-      return encodeURIComponent(`${this.text} ${this.url}`)
+      return encodeURIComponent(`${this.text} ${this.url}`);
     },
-    truncatedText () {
-      const title = document.querySelector('.document-content')?.dataset?.title || '';
-      return title.split(' ').splice(0, 8).join(' ') + '...';
+    emailSubject () {
+      const emailShare = document.querySelector('#email-share');
+      if (emailShare) {
+        return emailShare.getAttribute('data-subject');
+      }
+      return '';
     }
   },
 

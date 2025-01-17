@@ -51,9 +51,11 @@
                  target="_blank">
                 <i class="bi bi-linkedin linkedin-forecolor share-icon"></i>
               </a>
-              <a href="mailto:?subject={% trans 'Take a look at this document from' %} {{ APP_NAME }}: {{ document.title|truncatewords:7|escape }}&body={{ request.build_absolute_uri }}"
+              <a id="email-share"
+                 href="mailto:?subject={% trans 'Take a look at this document from' %} {{ APP_NAME }}: {{ document.title|truncatewords:7|escape }}&body={{ request.build_absolute_uri }}"
                  class="btn btn-link share-link"
-                 target="_blank">
+                 target="_blank"
+                 data-subject="{% trans 'Take a look at this document from' %} {{ APP_NAME }}: {{ document.title|truncatewords:7|escape }}">
                 <i class="bi bi-envelope-at-fill envelope-at-fill-forecolor share-icon"></i>
               </a>
             </div>
