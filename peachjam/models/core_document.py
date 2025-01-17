@@ -480,6 +480,8 @@ class CoreDocument(PolymorphicModel):
         "peachjam.Ingestor", on_delete=models.SET_NULL, null=True, blank=True
     )
 
+    restricted = models.BooleanField(default=False)
+
     class Meta:
         ordering = ["doc_type", "title"]
         permissions = [

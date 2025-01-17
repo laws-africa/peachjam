@@ -25,6 +25,7 @@ from django.utils.html import format_html
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
+from guardian.admin import GuardedModelAdminMixin
 from import_export.admin import ImportExportMixin as BaseImportExportMixin
 from languages_plus.models import Language
 from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularInline
@@ -88,6 +89,7 @@ from peachjam.models import (
     PeachJamSettings,
     Predicate,
     PublicationFile,
+    PublicGroup,
     Ratification,
     RatificationCountry,
     Relationship,
@@ -471,7 +473,7 @@ class CustomPropertyInline(admin.TabularInline):
     model = CustomProperty
 
 
-class DocumentAdmin(BaseAdmin):
+class DocumentAdmin(GuardedModelAdminMixin, BaseAdmin):
     form = DocumentForm
     inlines = [
         SourceFileInline,
@@ -571,6 +573,7 @@ class DocumentAdmin(BaseAdmin):
                     "content_html_is_akn",
                     "allow_robots",
                     "published",
+                    "restricted",
                 ],
             },
         ),
@@ -1603,6 +1606,7 @@ admin.site.register(
         CustomPropertyLabel,
         Folder,
         SavedDocument,
+        PublicGroup,
     ]
 )
 admin.site.unregister(User)
