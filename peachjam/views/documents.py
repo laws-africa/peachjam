@@ -1,5 +1,5 @@
 from cobalt import FrbrUri
-from django.http import Http404, HttpResponse, HttpResponseForbidden
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
@@ -11,6 +11,7 @@ from peachjam.helpers import get_language as get_language_from_request
 from peachjam.models import CoreDocument, DocumentNature, ExtractedCitation
 from peachjam.registry import registry
 from peachjam.resolver import resolver
+from peachjam.views import BaseDocumentDetailView
 
 
 class DocumentDetailViewResolver(View):
@@ -58,16 +59,18 @@ class DocumentDetailViewResolver(View):
             return redirect(url)
 
         if obj.restricted:
+            restricted_view = RestrictedDocument403View()
+            restricted_view.setup(request, *args, **kwargs)
+
             if not request.user.is_authenticated:
-                # TODO: redirect to "paywall" page
-                return HttpResponseForbidden()
+                return restricted_view.dispatch(request, *args, **kwargs)
 
             if not request.user.is_superuser or not request.user.is_staff:
                 # check if user belongs to a group that has access to the document
                 doc_groups = get_groups_with_perms(obj)
                 user_groups = request.user.groups.all()
                 if not doc_groups.intersection(user_groups):
-                    return HttpResponseForbidden()
+                    return restricted_view.dispatch(request, *args, **kwargs)
 
         view_class = registry.views.get(obj.doc_type)
 
@@ -243,3 +246,20 @@ class DocumentCitationsView(DetailView):
         context["direction"] = direction
 
         return context
+
+
+class RestrictedDocument403View(BaseDocumentDetailView):
+    """The view used when a user tries to access a restricted document without permission."""
+
+    model = CoreDocument
+    template_name = "peachjam/restricted_document_detail.html"
+
+    def get_context_data(self, **kwargs):
+        # deliberately don't call super
+        context = {}
+        context.update(kwargs)
+        context["document"] = self.get_object()
+        return context
+
+    def render_to_response(self, context, **response_kwargs):
+        return super().render_to_response(context, status=403, **response_kwargs)
