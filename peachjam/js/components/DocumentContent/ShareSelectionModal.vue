@@ -53,6 +53,13 @@
               @click="modal.hide()"
             ><i class="bi bi-linkedin linkedin-forecolor share-icon" />
             </a>
+            <a
+              :href="`mailto:?subject=${emailSubject}&body=${combined}`"
+              class="btn btn-link"
+              target="_blank"
+              @click="modal.hide()"
+            ><i class="bi bi-envelope-at-fill envelope-at-fill-forecolor share-icon" />
+            </a>
           </div>
         </div>
       </div>
@@ -68,7 +75,14 @@ export default {
 
   computed: {
     combined () {
-      return encodeURIComponent(`${this.text} ${this.url}`)
+      return encodeURIComponent(`${this.text} ${this.url}`);
+    },
+    emailSubject () {
+      const emailShare = document.querySelector('#email-share');
+      if (emailShare) {
+        return emailShare.getAttribute('data-subject');
+      }
+      return '';
     }
   },
 
