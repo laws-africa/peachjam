@@ -7,53 +7,58 @@
       <th>{% trans 'Court' %}</th>
       <th>{% trans 'Judges' %}</th>
       <th>{% trans 'Outcome' %}</th>
+      <th>{% trans 'Appeal outcome' %}</th>
     </tr>
   </thead>
   <tbody>
-    {% for history in case_histories %}
-      {% if history.historical_judgment_work %}
-        {% if history.historical_judgment_work.documents.exists %}
-          {% with history.historical_judgment_work.documents.first as historical_judgment %}
-            <tr>
-              <td>{{ historical_judgment.date }}</td>
-              <td>
-                <a href="{{ historical_judgment.expression_frbr_uri }}">{{ historical_judgment.title }}</a>
-              </td>
-              <td>{{ historical_judgment.court }}</td>
-              <td>
-                {% for judge in historical_judgment.judges.all %}
-                  {{ judge }}
-                  {% if not forloop.last %},{% endif %}
-                {% endfor %}
-              </td>
-              <td>
-                {% for outcome in historical_judgment.outcomes.all %}
-                  {{ outcome }}
-                  {% if not forloop.last %},{% endif %}
-                {% endfor %}
-              </td>
-            </tr>
-          {% endwith %}
-        {% else %}
-          <tr>
-            <td>{{ history.historical_judgment_work.frbr_uri_date|default:"" }}</td>
-            <td>{{ history.historical_judgment_work.title }}</td>
-          </tr>
-        {% endif %}
-      {% else %}
+    {% for entry in case_histories %}
+      <tr>
+        <td>{{ entry.document.date }}</td>
+        <td>
+          <a href="{% url 'document_detail' entry.document.expression_frbr_uri|slice:"1:" %}">{{ entry.document.title }}</a>
+          {% if entry.document == document %}
+            <span class="badge text-bg-primary">{% trans "This judgment" %}</span>
+          {% endif %}
+        </td>
+        <td>{{ entry.document.court }}</td>
+        <td>
+          {% for judge in entry.document.judges.all %}
+            {# djlint:off #}
+          <span class="text-nowrap">{{ judge }}{% if not forloop.last %},{% endif %}</span>
+            {# djlint:on #}
+          {% endfor %}
+        </td>
+        <td>{{ entry.document.outcome }}</td>
+        <td>&nbsp;</td>
+      </tr>
+      {% for child in entry.children %}
         <tr>
-          <td>{{ history.date }}</td>
-          <td>{{ history.case_number }}</td>
-          <td>{{ history.court }}</td>
+          <td>{{ child.info.date }}</td>
           <td>
-            {% for judge in history.judges.all %}
-              {{ judge }}
-              {% if not forloop.last %},{% endif %}
+            ↳
+            {% if child.document %}
+              <a href="{% url 'document_detail' child.document.expression_frbr_uri|slice:"1:" %}">{{ child.document.title }}</a>
+              {% if child.document == document %}
+                <span class="badge text-bg-primary">{% trans "This judgment" %}</span>
+              {% endif %}
+            {% else %}
+              {{ child.case_history.case_number }}
+            {% endif %}
+          </td>
+          <td>{{ child.info.court }}</td>
+          <td>
+            {% for judge in child.info.judges.all %}
+              {# djlint:off #}
+            <span class="text-nowrap">{{ judge }}{% if not forloop.last %},{% endif %}</span>
+              {# djlint:on #}
             {% endfor %}
           </td>
-          <td>{{ history.outcome }}</td>
+          <td>
+            {% if child.document %}{{ child.document.outcome }}{% endif %}
+          </td>
+          <td>{{ child.case_history.outcome }}</td>
         </tr>
-      {% endif %}
+      {% endfor %}
     {% endfor %}
   </tbody>
 </table>
