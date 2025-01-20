@@ -60,19 +60,25 @@
   <div style="margin-top:1rem;">
     <div style="margin-top:1rem;">
       <div class="col-lg-8 mx-auto">
-        {% for app in social_apps %}
-          <a class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{ app.name }}"
-             href="{% provider_login_url app.provider process='login' %}">
-            {% if app.provider == "google" %}
-              <img src="{% static 'images/google-logo.png' %}"
-                   alt="Google logo"
-                   style="height: 20px;
-                          margin-right: 5px"/>
-            {% else %}
-              <i class="fab fa-fw fa-{{ app.name }}"></i>
-            {% endif %}
-            Log in with {{ app.provider|title }}
-          </a>
+        {% get_providers as socialaccount_providers %}
+        {% for provider in socialaccount_providers %}
+          <form method="post"
+                class="mt-4"
+                action="{% provider_login_url provider.id process='login' %}">
+            {% csrf_token %}
+            <button class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{ provider.id }}"
+                    type="submit">
+              {% if provider.name == "Google" %}
+                <img alt="google-logo"
+                     src="{% static 'images/google-logo.png' %}"
+                     style="height: 16px;
+                            margin-right: 5px"/>
+              {% else %}
+                <i class="bi bi-{{ provider.id }}"></i>
+              {% endif %}
+              {% blocktrans with provider=provider.name %}Log in with {{provider}}{% endblocktrans %}
+            </button>
+          </form>
         {% endfor %}
       </div>
     </div>

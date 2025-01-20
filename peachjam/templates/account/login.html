@@ -69,23 +69,27 @@
         </p>
       </div>
     </form>
-    {{ social_apps }}
     {% get_providers as socialaccount_providers %}
     {% if socialaccount_providers %}
       <hr/>
       {% for provider in socialaccount_providers %}
-        <a class="btn btn-block btn-outline-primary socialaccount_provider {{ provider.id }}"
-           href="{% provider_login_url provider.id process='login' %}">
-          {% if provider.name == "Google" %}
-            <img alt="google-logo"
-                 src="{% static 'images/google-logo.png' %}"
-                 style="height: 16px;
-                        margin-right: 5px"/>
-          {% else %}
-            <i class="bi bi-{{ provider.id }}"></i>
-          {% endif %}
-          {% trans 'Login with ' %}{{ provider.name }}
-        </a>
+        <form method="post"
+              class="mt-4"
+              action="{% provider_login_url provider.id process='login' %}">
+          {% csrf_token %}
+          <button class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{ provider.id }}"
+                  type="submit">
+            {% if provider.name == "Google" %}
+              <img alt="google-logo"
+                   src="{% static 'images/google-logo.png' %}"
+                   style="height: 16px;
+                          margin-right: 5px"/>
+            {% else %}
+              <i class="bi bi-{{ provider.id }}"></i>
+            {% endif %}
+            {% blocktrans with provider=provider.name %}Log in with {{provider}}{% endblocktrans %}
+          </button>
+        </form>
       {% endfor %}
     {% endif %}
   </div>
