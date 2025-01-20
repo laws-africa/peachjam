@@ -73,7 +73,8 @@ class JudgmentDetailView(BaseDocumentDetailView):
             # ignore incoming history entries for dangling works that don't have a document
             if ch.judgment_work.documents.first()
         ]
-        if bool(histories):
+
+        if histories:
             context["notices"].append(
                 {
                     "type": messages.WARNING,
