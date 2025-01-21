@@ -5,7 +5,7 @@ from django.views.generic import ListView
 from guardian.shortcuts import get_objects_for_group
 from rest_framework.generics import get_object_or_404
 
-from peachjam.models import PublicGroup
+from peachjam.models import DocumentAccessGroup
 from peachjam.views import FilteredDocumentListView
 
 
@@ -14,7 +14,9 @@ class UserGroupListView(LoginRequiredMixin, ListView):
     context_object_name = "groups"
 
     def get_queryset(self):
-        return PublicGroup.objects.filter(group__in=self.request.user.groups.all())
+        return DocumentAccessGroup.objects.filter(
+            group__in=self.request.user.groups.all()
+        )
 
 
 class GroupDocumentListView(LoginRequiredMixin, FilteredDocumentListView):
@@ -23,7 +25,7 @@ class GroupDocumentListView(LoginRequiredMixin, FilteredDocumentListView):
 
     @cached_property
     def public_group(self):
-        return get_object_or_404(PublicGroup, slug=self.kwargs.get("slug"))
+        return get_object_or_404(DocumentAccessGroup, slug=self.kwargs.get("slug"))
 
     def get_base_queryset(self, exclude=None):
         ids = []

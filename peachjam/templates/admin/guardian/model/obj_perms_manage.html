@@ -1,0 +1,39 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% load guardian_tags %}
+{% block extrahead %}
+  {{ block.super }}
+  <style type="text/css"></style>
+{% endblock %}
+{# djlint:off #}
+{% block breadcrumbs %}
+  {% if not is_popup %}
+    <div class="breadcrumbs">
+      <a href="../../../../">{% trans "Home" %}</a> &rsaquo;
+      <a href="../../../">{{ opts.app_config.verbose_name|capfirst|escape }}</a> &rsaquo;
+      {% if has_change_permission %}
+        <a href="../../">{{ opts.verbose_name_plural|capfirst }}</a>
+      {% else %}
+        {{ opts.verbose_name_plural|capfirst }}
+      {% endif %}
+      &rsaquo;
+      {% if has_change_permission %}
+        <a href="../">{{ original|truncatewords:"18" }}</a>
+      {% else %}
+        {{ original|truncatewords:"18" }}
+      {% endif %}
+      &rsaquo;
+      {% trans "Object permissions" %}
+    </div>
+  {% endif %}
+{% endblock %}
+{# djlint:on #}
+{% block content %}
+  <form method="post" action=".">
+    {% csrf_token %}
+    {{ doc_access_form }}
+    <div>
+      <input name="set_doc_access" type="submit" value="{% trans "Save" %}"/>
+    </div>
+  </form>
+{% endblock %}

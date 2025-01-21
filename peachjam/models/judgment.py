@@ -8,7 +8,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
-from peachjam.models import CoreDocument, Label, Locality
+from peachjam.models import CoreDocument, Label, Locality, Perms
 
 
 class Attorney(models.Model):
@@ -354,7 +354,7 @@ class Judgment(CoreDocument):
         ordering = ["title"]
         verbose_name = _("judgment")
         verbose_name_plural = _("judgments")
-        permissions = [("api_judgment", "API judgment access")]
+        permissions = [("api_judgment", "API judgment access")] + Perms.permissions
 
     def __str__(self):
         return self.title
@@ -600,6 +600,9 @@ class CauseList(CoreDocument):
     )
     judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
     end_date = models.DateField(_("end date"), null=True, blank=True)
+
+    class Meta(CoreDocument.Meta):
+        permissions = Perms.permissions
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"

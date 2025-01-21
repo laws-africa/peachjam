@@ -9,12 +9,13 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin.utils import quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.http.response import FileResponse
+from django.http.response import FileResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
@@ -26,6 +27,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from guardian.admin import GuardedModelAdminMixin
+from guardian.shortcuts import assign_perm, get_groups_with_perms, remove_perm
 from import_export.admin import ImportExportMixin as BaseImportExportMixin
 from languages_plus.models import Language
 from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularInline
@@ -64,6 +66,7 @@ from peachjam.models import (
     CourtRegistry,
     CustomProperty,
     CustomPropertyLabel,
+    DocumentAccessGroup,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -89,7 +92,6 @@ from peachjam.models import (
     PeachJamSettings,
     Predicate,
     PublicationFile,
-    PublicGroup,
     Ratification,
     RatificationCountry,
     Relationship,
@@ -473,7 +475,56 @@ class CustomPropertyInline(admin.TabularInline):
     model = CustomProperty
 
 
-class DocumentAdmin(GuardedModelAdminMixin, BaseAdmin):
+class DocumentAccessForm(forms.Form):
+    groups = forms.ModelMultipleChoiceField(
+        queryset=DocumentAccessGroup.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+    )
+
+    def __init__(self, *args, doc=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.doc = doc
+        groups = DocumentAccessGroup.objects.filter(
+            group__in=get_groups_with_perms(doc)
+        )
+        self.fields["groups"].initial = groups
+
+    def set_doc_access_groups(self):
+        add_groups = self.cleaned_data["groups"]
+        remove_groups = DocumentAccessGroup.objects.exclude(pk__in=add_groups)
+        for group in add_groups:
+            assign_perm("can_view_restricted_document", group.group, self.doc)
+
+        for group in remove_groups:
+            remove_perm("can_view_restricted_document", group.group, self.doc)
+
+
+class GuardedMixin(GuardedModelAdminMixin):
+    def obj_perms_manage_view(self, request, object_pk):
+        from django.contrib.admin.utils import unquote
+
+        template_name = self.get_obj_perms_manage_template()
+        obj = get_object_or_404(self.get_queryset(request), pk=unquote(object_pk))
+        context = self.get_obj_perms_base_context(request, obj)
+        context.update(
+            {
+                "doc_access_form": DocumentAccessForm(doc=obj),
+            }
+        )
+
+        if request.method == "POST" and "set_doc_access" in request.POST:
+            form = DocumentAccessForm(request.POST, doc=obj)
+            if form.is_valid():
+                form.set_doc_access_groups()
+                messages.success(request, "Document access groups updated.")
+                return HttpResponseRedirect(".")
+            context["doc_access_form"] = form
+
+        return render(request, template_name, context)
+
+
+class DocumentAdmin(GuardedMixin, BaseAdmin):
     form = DocumentForm
     inlines = [
         SourceFileInline,
@@ -502,6 +553,7 @@ class DocumentAdmin(GuardedModelAdminMixin, BaseAdmin):
         "work_frbr_uri",
         "toc_json",
         "work_link",
+        "document_access_link",
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
@@ -574,6 +626,7 @@ class DocumentAdmin(GuardedModelAdminMixin, BaseAdmin):
                     "allow_robots",
                     "published",
                     "restricted",
+                    "document_access_link",
                 ],
             },
         ),
@@ -608,6 +661,17 @@ class DocumentAdmin(GuardedModelAdminMixin, BaseAdmin):
             fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
 
         return fieldsets
+
+    def document_access_link(self, obj):
+        if obj and obj.id:
+            url = reverse(
+                f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
+                args=[quote(obj.pk)],
+            )
+            return format_html('<a href="{}">{}</a>', url, "Set Document Access Groups")
+        return "-"
+
+    document_access_link.short_description = "Document access"
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
@@ -1606,7 +1670,7 @@ admin.site.register(
         CustomPropertyLabel,
         Folder,
         SavedDocument,
-        PublicGroup,
+        DocumentAccessGroup,
     ]
 )
 admin.site.unregister(User)

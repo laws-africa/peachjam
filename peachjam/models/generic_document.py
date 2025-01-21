@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, Perms
 from peachjam.models.author import Author
 
 
@@ -22,6 +22,7 @@ class GenericDocument(CoreDocument):
     class Meta(CoreDocument.Meta):
         verbose_name = _("generic document")
         verbose_name_plural = _("generic documents")
+        permissions = Perms.permissions
 
     def __str__(self):
         return self.title or ""

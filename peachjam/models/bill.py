@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, Perms
 
 
 class Bill(CoreDocument):
@@ -17,6 +17,7 @@ class Bill(CoreDocument):
     class Meta(CoreDocument.Meta):
         verbose_name = _("bill")
         verbose_name_plural = _("bills")
+        permissions = Perms.permissions
 
     def author_list(self):
         return [self.author] if self.author else []

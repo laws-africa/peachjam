@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.text import slugify
 
 
-class PublicGroup(models.Model):
+class DocumentAccessGroup(models.Model):
     group = models.OneToOneField(
         Group,
         on_delete=models.CASCADE,
@@ -15,10 +15,11 @@ class PublicGroup(models.Model):
         verbose_name="slug",
         blank=True,
     )
+    description = models.TextField()
 
     class Meta:
-        verbose_name = "public group"
-        verbose_name_plural = "public groups"
+        verbose_name = "document access group"
+        verbose_name_plural = "document access groups"
 
     def __str__(self):
         return self.group.name

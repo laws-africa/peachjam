@@ -6,6 +6,7 @@ from peachjam.models import (
     CoreDocumentManager,
     CoreDocumentQuerySet,
     Label,
+    Perms,
     Work,
 )
 
@@ -38,6 +39,7 @@ class Legislation(CoreDocument):
     class Meta(CoreDocument.Meta):
         verbose_name = _("legislation")
         verbose_name_plural = _("legislation")
+        permissions = Perms.permissions
 
     def __str__(self):
         return self.title
