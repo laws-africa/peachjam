@@ -1,7 +1,11 @@
+import datetime
+
+from countries_plus.models import Country
 from django.contrib.auth.models import User
 from django.test import TestCase
+from languages_plus.models import Language
 
-from peachjam.models import PeachJamSettings
+from peachjam.models import CaseHistory, Court, Judgment, Outcome, PeachJamSettings
 
 
 class PeachjamViewsTest(TestCase):
@@ -212,3 +216,39 @@ class PeachjamViewsTest(TestCase):
         )
         response = self.client.get("/accounts/profile/")
         self.assertEqual(response.status_code, 200)
+
+    def test_case_history(self):
+        appeal_allowed = Outcome.objects.create(name="Appeal Allowed")
+
+        main_case = Judgment.objects.create(
+            case_name="Main case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+        )
+
+        appeal_case = Judgment.objects.create(
+            case_name="Appeal case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 2, 2),
+            language=Language.objects.first(),
+        )
+
+        CaseHistory.objects.create(
+            judgment_work=appeal_case.work,
+            historical_judgment_work=main_case.work,
+            outcome=appeal_allowed,
+        )
+
+        response = self.client.get(appeal_case.expression_frbr_uri)
+        self.assertContains(response, "Case history")
+        self.assertContains(response, "Main case")
+        self.assertContains(response, "Appeal Allowed")
+
+        response = self.client.get(main_case.expression_frbr_uri)
+        self.assertContains(response, "reviewed by another court")
+        self.assertContains(response, "Case history")
+        self.assertContains(response, "Appeal case")
+        self.assertContains(response, "Appeal Allowed")
