@@ -543,6 +543,7 @@ class CaseHistory(models.Model):
     )
     historical_judgment_work = models.ForeignKey(
         "peachjam.Work",
+        related_name="incoming_case_histories",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
