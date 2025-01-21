@@ -244,11 +244,11 @@ class PeachjamViewsTest(TestCase):
 
         response = self.client.get(appeal_case.expression_frbr_uri)
         self.assertContains(response, "Case history")
-        self.assertContains(response, "Main case")
-        self.assertContains(response, "Appeal Allowed")
+        self.assertContains(response, main_case.title)
+        self.assertContains(response, appeal_allowed.name)
 
         response = self.client.get(main_case.expression_frbr_uri)
         self.assertContains(response, "reviewed by another court")
         self.assertContains(response, "Case history")
-        self.assertContains(response, "Appeal case")
-        self.assertContains(response, "Appeal Allowed")
+        self.assertContains(response, appeal_case.title)
+        self.assertContains(response, appeal_allowed.name)
