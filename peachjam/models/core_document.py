@@ -311,12 +311,6 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
         return obj, False
 
 
-class Perms:
-    permissions = [
-        ("can_view_restricted_document", "Can view restricted document"),
-    ]
-
-
 class CoreDocument(PolymorphicModel):
     # There are three ways of indicating a document's type:
     #
@@ -486,7 +480,10 @@ class CoreDocument(PolymorphicModel):
         "peachjam.Ingestor", on_delete=models.SET_NULL, null=True, blank=True
     )
 
-    restricted = models.BooleanField(default=False)
+    restricted = models.BooleanField(
+        default=False,
+        help_text=_("Restrict access to this document to selected groups."),
+    )
 
     class Meta:
         ordering = ["doc_type", "title"]
@@ -494,7 +491,6 @@ class CoreDocument(PolymorphicModel):
             ("can_delete_own_document", "Can delete own document"),
             ("can_edit_own_document", "Can edit own document"),
             ("can_edit_advanced_fields", "Can edit advanced fields"),
-            ("can_view_restricted_document", "Can view restricted document"),
         ]
 
     def __str__(self):

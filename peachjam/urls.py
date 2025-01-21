@@ -100,9 +100,12 @@ from peachjam.views import (
     WorkAutocomplete,
 )
 from peachjam.views.comments import comment_form_view
+from peachjam.views.document_access_group import (
+    DocumentAccessGroupDetailView,
+    DocumentAccessGroupListView,
+)
 from peachjam.views.generic_views import CSRFTokenView
 from peachjam.views.metabase_stats import MetabaseStatsView
-from peachjam.views.restricted_documents import GroupDocumentListView, UserGroupListView
 
 register_converter(ISODateConverter, "isodate")
 
@@ -480,14 +483,14 @@ urlpatterns = [
     ),
     # Restricted Documents
     path(
-        "user-groups",
-        UserGroupListView.as_view(),
-        name="user_groups",
+        "document-access-group/",
+        DocumentAccessGroupListView.as_view(),
+        name="document_access_group_list",
     ),
     path(
-        "group/<slug:slug>",
-        GroupDocumentListView.as_view(),
-        name="group_documents",
+        "document-access-group/<int:pk>",
+        DocumentAccessGroupDetailView.as_view(),
+        name="document_access_group_detail",
     ),
     path(
         "compare",

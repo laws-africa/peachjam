@@ -12,7 +12,9 @@ from django.contrib import admin, messages
 from django.contrib.admin.utils import quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http.response import FileResponse, HttpResponseRedirect
@@ -493,14 +495,19 @@ class DocumentAccessForm(forms.Form):
     def set_doc_access_groups(self):
         add_groups = self.cleaned_data["groups"]
         remove_groups = DocumentAccessGroup.objects.exclude(pk__in=add_groups)
+        content_type = ContentType.objects.get_for_model(self.doc)
+        view_perm = Permission.objects.get(
+            content_type=content_type, codename=f"view_{content_type.model}"
+        )
+
         for group in add_groups:
-            assign_perm("can_view_restricted_document", group.group, self.doc)
+            assign_perm(view_perm, group.group, self.doc)
 
         for group in remove_groups:
-            remove_perm("can_view_restricted_document", group.group, self.doc)
+            remove_perm(view_perm, group.group, self.doc)
 
 
-class GuardedMixin(GuardedModelAdminMixin):
+class DocumentAccessMixin(GuardedModelAdminMixin):
     def obj_perms_manage_view(self, request, object_pk):
         from django.contrib.admin.utils import unquote
 
@@ -524,7 +531,7 @@ class GuardedMixin(GuardedModelAdminMixin):
         return render(request, template_name, context)
 
 
-class DocumentAdmin(GuardedMixin, BaseAdmin):
+class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
     form = DocumentForm
     inlines = [
         SourceFileInline,
@@ -668,10 +675,12 @@ class DocumentAdmin(GuardedMixin, BaseAdmin):
                 f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
                 args=[quote(obj.pk)],
             )
-            return format_html('<a href="{}">{}</a>', url, "Set Document Access Groups")
+            return format_html(
+                '<a href="{}">{}</a>', url, "Select restricted document access groups"
+            )
         return "-"
 
-    document_access_link.short_description = "Document access"
+    document_access_link.short_description = "Restricted document access"
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:

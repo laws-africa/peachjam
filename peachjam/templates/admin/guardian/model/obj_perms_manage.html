@@ -23,7 +23,7 @@
         {{ original|truncatewords:"18" }}
       {% endif %}
       &rsaquo;
-      {% trans "Object permissions" %}
+      {% trans "Document access" %}
     </div>
   {% endif %}
 {% endblock %}
@@ -31,9 +31,13 @@
 {% block content %}
   <form method="post" action=".">
     {% csrf_token %}
+    <p class="form-label">Select groups that should have access to this document</p>
     {{ doc_access_form }}
-    <div>
-      <input name="set_doc_access" type="submit" value="{% trans "Save" %}"/>
+    <div class="my-3">
+      <input class="btn btn-success"
+             name="set_doc_access"
+             type="submit"
+             value="{% trans "Save" %}"/>
     </div>
   </form>
 {% endblock %}

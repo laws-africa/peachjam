@@ -10,12 +10,7 @@ class DocumentAccessGroup(models.Model):
         on_delete=models.CASCADE,
         verbose_name="group",
     )
-    slug = models.SlugField(
-        unique=True,
-        verbose_name="slug",
-        blank=True,
-    )
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
 
     class Meta:
         verbose_name = "document access group"

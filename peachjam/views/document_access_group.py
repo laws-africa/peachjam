@@ -5,12 +5,12 @@ from django.views.generic import ListView
 from guardian.shortcuts import get_objects_for_group
 from rest_framework.generics import get_object_or_404
 
-from peachjam.models import DocumentAccessGroup
+from peachjam.models import CoreDocument, DocumentAccessGroup
 from peachjam.views import FilteredDocumentListView
 
 
-class UserGroupListView(LoginRequiredMixin, ListView):
-    template_name = "peachjam/user_groups.html"
+class DocumentAccessGroupListView(LoginRequiredMixin, ListView):
+    template_name = "peachjam/document_access_group_list.html"
     context_object_name = "groups"
 
     def get_queryset(self):
@@ -19,21 +19,24 @@ class UserGroupListView(LoginRequiredMixin, ListView):
         )
 
 
-class GroupDocumentListView(LoginRequiredMixin, FilteredDocumentListView):
-    template_name = "peachjam/group_documents.html"
+class DocumentAccessGroupDetailView(LoginRequiredMixin, FilteredDocumentListView):
+    template_name = "peachjam/document_access_group_detail.html"
     context_object_name = "documents"
 
     @cached_property
     def public_group(self):
-        return get_object_or_404(DocumentAccessGroup, slug=self.kwargs.get("slug"))
+        return get_object_or_404(DocumentAccessGroup, pk=self.kwargs.get("pk"))
+
+    def get_perms(self):
+        # get view permission for each subclass of CoreDocument
+        return [
+            f"{klass._meta.app_label}.view_{klass._meta.model_name}"
+            for klass in CoreDocument.__subclasses__()
+        ]
 
     def get_base_queryset(self, exclude=None):
         ids = []
-        perms = [
-            "peachjam.view_genericdocument",
-            "peachjam.view_judgment",
-            "peachjam.view_legislation",
-        ]
+        perms = self.get_perms()
         for p in perms:
             ids.extend(
                 get_objects_for_group(self.public_group.group, p).values_list(

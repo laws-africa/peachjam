@@ -1,0 +1,20 @@
+{% extends "user_account/layout.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Document access groups' %}
+{% endblock %}
+{% block account-tabs %}
+  {% include 'user_account/_tabs.html' with active='doc_access_groups' %}
+{% endblock %}
+{% block account-content %}
+  <div class="container mt-4">
+    <h2>{% trans 'Document access groups' %}</h2>
+    <ul class="my-3">
+      {% for group in groups %}
+        <li>
+          <a href="{% url 'document_access_group_detail' group.pk %}">{{ group.group }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}

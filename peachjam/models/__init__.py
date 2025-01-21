@@ -5,6 +5,7 @@ from .author import *
 from .citations import *
 from .core_document import *
 from .custom_property import *
+from .document_access_group import *
 from .external_document import *
 from .gazette import *
 from .generic_document import *
@@ -14,7 +15,6 @@ from .judgment import *
 from .legislation import *
 from .partner import *
 from .profile import *
-from .public_groups import *
 from .ratification import *
 from .relationships import *
 from .save_document import *

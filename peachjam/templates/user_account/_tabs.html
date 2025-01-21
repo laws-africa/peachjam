@@ -46,9 +46,9 @@
       </li>
     {% endif %}
     <li class="nav-item">
-      <a href="{% url 'user_groups' %}"
-         class="nav-link {% if active == 'user_groups' %}active{% endif %}">
-        {% trans "My Groups" %}
+      <a href="{% url 'document_access_group_list' %}"
+         class="nav-link {% if active == 'doc_access_groups' %}active{% endif %}">
+        {% trans "Document access groups" %}
       </a>
     </li>
   {% endblock %}
