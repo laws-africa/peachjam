@@ -682,7 +682,7 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
             )
         return "-"
 
-    document_access_link.short_description = "Restricted document access"
+    document_access_link.short_description = _("Restricted document access")
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
