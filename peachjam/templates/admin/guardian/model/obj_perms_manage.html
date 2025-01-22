@@ -31,7 +31,11 @@
 {% block content %}
   <form method="post" action=".">
     {% csrf_token %}
-    <p class="form-label">Select groups that should have access to this document</p>
+    <p class="form-label">
+      {% blocktrans trimmed %}
+      Select the groups that have access to this document
+      {% endblocktrans %}
+    </p>
     {{ doc_access_form }}
     <div class="my-3">
       <input class="btn btn-success"

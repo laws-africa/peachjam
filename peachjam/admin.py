@@ -676,7 +676,9 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
                 args=[quote(obj.pk)],
             )
             return format_html(
-                '<a href="{}">{}</a>', url, "Select restricted document access groups"
+                '<a href="{}">{}</a>',
+                url,
+                _("Select restricted document access groups"),
             )
         return "-"
 

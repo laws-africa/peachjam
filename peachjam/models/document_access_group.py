@@ -1,7 +1,6 @@
 from django.contrib.auth.models import Group
 from django.db import models
 from django.urls import reverse
-from django.utils.text import slugify
 
 
 class DocumentAccessGroup(models.Model):
@@ -20,8 +19,4 @@ class DocumentAccessGroup(models.Model):
         return self.group.name
 
     def get_absolute_url(self):
-        return reverse("group_documents", args=[self.slug])
-
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.group.name)
-        super().save(*args, **kwargs)
+        return reverse("document_access_group_detail", args=[self.pk])

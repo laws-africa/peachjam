@@ -483,12 +483,12 @@ urlpatterns = [
     ),
     # Restricted Documents
     path(
-        "document-access-group/",
+        "document-access-groups/",
         DocumentAccessGroupListView.as_view(),
         name="document_access_group_list",
     ),
     path(
-        "document-access-group/<int:pk>",
+        "document-access-groups/<int:pk>",
         DocumentAccessGroupDetailView.as_view(),
         name="document_access_group_detail",
     ),
