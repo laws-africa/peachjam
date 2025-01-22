@@ -524,7 +524,7 @@ class DocumentAccessMixin(GuardedModelAdminMixin):
             form = DocumentAccessForm(request.POST, doc=obj)
             if form.is_valid():
                 form.set_doc_access_groups()
-                messages.success(request, "Document access groups updated.")
+                messages.success(request, _("Document access groups updated."))
                 return HttpResponseRedirect(".")
             context["doc_access_form"] = form
 
