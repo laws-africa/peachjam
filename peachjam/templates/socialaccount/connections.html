@@ -46,7 +46,11 @@
       {% get_providers as socialaccount_providers %}
       {% if socialaccount_providers %}
         <h5 class="mt-4">{% trans "Connect a social account" %}</h5>
-        <p class="mb-4">{% trans "Connecting to a social account allows you to use it to login to Indigo." %}</p>
+        <p class="mb-4">
+          {% blocktrans trimmed %}
+          Connecting to a social account allows you to use it to log in to {{ APP_NAME }}.
+          {% endblocktrans %}
+        </p>
         <div class="row">
           <div class="col-md-6">
             <ul class="socialaccount_providers list-unstyled">
