@@ -5,6 +5,7 @@ from .author import *
 from .citations import *
 from .core_document import *
 from .custom_property import *
+from .document_access_group import *
 from .external_document import *
 from .gazette import *
 from .generic_document import *

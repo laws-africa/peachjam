@@ -100,6 +100,10 @@ from peachjam.views import (
     WorkAutocomplete,
 )
 from peachjam.views.comments import comment_form_view
+from peachjam.views.document_access_group import (
+    DocumentAccessGroupDetailView,
+    DocumentAccessGroupListView,
+)
 from peachjam.views.generic_views import CSRFTokenView
 from peachjam.views.metabase_stats import MetabaseStatsView
 
@@ -476,6 +480,17 @@ urlpatterns = [
         "saved-documents/folders/<int:pk>/delete",
         FolderDeleteView.as_view(),
         name="folder_delete",
+    ),
+    # Restricted Documents
+    path(
+        "document-access-groups/",
+        DocumentAccessGroupListView.as_view(),
+        name="document_access_group_list",
+    ),
+    path(
+        "document-access-groups/<int:pk>",
+        DocumentAccessGroupDetailView.as_view(),
+        name="document_access_group_detail",
     ),
     path(
         "compare",

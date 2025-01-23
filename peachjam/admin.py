@@ -9,12 +9,15 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin.utils import quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.http.response import FileResponse
+from django.http.response import FileResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
@@ -25,6 +28,8 @@ from django.utils.html import format_html
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
+from guardian.admin import GuardedModelAdminMixin
+from guardian.shortcuts import assign_perm, get_groups_with_perms, remove_perm
 from import_export.admin import ImportExportMixin as BaseImportExportMixin
 from languages_plus.models import Language
 from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularInline
@@ -63,6 +68,7 @@ from peachjam.models import (
     CourtRegistry,
     CustomProperty,
     CustomPropertyLabel,
+    DocumentAccessGroup,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -471,7 +477,61 @@ class CustomPropertyInline(admin.TabularInline):
     model = CustomProperty
 
 
-class DocumentAdmin(BaseAdmin):
+class DocumentAccessForm(forms.Form):
+    groups = forms.ModelMultipleChoiceField(
+        queryset=DocumentAccessGroup.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+    )
+
+    def __init__(self, *args, doc=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.doc = doc
+        groups = DocumentAccessGroup.objects.filter(
+            group__in=get_groups_with_perms(doc)
+        )
+        self.fields["groups"].initial = groups
+
+    def set_doc_access_groups(self):
+        add_groups = self.cleaned_data["groups"]
+        remove_groups = DocumentAccessGroup.objects.exclude(pk__in=add_groups)
+        content_type = ContentType.objects.get_for_model(self.doc)
+        view_perm = Permission.objects.get(
+            content_type=content_type, codename=f"view_{content_type.model}"
+        )
+
+        for group in add_groups:
+            assign_perm(view_perm, group.group, self.doc)
+
+        for group in remove_groups:
+            remove_perm(view_perm, group.group, self.doc)
+
+
+class DocumentAccessMixin(GuardedModelAdminMixin):
+    def obj_perms_manage_view(self, request, object_pk):
+        from django.contrib.admin.utils import unquote
+
+        template_name = self.get_obj_perms_manage_template()
+        obj = get_object_or_404(self.get_queryset(request), pk=unquote(object_pk))
+        context = self.get_obj_perms_base_context(request, obj)
+        context.update(
+            {
+                "doc_access_form": DocumentAccessForm(doc=obj),
+            }
+        )
+
+        if request.method == "POST" and "set_doc_access" in request.POST:
+            form = DocumentAccessForm(request.POST, doc=obj)
+            if form.is_valid():
+                form.set_doc_access_groups()
+                messages.success(request, _("Document access groups updated."))
+                return HttpResponseRedirect(".")
+            context["doc_access_form"] = form
+
+        return render(request, template_name, context)
+
+
+class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
     form = DocumentForm
     inlines = [
         SourceFileInline,
@@ -500,6 +560,7 @@ class DocumentAdmin(BaseAdmin):
         "work_frbr_uri",
         "toc_json",
         "work_link",
+        "document_access_link",
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
@@ -571,6 +632,8 @@ class DocumentAdmin(BaseAdmin):
                     "content_html_is_akn",
                     "allow_robots",
                     "published",
+                    "restricted",
+                    "document_access_link",
                 ],
             },
         ),
@@ -605,6 +668,21 @@ class DocumentAdmin(BaseAdmin):
             fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
 
         return fieldsets
+
+    def document_access_link(self, obj):
+        if obj and obj.id:
+            url = reverse(
+                f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
+                args=[quote(obj.pk)],
+            )
+            return format_html(
+                '<a href="{}">{}</a>',
+                url,
+                _("Select restricted document access groups"),
+            )
+        return "-"
+
+    document_access_link.short_description = gettext_lazy("Restricted document access")
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
@@ -692,7 +770,7 @@ class DocumentAdmin(BaseAdmin):
                 instance.work,
             )
 
-    work_link.short_description = "Work"
+    work_link.short_description = gettext_lazy("Work")
 
     def download_sourcefile(self, request, pk):
         source_file = get_object_or_404(SourceFile.objects, pk=pk)
@@ -703,10 +781,12 @@ class DocumentAdmin(BaseAdmin):
         for doc in queryset.iterator():
             extract_citations_task(doc.pk, creator=doc)
         self.message_user(
-            request, f"Queued tasks to extract citations from {count} documents."
+            request,
+            _("Queued tasks to extract citations from %(count)d documents.")
+            % {"count": count},
         )
 
-    extract_citations.short_description = "Extract citations (background)"
+    extract_citations.short_description = gettext_lazy("Extract citations (background)")
 
     def reextract_content(self, request, queryset):
         """Re-extract content from source files that are Word documents, overwriting content_html."""
@@ -716,35 +796,51 @@ class DocumentAdmin(BaseAdmin):
                 count += 1
                 doc.extract_citations()
                 doc.save()
-        self.message_user(request, f"Re-imported content from {count} documents.")
+        self.message_user(
+            request,
+            _("Re-imported content from %(count)d documents.") % {"count": count},
+        )
 
-    reextract_content.short_description = "Re-extract content from DOCX files"
+    reextract_content.short_description = gettext_lazy(
+        "Re-extract content from DOCX files"
+    )
 
     def reindex_for_search(self, request, queryset):
         """Set up a background task to re-index documents for search."""
         count = queryset.count()
         for doc in queryset.iterator():
             search_model_saved(doc._meta.label, doc.pk)
-        self.message_user(request, f"Queued tasks to re-index for {count} documents.")
+        self.message_user(
+            request,
+            _("Queued tasks to re-index for %(count)d documents.") % {"count": count},
+        )
 
-    reindex_for_search.short_description = "Re-index for search (background)"
+    reindex_for_search.short_description = gettext_lazy(
+        "Re-index for search (background)"
+    )
 
     def apply_labels(self, request, queryset):
         count = queryset.count()
         for doc in queryset.iterator():
             doc.apply_labels()
-        self.message_user(request, f"Applying labels for {count} documents.")
+        self.message_user(
+            request, _("Applying labels for %(count)d documents.") % {"count": count}
+        )
 
-    apply_labels.short_description = "Apply labels"
+    apply_labels.short_description = gettext_lazy("Apply labels")
 
     def ensure_source_file_pdf(self, request, queryset):
         count = queryset.count()
         for doc in queryset.iterator():
             if hasattr(doc, "source_file"):
                 doc.source_file.ensure_file_as_pdf()
-        self.message_user(request, f"Ensuring PDF for {count} documents.")
+        self.message_user(
+            request, _("Ensuring PDF for %(count)d documents.") % {"count": count}
+        )
 
-    ensure_source_file_pdf.short_description = "Ensure PDF for source file (background)"
+    ensure_source_file_pdf.short_description = gettext_lazy(
+        "Ensure PDF for source file (background)"
+    )
 
     def has_delete_permission(self, request, obj=None):
         if obj and (
@@ -929,8 +1025,8 @@ class LowerBenchInline(admin.TabularInline):
 class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
     model = Relationship
     fields = ["predicate", "object_work"]
-    verbose_name = "Related judgment"
-    verbose_name_plural = "Related judgments"
+    verbose_name = gettext_lazy("Related judgment")
+    verbose_name_plural = gettext_lazy("Related judgments")
     extra = 2
 
     def get_form_queryset(self, obj):
@@ -952,7 +1048,7 @@ class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
 
 class CaseHistoryInlineAdmin(NonrelatedStackedInline):
     model = CaseHistory
-    verbose_name = verbose_name_plural = "case history"
+    verbose_name = verbose_name_plural = gettext_lazy("case history")
     exclude = ["judgment_work"]
     extra = 1
 
@@ -1368,10 +1464,12 @@ class WorkAdmin(admin.ModelAdmin):
         for work in queryset:
             update_extracted_citations_for_a_work(work.pk)
         self.message_user(
-            request, f"Queued tasks to update extracted citations for {count} works."
+            request,
+            _("Queued tasks to update extracted citations for %(count)d works.")
+            % {"count": count},
         )
 
-    update_extracted_citations.short_description = (
+    update_extracted_citations.short_description = gettext_lazy(
         "Update extracted citations (background)"
     )
 
@@ -1379,9 +1477,11 @@ class WorkAdmin(admin.ModelAdmin):
         count = queryset.count()
         for work in queryset:
             work.update_languages()
-        self.message_user(request, f"Updated languages for {count} works.")
+        self.message_user(
+            request, _("Updated languages for %(count)d works.") % {"count": count}
+        )
 
-    update_languages.short_description = "Update languages"
+    update_languages.short_description = gettext_lazy("Update languages")
 
 
 @admin.register(DocumentNature)
@@ -1603,6 +1703,7 @@ admin.site.register(
         CustomPropertyLabel,
         Folder,
         SavedDocument,
+        DocumentAccessGroup,
     ]
 )
 admin.site.unregister(User)

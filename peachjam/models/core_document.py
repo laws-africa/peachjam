@@ -480,6 +480,11 @@ class CoreDocument(PolymorphicModel):
         "peachjam.Ingestor", on_delete=models.SET_NULL, null=True, blank=True
     )
 
+    restricted = models.BooleanField(
+        default=False,
+        help_text=_("Restrict access to this document to selected groups."),
+    )
+
     class Meta:
         ordering = ["doc_type", "title"]
         permissions = [

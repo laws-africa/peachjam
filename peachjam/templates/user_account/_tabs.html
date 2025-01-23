@@ -45,5 +45,11 @@
         </a>
       </li>
     {% endif %}
+    <li class="nav-item">
+      <a href="{% url 'document_access_group_list' %}"
+         class="nav-link {% if active == 'doc_access_groups' %}active{% endif %}">
+        {% trans "Document access groups" %}
+      </a>
+    </li>
   {% endblock %}
 </ul>

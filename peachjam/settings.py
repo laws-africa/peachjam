@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     "django_htmx",
     "django_recaptcha",
     "django_comments",
+    "guardian",
 ]
 
 MIDDLEWARE = [
@@ -157,6 +158,7 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL = PEACHJAM["SUPPORT_EMAIL"]
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
+    "guardian.backends.ObjectPermissionBackend",
 ]
 # admins must create accounts
 ACCOUNT_SIGNUP_ENABLED = False
@@ -687,3 +689,6 @@ MESSAGE_TAGS = {
 TEST_RUNNER = os.environ.get("TEST_RUNNER", "django.test.runner.DiscoverRunner")
 # only used by xmlrunner https://github.com/xmlrunner/unittest-xml-reporting#django-support
 TEST_OUTPUT_DIR = "./test-reports"
+
+# django-guardian
+ANONYMOUS_USER_NAME = None
