@@ -682,7 +682,7 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
             )
         return "-"
 
-    document_access_link.short_description = _("Restricted document access")
+    document_access_link.short_description = gettext_lazy("Restricted document access")
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
@@ -770,7 +770,7 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
                 instance.work,
             )
 
-    work_link.short_description = "Work"
+    work_link.short_description = gettext_lazy("Work")
 
     def download_sourcefile(self, request, pk):
         source_file = get_object_or_404(SourceFile.objects, pk=pk)
@@ -781,10 +781,12 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
         for doc in queryset.iterator():
             extract_citations_task(doc.pk, creator=doc)
         self.message_user(
-            request, f"Queued tasks to extract citations from {count} documents."
+            request,
+            _("Queued tasks to extract citations from %(count)d documents.")
+            % {"count": count},
         )
 
-    extract_citations.short_description = "Extract citations (background)"
+    extract_citations.short_description = gettext_lazy("Extract citations (background)")
 
     def reextract_content(self, request, queryset):
         """Re-extract content from source files that are Word documents, overwriting content_html."""
@@ -794,35 +796,51 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
                 count += 1
                 doc.extract_citations()
                 doc.save()
-        self.message_user(request, f"Re-imported content from {count} documents.")
+        self.message_user(
+            request,
+            _("Re-imported content from %(count)d documents.") % {"count": count},
+        )
 
-    reextract_content.short_description = "Re-extract content from DOCX files"
+    reextract_content.short_description = gettext_lazy(
+        "Re-extract content from DOCX files"
+    )
 
     def reindex_for_search(self, request, queryset):
         """Set up a background task to re-index documents for search."""
         count = queryset.count()
         for doc in queryset.iterator():
             search_model_saved(doc._meta.label, doc.pk)
-        self.message_user(request, f"Queued tasks to re-index for {count} documents.")
+        self.message_user(
+            request,
+            _("Queued tasks to re-index for %(count)d documents.") % {"count": count},
+        )
 
-    reindex_for_search.short_description = "Re-index for search (background)"
+    reindex_for_search.short_description = gettext_lazy(
+        "Re-index for search (background)"
+    )
 
     def apply_labels(self, request, queryset):
         count = queryset.count()
         for doc in queryset.iterator():
             doc.apply_labels()
-        self.message_user(request, f"Applying labels for {count} documents.")
+        self.message_user(
+            request, _("Applying labels for %(count)d documents.") % {"count": count}
+        )
 
-    apply_labels.short_description = "Apply labels"
+    apply_labels.short_description = gettext_lazy("Apply labels")
 
     def ensure_source_file_pdf(self, request, queryset):
         count = queryset.count()
         for doc in queryset.iterator():
             if hasattr(doc, "source_file"):
                 doc.source_file.ensure_file_as_pdf()
-        self.message_user(request, f"Ensuring PDF for {count} documents.")
+        self.message_user(
+            request, _("Ensuring PDF for %(count)d documents.") % {"count": count}
+        )
 
-    ensure_source_file_pdf.short_description = "Ensure PDF for source file (background)"
+    ensure_source_file_pdf.short_description = gettext_lazy(
+        "Ensure PDF for source file (background)"
+    )
 
     def has_delete_permission(self, request, obj=None):
         if obj and (
@@ -1007,8 +1025,8 @@ class LowerBenchInline(admin.TabularInline):
 class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
     model = Relationship
     fields = ["predicate", "object_work"]
-    verbose_name = "Related judgment"
-    verbose_name_plural = "Related judgments"
+    verbose_name = gettext_lazy("Related judgment")
+    verbose_name_plural = gettext_lazy("Related judgments")
     extra = 2
 
     def get_form_queryset(self, obj):
@@ -1030,7 +1048,7 @@ class JudgmentRelationshipStackedInline(NonrelatedTabularInline):
 
 class CaseHistoryInlineAdmin(NonrelatedStackedInline):
     model = CaseHistory
-    verbose_name = verbose_name_plural = "case history"
+    verbose_name = verbose_name_plural = gettext_lazy("case history")
     exclude = ["judgment_work"]
     extra = 1
 
@@ -1446,10 +1464,12 @@ class WorkAdmin(admin.ModelAdmin):
         for work in queryset:
             update_extracted_citations_for_a_work(work.pk)
         self.message_user(
-            request, f"Queued tasks to update extracted citations for {count} works."
+            request,
+            _("Queued tasks to update extracted citations for %(count)d works.")
+            % {"count": count},
         )
 
-    update_extracted_citations.short_description = (
+    update_extracted_citations.short_description = gettext_lazy(
         "Update extracted citations (background)"
     )
 
@@ -1457,9 +1477,11 @@ class WorkAdmin(admin.ModelAdmin):
         count = queryset.count()
         for work in queryset:
             work.update_languages()
-        self.message_user(request, f"Updated languages for {count} works.")
+        self.message_user(
+            request, _("Updated languages for %(count)d works.") % {"count": count}
+        )
 
-    update_languages.short_description = "Update languages"
+    update_languages.short_description = gettext_lazy("Update languages")
 
 
 @admin.register(DocumentNature)
