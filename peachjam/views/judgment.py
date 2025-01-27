@@ -43,6 +43,18 @@ class JudgmentDetailView(BaseDocumentDetailView):
     model = Judgment
     template_name = "peachjam/judgment_detail.html"
 
+    def get_notices(self):
+        notices = super().get_notices()
+        document = self.get_object()
+        if document.anonymised:
+            notices.append(
+                {
+                    "type": messages.INFO,
+                    "html": mark_safe(_("This judgment has been anonymised.")),
+                }
+            )
+        return notices
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["judges"] = (
