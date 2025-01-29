@@ -52,7 +52,7 @@ class JudgmentDetailView(BaseDocumentDetailView):
                     "type": messages.INFO,
                     "html": mark_safe(
                         _(
-                            "Editorial note: This judgment has been anonymised to protect personal "
+                            "This judgment has been anonymised to protect personal "
                             "information in compliance with the law."
                         )
                     ),
