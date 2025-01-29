@@ -50,7 +50,12 @@ class JudgmentDetailView(BaseDocumentDetailView):
             notices.append(
                 {
                     "type": messages.INFO,
-                    "html": mark_safe(_("This judgment has been anonymised.")),
+                    "html": mark_safe(
+                        _(
+                            "Editorial note: This judgment has been anonymised to protect personal "
+                            "information in compliance with the law."
+                        )
+                    ),
                 }
             )
         return notices
