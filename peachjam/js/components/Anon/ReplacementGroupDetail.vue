@@ -9,7 +9,7 @@
       </h6>
       <button class="btn btn-success ms-auto" @click="apply" :disabled="!canApply" title="Apply"><i class="bi bi-check"></i></button>
       <button class="btn btn-warning ms-2" @click="unapply" :disabled="!canUnapply" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>
-      <button class="btn btn-danger ms-2 " @click="remove"><i class="bi bi-trash"></i></button>
+      <button class="btn btn-danger ms-2 " @click="remove" title="Remove"><i class="bi bi-trash"></i></button>
     </div>
     <ul :class="`list-group list-group-flush replacement-group-items ${collapsed ? 'd-none' : ''}`">
       <template v-for="replacement of group.replacements" :key="replacement.id">
@@ -59,21 +59,23 @@ export default {
     apply () {
       const replacements = this.group.replacements.concat(this.group.suggestions);
       for (const replacement of replacements) {
-        replacement.apply();
-        replacement.mark();
-        this.$emit('applied', replacement);
+        if (!replacement.applied) {
+          replacement.apply();
+          replacement.mark();
+        }
       }
+      this.$emit('applied', replacements);
     },
     unapply () {
       const replacements = this.group.replacements.concat(this.group.suggestions);
       for (const replacement of replacements) {
         replacement.unapply();
         replacement.mark();
-        this.$emit('unapplied', replacement);
       }
+      this.$emit('unapplied', replacements);
     },
     applied (replacement) {
-      this.$emit('applied', replacement);
+      this.$emit('applied', [replacement]);
     },
     remove () {
       if (this.group.replacements.some(r => r.applied) && !confirm("Are you sure?")) {

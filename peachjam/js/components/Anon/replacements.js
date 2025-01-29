@@ -16,12 +16,10 @@ export class Replacement {
   }
 
   apply () {
-    if (!this.applied) {
-      const range = this.toRange();
-      if (range) {
-        this.target = rangeToTarget(this.replaceWithText(range, this.newText), this.root);
-        this.applied = true;
-      }
+    const range = this.toRange();
+    if (range) {
+      this.target = rangeToTarget(this.replaceWithText(range, this.newText), this.root);
+      this.applied = true;
     }
   }
 

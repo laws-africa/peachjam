@@ -32,9 +32,7 @@ export default {
     const data = JSON.parse(document.getElementById('replacements').innerText);
     const contentRoot = this.getContentRoot();
     this.replacements.push(...data.map(r => new Replacement(contentRoot, r.old_text, r.new_text, r.target, false, true)));
-    this.$nextTick(() => {
-      this.updateGroups();
-    });
+    this.updateGroups();
   },
   methods: {
     newReplacement () {
@@ -54,10 +52,12 @@ export default {
         }
       }
     },
-    applied (replacement) {
-      if (replacement.suggestion) {
-        replacement.suggestion = false;
-        this.replacements.push(replacement);
+    applied (replacements) {
+      for (const replacement of replacements) {
+        if (replacement.suggestion) {
+          replacement.suggestion = false;
+          this.replacements.push(replacement);
+        }
       }
       this.$nextTick(() => this.updateGroups());
     },

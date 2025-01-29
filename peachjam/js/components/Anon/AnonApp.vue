@@ -5,10 +5,10 @@
         🥷
         <a :href="`/admin/peachjam/judgment/${documentId}/change/`">{{ title }}</a>
       </h5>
-      <button class="btn btn-outline-success ms-auto" :disabled="saving" @click="saveDraft">Save draft</button>
-      <button class="btn btn-success ms-2" :disabled="saving" @click="savePublish">Save and publish</button>
+      <button class="btn btn-success ms-auto" :disabled="saving" @click="savePublish">Save and publish</button>
+      <button class="btn btn-outline-success ms-2" :disabled="saving" @click="saveDraft">Save draft</button>
     </div>
-    <input v-model="newCaseName" class="form-control" minlength="3" required="required" />
+    <input v-model="newCaseName" class="form-control" />
   </header>
   <div class="main-pane">
     <div class="content-pane">
