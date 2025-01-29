@@ -122,11 +122,11 @@ body, html {
 }
 
 #anon-app mark.applied {
-  background-color: rgba(144, 238, 144, 0.4);
+  background-color: #aeffae;
 }
 
 #anon-app mark.applied.is-active {
-  background-color: rgba(144, 238, 144, 1.0);
+  background-color: #00ff00;
 }
 
 .list-group-item.replacement.is-active {
@@ -134,11 +134,11 @@ body, html {
 }
 
 .list-group-item.replacement.applied {
-  background-color: rgba(144, 238, 144, 0.4);
+  background-color: #aeffae;
 }
 
 .list-group-item.replacement.applied.is-active {
-  background-color: rgba(144, 238, 144, 0.6);
+  background-color: #00ff00;
 }
 
 .content-pane mark {
