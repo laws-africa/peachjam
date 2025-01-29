@@ -60,6 +60,8 @@ from peachjam.views import (
     CourtRegistryMonthView,
     CourtRegistryYearView,
     CourtYearView,
+    DocumentAnonymiseAPIView,
+    DocumentAnonymiseView,
     DocumentCitationsView,
     DocumentDetailViewResolver,
     DocumentListView,
@@ -359,6 +361,8 @@ urlpatterns = [
                     JudgmentWorksAutocomplete.as_view(),
                     name="autocomplete-judgment-works",
                 ),
+                path("anon/<int:pk>", DocumentAnonymiseView.as_view(), name="anon"),
+                path("anon/<int:pk>/update", DocumentAnonymiseAPIView.as_view()),
                 path("", admin.site.urls),
             ]
         ),

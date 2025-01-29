@@ -13,6 +13,7 @@ import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
 import TaxonomyTopics from './TaxonomyTopics.vue';
+import AnonApp from './Anon/AnonApp.vue';
 
 const components: Record<string, any> = {
   // Data components
@@ -28,6 +29,7 @@ const components: Record<string, any> = {
   TermsOfUse,
 
   // Vue components
+  AnonApp,
   DocumentProblemModal,
   FindDocuments,
   PocketLawDownload,
