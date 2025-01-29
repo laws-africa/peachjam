@@ -1,7 +1,13 @@
 <template>
-  <header class="bg-light p-2 d-flex">
-    <h5 class="mb-0">🥷 {{ title }}</h5>
-    <button class="btn btn-success ms-auto" :disabled="saving" @click="save">Save</button>
+  <header class="bg-light p-2">
+    <div class="d-flex mb-2">
+      <h5 class="mb-0">
+        🥷
+        <a :href="`/admin/peachjam/judgment/${documentId}/change/`">{{ title }}</a>
+      </h5>
+      <button class="btn btn-success ms-auto" :disabled="saving" @click="save">Save</button>
+    </div>
+    <input v-model="newCaseName" class="form-control" minlength="3" required="required" />
   </header>
   <div class="main-pane">
     <div class="content-pane">
@@ -22,11 +28,12 @@ import { unwrap } from './replacements';
 
 export default {
   components: { ReplacementPane },
-  props: ['documentId', 'title'],
-  data () {
+  props: ['documentId', 'title', 'caseName'],
+  data (self) {
     return {
       replacements: [],
       saving: false,
+      newCaseName: self.caseName,
       contentHtml: document.getElementById('document-content').innerHTML
     };
   },
@@ -50,7 +57,9 @@ export default {
             'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
           },
           body: JSON.stringify({
-            content_html: html, replacements
+            case_name: this.newCaseName,
+            content_html: html,
+            replacements
           })
         });
         if (!resp.ok) {

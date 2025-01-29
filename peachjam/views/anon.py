@@ -12,18 +12,19 @@ class ReplacementSerializer(serializers.ModelSerializer):
         fields = ["old_text", "new_text", "target"]
 
 
-class DocumentUpdateSerializer(serializers.ModelSerializer):
+class DocumentAnonymiseSerializer(serializers.ModelSerializer):
     replacements = ReplacementSerializer(many=True)
 
     class Meta:
         model = Judgment
-        fields = ["content_html", "replacements"]
+        fields = ["case_name", "content_html", "replacements"]
 
     def update(self, instance, validated_data):
         replacements_data = validated_data.pop("replacements")
         instance.content_html = validated_data.get(
             "content_html", instance.content_html
         )
+        instance.case_name = validated_data.get("case_name", instance.case_name)
         instance.save()
 
         # Clear existing replacements
@@ -54,7 +55,7 @@ class DocumentAnonymiseView(PermissionRequiredMixin, DetailView):
 
 class DocumentAnonymiseAPIView(generics.UpdateAPIView):
     queryset = Judgment.objects.all()
-    serializer_class = DocumentUpdateSerializer
+    serializer_class = DocumentAnonymiseSerializer
     permission_classes = [IsAuthenticated, DjangoModelPermissions]
 
     def get_object(self):
