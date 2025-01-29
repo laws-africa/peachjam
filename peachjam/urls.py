@@ -61,6 +61,7 @@ from peachjam.views import (
     CourtRegistryYearView,
     CourtYearView,
     DocumentAnonymiseAPIView,
+    DocumentAnonymiseSuggestionsAPIView,
     DocumentAnonymiseView,
     DocumentCitationsView,
     DocumentDetailViewResolver,
@@ -363,6 +364,10 @@ urlpatterns = [
                 ),
                 path("anon/<int:pk>", DocumentAnonymiseView.as_view(), name="anon"),
                 path("anon/<int:pk>/update", DocumentAnonymiseAPIView.as_view()),
+                path(
+                    "anon/<int:pk>/suggestions",
+                    DocumentAnonymiseSuggestionsAPIView.as_view(),
+                ),
                 path("", admin.site.urls),
             ]
         ),

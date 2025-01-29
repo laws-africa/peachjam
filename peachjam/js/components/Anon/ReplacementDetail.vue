@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  emits: ['applied', 'unapplied'],
+  emits: ['applied', 'unapplied', 'activated'],
   props: ['replacement', 'active'],
   data (self) {
     return {

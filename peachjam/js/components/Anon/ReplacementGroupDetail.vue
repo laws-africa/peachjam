@@ -38,7 +38,7 @@ import ReplacementDetail from './ReplacementDetail.vue';
 export default {
   props: ['group', 'modelValue'],
   components: { ReplacementDetail },
-  emits: ['remove', 'applied', 'unapplied'],
+  emits: ['remove', 'applied', 'unapplied', 'update:modelValue'],
   data () {
     return {
       collapsed: false,

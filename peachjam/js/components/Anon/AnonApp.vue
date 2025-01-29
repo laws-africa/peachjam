@@ -12,23 +12,23 @@
   </header>
   <div class="main-pane">
     <div class="content-pane">
-      <div id="content-root">
+      <div ref="contentRoot" id="content-root">
         <!-- Note: we have two roots, because targets need a root element with an ID that is inside "content-root" -->
         <div ref="documentRoot" id="document-root" v-html="contentHtml" />
       </div>
     </div>
     <div class="sidebar-pane border-start">
-      <ReplacementPane :replacements="replacements" />
+      <ReplacementsPane ref="replacements" :replacements="replacements" :document-id="documentId" />
     </div>
   </div>
 </template>
 
 <script>
-import ReplacementPane from './ReplacementPane.vue';
+import ReplacementsPane from './ReplacementsPane.vue';
 import { unwrap } from './replacements';
 
 export default {
-  components: { ReplacementPane },
+  components: { ReplacementsPane },
   props: ['documentId', 'title', 'caseName'],
   data (self) {
     return {

@@ -123,7 +123,7 @@ export class ReplacementGroup {
     if (this.replacements.length > 0) {
       const first = this.replacements[0];
 
-      for (const range of this.findSuggestions(first.root, first.oldText)) {
+      for (const range of findText(first.root, first.oldText)) {
         const replacement = new Replacement(
           first.root,
           range.toString(),
@@ -135,67 +135,68 @@ export class ReplacementGroup {
       }
     }
   }
+}
 
-  /**
-   * Find possible occurrences of this range in the root element, ignoring anything in <mark> tags
-   * @returns array of Range objects
-   */
-  findSuggestions (root, oldText) {
-    let text = oldText;
-    let marker = new Mark(root);
+/**
+ * Find possible occurrences of oldText in the root element, ignoring anything in <mark> tags
+ * @returns array of Range objects
+ */
+export function findText (root, text, max = 0) {
+  const ranges = [];
+  const marks = [];
 
-    const ranges = [];
-    const marks = [];
-
-    if (!RegExp.escape) {
-      text = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    } else {
-      text = RegExp.escape(text);
-    }
-
-    const re = new RegExp('\\b' + text + '\\b', 'g');
-
-    marker.markRegExp(re, {
-      acrossElements: true,
-      exclude: ["mark"],
-      each: (mark) => {
-        marks.push(mark);
-      }
-    });
-
-    // combine adjacent marks that don't have the whole text
-    let range;
-    for (let i = 0; i < marks.length; i++) {
-      const mark = marks[i];
-
-      if (range && range.toString().length < text.length) {
-        // combine with existing range
-        range.setEndAfter(mark);
-        unwrap(mark);
-        continue;
-      }
-
-      if (range && range.toString().length >= text.length) {
-        // we have a complete range
-        ranges.push(range);
-        range = null;
-      }
-
-      if (!range) {
-        range = document.createRange();
-        range.setStartBefore(mark);
-        range.setEndAfter(mark);
-      }
-
-      unwrap(mark);
-    }
-
-    if (range) {
-      ranges.push(range);
-    }
-
-    return ranges;
+  if (!RegExp.escape) {
+    text = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  } else {
+    text = RegExp.escape(text);
   }
+
+  const re = new RegExp('\\b' + text + '\\b', 'g');
+
+  new Mark(root).markRegExp(re, {
+    acrossElements: true,
+    exclude: ["mark"],
+    each: (mark) => {
+      marks.push(mark);
+    },
+    filter: (node, text, count) => {
+      // cap the number of matches
+      return (max === 0 || count < max);
+    }
+  });
+
+  // combine adjacent marks that don't have the whole text
+  let range;
+  for (let i = 0; i < marks.length; i++) {
+    const mark = marks[i];
+
+    if (range && range.toString().length < text.length) {
+      // combine with existing range
+      range.setEndAfter(mark);
+      unwrap(mark);
+      continue;
+    }
+
+    if (range && range.toString().length >= text.length) {
+      // we have a complete range
+      ranges.push(range);
+      range = null;
+    }
+
+    if (!range) {
+      range = document.createRange();
+      range.setStartBefore(mark);
+      range.setEndAfter(mark);
+    }
+
+    unwrap(mark);
+  }
+
+  if (range) {
+    ranges.push(range);
+  }
+
+  return ranges;
 }
 
 export function unwrap(el) {

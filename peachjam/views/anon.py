@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic.detail import DetailView
 from rest_framework import generics, serializers
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from rest_framework.response import Response
 
 from peachjam.models import Judgment, Replacement
 
@@ -55,3 +56,21 @@ class DocumentAnonymiseAPIView(generics.UpdateAPIView):
 
     def get_object(self):
         return generics.get_object_or_404(Judgment, pk=self.kwargs["pk"])
+
+
+class DocumentAnonymiseSuggestionsAPIView(generics.GenericAPIView):
+    queryset = Judgment.objects.all()
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+
+    def get_object(self):
+        return generics.get_object_or_404(Judgment, pk=self.kwargs["pk"])
+
+    def get(self, request, *args, **kwargs):
+        suggestions = [
+            {
+                "oldText": "Cohen",
+                "newText": "C",
+            }
+        ]
+
+        return Response({"suggestions": suggestions})

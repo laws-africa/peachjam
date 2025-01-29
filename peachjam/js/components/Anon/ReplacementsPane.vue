@@ -1,12 +1,13 @@
 <template>
   <div>
+    <SuggestionsPane @apply="add" :document-id="documentId" />
     <button class="btn btn-primary" @click="newReplacement">Replace...</button>
     <div v-for="group of groups.values()" :key="group.key" class="mt-3">
       <ReplacementGroupDetail
+        v-model="activeReplacement"
         :group="group"
         @remove="remove"
         @applied="applied"
-        v-model="activeReplacement"
       />
     </div>
   </div>
@@ -16,11 +17,13 @@
 import { Replacement, ReplacementGroup } from './replacements.js';
 import { rangeToTarget } from '@lawsafrica/indigo-akn/dist/ranges';
 import ReplacementGroupDetail from './ReplacementGroupDetail.vue';
+import SuggestionsPane from './SuggestionsPane.vue';
 
 export default {
-  components: { ReplacementGroupDetail },
+  components: { ReplacementGroupDetail, SuggestionsPane },
   props: {
-    replacements: Array
+    replacements: Array,
+    documentId: String,
   },
   data () {
     return {
@@ -35,6 +38,13 @@ export default {
     this.updateGroups();
   },
   methods: {
+    add (replacement) {
+      this.replacements.push(replacement);
+      // ensure there are marks before new suggestions are searched
+      replacement.mark();
+      this.updateGroups();
+      this.activeReplacement = replacement;
+    },
     newReplacement () {
       const selection = window.getSelection();
       const contentRoot = this.getContentRoot();
@@ -43,11 +53,7 @@ export default {
         const range = selection.getRangeAt(0);
         if (!range.collapsed && contentRoot.contains(range.commonAncestorContainer)) {
           const replacement = new Replacement(contentRoot, range.toString(), range.toString(), rangeToTarget(range, contentRoot));
-          // ensure there are marks before new suggestions are searched
-          replacement.mark();
-          this.replacements.push(replacement);
-          this.updateGroups();
-          this.activeReplacement = replacement;
+          this.add(replacement);
           selection.empty();
         }
       }
