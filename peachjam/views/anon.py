@@ -17,20 +17,15 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Judgment
-        fields = ["case_name", "content_html", "replacements"]
+        fields = ["case_name", "content_html", "replacements", "published"]
 
     def update(self, instance, validated_data):
         replacements_data = validated_data.pop("replacements")
-        instance.content_html = validated_data.get(
-            "content_html", instance.content_html
-        )
-        instance.case_name = validated_data.get("case_name", instance.case_name)
-        instance.save()
 
-        # Clear existing replacements
+        super().update(instance, validated_data)
+
+        # replace existing replacements
         instance.replacements.all().delete()
-
-        # Create new replacements
         for replacement_data in replacements_data:
             Replacement.objects.create(document=instance, **replacement_data)
 

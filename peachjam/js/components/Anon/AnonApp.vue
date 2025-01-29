@@ -5,7 +5,8 @@
         🥷
         <a :href="`/admin/peachjam/judgment/${documentId}/change/`">{{ title }}</a>
       </h5>
-      <button class="btn btn-success ms-auto" :disabled="saving" @click="save">Save</button>
+      <button class="btn btn-outline-success ms-auto" :disabled="saving" @click="saveDraft">Save draft</button>
+      <button class="btn btn-success ms-2" :disabled="saving" @click="savePublish">Save and publish</button>
     </div>
     <input v-model="newCaseName" class="form-control" minlength="3" required="required" />
   </header>
@@ -38,7 +39,13 @@ export default {
     };
   },
   methods: {
-    async save () {
+    saveDraft () {
+      this.save(false);
+    },
+    savePublish () {
+      this.save(true);
+    },
+    async save (published) {
       const root = this.$refs.documentRoot.cloneNode(true);
       // remove marks
       for (const mark of root.querySelectorAll('mark')) {
@@ -59,6 +66,7 @@ export default {
           body: JSON.stringify({
             case_name: this.newCaseName,
             content_html: html,
+            published,
             replacements
           })
         });
