@@ -341,6 +341,12 @@ class Judgment(CoreDocument):
         default=True,
     )
 
+    anonymised = models.BooleanField(
+        _("Anonymised"),
+        help_text=_("Whether or not the judgment is anonymised"),
+        default=False,
+    )
+
     CITATION_DATE_FORMAT = "(j F Y)"
 
     MNC_FORMAT = "[{year}] {author} {serial}"

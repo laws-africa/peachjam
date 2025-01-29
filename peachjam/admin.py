@@ -1114,6 +1114,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].append("outcomes")
     fieldsets[0][1]["fields"].append("serial_number")
     fieldsets[0][1]["fields"].append("serial_number_override")
+    fieldsets[0][1]["fields"].append("anonymised")
 
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
