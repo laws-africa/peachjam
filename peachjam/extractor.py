@@ -119,7 +119,7 @@ class ExtractorService:
             doc.save()
 
         # case numbers
-        for case_number in details.get("case_numbers", []):
+        for case_number in details.get("case_numbers") or []:
             # TODO: matter type
             try:
                 number = int(case_number["number"])
