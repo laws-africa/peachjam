@@ -35,11 +35,12 @@
       <div class="row my-4">
         <div class="col-md-9 mx-auto">
           <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
+            <input type="hidden" name="suggestion"/>
             <input type="text"
                    class="form-control form-control-lg flex-grow-1"
                    placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                    aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                   aria-describedby="button-addon2"
+                   {% if SEARCH_SUGGESTIONS %}data-component="SearchTypeahead"{% endif %}
                    name="q"/>
             <button type="submit" class="btn btn-primary btn-lg ms-2">{% trans "Search" %}</button>
           </form>
