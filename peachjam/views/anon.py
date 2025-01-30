@@ -1,6 +1,9 @@
 import requests
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.shortcuts import redirect
+from django.utils.translation import gettext as _
 from django.views.generic.detail import DetailView
 from rest_framework import generics, serializers
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
@@ -41,6 +44,16 @@ class DocumentAnonymiseView(PermissionRequiredMixin, DetailView):
     template_name = "peachjam/anon/anonymise.html"
     model = Judgment
     context_object_name = "document"
+
+    def get(self, request, *args, **kwargs):
+        document = self.get_object()
+        if True or not document.content_html or document.content_html_is_akn:
+            # redirect back to the referrer
+            messages.warning(
+                request, _("Only judgments with HTML content can be anonymised.")
+            )
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
