@@ -47,7 +47,7 @@ class DocumentAnonymiseView(PermissionRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         document = self.get_object()
-        if True or not document.content_html or document.content_html_is_akn:
+        if not document.content_html or document.content_html_is_akn:
             # redirect back to the referrer
             messages.warning(
                 request, _("Only judgments with HTML content can be anonymised.")
