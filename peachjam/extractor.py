@@ -35,7 +35,7 @@ class ExtractorService:
         }
         headers = self.get_headers()
         resp = requests.post(
-            self.api_url + "judgment",
+            self.api_url + "extract/judgment",
             files={"file": file},
             data=data,
             headers=headers,

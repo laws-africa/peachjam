@@ -4,7 +4,7 @@ import Mark from 'mark.js';
 let counter = 0;
 
 export class Replacement {
-  constructor (root, oldText, newText, target, suggestion, applied=false) {
+  constructor (root, oldText, newText, target, suggestion, applied = false) {
     this.id = counter++;
     this.root = root;
     this.oldText = oldText;
