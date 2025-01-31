@@ -1,3 +1,12 @@
-<div class="document-floating-header p-2" data-component="FloatingHeader">
-  <h5 class="m-0 align-self-center">{{ document.title }}</h5>
+{% load i18n %}
+<div class="document-floating-header bg-light"
+     data-component="FloatingHeader">
+  <div class="btn-primary menu-toggle d-lg-none"
+       data-bs-toggle="offcanvas"
+       data-bs-target="#navigation-offcanvas"
+       aria-controls="navigation-offcanvas">
+    <i class="bi bi-menu-button-wide"
+       title="{% trans "Navigate document" %}"></i>
+  </div>
+  <h5 class="title p-2 m-0 align-self-center">{{ document.title }}</h5>
 </div>

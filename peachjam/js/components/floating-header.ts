@@ -11,7 +11,7 @@ export default class FloatingHeader {
   }
 
   init () {
-    window.addEventListener('scroll', debounce(this.onScroll.bind(this), 200));
+    window.addEventListener('scroll', debounce(this.onScroll.bind(this), 50));
   }
 
   onScroll () {
