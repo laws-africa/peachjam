@@ -3,6 +3,7 @@ import { RelationshipEnrichments } from './RelationshipEnrichment';
 import DocumentFilterForm from './document-filter-form';
 import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
+import FloatingHeader from './floating-header';
 import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
 import TaxonomyTree from './taxonomy-tree';
@@ -21,6 +22,7 @@ const components: Record<string, any> = {
   DocumentContent,
   DocumentFilterForm,
   DocumentTable,
+  FloatingHeader,
   NavigationSelect,
   RelationshipEnrichments,
   SearchTypeahead,

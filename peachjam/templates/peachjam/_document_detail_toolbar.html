@@ -1,5 +1,5 @@
 {% load peachjam static i18n %}
-<div class="btn-toolbar justify-content-end mb-3"
+<div class="btn-toolbar justify-content-end mb-3 document-detail-toolbar"
      role="toolbar"
      aria-label="{% trans "Document toolbar" %}">
   {% block edit-btn %}
@@ -48,7 +48,7 @@
         </a>
         {% if document.source_file.filename_extension != "pdf" %}
           <button type="button"
-                  class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                  class="btn btn-primary btn-shrink-sm dropdown-toggle dropdown-toggle-split"
                   data-bs-toggle="dropdown"
                   aria-expanded="false">
             <span class="visually-hidden">{% trans "Toggle dropdown" %}</span>

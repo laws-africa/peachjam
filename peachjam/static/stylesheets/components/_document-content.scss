@@ -117,6 +117,7 @@
     display: flex;
     height: 100%;
     flex-direction: column;
+    margin-top: $floating-header-height;
 
     nav {
       padding-top: 1rem;
@@ -405,4 +406,26 @@ la-akoma-ntoso .akn-remark {
 // except in jurisdictions where they are already styled differently
 la-akoma-ntoso[frbr-country="na"] .akn-remark {
   background-color: inherit;
+}
+
+.document-floating-header {
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  left: 0px;
+  height: $floating-header-height;
+  display: none;
+  box-shadow: 0 4px 4px rgb(0, 0, 0, 0.2);
+  background: white;
+  z-index: 100;
+
+  &.visible {
+    display: flex;
+  }
+
+  h5 {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
