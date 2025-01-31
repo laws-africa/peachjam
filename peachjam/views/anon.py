@@ -74,9 +74,21 @@ class DocumentAnonymiseAPIView(generics.UpdateAPIView):
         return generics.get_object_or_404(Judgment, pk=self.kwargs["pk"])
 
 
+class SuggestPermissions(DjangoModelPermissions):
+    perms_map = {
+        "GET": ["%(app_label)s.change_%(model_name)s"],
+        "OPTIONS": [],
+        "HEAD": [],
+        "POST": ["%(app_label)s.change_%(model_name)s"],
+        "PUT": ["%(app_label)s.change_%(model_name)s"],
+        "PATCH": ["%(app_label)s.change_%(model_name)s"],
+        "DELETE": ["%(app_label)s.delete_%(model_name)s"],
+    }
+
+
 class DocumentAnonymiseSuggestionsAPIView(generics.GenericAPIView):
     queryset = Judgment.objects.all()
-    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, SuggestPermissions]
     api_token = settings.PEACHJAM["LAWSAFRICA_API_KEY"]
     api_url = settings.PEACHJAM["EXTRACTOR_API"]
 
