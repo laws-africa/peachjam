@@ -35,7 +35,7 @@ class ExtractorService:
         }
         headers = self.get_headers()
         resp = requests.post(
-            self.api_url + "judgment",
+            self.api_url + "extract/judgment",
             files={"file": file},
             data=data,
             headers=headers,
@@ -119,7 +119,7 @@ class ExtractorService:
             doc.save()
 
         # case numbers
-        for case_number in details.get("case_numbers", []):
+        for case_number in details.get("case_numbers") or []:
             # TODO: matter type
             try:
                 number = int(case_number["number"])

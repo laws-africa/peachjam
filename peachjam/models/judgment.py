@@ -612,3 +612,17 @@ class CauseList(CoreDocument):
         self.frbr_uri_doctype = "doc"
         self.doc_type = "causelist"
         super().pre_save()
+
+
+class Replacement(models.Model):
+    """A replacement made for anonymisation in a Judgment. Part of the judgment anonymiser app."""
+
+    document = models.ForeignKey(
+        "Judgment", on_delete=models.CASCADE, related_name="replacements"
+    )
+    old_text = models.TextField()
+    new_text = models.TextField()
+    target = models.JSONField()
+
+    def __str__(self):
+        return f"{self.old_text} -> {self.new_text}"

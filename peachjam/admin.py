@@ -508,6 +508,8 @@ class DocumentAccessForm(forms.Form):
 
 
 class DocumentAccessMixin(GuardedModelAdminMixin):
+    change_form_template = None
+
     def obj_perms_manage_view(self, request, object_pk):
         from django.contrib.admin.utils import unquote
 
