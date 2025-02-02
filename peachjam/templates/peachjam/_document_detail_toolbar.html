@@ -28,6 +28,8 @@
   {% block download-btn %}
     <div>
       {% if show_save_doc_button %}
+        <!-- this will be replaced by htmx -->
+        <div class="save-document-button"></div>
         <div hx-get="{% url 'saved_document_button' document.id %}"
              hx-trigger="load"></div>
         <div id="saveDocumentModal"
@@ -70,8 +72,8 @@
               class="btn btn-outline-secondary btn-shrink-sm ms-2"
               data-bs-toggle="modal"
               data-bs-target="#documentProblemModal">
-        <span class="d-inline d-sm-none">{% trans "Report" %}</span>
-        <span class="d-none d-sm-inline">{% trans 'Report a problem' %}</span>
+        <span class="d-md-none">{% trans "Report" %}</span>
+        <span class="d-none d-md-inline">{% trans 'Report a problem' %}</span>
       </button>
       <div class="modal fade"
            id="documentProblemModal"
