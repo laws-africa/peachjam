@@ -142,6 +142,10 @@
     margin-left: auto;
     margin-right: auto;
 
+    * {
+      scroll-margin-top: $floating-header-height + 1rem;
+    }
+
     &.la-akoma-ntoso-with-gutter {
       .content {
         flex: 80%;
