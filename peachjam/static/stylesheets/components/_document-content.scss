@@ -397,11 +397,17 @@ la-akoma-ntoso[frbr-country="na"] .akn-remark {
 }
 
 .document-floating-header {
+  --floating-header-height: #{$floating-header-height};
+
+  @include media-breakpoint-down(md) {
+    --floating-header-height: #{$floating-header-height-md};
+  }
+
   position: fixed;
   top: 0px;
   right: 0px;
   left: 0px;
-  height: $floating-header-height;
+  height: var(--floating-header-height);
   display: none;
   box-shadow: 0 4px 4px rgb(0, 0, 0, 0.2);
   z-index: 100;
@@ -413,8 +419,9 @@ la-akoma-ntoso[frbr-country="na"] .akn-remark {
   .menu-toggle {
     display: block;
     background-color: $primary;
-    width: $floating-header-height;
-    min-width: $floating-header-height;
+    color: color-contrast($primary);
+    width: var(--floating-header-height);
+    min-width: var(--floating-header-height);
     text-align: center;
     align-content: center;
     font-size: 1.5rem;
