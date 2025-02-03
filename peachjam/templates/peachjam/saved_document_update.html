@@ -1,5 +1,5 @@
 {% load i18n %}
-<button class="btn btn-outline-primary btn-shrink-sm ms-2 saved-document-button"
+<button class="btn btn-outline-primary btn-shrink-sm ms-2 save-document-button"
         type="button"
         data-bs-toggle="modal"
         data-bs-target="#saveDocumentModal"
@@ -7,7 +7,7 @@
         hx-swap-oob="outerHTML:.save-document-button">
   <i class="bi bi-star-fill"></i>
   {% if saved_document.folder %}
-    {% trans 'Saved to' %} {{ saved_document.folder }}
+    {{ saved_document.folder }}
   {% else %}
     {% trans 'Saved' %}
   {% endif %}

@@ -432,6 +432,12 @@ la-akoma-ntoso[frbr-country="na"] .akn-remark {
 
   button {
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @include media-breakpoint-down(md) {
+      max-width: 5rem;
+    }
   }
 }
 
