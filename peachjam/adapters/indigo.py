@@ -184,6 +184,34 @@ class IndigoAdapter(RequestsAdapter):
 
         return qs
 
+    def is_responsible_for(self, expression_frbr_uri):
+        """Is this adapter configured to handle this expression FRBR URI? The various filters are applied to the
+        FRBR URI to check if it matches."""
+        frbr_uri = FrbrUri.parse(expression_frbr_uri)
+
+        if frbr_uri.place not in self.place_codes:
+            return False
+
+        if self.include_doctypes and frbr_uri.doctype not in self.include_doctypes:
+            return False
+
+        if self.exclude_doctypes and frbr_uri.doctype in self.exclude_doctypes:
+            return False
+
+        if self.include_subtypes and frbr_uri.subtype not in self.include_subtypes:
+            return False
+
+        if self.exclude_subtypes and frbr_uri.subtype in self.exclude_subtypes:
+            return False
+
+        if self.include_actors and frbr_uri.actor not in self.include_actors:
+            return False
+
+        if self.exclude_actors and frbr_uri.actor in self.exclude_actors:
+            return False
+
+        return True
+
     def check_for_deleted(self, docs):
         uris = {d["expression_frbr_uri"] for d in docs}
         for doc in docs:
@@ -692,13 +720,15 @@ class IndigoAdapter(RequestsAdapter):
 
         logger.info(f"Handling webhook {data}")
 
-        if data.get("action") == "updated" and data.get("data", {}).get("url"):
-            update_document(self.ingestor.pk, data["data"]["url"])
+        url = data.get("data", {}).get("url")
+        expression_frbr_uri = data.get("data", {}).get("expression_frbr_uri")
 
-        if data.get("action") == "deleted" and data.get("data", {}).get(
-            "expression_frbr_uri"
-        ):
-            delete_document(self.ingestor.pk, data["data"]["expression_frbr_uri"])
+        if expression_frbr_uri and self.is_responsible_for(expression_frbr_uri):
+            if data.get("action") == "updated" and url:
+                update_document(self.ingestor.pk, url)
+
+            if data.get("action") == "deleted":
+                delete_document(self.ingestor.pk, expression_frbr_uri)
 
     def get_edit_url(self, document):
         if self.settings.get("indigo_url"):
