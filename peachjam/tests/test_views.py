@@ -139,12 +139,12 @@ class PeachjamViewsTest(TestCase):
 
         documents = [doc.title for doc in response.context.get("documents")]
         self.assertIn(
-            "Divorce Act, 1979",
+            "African Civil Aviation Commission Constitution (AFCAC)",
             documents,
         )
         self.assertEqual(
-            None,
-            sorted(response.context["facet_data"].get("years")),
+            [("1969", 1969), ("2005", 2005), ("2010", 2010), ("2020", 2020)],
+            sorted(response.context["facet_data"]["years"]["options"]),
         )
 
     def test_legislation_detail(self):
@@ -170,8 +170,8 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertEqual(
-            None,
-            response.context["facet_data"].get("years"),
+            [("2017", 2017)],
+            response.context["facet_data"]["years"]["options"],
         )
 
     def test_generic_document_detail(self):
