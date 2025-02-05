@@ -8111,6 +8111,7 @@
                 }
             ],
             "repealed": false,
+            "principal": true,
             "parent_work": null
         }
     },
