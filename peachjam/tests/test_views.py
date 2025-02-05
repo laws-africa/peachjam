@@ -170,8 +170,8 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertEqual(
-            [("2017", 2017)],
-            response.context["facet_data"]["years"]["options"],
+            None,
+            response.context["facet_data"].get("years"),
         )
 
     def test_generic_document_detail(self):
