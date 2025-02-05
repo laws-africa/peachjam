@@ -8,16 +8,8 @@ from django.utils.dates import MONTHS
 from django.utils.text import gettext_lazy as _
 from django.utils.text import slugify
 
-from peachjam.helpers import chunks, lowercase_alphabet
-from peachjam.models import (
-    Court,
-    CourtClass,
-    CourtRegistry,
-    Judge,
-    Judgment,
-    Outcome,
-    Taxonomy,
-)
+from peachjam.helpers import chunks
+from peachjam.models import Court, CourtClass, CourtRegistry, Judge, Judgment, Outcome
 from peachjam.views.generic_views import FilteredDocumentListView, YearListMixin
 
 
@@ -58,8 +50,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
         return context
 
-    def add_facets(self, context):
-        context["facet_data"] = {}
+    def get_judges_facet(self, context):
         if "judges" not in self.exclude_facets:
             judges = list(
                 judge
@@ -71,13 +62,15 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if judge
             )
-            context["facet_data"]["judges"] = {
-                "label": Judge.model_label_plural,
-                "type": "checkbox",
-                "options": sorted([(j, j) for j in judges]),
-                "values": self.request.GET.getlist("judges"),
-            }
+            if len(judges) > 1:
+                context["facet_data"]["judges"] = {
+                    "label": Judge.model_label_plural,
+                    "type": "checkbox",
+                    "options": sorted([(j, j) for j in judges]),
+                    "values": self.request.GET.getlist("judges"),
+                }
 
+    def get_labels_facet(self, context):
         if "labels" not in self.exclude_facets:
             labels = list(
                 label
@@ -89,13 +82,15 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if label
             )
-            context["facet_data"]["labels"] = {
-                "label": _("Labels"),
-                "type": "checkbox",
-                "options": sorted([(x, x) for x in labels]),
-                "values": self.request.GET.getlist("labels"),
-            }
+            if len(labels) > 1:
+                context["facet_data"]["labels"] = {
+                    "label": _("Labels"),
+                    "type": "checkbox",
+                    "options": sorted([(x, x) for x in labels]),
+                    "values": self.request.GET.getlist("labels"),
+                }
 
+    def get_outcomes_facet(self, context):
         if "outcomes" not in self.exclude_facets:
             outcomes = Outcome.objects.filter(
                 pk__in=self.form.filter_queryset(
@@ -105,15 +100,17 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .values_list("outcomes__id", flat=True)
                 .distinct()
             )
-            context["facet_data"]["outcomes"] = {
-                "label": _("Outcomes"),
-                "type": "checkbox",
-                "options": sorted(
-                    [(outcome.name, outcome.name) for outcome in outcomes]
-                ),
-                "values": self.request.GET.getlist("outcomes"),
-            }
+            if len(outcomes) > 1:
+                context["facet_data"]["outcomes"] = {
+                    "label": _("Outcomes"),
+                    "type": "checkbox",
+                    "options": sorted(
+                        [(outcome.name, outcome.name) for outcome in outcomes]
+                    ),
+                    "values": self.request.GET.getlist("outcomes"),
+                }
 
+    def get_attorneys_facet(self, context):
         if "attorneys" not in self.exclude_facets:
             attorneys = list(
                 attorney
@@ -125,40 +122,22 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if attorney
             )
-            context["facet_data"]["attorneys"] = {
-                "label": _("Attorneys"),
-                "type": "checkbox",
-                "options": sorted([(a, a) for a in attorneys]),
-                "values": self.request.GET.getlist("attorneys"),
-            }
+            if len(attorneys) > 1:
+                context["facet_data"]["attorneys"] = {
+                    "label": _("Attorneys"),
+                    "type": "checkbox",
+                    "options": sorted([(a, a) for a in attorneys]),
+                    "values": self.request.GET.getlist("attorneys"),
+                }
 
-        if "taxonomy" not in self.exclude_facets:
-            taxonomies = Taxonomy.objects.filter(
-                pk__in=self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="taxonomies"
-                )
-                .filter(taxonomies__topic__isnull=False)
-                .order_by("taxonomies__topic__id")
-                .values_list("taxonomies__topic__id", flat=True)
-                .distinct()
-            )
-
-            context["facet_data"]["taxonomies"] = {
-                "label": _("Topics"),
-                "type": "checkbox",
-                "options": sorted(
-                    [(t.slug, t.name) for t in taxonomies], key=lambda x: x[1]
-                ),
-                "values": self.request.GET.getlist("taxonomies"),
-            }
-
-        if "alphabet" not in self.exclude_facets:
-            context["facet_data"]["alphabet"] = {
-                "label": _("Alphabet"),
-                "type": "radio",
-                "options": [(a, a) for a in lowercase_alphabet()],
-                "values": self.request.GET.get("alphabet"),
-            }
+    def add_facets(self, context):
+        context["facet_data"] = {}
+        self.get_judges_facet(context)
+        self.get_labels_facet(context)
+        self.get_outcomes_facet(context)
+        self.get_attorneys_facet(context)
+        self.get_taxonomies_facet(context)
+        self.get_alphabet_facet(context)
 
     def populate_years(self, context):
         cache_key = f"judgment_years_{slugify(self.base_view_name())}"

@@ -173,6 +173,7 @@ class FilteredDocumentListView(DocumentListView):
     latest_expression_only = False
     # default values to pre-populate the form with
     form_defaults = None
+    exclude_facets = []
 
     def get(self, request, *args, **kwargs):
         self.form = self.get_form()
@@ -226,89 +227,110 @@ class FilteredDocumentListView(DocumentListView):
 
         return context
 
-    def add_facets(self, context):
-        natures = DocumentNature.objects.filter(
-            pk__in=self.form.filter_queryset(
-                self.get_base_queryset(), exclude="natures"
-            )
-            .order_by()
-            .values_list("nature_id", flat=True)
-            .distinct()
-        )
-
-        authors = []
-        authors_label = Author.model_label_plural
-        if hasattr(self.model, "author"):
-            authors = list(
-                a
-                for a in self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="authors"
+    def get_taxonomies_facet(self, context):
+        if "taxonomies" not in self.exclude_facets:
+            taxonomies = Taxonomy.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="taxonomies"
                 )
-                .order_by()
-                .values_list("author__name", flat=True)
+                .filter(taxonomies__topic__isnull=False)
+                .order_by("taxonomies__topic__id")
+                .values_list("taxonomies__topic__id", flat=True)
                 .distinct()
-                if a
             )
-            # customise the authors label?
-            authors_label = getattr(self.model, "author_label_plural", authors_label)
+            if len(taxonomies) > 1:
+                context["facet_data"]["taxonomies"] = {
+                    "label": _("Topics"),
+                    "type": "checkbox",
+                    "options": sorted(
+                        [(t.slug, t.name) for t in taxonomies], key=lambda x: x[1]
+                    ),
+                    "values": self.request.GET.getlist("taxonomies"),
+                }
 
-        years = list(
-            self.form.filter_queryset(self.get_base_queryset(), exclude="years")
-            .order_by()
-            .values_list("date__year", flat=True)
-            .distinct()
-        )
-
-        taxonomies = Taxonomy.objects.filter(
-            pk__in=self.form.filter_queryset(
-                self.get_base_queryset(), exclude="taxonomies"
-            )
-            .filter(taxonomies__topic__isnull=False)
-            .order_by("taxonomies__topic__id")
-            .values_list("taxonomies__topic__id", flat=True)
-            .distinct()
-        )
-
-        context["doc_table_show_author"] = bool(authors)
-        context["doc_table_show_doc_type"] = bool(natures)
-        context["facet_data"] = {
-            "years": {
-                "label": _("Years"),
-                "type": "checkbox",
-                # these are (value, label) tuples
-                "options": [(str(y), y) for y in sorted(years, reverse=True)],
-                "values": self.request.GET.getlist("years"),
-            },
-            "authors": {
-                "label": authors_label,
-                "type": "checkbox",
-                "options": sorted([(a, a) for a in authors]),
-                "values": self.request.GET.getlist("authors"),
-            },
-            "natures": {
-                "label": _("Document nature"),
-                "type": "radio",
-                # this ensures we get the translated name
-                "options": sorted(
-                    [(n.code, n.name) for n in natures], key=lambda x: x[1]
-                ),
-                "values": self.request.GET.getlist("natures"),
-            },
-            "taxonomies": {
-                "label": _("Topics"),
-                "type": "checkbox",
-                "options": sorted(
-                    [(t.slug, t.name) for t in taxonomies], key=lambda x: x[1]
-                ),
-                "values": self.request.GET.getlist("taxonomies"),
-            },
-            "alphabet": {
+    def get_alphabet_facet(self, context):
+        if "alphabet" not in self.exclude_facets:
+            context["facet_data"]["alphabet"] = {
                 "label": _("Alphabet"),
                 "type": "radio",
                 "options": [(a, a) for a in lowercase_alphabet()],
                 "values": self.request.GET.get("alphabet"),
-            },
-        }
+            }
+
+    def get_natures_facet(self, context):
+        if "natures" not in self.exclude_facets:
+            natures = DocumentNature.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="natures"
+                )
+                .order_by()
+                .values_list("nature_id", flat=True)
+                .distinct()
+            )
+            context["doc_table_show_doc_type"] = bool(natures)
+            if natures.count() > 1:
+                context["facet_data"]["natures"] = {
+                    "label": _("Document nature"),
+                    "type": "radio",
+                    # this ensures we get the translated name
+                    "options": sorted(
+                        [(n.code, n.name) for n in natures], key=lambda x: x[1]
+                    ),
+                    "values": self.request.GET.getlist("natures"),
+                }
+
+    def get_authors_facet(self, context):
+        if "authors" not in self.exclude_facets:
+            authors = []
+            authors_label = Author.model_label_plural
+            if hasattr(self.model, "author"):
+                authors = list(
+                    a
+                    for a in self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="authors"
+                    )
+                    .order_by()
+                    .values_list("author__name", flat=True)
+                    .distinct()
+                    if a
+                )
+                context["doc_table_show_author"] = bool(authors)
+                # customise the authors label?
+                if len(authors) > 1:
+                    authors_label = getattr(
+                        self.model, "author_label_plural", authors_label
+                    )
+                    context["facet_data"]["authors"] = {
+                        "label": authors_label,
+                        "type": "checkbox",
+                        "options": sorted([(a, a) for a in authors]),
+                        "values": self.request.GET.getlist("authors"),
+                    }
+
+    def get_years_facet(self, context):
+        if "years" in self.exclude_facets:
+            years = list(
+                self.form.filter_queryset(self.get_base_queryset(), exclude="years")
+                .order_by()
+                .values_list("date__year", flat=True)
+                .distinct()
+            )
+            if years:
+                context["facet_data"]["years"] = {
+                    "label": _("Years"),
+                    "type": "checkbox",
+                    # these are (value, label) tuples
+                    "options": [(str(y), y) for y in sorted(years, reverse=True)],
+                    "values": self.request.GET.getlist("years"),
+                }
+
+    def add_facets(self, context):
+        context["facet_data"] = {}
+        self.get_years_facet(context)
+        self.get_authors_facet(context)
+        self.get_natures_facet(context)
+        self.get_taxonomies_facet(context)
+        self.get_alphabet_facet(context)
 
     def show_facet_clear_all(self, context):
         context["show_clear_all"] = any(
