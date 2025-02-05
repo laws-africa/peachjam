@@ -320,11 +320,6 @@ class IndigoAdapter(RequestsAdapter):
                 code=slugify(document["subtype"]),
             )[0]
 
-        if hasattr(model, "author") and frbr_uri.actor:
-            field_data["author"] = Author.objects.get_or_create(
-                code=frbr_uri.actor, defaults={"name": frbr_uri.actor}
-            )[0]
-
         if hasattr(model, "metadata_json"):
             field_data["metadata_json"] = document
 
@@ -361,6 +356,12 @@ class IndigoAdapter(RequestsAdapter):
         )
 
         logger.info(f"New document: {new}")
+
+        if hasattr(model, "author") and frbr_uri.actor:
+            author = Author.objects.get_or_create(
+                code=frbr_uri.actor, defaults={"name": frbr_uri.actor}
+            )[0]
+            created_doc.author.set([author])
 
         self.attach_source_and_publication_file(url, document, created_doc)
         self.attach_taxonomy_topics(document, created_doc)
