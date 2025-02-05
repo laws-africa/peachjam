@@ -50,7 +50,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
         return context
 
-    def get_judges_facet(self, context):
+    def add_judges_facet(self, context):
         if "judges" not in self.exclude_facets:
             judges = list(
                 judge
@@ -70,7 +70,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                     "values": self.request.GET.getlist("judges"),
                 }
 
-    def get_labels_facet(self, context):
+    def add_labels_facet(self, context):
         if "labels" not in self.exclude_facets:
             labels = list(
                 label
@@ -90,7 +90,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                     "values": self.request.GET.getlist("labels"),
                 }
 
-    def get_outcomes_facet(self, context):
+    def add_outcomes_facet(self, context):
         if "outcomes" not in self.exclude_facets:
             outcomes = Outcome.objects.filter(
                 pk__in=self.form.filter_queryset(
@@ -110,7 +110,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                     "values": self.request.GET.getlist("outcomes"),
                 }
 
-    def get_attorneys_facet(self, context):
+    def add_attorneys_facet(self, context):
         if "attorneys" not in self.exclude_facets:
             attorneys = list(
                 attorney
@@ -132,12 +132,12 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
     def add_facets(self, context):
         context["facet_data"] = {}
-        self.get_judges_facet(context)
-        self.get_labels_facet(context)
-        self.get_outcomes_facet(context)
-        self.get_attorneys_facet(context)
-        self.get_taxonomies_facet(context)
-        self.get_alphabet_facet(context)
+        self.add_judges_facet(context)
+        self.add_labels_facet(context)
+        self.add_outcomes_facet(context)
+        self.add_attorneys_facet(context)
+        self.add_taxonomies_facet(context)
+        self.add_alphabet_facet(context)
 
     def populate_years(self, context):
         cache_key = f"judgment_years_{slugify(self.base_view_name())}"

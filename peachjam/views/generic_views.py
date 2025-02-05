@@ -227,7 +227,7 @@ class FilteredDocumentListView(DocumentListView):
 
         return context
 
-    def get_taxonomies_facet(self, context):
+    def add_taxonomies_facet(self, context):
         if "taxonomies" not in self.exclude_facets:
             taxonomies = Taxonomy.objects.filter(
                 pk__in=self.form.filter_queryset(
@@ -248,7 +248,7 @@ class FilteredDocumentListView(DocumentListView):
                     "values": self.request.GET.getlist("taxonomies"),
                 }
 
-    def get_alphabet_facet(self, context):
+    def add_alphabet_facet(self, context):
         if "alphabet" not in self.exclude_facets:
             context["facet_data"]["alphabet"] = {
                 "label": _("Alphabet"),
@@ -257,7 +257,7 @@ class FilteredDocumentListView(DocumentListView):
                 "values": self.request.GET.get("alphabet"),
             }
 
-    def get_natures_facet(self, context):
+    def add_natures_facet(self, context):
         if "natures" not in self.exclude_facets:
             natures = DocumentNature.objects.filter(
                 pk__in=self.form.filter_queryset(
@@ -279,7 +279,7 @@ class FilteredDocumentListView(DocumentListView):
                     "values": self.request.GET.getlist("natures"),
                 }
 
-    def get_authors_facet(self, context):
+    def add_authors_facet(self, context):
         if "authors" not in self.exclude_facets:
             authors = []
             authors_label = Author.model_label_plural
@@ -307,15 +307,15 @@ class FilteredDocumentListView(DocumentListView):
                         "values": self.request.GET.getlist("authors"),
                     }
 
-    def get_years_facet(self, context):
-        if "years" in self.exclude_facets:
+    def add_years_facet(self, context):
+        if "years" not in self.exclude_facets:
             years = list(
                 self.form.filter_queryset(self.get_base_queryset(), exclude="years")
                 .order_by()
                 .values_list("date__year", flat=True)
                 .distinct()
             )
-            if years:
+            if len(years) > 1:
                 context["facet_data"]["years"] = {
                     "label": _("Years"),
                     "type": "checkbox",
@@ -326,11 +326,11 @@ class FilteredDocumentListView(DocumentListView):
 
     def add_facets(self, context):
         context["facet_data"] = {}
-        self.get_years_facet(context)
-        self.get_authors_facet(context)
-        self.get_natures_facet(context)
-        self.get_taxonomies_facet(context)
-        self.get_alphabet_facet(context)
+        self.add_years_facet(context)
+        self.add_authors_facet(context)
+        self.add_natures_facet(context)
+        self.add_taxonomies_facet(context)
+        self.add_alphabet_facet(context)
 
     def show_facet_clear_all(self, context):
         context["show_clear_all"] = any(
