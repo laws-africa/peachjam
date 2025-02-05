@@ -29,6 +29,8 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         replacements_data = validated_data.pop("replacements")
 
+        # force anonymised flag
+        validated_data["anonymised"] = True
         super().update(instance, validated_data)
 
         # replace existing replacements
