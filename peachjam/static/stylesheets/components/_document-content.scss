@@ -377,6 +377,10 @@
     flex: 0 0 calc(100% - var(--dt-width));
   }
 
+  .btn.copy-to-clipboard {
+    @include button-size(0.125rem, 0.25rem, $btn-font-size-sm, $btn-border-radius-sm);
+    margin-left: map-get($spacers, 2);
+  }
 }
 
 .to-the-top {
@@ -444,6 +448,12 @@ la-akoma-ntoso[frbr-country="na"] .akn-remark {
 
     @include media-breakpoint-down(md) {
       max-width: 5rem;
+    }
+  }
+
+  @include media-breakpoint-down(lg) {
+    .btn.copy-to-clipboard {
+      display: none;
     }
   }
 }

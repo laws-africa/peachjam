@@ -187,15 +187,7 @@
                           </dt>
                           <dd class="text-muted">
                             {{ document.citation }}
-                            <button type="button"
-                                    class="btn btn-outline-secondary btn-xs ms-2"
-                                    title="{% trans "Copy to clipboard" %}"
-                                    data-component="CopyToClipboard"
-                                    data-value='{{ document.citation }}'
-                                    data-value-html='<a href="https://{{ request.site.domain }}{{ document.get_absolute_url }}">{{ document.citation }}</a>'
-                                    data-confirmation="{% trans "Copied!" %}">
-                              {% trans "Copy" %}
-                            </button>
+                            {% include 'peachjam/_copy_to_clipboard.html' with value=document.citation %}
                           </dd>
                         {% endif %}
                       {% endblock %}
@@ -215,15 +207,7 @@
                               {% for alternative_name in alternative_names %}
                                 <div>
                                   {{ alternative_name.title }}
-                                  <button type="button"
-                                          class="btn btn-outline-secondary btn-xs ms-2"
-                                          title="{% trans "Copy to clipboard" %}"
-                                          data-component="CopyToClipboard"
-                                          data-value='{{ alternative_name.title }}'
-                                          data-value-html='<a href="https://{{ request.site.domain }}{{ document.get_absolute_url }}">{{ alternative_name.title }}</a>'
-                                          data-confirmation="{% trans "Copied!" %}">
-                                    {% trans "Copy" %}
-                                  </button>
+                                  {% include 'peachjam/_copy_to_clipboard.html' with value=alternative_name.title %}
                                 </div>
                               {% endfor %}
                             </dd>
