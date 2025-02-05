@@ -1,10 +1,10 @@
 export class CopyToClipboard {
   root: HTMLElement;
-  text: string;
+  buttonHTML: string;
 
   constructor (root: HTMLElement) {
     this.root = root;
-    this.text = root.innerText;
+    this.buttonHTML = root.innerHTML;
     root.addEventListener('click', () => this.copy());
   }
 
@@ -30,13 +30,13 @@ export class CopyToClipboard {
 
         this.root.innerText = this.root.dataset.confirmation || 'Copied!';
         setTimeout(() => {
-          this.root.innerText = this.text;
+          this.root.innerHTML = this.buttonHTML;
         }, 1500);
       }
     } catch {
       this.root.innerText = 'Copy failed!';
       setTimeout(() => {
-        this.root.innerText = this.text;
+        this.root.innerHTML = this.buttonHTML;
       }, 1500);
     }
   }
