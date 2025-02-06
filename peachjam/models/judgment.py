@@ -44,21 +44,6 @@ class Judge(models.Model):
         return self.name
 
 
-class OrderOutcome(models.Model):
-    name = models.CharField(
-        _("name"), max_length=1024, null=False, blank=False, unique=True
-    )
-    description = models.TextField(_("description"), blank=True)
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = _("order outcome")
-        verbose_name_plural = _("order outcomes")
-
-    def __str__(self):
-        return self.name
-
-
 class Outcome(models.Model):
     name = models.CharField(
         _("name"), max_length=1024, null=False, blank=False, unique=True
@@ -292,11 +277,6 @@ class Judgment(CoreDocument):
     )
     attorneys = models.ManyToManyField(
         Attorney, blank=True, verbose_name=_("attorneys")
-    )
-    order_outcomes = models.ManyToManyField(
-        OrderOutcome,
-        blank=True,
-        related_name="judgments",
     )
     outcomes = models.ManyToManyField(
         Outcome,
