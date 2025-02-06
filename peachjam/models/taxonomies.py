@@ -126,6 +126,7 @@ class DocumentTopic(models.Model):
         ordering = ["topic"]
         verbose_name = _("document topic")
         verbose_name_plural = _("document topics")
+        unique_together = ("document", "topic")
 
     def __str__(self):
         return f"{self.topic.name} - {self.document.title}"
