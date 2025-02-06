@@ -11,18 +11,13 @@ class DocumentListView(FilteredDocumentListView):
     model = GenericDocument
     navbar_link = "doc"
     queryset = GenericDocument.objects.prefetch_related(
-        "authors", "nature", "work", "locality"
+        "author", "nature", "work", "locality"
     )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["doc_table_show_doc_type"] = True
-        context["doc_count"] = self.get_queryset().count()
         return context
-
-    def get_queryset(self):
-        queryset = super(DocumentListView, self).get_queryset()
-        return queryset.order_by("title")
 
 
 @registry.register_doc_type("generic_document")

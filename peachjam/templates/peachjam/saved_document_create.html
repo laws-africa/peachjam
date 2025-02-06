@@ -1,0 +1,25 @@
+{% load i18n %}
+<button class="btn btn-outline-primary btn-shrink-sm ms-2 save-document-button"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#saveDocumentModal"
+        aria-expanded="false"
+        hx-swap-oob="outerHTML:.save-document-button"
+        hx-post="{% url 'saved_document_create' %}?doc_id={{ form.document.value }}">
+  <i class="bi bi-star"></i>
+  <span class="d-md-none">{% trans 'Save' %}</span>
+  <span class="d-none d-md-inline">{% trans 'Save document' %}</span>
+</button>
+<div hx-swap-oob="true" id="saveDocumentModalDialog" class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <p class="h5 modal-title">{% trans 'Save document' %}</p>
+      <button type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"></button>
+    </div>
+    <div class="modal-body">{% trans 'Saving...' %}</div>
+    <div class="modal-footer d-flex"></div>
+  </div>
+</div>

@@ -3,8 +3,7 @@
     <div class="mb-4">
       <nav>
         <div
-          id="nav-tab"
-          class="nav nav-tabs mb-3"
+          class="nav nav-tabs mb-3 border-bottom"
           role="tablist"
         >
           <button
@@ -31,12 +30,22 @@
           >
             {{ $t('Advanced search') }}
           </button>
+          <button
+            v-if="showGoogle"
+            id="google-search-tab"
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#nav-google-search"
+            type="button"
+            role="tab"
+            aria-controls="nav-google-search"
+            aria-selected="false"
+          >
+            {{ $t('Search with Google') }}
+          </button>
         </div>
       </nav>
-      <div
-        id="nav-tabContent"
-        class="tab-content"
-      >
+      <div class="tab-content">
         <div
           id="nav-search"
           class="tab-pane fade show active"
@@ -48,24 +57,33 @@
             @submit.prevent="simpleSearch"
           >
             <input
+              ref="searchInput"
               v-model="q"
-              type="text"
+              type="search"
               class="form-control"
               :placeholder="searchPlaceholder"
               :aria-label="$t('Search documents')"
               aria-describedby="basic-addon2"
               required
+              @typeahead="onTypeahead"
             >
             <button
               type="submit"
-              class="btn btn-primary ms-1"
+              class="btn btn-primary ms-2"
               :disabled="loading"
             >
               <span
                 v-if="loading"
                 class="circle-loader--lt"
               />
-              <span v-else>{{ $t("Search") }}</span>
+              <span v-else>
+                <span class="d-none d-md-inline">
+                {{ $t("Search") }}
+                </span>
+                <span class="d-md-none">
+                  <i class="bi bi-search text-white"></i>
+                </span>
+              </span>
             </button>
             <button
               v-if="searchInfo.count"
@@ -73,11 +91,26 @@
               class="btn btn-secondary ms-1 d-lg-none text-nowrap"
               @click="() => drawerOpen = true"
             >
-              Filters <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
+              {{ $t("Filters") }} <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
             </button>
           </form>
-          <div class="my-2">
+          <div class="my-2 text-end">
             <HelpBtn page="search/" />
+          </div>
+          <div v-if="searchTip" class="mt-2 mb-3">
+            <i class="bi bi-info-circle" />
+            {{ searchTip.prompt }}
+            <a href="#" @click.stop.prevent="useSearchTip()">{{ searchTip.q }}</a>
+          </div>
+          <div id="saved-search-button" />
+          <div
+            id="saved-search-modal"
+            class="modal fade"
+            tabindex="-1"
+            aria-labelledby="saved-search-modal-label"
+            aria-hidden="true"
+          >
+            <div id="saved-search-modal-dialog" class="modal-dialog" />
           </div>
         </div>
         <div
@@ -90,13 +123,27 @@
             v-model="advancedSearchCriteria"
             :advanced-search-date-criteria="advancedSearchDateCriteria"
             :global-search-value="q"
+            :selected-facets-count="selectedFacetsCount"
+            :search-info="searchInfo"
             @global-search-change="value => q = value"
             @date-change="value => advancedSearchDateCriteria = {...value}"
             @submit="advancedSearch"
+            @show-facets="() => drawerOpen = true"
           />
         </div>
+        <div
+          v-if="showGoogle"
+          id="nav-google-search"
+          class="tab-pane fade"
+          role="tabpanel"
+          aria-labelledby="google-search-tab"
+        >
+          <div class="gcse-search" data-autoSearchOnLoad="false" />
+        </div>
       </div>
-
+    </div>
+    <div class="mt-3" v-if="!googleActive">
+      <FacetBadges v-model="facets" :permissive="searchInfo.count === 0" />
       <div
         v-if="error"
         class="mt-3 alert alert-warning"
@@ -109,96 +156,95 @@
       >
         {{ $t("No documents match your search.") }}
       </div>
-    </div>
-    <div ref="filters-results-container">
-      <div class="row">
-        <div class="col col-lg-3">
-          <MobileFacetsDrawer
-            :open="drawerOpen"
-            @outside-drawer-click="() => drawerOpen = false"
-          >
-            <FilterFacets
-              v-if="searchInfo.count"
-              v-model="facets"
-              :loading="loading"
+      <div ref="filters-results-container">
+        <div class="row">
+          <div class="col col-lg-3">
+            <MobileFacetsDrawer
+              :open="drawerOpen"
+              @outside-drawer-click="() => drawerOpen = false"
             >
-              <template #header-title>
-                <button
-                  type="button"
-                  class="btn-close d-lg-none"
-                  :aria-label="$t('Close')"
-                  @click="() => drawerOpen = false"
-                />
-                <strong class="filter-facet-title">{{ $t("Filters") }}</strong>
-              </template>
-            </FilterFacets>
-          </MobileFacetsDrawer>
-        </div>
-
-        <div class="col-md-12 col-lg-9 position-relative">
-          <div class="search-results">
-            <div v-if="searchInfo.count">
-              <FacetBadges v-model="facets" />
-              <div class="mb-3 sort-body row">
-                <div class="col-md-3 order-md-2 mb-2 sort__inner d-flex align-items-center">
-                  <div style="width: 65px;">
-                    {{ $t('Sort by') }}
-                  </div>
-                  <select
-                    v-model="ordering"
-                    class="ms-2 form-select"
-                  >
-                    <option value="-score">
-                      {{ $t('Relevance') }}
-                    </option>
-                    <option value="date">
-                      {{ $t('Date (oldest first)') }}
-                    </option>
-                    <option value="-date">
-                      {{ $t('Date (newest first)') }}
-                    </option>
-                  </select>
-                </div>
-                <div class="col-md order-md-1">
-                  <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
-                  <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
-                </div>
-              </div>
-
-              <ul class="list-unstyled">
-                <SearchResult
-                  v-for="item in searchInfo.results"
-                  :key="item.key"
-                  :item="item"
-                  :query="q"
-                  :debug="searchInfo.can_debug"
-                  :show-jurisdiction="showJurisdiction"
-                  :document-labels="documentLabels"
-                  @explain="explain(item)"
-                  @item-clicked="(e) => itemClicked(item, e)"
-                />
-              </ul>
-
-              <SearchPagination
-                :search="searchInfo"
-                :page="page"
-                @changed="handlePageChange"
-              />
-            </div>
+              <FilterFacets
+                v-if="searchInfo.count"
+                v-model="facets"
+                :loading="loading"
+              >
+                <template #header-title>
+                  <button
+                    type="button"
+                    class="btn-close d-lg-none"
+                    :aria-label="$t('Close')"
+                    @click="() => drawerOpen = false"
+                  />
+                  <strong class="filter-facet-title">{{ $t("Filters") }}</strong>
+                </template>
+              </FilterFacets>
+            </MobileFacetsDrawer>
           </div>
-          <div
-            v-if="loading && searchInfo.count"
-            class="overlay"
-          />
-        </div>
-      </div>
 
-      <a
-        href="#search"
-        class="to-the-top btn btn-secondary d-block d-lg-none"
-      >
-        ▲ {{ $t('To the top') }}
-      </a>
+          <div class="col-md-12 col-lg-9 position-relative">
+            <div class="search-results">
+              <div v-if="searchInfo.count">
+                <div class="mb-3 sort-body row">
+                  <div class="col-md-4 order-md-2 mb-2 sort__inner d-flex align-items-center">
+                    <div style="width: 6em">
+                      {{ $t('Sort') }}
+                    </div>
+                    <select
+                      v-model="ordering"
+                      class="ms-2 form-select"
+                    >
+                      <option value="-score">
+                        {{ $t('Relevance') }}
+                      </option>
+                      <option value="date">
+                        {{ $t('Date (oldest first)') }}
+                      </option>
+                      <option value="-date">
+                        {{ $t('Date (newest first)') }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="col-md order-md-1 align-self-center">
+                    <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
+                    <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
+                  </div>
+                </div>
+
+                <ul class="list-unstyled">
+                  <SearchResult
+                    v-for="item in searchInfo.results"
+                    :key="item.key"
+                    :item="item"
+                    :query="q"
+                    :debug="searchInfo.can_debug"
+                    :show-jurisdiction="showJurisdiction"
+                    :document-labels="documentLabels"
+                    @explain="explain(item)"
+                    @item-clicked="(e) => itemClicked(item, e)"
+                  />
+                </ul>
+
+                <SearchPagination
+                  :search="searchInfo"
+                  :page="page"
+                  @changed="handlePageChange"
+                />
+              </div>
+            </div>
+            <div
+              v-if="loading && searchInfo.count"
+              class="overlay"
+            />
+          </div>
+        </div>
+
+        <a
+          href="#search"
+          class="to-the-top btn btn-secondary d-block d-lg-none"
+        >
+          ▲ {{ $t('To the top') }}
+        </a>
+      </div>
     </div>
 
     <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
@@ -213,7 +259,6 @@
       {{ $t('Jurisdiction') }}
       {{ $t('Locality') }}
       {{ $t('Matter type') }}
-      {{ $t('Document nature') }}
       {{ $t('Language') }}
       {{ $t('Year') }}
     </div>
@@ -230,12 +275,14 @@ import HelpBtn from '../HelpBtn.vue';
 import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 import analytics from '../analytics';
-import {authHeaders, csrfToken} from '../../api';
+import { authHeaders } from '../../api';
+import SearchTypeahead from '../search-typeahead';
+import htmx from 'htmx.org';
 
 export default {
   name: 'FindDocuments',
   components: { FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
-  props: ['showJurisdiction'],
+  props: ['showJurisdiction', 'showGoogle', 'showSuggestions'],
   data () {
     const getLabelOptionLabels = (labels) => {
       // the function name is a bit confusing but this gets labels for the options in Labels facet
@@ -261,6 +308,8 @@ export default {
       ordering: '-score',
       q: '',
       drawerOpen: false,
+      searchTip: null,
+      suggestion: null,
       advancedSearchCriteria: [{
         text: '',
         fields: [],
@@ -276,12 +325,70 @@ export default {
       advancedSearchDateCriteria: {
         date_to: null,
         date_from: null
-      }
+      },
+      googleActive: false
     };
     const facets = [
+      // most frequently used facets first, based on user data
       {
         title: this.$t('Document type'),
-        name: 'doc_type',
+        name: 'nature',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Court'),
+        name: 'court',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Year'),
+        name: 'year',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: getTitle('registry'),
+        name: 'registry',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Locality'),
+        name: 'locality',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Outcome'),
+        name: 'outcome',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: getTitle('judge'),
+        name: 'judges',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: getTitle('author'),
+        name: 'authors',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Language'),
+        name: 'language',
         type: 'checkboxes',
         value: [],
         options: []
@@ -295,50 +402,8 @@ export default {
         optionLabels: getLabelOptionLabels(data.documentLabels)
       },
       {
-        title: getTitle('author'),
-        name: 'authors',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Court'),
-        name: 'court',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: getTitle('registry'),
-        name: 'registry',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Judges'),
-        name: 'judges',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
         title: this.$t('Attorneys'),
         name: 'attorneys',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Outcome'),
-        name: 'outcome',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Locality'),
-        name: 'locality',
         type: 'checkboxes',
         value: [],
         options: []
@@ -349,32 +414,11 @@ export default {
         type: 'checkboxes',
         value: [],
         options: []
-      },
-      {
-        title: this.$t('Document nature'),
-        name: 'nature',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Language'),
-        name: 'language',
-        type: 'checkboxes',
-        value: [],
-        options: []
-      },
-      {
-        title: this.$t('Year'),
-        name: 'year',
-        type: 'checkboxes',
-        value: [],
-        options: []
       }
     ];
 
     if (this.showJurisdiction) {
-      facets.splice(0, 0, {
+      facets.splice(1, 0, {
         title: this.$t('Jurisdiction'),
         name: 'jurisdiction',
         type: 'checkboxes',
@@ -410,14 +454,35 @@ export default {
   },
 
   mounted () {
+    if (this.showSuggestions) {
+      this.searchTypeahead = new SearchTypeahead(this.$refs.searchInput, true);
+    }
     this.loadState();
     window.addEventListener('popstate', () => this.loadState());
+    this.$el.addEventListener('show.bs.tab', this.tabChanged);
   },
 
   methods: {
-    sortGenericBuckets (items, reverse = false) {
+    tabChanged (e) {
+      this.googleActive = e.target.id === 'google-search-tab';
+    },
+
+    onTypeahead (e) {
+      this.suggestion = e.detail.suggestion;
+      this.q = this.suggestion.value;
+      this.simpleSearch();
+    },
+
+    sortBuckets (items, reverse = false, byCount = false) {
       const buckets = [...items];
-      buckets.sort((a, b) => a.key.localeCompare(b.key));
+      function keyFn (a, b) {
+        if (byCount) {
+          // sort by count, then by key
+          return a.doc_count === b.doc_count ? a.key.localeCompare(b.key) : b.doc_count - a.doc_count;
+        }
+        return a.key.localeCompare(b.key);
+      }
+      buckets.sort(keyFn);
       if (reverse) {
         buckets.reverse();
       }
@@ -425,10 +490,6 @@ export default {
     },
 
     getUrlParamValue (key, options) {
-      const queryString = window.location.search;
-      const urlParams = new URLSearchParams(queryString);
-      const availableOptions = options.map(option => option.value);
-      return urlParams.getAll(key).filter(value => availableOptions.includes(value));
     },
 
     handlePageChange (newPage) {
@@ -511,6 +572,8 @@ export default {
       this.page = parseInt(params.get('page')) || this.page;
       this.ordering = params.get('ordering') || this.ordering;
 
+      if (params.has('suggestion')) this.suggestion = { type: params.get('suggestion') };
+
       this.facets.forEach((facet) => {
         if (params.has(facet.name)) {
           facet.value = params.getAll(facet.name);
@@ -542,7 +605,7 @@ export default {
         tabTrigger.show();
       }
 
-      this.search();
+      this.search(false);
     },
 
     suggest (q) {
@@ -550,7 +613,15 @@ export default {
       this.search();
     },
 
+    useSearchTip () {
+      this.q = this.searchTip.q;
+      this.search();
+    },
+
     formatFacets () {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+
       const generateOptions = (buckets, labels) => {
         return buckets.map((bucket) => ({
           label: labels ? labels[bucket.key] : bucket.key,
@@ -562,9 +633,8 @@ export default {
       this.facets.forEach((facet) => {
         if (facet.name === 'year') {
           facet.options = generateOptions(
-            this.sortGenericBuckets(
-              this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
-                .buckets,
+            this.sortBuckets(
+              this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
               true
             ),
             facet.optionLabels
@@ -572,15 +642,24 @@ export default {
         } else {
           if (this.searchInfo.facets[`_filter_${facet.name}`]) {
             facet.options = generateOptions(
-              this.sortGenericBuckets(
-                this.searchInfo.facets[`_filter_${facet.name}`][facet.name]
-                  .buckets
+              this.sortBuckets(
+                this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
+               false,
+                // sort nature by descending count, everything else alphabetically
+                facet.name === 'nature'
               ),
               facet.optionLabels
             );
           }
         }
-        facet.value = this.getUrlParamValue(facet.name, facet.options);
+
+        // If we have results, then sanity check chosen options against those that are available.
+        // If there are no results, we trust any options given so that we can show the facet buttons
+        // and allow the user to remove the facets to try to find results.
+        if (this.searchInfo.count > 0) {
+          const availableOptions = facet.options.map(option => option.value);
+          facet.value = urlParams.getAll(facet.name).filter(value => availableOptions.includes(value));
+        }
       });
     },
 
@@ -589,6 +668,12 @@ export default {
         // number items from 1 consistently across pages
         this.searchInfo.results[i].position = (this.page - 1) * this.pageSize + i + 1;
       }
+
+      // determine best match: is the first result's score significantly better than the next?
+      if (this.page === 1 && this.searchInfo.results.length > 1 &&
+          this.searchInfo.results[0]._score / this.searchInfo.results[1]._score >= 1.2) {
+        this.searchInfo.results[0].best_match = true;
+      }
     },
 
     generateSearchParams () {
@@ -596,9 +681,6 @@ export default {
       if (this.q) params.append('search', this.q);
       params.append('page', this.page);
       params.append('ordering', this.ordering);
-      params.append('highlight', 'content');
-      params.append('highlight', 'title');
-      params.append('is_most_recent', 'true');
 
       this.facets.forEach((facet) => {
         facet.value.forEach((value) => {
@@ -612,6 +694,11 @@ export default {
       });
 
       this.generateAdvancedSearchParams(params);
+
+      // record suggestion details for statistics
+      if (this.suggestion) {
+        params.append('suggestion', this.suggestion.type);
+      }
 
       return params;
     },
@@ -665,12 +752,25 @@ export default {
     },
 
     async search (pushState = true) {
+      this.searchTip = null;
+      if (this.searchTypeahead) {
+        this.searchTypeahead.autocomplete.hideSuggestions();
+      }
+
       // if one of the search fields is true perform search
       if (this.q || (Array.isArray(this.advancedSearchCriteria) && this.advancedSearchCriteria.some(f => f.text))) {
         this.loadingCount = this.loadingCount + 1;
 
         // scroll to put the search box at the top of the window
         scrollToElement(this.$refs['search-box']);
+
+        // search tip
+        if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(' ') > -1) {
+          this.searchTip = {
+            prompt: this.$t('Tip: Use quotes to search for an exact phrase: '),
+            q: `"${this.q}"`
+          };
+        }
 
         try {
           const params = this.generateSearchParams();
@@ -688,15 +788,15 @@ export default {
 
           // check that the search state hasn't changed since we sent the request
           if (params.toString() === this.generateSearchParams().toString()) {
+            // clear the suggestion flag
+            this.suggestion = null;
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
-              if (this.searchInfo.count === 0) {
-                this.clearAllFilters();
-              }
               this.formatFacets();
               this.formatResults();
               this.trackSearch(params);
+              this.savedSearchModal();
             } else {
               this.error = response.statusText;
             }
@@ -772,7 +872,9 @@ export default {
         date_from: null
       };
     },
-
+    savedSearchModal () {
+      htmx.ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });
+    }
   }
 };
 </script>
@@ -796,9 +898,6 @@ export default {
 @media screen and (max-width: 400px) {
   .sort-body {
     flex-direction: column;
-  }
-  .sort__inner {
-    margin-top: 10px;
   }
 }
 

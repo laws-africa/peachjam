@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:54+0300\n"
-"PO-Revision-Date: 2023-09-19 11:54\n"
+"POT-Creation-Date: 2024-11-21 09:48+0200\n"
+"PO-Revision-Date: 2024-08-06 08:54\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -29,24 +29,23 @@ msgstr "Swahili"
 msgid "Karibu Katika Mfumo wa Taarifa za Maamuzi, Sheria na Kanuni za Tanzania"
 msgstr "Karibu Katika Mfumo wa Taarifa za Maamuzi, Sheria na Kanuni za Tanzanie"
 
-#: templates/liiweb/home.html:14
-msgid "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
+#: templates/liiweb/home.html:15
+#, fuzzy
+#| msgid "TanzLII ni tovuti ya Mahakama ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
+msgid "TanzLII ni tovuti ya Serikali ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 msgstr "TanzLII ni tovuti ya Mahakama ya Tanzanie inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzanie na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 
-#: templates/liiweb/home.html:23 templates/peachjam/_header.html:46
-#: templates/peachjam/about.html:4
-msgid "About"
-msgstr "À propos"
-
-#: templates/liiweb/home.html:26 templates/peachjam/about.html:11
+#: templates/liiweb/home.html:22 templates/peachjam/about.html:5
 msgid "TanzLII is a project of the Tanzanian Judiciary. We aim to support the rule of law by publishing the law of Tanzania for free online access."
 msgstr "TanzLII est un projet du pouvoir judiciaire tanzanien. Notre objectif est de soutenir l'état de droit en publiant la loi de la Tanzanie pour un accès en ligne gratuit."
 
 #: templates/peachjam/_footer.html:5
-msgid "TanzLII is based at the Judiciary of Tanzania and publishes the law of Tanzania for free online access for all. Free Access to the law supports the rule of law and access to justice. TanzLII partners with African Legal Information Institute (AfricanLII) and <a href=\"http://laws.africa/\">Laws.Africa</a> NPO, who provide it with technical support."
+#, fuzzy
+#| msgid "TanzLII is based at the Judiciary of Tanzania and publishes the law of Tanzania for free online access for all. Free Access to the law supports the rule of law and access to justice. TanzLII partners with African Legal Information Institute (AfricanLII) and <a href=\"http://laws.africa/\">Laws.Africa</a> NPO, who provide it with technical support."
+msgid "TanzLII is operated by the Judiciary of Tanzania and the Office of the Attorney General, Chief Parliamentary Draftsman, and publishes the law of Tanzania for free online access for all. Free Access to the law supports the rule of law and access to justice. TanzLII partners with <a href=\"https://africanlii.org/\">African Legal Information Institute</a> and <a href=\"http://laws.africa/\">Laws.Africa</a>, who provide it with technical support."
 msgstr "TanzLII est basé au pouvoir judiciaire de la Tanzanie et publie la loi de la Tanzanie pour un accès en ligne gratuit pour tous. Le libre accès à la loi soutient l'état de droit et l'accès à la justice. TanzLII est partenaire de l'Institut Africain d'Information Juridique (AfricanLII) et <a href=\"http://laws.africa/\">Laws.Africa</a> NPO, qui lui apportent un soutien technique."
 
-#: templates/peachjam/_footer.html:13
+#: templates/peachjam/_footer.html:11
 msgid "Our partners"
 msgstr "Nos partenaires"
 
@@ -59,37 +58,82 @@ msgid "Legislation"
 msgstr "Législation"
 
 #: templates/peachjam/_header.html:22
-msgid "Law Reform"
-msgstr "Réforme du droit"
+msgid "Government Gazette"
+msgstr ""
 
-#: templates/peachjam/_header.html:28
-msgid "Gazettes"
-msgstr "Journaux officiels"
+#: templates/peachjam/_header.html:31
+msgid "Practice Essentials"
+msgstr ""
 
-#: templates/peachjam/_header.html:34
-msgid "Speeches"
+#: templates/peachjam/_header.html:37
+msgid "Judiciary Guidelines & Procedures"
+msgstr ""
+
+#: templates/peachjam/_header.html:43
+msgid "National Prosecution Service Guidelines & Manuals"
+msgstr ""
+
+#: templates/peachjam/_header.html:49
+msgid "Tanganyika Law Society Guidelines & Manuals"
+msgstr ""
+
+#: templates/peachjam/_header.html:60
+msgid "Research Hub"
+msgstr ""
+
+#: templates/peachjam/_header.html:66
+msgid "TanzLII Case Digest"
+msgstr ""
+
+#: templates/peachjam/_header.html:72
+msgid "Law Reform Commission Reports"
+msgstr ""
+
+#: templates/peachjam/_header.html:77
+msgid "Legal Journals"
+msgstr ""
+
+#: templates/peachjam/_header.html:83
+msgid "Articles"
+msgstr ""
+
+#: templates/peachjam/_header.html:88
+#, fuzzy
+#| msgid "Speeches"
+msgid "Notable Speeches"
 msgstr "Discours"
 
-#: templates/peachjam/_header.html:40
-msgid "JOT Documents and Guidelines"
-msgstr "Documents et directives JOT"
+#: templates/peachjam/_header.html:96
+msgid "Street Law"
+msgstr ""
 
-#: templates/peachjam/about.html:9
-msgid "About TanzLII"
-msgstr "À propos de TanzLII"
-
-#: templates/peachjam/about.html:17
+#: templates/peachjam/about.html:11
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
 msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> fait partie de l'unité <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Gouvernance démocratique et droits</a> de la Faculté de droit de l'Université de Cape Town (UCT), Afrique du Sud. AfricanLII aide les individus, les organisations et les gouvernements à créer et à maintenir un accès libre et durable aux portails juridiques et à atteindre les peuples d'Afrique et d'ailleurs."
 
-#: templates/peachjam/about.html:27
+#: templates/peachjam/about.html:21
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> is a South Africa non-profit organisation that digitises African legal information for public use. Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial officers and civil servants to deliver services efficiently and effectively."
 msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> est une organisation sud-africaine à but non lucratif qui numérise les informations juridiques africaines à usage public. Le libre accès aux informations juridiques numériques africaines aide les communautés à prospérer, les entreprises à réussir, et les officiers de justice et les fonctionnaires à fournir des services de manière efficace et efficiente."
 
-#: templates/peachjam/about.html:34
+#: templates/peachjam/about.html:28
 msgid "Contact us"
 msgstr "Contactez-nous"
 
-#: templates/peachjam/about.html:36
+#: templates/peachjam/about.html:30
 msgid "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@tanzlii.org</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 msgstr "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@tanzlii.org</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
+
+#~ msgid "Gazettes"
+#~ msgstr "Journaux officiels"
+
+#~ msgid "JOT Documents and Guidelines"
+#~ msgstr "Documents et directives JOT"
+
+#~ msgid "Law Reform"
+#~ msgstr "Réforme du droit"
+
+#~ msgid "NPS Documents"
+#~ msgstr "Documents NPS"
+
+#~ msgid "Causelists"
+#~ msgstr "Listes de causes"

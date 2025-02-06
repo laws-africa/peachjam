@@ -3,7 +3,6 @@ from peachjam.settings import *  # noqa
 # Application definition
 INSTALLED_APPS = [
     "gazettes",
-    "django.contrib.humanize",
 ] + INSTALLED_APPS  # noqa
 
 
@@ -29,7 +28,6 @@ default_db_url = "postgres://gazettes:gazettes@localhost:5432/gazettes"
 db_config = dj_database_url.config(  # noqa
     default=os.environ.get("DATABASE_URL", default_db_url)  # noqa
 )
-db_config["ATOMIC_REQUESTS"] = True  # noqa
 DATABASES["default"] = db_config  # noqa
 
 

@@ -1,4 +1,3 @@
-import os
 import string
 import subprocess
 import tempfile
@@ -6,6 +5,7 @@ from datetime import date, datetime
 from functools import wraps
 
 import martor.utils
+from django.conf import settings
 from django.utils.translation import get_language_from_request
 from languages_plus.models import Language
 
@@ -46,7 +46,7 @@ def pdfjs_to_text(fname):
     """Extract text from fname using pdfjs-compatible script."""
     with tempfile.NamedTemporaryFile(suffix=".txt") as outf:
         cmd = [
-            os.path.join(os.path.dirname(__file__), "..", "bin", "pdfjs-to-text"),
+            settings.PEACHJAM["PDFJS_TO_TEXT"],
             fname,
             outf.name,
         ]
@@ -56,9 +56,24 @@ def pdfjs_to_text(fname):
 
 
 def chunks(lst, n):
-    """Yield successive n-sized chunks from list."""
+    """Split a list into n chunks, with the first chunk absorbing any rounding. If the list is shorter
+    than n, only len(n) chunks will be returned."""
+    if not lst:
+        return []
+
+    n = min(n, len(lst))
+    avg = len(lst) // n
+    remainder = len(lst) % n
+    result = []
+    start = 0
+
     for i in range(n):
-        yield lst[i::n]
+        # Add the remainder to the first chunk
+        size = avg + (1 if i < remainder else 0)
+        result.append(lst[start : start + size])
+        start += size
+
+    return result
 
 
 class ISODateConverter:
@@ -105,3 +120,17 @@ def markdownify(text):
 
 # override martor's markownify to use pandoc, so that we get alpha-numbered list support
 martor.utils.markdownify = markdownify
+
+
+def get_update_or_create(model, defaults, **kwargs):
+    # helper function to get or create or update model
+    obj, created = model.objects.get_or_create(defaults=defaults, **kwargs)
+    updated = False
+    if not created:
+        for k, v in defaults.items():
+            if getattr(obj, k) != v:
+                setattr(obj, k, v)
+                updated = True
+        if updated:
+            obj.save()
+    return obj, (created or updated)

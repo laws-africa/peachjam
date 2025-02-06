@@ -1,14 +1,17 @@
 from django.http import HttpResponse
-from django.views.generic.edit import FormView
+from django.views.generic.edit import View
 
 from peachjam.forms import DocumentProblemForm
 
 
-class DocumentProblemView(FormView):
-    template_name = "peachjam/_report_issue_modal.html"
+class DocumentProblemView(View):
     form_class = DocumentProblemForm
+    http_method_names = ["post"]
 
-    def form_valid(self, form):
+    def post(self, *args, **kwargs):
         # fire-and-forget
-        form.send_email()
-        return HttpResponse()
+        form = self.form_class(self.request.POST)
+        if form.is_valid():
+            form.send_email()
+            return HttpResponse()
+        return HttpResponse(status=400)

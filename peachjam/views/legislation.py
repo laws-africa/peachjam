@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.contrib import messages
+from django.db.models import CharField, Func, Value
 from django.template.defaultfilters import date as format_date
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
@@ -17,7 +18,16 @@ class LegislationListView(FilteredDocumentListView):
     model = Legislation
     template_name = "peachjam/legislation_list.html"
     navbar_link = "legislation"
-    queryset = Legislation.objects.prefetch_related("work")
+    extra_context = {"nature": "Act", "help_link": "legislation/"}
+    form_defaults = {"sort": "title"}
+
+    def add_facets(self, context):
+        super().add_facets(context)
+        # move the alphabet facet first, it's highly used on the legislation page for some LIIs
+        facets = {"alphabet": context["facet_data"].pop("alphabet")}
+        for k, v in context["facet_data"].items():
+            facets[k] = v
+        context["facet_data"] = facets
 
 
 @registry.register_doc_type("legislation")
@@ -228,18 +238,7 @@ class LegislationDetailView(BaseDocumentDetailView):
 
     def get_timeline(self):
         timeline = self.object.timeline_json
-        publication_url = None
-        work = self.object.metadata_json
         points_in_time = self.get_points_in_time()
-
-        # set publication_url
-        publication_date = work.get("publication_date")
-        if publication_date:
-            api_url = "https://api.laws.africa/v3/"
-            commons_url = "https://commons.laws.africa/"
-            publication_url = (work.get("publication_document") or {}).get("url")
-            if publication_url and api_url in publication_url:
-                publication_url = publication_url.replace(api_url, commons_url)
 
         # prepare for setting contains_unapplied_amendment flag
         point_in_time_dates = [p["date"] for p in points_in_time]
@@ -262,9 +261,6 @@ class LegislationDetailView(BaseDocumentDetailView):
             # add expression_frbr_uri
             for event in entry["events"]:
                 entry["expression_frbr_uri"] = expression_uris.get(entry["date"])
-                # add publication_url to publication event
-                if event["type"] == "publication":
-                    event["link_url"] = publication_url
                 # add contains_unapplied_amendment flag
                 if event["type"] == "amendment":
                     entry["contains_unapplied_amendment"] = (
@@ -275,12 +271,25 @@ class LegislationDetailView(BaseDocumentDetailView):
         return timeline
 
     def get_child_documents(self):
-        docs = (
-            self.model.objects.filter(parent_work=self.object.work)
-            .distinct("work_frbr_uri")
-            .order_by("work_frbr_uri", "-date")
-        )
+        docs_ids = self.model.objects.filter(
+            parent_work=self.object.work
+        ).latest_expression()
+
         # now sort by title
+        docs = (
+            self.model.objects.filter(pk__in=docs_ids)
+            .annotate(
+                padded_frbr_uri_number=Func(
+                    "frbr_uri_number",
+                    Value(10),
+                    Value("0"),
+                    function="LPAD",
+                    output_field=CharField(),
+                )
+            )
+            .order_by("-date", "-frbr_uri_date", "-padded_frbr_uri_number")
+            .select_related("work")
+            .prefetch_related("labels")
+        )
         # TODO: we're not guaranteed to get documents in the same language, here
-        docs = sorted(docs, key=lambda d: d.title)
         return docs

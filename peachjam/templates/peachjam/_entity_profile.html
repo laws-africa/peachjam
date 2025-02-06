@@ -15,7 +15,7 @@
            loading="lazy"/>
     {% endif %}
     <div class="entity-profile__body__info">
-      <h1>{{ entity_profile_title }}</h1>
+      <h1>{{ entity_profile_title|default:entity_profile.title }}</h1>
       {% if entity_profile.about_html %}<div class="mb-2">{{ entity_profile.about_html|safe }}</div>{% endif %}
       <div class="row">
         {% if entity_profile.address %}

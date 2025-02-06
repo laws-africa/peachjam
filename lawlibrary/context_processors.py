@@ -1,4 +1,4 @@
-from lawlibrary.constants import PROVINCIAL_CODES
+from lawlibrary.constants import MUNICIPAL_CODES, PROVINCIAL_CODES
 
 
 def lawlibrary(request):
@@ -7,4 +7,5 @@ def lawlibrary(request):
     """
     return {
         "PROVINCIAL_CODES": PROVINCIAL_CODES,
+        "MUNICIPAL_CODES": MUNICIPAL_CODES,
     }

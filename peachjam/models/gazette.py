@@ -20,16 +20,17 @@ class Gazette(CoreDocument):
     key = models.CharField(
         _("key"), max_length=512, null=True, blank=True, db_index=True
     )
+    volume_number = models.CharField(
+        _("volume number"), max_length=512, null=True, blank=True
+    )
+    special = models.BooleanField(_("special"), default=False)
+
+    default_nature = ("gazette", "Gazette")
 
     class Meta(CoreDocument.Meta):
         verbose_name = _("gazette")
         verbose_name_plural = _("gazettes")
         permissions = [("api_gazette", "API gazette access")]
-
-    def set_frbr_uri_subtype(self):
-        # preserve the existing subtype if nature is not set
-        if self.nature:
-            self.frbr_uri_subtype = self.nature.code
 
     def pre_save(self):
         self.frbr_uri_doctype = "officialGazette"

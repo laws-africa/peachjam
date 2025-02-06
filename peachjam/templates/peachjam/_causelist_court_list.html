@@ -1,0 +1,8 @@
+{% extends "peachjam/_court_list.html" %}
+{% load i18n %}
+{% block court_class_link %}
+  <a href="{% url 'causelist_court_class' court_class.slug %}">{% trans 'All causelists' %}</a>
+{% endblock %}
+{% block court_link %}
+  <a href="{% url 'causelist_court' court.code %}">{{ court.name }}</a>
+{% endblock %}

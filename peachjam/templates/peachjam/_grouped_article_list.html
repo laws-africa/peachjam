@@ -1,7 +1,0 @@
-{% load i18n peachjam %}
-{% for grouped_article in grouped_articles %}
-  <h4 class="my-4">{{ grouped_article.month }} {{ year }}</h4>
-  {% with articles=grouped_article.articles %}
-    {% include "peachjam/_article_list.html" %}
-  {% endwith %}
-{% endfor %}

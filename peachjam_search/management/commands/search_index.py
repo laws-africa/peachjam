@@ -3,6 +3,7 @@ from django_elasticsearch_dsl.management.commands.search_index import (
 )
 from django_elasticsearch_dsl.registries import registry
 
+from peachjam_search.documents import MultiLanguageIndexManager
 from peachjam_search.tasks import search_model_saved
 
 
@@ -16,6 +17,14 @@ class Command(OriginalCommand):
             default=False,
             dest="background",
             help="Run populate tasks in the background",
+        )
+
+        parser.add_argument(
+            "--update-indexes",
+            action="store_const",
+            dest="action",
+            const="update_indexes",
+            help="Update the index settings in elasticsearch (closes and re-opens the index)",
         )
 
     def _populate(self, models, options):
@@ -33,3 +42,15 @@ class Command(OriginalCommand):
 
             for doc in qs:
                 search_model_saved(doc._meta.label, doc.pk)
+
+    def _update_mappings(self, options):
+        """Updating mappings and settings for indexes."""
+        manager = MultiLanguageIndexManager.get_instance()
+        manager.load_language_index_settings()
+        manager.update_language_index_settings()
+
+    def handle(self, *args, **options):
+        if options.get("action") == "update_indexes":
+            self._update_mappings(options)
+        else:
+            super().handle(*args, **options)

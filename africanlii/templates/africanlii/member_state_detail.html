@@ -1,10 +1,13 @@
-{% extends 'peachjam/layouts/document_list.html' %}
+{% extends 'africanlii/au_institution_detail.html' %}
 {% load i18n %}
 {% block title %}{{ member_state }}{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
         <li class="breadcrumb-item">
           <a href="{% url 'au_detail_page' %}">{% trans 'African Union' %}</a>
         </li>
@@ -21,19 +24,18 @@
 {% block entity-profile %}
   {% with entity_profile=member_state.entity_profile.first entity_profile_title=member_state.name %}
     {% if entity_profile %}
-      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
+      {% include 'peachjam/_entity_profile.html' %}
     {% endif %}
   {% endwith %}
 {% endblock %}
+{% block page-title %}<h1 class="mt-4">{{ member_state }}</h1>{% endblock %}
 {% block page-header %}
-  <h1 class="mt-4">{{ member_state }}</h1>
-  {% include 'africanlii/_lii_info.html' %}
-  {% include 'peachjam/_document_count.html' %}
+  {{ block.super }}
+  <div class="mb-5">{% include 'africanlii/_lii_info.html' %}</div>
 {% endblock %}
-{% block page-list-facets %}{% endblock %}
-{% block content %}
+{% block document-table %}
   {% if ratification_countries %}
-    {% include 'africanlii/_ratification_table.html' %}
+    {% include 'peachjam/_ratification_table.html' %}
   {% else %}
     <p>{% trans 'No documents found.' %}</p>
   {% endif %}

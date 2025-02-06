@@ -1,9 +1,9 @@
 <template>
-  <div class="d-none d-md-block">
+  <div v-if="activeOptions" class="d-none d-md-block mb-3">
     <button
       v-for="option in activeOptions"
       :key="option.value"
-      class="btn btn-outline-primary me-2 mb-2 btn-sm"
+      class="btn btn-outline-primary me-2 btn-sm"
       type="button"
       :title="$t('Remove')"
       @click="updateModel(option.value)"
@@ -21,6 +21,12 @@ export default {
     modelValue: {
       type: Array,
       default: () => []
+    },
+    permissive: {
+      // if this is true, then we don't sanity check facet values against options, which is only important
+      // if there are no search results
+      type: Boolean,
+      default: false
     }
   },
   emits: ['update:modelValue'],
@@ -29,7 +35,17 @@ export default {
       const activeFacets = this.modelValue.filter(facet => facet.value.length);
       const options = [];
       activeFacets.forEach(facet => {
-        const activeOptions = facet.options.filter(option => facet.value.includes(option.value));
+        let activeOptions = [];
+        if (this.permissive) {
+          activeOptions = facet.value.map((v) => {
+            return {
+              value: v,
+              label: v
+            };
+          });
+        } else {
+          activeOptions = facet.options.filter(option => facet.value.includes(option.value));
+        }
         options.push(...activeOptions);
       });
       return options;

@@ -1,0 +1,26 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>{% trans "Search Alert" %}</title>
+  </head>
+  <body>
+    <p>{{ saved_search.user }},</p>
+    <p>{% trans "We have found new documents that match your search alert:" %}</p>
+    <p>
+      <strong><a href="https://{{ site.domain }}{{ saved_search.get_absolute_url }}">{{ saved_search.q }}</a></strong>
+    </p>
+    <p>{% include 'peachjam_search/_saved_search_filters.html' %}</p>
+    <ul>
+      {% for doc in hits %}
+        <li>
+          <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}">{{ doc.title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+    <p>
+      <a href="https://{{ site.domain }}{% url "search:saved_search_list" %}">{% trans "Manage your search alerts" %}</a>
+    </p>
+  </body>
+</html>

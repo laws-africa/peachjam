@@ -24,18 +24,33 @@ from peachjam.feeds import (
     CoreDocumentAtomSiteNewsFeed,
     GenericDocumentAtomSiteNewsFeed,
     JudgmentAtomSiteNewsFeed,
-    LegalInstrumentAtomSiteNewsFeed,
     LegislationAtomSiteNewsFeed,
 )
 from peachjam.helpers import ISODateConverter
 from peachjam.views import (
     AboutPageView,
+    ArticleAttachmentDetailView,
+    ArticleAuthorDetailView,
+    ArticleAuthorYearDetailView,
     ArticleDetailView,
     ArticleListView,
-    ArticleTopicListView,
-    ArticleYearArchiveView,
+    ArticleTopicView,
+    ArticleTopicYearView,
+    ArticleYearView,
     AuthorDetailView,
+    BillListView,
     BookListView,
+    CauseListCourtClassMonthView,
+    CauseListCourtClassView,
+    CauseListCourtClassYearView,
+    CauseListCourtDetailView,
+    CauseListCourtMonthView,
+    CauseListCourtRegistryDetailView,
+    CauseListCourtRegistryMonthView,
+    CauseListCourtRegistryYearView,
+    CauseListCourtYearView,
+    CauseListListView,
+    ComparePortionsView,
     CourtClassDetailView,
     CourtClassMonthView,
     CourtClassYearView,
@@ -45,31 +60,52 @@ from peachjam.views import (
     CourtRegistryMonthView,
     CourtRegistryYearView,
     CourtYearView,
+    DocumentAnonymiseAPIView,
+    DocumentAnonymiseSuggestionsAPIView,
+    DocumentAnonymiseView,
+    DocumentCitationsView,
     DocumentDetailViewResolver,
     DocumentListView,
     DocumentMediaView,
     DocumentNatureListView,
     DocumentPopupView,
     DocumentProblemView,
+    DocumentPublicationView,
     DocumentSourcePDFView,
     DocumentSourceView,
+    EditAccountView,
+    FolderCreateView,
+    FolderDeleteView,
+    FolderListView,
+    FolderUpdateView,
     GazetteListView,
     GazetteYearView,
     HomePageView,
     JournalListView,
+    JudgesAutocomplete,
     JudgmentListView,
-    LegalInstrumentListView,
+    JudgmentWorksAutocomplete,
     LegislationListView,
+    PartnerLogoView,
     PeachjamAdminLoginView,
+    PlaceBillListView,
     PlaceDetailView,
     PocketLawResources,
     RobotsView,
+    SavedDocumentButtonView,
+    SavedDocumentCreateView,
+    SavedDocumentDeleteView,
+    SavedDocumentUpdateView,
     TaxonomyDetailView,
     TaxonomyFirstLevelView,
     TaxonomyListView,
     TermsOfUsePageView,
-    UserProfileDetailView,
     WorkAutocomplete,
+)
+from peachjam.views.comments import comment_form_view
+from peachjam.views.document_access_group import (
+    DocumentAccessGroupDetailView,
+    DocumentAccessGroupListView,
 )
 from peachjam.views.generic_views import CSRFTokenView
 from peachjam.views.metabase_stats import MetabaseStatsView
@@ -95,68 +131,141 @@ urlpatterns = [
         AuthorDetailView.as_view(),
         name="author",
     ),
-    path("judgments/", JudgmentListView.as_view(), name="judgment_list"),
     path(
-        "judgments/court-class/<str:court_class>/",
-        CourtClassDetailView.as_view(),
-        name="court_class",
+        "judgments/",
+        include(
+            [
+                path("", JudgmentListView.as_view(), name="judgment_list"),
+                path(
+                    "court-class/<str:court_class>/",
+                    CourtClassDetailView.as_view(),
+                    name="court_class",
+                ),
+                path(
+                    "court-class/<str:court_class>/<int:year>/",
+                    CourtClassYearView.as_view(),
+                    name="court_class_year",
+                ),
+                path(
+                    "court-class/<str:court_class>/<int:year>/<int:month>/",
+                    CourtClassMonthView.as_view(),
+                    name="court_class_month",
+                ),
+                path(
+                    "<str:code>/",
+                    CourtDetailView.as_view(),
+                    name="court",
+                ),
+                path(
+                    "<str:code>/<int:year>/",
+                    CourtYearView.as_view(),
+                    name="court_year",
+                ),
+                path(
+                    "<str:code>/<int:year>/<int:month>/",
+                    CourtMonthView.as_view(),
+                    name="court_month",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/",
+                    CourtRegistryDetailView.as_view(),
+                    name="court_registry",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/<int:year>/",
+                    CourtRegistryYearView.as_view(),
+                    name="court_registry_year",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/<int:year>/<int:month>/",
+                    CourtRegistryMonthView.as_view(),
+                    name="court_registry_month",
+                ),
+            ]
+        ),
     ),
     path(
-        "judgments/court-class/<str:court_class>/<int:year>/",
-        CourtClassYearView.as_view(),
-        name="court_class_year",
-    ),
-    path(
-        "judgments/court-class/<str:court_class>/<int:year>/<int:month>/",
-        CourtClassMonthView.as_view(),
-        name="court_class_month",
-    ),
-    path(
-        "judgments/<str:code>/",
-        CourtDetailView.as_view(),
-        name="court",
-    ),
-    path(
-        "judgments/<str:code>/<int:year>/",
-        CourtYearView.as_view(),
-        name="court_year",
-    ),
-    path(
-        "judgments/<str:code>/<int:year>/<int:month>/",
-        CourtMonthView.as_view(),
-        name="court_month",
-    ),
-    path(
-        "judgments/<str:code>/<str:registry_code>/",
-        CourtRegistryDetailView.as_view(),
-        name="court_registry",
-    ),
-    path(
-        "judgments/<str:code>/<str:registry_code>/<int:year>/",
-        CourtRegistryYearView.as_view(),
-        name="court_registry_year",
-    ),
-    path(
-        "judgments/<str:code>/<str:registry_code>/<int:year>/<int:month>/",
-        CourtRegistryMonthView.as_view(),
-        name="court_registry_month",
+        "causelists/",
+        include(
+            [
+                path("", CauseListListView.as_view(), name="causelist_list"),
+                path(
+                    "<str:code>/",
+                    CauseListCourtDetailView.as_view(),
+                    name="causelist_court",
+                ),
+                path(
+                    "court-class/<str:court_class>/",
+                    CauseListCourtClassView.as_view(),
+                    name="causelist_court_class",
+                ),
+                path(
+                    "court-class/<str:court_class>/<int:year>/",
+                    CauseListCourtClassYearView.as_view(),
+                    name="causelist_court_class_year",
+                ),
+                path(
+                    "court-class/<str:court_class>/<int:year>/<int:month>/",
+                    CauseListCourtClassMonthView.as_view(),
+                    name="causelist_court_class_month",
+                ),
+                path(
+                    "<str:code>/<int:year>/",
+                    CauseListCourtYearView.as_view(),
+                    name="causelist_court_year",
+                ),
+                path(
+                    "<str:code>/<int:year>/<int:month>/",
+                    CauseListCourtMonthView.as_view(),
+                    name="causelist_court_month",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/",
+                    CauseListCourtRegistryDetailView.as_view(),
+                    name="causelist_court_registry",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/<int:year>/",
+                    CauseListCourtRegistryYearView.as_view(),
+                    name="causelist_court_registry_year",
+                ),
+                path(
+                    "<str:code>/<str:registry_code>/<int:year>/<int:month>/",
+                    CauseListCourtRegistryMonthView.as_view(),
+                    name="causelist_court_registry_month",
+                ),
+            ]
+        ),
     ),
     path("place/<str:code>", PlaceDetailView.as_view(), name="place"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
     path(
-        "legal_instruments/",
-        LegalInstrumentListView.as_view(),
-        name="legal_instrument_list",
+        "bills/",
+        include(
+            [
+                path("", BillListView.as_view(), name="bill_list"),
+                path("<str:code>", PlaceBillListView.as_view(), name="place_bill_list"),
+            ]
+        ),
     ),
-    path("gazettes", GazetteListView.as_view(), name="gazettes"),
     path(
-        "gazettes/<str:code>/", GazetteListView.as_view(), name="gazettes_by_locality"
-    ),
-    path("gazettes/<int:year>", GazetteYearView.as_view(), name="gazettes_by_year"),
-    path(
-        "gazettes/<str:code>/<int:year>",
-        GazetteYearView.as_view(),
-        name="gazettes_by_year",
+        "gazettes/",
+        include(
+            [
+                path("", GazetteListView.as_view(), name="gazettes"),
+                path(
+                    "<str:code>/",
+                    GazetteListView.as_view(),
+                    name="gazettes_by_locality",
+                ),
+                path("<int:year>", GazetteYearView.as_view(), name="gazettes_by_year"),
+                path(
+                    "<str:code>/<int:year>",
+                    GazetteYearView.as_view(),
+                    name="gazettes_by_year",
+                ),
+            ]
+        ),
     ),
     path(
         "doc/",
@@ -165,22 +274,34 @@ urlpatterns = [
     ),
     path("books/", BookListView.as_view(), name="book_list"),
     path("journals/", JournalListView.as_view(), name="journal_list"),
-    path("taxonomy/", TaxonomyListView.as_view(), name="top_level_taxonomy_list"),
     path(
-        "taxonomy/<slug:topic>",
-        TaxonomyFirstLevelView.as_view(),
-        name="first_level_taxonomy_list",
-    ),
-    path(
-        "taxonomy/<slug:topic>/<slug:child>",
-        TaxonomyDetailView.as_view(),
-        name="taxonomy_detail",
+        "taxonomy/",
+        include(
+            [
+                path("", TaxonomyListView.as_view(), name="top_level_taxonomy_list"),
+                path(
+                    "<slug:topic>",
+                    TaxonomyFirstLevelView.as_view(),
+                    name="first_level_taxonomy_list",
+                ),
+                path(
+                    "<slug:topic>/<slug:child>",
+                    TaxonomyDetailView.as_view(),
+                    name="taxonomy_detail",
+                ),
+            ]
+        ),
     ),
     # document detail views
     re_path(
         r"^(?P<frbr_uri>akn/.*)/source$",
         cache_page(CACHE_DURATION)(DocumentSourceView.as_view()),
         name="document_source",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/publication$",
+        cache_page(CACHE_DURATION)(DocumentPublicationView.as_view()),
+        name="document_publication",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/source.pdf$",
@@ -191,6 +312,11 @@ urlpatterns = [
         r"^(?P<frbr_uri>akn/.*)/media/(?P<filename>.+)$",
         cache_page(CACHE_DURATION)(DocumentMediaView.as_view()),
         name="document_media",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/citations$",
+        cache_page(CACHE_DURATION)(DocumentCitationsView.as_view()),
+        name="document_citations",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/?.*)$",
@@ -205,11 +331,6 @@ urlpatterns = [
         name="generic_document_feed",
     ),
     path(
-        "feeds/legal_instruments.xml",
-        LegalInstrumentAtomSiteNewsFeed(),
-        name="legal_instrument_feed",
-    ),
-    path(
         "feeds/legislation.xml", LegislationAtomSiteNewsFeed(), name="legislation_feed"
     ),
     path("feeds/all.xml", CoreDocumentAtomSiteNewsFeed(), name="atom_feed"),
@@ -221,33 +342,88 @@ urlpatterns = [
         PeachjamAdminLoginView.as_view(),
         name="login",
     ),
-    # autocomplete for admin area
     path(
-        "admin/autocomplete/works",
-        WorkAutocomplete.as_view(),
-        name="autocomplete-works",
+        "admin/",
+        include(
+            [
+                # autocomplete for admin area
+                path(
+                    "autocomplete/works",
+                    WorkAutocomplete.as_view(),
+                    name="autocomplete-works",
+                ),
+                path(
+                    "autocomplete/judges",
+                    JudgesAutocomplete.as_view(),
+                    name="autocomplete-judges",
+                ),
+                path(
+                    "autocomplete/judgments",
+                    JudgmentWorksAutocomplete.as_view(),
+                    name="autocomplete-judgment-works",
+                ),
+                path("anon/<int:pk>", DocumentAnonymiseView.as_view(), name="anon"),
+                path("anon/<int:pk>/update", DocumentAnonymiseAPIView.as_view()),
+                path(
+                    "anon/<int:pk>/suggestions",
+                    DocumentAnonymiseSuggestionsAPIView.as_view(),
+                ),
+                path("", admin.site.urls),
+            ]
+        ),
     ),
-    path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
+    path("accounts/profile/", EditAccountView.as_view(), name="edit_account"),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
-    path("articles/", ArticleListView.as_view(), name="article_list"),
     path(
-        "articles/<slug:topic>",
-        ArticleTopicListView.as_view(),
-        name="article_topic_list",
+        "articles/",
+        include(
+            [
+                path("", ArticleListView.as_view(), name="article_list"),
+                path(
+                    "authors/<username>",
+                    ArticleAuthorDetailView.as_view(),
+                    name="article_author",
+                ),
+                path(
+                    "authors/<username>/<int:year>",
+                    ArticleAuthorYearDetailView.as_view(),
+                    name="article_author_year",
+                ),
+                path(
+                    "<int:year>",
+                    ArticleYearView.as_view(),
+                    name="article_year_archive",
+                ),
+                path(
+                    "<slug:topic>",
+                    ArticleTopicView.as_view(),
+                    name="article_topic",
+                ),
+                path(
+                    "<slug:topic>/<int:year>",
+                    ArticleTopicYearView.as_view(),
+                    name="article_topic_year",
+                ),
+                path(
+                    "<isodate:date>/<str:author>/<slug:slug>",
+                    ArticleDetailView.as_view(),
+                    name="article_detail",
+                ),
+                path(
+                    "<isodate:date>/<str:author>/<slug:slug>/attachment/<int:pk>/<str:filename>",
+                    ArticleAttachmentDetailView.as_view(),
+                    name="article_attachment",
+                ),
+            ]
+        ),
     ),
     path(
-        "articles/<isodate:date>/<str:author>/<slug:slug>",
-        ArticleDetailView.as_view(),
-        name="article_detail",
+        "partners/<int:pk>/logo/<int:logo_pk>",
+        PartnerLogoView.as_view(),
+        name="partner_logo",
     ),
-    path(
-        "articles/<int:year>/",
-        ArticleYearArchiveView.as_view(),
-        name="article_year_archive",
-    ),
-    path("users/<username>", UserProfileDetailView.as_view(), name="user_profile"),
     path(
         "robots.txt",
         RobotsView.as_view(
@@ -273,8 +449,78 @@ urlpatterns = [
         DocumentProblemView.as_view(),
         name="document_problem",
     ),
+    # Saved Documents
+    path(
+        "saved-documents/button/<int:doc_id>",
+        SavedDocumentButtonView.as_view(),
+        name="saved_document_button",
+    ),
+    path(
+        "saved-documents/create",
+        SavedDocumentCreateView.as_view(),
+        name="saved_document_create",
+    ),
+    path(
+        "saved-documents/<int:pk>/update",
+        SavedDocumentUpdateView.as_view(),
+        name="saved_document_update",
+    ),
+    path(
+        "saved-documents/<int:pk>/delete",
+        SavedDocumentDeleteView.as_view(),
+        name="saved_document_delete",
+    ),
+    path(
+        "saved-documents/folders/",
+        FolderListView.as_view(),
+        name="folder_list",
+    ),
+    path(
+        "saved-documents/folders/create",
+        FolderCreateView.as_view(),
+        name="folder_create",
+    ),
+    path(
+        "saved-documents/folders/<int:pk>/update",
+        FolderUpdateView.as_view(),
+        name="folder_update",
+    ),
+    path(
+        "saved-documents/folders/<int:pk>/delete",
+        FolderDeleteView.as_view(),
+        name="folder_delete",
+    ),
+    # Restricted Documents
+    path(
+        "document-access-groups/",
+        DocumentAccessGroupListView.as_view(),
+        name="document_access_group_list",
+    ),
+    path(
+        "document-access-groups/<int:pk>",
+        DocumentAccessGroupDetailView.as_view(),
+        name="document_access_group_detail",
+    ),
+    path(
+        "compare",
+        ComparePortionsView.as_view(),
+        name="compare_portions",
+    ),
     # django-markdown-editor
     path("martor/", include("martor.urls")),
+    path(
+        "comments/",
+        include(
+            [
+                path("", include("django_comments.urls")),
+                path(
+                    "form/<str:app_label>/<str:model_name>/<slug:pk>",
+                    comment_form_view,
+                    name="comment_form",
+                ),
+            ]
+        ),
+    ),
 ]
 
 if settings.DEBUG:

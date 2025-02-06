@@ -7,18 +7,12 @@ def backfill_polymorphic_content_types(apps, schema_editor):
     """Add the polymorphic content type to existing document models"""
     ContentType = apps.get_model("contenttypes", "ContentType")
     GenericDocument = apps.get_model("peachjam", "GenericDocument")
-    LegalInstrument = apps.get_model("peachjam", "LegalInstrument")
     Legislation = apps.get_model("peachjam", "Legislation")
     Judgment = apps.get_model("peachjam", "Judgment")
 
     generic_doc_ct = ContentType.objects.get_for_model(GenericDocument)
     GenericDocument.objects.filter(polymorphic_ctype__isnull=True).update(
         polymorphic_ctype=generic_doc_ct
-    )
-
-    legal_instrument_ct = ContentType.objects.get_for_model(LegalInstrument)
-    LegalInstrument.objects.filter(polymorphic_ctype__isnull=True).update(
-        polymorphic_ctype=legal_instrument_ct
     )
 
     legislation_ct = ContentType.objects.get_for_model(Legislation)

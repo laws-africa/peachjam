@@ -1,5 +1,32 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
 {% load i18n %}
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
+      </li>
+      {% if document.court.court_class.show_listing_page %}
+        <li class="breadcrumb-item">
+          <a href="{% url 'court_class' document.court.court_class.slug %}">{{ document.court.court_class.name }}</a>
+        </li>
+      {% endif %}
+      {% if document.court %}
+        <li class="breadcrumb-item">
+          <a href="{% url 'court' document.court.code %}">{{ document.court.name }}</a>
+        </li>
+      {% endif %}
+      {% if document.registry %}
+        <li class="breadcrumb-item">
+          <a href="{% url 'court_registry' document.court.code document.registry.code %}">{{ document.registry.name }}</a>
+        </li>
+      {% endif %}
+    </ol>
+  </nav>
+{% endblock %}
 {% block document-metadata-content-citation %}
   {{ block.super }}
   {% if document.mnc %}
@@ -8,14 +35,7 @@
     </dt>
     <dd class="text-muted">
       {{ document.mnc }}
-      <button type="button"
-              class="btn btn-outline-secondary btn-xs ms-2"
-              title="{% trans "Copy to clipboard" %}"
-              data-component="CopyToClipboard"
-              data-value="{{ document.mnc }}"
-              data-confirmation="{% trans "Copied!" %}">
-        {% trans "Copy" %}
-      </button>
+      {% include 'peachjam/_copy_to_clipboard.html' with value=document.mnc %}
     </dd>
   {% endif %}
   {% if document.hearing_date %}
@@ -82,34 +102,30 @@
   {% endwith %}
 {% endblock %}
 {% block extra-metadata %}
-  {% if document.flynote %}
-    <dl>
+  <dl class="document-metadata-list d-md-flex">
+    {% if document.flynote %}
       <dt>
         {% trans 'Flynote' %}
       </dt>
       <dd>
         {{ document.flynote|safe }}
       </dd>
-    </dl>
-  {% endif %}
-  {% if document.order %}
-    <dl>
-      <dt>
-        {% trans 'Order' %}
-      </dt>
-      <dd>
-        {{ document.order|safe }}
-      </dd>
-    </dl>
-  {% endif %}
-  {% if document.case_summary %}
-    <dl>
+    {% endif %}
+    {% if document.case_summary %}
       <dt>
         {% trans 'Case summary' %}
       </dt>
       <dd>
         {{ document.case_summary|safe }}
       </dd>
-    </dl>
-  {% endif %}
+    {% endif %}
+    {% if document.order %}
+      <dt>
+        {% trans 'Order' %}
+      </dt>
+      <dd>
+        {{ document.order|safe }}
+      </dd>
+    {% endif %}
+  </dl>
 {% endblock %}

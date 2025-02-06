@@ -15,7 +15,7 @@ jobs:
           - liiweb
     services:
       postgres:
-        image: postgres:10
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
         ports:
@@ -28,15 +28,16 @@ jobs:
           --health-retries 3
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python Environment
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
-        python-version: "3.8"
-    - uses: actions/setup-node@v2
+        python-version: "3.10"
+        cache: 'pip'
+    - uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '18'
 
     - name: Install dependencies
       run: |
@@ -44,13 +45,21 @@ jobs:
         sudo apt-get install -y libreoffice poppler-utils
         python -m pip install --upgrade setuptools wheel
         pip install .
-        pip install psycopg2-binary==2.9.3
+        pip install psycopg2-binary==2.9.3 unittest-xml-reporting
         npm ci --no-audit --ignore-scripts --only=prod
         npm i -g sass
 
-    - name: Lint and Run tests
+    - name: Run tests
       env:
         DATABASE_URL: "postgres://postgres:postgres@localhost:5432/peach-jam"
+        TEST_RUNNER: "xmlrunner.extra.djangotestrunner.XMLTestRunner"
       run: |
         pre-commit run --all-files
         python manage.py test ${{ matrix.app }} --settings=${{ matrix.app }}.settings
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/linux@v2
+      if: success() || failure()
+      continue-on-error: true
+      with:
+        files: test-reports/*.xml

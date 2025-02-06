@@ -1,0 +1,35 @@
+{% extends "user_account/layout.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Document access groups' %}
+{% endblock %}
+{% block account-tabs %}
+  {% include 'user_account/_tabs.html' with active='doc_access_groups' %}
+{% endblock %}
+{% block account-content %}
+  <div class="container mt-4">
+    <h2>{% trans 'Document access groups' %}</h2>
+    <p>
+      {% blocktrans trimmed %}
+      Some documents are only visible to certain users. These groups control which restricted documents you have access to.
+      {% endblocktrans %}
+    </p>
+    <div class="my-3">
+      {% if groups|length %}
+        <ul>
+          {% for group in groups %}
+            <li>
+              <a href="{{ group.get_absolute_url }}">{{ group.group }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>
+          {% blocktrans trimmed %}
+        You do not belong to any groups.
+        {% endblocktrans %}
+        </p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

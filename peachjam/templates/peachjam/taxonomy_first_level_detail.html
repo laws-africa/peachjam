@@ -7,7 +7,10 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a href="{% url 'top_level_taxonomy_list' %}">{% trans 'Taxonomies' %}</a>
+            <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'top_level_taxonomy_list' %}">{% trans 'Collections' %}</a>
           </li>
           <li class="breadcrumb-item active" aria-current="page">{{ taxonomy }}</li>
         </ol>
@@ -17,7 +20,7 @@
       <div class="pt-4 pb-5">
         <h1 class="mb-4">{{ taxonomy }}</h1>
         {% if help_link %}
-          {% include "peachjam/_help_button.html" with link=help_link %}
+          {% include "peachjam/_help_button.html" %}
         {% endif %}
         {% if taxonomy.get_children|length > 0 %}
           <ul>

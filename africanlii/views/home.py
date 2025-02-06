@@ -7,7 +7,14 @@ from africanlii.models import (
     MemberState,
     RegionalEconomicCommunity,
 )
-from peachjam.models import Article, CoreDocument, CourtClass, GenericDocument, Taxonomy
+from peachjam.models import (
+    Article,
+    CoreDocument,
+    CourtClass,
+    GenericDocument,
+    Legislation,
+    Taxonomy,
+)
 from peachjam.views import HomePageView as BaseHomePageView
 
 
@@ -25,16 +32,21 @@ class HomePageView(BaseHomePageView):
         context["recent_soft_law"] = (
             GenericDocument.objects.exclude(published=False)
             .exclude(frbr_uri_doctype="doc")
+            .prefetch_related("labels")
             .order_by("-date")[:5]
         )
         context["recent_reports_guides"] = (
             GenericDocument.objects.exclude(published=False)
             .filter(frbr_uri_doctype="doc")
+            .prefetch_related("labels")
             .order_by("-date")[:5]
         )
         context["recent_legal_instruments"] = (
-            CoreDocument.objects.exclude(published=False)
-            .filter(frbr_uri_doctype="act")
+            Legislation.objects.exclude(published=False)
+            .filter(
+                taxonomies__topic__slug="african-union-collections-legal-instruments"
+            )
+            .prefetch_related("labels")
             .order_by("-date")[:5]
         )
         context["au_organs"] = AfricanUnionOrgan.objects.prefetch_related("author")
@@ -46,6 +58,9 @@ class HomePageView(BaseHomePageView):
         context["taxonomies"] = Taxonomy.dump_bulk()
         context["taxonomy_url"] = "taxonomy_detail"
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
+        context["documents_count"] = CoreDocument.objects.exclude(
+            published=False
+        ).count()
 
         context["liis"] = LIIS
 

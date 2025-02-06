@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from peachjam.models import Author
@@ -13,10 +12,7 @@ class AuthorDetailView(FilteredDocumentListView):
         return (
             super()
             .get_base_queryset()
-            .filter(
-                Q(genericdocument__authors__in=[self.author])
-                | Q(legalinstrument__authors__in=[self.author])
-            )
+            .filter(genericdocument__author__in=[self.author])
             .select_related("locality")
         )
 

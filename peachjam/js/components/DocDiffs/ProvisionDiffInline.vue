@@ -68,7 +68,6 @@
 
 <script>
 import DiffContent from './DiffContent.vue';
-import { getBaseUrl } from './index';
 import debounce from 'lodash/debounce';
 
 export default {
@@ -84,6 +83,10 @@ export default {
       required: true
     },
     frbrExpressionUri: {
+      type: String,
+      required: true
+    },
+    serviceUrl: {
       type: String,
       required: true
     }
@@ -140,7 +143,7 @@ export default {
     }, 200),
 
     async loadDiffContentsets () {
-      const url = `${getBaseUrl()}/e/diffsets${this.frbrExpressionUri}/?id=${this.provision.id}`;
+      const url = `${this.serviceUrl}/e/diffsets${this.frbrExpressionUri}/?id=${this.provision.id}`;
       const resp = await fetch(url);
       if (resp.ok) {
         this.diffsets = (await resp.json()).diffsets;

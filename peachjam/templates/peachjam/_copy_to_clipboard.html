@@ -1,0 +1,14 @@
+{% load i18n %}
+<button type="button"
+        class="btn btn-outline-secondary copy-to-clipboard"
+        title="{% trans "Copy to clipboard" %}"
+        data-component="CopyToClipboard"
+        data-value='{{ value }}'
+        data-value-html='<a href="https://{{ request.site.domain }}{{ document.get_absolute_url }}">{{ value }}</a>'
+        data-confirmation="{% trans "Copied!" %}">
+  {% if verb %}
+    {{ verb }}
+  {% else %}
+    {% trans "Copy" %}
+  {% endif %}
+</button>

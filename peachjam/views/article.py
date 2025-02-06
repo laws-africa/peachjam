@@ -1,13 +1,25 @@
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils.dates import MONTHS
 from django.views.generic import DetailView, ListView
-from django.views.generic.dates import YearArchiveView
 
-from peachjam.models import Article, Taxonomy, UserProfile
+from peachjam.models import Article, ArticleAttachment, Taxonomy, UserProfile
+from peachjam.views.generic_views import YearMixin
 
 
-class ArticleListView(ListView):
+class ArticleViewMixin:
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context["article_tags"] = sorted(
+            Article.get_article_tags_root().get_descendants(), key=lambda x: x.name
+        )
+        context["recent_articles"] = Article.objects.filter(published=True).order_by(
+            "-date"
+        )[:8]
+        return context
+
+
+class ArticleListView(ArticleViewMixin, ListView):
     model = Article
     queryset = (
         Article.objects.filter(published=True)
@@ -18,28 +30,32 @@ class ArticleListView(ListView):
     template_name = "peachjam/article_list.html"
     context_object_name = "articles"
     navbar_link = "articles"
-    paginate_by = 10
+    paginate_by = 20
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        self.populate_years(context)
+        return context
+
+    def populate_years(self, context):
         years = (
-            self.model.objects.filter(published=True)
-            .dates("date", "year", order="DESC")
+            self.queryset.dates("date", "year", order="DESC")
             .values_list("date__year", flat=True)
             .distinct()
         )
-
         context["years"] = [
             {"url": reverse("article_year_archive", args=[y]), "year": y} for y in years
         ]
-
         context["all_years_url"] = reverse("article_list")
 
-        return context
+
+class ArticleYearView(YearMixin, ArticleListView):
+    def get_queryset(self):
+        return super().get_queryset().filter(date__year=self.year)
 
 
-class ArticleTopicListView(ArticleListView):
-    template_name = "peachjam/article_topic_list.html"
+class ArticleTopicView(ArticleListView):
+    template_name = "peachjam/article_topic_detail.html"
 
     def get(self, *args, **kwargs):
         self.topic = get_object_or_404(Taxonomy.objects.filter(slug=kwargs["topic"]))
@@ -51,8 +67,26 @@ class ArticleTopicListView(ArticleListView):
     def get_context_data(self, **kwargs):
         return super().get_context_data(topic=self.topic, **kwargs)
 
+    def populate_years(self, context):
+        years = (
+            self.queryset.filter(topics=self.topic)
+            .dates("date", "year", order="DESC")
+            .values_list("date__year", flat=True)
+            .distinct()
+        )
+        context["years"] = [
+            {"url": reverse("article_topic_year", args=[self.topic.slug, y]), "year": y}
+            for y in years
+        ]
+        context["all_years_url"] = reverse("article_topic", args=[self.topic.slug])
 
-class ArticleDetailView(DetailView):
+
+class ArticleTopicYearView(YearMixin, ArticleTopicView):
+    def get_queryset(self):
+        return super().get_queryset().filter(date__year=self.kwargs["year"])
+
+
+class ArticleDetailView(ArticleViewMixin, DetailView):
     model = Article
     queryset = Article.objects.filter(published=True)
     template_name = "peachjam/article_detail.html"
@@ -69,82 +103,67 @@ class ArticleDetailView(DetailView):
         context["user_profile"] = get_object_or_404(
             UserProfile, user__pk=self.object.author.pk
         )
-        context["more_articles"] = (
-            Article.objects.filter(author=self.object.author, published=True)
-            .select_related("author")
-            .prefetch_related("topics")
-            .exclude(pk=self.object.pk)
-            .order_by("-date")[:5]
+        context["attachments"] = self.object.attachments.exclude(
+            mimetype__icontains="image"
         )
         return context
 
 
-class UserProfileDetailView(DetailView):
-    model = UserProfile
-    template_name = "peachjam/user_profile.html"
-    context_object_name = "user_profile"
+class ArticleAuthorDetailView(ArticleListView):
+    template_name = "peachjam/article_author.html"
 
-    def get_object(self, queryset=None):
-        return get_object_or_404(UserProfile, user__username=self.kwargs["username"])
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["articles"] = (
-            context["object"].user.articles.filter(published=True).order_by("-date")
+    def dispatch(self, *args, **kwargs):
+        self.user_profile = get_object_or_404(
+            UserProfile, user__username=kwargs["username"]
         )
-        return context
-
-
-class ArticleYearArchiveView(YearArchiveView):
-    queryset = (
-        Article.objects.select_related("author")
-        .prefetch_related("topics")
-        .filter(published=True)
-        .order_by("-date")
-    )
-    date_field = "date"
-    make_object_list = True
-    allow_future = True
-    context_object_name = "articles"
-    paginate_by = 10
-    template_name = "peachjam/article_list.html"
-    navbar_link = "articles"
+        return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
-        qs = self.queryset
-        if self.get_year() is not None:
-            qs = qs.filter(date__year=self.get_year())
-        return qs
+        return super().get_queryset().filter(author=self.user_profile.user)
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs, user_profile=self.user_profile)
+
+    def populate_years(self, context):
         years = (
-            self.queryset.order_by("-date__year")
+            self.queryset.filter(author=self.user_profile.user)
             .dates("date", "year", order="DESC")
             .values_list("date__year", flat=True)
             .distinct()
         )
-
         context["years"] = [
-            {"url": reverse("article_year_archive", args=[y]), "year": y} for y in years
+            {
+                "url": reverse(
+                    "article_author_year", args=[self.user_profile.user.username, y]
+                ),
+                "year": y,
+            }
+            for y in years
         ]
+        context["all_years_url"] = reverse(
+            "article_author", args=[self.user_profile.user.username]
+        )
 
-        context["all_years_url"] = reverse("article_list")
-        context["year"] = int(self.kwargs["year"])
-        context["grouped_articles"] = self.grouped_articles(self.get_queryset())
 
-        return context
+class ArticleAuthorYearDetailView(YearMixin, ArticleAuthorDetailView):
+    def get_queryset(self):
+        return super().get_queryset().filter(date__year=self.kwargs["year"])
 
-    def grouped_articles(self, queryset):
-        """Group the articles by month and return a list of dicts with the month name and articles for that month"""
 
-        # Get the distinct months from the queryset
-        months = queryset.dates(self.date_field, "month")
+class ArticleAttachmentDetailView(DetailView):
+    model = ArticleAttachment
 
-        # Create a list of { month: month_name, articles: [list of articles] } dicts
-        grouped_articles = [
-            {"month": MONTHS[m.month], "articles": queryset.filter(date__month=m.month)}
-            for m in months
-        ]
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            ArticleAttachment,
+            document__date=self.kwargs["date"],
+            document__slug=self.kwargs["slug"],
+            document__author__username=self.kwargs["author"],
+            pk=self.kwargs["pk"],
+            filename=self.kwargs["filename"],
+        )
 
-        return grouped_articles
+    def render_to_response(self, context, **response_kwargs):
+        response = FileResponse(self.object.file, filename=self.object.filename)
+        response["Cache-Control"] = "max-age=31536000"
+        return response

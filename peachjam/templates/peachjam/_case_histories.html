@@ -1,0 +1,64 @@
+{% load i18n %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>{% trans 'Date' %}</th>
+      <th>{% trans 'Case' %}</th>
+      <th>{% trans 'Court' %}</th>
+      <th>{% trans 'Judges' %}</th>
+      <th>{% trans 'Outcome' %}</th>
+      <th>{% trans 'Appeal outcome' %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in case_histories %}
+      <tr>
+        <td>{{ entry.document.date }}</td>
+        <td>
+          <a href="{% url 'document_detail' entry.document.expression_frbr_uri|slice:"1:" %}">{{ entry.document.title }}</a>
+          {% if entry.document == document %}
+            <span class="badge text-bg-primary">{% trans "This judgment" %}</span>
+          {% endif %}
+        </td>
+        <td>{{ entry.document.court }}</td>
+        <td>
+          {% for judge in entry.document.judges.all %}
+            {# djlint:off #}
+          <span class="text-nowrap">{{ judge }}{% if not forloop.last %},{% endif %}</span>
+            {# djlint:on #}
+          {% endfor %}
+        </td>
+        <td>{{ entry.document.outcome }}</td>
+        <td>&nbsp;</td>
+      </tr>
+      {% for child in entry.children %}
+        <tr>
+          <td>{{ child.info.date }}</td>
+          <td>
+            ↳
+            {% if child.document %}
+              <a href="{% url 'document_detail' child.document.expression_frbr_uri|slice:"1:" %}">{{ child.document.title }}</a>
+              {% if child.document == document %}
+                <span class="badge text-bg-primary">{% trans "This judgment" %}</span>
+              {% endif %}
+            {% else %}
+              {{ child.case_history.case_number }}
+            {% endif %}
+          </td>
+          <td>{{ child.info.court }}</td>
+          <td>
+            {% for judge in child.info.judges.all %}
+              {# djlint:off #}
+            <span class="text-nowrap">{{ judge }}{% if not forloop.last %},{% endif %}</span>
+              {# djlint:on #}
+            {% endfor %}
+          </td>
+          <td>
+            {% if child.document %}{{ child.document.outcome }}{% endif %}
+          </td>
+          <td>{{ child.case_history.outcome }}</td>
+        </tr>
+      {% endfor %}
+    {% endfor %}
+  </tbody>
+</table>

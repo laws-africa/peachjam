@@ -36,10 +36,16 @@ class Article(models.Model):
     topics = models.ManyToManyField(
         "peachjam.Taxonomy", verbose_name=_("topics"), blank=True
     )
+    featured = models.BooleanField(
+        _("featured"),
+        default=False,
+        help_text=_("Featured articles will be displayed on the homepage."),
+    )
 
     class Meta:
         verbose_name = _("article")
         verbose_name_plural = _("articles")
+        ordering = ("-date",)
 
     def __str__(self):
         return self.title
@@ -66,6 +72,15 @@ class Article(models.Model):
             self.image = saved_image
 
         return super().save(*args, **kwargs)
+
+    @classmethod
+    def get_article_tags_root(cls):
+        from peachjam.models import Taxonomy
+
+        root = Taxonomy.objects.filter(name_en__iexact="Article tags").first()
+        if not root:
+            root = Taxonomy.add_root(name_en="Article tags")
+        return root
 
 
 class UserProfile(models.Model):

@@ -1,4 +1,6 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
 {% block title %}{{ place }}{% endblock %}
-{% block page-title %}<h1 class="mt-2">{{ place }}</h1>{% endblock %}
+{% block page-title %}
+  {% if not entity_profile %}<h1 class="mt-2">{{ place }}</h1>{% endif %}
+{% endblock %}

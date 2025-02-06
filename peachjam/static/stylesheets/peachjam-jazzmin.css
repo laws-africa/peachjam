@@ -9211,8 +9211,24 @@ a.text-dark:hover, a.text-dark:focus {
 .theme-peachjam .field-file_path select {
   font-size: 0.875rem;
 }
+.theme-peachjam .form-group .vTextField,
+.theme-peachjam .form-group .vLargeTextField,
+.theme-peachjam .form-group .vURLField,
+.theme-peachjam .form-group input[type=text], .theme-peachjam .form-row .vTextField,
+.theme-peachjam .form-row .vLargeTextField,
+.theme-peachjam .form-row .vURLField,
+.theme-peachjam .form-row input[type=text] {
+  width: 100%;
+}
 .theme-peachjam .main-sidebar .brand-link .brand-image {
   display: none;
+}
+.theme-peachjam form .form-group .col-sm-7 {
+  flex: 0 0 75%;
+  max-width: 75%;
+}
+.theme-peachjam form la-toc-item label {
+  font-weight: normal !important;
 }
 
 /*# sourceMappingURL=peachjam-jazzmin.css.map */

@@ -35,11 +35,12 @@
       <div class="row my-4">
         <div class="col-md-9 mx-auto">
           <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
+            <input type="hidden" name="suggestion"/>
             <input type="text"
                    class="form-control form-control-lg flex-grow-1"
                    placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                    aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                   aria-describedby="button-addon2"
+                   {% if SEARCH_SUGGESTIONS %}data-component="SearchTypeahead"{% endif %}
                    name="q"/>
             <button type="submit" class="btn btn-primary btn-lg ms-2">{% trans "Search" %}</button>
           </form>
@@ -119,6 +120,12 @@
   </section>
   <section class="py-5">
     <div class="container">
+      <h2 class="mb-4">{% trans 'Explore curated African law' %}</h2>
+      {% include 'peachjam/_taxonomy_list.html' %}
+    </div>
+  </section>
+  <section class="py-5">
+    <div class="container">
       <div class="row">
         <div class="col-lg-6 mb-3">
           <h3 class="mb-4">{% trans 'Recent Judgments' %}</h3>
@@ -175,7 +182,9 @@
                   <img src="{% static lii.logo %}" alt="{{ lii.name }}" class="mb-3"/>
                 {% endif %}
                 <h5 class="card-title">{{ lii.country }}</h5>
-                <div>{{ lii.name }}</div>
+                <div>
+                  {{ lii.name }}
+                </div>
                 <a href="{{ lii.url }}" class="stretched-link" target="_blank">{{ lii.domain }}</a>
               </div>
             </div>
@@ -191,14 +200,6 @@
       </h2>
       {% include 'peachjam/_article_list.html' with articles=recent_articles %}
       <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">{% trans "View more commentary" %}</a>
-    </div>
-  </section>
-  <section class="py-5">
-    <div class="container">
-      <h2 class="mb-4">
-        {% trans 'Collections' %}
-      </h2>
-      {% include 'peachjam/_taxonomy_list.html' %}
     </div>
   </section>
 {% endblock %}

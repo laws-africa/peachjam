@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:54+0300\n"
-"PO-Revision-Date: 2023-09-19 11:54\n"
+"POT-Creation-Date: 2024-06-06 15:17+0200\n"
+"PO-Revision-Date: 2024-08-06 08:54\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -33,17 +33,12 @@ msgstr "Karibu kwenye Zanzibar Institut d'information juridique"
 msgid "ZanzibarLII ni tovuti ya Mahakama ya Zanzibar inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. ZanzibarLII provides free access to the law of Zanzibar and is a member of the African LII community."
 msgstr "ZanzibarLII ni tovuti ya Mahakama ya Zanzibar inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. ZanzibarLII offre un accès gratuit au droit de Zanzibar et est membre de la communauté africaine LII."
 
-#: templates/liiweb/home.html:19 templates/peachjam/_header.html:26
-#: templates/peachjam/about.html:4
-msgid "About"
-msgstr "À propos"
-
-#: templates/liiweb/home.html:22 templates/peachjam/_footer.html:5
-#: templates/peachjam/about.html:11
+#: templates/liiweb/home.html:19 templates/peachjam/_footer.html:5
+#: templates/peachjam/about.html:5
 msgid "ZanzibarLII is developed under the auspices of the Judiciary of Zanzibar and publishes the law of Zanzibar for free online access to all. ZanzibarLII promotes the rule of law and access to justice in Zanzibar."
 msgstr "ZanzibarLII est développé sous les auspices du pouvoir judiciaire de Zanzibar et publie la loi de Zanzibar pour un accès en ligne gratuit à tous. ZanzibarLII promeut l'état de droit et l'accès à la justice à Zanzibar."
 
-#: templates/liiweb/home.html:28
+#: templates/liiweb/home.html:25
 msgid "Tweets by AfricanLII"
 msgstr "Tweets par AfricanLII"
 
@@ -67,22 +62,22 @@ msgstr "Législation"
 msgid "Licensed Advocates"
 msgstr "Avocats agréés"
 
-#: templates/peachjam/about.html:9
-msgid "About ZanzibarLII"
-msgstr "À propos de ZanzibarLII"
+#: templates/peachjam/_header.html:26
+msgid "About"
+msgstr "À propos"
 
-#: templates/peachjam/about.html:18
+#: templates/peachjam/about.html:12
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
 msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> fait partie de l'unité <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Gouvernance démocratique et droits</a> de la Faculté de droit de l'Université de Cape Town (UCT), Afrique du Sud. AfricanLII aide les individus, les organisations et les gouvernements à créer et à maintenir un accès libre et durable aux portails juridiques et à atteindre les peuples d'Afrique et d'ailleurs."
 
-#: templates/peachjam/about.html:28
+#: templates/peachjam/about.html:22
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> is a South Africa non-profit organisation that digitises African legal information for public use. Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial officers and civil servants to deliver services efficiently and effectively."
 msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> est une organisation sud-africaine à but non lucratif qui numérise les informations juridiques africaines à usage public. Le libre accès aux informations juridiques numériques africaines aide les communautés à prospérer, les entreprises à réussir, et les officiers de justice et les fonctionnaires à fournir des services de manière efficace et efficiente."
 
-#: templates/peachjam/about.html:35
+#: templates/peachjam/about.html:29
 msgid "Contact us"
 msgstr "Contactez-nous"
 
-#: templates/peachjam/about.html:37
+#: templates/peachjam/about.html:31
 msgid "Contact us on <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> for more information."
 msgstr "Contactez-nous au <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> pour plus d'informations."

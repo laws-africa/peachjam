@@ -25,7 +25,7 @@
   {% if MICROSITE %}
     <li class="nav-item">
       <a class="nav-link"
-         href="{% url 'municipal_by_laws' code=MICROSITE.locality.code %}">{{ MICROSITE.locality.name }} By-laws</a>
+         href="{% url 'locality_legislation_list' code=MICROSITE.locality.place_code %}">{{ MICROSITE.locality.name }} By-laws</a>
     </li>
   {% endif %}
 {% endblock %}

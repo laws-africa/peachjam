@@ -22,8 +22,9 @@
           {% for event in entry.events %}
             <div>
               {% if event.type == "publication" %}
-                {% if event.link_url %}
-                  <a href="{{ event.link_url }}">{{ event.description }}</a>
+                {% if document.publication_file %}
+                  <a href="{% url 'document_publication' document.expression_frbr_uri|strip_first_character %}"
+                     target="_blank">{{ event.description }}</a>
                 {% else %}
                   {{ event.description }}
                 {% endif %}

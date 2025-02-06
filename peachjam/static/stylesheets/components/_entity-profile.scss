@@ -1,5 +1,6 @@
 .entity-profile {
   @extend .bg-light;
+  margin-bottom: 1rem;
 
   &.has-background-photo {
     background-color: transparent !important;
@@ -43,12 +44,13 @@
 
   .entity-profile__body__info {
     flex: 1;
+    align-self: center;
   }
 
   .entity-profile__body__profile-image {
     @extend .img-thumbnail;
-    height: 200px;
-    width: 200px;
+    height: 150px;
+    width: 150px;
     object-position: center;
     object-fit: cover;
     border-radius: 50%;

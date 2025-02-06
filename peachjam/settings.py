@@ -18,6 +18,7 @@ from urllib.parse import urlparse
 
 import dj_database_url
 import sentry_sdk
+from django.contrib.messages import constants as messages
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -65,6 +66,7 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.humanize",
     "django.contrib.messages",
     "django.contrib.sites",
     "django.contrib.staticfiles",
@@ -78,10 +80,15 @@ INSTALLED_APPS = [
     "django_advanced_password_validation",
     "martor",
     "corsheaders",
+    "django_htmx",
+    "django_recaptcha",
+    "django_comments",
+    "guardian",
 ]
 
 MIDDLEWARE = [
     "peachjam.middleware.GeneralUpdateCacheMiddleware",
+    "peachjam.middleware.VaryOnHxHeadersMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
     "peachjam.middleware.RedirectWWWMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -96,6 +103,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django.middleware.cache.FetchFromCacheMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
+    "django.contrib.sites.middleware.CurrentSiteMiddleware",
 ]
 
 ROOT_URLCONF = "peachjam.urls"
@@ -122,14 +131,21 @@ PEACHJAM = {
     "SUPPORT_EMAIL": os.environ.get("SUPPORT_EMAIL"),
     "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
     "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),
+    "LAWSAFRICA_API_KEY": os.environ.get(
+        "LAWSAFRICA_API_KEY", os.environ.get("CITATOR_API_KEY")
+    ),
     "CITATOR_API": os.environ.get(
         "CITATOR_API", "https://services.lawsafrica.com/citator/v1/extract-citations"
     ),
-    "CITATOR_API_KEY": os.environ.get("CITATOR_API_KEY"),
+    "EXTRACTOR_API": os.environ.get(
+        "EXTRACTOR_API", "https://services.lawsafrica.com/extractor/v1/"
+    ),
     "EXTRA_SEARCH_INDEXES": [],
     "SEARCH_JURISDICTION_FILTER": False,
+    "SEARCH_SUGGESTIONS": os.environ.get("SEARCH_SUGGESTIONS", "false") == "true",
     "MULTIPLE_JURISDICTIONS": False,
     "MULTIPLE_LOCALITIES": False,
+    "PDFJS_TO_TEXT": "bin/pdfjs-to-text" if DEBUG else "pdfjs-to-text",
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -142,19 +158,25 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL = PEACHJAM["SUPPORT_EMAIL"]
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
+    "guardian.backends.ObjectPermissionBackend",
 ]
 # admins must create accounts
 ACCOUNT_SIGNUP_ENABLED = False
-# sign in with email addresses
-ACCOUNT_AUTHENTICATION_METHOD = "email"
 # email addresses are required for new accounts
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_PRESERVE_USERNAME_CASING = False
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http" if DEBUG else "https"
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home_page"
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_FORMS = {
+    "signup": "peachjam.forms.PeachjamSignupForm",
+    "login": "peachjam.forms.PeachjamLoginForm",
+}
 
 # social logins
 SOCIALACCOUNT_PROVIDERS = {
@@ -169,7 +191,16 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = "peachjam.auth.SocialAccountAdapter"
+
+# Recaptcha
+RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY", "")
+RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY", "")
+if DEBUG:
+    SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
+
 
 if DEBUG:
     INSTALLED_APPS.append("debug_toolbar")
@@ -177,6 +208,7 @@ if DEBUG:
     INSTALLED_APPS.append("elastic_panel")
     MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
     INTERNAL_IPS = ["127.0.0.1"]
+    import peachjam.debugging  # noqa
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -186,7 +218,6 @@ default_db_config = dj_database_url.config(default=default_db_url)
 gazette_db_config = dj_database_url.config(
     default=gazette_db_url, env="GAZETTES_DATABASE_URL"
 )
-default_db_config["ATOMIC_REQUESTS"] = True
 
 DATABASES = {
     "default": default_db_config,
@@ -291,12 +322,14 @@ ELASTICSEARCH_DSL = {
 }
 
 ELASTICSEARCH_MAX_ANALYZED_OFFSET = os.environ.get(
-    "ELASTICSEARCH_MAX_ANALYZED_OFFSET", 2000000
+    "ELASTICSEARCH_MAX_ANALYZED_OFFSET", 999999
 )
 
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
     "peachjam_search.tasks.BackgroundTaskSearchProcessor"
 )
+
+ELASTICSEARCH_FAIL_ON_SHARD_FAILURE = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -443,7 +476,6 @@ JAZZMIN_SETTINGS = {
         "liiweb.CourtClass": "fa fa-building",
         "liiweb.CourtDetail": "fa fa-list-alt",
         "peachjam.GenericDocument": "fa fa-copy",
-        "peachjam.LegalInstrument": "fa fa-briefcase",
         "peachjam.Locality": "fa fa-map",
         "peachjam.Ingestor": "fa fa-download",
         "peachjam.Image": "fa fa-file-image",
@@ -519,7 +551,37 @@ if DEBUG:
 CKEDITOR_CONFIGS = {
     # The rest of this config is defined in ckeditor.configs.DEFAULT_CONFIG
     "default": {
-        "removePlugins": ["image"],
+        "removePlugins": ["image", "iframe"],
+        "extraAllowedContent": "iframe[*];*[id]",
+        "toolbar_Full": [
+            [
+                "Styles",
+                "Format",
+                "Bold",
+                "Italic",
+                "Underline",
+                "Strike",
+                "Blockquote",
+                "Superscript",
+                "Subscript",
+                "SpellChecker",
+                "Undo",
+                "Redo",
+                "JustifyLeft",
+                "JustifyCenter",
+                "JustifyRight",
+                "JustifyBlock",
+            ],
+            ["Link", "Unlink", "Anchor"],
+            ["Image", "Flash", "Table", "HorizontalRule", "Iframe"],
+            ["TextColor", "BGColor"],
+            ["Smiley", "SpecialChar", "LaAkn"],
+            ["Source"],
+        ],
+    },
+    "article": {
+        "removePlugins": ["iframe"],
+        "extraAllowedContent": "*[id];*{*}",
         "toolbar_Full": [
             [
                 "Styles",
@@ -536,12 +598,12 @@ CKEDITOR_CONFIGS = {
                 "Redo",
             ],
             ["Link", "Unlink", "Anchor"],
-            ["Image", "Flash", "Table", "HorizontalRule"],
+            ["Image", "Flash", "Table", "HorizontalRule", "Iframe"],
             ["TextColor", "BGColor"],
             ["Smiley", "SpecialChar", "LaAkn"],
             ["Source"],
         ],
-    }
+    },
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
@@ -563,6 +625,7 @@ else:
         "default": {
             "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
             "LOCATION": "/var/tmp/django_cache",
+            "TIMEOUT": 60 * 30,
         },
     }
     # in general, cache most pages
@@ -582,7 +645,10 @@ LOGGING["handlers"]["console"]["filters"] = ["request_id"]
 
 
 # E-mail configuration
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST")
 EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD")
@@ -616,3 +682,17 @@ MARTOR_ALTERNATIVE_CSS_FILE_THEME = "martor/css/peachjam.css"
 # CORS
 # disable regex matches, we do matching using signals
 CORS_URLS_REGEX = r"^$"
+
+
+MESSAGE_TAGS = {
+    messages.ERROR: "danger",
+}
+
+
+# allow injection of a custom test runner for github actions
+TEST_RUNNER = os.environ.get("TEST_RUNNER", "django.test.runner.DiscoverRunner")
+# only used by xmlrunner https://github.com/xmlrunner/unittest-xml-reporting#django-support
+TEST_OUTPUT_DIR = "./test-reports"
+
+# django-guardian
+ANONYMOUS_USER_NAME = None

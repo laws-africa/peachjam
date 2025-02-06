@@ -1,8 +1,17 @@
-{% load i18n %}
-<p class="text-muted mb-4">
-  {% blocktrans trimmed count doc_count=doc_count %}
-    {{ doc_count }} document
-  {% plural %}
-    {{ doc_count }} documents
-  {% endblocktrans %}
-</p>
+{% load i18n humanize %}
+<div class="text-muted mb-2">
+  {{ doc_count|intcomma }}
+  {% if doc_count == 1 %}
+    {% if doc_count_noun %}
+      {{ doc_count_noun }}
+    {% else %}
+      {% trans "document" %}
+    {% endif %}
+  {% else %}
+    {% if doc_count_noun_plural %}
+      {{ doc_count_noun_plural }}
+    {% else %}
+      {% trans "documents" %}
+    {% endif %}
+  {% endif %}
+</div>

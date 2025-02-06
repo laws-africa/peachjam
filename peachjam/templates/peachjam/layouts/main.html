@@ -2,8 +2,6 @@
 {% load static peachjam %}
 {% load sass_tags %}
 {% block head-css %}
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="stylesheet"
         href="{% sass_src 'stylesheets/peachjam.scss' %}"
@@ -13,8 +11,8 @@
   {{ PEACHJAM_JS_CONFIG|json_script:"peachjam-config" }}
   {% if not DEBUG %}
     <!-- sentry -->
-    <script src="https://browser.sentry-cdn.com/7.51.2/bundle.min.js"
-            integrity="sha384-TIc4wz4oU9UgbI5Cu7R/6jhJOszkPGImz+Ney9MXZ3MESAGeYJUOV+36KnTacIXP"
+    <script src="https://browser.sentry-cdn.com/8.19.0/bundle.min.js"
+            integrity="sha384-GMXJOdPusU6buvY19uetB8sepCeSxAnhMOOvoTJ8NVDumzfGeBFgRFuRD6rsz8Np"
             crossorigin="anonymous"
             defer></script>
     {% if PEACHJAM_SETTINGS.google_analytics_id %}
@@ -61,7 +59,9 @@
   {% include 'peachjam/_header.html' %}
 {% endblock %}
 {% block body-content %}
+  {% block before-content %}{% endblock %}
   <main id="top">
+    {% include "peachjam/_messages.html" %}
     {% block page-content %}{% endblock %}
   </main>
 {% endblock %}

@@ -1,13 +1,18 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load peachjam i18n %}
 {% block title %}{{ taxonomy.name }}{% endblock %}
-{% block page-title %}<h1 class="mt-4">{{ taxonomy.name }}</h1>{% endblock %}
+{% block page-title %}
+  {% if not entity_profile %}<h1 class="mt-4">{{ taxonomy.name }}</h1>{% endif %}
+{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
-          <a href="{% url 'top_level_taxonomy_list' %}">{% trans 'Taxonomies' %}</a>
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'top_level_taxonomy_list' %}">{% trans 'Collections' %}</a>
         </li>
         {% for ancestor in ancestors %}
           <li class="breadcrumb-item">
@@ -21,18 +26,8 @@
 {% block entity-profile %}
   {% if entity_profile %}
     {% with entity_profile_title=taxonomy.name %}
-      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
+      {% include 'peachjam/_entity_profile.html' %}
     {% endwith %}
-  {% endif %}
-{% endblock %}
-{% block mobile-taxonomy-list %}
-  {% if taxonomy_tree|length > 0 and not is_leaf_node %}
-    <div class="mb-2">{% include "peachjam/_taxonomy_tree_facet.html" %}</div>
-  {% endif %}
-{% endblock %}
-{% block desktop-taxonomy-list %}
-  {% if taxonomy_tree|length > 0 and not is_leaf_node %}
-    <div class="mb-2">{% include "peachjam/_taxonomy_tree_facet.html" %}</div>
   {% endif %}
 {% endblock %}
 {% block taxonomy-json %}{{ taxonomy_tree|json_script:"taxonomy_tree" }}{% endblock %}

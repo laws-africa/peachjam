@@ -1,12 +1,22 @@
 from datetime import date
 
+from cobalt.uri import FrbrUri
 from django.test import TestCase
 
-from peachjam.models import Book, CoreDocument, Country, Journal, Language
+from peachjam.models import (
+    Book,
+    CoreDocument,
+    Country,
+    Gazette,
+    GenericDocument,
+    Journal,
+    Language,
+    get_country_and_locality,
+)
 
 
 class CoreDocumentTestCase(TestCase):
-    fixtures = ["documents/sample_documents"]
+    fixtures = ["tests/countries", "tests/languages", "documents/sample_documents"]
 
     def test_document_text_from_html(self):
         doc = CoreDocument.objects.get(
@@ -107,3 +117,48 @@ ZAGPPHC 1063</a>.</p>
         journal.save()
         self.assertEqual("doc", journal.frbr_uri_doctype)
         self.assertEqual("journal", journal.frbr_uri_subtype)
+
+    def test_clean_content_html(self):
+        doc = CoreDocument()
+        self.assertIsNone(doc.clean_content_html(""""""))
+        self.assertIsNone(doc.clean_content_html("""<aoeu"""))
+        self.assertIsNone(doc.clean_content_html("""<div>   \n&nbsp;  \n</div>"""))
+        self.assertEqual(
+            doc.clean_content_html("""<div>test</div>"""), """<div>test</div>"""
+        )
+
+    def test_gazette(self):
+        frbr_uri = FrbrUri.parse(
+            "/akn/za/officialGazette/provincial-gazette/2024-09-13/3585/eng@2024-09-13"
+        )
+        country, locality = get_country_and_locality("za")
+
+        gazette = Gazette.objects.create(
+            **{
+                "expression_frbr_uri": frbr_uri.expression_uri(),
+                "jurisdiction": country,
+                "locality": locality,
+                "frbr_uri_doctype": frbr_uri.doctype,
+                "frbr_uri_subtype": frbr_uri.subtype,
+                "frbr_uri_actor": frbr_uri.actor,
+                "frbr_uri_number": frbr_uri.number,
+                "frbr_uri_date": frbr_uri.date,
+                "language": Language.objects.get(pk="en"),
+                "date": date.fromisoformat("2024-09-13"),
+                "title": "gazette title",
+                "publication": "Provincial Gazette",
+                "key": "key",
+            }
+        )
+        self.assertEqual(frbr_uri.expression_uri(), gazette.expression_frbr_uri)
+
+    def test_generic_document(self):
+        doc = GenericDocument(
+            jurisdiction=Country.objects.get(pk="ZM"),
+            date=date(2020, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="My Test",
+        )
+        doc.save()
+        self.assertEqual("my-test", doc.frbr_uri_number)

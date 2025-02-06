@@ -33,7 +33,7 @@
     <ul class="dropdown-menu">
       {% for locality in LOCALITIES %}
         <li class="dropdown-item">
-          <a href="{% url 'municipal_by_laws' code=locality.code %}">{{ locality.name }}</a>
+          <a href="{% url 'locality_legislation_list' code=locality.place_code %}">{{ locality.name }}</a>
         </li>
       {% endfor %}
     </ul>

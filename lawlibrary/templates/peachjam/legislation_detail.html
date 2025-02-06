@@ -2,27 +2,32 @@
 {% load i18n %}
 {% block breadcrumbs %}
   <nav aria-label="breadcrumb">
-    {% if document.locality %}
-      <ol class="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+      </li>
+      {% if document.locality %}
         {% if document.locality.code in PROVINCIAL_CODES %}
           <li class="breadcrumb-item">
             <a href="{% url 'locality_legislation' %}">{% trans 'Provincial Legislation' %}</a>
           </li>
-        {% else %}
+        {% elif document.locality.code in MUNICIPAL_CODES %}
           <li class="breadcrumb-item">
             <a href="{% url 'municipal_legislation' %}">{% trans 'Municipal By-laws' %}</a>
+          </li>
+        {% else %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'legislation_list' %}">{% trans 'Legislation' %}</a>
           </li>
         {% endif %}
         <li class="breadcrumb-item">
           <a href="{% url 'locality_legislation_list' document.locality.code %}">{{ document.locality.name }}</a>
         </li>
-      </ol>
-    {% else %}
-      <ol class="breadcrumb">
+      {% else %}
         <li class="breadcrumb-item">
           <a href="{% url 'legislation_list' %}">{% trans 'National legislation' %}</a>
         </li>
-      </ol>
-    {% endif %}
+      {% endif %}
+    </ol>
   </nav>
 {% endblock %}

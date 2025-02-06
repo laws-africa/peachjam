@@ -1,7 +1,7 @@
 from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
-from django.db.models import Max
+from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
 from django.utils.text import slugify
@@ -27,6 +27,9 @@ class Attorney(models.Model):
 
 
 class Judge(models.Model):
+    model_label = _("Judge")
+    model_label_plural = _("Judges")
+
     name = models.CharField(
         _("name"), max_length=1024, null=False, blank=False, unique=True
     )
@@ -77,6 +80,9 @@ class CourtClass(models.Model):
     slug = models.SlugField(_("slug"), max_length=255, null=False, unique=True)
     order = models.IntegerField(_("order"), null=True, blank=True)
     show_listing_page = models.BooleanField(null=False, default=False)
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
 
     class Meta:
         ordering = (
@@ -94,6 +100,36 @@ class CourtClass(models.Model):
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
+
+    @classmethod
+    def get_court_classes_with_cause_lists(cls):
+        return (
+            cls.objects.filter(courts__causelists__isnull=False)
+            .prefetch_related(
+                Prefetch(
+                    "courts",
+                    queryset=Court.objects.filter(causelists__isnull=False).distinct(),
+                )
+            )
+            .distinct()
+        )
+
+
+class CourtDivision(models.Model):
+    name = models.CharField(_("name"), max_length=255, null=False, unique=True)
+    code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
+    order = models.IntegerField(_("order"), null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = slugify(self.name)
         return super().save(*args, **kwargs)
 
 
@@ -154,7 +190,7 @@ class CourtRegistry(models.Model):
     court = models.ForeignKey(
         Court,
         on_delete=models.CASCADE,
-        null=True,
+        null=False,
         related_name="registries",
         verbose_name=_("court"),
     )
@@ -162,6 +198,7 @@ class CourtRegistry(models.Model):
     code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
 
     class Meta:
+        ordering = ("name",)
         verbose_name = _("court registry")
         verbose_name_plural = _("court registries")
         unique_together = ("court", "name")
@@ -278,10 +315,16 @@ class Judgment(CoreDocument):
     )
     hearing_date = models.DateField(null=True, blank=True)
 
-    auto_assign_title = models.BooleanField(
-        _("Auto-assign title"),
-        help_text=_("Whether or not the system should assign the title"),
+    auto_assign_details = models.BooleanField(
+        _("Auto-assign details"),
+        help_text=_("Whether or not the system should assign the details"),
         default=True,
+    )
+
+    anonymised = models.BooleanField(
+        _("Anonymised"),
+        help_text=_("Whether or not the judgment is anonymised"),
+        default=False,
     )
 
     CITATION_DATE_FORMAT = "(j F Y)"
@@ -290,6 +333,8 @@ class Judgment(CoreDocument):
     """ Format string to use for building short MNCs. """
 
     frbr_uri_doctypes = ["judgment"]
+
+    default_nature = ("judgment", "Judgment")
 
     class Meta(CoreDocument.Meta):
         ordering = ["title"]
@@ -334,14 +379,16 @@ class Judgment(CoreDocument):
 
     def generate_work_frbr_uri(self):
         # enforce certain defaults for judgment FRBR URIs
-        self.frbr_uri_doctype = "judgment"
-        self.frbr_uri_actor = self.court.code.lower() if self.court else None
-        self.frbr_uri_date = str(self.date.year) if self.date else ""
-        self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
+        if self.auto_assign_details:
+            self.frbr_uri_doctype = "judgment"
+            self.frbr_uri_actor = self.court.code.lower() if self.court else None
+            self.frbr_uri_date = str(self.date.year) if self.date else ""
+            self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
         return super().generate_work_frbr_uri()
 
     def clean(self):
-        self.assign_mnc()
+        if self.auto_assign_details:
+            self.assign_mnc()
         super().clean()
 
     def assign_title(self):
@@ -359,9 +406,11 @@ class Judgment(CoreDocument):
         if self.case_name:
             parts.append(self.case_name)
 
-        case_number = "; ".join(n.string for n in self.case_numbers.all())
-        if case_number:
-            parts.append("(" + case_number + ")")
+        # can't lookup foreign keys without being saved
+        if self.pk:
+            case_number = "; ".join(n.string for n in self.case_numbers.all())
+            if case_number:
+                parts.append("(" + case_number + ")")
 
         if self.mnc:
             parts.append(self.mnc)
@@ -406,8 +455,8 @@ class Judgment(CoreDocument):
                 self.locality = self.court.locality
 
         self.doc_type = "judgment"
-        self.assign_mnc()
-        if self.auto_assign_title:
+        if self.auto_assign_details:
+            self.assign_mnc()
             self.assign_title()
         super().pre_save()
 
@@ -466,3 +515,94 @@ class CaseNumber(models.Model):
     def save(self, *args, **kwargs):
         self.string = self.get_case_number_string()
         return super().save(*args, **kwargs)
+
+
+class CaseHistory(models.Model):
+    judgment_work = models.ForeignKey(
+        "peachjam.Work",
+        related_name="case_histories",
+        on_delete=models.CASCADE,
+        verbose_name=_("judgment work"),
+    )
+    case_number = models.CharField(
+        _("case number"), max_length=1024, null=True, blank=True
+    )
+    historical_judgment_work = models.ForeignKey(
+        "peachjam.Work",
+        related_name="incoming_case_histories",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("historical judgment work"),
+    )
+    outcome = models.ForeignKey(
+        Outcome,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("outcome"),
+    )
+    judges = models.ManyToManyField(Judge, verbose_name=_("judges"), blank=True)
+    court = models.ForeignKey(
+        Court, on_delete=models.PROTECT, null=True, blank=True, verbose_name=_("court")
+    )
+    date = models.DateField(_("date"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["-date"]
+        verbose_name = _("case history")
+        verbose_name_plural = _("case histories")
+
+    def __str__(self):
+        if self.judgment_work:
+            return f"{self.judgment_work}"
+        elif self.case_number:
+            return f"{self.case_number}"
+        return _("Case history")
+
+
+class CauseList(CoreDocument):
+    frbr_uri_doctypes = ["doc"]
+    default_nature = ("causelist", "Cause list")
+    court = models.ForeignKey(
+        Court,
+        on_delete=models.PROTECT,
+        null=True,
+        verbose_name=_("court"),
+        related_name="causelists",
+    )
+    registry = models.ForeignKey(
+        CourtRegistry,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="causelists",
+        blank=True,
+    )
+    division = models.ForeignKey(
+        CourtDivision,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="causelists",
+        blank=True,
+    )
+    judges = models.ManyToManyField(Judge, blank=True, verbose_name=_("judges"))
+    end_date = models.DateField(_("end date"), null=True, blank=True)
+
+    def pre_save(self):
+        self.frbr_uri_doctype = "doc"
+        self.doc_type = "causelist"
+        super().pre_save()
+
+
+class Replacement(models.Model):
+    """A replacement made for anonymisation in a Judgment. Part of the judgment anonymiser app."""
+
+    document = models.ForeignKey(
+        "Judgment", on_delete=models.CASCADE, related_name="replacements"
+    )
+    old_text = models.TextField()
+    new_text = models.TextField()
+    target = models.JSONField()
+
+    def __str__(self):
+        return f"{self.old_text} -> {self.new_text}"

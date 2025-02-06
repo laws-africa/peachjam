@@ -5,14 +5,12 @@ from peachjam.models import Legislation
 
 
 class TestPreferredLanguage(TestCase):
-    fixtures = ["documents/sample_documents", "tests/countries", "tests/languages"]
+    fixtures = ["tests/countries", "documents/sample_documents", "tests/languages"]
     maxDiff = None
 
     def test_preferred_language(self):
-        response = self.client.get("/legal_instruments/")
-
-        assert response.context.get("documents").count() == 2
-        assert response.context.get("LANGUAGE_CODE") == "en"
+        response = self.client.get("/legislation/")
+        self.assertEqual(4, response.context.get("documents").count())
 
     def test_update_work_languages(self):
         doc = Legislation.objects.get(

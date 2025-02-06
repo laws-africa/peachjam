@@ -6,9 +6,9 @@ from africanlii.models import (
     AfricanUnionInstitution,
     AfricanUnionOrgan,
     MemberState,
-    RatificationCountry,
     RegionalEconomicCommunity,
 )
+from peachjam.models import CourtClass, RatificationCountry
 from peachjam.views import AuthorDetailView, CoreDocument, PlaceDetailView
 
 
@@ -28,6 +28,7 @@ class AfricanUnionDetailPageView(TemplateView):
         context["au_institutions"] = AfricanUnionInstitution.objects.prefetch_related(
             "author"
         )
+        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["liis"] = LIIS
         return context
 
@@ -46,6 +47,7 @@ class RegionalEconomicCommunityDetailView(PlaceDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["doc_table_show_jurisdiction"] = False
         context["rec"] = get_object_or_404(
             RegionalEconomicCommunity, locality=self.locality
         )
@@ -62,12 +64,10 @@ class MemberStateDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context[
-            "ratification_countries"
-        ] = ratification_countries = RatificationCountry.objects.prefetch_related(
-            "ratification", "country"
-        ).filter(
-            country=self.get_object().country
+        context["ratification_countries"] = ratification_countries = (
+            RatificationCountry.objects.prefetch_related("ratification", "country")
+            .filter(country=self.get_object().country)
+            .order_by("ratification__work__title")
         )
         context["doc_count"] = ratification_countries.count()
         context["liis"] = LIIS

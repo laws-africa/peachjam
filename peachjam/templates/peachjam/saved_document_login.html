@@ -1,0 +1,33 @@
+{% load i18n %}
+<button class="btn btn-outline-primary ms-2 save-document-button"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#saveDocumentModal"
+        aria-expanded="false"
+        hx-swap-oob="outerHTML:.save-document-button">
+  <i class="bi bi-star"></i>
+  <span class="d-md-none">{% trans 'Save' %}</span>
+  <span class="d-none d-md-inline">{% trans 'Save document' %}</span>
+</button>
+<div hx-swap-oob="true" id="saveDocumentModalDialog" class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">{% trans 'Login' %}</h5>
+      <button type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <p>
+        <strong>{% trans 'You are not logged in' %}.</strong>
+      </p>
+      <p>{% trans 'To save a document you need to be logged in' %}.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
+      <a href="{% url 'account_login' %}?next={{ document.get_absolute_url }}"
+         class="btn btn-primary">{% trans 'Login' %}</a>
+    </div>
+  </div>
+</div>

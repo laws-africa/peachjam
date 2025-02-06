@@ -1,14 +1,17 @@
 from cobalt import FrbrUri
 from django.http import Http404, HttpResponse
-from django.shortcuts import get_object_or_404, redirect, reverse
+from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.generic import DetailView, View
+from guardian.shortcuts import get_groups_with_perms
 
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
-from peachjam.models import CoreDocument
+from peachjam.helpers import get_language as get_language_from_request
+from peachjam.models import CoreDocument, DocumentNature, ExtractedCitation
 from peachjam.registry import registry
 from peachjam.resolver import resolver
+from peachjam.views import BaseDocumentDetailView
 
 
 class DocumentDetailViewResolver(View):
@@ -55,6 +58,20 @@ class DocumentDetailViewResolver(View):
                 url = url + "#" + portion
             return redirect(url)
 
+        if obj.restricted:
+            restricted_view = RestrictedDocument403View()
+            restricted_view.setup(request, *args, **kwargs)
+
+            if not request.user.is_authenticated:
+                return restricted_view.dispatch(request, *args, **kwargs)
+
+            if not request.user.is_superuser or not request.user.is_staff:
+                # check if user belongs to a group that has access to the document
+                doc_groups = get_groups_with_perms(obj)
+                user_groups = request.user.groups.all()
+                if not doc_groups.intersection(user_groups):
+                    return restricted_view.dispatch(request, *args, **kwargs)
+
         view_class = registry.views.get(obj.doc_type)
 
         if view_class:
@@ -62,6 +79,10 @@ class DocumentDetailViewResolver(View):
             view.setup(request, *args, **kwargs)
 
             return view.dispatch(request, *args, **kwargs)
+
+        raise Exception(
+            f"The document type {obj.doc_type} does not have a view registered."
+        )
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
@@ -88,6 +109,10 @@ class DocumentSourceView(DetailView):
             if source_file.source_url:
                 return redirect(source_file.source_url)
 
+            if getattr(source_file.file.storage, "custom_domain", None):
+                # use the storage's custom domain to serve the file
+                return redirect(source_file.file.url)
+
             return self.make_response(
                 source_file.file.open(),
                 source_file.mimetype,
@@ -98,7 +123,7 @@ class DocumentSourceView(DetailView):
     def make_response(self, f, content_type, fname):
         file_bytes = f.read()
         response = HttpResponse(file_bytes, content_type=content_type)
-        response["Content-Disposition"] = f"inline; filename={fname}"
+        response["Content-Disposition"] = f"attachment; filename={fname}"
         response["Content-Length"] = str(len(file_bytes))
         return response
 
@@ -114,12 +139,38 @@ class DocumentSourcePDFView(DocumentSourceView):
 
             pdf = source_file.as_pdf()
             if pdf:
-                return self.make_response(
-                    pdf,
-                    "application/pdf",
-                    source_file.filename_for_download(".pdf"),
-                )
+                if getattr(pdf.storage, "custom_domain", None):
+                    # use the storage's custom domain to serve the file
+                    return redirect(pdf.url)
+                else:
+                    return self.make_response(
+                        pdf,
+                        "application/pdf",
+                        source_file.filename_for_download(".pdf"),
+                    )
         raise Http404()
+
+
+class DocumentPublicationView(DocumentSourceView):
+    def render_to_response(self, context, **response_kwargs):
+        if hasattr(self.object, "publication_file"):
+            publication_file = self.object.publication_file
+            if publication_file.use_source_file:
+                return redirect(
+                    reverse(
+                        "document_source",
+                        kwargs={"frbr_uri": self.object.expression_frbr_uri[1:]},
+                    )
+                )
+            if publication_file.url:
+                return redirect(publication_file.url)
+
+            return self.make_response(
+                publication_file.file.open(),
+                publication_file.mimetype,
+                publication_file.filename,
+            )
+        raise Http404
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
@@ -134,9 +185,81 @@ class DocumentMediaView(DetailView):
     slug_url_kwarg = "frbr_uri"
 
     def render_to_response(self, context, **response_kwargs):
-        img = get_object_or_404(self.object.images, filename=self.kwargs["filename"])
+        # there should only be one, but until we enforce uniqueness of filenames, get the first in the list
+        # see https://github.com/laws-africa/peachjam/issues/2024
+        img = get_list_or_404(self.object.images, filename=self.kwargs["filename"])[0]
+
+        if getattr(img.file.storage, "custom_domain", None):
+            # use the storage's custom domain to serve the file
+            return redirect(img.file.url)
+
         file = img.file.open()
         file_bytes = file.read()
         response = HttpResponse(file_bytes, content_type=img.mimetype)
         response["Content-Length"] = str(len(file_bytes))
         return response
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+class DocumentCitationsView(DetailView):
+    model = CoreDocument
+    slug_field = "expression_frbr_uri"
+    slug_url_kwarg = "frbr_uri"
+    context_object_name = "document"
+    template_name = "peachjam/_citations_list_items.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        direction = self.request.GET.get("direction", "incoming")
+
+        try:
+            nature = int(self.request.GET.get("nature"))
+            nature = get_object_or_404(DocumentNature, pk=nature)
+        except (TypeError, ValueError):
+            raise Http404
+
+        try:
+            offset = max(0, int(self.request.GET.get("offset", 0)))
+        except ValueError:
+            raise Http404
+
+        doc = self.get_object()
+        works = (
+            doc.work.works_citing_current_work()
+            if direction == "incoming"
+            else doc.work.cited_works()
+        )
+
+        (
+            context["docs"],
+            context["truncated"],
+        ) = ExtractedCitation.fetch_grouped_citation_docs(
+            works,
+            get_language_from_request(self.request),
+            nature=nature,
+            offset=offset,
+        )
+        context["start"] = offset
+        context["offset"] = offset + len(context["docs"])
+        context["nature"] = nature
+        context["direction"] = direction
+
+        return context
+
+
+class RestrictedDocument403View(BaseDocumentDetailView):
+    """The view used when a user tries to access a restricted document without permission."""
+
+    model = CoreDocument
+    template_name = "peachjam/restricted_document_detail.html"
+
+    def get_context_data(self, **kwargs):
+        # deliberately don't call super
+        context = {}
+        context.update(kwargs)
+        context["document"] = self.get_object()
+        return context
+
+    def render_to_response(self, context, **response_kwargs):
+        return super().render_to_response(context, status=403, **response_kwargs)

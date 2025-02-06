@@ -5,6 +5,7 @@ from peachjam.models import (
     Court,
     CourtClass,
     CourtRegistry,
+    CustomPropertyLabel,
     DocumentNature,
     Label,
     Outcome,
@@ -55,4 +56,9 @@ class PredicateTranslationOptions(TranslationOptions):
 
 @register(Taxonomy)
 class TaxonomyTranslationOptions(TranslationOptions):
+    fields = ("name", "path_name")
+
+
+@register(CustomPropertyLabel)
+class CustomPropertyLabelTranslationOptions(TranslationOptions):
     fields = ("name",)

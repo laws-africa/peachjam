@@ -1,16 +1,39 @@
 import copy
+import logging
 
+from allauth.account.forms import LoginForm, SignupForm
+from countries_plus.models import Country
+from dal import autocomplete
 from django import forms
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
+from django.db.models import Q
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Invisible
 
-from peachjam.models import AttachedFiles, CoreDocument, SourceFile, pj_settings
+from peachjam.models import (
+    AttachedFiles,
+    CoreDocument,
+    Folder,
+    PeachJamSettings,
+    PublicationFile,
+    Ratification,
+    SavedDocument,
+    SourceFile,
+    pj_settings,
+)
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
+
+log = logging.getLogger(__name__)
+
+User = get_user_model()
 
 
 def work_choices():
@@ -31,6 +54,13 @@ class NewDocumentFormMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["upload_file"] = forms.FileField(required=False)
+
+    def clean_upload_file(self):
+        if self.cleaned_data["upload_file"]:
+            self.cleaned_data["upload_file"].name = clean_filename(
+                self.cleaned_data["upload_file"].name
+            )
+        return self.cleaned_data["upload_file"]
 
     def _save_m2m(self):
         super()._save_m2m()
@@ -70,40 +100,87 @@ class NewDocumentFormMixin:
         return [f for f in fields if f != "upload_file"]
 
 
+class PermissiveTypedListField(forms.TypedMultipleChoiceField):
+    """Field that accepts multiple values and coerces its values to the right type, ignoring any that can't be coerced.
+    Defaults to raw form data, which is strings for querystring-based forms."""
+
+    def _coerce(self, value):
+        """Validate that the values can be coerced to the right type, and ignore anything dodgy."""
+        if value == self.empty_value or value in self.empty_values:
+            return self.empty_value
+        new_value = []
+        for choice in value:
+            try:
+                new_value.append(self.coerce(choice))
+            except (ValueError, TypeError, ValidationError):
+                pass
+        return new_value
+
+    def valid_value(self, value):
+        return True
+
+
+def remove_nulls(value):
+    return value.replace("\x00", "") if value else value
+
+
 class BaseDocumentFilterForm(forms.Form):
     """This is the main form used for filtering Document ListViews,
     using facets such as year and alphabetical title.
     """
 
-    years = forms.CharField(required=False)
+    years = PermissiveTypedListField(coerce=int, required=False)
     alphabet = forms.CharField(required=False)
-    authors = forms.CharField(required=False)
-    doc_type = forms.CharField(required=False)
-    judges = forms.CharField(required=False)
-    natures = forms.CharField(required=False)
-    localities = forms.CharField(required=False)
-    registries = forms.CharField(required=False)
-    attorneys = forms.CharField(required=False)
-    outcomes = forms.CharField(required=False)
+    authors = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    doc_type = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    judges = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    natures = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    localities = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    registries = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    divisions = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    attorneys = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    outcomes = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    taxonomies = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    labels = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    q = forms.CharField(required=False)
 
-    def __init__(self, data, *args, **kwargs):
+    sort = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("title", _("Title") + " (A - Z)"),
+            ("-title", _("Title") + " (Z - A)"),
+            ("-date", _("Date") + " " + _("(Newest first)")),
+            ("date", _("Date") + " " + _("(Oldest first)")),
+        ],
+    )
+
+    def __init__(self, defaults, data, *args, **kwargs):
+        self.secondary_sort = "title"
+        if defaults is not None:
+            self.secondary_sort = defaults.get("secondary_sort", "title")
         self.params = QueryDict(mutable=True)
+        self.params.update({"sort": "-date"})
+        self.params.update(defaults or {})
         self.params.update(data)
 
         super().__init__(self.params, *args, **kwargs)
 
-    def filter_queryset(self, queryset, exclude=None):
-        years = self.params.getlist("years")
+    def filter_queryset(self, queryset, exclude=None, filter_q=False):
+        years = self.cleaned_data.get("years", [])
         alphabet = self.cleaned_data.get("alphabet")
-        authors = self.params.getlist("authors")
-        courts = self.params.getlist("courts")
-        doc_type = self.params.getlist("doc_type")
-        judges = self.params.getlist("judges")
-        natures = self.params.getlist("natures")
-        localities = self.params.getlist("localities")
-        registries = self.params.getlist("registries")
-        attorneys = self.params.getlist("attorneys")
-        outcomes = self.params.getlist("outcomes")
+        authors = self.cleaned_data.get("authors", [])
+        courts = self.cleaned_data.get("courts", [])
+        doc_type = self.cleaned_data.get("doc_type", [])
+        judges = self.cleaned_data.get("judges", [])
+        natures = self.cleaned_data.get("natures", [])
+        localities = self.cleaned_data.get("localities", [])
+        registries = self.cleaned_data.get("registries", [])
+        divisions = self.cleaned_data.get("divisions", [])
+        attorneys = self.cleaned_data.get("attorneys", [])
+        outcomes = self.cleaned_data.get("outcomes", [])
+        labels = self.cleaned_data.get("labels", [])
+        taxonomies = self.cleaned_data.get("taxonomies", [])
+        q = self.cleaned_data.get("q")
 
         queryset = self.order_queryset(queryset, exclude)
 
@@ -114,7 +191,7 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(title__istartswith=alphabet)
 
         if authors and exclude != "authors":
-            queryset = queryset.filter(authors__name__in=authors)
+            queryset = queryset.filter(author__name__in=authors)
 
         if courts and exclude != "courts":
             queryset = queryset.filter(court__name__in=courts)
@@ -123,10 +200,10 @@ class BaseDocumentFilterForm(forms.Form):
             queryset = queryset.filter(doc_type__in=doc_type)
 
         if judges and exclude != "judges":
-            queryset = queryset.filter(judges__name__in=judges)
+            queryset = queryset.filter(judges__name__in=judges).distinct()
 
         if natures and exclude != "natures":
-            queryset = queryset.filter(nature__name__in=natures)
+            queryset = queryset.filter(nature__code__in=natures)
 
         if localities and exclude != "localities":
             queryset = queryset.filter(locality__name__in=localities)
@@ -134,19 +211,65 @@ class BaseDocumentFilterForm(forms.Form):
         if registries and exclude != "registries":
             queryset = queryset.filter(registry__name__in=registries)
 
+        if divisions and exclude != "divisions":
+            queryset = queryset.filter(division__code__in=divisions)
+
         if attorneys and exclude != "attorneys":
-            queryset = queryset.filter(attorneys__name__in=attorneys)
+            queryset = queryset.filter(attorneys__name__in=attorneys).distinct()
 
         if outcomes and exclude != "outcomes":
             queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
 
+        if labels and exclude != "labels":
+            queryset = queryset.filter(labels__name__in=labels).distinct()
+
+        if taxonomies and exclude != "taxonomies":
+            queryset = queryset.filter(taxonomies__topic__slug__in=taxonomies)
+
+        if filter_q and q and exclude != "q":
+            terms = q.split()
+            queries = Q()
+            for term in terms:
+                queries &= Q(Q(title__icontains=term) | Q(citation__icontains=term))
+            queryset = queryset.filter(queries)
+
         return queryset
 
     def order_queryset(self, queryset, exclude=None):
-        if self.cleaned_data.get("alphabet") and exclude != "alphabet":
-            queryset = queryset.order_by("title")
-        else:
-            queryset = queryset.order_by("-date", "title")
+        sort = self.cleaned_data.get("sort") or "-date"
+        if sort == "-date" and "frbr_uri_number" in self.secondary_sort:
+            self.secondary_sort = "-frbr_uri_number"
+        elif sort == "date" and "frbr_uri_number" in self.secondary_sort:
+            self.secondary_sort = "frbr_uri_number"
+        queryset = queryset.order_by(sort, self.secondary_sort)
+        return queryset
+
+
+class GazetteFilterForm(BaseDocumentFilterForm):
+    sub_publications = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    special = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    supplement = forms.BooleanField(required=False)
+
+    def filter_queryset(self, queryset, exclude=None, filter_q=False):
+        queryset = super().filter_queryset(queryset, exclude, filter_q)
+        sub_publications = self.cleaned_data.get("sub_publications", [])
+        special = self.cleaned_data.get("special", [])
+        supplement = self.cleaned_data.get("supplement", False)
+
+        if sub_publications and exclude != "sub_publications":
+            queryset = queryset.filter(sub_publication__in=sub_publications)
+
+        if special and exclude != "special":
+            special_qs = Q()
+            if "special" in special:
+                special_qs |= Q(special=True)
+            if "not_special" in special:
+                special_qs |= Q(special=False)
+            queryset = queryset.filter(special_qs)
+
+        if supplement and exclude != "supplement":
+            queryset = queryset.filter(supplement=True)
+
         return queryset
 
 
@@ -154,13 +277,21 @@ class AttachmentFormMixin:
     """Admin form for editing models that extend from AbstractAttachmentModel."""
 
     def clean_file(self):
-        # dynamic storage files don't like colons in filenames
-        self.cleaned_data["file"].name = clean_filename(self.cleaned_data["file"].name)
+        if self.cleaned_data["file"]:
+            # dynamic storage files don't like colons in filenames
+            self.cleaned_data["file"].name = clean_filename(
+                self.cleaned_data["file"].name
+            )
         return self.cleaned_data["file"]
 
     def save(self, commit=True):
         # clear these for changed files so they get updated
         if "file" in self.changed_data:
+            # get the old file and make sure it's deleted
+            if self.instance.pk:
+                existing = self.instance.__class__.objects.get(pk=self.instance.pk)
+                if existing.file:
+                    existing.file.delete(False)
             self.instance.size = None
             self.instance.mimetype = None
             self.instance.filename = self.instance.file.name
@@ -182,6 +313,12 @@ class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
                 # if the file is changed, we need delete the existing pdf and re-generate
                 self.instance.file_as_pdf.delete()
                 self.instance.ensure_file_as_pdf()
+
+
+class PublicationFileForm(AttachmentFormMixin, forms.ModelForm):
+    class Meta:
+        model = PublicationFile
+        fields = "__all__"
 
 
 class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):
@@ -231,3 +368,101 @@ class DocumentProblemForm(forms.Form):
             html_message=html,
             fail_silently=False,
         )
+
+
+class ContactUsForm(forms.Form):
+    name = forms.CharField(max_length=255, required=True)
+    email = forms.EmailField(required=True)
+    message = forms.CharField(widget=forms.Textarea, required=True)
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+
+    def send_email(self):
+        name = self.cleaned_data["name"]
+        email = self.cleaned_data["email"]
+        message = self.cleaned_data["message"]
+
+        context = {
+            "name": name,
+            "email": email,
+            "message": message,
+            "APP_NAME": settings.PEACHJAM["APP_NAME"],
+        }
+
+        html = render_to_string(
+            "peachjam/emails/contact_us_email.html", context=context
+        )
+        plain_txt_msg = render_to_string(
+            "peachjam/emails/contact_us_email.txt",
+            context=context,
+        )
+
+        subject = settings.EMAIL_SUBJECT_PREFIX + _("Contact us message")
+
+        default_admin_emails = [email for name, email in settings.ADMINS]
+        site_admin_emails = (pj_settings().admin_emails or "").split()
+
+        send_mail(
+            subject=subject,
+            message=plain_txt_msg,
+            from_email=None,
+            recipient_list=default_admin_emails + site_admin_emails,
+            html_message=html,
+            fail_silently=False,
+        )
+
+
+class SaveDocumentForm(forms.ModelForm):
+    new_folder = forms.CharField(max_length=255, required=False)
+
+    class Meta:
+        model = SavedDocument
+        fields = ["document", "folder", "new_folder"]
+        widgets = {"document": forms.HiddenInput()}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["folder"].queryset = self.instance.user.folders.all()
+        self.fields["document"].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_data["document"] = self.instance.document
+        if cleaned_data.get("new_folder"):
+            folder, _ = Folder.objects.get_or_create(
+                name=cleaned_data["new_folder"],
+                user=self.instance.user,
+            )
+            cleaned_data["folder"] = folder
+        return cleaned_data
+
+
+class PeachjamSignupForm(SignupForm):
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+
+
+class PeachjamLoginForm(LoginForm):
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name"]
+
+
+class JudgmentUploadForm(forms.Form):
+    jurisdiction = forms.ModelChoiceField(Country.objects)
+    file = forms.FileField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields[
+            "jurisdiction"
+        ].queryset = PeachJamSettings.load().document_jurisdictions.all()
+
+
+class RatificationForm(forms.ModelForm):
+    class Meta:
+        model = Ratification
+        fields = "__all__"
+        widgets = {"work": autocomplete.ModelSelect2(url="autocomplete-works")}

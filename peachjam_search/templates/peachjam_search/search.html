@@ -3,12 +3,22 @@
 {% block title %}
   {% trans 'Search' %}
 {% endblock %}
+{% block head-js %}
+  {{ block.super }}
+  {% if PEACHJAM_SETTINGS.google_search_engine_id %}
+    <script async
+            src="https://cse.google.com/cse.js?cx={{ PEACHJAM_SETTINGS.google_search_engine_id }}"></script>
+  {% endif %}
+{% endblock %}
 {% block page-content %}
   <div>
     <div class="container pt-lg-5 pt-2 pb-5">
       {% block lead-text %}{% endblock %}
       <div data-vue-component="FindDocuments"
-           {% if show_jurisdiction %}data-show-jurisdiction="true"{% endif %}></div>
+           {% if show_jurisdiction %}data-show-jurisdiction="true"{% endif %}
+           {% if SEARCH_SUGGESTIONS %}data-show-suggestions="true"{% endif %}
+           {% if PEACHJAM_SETTINGS.google_search_engine_id %}data-show-google="true"{% endif %}>
+      </div>
       {{ labels|json_script:"data-labels" }}
     </div>
   </div>

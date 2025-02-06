@@ -67,6 +67,11 @@ class PeachJamSettings(SingletonModel):
     allowed_login_domains = models.CharField(
         verbose_name=_("allowed login domains"), max_length=1024, null=True, blank=True
     )
+    allow_social_logins = models.BooleanField(
+        verbose_name=_("allow social logins"),
+        default=False,
+        help_text=_("Allow signups via social accounts"),
+    )
 
     metabase_dashboard_link = models.URLField(
         verbose_name=_("metabase dashboard link"), null=True, blank=True
@@ -83,6 +88,9 @@ class PeachJamSettings(SingletonModel):
     )
     linkedin_link = models.URLField(
         verbose_name=_("linkedin link"), null=True, blank=True
+    )
+    youtube_link = models.URLField(
+        verbose_name=_("youtube link"), null=True, blank=True
     )
     contact_form_url = models.URLField(
         verbose_name=_("contact form URL"), null=True, blank=True
@@ -125,6 +133,35 @@ class PeachJamSettings(SingletonModel):
         null=True,
         blank=True,
         help_text=_("Matomo site ID (e.g. 2)"),
+    )
+    survey_link = models.URLField(
+        _("survey link"),
+        null=True,
+        blank=True,
+    )
+    allow_save_documents = models.BooleanField(
+        verbose_name=_("allow save documents"),
+        default=False,
+        help_text=_("Allow documents to be saved."),
+    )
+    allow_save_searches = models.BooleanField(
+        verbose_name=_("allow save searches"),
+        default=False,
+        help_text=_("Allow searches to be saved."),
+    )
+    show_contact_form = models.BooleanField(
+        verbose_name=_("show contact form"),
+        default=False,
+        help_text=_("Show the contact form."),
+    )
+    robots_txt = models.TextField(
+        null=True, blank=True, help_text=_("Additional robots.txt rules.")
+    )
+    google_search_engine_id = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_("ID of a Google custom search engine."),
     )
 
     class Meta:

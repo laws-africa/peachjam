@@ -1,5 +1,5 @@
 from allauth.account.utils import perform_login
-from allauth.exceptions import ImmediateHttpResponse
+from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialAccount
 from django.contrib import messages
@@ -39,4 +39,4 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                     perform_login(request, user, email_verification="none")
 
     def is_open_for_signup(self, request, sociallogin):
-        return False
+        return pj_settings().allow_social_logins

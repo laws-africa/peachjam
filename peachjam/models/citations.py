@@ -1,6 +1,11 @@
 import logging
+from datetime import timedelta
+from random import randint
 
 from django.db import models
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .settings import SingletonModel
@@ -86,18 +91,21 @@ class ExtractedCitation(models.Model):
 
     @classmethod
     def for_citing_works(cls, work):
+        # only returns works with an associated document
         return (
             cls.objects.prefetch_related("citing_work", "target_work")
-            .filter(citing_work=work)
-            .order_by("target_work__title")
+            .filter(citing_work=work, target_work__documents__isnull=False)
+            .order_by("target_work_id")
+            .distinct("target_work")
         )
 
     @classmethod
     def for_target_works(cls, work):
         return (
             cls.objects.prefetch_related("citing_work", "target_work")
-            .filter(target_work=work)
-            .order_by("citing_work__title")
+            .filter(target_work=work, citing_work__documents__isnull=False)
+            .order_by("citing_work_id")
+            .distinct("citing_work")
         )
 
     @classmethod
@@ -105,6 +113,53 @@ class ExtractedCitation(models.Model):
         work.n_cited_works = cls.for_citing_works(work).count()
         work.n_citing_works = cls.for_target_works(work).count()
         work.save(update_fields=["n_cited_works", "n_citing_works"])
+
+    @classmethod
+    def fetch_grouped_citation_docs(
+        self, works, language, n_per_group=10, offset=0, nature=None
+    ):
+        """Fetch documents for the given works, grouped by nature and ordered by the most incoming citations.
+        Returns a list of documents ordered by nature, -citing works, title."""
+        from .core_document import CoreDocument
+
+        # get the best documents for these works
+        docs = (
+            CoreDocument.objects.filter(work__in=works)
+            .distinct("work_frbr_uri")
+            # we're fetching documents, so we want the most recent one for each work
+            .order_by("work_frbr_uri", "-date")
+            .preferred_language(language)
+        )
+
+        qs = (
+            CoreDocument.objects.prefetch_related("work")
+            .select_related("nature")
+            .filter(pk__in=docs)
+        )
+
+        truncated = False
+        # get the top n_per_group documents for each nature, ordering by the number of incoming citations
+        if nature:
+            # just one group, don't need a window function
+            qs = qs.filter(nature=nature).order_by("-work__n_citing_works", "title")
+            truncated = qs.count() > offset + n_per_group
+            qs = qs[offset : offset + n_per_group]
+        else:
+            # use a window function to apply a row number within each nature group, ordering by number of citations
+            # offset is not supported
+            assert offset == 0
+            qs = qs.annotate(
+                row_number=Window(
+                    expression=RowNumber(),
+                    partition_by=[F("nature__name")],
+                    order_by=[F("work__n_citing_works").desc(), F("title")],
+                )
+            ).filter(row_number__lte=n_per_group)
+
+        return (
+            sorted(qs, key=lambda d: [d.nature.name, -d.work.n_citing_works, d.title]),
+            truncated,
+        )
 
 
 class CitationProcessing(SingletonModel):
@@ -125,7 +180,12 @@ class CitationProcessing(SingletonModel):
                 log.info("Updating processing date to %s", date)
                 self.processing_date = date
                 self.save()
-                re_extract_citations()
+
+                # run next saturday at a random hour, since it queues up a lot of other tasks
+                now = timezone.now()
+                at = now + timedelta(days=(5 - now.weekday()) % 7)
+                at = at.replace(hour=randint(0, 23), minute=0, second=0, microsecond=0)
+                re_extract_citations(schedule=at)
 
     def re_extract_citations(self):
         """
@@ -147,8 +207,9 @@ class CitationProcessing(SingletonModel):
                 later_documents.count(),
                 self.processing_date,
             )
-            for document in later_documents.iterator():
-                extract_citations(document.id)
+
+            for pk in later_documents.values_list("pk", flat=True):
+                extract_citations(pk, creator=CoreDocument(pk=pk))
 
             self.reset_processing_date()
 

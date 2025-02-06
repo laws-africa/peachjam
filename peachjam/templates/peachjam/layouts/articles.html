@@ -1,0 +1,47 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n peachjam %}
+{% block title %}
+  {% trans 'Articles' %}
+{% endblock %}
+{% block page-content %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'article_list' %}">{% trans 'Articles' %}</a>
+        </li>
+        {% block breadcrumb-items %}{% endblock %}
+      </ol>
+    </nav>
+    {% block article-header %}{% endblock %}
+    <div class="row">
+      <div class="col-md-9">
+        {% block article-content %}{% endblock %}
+      </div>
+      <div class="col-md-3">
+        {% block article-sidebar %}
+          {% block article-sidebar-recent %}
+            <h4>{% trans 'Recent news' %}</h4>
+            <ul class="list-inline list-unstyled mb-5">
+              {% for art in recent_articles %}
+                <li>
+                  <a href="{{ art.get_absolute_url }}">{{ art }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endblock %}
+          {% block article-sidebar-categories %}
+            <h4>{% trans 'Categories' %}</h4>
+            <ul class="list-inline list-unstyled">
+              {% for tag in article_tags %}
+                <li>
+                  <a href="{% url 'article_topic' tag.slug %}">{{ tag }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endblock %}
+        {% endblock %}
+      </div>
+    </div>
+  {% endblock page-content %}
+</div>

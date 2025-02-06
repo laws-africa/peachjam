@@ -6,6 +6,9 @@
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
           <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
         </li>
         {% if court.court_class.show_listing_page %}
@@ -31,16 +34,11 @@
     </nav>
   </div>
 {% endblock %}
-{% block entity-profile %}
-  {% with entity_profile=court.entity_profile.first entity_profile_title=court.name %}
-    {% if entity_profile %}
-      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
-    {% endif %}
-  {% endwith %}
+{% block page-title %}
+  {% if not entity_profile %}<h1 class="mt-4">{{ page_title }}</h1>{% endif %}
 {% endblock %}
 {% block page-header %}
-  <h1 class="mt-4">{{ page_title }}</h1>
-  {% include 'peachjam/_document_count.html' %}
+  {{ block.super }}
   {% block court_list %}
     {% include 'peachjam/_registries.html' %}
   {% endblock %}
@@ -50,15 +48,4 @@
   {% block month_list %}
     {% include 'peachjam/_court_months_list.html' %}
   {% endblock %}
-{% endblock %}
-{% block content %}
-  {% if grouped_documents %}
-    {% include 'peachjam/_grouped_judgments_table.html' %}
-    {% include 'peachjam/_pagination.html' %}
-  {% elif documents %}
-    {% include 'peachjam/_judgment_table.html' %}
-    {% include 'peachjam/_pagination.html' %}
-  {% else %}
-    <p>{% trans 'No documents found.' %}</p>
-  {% endif %}
 {% endblock %}

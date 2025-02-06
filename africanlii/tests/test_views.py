@@ -2,11 +2,14 @@ from django.test import TestCase
 
 
 class AfricanliiViewsTest(TestCase):
-    fixtures = ["documents/sample_documents"]
+    fixtures = ["tests/countries", "documents/sample_documents"]
 
     def test_homepage(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
+
+        # documents
+        self.assertEqual(10, response.context.get("documents_count"))
 
         court_classes = [
             court_class.name for court_class in response.context.get("court_classes")
@@ -28,3 +31,7 @@ class AfricanliiViewsTest(TestCase):
 
         recent_articles = [r_a.title for r_a in response.context.get("recent_articles")]
         self.assertEqual(0, len(recent_articles))
+
+    def test_legal_instrument_listing(self):
+        response = self.client.get("/legal-instruments/")
+        self.assertEqual(response.status_code, 301)

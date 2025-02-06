@@ -1,15 +1,16 @@
 from functools import cached_property
-from itertools import groupby
 
+from django.core.cache import cache
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.utils.text import gettext_lazy as _
+from django.utils.text import slugify
 
-from peachjam.helpers import chunks, lowercase_alphabet
-from peachjam.models import Court, CourtClass, CourtRegistry, Judgment
-from peachjam.views.generic_views import FilteredDocumentListView
+from peachjam.helpers import chunks
+from peachjam.models import Court, CourtClass, CourtRegistry, Judge, Judgment, Outcome
+from peachjam.views.generic_views import FilteredDocumentListView, YearListMixin
 
 
 class FilteredJudgmentView(FilteredDocumentListView):
@@ -17,7 +18,15 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
     model = Judgment
     navbar_link = "judgments"
-    queryset = Judgment.objects.prefetch_related("judges", "labels")
+    queryset = Judgment.objects.prefetch_related(
+        "judges", "labels", "attorneys", "outcomes"
+    ).select_related("work")
+    exclude_facets = []
+    group_by_date = "month-year"
+
+    def get_form(self):
+        self.form_defaults = {"sort": "-date"}
+        return super().get_form()
 
     def base_view_name(self):
         return _("Judgments")
@@ -28,69 +37,117 @@ class FilteredJudgmentView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["doc_type"] = "Judgment"
+        context["nature"] = "Judgment"
         context["page_title"] = self.page_title()
-
-        if not self.form.cleaned_data.get("alphabet"):
-            context["grouped_documents"] = self.grouped_judgments(context["documents"])
+        context["doc_table_show_jurisdiction"] = False
+        context["doc_table_title_label"] = _("Citation")
+        context["doc_table_date_label"] = _("Judgment date")
+        context["doc_count_noun"] = _("judgment")
+        context["doc_count_noun_plural"] = _("judgments")
 
         self.populate_years(context)
-        self.populate_facets(context)
+        context["documents"] = self.group_documents(context["documents"])
 
         return context
 
-    def populate_facets(self, context):
-        judges = list(
-            judge
-            for judge in self.form.filter_queryset(
-                self.get_base_queryset(), exclude="judges"
+    def add_judges_facet(self, context):
+        if "judges" not in self.exclude_facets:
+            judges = list(
+                judge
+                for judge in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="judges"
+                )
+                .order_by()
+                .values_list("judges__name", flat=True)
+                .distinct()
+                if judge
             )
-            .order_by()
-            .values_list("judges__name", flat=True)
-            .distinct()
-            if judge
-        )
+            if len(judges) > 1:
+                context["facet_data"]["judges"] = {
+                    "label": Judge.model_label_plural,
+                    "type": "checkbox",
+                    "options": sorted([(j, j) for j in judges]),
+                    "values": self.request.GET.getlist("judges"),
+                }
 
-        attorneys = list(
-            attorney
-            for attorney in self.form.filter_queryset(
-                self.get_base_queryset(), exclude="attorneys"
+    def add_labels_facet(self, context):
+        if "labels" not in self.exclude_facets:
+            labels = list(
+                label
+                for label in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="labels"
+                )
+                .order_by()
+                .values_list("labels__name", flat=True)
+                .distinct()
+                if label
             )
-            .order_by()
-            .values_list("attorneys__name", flat=True)
-            .distinct()
-            if attorney
-        )
+            if len(labels) > 1:
+                context["facet_data"]["labels"] = {
+                    "label": _("Labels"),
+                    "type": "checkbox",
+                    "options": sorted([(x, x) for x in labels]),
+                    "values": self.request.GET.getlist("labels"),
+                }
 
-        outcomes = list(
-            outcome
-            for outcome in self.form.filter_queryset(
-                self.get_base_queryset(), exclude="outcomes"
+    def add_outcomes_facet(self, context):
+        if "outcomes" not in self.exclude_facets:
+            outcomes = Outcome.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="outcomes"
+                )
+                .order_by()
+                .values_list("outcomes__id", flat=True)
+                .distinct()
             )
-            .order_by()
-            .values_list("outcomes__name", flat=True)
-            .distinct()
-            if outcome
-        )
+            if len(outcomes) > 1:
+                context["facet_data"]["outcomes"] = {
+                    "label": _("Outcomes"),
+                    "type": "checkbox",
+                    "options": sorted(
+                        [(outcome.name, outcome.name) for outcome in outcomes]
+                    ),
+                    "values": self.request.GET.getlist("outcomes"),
+                }
 
-        context["facet_data"] = {
-            "judges": judges,
-            "alphabet": lowercase_alphabet(),
-            "attorneys": attorneys,
-            "outcomes": outcomes,
-        }
+    def add_attorneys_facet(self, context):
+        if "attorneys" not in self.exclude_facets:
+            attorneys = list(
+                attorney
+                for attorney in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="attorneys"
+                )
+                .order_by()
+                .values_list("attorneys__name", flat=True)
+                .distinct()
+                if attorney
+            )
+            if len(attorneys) > 1:
+                context["facet_data"]["attorneys"] = {
+                    "label": _("Attorneys"),
+                    "type": "checkbox",
+                    "options": sorted([(a, a) for a in attorneys]),
+                    "values": self.request.GET.getlist("attorneys"),
+                }
+
+    def add_facets(self, context):
+        context["facet_data"] = {}
+        self.add_judges_facet(context)
+        self.add_labels_facet(context)
+        self.add_outcomes_facet(context)
+        self.add_attorneys_facet(context)
+        self.add_taxonomies_facet(context)
+        self.add_alphabet_facet(context)
 
     def populate_years(self, context):
-        context["years"] = self.get_base_queryset(exclude=["year", "month"]).dates(
-            "date", "year", order="DESC"
-        )
-
-    def grouped_judgments(self, documents):
-        """Group the judgments by month and return a list of dicts with the month name and judgments for that month"""
-        # Group documents by month
-        groups = groupby(documents, lambda d: f"{MONTHS[d.date.month]} {d.date.year}")
-
-        return [{"key": key, "judgments": list(group)} for key, group in groups]
+        cache_key = f"judgment_years_{slugify(self.base_view_name())}"
+        years = cache.get(cache_key)
+        if years is None:
+            years = self.get_base_queryset(exclude=["year", "month"]).dates(
+                "date", "year", order="DESC"
+            )
+            cache.set(cache_key, years)
+        context["years"] = years
 
 
 class CourtDetailView(FilteredJudgmentView):
@@ -98,56 +155,38 @@ class CourtDetailView(FilteredJudgmentView):
 
     @cached_property
     def court(self):
+        if self.kwargs.get("code") == "all":
+            return Court(name=_("All courts"), code="all")
         return get_object_or_404(Court, code=self.kwargs.get("code"))
 
     def base_view_name(self):
         return self.court.name
 
     def get_base_queryset(self, exclude=None):
-        qs = super().get_base_queryset(exclude=exclude).filter(court=self.court)
+        qs = super().get_base_queryset(exclude=exclude)
+        if self.court.code != "all":
+            qs = qs.filter(court=self.court)
         return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["court"] = self.court
         context["registry_label_plural"] = CourtRegistry.model_label_plural
-        context["registries"] = self.court.registries.exclude(
-            judgments__isnull=True
-        )  # display registries with judgments only
-        context["registry_groups"] = list(chunks(context["registries"], 2))
+        if self.court.code != "all":
+            context["registries"] = registries = self.court.registries.exclude(
+                judgments__isnull=True
+            )  # display registries with judgments only
+            context["registry_groups"] = chunks(registries, 3)
+
         context["all_years_url"] = self.court.get_absolute_url()
         return context
 
-
-class YearMixin:
-    @property
-    def year(self):
-        return self.kwargs["year"]
-
-    def page_title(self):
-        return f"{super().page_title()} - {self.year}"
-
-    def get_base_queryset(self, exclude=None):
-        qs = super().get_base_queryset()
-        if exclude is None:
-            exclude = []
-        if "year" not in exclude:
-            qs = qs.filter(date__year=self.kwargs["year"])
-        return qs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["year"] = self.year
-        self.populate_months(context)
-        return context
-
-    def populate_months(self, context):
-        context["months"] = self.get_base_queryset(exclude=["month"]).dates(
-            "date", "month", order="ASC"
-        )
+    def add_entity_profile(self, context):
+        context["entity_profile"] = self.court.entity_profile.first()
+        context["entity_profile_title"] = self.court.name
 
 
-class CourtYearView(YearMixin, CourtDetailView):
+class CourtYearView(YearListMixin, CourtDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["all_months_url"] = reverse(
@@ -208,7 +247,7 @@ class CourtRegistryDetailView(RegistryMixin, CourtDetailView):
     pass
 
 
-class CourtRegistryYearView(YearMixin, CourtRegistryDetailView):
+class CourtRegistryYearView(YearListMixin, CourtRegistryDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["all_months_url"] = reverse(
@@ -238,18 +277,25 @@ class CourtClassDetailView(FilteredJudgmentView):
             .filter(court__court_class=self.court_class)
         )
 
+    def get_registries(self):
+        return Court.objects.filter(court_class=self.court_class)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["court_class"] = self.court_class
-        context["registries"] = Court.objects.filter(court_class=self.court_class)
+        context["registries"] = self.get_registries()
         context["registry_label_plural"] = _("Courts")
-        context["registry_groups"] = list(chunks(context["registries"], 2))
+        context["registry_groups"] = chunks(context["registries"], 3)
         context["all_years_url"] = self.court_class.get_absolute_url()
 
         return context
 
+    def add_entity_profile(self, context):
+        context["entity_profile"] = self.court_class.entity_profile.first()
+        context["entity_profile_title"] = self.court_class.name
 
-class CourtClassYearView(YearMixin, CourtClassDetailView):
+
+class CourtClassYearView(YearListMixin, CourtClassDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["all_months_url"] = reverse(

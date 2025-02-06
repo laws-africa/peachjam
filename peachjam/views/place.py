@@ -1,4 +1,4 @@
-from peachjam.models.core_document_model import get_country_and_locality_or_404
+from peachjam.models.core_document import get_country_and_locality_or_404
 from peachjam.views import FilteredDocumentListView
 
 

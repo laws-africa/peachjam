@@ -3,136 +3,161 @@
 {% block title %}
   {% trans 'Home' %}
 {% endblock %}
+{% block survey-banner %}{% endblock %}
 {% block page-content %}
-  <section class="hero">
-    {% block hero-img %}
-      <img class="hero__background-img"
-           src="{% static 'images/banner.jpg' %}"
-           srcset="{% static 'images/banner-small.jpg' %} 770w,
-                   {% static 'images/banner.jpg' %} 1920w"
-           sizes="100vw"
-           alt="{{ APP_NAME }}"
-           height="40"/>
-    {% endblock %}
-    <div class="hero__content">
-      <div class="row">
-        <div class="col-lg-8 col-12">
-          {% block hero-content %}
-            {% block hero-headings %}<h1 class="mb-4">{{ APP_NAME }}</h1>{% endblock %}
-          {% endblock %}
+  {% block hero-search %}
+    <section class="pt-5 pb-3 hero-search">
+      <div class="container">{% include 'liiweb/_hero_search.html' %}</div>
+    </section>
+  {% endblock %}
+  {% block hero-content %}
+    <section class="pt-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-9">
+            {% block hero-headings %}
+              <h2>
+                {% block hero-headings-title %}{% endblock %}
+              </h2>
+              <p class="h4 mt-4">
+                {% block hero-headings-welcome %}{% endblock %}
+              </p>
+            {% endblock %}
+          </div>
+          <div class="col-3 col-lg-2 offset-lg-1 text-center">
+            {% block hero-images %}
+              <img src="{% static 'images/logo.png' %}"
+                   class="img-fluid"
+                   alt="{{ APP_NAME }} logo"/>
+            {% endblock %}
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endblock %}
+  {% block frequently-used %}
+    <div class="container pt-2">
+      <div class="mt-3 d-lg-none row row-cols-2">
+        <div class="col mb-2">
+          <a href="{% url 'judgment_list' %}" class="btn btn-primary d-block">{% trans 'Judgments' %}</a>
+        </div>
+        <div class="col mb-2">
+          <a href="{% url 'legislation_list' %}" class="btn btn-primary d-block">{% trans 'Legislation' %}</a>
         </div>
       </div>
     </div>
-  </section>
-  <section class="py-5 hero-search">
-    <div class="container">
-      {% block hero-search %}
-        <div class="row justify-content-center">
-          <div class="col col-md-10 col-lg-8">
-            <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
-              <input type="text"
-                     class="form-control form-control-lg flex-grow-1"
-                     placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                     aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                     aria-describedby="button-addon2"
-                     autofocus=""
-                     name="q"/>
-              <input type="submit"
-                     class="btn btn-primary ms-2 btn-lg"
-                     value="{% trans 'Search' %}"/>
-            </form>
-            <div class="d-flex">
-              <a class="me-4" href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
-              {% include "peachjam/_help_button.html" with link="search" %}
+  {% endblock %}
+  {% block after-search %}{% endblock %}
+  {% if PEACHJAM_SETTINGS.survey_link %}
+    {% include "peachjam/_survey_banner_lg.html" %}
+  {% endif %}
+  {% block about %}
+    <section class="mt-2">
+      <div class="container">
+        <div class="row justify-content-between align-items-center mt-5 mb-3">
+          <div class="col-12 col-lg-6">
+            {% block second-column-content %}
+              {% block second-col-about %}{% endblock %}
+              {% block second-col-logos %}{% endblock %}
+              {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link or PEACHJAM_SETTINGS.linkedin_link %}
+                {% block social-media %}
+                  {% include 'peachjam/_social_media.html' %}
+                {% endblock %}
+              {% endif %}
+            {% endblock %}
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="hero-logos row justify-content-center justify-content-lg-end">
+              {% block hero-logos %}
+                <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
+                <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
+              {% endblock %}
             </div>
           </div>
         </div>
-      {% endblock %}
-    </div>
-  </section>
-  {% block after-search %}{% endblock %}
-  <section class="mt-2">
-    <div class="container">
-      <div class="row justify-content-between align-items-center mt-5 mb-3">
-        <div class="col-12 col-lg-6">
-          {% block second-column-content %}
-            {% block second-col-about %}{% endblock %}
-            {% block second-col-logos %}{% endblock %}
-            {% if PEACHJAM_SETTINGS.facebook_link or PEACHJAM_SETTINGS.twitter_link or PEACHJAM_SETTINGS.linkedin_link %}
-              {% block social-media %}
-                {% include 'peachjam/_social_media.html' %}
-              {% endblock %}
-            {% endif %}
-          {% endblock %}
-        </div>
-        <div class="col-12 col-lg-6">
-          <div class="hero-logos row justify-content-center">
-            {% block hero-logos %}
-              <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
-              <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
+      </div>
+    </section>
+  {% endblock %}
+  {% block recent-documents %}
+    <section class="my-5">
+      <div class="container">
+        <div class="row row-cols-1 row-cols-lg-2">
+          <div class="col mb-5">
+            {% block recent-judgments %}
+              <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
+              {% trans 'View more judgments' as text %}
+              {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
             {% endblock %}
           </div>
+          <div class="col mb-5">
+            {% block recent-legislation %}
+              <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
+              {% trans 'View more legislation' as text %}
+              {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation collapse=True with_citations=True view_more_text=text view_more_url_name='legislation_list' %}
+            {% endblock %}
+          </div>
+          {% if recent_gazettes %}
+            <div class="col mb-5">
+              {% block recent-gazettes %}
+                <h2 class="mb-4">{% trans 'Recent Gazettes' %}</h2>
+                {% trans 'View more gazettes' as text %}
+                {% include 'peachjam/_recent_document_list.html' with documents=recent_gazettes view_more_text=text view_more_url_name='gazettes' %}
+              {% endblock %}
+            </div>
+          {% endif %}
         </div>
       </div>
-    </div>
-  </section>
-  <section class="py-5">
-    <div class="container">
-      <div>
-        {% block first-column-content %}
-          <section class="pb-3 pt-3">
-            <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
-            {% trans 'View more judgments' as text %}
-            {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
-          </section>
-          <section class="pb-3 pt-3">
-            <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
-            {% trans 'View more legislation' as text %}
-            {% include 'peachjam/_recent_document_list.html' with documents=recent_legislation view_more_text=text view_more_url_name='legislation_list' %}
-          </section>
-        {% endblock %}
+    </section>
+  {% endblock %}
+  {% block courts %}
+    <section class="my-5 bg-brand-pale py-5">
+      <div class="container">
+        <h2 class="mb-4">{% trans 'Courts' %}</h2>
+        {% include 'peachjam/_court_list.html' %}
       </div>
-      <div>
-        {% block lower-row-content %}
-          <section class="pb-3 pt-3">
-            <h2 class="mb-4">{% trans 'Courts' %}</h2>
-            {% include 'peachjam/_court_list.html' %}
-          </section>
-          <section class="pb-3 pt-3">
-            <h2 class="mb-4">{% trans 'Collections' %}</h2>
-            {% include 'peachjam/_taxonomy_list.html' %}
-          </section>
-          {% if PEACHJAM_SETTINGS.pocket_law_repo %}
-            {% block pocketlaw %}
-              <section class="py-5">
-                <div class="row">
-                  <div class="col-sm-3 mb-3">
-                    <img src="{% static 'images/pocketlaw-logo.png' %}"
-                         alt="Pocket Law"
-                         class="img-fluid"/>
-                  </div>
-                  <div class="col-sm-9 ps-sm-5">
-                    <h2 class="mb-4">{% blocktrans trimmed %}Use {{ APP_NAME }} when you're offline{% endblocktrans %}</h2>
-                    <p class="lead">
-                      {% blocktrans trimmed %}
-                        Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.
-                      {% endblocktrans %}
-                    </p>
-                    <a href="{% url 'pocketlaw' %}" class="btn btn-lg btn-primary">Pocket Law</a>
-                  </div>
-                </div>
-              </section>
-            {% endblock %}
-          {% endif %}
-          {% if recent_articles %}
-            <section class="pb-5 pt-5">
-              <h2 class="mb-4">{% trans 'Latest Articles' %}</h2>
-              {% include 'peachjam/_article_list.html' with articles=recent_articles %}
-              <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">{% trans "View more articles" %}</a>
-            </section>
-          {% endif %}
-        {% endblock %}
+    </section>
+  {% endblock %}
+  {% block collections %}
+    <section class="my-5">
+      <div class="container">
+        <h2 class="mb-4">{% trans 'Collections' %}</h2>
+        {% include 'peachjam/_taxonomy_list.html' %}
       </div>
-    </div>
-  </section>
+    </section>
+  {% endblock %}
+  {% block pocketlaw %}
+    {% if PEACHJAM_SETTINGS.pocket_law_repo %}
+      <section class="my-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-3 mb-3">
+              <img src="{% static 'images/pocketlaw-logo.png' %}"
+                   alt="Pocket Law"
+                   class="img-fluid"/>
+            </div>
+            <div class="col-sm-9 ps-sm-5">
+              <h2 class="mb-4">{% blocktrans trimmed %}Use {{ APP_NAME }} when you're offline{% endblocktrans %}</h2>
+              <p class="lead">
+                {% blocktrans trimmed %}
+                  Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.
+                {% endblocktrans %}
+              </p>
+              <a href="{% url 'pocketlaw' %}" class="btn btn-lg btn-primary">Pocket Law</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    {% endif %}
+  {% endblock %}
+  {% block recent-articles %}
+    {% if recent_articles %}
+      <section class="my-5">
+        <div class="container">
+          <h2 class="mb-4">{% trans 'Latest Articles' %}</h2>
+          {% include 'peachjam/_article_list.html' with articles=recent_articles %}
+          <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">{% trans "View more articles" %}</a>
+        </div>
+      </section>
+    {% endif %}
+  {% endblock %}
 {% endblock %}

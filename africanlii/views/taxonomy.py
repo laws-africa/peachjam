@@ -1,5 +1,8 @@
+import datetime
+
 from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, TemplateView
 from elasticsearch_dsl.faceted_search import FacetedSearch, TermsFacet
 
@@ -7,7 +10,7 @@ from africanlii.forms import ESDocumentFilterForm
 from peachjam.helpers import lowercase_alphabet
 from peachjam.models import Taxonomy
 from peachjam.views import TaxonomyDetailView, TaxonomyFirstLevelView
-from peachjam_search.documents import SearchableDocument, get_search_indexes
+from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
 from peachjam_search.views import DocumentSearchViewSet
 
 
@@ -79,19 +82,23 @@ class DocIndexDetailView(TaxonomyDetailView):
         documents = list(documents)
         for r in documents:
             r["get_absolute_url"] = r["expression_frbr_uri"]
+            if isinstance(r["date"], datetime.datetime):
+                r["date"] = r["date"].date()
+            else:
+                r["date"] = datetime.datetime.strptime(r["date"], "%Y-%m-%d").date()
         return documents
 
     def get_base_queryset(self):
-        index = get_search_indexes(SearchableDocument._index._name)
+        indexes = MultiLanguageIndexManager.get_instance().get_all_search_index_names()
         search = (
-            SearchableDocument.search(index=index)
+            SearchableDocument.search(index=indexes)
             .source(exclude=DocumentSearchViewSet.source["excludes"])
             .filter("term", taxonomies=self.taxonomy.slug)
         )
         return search
 
     def get_queryset(self):
-        search = self.filter_queryset(self.get_base_queryset())
+        search = self.filter_queryset(self.get_base_queryset(), filter_q=True)
         if self.latest_expression_only:
             search = search.filter("term", is_most_recent=True)
         return search
@@ -99,7 +106,9 @@ class DocIndexDetailView(TaxonomyDetailView):
     def add_facets(self, context):
         """Add a limited set of facets pulled from ES."""
         faceted = FacetedSearch()
-        faceted.index = get_search_indexes(SearchableDocument._index._name)
+        faceted.index = (
+            MultiLanguageIndexManager.get_instance().get_all_search_index_names()
+        )
         faceted.facets = {
             "year": TermsFacet(field="year", size=100),
             "jurisdiction": TermsFacet(field="jurisdiction", size=100),
@@ -121,9 +130,26 @@ class DocIndexDetailView(TaxonomyDetailView):
         res._faceted_search = faceted
 
         context["facet_data"] = {
-            "alphabet": lowercase_alphabet(),
-            "years": [y for y, n, x in res.facets.year],
-            "jurisdictions": [j for j, n, x in res.facets.jurisdiction],
+            "jurisdictions": {
+                "label": _("Judrisdictions"),
+                "type": "checkbox",
+                "options": [(j, j) for j, n, x in res.facets.jurisdiction],
+                "values": self.request.GET.getlist("jurisdictions"),
+            },
+            "years": {
+                "label": _("Years"),
+                "type": "checkbox",
+                "options": [
+                    (str(y), y) for y, n, x in sorted(res.facets.year, reverse=True)
+                ],
+                "values": self.request.GET.getlist("years"),
+            },
+            "alphabet": {
+                "label": _("Alphabet"),
+                "type": "radio",
+                "options": [(a, a) for a in lowercase_alphabet()],
+                "values": self.request.GET.get("alphabet"),
+            },
         }
 
 

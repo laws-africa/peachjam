@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:54+0300\n"
-"PO-Revision-Date: 2023-09-19 11:54\n"
+"POT-Creation-Date: 2024-11-21 09:48+0200\n"
+"PO-Revision-Date: 2024-08-06 08:54\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -17,89 +17,121 @@ msgstr ""
 "X-Crowdin-File: /main/liiweb/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 103\n"
 
-#: templates/liiweb/home.html:4
-msgid "Home"
-msgstr "Página inicial"
+#: templates/liiweb/_donate_call_to_action.html:6
+#: templates/liiweb/donate.html:8
+#, python-format
+msgid "Donate to %(APP_NAME)s"
+msgstr "Doe para %(APP_NAME)s"
 
-#: templates/liiweb/home.html:35 templates/liiweb/home.html:36
+#: templates/liiweb/_donate_call_to_action.html:8
+#, python-format
+msgid "%(APP_NAME)s relies on donations to keep our platform free. Help us maintain and expand our resources. Donate today and support."
+msgstr "%(APP_NAME)s depende de doações para manter nossa plataforma gratuita. Ajude-nos a manter e expandir nossos recursos. Doe hoje e apoie."
+
+#: templates/liiweb/_donate_call_to_action.html:14
+#: templates/liiweb/donate.html:4
+msgid "Donate"
+msgstr "Doar"
+
+#: templates/liiweb/_hero_search.html:8 templates/liiweb/_hero_search.html:9
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr "Pesquisar %(APP_NAME)s"
 
-#: templates/liiweb/home.html:42
+#: templates/liiweb/_hero_search.html:14
 msgid "Search"
 msgstr "Pesquisa"
 
-#: templates/liiweb/home.html:44
+#: templates/liiweb/_hero_search.html:17
 msgid "Advanced search"
 msgstr "Pesquisa avançada"
 
-#: templates/liiweb/home.html:67
+#: templates/liiweb/home.html:4
+#: templates/liiweb/locality_legislation_list.html:9
+msgid "Home"
+msgstr "Página inicial"
+
+#: templates/liiweb/home.html:79
 msgid "Recent Judgments"
 msgstr "Julgamentos Recentes"
 
-#: templates/liiweb/home.html:68
+#: templates/liiweb/home.html:80
 msgid "View more judgments"
 msgstr "Ver mais julgamentos"
 
-#: templates/liiweb/home.html:72
+#: templates/liiweb/home.html:86
 msgid "Recent Legislation"
 msgstr "Legislação recente"
 
-#: templates/liiweb/home.html:73
+#: templates/liiweb/home.html:87
 msgid "View more legislation"
 msgstr "Ver mais legislação"
 
-#: templates/liiweb/home.html:100
-msgid "Facebook"
-msgstr "Facebook"
+#: templates/liiweb/home.html:94
+msgid "Recent Gazettes"
+msgstr "Diários recentes"
 
-#: templates/liiweb/home.html:135
+#: templates/liiweb/home.html:95
+msgid "View more gazettes"
+msgstr "Veja mais jornais"
+
+#: templates/liiweb/home.html:107
 msgid "Courts"
 msgstr "Tribunais"
 
-#: templates/liiweb/home.html:139
+#: templates/liiweb/home.html:115
 msgid "Collections"
 msgstr "Coleções"
 
-#: templates/liiweb/home.html:152
+#: templates/liiweb/home.html:131
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr "Use %(APP_NAME)s quando estiver off-line"
 
-#: templates/liiweb/home.html:154
+#: templates/liiweb/home.html:133
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr "Pocket Law é uma cópia offline da jurisprudência, legislação e outros materiais jurídicos de %(APP_NAME)s."
 
-#: templates/liiweb/home.html:166
+#: templates/liiweb/home.html:148
 msgid "Latest Articles"
 msgstr "Artigos mais Recentes"
 
-#: templates/liiweb/home.html:168
+#: templates/liiweb/home.html:150
 msgid "View more articles"
 msgstr "Ver mais artigos"
 
 #: templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:16 templates/peachjam/_header.html:17
+#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:17
 msgid "Legislation"
 msgstr "Legislação"
 
-#: templates/liiweb/legislation_list.html:24
+#: templates/liiweb/legislation_list.html:13
+msgid "You are viewing repealed legislation which is no longer in force."
+msgstr "Estão a ver legislação revogada, que já não está em vigor."
+
+#: templates/liiweb/legislation_list.html:22
+#: templates/liiweb/locality_legislation_list.html:27
 msgid "Current legislation"
 msgstr "Legislação atual"
 
 #: templates/liiweb/legislation_list.html:30
+msgid "Recent legislation"
+msgstr "Legislação recente"
+
+#: templates/liiweb/legislation_list.html:44
+msgid "Uncommenced legislation"
+msgstr "Legislação não iniciada"
+
+#: templates/liiweb/legislation_list.html:52
+#: templates/liiweb/locality_legislation_list.html:33
 msgid "Repealed legislation"
 msgstr "Legislação repetida"
 
-#: templates/liiweb/legislation_list.html:42
+#: templates/liiweb/legislation_list.html:59
+#: templates/liiweb/locality_legislation_list.html:43
 msgid "All legislation"
 msgstr "Toda a legislação"
-
-#: templates/liiweb/legislation_list.html:48
-msgid "You are viewing repealed legislation which is no longer in force."
-msgstr "Estão a ver legislação revogada, que já não está em vigor."
 
 #: templates/liiweb/pocketlaw.html:7
 msgid "Pocket Law"
@@ -118,15 +150,23 @@ msgstr "Use %(APP_NAME)s offline com <a href=\"%(pocket_law_url)s\">Pocket Law</
 msgid "Site Statistics"
 msgstr "Estatísticas do site"
 
-#: templates/peachjam/_footer.html:24
+#: templates/peachjam/_footer.html:25
 msgid "Terms of Use"
 msgstr "Termos de Utilização"
 
-#: templates/peachjam/_footer.html:29
+#: templates/peachjam/_footer.html:28
+msgid "About us"
+msgstr "Sobre nós"
+
+#: templates/peachjam/_footer.html:31
+msgid "Contact us"
+msgstr "Contate-nos"
+
+#: templates/peachjam/_footer.html:37
 msgid "Our partners"
 msgstr "Nossos parceiros"
 
-#: templates/peachjam/_footer.html:38
+#: templates/peachjam/_footer.html:46
 msgid "Other African Legal Information Institutions"
 msgstr "Outras Instituições Jurídicas Africanas"
 
@@ -134,7 +174,7 @@ msgstr "Outras Instituições Jurídicas Africanas"
 msgid "Judgments"
 msgstr "Julgamentos"
 
-#: views/legislation.py:110
+#: views/legislation.py:165
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Legislação"

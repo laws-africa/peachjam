@@ -10,12 +10,14 @@ class PeachjamSearchConfig(AppConfig):
         from background_task.models import Task
 
         import peachjam_search.signals  # noqa
-        from peachjam_search.documents import setup_language_indexes
+        from peachjam_search.documents import MultiLanguageIndexManager
 
-        setup_language_indexes()
+        manager = MultiLanguageIndexManager.get_instance()
+        manager.register_indexes()
 
         if not settings.DEBUG:
-            from peachjam_search.tasks import prune_search_traces
+            from peachjam_search.tasks import prune_search_traces, update_saved_searches
 
             # run in an hour and repeat daily
             prune_search_traces(schedule=Task.HOURLY, repeat=Task.DAILY)
+            update_saved_searches(schedule=Task.HOURLY, repeat=Task.DAILY)

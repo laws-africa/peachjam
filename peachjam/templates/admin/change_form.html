@@ -1,9 +1,37 @@
 {% extends "admin/change_form.html" %}
-{% load i18n %}
+{% load i18n comments humanize static %}
+{% block form_top %}
+  {{ block.super }}
+  {% if adminform.form.edit_activity_start %}{{ adminform.form.edit_activity_start }}{% endif %}
+  {% if adminform.form.edit_activity_stage %}{{ adminform.form.edit_activity_stage }}{% endif %}
+{% endblock %}
 {% block extra_actions %}
+  {{ block.super }}
   {% if PEACHJAM_SETTINGS.editor_help_link and adminform.model_admin.help_topic %}
     <a target="_blank"
        href="{{ PEACHJAM_SETTINGS.editor_help_link }}{{ adminform.model_admin.help_topic }}"
        class="btn btn-block btn-info">{% trans 'Help' %}</a>
+  {% endif %}
+  {% block comments %}
+    {% if original %}
+      <hr/>
+      <!-- actual comments, this is updated with hx-swap when a comment is posted -->
+      <div id="comments-list">{% include 'admin/_comments_list.html' with object=original %}</div>
+    {% endif %}
+  {% endblock %}
+{% endblock %}
+{% block content %}
+  <script>
+  // app-prod.js uses Bootstrap 5, but jazzmin uses Bootstrap 4. So tell Bootstrap 5 not to integrate with jquery,
+  // so that it doesn't conflict with Bootstrap 4.
+  document.body.setAttribute('data-bs-no-jquery', 'true');
+  </script>
+  <script defer src="{% static 'js/app-prod.js' %}"></script>
+  {{ block.super }}
+  {% if original %}
+    <!-- actual comment form, outside of main form; this will be updated with hx-oob-swap when a comment is posted -->
+    <div id="comments-form-wrapper">
+      {% include 'admin/_comments_form.html' with object=original app_label=opts.app_label model_name=opts.model_name %}
+    </div>
   {% endif %}
 {% endblock %}

@@ -5,7 +5,7 @@ import igraph as ig
 from elasticsearch import helpers
 
 from peachjam.models import CoreDocument, pj_settings
-from peachjam_search.documents import SearchableDocument
+from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
 
 from ..models import ExtractedCitation
 
@@ -84,11 +84,10 @@ class GraphRanker:
         log.info(
             f"updating index with {len(docs)} documents",
         )
-        searchable_doc = SearchableDocument()
         actions = (
             {
                 "_op_type": "update",
-                "_index": searchable_doc.get_index_for_language(
+                "_index": MultiLanguageIndexManager.get_instance().get_index_for_language(
                     doc["language__iso_639_2T"]
                 ),
                 "_id": doc["id"],

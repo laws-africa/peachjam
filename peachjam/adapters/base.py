@@ -1,3 +1,10 @@
+import logging
+
+import requests
+
+logger = logging.getLogger(__name__)
+
+
 class Adapter:
     def __init__(self, ingestor, settings):
         self.ingestor = ingestor
@@ -34,6 +41,29 @@ class Adapter:
         """Handle webhook from a remote server."""
         pass
 
+    def get_edit_url(self, document):
+        """Get an adapter-specific edit URL for this document."""
+        pass
+
     @classmethod
     def name(cls):
         return cls.__name__
+
+
+class RequestsAdapter(Adapter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.client = requests.session()
+        self.api_url = self.settings["api_url"]
+
+    def client_request(self, method, url, **kwargs):
+        logger.debug(f"{method.upper()} {url} kwargs={kwargs}")
+        r = getattr(self.client, method)(url, **kwargs)
+        r.raise_for_status()
+        return r
+
+    def client_get(self, url, **kwargs):
+        return self.client_request("get", url, **kwargs)
+
+    def client_post(self, url, **kwargs):
+        return self.client_request("post", url, **kwargs)

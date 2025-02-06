@@ -9,18 +9,14 @@
   <img src="{% static 'images/cooperation-logo-ger-ger-giz.jpg' %}"
        alt="GIZ logo"/>
 {% endblock %}
-{% block hero-headings %}
-  <h1 class="mb-4">
-    {% blocktrans trimmed %}
-    Welcome to the Ghana Legal Information Institute
-  {% endblocktrans %}
-  </h1>
-  <h4 class="mb-4">
-    {% blocktrans trimmed %}
+{% block hero-headings-title %}
+  {% trans 'Welcome to the Ghana Legal Information Institute' %}
+{% endblock %}
+{% block hero-headings-welcome %}
+  {% blocktrans trimmed %}
     GhaLII digitises and publishes the law of Ghana for free access to all, in partnership with the
     Judicial Service of Ghana.
   {% endblocktrans %}
-  </h4>
 {% endblock %}
 {% block second-col-about %}
   <p class="lead">

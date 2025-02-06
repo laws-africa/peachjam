@@ -9,7 +9,7 @@ def general(request):
     Add some useful context to templates.
     """
     # get current language
-    language = request.LANGUAGE_CODE
+    language = getattr(request, "LANGUAGE_CODE", settings.LANGUAGE_CODE)
 
     return {
         "DEBUG": settings.DEBUG,
@@ -19,6 +19,7 @@ def general(request):
         "CURRENT_LANGUAGE": language,
         "MULTIPLE_JURISDICTIONS": settings.PEACHJAM["MULTIPLE_JURISDICTIONS"],
         "MULTIPLE_LOCALITIES": settings.PEACHJAM["MULTIPLE_LOCALITIES"],
+        "SEARCH_SUGGESTIONS": settings.PEACHJAM["SEARCH_SUGGESTIONS"],
         # this object will be injected into Javascript to provide configuration settings to the Javascript app
         "PEACHJAM_JS_CONFIG": {
             "appName": settings.PEACHJAM["APP_NAME"],

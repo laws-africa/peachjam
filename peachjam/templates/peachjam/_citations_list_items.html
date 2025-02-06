@@ -3,7 +3,7 @@
   <tr>
     <td>{{ start|add:forloop.counter }}.</td>
     <td>
-      <a href="{% url 'document_detail' frbr_uri=doc.work.frbr_uri|strip_first_character %}">{{ doc.title }}</a>
+      <a href="{% url 'document_detail' frbr_uri=doc.expression_frbr_uri|strip_first_character %}">{{ doc.title }}</a>
     </td>
     <td class="text-nowrap">
       {% if doc.work.n_citing_works %}
@@ -16,3 +16,11 @@
     </td>
   </tr>
 {% endfor %}
+{% if request.htmx %}
+  {% if truncated %}
+    {% include 'peachjam/_citations_list_more_button.html' %}
+  {% else %}
+    <span id="citation-button-{{ direction }}-{{ nature.pk }}"
+          hx-swap-oob="true"></span>
+  {% endif %}
+{% endif %}

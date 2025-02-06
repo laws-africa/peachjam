@@ -5,8 +5,8 @@ from django.conf import settings
 from django.utils.functional import classproperty
 from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
-from elasticsearch_dsl import RankFeature
-from elasticsearch_dsl.index import Index
+from elasticsearch_dsl import RankFeature, token_filter
+from elasticsearch_dsl.analysis import CustomAnalyzer
 
 from peachjam.models import (
     Attorney,
@@ -37,6 +37,8 @@ class RankField(fields.DEDField, RankFeature):
 
 @registry.register_document
 class SearchableDocument(Document):
+    # NB: This is a legacy field; use nature for an accurate human-friendly value. This field is a mixture of doc_type
+    # and nature unless the search index has been updated since nature became required.
     doc_type = fields.KeywordField()
     title = fields.TextField()
     # title field for sorting and alphabetical listing
@@ -74,7 +76,8 @@ class SearchableDocument(Document):
     case_summary = fields.TextField()
     flynote = fields.TextField()
     order = fields.TextField()
-    judges = fields.KeywordField(attr="judge.name")
+    judges = fields.KeywordField()
+    judges_text = fields.TextField()
     attorneys = fields.KeywordField(attr="attorney.name")
 
     registry = fields.KeywordField(attr="registry.name")
@@ -89,7 +92,7 @@ class SearchableDocument(Document):
     outcome_fr = fields.KeywordField()
     outcome_pt = fields.KeywordField()
 
-    # GenericDocument, LegalInstrument
+    # GenericDocument
     authors = fields.KeywordField()
 
     nature = fields.KeywordField(attr="nature.name")
@@ -122,12 +125,19 @@ class SearchableDocument(Document):
         }
     )
 
+    # for typeahead suggestions
+    suggest = fields.CompletionField(analyzer="standard")
+
     # this will be used to build prepare_xxx_xx fields for each of these
     translated_fields = [
         ("court", "name"),
         ("registry", "name"),
         ("nature", "name"),
     ]
+
+    # ES's max request size is 100mb, so limit the size of the text fields to a little below that
+    # 80 MB
+    MAX_TEXT_LENGTH = 80 * 1024 * 1024
 
     def should_index_object(self, obj):
         if isinstance(obj, ExternalDocument) or not obj.published:
@@ -192,22 +202,15 @@ class SearchableDocument(Document):
             return related_instance.judgment_set.all()
 
         if isinstance(related_instance, Author):
-            generic = CoreDocument.objects.filter(
+            return CoreDocument.objects.filter(
                 genericdocument__authors=related_instance
             )
-            legal = CoreDocument.objects.filter(
-                legalinstrument__authors=related_instance
-            )
-            return generic | legal
 
         if isinstance(related_instance, Taxonomy):
             topics = [related_instance] + [
                 t for t in related_instance.get_descendants()
             ]
             return CoreDocument.objects.filter(taxonomies__topic__in=topics).distinct()
-
-    def prepare_doc_type(self, instance):
-        return instance.get_doc_type_display()
 
     def prepare_case_number(self, instance):
         if hasattr(instance, "case_numbers"):
@@ -220,20 +223,29 @@ class SearchableDocument(Document):
         if instance.doc_type == "judgment":
             return [j.name for j in instance.judges.all()]
 
+    def prepare_judges_text(self, instance):
+        return self.prepare_judges(instance)
+
     def prepare_attorneys(self, instance):
         if instance.doc_type == "judgment":
             return [a.name for a in instance.attorneys.all()]
 
     def prepare_authors(self, instance):
-        if hasattr(instance, "authors"):
-            return [a.name for a in instance.authors.all()]
+        if hasattr(instance, "author"):
+            return [a.name for a in instance.author_list()]
 
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""
         if instance.content_html and (
             not instance.content_html_is_akn or not instance.toc_json
         ):
-            return instance.get_content_as_text()
+            text = instance.get_content_as_text()
+            if text and len(text) > self.MAX_TEXT_LENGTH:
+                log.warning(
+                    f"Limiting text content of {instance} to {self.MAX_TEXT_LENGTH} (length is {len(text)})"
+                )
+                text = text[: self.MAX_TEXT_LENGTH]
+            return text
 
     def prepare_ranking(self, instance):
         if instance.work.ranking > 0:
@@ -247,10 +259,6 @@ class SearchableDocument(Document):
     def prepare_registry(self, instance):
         if hasattr(instance, "registry") and instance.registry:
             return instance.registry.name
-
-    def prepare_nature(self, instance):
-        if hasattr(instance, "nature") and instance.nature:
-            return instance.nature.name
 
     def prepare_outcome(self, instance):
         if hasattr(instance, "outcomes") and instance.outcomes:
@@ -272,6 +280,11 @@ class SearchableDocument(Document):
         """Text content of pages extracted from PDF."""
         if not instance.content_html:
             text = instance.get_content_as_text()
+            if text and len(text) > self.MAX_TEXT_LENGTH:
+                log.warning(
+                    f"Limiting text content of {instance} to {self.MAX_TEXT_LENGTH} (length is {len(text)})"
+                )
+                text = text[: self.MAX_TEXT_LENGTH]
             page_texts = text.split("\x0c")
             pages = []
             for i, page in enumerate(page_texts):
@@ -347,15 +360,27 @@ class SearchableDocument(Document):
         parts.extend([a.title for a in instance.alternative_names.all()])
         return " ".join(parts)
 
-    def get_index_for_language(self, lang):
-        if lang in ANALYZERS:
-            return f"{self._index._name}_{lang}"
-        return self._index._name
+    def prepare_suggest(self, instance):
+        # don't provide suggestions for gazettes
+        if instance.frbr_uri_doctype == "officialGazette":
+            return None
+
+        suggestions = [instance.title]
+
+        if instance.citation and instance.citation != instance.title:
+            suggestions.append(instance.citation)
+
+        for name in instance.alternative_names.all():
+            suggestions.append(name.title)
+
+        return suggestions
 
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
         log.info(f"Prepared document #{object_instance.pk} for indexing")
-        info["_index"] = self.get_index_for_language(
+        info[
+            "_index"
+        ] = MultiLanguageIndexManager.get_instance().get_index_for_language(
             object_instance.language.iso_639_2T
         )
         return info
@@ -396,45 +421,164 @@ for field, attr in SearchableDocument.translated_fields:
             make_prepare(field, attr, lang),
         )
 
-# These are the language-specific indexes we create and their associated analyzers for text fields.
-# Documents in other languages are stored in a general index with the "standard" analyzer
-ANALYZERS = {
-    "ara": "arabic",
-    "eng": "english",
-    "fra": "french",
-    "por": "portuguese",
-}
 
+class MultiLanguageIndexManager:
+    """Helper that creates multi-language indexes from the main search index definition.
+    and ensures the text fields use the correct language variant analyzers."""
 
-def get_search_indexes(base_index):
-    return (
-        [base_index]
-        + [f"{base_index}_{lang}" for lang in ANALYZERS.keys()]
-        + [
+    # These are the language-specific indexes we create and their associated analyzers for text fields.
+    # Documents in other languages are stored in a general index with the "standard" analyzer
+    ANALYZERS = {
+        "ara": "arabic",
+        "eng": "english",
+        "fra": "french",
+        "por": "portuguese",
+    }
+
+    # analyzer and filters for synonyms
+    SEARCH_ANALYZERS = {
+        # Re-implement the built-in English analyzer, but include English synonyms
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/7.17/analysis-lang-analyzer.html#english-analyzer
+        "eng": CustomAnalyzer(
+            "english_synonym",
+            tokenizer="standard",
+            filter=[
+                token_filter(
+                    "english_synonym_filter",
+                    type="synonym_graph",
+                    synonyms=[
+                        # Any occurrence of one of these words will be expanded to all the others.
+                        # All the terms will then go through the normal filters, such as lowercasing and stemming.
+                        # NB: synonyms are case-sensitive
+                        "Anor, Another",
+                        "AU, African Union",
+                        "au, African Union",
+                        "delict, tort",
+                        "Ors, Others",
+                        "ors, others",
+                        "R, Republic",
+                        "S, State",
+                        "v, vs, versus",
+                        "V, Vs, Versus",
+                    ],
+                ),
+                token_filter(
+                    "english_possessive_stemmer",
+                    type="stemmer",
+                    language="possessive_english",
+                ),
+                "lowercase",
+                token_filter("english_stop", type="stop", stopwords="_english_"),
+                token_filter("english_stemmer", type="stemmer", language="english"),
+            ],
+        )
+    }
+
+    def __init__(self):
+        self.main_index = SearchableDocument._index
+        self.language_indexes = self.create_language_indexes()
+        self.load_language_index_settings(from_server=False)
+
+    @classmethod
+    def get_instance(cls):
+        if not hasattr(cls, "_instance"):
+            cls._instance = cls()
+        return cls._instance
+
+    def create_language_indexes(self):
+        """Create basic multi-language indexes. They are not fully configured with mapping details, because that
+        requires an elasticsearch connection."""
+        return {
+            lang: self.main_index.clone(f"{self.main_index._name}_{lang}")
+            for lang in self.ANALYZERS.keys()
+        }
+
+    def load_language_index_settings(self, from_server=True):
+        """Configure mappings etc for the language indexes. Requires an elasticsearch connection."""
+        main_mappings = self.main_index.to_dict()["mappings"]
+
+        for lang, index in self.language_indexes.items():
+            search_analyzer = None
+            if lang in self.SEARCH_ANALYZERS:
+                # setup synonyms
+                index.analyzer(self.SEARCH_ANALYZERS[lang])
+                search_analyzer = self.SEARCH_ANALYZERS[lang]._name
+
+            if from_server and index.exists():
+                is_new = False
+                index.load_mappings()
+                new_mappings = index.get_or_create_mapping().to_dict()
+                # merge in new fields
+                for fld in main_mappings["properties"]:
+                    if fld not in new_mappings["properties"]:
+                        new_mappings["properties"][fld] = main_mappings["properties"][
+                            fld
+                        ]
+            else:
+                is_new = True
+                new_mappings = copy.deepcopy(main_mappings)
+
+            # update analyzers store mappings
+            self.set_text_field_analyzer(
+                new_mappings["properties"],
+                self.ANALYZERS[lang],
+                search_analyzer,
+                is_new,
+            )
+            index.get_or_create_mapping()._update_from_dict(new_mappings)
+
+    def set_text_field_analyzer(self, fields, analyzer, search_analyzer, is_new):
+        """Recursively set analyzers for text fields."""
+        # these fields weren't initialised correctly and we can't change the mappings
+        for name, fld in fields.items():
+            if fld["type"] == "text":
+                if is_new and "analyzer" not in fld:
+                    # the analyzer can't change once it is set
+                    fld["analyzer"] = analyzer
+
+                if search_analyzer and (
+                    is_new and fld.get("analyzer") == analyzer or "analyzer" not in fld
+                ):
+                    # this can always change
+                    fld["search_analyzer"] = search_analyzer
+
+                # the analyzer can't change once it is set
+                if is_new and "analyzer" not in fld:
+                    fld["analyzer"] = analyzer
+            elif fld["type"] == "nested":
+                self.set_text_field_analyzer(
+                    fld["properties"], analyzer, search_analyzer, is_new
+                )
+
+    def update_language_index_settings(self):
+        for index in self.language_indexes.values():
+            log.info(f"Updating index settings for {index._name}")
+            index.close()
+            log.info("Index closed")
+            try:
+                index.save()
+                log.info("Index updated")
+            finally:
+                index.open()
+                log.info("Index re-opened")
+
+    def register_indexes(self):
+        for index in self.language_indexes.values():
+            registry.register(index, SearchableDocument)
+
+    def get_all_search_index_names(self):
+        """The names of all indexes to use for a search."""
+        names = [self.main_index._name] + [
+            ix._name for ix in self.language_indexes.values()
+        ]
+        # fold in language variants of the extra search indexes, if any
+        return names + [
             f"{i}_{lang}"
             for i in settings.PEACHJAM["EXTRA_SEARCH_INDEXES"]
-            for lang in ANALYZERS.keys()
+            for lang in self.ANALYZERS.keys()
         ]
-    )
 
-
-def setup_language_indexes():
-    """Setup multi-language indexes."""
-    main_index = SearchableDocument._index
-    mappings = main_index.to_dict()["mappings"]
-
-    def set_analyzer(fields, analyzer):
-        """Recursively set analyzer for text fields."""
-        for fld in fields:
-            if fld["type"] == "text":
-                fld["analyzer"] = analyzer
-            elif fld["type"] == "nested":
-                set_analyzer(fld["properties"].values(), analyzer)
-
-    for lang, analyzer in ANALYZERS.items():
-        new_mappings = copy.deepcopy(mappings)
-        set_analyzer(new_mappings["properties"].values(), analyzer)
-        index = Index(name=f"{main_index._name}_{lang}")
-        index.get_or_create_mapping()._update_from_dict(new_mappings)
-        index._settings = main_index._settings
-        registry.register(index, SearchableDocument)
+    def get_index_for_language(self, lang):
+        if lang in self.ANALYZERS:
+            return f"{self.main_index._name}_{lang}"
+        return self.main_index._name

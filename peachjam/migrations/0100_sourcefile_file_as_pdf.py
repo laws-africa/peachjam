@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-import peachjam.models.core_document_model
+import peachjam.models.attachments
 
 
 class Migration(migrations.Migration):
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 max_length=1024,
                 null=True,
-                upload_to=peachjam.models.core_document_model.file_location,
+                upload_to=peachjam.models.attachments.file_location,
                 verbose_name="file as pdf",
             ),
         ),

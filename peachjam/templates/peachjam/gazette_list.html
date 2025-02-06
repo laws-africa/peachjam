@@ -1,93 +1,89 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends "peachjam/layouts/document_list.html" %}
 {% load i18n %}
 {% block title %}
   {{ place|default_if_none:"" }} {% trans 'Gazettes' %} {{ year }}
 {% endblock %}
-{% block page-content %}
-  <section class="pb-5">
-    <div class="container">
-      {% block breadcrumbs %}
-        {% if place %}
-          <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-              <li class="breadcrumb-item">
-                <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
-              </li>
-              {% if country %}
-                <li class="breadcrumb-item">
-                  <a href="{% url 'gazettes_by_locality' country.pk.lower %}">{{ country }}</a>
-                </li>
-              {% endif %}
-              {% if locality %}
-                <li class="breadcrumb-item">
-                  <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality }}</a>
-                </li>
-              {% endif %}
-            </ol>
-          </nav>
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'gazettes' %}">{% trans 'Gazettes' %}</a>
+        </li>
+        {% if country %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'gazettes_by_locality' country.pk.lower %}">{{ country }}</a>
+          </li>
         {% endif %}
-      {% endblock %}
-      {% block page-title %}
-        <h1 class="my-4">
-          {% if place %}{{ place }}{% endif %}
-          {% trans 'Gazettes' %}
-        </h1>
-      {% endblock %}
-      {% include 'peachjam/_quick_search.html' %}
-      {% block localities %}
-        {% if localities %}
-          {% include 'peachjam/_gazette_localities.html' %}
+        {% if locality %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'gazettes_by_locality' locality.place_code %}">{{ locality }}</a>
+          </li>
         {% endif %}
-      {% endblock %}
-      {% if doc_count %}
-        <h4 class="text-muted my-3">
-          {% blocktrans trimmed count counter=doc_count %}
-            {{ counter }} gazette
-          {% plural %}
-            {{ counter }} gazettes
-          {% endblocktrans %}
-        </h4>
-        {% block years-list %}
-          <div class="row mt-5">
-            {% for year in years %}
-              <div class="col-md-4 col-sm-6 col-12 mb-5 mr-3">
-                <div class="card">
-                  <div class="card-body">
-                    <h2 class="text-center fw-bold">
-                      {% block gazette-year-link %}
-                        {% if locality %}
-                          <a href="{% url 'gazettes_by_year' locality.place_code year.year %}">{{ year.year }}</a>
-                        {% elif country %}
-                          <a href="{% url 'gazettes_by_year' country.pk.lower year.year %}">{{ year.year }}</a>
-                        {% else %}
-                          <a href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
-                        {% endif %}
-                      {% endblock %}
-                    </h2>
-                    <div class="text-center mb-3">
-                      {% blocktrans trimmed count num_gazettes=year.count %}
-                        {{ num_gazettes }} gazette
-                      {% plural %}
-                        {{ num_gazettes }} gazettes
-                      {% endblocktrans %}
-                    </div>
-                    {% block monthly-chart %}
-                      {% if locality %}
-                        {% url 'gazettes_by_year' locality.place_code year.year as url %}
-                      {% elif country %}
-                        {% url 'gazettes_by_year' country.pk.lower year.year as url %}
-                      {% else %}
-                        {% url 'gazettes_by_year' year.year as url %}
-                      {% endif %}
-                      {% include 'peachjam/_monthly_column_chart.html' %}
-                    {% endblock %}
-                  </div>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-title %}
+  {% if not entity_profile %}
+    <h1 class="my-4">
+      {% if place %}{{ place }}{% endif %}
+      {% trans 'Gazettes' %}
+    </h1>
+  {% endif %}
+{% endblock %}
+{% block count-and-search %}
+  {% block localities %}
+    {% if localities %}
+      {% include 'peachjam/_gazette_localities.html' %}
+    {% endif %}
+  {% endblock %}
+  {% include 'peachjam/_count_and_search.html' %}
+{% endblock %}
+{% block document-table %}
+  {% if doc_count %}
+    {% block years-list %}
+      <div class="row mt-5">
+        {% for year in years %}
+          <div class="col-md-4 col-sm-6 col-12 mb-5 mr-3">
+            <div class="card">
+              <div class="card-body">
+                <h2 class="text-center fw-bold">
+                  {% block gazette-year-link %}
+                    {% if locality %}
+                      <a href="{% url 'gazettes_by_year' locality.place_code year.year %}">{{ year.year }}</a>
+                    {% elif country %}
+                      <a href="{% url 'gazettes_by_year' country.pk.lower year.year %}">{{ year.year }}</a>
+                    {% else %}
+                      <a href="{% url 'gazettes_by_year' year.year %}">{{ year.year }}</a>
+                    {% endif %}
+                  {% endblock %}
+                </h2>
+                <div class="text-center mb-3">
+                  {% blocktrans trimmed count num_gazettes=year.count %}
+                    {{ num_gazettes }} gazette
+                  {% plural %}
+                    {{ num_gazettes }} gazettes
+                  {% endblocktrans %}
                 </div>
+                {% block monthly-chart %}
+                  {% if locality %}
+                    {% url 'gazettes_by_year' locality.place_code year.year as url %}
+                  {% elif country %}
+                    {% url 'gazettes_by_year' country.pk.lower year.year as url %}
+                  {% else %}
+                    {% url 'gazettes_by_year' year.year as url %}
+                  {% endif %}
+                  {% include 'peachjam/_monthly_column_chart.html' %}
+                {% endblock %}
               </div>
-            {% endfor %}
+            </div>
           </div>
-        {% endblock %}
-      {% endif %}
-    </div>
-  </section>
+        {% endfor %}
+      </div>
+    {% endblock %}
+  {% endif %}
 {% endblock %}

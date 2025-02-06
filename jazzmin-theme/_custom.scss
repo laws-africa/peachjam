@@ -38,7 +38,27 @@
     font-size: $font-size-base;
   }
 
+  // text inputs should be wide
+  .form-group, .form-row {
+    .vTextField,
+    .vLargeTextField,
+    .vURLField,
+    input[type="text"] {
+      width: 100%;
+    }
+  }
+
   .main-sidebar .brand-link .brand-image {
     display: none;
+  }
+
+  form .form-group .col-sm-7 {
+    // mimic col-9
+    flex: 0 0 75%;
+    max-width: 75%;
+  }
+
+  form la-toc-item label {
+    font-weight: normal !important;
   }
 }

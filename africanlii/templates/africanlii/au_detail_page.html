@@ -9,7 +9,7 @@
       {% block breadcrumbs %}{% endblock %}
       {% block page-heading %}
         <h1 class="my-4">{% trans 'African Union (AU)' %}</h1>
-        {% include "peachjam/_help_button.html" with link="african-union-documents-au" %}
+        {% include "peachjam/_help_button.html" with help_link="african-union-documents-au" %}
       {% endblock %}
       <p>
         {% blocktrans trimmed %}
@@ -71,7 +71,20 @@
   </section>
   <section class="container">
     <div class="row">
-      <div class="col-sm-12"></div>
+      <div class="col-md-6 col-lg-4 mb-3">
+        {% for court_class in court_classes %}
+          {% if court_class.courts.all %}
+            <h3>{{ court_class.name }}</h3>
+            <ul class="list-unstyled">
+              {% for court in court_class.courts.all %}
+                <li>
+                  <a href="{% url 'court' court.code %}">{{ court.name }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+      </div>
     </div>
   </section>
   <section class="container">

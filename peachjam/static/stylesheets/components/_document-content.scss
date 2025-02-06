@@ -6,8 +6,8 @@
   }
 
   .content.content__html {
-    // reset line height so html documents use their default, rather than bootstrap's adjusted line height
-    line-height: normal;
+    // reset line height to a reasonable default for text documents, rather than bootstrap's adjusted line height
+    line-height: 1.3;
     font-size: 15px;
 
     // style embedded la-akoma-ntoso content
@@ -81,20 +81,9 @@
     }
   }
 
-  .document-content__toggle {
-    @extend .mb-4;
-    position: sticky;
-    top: 0;
-    left: 0;
-    z-index: 99;
-    @include media-breakpoint-up(lg) {
-      display: none;
-    }
-  }
-
   .navigation {
     position: sticky;
-    top: 0;
+    top: $floating-header-height;
     left: 0;
     height: 100vh;
     border-right: 1px solid $gray-200;
@@ -152,14 +141,21 @@
     max-width: 70em;
     margin-left: auto;
     margin-right: auto;
-    .content {
-      flex: 80%;
-      max-width: 80%;
-      padding-right: 0.5rem;
 
-      @include media-breakpoint-down(lg) {
-        flex: 100%;
-        max-width: 100%;
+    * {
+      scroll-margin-top: $floating-header-height + 1rem;
+    }
+
+    &.la-akoma-ntoso-with-gutter {
+      .content {
+        flex: 80%;
+        max-width: 80%;
+        padding-right: 0.5rem;
+
+        @include media-breakpoint-down(lg) {
+          flex: 100%;
+          max-width: 100%;
+        }
       }
     }
 
@@ -336,10 +332,6 @@
     .pdf-content {
       display: none;
     }
-
-    .document-content__toggle {
-      display: none;
-    }
   }
 
   &[data-pdf-standby] {
@@ -374,7 +366,6 @@
   }
 
   margin-bottom: 0px;
-  display: flex;
   flex-wrap: wrap;
 
   dt {
@@ -383,10 +374,13 @@
   }
   dd {
     padding-left: 0.5rem;
-    width: calc(100% - var(--dt-width));
     flex: 0 0 calc(100% - var(--dt-width));
   }
 
+  .btn.copy-to-clipboard {
+    @include button-size(0.125rem, 0.25rem, $btn-font-size-sm, $btn-border-radius-sm);
+    margin-left: map-get($spacers, 2);
+  }
 }
 
 .to-the-top {
@@ -394,4 +388,76 @@
   right: 10px;
   bottom: 10px;
   z-index: 10;
+}
+
+// give remarks a background colour
+la-akoma-ntoso .akn-remark {
+  background-color: var(--bs-primary-bg-subtle);
+}
+
+// except in jurisdictions where they are already styled differently
+la-akoma-ntoso[frbr-country="na"] .akn-remark {
+  background-color: inherit;
+}
+
+.document-floating-header {
+  --floating-header-height: #{$floating-header-height};
+
+  @include media-breakpoint-down(md) {
+    --floating-header-height: #{$floating-header-height-md};
+  }
+
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  left: 0px;
+  height: var(--floating-header-height);
+  display: none;
+  box-shadow: 0 4px 4px rgb(0, 0, 0, 0.2);
+  z-index: 100;
+
+  &.visible {
+    display: flex;
+  }
+
+  .menu-toggle {
+    display: block;
+    background-color: $primary;
+    color: color-contrast($primary);
+    width: var(--floating-header-height);
+    min-width: var(--floating-header-height);
+    text-align: center;
+    align-content: center;
+    font-size: 1.5rem;
+  }
+
+  .title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    @include media-breakpoint-down(lg) {
+      @include font-size($h6-font-size);
+    }
+  }
+
+  button {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @include media-breakpoint-down(md) {
+      max-width: 5rem;
+    }
+  }
+
+  @include media-breakpoint-down(lg) {
+    .btn.copy-to-clipboard {
+      display: none;
+    }
+  }
+}
+
+.offcanvas .navigation__inner {
+  margin-top: 0px;
 }

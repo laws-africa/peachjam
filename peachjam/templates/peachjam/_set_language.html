@@ -5,19 +5,29 @@
 {% if languages|length > 1 %}
   <form action="{% url 'set_language' %}"
         method="post"
-        class="ms-0 ms-lg-3 mt-2 mt-lg-0">
+        class="mt-2 mt-lg-0 ms-lg-2">
     {% csrf_token %}
     <input name="next" type="hidden" value="{{ redirect_to }}"/>
-    <select class="form-select"
-            name="language"
-            onChange="form.submit();"
-            id="language">
-      {% for language in languages %}
-        <option value="{{ language.code }}"
-                {% if language.code == LANGUAGE_CODE %} selected{% endif %}>
-          {{ language.name_local }} ({{ language.code }})
-        </option>
-      {% endfor %}
-    </select>
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false">
+        {% for language in languages %}
+          {% if language.code == LANGUAGE_CODE %}<i class="bi bi-globe"></i> {{ language.name_local }}{% endif %}
+        {% endfor %}
+      </button>
+      <ul class="dropdown-menu">
+        {% for language in languages %}
+          <li>
+            <button class="btn btn-link dropdown-item"
+                    name="language"
+                    value="{{ language.code }}">
+              {{ language.name_local }}
+            </button>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
   </form>
 {% endif %}

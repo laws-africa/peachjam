@@ -1,76 +1,63 @@
-{% extends "peachjam/layouts/main.html" %}
+{% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
 {% block title %}
   {% trans 'Legislation' %}
 {% endblock %}
-{% block page-content %}
-  {% block breadcrumbs %}{% endblock %}
-  {% block entity-profile %}
-    {% if entity_profile %}
-      <div class="mt-3">{% include 'peachjam/_entity_profile.html' %}</div>
-    {% endif %}
-  {% endblock %}
-  <section class="pb-5">
-    <div class="container">
-      {% block page-heading %}
-        <h1 class="my-4">{% trans 'Legislation' %}</h1>
-        {% include "peachjam/_help_button.html" with link="legislation/" %}
-      {% endblock %}
-      {% block legislation-nav %}
-        <nav class="nav nav-tabs scroll-xs mb-3 border-bottom">
-          <li class="nav-item">
-            <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
-               href="{% url 'legislation_list' %}">
-              {% trans 'Current legislation' %}
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
-               href="{% url 'legislation_list_repealed' %}">
-              {% trans 'Repealed legislation' %}
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if view.variant == 'subleg' %}active{% endif %}"
-               href="{% url 'legislation_list_subsidiary' %}">
-              {{ PEACHJAM_SETTINGS.subleg_label }}
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
-               href="{% url 'legislation_list_all' %}">
-              {% trans 'All legislation' %}
-            </a>
-          </li>
-        </nav>
-      {% endblock %}
-      {% if view.variant == 'repealed' %}
-        <div class="alert alert-danger">{% trans 'You are viewing repealed legislation which is no longer in force.' %}</div>
-      {% endif %}
-      <div data-vue-component="LegislationTable"
-           {% if legislation_list_show_dates %}data-show-dates="true"{% endif %}>
-        {% comment %}
-        This ensures that peachjam has links to scrape. This content is replaced when the javacript LegislationTable
-        component runs.
-        {% endcomment %}
-        <ul>
-          {% for item in legislation_table %}
-            <li>
-              <a href="{{ item.work_frbr_uri }}">{{ item.title }}</a>
-              {% if item.children %}
-                <ul>
-                  {% for kid in item.children %}
-                    <li>
-                      <a href="{{ kid.work_frbr_uri }}">{{ kid.title }}</a>
-                    </li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-      {{ legislation_table|json_script:"legislation-table" }}
-    </div>
-  </section>
+{% block page-title %}
+  {% if not entity_profile %}
+    <h1 class="my-4">{% trans 'Legislation' %}</h1>
+  {% endif %}
+{% endblock %}
+{% block alerts %}
+  {% if view.variant == 'repealed' %}
+    <div class="alert alert-danger">{% trans 'You are viewing repealed legislation which is no longer in force.' %}</div>
+  {% endif %}
+{% endblock %}
+{% block nav-tabs %}
+  <nav class="nav nav-tabs scroll-xs mb-3 border-bottom">
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
+         href="{% url 'legislation_list' %}">
+        {% block current_tab_title %}
+          {% trans 'Current legislation' %}
+        {% endblock %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'recent' %}active{% endif %}"
+         href="{% url 'legislation_list_recent' %}">
+        {% block recent_tab_title %}
+          {% trans 'Recent legislation' %}
+        {% endblock %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'subleg' %}active{% endif %}"
+         href="{% url 'legislation_list_subsidiary' %}">
+        {% block sublegislation_tab_title %}{{ PEACHJAM_SETTINGS.subleg_label }}{% endblock %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'uncommenced' %}active{% endif %}"
+         href="{% url 'legislation_list_uncommenced' %}">
+        {% block uncommenced_tab_title %}
+          {% trans 'Uncommenced legislation' %}
+        {% endblock %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
+         href="{% url 'legislation_list_repealed' %}">
+        {% block repealed_tab_title %}
+          {% trans 'Repealed legislation' %}
+        {% endblock %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
+         href="{% url 'legislation_list_all' %}">
+        {% trans 'All legislation' %}
+      </a>
+    </li>
+  </nav>
 {% endblock %}

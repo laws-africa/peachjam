@@ -2,8 +2,10 @@ import logging
 
 import sentry_sdk
 from background_task import background
+from background_task.signals import task_error
 from background_task.tasks import DBTaskRunner, Task, logger, tasks
 from django.db.utils import OperationalError
+from django.dispatch import receiver
 from sentry_sdk.tracing import TRANSACTION_SOURCE_TASK
 
 from peachjam.models import CoreDocument, Work, citations_processor
@@ -42,6 +44,17 @@ class PatchedDBTaskRunner(DBTaskRunner):
 
 # use the patched runner
 tasks._runner = PatchedDBTaskRunner()
+
+
+@receiver(task_error)
+def on_task_error(*args, **kwargs):
+    # report the exception to Sentry
+    hub = sentry_sdk.Hub.current
+    hub.capture_exception()
+
+    # now mark the current transaction as handled, otherwise it'll be reported twice
+    if hub.scope and hub.scope.transaction:
+        hub.scope.transaction.timestamp = -1
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
@@ -92,20 +105,6 @@ def delete_document(ingestor_id, expression_frbr_uri):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def run_ingestors():
-    """Queues up background tasks to run ingestors."""
-    from peachjam.models import Ingestor
-
-    log.info("Setting up background tasks to run ingestors...")
-
-    for ingestor in Ingestor.objects.all():
-        if ingestor.enabled:
-            run_ingestor(ingestor.pk)
-
-    log.info("Done")
-
-
-@background(queue="peachjam", remove_existing_tasks=True)
 def run_ingestor(ingestor_id):
     """Run an ingestor."""
     from peachjam.models import Ingestor
@@ -124,7 +123,8 @@ def run_ingestor(ingestor_id):
         log.info("Ingestor not enabled, ignoring.")
 
 
-@background(queue="peachjam", remove_existing_tasks=True)
+# this can be slow and is not urgent, run at a lower priority
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def extract_citations(document_id):
     """Extract citations from a document in the background."""
 
@@ -193,7 +193,33 @@ def convert_source_file_to_pdf(source_file_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+def convert_html_to_pdf(doc_id):
+    from peachjam.models import CoreDocument
+
+    doc = CoreDocument.objects.filter(id=doc_id).first()
+    logger.info(f"Creating PDF from HTML for document {doc_id}")
+    if not doc:
+        logger.warning("Document not found")
+        return
+    doc.convert_html_to_pdf()
+    logger.info("Done")
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
 def rank_works():
     from peachjam.graph.ranker import GraphRanker
 
     GraphRanker().rank_and_publish()
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def get_deleted_documents(ingestor_id, range_start, range_end):
+    from peachjam.models import Ingestor
+
+    ingestor = Ingestor.objects.get(pk=ingestor_id)
+    if not ingestor.enabled:
+        log.info(f"ingestor {ingestor.name} disabled, ignoring")
+        return
+
+    adapter = ingestor.get_adapter()
+    adapter.get_deleted_documents(range_start, range_end)

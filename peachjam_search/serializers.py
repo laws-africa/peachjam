@@ -2,12 +2,36 @@ from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 from rest_framework.serializers import (
     CharField,
     FloatField,
+    ListField,
+    ListSerializer,
     ModelSerializer,
     SerializerMethodField,
 )
 
+from peachjam.models import DocumentTopic
 from peachjam_search.documents import SearchableDocument
 from peachjam_search.models import SearchClick
+
+
+class SearchableDocumentListSerializer(ListSerializer):
+    def to_representation(self, data):
+        self.add_topic_path_names(data)
+        return super().to_representation(data)
+
+    def add_topic_path_names(self, data):
+        # add topic path names for topics that should be shown in result listings
+        doc_ids = [doc.meta.id for doc in data]
+        doc_topics = DocumentTopic.objects.filter(
+            document_id__in=doc_ids, topic__show_in_document_listing=True
+        ).prefetch_related("topic")
+        topics = {}
+        for doc_topic in doc_topics:
+            topics.setdefault(str(doc_topic.document_id), []).append(
+                doc_topic.topic.path_name
+            )
+
+        for hit in data:
+            hit.topic_path_names = topics.get(hit.meta.id, [])
 
 
 class SearchableDocumentSerializer(DocumentSerializer):
@@ -20,6 +44,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
     outcome = SerializerMethodField()
     registry = SerializerMethodField()
     labels = CharField(allow_null=True)
+    topic_path_names = ListField()
     _score = FloatField(source="meta.score")
     _index = CharField(source="meta.index")
 
@@ -30,6 +55,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
         self.language_suffix = ""
 
     class Meta:
+        list_serializer_class = SearchableDocumentListSerializer
         document = SearchableDocument
         fields = [
             "id",
@@ -45,6 +71,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "author",
             "nature",
             "matter_type",
+            "created_at",
             "case_number_string",
             "court",
             "judges",
@@ -52,6 +79,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
             "is_most_recent",
             "alternative_names",
             "labels",
+            "topic_path_names",
             "_score",
             "_index",
         ]
@@ -64,12 +92,13 @@ class SearchableDocumentSerializer(DocumentSerializer):
     def get_pages(self, obj):
         """Serialize nested page hits and highlights."""
         pages = []
-        if hasattr(obj.meta, "inner_hits"):
+        if hasattr(obj.meta, "inner_hits") and hasattr(obj.meta.inner_hits, "pages"):
             for page in obj.meta.inner_hits.pages.hits.hits:
                 info = page._source.to_dict()
                 info["highlight"] = (
                     page.highlight.to_dict() if hasattr(page, "highlight") else {}
                 )
+                self.merge_exact_highlights(info["highlight"])
                 pages.append(info)
         return pages
 
@@ -95,6 +124,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
                     if hasattr(provision, "highlight")
                     else {}
                 )
+                self.merge_exact_highlights(info["highlight"])
                 provisions.append(info)
         return provisions
 
@@ -114,6 +144,15 @@ class SearchableDocumentSerializer(DocumentSerializer):
 
     def get_registry(self, obj):
         return obj["registry" + self.language_suffix]
+
+    def merge_exact_highlights(self, highlight):
+        # fold .exact highlights into the main field to make life easier for the client
+        for key, value in list(highlight.items()):
+            if key.endswith(".exact"):
+                short = key[:-6]
+                if short not in highlight:
+                    highlight[short] = value
+                del highlight[key]
 
 
 class SearchClickSerializer(ModelSerializer):

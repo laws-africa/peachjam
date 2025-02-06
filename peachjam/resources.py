@@ -38,19 +38,26 @@ from peachjam.models import (
     AttachedFiles,
     Attorney,
     Author,
+    Bill,
     CaseNumber,
     Court,
     CourtRegistry,
+    CustomProperty,
+    CustomPropertyLabel,
     DocumentNature,
     DocumentTopic,
+    Gazette,
     GenericDocument,
     Judge,
     Judgment,
     Locality,
     MatterType,
     Outcome,
+    Ratification,
+    RatificationCountry,
     SourceFile,
     Taxonomy,
+    Work,
     citations_processor,
 )
 from peachjam.pipelines import DOC_MIMETYPES
@@ -75,6 +82,7 @@ class SourceFileWidget(CharWidget):
             return value
 
         source_url = self.get_best_source_url(value)
+        source_url = source_url.replace(" ", "%20")
         try:
             with TemporaryDirectory() as dir:
                 with NamedTemporaryFile(dir=dir) as file:
@@ -193,6 +201,23 @@ class TaxonomiesWidget(ManyToManyWidget):
         return [self.model(**{self.field: t}) for t in taxonomies]
 
 
+class CustomPropertiesWidget(ManyToManyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        """Parse newline separate key: value pairs."""
+        properties = []
+        for prop in (value or "").strip().splitlines():
+            prop = prop.strip()
+            if not prop or ":" not in prop:
+                continue
+            key, value = prop.split(":", 1)
+            if key and value:
+                label = CustomPropertyLabel.objects.get_or_create(
+                    name__iexact=key, defaults={"name": key}
+                )[0]
+                properties.append(CustomProperty(label=label, value=value.strip()))
+        return properties
+
+
 class ManyToManyField(fields.Field):
     """Handles many-to-many relationships."""
 
@@ -215,6 +240,10 @@ class ManyToOneWidget(ManyToManyWidget):
         values = [v.strip() for v in value.split(self.separator)]
         return [self.model(**{self.field: v}) for v in values if v]
 
+    def render(self, value, obj=None):
+        if obj.pk:
+            return super().render(value, obj)
+
 
 class StripHtmlWidget(CharWidget):
     def clean(self, value, row=None, **kwargs):
@@ -227,6 +256,10 @@ class StripHtmlWidget(CharWidget):
 
 
 class BaseDocumentResource(resources.ModelResource):
+    frbr_uri_date = fields.Field(
+        attribute="frbr_uri_date",
+        widget=CharWidget(coerce_to_string=True, allow_blank=True),
+    )
     date = fields.Field(attribute="date", widget=DateWidget(name="date"))
     language = fields.Field(
         attribute="language",
@@ -250,11 +283,17 @@ class BaseDocumentResource(resources.ModelResource):
         attribute="alternative_names",
         widget=ManyToOneWidget(AlternativeName, separator="|", field="title"),
     )
-
+    custom_properties = ManyToManyField(
+        attribute="custom_properties", widget=CustomPropertiesWidget(CustomProperty)
+    )
     download_url = fields.Field(readonly=True)
 
     def get_queryset(self):
-        return self._meta.model.objects.get_qs_no_defer()
+        return (
+            self._meta.model.objects.get_qs_no_defer()
+            .select_related("jurisdiction", "locality", "language")
+            .prefetch_related("custom_properties", "taxonomies")
+        )
 
     def dehydrate_download_url(self, obj):
         domain = Site.objects.get_current().domain
@@ -265,6 +304,13 @@ class BaseDocumentResource(resources.ModelResource):
             scheme = "https"
             return f"{scheme}://{domain}{download_source}"
         return ""
+
+    def dehydrate_custom_properties(self, obj):
+        if obj.pk:
+            return "\n".join(
+                f"{prop.label.name}: {prop.value}"
+                for prop in obj.custom_properties.all()
+            )
 
     class Meta:
         exclude = (
@@ -327,7 +373,7 @@ class BaseDocumentResource(resources.ModelResource):
             logger.info(f"Importing row: {row}")
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
-        return row["skip"]
+        return row["skip"] or all(not x for x in row.values())
 
     def save_m2m(self, instance, row, using_transactions, dry_run):
         super().save_m2m(instance, row, using_transactions, dry_run)
@@ -385,7 +431,8 @@ class BaseDocumentResource(resources.ModelResource):
                 self.download_attachment(url, instance, "Other documents")
 
     def dehydrate_taxonomies(self, instance):
-        return "|".join(t.topic.slug for t in instance.taxonomies.all())
+        if instance.pk:
+            return "|".join(t.topic.slug for t in instance.taxonomies.all())
 
 
 class DocumentNatureWidget(ForeignKeyWidget):
@@ -431,9 +478,9 @@ class GenericDocumentResource(BaseDocumentResource):
         attribute="nature",
         widget=DocumentNatureWidget(DocumentNature, field="code"),
     )
-    authors = fields.Field(
-        column_name="authors",
-        attribute="authors",
+    author = fields.Field(
+        column_name="author",
+        attribute="author",
         widget=ManyToManyRequiredWidget(Author, separator="|", field="code"),
     )
 
@@ -563,11 +610,12 @@ class JudgmentResource(BaseDocumentResource):
 
     def get_case_number_attributes(self, judgment, attribute):
         values = []
-        for case_number in judgment.case_numbers.all().order_by(
-            "year", "number", "string_override"
-        ):
-            val = getattr(case_number, attribute)
-            values.append(f"{val or ''}")
+        if judgment.pk:
+            for case_number in judgment.case_numbers.all().order_by(
+                "year", "number", "string_override"
+            ):
+                val = getattr(case_number, attribute)
+                values.append(f"{val or ''}")
 
         return "|".join(values)
 
@@ -582,13 +630,14 @@ class JudgmentResource(BaseDocumentResource):
 
     def dehydrate_matter_type(self, judgment):
         values = []
-        for case_number in judgment.case_numbers.all().order_by(
-            "year", "number", "string_override"
-        ):
-            if getattr(case_number, "matter_type"):
-                values.append(case_number.matter_type.name)
-            else:
-                values.append("")
+        if judgment.pk:
+            for case_number in judgment.case_numbers.all().order_by(
+                "year", "number", "string_override"
+            ):
+                if getattr(case_number, "matter_type"):
+                    values.append(case_number.matter_type.name)
+                else:
+                    values.append("")
 
         return "|".join(values)
 
@@ -632,11 +681,7 @@ class PublishedWidget(BooleanWidget):
 class TopicsWidget(ManyToManyWidget):
     def clean(self, value, row=None, **kwargs):
         if value:
-            article_tag_root = Taxonomy.objects.filter(
-                name__iexact="Article tags"
-            ).first()
-            if not article_tag_root:
-                article_tag_root = Taxonomy.add_root(name="Article tags")
+            article_tag_root = Article.get_article_tags_root()
 
             taxonomies = [
                 " ".join(t.split()).capitalize() for t in value.split(self.separator)
@@ -675,6 +720,11 @@ class ArticleResource(resources.ModelResource):
         exclude = ("slug",)
 
 
+class GazetteResource(BaseDocumentResource):
+    class Meta(BaseDocumentResource.Meta):
+        model = Gazette
+
+
 class UserResource(resources.ModelResource):
     groups = fields.Field(
         column_name="groups",
@@ -706,3 +756,85 @@ class AttorneyResource(resources.ModelResource):
 
     class Meta:
         model = Attorney
+
+
+class RatificationField(ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            raise ValueError("work frbr_uri is required")
+        work = Work.objects.filter(frbr_uri=value).first()
+        if not work:
+            raise ValueError(f'work with frbr_uri "{value}" not found')
+        ratification = Ratification.objects.update_or_create(
+            work=work,
+            defaults={
+                "source_url": row.get("source_url"),
+                "last_updated": row.get("last_updated"),
+            },
+        )[0]
+        return ratification
+
+
+class CountryField(ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            raise ValueError("country code is required")
+        country = Country.objects.filter(iso=value.upper()).first()
+        if not country:
+            raise ValueError(f'country with iso "{value}" not found')
+        return country
+
+
+class RatificationResource(resources.ModelResource):
+    work = fields.Field(
+        column_name="work",
+        attribute="ratification",
+        widget=RatificationField(Ratification, field="work__frbr_uri"),
+    )
+    country = fields.Field(
+        attribute="country",
+        column_name="country",
+        widget=CountryField(Country, field="name"),
+    )
+    ratification_date = fields.Field(
+        attribute="ratification_date",
+        column_name="ratification_date",
+        widget=DateWidget(),
+    )
+    deposit_date = fields.Field(
+        attribute="deposit_date",
+        column_name="deposit_date",
+        widget=DateWidget(),
+    )
+    signature_date = fields.Field(
+        attribute="signature_date",
+        column_name="signature_date",
+        widget=DateWidget(),
+    )
+    source_url = fields.Field(
+        attribute="source_url", column_name="source_url", widget=CharWidget()
+    )
+    last_updated = fields.Field(
+        attribute="last_updated",
+        column_name="last_updated",
+        widget=DateWidget(),
+    )
+
+    class Meta:
+        model = RatificationCountry
+        exclude = ("id", "ratification")
+        import_id_fields = (
+            "work",
+            "country",
+        )
+
+
+class BillResource(BaseDocumentResource):
+    author = fields.Field(
+        column_name="author",
+        attribute="author",
+        widget=ForeignKeyWidget(Author, field="code"),
+    )
+
+    class Meta(BaseDocumentResource.Meta):
+        model = Bill

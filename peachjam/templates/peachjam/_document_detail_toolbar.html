@@ -1,14 +1,45 @@
 {% load peachjam static i18n %}
-<div class="btn-toolbar justify-content-end mb-3"
+<div class="btn-toolbar justify-content-end mb-3 document-detail-toolbar"
      role="toolbar"
      aria-label="{% trans "Document toolbar" %}">
   {% block edit-btn %}
-    {% if perms.peachjam.change_coredocument or perms.peachjam.can_edit_own_document %}
-      <a class="btn btn-outline-secondary btn-shrink-sm"
-         href="{{ document|admin_url:'change' }}">{% trans "Edit" %}</a>
+    {% if user.is_staff %}
+      {% if document.ingestor_edit_url %}
+        <div class="btn-group">
+          <a class="btn btn-outline-secondary btn-shrink-sm"
+             href="{{ document.ingestor_edit_url }}"
+             target="_blank">{% trans "Edit" %}</a>
+          <button type="button"
+                  class="btn btn-outline-secondary btn-shrink-sm dropdown-toggle dropdown-toggle-split"
+                  data-bs-toggle="dropdown">
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="{{ document|admin_url:'change' }}">{% trans "Edit in admin area" %}</a>
+            </li>
+          </ul>
+        </div>
+      {% else %}
+        <a class="btn btn-outline-secondary btn-shrink-sm"
+           href="{{ document|admin_url:'change' }}">{% trans "Edit" %}</a>
+      {% endif %}
     {% endif %}
   {% endblock %}
   {% block download-btn %}
+    <div>
+      {% if show_save_doc_button %}
+        <!-- this will be replaced by htmx -->
+        <div class="save-document-button"></div>
+        <div hx-get="{% url 'saved_document_button' document.id %}"
+             hx-trigger="load"></div>
+        <div id="saveDocumentModal"
+             class="modal fade"
+             tabindex="-1"
+             aria-hidden="true">
+          <div id="saveDocumentModalDialog" class="modal-dialog"></div>
+        </div>
+      {% endif %}
+    </div>
     {% if document.source_file %}
       <div class="btn-group dropdown-center ms-2">
         <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
@@ -19,7 +50,7 @@
         </a>
         {% if document.source_file.filename_extension != "pdf" %}
           <button type="button"
-                  class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                  class="btn btn-primary btn-shrink-sm dropdown-toggle dropdown-toggle-split"
                   data-bs-toggle="dropdown"
                   aria-expanded="false">
             <span class="visually-hidden">{% trans "Toggle dropdown" %}</span>
@@ -41,8 +72,8 @@
               class="btn btn-outline-secondary btn-shrink-sm ms-2"
               data-bs-toggle="modal"
               data-bs-target="#documentProblemModal">
-        <span class="d-inline d-sm-none">{% trans "Report" %}</span>
-        <span class="d-none d-sm-inline">{% trans 'Report a problem' %}</span>
+        <span class="d-md-none">{% trans "Report" %}</span>
+        <span class="d-none d-md-inline">{% trans 'Report a problem' %}</span>
       </button>
       <div class="modal fade"
            id="documentProblemModal"

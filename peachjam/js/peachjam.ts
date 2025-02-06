@@ -4,27 +4,16 @@ import components from './components';
 import { vueI18n } from './i18n';
 import { createAndMountApp } from './utils/vue-utils';
 
-import {
-  LaAkomaNtoso,
-  LaGutter,
-  LaGutterItem,
-  LaTableOfContentsController,
-  LaTableOfContents,
-  LaTocItem,
-  LaDecorateInternalRefs,
-  LaDecorateExternalRefs,
-  LaDecorateTerms
-} from '@lawsafrica/law-widgets/dist/components';
-
-customElements.define('la-akoma-ntoso', LaAkomaNtoso as any);
-customElements.define('la-gutter', LaGutter as any);
-customElements.define('la-gutter-item', LaGutterItem as any);
-customElements.define('la-decorate-internal-refs', LaDecorateInternalRefs as any);
-customElements.define('la-decorate-external-refs', LaDecorateExternalRefs as any);
-customElements.define('la-decorate-terms', LaDecorateTerms as any);
-customElements.define('la-table-of-contents-controller', LaTableOfContentsController as any);
-customElements.define('la-table-of-contents', LaTableOfContents as any);
-customElements.define('la-toc-item', LaTocItem as any);
+import '@lawsafrica/law-widgets/dist/components/la-akoma-ntoso';
+import '@lawsafrica/law-widgets/dist/components/la-gutter';
+import '@lawsafrica/law-widgets/dist/components/la-gutter-item';
+import '@lawsafrica/law-widgets/dist/components/la-table-of-contents-controller';
+import '@lawsafrica/law-widgets/dist/components/la-decorate-external-refs';
+import '@lawsafrica/law-widgets/dist/components/la-decorate-internal-refs';
+import '@lawsafrica/law-widgets/dist/components/la-decorate-terms';
+// @ts-ignore
+import htmx from 'htmx.org';
+import { csrfToken } from './api';
 
 export interface PeachJamConfig {
   appName: string;
@@ -53,15 +42,20 @@ class PeachJam {
   }
 
   setup () {
+    window.dispatchEvent(new Event('peachjam.before-setup'));
     this.setupConfig();
     // add the current user agent to the root HTML element for use with pocketlaw
     document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
+    this.setupHtmx();
     this.setupSentry();
-    this.createComponents();
+    this.createComponents(document.body);
+    this.createVueComponents(document.body);
     this.setupTooltips();
     this.setupPopovers();
     this.scrollNavTabs();
     this.clearGACookies();
+    this.setupConfirm();
+    window.dispatchEvent(new Event('peachjam.after-setup'));
   }
 
   setupConfig () {
@@ -71,32 +65,83 @@ class PeachJam {
     }
   }
 
-  createComponents () {
-    document.querySelectorAll('[data-component]').forEach((el) => {
-      const name: string | null = el.getAttribute('data-component');
-      if (name && components[name]) {
-        // create the component and attached it to the HTML element
-        (el as any).component = new components[name](el);
-        this.components.push((el as any).component);
+  setupHtmx () {
+    window.htmx = htmx;
+    // htmx:load is fired both when the page loads (weird) and when new content is loaded. We only care about the latter
+    // case. See https://github.com/bigskysoftware/htmx/issues/1500
+    const htmxHelper = { firstLoad: true };
+    let token: string = '';
+    document.body.addEventListener('htmx:load', async (e) => {
+      if (htmxHelper.firstLoad) {
+        htmxHelper.firstLoad = false;
+        return;
+      }
+      // mount components on new elements
+      this.createComponents(e.target as HTMLElement);
+      this.createVueComponents(e.target as HTMLElement);
+    });
+
+    htmx.on('htmx:confirm', (e:any) => {
+      if (e.detail.verb === 'post') {
+        e.preventDefault();
+        csrfToken().then((t) => {
+          token = t;
+          e.detail.issueRequest();
+        });
       }
     });
 
-    // create vue-based components
-    document.querySelectorAll('[data-vue-component]').forEach((el) => {
-      const name = el.getAttribute('data-vue-component');
-      if (name && components[name]) {
-        const vueComp = components[name];
-        createAndMountApp({
-          component: vueComp,
-          // pass in the element's data attributes as props
-          props: { ...(el as HTMLElement).dataset },
-          use: [vueI18n],
-          mountTarget: el as HTMLElement
-        });
-        (el as any).component = vueComp;
-        this.components.push(vueComp);
+    htmx.on('htmx:configRequest', (e: any) => {
+      if (e.detail.verb === 'post') {
+        e.detail.headers['X-CSRFToken'] = token;
       }
     });
+  }
+
+  createComponents (root: HTMLElement) {
+    if (root.getAttribute('data-component')) {
+      this.createComponent(root);
+    }
+    // @ts-ignore
+    for (const element of root.querySelectorAll('[data-component]')) {
+      this.createComponent(element);
+    }
+    window.dispatchEvent(new Event('peachjam.components-created'));
+  }
+
+  createVueComponents (root: HTMLElement) {
+    // create vue-based components
+    // @ts-ignore
+    for (const element of root.querySelectorAll('[data-vue-component]')) {
+      this.createVueComponent(element);
+    }
+    window.dispatchEvent(new Event('peachjam.vue-components-created'));
+  }
+
+  createComponent (el: HTMLElement) {
+    const name: string | null = el.getAttribute('data-component');
+    if (name && components[name]) {
+      // create the component and attached it to the HTML element
+      (el as any).component = new components[name](el);
+      this.components.push((el as any).component);
+    }
+  }
+
+  createVueComponent (el: HTMLElement) {
+    // create vue-based components
+    const name = el.getAttribute('data-vue-component');
+    if (name && components[name]) {
+      const vueComp = components[name];
+      createAndMountApp({
+        component: vueComp,
+        // pass in the element's data attributes as props
+        props: { ...(el as HTMLElement).dataset },
+        use: [vueI18n],
+        mountTarget: el as HTMLElement
+      });
+      (el as any).component = vueComp;
+      this.components.push(vueComp);
+    }
   }
 
   setupSentry () {
@@ -120,13 +165,18 @@ class PeachJam {
             }
 
             const frames = event.exception.values[0].stacktrace.frames;
-            // if all frames are anonymous, don't send this event
+
+            // if first frame is anonymous, don't send this event
             // see https://github.com/getsentry/sentry-javascript/issues/3147
-            if (frames && frames.length > 0 && frames.every((f: any) => f.filename === '<anonymous>')) {
-              return null;
+            if (frames && frames.length > 0) {
+              const firstFrame = frames[0];
+              if (!firstFrame.filename || firstFrame.filename === '<anonymous>') {
+                return null;
+              }
             }
           } catch (e) {
             // ignore error, send event
+            console.log(e);
           }
 
           return event;
@@ -198,6 +248,23 @@ class PeachJam {
         }
       }
     }
+  }
+
+  setupConfirm () {
+    // On buttons and links with a data-confirm="message" attribute, show a message and stop everything if the user
+    // doesn't confirm.
+    document.body.addEventListener('click', function (e) {
+      if (e.target && e.target instanceof HTMLElement && e.target.matches('a[data-confirm], button[data-confirm], input[data-confirm]')) {
+        const message = e.target.getAttribute('data-confirm');
+        if (message) {
+          if (!confirm(message)) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+          }
+        }
+      }
+    });
   }
 }
 

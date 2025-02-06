@@ -14,14 +14,26 @@
 <table class="table">
   <thead>
     <tr>
-      <th>{% trans 'Country' %}</th>
-      <th>{% trans 'Signature Date' %}</th>
-      <th>{% trans 'Ratification Date' %}</th>
-      <th>{% trans 'Deposit Date' %}</th>
+      <th>
+        {% trans 'Country' %}
+        <span class="badge bg-secondary">{{ ratification.countries.count }}</span>
+      </th>
+      <th>
+        {% trans 'Signature Date' %}
+        <span class="badge bg-secondary">{{ ratification.n_signed }}</span>
+      </th>
+      <th>
+        {% trans 'Ratification Date' %}
+        <span class="badge bg-secondary">{{ ratification.n_ratified }}</span>
+      </th>
+      <th>
+        {% trans 'Deposit Date' %}
+        <span class="badge bg-secondary">{{ ratification.n_deposited }}</span>
+      </th>
     </tr>
   </thead>
   <tbody>
-    {% for ratification in ratification.countries.all %}
+    {% for ratification in ratification.countries_list %}
       <tr>
         <td>{{ ratification.country.name }}</td>
         <td>{{ ratification.signature_date.isoformat }}</td>

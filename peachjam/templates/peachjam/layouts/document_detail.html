@@ -24,10 +24,11 @@
       <div class="container">
         {% block breadcrumbs %}{% endblock %}
         {% block document-title %}
-          <div class="d-md-flex justify-content-md-between py-4">
+          <div class="d-md-flex justify-content-md-between py-3">
             <div>
               <h1>{{ document.title }}</h1>
-              {% include 'peachjam/_labels.html' %}
+              {% block sub-title %}{% endblock %}
+              {% include 'peachjam/_document_labels.html' %}
             </div>
             <div class="d-flex align-items-center">
               <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
@@ -38,7 +39,7 @@
               <a href="https://twitter.com/intent/tweet?text={{ request.build_absolute_uri }}"
                  class="btn btn-link share-link"
                  target="_blank">
-                <i class="bi bi-twitter twitter-forecolor share-icon"></i>
+                <i class="bi bi-twitter-x twitter-x-forecolor share-icon"></i>
               </a>
               <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
                  class="btn btn-link share-link"
@@ -50,11 +51,19 @@
                  target="_blank">
                 <i class="bi bi-linkedin linkedin-forecolor share-icon"></i>
               </a>
+              <a id="email-share"
+                 href="mailto:?subject={% trans 'Take a look at this document from' %} {{ APP_NAME }}: {{ document.title|truncatewords:7|escape }}&body={{ request.build_absolute_uri }}"
+                 class="btn btn-link share-link"
+                 target="_blank"
+                 data-subject="{% trans 'Take a look at this document from' %} {{ APP_NAME }}: {{ document.title|truncatewords:7|escape }}">
+                <i class="bi bi-envelope-at-fill envelope-at-fill-forecolor share-icon"></i>
+              </a>
             </div>
           </div>
         {% endblock %}
         {% include 'peachjam/_notices.html' with messages=notices %}
         {% include "peachjam/_document_detail_toolbar.html" %}
+        {% include 'peachjam/_document_floating_header.html' %}
         <ul class="nav nav-tabs border-bottom scroll-xs" role="tablist">
           {% block document-tabs %}
             <li class="nav-item" role="presentation">
@@ -113,7 +122,21 @@
                 </button>
               </li>
             {% endif %}
-            {% if document.work.ratification.countries.all|length %}
+            {% if case_histories %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#case-history-tab"
+                        type="button"
+                        role="tab"
+                        aria-controls="case-history-tab"
+                        aria-selected="false">
+                  <i class="bi bi-pj pj-case-history"></i>
+                  {% trans 'Case history' %}
+                </button>
+              </li>
+            {% endif %}
+            {% if document.work.ratification %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
                         data-bs-toggle="tab"
@@ -123,7 +146,7 @@
                         aria-controls="ratifications-tab"
                         aria-selected="false">
                   {% trans "Ratifications" %}
-                  <span class="badge bg-secondary">{{ document.work.ratification.countries.all|length }}</span>
+                  <span class="badge bg-secondary">{{ document.work.ratification.n_ratified }}</span>
                 </button>
               </li>
             {% endif %}
@@ -142,7 +165,7 @@
               <div class="row">
                 <div class="col-md mb-3">
                   {% block document-metadata-content %}
-                    <dl class="document-metadata-list">
+                    <dl class="document-metadata-list d-flex">
                       {% block document-metadata-content-jurisdiction %}
                         {% if MULTIPLE_JURISDICTIONS or document.locality %}
                           <dt>
@@ -164,14 +187,7 @@
                           </dt>
                           <dd class="text-muted">
                             {{ document.citation }}
-                            <button type="button"
-                                    class="btn btn-outline-secondary btn-xs ms-2"
-                                    title="{% trans "Copy to clipboard" %}"
-                                    data-component="CopyToClipboard"
-                                    data-value="{{ document.citation }}"
-                                    data-confirmation="{% trans "Copied!" %}">
-                              {% trans "Copy" %}
-                            </button>
+                            {% include 'peachjam/_copy_to_clipboard.html' with value=document.citation %}
                           </dd>
                         {% endif %}
                       {% endblock %}
@@ -191,14 +207,7 @@
                               {% for alternative_name in alternative_names %}
                                 <div>
                                   {{ alternative_name.title }}
-                                  <button type="button"
-                                          class="btn btn-outline-secondary btn-xs ms-2"
-                                          title="{% trans "Copy to clipboard" %}"
-                                          data-component="CopyToClipboard"
-                                          data-value="{{ alternative_name.title }}"
-                                          data-confirmation="{% trans "Copied!" %}">
-                                    {% trans "Copy" %}
-                                  </button>
+                                  {% include 'peachjam/_copy_to_clipboard.html' with value=alternative_name.title %}
                                 </div>
                               {% endfor %}
                             </dd>
@@ -206,19 +215,20 @@
                         {% endwith %}
                       {% endblock %}
                       {% block document-metadata-content-author %}
-                        {% with document.authors.all as authors %}
+                        {% with document.author_list as authors %}
                           {% if authors %}
                             <dt>
                               {% if authors|length > 1 %}
-                                {{ authors.first.model_label_plural }}
+                                {{ document.author_label_plural }}
                               {% else %}
-                                {{ authors.first.model_label }}
+                                {{ document.author_label }}
                               {% endif %}
                             </dt>
                             <dd class="text-muted">
                               {% for author in authors %}
-                                <a href="{% url 'author' author.code %}">{{ author.name }}</a>
-                                {% if not forloop.last %},{% endif %}
+                                {# djlint:off #}
+                                <a href="{% url 'author' author.code %}">{{ author.name }}</a>{% if not forloop.last %},{% endif %}
+                                {# djlint:on #}
                               {% endfor %}
                             </dd>
                           {% endif %}
@@ -321,6 +331,18 @@
                           {% trans document.get_doc_type_display %}
                         </dd>
                       {% endblock %}
+                      {% block document-metadata-content-publication %}
+                        {% if document.publication_file %}
+                          <dt>
+                            {% trans 'Publication' %}
+                          </dt>
+                          <dd class="text-muted">
+                            <a href="{% url 'document_publication' document.expression_frbr_uri|strip_first_character %}"
+                               target="_blank">{% trans "Download" %} {{ document.publication_file.filename_extension|upper }}</a>
+                            ({{ document.publication_file.size|filesizeformat }})
+                          </dd>
+                        {% endif %}
+                      {% endblock %}
                       {% block document-metadata-media-summary-download %}
                         {% if document.attachedfiles_set %}
                           {% for attachedfile in document.attachedfiles_set.all %}
@@ -334,11 +356,26 @@
                           {% endfor %}
                         {% endif %}
                       {% endblock %}
+                      {% block document-metadata-custom-properties %}
+                        {% for prop in document.custom_properties.all %}
+                          <dt>
+                            {{ prop.label }}
+                          </dt>
+                          <dd class="text-muted">
+                            {{ prop.value }}
+                          </dd>
+                        {% endfor %}
+                      {% endblock %}
                     </dl>
                   {% endblock %}
                 </div>
-                {% if n_relationships or taxonomies %}
+                {% if n_relationships or taxonomies or document.work.partner %}
                   <div class="col-md">
+                    {% block document-partner %}
+                      {% if document.work.partner %}
+                        {% include "peachjam/_document_partner.html" %}
+                      {% endif %}
+                    {% endblock %}
                     {% block document-taxonomies %}
                       {% if taxonomies %}
                         {% include "peachjam/_taxonomies.html" %}
@@ -391,7 +428,8 @@
           </div>
           <div class="container-fluid">
             {% block content %}
-              {% include 'peachjam/_document_content.html' with document=document %}
+              {% include 'peachjam/_document_content.html' with show_sidebar=True %}
+              <a href="#top" class="btn btn-sm btn-secondary to-the-top">▲ {% trans "To the top" %}</a>
             {% endblock %}
           </div>
         </div>
@@ -411,23 +449,31 @@
             <div class="container">{% include 'peachjam/_related_documents.html' %}</div>
           </div>
         {% endif %}
+        {% if cited_documents or documents_citing_current_doc %}
+          <div class="tab-pane fade"
+               id="citations-tab"
+               role="tabpanel"
+               aria-labelledby="citations-tab">
+            <div class="container">{% include 'peachjam/_citations.html' %}</div>
+          </div>
+        {% endif %}
+        {% if case_histories %}
+          <div class="tab-pane fade"
+               id="case-history-tab"
+               role="tabpanel"
+               aria-labelledby="case-history-tab">
+            <div class="container">{% include 'peachjam/_case_histories.html' %}</div>
+          </div>
+        {% endif %}
+        {% if document.work.ratification %}
+          <div class="tab-pane fade"
+               id="ratifications-tab"
+               role="tabpanel"
+               aria-labelledby="ratifications-tab">
+            <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
+          </div>
+        {% endif %}
       {% endblock %}
-      {% if cited_documents or documents_citing_current_doc %}
-        <div class="tab-pane fade"
-             id="citations-tab"
-             role="tabpanel"
-             aria-labelledby="citations-tab">
-          <div class="container">{% include 'peachjam/_citations.html' %}</div>
-        </div>
-      {% endif %}
-      {% if document.work.ratification.countries.all|length %}
-        <div class="tab-pane fade"
-             id="ratifications-tab"
-             role="tabpanel"
-             aria-labelledby="ratifications-tab">
-          <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
-        </div>
-      {% endif %}
     </div>
     {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}

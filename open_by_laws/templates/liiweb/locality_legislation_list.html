@@ -1,0 +1,36 @@
+{% extends "liiweb/locality_legislation_list.html" %}
+{% load i18n %}
+{% block title %}
+  {% blocktrans with locality=locality.name %}{{ locality }} By-laws{% endblocktrans %}
+{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Municipalities' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ locality }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-title %}
+  <h1 class="my-4">{% blocktrans with locality=locality.name %}{{ locality }} By-laws{% endblocktrans %}</h1>
+{% endblock %}
+{% block nav-tabs %}
+  <nav class="nav nav-tabs mb-3 border-bottom">
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
+         href="{% url 'locality_legislation_list' locality.place_code %}">Current by-laws</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
+         href="{% url 'locality_legislation_list_repealed' locality.place_code %}">Repealed by-laws</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
+         href="{% url 'locality_legislation_list_all' locality.place_code %}">All by-laws</a>
+    </li>
+  </nav>
+{% endblock %}
