@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from django.conf import settings
 from django.contrib.syndication.views import Feed
@@ -16,6 +17,10 @@ from peachjam.models import (
 class BaseFeed(Feed):
     model = None
 
+    def clean_xml_text(self, text):
+        """Remove control characters that are not allowed in XML."""
+        return re.sub(r"[\x00-\x08\x0B-\x0C\x0E-\x1F]", "", text)
+
     def items(self):
         if self.model in [Article]:
             return self.model.objects.filter(published=True).order_by("-date")[:100]
@@ -24,6 +29,12 @@ class BaseFeed(Feed):
 
     def item_pubdate(self, item):
         return datetime.datetime.combine(item.date, datetime.time())
+
+    def item_title(self, item):
+        return self.clean_xml_text(item.title)
+
+    def item_description(self, item):
+        return self.clean_xml_text(item.title)
 
 
 class BaseAtomFeed(BaseFeed):
