@@ -194,15 +194,15 @@
                       {% block document-metadata-content-alternative-names %}
                         {% with document.alternative_names.all as alternative_names %}
                           {% if alternative_names %}
-                            {% if document.doc_type == "judgment" %}
-                              <dt>
-                                {% trans 'Law report citations' %}
-                              </dt>
-                            {% else %}
-                              <dt>
-                                {% trans 'Alternative names' %}
-                              </dt>
-                            {% endif %}
+                            <dt>
+                              {% block document-metadata-alternative-names-label %}
+                                {% if document.doc_type == "judgment" %}
+                                  {% trans 'Law report citations' %}
+                                {% else %}
+                                  {% trans 'Alternative names' %}
+                                {% endif %}
+                              {% endblock %}
+                            </dt>
                             <dd class="text-muted">
                               {% for alternative_name in alternative_names %}
                                 <div>
