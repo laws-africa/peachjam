@@ -824,7 +824,8 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
     def apply_labels(self, request, queryset):
         count = queryset.count()
         for doc in queryset.iterator():
-            doc.apply_labels()
+            if doc.decorator:
+                doc.decorator.apply_labels(doc)
         self.message_user(
             request, _("Applying labels for %(count)d documents.") % {"count": count}
         )
