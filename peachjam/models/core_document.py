@@ -27,6 +27,7 @@ from polymorphic.models import PolymorphicModel
 from polymorphic.query import PolymorphicQuerySet
 
 from peachjam.analysis.html import generate_toc_json_from_html, wrap_toc_entries_in_divs
+from peachjam.decorators import DocumentDecorator
 from peachjam.frbr_uri import (
     FRBR_URI_DOCTYPE_CHOICES,
     FRBR_URI_DOCTYPES,
@@ -340,6 +341,9 @@ class CoreDocument(PolymorphicModel):
     # that all documents have a nature.
     default_nature = ("document", "Document")
 
+    # the decorator is a plugin-point to make changes to a document pre- and post-save
+    decorator = DocumentDecorator()
+
     objects = CoreDocumentManager.from_queryset(CoreDocumentQuerySet)()
 
     work = models.ForeignKey(
@@ -496,9 +500,6 @@ class CoreDocument(PolymorphicModel):
     def __str__(self):
         return f"{self.doc_type} - {self.title}"
 
-    def apply_labels(self):
-        pass
-
     def get_all_fields(self):
         return self._meta.get_fields()
 
@@ -651,13 +652,19 @@ class CoreDocument(PolymorphicModel):
             self.work.title = self.title
             self.work.save()
 
+        if self.decorator:
+            self.decorator.pre_save(self)
+
+    def post_save(self):
+        if self.decorator:
+            self.decorator.post_save(self)
+
     def save(self, *args, **kwargs):
         # give ourselves and subclasses a chance to pre-populate derived fields before saving,
         # in case full_clean() has not yet been called
         self.pre_save()
         super().save(*args, **kwargs)
-        # apply labels
-        self.apply_labels()
+        self.post_save()
 
     def extract_citations(self):
         """Run citation extraction on this document. If the document has content_html,

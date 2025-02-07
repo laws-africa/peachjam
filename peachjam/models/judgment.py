@@ -8,7 +8,8 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
-from peachjam.models import CoreDocument, Label, Locality
+from peachjam.decorators import JudgmentDecorator
+from peachjam.models import CoreDocument, Locality
 
 
 class Attorney(models.Model):
@@ -255,6 +256,8 @@ class LowerBench(models.Model):
 
 
 class Judgment(CoreDocument):
+    decorator = JudgmentDecorator()
+
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
     )
@@ -421,26 +424,6 @@ class Judgment(CoreDocument):
 
         self.title = " ".join(parts)
         self.citation = self.title
-
-    def apply_labels(self):
-        """Apply labels to this judgment based on its properties."""
-        # label showing that a judgment is cited/reported in law reports, hence "more important"
-        label, _ = Label.objects.get_or_create(
-            code="reported",
-            defaults={"name": "Reported", "code": "reported", "level": "success"},
-        )
-
-        labels = list(self.labels.all())
-
-        # if the judgment has alternative_names, apply the "reported" label
-        if self.alternative_names.exists():
-            if label not in labels:
-                self.labels.add(label.pk)
-        # if the judgment has no alternative_names, remove the "reported" label
-        elif label in labels:
-            self.labels.remove(label.pk)
-
-        super().apply_labels()
 
     def pre_save(self):
         # ensure registry aligns to the court
