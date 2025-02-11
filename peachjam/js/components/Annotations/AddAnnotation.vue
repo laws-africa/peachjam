@@ -4,8 +4,8 @@
   >
     <div class="card">
       <div class="card-body">
-        <input v-model="newAnnotation" type="text">
-        <button class="btn btn-sm btn-secondary" type="button" @click="addAnnotation" >
+        <input ref="annotationInput" v-model="newAnnotation" type="text">
+        <button ref="annotationButton" class="btn btn-sm btn-secondary" type="button" @click="addAnnotation">
           Add
         </button>
       </div>
@@ -28,15 +28,13 @@ export default {
     newAnnotation: ''
   }),
   mounted () {
-    console.log('mounting');
-    console.log(this.target);
     this.anchorElement = document.getElementById(this.target.anchor_id);
     this.gutter.appendChild(this.$el);
   },
   methods: {
     addAnnotation () {
-      // get the value of the input
-      console.log(this.newAnnotation);
+      // emit an event with the value of the input
+      this.$emit('add-annotation', this.newAnnotation);
     }
   }
 };

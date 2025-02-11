@@ -72,7 +72,6 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   }
 
   addEnrichment (target: IRangeTarget): void {
-    console.log('adding enrichment');
     // @ts-ignore
     this.listComponent.creating = {
       id: null,

@@ -46,18 +46,7 @@ export class AnnotationsProvider implements IGutterEnrichmentProvider {
 
     addEnrichment (target: IRangeTarget): void {
       console.log('adding enrichment');
-      if (this.addAnnotationComponent) {
-        this.addAnnotationComponent.$el.remove();
-      }
-      this.addAnnotationComponent = createAndMountApp({
-        component: AddAnnotation,
-        props: {
-          gutter: this.gutter,
-          target,
-          viewRoot: this.root
-        },
-        use: [vueI18n],
-        mountTarget: document.createElement('div') as HTMLElement
-      });
+      // @ts-ignore
+      this.listComponent.addNote(target);
     }
 }
