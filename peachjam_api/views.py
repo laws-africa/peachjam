@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from peachjam.models import (
+    Annotation,
     CaseNumber,
     CitationLink,
     Ingestor,
@@ -18,6 +19,7 @@ from peachjam.models import (
 )
 from peachjam_api.permissions import CoreDocumentPermission
 from peachjam_api.serializers import (
+    AnnotationSerializer,
     CitationLinkSerializer,
     RelationshipSerializer,
     WorkSerializer,
@@ -27,6 +29,11 @@ from peachjam_api.serializers import (
 class RelationshipViewSet(viewsets.ModelViewSet):
     queryset = Relationship.objects.all()
     serializer_class = RelationshipSerializer
+
+
+class AnnotationViewSet(viewsets.ModelViewSet):
+    queryset = Annotation.objects.all()
+    serializer_class = AnnotationSerializer
 
 
 class WorksViewSet(viewsets.ReadOnlyModelViewSet):

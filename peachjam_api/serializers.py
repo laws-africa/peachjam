@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from peachjam.models import (
+    Annotation,
     CaseNumber,
     CitationLink,
     CoreDocument,
@@ -71,6 +72,12 @@ class RelationshipSerializer(serializers.ModelSerializer):
             "subject_documents",
             "object_documents",
         ]
+
+
+class AnnotationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Annotation
+        fields = ("id", "document", "text", "target_id", "target_selectors")
 
 
 class CitationLinkSerializer(serializers.ModelSerializer):

@@ -22,16 +22,43 @@
             </div>
           </div>
         </div>
-        <p>{{ annotation.annotation.text }}</p>
+        <textarea
+          v-if="editing"
+          v-model="annotation.text"
+          class="form-control grow-text"
+        />
+        <p v-else>
+          {{ annotation.text }}
+        </p>
+        <div class="mt-2 text-end">
+          <button
+            v-if="editing"
+            class="ms-1 btn btn-sm btn-secondary"
+            @click="editing = false"
+          >
+            Cancel
+          </button>
+
+          <button
+            v-if="editing"
+            class="ms-1 btn btn-sm btn-primary"
+            @click="saveAnnotation"
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
   </la-gutter-item>
 </template>
 <script>
+
+import { authHeaders } from '../../api';
+
 export default {
   name: 'AnnotationItem',
   props: {
-    annotation: {
+    annotationData: {
       type: Object,
       default: null
     },
@@ -39,26 +66,61 @@ export default {
     gutter: HTMLElement,
     useSelectors: Boolean
   },
-  data: () => ({
+  emits: ['edit-annotation', 'delete-annotation'],
+  data: (x) => ({
     marks: [],
-    anchorElement: null
+    anchorElement: null,
+    editing: x.annotationData.editing || false,
+    annotation: x.annotationData
   }),
+  mounted () {
+    this.anchorElement = document.getElementById(this.annotation.target_id);
+    this.gutter.appendChild(this.$el);
+  },
   methods: {
     editAnnotation () {
-      console.log('edit annotation');
-      this.$emit('edit-annotation', this.annotation);
+      this.editing = true;
     },
-    deleteAnnotation () {
-      console.log('delete annotation');
-      this.$emit('delete-annotation', this.annotation);
+    async saveAnnotation () {
+      const headers = await authHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      const body = {
+        text: this.annotation.text,
+        target_selectors: this.annotation.target_selectors,
+        target_id: this.annotation.target_id,
+        document: this.annotation.document
+      };
+
+      const method = this.annotation.id === 'new' ? 'POST' : 'PUT';
+      const url = this.annotation.id === 'new' ? '/api/annotations/' : `/api/annotations/${this.annotation.id}/`;
+      const resp = await fetch(url, {
+        method,
+        headers,
+        body: JSON.stringify(body)
+      });
+
+      if (resp.ok) {
+        this.annotation = await resp.json();
+        this.editing = false;
+      }
+    },
+    async deleteAnnotation () {
+      const headers = await authHeaders();
+      const resp = await fetch(`/api/annotations/${this.annotation.id}/`, {
+        method: 'DELETE',
+        headers
+      });
+      if (resp.ok) {
+        this.$el.remove();
+      }
     }
-  },
-
-  mounted () {
-    console.log('annotation', this.annotation.annotation);
-    this.anchorElement = document.getElementById(this.annotation.annotation.target.anchor_id);
-    this.gutter.appendChild(this.$el);
   }
-
 };
 </script>
+
+<style scoped>
+.grow-text {
+  field-sizing: content
+}
+</style>
