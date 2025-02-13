@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from django.contrib import messages
 from django.db.models import CharField, Func, Value
+from django.http import Http404
 from django.template.defaultfilters import date as format_date
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
@@ -34,6 +35,20 @@ class LegislationListView(FilteredDocumentListView):
 class LegislationDetailView(BaseDocumentDetailView):
     model = Legislation
     template_name = "peachjam/legislation_detail.html"
+
+    def get_object(self, *args, **kwargs):
+        obj = super().get_object(*args, **kwargs)
+        if self.is_stranded_expression(obj):
+            raise Http404()
+        return obj
+
+    def is_stranded_expression(self, obj):
+        current_object_date = obj.date.strftime("%Y-%m-%d")
+        point_in_time_dates = [
+            point_in_time["date"]
+            for point_in_time in obj.metadata_json.get("points_in_time", [])
+        ]
+        return current_object_date not in point_in_time_dates
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
