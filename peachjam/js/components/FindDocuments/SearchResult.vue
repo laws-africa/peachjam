@@ -95,6 +95,14 @@
         </div>
       </div>
     </div>
+    <div v-if="showFeedbackCard" class="card mt-4">
+      <div class="card-body">
+        <p class="card-text">Can't find what you're looking for? Please let us know.</p>
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#provideFeedback">
+          Provide feedback
+        </button>
+      </div>
+    </div>
   </li>
 </template>
 
@@ -130,6 +138,14 @@ export default {
     debug: {
       type: Boolean,
       default: false
+    },
+    count: {
+      type: Number,
+      default: 0
+    },
+    index: {
+      type: Number,
+      default: 0
     }
   },
   emits: ['explain', 'item-clicked'],
@@ -137,6 +153,14 @@ export default {
     labels () {
       // get documentLabels where the code is in item.labels
       return this.documentLabels.filter(label => (this.item.labels || []).includes(label.code));
+    },
+    showFeedbackCard () {
+      if (this.count >= 3 && this.index === 2) {
+        return true;
+      } else if (this.count < 3 && this.index === this.count - 1) {
+        return true;
+      }
+      return false;
     }
   },
   methods: {

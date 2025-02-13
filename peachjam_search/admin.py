@@ -1,5 +1,10 @@
 from background_task.admin import TaskAdmin
+from django.contrib import admin
 from django.utils.timezone import now
+
+from peachjam_search.models import SearchFeedback
+
+admin.site.register(SearchFeedback)
 
 
 def run_now(modeladmin, request, queryset):

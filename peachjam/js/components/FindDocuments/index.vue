@@ -154,7 +154,13 @@
         v-if="searchInfo.count === 0"
         class="mt-3"
       >
-        {{ $t("No documents match your search.") }}
+        <p>{{ $t("No documents match your search.") }}</p>
+        <div class="mt-2">
+          <p>Can't find what you're looking for? Please let us know.</p>
+          <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#provideFeedback">
+            Provide feedback
+          </button>
+        </div>
       </div>
       <div ref="filters-results-container">
         <div class="row">
@@ -212,8 +218,10 @@
 
                 <ul class="list-unstyled">
                   <SearchResult
-                    v-for="item in searchInfo.results"
+                    v-for="(item, index) in searchInfo.results"
                     :key="item.key"
+                    :index="index"
+                    :count="searchInfo.count"
                     :item="item"
                     :query="q"
                     :debug="searchInfo.can_debug"
@@ -262,6 +270,7 @@
       {{ $t('Language') }}
       {{ $t('Year') }}
     </div>
+    <ProvideFeedback :user="user" :trace-id="searchInfo.trace_id" />
   </div>
 </template>
 
@@ -278,10 +287,11 @@ import analytics from '../analytics';
 import { authHeaders } from '../../api';
 import SearchTypeahead from '../search-typeahead';
 import htmx from 'htmx.org';
+import ProvideFeedback from './ProvideFeedback.vue';
 
 export default {
   name: 'FindDocuments',
-  components: { FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
+  components: { ProvideFeedback, FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
   props: ['showJurisdiction', 'showGoogle', 'showSuggestions'],
   data () {
     const getLabelOptionLabels = (labels) => {
@@ -296,6 +306,8 @@ export default {
     const getTitle = (title) => {
       return JSON.parse(document.querySelector('#data-labels').textContent)[title];
     };
+
+    const getUser = JSON.parse(document.querySelector('#data-user').textContent);
 
     const data = {
       searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
@@ -326,7 +338,8 @@ export default {
         date_to: null,
         date_from: null
       },
-      googleActive: false
+      googleActive: false,
+      user: getUser
     };
     const facets = [
       // most frequently used facets first, based on user data

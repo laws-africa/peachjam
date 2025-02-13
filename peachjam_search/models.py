@@ -4,6 +4,7 @@ from datetime import timedelta
 from math import exp
 from urllib.parse import urlencode
 
+from allauth.account import app_settings
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
@@ -170,3 +171,24 @@ class SavedSearch(models.Model):
             html_message=html,
             fail_silently=False,
         )
+
+
+class SearchFeedback(models.Model):
+    search_trace = models.ForeignKey(
+        SearchTrace, on_delete=models.CASCADE, related_name="search_clicks"
+    )
+    feedback = models.CharField(_("feedback"), max_length=4096, null=False, blank=False)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    name = models.CharField(_("name"), max_length=1024)
+    email = models.EmailField(
+        db_index=True,
+        max_length=app_settings.EMAIL_MAX_LENGTH,
+        verbose_name=_("email address"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return self.email
