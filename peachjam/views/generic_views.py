@@ -371,6 +371,9 @@ class BaseDocumentDetailView(DetailView):
             or self.request.user.has_perm("peachjam.add_saveddocument")
         )
 
+    def get_all_versions(self):
+        return CoreDocument.objects.filter(work_frbr_uri=self.object.work_frbr_uri)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
             document_diffs_url=self.document_diffs_url, **kwargs
@@ -384,9 +387,7 @@ class BaseDocumentDetailView(DetailView):
         ).data
 
         # get all versions that match current document work_frbr_uri
-        all_versions = CoreDocument.objects.filter(
-            work_frbr_uri=self.object.work_frbr_uri
-        )
+        all_versions = self.get_all_versions()
         # language versions that match current document date
         context["language_versions"] = all_versions.filter(date=self.object.date)
 

@@ -44,6 +44,14 @@ class LegislationDetailView(BaseDocumentDetailView):
         context["child_documents"] = self.get_child_documents()
         return context
 
+    def get_all_versions(self):
+        all_versions = super().get_all_versions()
+        # only include versions that have a date in points_in_time (usually the case, but not always)
+        point_in_time_dates = [
+            datetime.fromisoformat(p["date"]).date() for p in self.get_points_in_time()
+        ]
+        return all_versions.filter(date__in=point_in_time_dates)
+
     def get_notices(self):
         notices = super().get_notices()
         repeal = self.get_repeal_info()
