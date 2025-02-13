@@ -28,9 +28,6 @@ class BillListView(FilteredDocumentListView):
         context["doc_table_show_court"] = False
         context["doc_table_show_jurisdiction"] = False
 
-        if "nature" in context["facet_data"]:
-            del context["facet_data"]["nature"]
-
         return context
 
 
