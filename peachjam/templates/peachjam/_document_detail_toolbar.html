@@ -1,5 +1,5 @@
 {% load peachjam static i18n %}
-<div class="btn-toolbar justify-content-end mb-3"
+<div class="btn-toolbar justify-content-end mb-3 document-detail-toolbar"
      role="toolbar"
      aria-label="{% trans "Document toolbar" %}">
   {% block edit-btn %}
@@ -28,6 +28,8 @@
   {% block download-btn %}
     <div>
       {% if show_save_doc_button %}
+        <!-- this will be replaced by htmx -->
+        <div class="save-document-button"></div>
         <div hx-get="{% url 'saved_document_button' document.id %}"
              hx-trigger="load"></div>
         <div id="saveDocumentModal"
@@ -48,7 +50,7 @@
         </a>
         {% if document.source_file.filename_extension != "pdf" %}
           <button type="button"
-                  class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                  class="btn btn-primary btn-shrink-sm dropdown-toggle dropdown-toggle-split"
                   data-bs-toggle="dropdown"
                   aria-expanded="false">
             <span class="visually-hidden">{% trans "Toggle dropdown" %}</span>
@@ -70,8 +72,8 @@
               class="btn btn-outline-secondary btn-shrink-sm ms-2"
               data-bs-toggle="modal"
               data-bs-target="#documentProblemModal">
-        <span class="d-inline d-sm-none">{% trans "Report" %}</span>
-        <span class="d-none d-sm-inline">{% trans 'Report a problem' %}</span>
+        <span class="d-md-none">{% trans "Report" %}</span>
+        <span class="d-none d-md-inline">{% trans 'Report a problem' %}</span>
       </button>
       <div class="modal fade"
            id="documentProblemModal"

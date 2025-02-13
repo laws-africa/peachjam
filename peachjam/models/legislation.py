@@ -1,11 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.decorators import LegislationDecorator
 from peachjam.models import (
     CoreDocument,
     CoreDocumentManager,
     CoreDocumentQuerySet,
-    Label,
     Work,
 )
 
@@ -17,6 +17,8 @@ class LegislationManager(CoreDocumentManager):
 
 
 class Legislation(CoreDocument):
+    decorator = LegislationDecorator()
+
     objects = LegislationManager.from_queryset(CoreDocumentQuerySet)()
 
     timeline_json = models.JSONField(
@@ -52,39 +54,6 @@ class Legislation(CoreDocument):
     @property
     def commenced(self):
         return self.metadata_json.get("commenced", None)
-
-    def apply_labels(self):
-        labels = list(self.labels.all())
-
-        # label to indicate that this legislation is repealed
-        repealed_label, _ = Label.objects.get_or_create(
-            code="repealed",
-            defaults={"name": "Repealed", "code": "repealed", "level": "danger"},
-        )
-        uncommenced_label, _ = Label.objects.get_or_create(
-            code="uncommenced",
-            defaults={
-                "name": "Uncommenced",
-                "level": "danger",
-            },
-        )
-
-        # apply label if repealed
-        if self.repealed:
-            if repealed_label not in labels:
-                self.labels.add(repealed_label.pk)
-        elif repealed_label in labels:
-            # not repealed, remove label
-            self.labels.remove(repealed_label.pk)
-
-        # apply label if not commenced
-        if not self.commenced:
-            if uncommenced_label not in labels:
-                self.labels.add(uncommenced_label.pk)
-        elif uncommenced_label in labels:
-            self.labels.remove(uncommenced_label.pk)
-
-        super().apply_labels()
 
     def pre_save(self):
         self.doc_type = "legislation"

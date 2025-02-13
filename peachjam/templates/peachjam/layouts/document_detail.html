@@ -63,6 +63,7 @@
         {% endblock %}
         {% include 'peachjam/_notices.html' with messages=notices %}
         {% include "peachjam/_document_detail_toolbar.html" %}
+        {% include 'peachjam/_document_floating_header.html' %}
         <ul class="nav nav-tabs border-bottom scroll-xs" role="tablist">
           {% block document-tabs %}
             <li class="nav-item" role="presentation">
@@ -186,43 +187,27 @@
                           </dt>
                           <dd class="text-muted">
                             {{ document.citation }}
-                            <button type="button"
-                                    class="btn btn-outline-secondary btn-xs ms-2"
-                                    title="{% trans "Copy to clipboard" %}"
-                                    data-component="CopyToClipboard"
-                                    data-value='{{ document.citation }}'
-                                    data-value-html='<a href="https://{{ request.site.domain }}{{ document.get_absolute_url }}">{{ document.citation }}</a>'
-                                    data-confirmation="{% trans "Copied!" %}">
-                              {% trans "Copy" %}
-                            </button>
+                            {% include 'peachjam/_copy_to_clipboard.html' with value=document.citation %}
                           </dd>
                         {% endif %}
                       {% endblock %}
                       {% block document-metadata-content-alternative-names %}
                         {% with document.alternative_names.all as alternative_names %}
                           {% if alternative_names %}
-                            {% if document.doc_type == "judgment" %}
-                              <dt>
-                                {% trans 'Law report citations' %}
-                              </dt>
-                            {% else %}
-                              <dt>
-                                {% trans 'Alternative names' %}
-                              </dt>
-                            {% endif %}
+                            <dt>
+                              {% block document-metadata-alternative-names-label %}
+                                {% if document.doc_type == "judgment" %}
+                                  {% trans 'Law report citations' %}
+                                {% else %}
+                                  {% trans 'Alternative names' %}
+                                {% endif %}
+                              {% endblock %}
+                            </dt>
                             <dd class="text-muted">
                               {% for alternative_name in alternative_names %}
                                 <div>
                                   {{ alternative_name.title }}
-                                  <button type="button"
-                                          class="btn btn-outline-secondary btn-xs ms-2"
-                                          title="{% trans "Copy to clipboard" %}"
-                                          data-component="CopyToClipboard"
-                                          data-value='{{ alternative_name.title }}'
-                                          data-value-html='<a href="https://{{ request.site.domain }}{{ document.get_absolute_url }}">{{ alternative_name.title }}</a>'
-                                          data-confirmation="{% trans "Copied!" %}">
-                                    {% trans "Copy" %}
-                                  </button>
+                                  {% include 'peachjam/_copy_to_clipboard.html' with value=alternative_name.title %}
                                 </div>
                               {% endfor %}
                             </dd>

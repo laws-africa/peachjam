@@ -54,9 +54,15 @@
             {% endfor %}
           </td>
           <td>
-            {% if child.document %}{{ child.document.outcome }}{% endif %}
+            {% if child.document %}
+              {% for outcome in child.document.outcomes.all %}
+                {# djlint:off #}
+                <span class="text-nowrap">{{ outcome }}{% if not forloop.last %},{% endif %}</span>
+                {# djlint:on #}
+              {% endfor %}
+            {% endif %}
           </td>
-          <td>{{ child.case_history.outcome }}</td>
+          <td>{{ child.case_history.outcome|default_if_none:"" }}</td>
         </tr>
       {% endfor %}
     {% endfor %}

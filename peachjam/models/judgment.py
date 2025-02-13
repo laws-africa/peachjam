@@ -8,7 +8,8 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
-from peachjam.models import CoreDocument, Label, Locality
+from peachjam.decorators import JudgmentDecorator
+from peachjam.models import CoreDocument, Locality
 
 
 class Attorney(models.Model):
@@ -39,21 +40,6 @@ class Judge(models.Model):
         ordering = ("name",)
         verbose_name = _("judge")
         verbose_name_plural = _("judges")
-
-    def __str__(self):
-        return self.name
-
-
-class OrderOutcome(models.Model):
-    name = models.CharField(
-        _("name"), max_length=1024, null=False, blank=False, unique=True
-    )
-    description = models.TextField(_("description"), blank=True)
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = _("order outcome")
-        verbose_name_plural = _("order outcomes")
 
     def __str__(self):
         return self.name
@@ -270,6 +256,8 @@ class LowerBench(models.Model):
 
 
 class Judgment(CoreDocument):
+    decorator = JudgmentDecorator()
+
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
     )
@@ -292,11 +280,6 @@ class Judgment(CoreDocument):
     )
     attorneys = models.ManyToManyField(
         Attorney, blank=True, verbose_name=_("attorneys")
-    )
-    order_outcomes = models.ManyToManyField(
-        OrderOutcome,
-        blank=True,
-        related_name="judgments",
     )
     outcomes = models.ManyToManyField(
         Outcome,
@@ -339,6 +322,12 @@ class Judgment(CoreDocument):
         _("Auto-assign details"),
         help_text=_("Whether or not the system should assign the details"),
         default=True,
+    )
+
+    anonymised = models.BooleanField(
+        _("Anonymised"),
+        help_text=_("Whether or not the judgment is anonymised"),
+        default=False,
     )
 
     CITATION_DATE_FORMAT = "(j F Y)"
@@ -435,26 +424,6 @@ class Judgment(CoreDocument):
 
         self.title = " ".join(parts)
         self.citation = self.title
-
-    def apply_labels(self):
-        """Apply labels to this judgment based on its properties."""
-        # label showing that a judgment is cited/reported in law reports, hence "more important"
-        label, _ = Label.objects.get_or_create(
-            code="reported",
-            defaults={"name": "Reported", "code": "reported", "level": "success"},
-        )
-
-        labels = list(self.labels.all())
-
-        # if the judgment has alternative_names, apply the "reported" label
-        if self.alternative_names.exists():
-            if label not in labels:
-                self.labels.add(label.pk)
-        # if the judgment has no alternative_names, remove the "reported" label
-        elif label in labels:
-            self.labels.remove(label.pk)
-
-        super().apply_labels()
 
     def pre_save(self):
         # ensure registry aligns to the court
@@ -606,3 +575,17 @@ class CauseList(CoreDocument):
         self.frbr_uri_doctype = "doc"
         self.doc_type = "causelist"
         super().pre_save()
+
+
+class Replacement(models.Model):
+    """A replacement made for anonymisation in a Judgment. Part of the judgment anonymiser app."""
+
+    document = models.ForeignKey(
+        "Judgment", on_delete=models.CASCADE, related_name="replacements"
+    )
+    old_text = models.TextField()
+    new_text = models.TextField()
+    target = models.JSONField()
+
+    def __str__(self):
+        return f"{self.old_text} -> {self.new_text}"

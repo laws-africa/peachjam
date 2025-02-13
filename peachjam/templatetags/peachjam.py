@@ -32,6 +32,11 @@ def parse_string_date(date):
     return datetime.datetime.strptime(date, "%Y-%m-%d")
 
 
+@register.filter
+def parse_isodate_string(date):
+    return datetime.datetime.fromisoformat(date)
+
+
 @register.simple_tag
 def get_proper_elided_page_range(paginator, number, on_each_side=3, on_ends=2):
     return paginator.get_elided_page_range(

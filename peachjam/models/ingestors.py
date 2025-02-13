@@ -62,6 +62,7 @@ class Ingestor(models.Model):
         log.info(
             f"Checking for ingestor updates for {self}, last_refresh_at {self.last_refreshed_at}"
         )
+        now = timezone.now()
         updated, deleted = adapter.check_for_updates(self.last_refreshed_at)
         log.info(f"{len(updated)} documents to update")
         for doc in updated:
@@ -70,7 +71,7 @@ class Ingestor(models.Model):
         for doc in deleted:
             delete_document(self.id, doc)
 
-        self.last_refreshed_at = timezone.now()
+        self.last_refreshed_at = now
         self.save()
         log.info(f"Finished checking for ingestor updates for {self}")
 

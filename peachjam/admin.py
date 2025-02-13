@@ -508,6 +508,8 @@ class DocumentAccessForm(forms.Form):
 
 
 class DocumentAccessMixin(GuardedModelAdminMixin):
+    change_form_template = None
+
     def obj_perms_manage_view(self, request, object_pk):
         from django.contrib.admin.utils import unquote
 
@@ -822,7 +824,8 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
     def apply_labels(self, request, queryset):
         count = queryset.count()
         for doc in queryset.iterator():
-            doc.apply_labels()
+            if doc.decorator:
+                doc.decorator.apply_labels(doc)
         self.message_user(
             request, _("Applying labels for %(count)d documents.") % {"count": count}
         )
@@ -1114,6 +1117,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[0][1]["fields"].append("outcomes")
     fieldsets[0][1]["fields"].append("serial_number")
     fieldsets[0][1]["fields"].append("serial_number_override")
+    fieldsets[0][1]["fields"].append("anonymised")
 
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 

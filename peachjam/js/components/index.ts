@@ -3,6 +3,7 @@ import { RelationshipEnrichments } from './RelationshipEnrichment';
 import DocumentFilterForm from './document-filter-form';
 import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
+import FloatingHeader from './floating-header';
 import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
 import TaxonomyTree from './taxonomy-tree';
@@ -13,6 +14,7 @@ import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
 import TaxonomyTopics from './TaxonomyTopics.vue';
+import AnonApp from './Anon/AnonApp.vue';
 
 const components: Record<string, any> = {
   // Data components
@@ -20,6 +22,7 @@ const components: Record<string, any> = {
   DocumentContent,
   DocumentFilterForm,
   DocumentTable,
+  FloatingHeader,
   NavigationSelect,
   RelationshipEnrichments,
   SearchTypeahead,
@@ -28,6 +31,7 @@ const components: Record<string, any> = {
   TermsOfUse,
 
   // Vue components
+  AnonApp,
   DocumentProblemModal,
   FindDocuments,
   PocketLawDownload,
