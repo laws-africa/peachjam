@@ -33,7 +33,10 @@ export default {
   }),
   methods: {
     addAnnotation (target) {
-      this.items = this.items.filter(item => item.id !== 'new');
+      const unsaved = document.getElementById('new');
+      if (unsaved) {
+        unsaved.remove();
+      }
       const newAnnotation = {
         id: 'new',
         text: '',

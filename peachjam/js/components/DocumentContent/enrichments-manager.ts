@@ -62,6 +62,7 @@ class EnrichmentsManager {
     // setup PDF enrichments after the PDF has been rendered
     this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
     this.citationLinks = new PDFCitationLinks(this.root, this.gutterManager);
+    this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
   }
 }
 
