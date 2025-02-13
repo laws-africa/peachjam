@@ -260,6 +260,11 @@ class IndigoAdapter(RequestsAdapter):
                 logger.info("Skipping stub document without publication document")
                 return
 
+        # don't ingest expressions that don't have a related point in time
+        if self.is_stranded_expression(document):
+            logger.info("Skipping stranded document")
+            return
+
         frbr_uri = FrbrUri.parse(document["frbr_uri"])
         title = document["title"]
         toc_json = self.get_toc_json(url)
@@ -734,6 +739,13 @@ class IndigoAdapter(RequestsAdapter):
     def get_edit_url(self, document):
         if self.settings.get("indigo_url"):
             return f"{self.settings['indigo_url']}/works{document.work_frbr_uri}"
+
+    def is_stranded_expression(self, document):
+        point_in_time_dates = [
+            point_in_time["date"]
+            for point_in_time in document.get("points_in_time", [])
+        ]
+        return document["expression_date"] not in point_in_time_dates
 
 
 @plugins.register("ingestor-adapter")
