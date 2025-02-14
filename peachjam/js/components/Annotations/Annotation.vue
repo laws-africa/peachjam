@@ -18,8 +18,8 @@
               <i class="bi bi-three-dots" />
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" @click="editAnnotation">Edit</a>
-              <a class="dropdown-item" @click="deleteAnnotation">Delete</a>
+              <a class="dropdown-item" role="button" @click="editAnnotation">Edit</a>
+              <a class="dropdown-item" role="button" @click="deleteAnnotation">Delete</a>
             </div>
           </div>
         </div>
