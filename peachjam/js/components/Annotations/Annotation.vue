@@ -92,7 +92,7 @@ export default {
       };
 
       const method = this.annotation.id === 'new' ? 'POST' : 'PUT';
-      const url = this.annotation.id === 'new' ? '/api/annotations/' : `/api/annotations/${this.annotation.id}/`;
+      const url = this.annotation.id === 'new' ? `/api/documents/${this.annotation.document}/annotations/` : `/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/`;
       const resp = await fetch(url, {
         method,
         headers,
@@ -109,7 +109,7 @@ export default {
     },
     async deleteAnnotation () {
       const headers = await authHeaders();
-      const resp = await fetch(`/api/annotations/${this.annotation.id}/`, {
+      const resp = await fetch(`/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/`, {
         method: 'DELETE',
         headers
       });

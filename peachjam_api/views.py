@@ -39,7 +39,7 @@ class AnnotationViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         if self.request.user.is_authenticated:
             queryset = queryset.filter(user=self.request.user)
-            document_id = self.request.query_params.get("document")
+            document_id = self.kwargs.get("document_id")
             if document_id:
                 queryset = queryset.filter(document__id=document_id)
             return queryset

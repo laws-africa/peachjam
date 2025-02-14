@@ -1,0 +1,42 @@
+{% extends "user_account/layout.html" %}
+{% load i18n peachjam %}
+{% block title %}
+  {% trans 'Annotations' %}
+{% endblock %}
+{% block account-tabs %}
+  {% include 'user_account/_tabs.html' with active='annotations' %}
+{% endblock %}
+{% block account-content %}
+  <div class="container mt-4">
+    <h2>{% trans 'Annotations' %}</h2>
+    <div class="my-3">
+      {% if annotations|length %}
+        {% for annotation in annotations %}
+          <div class="card my-4">
+            <div class="card-body">
+              <a href="{% url 'document_detail' annotation.document.expression_frbr_uri|strip_first_character %}#{{ annotation.target_id }}">{{ annotation.document }}</a>
+              <div class="my-2">
+                {% for selector in annotation.target_selectors %}
+                  {% if selector.type == 'TextQuoteSelector' %}<mark><span>{{ selector.exact }}</span></mark>{% endif %}
+                {% endfor %}
+              </div>
+              <hr/>
+              <div class="my-2">
+                <p>{{ annotation.text }}</p>
+              </div>
+            </div>
+            <div class="card-footer">
+              <small class="text-sm text-muted"><span>{% trans 'Created at:' %}</span><span>{{ annotation.created_at }}</span></small>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>
+          {% blocktrans trimmed %}
+      You have not created any annotations.
+      {% endblocktrans %}
+        </p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

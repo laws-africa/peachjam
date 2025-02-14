@@ -29,6 +29,7 @@ from peachjam.feeds import (
 from peachjam.helpers import ISODateConverter
 from peachjam.views import (
     AboutPageView,
+    AnnotationListView,
     ArticleAttachmentDetailView,
     ArticleAuthorDetailView,
     ArticleAuthorYearDetailView,
@@ -500,6 +501,19 @@ urlpatterns = [
         "document-access-groups/<int:pk>",
         DocumentAccessGroupDetailView.as_view(),
         name="document_access_group_detail",
+    ),
+    # Annotations
+    path(
+        "annotations/",
+        include(
+            [
+                path(
+                    "",
+                    AnnotationListView.as_view(),
+                    name="annotation_list",
+                ),
+            ]
+        ),
     ),
     path(
         "compare",

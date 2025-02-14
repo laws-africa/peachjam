@@ -35,7 +35,7 @@ export default {
   },
   methods: {
     getAnnotations () {
-      fetch(`/api/annotations/?document=${this.viewRoot.dataset.documentId}`)
+      fetch(`/api/documents/${this.viewRoot.dataset.documentId}/annotations/`)
         .then((resp) => {
           if (!resp.ok) {
             throw new Error('Failed to fetch annotations');

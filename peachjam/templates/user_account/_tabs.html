@@ -51,5 +51,11 @@
         {% trans "Document access groups" %}
       </a>
     </li>
+    <li class="nav-item">
+      <a href="{% url 'annotation_list' %}"
+         class="nav-link {% if active == 'annotations' %}active{% endif %}">
+        {% trans "Annotations" %}
+      </a>
+    </li>
   {% endblock %}
 </ul>

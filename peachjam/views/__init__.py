@@ -1,6 +1,7 @@
 # flake8: noqa
 from .about import *
 from .accounts import *
+from .annotation import *
 from .anon import *
 from .article import *
 from .authors import *
