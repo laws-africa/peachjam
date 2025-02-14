@@ -4,7 +4,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
-            Share your feedback
+            {{ $t("Share your feedback") }}
           </h5>
           <button
             type="button"
@@ -18,23 +18,25 @@
           <div v-if="submitted">
             {{ success ? $t('Thank you for your feedback.') : $t('Something went wrong.') }}
           </div>
-          <form v-else ref="feedbackForm">
+          <form
+            v-else
+            id="feedbackForm"
+            ref="feedbackForm"
+            method="post"
+            @submit.prevent="onSubmit"
+          >
             <input
-              type="hidden"
+              hidden
               name="search_trace"
               :value="traceId"
             >
-            <input
-              type="hidden"
-              name="user"
-              :value="user?.id"
+            <div
+              class="mb-3"
             >
-            <div class="mb-3">
-              <label for="name" class="col-form-label">Name</label>
+              <label for="search-feedback_name" class="col-form-label">{{ $t("Name") }}</label>
               <input
-                id="name"
+                id="search-feedback_name"
                 name="name"
-                required
                 :value="user?.username"
                 type="text"
                 class="form-control"
@@ -42,20 +44,19 @@
               >
             </div>
             <div class="mb-3">
-              <label for="email" class="col-form-label">Email address</label>
+              <label for="search-feedback_email" class="col-form-label">{{ $t("Email address") }}</label>
               <input
-                id="email"
+                id="search-feedback_email"
                 name="email"
-                required
                 :value="user?.email"
                 type="email"
                 class="form-control"
               >
             </div>
             <div class="mb-3">
-              <label for="feedback" class="col-form-label">Message:</label>
+              <label for="search-feedback_feedback" class="col-form-label">{{ $t("What are you looking for?") }}</label>
               <textarea
-                id="feedback"
+                id="search-feedback_feedback"
                 name="feedback"
                 required
                 class="form-control"
@@ -75,11 +76,11 @@
           </button>
           <button
             v-if="!submitted"
-            type="button"
+            type="submit"
             class="btn btn-primary"
-            @click="onSubmit"
+            form="feedbackForm"
           >
-            Submit
+            {{ $t("Submit") }}
           </button>
         </div>
       </div>

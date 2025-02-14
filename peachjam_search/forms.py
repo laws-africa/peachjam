@@ -18,4 +18,4 @@ class SavedSearchUpdateForm(forms.ModelForm):
 class SearchFeedbackCreateForm(forms.ModelForm):
     class Meta:
         model = SearchFeedback
-        fields = ["name", "email", "search_trace", "user", "feedback"]
+        fields = ["name", "email", "search_trace", "feedback"]

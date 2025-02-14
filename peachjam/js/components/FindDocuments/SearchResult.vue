@@ -97,9 +97,9 @@
     </div>
     <div v-if="showFeedbackCard" class="card mt-4">
       <div class="card-body">
-        <p class="card-text">Can't find what you're looking for? Please let us know.</p>
+        <p class="card-text">{{ $t("Can't find what you're looking for? Please let us know.") }}</p>
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#provideFeedback">
-          Provide feedback
+          {{ $t("Provide feedback") }}
         </button>
       </div>
     </div>

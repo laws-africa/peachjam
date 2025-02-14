@@ -156,9 +156,9 @@
       >
         <p>{{ $t("No documents match your search.") }}</p>
         <div class="mt-2">
-          <p>Can't find what you're looking for? Please let us know.</p>
+          <p>{{ $t("Can't find what you're looking for? Please let us know.") }}</p>
           <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#provideFeedback">
-            Provide feedback
+            {{ $t("Provide feedback") }}
           </button>
         </div>
       </div>
@@ -270,7 +270,7 @@
       {{ $t('Language') }}
       {{ $t('Year') }}
     </div>
-    <ProvideFeedback :user="user" :trace-id="searchInfo.trace_id" />
+    <SearchFeedback :user="user" :trace-id="searchInfo.trace_id" />
   </div>
 </template>
 
@@ -287,11 +287,11 @@ import analytics from '../analytics';
 import { authHeaders } from '../../api';
 import SearchTypeahead from '../search-typeahead';
 import htmx from 'htmx.org';
-import ProvideFeedback from './ProvideFeedback.vue';
+import SearchFeedback from './SearchFeedback.vue';
 
 export default {
   name: 'FindDocuments',
-  components: { ProvideFeedback, FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
+  components: { SearchFeedback, FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
   props: ['showJurisdiction', 'showGoogle', 'showSuggestions'],
   data () {
     const getLabelOptionLabels = (labels) => {

@@ -179,9 +179,10 @@ class SearchFeedback(models.Model):
     )
     feedback = models.CharField(_("feedback"), max_length=4096, null=False, blank=False)
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
-    name = models.CharField(_("name"), max_length=1024)
+    name = models.CharField(_("name"), null=True, blank=True, max_length=1024)
     email = models.EmailField(
-        db_index=True,
+        null=True,
+        blank=True,
         max_length=app_settings.EMAIL_MAX_LENGTH,
         verbose_name=_("email address"),
     )
@@ -191,4 +192,4 @@ class SearchFeedback(models.Model):
         ordering = ("-created_at",)
 
     def __str__(self):
-        return self.email
+        return f"{self.created_at}"

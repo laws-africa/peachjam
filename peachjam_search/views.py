@@ -900,9 +900,10 @@ class SearchFeedbackCreateView(View):
     http_method_names = ["post"]
 
     def post(self, *args, **kwargs):
-        # fire-and-forget
         form = self.form_class(self.request.POST)
         if form.is_valid():
+            if self.request.user:
+                form.instance.user = self.request.user
             form.save()
             return HttpResponse()
         return HttpResponse(status=400)
