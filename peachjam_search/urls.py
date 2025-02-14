@@ -36,6 +36,11 @@ urlpatterns = [
         views.SavedSearchListView.as_view(),
         name="saved_search_list",
     ),
+    path(
+        "feedback/create",
+        views.SearchFeedbackCreateView.as_view(),
+        name="search_feedback_create",
+    ),
     path("", views.SearchView.as_view(), name="search"),
     path("traces", views.SearchTraceListView.as_view(), name="search_traces"),
     path(
