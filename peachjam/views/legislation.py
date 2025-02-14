@@ -133,7 +133,10 @@ class LegislationDetailView(BaseDocumentDetailView):
                 point_in_time["date"] for point_in_time in points_in_time
             ]
 
-            index = point_in_time_dates.index(current_object_date)
+            try:
+                index = point_in_time_dates.index(current_object_date)
+            except ValueError:
+                return notices
 
             if index == len(point_in_time_dates) - 1:
                 if self.object.repealed and repeal:
