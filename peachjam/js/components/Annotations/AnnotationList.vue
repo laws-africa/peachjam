@@ -27,11 +27,27 @@ export default {
     gutter: HTMLElement,
     useSelectors: Boolean
   },
-  data: (x) => ({
-    items: x.annotations,
-    addAnnotationComponent: null
+  data: () => ({
+    items: []
   }),
+  mounted () {
+    this.getAnnotations();
+  },
   methods: {
+    getAnnotations () {
+      fetch(`/api/annotations/?document=${this.viewRoot.dataset.documentId}`)
+        .then((resp) => {
+          if (!resp.ok) {
+            throw new Error('Failed to fetch annotations');
+          }
+          return resp.json();
+        })
+        .then((annotations) => {
+          this.items = annotations.results;})
+        .catch((err) => {
+          console.error(err);
+        });
+    },
     addAnnotation (target) {
       const unsaved = document.getElementById('new');
       if (unsaved) {

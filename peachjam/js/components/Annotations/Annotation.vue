@@ -123,7 +123,6 @@ export default {
         selectors: this.annotation.target_selectors,
         anchor_id: this.annotation.target_id
       }, this.viewRoot);
-      console.log(range);
       if (!range) return;
       markRange(range, 'mark', mark => {
         this.marks.push(mark);

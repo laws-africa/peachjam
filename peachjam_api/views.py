@@ -35,6 +35,19 @@ class AnnotationViewSet(viewsets.ModelViewSet):
     queryset = Annotation.objects.all()
     serializer_class = AnnotationSerializer
 
+    def get_queryset(self, *args, **kwargs):
+        queryset = super().get_queryset()
+        if self.request.user.is_authenticated:
+            queryset = queryset.filter(user=self.request.user)
+            document_id = self.request.query_params.get("document")
+            if document_id:
+                queryset = queryset.filter(document__id=document_id)
+            return queryset
+        return queryset.none()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 class WorksViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Work.objects.all()

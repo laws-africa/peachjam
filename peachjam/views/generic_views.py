@@ -28,7 +28,6 @@ from peachjam.models import (
 )
 from peachjam.xmlutils import parse_html_str
 from peachjam_api.serializers import (
-    AnnotationSerializer,
     CitationLinkSerializer,
     PredicateSerializer,
     RelationshipSerializer,
@@ -398,7 +397,6 @@ class BaseDocumentDetailView(DetailView):
 
         self.add_relationships(context)
         self.add_provision_relationships(context)
-        self.add_annotations(context)
 
         if context["document"].content_html:
             context["display_type"] = (
@@ -530,11 +528,6 @@ class BaseDocumentDetailView(DetailView):
 
     def get_notices(self):
         return []
-
-    def add_annotations(self, context):
-        context["annotations"] = AnnotationSerializer(
-            self.object.annotations.all(), many=True
-        ).data
 
     def prefix_images(self, document):
         """Rewrite image URLs so that we can serve them correctly."""

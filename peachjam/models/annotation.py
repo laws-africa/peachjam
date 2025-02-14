@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -14,6 +15,13 @@ class Annotation(models.Model):
     target_selectors = models.JSONField(
         verbose_name=_("target selectors"), null=True, blank=True
     )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="annotations",
+        on_delete=models.CASCADE,
+        verbose_name=_("user"),
+    )
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
         verbose_name = _("annotation")
