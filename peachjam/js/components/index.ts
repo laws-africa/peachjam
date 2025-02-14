@@ -1,5 +1,6 @@
 import { CopyToClipboard } from './clipboard';
 import { RelationshipEnrichments } from './RelationshipEnrichment';
+import { AnnotationsProvider } from './Annotations';
 import DocumentFilterForm from './document-filter-form';
 import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
@@ -25,6 +26,7 @@ const components: Record<string, any> = {
   FloatingHeader,
   NavigationSelect,
   RelationshipEnrichments,
+  AnnotationsProvider,
   SearchTypeahead,
   ToggleTab,
   TaxonomyTree,
