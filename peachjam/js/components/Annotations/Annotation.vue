@@ -91,7 +91,7 @@ export default {
     async checkDocumentSaved () {
       const response = await fetch(`/saved-documents/button/${this.viewRoot.dataset.documentId}`);
       if (!response.ok) {
-        throw new Error(`Error checkin document saved: ${response.status}`);
+        throw new Error(`Error checking document saved: ${response.status}`);
       }
       return response.url.includes('update');
     },
@@ -114,8 +114,8 @@ export default {
         document: this.annotation.document
       };
 
-      const method = this.annotation.ref_id.includes('new') ? 'POST' : 'PUT';
-      const url = this.annotation.ref_id.includes('new') ? `/api/documents/${this.annotation.document}/annotations/` : `/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/`;
+      const method = this.annotation.id ? 'PUT' : 'POST';
+      const url = this.annotation.id ? `/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/` : `/api/documents/${this.annotation.document}/annotations/`;
       const resp = await fetch(url, {
         method,
         headers,

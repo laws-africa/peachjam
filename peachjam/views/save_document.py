@@ -41,8 +41,15 @@ class BaseFolderMixin(
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["ungrouped_saved_documents"] = self.request.user.saved_documents.filter(
-            folder__isnull=True
+        context["ungrouped_saved_documents"] = (
+            self.request.user.saved_documents.filter(folder__isnull=True)
+            .select_related("document")
+            .annotate(
+                annotation_count=Count(
+                    "document__annotations",
+                    filter=Q(document__annotations__user=self.request.user),
+                )
+            )
         )
         context["folders"] = Folder.objects.prefetch_related(
             Prefetch(

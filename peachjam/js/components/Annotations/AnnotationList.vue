@@ -38,7 +38,7 @@ export default {
           return resp.json();
         })
         .then((annotations) => {
-          this.items = annotations.results.map((annotation, idx) => ({
+          this.items = annotations.results.map((annotation) => ({
             ...annotation,
             ref_id: `annotation-${annotation.id}`
           }));
