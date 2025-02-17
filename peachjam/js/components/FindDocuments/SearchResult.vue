@@ -95,20 +95,17 @@
         </div>
       </div>
     </div>
-    <SearchFeedback v-if="showFeedbackCard" :trace-id="traceId" />
   </li>
 </template>
 
 <script>
 import JsonTable from './JsonTable.vue';
-import SearchFeedback from './SearchFeedback.vue';
 import SearchResultProvision from './SearchResultProvision.vue';
 
 export default {
   name: 'SearchResult',
   components: {
     JsonTable,
-    SearchFeedback,
     SearchResultProvision
   },
   props: {
@@ -133,18 +130,6 @@ export default {
     debug: {
       type: Boolean,
       default: false
-    },
-    count: {
-      type: Number,
-      default: 0
-    },
-    index: {
-      type: Number,
-      default: 0
-    },
-    traceId: {
-      type: String,
-      default: ''
     }
   },
   emits: ['explain', 'item-clicked'],
@@ -152,14 +137,6 @@ export default {
     labels () {
       // get documentLabels where the code is in item.labels
       return this.documentLabels.filter(label => (this.item.labels || []).includes(label.code));
-    },
-    showFeedbackCard () {
-      if (this.count >= 3 && this.index === 2) {
-        return true;
-      } else if (this.count < 3 && this.index === this.count - 1) {
-        return true;
-      }
-      return false;
     }
   },
   methods: {

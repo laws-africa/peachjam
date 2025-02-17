@@ -228,6 +228,8 @@
                   />
                 </ul>
 
+                <SearchFeedback :trace-id="searchInfo.trace_id" />
+
                 <SearchPagination
                   :search="searchInfo"
                   :page="page"

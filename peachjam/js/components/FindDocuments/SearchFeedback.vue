@@ -1,6 +1,8 @@
 <template>
-  <div class="mt-3">
-    <p>{{ $t("Can't find what you're looking for? Please let us know.") }}</p>
+  <div class="mt-3 mb-5 d-lg-flex align-items-center">
+    <p class="mb-lg-0 me-3">
+      {{ $t("Can't find what you're looking for? Please let us know.") }}
+    </p>
     <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#provideFeedback">
       {{ $t("Provide feedback") }}
     </button>
@@ -43,7 +45,7 @@
               <input
                 id="search-feedback_name"
                 name="name"
-                :value="userInfo?.username"
+                :value="userInfo?.name"
                 type="text"
                 class="form-control"
                 maxlength="1024"
