@@ -1,5 +1,4 @@
-import copy
-import logging
+import json
 from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
@@ -10,9 +9,7 @@ from django.http import HttpResponseRedirect, QueryDict
 from django.http.response import Http404, HttpResponse, JsonResponse
 from django.shortcuts import redirect, reverse
 from django.utils.decorators import method_decorator
-from django.utils.functional import cached_property
 from django.utils.timezone import now
-from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.decorators.cache import cache_page
@@ -25,22 +22,6 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
-from django_elasticsearch_dsl_drf.filter_backends import (
-    DefaultOrderingFilterBackend,
-    FacetedFilterSearchFilterBackend,
-    HighlightBackend,
-    OrderingFilterBackend,
-    SourceBackend,
-)
-from django_elasticsearch_dsl_drf.filter_backends.search.base import (
-    BaseSearchFilterBackend,
-)
-from django_elasticsearch_dsl_drf.pagination import PageNumberPagination, Paginator
-from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
-from elasticsearch_dsl import DateHistogramFacet
-from elasticsearch_dsl.connections import get_connection
-from elasticsearch_dsl.query import MatchPhrase, Q, SimpleQueryString, Term
-from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
@@ -48,11 +29,12 @@ from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
 from peachjam_api.serializers import LabelSerializer
-from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
+from peachjam_search.engine import SearchEngine
 from peachjam_search.forms import (
     SavedSearchCreateForm,
     SavedSearchUpdateForm,
     SearchFeedbackCreateForm,
+    SearchForm,
 )
 from peachjam_search.models import SavedSearch, SearchTrace
 from peachjam_search.serializers import (
@@ -62,353 +44,6 @@ from peachjam_search.serializers import (
 
 CACHE_SECS = 15 * 60
 SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
-
-log = logging.getLogger(__name__)
-
-
-class RobustPaginator(Paginator):
-    max_results = 10_000
-
-    @cached_property
-    def num_pages(self):
-        # clamp the page number to prevent exceeding max_results
-        return min(super().num_pages, (self.max_results - 1) // self.per_page)
-
-    def _get_page(self, response, *args, **kwargs):
-        # this is the only place we get access to the response from ES, so we can check for errors
-        if response._shards.failed:
-            # it's better to fail here than to silently return partial (or no) results
-            log.error(f"ES query failed: {response._shards.failures}")
-            if settings.ELASTICSEARCH_FAIL_ON_SHARD_FAILURE:
-                raise Exception(f"ES query failed: {response._shards.failures}")
-        return super()._get_page(response, *args, **kwargs)
-
-
-class CustomPageNumberPagination(PageNumberPagination):
-    # NB: if this changes, update pageSize in peachjam/js/components/FindDocuments/index.vue
-    page_size = 10
-    django_paginator_class = RobustPaginator
-
-
-class MainSearchBackend(BaseSearchFilterBackend):
-    """A search backend that builds the core query.
-
-    It is a combination of MUST (AND) queries and SHOULD (OR) queries.
-    """
-
-    pages_inner_hits = {
-        "_source": ["pages.page_num"],
-        "highlight": {
-            "fields": {"pages.body": {}, "pages.body.exact": {}},
-            "pre_tags": ["<mark>"],
-            "post_tags": ["</mark>"],
-            "fragment_size": 80,
-            "number_of_fragments": 2,
-            "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-        },
-    }
-
-    provisions_inner_hits = {
-        "_source": [
-            "provisions.title",
-            "provisions.id",
-            "provisions.parent_titles",
-            "provisions.parent_ids",
-        ],
-        "highlight": {
-            "fields": {"provisions.body": {}, "provisions.body.exact": {}},
-            "pre_tags": ["<mark>"],
-            "post_tags": ["</mark>"],
-            "fragment_size": 80,
-            "number_of_fragments": 2,
-            "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-        },
-    }
-
-    query = None
-
-    def get_field(self, view, field):
-        options = (
-            view.search_fields.get(field, {})
-            or view.advanced_search_fields.get(field, {})
-            or {}
-        )
-        if "boost" in options:
-            return f'{field}^{options["boost"]}'
-        return field
-
-    def filter_queryset(self, request, queryset, view):
-        """Build the actual search queries."""
-        # the basic query for a simple search
-        self.query = " ".join(self.get_search_query_params(request))
-
-        must_queries = [Term(is_most_recent=True)]
-        must_queries.extend(self.build_rank_feature_queries(request, view))
-        must_queries.extend(self.build_per_field_queries(request, view))
-
-        should_queries = []
-        if self.is_advanced_search(request, view):
-            # these handle advanced search, and can't be combined with normal search because they both
-            # build queries to return nested content, and ES complains if multiple queries try to return the
-            # same nested content fields
-            must_queries.extend(self.build_advanced_all_queries(request, view))
-            must_queries.extend(self.build_advanced_content_queries(request, view))
-        else:
-            # these handle basic search
-            should_queries.extend(self.build_basic_queries(request, view))
-            should_queries.extend(self.build_content_phrase_queries(request, view))
-            should_queries.extend(self.build_nested_page_queries(request, view))
-            should_queries.extend(self.build_nested_provision_queries(request, view))
-
-        return queryset.query(
-            "bool",
-            must=must_queries,
-            should=should_queries,
-            minimum_should_match=1 if should_queries else 0,
-        )
-
-    def is_advanced_search(self, request, view):
-        # it's an advanced search if any of the search__* query parameters are present
-        return any(
-            request.query_params.get(self.search_param + "__" + field)
-            for field in list(view.advanced_search_fields.keys()) + ["all"]
-        )
-
-    def build_rank_feature_queries(self, request, view):
-        """Apply a rank_feature query to boost the score based on the ranking field."""
-        if pj_settings().pagerank_boost_value:
-            # apply pagerank boost to the score using the saturation function
-            kwargs = {"field": "ranking", "boost": pj_settings().pagerank_boost_value}
-            if pj_settings().pagerank_pivot_value:
-                kwargs["saturation"] = {"pivot": pj_settings().pagerank_pivot_value}
-            return [Q("rank_feature", **kwargs)]
-        return []
-
-    def build_per_field_queries(self, request, view):
-        """Supports searching across multiple fields. Specify zero or more query parameters such as search__title=foo"""
-        queries = []
-
-        for field in view.advanced_search_fields.keys():
-            if field == "content":
-                # advanced search on the "content" field (which must include pages and provisions too), is handled
-                # by build_advanced_content_queries
-                continue
-            query = request.query_params.get(self.search_param + "__" + field)
-            if query:
-                queries.append(
-                    SimpleQueryString(
-                        query=query,
-                        fields=[self.get_field(view, field)],
-                        **view.advanced_simple_query_string_options,
-                    )
-                )
-
-        return queries
-
-    def build_basic_queries(self, request, view):
-        """This implements a simple_query_string query across multiple fields, using AND logic for the terms
-        in a field, but effectively OR (should) logic between the fields."""
-        if not self.query:
-            return []
-
-        query_fields = [
-            self.get_field(view, field) for field, options in view.search_fields.items()
-        ]
-        queries = [
-            SimpleQueryString(
-                query=self.query,
-                fields=[field],
-                **view.simple_query_string_options,
-            )
-            for field in query_fields
-        ]
-
-        if " " in self.query:
-            # do optimistic match-phrase queries for multi-word queries
-            for field, options in view.search_fields.items():
-                query = {"query": self.query, "slop": view.optimistic_phrase_match_slop}
-                if "boost" in (options or {}):
-                    query["boost"] = options["boost"]
-                if field == "content":
-                    query["boost"] = view.optimistic_phrase_match_content_boost
-                queries.append(MatchPhrase(**{field: query}))
-
-        return queries
-
-    def build_content_phrase_queries(self, request, view):
-        """Adds a best-effort phrase match query on the content field."""
-        if not self.query:
-            return []
-        return [
-            MatchPhrase(
-                content={
-                    "query": self.query,
-                    "slop": view.optimistic_phrase_match_slop,
-                    "boost": view.optimistic_phrase_match_content_boost,
-                }
-            )
-        ]
-
-    def build_advanced_all_queries(self, request, view):
-        """Build queries for search__all (advanced search across all fields). Similar logic to build_basic_queries,
-        but all terms are required by default."""
-        query = request.query_params.get(self.search_param + "__all")
-        if not query:
-            return []
-
-        query_fields = [
-            self.get_field(view, field)
-            for field, options in view.advanced_search_fields.items()
-        ]
-        return [
-            Q(
-                "bool",
-                minimum_should_match=1,
-                should=[
-                    SimpleQueryString(
-                        query=query,
-                        fields=[field],
-                        **view.advanced_simple_query_string_options,
-                    )
-                    for field in query_fields
-                ]
-                + self.build_advanced_content_query(view, query),
-            )
-        ]
-
-    def build_advanced_content_queries(self, request, view):
-        """Adds advanced search queries for search__content, which searches across content, pages.body and
-        provisions.body."""
-        query = request.query_params.get(self.search_param + "__content")
-
-        # don't allow search__content and search__all to clash, only one is needed to search content fields
-        if query and request.query_params.get(self.search_param + "__all"):
-            return []
-
-        if query:
-            return [
-                Q(
-                    "bool",
-                    minimum_should_match=1,
-                    should=self.build_advanced_content_query(view, query),
-                )
-            ]
-        return []
-
-    def build_advanced_content_query(self, view, query):
-        # TODO: negative queries don't work, because they must be applied to the whole content, not just a
-        # particular page or provision
-        return [
-            # content
-            SimpleQueryString(
-                query=query,
-                fields=["content"],
-                **view.advanced_simple_query_string_options,
-            ),
-            # pages.body
-            Q(
-                "nested",
-                path="pages",
-                inner_hits=self.pages_inner_hits,
-                query=SimpleQueryString(
-                    query=query,
-                    fields=["pages.body"],
-                    quote_field_suffix=".exact",
-                    **view.advanced_simple_query_string_options,
-                ),
-            ),
-            # provisions.body
-            Q(
-                "nested",
-                path="provisions",
-                inner_hits=self.provisions_inner_hits,
-                query=Q(
-                    "bool",
-                    should=[
-                        SimpleQueryString(
-                            query=query,
-                            fields=["provisions.body"],
-                            quote_field_suffix=".exact",
-                            **view.advanced_simple_query_string_options,
-                        ),
-                        SimpleQueryString(
-                            query=self.query,
-                            fields=["provisions.title^4", "provisions.parent_titles^2"],
-                            **view.advanced_simple_query_string_options,
-                        ),
-                    ],
-                ),
-            ),
-        ]
-
-    def build_nested_page_queries(self, request, view):
-        """Does a nested page search, and includes highlights."""
-        if not self.query:
-            return []
-
-        return [
-            Q(
-                "nested",
-                path="pages",
-                inner_hits=self.pages_inner_hits,
-                query=Q(
-                    "bool",
-                    must=[
-                        SimpleQueryString(
-                            query=self.query,
-                            fields=["pages.body"],
-                            quote_field_suffix=".exact",
-                            **view.simple_query_string_options,
-                        )
-                    ],
-                    should=[
-                        MatchPhrase(
-                            pages__body={
-                                "query": self.query,
-                                "slop": view.optimistic_phrase_match_slop,
-                                "boost": view.optimistic_phrase_match_content_boost,
-                            }
-                        ),
-                    ],
-                ),
-            )
-        ]
-
-    def build_nested_provision_queries(self, request, view):
-        """Does a nested provision search, and includes highlights."""
-        if not self.query:
-            return []
-
-        return [
-            Q(
-                "nested",
-                path="provisions",
-                inner_hits=self.provisions_inner_hits,
-                query=Q(
-                    "bool",
-                    should=[
-                        MatchPhrase(
-                            provisions__body={
-                                "query": self.query,
-                                "slop": view.optimistic_phrase_match_slop,
-                                "boost": view.optimistic_phrase_match_content_boost,
-                            }
-                        ),
-                        SimpleQueryString(
-                            query=self.query,
-                            fields=["provisions.body"],
-                            quote_field_suffix=".exact",
-                            **view.simple_query_string_options,
-                        ),
-                        SimpleQueryString(
-                            query=self.query,
-                            fields=["provisions.title^4", "provisions.parent_titles^2"],
-                            **view.simple_query_string_options,
-                        ),
-                    ],
-                ),
-            )
-        ]
 
 
 class SearchView(TemplateView):
@@ -430,241 +65,116 @@ class SearchView(TemplateView):
         return context
 
 
-class DocumentSearchViewSet(BaseDocumentViewSet):
-    """API endpoint that allows document to be searched."""
-
-    # This identifies the search configuration, for tracking changes across versions.
-    # If a search setting changes, such as a boost or a new field, then changes this to the date of the release.
+class DocumentSearchView(TemplateView):
+    http_method_names = ["get"]
+    action = "search"
+    template_name = "peachjam_search/search_request_debug.html"
     config_version = "2024-10-31"
 
-    document = SearchableDocument
-    serializer_class = SearchableDocumentSerializer
-    permission_classes = (AllowAny,)
-    filter_backends = [
-        # lets the use specify order with ordering=field
-        OrderingFilterBackend,
-        # applies a default ordering
-        DefaultOrderingFilterBackend,
-        # supports filtering and facets by various fields
-        FacetedFilterSearchFilterBackend,
-        # do the actual search against the various fields
-        MainSearchBackend,
-        # overrides the fields that are fetched from ES
-        SourceBackend,
-        HighlightBackend,
-    ]
+    def get(self, request, *args, **kwargs):
+        return getattr(self, self.action)(request, *args, **kwargs)
 
-    pagination_class = CustomPageNumberPagination
+    @vary_on_cookie
+    @method_decorator(cache_page(CACHE_SECS))
+    def search(self, request, *args, **kwargs):
+        form = SearchForm(request.GET)
+        if not form.is_valid():
+            return JsonResponse({"error": form.errors}, status=400)
 
-    # allowed and default ordering
-    ordering_fields = {"date": "date", "title": "title"}
-    ordering = ("_score", "date")
-    # this means that at least 70% of terms must appear in ANY of the searched fields
-    simple_query_string_options = {
-        "default_operator": "OR",
-        # all for 1-4 terms, 5 or more requires at 80% to match
-        "minimum_should_match": "4<80%",
-    }
-    # how to treat queries for advanced search: AND
-    advanced_simple_query_string_options = {
-        "default_operator": "AND",
-    }
+        engine = self.make_search_engine(request, form)
+        es_response = engine.execute()
 
-    filter_fields = {
-        "authors": "authors",
-        "court": "court",
-        "date": "date",
-        "created_at": "created_at",
-        "doc_type": "doc_type",
-        "jurisdiction": "jurisdiction",
-        "language": "language",
-        "locality": "locality",
-        "matter_type": "matter_type",
-        "nature": "nature",
-        "year": "year",
-        "judges": "judges",
-        "registry": "registry",
-        "attorneys": "attorneys",
-        "outcome": "outcome",
-        "labels": "labels",
-    }
+        if not engine.query and not engine.field_queries:
+            # no search term
+            return JsonResponse({"error": "No search term"}, status=400)
 
-    search_fields = {
-        "title": {"boost": 8},
-        "title_expanded": {"boost": 3},
-        "citation": {"boost": 2},
-        "alternative_names": {"boost": 4},
-        "content": None,
-    }
+        results = SearchableDocumentSerializer(
+            es_response.hits, many=True, context={"request": request}
+        ).data
 
-    # when doing a SHOULD phrase match on content fields, what should we boost by?
-    optimistic_phrase_match_content_boost = 4
-    optimistic_phrase_match_slop = 0
+        response = {
+            "count": es_response.hits.total.value,
+            "results": results,
+            "facets": es_response.aggregations.to_dict(),
+        }
 
-    advanced_search_fields = {
-        "case_number": None,
-        "case_name": None,
-        "judges_text": None,
-    }
-    advanced_search_fields.update(search_fields)
+        trace = self.save_search_trace(engine, response)
 
-    faceted_search_fields = {
-        "doc_type": {
-            "field": "doc_type",
-            "options": {"size": 100},
-        },
-        "authors": {
-            "field": "authors",
-            "options": {"size": 100},
-        },
-        "jurisdiction": {
-            "field": "jurisdiction",
-            "options": {"size": 100},
-        },
-        "locality": {
-            "field": "locality",
-            "options": {"size": 100},
-        },
-        "matter_type": {
-            "field": "matter_type",
-            "options": {"size": 100},
-        },
-        "date": {
-            "field": "date",
-            "facet": DateHistogramFacet,
-            "options": {"interval": "year", "size": 100},
-        },
-        "year": {"field": "year", "options": {"size": 100}},
-        "nature": {
-            "field": "nature",
-            "options": {"size": 100},
-        },
-        "language": {
-            "field": "language",
-            "options": {"size": 100},
-        },
-        "court": {"field": "court", "options": {"size": 100}},
-        "judges": {"field": "judges", "options": {"size": 100}},
-        "registry": {"field": "registry", "options": {"size": 100}},
-        "attorneys": {"field": "attorneys", "options": {"size": 100}},
-        "outcome": {"field": "outcome", "options": {"size": 100}},
-        "labels": {"field": "labels", "options": {"size": 100}},
-    }
+        # show debug information to this user
+        response["can_debug"] = self.request.user.has_perm("peachjam.can_debug_search")
+        response["trace_id"] = trace.id if trace else None
 
-    highlight_fields = {
-        "title": {
-            "enabled": True,
-            "options": {
-                "pre_tags": ["<mark>"],
-                "post_tags": ["</mark>"],
-                "fragment_size": 0,
-                "number_of_fragments": 0,
-                "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-            },
-        },
-        "alternative_names": {
-            "enabled": True,
-            "options": {
-                "pre_tags": ["<mark>"],
-                "post_tags": ["</mark>"],
-                "fragment_size": 0,
-                "number_of_fragments": 0,
-                "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-            },
-        },
-        "citation": {
-            "enabled": True,
-            "options": {
-                "pre_tags": ["<mark>"],
-                "post_tags": ["</mark>"],
-                "fragment_size": 0,
-                "number_of_fragments": 0,
-                "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-            },
-        },
-        "content": {
-            "enabled": True,
-            "options": {
-                "pre_tags": ["<mark>"],
-                "post_tags": ["</mark>"],
-                "fragment_size": 80,
-                "number_of_fragments": 2,
-                "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-            },
-        },
-    }
+        return self.render(response)
 
-    # TODO perhaps better to explicitly include specific fields
-    source = {
-        "excludes": [
-            "pages",
-            "content",
-            "flynote",
-            "case_summary",
-            "provisions",
-            "suggest",
-        ]
-    }
+    def explain(self, request, pk, *args, **kwargs):
+        if not request.user.has_perm("peachjam.can_debug_search"):
+            raise PermissionDenied()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # search multiple language indexes
-        self.index = (
-            MultiLanguageIndexManager.get_instance().get_all_search_index_names()
-        )
-        self.search = self.search.index(self.index)
+        form = SearchForm(request.GET)
+        if not form.is_valid():
+            return JsonResponse({"error": form.errors}, status=400)
 
-    def get_translatable_fields(self, request):
-        # get language from request to use as suffix for translatable fields
-        current_language_code = get_language_from_request(request)
-        suffix = "_" + current_language_code
+        engine = self.make_search_engine(request, form)
+        # the index must be passed in as a query param otherwise we don't know which one to use
+        engine.index = request.GET.get("index") or engine.index
+        es_response = engine.explain(pk)
 
-        self.filter_fields = copy.deepcopy(self.filter_fields)
-        self.faceted_search_fields = copy.deepcopy(self.faceted_search_fields)
+        return self.render(es_response)
 
-        translatable_fields = [
-            "court",
-            "nature",
-            "registry",
-            "outcome",
-        ]
+    @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
+    def suggest(self, request, *args, **kwargs):
+        q = request.GET.get("q")
+        suggestions = []
 
-        for field in translatable_fields:
-            self.filter_fields[field] = self.filter_fields[field] + suffix
-            self.faceted_search_fields[field]["field"] = (
-                self.faceted_search_fields[field]["field"] + suffix
+        if q and settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
+            suggestions = self.get_search_engine().suggest(q).suggest.to_dict()
+            suggestions["prefix"] = suggestions["prefix"][0]
+
+        response = {"suggestions": suggestions}
+        return self.render(response)
+
+    def get_search_engine(self):
+        return SearchEngine()
+
+    def make_search_engine(self, request, form):
+        engine = self.get_search_engine()
+        engine.query = form.cleaned_data.get("search")
+        engine.page = form.cleaned_data.get("page") or 1
+        engine.ordering = form.cleaned_data.get("ordering") or engine.ordering
+
+        engine.filters = {}
+        for key in request.GET.keys():
+            if key in engine.filter_fields:
+                engine.filters[key] = request.GET.getlist(key)
+
+        # date ranges handled separately
+        date = form.cleaned_data.get("date")
+        if date:
+            engine.filters["date"] = date
+
+        engine.field_queries = {}
+        for field in list(engine.advanced_search_fields.keys()) + ["all"]:
+            val = (request.GET.get(f"search__{field}") or "").strip()
+            if val:
+                engine.field_queries[field] = val
+
+        return engine
+
+    def render(self, response):
+        if "html" in self.request.GET:
+            # useful for debugging and showing django debug panel details
+            return self.render_to_response(
+                {"response_json": json.dumps(response, indent=2)}
             )
+        return JsonResponse(response)
 
-    def list(self, request, *args, **kwargs):
-        # TODO: uncomment when we have reindexd the data
-        # self.get_translatable_fields(request)
-        resp = super().list(request, *args, **kwargs)
-
-        trace = self.save_search_trace(resp)
-
-        # show debug information to this user?
-        resp.data["can_debug"] = self.request.user.has_perm("peachjam.can_debug_search")
-        resp.data["trace_id"] = trace.id if trace else None
-
-        return resp
-
-    def save_search_trace(self, response):
+    def save_search_trace(self, engine, response):
         # don't save search traces for alerts
+        # TODO
         if "search-alert" in self.request.id:
             return
 
-        field_searches = {
-            fld: self.request.GET.get(f"search__{fld}")
-            for fld in self.advanced_search_fields.keys()
-            if f"search__{fld}" in self.request.GET
-        }
-
-        filters = {
-            fld: self.request.GET.getlist(fld)
-            for fld in sorted(self.filter_fields.keys())
-            if fld in self.request.GET
-        }
-        filters_string = "; ".join(f"{k}={v}" for k, v in filters.items())
+        filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
 
         previous = None
         if self.request.GET.get("previous"):
@@ -686,10 +196,10 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             config_version=self.config_version,
             request_id=self.request.id if self.request.id != "none" else None,
             search=search,
-            field_searches=field_searches,
-            n_results=response.data["count"],
-            page=self.paginator.page.number,
-            filters=filters,
+            field_searches=engine.field_queries,
+            n_results=response["count"],
+            page=engine.page,
+            filters=engine.filters,
             filters_string=filters_string,
             ordering=self.request.GET.get("ordering"),
             previous_search=previous,
@@ -697,46 +207,6 @@ class DocumentSearchViewSet(BaseDocumentViewSet):
             ip_address=self.request.headers.get("x-forwarded-for"),
             user_agent=self.request.headers.get("user-agent"),
         )
-
-    @action(detail=True)
-    def explain(self, request, pk, *args, **kwargs):
-        if not request.user.has_perm("peachjam.can_debug_search"):
-            raise PermissionDenied()
-
-        query = self.filter_queryset(self.get_queryset()).to_dict()["query"]
-        # the index must be passed in as a query param otherwise we don't know which one to use
-        index = request.GET.get("index") or self.index[0]
-
-        es = get_connection(self.search._using)
-        resp = es.explain(index, pk, {"query": query})
-        return JsonResponse(resp)
-
-    @action(detail=False)
-    @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
-    def suggest(self, request, *args, **kwargs):
-        q = request.GET.get("q")
-        suggestions = []
-        if q and settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
-            s = self.search.source("").suggest(
-                "prefix",
-                q,
-                completion={
-                    "field": "suggest",
-                    "size": 5,
-                    "skip_duplicates": True,
-                },
-            )
-            # change it from a text query into a prefix query
-            s._suggest["prefix"]["prefix"] = s._suggest["prefix"].pop("text")
-            suggestions = s.execute().suggest.to_dict()
-            suggestions["prefix"] = suggestions["prefix"][0]
-
-        return JsonResponse({"suggestions": suggestions})
-
-    @vary_on_cookie
-    @method_decorator(cache_page(CACHE_SECS))
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
 
 class SearchClickViewSet(CreateModelMixin, GenericViewSet):

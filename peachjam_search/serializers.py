@@ -39,6 +39,7 @@ class SearchableDocumentSerializer(DocumentSerializer):
     highlight = SerializerMethodField()
     pages = SerializerMethodField()
     provisions = SerializerMethodField()
+    content_chunks = SerializerMethodField()
     court = SerializerMethodField()
     nature = SerializerMethodField()
     outcome = SerializerMethodField()
@@ -127,6 +128,17 @@ class SearchableDocumentSerializer(DocumentSerializer):
                 self.merge_exact_highlights(info["highlight"])
                 provisions.append(info)
         return provisions
+
+    def get_content_chunks(self, obj):
+        """Serialize nested page hits and highlights."""
+        chunks = []
+        if hasattr(obj.meta, "inner_hits") and hasattr(
+            obj.meta.inner_hits, "content_chunks"
+        ):
+            for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
+                info = chunk._source.to_dict()
+                chunks.append(info)
+        return chunks
 
     def get_court(self, obj):
         return obj["court" + self.language_suffix]

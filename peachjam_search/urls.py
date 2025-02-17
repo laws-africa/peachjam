@@ -4,12 +4,17 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter()
-router.register("documents", views.DocumentSearchViewSet, basename="document_search")
 router.register("click", views.SearchClickViewSet, basename="search_click")
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
+    path("api/documents/", views.DocumentSearchView.as_view()),
+    path("api/documents/suggest/", views.DocumentSearchView.as_view(action="suggest")),
+    path(
+        "api/documents/<int:pk>/explain/",
+        views.DocumentSearchView.as_view(action="explain"),
+    ),
     path("api/", include(router.urls)),
     path(
         "saved-searches/button",

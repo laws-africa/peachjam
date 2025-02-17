@@ -495,6 +495,8 @@ class MultiLanguageIndexManager:
 
     def load_language_index_settings(self, from_server=True):
         """Configure mappings etc for the language indexes. Requires an elasticsearch connection."""
+        # XXX
+        return
         main_mappings = self.main_index.to_dict()["mappings"]
 
         for lang, index in self.language_indexes.items():
