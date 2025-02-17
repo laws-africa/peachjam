@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import UpdateView
 
+from peachjam.auth import user_display
 from peachjam.forms import UserForm
 
 User = get_user_model()
@@ -32,7 +33,7 @@ class GetAccountView(View):
             user_details = {
                 "id": self.request.user.id,
                 "email": self.request.user.email,
-                "username": self.request.user.username,
+                "name": user_display(self.request.user),
             }
             response = JsonResponse(user_details)
             return response

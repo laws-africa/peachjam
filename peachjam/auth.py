@@ -9,6 +9,11 @@ from django.contrib.auth.views import redirect_to_login
 from peachjam.models import pj_settings
 
 
+def user_display(user):
+    """Return the user's display name."""
+    return user.get_full_name() or user.email or user.username
+
+
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     """Adapter that permits logins only from specific domains."""
 
