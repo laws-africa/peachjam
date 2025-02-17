@@ -7,13 +7,14 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, QueryDict
-from django.http.response import Http404, JsonResponse
+from django.http.response import Http404, HttpResponse, JsonResponse
 from django.shortcuts import redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import get_language_from_request
 from django.utils.translation import gettext_lazy as _
+from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.views.generic import (
@@ -48,7 +49,11 @@ from rest_framework.viewsets import GenericViewSet
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
-from peachjam_search.forms import SavedSearchCreateForm, SavedSearchUpdateForm
+from peachjam_search.forms import (
+    SavedSearchCreateForm,
+    SavedSearchUpdateForm,
+    SearchFeedbackCreateForm,
+)
 from peachjam_search.models import SavedSearch, SearchTrace
 from peachjam_search.serializers import (
     SearchableDocumentSerializer,
@@ -882,3 +887,17 @@ class SavedSearchDeleteView(BaseSavedSearchFormView, DeleteView):
 
     def get_success_url(self):
         return self.request.GET.get("next", None) or reverse("search:saved_search_list")
+
+
+class SearchFeedbackCreateView(View):
+    form_class = SearchFeedbackCreateForm
+    http_method_names = ["post"]
+
+    def post(self, *args, **kwargs):
+        form = self.form_class(self.request.POST)
+        if form.is_valid():
+            if self.request.user.is_authenticated:
+                form.instance.user = self.request.user
+            form.save()
+            return HttpResponse()
+        return HttpResponse(status=400)
