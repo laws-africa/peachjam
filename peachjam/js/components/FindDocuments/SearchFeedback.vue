@@ -1,4 +1,10 @@
 <template>
+  <div class="mt-3">
+    <p>{{ $t("Can't find what you're looking for? Please let us know.") }}</p>
+    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#provideFeedback">
+      {{ $t("Provide feedback") }}
+    </button>
+  </div>
   <div id="provideFeedback" class="modal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -37,7 +43,7 @@
               <input
                 id="search-feedback_name"
                 name="name"
-                :value="user?.username"
+                :value="userInfo?.username"
                 type="text"
                 class="form-control"
                 maxlength="1024"
@@ -48,7 +54,7 @@
               <input
                 id="search-feedback_email"
                 name="email"
-                :value="user?.email"
+                :value="userInfo?.email"
                 type="email"
                 class="form-control"
               >
@@ -97,17 +103,25 @@ export default {
     traceId: {
       type: String,
       default: () => ''
-    },
-    user: {
-      type: String,
-      default: ''
     }
   },
   data () {
     return {
+      userInfo: {},
       submitted: false,
       success: false
     };
+  },
+  async mounted () {
+    fetch('/accounts/user/', {
+      method: 'get'
+    }).then(async response => {
+      if (response.ok) {
+        this.userInfo = await response.json();
+      }
+    }).catch(error => {
+      console.log(error);
+    });
   },
   methods: {
     async onSubmit () {

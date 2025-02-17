@@ -80,6 +80,7 @@ from peachjam.views import (
     FolderUpdateView,
     GazetteListView,
     GazetteYearView,
+    GetAccountView,
     HomePageView,
     JournalListView,
     JudgesAutocomplete,
@@ -374,6 +375,7 @@ urlpatterns = [
     ),
     path("accounts/", include("allauth.urls")),
     path("accounts/profile/", EditAccountView.as_view(), name="edit_account"),
+    path("accounts/user/", GetAccountView.as_view(), name="get_account"),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
     path(

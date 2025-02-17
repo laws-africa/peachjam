@@ -95,25 +95,20 @@
         </div>
       </div>
     </div>
-    <div v-if="showFeedbackCard" class="card mt-4">
-      <div class="card-body">
-        <p class="card-text">{{ $t("Can't find what you're looking for? Please let us know.") }}</p>
-        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#provideFeedback">
-          {{ $t("Provide feedback") }}
-        </button>
-      </div>
-    </div>
+    <SearchFeedback v-if="showFeedbackCard" :trace-id="traceId" />
   </li>
 </template>
 
 <script>
 import JsonTable from './JsonTable.vue';
+import SearchFeedback from './SearchFeedback.vue';
 import SearchResultProvision from './SearchResultProvision.vue';
 
 export default {
   name: 'SearchResult',
   components: {
     JsonTable,
+    SearchFeedback,
     SearchResultProvision
   },
   props: {
@@ -146,6 +141,10 @@ export default {
     index: {
       type: Number,
       default: 0
+    },
+    traceId: {
+      type: String,
+      default: ''
     }
   },
   emits: ['explain', 'item-clicked'],

@@ -427,12 +427,6 @@ class SearchView(TemplateView):
             "documentLabels": LabelSerializer(Label.objects.all(), many=True).data,
         }
         context["show_jurisdiction"] = settings.PEACHJAM["SEARCH_JURISDICTION_FILTER"]
-        if self.request.user.is_authenticated:
-            context["user_details"] = {
-                "username": self.request.user.username,
-                "email": self.request.user.email,
-                "id": self.request.user.pk,
-            }
         return context
 
 
@@ -902,7 +896,7 @@ class SearchFeedbackCreateView(View):
     def post(self, *args, **kwargs):
         form = self.form_class(self.request.POST)
         if form.is_valid():
-            if self.request.user:
+            if self.request.user.is_authenticated:
                 form.instance.user = self.request.user
             form.save()
             return HttpResponse()

@@ -155,12 +155,7 @@
         class="mt-3"
       >
         <p>{{ $t("No documents match your search.") }}</p>
-        <div class="mt-2">
-          <p>{{ $t("Can't find what you're looking for? Please let us know.") }}</p>
-          <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#provideFeedback">
-            {{ $t("Provide feedback") }}
-          </button>
-        </div>
+        <SearchFeedback :trace-id="searchInfo.trace_id" />
       </div>
       <div ref="filters-results-container">
         <div class="row">
@@ -222,6 +217,7 @@
                     :key="item.key"
                     :index="index"
                     :count="searchInfo.count"
+                    :trace-id="searchInfo.trace_id"
                     :item="item"
                     :query="q"
                     :debug="searchInfo.can_debug"
@@ -270,7 +266,6 @@
       {{ $t('Language') }}
       {{ $t('Year') }}
     </div>
-    <SearchFeedback :user="user" :trace-id="searchInfo.trace_id" />
   </div>
 </template>
 
@@ -307,8 +302,6 @@ export default {
       return JSON.parse(document.querySelector('#data-labels').textContent)[title];
     };
 
-    const getUser = JSON.parse(document.querySelector('#data-user').textContent);
-
     const data = {
       searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
       documentLabels: JSON.parse(document.querySelector('#data-labels').textContent).documentLabels,
@@ -338,8 +331,7 @@ export default {
         date_to: null,
         date_from: null
       },
-      googleActive: false,
-      user: getUser
+      googleActive: false
     };
     const facets = [
       // most frequently used facets first, based on user data
