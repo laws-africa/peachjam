@@ -1,0 +1,13 @@
+{% load i18n %}
+<form hx-target="#annotation-text-{{ annotation.pk }}"
+      hx-post="{% url 'annotation_edit' annotation.pk %}">
+  <textarea style="field-sizing:content"
+            class="form-control"
+            name="{{ form.text.name }}"
+            id="{{ form.text.id_for_label }}"
+            cols="30"
+            rows="10">{{ form.text.value }}</textarea>
+  <div class="text-end my-2">
+    <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+  </div>
+</form>

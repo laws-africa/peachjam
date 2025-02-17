@@ -1,0 +1,72 @@
+{% load i18n peachjam %}
+<div id="annotation-list" class="my-3">
+  <div>
+    <div class="col-md-4">
+      <form method="get" action="{% url 'annotation_list' %}">
+        <div class="input-group">
+          <input type="text"
+                 name="q"
+                 placeholder="{% trans 'Search by document title or annotation' %}"
+                 class="form-control"
+                 value="{{ request.GET.q }}"/>
+          <button type="submit" class="btn btn-primary">{% trans 'Search' %}</button>
+        </div>
+      </form>
+    </div>
+    <div class="my-3">
+      <div class="mb-2">
+        <p class="text-muted">{{ annotations.count }} {% trans 'annotations' %}</p>
+      </div>
+    </div>
+    {% if annotations|length %}
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for annotation in annotations %}
+          <div class="col">
+            <div class="card mb-4 h-100 mh-100">
+              <div class="card-body">
+                <div class="dropdown text-end">
+                  <a id="dropdownMenuButton"
+                     class="btn btn-link"
+                     type="button"
+                     data-bs-toggle="dropdown"
+                     aria-haspopup="true"
+                     aria-expanded="false">
+                    <i class="bi bi-three-dots"></i>
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a hx-target="#annotation-text-{{ annotation.pk }}"
+                       hx-get="{% url 'annotation_edit' annotation.pk %}"
+                       class="dropdown-item"
+                       role="button">{% trans 'Edit' %}</a>
+                    <a hx-confirm="{% trans 'Are you sure you want to delete this annotation?' %}"
+                       hx-target="#annotation-list"
+                       hx-post="{% url 'annotation_delete' annotation.pk %}"
+                       class="dropdown-item"
+                       role="button">{% trans 'Delete' %}</a>
+                  </div>
+                </div>
+                <a href="{% url 'document_detail' annotation.document.expression_frbr_uri|strip_first_character %}#{{ annotation.target_id }}">{{ annotation.document }}</a>
+                <div class="my-2">
+                  {% for selector in annotation.target_selectors %}
+                    {% if selector.type == 'TextQuoteSelector' %}<mark><span>{{ selector.exact }}</span></mark>{% endif %}
+                  {% endfor %}
+                </div>
+                <hr/>
+                {% include "peachjam/annotation_detail.html" %}
+              </div>
+              <div class="card-footer">
+                <small class="text-sm text-muted">{{ annotation.created_at }}</small>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>
+        {% blocktrans trimmed %}
+          No annotations found.
+        {% endblocktrans %}
+      </p>
+    {% endif %}
+  </div>
+</div>

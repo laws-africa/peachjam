@@ -29,6 +29,9 @@ from peachjam.feeds import (
 from peachjam.helpers import ISODateConverter
 from peachjam.views import (
     AboutPageView,
+    AnnotationDeleteView,
+    AnnotationDetailView,
+    AnnotationEditView,
     AnnotationListView,
     ArticleAttachmentDetailView,
     ArticleAuthorDetailView,
@@ -511,6 +514,21 @@ urlpatterns = [
                     "",
                     AnnotationListView.as_view(),
                     name="annotation_list",
+                ),
+                path(
+                    "<int:pk>/",
+                    AnnotationDetailView.as_view(),
+                    name="annotation_detail",
+                ),
+                path(
+                    "<int:pk>/edit",
+                    AnnotationEditView.as_view(),
+                    name="annotation_edit",
+                ),
+                path(
+                    "<int:pk>/delete",
+                    AnnotationDeleteView.as_view(),
+                    name="annotation_delete",
                 ),
             ]
         ),
