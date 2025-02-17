@@ -16,9 +16,6 @@ class BaseAnnotationView:
     def get_object(self, *args, **kwargs):
         return self.get_queryset().get(pk=self.kwargs["pk"])
 
-    def get_success_url(self):
-        return reverse("annotation_detail", args=[self.object.pk])
-
 
 class AnnotationListView(ListView):
     template_name = "peachjam/annotation_list.html"

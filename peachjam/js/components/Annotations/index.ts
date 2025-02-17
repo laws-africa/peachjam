@@ -10,31 +10,19 @@ import { IAnnotation } from './annotation';
 export class AnnotationsProvider implements IGutterEnrichmentProvider {
     root: HTMLElement;
     gutter: Element | null;
-    akn: Element | null;
     manager: GutterEnrichmentManager;
-    displayType: string;
     listComponent: ComponentPublicInstance;
-    annotations: IAnnotation[];
 
     constructor (root: HTMLElement, manager: GutterEnrichmentManager, displayType: string) {
       this.root = root;
       this.manager = manager;
-      this.displayType = displayType;
       this.gutter = root.querySelector('la-gutter');
-      this.akn = root.querySelector('la-akoma-ntoso');
-      const annotationsJson = document.getElementById('annotations');
-      if (annotationsJson) {
-        this.annotations = JSON.parse(annotationsJson.innerText) || [];
-      } else {
-        this.annotations = [];
-      }
       // @ts-ignore
       this.listComponent = createAndMountApp({
         component: AnnotationList,
         props: {
           gutter: this.gutter,
-          viewRoot: this.root,
-          annotations: this.annotations
+          viewRoot: this.root
         },
         use: [vueI18n],
         mountTarget: document.createElement('div') as HTMLElement

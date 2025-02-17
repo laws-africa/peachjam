@@ -7,7 +7,7 @@
       :annotation-data="annotation"
       :view-root="viewRoot"
       :gutter="gutter"
-      :use-selectors="useSelectors"
+      @remove-annotation="removeAnnotation"
     />
   </div>
 </template>
@@ -19,13 +19,8 @@ export default {
     AnnotationItem
   },
   props: {
-    annotations: {
-      type: Array,
-      default: () => []
-    },
     viewRoot: HTMLElement,
-    gutter: HTMLElement,
-    useSelectors: Boolean
+    gutter: HTMLElement
   },
   data: () => ({
     items: []
@@ -43,18 +38,18 @@ export default {
           return resp.json();
         })
         .then((annotations) => {
-          this.items = annotations.results;})
+          this.items = annotations.results.map((annotation, idx) => ({
+            ...annotation,
+            ref_id: `annotation-${annotation.id}`
+          }));
+        })
         .catch((err) => {
           console.error(err);
         });
     },
     addAnnotation (target) {
-      const unsaved = document.getElementById('new');
-      if (unsaved) {
-        unsaved.remove();
-      }
       const newAnnotation = {
-        id: 'new',
+        ref_id: `new-annotation-${this.items.length + 1}`,
         text: '',
         target_selectors: target.selectors,
         target_id: target.anchor_id,
@@ -62,6 +57,9 @@ export default {
         editing: true
       };
       this.items.push(newAnnotation);
+    },
+    async removeAnnotation (annotation) {
+      this.items = this.items.filter((item) => item.ref_id !== annotation.ref_id);
     }
   }
 };

@@ -27,7 +27,9 @@ class Folder(models.Model):
 
 
 class SavedDocument(models.Model):
-    document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
+    document = models.ForeignKey(
+        CoreDocument, related_name="saved_documents", on_delete=models.CASCADE
+    )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

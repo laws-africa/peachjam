@@ -12,7 +12,7 @@
   {% if folders or ungrouped_saved_documents %}
     {% for folder in folders %}
       <div class="card mb-5">
-        <h5 class="card-header">{{ folder }}</h5>
+        <h5 class="card-header">{{ folder.name }}</h5>
         <div class="card-body">
           <div>
             {% if folder.saved_documents.all %}
@@ -22,6 +22,9 @@
                     <td class="cell-title">
                       <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
                       {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
+                    </td>
+                    <td>
+                      <span> <i class="text-primary bi bi-chat-left-text"></i> {{ saved_doc.annotation_count }}</span>
                     </td>
                     <td class="cell-date" style="white-space: nowrap;">
                       {{ saved_doc.document.date }}
