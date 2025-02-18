@@ -62,7 +62,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if judge
             )
-            if len(judges) > 1:
+            if judges:
                 context["facet_data"]["judges"] = {
                     "label": Judge.model_label_plural,
                     "type": "checkbox",
@@ -82,7 +82,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if label
             )
-            if len(labels) > 1:
+            if labels:
                 context["facet_data"]["labels"] = {
                     "label": _("Labels"),
                     "type": "checkbox",
@@ -100,7 +100,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .values_list("outcomes__id", flat=True)
                 .distinct()
             )
-            if len(outcomes) > 1:
+            if outcomes:
                 context["facet_data"]["outcomes"] = {
                     "label": _("Outcomes"),
                     "type": "checkbox",
@@ -122,7 +122,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
                 .distinct()
                 if attorney
             )
-            if len(attorneys) > 1:
+            if attorneys:
                 context["facet_data"]["attorneys"] = {
                     "label": _("Attorneys"),
                     "type": "checkbox",

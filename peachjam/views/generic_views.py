@@ -238,7 +238,7 @@ class FilteredDocumentListView(DocumentListView):
                 .values_list("taxonomies__topic__id", flat=True)
                 .distinct()
             )
-            if len(taxonomies) > 1:
+            if taxonomies:
                 context["facet_data"]["taxonomies"] = {
                     "label": _("Topics"),
                     "type": "checkbox",
@@ -296,7 +296,7 @@ class FilteredDocumentListView(DocumentListView):
                 )
                 context["doc_table_show_author"] = bool(authors)
                 # customise the authors label?
-                if len(authors) > 1:
+                if authors:
                     authors_label = getattr(
                         self.model, "author_label_plural", authors_label
                     )
@@ -315,7 +315,7 @@ class FilteredDocumentListView(DocumentListView):
                 .values_list("date__year", flat=True)
                 .distinct()
             )
-            if len(years) > 1:
+            if years:
                 context["facet_data"]["years"] = {
                     "label": _("Years"),
                     "type": "checkbox",
