@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from peachjam.auth import user_display
 from peachjam.models import (
     Annotation,
     CaseNumber,
@@ -79,10 +80,10 @@ class AnnotationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Annotation
-        fields = ("id", "document", "text", "target_id", "target_selectors")
+        fields = ("id", "document", "text", "target_id", "target_selectors", "user")
 
     def get_user(self, instance):
-        return instance.user.name
+        return user_display(instance.user)
 
 
 class CitationLinkSerializer(serializers.ModelSerializer):

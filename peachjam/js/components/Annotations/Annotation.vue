@@ -5,7 +5,10 @@
   >
     <div class="card">
       <div class="card-body">
-        <div>
+        <div class="d-flex justify-content-between align-items-baseline">
+          <div>
+            <small class="fw-bold text-muted">{{ annotation.user }}</small>
+          </div>
           <div class="dropdown text-end">
             <a
               id="dropdownMenuButton"
