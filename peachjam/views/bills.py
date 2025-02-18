@@ -28,8 +28,6 @@ class BillListView(FilteredDocumentListView):
         context["doc_table_show_court"] = False
         context["doc_table_show_jurisdiction"] = False
 
-        del context["facet_data"]["natures"]
-
         return context
 
 

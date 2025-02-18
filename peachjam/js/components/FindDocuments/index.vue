@@ -154,7 +154,8 @@
         v-if="searchInfo.count === 0"
         class="mt-3"
       >
-        {{ $t("No documents match your search.") }}
+        <p>{{ $t("No documents match your search.") }}</p>
+        <SearchFeedback :trace-id="searchInfo.trace_id" />
       </div>
       <div ref="filters-results-container">
         <div class="row">
@@ -212,8 +213,11 @@
 
                 <ul class="list-unstyled">
                   <SearchResult
-                    v-for="item in searchInfo.results"
+                    v-for="(item, index) in searchInfo.results"
                     :key="item.key"
+                    :index="index"
+                    :count="searchInfo.count"
+                    :trace-id="searchInfo.trace_id"
                     :item="item"
                     :query="q"
                     :debug="searchInfo.can_debug"
@@ -223,6 +227,8 @@
                     @item-clicked="(e) => itemClicked(item, e)"
                   />
                 </ul>
+
+                <SearchFeedback :trace-id="searchInfo.trace_id" />
 
                 <SearchPagination
                   :search="searchInfo"
@@ -278,10 +284,11 @@ import analytics from '../analytics';
 import { authHeaders } from '../../api';
 import SearchTypeahead from '../search-typeahead';
 import htmx from 'htmx.org';
+import SearchFeedback from './SearchFeedback.vue';
 
 export default {
   name: 'FindDocuments',
-  components: { FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
+  components: { SearchFeedback, FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
   props: ['showJurisdiction', 'showGoogle', 'showSuggestions'],
   data () {
     const getLabelOptionLabels = (labels) => {
