@@ -42,6 +42,7 @@
       {% if document.children %}
         <tbody id="doc-table-children-{{ forloop.counter0 }}"
                class="doc-table-children collapse">
+          {% include 'peachjam/_document_table_row.html' with document=subleg_group_row %}
           {% for d in document.children %}
             {% include 'peachjam/_document_table_row.html' with document=d %}
           {% endfor %}

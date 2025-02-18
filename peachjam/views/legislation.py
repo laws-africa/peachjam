@@ -8,7 +8,7 @@ from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
 
 from peachjam.forms import LegislationFilterForm
-from peachjam.models import Legislation
+from peachjam.models import Legislation, pj_settings
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
@@ -24,6 +24,10 @@ class LegislationListView(FilteredDocumentListView):
         "nature": "Act",
         "help_link": "legislation/",
         "doc_table_show_date": False,
+        "subleg_group_row": {
+            "is_group": True,
+            "title": pj_settings().subleg_label,
+        },
     }
     form_defaults = {"sort": "title"}
     form_class = LegislationFilterForm

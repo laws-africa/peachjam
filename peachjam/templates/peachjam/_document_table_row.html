@@ -5,6 +5,7 @@
       {% if document.children %}
         <button class="btn btn-sm bg-none collapsed"
                 type="button"
+                title="{{ PEACHJAM_SETTINGS.subleg_label }}"
                 data-bs-toggle="collapse"
                 data-bs-target="#doc-table-children-{{ forloop.counter0 }}"
                 aria-expanded="false"
