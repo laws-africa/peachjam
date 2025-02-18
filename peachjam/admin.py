@@ -1210,10 +1210,13 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             if form.is_valid():
                 try:
                     with transaction.atomic():
+                        fname = form.cleaned_data["file"].name
                         doc = extractor.extract_judgment_from_file(
                             jurisdiction=form.cleaned_data["jurisdiction"],
                             file=form.cleaned_data["file"],
+                            user=request.user,
                         )
+                        self.log_addition(request, doc, _("Uploaded") + f": {fname}")
                     messages.success(
                         request, _("Judgment uploaded. Please check details carefully.")
                     )
