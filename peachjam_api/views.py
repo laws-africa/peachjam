@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from rest_framework import authentication, viewsets
+from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -34,6 +35,7 @@ class RelationshipViewSet(viewsets.ModelViewSet):
 class AnnotationViewSet(viewsets.ModelViewSet):
     queryset = Annotation.objects.all()
     serializer_class = AnnotationSerializer
+    permission_classes = [DjangoModelPermissions]
 
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset()

@@ -75,9 +75,14 @@ class RelationshipSerializer(serializers.ModelSerializer):
 
 
 class AnnotationSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField("get_user")
+
     class Meta:
         model = Annotation
         fields = ("id", "document", "text", "target_id", "target_selectors")
+
+    def get_user(self, instance):
+        return instance.user.name
 
 
 class CitationLinkSerializer(serializers.ModelSerializer):
