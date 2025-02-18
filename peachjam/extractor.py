@@ -51,7 +51,7 @@ class ExtractorService:
     def get_headers(self):
         return {"Authorization": "Token " + self.api_token}
 
-    def extract_judgment_from_file(self, jurisdiction, file):
+    def extract_judgment_from_file(self, jurisdiction, file, user):
         details = self.extract_judgment_details(jurisdiction, file)
 
         if details.get("language"):
@@ -81,6 +81,7 @@ class ExtractorService:
 
         log.info("Creating new judgment")
         doc = Judgment()
+        doc.created_by = user
         doc.jurisdiction = jurisdiction
         doc.language = language
         doc.court = court
