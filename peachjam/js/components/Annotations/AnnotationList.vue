@@ -7,12 +7,41 @@
       :annotation-data="annotation"
       :view-root="viewRoot"
       :gutter="gutter"
+      :editable="editable"
       @remove-annotation="removeAnnotation"
     />
+
+    <div ref="loginModal" class="modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              {{ $t('Permission required') }}
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            />
+          </div>
+          <div class="modal-body">
+            <p>{{ $t('To add an annotation, please login or contact your administrator.') }}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              {{ $t('Close') }}
+            </button>
+            <a href="/accounts/login" type="button" class="btn btn-primary">{{ $t('Log in') }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
 import AnnotationItem from './Annotation.vue';
+import { Modal } from 'bootstrap';
 export default {
   name: 'AnnotationsList',
   components: {
@@ -20,7 +49,8 @@ export default {
   },
   props: {
     viewRoot: HTMLElement,
-    gutter: HTMLElement
+    gutter: HTMLElement,
+    editable: Boolean
   },
   data: () => ({
     items: []
@@ -30,6 +60,7 @@ export default {
   },
   methods: {
     getAnnotations () {
+      if (!this.editable) return;
       fetch(`/api/documents/${this.viewRoot.dataset.documentId}/annotations/`)
         .then((resp) => {
           if (!resp.ok) {
@@ -48,6 +79,12 @@ export default {
         });
     },
     addAnnotation (target) {
+      if (!this.editable) {
+        // show modal
+        const loginModal = new Modal(this.$refs.loginModal);
+        loginModal.show();
+        return;
+      }
       const newAnnotation = {
         ref_id: `new-annotation-${this.items.length + 1}`,
         text: '',

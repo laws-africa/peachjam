@@ -24,7 +24,9 @@
                       {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
                     </td>
                     <td>
-                      <span> <i class="text-primary bi bi-chat-left-text"></i> {{ saved_doc.annotation_count }}</span>
+                      {% if saved_doc.annotation_count %}
+                        <span> <i class="text-primary bi bi-chat-left-text"></i> {{ saved_doc.annotation_count }}</span>
+                      {% endif %}
                     </td>
                     <td class="cell-date" style="white-space: nowrap;">
                       {{ saved_doc.document.date }}
@@ -79,7 +81,9 @@
                   {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
                 </td>
                 <td>
-                  <span> <i class="text-primary bi bi-chat-left-text"></i> {{ saved_doc.annotation_count }}</span>
+                  {% if saved_doc.annotation_count %}
+                    <span> <i class="text-primary bi bi-chat-left-text"></i> {{ saved_doc.annotation_count }}</span>
+                  {% endif %}
                 </td>
                 <td class="cell-date" style="white-space: nowrap;">
                   {{ saved_doc.document.date }}

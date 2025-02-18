@@ -21,8 +21,8 @@
               <i class="bi bi-three-dots" />
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" role="button" @click="editAnnotation">Edit</a>
-              <a class="dropdown-item" role="button" @click="deleteAnnotation">Delete</a>
+              <a class="dropdown-item" role="button" @click="editAnnotation">{{ $t('Edit') }}</a>
+              <a class="dropdown-item" role="button" @click="deleteAnnotation">{{ $t('Delete') }}</a>
             </div>
           </div>
         </div>
@@ -42,7 +42,7 @@
               class="ms-1 btn btn-sm btn-secondary"
               @click="cancelEdit"
             >
-              Cancel
+              {{ $t('Cancel') }}
             </button>
 
             <button
@@ -50,7 +50,7 @@
               class="ms-1 btn btn-sm btn-primary"
               type="submit"
             >
-              Save
+              {{ $t('Save') }}
             </button>
           </div>
         </form>
@@ -71,7 +71,8 @@ export default {
       default: null
     },
     viewRoot: HTMLElement,
-    gutter: HTMLElement
+    gutter: HTMLElement,
+    editable: Boolean
   },
   emits: ['remove-annotation'],
   data: (x) => ({
@@ -99,6 +100,7 @@ export default {
       return response.url.includes('update');
     },
     async saveAnnotation (e) {
+      if (!this.editable) return;
       e.preventDefault();
       const isSaved = await this.checkDocumentSaved();
       if (!isSaved) {
@@ -135,6 +137,7 @@ export default {
       this.editing = true;
     },
     async deleteAnnotation () {
+      if (!this.editable) return;
       if (this.annotation.id) {
         const headers = await authHeaders();
         const resp = await fetch(`/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/`, {
@@ -161,7 +164,7 @@ export default {
     },
     cancelEdit () {
       this.editing = false;
-      if (this.annotation.ref_id.includes('new') && !this.annotation.id) {
+      if (!this.annotation.id) {
         this.$emit('remove-annotation', this.annotation);
       }
     },
