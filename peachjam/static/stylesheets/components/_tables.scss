@@ -139,6 +139,12 @@ table.doc-table {
 // variants
 table.doc-table.doc-table--citation {
   .cell-title {
+    width: 70%;
+  }
+}
+
+table.doc-table.doc-table--citation.doc-table--date {
+  .cell-title {
     width: 60%;
   }
 }
