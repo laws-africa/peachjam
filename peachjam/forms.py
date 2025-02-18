@@ -305,6 +305,19 @@ class LegislationFilterForm(BaseDocumentFilterForm):
             else queryset
         )
 
+    def order_queryset(self, queryset, exclude=None):
+        queryset = super().order_queryset(queryset, exclude)
+
+        # change ordering so that date uses frbr_uri_date
+        ordering = list(queryset.query.order_by)
+        for i, order in enumerate(ordering):
+            if order == "date":
+                ordering[i] = "frbr_uri_date"
+            if order == "-date":
+                ordering[i] = "-frbr_uri_date"
+
+        return queryset.order_by(*ordering)
+
 
 class GazetteFilterForm(BaseDocumentFilterForm):
     sub_publications = PermissiveTypedListField(coerce=remove_nulls, required=False)

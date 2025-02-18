@@ -55,7 +55,7 @@ class LegislationListView(FilteredDocumentListView):
                 }
 
     def get_document_group(self, group_by, document):
-        if group_by == "date":
+        if group_by == "frbr_uri_date":
             # use work year
             return document.frbr_uri_date[:4]
         return super().get_document_group(group_by, document)
