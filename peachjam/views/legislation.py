@@ -2,10 +2,12 @@ from datetime import datetime, timedelta
 
 from django.contrib import messages
 from django.db.models import CharField, Func, Value
+from django.db.models.functions.text import Substr
 from django.template.defaultfilters import date as format_date
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
 
+from peachjam.forms import LegislationFilterForm
 from peachjam.models import Legislation
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
@@ -18,8 +20,13 @@ class LegislationListView(FilteredDocumentListView):
     model = Legislation
     template_name = "peachjam/legislation_list.html"
     navbar_link = "legislation"
-    extra_context = {"nature": "Act", "help_link": "legislation/"}
+    extra_context = {
+        "nature": "Act",
+        "help_link": "legislation/",
+        "doc_table_show_date": False,
+    }
     form_defaults = {"sort": "title"}
+    form_class = LegislationFilterForm
 
     def add_facets(self, context):
         super().add_facets(context)
@@ -28,6 +35,30 @@ class LegislationListView(FilteredDocumentListView):
         for k, v in context["facet_data"].items():
             facets[k] = v
         context["facet_data"] = facets
+
+    def add_years_facet(self, context):
+        # for legislation, use the work year as the years facet
+        if "years" not in self.exclude_facets:
+            years = list(
+                self.form.filter_queryset(self.get_base_queryset(), exclude="years")
+                .order_by()
+                .values_list(Substr("frbr_uri_date", 1, 4), flat=True)
+                .distinct()
+            )
+            if years:
+                context["facet_data"]["years"] = {
+                    "label": _("Years"),
+                    "type": "checkbox",
+                    # these are (value, label) tuples
+                    "options": [(str(y), y) for y in sorted(years, reverse=True)],
+                    "values": self.request.GET.getlist("years"),
+                }
+
+    def get_document_group(self, group_by, document):
+        if group_by == "date":
+            # use work year
+            return document.frbr_uri_date[:4]
+        return super().get_document_group(group_by, document)
 
 
 @registry.register_doc_type("legislation")

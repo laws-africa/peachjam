@@ -113,6 +113,7 @@ class DocumentListView(ListView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(
             doc_table_show_jurisdiction=True,
+            doc_table_show_date=True,
             doc_count_noun=_("document"),
             doc_count_noun_plural=_("documents"),
             *args,
@@ -128,15 +129,6 @@ class DocumentListView(ListView):
         if not group_by:
             return documents
 
-        def grouper(d):
-            if group_by == "date":
-                if self.group_by_date == "month-year":
-                    return f"{d.date.month} {d.date.year}"
-                else:
-                    return f"{d.date.year}"
-            elif group_by == "title":
-                return d.title[0].upper()
-
         class Group:
             is_group = True
 
@@ -149,11 +141,22 @@ class DocumentListView(ListView):
                         self.title = f"{MONTHS[int(title[0])]} {title[1]}"
 
         docs = []
-        for key, group in itertools.groupby(documents, grouper):
+        for key, group in itertools.groupby(
+            documents, lambda d: self.get_document_group(group_by, d)
+        ):
             docs.append(Group(key))
             docs.extend(group)
 
         return docs
+
+    def get_document_group(self, group_by, document):
+        if group_by == "date":
+            if self.group_by_date == "month-year":
+                return f"{document.date.month} {document.date.year}"
+            else:
+                return f"{document.date.year}"
+        elif group_by == "title":
+            return document.title[0].upper()
 
     def get_template_names(self):
         if self.request.htmx:
