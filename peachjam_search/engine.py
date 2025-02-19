@@ -140,7 +140,7 @@ class SearchEngine:
         {
             "field": "date",
             "facet": DateHistogramFacet,
-            "options": {"calendar_interval": "year"},
+            "options": {"interval": "year"},
         },
         {"field": "year", "options": {"size": 100}},
         {

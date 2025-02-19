@@ -1,15 +1,16 @@
-from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 from rest_framework.serializers import (
+    BooleanField,
     CharField,
     FloatField,
+    IntegerField,
     ListField,
     ListSerializer,
     ModelSerializer,
+    Serializer,
     SerializerMethodField,
 )
 
 from peachjam.models import DocumentTopic
-from peachjam_search.documents import SearchableDocument
 from peachjam_search.models import SearchClick
 
 
@@ -34,20 +35,37 @@ class SearchableDocumentListSerializer(ListSerializer):
             hit.topic_path_names = topics.get(hit.meta.id, [])
 
 
-class SearchableDocumentSerializer(DocumentSerializer):
+class SearchableDocumentSerializer(Serializer):
     id = CharField(source="meta.id")
+    doc_type = CharField()
+    title = CharField()
+    date = CharField()
+    year = IntegerField()
+    jurisdiction = CharField()
+    locality = CharField()
+    citation = CharField()
+    expression_frbr_uri = CharField()
+    work_frbr_uri = CharField()
+    authors = ListField()
+    matter_type = CharField()
+    created_at = CharField()
+    case_number = ListField()
+    judges = ListField()
+    is_most_recent = BooleanField()
+    alternative_names = ListField()
+    labels = ListField()
+    topic_path_names = ListField()
+    _score = FloatField(source="meta.score")
+    _index = CharField(source="meta.index")
+
+    nature = SerializerMethodField()
+    court = SerializerMethodField()
     highlight = SerializerMethodField()
     pages = SerializerMethodField()
     provisions = SerializerMethodField()
     content_chunks = SerializerMethodField()
-    court = SerializerMethodField()
-    nature = SerializerMethodField()
     outcome = SerializerMethodField()
     registry = SerializerMethodField()
-    labels = CharField(allow_null=True)
-    topic_path_names = ListField()
-    _score = FloatField(source="meta.score")
-    _index = CharField(source="meta.index")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -57,33 +75,6 @@ class SearchableDocumentSerializer(DocumentSerializer):
 
     class Meta:
         list_serializer_class = SearchableDocumentListSerializer
-        document = SearchableDocument
-        fields = [
-            "id",
-            "doc_type",
-            "title",
-            "date",
-            "year",
-            "jurisdiction",
-            "locality",
-            "citation",
-            "expression_frbr_uri",
-            "work_frbr_uri",
-            "author",
-            "nature",
-            "matter_type",
-            "created_at",
-            "case_number_string",
-            "court",
-            "judges",
-            "highlight",
-            "is_most_recent",
-            "alternative_names",
-            "labels",
-            "topic_path_names",
-            "_score",
-            "_index",
-        ]
 
     def get_highlight(self, obj):
         if hasattr(obj.meta, "highlight"):
