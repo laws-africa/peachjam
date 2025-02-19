@@ -63,7 +63,6 @@ class SearchableDocumentSerializer(Serializer):
     highlight = SerializerMethodField()
     pages = SerializerMethodField()
     provisions = SerializerMethodField()
-    content_chunks = SerializerMethodField()
     outcome = SerializerMethodField()
     registry = SerializerMethodField()
 
