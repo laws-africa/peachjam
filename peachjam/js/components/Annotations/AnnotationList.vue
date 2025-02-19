@@ -2,7 +2,7 @@
   <div>
     <annotation-item
       v-for="annotation in items"
-      :key="annotation.id"
+      :key="annotation.ref_id"
       ref="gutter-item"
       :annotation-data="annotation"
       :view-root="viewRoot"
@@ -11,7 +11,7 @@
       @remove-annotation="removeAnnotation"
     />
 
-    <div ref="loginModal" class="modal" tabindex="-1">
+    <div ref="permissionModal" class="modal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -32,7 +32,7 @@
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               {{ $t('Close') }}
             </button>
-            <a href="/accounts/login" type="button" class="btn btn-primary">{{ $t('Log in') }}</a>
+            <a href="/accounts/login/" type="button" class="btn btn-primary">{{ $t('Log in') }}</a>
           </div>
         </div>
       </div>
@@ -80,9 +80,8 @@ export default {
     },
     addAnnotation (target) {
       if (!this.editable) {
-        // show modal
-        const loginModal = new Modal(this.$refs.loginModal);
-        loginModal.show();
+        const permissionModal = new Modal(this.$refs.permissionModal);
+        permissionModal.show();
         return;
       }
       const newAnnotation = {

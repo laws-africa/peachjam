@@ -51,7 +51,7 @@ class BaseFolderMixin(
                 )
             )
         )
-        context["folders"] = Folder.objects.prefetch_related(
+        context["folders"] = self.request.user.folders.prefetch_related(
             Prefetch(
                 "saved_documents",
                 queryset=SavedDocument.objects.select_related("document").annotate(
