@@ -21,10 +21,30 @@
                   <tr>
                     <td class="cell-title">
                       <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
+                      {% if saved_doc.note %}
+                        <br/>
+                        <div>
+                          <i class="bi bi-sticky"></i>
+                          <span class="text-muted">{{ saved_doc.note }}</span>
+                        </div>
+                      {% endif %}
                       {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
                     </td>
                     <td class="cell-date" style="white-space: nowrap;">
                       {{ saved_doc.document.date }}
+                      <a class="ms-3"
+                         type="button"
+                         data-bs-toggle="modal"
+                         data-bs-target="#saveDocumentModal">
+                        <i class="bi bi-pencil"
+                           hx-post="{% url 'saved_document_update' saved_doc.id %}"></i>
+                      </a>
+                      <div id="saveDocumentModal"
+                           class="modal fade"
+                           tabindex="-1"
+                           aria-hidden="true">
+                        <div id="saveDocumentModalDialog" class="modal-dialog"></div>
+                      </div>
                       <a class="ms-3"
                          type="button"
                          hx-post="{% url 'saved_document_delete' saved_doc.id %}"
@@ -77,6 +97,19 @@
                 </td>
                 <td class="cell-date" style="white-space: nowrap;">
                   {{ saved_doc.document.date }}
+                  <a class="ms-3"
+                     type="button"
+                     data-bs-toggle="modal"
+                     data-bs-target="#saveDocumentModal">
+                    <i class="bi bi-pencil"
+                       hx-post="{% url 'saved_document_update' saved_doc.id %}"></i>
+                  </a>
+                  <div id="saveDocumentModal"
+                       class="modal fade"
+                       tabindex="-1"
+                       aria-hidden="true">
+                    <div id="saveDocumentModalDialog" class="modal-dialog"></div>
+                  </div>
                   <a class="ms-3"
                      type="button"
                      hx-post="{% url 'saved_document_delete' saved_doc.id %}"

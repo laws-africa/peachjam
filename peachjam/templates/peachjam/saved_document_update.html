@@ -21,7 +21,7 @@
               data-bs-dismiss="modal"
               aria-label="Close"></button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body text-start">
       <form id="save-document-form"
             hx-post="{% url 'saved_document_update' saved_document.id %}">
         {{ form.document }}
@@ -54,6 +54,13 @@
         </div>
         <div class="mt-3">
           <a href="{% url 'folder_list' %}">{% trans 'All saved documents' %}</a>
+        </div>
+        <div>
+          <label class="form-label" for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
+          <textarea class="form-control"
+                    id="{{ form.note.id_for_label }}"
+                    name="{{ form.note.name }}"
+                    placeholder="{% trans "A note to yourself about this document" %}">{{ form.note.value|default_if_none:'' }}</textarea>
         </div>
       </form>
     </div>
