@@ -39,6 +39,7 @@ class LocalityLegislationListView(BaseLocalityLegislationListView):
             context["breadcrumb_link"] = reverse("locality_legislation")
         elif self.locality.code in MUNICIPAL_CODES:
             context["locality_legislation_title"] = "Municipal By-laws"
+            context["doc_table_toggle"] = False
             context["page_heading"] = _(
                 "%(locality)s By-laws" % {"locality": self.locality}
             )
