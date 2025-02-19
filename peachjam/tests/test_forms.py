@@ -10,7 +10,7 @@ class BaseDocumentFilterFormTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.context["facet_data"]["years"]["options"],
-            [("2020", 2020), ("2010", 2010), ("2005", 2005), ("1969", 1969)],
+            [("2005", "2005"), ("1979", "1979"), ("1969", "1969")],
         )
 
     def test_alphabet_filter(self):
