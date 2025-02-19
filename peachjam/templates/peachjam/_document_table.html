@@ -2,7 +2,7 @@
 <div class="table-responsive"
      id="doc-table"
      data-component="DocumentTable">
-  <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {{ doc_table_classes }}">
+  <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {% if doc_table_show_date %}doc-table--date{% endif %} {{ doc_table_classes }}">
     <thead>
       <tr>
         {% if doc_table_toggle %}<th class="cell-toggle"></th>{% endif %}
@@ -25,14 +25,16 @@
         {% if doc_table_show_sub_publication %}<th scope="col"></th>{% endif %}
         {% if doc_table_show_frbr_uri_number %}<th scope="col"></th>{% endif %}
         {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
-        <th scope="col" class="cell-date">
-          <div class="align-items-center"
-               role="button"
-               data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
-            {{ doc_table_date_label|default_if_none:"Date" }}
-            <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"></i>
-          </div>
-        </th>
+        {% if doc_table_show_date %}
+          <th scope="col" class="cell-date">
+            <div class="align-items-center"
+                 role="button"
+                 data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
+              {{ doc_table_date_label|default_if_none:"Date" }}
+              <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"></i>
+            </div>
+          </th>
+        {% endif %}
       </tr>
     </thead>
     {% for document in documents %}
@@ -40,6 +42,7 @@
       {% if document.children %}
         <tbody id="doc-table-children-{{ forloop.counter0 }}"
                class="doc-table-children collapse">
+          {% include 'peachjam/_document_table_row.html' with document=subleg_group_row %}
           {% for d in document.children %}
             {% include 'peachjam/_document_table_row.html' with document=d %}
           {% endfor %}

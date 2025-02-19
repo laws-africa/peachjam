@@ -143,7 +143,7 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertEqual(
-            [("1969", 1969), ("2005", 2005), ("2010", 2010), ("2020", 2020)],
+            [("1969", "1969"), ("1979", "1979"), ("2005", "2005")],
             sorted(response.context["facet_data"]["years"]["options"]),
         )
 

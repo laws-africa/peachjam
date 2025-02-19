@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.db.models.functions.text import Substr
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
@@ -154,6 +155,24 @@ class BaseDocumentFilterForm(forms.Form):
         ],
     )
 
+    # fields for which filters are applied
+    filter_fields = [
+        "years",
+        "alphabet",
+        "authors",
+        "courts",
+        "doc_type",
+        "judges",
+        "natures",
+        "localities",
+        "registries",
+        "divisions",
+        "attorneys",
+        "outcomes",
+        "labels",
+        "taxonomies",
+    ]
+
     def __init__(self, defaults, data, *args, **kwargs):
         self.secondary_sort = "title"
         if defaults is not None:
@@ -166,72 +185,14 @@ class BaseDocumentFilterForm(forms.Form):
         super().__init__(self.params, *args, **kwargs)
 
     def filter_queryset(self, queryset, exclude=None, filter_q=False):
-        years = self.cleaned_data.get("years", [])
-        alphabet = self.cleaned_data.get("alphabet")
-        authors = self.cleaned_data.get("authors", [])
-        courts = self.cleaned_data.get("courts", [])
-        doc_type = self.cleaned_data.get("doc_type", [])
-        judges = self.cleaned_data.get("judges", [])
-        natures = self.cleaned_data.get("natures", [])
-        localities = self.cleaned_data.get("localities", [])
-        registries = self.cleaned_data.get("registries", [])
-        divisions = self.cleaned_data.get("divisions", [])
-        attorneys = self.cleaned_data.get("attorneys", [])
-        outcomes = self.cleaned_data.get("outcomes", [])
-        labels = self.cleaned_data.get("labels", [])
-        taxonomies = self.cleaned_data.get("taxonomies", [])
-        q = self.cleaned_data.get("q")
-
         queryset = self.order_queryset(queryset, exclude)
 
-        if years and exclude != "years":
-            queryset = queryset.filter(date__year__in=years)
+        for field in self.filter_fields:
+            if exclude != field:
+                queryset = getattr(self, f"apply_filter_{field}")(queryset)
 
-        if alphabet and exclude != "alphabet":
-            queryset = queryset.filter(title__istartswith=alphabet)
-
-        if authors and exclude != "authors":
-            queryset = queryset.filter(author__name__in=authors)
-
-        if courts and exclude != "courts":
-            queryset = queryset.filter(court__name__in=courts)
-
-        if doc_type and exclude != "doc_type":
-            queryset = queryset.filter(doc_type__in=doc_type)
-
-        if judges and exclude != "judges":
-            queryset = queryset.filter(judges__name__in=judges).distinct()
-
-        if natures and exclude != "natures":
-            queryset = queryset.filter(nature__code__in=natures)
-
-        if localities and exclude != "localities":
-            queryset = queryset.filter(locality__name__in=localities)
-
-        if registries and exclude != "registries":
-            queryset = queryset.filter(registry__name__in=registries)
-
-        if divisions and exclude != "divisions":
-            queryset = queryset.filter(division__code__in=divisions)
-
-        if attorneys and exclude != "attorneys":
-            queryset = queryset.filter(attorneys__name__in=attorneys).distinct()
-
-        if outcomes and exclude != "outcomes":
-            queryset = queryset.filter(outcomes__name__in=outcomes).distinct()
-
-        if labels and exclude != "labels":
-            queryset = queryset.filter(labels__name__in=labels).distinct()
-
-        if taxonomies and exclude != "taxonomies":
-            queryset = queryset.filter(taxonomies__topic__slug__in=taxonomies)
-
-        if filter_q and q and exclude != "q":
-            terms = q.split()
-            queries = Q()
-            for term in terms:
-                queries &= Q(Q(title__icontains=term) | Q(citation__icontains=term))
-            queryset = queryset.filter(queries)
+        if filter_q and exclude != "q":
+            queryset = self.apply_filter_q(queryset)
 
         return queryset
 
@@ -243,6 +204,119 @@ class BaseDocumentFilterForm(forms.Form):
             self.secondary_sort = "frbr_uri_number"
         queryset = queryset.order_by(sort, self.secondary_sort)
         return queryset
+
+    def apply_filter_years(self, queryset):
+        years = self.cleaned_data.get("years", [])
+        return queryset.filter(date__year__in=years) if years else queryset
+
+    def apply_filter_alphabet(self, queryset):
+        alphabet = self.cleaned_data.get("alphabet")
+        return queryset.filter(title__istartswith=alphabet) if alphabet else queryset
+
+    def apply_filter_authors(self, queryset):
+        authors = self.cleaned_data.get("authors")
+        return queryset.filter(author__name__in=authors) if authors else queryset
+
+    def apply_filter_courts(self, queryset):
+        courts = self.cleaned_data.get("courts", [])
+        return queryset.filter(court__name__in=courts) if courts else queryset
+
+    def apply_filter_doc_type(self, queryset):
+        doc_type = self.cleaned_data.get("doc_type", [])
+        return queryset.filter(doc_type__in=doc_type) if doc_type else queryset
+
+    def apply_filter_judges(self, queryset):
+        judges = self.cleaned_data.get("judges", [])
+        return (
+            queryset.filter(judges__name__in=judges).distinct() if judges else queryset
+        )
+
+    def apply_filter_natures(self, queryset):
+        natures = self.cleaned_data.get("natures", [])
+        return queryset.filter(nature__code__in=natures) if natures else queryset
+
+    def apply_filter_localities(self, queryset):
+        localities = self.cleaned_data.get("localities", [])
+        return (
+            queryset.filter(locality__name__in=localities) if localities else queryset
+        )
+
+    def apply_filter_registries(self, queryset):
+        registries = self.cleaned_data.get("registries", [])
+        return (
+            queryset.filter(registry__name__in=registries) if registries else queryset
+        )
+
+    def apply_filter_divisions(self, queryset):
+        divisions = self.cleaned_data.get("divisions", [])
+        return queryset.filter(division__code__in=divisions) if divisions else queryset
+
+    def apply_filter_attorneys(self, queryset):
+        attorneys = self.cleaned_data.get("attorneys", [])
+        return (
+            queryset.filter(attorneys__name__in=attorneys).distinct()
+            if attorneys
+            else queryset
+        )
+
+    def apply_filter_outcomes(self, queryset):
+        outcomes = self.cleaned_data.get("outcomes", [])
+        return (
+            queryset.filter(outcomes__name__in=outcomes).distinct()
+            if outcomes
+            else queryset
+        )
+
+    def apply_filter_labels(self, queryset):
+        labels = self.cleaned_data.get("labels", [])
+        return (
+            queryset.filter(labels__name__in=labels).distinct() if labels else queryset
+        )
+
+    def apply_filter_taxonomies(self, queryset):
+        taxonomies = self.cleaned_data.get("taxonomies", [])
+        return (
+            queryset.filter(taxonomies__topic__slug__in=taxonomies)
+            if taxonomies
+            else queryset
+        )
+
+    def apply_filter_q(self, queryset):
+        q = self.cleaned_data.get("q")
+        if q:
+            terms = q.split()
+            queries = Q()
+            for term in terms:
+                queries &= Q(Q(title__icontains=term) | Q(citation__icontains=term))
+            queryset = queryset.filter(queries)
+        return queryset
+
+
+class LegislationFilterForm(BaseDocumentFilterForm):
+    def apply_filter_years(self, queryset):
+        years = self.cleaned_data.get("years", [])
+        return (
+            (
+                queryset.annotate(
+                    frbr_uri_date_year=Substr("frbr_uri_date", 1, 4)
+                ).filter(frbr_uri_date_year__in=years)
+            )
+            if years
+            else queryset
+        )
+
+    def order_queryset(self, queryset, exclude=None):
+        queryset = super().order_queryset(queryset, exclude)
+
+        # change ordering so that date uses frbr_uri_date
+        ordering = list(queryset.query.order_by)
+        for i, order in enumerate(ordering):
+            if order == "date":
+                ordering[i] = "frbr_uri_date"
+            if order == "-date":
+                ordering[i] = "-frbr_uri_date"
+
+        return queryset.order_by(*ordering)
 
 
 class GazetteFilterForm(BaseDocumentFilterForm):
