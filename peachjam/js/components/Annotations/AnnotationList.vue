@@ -2,7 +2,7 @@
   <div>
     <annotation-item
       v-for="annotation in items"
-      :key="annotation.ref_id"
+      :key="annotation.id"
       ref="gutter-item"
       :annotation-data="annotation"
       :view-root="viewRoot"
@@ -53,30 +53,20 @@ export default {
     editable: Boolean
   },
   data: () => ({
-    items: []
+    items: [],
+    counter: -1
   }),
   mounted () {
     this.getAnnotations();
   },
   methods: {
-    getAnnotations () {
+    async getAnnotations () {
       if (!this.editable) return;
-      fetch(`/api/documents/${this.viewRoot.dataset.documentId}/annotations/`)
-        .then((resp) => {
-          if (!resp.ok) {
-            throw new Error('Failed to fetch annotations');
-          }
-          return resp.json();
-        })
-        .then((annotations) => {
-          this.items = annotations.results.map((annotation) => ({
-            ...annotation,
-            ref_id: `annotation-${annotation.id}`
-          }));
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      const resp = await fetch(`/api/documents/${this.viewRoot.dataset.documentId}/annotations/`);
+      if (!resp.ok) {
+        throw new Error('Failed to fetch annotations');
+      }
+      this.items = (await resp.json()).results;
     },
     addAnnotation (target) {
       if (!this.editable) {
@@ -85,17 +75,16 @@ export default {
         return;
       }
       const newAnnotation = {
-        ref_id: `new-annotation-${this.items.length + 1}`,
+        id: this.counter--,
         text: '',
         target_selectors: target.selectors,
         target_id: target.anchor_id,
-        document: this.viewRoot.dataset.documentId,
-        editing: true
+        document: this.viewRoot.dataset.documentId
       };
       this.items.push(newAnnotation);
     },
     async removeAnnotation (annotation) {
-      this.items = this.items.filter((item) => item.ref_id !== annotation.ref_id);
+      this.items = this.items.filter((item) => item !== annotation);
     }
   }
 };

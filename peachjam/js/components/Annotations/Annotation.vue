@@ -1,6 +1,5 @@
 <template>
   <la-gutter-item
-    :id="annotation.ref_id"
     :anchor.prop="anchorElement"
   >
     <div class="card">
@@ -78,10 +77,14 @@ export default {
   data: (x) => ({
     marks: [],
     anchorElement: null,
-    editing: x.annotationData.editing || false,
-    annotation: x.annotationData,
-    ref_id: x.annotationData.ref_id
+    editing: x.annotationData.id < 0,
+    annotation: x.annotationData
   }),
+  computed: {
+    isNew () {
+      return this.annotation.id < 0;
+    }
+  },
   mounted () {
     this.anchorElement = document.getElementById(this.annotation.target_id);
     this.mark();
@@ -90,14 +93,9 @@ export default {
   unmounted () {
     this.unmark();
   },
-
   methods: {
     async checkDocumentSaved () {
-      const response = await fetch(`/saved-documents/button/${this.viewRoot.dataset.documentId}`);
-      if (!response.ok) {
-        throw new Error(`Error checking document saved: ${response.status}`);
-      }
-      return response.url.includes('update');
+      return document.querySelector('[data-saved-document]') !== null;
     },
     async saveAnnotation (e) {
       if (!this.editable) return;
@@ -119,8 +117,8 @@ export default {
         document: this.annotation.document
       };
 
-      const method = this.annotation.id ? 'PUT' : 'POST';
-      const url = this.annotation.id ? `/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/` : `/api/documents/${this.annotation.document}/annotations/`;
+      const method = !this.isNew ? 'PUT' : 'POST';
+      const url = !this.isNew ? `/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/` : `/api/documents/${this.annotation.document}/annotations/`;
       const resp = await fetch(url, {
         method,
         headers,
@@ -128,8 +126,7 @@ export default {
       });
 
       if (resp.ok) {
-        this.annotation = await resp.json();
-        this.annotation.ref_id = this.ref_id;
+        Object.assign(this.annotation, await resp.json());
         this.editing = false;
       }
     },
@@ -138,7 +135,7 @@ export default {
     },
     async deleteAnnotation () {
       if (!this.editable) return;
-      if (this.annotation.id) {
+      if (!this.isNew) {
         const headers = await authHeaders();
         const resp = await fetch(`/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/`, {
           method: 'DELETE',
