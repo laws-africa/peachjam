@@ -1,5 +1,4 @@
 from django import forms
-from django.db.models import Q
 from django.urls import reverse
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
@@ -11,7 +10,9 @@ class BaseAnnotationView:
     context_object_name = "annotation"
 
     def get_queryset(self):
-        return Annotation.objects.filter(user=self.request.user)
+        return Annotation.objects.filter(
+            document=self.kwargs["document_pk"], user=self.request.user
+        )
 
     def get_object(self, *args, **kwargs):
         return self.get_queryset().get(pk=self.kwargs["pk"])
@@ -27,12 +28,14 @@ class AnnotationListView(ListView):
         return ["peachjam/annotation_list.html"]
 
     def get_queryset(self):
-        q = self.request.GET.get("q")
-        qs = Annotation.objects.filter(user=self.request.user)
-        if q:
-            q = Q(text__icontains=q) | Q(document__title__icontains=q)
-            return qs.filter(q)
-        return qs
+        return Annotation.objects.filter(
+            document=self.kwargs["document_pk"], user=self.request.user
+        )
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context["document_pk"] = self.kwargs["document_pk"]
+        return context
 
 
 class AnnotationForm(forms.ModelForm):
@@ -50,7 +53,9 @@ class AnnotationEditView(BaseAnnotationView, UpdateView):
     form_class = AnnotationForm
 
     def get_success_url(self):
-        return reverse("annotation_detail", args=[self.object.pk])
+        return reverse(
+            "annotation_detail", args=[self.object.document.pk, self.object.pk]
+        )
 
 
 class AnnotationDeleteView(BaseAnnotationView, DeleteView):
@@ -61,4 +66,4 @@ class AnnotationDeleteView(BaseAnnotationView, DeleteView):
         return self.post(*args, **kwargs)
 
     def get_success_url(self):
-        return reverse("annotation_list")
+        return reverse("annotation_list", args=[self.object.document.pk])

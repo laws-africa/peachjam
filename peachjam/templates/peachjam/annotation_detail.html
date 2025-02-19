@@ -1,3 +1,44 @@
-<div class="my-2">
-  <p id="annotation-text-{{ annotation.pk }}">{{ annotation.text }}</p>
+{% load i18n peachjam %}
+<div id="annotation-detail-{{ annotation.pk }}" class="card">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-baseline">
+      <div>
+        <small class="fw-bold text-muted">{{ annotation.user.first_name }} {{ annotation.user.last_name }}</small>
+      </div>
+      <div class="dropdown text-end">
+        <a id="dropdownMenuButton"
+           class="btn btn-link"
+           type="button"
+           data-bs-toggle="dropdown"
+           aria-haspopup="true"
+           aria-expanded="false">
+          <i class="bi bi-three-dots"></i>
+        </a>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <a hx-target="#annotation-text-{{ annotation.pk }}"
+             hx-get="{% url 'annotation_edit' annotation.document.pk annotation.pk %}"
+             class="dropdown-item"
+             role="button">{% trans 'Edit' %}</a>
+          <a hx-confirm="{% trans 'Are you sure you want to delete this annotation?' %}"
+             hx-target="#annotation-list-{{ document_pk }}"
+             hx-post="{% url 'annotation_delete' annotation.document.pk annotation.pk %}"
+             class="dropdown-item"
+             role="button">{% trans 'Delete' %}</a>
+        </div>
+      </div>
+    </div>
+    <a href="{% url 'document_detail' annotation.document.expression_frbr_uri|strip_first_character %}#{{ annotation.target_id }}">{{ annotation.document }}</a>
+    <div class="my-2">
+      {% for selector in annotation.target_selectors %}
+        {% if selector.type == 'TextQuoteSelector' %}<mark><span>{{ selector.exact }}</span></mark>{% endif %}
+      {% endfor %}
+    </div>
+    <hr/>
+    <div class="my-2">
+      <p id="annotation-text-{{ annotation.pk }}">{{ annotation.text }}</p>
+    </div>
+  </div>
+  <div class="card-footer">
+    <small class="text-sm text-muted">{{ annotation.created_at }}</small>
+  </div>
 </div>

@@ -509,7 +509,7 @@ urlpatterns = [
     ),
     # Annotations
     path(
-        "annotations/",
+        "document/<int:document_pk>/annotations/",
         include(
             [
                 path(

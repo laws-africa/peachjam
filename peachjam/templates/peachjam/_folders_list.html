@@ -16,31 +16,9 @@
         <div class="card-body">
           <div>
             {% if folder.saved_documents.all %}
-              <table class="doc-table">
-                {% for saved_doc in folder.saved_documents.all %}
-                  <tr>
-                    <td class="cell-title">
-                      <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
-                      {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
-                    </td>
-                    <td>
-                      {% if saved_doc.annotation_count %}
-                        <span> <i class="text-primary bi bi-chat-left-text"></i> {{ saved_doc.annotation_count }}</span>
-                      {% endif %}
-                    </td>
-                    <td class="cell-date" style="white-space: nowrap;">
-                      {{ saved_doc.document.date }}
-                      <a class="ms-3"
-                         type="button"
-                         hx-post="{% url 'saved_document_delete' saved_doc.id %}"
-                         hx-target="#folders-list"
-                         hx-confirm="Are you sure you want to remove this document?">
-                        <i class="bi bi-trash"></i>
-                      </a>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </table>
+              {% for saved_doc in folder.saved_documents.all %}
+                {% include "peachjam/_folder_list_item.html" %}
+              {% endfor %}
             {% else %}
               <p>{% trans 'No saved documents.' %}</p>
             {% endif %}
@@ -73,31 +51,9 @@
       <div class="card">
         <h5 class="card-header">{% trans 'Ungrouped documents' %}</h5>
         <div class="card-body">
-          <table class="doc-table">
-            {% for saved_doc in ungrouped_saved_documents %}
-              <tr>
-                <td class="cell-title">
-                  <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
-                  {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
-                </td>
-                <td>
-                  {% if saved_doc.annotation_count %}
-                    <span> <i class="text-primary bi bi-chat-left-text"></i> {{ saved_doc.annotation_count }}</span>
-                  {% endif %}
-                </td>
-                <td class="cell-date" style="white-space: nowrap;">
-                  {{ saved_doc.document.date }}
-                  <a class="ms-3"
-                     type="button"
-                     hx-post="{% url 'saved_document_delete' saved_doc.id %}"
-                     hx-target="#folders-list"
-                     hx-confirm="Are you sure you want to remove this document?">
-                    <i class="bi bi-trash"></i>
-                  </a>
-                </td>
-              </tr>
-            {% endfor %}
-          </table>
+          {% for saved_doc in ungrouped_saved_documents %}
+            {% include "peachjam/_folder_list_item.html" %}
+          {% endfor %}
         </div>
       </div>
     {% endif %}
