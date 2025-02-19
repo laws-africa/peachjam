@@ -49,7 +49,6 @@ class SearchEngine:
             "case_summary",
             "provisions",
             "suggest",
-            "content_chunks",
         ]
     }
 
