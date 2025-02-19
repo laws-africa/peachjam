@@ -81,7 +81,7 @@ class DocumentSearchView(TemplateView):
         if not form.is_valid():
             return JsonResponse({"error": form.errors}, status=400)
 
-        engine = self.make_search_engine(request, form)
+        engine = self.make_search_engine(form)
 
         if not engine.query and not engine.field_queries:
             # no search term
@@ -114,7 +114,7 @@ class DocumentSearchView(TemplateView):
         if not form.is_valid():
             return JsonResponse({"error": form.errors}, status=400)
 
-        engine = self.make_search_engine(request, form)
+        engine = self.make_search_engine(form)
         # the index must be passed in as a query param otherwise we don't know which one to use
         engine.index = request.GET.get("index") or engine.index
         es_response = engine.explain(pk)
@@ -133,9 +133,9 @@ class DocumentSearchView(TemplateView):
         response = {"suggestions": suggestions}
         return self.render(response)
 
-    def make_search_engine(self, request, form):
+    def make_search_engine(self, form):
         engine = SearchEngine()
-        engine.from_form(form, request)
+        form.configure_engine(engine)
         return engine
 
     def render(self, response):

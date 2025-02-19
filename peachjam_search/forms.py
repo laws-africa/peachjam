@@ -42,6 +42,27 @@ class SearchForm(forms.Form):
         if val and is_valid(val):
             return [None, val]
 
+    def configure_engine(self, engine):
+        engine.query = self.cleaned_data.get("search")
+        engine.page = self.cleaned_data.get("page") or 1
+        engine.ordering = self.cleaned_data.get("ordering") or engine.ordering
+
+        engine.filters = {}
+        for key in self.data.keys():
+            if key in engine.filter_fields:
+                engine.filters[key] = self.data.getlist(key)
+
+        # date ranges handled separately
+        date = self.cleaned_data.get("date")
+        if date:
+            engine.filters["date"] = date
+
+        engine.field_queries = {}
+        for field in list(engine.advanced_search_fields.keys()) + ["all"]:
+            val = (self.data.get(f"search__{field}") or "").strip()
+            if val:
+                engine.field_queries[field] = val
+
 
 class SavedSearchCreateForm(forms.ModelForm):
     class Meta:
