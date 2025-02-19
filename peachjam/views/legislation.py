@@ -24,10 +24,6 @@ class LegislationListView(FilteredDocumentListView):
         "nature": "Act",
         "help_link": "legislation/",
         "doc_table_show_date": False,
-        "subleg_group_row": {
-            "is_group": True,
-            "title": pj_settings().subleg_label,
-        },
     }
     form_defaults = {"sort": "title"}
     form_class = LegislationFilterForm
@@ -63,6 +59,14 @@ class LegislationListView(FilteredDocumentListView):
             # use work year
             return document.frbr_uri_date[:4]
         return super().get_document_group(group_by, document)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["subleg_group_row"] = {
+            "is_group": True,
+            "title": pj_settings().subleg_label,
+        }
+        return context
 
 
 @registry.register_doc_type("legislation")
