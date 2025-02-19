@@ -120,17 +120,6 @@ class SearchableDocumentSerializer(Serializer):
                 provisions.append(info)
         return provisions
 
-    def get_content_chunks(self, obj):
-        """Serialize nested page hits and highlights."""
-        chunks = []
-        if hasattr(obj.meta, "inner_hits") and hasattr(
-            obj.meta.inner_hits, "content_chunks"
-        ):
-            for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
-                info = chunk._source.to_dict()
-                chunks.append(info)
-        return chunks
-
     def get_court(self, obj):
         return obj["court" + self.language_suffix]
 

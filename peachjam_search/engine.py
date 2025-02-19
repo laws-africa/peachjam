@@ -210,6 +210,27 @@ class SearchEngine:
             MultiLanguageIndexManager.get_instance().get_all_search_index_names()
         )
 
+    def from_form(self, form, request):
+        self.query = form.cleaned_data.get("search")
+        self.page = form.cleaned_data.get("page") or 1
+        self.ordering = form.cleaned_data.get("ordering") or self.ordering
+
+        self.filters = {}
+        for key in request.GET.keys():
+            if key in self.filter_fields:
+                self.filters[key] = request.GET.getlist(key)
+
+        # date ranges handled separately
+        date = form.cleaned_data.get("date")
+        if date:
+            self.filters["date"] = date
+
+        self.field_queries = {}
+        for field in list(self.advanced_search_fields.keys()) + ["all"]:
+            val = (request.GET.get(f"search__{field}") or "").strip()
+            if val:
+                self.field_queries[field] = val
+
     def execute(self):
         search = self.build_search()
         response = search.execute()

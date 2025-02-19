@@ -82,12 +82,12 @@ class DocumentSearchView(TemplateView):
             return JsonResponse({"error": form.errors}, status=400)
 
         engine = self.make_search_engine(request, form)
-        es_response = engine.execute()
 
         if not engine.query and not engine.field_queries:
             # no search term
             return JsonResponse({"error": "No search term"}, status=400)
 
+        es_response = engine.execute()
         results = SearchableDocumentSerializer(
             es_response.hits, many=True, context={"request": request}
         ).data
@@ -127,37 +127,15 @@ class DocumentSearchView(TemplateView):
         suggestions = []
 
         if q and settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
-            suggestions = self.get_search_engine().suggest(q).suggest.to_dict()
+            suggestions = SearchEngine().suggest(q).suggest.to_dict()
             suggestions["prefix"] = suggestions["prefix"][0]
 
         response = {"suggestions": suggestions}
         return self.render(response)
 
-    def get_search_engine(self):
-        return SearchEngine()
-
     def make_search_engine(self, request, form):
-        engine = self.get_search_engine()
-        engine.query = form.cleaned_data.get("search")
-        engine.page = form.cleaned_data.get("page") or 1
-        engine.ordering = form.cleaned_data.get("ordering") or engine.ordering
-
-        engine.filters = {}
-        for key in request.GET.keys():
-            if key in engine.filter_fields:
-                engine.filters[key] = request.GET.getlist(key)
-
-        # date ranges handled separately
-        date = form.cleaned_data.get("date")
-        if date:
-            engine.filters["date"] = date
-
-        engine.field_queries = {}
-        for field in list(engine.advanced_search_fields.keys()) + ["all"]:
-            val = (request.GET.get(f"search__{field}") or "").strip()
-            if val:
-                engine.field_queries[field] = val
-
+        engine = SearchEngine()
+        engine.from_form(form, request)
         return engine
 
     def render(self, response):

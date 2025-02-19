@@ -142,7 +142,6 @@ PEACHJAM = {
     "EXTRA_SEARCH_INDEXES": [],
     "SEARCH_JURISDICTION_FILTER": False,
     "SEARCH_SUGGESTIONS": os.environ.get("SEARCH_SUGGESTIONS", "false") == "true",
-    "SEARCH_HYBRID": os.environ.get("SEARCH_HYBRID", "true") == "true",
     "MULTIPLE_JURISDICTIONS": False,
     "MULTIPLE_LOCALITIES": False,
     "PDFJS_TO_TEXT": "bin/pdfjs-to-text" if DEBUG else "pdfjs-to-text",
