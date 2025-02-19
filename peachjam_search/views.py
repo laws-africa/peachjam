@@ -88,9 +88,7 @@ class DocumentSearchView(TemplateView):
             return JsonResponse({"error": "No search term"}, status=400)
 
         es_response = engine.execute()
-        results = SearchableDocumentSerializer(
-            es_response.hits, many=True, context={"request": request}
-        ).data
+        results = SearchableDocumentSerializer(es_response.hits, many=True).data
 
         response = {
             "count": es_response.hits.total.value,
@@ -147,11 +145,6 @@ class DocumentSearchView(TemplateView):
         return JsonResponse(response)
 
     def save_search_trace(self, engine, response):
-        # don't save search traces for alerts
-        # TODO
-        if "search-alert" in self.request.id:
-            return
-
         filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
 
         previous = None

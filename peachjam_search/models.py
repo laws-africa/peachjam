@@ -15,7 +15,6 @@ from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from rest_framework.test import APIRequestFactory
 
 log = logging.getLogger(__name__)
 
@@ -131,23 +130,24 @@ class SavedSearch(models.Model):
             self.save()
 
     def find_new_hits(self):
-        from peachjam_search.views import DocumentSearchViewSet
+        from peachjam_search.engine import SearchEngine
+        from peachjam_search.forms import SearchForm
+        from peachjam_search.serializers import SearchableDocumentSerializer
 
-        factory = APIRequestFactory()
-        request = factory.get("/search/api/documents/")
-        request.user = self.user
-        params = self.get_filters_dict()
+        params = QueryDict("", mutable=True)
+        params.update(self.get_filters_dict())
         params["search"] = self.q
         params["created_at__gte"] = self.last_alerted_at.replace(
             tzinfo=None
         ).isoformat()
-        params = urlencode(params, doseq=True)
-        request.GET = QueryDict(params)
-        request.id = "search-alert-" + str(self.pk)
-        view = DocumentSearchViewSet.as_view({"get": "list"})
-        response = view(request)
-        hits = response.data["results"]
-        return hits
+
+        engine = SearchEngine()
+        form = SearchForm(params)
+        form.is_valid()
+        form.configure_engine(engine)
+        es_response = engine.execute()
+
+        return SearchableDocumentSerializer(es_response.hits, many=True).data
 
     def send_alert(self, hits):
         # send an email or other alert to the user
