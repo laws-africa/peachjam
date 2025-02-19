@@ -138,9 +138,10 @@ class LocalityLegislationListView(LegislationListView):
     template_name = "liiweb/locality_legislation_list.html"
     navbar_link = "legislation/locality"
     extra_context = {
+        "doc_table_show_date": False,
         "locality_legislation_title": LocalityLegislationView.extra_context[
             "locality_legislation_title"
-        ]
+        ],
     }
     national_only = False
 
