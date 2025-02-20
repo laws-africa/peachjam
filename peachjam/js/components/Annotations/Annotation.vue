@@ -4,48 +4,47 @@
   >
     <div class="card">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-baseline">
+        <div class="d-flex mb-1">
           <div>
             <small class="fw-bold text-muted">{{ annotation.user }}</small>
           </div>
-          <div class="dropdown text-end">
+          <div class="dropdown ms-auto">
             <a
-              id="dropdownMenuButton"
-              class="btn btn-link"
-              type="button"
+              class="dropdown-toggle"
+              href="#"
               data-bs-toggle="dropdown"
               aria-haspopup="true"
               aria-expanded="false"
-            >
-              <i class="bi bi-three-dots" />
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" role="button" @click="editAnnotation">{{ $t('Edit') }}</a>
-              <a class="dropdown-item" role="button" @click="deleteAnnotation">{{ $t('Delete') }}</a>
-            </div>
+            />
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" role="button" @click="editAnnotation">{{ $t('Edit') }}</a>
+              </li>
+              <li>
+                <a class="dropdown-item" role="button" @click="deleteAnnotation">{{ $t('Delete') }}</a>
+              </li>
+            </ul>
           </div>
         </div>
-        <form @submit="saveAnnotation">
+        <form @submit.prevent="saveAnnotation">
           <textarea
             v-if="editing"
             v-model="annotation.text"
             class="form-control grow-text"
             required
           />
-          <p v-else>
+          <div v-else>
             {{ annotation.text }}
-          </p>
-          <div class="mt-2 text-end">
+          </div>
+          <div v-if="editing" class="mt-2 text-end">
             <button
-              v-if="editing"
-              class="ms-1 btn btn-sm btn-secondary"
+              class="btn btn-sm btn-secondary"
               @click="cancelEdit"
             >
               {{ $t('Cancel') }}
             </button>
 
             <button
-              v-if="editing"
               class="ms-1 btn btn-sm btn-primary"
               type="submit"
             >
@@ -86,7 +85,6 @@ export default {
     }
   },
   mounted () {
-    this.anchorElement = document.getElementById(this.annotation.target_id);
     this.mark();
     this.gutter.appendChild(this.$el);
   },
@@ -94,14 +92,10 @@ export default {
     this.unmark();
   },
   methods: {
-    async checkDocumentSaved () {
-      return document.querySelector('[data-saved-document]') !== null;
-    },
     async saveAnnotation (e) {
       if (!this.editable) return;
-      e.preventDefault();
-      const isSaved = await this.checkDocumentSaved();
-      if (!isSaved) {
+      const isDocumentSaved = document.querySelector('[data-saved-document]') !== null;
+      if (!isDocumentSaved) {
         await window.htmx.ajax('post', `/saved-documents/create?doc_id=${this.annotation.document}`, {
           target: '.save-document-button'
         });
@@ -136,7 +130,7 @@ export default {
     async deleteAnnotation () {
       if (!this.editable) return;
       if (!this.isNew) {
-        if (confirm(this.$t('Are you sure you want to delete this annotation?'))) {
+        if (confirm(this.$t('Are you sure you want to delete this comment?'))) {
           const headers = await authHeaders();
           const resp = await fetch(`/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/`, {
             method: 'DELETE',
@@ -145,7 +139,7 @@ export default {
           if (!resp.ok) {
             throw new Error('Failed to delete annotation');
           }
-        };
+        }
       }
       this.$emit('remove-annotation', this.annotation);
     },
@@ -158,12 +152,14 @@ export default {
       markRange(range, 'mark', mark => {
         this.marks.push(mark);
         return mark;
+      });
+      if (this.marks.length) {
+        this.anchorElement = this.marks[0];
       }
-      );
     },
     cancelEdit () {
       this.editing = false;
-      if (!this.annotation.id) {
+      if (this.isNew) {
         this.$emit('remove-annotation', this.annotation);
       }
     },

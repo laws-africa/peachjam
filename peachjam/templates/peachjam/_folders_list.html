@@ -34,7 +34,7 @@
                   hx-post="{% url 'folder_delete' folder.id %}"
                   hx-target="#folders-list"
                   hx-include="#folder_{{ forloop.counter }}"
-                  hx-confirm="Are you sure you want to delete this folder? All saved documents in this folder will also be deleted.">
+                  hx-confirm="{% trans "Are you sure you want to delete this folder? All saved documents in this folder will also be deleted." %}">
             {% trans 'Delete' %}
           </button>
           <button class="btn btn-secondary"

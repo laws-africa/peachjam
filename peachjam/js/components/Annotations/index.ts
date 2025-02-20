@@ -1,11 +1,10 @@
 import { GutterEnrichmentManager, IGutterEnrichmentProvider } from '@lawsafrica/indigo-akn/dist/enrichments';
 import AnnotationList from './AnnotationList.vue';
-import AddAnnotation from './AddAnnotation.vue';
 import { IRangeTarget } from '@lawsafrica/indigo-akn/dist/ranges';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { vueI18n } from '../../i18n';
-import { ComponentPublicInstance, VueElement } from 'vue';
-import { IAnnotation } from './annotation';
+import { ComponentPublicInstance } from 'vue';
+import i18next from 'i18next';
 
 export class AnnotationsProvider implements IGutterEnrichmentProvider {
     root: HTMLElement;
@@ -38,11 +37,12 @@ export class AnnotationsProvider implements IGutterEnrichmentProvider {
       const btn = document.createElement('button');
       btn.className = 'btn btn-outline-secondary';
       btn.type = 'button';
-      btn.innerText = 'Add annotation...';
+      btn.innerText = i18next.t('Add comment...');
       return btn;
     }
 
     addEnrichment (target: IRangeTarget): void {
+      document.getSelection()?.removeAllRanges();
       // @ts-ignore
       this.listComponent.addAnnotation(target);
     }
