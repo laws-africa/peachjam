@@ -85,7 +85,6 @@ export default {
     }
   },
   mounted () {
-    this.anchorElement = document.getElementById(this.annotation.target_id);
     this.mark();
     this.gutter.appendChild(this.$el);
   },
@@ -154,6 +153,9 @@ export default {
         this.marks.push(mark);
         return mark;
       });
+      if (this.marks.length) {
+        this.anchorElement = this.marks[0];
+      }
     },
     cancelEdit () {
       this.editing = false;
