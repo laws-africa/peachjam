@@ -32,7 +32,7 @@
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               {{ $t('Close') }}
             </button>
-            <a href="/accounts/login/" type="button" class="btn btn-primary">{{ $t('Log in') }}</a>
+            <a :href="loginUrl" type="button" class="btn btn-primary">{{ $t('Log in') }}</a>
           </div>
         </div>
       </div>
@@ -57,6 +57,11 @@ export default {
     counter: -1,
     user: null
   }),
+  computed: {
+    loginUrl () {
+      return '/accounts/login/?next=' + encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
+    }
+  },
   mounted () {
     this.getUser();
     this.getAnnotations();
