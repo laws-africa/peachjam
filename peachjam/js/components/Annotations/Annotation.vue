@@ -29,7 +29,7 @@
         <form @submit.prevent="saveAnnotation">
           <textarea
             v-if="editing"
-            v-model="annotation.text"
+            v-model="text"
             class="form-control grow-text"
             required
           />
@@ -77,7 +77,8 @@ export default {
     marks: [],
     anchorElement: null,
     editing: x.annotationData.id < 0,
-    annotation: x.annotationData
+    annotation: x.annotationData,
+    text: x.annotationData.text
   }),
   computed: {
     isNew () {
@@ -94,6 +95,8 @@ export default {
   methods: {
     async saveAnnotation (e) {
       if (!this.editable) return;
+      this.annotation.text = this.text;
+
       const isDocumentSaved = document.querySelector('[data-saved-document]') !== null;
       if (!isDocumentSaved) {
         await window.htmx.ajax('post', `/saved-documents/create?doc_id=${this.annotation.document}`, {
@@ -159,6 +162,7 @@ export default {
     },
     cancelEdit () {
       this.editing = false;
+      this.text = this.annotation.text;
       if (this.isNew) {
         this.$emit('remove-annotation', this.annotation);
       }
