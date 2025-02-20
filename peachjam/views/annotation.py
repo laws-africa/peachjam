@@ -33,16 +33,15 @@ class AnnotationEditView(BaseAnnotationView, UpdateView):
 
     def get_success_url(self):
         return reverse(
-            "annotation_detail", args=[self.object.document.pk, self.object.pk]
+            "annotation_detail", args=[self.object.document_id, self.object.pk]
         )
 
 
 class AnnotationDeleteView(BaseAnnotationView, DeleteView):
     template_name = "peachjam/_annotation_detail.html"
-    context_object_name = "annotation"
 
     def get(self, *args, **kwargs):
         return self.post(*args, **kwargs)
 
     def get_success_url(self):
-        return reverse("annotation_list", args=[self.object.document.pk])
+        return reverse("annotation_list", args=[self.object.document_id])
