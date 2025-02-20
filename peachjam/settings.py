@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
     "django_elasticsearch_dsl",
-    "django_elasticsearch_dsl_drf",
     "jazzmin",
     "dal",
     "dal_select2",

@@ -11,7 +11,7 @@ from peachjam.helpers import lowercase_alphabet
 from peachjam.models import Taxonomy
 from peachjam.views import TaxonomyDetailView, TaxonomyFirstLevelView
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
-from peachjam_search.views import DocumentSearchViewSet
+from peachjam_search.engine import SearchEngine
 
 
 def is_doc_index_topic(topic):
@@ -92,7 +92,7 @@ class DocIndexDetailView(TaxonomyDetailView):
         indexes = MultiLanguageIndexManager.get_instance().get_all_search_index_names()
         search = (
             SearchableDocument.search(index=indexes)
-            .source(exclude=DocumentSearchViewSet.source["excludes"])
+            .source(exclude=SearchEngine.source["excludes"])
             .filter("term", taxonomies=self.taxonomy.slug)
         )
         return search
