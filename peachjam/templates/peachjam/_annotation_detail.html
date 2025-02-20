@@ -17,7 +17,7 @@
              class="dropdown-item"
              role="button">{% trans 'Edit' %}</a>
           <a hx-confirm="{% trans 'Are you sure you want to delete this annotation?' %}"
-             hx-target="#annotation-list-{{ document_pk }}"
+             hx-target="#annotation-list-{{ annotation.document.pk }}"
              hx-post="{% url 'annotation_delete' annotation.document.pk annotation.pk %}"
              class="dropdown-item"
              role="button">{% trans 'Delete' %}</a>
