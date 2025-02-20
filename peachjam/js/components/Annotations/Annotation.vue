@@ -136,14 +136,16 @@ export default {
     async deleteAnnotation () {
       if (!this.editable) return;
       if (!this.isNew) {
-        const headers = await authHeaders();
-        const resp = await fetch(`/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/`, {
-          method: 'DELETE',
-          headers
-        });
-        if (!resp.ok) {
-          throw new Error('Failed to delete annotation');
-        }
+        if (confirm(this.$t('Are you sure you want to delete this annotation?'))) {
+          const headers = await authHeaders();
+          const resp = await fetch(`/api/documents/${this.annotation.document}/annotations/${this.annotation.id}/`, {
+            method: 'DELETE',
+            headers
+          });
+          if (!resp.ok) {
+            throw new Error('Failed to delete annotation');
+          }
+        };
       }
       this.$emit('remove-annotation', this.annotation);
     },

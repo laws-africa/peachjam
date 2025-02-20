@@ -51,3 +51,7 @@ class SavedDocument(models.Model):
         verbose_name = _("saved document")
         verbose_name_plural = _("saved documents")
         unique_together = ("document", "folder")
+
+    def delete(self, using=None, keep_parents=False):
+        self.document.annotations.filter(user=self.user).delete()
+        return super().delete(using=using, keep_parents=keep_parents)

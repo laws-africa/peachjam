@@ -30,7 +30,9 @@
     <a href="{% url 'document_detail' annotation.document.expression_frbr_uri|strip_first_character %}#{{ annotation.target_id }}">{{ annotation.document }}</a>
     <div class="my-2">
       {% for selector in annotation.target_selectors %}
-        {% if selector.type == 'TextQuoteSelector' %}<mark><span>{{ selector.exact }}</span></mark>{% endif %}
+        {% if selector.type == 'TextQuoteSelector' %}
+          <span>{{ selector.prefix }}<mark>{{ selector.exact }}</mark>{{ selector.suffix }}</span>
+        {% endif %}
       {% endfor %}
     </div>
     <hr/>

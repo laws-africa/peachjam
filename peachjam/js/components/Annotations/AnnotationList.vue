@@ -54,12 +54,22 @@ export default {
   },
   data: () => ({
     items: [],
-    counter: -1
+    counter: -1,
+    user: null
   }),
   mounted () {
+    this.getUser();
     this.getAnnotations();
   },
   methods: {
+    async getUser () {
+      if (!this.editable) return;
+      const resp = await fetch('/accounts/user/');
+      if (!resp.ok) {
+        throw new Error('Failed to fetch user');
+      }
+      this.user = await resp.json();
+    },
     async getAnnotations () {
       if (!this.editable) return;
       const resp = await fetch(`/api/documents/${this.viewRoot.dataset.documentId}/annotations/`);
@@ -79,7 +89,8 @@ export default {
         text: '',
         target_selectors: target.selectors,
         target_id: target.anchor_id,
-        document: this.viewRoot.dataset.documentId
+        document: this.viewRoot.dataset.documentId,
+        user: this.user.name
       };
       this.items.push(newAnnotation);
     },
