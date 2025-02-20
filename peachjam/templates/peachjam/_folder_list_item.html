@@ -2,40 +2,37 @@
 <div class="border-bottom">
   <div class="row pt-2">
     <div class="col-md-8">
-      <p class="flex-fill">
-        <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
-        {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
-      </p>
+      <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
+      {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
     </div>
     <div class="col-md-2">
-      <p class="text-end">
-        {% if saved_doc.annotation_count %}
-        <a href=""
+      {% if saved_doc.annotation_count %}
+        <i class="text-primary bi bi-chat-left-text"></i>
+        <a href="#"
            hx-target="#document-annotations-{{ saved_doc.document.pk }}"
-           hx-get="{% url 'annotation_list' saved_doc.document.pk %}"> <i class="text-primary bi bi-chat-left-text"></i>
-        {% blocktrans trimmed count comment_count=saved_doc.annotation_count %}
-              {{ comment_count }} comment
-            {% plural %}
-              {{ comment_count }} comments
-            {% endblocktrans %}
-      </a>
-    {% endif %}
-  </p>
-</div>
-<div class="col-md-2">
-  <p class="text-end" style="white-space: nowrap;">
-    {{ saved_doc.document.date }}
-    <a class="text-primary"
-       type="button"
-       hx-post="{% url 'saved_document_delete' saved_doc.id %}"
-       hx-target="#folders-list"
-       hx-confirm="Are you sure you want to remove this document?">
-      <i class="bi bi-trash"></i>
-    </a>
-  </p>
-</div>
-</div>
-<div class="row">
-  <div id="document-annotations-{{ saved_doc.document.pk }}" class="col"></div>
-</div>
+           hx-get="{% url 'annotation_list' saved_doc.document.pk %}">
+          {% blocktrans trimmed count comment_count=saved_doc.annotation_count %}
+            {{ comment_count }} comment
+          {% plural %}
+            {{ comment_count }} comments
+          {% endblocktrans %}
+        </a>
+      {% endif %}
+    </div>
+    <div class="col-md-2">
+      <div class="text-end text-nowrap">
+        {{ saved_doc.document.date }}
+        <button class="btn btn-link"
+                type="button"
+                hx-post="{% url 'saved_document_delete' saved_doc.id %}"
+                hx-target="#folders-list"
+                hx-confirm="Are you sure you want to remove this document?">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div id="document-annotations-{{ saved_doc.document.pk }}" class="col"></div>
+  </div>
 </div>

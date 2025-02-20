@@ -1,20 +1,17 @@
-{% load i18n peachjam %}
+{% load i18n peachjam account %}
 <div id="annotation-detail-{{ annotation.pk }}" class="card">
   <div class="card-body">
-    <div class="d-flex justify-content-between align-items-baseline">
+    <div class="d-flex mb-1">
       <div>
-        <small class="fw-bold text-muted">{{ annotation.user.first_name }} {{ annotation.user.last_name }}</small>
+        <small class="fw-bold text-muted">{% user_display annotation.user %}</small>
       </div>
-      <div class="dropdown text-end">
-        <a id="dropdownMenuButton"
-           class="btn btn-link"
-           type="button"
+      <div class="dropdown ms-auto">
+        <a href="#"
+           class="dropdown-toggle"
            data-bs-toggle="dropdown"
            aria-haspopup="true"
-           aria-expanded="false">
-          <i class="bi bi-three-dots"></i>
-        </a>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+           aria-expanded="false"></a>
+        <div class="dropdown-menu">
           <a hx-target="#annotation-text-{{ annotation.pk }}"
              hx-get="{% url 'annotation_edit' annotation.document.pk annotation.pk %}"
              class="dropdown-item"
@@ -31,13 +28,13 @@
     <div class="my-2">
       {% for selector in annotation.target_selectors %}
         {% if selector.type == 'TextQuoteSelector' %}
-          <span>{{ selector.prefix }}<mark>{{ selector.exact }}</mark>{{ selector.suffix }}</span>
+          <span>...{{ selector.prefix }}<mark>{{ selector.exact }}</mark>{{ selector.suffix }}...</span>
         {% endif %}
       {% endfor %}
     </div>
     <hr/>
     <div class="my-2">
-      <p id="annotation-text-{{ annotation.pk }}">{{ annotation.text }}</p>
+      <div id="annotation-text-{{ annotation.pk }}">{{ annotation.text }}</div>
     </div>
   </div>
   <div class="card-footer">
