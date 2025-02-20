@@ -27,7 +27,9 @@ class Folder(models.Model):
 
 
 class SavedDocument(models.Model):
-    document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
+    document = models.ForeignKey(
+        CoreDocument, related_name="saved_documents", on_delete=models.CASCADE
+    )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -49,3 +51,7 @@ class SavedDocument(models.Model):
         verbose_name = _("saved document")
         verbose_name_plural = _("saved documents")
         unique_together = ("document", "folder")
+
+    def delete(self, using=None, keep_parents=False):
+        self.document.annotations.filter(user=self.user).delete()
+        return super().delete(using=using, keep_parents=keep_parents)

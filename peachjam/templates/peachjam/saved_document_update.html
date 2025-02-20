@@ -4,6 +4,7 @@
         data-bs-toggle="modal"
         data-bs-target="#saveDocumentModal"
         aria-expanded="false"
+        data-saved-document="{{ saved_document.id }}"
         hx-swap-oob="outerHTML:.save-document-button">
   <i class="bi bi-star-fill"></i>
   {% if saved_document.folder %}
@@ -63,7 +64,7 @@
               data-bs-dismiss="modal"
               hx-include="#save-document-form"
               hx-post="{% url 'saved_document_delete' saved_document.id %}"
-              hx-confirm="{% trans "Are you sure?" %}">
+              hx-confirm="{% trans "Are you sure you want to unsave? This will also remove all comments." %}">
         {% trans 'Unsave' %}
       </button>
       <div>

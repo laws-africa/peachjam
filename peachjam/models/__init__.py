@@ -1,4 +1,5 @@
 # flake8: noqa
+from .annotation import *
 from .article import *
 from .attachments import *
 from .author import *

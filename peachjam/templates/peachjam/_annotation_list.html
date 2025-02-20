@@ -1,0 +1,19 @@
+{% load i18n peachjam %}
+<div class="mb-3" id="annotation-list-{{ document_pk }}">
+  <div>
+    <small class="m-1 text-muted">
+      {% blocktrans trimmed count comment_count=annotation_list.count %}
+        {{ comment_count }} comment
+        {% plural %}
+        {{ comment_count }} comments
+      {% endblocktrans %}
+    </small>
+    {% if annotation_list|length %}
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for annotation in annotation_list %}
+          <div class="col">{% include "peachjam/_annotation_detail.html" %}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>

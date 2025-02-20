@@ -19,6 +19,7 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from peachjam.models import (
+    Annotation,
     AttachedFiles,
     CoreDocument,
     Folder,
@@ -540,3 +541,9 @@ class RatificationForm(forms.ModelForm):
         model = Ratification
         fields = "__all__"
         widgets = {"work": autocomplete.ModelSelect2(url="autocomplete-works")}
+
+
+class AnnotationForm(forms.ModelForm):
+    class Meta:
+        model = Annotation
+        fields = ["text"]

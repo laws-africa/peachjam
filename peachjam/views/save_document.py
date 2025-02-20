@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.db.models import Count, Prefetch, Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
@@ -40,10 +41,28 @@ class BaseFolderMixin(
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["ungrouped_saved_documents"] = self.request.user.saved_documents.filter(
-            folder__isnull=True
+        context["ungrouped_saved_documents"] = (
+            self.request.user.saved_documents.filter(folder__isnull=True)
+            .select_related("document")
+            .annotate(
+                annotation_count=Count(
+                    "document__annotations",
+                    filter=Q(document__annotations__user=self.request.user),
+                )
+            )
         )
-        context["folders"] = self.get_queryset()
+        context["folders"] = self.request.user.folders.prefetch_related(
+            Prefetch(
+                "saved_documents",
+                queryset=SavedDocument.objects.select_related("document").annotate(
+                    annotation_count=Count(
+                        "document__annotations",
+                        filter=Q(document__annotations__user=self.request.user),
+                    )
+                ),
+            )
+        )
+
         return context
 
 
