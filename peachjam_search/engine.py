@@ -207,6 +207,8 @@ class SearchEngine:
         self.index = (
             MultiLanguageIndexManager.get_instance().get_all_search_index_names()
         )
+        self.field_queries = {}
+        self.filters = {}
 
     def execute(self):
         search = self.build_search()
