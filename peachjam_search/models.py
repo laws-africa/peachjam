@@ -135,7 +135,12 @@ class SavedSearch(models.Model):
         from peachjam_search.serializers import SearchableDocumentSerializer
 
         params = QueryDict("", mutable=True)
-        params.update(self.get_filters_dict())
+        for key, values in self.get_filters_dict().items():
+            if isinstance(values, list):
+                for value in values:
+                    params.appendlist(key, value)  # Append multiple values
+            else:
+                params[key] = values
         params["search"] = self.q
         params["created_at__gte"] = self.last_alerted_at.replace(
             tzinfo=None
