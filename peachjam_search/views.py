@@ -100,7 +100,7 @@ class DocumentSearchView(TemplateView):
 
         # show debug information to this user
         response["can_debug"] = self.request.user.has_perm("peachjam.can_debug_search")
-        response["trace_id"] = trace.id if trace else None
+        response["trace_id"] = str(trace.id) if trace else None
 
         return self.render(response)
 
