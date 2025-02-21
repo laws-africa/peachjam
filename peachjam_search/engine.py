@@ -13,8 +13,7 @@ log = logging.getLogger(__name__)
 
 class SearchEngine:
     document = SearchableDocument
-    # TODO
-    index = ["pj-doc-za-eng-20250217"]
+    index = None
 
     # query details that can be passed in by the client
     query = None
