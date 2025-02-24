@@ -91,7 +91,7 @@
               :href="`${item.expression_frbr_uri}#${chunk.portion}`"
               target="_blank"
               @click="$emit('item-clicked', `${chunk.portion}`)"
-            >??? {{ chunk.portion }}</a>:
+            >{{ chunk.portion }}</a>:
             <span>{{ chunk.text }}</span>
           </div>
         </div>

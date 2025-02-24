@@ -223,9 +223,19 @@ class SearchEngine:
 
     def explain(self, doc_id):
         search = self.build_search()
-        # TODO: retriever?
-        query = search.to_dict()["query"]
-        return self.client.explain(self.index, doc_id, {"query": query})
+        if self.mode == "text":
+            query = search.to_dict()["query"]
+            return self.client.explain(self.index, doc_id, {"query": query}).get(
+                "explanation", {}
+            )
+
+        # the .explain api doesn't support retrievers
+        search = search.extra(explain=True)
+        es_response = search.execute()
+        doc_id = str(doc_id)
+        for hit in es_response.hits.hits:
+            if hit._id == doc_id:
+                return hit._explanation.to_dict()
 
     def suggest(self, query):
         search = Search(using=self.client, index=self.index)
@@ -374,8 +384,13 @@ class SearchEngine:
                 "rank_window_size": self.rrf_rank_window_size,
                 "rank_constant": self.rrf_rank_constant,
                 "retrievers": [
-                    {"standard": {"query": text_search.to_dict()["query"]}},
-                    {"standard": {"query": knn}},
+                    {
+                        "standard": {
+                            "query": text_search.to_dict()["query"],
+                            "_name": "text",
+                        }
+                    },
+                    {"standard": {"query": knn, "_name": "semantic"}},
                 ],
             }
         }
