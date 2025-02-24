@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-11-21 09:48+0200\n"
-"PO-Revision-Date: 2024-08-06 08:54\n"
+"PO-Revision-Date: 2025-02-21 07:22\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -415,50 +415,3 @@ msgstr "anos"
 msgid "Alphabet"
 msgstr "Alfabeto"
 
-#~ msgid "work"
-#~ msgstr "Trabalho"
-
-#~ msgid "source URL"
-#~ msgstr "URL fonte"
-
-#~ msgid "last updated"
-#~ msgstr "última atualização"
-
-#~ msgid "ratification"
-#~ msgstr "ratificação"
-
-#~ msgid "ratifications"
-#~ msgstr "ratificações"
-
-#~ msgid "ratification date"
-#~ msgstr "data da ratificação"
-
-#~ msgid "deposit date"
-#~ msgstr "data do depósito"
-
-#~ msgid "signature date"
-#~ msgstr "data da assinatura"
-
-#~ msgid "ratification country"
-#~ msgstr "país de ratificação"
-
-#~ msgid "ratification countries"
-#~ msgstr "países ratificados"
-
-#~ msgid "Ratified documents"
-#~ msgstr "Documentos ratificados"
-
-#~ msgid "Title"
-#~ msgstr "Título"
-
-#~ msgid "Signature Date"
-#~ msgstr "Data da Assinatura"
-
-#~ msgid "Ratification Date"
-#~ msgstr "Data de ratificação"
-
-#~ msgid "Deposit Date"
-#~ msgstr "Data do Depósito"
-
-#~ msgid "Topics"
-#~ msgstr "Disciplinas"
