@@ -169,7 +169,7 @@ export default {
     },
     authors (item) {
       if (item.authors) {
-        return Array.isArray(item.authors) ? ', '.join(item.authors) : item.authors;
+        return Array.isArray(item.authors) ? item.authors.join(', ') : item.authors;
       }
       return '';
     },
