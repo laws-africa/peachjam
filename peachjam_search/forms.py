@@ -12,6 +12,7 @@ class SearchForm(forms.Form):
         required=False, choices=[(x, x) for x in ["-score", "date", "-date"]]
     )
     date = forms.CharField(required=False)
+    created_at = forms.CharField(required=False)
 
     def clean_ordering(self):
         if self.cleaned_data["ordering"] == "-score":
@@ -19,6 +20,12 @@ class SearchForm(forms.Form):
         return self.cleaned_data["ordering"]
 
     def clean_date(self):
+        return self.clean_date_range("date")
+
+    def clean_created_at(self):
+        return self.clean_date_range("created_at")
+
+    def clean_date_range(self, field):
         def is_valid(date_string):
             try:
                 datetime.datetime.strptime(date_string, "%Y-%m-%d")
@@ -26,7 +33,7 @@ class SearchForm(forms.Form):
             except ValueError:
                 return False
 
-        val = self.data.get("date__range")
+        val = self.data.get(f"{field}__range")
         if val:
             if "__" in val:
                 val = val.split("__", 2)
@@ -34,11 +41,11 @@ class SearchForm(forms.Form):
                     return val
             return None
 
-        val = self.data.get("date__gte")
+        val = self.data.get(f"{field}__gte")
         if val and is_valid(val):
             return [val, None]
 
-        val = self.data.get("date__lte")
+        val = self.data.get(f"{field}__lte")
         if val and is_valid(val):
             return [None, val]
 
@@ -53,10 +60,11 @@ class SearchForm(forms.Form):
                 if vals:
                     engine.filters[key] = vals
 
-        # date ranges handled separately
-        date = self.cleaned_data.get("date")
-        if date:
-            engine.filters["date"] = date
+        # range fields (eg. dates) handled separately, can't be lists
+        for field in engine.range_filter_fields:
+            val = self.cleaned_data.get(field)
+            if val:
+                engine.filters[field] = val
 
         for field in list(engine.advanced_search_fields.keys()) + ["all"]:
             val = (self.data.get(f"search__{field}") or "").strip()
