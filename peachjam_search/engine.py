@@ -117,6 +117,12 @@ class SearchEngine:
         "labels",
     }
 
+    # these support ranges
+    range_filter_fields = {
+        "date",
+        "created_at",
+    }
+
     facet_fields = [
         {"field": "doc_type", "options": {"size": 100}},
         {
@@ -261,8 +267,8 @@ class SearchEngine:
             # if this field is faceted, then apply it as a post-filter
             if field in self.facets:
                 search = search.post_filter("terms", **{field: values})
-            elif field == "date":
-                # date is a special case, because it's a range query, with possibly the endpoints as null
+            elif field in self.range_filter_fields:
+                # range fields (can't be faceted)
                 start, end = values
                 values = {}
                 if start:
@@ -271,6 +277,7 @@ class SearchEngine:
                     values["lte"] = end
                 search = search.filter("range", **{field: values})
             else:
+                # normal filter field
                 search = search.filter("terms", **{field: values})
 
         return search
