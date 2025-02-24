@@ -1,9 +1,11 @@
 import logging
 
 from django.conf import settings
-from elasticsearch_dsl import DateHistogramFacet, Search, TermsFacet
+from django.core.cache import cache
+from elasticsearch_dsl import Search, TermsFacet
 from elasticsearch_dsl.connections import connections
-from elasticsearch_dsl.query import MatchAll, MatchPhrase, Q, SimpleQueryString, Term
+from elasticsearch_dsl.query import MatchAll, MatchPhrase, Q, Query, SimpleQueryString
+from llama_index.embeddings.bedrock import BedrockEmbedding
 
 from peachjam.models import pj_settings
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
@@ -36,20 +38,16 @@ class SearchEngine:
         "attorneys",
         "matter_type",
     ]
+    # text / semantic / hybrid
+    mode = "text"
 
     # search configuration
     page_size = 10
-
-    source = {
-        "excludes": [
-            "pages",
-            "content",
-            "flynote",
-            "case_summary",
-            "provisions",
-            "suggest",
-        ]
-    }
+    # this should be enough for up to 10 pages, 10 per page with 10 chunks each
+    knn_k = 10 * page_size * 10
+    # ES clamps this at knn_k in any case
+    rrf_rank_window_size = knn_k
+    rrf_rank_constant = 60
 
     highlight = {
         "title": {
@@ -141,11 +139,6 @@ class SearchEngine:
             "field": "matter_type",
             "options": {"size": 100},
         },
-        {
-            "field": "date",
-            "facet": DateHistogramFacet,
-            "options": {"interval": "year"},
-        },
         {"field": "year", "options": {"size": 100}},
         {
             "field": "nature",
@@ -230,6 +223,7 @@ class SearchEngine:
 
     def explain(self, doc_id):
         search = self.build_search()
+        # TODO: retriever?
         query = search.to_dict()["query"]
         return self.client.explain(self.index, doc_id, {"query": query})
 
@@ -249,7 +243,7 @@ class SearchEngine:
         return search.execute()
 
     def build_search(self):
-        search = Search(using=self.client, index=self.index)
+        search = RetrieverSearch(using=self.client, index=self.index)
         search = self.add_query(search)
         search = self.add_filters(search)
         search = self.add_sort(search)
@@ -260,9 +254,24 @@ class SearchEngine:
         return search
 
     def add_source(self, search):
-        return search.source(self.source)
+        return search.source(
+            {
+                "excludes": [
+                    "pages",
+                    "content",
+                    "content_chunks",
+                    "flynote",
+                    "case_summary",
+                    "provisions",
+                    "suggest",
+                ]
+            }
+        )
 
     def add_filters(self, search):
+        # always applied
+        search = search.filter("term", is_most_recent=True)
+
         for field, values in self.filters.items():
             # if this field is faceted, then apply it as a post-filter
             if field in self.facets:
@@ -320,30 +329,58 @@ class SearchEngine:
 
     def add_query(self, search):
         """Build the actual search queries."""
-        must_queries = [Term(is_most_recent=True)]
-        must_queries.extend(self.build_rank_feature_queries())
-        must_queries.extend(self.build_per_field_queries())
-
+        # TODO: how does this play with KNN?
+        must_queries = self.build_rank_feature_queries()
         should_queries = []
+
         if self.is_advanced_search():
+            # we only support text mode with advanced search
+            self.mode = "text"
+
             # these handle advanced search, and can't be combined with normal search because they both
             # build queries to return nested content, and ES complains if multiple queries try to return the
             # same nested content fields
+            must_queries.extend(self.build_per_field_queries())
             must_queries.extend(self.build_advanced_all_queries())
             must_queries.extend(self.build_advanced_content_queries())
         else:
             # these handle basic search
-            should_queries.extend(self.build_basic_queries())
-            should_queries.extend(self.build_content_phrase_queries())
-            should_queries.extend(self.build_nested_page_queries())
-            should_queries.extend(self.build_nested_provision_queries())
+            if self.mode in ["text", "hybrid"]:
+                should_queries.extend(self.build_basic_queries())
+                should_queries.extend(self.build_content_phrase_queries())
+                should_queries.extend(self.build_nested_page_queries())
+                should_queries.extend(self.build_nested_provision_queries())
 
-        return search.query(
+        text_search = search.query(
             "bool",
             must=must_queries,
             should=should_queries,
             minimum_should_match=1 if should_queries else 0,
         )
+
+        if self.mode == "text":
+            return text_search
+
+        knn = self.build_knn_query(search)
+
+        if self.mode == "semantic":
+            # we don't need a retriever, just a normal knn-based query
+            return search.query(knn)
+
+        # hybrid
+        # TODO: elasticsearch 8 client supports this directly
+        search.retriever = {
+            "rrf": {
+                "rank_window_size": self.rrf_rank_window_size,
+                "rank_constant": self.rrf_rank_constant,
+                "retrievers": [
+                    {"standard": {"query": text_search.to_dict()["query"]}},
+                    {"standard": {"query": knn}},
+                ],
+            }
+        }
+
+        return search
 
     def build_rank_feature_queries(self):
         """Apply a rank_feature query to boost the score based on the ranking field."""
@@ -596,6 +633,37 @@ class SearchEngine:
             aggs[field["field"]] = facet(field=field["field"], **field["options"])
         return aggs
 
+    def build_knn_query(self, search):
+        """Builds a KNN query."""
+        return {
+            "nested": {
+                "path": "content_chunks",
+                "inner_hits": {
+                    "_source": [
+                        "content_chunks.type",
+                        "content_chunks.portion",
+                        "content_chunks.text",
+                        "content_chunks.chunk_n",
+                    ]
+                },
+                "score_mode": "max",
+                "query": {
+                    "knn": {
+                        "field": "content_chunks.text_embedding",
+                        "k": self.knn_k,
+                        "num_candidates": 10_000,
+                        # minimum cosine similarity score (ranges from -1 to 1)
+                        # https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search  # noqa: E501
+                        "similarity": 0.3,
+                        "query_vector": self.get_query_embedding(self.query),
+                    }
+                },
+            }
+        }
+
+    def get_query_embedding(self, query):
+        return get_query_embedding(query)
+
     def get_field(self, field):
         options = (
             self.search_fields.get(field, {})
@@ -605,3 +673,54 @@ class SearchEngine:
         if "boost" in options:
             return f'{field}^{options["boost"]}'
         return field
+
+
+class RetrieverSearch(Search):
+    retriever = None
+
+    def to_dict(self, count=False, **kwargs):
+        d = super().to_dict(count, **kwargs)
+
+        if self.retriever:
+            del d["query"]
+            # TODO: cannot specify [retriever] and [sort];'
+            if "sort" in d:
+                del d["sort"]
+            d["retriever"] = self.retriever
+
+        return d
+
+    def _clone(self):
+        s = super()._clone()
+        s.retriever = self.retriever
+        return s
+
+
+class KNN(Query):
+    name = "knn"
+
+
+_bedrock_embedding = None
+
+
+def get_bedrock_embedding():
+    global _bedrock_embedding
+    if _bedrock_embedding is None:
+        _bedrock_embedding = BedrockEmbedding(
+            region_name="us-east-1",
+            model_name="cohere.embed-english-v3",
+            # cohere can handle up to 96 texts to embed concurrently per call
+            embed_batch_size=96,
+        )
+    return _bedrock_embedding
+
+
+def get_query_embedding(query):
+    cache_key = "query-embedding::" + query
+    embedding = cache.get(cache_key)
+
+    if not embedding:
+        embedding = get_bedrock_embedding().get_query_embedding(query)
+        cache.set(cache_key, embedding, timeout=None)
+
+    return embedding

@@ -95,6 +95,11 @@
             </button>
           </form>
           <div class="my-2 text-end">
+            <select v-if="showModes && searchInfo && searchInfo.can_debug" v-model="mode" class="me-2">
+              <option value="text">Text (regular)</option>
+              <option value="hybrid">Text and semantic</option>
+              <option value="semantic">Semantic (content only)</option>
+            </select>
             <HelpBtn page="search/" />
           </div>
           <div v-if="searchTip" class="mt-2 mb-3">
@@ -289,7 +294,7 @@ import SearchFeedback from './SearchFeedback.vue';
 export default {
   name: 'FindDocuments',
   components: { SearchFeedback, FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
-  props: ['showJurisdiction', 'showGoogle', 'showSuggestions'],
+  props: ['showJurisdiction', 'showGoogle', 'showSuggestions', 'showModes'],
   data () {
     const getLabelOptionLabels = (labels) => {
       // the function name is a bit confusing but this gets labels for the options in Labels facet
@@ -333,7 +338,8 @@ export default {
         date_to: null,
         date_from: null
       },
-      googleActive: false
+      googleActive: false,
+      mode: 'text',
     };
     const facets = [
       // most frequently used facets first, based on user data
@@ -538,6 +544,9 @@ export default {
       if (this.ordering !== '-score') {
         params.set('ordering', this.ordering);
       }
+      if (this.mode !== 'text') {
+        params.set('mode', this.mode);
+      }
 
       this.facets.forEach((facet) => {
         facet.value.forEach((value) => {
@@ -578,6 +587,7 @@ export default {
       this.q = params.get('q') || '';
       this.page = parseInt(params.get('page')) || this.page;
       this.ordering = params.get('ordering') || this.ordering;
+      this.mode = params.get('mode') || this.mode;
 
       if (params.has('suggestion')) this.suggestion = { type: params.get('suggestion') };
 
@@ -705,6 +715,10 @@ export default {
       // record suggestion details for statistics
       if (this.suggestion) {
         params.append('suggestion', this.suggestion.type);
+      }
+
+      if (this.mode !== 'text') {
+        params.append('mode', this.mode);
       }
 
       return params;

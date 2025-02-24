@@ -142,6 +142,7 @@ PEACHJAM = {
     "EXTRA_SEARCH_INDEXES": [],
     "SEARCH_JURISDICTION_FILTER": False,
     "SEARCH_SUGGESTIONS": os.environ.get("SEARCH_SUGGESTIONS", "false") == "true",
+    "SEARCH_SEMANTIC": os.environ.get("SEARCH_SEMANTIC", "false") == "true",
     "MULTIPLE_JURISDICTIONS": False,
     "MULTIPLE_LOCALITIES": False,
     "PDFJS_TO_TEXT": "bin/pdfjs-to-text" if DEBUG else "pdfjs-to-text",
@@ -317,6 +318,7 @@ ELASTICSEARCH_DSL_INDEX_SETTINGS = {"index.mapping.nested_objects.limit": "50000
 ELASTICSEARCH_DSL = {
     "default": {
         "hosts": os.environ.get("ELASTICSEARCH_HOST", "localhost:9200"),
+        "api_key": os.environ.get("ELASTICSEARCH_API_KEY", ""),
         "timeout": 30,
     },
 }
