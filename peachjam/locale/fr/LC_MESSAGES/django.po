@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-11-21 09:48+0200\n"
-"PO-Revision-Date: 2025-02-21 07:22\n"
+"PO-Revision-Date: 2025-02-24 09:38\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -1965,7 +1965,7 @@ msgstr "Erreurs et omissions"
 #: templates/peachjam/_terms_of_use_content.html:72
 #, python-format
 msgid "We scan and digitize most of the documents made available on the %(organisation_name)s and affiliate LII websites. We use industry-standard Optical Character Recognition (OCR) software to convert these documents to readable text and there may be errors introduced by this process."
-msgstr "Nous scannons et numérisons la plupart des documents mis à disposition sur les sites Web %(organisation_name)s et affiliés LII. Nous utilisons un logiciel standard de reconnaissance optique de caractères (ROC) pour convertir ces documents en texte lisible mais il peut y avoir des erreurs introduites par ce processus."
+msgstr "Nous numérisons et numérisons la plupart des documents mis à disposition sur les sites Web %(organisation_name)s et affiliés LII. Nous utilisons un logiciel standard de reconnaissance de caractères optique (OCR) pour convertir ces documents en texte lisible et il peut y avoir des erreurs introduites par ce processus."
 
 #: templates/peachjam/_terms_of_use_content.html:79
 msgid "Please contact us should you encounter errors in any of the documents published and we shall rectify them within a reasonable time."
@@ -2001,16 +2001,16 @@ msgstr "%(organisation_name)s et Laws.Africa, les membres de son équipe, et ses
 #: templates/peachjam/_terms_of_use_content.html:112
 #, python-format
 msgid "%(organisation_name)s does not invite reliance upon, nor accept responsibility for, the information it provides. %(organisation_name)s makes every effort to provide a high-quality service. However, neither %(organisation_name)s nor the providers of data on %(organisation_name)s, give any guarantees, undertakings or warranties concerning the accuracy, completeness or up-to-date nature of the information provided. Users should confirm information from another source if it is of sufficient importance for them to do so."
-msgstr "%(organisation_name)s n'invite pas à se fier aux informations qu'il fournit et n'en accepte pas la responsabilité. %(organisation_name)s fait tout effort pour fournir un service de haute qualité. Toutefois, ni %(organisation_name)s ni les fournisseurs de données sur %(organisation_name)s, ne garantissent pas l'exactitude, l'exhaustivité ou l'actualité des informations fournies. Les utilisateurs doivent confirmer les informations provenant d'une autre source si cela est suffisamment important pour qu'ils le fassent."
+msgstr "%(organisation_name)s n'invite pas la confiance et n'accepte pas la responsabilité des renseignements qu'elle fournit. %(organisation_name)s s’efforce de fournir un service de haute qualité. Cependant, ni %(organisation_name)s ni les fournisseurs de données sur %(organisation_name)s, ne donnent aucune garantie, les entreprises ou les garanties concernant l'exactitude, l'exhaustivité ou la nature à jour des renseignements fournis. Les utilisateurs devraient confirmer les informations provenant d'une autre source s'il est suffisamment important pour qu'ils le fassent."
 
 #: templates/peachjam/_terms_of_use_content.html:121
 #, python-format
 msgid "Hypertext links on %(organisation_name)s are (in most cases) inserted by %(organisation_name)s, not by the data providers. Automated insertion of hypertext links on %(organisation_name)s means that links will not be comprehensive or accurate in all cases. Neither %(organisation_name)s nor its providers of data, give any guarantees, undertakings or warranties concerning hypertext linking."
-msgstr "Les liens hypertextes sur %(organisation_name)s sont (dans la plupart des cas) insérés par %(organisation_name)s, pas par les fournisseurs de données. L'insertion automatique de liens hypertextes sur %(organisation_name)s signifie que les liens ne seront pas complets ou exacts dans tous les cas. Ni %(organisation_name)s ni ses fournisseurs de données, ne donnent pas des garanties, d'engagements ou de garanties concernant le lien hypertexte."
+msgstr "Les liens hypertextes sur %(organisation_name)s sont (dans la plupart des cas) insérés par %(organisation_name)s, pas par les fournisseurs de données. L'insertion automatique de liens hypertextes sur %(organisation_name)s signifie que les liens ne seront pas complets ou exacts dans tous les cas. Ni %(organisation_name)s ni ses fournisseurs de données, ne donnent de garanties, d'engagements ou de garanties concernant le lien hypertexte."
 
 #: templates/peachjam/_terms_of_use_content.html:128
 msgid "Copyright and Licensing"
-msgstr "Droits d'auteur et licences"
+msgstr "Copyright et licence"
 
 #: templates/peachjam/_terms_of_use_content.html:130
 #, python-format
@@ -2081,7 +2081,7 @@ msgstr "Informations personnelles dans les journaux officielles"
 
 #: templates/peachjam/_terms_of_use_content.html:208
 msgid "Government gazettes and official journals are official publications of the states that publish them. The law mandates that certain personal information should be made public via the government gazette and government departments place these public notices in the government gazette with the intent of the contents being made accessible to the public."
-msgstr "Les journaux officielles et les revues gouvernementaux sont des publications officielles des États qui les publient. La loi évoque que certains renseignements personnels doivent être rendus publics par l'intermédiaire du journal gouvernemental et des ministères placent ces avis publics dans le journal officiel dans l'intention de les rendre accessibles au public."
+msgstr "Les journaux gouvernementaux et les revues officielles sont des publications officielles des États qui les publient. La loi stipule que certains renseignements personnels doivent être rendus publics par l'intermédiaire du journal gouvernemental et des ministères placent ces avis publics dans le journal du gouvernement dans l'intention de les rendre accessibles au public."
 
 #: templates/peachjam/_terms_of_use_content.html:215
 #, python-format
