@@ -30,6 +30,7 @@ class TestEngine(TestCase):
                         "excludes": [
                             "pages",
                             "content",
+                            "content_chunks",
                             "flynote",
                             "case_summary",
                             "provisions",
@@ -54,18 +55,6 @@ class TestEngine(TestCase):
                         "_filter_court": {
                             "aggs": {
                                 "court": {"terms": {"field": "court", "size": 100}}
-                            },
-                            "filter": {"terms": {"nature": ["Act"]}},
-                        },
-                        "_filter_date": {
-                            "aggs": {
-                                "date": {
-                                    "date_histogram": {
-                                        "field": "date",
-                                        "interval": "year",
-                                        "min_doc_count": 0,
-                                    }
-                                }
                             },
                             "filter": {"terms": {"nature": ["Act"]}},
                         },
@@ -182,8 +171,8 @@ class TestEngine(TestCase):
                     "post_filter": {"terms": {"nature": ["Act"]}},
                     "query": {
                         "bool": {
+                            "filter": [{"term": {"is_most_recent": True}}],
                             "minimum_should_match": 1,
-                            "must": [{"term": {"is_most_recent": True}}],
                             "should": [
                                 {
                                     "simple_query_string": {

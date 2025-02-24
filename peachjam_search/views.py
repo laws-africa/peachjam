@@ -134,6 +134,10 @@ class DocumentSearchView(TemplateView):
     def make_search_engine(self, form):
         engine = SearchEngine()
         form.configure_engine(engine)
+        if settings.PEACHJAM["SEARCH_SEMANTIC"] and self.request.user.has_perm(
+            "peachjam.can_debug_search"
+        ):
+            engine.mode = form.cleaned_data.get("mode") or engine.mode
         return engine
 
     def render(self, response):

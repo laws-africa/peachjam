@@ -63,6 +63,7 @@ class SearchableDocumentSerializer(Serializer):
     highlight = SerializerMethodField()
     pages = SerializerMethodField()
     provisions = SerializerMethodField()
+    content_chunks = SerializerMethodField()
     outcome = SerializerMethodField()
     registry = SerializerMethodField()
 
@@ -118,6 +119,16 @@ class SearchableDocumentSerializer(Serializer):
                 self.merge_exact_highlights(info["highlight"])
                 provisions.append(info)
         return provisions
+
+    def get_content_chunks(self, obj):
+        """Serialize content chunks from knn search."""
+        chunks = []
+        if hasattr(obj.meta, "inner_hits") and hasattr(
+            obj.meta.inner_hits, "content_chunks"
+        ):
+            for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
+                chunks.append(chunk._source.to_dict())
+        return chunks
 
     def get_court(self, obj):
         return obj["court" + self.language_suffix]

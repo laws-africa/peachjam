@@ -13,6 +13,9 @@ class SearchForm(forms.Form):
     )
     date = forms.CharField(required=False)
     created_at = forms.CharField(required=False)
+    mode = forms.ChoiceField(
+        required=False, choices=[(x, x) for x in ["text", "semantic", "hybrid"]]
+    )
 
     def clean_ordering(self):
         if self.cleaned_data["ordering"] == "-score":
