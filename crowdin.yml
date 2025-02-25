@@ -1,6 +1,8 @@
 files:
   - source: /peachjam/locale/en/LC_MESSAGES/django.po
     translation: /peachjam/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
+  - source: /peachjam_search/locale/en/LC_MESSAGES/django.po
+    translation: /peachjam_search/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
   - source: /africanlii/locale/en/LC_MESSAGES/django.po
     translation: /africanlii/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
   - source: /liiweb/locale/en/LC_MESSAGES/django.po

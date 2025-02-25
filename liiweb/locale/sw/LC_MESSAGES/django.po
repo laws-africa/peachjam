@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-21 09:48+0200\n"
+"POT-Creation-Date: 2025-02-25 16:54+0200\n"
 "PO-Revision-Date: 2025-02-21 07:22\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -51,60 +51,64 @@ msgstr "Utafutaji wa kina"
 msgid "Home"
 msgstr "Nyumbani"
 
-#: templates/liiweb/home.html:79
+#: templates/liiweb/home.html:42 templates/peachjam/_header.html:11
+msgid "Judgments"
+msgstr "Hukumu"
+
+#: templates/liiweb/home.html:45 templates/liiweb/legislation_list.html:4
+#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:17
+msgid "Legislation"
+msgstr "Sheria"
+
+#: templates/liiweb/home.html:87
 msgid "Recent Judgments"
 msgstr "Hukumu za Hivi Karibuni"
 
-#: templates/liiweb/home.html:80
+#: templates/liiweb/home.html:88
 msgid "View more judgments"
 msgstr "Tazama hukumu zaidi"
 
-#: templates/liiweb/home.html:86
+#: templates/liiweb/home.html:94
 msgid "Recent Legislation"
 msgstr "Sheria ya Hivi Karibuni"
 
-#: templates/liiweb/home.html:87
+#: templates/liiweb/home.html:95
 msgid "View more legislation"
 msgstr "Tazama sheria zaidi"
 
-#: templates/liiweb/home.html:94
+#: templates/liiweb/home.html:102
 msgid "Recent Gazettes"
 msgstr "Magazeti ya Hivi Punde"
 
-#: templates/liiweb/home.html:95
+#: templates/liiweb/home.html:103
 msgid "View more gazettes"
 msgstr "Tazama magazeti zaidi"
 
-#: templates/liiweb/home.html:107
+#: templates/liiweb/home.html:115
 msgid "Courts"
 msgstr "Mahakama"
 
-#: templates/liiweb/home.html:115
+#: templates/liiweb/home.html:123
 msgid "Collections"
 msgstr "Makusanyo"
 
-#: templates/liiweb/home.html:131
+#: templates/liiweb/home.html:139
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr "Tumia %(APP_NAME)s ukiwa nje ya mtandao"
 
-#: templates/liiweb/home.html:133
+#: templates/liiweb/home.html:141
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr "Pocket Law ni nakala ya nje ya mtandao ya sheria ya kesi, sheria na nyaraka nyingine za kisheria kutoka %(APP_NAME)s."
 
-#: templates/liiweb/home.html:148
+#: templates/liiweb/home.html:156
 msgid "Latest Articles"
 msgstr "Makala za Hivi Karibuni"
 
-#: templates/liiweb/home.html:150
+#: templates/liiweb/home.html:158
 msgid "View more articles"
 msgstr "Tazama makala zaidi"
-
-#: templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:17
-msgid "Legislation"
-msgstr "Sheria"
 
 #: templates/liiweb/legislation_list.html:13
 msgid "You are viewing repealed legislation which is no longer in force."
@@ -170,12 +174,7 @@ msgstr "Washirika wetu"
 msgid "Other African Legal Information Institutions"
 msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 
-#: templates/peachjam/_header.html:11
-msgid "Judgments"
-msgstr "Hukumu"
-
-#: views/legislation.py:165
+#: views/legislation.py:166
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Sheria"
-

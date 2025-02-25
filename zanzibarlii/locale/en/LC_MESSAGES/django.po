@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 09:40+0200\n"
+"POT-Creation-Date: 2025-02-25 16:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgstr ""
 msgid "Karibu kwenye Zanzibar Legal Information Institute"
 msgstr ""
 
-#: templates/liiweb/home.html:12
+#: templates/liiweb/home.html:13
 msgid "ZanzibarLII ni tovuti ya Mahakama ya Zanzibar inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. ZanzibarLII provides free access to the law of Zanzibar and is a member of the African LII community."
 msgstr ""
 
@@ -64,6 +64,10 @@ msgid "Licensed Advocates"
 msgstr ""
 
 #: templates/peachjam/_header.html:26
+msgid "Gazettes"
+msgstr ""
+
+#: templates/peachjam/_header.html:32
 msgid "About"
 msgstr ""
 

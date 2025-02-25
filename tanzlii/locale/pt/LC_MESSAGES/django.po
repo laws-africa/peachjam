@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-21 09:48+0200\n"
+"POT-Creation-Date: 2025-02-25 16:54+0200\n"
 "PO-Revision-Date: 2025-02-21 07:22\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -33,7 +33,23 @@ msgstr "Karibu Katika Mfumo wa Taarifa para Maamuzi, Sheria na Kanuni para Tanz�
 msgid "TanzLII ni tovuti ya Serikali ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 msgstr "TanzLII ni tovuti ya Serikali ya Tanzânia inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzânia na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 
-#: templates/liiweb/home.html:22 templates/peachjam/about.html:5
+#: templates/liiweb/home.html:25 templates/peachjam/_header.html:10
+msgid "Judgments"
+msgstr "Julgamentos"
+
+#: templates/liiweb/home.html:28 templates/peachjam/_header.html:16
+msgid "Legislation"
+msgstr "Legislação"
+
+#: templates/liiweb/home.html:31 templates/peachjam/_header.html:22
+msgid "Government Gazette"
+msgstr "Diário do Governo"
+
+#: templates/liiweb/home.html:34 templates/peachjam/_header.html:83
+msgid "Articles"
+msgstr "Artigos"
+
+#: templates/liiweb/home.html:40 templates/peachjam/about.html:5
 msgid "TanzLII is a project of the Tanzanian Judiciary. We aim to support the rule of law by publishing the law of Tanzania for free online access."
 msgstr "TanzLII é um projeto do Judiciário da Tanzânia. Nosso objetivo é apoiar o estado de direito publicando a lei da Tanzânia para acesso online gratuito."
 
@@ -44,18 +60,6 @@ msgstr "TanzLII é operado pelo Judiciário da Tanzânia e pelo Gabinete do Proc
 #: templates/peachjam/_footer.html:11
 msgid "Our partners"
 msgstr "Nossos parceiros"
-
-#: templates/peachjam/_header.html:10
-msgid "Judgments"
-msgstr "Julgamentos"
-
-#: templates/peachjam/_header.html:16
-msgid "Legislation"
-msgstr "Legislação"
-
-#: templates/peachjam/_header.html:22
-msgid "Government Gazette"
-msgstr "Diário do Governo"
 
 #: templates/peachjam/_header.html:31
 msgid "Practice Essentials"
@@ -89,10 +93,6 @@ msgstr "Relatórios da Comissão de Reforma da Lei"
 msgid "Legal Journals"
 msgstr "Revistas Jurídicas"
 
-#: templates/peachjam/_header.html:83
-msgid "Articles"
-msgstr "Artigos"
-
 #: templates/peachjam/_header.html:88
 msgid "Notable Speeches"
 msgstr "Discursos notáveis"
@@ -116,4 +116,3 @@ msgstr "Contate-nos"
 #: templates/peachjam/about.html:30
 msgid "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@tanzlii.org</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 msgstr "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@tanzlii.org</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
-

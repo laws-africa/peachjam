@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-21 09:48+0200\n"
+"POT-Creation-Date: 2025-02-25 16:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Regional Body / Author"
 msgstr ""
 
-#: apps.py:21
+#: apps.py:22
 msgid "Regional Bodies / Authors"
 msgstr ""
 
@@ -75,25 +75,25 @@ msgstr ""
 
 #: templates/africanlii/au_detail_page.html:39
 #: templates/africanlii/au_organ_detail.html:14
-#: templates/peachjam/_header.html:78 templates/peachjam/home.html:64
+#: templates/peachjam/_header.html:78 templates/peachjam/home.html:65
 msgid "African Union Organs"
 msgstr ""
 
 #: templates/africanlii/au_detail_page.html:49
 #: templates/africanlii/regional_economic_community_detail.html:15
-#: templates/peachjam/home.html:86
+#: templates/peachjam/home.html:87
 msgid "Regional Economic Communities"
 msgstr ""
 
 #: templates/africanlii/au_detail_page.html:61
 #: templates/africanlii/au_institution_detail.html:15
-#: templates/peachjam/_header.html:91 templates/peachjam/home.html:74
+#: templates/peachjam/_header.html:91 templates/peachjam/home.html:75
 msgid "African Union Institutions"
 msgstr ""
 
 #: templates/africanlii/au_detail_page.html:92
 #: templates/africanlii/member_state_detail.html:15
-#: templates/peachjam/home.html:110
+#: templates/peachjam/home.html:111
 msgid "Member States"
 msgstr ""
 
@@ -219,8 +219,7 @@ msgstr ""
 msgid "Member states"
 msgstr ""
 
-#: templates/peachjam/_header.html:106 templates/peachjam/home.html:199
-#: templates/peachjam/taxonomy_list.html:4
+#: templates/peachjam/_header.html:106 templates/peachjam/taxonomy_list.html:4
 #: templates/peachjam/taxonomy_list.html:7
 msgid "Collections"
 msgstr ""
@@ -318,80 +317,84 @@ msgstr ""
 msgid "Search %(documents_count)s African Union documents and legal information from %(lii_count)s African countries."
 msgstr ""
 
-#: templates/peachjam/home.html:40 templates/peachjam/home.html:41
+#: templates/peachjam/home.html:41 templates/peachjam/home.html:42
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr ""
 
-#: templates/peachjam/home.html:44 templates/peachjam/home.html:165
+#: templates/peachjam/home.html:45 templates/peachjam/home.html:172
 msgid "Search"
 msgstr ""
 
-#: templates/peachjam/home.html:47
+#: templates/peachjam/home.html:48
 msgid "Advanced search"
 msgstr ""
 
-#: templates/peachjam/home.html:55
+#: templates/peachjam/home.html:56
 msgid "Explore the law and policy of the African Union"
 msgstr ""
 
-#: templates/peachjam/home.html:57
+#: templates/peachjam/home.html:58
 msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
 msgstr ""
 
-#: templates/peachjam/home.html:115
+#: templates/peachjam/home.html:116
 msgid "Explore Member States"
 msgstr ""
 
-#: templates/peachjam/home.html:124
+#: templates/peachjam/home.html:123
+msgid "Explore curated African law"
+msgstr ""
+
+#: templates/peachjam/home.html:131
 msgid "Recent Judgments"
 msgstr ""
 
-#: templates/peachjam/home.html:125
+#: templates/peachjam/home.html:132
 msgid "View more judgments"
 msgstr ""
 
-#: templates/peachjam/home.html:129
+#: templates/peachjam/home.html:136
 msgid "Recent Legal Instruments"
 msgstr ""
 
-#: templates/peachjam/home.html:130
+#: templates/peachjam/home.html:137
 msgid "View more legal instruments"
 msgstr ""
 
-#: templates/peachjam/home.html:136
+#: templates/peachjam/home.html:143
 msgid "Recent Soft Law"
 msgstr ""
 
-#: templates/peachjam/home.html:137
+#: templates/peachjam/home.html:144
 msgid "View more Soft Law"
 msgstr ""
 
-#: templates/peachjam/home.html:141
+#: templates/peachjam/home.html:148
 msgid "Recent Reports and Guides"
 msgstr ""
 
-#: templates/peachjam/home.html:142
+#: templates/peachjam/home.html:149
 msgid "View more Reports and Guides"
 msgstr ""
 
-#: templates/peachjam/home.html:150
+#: templates/peachjam/home.html:157
 msgid "Explore African national legal information"
 msgstr ""
 
-#: templates/peachjam/home.html:152
+#: templates/peachjam/home.html:159
 msgid "Explore African national legislation and court judgments from Legal Information Institutes across Africa."
 msgstr ""
 
-#: templates/peachjam/home.html:161 templates/peachjam/home.html:162
+#: templates/peachjam/home.html:168 templates/peachjam/home.html:169
 msgid "Search African legal information"
 msgstr ""
 
-#: templates/peachjam/home.html:190
+#: templates/peachjam/home.html:199
 msgid "Latest Commentary"
 msgstr ""
 
-#: templates/peachjam/home.html:193
+#: templates/peachjam/home.html:202
 msgid "View more commentary"
 msgstr ""
 
@@ -404,14 +407,14 @@ msgstr ""
 msgid "Search regional and national African legal information."
 msgstr ""
 
-#: views/taxonomy.py:134
+#: views/taxonomy.py:133
 msgid "Judrisdictions"
 msgstr ""
 
-#: views/taxonomy.py:140
+#: views/taxonomy.py:139
 msgid "Years"
 msgstr ""
 
-#: views/taxonomy.py:148
+#: views/taxonomy.py:147
 msgid "Alphabet"
 msgstr ""

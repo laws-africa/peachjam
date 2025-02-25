@@ -3,7 +3,7 @@
 set -e
 
 echo "Extracting translatable strings from django"
-for d in peachjam africanlii liiweb tanzlii zanzibarlii; do
+for d in peachjam peachjam_search africanlii liiweb tanzlii zanzibarlii; do
   pushd $d
   django-admin makemessages -a --no-wrap
   popd

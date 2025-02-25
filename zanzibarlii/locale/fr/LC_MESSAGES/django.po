@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-06 15:17+0200\n"
+"POT-Creation-Date: 2025-02-25 16:54+0200\n"
 "PO-Revision-Date: 2025-02-21 07:22\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -29,7 +29,7 @@ msgstr "Anglais"
 msgid "Karibu kwenye Zanzibar Legal Information Institute"
 msgstr "Karibu kwenye Zanzibar Institut d'information juridique"
 
-#: templates/liiweb/home.html:12
+#: templates/liiweb/home.html:13
 msgid "ZanzibarLII ni tovuti ya Mahakama ya Zanzibar inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. ZanzibarLII provides free access to the law of Zanzibar and is a member of the African LII community."
 msgstr "ZanzibarLII ni tovuti ya Mahakama ya Zanzibar inayochapisha maamuzi, Sheria na Kanuni kwa ufikiaji bure Mtandaoni. ZanzibarLII offre un accès gratuit au droit de Zanzibar et est membre de la communauté africaine LII."
 
@@ -63,6 +63,10 @@ msgid "Licensed Advocates"
 msgstr "Avocats agréés"
 
 #: templates/peachjam/_header.html:26
+msgid "Gazettes"
+msgstr ""
+
+#: templates/peachjam/_header.html:32
 msgid "About"
 msgstr "À propos"
 
@@ -81,4 +85,3 @@ msgstr "Contactez-nous"
 #: templates/peachjam/about.html:31
 msgid "Contact us on <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> for more information."
 msgstr "Contactez-nous au <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> pour plus d'informations."
-
