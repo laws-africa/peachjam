@@ -12,6 +12,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.db import models
+from django.db.models import Prefetch
 from django.http import Http404
 from django.utils.functional import cached_property
 from django.utils.text import slugify
@@ -36,7 +37,7 @@ from peachjam.frbr_uri import (
 )
 from peachjam.helpers import pdfjs_to_text
 from peachjam.models.attachments import Image, SourceFile
-from peachjam.models.citations import CitationLink, ExtractedCitation
+from peachjam.models.citations import CitationLink, ExtractedCitation, Treatment
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -206,40 +207,73 @@ class Work(models.Model):
 
     def update_extracted_citations(self):
         """Update the current work's ExtractedCitations."""
-        target_works = Work.objects.filter(
-            frbr_uri__in=self.fetch_cited_works_frbr_uris()
-        )
-
         # delete existing extracted citations
         ExtractedCitation.objects.filter(citing_work=self).delete()
 
-        for target_work in target_works:
-            ExtractedCitation.objects.get_or_create(
-                citing_work=self, target_work=target_work
+        for work_frbr_uri, treatments in self.fetch_cited_works_frbr_uris().items():
+            try:
+                work = Work.objects.get(frbr_uri=work_frbr_uri)
+            except ObjectDoesNotExist:
+                log.warning(f"Work {work_frbr_uri} not found")
+                continue
+
+            extracted_citations, _ = ExtractedCitation.objects.get_or_create(
+                citing_work=self, target_work=work
             )
+            extracted_citations.treatments.set(treatments)
 
     def fetch_cited_works_frbr_uris(self):
         """Returns a set of work_frbr_uris,
         taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links.
         """
-        work_frbr_uris = set()
+        work_frbr_uris = {}
 
         for doc in self.documents.all():
-            work_frbr_uris.update(doc.get_cited_work_frbr_uris())
+            for citation, treatments in doc.get_cited_work_frbr_uris().items():
+                if work_frbr_uris.get(citation):
+                    work_frbr_uris[citation].extend(treatments)
+                    if len(work_frbr_uris[citation]) > 1:
+                        work_frbr_uris[citation] = list(set(work_frbr_uris[citation]))
+                else:
+                    work_frbr_uris[citation] = treatments
 
         # A work does not cite itself
-        if self.frbr_uri in work_frbr_uris:
-            work_frbr_uris.remove(self.frbr_uri)
+        if self.frbr_uri in work_frbr_uris.keys():
+            del work_frbr_uris[self.frbr_uri]
 
         return work_frbr_uris
 
     def cited_works(self):
         """Returns a list of works cited by the current work."""
-        return ExtractedCitation.for_citing_works(self).values("target_work")
+        qs = (
+            ExtractedCitation.for_citing_works(self)
+            .prefetch_related(Prefetch("treatments", queryset=Treatment.objects.all()))
+            .only("target_work__id", "treatments")
+        )
+        results = [
+            {
+                "work": ec.target_work.id,
+                "treatments": ec.treatments.all(),
+            }
+            for ec in qs
+        ]
+        return results
 
     def works_citing_current_work(self):
         """Returns a list of works that cite the current work."""
-        return ExtractedCitation.for_target_works(self).values("citing_work")
+        qs = (
+            ExtractedCitation.for_target_works(self)
+            .prefetch_related(Prefetch("treatments", queryset=Treatment.objects.all()))
+            .only("citing_work__id", "treatments")
+        )
+        results = [
+            {
+                "work": ec.citing_work.id,
+                "treatments": ec.treatments.all(),
+            }
+            for ec in qs
+        ]
+        return results
 
     def save(self, *args, **kwargs):
         self.explode_frbr_uri()
@@ -769,7 +803,7 @@ class CoreDocument(PolymorphicModel):
 
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document."""
-        work_frbr_uris = set()
+        work_frbr_uris = {}
 
         if self.content_html:
             root = html.fromstring(self.content_html)
@@ -787,7 +821,9 @@ class CoreDocument(PolymorphicModel):
 
             for a in root.xpath(xpath):
                 try:
-                    work_frbr_uris.add(FrbrUri.parse(a.attrib[attr]).work_uri())
+                    work_frbr_uri = FrbrUri.parse(a.attrib[attr]).work_uri()
+                    # here we can add a list of citation treatments as values
+                    work_frbr_uris[work_frbr_uri] = []
                 except ValueError:
                     # ignore malformed FRBR URIs
                     pass
@@ -796,7 +832,8 @@ class CoreDocument(PolymorphicModel):
                 try:
                     uri = FrbrUri.parse(citation_link.url)
                     uri.portion = None
-                    work_frbr_uris.add(uri.work_uri())
+                    work_frbr_uri = uri.work_uri()
+                    work_frbr_uris[work_frbr_uri] = []
                 except ValueError:
                     # ignore malformed FRBR URIs
                     pass
