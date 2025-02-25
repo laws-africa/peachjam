@@ -92,8 +92,8 @@ class DocIndexDetailView(TaxonomyDetailView):
         indexes = MultiLanguageIndexManager.get_instance().get_all_search_index_names()
         search = SearchableDocument.search(index=indexes)
         engine = SearchEngine()
-        engine.add_source(search)
-        search.filter("term", taxonomies=self.taxonomy.slug)
+        search = engine.add_source(search)
+        search = search.filter("term", taxonomies=self.taxonomy.slug)
         return search
 
     def get_queryset(self):
