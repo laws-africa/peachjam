@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-21 09:48+0200\n"
-"PO-Revision-Date: 2025-02-21 07:22\n"
+"POT-Creation-Date: 2025-02-25 16:54+0200\n"
+"PO-Revision-Date: 2025-02-25 14:58\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "Regional Body / Author"
 msgstr "Mwili wa Mkoa / Mwandishi"
 
-#: apps.py:21
+#: apps.py:22
 msgid "Regional Bodies / Authors"
 msgstr "Vyombo/Waandishi wa Mikoa"
 
@@ -74,25 +74,25 @@ msgstr "Kwa taarifa zaidi, tembelea tovuti rasmi <a href=\"https://au.int/\" tar
 
 #: templates/africanlii/au_detail_page.html:39
 #: templates/africanlii/au_organ_detail.html:14
-#: templates/peachjam/_header.html:78 templates/peachjam/home.html:64
+#: templates/peachjam/_header.html:78 templates/peachjam/home.html:65
 msgid "African Union Organs"
 msgstr "Mashirika ya Umoja wa Afrika"
 
 #: templates/africanlii/au_detail_page.html:49
 #: templates/africanlii/regional_economic_community_detail.html:15
-#: templates/peachjam/home.html:86
+#: templates/peachjam/home.html:87
 msgid "Regional Economic Communities"
 msgstr "Jumuiya za Kiuchumi za Kanda"
 
 #: templates/africanlii/au_detail_page.html:61
 #: templates/africanlii/au_institution_detail.html:15
-#: templates/peachjam/_header.html:91 templates/peachjam/home.html:74
+#: templates/peachjam/_header.html:91 templates/peachjam/home.html:75
 msgid "African Union Institutions"
 msgstr "Taasisi za Umoja wa Afrika"
 
 #: templates/africanlii/au_detail_page.html:92
 #: templates/africanlii/member_state_detail.html:15
-#: templates/peachjam/home.html:110
+#: templates/peachjam/home.html:111
 msgid "Member States"
 msgstr "Nchi Wanachama"
 
@@ -218,8 +218,7 @@ msgstr "Taasisi za Umoja wa Afrika (AU)."
 msgid "Member states"
 msgstr "Nchi wanachama"
 
-#: templates/peachjam/_header.html:106 templates/peachjam/home.html:199
-#: templates/peachjam/taxonomy_list.html:4
+#: templates/peachjam/_header.html:106 templates/peachjam/taxonomy_list.html:4
 #: templates/peachjam/taxonomy_list.html:7
 msgid "Collections"
 msgstr "Makusanyo"
@@ -317,80 +316,84 @@ msgstr "Sheria na sera ya kitaifa"
 msgid "Search %(documents_count)s African Union documents and legal information from %(lii_count)s African countries."
 msgstr "Tafuta hati %(documents_count)s za Umoja wa Afrika na taarifa za kisheria kutoka nchi %(lii_count)s za Afrika."
 
-#: templates/peachjam/home.html:40 templates/peachjam/home.html:41
+#: templates/peachjam/home.html:41 templates/peachjam/home.html:42
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr "Tafuta %(APP_NAME)s"
 
-#: templates/peachjam/home.html:44 templates/peachjam/home.html:165
+#: templates/peachjam/home.html:45 templates/peachjam/home.html:172
 msgid "Search"
 msgstr "Tafuta"
 
-#: templates/peachjam/home.html:47
+#: templates/peachjam/home.html:48
 msgid "Advanced search"
 msgstr "Utafutaji wa kina"
 
-#: templates/peachjam/home.html:55
+#: templates/peachjam/home.html:56
 msgid "Explore the law and policy of the African Union"
 msgstr "Fahamu sheria na sera ya Umoja wa Afrika"
 
-#: templates/peachjam/home.html:57
+#: templates/peachjam/home.html:58
 msgid "We digitise the law and policy of the African Governance Architecture and help Africans and the world connect with and understand the African Union agenda."
 msgstr "Tunaweka kidigiti sheria na sera ya Muundo wa Utawala wa Afrika na kuwasaidia Waafrika na ulimwengu kuungana na kuelewa ajenda ya Umoja wa Afrika."
 
-#: templates/peachjam/home.html:115
+#: templates/peachjam/home.html:116
 msgid "Explore Member States"
 msgstr "Fahamu Nchi Wanachama"
 
-#: templates/peachjam/home.html:124
+#: templates/peachjam/home.html:123
+msgid "Explore curated African law"
+msgstr "Chunguza sheria za Kiafrika zilizoratibiwa"
+
+#: templates/peachjam/home.html:131
 msgid "Recent Judgments"
 msgstr "Hukumu za Hivi Karibuni"
 
-#: templates/peachjam/home.html:125
+#: templates/peachjam/home.html:132
 msgid "View more judgments"
 msgstr "Tazama hukumu zaidi"
 
-#: templates/peachjam/home.html:129
+#: templates/peachjam/home.html:136
 msgid "Recent Legal Instruments"
 msgstr "Hati za Kisheria za Hivi Karibuni"
 
-#: templates/peachjam/home.html:130
+#: templates/peachjam/home.html:137
 msgid "View more legal instruments"
 msgstr "Tazama hati zaidi za kisheria"
 
-#: templates/peachjam/home.html:136
+#: templates/peachjam/home.html:143
 msgid "Recent Soft Law"
 msgstr "Sheria Zisizofunga za Hivi Karibuni"
 
-#: templates/peachjam/home.html:137
+#: templates/peachjam/home.html:144
 msgid "View more Soft Law"
 msgstr "Tazama zaidi Sheria Zisizofunga"
 
-#: templates/peachjam/home.html:141
+#: templates/peachjam/home.html:148
 msgid "Recent Reports and Guides"
 msgstr "Ripoti na Miongozo ya Hivi Karibuni"
 
-#: templates/peachjam/home.html:142
+#: templates/peachjam/home.html:149
 msgid "View more Reports and Guides"
 msgstr "Tazama Ripoti na Miongozo zaidi"
 
-#: templates/peachjam/home.html:150
+#: templates/peachjam/home.html:157
 msgid "Explore African national legal information"
 msgstr "Fahamu taarifa za kisheria za kitaifa za Afrika"
 
-#: templates/peachjam/home.html:152
+#: templates/peachjam/home.html:159
 msgid "Explore African national legislation and court judgments from Legal Information Institutes across Africa."
 msgstr "Gundua sheria za kitaifa za Kiafrika na hukumu za mahakama kutoka Taasisi za Habari za Kisheria kote barani Afrika."
 
-#: templates/peachjam/home.html:161 templates/peachjam/home.html:162
+#: templates/peachjam/home.html:168 templates/peachjam/home.html:169
 msgid "Search African legal information"
 msgstr "Tafuta habari za kisheria za Afrika"
 
-#: templates/peachjam/home.html:190
+#: templates/peachjam/home.html:199
 msgid "Latest Commentary"
 msgstr "Maoni ya Hivi Karibuni"
 
-#: templates/peachjam/home.html:193
+#: templates/peachjam/home.html:202
 msgid "View more commentary"
 msgstr "Tazama maoni zaidi"
 
@@ -403,15 +406,15 @@ msgstr "Ripoti na Miongozo"
 msgid "Search regional and national African legal information."
 msgstr "Tafuta taarifa za kisheria za kikanda na kitaifa za Afrika."
 
-#: views/taxonomy.py:134
+#: views/taxonomy.py:133
 msgid "Judrisdictions"
 msgstr "Mamlaka"
 
-#: views/taxonomy.py:140
+#: views/taxonomy.py:139
 msgid "Years"
 msgstr "Miaka"
 
-#: views/taxonomy.py:148
+#: views/taxonomy.py:147
 msgid "Alphabet"
 msgstr "Alfabeti"
 
