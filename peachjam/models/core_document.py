@@ -2,6 +2,7 @@ import logging
 import re
 import shutil
 import tempfile
+from collections import defaultdict
 
 from cobalt.akn import StructuredDocument, datestring
 from cobalt.uri import FrbrUri
@@ -12,7 +13,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.db import models
-from django.db.models import Prefetch
 from django.http import Http404
 from django.utils.functional import cached_property
 from django.utils.text import slugify
@@ -37,7 +37,7 @@ from peachjam.frbr_uri import (
 )
 from peachjam.helpers import pdfjs_to_text
 from peachjam.models.attachments import Image, SourceFile
-from peachjam.models.citations import CitationLink, ExtractedCitation, Treatment
+from peachjam.models.citations import CitationLink, ExtractedCitation
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -209,67 +209,73 @@ class Work(models.Model):
         """Update the current work's ExtractedCitations."""
         # delete existing extracted citations
         ExtractedCitation.objects.filter(citing_work=self).delete()
+        cited_works = self.fetch_cited_works_frbr_uris()
+        works = {
+            w.frbr_uri: w for w in Work.objects.filter(frbr_uri__in=cited_works.keys())
+        }
 
-        for work_frbr_uri, treatments in self.fetch_cited_works_frbr_uris().items():
-            try:
-                work = Work.objects.get(frbr_uri=work_frbr_uri)
-            except ObjectDoesNotExist:
-                log.warning(f"Work {work_frbr_uri} not found")
-                continue
-
-            extracted_citations, _ = ExtractedCitation.objects.get_or_create(
-                citing_work=self, target_work=work
-            )
-            extracted_citations.treatments.set(treatments)
+        for frbr_uri, treatments in cited_works.items():
+            work = works.get(frbr_uri)
+            if work:
+                extracted_citations, _ = ExtractedCitation.objects.get_or_create(
+                    citing_work=self, target_work=work
+                )
+                extracted_citations.treatments.set(treatments)
 
     def fetch_cited_works_frbr_uris(self):
-        """Returns a set of work_frbr_uris,
+        """Retrieves a mapping of cited work FRBR URIs and treatments,
         taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links.
+        Returns:
+            dict: {work_frbr_uri: [treatments]}
         """
-        work_frbr_uris = {}
+        work_frbr_uris = defaultdict(list)
 
         for doc in self.documents.all():
-            for citation, treatments in doc.get_cited_work_frbr_uris().items():
-                if work_frbr_uris.get(citation):
-                    work_frbr_uris[citation].extend(treatments)
-                    if len(work_frbr_uris[citation]) > 1:
-                        work_frbr_uris[citation] = list(set(work_frbr_uris[citation]))
-                else:
-                    work_frbr_uris[citation] = treatments
+            for frbr_uri, treatments in doc.get_cited_work_frbr_uris().items():
+                work_frbr_uris[frbr_uri].extend(treatments)
 
-        # A work does not cite itself
-        if self.frbr_uri in work_frbr_uris.keys():
-            del work_frbr_uris[self.frbr_uri]
+        # remove duplicate treatments and self citations
+        work_frbr_uris = {
+            frbr_uri: list(set(treatments))
+            for frbr_uri, treatments in work_frbr_uris.items()
+            if frbr_uri != self.frbr_uri
+        }
 
-        return work_frbr_uris
+        return dict(work_frbr_uris)
 
     def cited_works(self):
-        """Returns a list of works cited by the current work."""
+        """Returns list of objects with ids of cited works and their treatments.
+        Return:
+            list: [{"work_id": work_id, "treatments": [treatments queryset]}]
+        """
         qs = (
             ExtractedCitation.for_citing_works(self)
-            .prefetch_related(Prefetch("treatments", queryset=Treatment.objects.all()))
-            .only("target_work__id", "treatments")
+            .prefetch_related("treatments")
+            .only("target_work_id", "treatments")
         )
         results = [
             {
-                "work": ec.target_work.id,
-                "treatments": ec.treatments.all(),
+                "work_id": ec.target_work.id,
+                "treatments": ec.treatments,
             }
             for ec in qs
         ]
         return results
 
     def works_citing_current_work(self):
-        """Returns a list of works that cite the current work."""
+        """Returns a list of objects with ids of works that cite the current work and their treatments
+        Return:
+            list: [{"work_id": work_id, "treatments": [treatments queryset]}]
+        """
         qs = (
             ExtractedCitation.for_target_works(self)
-            .prefetch_related(Prefetch("treatments", queryset=Treatment.objects.all()))
-            .only("citing_work__id", "treatments")
+            .prefetch_related("treatments")
+            .only("citing_work_id", "treatments")
         )
         results = [
             {
-                "work": ec.citing_work.id,
-                "treatments": ec.treatments.all(),
+                "work_id": ec.citing_work.id,
+                "treatments": ec.treatments,
             }
             for ec in qs
         ]

@@ -125,7 +125,7 @@ class ExtractedCitation(models.Model):
 
         # get the best documents for these works
         docs = (
-            CoreDocument.objects.filter(work__in=[w["work"] for w in works])
+            CoreDocument.objects.filter(work__in=[w["work_id"] for w in works])
             .distinct("work_frbr_uri")
             # we're fetching documents, so we want the most recent one for each work
             .order_by("work_frbr_uri", "-date")
@@ -157,7 +157,7 @@ class ExtractedCitation(models.Model):
                 )
             ).filter(row_number__lte=n_per_group)
 
-        citations_treatments = {w["work"]: w["treatments"] for w in works}
+        citations_treatments = {w["work_id"]: w["treatments"] for w in works}
 
         qs = list(qs)
 
