@@ -432,7 +432,7 @@ class BaseDocumentDetailView(DetailView):
         # count the number of unique works, grouping by nature
         counts = {
             r["nature"]: r["n"]
-            for r in CoreDocument.objects.filter(work__in=works)
+            for r in CoreDocument.objects.filter(work__in=[w["work_id"] for w in works])
             .values("nature")
             .annotate(n=Count("work_frbr_uri", distinct=True))
         }
