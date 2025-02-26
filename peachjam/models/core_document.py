@@ -241,7 +241,7 @@ class Work(models.Model):
             if frbr_uri != self.frbr_uri
         }
 
-        return dict(work_frbr_uris)
+        return work_frbr_uris
 
     def cited_works(self):
         """Returns list of objects with ids of cited works and their treatments.
@@ -255,7 +255,7 @@ class Work(models.Model):
         )
         results = [
             {
-                "work_id": ec.target_work.id,
+                "work_id": ec.target_work_id,
                 "treatments": ec.treatments,
             }
             for ec in qs
@@ -274,7 +274,7 @@ class Work(models.Model):
         )
         results = [
             {
-                "work_id": ec.citing_work.id,
+                "work_id": ec.citing_work_id,
                 "treatments": ec.treatments,
             }
             for ec in qs
