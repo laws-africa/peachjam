@@ -248,15 +248,11 @@ class Work(models.Model):
         Return:
             list: [{"work_id": work_id, "treatments": [treatments queryset]}]
         """
-        qs = (
-            ExtractedCitation.for_citing_works(self)
-            .prefetch_related("treatments")
-            .only("target_work_id", "treatments")
-        )
+        qs = ExtractedCitation.for_citing_works(self).only("target_work_id")
         results = [
             {
                 "work_id": ec.target_work_id,
-                "treatments": ec.treatments,
+                "treatments": [],
             }
             for ec in qs
         ]
@@ -267,18 +263,8 @@ class Work(models.Model):
         Return:
             list: [{"work_id": work_id, "treatments": [treatments queryset]}]
         """
-        qs = (
-            ExtractedCitation.for_target_works(self)
-            .prefetch_related("treatments")
-            .only("citing_work_id", "treatments")
-        )
-        results = [
-            {
-                "work_id": ec.citing_work_id,
-                "treatments": ec.treatments,
-            }
-            for ec in qs
-        ]
+        qs = ExtractedCitation.for_target_works(self).only("citing_work_id")
+        results = [{"work_id": ec.citing_work_id, "treatments": []} for ec in qs]
         return results
 
     def save(self, *args, **kwargs):
