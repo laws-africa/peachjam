@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-02-25 16:53+0200\n"
-"PO-Revision-Date: 2025-02-21 07:22\n"
+"PO-Revision-Date: 2025-02-27 13:33\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -22,10 +22,8 @@ msgid "Import"
 msgstr "Importar"
 
 #: admin.py:529
-#, fuzzy
-#| msgid "Documents unpublished."
 msgid "Document access groups updated."
-msgstr "Documentos não publicados."
+msgstr "Grupos de acesso a documentos atualizados."
 
 #: admin.py:582
 msgid "Key details"
@@ -53,66 +51,60 @@ msgstr "Taxonomies"
 
 #: admin.py:683
 msgid "Select restricted document access groups"
-msgstr ""
+msgstr "Selecione grupos de acesso restrito a documentos"
 
 #: admin.py:687
-#, fuzzy
-#| msgid "Related documents"
 msgid "Restricted document access"
-msgstr "Documentos relacionados"
+msgstr "Acesso restrito a documentos"
 
 #: admin.py:775
 msgid "Work"
-msgstr ""
+msgstr "Trabalhar"
 
 #: admin.py:787
 #, python-format
 msgid "Queued tasks to extract citations from %(count)d documents."
-msgstr ""
+msgstr "Tarefas enfileiradas para extrair citações de %(count)d documentos."
 
 #: admin.py:791
-#, fuzzy
-#| msgid "re-extract citations"
 msgid "Extract citations (background)"
-msgstr "reextrair citações"
+msgstr "Extrair citações (fundo)"
 
 #: admin.py:803
 #, python-format
 msgid "Re-imported content from %(count)d documents."
-msgstr ""
+msgstr "Conteúdo reimportado de %(count)d documentos."
 
 #: admin.py:807
 msgid "Re-extract content from DOCX files"
-msgstr ""
+msgstr "Extraia novamente o conteúdo dos arquivos DOCX"
 
 #: admin.py:817
 #, python-format
 msgid "Queued tasks to re-index for %(count)d documents."
-msgstr ""
+msgstr "Tarefas enfileiradas para reindexação de %(count)d documentos."
 
 #: admin.py:821
 msgid "Re-index for search (background)"
-msgstr ""
+msgstr "Reindexar para pesquisa (fundo)"
 
 #: admin.py:830
 #, python-format
 msgid "Applying labels for %(count)d documents."
-msgstr ""
+msgstr "Aplicando rótulos para documentos %(count)d ."
 
 #: admin.py:833
-#, fuzzy
-#| msgid "labels"
 msgid "Apply labels"
-msgstr "rótulos"
+msgstr "Aplicar rótulos"
 
 #: admin.py:841
 #, python-format
 msgid "Ensuring PDF for %(count)d documents."
-msgstr ""
+msgstr "Garantindo PDF para %(count)d documentos."
 
 #: admin.py:845
 msgid "Ensure PDF for source file (background)"
-msgstr ""
+msgstr "Garantir PDF para arquivo de origem (fundo)"
 
 #: admin.py:866
 msgid "Documents published."
@@ -161,16 +153,12 @@ msgid "lower court judges"
 msgstr "juízes de primeira instância"
 
 #: admin.py:1031
-#, fuzzy
-#| msgid "Related documents"
 msgid "Related judgment"
-msgstr "Documentos relacionados"
+msgstr "Julgamento relacionado"
 
 #: admin.py:1032
-#, fuzzy
-#| msgid "Related documents"
 msgid "Related judgments"
-msgstr "Documentos relacionados"
+msgstr "Julgamentos relacionados"
 
 #: admin.py:1054 models/judgment.py:536
 msgid "case history"
@@ -181,10 +169,8 @@ msgid "The Laws.Africa extractor is not enabled. Please check your settings."
 msgstr "O extrator Laws.Africa não está habilitado. Por favor, verifique suas configurações."
 
 #: admin.py:1219
-#, fuzzy
-#| msgid "Upload"
 msgid "Uploaded"
-msgstr "Carregar"
+msgstr "Enviado"
 
 #: admin.py:1221
 msgid "Judgment uploaded. Please check details carefully."
@@ -225,24 +211,20 @@ msgstr "Cancelar publicação de artigos selecionados"
 #: admin.py:1475
 #, python-format
 msgid "Queued tasks to update extracted citations for %(count)d works."
-msgstr ""
+msgstr "Tarefas enfileiradas para atualizar citações extraídas para %(count)d trabalhos."
 
 #: admin.py:1480
-#, fuzzy
-#| msgid "re-extract citations"
 msgid "Update extracted citations (background)"
-msgstr "reextrair citações"
+msgstr "Atualizar citações extraídas (background)"
 
 #: admin.py:1488
 #, python-format
 msgid "Updated languages for %(count)d works."
-msgstr ""
+msgstr "Idiomas atualizados para %(count)d obras."
 
 #: admin.py:1491
-#, fuzzy
-#| msgid "languages"
 msgid "Update languages"
-msgstr "Idiomas"
+msgstr "Atualizar idiomas"
 
 #: admin.py:1550
 msgid "Gazette number"
@@ -273,10 +255,8 @@ msgid "Document problem reported"
 msgstr "Problema no documento relatado"
 
 #: forms.py:474
-#, fuzzy
-#| msgid "Contact us"
 msgid "Contact us message"
-msgstr "Contate-nos"
+msgstr "Mensagem de contato"
 
 #: models/annotation.py:11 models/attachments.py:68 models/attachments.py:95
 #: models/attachments.py:173 models/attachments.py:216 models/citations.py:21
@@ -309,16 +289,12 @@ msgid "created at"
 msgstr "criado em"
 
 #: models/annotation.py:27
-#, fuzzy
-#| msgid "citation"
 msgid "annotation"
-msgstr "citação"
+msgstr "anotação"
 
 #: models/annotation.py:28
-#, fuzzy
-#| msgid "Citations"
 msgid "annotations"
-msgstr "Citações"
+msgstr "Anotações"
 
 #: models/article.py:21 models/core_document.py:365 models/judgment.py:532
 msgid "date"
@@ -512,16 +488,12 @@ msgid "authors"
 msgstr "autores"
 
 #: models/bill.py:14
-#, fuzzy
-#| msgid "Case number"
 msgid "Chamber"
-msgstr "Número do processo"
+msgstr "Câmara"
 
 #: models/bill.py:15
-#, fuzzy
-#| msgid "Case number"
 msgid "Chambers"
-msgstr "Número do processo"
+msgstr "Câmaras"
 
 #: models/bill.py:18
 msgid "bill"
@@ -735,7 +707,7 @@ msgstr "metadados JSON"
 
 #: models/core_document.py:489
 msgid "Restrict access to this document to selected groups."
-msgstr ""
+msgstr "Restringir o acesso a este documento a grupos selecionados."
 
 #: models/core_document.py:562
 #, python-format
@@ -791,16 +763,12 @@ msgid "custom properties"
 msgstr "propriedades personalizadas"
 
 #: models/document_access_group.py:16
-#, fuzzy
-#| msgid "document natures"
 msgid "document access group"
-msgstr "índices de documentos"
+msgstr "grupo de acesso a documentos"
 
 #: models/document_access_group.py:17
-#, fuzzy
-#| msgid "document languages"
 msgid "document access groups"
-msgstr "idiomas do documento"
+msgstr "grupos de acesso a documentos"
 
 #: models/gazette.py:9
 msgid "publication"
@@ -1016,13 +984,11 @@ msgstr "Se o sistema deve ou não atribuir os detalhes"
 
 #: models/judgment.py:328
 msgid "Anonymised"
-msgstr ""
+msgstr "Anonimizado"
 
 #: models/judgment.py:329
-#, fuzzy
-#| msgid "Whether or not the system should assign the details"
 msgid "Whether or not the judgment is anonymised"
-msgstr "Se o sistema deve ou não atribuir os detalhes"
+msgstr "Se o julgamento é ou não anonimizado"
 
 #: models/judgment.py:345 views/courts.py:46 views/judgment.py:28
 msgid "judgments"
@@ -1350,28 +1316,20 @@ msgid "Allow documents to be saved."
 msgstr "Permitir que documentos sejam salvos."
 
 #: models/settings.py:148
-#, fuzzy
-#| msgid "allow save documents"
 msgid "allow save searches"
-msgstr "permitir salvar documentos"
+msgstr "permitir salvar pesquisas"
 
 #: models/settings.py:150
-#, fuzzy
-#| msgid "Allow documents to be saved."
 msgid "Allow searches to be saved."
-msgstr "Permitir que documentos sejam salvos."
+msgstr "Permitir que pesquisas sejam salvas."
 
 #: models/settings.py:153
-#, fuzzy
-#| msgid "contact form URL"
 msgid "show contact form"
-msgstr "URL do formulário de contato"
+msgstr "mostrar formulário de contato"
 
 #: models/settings.py:155
-#, fuzzy
-#| msgid "contact form URL"
 msgid "Show the contact form."
-msgstr "URL do formulário de contato"
+msgstr "Mostrar o formulário de contato."
 
 #: models/settings.py:158
 msgid "Additional robots.txt rules."
@@ -1551,10 +1509,9 @@ msgid "Forgot your password?"
 msgstr "Esqueceu-se da sua senha?"
 
 #: templates/account/login.html:90 templates/admin/login.html:79
-#, fuzzy, python-format
-#| msgid "Login with "
+#, python-format
 msgid "Log in with %(provider)s"
-msgstr "Entrar com "
+msgstr "Entre com %(provider)s"
 
 #: templates/account/logout.html:4 templates/account/logout.html:7
 #: templates/account/logout.html:16
@@ -1694,14 +1651,12 @@ msgid "Home"
 msgstr "Página inicial"
 
 #: templates/admin/guardian/model/obj_perms_manage.html:26
-#, fuzzy
-#| msgid "Document saved"
 msgid "Document access"
-msgstr "Documento salvo"
+msgstr "Acesso ao documento"
 
 #: templates/admin/guardian/model/obj_perms_manage.html:35
 msgid "Select the groups that have access to this document"
-msgstr ""
+msgstr "Selecione os grupos que têm acesso a este documento"
 
 #: templates/admin/guardian/model/obj_perms_manage.html:44
 #: templates/peachjam/_annotation_edit.html:11
@@ -1745,7 +1700,7 @@ msgstr "Esqueceu sua senha ou usuário?"
 
 #: templates/admin/peachjam/judgment/change_form.html:5
 msgid "Anonymise"
-msgstr ""
+msgstr "Anonimizar"
 
 #: templates/admin/tree_change_list.html:7
 #: templates/peachjam/_document_content_sidebar.html:42
@@ -1772,10 +1727,8 @@ msgid "Edit"
 msgstr "Editar"
 
 #: templates/peachjam/_annotation_detail.html:19
-#, fuzzy
-#| msgid "Are you sure you want to log out?"
 msgid "Are you sure you want to delete this annotation?"
-msgstr "Tem certeza de que deseja sair?"
+msgstr "Tem certeza de que deseja excluir esta anotação?"
 
 #: templates/peachjam/_annotation_detail.html:23
 #: templates/peachjam/_folders_list.html:38
@@ -1787,8 +1740,8 @@ msgstr "Excluir"
 #, python-format
 msgid "%(comment_count)s comment"
 msgid_plural "%(comment_count)s comments"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(comment_count)s comentário"
+msgstr[1] "%(comment_count)s comentários"
 
 #: templates/peachjam/_case_histories.html:6
 msgid "Case"
@@ -1806,17 +1759,13 @@ msgid "Outcome"
 msgstr "Resultado"
 
 #: templates/peachjam/_case_histories.html:10
-#, fuzzy
-#| msgid "order outcome"
 msgid "Appeal outcome"
-msgstr "resultado do pedido"
+msgstr "Resultado do recurso"
 
 #: templates/peachjam/_case_histories.html:20
 #: templates/peachjam/_case_histories.html:42
-#, fuzzy
-#| msgid "judgment"
 msgid "This judgment"
-msgstr "julgamento"
+msgstr "Este julgamento"
 
 #: templates/peachjam/_causelist_court_list.html:4
 msgid "All causelists"
@@ -1847,19 +1796,19 @@ msgstr "Mais..."
 
 #: templates/peachjam/_contact_form.html:4
 msgid "Send us a message us with any questions and comments."
-msgstr ""
+msgstr "Envie-nos uma mensagem com quaisquer dúvidas ou comentários."
 
 #: templates/peachjam/_contact_form.html:8
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #: templates/peachjam/_contact_form.html:32
 msgid "Message"
-msgstr ""
+msgstr "Mensagem"
 
 #: templates/peachjam/_contact_form.html:48
 msgid "Submit"
-msgstr ""
+msgstr "Enviar"
 
 #: templates/peachjam/_copy_to_clipboard.html:4
 msgid "Copy to clipboard"
@@ -1954,10 +1903,8 @@ msgid "Navigate document"
 msgstr "Navegar pelo documento"
 
 #: templates/peachjam/_document_floating_header.html:13
-#, fuzzy
-#| msgid "citation"
 msgid "Copy citation"
-msgstr "citação"
+msgstr "Copiar citação"
 
 #: templates/peachjam/_document_table.html:54
 msgid "No documents found."
@@ -2009,10 +1956,8 @@ msgid "Visit website"
 msgstr "Visitar site"
 
 #: templates/peachjam/_folder_list_item.html:29
-#, fuzzy
-#| msgid "Are you sure you want to log out?"
 msgid "Are you sure you want to remove this document?"
-msgstr "Tem certeza de que deseja sair?"
+msgstr "Tem certeza de que deseja remover este documento?"
 
 #: templates/peachjam/_folders_list.html:4
 #: templates/peachjam/_user_menu.html:21 templates/user_account/_tabs.html:35
@@ -2029,7 +1974,7 @@ msgstr "Nenhum documento salvo."
 
 #: templates/peachjam/_folders_list.html:37
 msgid "Are you sure you want to delete this folder? All saved documents in this folder will also be deleted."
-msgstr ""
+msgstr "Tem certeza de que deseja excluir esta pasta? Todos os documentos salvos nesta pasta também serão excluídos."
 
 #: templates/peachjam/_folders_list.html:45
 msgid "Rename"
@@ -2131,8 +2076,7 @@ msgstr "Contate-nos"
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Take the %(APP_NAME)s Survey</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Help us make %(APP_NAME)s better.\n"
@@ -2140,8 +2084,7 @@ msgid ""
 "               All information shared is confidential.\n"
 "              </p>\n"
 "            "
-msgstr ""
-"\n"
+msgstr "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Participe da pesquisa %(APP_NAME)s</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Ajude-nos a tornar o %(APP_NAME)s melhor.\n"
@@ -2157,14 +2100,12 @@ msgstr "Participe da pesquisa"
 
 #: templates/peachjam/_survey_banner_sm.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Help us make %(APP_NAME)s better. Take this short 5 minute survey and tell us about how you use %(APP_NAME)s and how we can improve it. All information shared is confidential.\n"
 "            </p>\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Ajude-nos a tornar o %(APP_NAME)s melhor. Responda a esta breve pesquisa de 5 minutos e conte-nos sobre como você usa o %(APP_NAME)s e como podemos melhorá-lo. Todas as informações compartilhadas são confidenciais.\n"
 "            </p>\n"
@@ -2175,10 +2116,8 @@ msgstr ""
 #: templates/peachjam/taxonomy_first_level_detail.html:13
 #: templates/peachjam/taxonomy_list.html:4
 #: templates/peachjam/taxonomy_list.html:9
-#, fuzzy
-#| msgid "Citations"
 msgid "Collections"
-msgstr "Citações"
+msgstr "Coleções"
 
 #: templates/peachjam/_taxonomy_list.html:22
 #: templates/peachjam/taxonomy_first_level_detail.html:34
@@ -2449,10 +2388,8 @@ msgid "Admin"
 msgstr "Administrador"
 
 #: templates/peachjam/_user_menu.html:26 templates/user_account/_tabs.html:44
-#, fuzzy
-#| msgid "Search"
 msgid "Search alerts"
-msgstr "Pesquisa"
+msgstr "Alertas de pesquisa"
 
 #: templates/peachjam/_user_menu.html:30
 msgid "Logout"
@@ -2464,7 +2401,7 @@ msgstr "Sobre"
 
 #: templates/peachjam/article_detail.html:56
 msgid "Take a look at this article from"
-msgstr ""
+msgstr "Dê uma olhada neste artigo de"
 
 #: templates/peachjam/article_list.html:5
 #: templates/peachjam/layouts/articles.html:4
@@ -2523,18 +2460,16 @@ msgstr "Julgamentos"
 #: templates/peachjam/document_access_group_list.html:4
 #: templates/peachjam/document_access_group_list.html:11
 #: templates/user_account/_tabs.html:51
-#, fuzzy
-#| msgid "Document saved"
 msgid "Document access groups"
-msgstr "Documento salvo"
+msgstr "Grupos de acesso a documentos"
 
 #: templates/peachjam/document_access_group_list.html:13
 msgid "Some documents are only visible to certain users. These groups control which restricted documents you have access to."
-msgstr ""
+msgstr "Alguns documentos são visíveis apenas para certos usuários. Esses grupos controlam a quais documentos restritos você tem acesso."
 
 #: templates/peachjam/document_access_group_list.html:28
 msgid "You do not belong to any groups."
-msgstr ""
+msgstr "Você não pertence a nenhum grupo."
 
 #: templates/peachjam/folders_list.html:4
 msgid "Saved Documents"
@@ -2622,7 +2557,7 @@ msgstr "Categorias"
 #: templates/peachjam/layouts/document_detail.html:55
 #: templates/peachjam/layouts/document_detail.html:58
 msgid "Take a look at this document from"
-msgstr ""
+msgstr "Dê uma olhada neste documento de"
 
 #: templates/peachjam/layouts/document_detail.html:78
 msgid "Document detail"
@@ -2706,15 +2641,15 @@ msgstr "%(place)s Contas"
 
 #: templates/peachjam/restricted_document_detail.html:17
 msgid "Permission denied"
-msgstr ""
+msgstr "Permissão negada"
 
 #: templates/peachjam/restricted_document_detail.html:20
 msgid "You don't have permission to view this document."
-msgstr ""
+msgstr "Você não tem permissão para visualizar este documento."
 
 #: templates/peachjam/restricted_document_detail.html:22
 msgid "You must be logged in to view this document."
-msgstr ""
+msgstr "Você precisa estar logado para visualizar este documento."
 
 #: templates/peachjam/saved_document_create.html:11
 #: templates/peachjam/saved_document_create.html:16
@@ -2756,14 +2691,12 @@ msgid "New folder name"
 msgstr "Novo nome da pasta"
 
 #: templates/peachjam/saved_document_update.html:57
-#, fuzzy
-#| msgid "saved documents"
 msgid "All saved documents"
-msgstr "documentos salvos"
+msgstr "Todos os documentos salvos"
 
 #: templates/peachjam/saved_document_update.html:67
 msgid "Are you sure you want to unsave? This will also remove all comments."
-msgstr ""
+msgstr "Tem certeza de que deseja desfazer o salvamento? Isso também removerá todos os comentários."
 
 #: templates/peachjam/saved_document_update.html:68
 msgid "Unsave"
@@ -2807,10 +2740,9 @@ msgid "Connect a social account"
 msgstr "Conecte uma conta social"
 
 #: templates/socialaccount/connections.html:50
-#, fuzzy, python-format
-#| msgid "Connecting to a social account allows you to use it to login to Indigo."
+#, python-format
 msgid "Connecting to a social account allows you to use it to log in to %(APP_NAME)s."
-msgstr "Conectar-se a uma conta social permite que você a utilize para fazer login no Indigo."
+msgstr "Conectar-se a uma conta social permite que você a utilize para fazer login em %(APP_NAME)s."
 
 #: templates/socialaccount/connections.html:62
 msgid "Connect to"
@@ -2825,14 +2757,12 @@ msgid "Edit Profile"
 msgstr "Editar Perfil"
 
 #: views/about.py:28
-#, fuzzy
-#| msgid "Your password has been reset."
 msgid "Your message has been sent. Thank you!"
-msgstr "Sua senha foi redefinida."
+msgstr "Sua mensagem foi enviada. Obrigado!"
 
 #: views/anon.py:55
 msgid "Only judgments with HTML content can be anonymised."
-msgstr ""
+msgstr "Somente julgamentos com conteúdo HTML podem ser anonimizados."
 
 #: views/causelist.py:60 views/causelist.py:95
 msgid "cause list"
@@ -2896,11 +2826,11 @@ msgstr "anos"
 
 #: views/judgment.py:55
 msgid "This judgment has been anonymised to protect personal information in compliance with the law."
-msgstr ""
+msgstr "Este julgamento foi tornado anônimo para proteger informações pessoais em conformidade com a lei."
 
 #: views/judgment.py:100
 msgid "This judgment was reviewed by another court. See the Case history tab for details."
-msgstr ""
+msgstr "Este julgamento foi revisado por outro tribunal. Veja a aba Case history para detalhes."
 
 #: views/legislation.py:108
 #, python-format
@@ -2946,11 +2876,3 @@ msgstr "Esta é a versão deste %(friendly_type)s como era de %(date_from)s a %(
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Existem alterações pendentes que ainda não foram aplicadas. Consulte a guia Histórico para obter mais informações."
 
-#~ msgid "order outcomes"
-#~ msgstr "resultados de pedidos"
-
-#~ msgid "Saved to"
-#~ msgstr "Salvo em"
-
-#~ msgid "View saved documents"
-#~ msgstr "Ver documentos salvos"
