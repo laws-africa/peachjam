@@ -244,28 +244,12 @@ class Work(models.Model):
         return work_frbr_uris
 
     def cited_works(self):
-        """Returns list of objects with ids of cited works and their treatments.
-        Return:
-            list: [{"work_id": work_id, "treatments": [treatments queryset]}]
-        """
-        qs = ExtractedCitation.for_citing_works(self).only("target_work_id")
-        results = [
-            {
-                "work_id": ec.target_work_id,
-                "treatments": [],
-            }
-            for ec in qs
-        ]
-        return results
+        """Returns a list of works cited by the current work."""
+        return ExtractedCitation.for_citing_works(self).values("target_work")
 
     def works_citing_current_work(self):
-        """Returns a list of objects with ids of works that cite the current work and their treatments
-        Return:
-            list: [{"work_id": work_id, "treatments": [treatments queryset]}]
-        """
-        qs = ExtractedCitation.for_target_works(self).only("citing_work_id")
-        results = [{"work_id": ec.citing_work_id, "treatments": []} for ec in qs]
-        return results
+        """Returns a list of works that cite the current work."""
+        return ExtractedCitation.for_target_works(self).values("citing_work")
 
     def save(self, *args, **kwargs):
         self.explode_frbr_uri()
