@@ -280,7 +280,6 @@ class IndigoAdapter(RequestsAdapter):
             "toc_json": toc_json,
             "content_html": self.get_content_html(document),
             "citation": document["numbered_title"],
-            "principal": document["principal"],
             "ingestor": self.ingestor,
         }
 
@@ -335,6 +334,9 @@ class IndigoAdapter(RequestsAdapter):
 
         if hasattr(model, "repealed"):
             field_data["repealed"] = bool(document["repeal"])
+
+        if hasattr(model, "principal"):
+            field_data["principal"] = document["principal"]
 
         # the document may already be in the database, but not as the right document type.
         # It's unlikely, but does happen and is confusing to debug, so let's check for it explicitly.
