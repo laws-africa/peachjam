@@ -1,3 +1,4 @@
+from django.utils.translation import get_language_from_request
 from rest_framework.serializers import (
     BooleanField,
     CharField,
@@ -69,9 +70,11 @@ class SearchableDocumentSerializer(Serializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # TODO: uncomment this when we have reindexed
-        # self.language_suffix = "_" + get_language_from_request(self.context["request"])
         self.language_suffix = ""
+        if "request" in self.context:
+            self.language_suffix = "_" + get_language_from_request(
+                self.context["request"]
+            )
 
     class Meta:
         list_serializer_class = SearchableDocumentListSerializer

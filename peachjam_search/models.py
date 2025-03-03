@@ -142,9 +142,7 @@ class SavedSearch(models.Model):
             else:
                 params[key] = values
         params["search"] = self.q
-        params["created_at__gte"] = self.last_alerted_at.replace(
-            tzinfo=None
-        ).isoformat()
+        params["created_at__gte"] = self.last_alerted_at.isoformat()
 
         engine = SearchEngine()
         form = SearchForm(params)

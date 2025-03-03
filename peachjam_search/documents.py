@@ -16,6 +16,7 @@ from peachjam.models import (
     CourtRegistry,
     DocumentNature,
     ExternalDocument,
+    GenericDocument,
     Judge,
     Locality,
     Outcome,
@@ -202,9 +203,7 @@ class SearchableDocument(Document):
             return related_instance.judgment_set.all()
 
         if isinstance(related_instance, Author):
-            return CoreDocument.objects.filter(
-                genericdocument__authors=related_instance
-            )
+            return GenericDocument.objects.filter(author=related_instance)
 
         if isinstance(related_instance, Taxonomy):
             topics = [related_instance] + [

@@ -23,15 +23,15 @@ class SearchForm(forms.Form):
         return self.cleaned_data["ordering"]
 
     def clean_date(self):
-        return self.clean_date_range("date")
+        return self.clean_date_range("date", datetime.date.fromisoformat)
 
     def clean_created_at(self):
-        return self.clean_date_range("created_at")
+        return self.clean_date_range("created_at", datetime.datetime.fromisoformat)
 
-    def clean_date_range(self, field):
+    def clean_date_range(self, field, parser):
         def is_valid(date_string):
             try:
-                datetime.datetime.strptime(date_string, "%Y-%m-%d")
+                parser(date_string)
                 return True
             except ValueError:
                 return False

@@ -2,6 +2,7 @@ import logging
 import re
 import shutil
 import tempfile
+from collections import defaultdict
 
 from cobalt.akn import StructuredDocument, datestring
 from cobalt.uri import FrbrUri
@@ -206,30 +207,39 @@ class Work(models.Model):
 
     def update_extracted_citations(self):
         """Update the current work's ExtractedCitations."""
-        target_works = Work.objects.filter(
-            frbr_uri__in=self.fetch_cited_works_frbr_uris()
-        )
-
         # delete existing extracted citations
         ExtractedCitation.objects.filter(citing_work=self).delete()
+        cited_works = self.fetch_cited_works_frbr_uris()
+        works = {
+            w.frbr_uri: w for w in Work.objects.filter(frbr_uri__in=cited_works.keys())
+        }
 
-        for target_work in target_works:
-            ExtractedCitation.objects.get_or_create(
-                citing_work=self, target_work=target_work
-            )
+        for frbr_uri, treatments in cited_works.items():
+            work = works.get(frbr_uri)
+            if work:
+                extracted_citations, _ = ExtractedCitation.objects.get_or_create(
+                    citing_work=self, target_work=work
+                )
+                extracted_citations.treatments.set(treatments)
 
     def fetch_cited_works_frbr_uris(self):
-        """Returns a set of work_frbr_uris,
+        """Retrieves a mapping of cited work FRBR URIs and treatments,
         taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links.
+        Returns:
+            dict: {work_frbr_uri: [treatments]}
         """
-        work_frbr_uris = set()
+        work_frbr_uris = defaultdict(list)
 
         for doc in self.documents.all():
-            work_frbr_uris.update(doc.get_cited_work_frbr_uris())
+            for frbr_uri, treatments in doc.get_cited_work_frbr_uris().items():
+                work_frbr_uris[frbr_uri].extend(treatments)
 
-        # A work does not cite itself
-        if self.frbr_uri in work_frbr_uris:
-            work_frbr_uris.remove(self.frbr_uri)
+        # remove duplicate treatments and self citations
+        work_frbr_uris = {
+            frbr_uri: list(set(treatments))
+            for frbr_uri, treatments in work_frbr_uris.items()
+            if frbr_uri != self.frbr_uri
+        }
 
         return work_frbr_uris
 
@@ -769,7 +779,7 @@ class CoreDocument(PolymorphicModel):
 
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document."""
-        work_frbr_uris = set()
+        work_frbr_uris = {}
 
         if self.content_html:
             root = html.fromstring(self.content_html)
@@ -787,7 +797,9 @@ class CoreDocument(PolymorphicModel):
 
             for a in root.xpath(xpath):
                 try:
-                    work_frbr_uris.add(FrbrUri.parse(a.attrib[attr]).work_uri())
+                    work_frbr_uri = FrbrUri.parse(a.attrib[attr]).work_uri()
+                    # here we can add a list of citation treatments as values
+                    work_frbr_uris[work_frbr_uri] = []
                 except ValueError:
                     # ignore malformed FRBR URIs
                     pass
@@ -796,7 +808,8 @@ class CoreDocument(PolymorphicModel):
                 try:
                     uri = FrbrUri.parse(citation_link.url)
                     uri.portion = None
-                    work_frbr_uris.add(uri.work_uri())
+                    work_frbr_uri = uri.work_uri()
+                    work_frbr_uris[work_frbr_uri] = []
                 except ValueError:
                     # ignore malformed FRBR URIs
                     pass

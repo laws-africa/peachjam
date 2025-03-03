@@ -11,6 +11,7 @@ from peachjam.models import (
     Outcome,
     Predicate,
     Taxonomy,
+    Treatment,
 )
 
 
@@ -61,4 +62,9 @@ class TaxonomyTranslationOptions(TranslationOptions):
 
 @register(CustomPropertyLabel)
 class CustomPropertyLabelTranslationOptions(TranslationOptions):
+    fields = ("name",)
+
+
+@register(Treatment)
+class TreatmentTranslationOptions(TranslationOptions):
     fields = ("name",)

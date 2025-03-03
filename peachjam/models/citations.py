@@ -88,6 +88,7 @@ class ExtractedCitation(models.Model):
         related_name="incoming_citations",
         verbose_name=_("target work"),
     )
+    treatments = models.ManyToManyField("Treatment", verbose_name=_("treatment"))
 
     @classmethod
     def for_citing_works(cls, work):
@@ -155,11 +156,17 @@ class ExtractedCitation(models.Model):
                     order_by=[F("work__n_citing_works").desc(), F("title")],
                 )
             ).filter(row_number__lte=n_per_group)
-
         return (
             sorted(qs, key=lambda d: [d.nature.name, -d.work.n_citing_works, d.title]),
             truncated,
         )
+
+
+class Treatment(models.Model):
+    name = models.CharField(_("name"), max_length=4096, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class CitationProcessing(SingletonModel):

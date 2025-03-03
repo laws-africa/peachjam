@@ -5,7 +5,6 @@ from django.core.cache import cache
 from elasticsearch_dsl import Search, TermsFacet
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl.query import MatchAll, MatchPhrase, Q, Query, SimpleQueryString
-from llama_index.embeddings.bedrock import BedrockEmbedding
 
 from peachjam.models import pj_settings
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
@@ -721,6 +720,8 @@ _bedrock_embedding = None
 def get_bedrock_embedding():
     global _bedrock_embedding
     if _bedrock_embedding is None:
+        from llama_index.embeddings.bedrock import BedrockEmbedding
+
         _bedrock_embedding = BedrockEmbedding(
             region_name="us-east-1",
             model_name="cohere.embed-english-v3",

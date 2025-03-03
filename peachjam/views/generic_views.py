@@ -420,14 +420,16 @@ class BaseDocumentDetailView(DetailView):
         context["labels"] = doc.labels.all()
 
         # citations
-        context["cited_documents"] = self.fetch_citation_docs(doc.work.cited_works())
+        context["cited_documents"] = self.fetch_citation_docs(
+            doc.work.cited_works(), "cited_works"
+        )
         context["documents_citing_current_doc"] = self.fetch_citation_docs(
-            doc.work.works_citing_current_work()
+            doc.work.works_citing_current_work(), "citing_works"
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
         return context
 
-    def fetch_citation_docs(self, works):
+    def fetch_citation_docs(self, works, direction):
         """Fetch documents for the given works, grouped by nature and ordered by the most incoming citations."""
         # count the number of unique works, grouping by nature
         counts = {
@@ -441,6 +443,23 @@ class BaseDocumentDetailView(DetailView):
         docs, truncated = ExtractedCitation.fetch_grouped_citation_docs(
             works, get_language(self.request)
         )
+
+        if direction == "cited_works":
+            citations = ExtractedCitation.objects.filter(
+                citing_work=self.object.work, target_work__documents__in=docs
+            ).prefetch_related("treatments")
+            treatments = {c.target_work_id: c.treatments for c in citations}
+
+        elif direction == "citing_works":
+            citations = ExtractedCitation.objects.filter(
+                citing_work__documents__in=docs, target_work=self.object.work
+            ).prefetch_related("treatments")
+            treatments = {c.citing_work_id: c.treatments for c in citations}
+
+        for d in docs:
+            treatment = treatments.get(d.work.pk, [])
+            setattr(d, "treatments", treatment)
+
         result = [
             {
                 "nature": nature,

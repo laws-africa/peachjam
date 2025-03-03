@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-21 09:48+0200\n"
+"POT-Creation-Date: 2025-02-25 16:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,59 +52,63 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: templates/liiweb/home.html:79
-msgid "Recent Judgments"
+#: templates/liiweb/home.html:42 templates/peachjam/_header.html:11
+msgid "Judgments"
 msgstr ""
 
-#: templates/liiweb/home.html:80
-msgid "View more judgments"
-msgstr ""
-
-#: templates/liiweb/home.html:86
-msgid "Recent Legislation"
+#: templates/liiweb/home.html:45 templates/liiweb/legislation_list.html:4
+#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:17
+msgid "Legislation"
 msgstr ""
 
 #: templates/liiweb/home.html:87
-msgid "View more legislation"
+msgid "Recent Judgments"
+msgstr ""
+
+#: templates/liiweb/home.html:88
+msgid "View more judgments"
 msgstr ""
 
 #: templates/liiweb/home.html:94
-msgid "Recent Gazettes"
+msgid "Recent Legislation"
 msgstr ""
 
 #: templates/liiweb/home.html:95
+msgid "View more legislation"
+msgstr ""
+
+#: templates/liiweb/home.html:102
+msgid "Recent Gazettes"
+msgstr ""
+
+#: templates/liiweb/home.html:103
 msgid "View more gazettes"
 msgstr ""
 
-#: templates/liiweb/home.html:107
+#: templates/liiweb/home.html:115
 msgid "Courts"
 msgstr ""
 
-#: templates/liiweb/home.html:115
+#: templates/liiweb/home.html:123
 msgid "Collections"
 msgstr ""
 
-#: templates/liiweb/home.html:131
+#: templates/liiweb/home.html:139
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr ""
 
-#: templates/liiweb/home.html:133
+#: templates/liiweb/home.html:141
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr ""
 
-#: templates/liiweb/home.html:148
+#: templates/liiweb/home.html:156
 msgid "Latest Articles"
 msgstr ""
 
-#: templates/liiweb/home.html:150
+#: templates/liiweb/home.html:158
 msgid "View more articles"
-msgstr ""
-
-#: templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:17
-msgid "Legislation"
 msgstr ""
 
 #: templates/liiweb/legislation_list.html:13
@@ -171,11 +175,7 @@ msgstr ""
 msgid "Other African Legal Information Institutions"
 msgstr ""
 
-#: templates/peachjam/_header.html:11
-msgid "Judgments"
-msgstr ""
-
-#: views/legislation.py:165
+#: views/legislation.py:166
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr ""

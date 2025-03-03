@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-21 09:48+0200\n"
-"PO-Revision-Date: 2025-02-21 07:22\n"
+"POT-Creation-Date: 2025-02-25 16:54+0200\n"
+"PO-Revision-Date: 2025-02-27 13:33\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -33,7 +33,23 @@ msgstr "Karibu Katika Mfumo wa Taarifa za Maamuzi, Sheria na Kanuni za Tanzanie"
 msgid "TanzLII ni tovuti ya Serikali ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 msgstr "TanzLII ni tovuti ya Serikali ya Tanzanie inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzanie na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 
-#: templates/liiweb/home.html:22 templates/peachjam/about.html:5
+#: templates/liiweb/home.html:25 templates/peachjam/_header.html:10
+msgid "Judgments"
+msgstr "Jugements"
+
+#: templates/liiweb/home.html:28 templates/peachjam/_header.html:16
+msgid "Legislation"
+msgstr "Législation"
+
+#: templates/liiweb/home.html:31 templates/peachjam/_header.html:22
+msgid "Government Gazette"
+msgstr "Journal officiel du gouvernement"
+
+#: templates/liiweb/home.html:34 templates/peachjam/_header.html:83
+msgid "Articles"
+msgstr "Articles"
+
+#: templates/liiweb/home.html:40 templates/peachjam/about.html:5
 msgid "TanzLII is a project of the Tanzanian Judiciary. We aim to support the rule of law by publishing the law of Tanzania for free online access."
 msgstr "TanzLII est un projet du pouvoir judiciaire tanzanien. Notre objectif est de soutenir l'état de droit en publiant la loi de la Tanzanie pour un accès en ligne gratuit."
 
@@ -44,18 +60,6 @@ msgstr "TanzLII est géré par le pouvoir judiciaire de Tanzanie et le bureau du
 #: templates/peachjam/_footer.html:11
 msgid "Our partners"
 msgstr "Nos partenaires"
-
-#: templates/peachjam/_header.html:10
-msgid "Judgments"
-msgstr "Jugements"
-
-#: templates/peachjam/_header.html:16
-msgid "Legislation"
-msgstr "Législation"
-
-#: templates/peachjam/_header.html:22
-msgid "Government Gazette"
-msgstr "Journal officiel du gouvernement"
 
 #: templates/peachjam/_header.html:31
 msgid "Practice Essentials"
@@ -88,10 +92,6 @@ msgstr "Rapports de la Commission de réforme du droit"
 #: templates/peachjam/_header.html:77
 msgid "Legal Journals"
 msgstr "Revues juridiques"
-
-#: templates/peachjam/_header.html:83
-msgid "Articles"
-msgstr "Articles"
 
 #: templates/peachjam/_header.html:88
 msgid "Notable Speeches"
