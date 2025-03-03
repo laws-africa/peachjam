@@ -21,6 +21,7 @@ class SearchEngine:
     field_queries = None
     page = 1
     ordering = "-score"
+    explain = False
     # dict from field name to list of values
     filters = None
     facets = [
@@ -220,7 +221,7 @@ class SearchEngine:
 
         return response
 
-    def explain(self, doc_id):
+    def old_explain(self, doc_id):
         search = self.build_search()
         if self.mode == "text":
             query = search.to_dict()["query"]
@@ -260,6 +261,8 @@ class SearchEngine:
         search = self.add_source(search)
         search = self.add_highlight(search)
         search = self.add_aggs(search)
+        search = self.add_extra(search)
+        search = self.add_retrievers(search)
         return search
 
     def add_source(self, search):
@@ -336,9 +339,11 @@ class SearchEngine:
         # TODO: guard against going beyond end of results
         return search[(self.page - 1) * self.page_size : self.page * self.page_size]
 
+    def add_extra(self, search):
+        return search.extra(explain=self.explain)
+
     def add_query(self, search):
         """Build the actual search queries."""
-        # TODO: how does this play with KNN?
         must_queries = self.build_rank_feature_queries()
         should_queries = []
 
@@ -360,36 +365,39 @@ class SearchEngine:
                 should_queries.extend(self.build_nested_page_queries())
                 should_queries.extend(self.build_nested_provision_queries())
 
-        text_search = search.query(
+        return search.query(
             "bool",
             must=must_queries,
             should=should_queries,
             minimum_should_match=1 if should_queries else 0,
         )
 
+    def add_retrievers(self, search):
         if self.mode == "text":
-            return text_search
+            return search
 
-        knn = self.build_knn_query(search)
-
+        knn_query = self.build_knn_query(search, self.mode)
         if self.mode == "semantic":
             # we don't need a retriever, just a normal knn-based query
-            return search.query(knn)
+            return search.query(knn_query)
 
         # hybrid
+        standard_query = search.to_dict()
+        for attr in list(standard_query.keys()):
+            if attr not in ["query", "filter"]:
+                del standard_query[attr]
+
+        standard_query["_name"] = "text"
+        knn_query["_name"] = "semantic"
+
         # TODO: elasticsearch 8 client supports this directly
         search.retriever = {
             "rrf": {
                 "rank_window_size": self.rrf_rank_window_size,
                 "rank_constant": self.rrf_rank_constant,
                 "retrievers": [
-                    {
-                        "standard": {
-                            "query": text_search.to_dict()["query"],
-                            "_name": "text",
-                        }
-                    },
-                    {"standard": {"query": knn, "_name": "semantic"}},
+                    {"standard": standard_query},
+                    {"standard": knn_query},
                 ],
             }
         }
@@ -647,33 +655,51 @@ class SearchEngine:
             aggs[field["field"]] = facet(field=field["field"], **field["options"])
         return aggs
 
-    def build_knn_query(self, search):
+    def build_knn_query(self, search, mode):
         """Builds a KNN query."""
-        return {
-            "nested": {
-                "path": "content_chunks",
-                "inner_hits": {
-                    "_source": [
-                        "content_chunks.type",
-                        "content_chunks.portion",
-                        "content_chunks.text",
-                        "content_chunks.chunk_n",
-                    ]
-                },
-                "score_mode": "max",
-                "query": {
-                    "knn": {
-                        "field": "content_chunks.text_embedding",
-                        "k": self.knn_k,
-                        "num_candidates": 10_000,
-                        # minimum cosine similarity score (ranges from -1 to 1)
-                        # https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search  # noqa: E501
-                        "similarity": 0.3,
-                        "query_vector": self.get_query_embedding(self.query),
-                    }
-                },
+        must_queries = [q.to_dict() for q in self.build_rank_feature_queries()]
+        must_queries.append(
+            {
+                "nested": {
+                    "path": "content_chunks",
+                    "inner_hits": {
+                        "_source": [
+                            "content_chunks.type",
+                            "content_chunks.portion",
+                            "content_chunks.text",
+                            "content_chunks.chunk_n",
+                        ]
+                    },
+                    "score_mode": "max",
+                    "query": {
+                        "knn": {
+                            "field": "content_chunks.text_embedding",
+                            "k": self.knn_k,
+                            "num_candidates": 10_000,
+                            # minimum cosine similarity score (ranges from -1 to 1)
+                            # https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search  # noqa: E501
+                            # "similarity": 0.3,
+                            "query_vector": self.get_query_embedding(self.query),
+                        }
+                    },
+                }
             }
+        )
+
+        knn = {"bool": {"must": must_queries}}
+
+        if mode == "semantic":
+            return knn
+
+        # hybrid mode needs the filters from the original search
+        search_dict = search.to_dict()
+        knn = {
+            "query": knn,
         }
+        if "filter" in search_dict["query"]["bool"]:
+            knn["filter"] = search_dict["query"]["bool"]["filter"]
+
+        return knn
 
     def get_query_embedding(self, query):
         return get_query_embedding(query)
