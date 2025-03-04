@@ -79,6 +79,7 @@
               @click="$emit('item-clicked', `page-${page.page_num}`)"
             >{{ $t('Page') }} {{ page.page_num }}</a>:
             <span v-if="page.highlight['pages.body']" v-html="page.highlight['pages.body'].join(' ... ')" />
+            <span v-if="debug"> ({{ page.score }})</span>
           </div>
         </div>
         <div v-if="item.provisions.length">
@@ -90,20 +91,6 @@
             :expression-frbr-uri="item.expression_frbr_uri"
             @item-clicked="(x) => $emit('item-clicked', x)"
           />
-        </div>
-        <div v-if="item.content_chunks && item.content_chunks.length">
-          <div
-            v-for="chunk in item.content_chunks"
-            :key="chunk.chunk_n"
-            class="mb-1"
-          >
-            <a
-              :href="`${item.expression_frbr_uri}#${chunk.portion}`"
-              target="_blank"
-              @click="$emit('item-clicked', `${chunk.portion}`)"
-            >{{ chunk.portion }}</a>:
-            <span>{{ chunk.text }}</span>
-          </div>
         </div>
         <div v-else class="ms-3">
           <span
