@@ -45,6 +45,12 @@ class SearchEngine:
     page_size = 10
     # this should be enough for up to 10 pages, 10 per page with 10 chunks each
     knn_k = 10 * page_size * 10
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search  # noqa: E501
+    # minimum cosine similarity (ranges from -1 to 1)
+    # work backwards from score in [0, 1] and use
+    #   similarity = 2 * score - 1
+    # eg: 2 * 0.6 - 1 = 0.2
+    knn_similarity = 0.2
     # ES clamps this at knn_k in any case
     rrf_rank_window_size = knn_k
     rrf_rank_constant = 60
@@ -328,8 +334,11 @@ class SearchEngine:
 
     def add_query(self, search):
         """Build the actual search queries."""
-        must_queries = self.build_rank_feature_queries()
+        must_queries = []
         should_queries = []
+
+        if self.mode in ["text", "hybrid"]:
+            must_queries.extend(self.build_rank_feature_queries())
 
         if self.is_advanced_search():
             # we only support text mode with advanced search
@@ -388,11 +397,14 @@ class SearchEngine:
 
         return search
 
-    def build_rank_feature_queries(self):
+    def build_rank_feature_queries(self, factor=1.0):
         """Apply a rank_feature query to boost the score based on the ranking field."""
         if pj_settings().pagerank_boost_value:
             # apply pagerank boost to the score using the saturation function
-            kwargs = {"field": "ranking", "boost": pj_settings().pagerank_boost_value}
+            kwargs = {
+                "field": "ranking",
+                "boost": pj_settings().pagerank_boost_value * factor,
+            }
             if pj_settings().pagerank_pivot_value:
                 kwargs["saturation"] = {"pivot": pj_settings().pagerank_pivot_value}
             return [Q("rank_feature", **kwargs)]
@@ -641,7 +653,7 @@ class SearchEngine:
 
     def build_knn_query(self, search, mode):
         """Builds a KNN query."""
-        must_queries = [q.to_dict() for q in self.build_rank_feature_queries()]
+        must_queries = [q.to_dict() for q in self.build_rank_feature_queries(0.1)]
         must_queries.append(
             {
                 "nested": {
@@ -660,9 +672,7 @@ class SearchEngine:
                             "field": "content_chunks.text_embedding",
                             "k": self.knn_k,
                             "num_candidates": 10_000,
-                            # minimum cosine similarity score (ranges from -1 to 1)
-                            # https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search  # noqa: E501
-                            # "similarity": 0.3,
+                            "similarity": self.knn_similarity,
                             "query_vector": self.get_query_embedding(self.query),
                         }
                     },
@@ -733,8 +743,8 @@ def get_bedrock_embedding():
         from llama_index.embeddings.bedrock import BedrockEmbedding
 
         _bedrock_embedding = BedrockEmbedding(
-            region_name="us-east-1",
-            model_name="cohere.embed-english-v3",
+            region_name="eu-west-1",
+            model_name="cohere.embed-multilingual-v3",
             # cohere can handle up to 96 texts to embed concurrently per call
             embed_batch_size=96,
         )
