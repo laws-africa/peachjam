@@ -24,6 +24,9 @@
         {% endif %}
       {% endblock %}
       {% block date %}<div>{{ document.date }}</div>{% endblock %}
+      {% if document.listing_taxonomies %}
+        <div class="mt-2">{% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}</div>
+      {% endif %}
     </div>
     {% block offsite_request %}
       {% if offsite_request %}

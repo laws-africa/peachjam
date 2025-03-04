@@ -1,5 +1,5 @@
 {% if taxonomies %}
-  <div class="ms-3 text-muted fs-sm fst-italic">
+  <div class="text-muted fs-sm fst-italic">
     {% for taxonomy in taxonomies %}
       {% if not forloop.first %}·{% endif %}
       {{ taxonomy.topic.path_name }}
