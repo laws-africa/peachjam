@@ -221,22 +221,6 @@ class SearchEngine:
 
         return response
 
-    def old_explain(self, doc_id):
-        search = self.build_search()
-        if self.mode == "text":
-            query = search.to_dict()["query"]
-            return self.client.explain(self.index, doc_id, {"query": query}).get(
-                "explanation", {}
-            )
-
-        # the .explain api doesn't support retrievers
-        search = search.extra(explain=True)
-        es_response = search.execute()
-        doc_id = str(doc_id)
-        for hit in es_response.hits.hits:
-            if hit._id == doc_id:
-                return hit._explanation.to_dict()
-
     def suggest(self, query):
         search = Search(using=self.client, index=self.index)
         search = search.source(["_id"]).suggest(

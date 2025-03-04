@@ -46,8 +46,8 @@
             <a
               v-if="debug"
               class="me-3"
-              href="#"
-              @click.prevent="$emit('explain')"
+              :href="`#explanation-${item.id}`"
+              data-bs-toggle="collapse"
             >{{ item._score }}</a>
           </div>
           <div>
@@ -55,6 +55,16 @@
           </div>
           <div v-if="item.topic_path_names" class="text-muted fst-italic mt-1">
             {{ item.topic_path_names.join(' · ') }}
+          </div>
+        </div>
+        <div v-if="debug && item.explanation" :id="`explanation-${item.id}`" class="my-2 collapse">
+          <div class="card">
+            <h5 class="card-header">
+              Explanation
+            </h5>
+            <div class="card-body explanation">
+              <json-table :data="item.explanation" />
+            </div>
           </div>
         </div>
         <div v-if="item.pages.length">
@@ -101,12 +111,6 @@
             v-html="highlights(item)"
           />
         </div>
-        <div v-if="debug && item.explanation" class="ms-3 mt-2">
-          <h5>Explanation</h5>
-          <div class="explanation border p-2">
-            <json-table :data="item.explanation" />
-          </div>
-        </div>
       </div>
     </div>
   </li>
@@ -146,7 +150,7 @@ export default {
       default: false
     }
   },
-  emits: ['explain', 'item-clicked'],
+  emits: ['item-clicked'],
   computed: {
     labels () {
       // get documentLabels where the code is in item.labels
@@ -201,11 +205,11 @@ export default {
   overflow-y: auto;
 }
 
-.hit.best-match .card {
+.hit.best-match > .card {
   box-shadow: 0px 0px 5px 2px gold;
 }
 
-.hit.best-match .card::before {
+.hit.best-match > .card::before {
   content: attr(data-best-match);
   position: absolute;
   background: gold;

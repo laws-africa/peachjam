@@ -67,6 +67,7 @@ class SearchableDocumentSerializer(Serializer):
     content_chunks = SerializerMethodField()
     outcome = SerializerMethodField()
     registry = SerializerMethodField()
+    explanation = SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -158,6 +159,11 @@ class SearchableDocumentSerializer(Serializer):
                 if short not in highlight:
                     highlight[short] = value
                 del highlight[key]
+
+    def get_explanation(self, obj):
+        if self.context["explain"]:
+            if hasattr(obj.meta, "explanation"):
+                return obj.meta.explanation.to_dict()
 
 
 class SearchClickSerializer(ModelSerializer):
