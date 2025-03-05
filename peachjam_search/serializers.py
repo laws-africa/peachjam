@@ -68,6 +68,7 @@ class SearchableDocumentSerializer(Serializer):
     outcome = SerializerMethodField()
     registry = SerializerMethodField()
     explanation = SerializerMethodField()
+    raw = SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -120,9 +121,8 @@ class SearchableDocumentSerializer(Serializer):
                         if len(pages) >= 3:
                             break
                         info = chunk._source.to_dict()
-                        # TODO: later this will be just an integer
-                        page_num = info["portion"].split("-", 1)[1]
-                        if page_num not in [str(p["page_num"]) for p in pages]:
+                        page_num = info["portion"]
+                        if page_num not in [p["page_num"] for p in pages]:
                             pages.append(
                                 {
                                     "page_num": page_num,
@@ -192,6 +192,15 @@ class SearchableDocumentSerializer(Serializer):
         if self.context["explain"]:
             if hasattr(obj.meta, "explanation"):
                 return obj.meta.explanation.to_dict()
+
+    def get_raw(self, obj):
+        if self.context["explain"]:
+            data = obj.meta.to_dict()
+            del data["explanation"]
+            for key, value in data["inner_hits"].items():
+                # force to_dict
+                data["inner_hits"][key] = value.to_dict()
+            return data
 
 
 class SearchClickSerializer(ModelSerializer):

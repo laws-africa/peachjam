@@ -46,7 +46,7 @@
             <a
               v-if="debug"
               class="me-3"
-              :href="`#explanation-${item.id}`"
+              :href="`#debug-${item.id}`"
               data-bs-toggle="collapse"
             >{{ item._score }}</a>
           </div>
@@ -57,13 +57,27 @@
             {{ item.topic_path_names.join(' · ') }}
           </div>
         </div>
-        <div v-if="debug && item.explanation" :id="`explanation-${item.id}`" class="my-2 collapse">
+        <div v-if="debug && item.explanation" :id="`debug-${item.id}`" class="my-2 collapse">
           <div class="card">
-            <h5 class="card-header">
-              Explanation
-            </h5>
+            <div class="card-header">
+              <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                  <a class="nav-link active" data-bs-toggle="tab" :href="`#explanation-${item.id}`">Explanation</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" data-bs-toggle="tab" :href="`#raw-${item.id}`">Raw</a>
+                </li>
+              </ul>
+            </div>
             <div class="card-body explanation">
-              <json-table :data="item.explanation" />
+              <div class="tab-content">
+                <div :id="`explanation-${item.id}`" class="tab-pane active show">
+                  <json-table :data="item.explanation" />
+                </div>
+                <div :id="`raw-${item.id}`" class="tab-pane">
+                  <json-table :data="item.raw" />
+                </div>
+              </div>
             </div>
           </div>
         </div>

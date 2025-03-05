@@ -50,7 +50,7 @@ class SearchEngine:
     # work backwards from score in [0, 1] and use
     #   similarity = 2 * score - 1
     # eg: 2 * 0.6 - 1 = 0.2
-    knn_similarity = 0.2
+    knn_similarity = 0.4
     # ES clamps this at knn_k in any case
     rrf_rank_window_size = knn_k
     rrf_rank_constant = 60
