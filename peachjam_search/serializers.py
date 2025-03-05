@@ -190,12 +190,12 @@ class SearchableDocumentSerializer(Serializer):
                 del highlight[key]
 
     def get_explanation(self, obj):
-        if self.context["explain"]:
+        if self.context.get("explain"):
             if hasattr(obj.meta, "explanation"):
                 return obj.meta.explanation.to_dict()
 
     def get_raw(self, obj):
-        if self.context["explain"]:
+        if self.context.get("explain"):
             data = obj.meta.to_dict()
             del data["explanation"]
             for key, value in data["inner_hits"].items():
