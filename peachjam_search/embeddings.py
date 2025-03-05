@@ -3,7 +3,6 @@ from copy import copy
 
 import boto3
 from django.core.cache import cache
-from llama_index.core.node_parser.text.sentence import SentenceSplitter
 
 # max-tokens is 512 for cohere embed model
 CHUNK_SIZE = 256
@@ -13,6 +12,8 @@ MODEL_NAME = "cohere.embed-multilingual-v3"
 
 def make_content_chunks(text, chunk_size=CHUNK_SIZE, max_chunk_length=MAX_CHUNK_LENGTH):
     """Split text (which could be plain text or pages separated with \f) into chunks suitable for embedding."""
+    from llama_index.core.node_parser.text.sentence import SentenceSplitter
+
     splitter = SentenceSplitter.from_defaults(
         chunk_size=chunk_size, chunk_overlap=int(chunk_size * 0.2)
     )
