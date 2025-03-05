@@ -26,7 +26,7 @@ source .venv/bin/activate
 ```
 - Install requirements.
 ```
-pip install -e .
+pip install -e .[dev]
 pip install psycopg2-binary==2.9.3
 ```
 
