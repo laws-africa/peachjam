@@ -20,6 +20,7 @@ from peachjam.models import (
     DocumentTopic,
     Judge,
     Judgment,
+    Locality,
     MatterType,
     SourceFile,
     Taxonomy,
@@ -117,10 +118,8 @@ class JudgmentAdapter(BaseJudgmentAdapter):
         court, _ = Court.objects.get_or_create(
             code=doc["court"]["code"], defaults={"name": doc["court"]["name"]}
         )
-        registry, _ = CourtRegistry.objects.get_or_create(
-            code=doc["registry"]["code"],
-            defaults={"name": doc["registry"]["name"], "court": court},
-        )
+        registry = self.get_registry(doc, court)
+        locality = self.get_locality(doc, jurisdiction)
 
         data = {
             "title": doc["title"],
@@ -146,6 +145,7 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             "court": court,
             "language": language,
             "jurisdiction": jurisdiction,
+            "locality": locality,
         }
 
         document = Judgment(**data)
@@ -168,6 +168,23 @@ class JudgmentAdapter(BaseJudgmentAdapter):
 
         log.info(f"Updated judgment {created_doc}")
         log.info(f"New {new}")
+
+    def get_registry(self, doc, court):
+        if doc.get("registry"):
+            registry, _ = CourtRegistry.objects.get_or_create(
+                court=court,
+                code=doc["registry"]["code"],
+                defaults={"name": doc["registry"]["name"]},
+            )
+            return registry
+        return None
+
+    def get_locality(self, doc, jurisdiction):
+        if doc.get("locality"):
+            return Locality.objects.get(
+                code=doc["locality"]["code"], jurisdiction=jurisdiction
+            )
+        return None
 
     def get_case_numbers(self, case_numbers, doc):
         CaseNumber.objects.filter(document=doc).delete()
