@@ -321,7 +321,7 @@ ELASTICSEARCH_FAIL_ON_SHARD_FAILURE = True
 ELASTICSEARCH_DSL_INDEX_SETTINGS = {"index.mapping.nested_objects.limit": "50000"}
 ELASTICSEARCH_DSL = {
     "default": {
-        "hosts": os.environ.get("ELASTICSEARCH_HOST", "localhost:9200"),
+        "hosts": os.environ.get("ELASTICSEARCH_HOST", "http://localhost:9200"),
         "api_key": os.environ.get("ELASTICSEARCH_API_KEY", ""),
         "timeout": 30,
     },
