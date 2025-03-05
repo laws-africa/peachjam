@@ -74,7 +74,6 @@ def get_bedrock_embedding():
         from llama_index.embeddings.bedrock import BedrockEmbedding
 
         _bedrock_embedding = BedrockEmbedding(
-            region_name="eu-west-1",
             model_name="cohere.embed-multilingual-v3",
             # cohere can handle up to 96 texts to embed concurrently per call
             embed_batch_size=96,
