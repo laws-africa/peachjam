@@ -132,6 +132,7 @@ class SearchableDocument(Document):
             "chunk_n": fields.IntegerField(),
             "n_chunks": fields.IntegerField(),
             "portion": fields.KeywordField(),
+            # TODO: this should be a keyword field with index=False, since we don't need analysis overhead
             "text": fields.TextField(),
             "text_embedding": {
                 "type": "dense_vector",

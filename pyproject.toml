@@ -65,7 +65,6 @@ dependencies = [
     "google-auth-oauthlib>=0.5.1",
     "igraph>=0.10.4",
     "llama-index-core>=0.12.19",
-    "llama-index-embeddings-bedrock>=0.5.0",
     "lxml>=4.8.0",
     "martor>=1.6",
     "Pillow>=9.0.1",
