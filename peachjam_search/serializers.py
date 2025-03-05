@@ -90,6 +90,7 @@ class SearchableDocumentSerializer(Serializer):
         if not highlight.get("content") and hasattr(
             obj.meta.inner_hits, "content_chunks"
         ):
+            highlight["content"] = []
             for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
                 if chunk._source.type == "text":
                     # max pages to return
