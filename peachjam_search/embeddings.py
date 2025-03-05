@@ -7,6 +7,7 @@ from django.core.cache import cache
 # max-tokens is 512 for cohere embed model
 CHUNK_SIZE = 256
 MAX_CHUNK_LENGTH = 2048
+EMBEDDING_BATCH_SIZE = 96
 MODEL_NAME = "cohere.embed-multilingual-v3"
 
 
@@ -59,12 +60,21 @@ def add_chunk_embeddings(chunks):
 
 def get_text_embedding_batch(texts):
     """Return an array of embeddings for the given texts."""
-    return call_bedrock_model(
-        {
-            "input_type": "search_document",
-            "texts": [t[:2048] for t in texts],
-        }
-    )["embeddings"]
+    embeddings = []
+
+    # batch texts
+    for i in range(0, len(texts), EMBEDDING_BATCH_SIZE):
+        batch = texts[i : i + EMBEDDING_BATCH_SIZE]
+        embeddings.extend(
+            call_bedrock_model(
+                {
+                    "input_type": "search_document",
+                    "texts": [t[:2048] for t in batch],
+                }
+            )["embeddings"]
+        )
+
+    return embeddings
 
 
 def get_query_embedding(query):
