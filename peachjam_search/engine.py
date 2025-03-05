@@ -1,13 +1,13 @@
 import logging
 
 from django.conf import settings
-from django.core.cache import cache
 from elasticsearch_dsl import Search, TermsFacet
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl.query import MatchAll, MatchPhrase, Q, Query, SimpleQueryString
 
 from peachjam.models import pj_settings
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
+from peachjam_search.embeddings import get_query_embedding
 
 log = logging.getLogger(__name__)
 
@@ -732,31 +732,3 @@ class RetrieverSearch(Search):
 
 class KNN(Query):
     name = "knn"
-
-
-_bedrock_embedding = None
-
-
-def get_bedrock_embedding():
-    global _bedrock_embedding
-    if _bedrock_embedding is None:
-        from llama_index.embeddings.bedrock import BedrockEmbedding
-
-        _bedrock_embedding = BedrockEmbedding(
-            region_name="eu-west-1",
-            model_name="cohere.embed-multilingual-v3",
-            # cohere can handle up to 96 texts to embed concurrently per call
-            embed_batch_size=96,
-        )
-    return _bedrock_embedding
-
-
-def get_query_embedding(query):
-    cache_key = "query-embedding::" + query
-    embedding = cache.get(cache_key)
-
-    if not embedding:
-        embedding = get_bedrock_embedding().get_query_embedding(query)
-        cache.set(cache_key, embedding, timeout=None)
-
-    return embedding

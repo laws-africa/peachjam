@@ -23,6 +23,7 @@ from peachjam.models import (
     Taxonomy,
 )
 from peachjam.xmlutils import parse_html_str
+from peachjam_search.embeddings import add_chunk_embeddings, make_content_chunks
 
 log = logging.getLogger(__name__)
 
@@ -123,6 +124,22 @@ class SearchableDocument(Document):
             "parent_titles": fields.TextField(),
             "parent_ids": fields.KeywordField(),
             "body": fields.TextField(fields={"exact": Text()}),
+        }
+    )
+
+    content_chunks = fields.NestedField(
+        properties={
+            "chunk_n": fields.IntegerField(),
+            "n_chunks": fields.IntegerField(),
+            "portion": fields.KeywordField(),
+            "text": fields.TextField(),
+            "text_embedding": {
+                "type": "dense_vector",
+                "dims": 1024,
+                "index": True,
+                "similarity": "cosine",
+                "index_options": {"type": "int8_hnsw", "m": 16, "ef_construction": 100},
+            },
         }
     )
 
@@ -337,6 +354,18 @@ class SearchableDocument(Document):
                 prepare_provision(item, [])
 
             return provisions
+
+    def prepare_content_chunks(self, instance):
+        """Prepare the content_chunks field with embeddings."""
+        if settings.PEACHJAM["SEARCH_SEMANTIC"]:
+            # only for judgments currently
+            if instance.frbr_uri_doctype == "judgment":
+                text = instance.get_content_as_text()
+                if text:
+                    chunks = make_content_chunks(text)
+                    # TODO: can we re-use existing embeddings if we already have them, to save $$$?
+                    add_chunk_embeddings(chunks)
+                    return chunks
 
     def prepare_taxonomies(self, instance):
         """Taxonomy topics are stored as slugs of all the items in the tree down to that topic. This is easier than
