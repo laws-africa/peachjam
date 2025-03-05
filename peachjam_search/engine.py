@@ -238,8 +238,6 @@ class SearchEngine:
                 "skip_duplicates": True,
             },
         )
-        # change it from a text query into a prefix query
-        search._suggest["prefix"]["prefix"] = search._suggest["prefix"].pop("text")
         return search.execute()
 
     def build_search(self):
