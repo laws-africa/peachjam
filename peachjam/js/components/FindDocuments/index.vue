@@ -219,7 +219,7 @@
                 <ul class="list-unstyled">
                   <SearchResult
                     v-for="(item, index) in searchInfo.results"
-                    :key="item.key"
+                    :key="item.id"
                     :index="index"
                     :count="searchInfo.count"
                     :trace-id="searchInfo.trace_id"
@@ -228,7 +228,6 @@
                     :debug="searchInfo.can_debug"
                     :show-jurisdiction="showJurisdiction"
                     :document-labels="documentLabels"
-                    @explain="explain(item)"
                     @item-clicked="(e) => itemClicked(item, e)"
                   />
                 </ul>
@@ -500,9 +499,6 @@ export default {
         buckets.reverse();
       }
       return buckets;
-    },
-
-    getUrlParamValue (key, options) {
     },
 
     handlePageChange (newPage) {
@@ -846,15 +842,6 @@ export default {
       });
 
       analytics.trackSiteSearch(keywords.join('; '), facets.join('; '), this.searchInfo.count);
-    },
-
-    async explain (item) {
-      const params = this.generateSearchParams();
-      params.set('index', item._index);
-      const url = `/search/api/documents/${item.id}/explain/?${params.toString()}`;
-      const resp = await fetch(url);
-      const json = await resp.json();
-      item.explanation = json;
     },
 
     async itemClicked (item, portion) {

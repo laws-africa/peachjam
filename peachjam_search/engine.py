@@ -1,13 +1,13 @@
 import logging
 
 from django.conf import settings
-from django.core.cache import cache
 from elasticsearch_dsl import Search, TermsFacet
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl.query import MatchAll, MatchPhrase, Q, Query, SimpleQueryString
 
 from peachjam.models import pj_settings
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
+from peachjam_search.embeddings import get_query_embedding
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +21,7 @@ class SearchEngine:
     field_queries = None
     page = 1
     ordering = "-score"
+    explain = False
     # dict from field name to list of values
     filters = None
     facets = [
@@ -44,6 +45,12 @@ class SearchEngine:
     page_size = 10
     # this should be enough for up to 10 pages, 10 per page with 10 chunks each
     knn_k = 10 * page_size * 10
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search  # noqa: E501
+    # minimum cosine similarity (ranges from -1 to 1)
+    # work backwards from score in [0, 1] and use
+    #   similarity = 2 * score - 1
+    # eg: 2 * 0.6 - 1 = 0.2
+    knn_similarity = 0.4
     # ES clamps this at knn_k in any case
     rrf_rank_window_size = knn_k
     rrf_rank_constant = 60
@@ -220,12 +227,6 @@ class SearchEngine:
 
         return response
 
-    def explain(self, doc_id):
-        search = self.build_search()
-        # TODO: retriever?
-        query = search.to_dict()["query"]
-        return self.client.explain(self.index, doc_id, {"query": query})
-
     def suggest(self, query):
         search = Search(using=self.client, index=self.index)
         search = search.source(["_id"]).suggest(
@@ -250,6 +251,8 @@ class SearchEngine:
         search = self.add_source(search)
         search = self.add_highlight(search)
         search = self.add_aggs(search)
+        search = self.add_extra(search)
+        search = self.add_retrievers(search)
         return search
 
     def add_source(self, search):
@@ -326,11 +329,16 @@ class SearchEngine:
         # TODO: guard against going beyond end of results
         return search[(self.page - 1) * self.page_size : self.page * self.page_size]
 
+    def add_extra(self, search):
+        return search.extra(explain=self.explain)
+
     def add_query(self, search):
         """Build the actual search queries."""
-        # TODO: how does this play with KNN?
-        must_queries = self.build_rank_feature_queries()
+        must_queries = []
         should_queries = []
+
+        if self.mode in ["text", "hybrid"]:
+            must_queries.extend(self.build_rank_feature_queries())
 
         if self.is_advanced_search():
             # we only support text mode with advanced search
@@ -350,42 +358,53 @@ class SearchEngine:
                 should_queries.extend(self.build_nested_page_queries())
                 should_queries.extend(self.build_nested_provision_queries())
 
-        text_search = search.query(
+        return search.query(
             "bool",
             must=must_queries,
             should=should_queries,
             minimum_should_match=1 if should_queries else 0,
         )
 
+    def add_retrievers(self, search):
         if self.mode == "text":
-            return text_search
+            return search
 
-        knn = self.build_knn_query(search)
-
+        knn_query = self.build_knn_query(search, self.mode)
         if self.mode == "semantic":
             # we don't need a retriever, just a normal knn-based query
-            return search.query(knn)
+            return search.query(knn_query)
 
         # hybrid
+        standard_query = search.to_dict()
+        for attr in list(standard_query.keys()):
+            if attr not in ["query", "filter"]:
+                del standard_query[attr]
+
+        standard_query["_name"] = "text"
+        knn_query["_name"] = "semantic"
+
         # TODO: elasticsearch 8 client supports this directly
         search.retriever = {
             "rrf": {
                 "rank_window_size": self.rrf_rank_window_size,
                 "rank_constant": self.rrf_rank_constant,
                 "retrievers": [
-                    {"standard": {"query": text_search.to_dict()["query"]}},
-                    {"standard": {"query": knn}},
+                    {"standard": standard_query},
+                    {"standard": knn_query},
                 ],
             }
         }
 
         return search
 
-    def build_rank_feature_queries(self):
+    def build_rank_feature_queries(self, factor=1.0):
         """Apply a rank_feature query to boost the score based on the ranking field."""
         if pj_settings().pagerank_boost_value:
             # apply pagerank boost to the score using the saturation function
-            kwargs = {"field": "ranking", "boost": pj_settings().pagerank_boost_value}
+            kwargs = {
+                "field": "ranking",
+                "boost": pj_settings().pagerank_boost_value * factor,
+            }
             if pj_settings().pagerank_pivot_value:
                 kwargs["saturation"] = {"pivot": pj_settings().pagerank_pivot_value}
             return [Q("rank_feature", **kwargs)]
@@ -632,33 +651,49 @@ class SearchEngine:
             aggs[field["field"]] = facet(field=field["field"], **field["options"])
         return aggs
 
-    def build_knn_query(self, search):
+    def build_knn_query(self, search, mode):
         """Builds a KNN query."""
-        return {
-            "nested": {
-                "path": "content_chunks",
-                "inner_hits": {
-                    "_source": [
-                        "content_chunks.type",
-                        "content_chunks.portion",
-                        "content_chunks.text",
-                        "content_chunks.chunk_n",
-                    ]
-                },
-                "score_mode": "max",
-                "query": {
-                    "knn": {
-                        "field": "content_chunks.text_embedding",
-                        "k": self.knn_k,
-                        "num_candidates": 10_000,
-                        # minimum cosine similarity score (ranges from -1 to 1)
-                        # https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search  # noqa: E501
-                        "similarity": 0.3,
-                        "query_vector": self.get_query_embedding(self.query),
-                    }
-                },
+        must_queries = [q.to_dict() for q in self.build_rank_feature_queries(0.1)]
+        must_queries.append(
+            {
+                "nested": {
+                    "path": "content_chunks",
+                    "inner_hits": {
+                        "_source": [
+                            "content_chunks.type",
+                            "content_chunks.portion",
+                            "content_chunks.text",
+                            "content_chunks.chunk_n",
+                        ]
+                    },
+                    "score_mode": "max",
+                    "query": {
+                        "knn": {
+                            "field": "content_chunks.text_embedding",
+                            "k": self.knn_k,
+                            "num_candidates": 10_000,
+                            "similarity": self.knn_similarity,
+                            "query_vector": self.get_query_embedding(self.query),
+                        }
+                    },
+                }
             }
+        )
+
+        knn = {"bool": {"must": must_queries}}
+
+        if mode == "semantic":
+            return knn
+
+        # hybrid mode needs the filters from the original search
+        search_dict = search.to_dict()
+        knn = {
+            "query": knn,
         }
+        if "filter" in search_dict["query"]["bool"]:
+            knn["filter"] = search_dict["query"]["bool"]["filter"]
+
+        return knn
 
     def get_query_embedding(self, query):
         return get_query_embedding(query)
@@ -697,31 +732,3 @@ class RetrieverSearch(Search):
 
 class KNN(Query):
     name = "knn"
-
-
-_bedrock_embedding = None
-
-
-def get_bedrock_embedding():
-    global _bedrock_embedding
-    if _bedrock_embedding is None:
-        from llama_index.embeddings.bedrock import BedrockEmbedding
-
-        _bedrock_embedding = BedrockEmbedding(
-            region_name="us-east-1",
-            model_name="cohere.embed-english-v3",
-            # cohere can handle up to 96 texts to embed concurrently per call
-            embed_batch_size=96,
-        )
-    return _bedrock_embedding
-
-
-def get_query_embedding(query):
-    cache_key = "query-embedding::" + query
-    embedding = cache.get(cache_key)
-
-    if not embedding:
-        embedding = get_bedrock_embedding().get_query_embedding(query)
-        cache.set(cache_key, embedding, timeout=None)
-
-    return embedding

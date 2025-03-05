@@ -11,10 +11,6 @@ router.register("click", views.SearchClickViewSet, basename="search_click")
 urlpatterns = [
     path("api/documents/", views.DocumentSearchView.as_view()),
     path("api/documents/suggest/", views.DocumentSearchView.as_view(action="suggest")),
-    path(
-        "api/documents/<int:pk>/explain/",
-        views.DocumentSearchView.as_view(action="explain"),
-    ),
     path("api/", include(router.urls)),
     path(
         "saved-searches/button",

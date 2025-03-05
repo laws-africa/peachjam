@@ -22,7 +22,6 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
@@ -89,7 +88,12 @@ class DocumentSearchView(TemplateView):
 
         es_response = engine.execute()
         results = SearchableDocumentSerializer(
-            es_response.hits, many=True, context={"request": request}
+            es_response.hits,
+            many=True,
+            context={
+                "request": request,
+                "explain": request.user.has_perm("peachjam.can_debug_search"),
+            },
         ).data
 
         response = {
@@ -106,21 +110,6 @@ class DocumentSearchView(TemplateView):
 
         return self.render(response)
 
-    def explain(self, request, pk, *args, **kwargs):
-        if not request.user.has_perm("peachjam.can_debug_search"):
-            raise PermissionDenied()
-
-        form = SearchForm(request.GET)
-        if not form.is_valid():
-            return JsonResponse({"error": form.errors}, status=400)
-
-        engine = self.make_search_engine(form)
-        # the index must be passed in as a query param otherwise we don't know which one to use
-        engine.index = request.GET.get("index") or engine.index
-        es_response = engine.explain(pk)
-
-        return self.render(es_response)
-
     @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
     def suggest(self, request, *args, **kwargs):
         q = request.GET.get("q")
@@ -136,10 +125,12 @@ class DocumentSearchView(TemplateView):
     def make_search_engine(self, form):
         engine = SearchEngine()
         form.configure_engine(engine)
-        if settings.PEACHJAM["SEARCH_SEMANTIC"] and self.request.user.has_perm(
-            "peachjam.can_debug_search"
-        ):
-            engine.mode = form.cleaned_data.get("mode") or engine.mode
+
+        if self.request.user.has_perm("peachjam.can_debug_search"):
+            engine.explain = True
+            if settings.PEACHJAM["SEARCH_SEMANTIC"]:
+                engine.mode = form.cleaned_data.get("mode") or engine.mode
+
         return engine
 
     def render(self, response):

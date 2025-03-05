@@ -313,6 +313,10 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+ELASTICSEARCH_MAX_ANALYZED_OFFSET = os.environ.get(
+    "ELASTICSEARCH_MAX_ANALYZED_OFFSET", 999999
+)
+ELASTICSEARCH_FAIL_ON_SHARD_FAILURE = True
 # effectively, max pages we'll index from documents
 ELASTICSEARCH_DSL_INDEX_SETTINGS = {"index.mapping.nested_objects.limit": "50000"}
 ELASTICSEARCH_DSL = {
@@ -322,16 +326,11 @@ ELASTICSEARCH_DSL = {
         "timeout": 30,
     },
 }
-
-ELASTICSEARCH_MAX_ANALYZED_OFFSET = os.environ.get(
-    "ELASTICSEARCH_MAX_ANALYZED_OFFSET", 999999
-)
-
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = (
     "peachjam_search.tasks.BackgroundTaskSearchProcessor"
 )
-
-ELASTICSEARCH_FAIL_ON_SHARD_FAILURE = True
+if DEBUG:
+    ELASTICSEARCH_DSL_AUTOSYNC = False
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -544,10 +543,6 @@ LOGGING = {
         "import_export": {"level": "DEBUG"},
     },
 }
-
-
-if DEBUG:
-    ELASTICSEARCH_DSL_AUTOSYNC = False
 
 
 CKEDITOR_CONFIGS = {

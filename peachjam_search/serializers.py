@@ -1,3 +1,4 @@
+from django.utils.html import escape
 from django.utils.translation import get_language_from_request
 from rest_framework.serializers import (
     BooleanField,
@@ -64,9 +65,10 @@ class SearchableDocumentSerializer(Serializer):
     highlight = SerializerMethodField()
     pages = SerializerMethodField()
     provisions = SerializerMethodField()
-    content_chunks = SerializerMethodField()
     outcome = SerializerMethodField()
     registry = SerializerMethodField()
+    explanation = SerializerMethodField()
+    raw = SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -80,21 +82,55 @@ class SearchableDocumentSerializer(Serializer):
         list_serializer_class = SearchableDocumentListSerializer
 
     def get_highlight(self, obj):
+        highlight = {}
         if hasattr(obj.meta, "highlight"):
-            return obj.meta.highlight.__dict__["_d_"]
-        return {}
+            highlight = obj.meta.highlight.__dict__["_d_"]
+
+        # add text content chunks as content highlights
+        if not highlight.get("content") and hasattr(
+            obj.meta.inner_hits, "content_chunks"
+        ):
+            for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
+                if chunk._source.type == "text":
+                    # max pages to return
+                    if len(highlight["content"]) >= 3:
+                        break
+                    highlight["content"].append(escape(chunk._source.text))
+
+        return highlight
 
     def get_pages(self, obj):
         """Serialize nested page hits and highlights."""
         pages = []
-        if hasattr(obj.meta, "inner_hits") and hasattr(obj.meta.inner_hits, "pages"):
-            for page in obj.meta.inner_hits.pages.hits.hits:
-                info = page._source.to_dict()
-                info["highlight"] = (
-                    page.highlight.to_dict() if hasattr(page, "highlight") else {}
-                )
-                self.merge_exact_highlights(info["highlight"])
-                pages.append(info)
+        if hasattr(obj.meta, "inner_hits"):
+            if hasattr(obj.meta.inner_hits, "pages"):
+                for page in obj.meta.inner_hits.pages.hits.hits:
+                    info = page._source.to_dict()
+                    info["highlight"] = (
+                        page.highlight.to_dict() if hasattr(page, "highlight") else {}
+                    )
+                    info["score"] = page._score
+                    self.merge_exact_highlights(info["highlight"])
+                    pages.append(info)
+
+            # merge in page-based content chunks
+            if hasattr(obj.meta.inner_hits, "content_chunks"):
+                for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
+                    if chunk._source.type == "page":
+                        # max pages to return
+                        if len(pages) >= 3:
+                            break
+                        info = chunk._source.to_dict()
+                        page_num = info["portion"]
+                        if page_num not in [p["page_num"] for p in pages]:
+                            pages.append(
+                                {
+                                    "page_num": page_num,
+                                    "highlight": {"pages.body": [escape(info["text"])]},
+                                    "score": chunk._score,
+                                }
+                            )
+
         return pages
 
     def get_provisions(self, obj):
@@ -121,17 +157,10 @@ class SearchableDocumentSerializer(Serializer):
                 )
                 self.merge_exact_highlights(info["highlight"])
                 provisions.append(info)
-        return provisions
 
-    def get_content_chunks(self, obj):
-        """Serialize content chunks from knn search."""
-        chunks = []
-        if hasattr(obj.meta, "inner_hits") and hasattr(
-            obj.meta.inner_hits, "content_chunks"
-        ):
-            for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
-                chunks.append(chunk._source.to_dict())
-        return chunks
+        # TODO: fold in content chunks when those are indexed and available from semantic search
+
+        return provisions
 
     def get_court(self, obj):
         return obj["court" + self.language_suffix]
@@ -158,6 +187,20 @@ class SearchableDocumentSerializer(Serializer):
                 if short not in highlight:
                     highlight[short] = value
                 del highlight[key]
+
+    def get_explanation(self, obj):
+        if self.context["explain"]:
+            if hasattr(obj.meta, "explanation"):
+                return obj.meta.explanation.to_dict()
+
+    def get_raw(self, obj):
+        if self.context["explain"]:
+            data = obj.meta.to_dict()
+            del data["explanation"]
+            for key, value in data["inner_hits"].items():
+                # force to_dict
+                data["inner_hits"][key] = value.to_dict()
+            return data
 
 
 class SearchClickSerializer(ModelSerializer):

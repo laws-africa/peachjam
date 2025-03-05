@@ -46,8 +46,8 @@
             <a
               v-if="debug"
               class="me-3"
-              href="#"
-              @click.prevent="$emit('explain')"
+              :href="`#debug-${item.id}`"
+              data-bs-toggle="collapse"
             >{{ item._score }}</a>
           </div>
           <div>
@@ -55,6 +55,30 @@
           </div>
           <div v-if="item.topic_path_names" class="text-muted fst-italic mt-1">
             {{ item.topic_path_names.join(' · ') }}
+          </div>
+        </div>
+        <div v-if="debug && item.explanation" :id="`debug-${item.id}`" class="my-2 collapse">
+          <div class="card">
+            <div class="card-header">
+              <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                  <a class="nav-link active" data-bs-toggle="tab" :href="`#explanation-${item.id}`">Explanation</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" data-bs-toggle="tab" :href="`#raw-${item.id}`">Raw</a>
+                </li>
+              </ul>
+            </div>
+            <div class="card-body explanation">
+              <div class="tab-content">
+                <div :id="`explanation-${item.id}`" class="tab-pane active show">
+                  <json-table :data="item.explanation" />
+                </div>
+                <div :id="`raw-${item.id}`" class="tab-pane">
+                  <json-table :data="item.raw" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div v-if="item.pages.length">
@@ -69,6 +93,7 @@
               @click="$emit('item-clicked', `page-${page.page_num}`)"
             >{{ $t('Page') }} {{ page.page_num }}</a>:
             <span v-if="page.highlight['pages.body']" v-html="page.highlight['pages.body'].join(' ... ')" />
+            <span v-if="debug"> ({{ page.score }})</span>
           </div>
         </div>
         <div v-if="item.provisions.length">
@@ -81,31 +106,11 @@
             @item-clicked="(x) => $emit('item-clicked', x)"
           />
         </div>
-        <div v-if="item.content_chunks && item.content_chunks.length">
-          <div
-            v-for="chunk in item.content_chunks"
-            :key="chunk.chunk_n"
-            class="mb-1"
-          >
-            <a
-              :href="`${item.expression_frbr_uri}#${chunk.portion}`"
-              target="_blank"
-              @click="$emit('item-clicked', `${chunk.portion}`)"
-            >??? {{ chunk.portion }}</a>:
-            <span>{{ chunk.text }}</span>
-          </div>
-        </div>
         <div v-else class="ms-3">
           <span
             class="snippet"
             v-html="highlights(item)"
           />
-        </div>
-        <div v-if="debug && item.explanation" class="ms-3 mt-2">
-          <h5>Explanation</h5>
-          <div class="explanation border p-2">
-            <json-table :data="item.explanation" />
-          </div>
         </div>
       </div>
     </div>
@@ -146,7 +151,7 @@ export default {
       default: false
     }
   },
-  emits: ['explain', 'item-clicked'],
+  emits: ['item-clicked'],
   computed: {
     labels () {
       // get documentLabels where the code is in item.labels
@@ -201,11 +206,11 @@ export default {
   overflow-y: auto;
 }
 
-.hit.best-match .card {
+.hit.best-match > .card {
   box-shadow: 0px 0px 5px 2px gold;
 }
 
-.hit.best-match .card::before {
+.hit.best-match > .card::before {
   content: attr(data-best-match);
   position: absolute;
   background: gold;
