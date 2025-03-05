@@ -61,6 +61,12 @@
         </a>
       </li>
       <li class="dropdown-item">
+        <a class="nav-link px-0 {% if 'aa-ecowas' in request.path %}active{% endif %}"
+           href="{% url 'place' 'aa-ecowas' %}">
+          {% trans "Economic Community of West African States (ECOWAS)" %}
+        </a>
+      </li>
+      <li class="dropdown-item">
         <a class=" nav-link px-0 {% if 'aa-au' in request.path %}active{% endif %}"
            href="{% url 'place' 'aa-au' %}">
           {% trans 'AU Charters and Treaties' %}
