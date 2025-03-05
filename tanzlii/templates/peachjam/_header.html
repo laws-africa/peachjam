@@ -96,4 +96,43 @@
       {% trans 'Street Law' %}
     </a>
   </li>
+  <li class="nav-item dropdown main-nav">
+    <a class="nav-link dropdown-toggle"
+       href="#"
+       role="button"
+       data-bs-toggle="dropdown"
+       aria-expanded="false">
+      {% trans 'African Union and EAC' %}
+    </a>
+    <ul class="dropdown-menu">
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if 'afchpr' in request.path %}active{% endif %}"
+           href="{% url 'court' 'AfCHPR' %}">
+          {% trans "African Court of Human and People's Rights" %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link px-0 {% if 'achpr' in request.path %}active{% endif %}"
+           href="{% url 'court' 'ACHPR' %}">
+          {% trans "African Commission on Human and People's Rights" %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if 'aa-eac' in request.path %}active{% endif %}"
+           href="{% url 'place' 'aa-eac' %}">{% trans 'East African Community (EAC)' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if 'EACJ' in request.path %}active{% endif %}"
+           href="{% url 'court' 'EACJ' %}">{% trans 'East African Court of Justice' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if 'aa-au' in request.path %}active{% endif %}"
+           href="{% url 'place' 'aa-au' %}">
+          {% trans 'AU Charters and Treaties' %}
+        </a>
+      </li>
+    </ul>
+  </li>
 {% endblock %}
