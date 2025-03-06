@@ -3,5 +3,17 @@
     "dokku": {
       "predeploy": "python manage.py compilescss && python manage.py collectstatic --noinput -i *.scss && python manage.py migrate"
     }
+  },
+  "healthchecks": {
+    "web": [
+      {
+        "type": "startup",
+        "name": "web-check",
+        "path": "/accounts/login/",
+        "content": "Indigo",
+        "attempts": 5,
+        "initialDelay": 10
+      }
+    ]
   }
 }
