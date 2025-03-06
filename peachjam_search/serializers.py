@@ -87,8 +87,10 @@ class SearchableDocumentSerializer(Serializer):
             highlight = obj.meta.highlight.__dict__["_d_"]
 
         # add text content chunks as content highlights
-        if not highlight.get("content") and hasattr(
-            obj.meta.inner_hits, "content_chunks"
+        if (
+            not highlight.get("content")
+            and hasattr(obj.meta, "inner_hits")
+            and hasattr(obj.meta.inner_hits, "content_chunks")
         ):
             highlight["content"] = []
             for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
@@ -198,7 +200,7 @@ class SearchableDocumentSerializer(Serializer):
         if self.context.get("explain"):
             data = obj.meta.to_dict()
             del data["explanation"]
-            for key, value in data["inner_hits"].items():
+            for key, value in data.get("inner_hits", {}).items():
                 # force to_dict
                 data["inner_hits"][key] = value.to_dict()
             return data
