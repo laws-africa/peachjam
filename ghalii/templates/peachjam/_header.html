@@ -67,6 +67,12 @@
         </a>
       </li>
       <li class="dropdown-item">
+        <a class="nav-link px-0 {% if 'ECOWASCJ' in request.path %}active{% endif %}"
+           href="{% url 'court' 'ECOWASCJ' %}">
+          {% trans "ECOWAS Community Court of Justice" %}
+        </a>
+      </li>
+      <li class="dropdown-item">
         <a class=" nav-link px-0 {% if 'aa-au' in request.path %}active{% endif %}"
            href="{% url 'place' 'aa-au' %}">
           {% trans 'AU Charters and Treaties' %}
