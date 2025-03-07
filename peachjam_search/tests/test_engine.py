@@ -523,8 +523,8 @@ class TestSearchEngine(TestCase):
                                         "query": {
                                             "knn": {
                                                 "field": "content_chunks.text_embedding",
-                                                "k": 1000,
-                                                "num_candidates": 10000,
+                                                "k": 150,
+                                                "num_candidates": 1500,
                                                 "query_vector": [0.1, 0.2],
                                                 "similarity": 0.4,
                                             }
