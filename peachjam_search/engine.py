@@ -43,8 +43,10 @@ class SearchEngine:
 
     # search configuration
     page_size = 10
-    # this should be enough for up to 10 pages, 10 per page with 10 chunks each
-    knn_k = 10 * page_size * 10
+    # this should be enough for up to 5 pages, 10 per page with 3 chunks each
+    knn_k = 5 * page_size * 3
+    # number of candidates to find on each shard
+    knn_num_candidates = knn_k * 10
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search  # noqa: E501
     # minimum cosine similarity (ranges from -1 to 1)
     # work backwards from score in [0, 1] and use
@@ -669,7 +671,7 @@ class SearchEngine:
                         "knn": {
                             "field": "content_chunks.text_embedding",
                             "k": self.knn_k,
-                            "num_candidates": 10_000,
+                            "num_candidates": self.knn_num_candidates,
                             "similarity": self.knn_similarity,
                             "query_vector": self.get_query_embedding(self.query),
                         }

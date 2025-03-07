@@ -6,7 +6,12 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, QueryDict
-from django.http.response import Http404, HttpResponse, JsonResponse
+from django.http.response import (
+    Http404,
+    HttpResponse,
+    HttpResponseBadRequest,
+    JsonResponse,
+)
 from django.shortcuts import redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
@@ -144,16 +149,6 @@ class DocumentSearchView(TemplateView):
     def save_search_trace(self, engine, response):
         filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
 
-        previous = None
-        if self.request.GET.get("previous"):
-            try:
-                previous = SearchTrace.objects.filter(
-                    pk=self.request.GET["previous"]
-                ).first()
-            except ValidationError:
-                # ignore badly formed previous search ids
-                pass
-
         search = self.request.GET.get("search", "")[:2048]
         # ignore nulls
         search = search.replace("\00", " ")
@@ -163,6 +158,7 @@ class DocumentSearchView(TemplateView):
             user=self.request.user if self.request.user.is_authenticated else None,
             config_version=self.config_version,
             request_id=self.request.id if self.request.id != "none" else None,
+            mode=engine.mode,
             search=search,
             field_searches=engine.field_queries,
             n_results=response["count"],
@@ -170,7 +166,6 @@ class DocumentSearchView(TemplateView):
             filters=engine.filters,
             filters_string=filters_string,
             ordering=self.request.GET.get("ordering"),
-            previous_search=previous,
             suggestion=self.request.GET.get("suggestion"),
             ip_address=self.request.headers.get("x-forwarded-for"),
             user_agent=self.request.headers.get("user-agent"),
@@ -213,10 +208,12 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         trace = self.get_object()
         # walk the previous searches chain to find the first one
+        ids = set()
         if trace.previous_search:
             original_trace = trace
-            while trace.previous_search:
+            while trace.previous_search and trace.id not in ids:
                 trace = trace.previous_search
+                ids.add(trace.id)
             url = (
                 reverse("search:search_trace", kwargs={"pk": trace.pk})
                 + f"#{original_trace.pk}"
@@ -339,3 +336,38 @@ class SearchFeedbackCreateView(View):
             form.save()
             return HttpResponse()
         return HttpResponse(status=400)
+
+
+class LinkTracesView(View):
+    """This view allows the API to link new search trace to its preceding search, which we can't do directly
+    when the search is executed because caching would get in the way. Instead, the search response includes a new
+    trace ID and the frontend calls this to link the old and new search traces.
+    """
+
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        previous_id = request.GET.get("previous")
+        new_id = request.GET.get("new")
+
+        if not previous_id or not new_id or previous_id == new_id:
+            return HttpResponseBadRequest()
+
+        try:
+            previous_trace = SearchTrace.objects.get(pk=previous_id)
+            # prevent loops caused by re-use trace-ids and caching, by ensuring we only go forwards in time
+            new_trace = SearchTrace.objects.get(
+                pk=new_id,
+                previous_search=None,
+                created_at__gte=previous_trace.created_at,
+            )
+        except ValidationError:
+            return HttpResponseBadRequest()
+        except SearchTrace.DoesNotExist:
+            return HttpResponseBadRequest()
+
+        if new_trace and previous_trace:
+            new_trace.previous_search = previous_trace
+            new_trace.save()
+
+        return HttpResponse()

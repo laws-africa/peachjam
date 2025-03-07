@@ -95,10 +95,9 @@ class SearchableDocumentSerializer(Serializer):
             highlight["content"] = []
             for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
                 if chunk._source.type == "text":
-                    # max pages to return
-                    if len(highlight["content"]) >= 3:
-                        break
                     highlight["content"].append(escape(chunk._source.text))
+                    # only add one, otherwise it's too long
+                    break
 
         return highlight
 

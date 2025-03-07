@@ -440,6 +440,7 @@ export default {
     }
 
     data.facets = facets;
+    data.linkedTraces = new Set();
     return data;
   },
 
@@ -792,7 +793,7 @@ export default {
         try {
           const params = this.generateSearchParams();
           const previousId = this.searchInfo.trace_id || '';
-          const url = `/search/api/documents/?${params.toString()}&previous=${previousId}`;
+          const url = `/search/api/documents/?${params.toString()}`;
 
           if (pushState) {
             window.history.pushState(
@@ -814,6 +815,7 @@ export default {
               this.formatResults();
               this.trackSearch(params);
               this.savedSearchModal();
+              this.linkTraces(previousId, this.searchInfo.trace_id);
             } else {
               this.error = response.statusText;
             }
@@ -882,6 +884,22 @@ export default {
     },
     savedSearchModal () {
       htmx.ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });
+    },
+    async linkTraces (previousId, newId) {
+      if (previousId) {
+        // ensure we don't try to link our very first trace if we re-use a trace due to caching
+        if (this.linkedTraces.size === 0) {
+          this.linkedTraces.add(previousId);
+        }
+
+        if (newId && previousId !== newId && !this.linkedTraces.has(newId)) {
+          this.linkedTraces.add(newId);
+          fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {
+            method: 'POST',
+            headers: await authHeaders()
+          });
+        }
+      }
     }
   }
 };
