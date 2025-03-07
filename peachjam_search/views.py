@@ -158,6 +158,7 @@ class DocumentSearchView(TemplateView):
             user=self.request.user if self.request.user.is_authenticated else None,
             config_version=self.config_version,
             request_id=self.request.id if self.request.id != "none" else None,
+            mode=engine.mode,
             search=search,
             field_searches=engine.field_queries,
             n_results=response["count"],
@@ -207,10 +208,12 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         trace = self.get_object()
         # walk the previous searches chain to find the first one
+        ids = set()
         if trace.previous_search:
             original_trace = trace
-            while trace.previous_search:
+            while trace.previous_search and trace.id not in ids:
                 trace = trace.previous_search
+                ids.add(trace.id)
             url = (
                 reverse("search:search_trace", kwargs={"pk": trace.pk})
                 + f"#{original_trace.pk}"
@@ -352,7 +355,12 @@ class LinkTracesView(View):
 
         try:
             previous_trace = SearchTrace.objects.get(pk=previous_id)
-            new_trace = SearchTrace.objects.get(pk=new_id, previous_search=None)
+            # prevent loops caused by re-use trace-ids and caching, by ensuring we only go forwards in time
+            new_trace = SearchTrace.objects.get(
+                pk=new_id,
+                previous_search=None,
+                created_at__gte=previous_trace.created_at,
+            )
         except ValidationError:
             return HttpResponseBadRequest()
         except SearchTrace.DoesNotExist:

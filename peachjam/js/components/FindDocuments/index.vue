@@ -886,12 +886,19 @@ export default {
       htmx.ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });
     },
     async linkTraces (previousId, newId) {
-      if (previousId && newId && previousId !== newId && !this.linkedTraces.has(newId)) {
-        this.linkedTraces.add(newId);
-        fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {
-          method: 'POST',
-          headers: await authHeaders()
-        });
+      if (previousId) {
+        // ensure we don't try to link our very first trace if we re-use a trace due to caching
+        if (this.linkedTraces.size === 0) {
+          this.linkedTraces.add(previousId);
+        }
+
+        if (newId && previousId !== newId && !this.linkedTraces.has(newId)) {
+          this.linkedTraces.add(newId);
+          fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {
+            method: 'POST',
+            headers: await authHeaders()
+          });
+        }
       }
     }
   }

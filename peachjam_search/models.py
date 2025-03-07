@@ -35,6 +35,7 @@ class SearchTrace(models.Model):
     user_agent = models.CharField(max_length=2048, null=True)
 
     search = models.CharField(max_length=2048)
+    mode = models.CharField(max_length=20, null=False, default="text")
     field_searches = models.JSONField(null=True)
     n_results = models.IntegerField()
     page = models.IntegerField()
