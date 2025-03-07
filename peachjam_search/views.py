@@ -6,7 +6,12 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, QueryDict
-from django.http.response import Http404, HttpResponse, JsonResponse
+from django.http.response import (
+    Http404,
+    HttpResponse,
+    HttpResponseBadRequest,
+    JsonResponse,
+)
 from django.shortcuts import redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
@@ -144,16 +149,6 @@ class DocumentSearchView(TemplateView):
     def save_search_trace(self, engine, response):
         filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
 
-        previous = None
-        if self.request.GET.get("previous"):
-            try:
-                previous = SearchTrace.objects.filter(
-                    pk=self.request.GET["previous"]
-                ).first()
-            except ValidationError:
-                # ignore badly formed previous search ids
-                pass
-
         search = self.request.GET.get("search", "")[:2048]
         # ignore nulls
         search = search.replace("\00", " ")
@@ -170,7 +165,6 @@ class DocumentSearchView(TemplateView):
             filters=engine.filters,
             filters_string=filters_string,
             ordering=self.request.GET.get("ordering"),
-            previous_search=previous,
             suggestion=self.request.GET.get("suggestion"),
             ip_address=self.request.headers.get("x-forwarded-for"),
             user_agent=self.request.headers.get("user-agent"),
@@ -339,3 +333,33 @@ class SearchFeedbackCreateView(View):
             form.save()
             return HttpResponse()
         return HttpResponse(status=400)
+
+
+class LinkTracesView(View):
+    """This view allows the API to link new search trace to its preceding search, which we can't do directly
+    when the search is executed because caching would get in the way. Instead, the search response includes a new
+    trace ID and the frontend calls this to link the old and new search traces.
+    """
+
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        previous_id = request.GET.get("previous")
+        new_id = request.GET.get("new")
+
+        if not previous_id or not new_id or previous_id == new_id:
+            return HttpResponseBadRequest()
+
+        try:
+            previous_trace = SearchTrace.objects.get(pk=previous_id)
+            new_trace = SearchTrace.objects.get(pk=new_id, previous_search=None)
+        except ValidationError:
+            return HttpResponseBadRequest()
+        except SearchTrace.DoesNotExist:
+            return HttpResponseBadRequest()
+
+        if new_trace and previous_trace:
+            new_trace.previous_search = previous_trace
+            new_trace.save()
+
+        return HttpResponse()
