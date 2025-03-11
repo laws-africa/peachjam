@@ -17,7 +17,8 @@
   {% endif %}
   <div class="document-content__inner">
     {% if show_sidebar %}<div class="navigation" id="navigation-column"></div>{% endif %}
-    <div class="content-and-enrichments"
+    <div id="document-content"
+         class="content-and-enrichments"
          data-work-id="{{ document.work_id }}"
          data-work-frbr-uri="{{ document.work_frbr_uri }}"
          data-document-id="{{ document.id }}"
