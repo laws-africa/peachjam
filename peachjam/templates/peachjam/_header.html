@@ -5,7 +5,7 @@
       <a class="bg-white"
          href="{% if 'akn/' in request.path %}#document-content{% else %}#top{% endif %}">{% trans 'Skip to document content' %}</a>
       <a class="bg-white" href="#main-nav">{% trans 'Skip to main menu' %}</a>
-      <a class="bg-white" href="#search">{% trans 'Skip to search' %}</a>
+      <a class="bg-white" href="#header-search">{% trans 'Skip to search' %}</a>
     </div>
   {% endblock %}
   {% block top-bar %}<div>Top bar content</div>{% endblock %}
@@ -31,6 +31,7 @@
           {% block search-form %}
             <div class="input-group">
               <input type="text"
+                     id="header-search"
                      class="form-control"
                      placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                      aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
