@@ -10,7 +10,7 @@
         "type": "startup",
         "name": "web-check",
         "path": "/accounts/login/",
-        "content": "Indigo",
+        "content": "Log In",
         "attempts": 5,
         "initialDelay": 10
       }
