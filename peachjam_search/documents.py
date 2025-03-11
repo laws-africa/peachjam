@@ -132,14 +132,16 @@ class SearchableDocument(Document):
             "chunk_n": fields.IntegerField(),
             "n_chunks": fields.IntegerField(),
             "portion": fields.KeywordField(),
-            # TODO: this should be a keyword field with index=False, since we don't need analysis overhead
             "text": fields.TextField(),
             "text_embedding": {
                 "type": "dense_vector",
                 "dims": 1024,
                 "index": True,
+                # internally elasticsearch normalises the vectors and uses dot product
                 "similarity": "cosine",
-                "index_options": {"type": "int8_hnsw", "m": 16, "ef_construction": 100},
+                # int4 means we quantize down to half bytes
+                # see https://www.elastic.co/search-labs/blog/optimized-scalar-quantization-elasticsearch
+                "index_options": {"type": "int4_hnsw", "m": 16, "ef_construction": 100},
             },
         }
     )
