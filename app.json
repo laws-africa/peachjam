@@ -10,7 +10,7 @@
         "type": "startup",
         "name": "web-check",
         "path": "/accounts/login/",
-        "content": "Log In",
+        "content": "login",
         "attempts": 5,
         "initialDelay": 10
       }
