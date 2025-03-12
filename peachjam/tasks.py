@@ -223,3 +223,11 @@ def get_deleted_documents(ingestor_id, range_start, range_end):
 
     adapter = ingestor.get_adapter()
     adapter.get_deleted_documents(range_start, range_end)
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def update_user_follows():
+    from peachjam.models import UserFollowing
+
+    log.info("Updating user follows")
+    UserFollowing.update_and_alert()

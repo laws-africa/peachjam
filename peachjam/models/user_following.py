@@ -1,7 +1,11 @@
 from countries_plus.models import Country
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.db import models
+from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
 from . import Author, CoreDocument, Court, CourtClass, CourtRegistry, Locality, Taxonomy
@@ -162,20 +166,79 @@ class UserFollowing(models.Model):
     def get_new_followed_documents(self):
         qs = CoreDocument.objects.filter(created_at__gt=self.last_alerted_at)
         if self.court:
-            qs.filter(judgment__court=self.court)
+            return {
+                "followed_object": self.court,
+                "documents": qs.filter(judgment__court=self.court)[:10],
+            }
         elif self.author:
-            qs.filter(genericdocument__author=self.author)
+            return {
+                "followed_object": self.author,
+                "documents": qs.filter(genericdocument__author=self.author)[:10],
+            }
         elif self.court_class:
-            qs.filter(judgment__court__court_class=self.court_class)
+            return {
+                "followed_object": self.court_class,
+                "documents": qs.filter(judgment__court__court_class=self.court_class),
+            }
         elif self.court_registry:
-            qs.filter(judgment__court__court_registry=self.court_registry)
+            return {
+                "followed_object": self.court_registry,
+                "documents": qs.filter(
+                    judgment__court__court_registry=self.court_registry
+                )[:10],
+            }
         elif self.country:
-            qs.filter(jurisdiction=self.country)
+            return {
+                "followed_object": self.country,
+                "documents": qs.filter(jurisdiction=self.country),
+            }
         elif self.locality:
-            qs.filter(locality=self.locality)
+            return {
+                "followed_object": self.locality,
+                "documents": qs.filter(locality=self.locality),
+            }
         elif self.taxonomy_topic:
             topics = [self.taxonomy_topic] + [
                 t for t in self.taxonomy_topic.get_descendants()
             ]
-            qs.filter(taxonomies__topic__in=topics)
-        return qs[:10]
+            return {
+                "followed_object": self.taxonomy_topic,
+                "documents": qs.filter(taxonomies__topic__in=topics),
+            }
+
+    @classmethod
+    def update_and_alert(cls):
+        users = get_user_model().objects.filter(following__isnull=False).distinct()
+        for user in users:
+            follows = UserFollowing.objects.filter(user=user)
+            documents = []
+            for follow in follows:
+                new = follow.get_new_followed_documents()
+                if new["documents"]:
+                    documents.append(follow.get_new_followed_documents())
+            if documents:
+                cls.send_alert(user, documents)
+
+    @classmethod
+    def send_alert(cls, user, documents):
+        documents = documents
+        context = {
+            "documents": documents,
+            "user": user,
+            "site": Site.objects.get_current(),
+        }
+        html = render_to_string(
+            "peachjam/emails/user_following_alert_email.html", context
+        )
+        plain_txt = render_to_string(
+            "peachjam/emails/user_following_alert_email.txt", context
+        )
+        subject = settings.EMAIL_SUBJECT_PREFIX + _("New documents have been published")
+        send_mail(
+            subject=subject,
+            message=plain_txt,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+            html_message=html,
+        )
