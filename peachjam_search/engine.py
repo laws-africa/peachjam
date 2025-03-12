@@ -3,7 +3,7 @@ import logging
 from django.conf import settings
 from elasticsearch_dsl import Search, TermsFacet
 from elasticsearch_dsl.connections import connections
-from elasticsearch_dsl.query import MatchAll, MatchPhrase, Q, Query, SimpleQueryString
+from elasticsearch_dsl.query import MatchAll, MatchPhrase, Q, SimpleQueryString
 
 from peachjam.models import pj_settings
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
@@ -47,6 +47,7 @@ class SearchEngine:
     knn_k = 5 * page_size * 3
     # number of candidates to find on each shard
     knn_num_candidates = knn_k * 10
+    knn_embedding_field = "content_chunks.text_embedding"
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search  # noqa: E501
     # minimum cosine similarity (ranges from -1 to 1)
     # work backwards from score in [0, 1] and use
@@ -56,6 +57,18 @@ class SearchEngine:
     # ES clamps this at knn_k in any case
     rrf_rank_window_size = knn_k
     rrf_rank_constant = 60
+
+    source = {
+        "excludes": [
+            "pages",
+            "content",
+            "content_chunks",
+            "flynote",
+            "case_summary",
+            "provisions",
+            "suggest",
+        ]
+    }
 
     highlight = {
         "title": {
@@ -256,19 +269,7 @@ class SearchEngine:
         return search
 
     def add_source(self, search):
-        return search.source(
-            {
-                "excludes": [
-                    "pages",
-                    "content",
-                    "content_chunks",
-                    "flynote",
-                    "case_summary",
-                    "provisions",
-                    "suggest",
-                ]
-            }
-        )
+        return search.source(self.source)
 
     def add_filters(self, search):
         # always applied
@@ -659,17 +660,14 @@ class SearchEngine:
                 "nested": {
                     "path": "content_chunks",
                     "inner_hits": {
-                        "_source": [
-                            "content_chunks.type",
-                            "content_chunks.portion",
-                            "content_chunks.text",
-                            "content_chunks.chunk_n",
-                        ]
+                        "_source": {
+                            "excludes": ["content_chunks.text_embedding"],
+                        }
                     },
                     "score_mode": "max",
                     "query": {
                         "knn": {
-                            "field": "content_chunks.text_embedding",
+                            "field": self.knn_embedding_field,
                             "k": self.knn_k,
                             "num_candidates": self.knn_num_candidates,
                             "similarity": self.knn_similarity,
@@ -728,7 +726,3 @@ class RetrieverSearch(Search):
         s = super()._clone()
         s.retriever = self.retriever
         return s
-
-
-class KNN(Query):
-    name = "knn"

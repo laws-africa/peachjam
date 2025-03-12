@@ -1,5 +1,7 @@
+import dataclasses
 import json
 from copy import copy
+from typing import List, Optional, Union
 
 import boto3
 from django.core.cache import cache
@@ -10,52 +12,81 @@ MAX_CHUNK_LENGTH = 2048
 EMBEDDING_BATCH_SIZE = 96
 MODEL_NAME = "cohere.embed-multilingual-v3"
 
+# sometimes we want to inject extra text before the real text so that extra content is included in the embedding.
+# we use this separator so we can strip the extra text when showing it to the user
+TEXT_INJECTION_SEPARATOR = "\n-<>-\n\n"
 
-def make_content_chunks(text, chunk_size=CHUNK_SIZE, max_chunk_length=MAX_CHUNK_LENGTH):
-    """Split text (which could be plain text or pages separated with \f) into chunks suitable for embedding."""
+
+@dataclasses.dataclass
+class ContentChunk:
+    """A chunk of content that is indexed for semantic search. This has slightly different semantics for different
+    types of content:
+
+    * text: plain text chunks, usually for plain HTML documents
+    * page: a chunk of a page of text, from a PDF
+    * provision: a chunk of a provision from AKN legislation
+
+    Additionally, a chunk of text to be embedded has a maximum length, so a long text may be split into multiple chunks.
+    This in indicated by n_chunks (total number for this piece of text) and chunk_n (the 1-based index).
+
+    This structure is indexed directly into Elasticsearch as a nested object.
+    """
+
+    # "text", "page" or "provision"
+    type: str
+    text: str
+    # the portion id (page number or eid)
+    portion: Optional[Union[str, int]] = None
+    chunk_n: int = 0
+    n_chunks: int = 1
+    # for provisions - mimics the format used by SearchableDocument.prepare_provisions
+    provision_type: Optional[str] = None
+    title: Optional[str] = None
+    parent_titles: Optional[List[str]] = None
+    parent_ids: Optional[List[str]] = None
+    # the actual embedding
+    text_embedding: List[float] = None
+
+    def asdict(self):
+        return dataclasses.asdict(self)
+
+
+def make_page_chunks(text) -> List[ContentChunk]:
+    """Split text on page boundaries '\f' and return chunks."""
+    # pages
+    return [
+        ContentChunk("page", p, portion=i + 1) for i, p in enumerate(text.split("\f"))
+    ]
+
+
+def split_chunks(
+    chunks: list[ContentChunk], chunk_size=CHUNK_SIZE, max_chunk_length=MAX_CHUNK_LENGTH
+):
+    """Split chunks that are too long."""
     from llama_index.core.node_parser.text.sentence import SentenceSplitter
 
     splitter = SentenceSplitter.from_defaults(
         chunk_size=chunk_size, chunk_overlap=int(chunk_size * 0.2)
     )
+    new_chunks = []
 
-    if "\f" in text:
-        portions = [
-            {
-                "type": "page",
-                "portion": i + 1,
-                "text": p,
-            }
-            for i, p in enumerate(text.split("\f"))
-        ]
-    else:
-        portions = [
-            {
-                "type": "text",
-                "text": text,
-            }
-        ]
+    for chunk in chunks:
+        chunk_splits = [c[:max_chunk_length] for c in splitter.split_text(chunk.text)]
+        for i, text in enumerate(chunk_splits):
+            chunk = copy(chunk)
+            chunk.chunk_n = i
+            chunk.n_chunks = len(chunk_splits)
+            chunk.text = text
+            new_chunks.append(chunk)
 
-    chunks = []
-    for portion in portions:
-        portion_chunks = [
-            c[:max_chunk_length] for c in splitter.split_text(portion["text"])
-        ]
-        for i, chunk in enumerate(portion_chunks):
-            portion = copy(portion)
-            portion["chunk_n"] = i
-            portion["n_chunks"] = len(portion_chunks)
-            portion["text"] = chunk
-            chunks.append(portion)
-
-    return chunks
+    return new_chunks
 
 
-def add_chunk_embeddings(chunks):
+def add_chunk_embeddings(chunks: List[ContentChunk]):
     """Add text embeddings to each chunk."""
-    embeddings = get_text_embedding_batch([c["text"] for c in chunks])
+    embeddings = get_text_embedding_batch([c.text for c in chunks])
     for chunk, embedding in zip(chunks, embeddings):
-        chunk["text_embedding"] = embedding
+        chunk.text_embedding = embedding
 
 
 def get_text_embedding_batch(texts):

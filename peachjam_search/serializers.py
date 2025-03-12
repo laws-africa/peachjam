@@ -13,6 +13,7 @@ from rest_framework.serializers import (
 )
 
 from peachjam.models import DocumentTopic
+from peachjam_search.embeddings import TEXT_INJECTION_SEPARATOR
 from peachjam_search.models import SearchClick
 
 
@@ -120,7 +121,7 @@ class SearchableDocumentSerializer(Serializer):
                 for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
                     if chunk._source.type == "page":
                         # max pages to return
-                        if len(pages) >= 3:
+                        if len(pages) >= 2:
                             break
                         info = chunk._source.to_dict()
                         page_num = info["portion"]
@@ -160,7 +161,33 @@ class SearchableDocumentSerializer(Serializer):
                 self.merge_exact_highlights(info["highlight"])
                 provisions.append(info)
 
-        # TODO: fold in content chunks when those are indexed and available from semantic search
+        # merge in provision-based content chunks
+        if hasattr(obj.meta.inner_hits, "content_chunks"):
+            for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
+                if chunk._source.type == "provision":
+                    # max provisions to return
+                    if len(provisions) >= 3:
+                        break
+
+                    info = chunk._source.to_dict()
+                    if info["portion"] in seen:
+                        continue
+                    seen.add(info["portion"])
+                    if info.get("parent_ids"):
+                        seen.update(info["parent_ids"])
+                    else:
+                        info["parent_ids"] = []
+                        info["parent_titles"] = []
+
+                    text = info["text"]
+                    if TEXT_INJECTION_SEPARATOR in text:
+                        # remove injected text at the start
+                        text = text.split(TEXT_INJECTION_SEPARATOR, 1)[1]
+
+                    info["highlight"] = {"provisions.body": [escape(text)]}
+                    info["id"] = info["portion"]
+                    info["type"] = info["provision_type"]
+                    provisions.append(info)
 
         return provisions
 

@@ -562,6 +562,7 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
         "updated_at",
         "work_frbr_uri",
         "toc_json",
+        "metadata_json",
         "work_link",
         "document_access_link",
     )
@@ -631,12 +632,13 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
             {
                 "classes": ("collapse",),
                 "fields": [
-                    "toc_json",
                     "content_html_is_akn",
                     "allow_robots",
                     "published",
                     "restricted",
                     "document_access_link",
+                    "toc_json",
+                    "metadata_json",
                 ],
             },
         ),
@@ -971,12 +973,13 @@ class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
 class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["nature"])
-    fieldsets[3][1]["fields"].extend(["metadata_json"])
-    fieldsets[3][1]["fields"].extend(["commencements_json"])
-    fieldsets[3][1]["fields"].extend(["timeline_json"])
     fieldsets[2][1]["classes"] = ("collapse",)
-    fieldsets[4][1]["fields"].extend(["parent_work"])
-    readonly_fields = ["parent_work"] + list(DocumentAdmin.readonly_fields)
+    fieldsets[4][1]["fields"].extend(
+        ["parent_work", "commencements_json", "timeline_json"]
+    )
+    readonly_fields = ["parent_work", "commencements_json", "timeline_json"] + list(
+        DocumentAdmin.readonly_fields
+    )
 
 
 @admin.register(Bill)
