@@ -160,7 +160,23 @@ class SearchableDocumentSerializer(Serializer):
                 self.merge_exact_highlights(info["highlight"])
                 provisions.append(info)
 
-        # TODO: fold in content chunks when those are indexed and available from semantic search
+        # merge in provision-based content chunks
+        if hasattr(obj.meta.inner_hits, "content_chunks"):
+            for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
+                if chunk._source.type == "provision":
+                    # max provisions to return
+                    if len(provisions) >= 3:
+                        break
+
+                    info = chunk._source.to_dict()
+                    if info["portion"] in seen:
+                        continue
+                    seen.add(info["portion"])
+                    seen.update(info["parent_ids"])
+
+                    # TODO: check shape
+                    info["highlight"] = ({"portion.body": [escape(info["text"])]},)
+                    provisions.append(info)
 
         return provisions
 
