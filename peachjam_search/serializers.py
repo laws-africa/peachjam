@@ -120,7 +120,7 @@ class SearchableDocumentSerializer(Serializer):
                 for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
                     if chunk._source.type == "page":
                         # max pages to return
-                        if len(pages) >= 3:
+                        if len(pages) >= 2:
                             break
                         info = chunk._source.to_dict()
                         page_num = info["portion"]
@@ -175,7 +175,7 @@ class SearchableDocumentSerializer(Serializer):
                     seen.update(info["parent_ids"])
 
                     # TODO: check shape
-                    info["highlight"] = ({"portion.body": [escape(info["text"])]},)
+                    info["highlight"] = {"portion.body": [escape(info["text"])]}
                     provisions.append(info)
 
         return provisions

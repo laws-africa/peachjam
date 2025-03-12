@@ -132,11 +132,18 @@ class SearchableDocument(Document):
         }
     )
 
+    # see peachjam_search.embeddings.ContentChunk
     content_chunks = fields.NestedField(
         properties={
             "chunk_n": fields.IntegerField(),
             "n_chunks": fields.IntegerField(),
             "portion": fields.KeywordField(),
+            # for provisions, similar to provisions above
+            "provision_type": fields.KeywordField(),
+            "title": fields.KeywordField(),
+            "parent_titles": fields.KeywordField(),
+            "parent_ids": fields.KeywordField(),
+            # text and embedding
             "text": fields.TextField(),
             "text_embedding": {
                 "type": "dense_vector",

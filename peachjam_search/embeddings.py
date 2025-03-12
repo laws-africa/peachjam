@@ -24,6 +24,8 @@ class ContentChunk:
 
     Additionally, a chunk of text to be embedded has a maximum length, so a long text may be split into multiple chunks.
     This in indicated by n_chunks (total number for this piece of text) and chunk_n (the 1-based index).
+
+    This structure is indexed directly into Elasticsearch as a nested object.
     """
 
     # "text", "page" or "provision"
@@ -51,21 +53,6 @@ def make_page_chunks(text) -> List[ContentChunk]:
     return [
         ContentChunk("page", p, portion=i + 1) for i, p in enumerate(text.split("\f"))
     ]
-
-
-def make_content_chunks(
-    text, mode="text", chunk_size=CHUNK_SIZE, max_chunk_length=MAX_CHUNK_LENGTH
-) -> List[ContentChunk]:
-    """Split text (which could be plain text or pages separated with \f) into chunks suitable for embedding."""
-    if mode == "page":
-        chunks = [
-            ContentChunk("page", p, portion=i + 1)
-            for i, p in enumerate(text.split("\f"))
-        ]
-    else:
-        chunks = [ContentChunk("text", text)]
-
-    return split_chunks(chunks, chunk_size, max_chunk_length)
 
 
 def split_chunks(
