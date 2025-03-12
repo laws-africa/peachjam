@@ -101,6 +101,7 @@ from peachjam.models import (
     SourceFile,
     Taxonomy,
     Treatment,
+    UserFollowing,
     UserProfile,
     Work,
     citations_processor,
@@ -1713,6 +1714,7 @@ admin.site.register(
         SavedDocument,
         DocumentAccessGroup,
         Treatment,
+        UserFollowing,
     ]
 )
 admin.site.unregister(User)
