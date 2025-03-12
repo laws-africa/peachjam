@@ -13,6 +13,7 @@ from rest_framework.serializers import (
 )
 
 from peachjam.models import DocumentTopic
+from peachjam_search.embeddings import TEXT_INJECTION_SEPARATOR
 from peachjam_search.models import SearchClick
 
 
@@ -172,10 +173,20 @@ class SearchableDocumentSerializer(Serializer):
                     if info["portion"] in seen:
                         continue
                     seen.add(info["portion"])
-                    seen.update(info["parent_ids"])
+                    if info.get("parent_ids"):
+                        seen.update(info["parent_ids"])
+                    else:
+                        info["parent_ids"] = []
+                        info["parent_titles"] = []
 
-                    # TODO: check shape
-                    info["highlight"] = {"portion.body": [escape(info["text"])]}
+                    text = info["text"]
+                    if TEXT_INJECTION_SEPARATOR in text:
+                        # remove injected text at the start
+                        text = text.split(TEXT_INJECTION_SEPARATOR, 1)[1]
+
+                    info["highlight"] = {"provisions.body": [escape(text)]}
+                    info["id"] = info["portion"]
+                    info["type"] = info["provision_type"]
                     provisions.append(info)
 
         return provisions

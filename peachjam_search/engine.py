@@ -660,12 +660,9 @@ class SearchEngine:
                 "nested": {
                     "path": "content_chunks",
                     "inner_hits": {
-                        "_source": [
-                            "content_chunks.type",
-                            "content_chunks.portion",
-                            "content_chunks.text",
-                            "content_chunks.chunk_n",
-                        ]
+                        "_source": {
+                            "excludes": ["content_chunks.text_embedding"],
+                        }
                     },
                     "score_mode": "max",
                     "query": {

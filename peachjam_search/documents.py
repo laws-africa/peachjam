@@ -24,6 +24,7 @@ from peachjam.models import (
 )
 from peachjam.xmlutils import parse_html_str
 from peachjam_search.embeddings import (
+    TEXT_INJECTION_SEPARATOR,
     ContentChunk,
     add_chunk_embeddings,
     make_page_chunks,
@@ -389,9 +390,19 @@ class SearchableDocument(Document):
                 # AKN provisions
                 provisions = self.prepare_provisions(instance)
                 for provision in provisions:
-                    for chunk in split_chunks(
-                        [ContentChunk("provision", provision["body"])]
-                    ):
+                    text = provision["body"]
+                    # inject the titles at the top of the text to add extra context
+                    titles = [
+                        t
+                        for t in provision["parent_titles"] + [provision["title"]]
+                        if t
+                    ]
+                    if titles:
+                        text = (
+                            "\n".join(titles) + "\n" + TEXT_INJECTION_SEPARATOR + text
+                        )
+
+                    for chunk in split_chunks([ContentChunk("provision", text)]):
                         chunk.portion = provision["id"]
                         chunk.provision_type = provision["type"]
                         chunk.title = provision["title"]

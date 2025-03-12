@@ -12,6 +12,10 @@ MAX_CHUNK_LENGTH = 2048
 EMBEDDING_BATCH_SIZE = 96
 MODEL_NAME = "cohere.embed-multilingual-v3"
 
+# sometimes we want to inject extra text before the real text so that extra content is included in the embedding.
+# we use this separator so we can strip the extra text when showing it to the user
+TEXT_INJECTION_SEPARATOR = "\n-<>-\n\n"
+
 
 @dataclasses.dataclass
 class ContentChunk:
