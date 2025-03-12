@@ -377,6 +377,7 @@ class SearchableDocument(Document):
             if (
                 instance.doc_type
                 in settings.PEACHJAM["SEARCH_SEMANTIC_EXCLUDE_DOCTYPES"]
+                or not instance.is_most_recent()
             ):
                 return
 
