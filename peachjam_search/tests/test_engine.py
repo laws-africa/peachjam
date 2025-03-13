@@ -547,6 +547,7 @@ class TestSearchEngine(TestCase):
         params = QueryDict("", mutable=True)
         # we treat this as (content: foo) AND (all: bar), but it could also be interpreted as OR
         # TODO: we need to add a way to specify AND/OR through the URL
+        # see https://github.com/laws-africa/peachjam/issues/2355
         params["search__content"] = "foo"
         params["search__all"] = "bar"
 
