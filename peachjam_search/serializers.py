@@ -142,52 +142,51 @@ class SearchableDocumentSerializer(Serializer):
         # keep track of which provisions (including parents) we've seen, so that we don't, for
         # example, repeat Chapter 7 if Chapter 7, Section 32 is also a hit
         seen = set()
-        if hasattr(obj.meta, "inner_hits") and hasattr(
-            obj.meta.inner_hits, "provisions"
-        ):
-            for provision in obj.meta.inner_hits.provisions.hits.hits:
-                info = provision._source.to_dict()
+        if hasattr(obj.meta, "inner_hits"):
+            if hasattr(obj.meta.inner_hits, "provisions"):
+                for provision in obj.meta.inner_hits.provisions.hits.hits:
+                    info = provision._source.to_dict()
 
-                if info["id"] in seen:
-                    continue
-                seen.add(info["id"])
-                seen.update(info["parent_ids"])
-
-                info["highlight"] = (
-                    provision.highlight.to_dict()
-                    if hasattr(provision, "highlight")
-                    else {}
-                )
-                self.merge_exact_highlights(info["highlight"])
-                provisions.append(info)
-
-        # merge in provision-based content chunks
-        if hasattr(obj.meta.inner_hits, "content_chunks"):
-            for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
-                if chunk._source.type == "provision":
-                    # max provisions to return
-                    if len(provisions) >= 3:
-                        break
-
-                    info = chunk._source.to_dict()
-                    if info["portion"] in seen:
+                    if info["id"] in seen:
                         continue
-                    seen.add(info["portion"])
-                    if info.get("parent_ids"):
-                        seen.update(info["parent_ids"])
-                    else:
-                        info["parent_ids"] = []
-                        info["parent_titles"] = []
+                    seen.add(info["id"])
+                    seen.update(info["parent_ids"])
 
-                    text = info["text"]
-                    if TEXT_INJECTION_SEPARATOR in text:
-                        # remove injected text at the start
-                        text = text.split(TEXT_INJECTION_SEPARATOR, 1)[1]
-
-                    info["highlight"] = {"provisions.body": [escape(text)]}
-                    info["id"] = info["portion"]
-                    info["type"] = info["provision_type"]
+                    info["highlight"] = (
+                        provision.highlight.to_dict()
+                        if hasattr(provision, "highlight")
+                        else {}
+                    )
+                    self.merge_exact_highlights(info["highlight"])
                     provisions.append(info)
+
+            # merge in provision-based content chunks
+            if hasattr(obj.meta.inner_hits, "content_chunks"):
+                for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
+                    if chunk._source.type == "provision":
+                        # max provisions to return
+                        if len(provisions) >= 3:
+                            break
+
+                        info = chunk._source.to_dict()
+                        if info["portion"] in seen:
+                            continue
+                        seen.add(info["portion"])
+                        if info.get("parent_ids"):
+                            seen.update(info["parent_ids"])
+                        else:
+                            info["parent_ids"] = []
+                            info["parent_titles"] = []
+
+                        text = info["text"]
+                        if TEXT_INJECTION_SEPARATOR in text:
+                            # remove injected text at the start
+                            text = text.split(TEXT_INJECTION_SEPARATOR, 1)[1]
+
+                        info["highlight"] = {"provisions.body": [escape(text)]}
+                        info["id"] = info["portion"]
+                        info["type"] = info["provision_type"]
+                        provisions.append(info)
 
         return provisions
 
