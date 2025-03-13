@@ -164,7 +164,9 @@ class UserFollowing(models.Model):
         super().save(*args, **kwargs)
 
     def get_new_followed_documents(self):
-        qs = CoreDocument.objects.filter(created_at__gt=self.last_alerted_at)
+        qs = CoreDocument.objects.all()
+        if self.last_alerted_at:
+            qs.filter(created_at__gt=self.last_alerted_at)
         if self.court:
             return {
                 "followed_object": self.court,
@@ -216,14 +218,16 @@ class UserFollowing(models.Model):
                 new = follow.get_new_followed_documents()
                 if new["documents"]:
                     documents.append(follow.get_new_followed_documents())
+            print(documents)
             if documents:
+
                 cls.send_alert(user, documents)
 
     @classmethod
     def send_alert(cls, user, documents):
         documents = documents
         context = {
-            "documents": documents,
+            "followed_documents": documents,
             "user": user,
             "site": Site.objects.get_current(),
         }

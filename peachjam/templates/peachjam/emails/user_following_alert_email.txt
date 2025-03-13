@@ -1,8 +1,8 @@
 {{ user }}
 We have found new documents for areas that you are following:
-{% for followed_object, documents in followed_documents %}
- {{ followed_object }}
-  {% for doc in documents %}
+{% for item in followed_documents %}
+ {{ item.followed_object }}
+  {% for doc in item.documents %}
       Title: {{ doc.title }}
       https://{{ site.domain }}{{ doc.expression_frbr_uri }}
   {% endfor %}
