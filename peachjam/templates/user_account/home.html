@@ -1,0 +1,60 @@
+{% extends 'user_account/layout.html' %}
+{% load i18n socialaccount %}
+{% block title %}
+  {% trans "My Account" %} {{ block.super }}
+{% endblock %}
+{% block account-tabs %}
+  {% include 'user_account/_tabs.html' with active='home' %}
+{% endblock %}
+{% block account-content %}
+  {% block account-home-content %}
+    <div class="row">
+      {% if PEACHJAM_SETTINGS.allow_save_documents %}
+        <div class="col-md">
+          <div class="card mb-3">
+            <h5 class="card-header">{% trans "Saved documents" %}</h5>
+            <div class="card-body">
+              <p>{% trans "Save documents to folders to make research easier." %}</p>
+              <a href="{% url 'folder_list' %}" class="btn btn-primary">{% trans "Saved documents" %}</a>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      {% if PEACHJAM_SETTINGS.allow_save_searches %}
+        <div class="col-md">
+          <div class="col-md">
+            <div class="card mb-3">
+              <h5 class="card-header">{% trans "Search alerts" %}</h5>
+              <div class="card-body">
+                <p>{% trans "We'll email you when new documents match your search." %}</p>
+                <a href="{% url 'search:saved_search_list' %}" class="btn btn-primary">{% trans "Search alerts" %}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  {% endblock %}
+  {% block account-home-links %}
+    <div class="d-md-none">
+      <h3>{% trans "Settings" %}</h3>
+      <ol class="list-unstyled">
+        <li>
+          <a href="{% url 'edit_account' %}">{% trans "Change your name" %}</a>
+        </li>
+        <li>
+          <a href="{% url 'account_change_password' %}">{% trans "Change your password" %}</a>
+        </li>
+        <li>
+          <a href="{% url 'account_email' %}">{% trans "Manage email addresses" %}</a>
+        </li>
+        {% get_providers as socialaccount_providers %}
+        {% if socialaccount_providers %}
+          <li>
+            <a href="{% url 'socialaccount_connections' %}">{% trans "Manage social accounts" %}</a>
+          </li>
+        {% endif %}
+      </ol>
+    </div>
+  {% endblock %}
+{% endblock %}

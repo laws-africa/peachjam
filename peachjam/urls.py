@@ -29,6 +29,7 @@ from peachjam.feeds import (
 from peachjam.helpers import ISODateConverter
 from peachjam.views import (
     AboutPageView,
+    AccountsHomeView,
     AnnotationDeleteView,
     AnnotationDetailView,
     AnnotationEditView,
@@ -377,9 +378,17 @@ urlpatterns = [
             ]
         ),
     ),
-    path("accounts/", include("allauth.urls")),
-    path("accounts/profile/", EditAccountView.as_view(), name="edit_account"),
-    path("accounts/user/", GetAccountView.as_view(), name="get_account"),
+    path(
+        "accounts/",
+        include(
+            [
+                path("", include("allauth.urls")),
+                path("home/", AccountsHomeView.as_view(), name="account_home"),
+                path("profile/", EditAccountView.as_view(), name="edit_account"),
+                path("user/", GetAccountView.as_view(), name="get_account"),
+            ]
+        ),
+    ),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
     path(
