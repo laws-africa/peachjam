@@ -563,6 +563,8 @@ class SearchEngine:
         query_fields = [
             self.get_field(field)
             for field, options in self.advanced_search_fields.items()
+            # content is handled specially
+            if field != "content"
         ]
         return [
             Q(
@@ -576,6 +578,7 @@ class SearchEngine:
                     )
                     for field in query_fields
                 ]
+                # content is handled specially
                 + self.build_advanced_content_query(query),
             )
         ]
@@ -585,8 +588,7 @@ class SearchEngine:
         provisions.body."""
         query = self.field_queries.get("content")
 
-        # don't allow search__content and search__all to clash, only one is needed to search content fields
-        if query and self.field_queries.get("all"):
+        if not query:
             return []
 
         if query:
