@@ -871,6 +871,7 @@ class DownloadDocumentsResource(resources.ModelResource):
         Judgment: ["court", "registry"],
     }
     prefetch_related = {
+        None: ["labels"],
         Judgment: ["judges"],
     }
 
