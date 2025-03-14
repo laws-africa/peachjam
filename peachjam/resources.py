@@ -40,6 +40,7 @@ from peachjam.models import (
     Author,
     Bill,
     CaseNumber,
+    CoreDocument,
     Court,
     CourtRegistry,
     CustomProperty,
@@ -838,3 +839,80 @@ class BillResource(BaseDocumentResource):
 
     class Meta(BaseDocumentResource.Meta):
         model = Bill
+
+
+class DownloadDocumentsResource(resources.ModelResource):
+    """Resource used for downloading collections of documents by users from search results and saved folders."""
+
+    # all documents
+    title = fields.Field("title")
+    date = fields.Field("date", widget=DateWidget())
+    citation = fields.Field("citation")
+    url = fields.Field(readonly=True)
+    source_url = fields.Field(readonly=True)
+    expression_frbr_uri = fields.Field("expression_frbr_uri")
+    language = fields.Field("language")
+
+    # judgments
+    court = fields.Field("court", widget=DateWidget())
+    registry = fields.Field("registry", widget=DateWidget())
+    order = fields.Field("order")
+    judges = fields.Field("judges")
+
+    # FK fields above must be added to either select_related or prefetch_related
+    select_related = {
+        None: ["language"],
+        Judgment: ["court", "registry"],
+    }
+    prefetch_related = {
+        Judgment: ["judges"],
+    }
+
+    def dehydrate_judges(self, obj):
+        return "|".join(judge.name for judge in obj.judges.all())
+
+    def dehydrate_url(self, obj):
+        domain = Site.objects.get_current().domain
+        if obj.expression_frbr_uri:
+            return f"https://{domain}{obj.expression_frbr_uri}"
+        return ""
+
+    def dehydrate_source_url(self, obj):
+        domain = Site.objects.get_current().domain
+        if obj.expression_frbr_uri:
+            download_source = reverse(
+                "document_source", kwargs={"frbr_uri": obj.expression_frbr_uri[1:]}
+            )
+            return f"https://{domain}{download_source}"
+        return ""
+
+    @classmethod
+    def get_objects_for_download(cls, pks):
+        """Helper method to return a list of documents identified by the provided PKs, ready for download with this
+        resource. This ensures correct prefetches to make the export more efficient."""
+        # group pks by content type
+        by_ctype = {}
+        qs = (
+            CoreDocument.objects.non_polymorphic()
+            .filter(pk__in=pks)
+            .select_related("polymorphic_ctype")
+            .only("pk", "polymorphic_ctype")
+        )
+        for doc in qs:
+            by_ctype.setdefault(doc.polymorphic_ctype, []).append(doc.pk)
+
+        # load each type separately with the correct prefetches
+        docs = []
+        for ctype, ctype_pks in by_ctype.items():
+            model = ctype.model_class()
+            qs = model.objects.filter(pk__in=ctype_pks)
+            qs = qs.select_related(
+                *(cls.select_related.get(model) or [] + cls.select_related[None])
+            )
+            qs = qs.prefetch_related(*cls.prefetch_related.get(model) or [])
+            docs.extend(qs.all())
+
+        # sort docs based on the initial order of pks
+        docs = sorted(docs, key=lambda d: pks.index(d.pk))
+
+        return docs
