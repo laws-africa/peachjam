@@ -21,5 +21,6 @@ from .relationships import *
 from .save_document import *
 from .settings import *
 from .taxonomies import *
+from .user_following import *
 
 from .bill import *  # isort:skip
