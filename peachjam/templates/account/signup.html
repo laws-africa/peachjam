@@ -85,5 +85,8 @@
         <button class="btn btn-primary px-4" type="submit">{% trans 'Sign up' %}</button>
       </div>
     </form>
+    {% if PEACHJAM_SETTINGS.allow_social_logins %}
+      {% include "account/google_login_button.html" %}
+    {% endif %}
   </div>
 {% endblock %}
