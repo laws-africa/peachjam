@@ -198,8 +198,8 @@ class DocumentSearchView(TemplateView):
         engine.page = 1
         engine.page_size = 1000
         response = engine.execute()
-
         pks = [int(hit.meta.id) for hit in response.hits]
+
         dataset = DownloadDocumentsResource().export(
             DownloadDocumentsResource.get_objects_for_download(pks)
         )

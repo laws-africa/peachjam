@@ -51,6 +51,7 @@ from peachjam.models import (
     GenericDocument,
     Judge,
     Judgment,
+    Label,
     Locality,
     MatterType,
     Outcome,
@@ -852,12 +853,17 @@ class DownloadDocumentsResource(resources.ModelResource):
     source_url = fields.Field(readonly=True)
     expression_frbr_uri = fields.Field("expression_frbr_uri")
     language = fields.Field("language")
+    labels = fields.Field(
+        "labels", widget=ManyToManyWidget(Label, separator=", ", field="name")
+    )
 
     # judgments
     court = fields.Field("court", widget=DateWidget())
     registry = fields.Field("registry", widget=DateWidget())
     order = fields.Field("order")
-    judges = fields.Field("judges")
+    judges = fields.Field(
+        "judges", widget=ManyToManyWidget(Judge, separator=", ", field="name")
+    )
 
     # FK fields above must be added to either select_related or prefetch_related
     select_related = {
@@ -867,10 +873,6 @@ class DownloadDocumentsResource(resources.ModelResource):
     prefetch_related = {
         Judgment: ["judges"],
     }
-
-    def dehydrate_judges(self, obj):
-        if hasattr(obj, "judges"):
-            return "|".join(judge.name for judge in obj.judges.all())
 
     def dehydrate_url(self, obj):
         domain = Site.objects.get_current().domain
