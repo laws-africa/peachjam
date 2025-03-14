@@ -10,6 +10,7 @@ from django.http.response import (
     Http404,
     HttpResponse,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     JsonResponse,
 )
 from django.shortcuts import redirect, reverse
@@ -27,11 +28,13 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
+from import_export.formats.base_formats import CSV, XLSX
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
+from peachjam.resources import DownloadDocumentsResource
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.engine import SearchEngine
 from peachjam_search.forms import (
@@ -75,6 +78,11 @@ class DocumentSearchView(TemplateView):
     template_name = "peachjam_search/search_request_debug.html"
     config_version = "2024-10-31"
 
+    download_formats = {
+        "xlsx": XLSX,
+        "csv": CSV,
+    }
+
     def get(self, request, *args, **kwargs):
         return getattr(self, self.action)(request, *args, **kwargs)
 
@@ -90,6 +98,10 @@ class DocumentSearchView(TemplateView):
         if not engine.query and not engine.field_queries:
             # no search term
             return JsonResponse({"error": "No search term"}, status=400)
+
+        # download as xlsx
+        if self.request.GET.get("format"):
+            return self.download_results(engine, self.request.GET["format"])
 
         es_response = engine.execute()
         results = SearchableDocumentSerializer(
@@ -170,6 +182,34 @@ class DocumentSearchView(TemplateView):
             ip_address=self.request.headers.get("x-forwarded-for"),
             user_agent=self.request.headers.get("user-agent"),
         )
+
+    def download_results(self, engine, format):
+        # TODO: better perm
+        if not self.request.user.has_perm("peachjam.can_debug_search"):
+            return HttpResponseForbidden()
+
+        if format not in self.download_formats:
+            return HttpResponseBadRequest("Invalid format")
+
+        # only need the ids
+        engine.source = ["_id"]
+        engine.explain = False
+        # TODO: first 1000 hits
+        engine.page = 1
+        engine.page_size = 1000
+        response = engine.execute()
+        pks = [int(hit.meta.id) for hit in response.hits]
+
+        dataset = DownloadDocumentsResource().export(
+            DownloadDocumentsResource.get_objects_for_download(pks)
+        )
+        fmt = self.download_formats[format]()
+        data = fmt.export_data(dataset)
+
+        response = HttpResponse(data, content_type=fmt.get_content_type())
+        fname = "search-results." + fmt.get_extension()
+        response["Content-Disposition"] = f'attachment; filename="{fname}"'
+        return response
 
 
 class SearchClickViewSet(CreateModelMixin, GenericViewSet):
