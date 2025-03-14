@@ -3,11 +3,13 @@
 {% block page-content %}
   <div class="container">
     <h1 class="mb-3 mt-3">{% trans "My account" %}</h1>
-    <div>
-      {% block account-tabs %}{% endblock %}
-    </div>
-    <div class="mt-3">
-      {% block account-content %}{% endblock %}
+    <div class="row">
+      <div class="col-3 col-lg-2 d-none d-md-block">
+        {% block account-tabs %}{% endblock %}
+      </div>
+      <div class="col">
+        {% block account-content %}{% endblock %}
+      </div>
     </div>
   </div>
 {% endblock %}

@@ -7,8 +7,8 @@
   {% include 'user_account/_tabs.html' with active='social' %}
 {% endblock %}
 {% block account-content %}
+  <h2>{% trans "Social accounts" %}</h2>
   <div class="card mb-5">
-    <h5 class="card-header">{% trans "Social accounts" %}</h5>
     <div class="card-body">
       {% if form.accounts %}
         <p>{% blocktrans %}You can sign in to your account using any of these third party accounts:{% endblocktrans %}</p>
@@ -22,7 +22,7 @@
             {% with base_account.get_provider_account as account %}
               <tr>
                 <td>
-                  <i class="fab fa-fw fa-{{ account.get_brand.id }}"></i> {{ account.get_brand.name }}
+                  <i class="bi bi-{{ account.get_brand.id }}"></i> {{ account.get_brand.name }}
                 </td>
                 <td>{{ account.account.extra_data.email|default:account }}</td>
                 <td class="text-end">
@@ -58,7 +58,7 @@
                 <li>
                   <a class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{ provider.id }}"
                      href="{% provider_login_url provider.id process='connect' %}">
-                    <i class="fab fa-fw fa-{{ provider.id }}"></i>
+                    <i class="bi bi-{{ provider.id }}"></i>
                     {% trans "Connect to" %} {{ provider.name }}
                   </a>
                 </li>

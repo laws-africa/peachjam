@@ -9,7 +9,7 @@
   </a>
   <ul class="dropdown-menu">
     <li>
-      <a class="dropdown-item" href="{% url 'edit_account' %}">{% trans 'My account' %}</a>
+      <a class="dropdown-item" href="{% url 'account_home' %}">{% trans 'My account' %}</a>
     </li>
     {% if user.is_staff %}
       <li>

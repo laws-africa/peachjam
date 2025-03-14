@@ -4,11 +4,16 @@ from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.views import View
 from django.views.generic import UpdateView
+from django.views.generic.base import TemplateView
 
 from peachjam.auth import user_display
 from peachjam.forms import UserForm
 
 User = get_user_model()
+
+
+class AccountsHomeView(LoginRequiredMixin, TemplateView):
+    template_name = "user_account/home.html"
 
 
 class EditAccountView(LoginRequiredMixin, UpdateView):

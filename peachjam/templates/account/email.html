@@ -5,8 +5,8 @@
   {% include 'user_account/_tabs.html' with active='emails' %}
 {% endblock %}
 {% block account-content %}
+  <h2>{% trans "Email addresses" %}</h2>
   <div class="card mb-5">
-    <h5 class="card-header">{% trans "Email addresses" %}</h5>
     <div class="card-body">
       {% with user.emailaddress_set.all as emails %}
         {% if emails %}
@@ -32,10 +32,10 @@
                 <td class="{% if emailaddress.primary %}font-weight-bold{% endif %}">{{ emailaddress.email }}</td>
                 <td>
                   {% if emailaddress.verified %}
-                    <i class="far fa-fw fa-check-circle text-success"></i>
+                    <i class="bi bi-check-circle text-success"></i>
                     {% trans 'verified' %}
                   {% else %}
-                    <i class="far fa-fw fa-question-circle text-danger"></i>
+                    <i class="bi bi-question-circle text-danger"></i>
                     {% trans 'unverified' %}
                   {% endif %}
                   {% if emailaddress.primary %}
@@ -88,7 +88,7 @@
             </div>
           {% endif %}
         </div>
-        <button name="action_add" type="submit" class="btn btn-primary">{% trans 'Add email' %}</button>
+        <button name="action_add" type="submit" class="btn btn-primary">{% trans 'Add email address' %}</button>
       </form>
     </div>
   </div>
