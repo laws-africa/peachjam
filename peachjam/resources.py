@@ -913,7 +913,9 @@ class DownloadDocumentsResource(resources.ModelResource):
             qs = qs.select_related(
                 *(cls.select_related.get(model) or [] + cls.select_related[None])
             )
-            qs = qs.prefetch_related(*cls.prefetch_related.get(model) or [])
+            qs = qs.prefetch_related(
+                *(cls.prefetch_related.get(model) or [] + cls.prefetch_related[None])
+            )
             docs.extend(qs.all())
 
         # sort docs based on the initial order of pks
