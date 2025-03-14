@@ -1,10 +1,16 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.db import models
 
 
 class Product(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
+    group = models.OneToOneField(Group, on_delete=models.CASCADE, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.group:
+            self.group, created = Group.objects.get_or_create(name=self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
