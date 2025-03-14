@@ -211,8 +211,13 @@
                     </select>
                   </div>
                   <div class="col-md order-md-1 align-self-center">
-                    <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
-                    <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
+                    <div>
+                      <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
+                      <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
+                    </div>
+                    <div v-if="searchInfo.can_debug">
+                      <a :href="downloadUrl()" target="_blank">{{ $t('Download results') }}</a>
+                    </div>
                   </div>
                 </div>
 
@@ -882,9 +887,11 @@ export default {
         date_from: null
       };
     },
+
     savedSearchModal () {
       htmx.ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });
     },
+
     async linkTraces (previousId, newId) {
       if (previousId) {
         // ensure we don't try to link our very first trace if we re-use a trace due to caching
@@ -900,6 +907,12 @@ export default {
           });
         }
       }
+    },
+
+    downloadUrl () {
+      const params = this.generateSearchParams();
+      params.set('format', 'xlsx');
+      return `/search/api/documents/?${params.toString()}`;
     }
   }
 };

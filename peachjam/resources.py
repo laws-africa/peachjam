@@ -869,7 +869,8 @@ class DownloadDocumentsResource(resources.ModelResource):
     }
 
     def dehydrate_judges(self, obj):
-        return "|".join(judge.name for judge in obj.judges.all())
+        if hasattr(obj, "judges"):
+            return "|".join(judge.name for judge in obj.judges.all())
 
     def dehydrate_url(self, obj):
         domain = Site.objects.get_current().domain
