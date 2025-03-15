@@ -1,12 +1,21 @@
 from django.contrib import admin
 
-from .models import PricingPlan, Product, ProductOffering, Subscription
+from .models import Feature, PricingPlan, Product, ProductOffering, Subscription
+
+
+@admin.register(Feature)
+class FeatureAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+    filter_horizontal = ("permissions",)
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ("name", "description")
     search_fields = ("name",)
+    readonly_fields = ("group",)
+    filter_horizontal = ("features",)
 
 
 @admin.register(PricingPlan)
@@ -28,8 +37,9 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ("user", "product_offering", "active", "created_at")
     search_fields = ("user__username", "product_offering__product__name")
     list_filter = ("active", "created_at")
+    readonly_fields = ["created_at"]
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ["user", "product_offering"]
-        return []
+            return self.readonly_fields + ["user"]
+        return self.readonly_fields
