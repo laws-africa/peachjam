@@ -12,8 +12,8 @@
       {% if PEACHJAM_SETTINGS.allow_save_documents %}
         <div class="col-md">
           <div class="card mb-3">
-            <h5 class="card-header">{% trans "Saved documents" %}</h5>
             <div class="card-body">
+              <h4 class="card-title">{% trans "Saved documents" %}</h4>
               <p>{% trans "Save documents to folders to make research easier." %}</p>
               <a href="{% url 'folder_list' %}" class="btn btn-primary">{% trans "Saved documents" %}</a>
             </div>
@@ -24,8 +24,8 @@
         <div class="col-md">
           <div class="col-md">
             <div class="card mb-3">
-              <h5 class="card-header">{% trans "Search alerts" %}</h5>
               <div class="card-body">
+                <h4 class="card-title">{% trans "Search alerts" %}</h4>
                 <p>{% trans "We'll email you when new documents match your search." %}</p>
                 <a href="{% url 'search:saved_search_list' %}" class="btn btn-primary">{% trans "Search alerts" %}</a>
               </div>
