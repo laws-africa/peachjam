@@ -7,6 +7,13 @@
   {% include 'user_account/_tabs.html' with active='home' %}
 {% endblock %}
 {% block account-content %}
+  <h1 class="mb-2">{% trans "My account" %}</h1>
+  <div class="mb-4 h5 text-muted">
+    {% if user.first_name %}
+      <span class="me-3">{{ user.first_name }} {{ user.last_name }}</span>
+      {{ user.email }}
+    {% endif %}
+  </div>
   {% block account-home-content %}
     <div class="row">
       {% if PEACHJAM_SETTINGS.allow_save_documents %}
