@@ -218,9 +218,9 @@ class UserFollowing(models.Model):
                 new = follow.get_new_followed_documents()
                 if new["documents"]:
                     documents.append(follow.get_new_followed_documents())
-            print(documents)
             if documents:
-
+                # TODO: we need a better way to do this, as we are updating the last_alerted_at for all follows
+                # follows.update(last_alerted_at=timezone.now())
                 cls.send_alert(user, documents)
 
     @classmethod
