@@ -15,7 +15,7 @@ from .models import (
 
 @admin.register(Feature)
 class FeatureAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("name", "ordering")
     search_fields = ("name",)
     filter_horizontal = ("permissions",)
 

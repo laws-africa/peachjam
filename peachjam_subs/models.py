@@ -20,9 +20,13 @@ The subscriptions work as follows:
 class Feature(models.Model):
     name = models.CharField(max_length=100, unique=True)
     permissions = models.ManyToManyField(Permission, blank=True)
+    ordering = models.IntegerField(default=0)
     hidden = models.BooleanField(
         default=False, help_text=_("Is this feature hidden from users?")
     )
+
+    class Meta:
+        ordering = ("ordering",)
 
     def __str__(self):
         s = self.name
