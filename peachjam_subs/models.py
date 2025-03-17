@@ -2,6 +2,8 @@ from django.contrib.auth.models import Group, Permission, User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.models import SingletonModel
+
 
 class Feature(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -76,3 +78,20 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"Subscription<{self.user.username} - {self.product_offering}"
+
+
+class SubscriptionSettings(SingletonModel):
+    default_product_offering = models.ForeignKey(
+        ProductOffering,
+        related_name="+",
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("default product offering"),
+    )
+
+    def __str__(self):
+        return "Subscription Settings"
+
+
+def subscription_settings():
+    return SubscriptionSettings.load()

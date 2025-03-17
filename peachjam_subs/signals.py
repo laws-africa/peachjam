@@ -1,7 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.db.models.signals import m2m_changed, post_delete, post_save
 from django.dispatch import receiver
 
-from .models import Feature, Product, Subscription
+from .models import Feature, Product, Subscription, subscription_settings
 
 
 @receiver(post_save, sender=Subscription)
@@ -37,3 +38,19 @@ def product_features_changed(sender, instance, action, **kwargs):
 def feature_saved(sender, instance, **kwargs):
     for product in instance.product_set.all():
         product.reset_permissions()
+
+
+# peachjam_subs/signals.py
+
+
+User = get_user_model()
+
+
+@receiver(post_save, sender=User)
+def create_default_subscription(sender, instance, created, **kwargs):
+    if created:
+        default_product_offering = subscription_settings().default_product_offering
+        if default_product_offering:
+            Subscription.objects.create(
+                user=instance, product_offering=default_product_offering
+            )

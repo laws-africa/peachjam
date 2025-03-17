@@ -1,6 +1,16 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.shortcuts import redirect
 
-from .models import Feature, PricingPlan, Product, ProductOffering, Subscription
+from .models import (
+    Feature,
+    PricingPlan,
+    Product,
+    ProductOffering,
+    Subscription,
+    SubscriptionSettings,
+    subscription_settings,
+)
 
 
 @admin.register(Feature)
@@ -43,3 +53,27 @@ class SubscriptionAdmin(admin.ModelAdmin):
         if obj:
             return self.readonly_fields + ["user"]
         return self.readonly_fields
+
+
+@admin.register(SubscriptionSettings)
+class SubscriptionSettingsAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        # redirect to edit the singleton
+        return redirect(
+            "admin:peachjam_subs_subscriptionsettings_change",
+            subscription_settings().pk,
+        )
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if obj.default_product_offering:
+            users_without_subscription = get_user_model().objects.filter(
+                subscriptions__isnull=True
+            )
+            for user in users_without_subscription:
+                Subscription.objects.create(
+                    user=user, product_offering=obj.default_product_offering
+                )
