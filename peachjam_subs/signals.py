@@ -30,9 +30,6 @@ def feature_saved(sender, instance, **kwargs):
         product.reset_permissions()
 
 
-# peachjam_subs/signals.py
-
-
 User = get_user_model()
 
 
