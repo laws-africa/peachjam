@@ -13,3 +13,7 @@
     {% endif %}
   {% endwith %}
 {% endblock %}
+{% block follow-button %}
+  <div hx-get="{% url 'user_following_button' %}?author={{ author.pk }}"
+       hx-trigger="load"></div>
+{% endblock %}
