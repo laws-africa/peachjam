@@ -4,6 +4,18 @@ from django.utils.translation import gettext_lazy as _
 
 from peachjam.models import SingletonModel
 
+"""
+The subscriptions work as follows:
+
+1. A feature is a permission that is included in a product. A feature is usually associated with multiple Django
+   permissions which enable access to the feature.
+2. A product is a collection of features, such as "Team Plan".
+3. A pricing plan is a way to charge for a product, such as X per month.
+4. A product offering is a product with a pricing plan. The same product may be offered under different pricing plans
+   to reflect discounts, etc.
+5. A subscription is a user's access to a product offering.
+"""
+
 
 class Feature(models.Model):
     name = models.CharField(max_length=100, unique=True)
