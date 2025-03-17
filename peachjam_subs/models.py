@@ -92,6 +92,13 @@ class Subscription(models.Model):
     def product(self):
         return self.product_offering.product
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.active:
+            self.product_offering.product.group.user_set.add(self.user)
+        else:
+            self.product_offering.product.group.user_set.remove(self.user)
+
     def __str__(self):
         return f"Subscription<{self.user.username} - {self.product_offering}"
 
