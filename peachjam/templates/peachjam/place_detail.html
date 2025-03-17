@@ -4,3 +4,7 @@
 {% block page-title %}
   {% if not entity_profile %}<h1 class="mt-2">{{ place }}</h1>{% endif %}
 {% endblock %}
+{% block follow-button %}
+  <div hx-get="{% url 'user_following_button' %}?{{ place_model_name }}={{ place.pk }}"
+       hx-trigger="load"></div>
+{% endblock %}
