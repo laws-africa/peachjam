@@ -1,7 +1,7 @@
 {% load static i18n %}
 <header>
   {% block skip-links %}
-    <div id="skip-links">
+    <div class="skip-links">
       <a class="bg-white"
          href="{% if 'akn/' in request.path %}#document-content{% else %}#top{% endif %}">{% trans 'Skip to document content' %}</a>
       <a class="bg-white" href="#main-nav">{% trans 'Skip to main menu' %}</a>
