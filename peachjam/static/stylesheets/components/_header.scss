@@ -9,3 +9,16 @@
     }
   }
 }
+
+#secondary-nav .navbar-collapse {
+  flex-grow: 0;
+}
+
+.navbar-nav .nav-user-dropdown-menu {
+  position: absolute;
+}
+
+.dropdown-item.username {
+  max-width: 50vw;
+  overflow-x: hidden;
+}
