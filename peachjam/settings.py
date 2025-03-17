@@ -162,8 +162,6 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
     "guardian.backends.ObjectPermissionBackend",
 ]
-# admins must create accounts
-ACCOUNT_SIGNUP_ENABLED = False
 # email addresses are required for new accounts
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_PRESERVE_USERNAME_CASING = False

@@ -14,6 +14,9 @@
       <a class="navbar-brand" href="{% url 'home_page' %}">
         {% block navbar-logo %}Logo image{% endblock %}
       </a>
+      {% block navbar-user-menu %}
+        {% include "peachjam/_user_menu.html" %}
+      {% endblock %}
       <button class="navbar-toggler"
               type="button"
               data-bs-toggle="collapse"
@@ -58,20 +61,6 @@
             </li>
           {% endblock %}
         </ul>
-        {% if user.is_authenticated %}
-          <ul class="navbar-nav">
-            {% block navbar-user-menu %}
-              {% include "peachjam/_user_menu.html" %}
-            {% endblock %}
-          </ul>
-        {% elif PEACHJAM_SETTINGS.allow_save_documents %}
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="btn btn-primary"
-                 href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">{% trans "Log in" %}</a>
-            </li>
-          </ul>
-        {% endif %}
       </div>
     </div>
   </nav>
