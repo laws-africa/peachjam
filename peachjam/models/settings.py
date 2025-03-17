@@ -72,6 +72,11 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow signups via social accounts"),
     )
+    allow_signups = models.BooleanField(
+        verbose_name=_("allow signups"),
+        default=True,
+        help_text=_("Allow users to create accounts"),
+    )
 
     metabase_dashboard_link = models.URLField(
         verbose_name=_("metabase dashboard link"), null=True, blank=True

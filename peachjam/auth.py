@@ -1,3 +1,4 @@
+from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.utils import perform_login
 from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
@@ -12,6 +13,11 @@ from peachjam.models import pj_settings
 def user_display(user):
     """Return the user's display name."""
     return user.get_full_name() or user.email or user.username
+
+
+class AccountAdapter(DefaultAccountAdapter):
+    def is_open_for_signup(self, request):
+        return pj_settings().allow_signups
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
