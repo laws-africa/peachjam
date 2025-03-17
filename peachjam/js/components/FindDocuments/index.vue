@@ -107,16 +107,6 @@
             {{ searchTip.prompt }}
             <a href="#" @click.stop.prevent="useSearchTip()">{{ searchTip.q }}</a>
           </div>
-          <div id="saved-search-button" />
-          <div
-            id="saved-search-modal"
-            class="modal fade"
-            tabindex="-1"
-            aria-labelledby="saved-search-modal-label"
-            aria-hidden="true"
-          >
-            <div id="saved-search-modal-dialog" class="modal-dialog" />
-          </div>
         </div>
         <div
           id="nav-advanced-search"
@@ -148,7 +138,6 @@
       </div>
     </div>
     <div class="mt-3" v-if="!googleActive">
-      <FacetBadges v-model="facets" :permissive="searchInfo.count === 0" />
       <div
         v-if="error"
         class="mt-3 alert alert-warning"
@@ -188,12 +177,23 @@
           </div>
 
           <div class="col-md-12 col-lg-9 position-relative">
-            <div class="search-results">
+            <div>
+              <FacetBadges v-model="facets" :permissive="searchInfo.count === 0" />
+              <div id="saved-search-button" />
+              <div
+                id="saved-search-modal"
+                class="modal fade"
+                tabindex="-1"
+                aria-labelledby="saved-search-modal-label"
+                aria-hidden="true"
+              >
+                <div id="saved-search-modal-dialog" class="modal-dialog" />
+              </div>
               <div v-if="searchInfo.count">
-                <div class="mb-3 sort-body row">
+                <div class="my-3 sort-body row">
                   <div class="col-md-4 order-md-2 mb-2 sort__inner d-flex align-items-center">
                     <div style="width: 6em">
-                      {{ $t('Sort') }}
+                      {{ $t('Sort by') }}
                     </div>
                     <select
                       v-model="ordering"
@@ -214,9 +214,10 @@
                     <div>
                       <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
                       <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
-                    </div>
-                    <div v-if="searchInfo.can_debug">
-                      <a :href="downloadUrl()" target="_blank">{{ $t('Download results') }}</a>
+                      <span v-if="searchInfo.can_download">
+                        &nbsp;
+                        <a :href="downloadUrl()" target="_blank">{{ $t('Download to Excel') }}</a>
+                      </span>
                     </div>
                   </div>
                 </div>
