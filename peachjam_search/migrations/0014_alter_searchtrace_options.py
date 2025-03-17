@@ -15,9 +15,9 @@ class Migration(migrations.Migration):
             options={
                 "ordering": ("-created_at",),
                 "permissions": [
-                    ("can_debug_search", "Can debug search"),
-                    ("can_download_search", "Can download search results"),
-                    ("can_semantic_search", "Can use semantic search"),
+                    ("debug_search", "Can debug search"),
+                    ("download_search", "Can download search results"),
+                    ("semantic_search", "Can use semantic search"),
                 ],
             },
         ),
