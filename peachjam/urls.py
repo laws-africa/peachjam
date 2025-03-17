@@ -105,6 +105,9 @@ from peachjam.views import (
     TaxonomyFirstLevelView,
     TaxonomyListView,
     TermsOfUsePageView,
+    UserFollowingButtonView,
+    UserFollowingCreateView,
+    UserFollowingDeleteView,
     WorkAutocomplete,
 )
 from peachjam.views.comments import comment_form_view
@@ -531,6 +534,29 @@ urlpatterns = [
                     "<int:pk>/delete",
                     AnnotationDeleteView.as_view(),
                     name="annotation_delete",
+                ),
+            ]
+        ),
+    ),
+    # Following
+    path(
+        "follow/",
+        include(
+            [
+                path(
+                    "button/",
+                    UserFollowingButtonView.as_view(),
+                    name="user_following_button",
+                ),
+                path(
+                    "create/",
+                    UserFollowingCreateView.as_view(),
+                    name="user_following_create",
+                ),
+                path(
+                    "<int:pk>/delete/",
+                    UserFollowingDeleteView.as_view(),
+                    name="user_following_delete",
                 ),
             ]
         ),

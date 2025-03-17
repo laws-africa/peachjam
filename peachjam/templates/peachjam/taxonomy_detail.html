@@ -30,4 +30,8 @@
     {% endwith %}
   {% endif %}
 {% endblock %}
+{% block follow-button %}
+  <div hx-get="{% url 'user_following_button' %}?taxonomy_topic={{ taxonomy.pk }}"
+       hx-trigger="load"></div>
+{% endblock %}
 {% block taxonomy-json %}{{ taxonomy_tree|json_script:"taxonomy_tree" }}{% endblock %}

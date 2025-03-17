@@ -1,0 +1,8 @@
+{% load i18n %}
+<form hx-post="{% url 'user_following_delete' object.pk %}?{{ request.GET.urlencode }}">
+  {% csrf_token %}
+  <button class="btn btn-primary" type="submit">
+    <span><i class="bi bi-bell"></i></span>
+    <span>{% trans 'Unfollow' %}</span>
+  </button>
+</form>

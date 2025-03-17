@@ -6,3 +6,7 @@
 {% block month_list %}
   {% include "peachjam/_court_registries_months_list.html" %}
 {% endblock %}
+{% block follow-button %}
+  <div hx-get="{% url 'user_following_button' %}?court_registry={{ registry.pk }}"
+       hx-trigger="load"></div>
+{% endblock %}
