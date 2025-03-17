@@ -128,6 +128,9 @@ class DocumentSearchView(TemplateView):
         response["can_download"] = self.request.user.has_perm(
             "peachjam_search.can_download_search"
         )
+        response["can_semantic"] = settings.PEACHJAM[
+            "SEARCH_SEMANTIC"
+        ] and self.request.user.has_perm("peachjam_search.can_semantic_search")
         response["trace_id"] = str(trace.id) if trace else None
 
         return self.render(response)
@@ -148,10 +151,11 @@ class DocumentSearchView(TemplateView):
         engine = SearchEngine()
         form.configure_engine(engine)
 
-        if self.request.user.has_perm("peachjam_search.can_debug_search"):
-            engine.explain = True
-            if settings.PEACHJAM["SEARCH_SEMANTIC"]:
-                engine.mode = form.cleaned_data.get("mode") or engine.mode
+        engine.explain = self.request.user.has_perm("peachjam_search.can_debug_search")
+        if settings.PEACHJAM["SEARCH_SEMANTIC"] and self.request.user.has_perm(
+            "peachjam_search.can_semantic_search"
+        ):
+            engine.mode = form.cleaned_data.get("mode") or engine.mode
 
         return engine
 

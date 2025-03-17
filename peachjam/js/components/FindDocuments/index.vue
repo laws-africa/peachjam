@@ -94,13 +94,26 @@
               {{ $t("Filters") }} <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
             </button>
           </form>
-          <div class="my-2 text-end">
-            <select v-if="showModes && searchInfo && searchInfo.can_debug" v-model="mode" class="me-2">
-              <option value="text">Text (regular)</option>
-              <option value="hybrid">Text and semantic</option>
-              <option value="semantic">Semantic (content only)</option>
-            </select>
-            <HelpBtn page="search/" />
+          <div class="d-flex my-2">
+            <div v-if="showModes && searchInfo && searchInfo.can_semantic">
+              <div class="form-check form-switch">
+                <input
+                  id="mode-hybrid"
+                  v-model="mode"
+                  class="form-check-input"
+                  type="checkbox"
+                  :true-value="'hybrid'"
+                  :false-value="'text'"
+                >
+                <label class="form-check-label" for="mode-hybrid">
+                  {{ $t('Expand your search using AI') }}
+                  <i class="bi bi-stars"></i>
+                </label>
+              </div>
+            </div>
+            <div class="ms-auto">
+              <HelpBtn page="search/" />
+            </div>
           </div>
           <div v-if="searchTip" class="mt-2 mb-3">
             <i class="bi bi-info-circle" />
@@ -344,7 +357,7 @@ export default {
         date_from: null
       },
       googleActive: false,
-      mode: 'text',
+      mode: 'text'
     };
     const facets = [
       // most frequently used facets first, based on user data
@@ -461,6 +474,10 @@ export default {
 
   watch: {
     ordering () {
+      this.search();
+    },
+
+    mode () {
       this.search();
     },
 
