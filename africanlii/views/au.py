@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, TemplateView
 
@@ -9,7 +10,12 @@ from africanlii.models import (
     RegionalEconomicCommunity,
 )
 from peachjam.models import CourtClass, RatificationCountry
-from peachjam.views import AuthorDetailView, CoreDocument, PlaceDetailView
+from peachjam.views import (
+    AuthorDetailView,
+    CoreDocument,
+    FilteredDocumentListView,
+    PlaceDetailView,
+)
 
 
 class AfricanUnionDetailPageView(TemplateView):
@@ -35,6 +41,22 @@ class AfricanUnionDetailPageView(TemplateView):
 
 class AfricanUnionOrganDetailView(AuthorDetailView):
     template_name = "africanlii/au_organ_detail.html"
+
+    def get_base_queryset(self):
+        # ACHPR must also include judgments from the court with the same code
+        if self.kwargs["code"] == "ACHPR":
+            return (
+                # skip the AuthorDetailView method
+                super(FilteredDocumentListView, self)
+                .get_base_queryset()
+                .filter(
+                    Q(genericdocument__author__in=[self.author])
+                    | Q(judgment__court__code=self.kwargs["code"])
+                )
+                .select_related("locality")
+            )
+        else:
+            return super().get_base_queryset()
 
 
 class AfricanUnionInstitutionDetailView(AuthorDetailView):
