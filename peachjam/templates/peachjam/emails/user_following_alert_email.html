@@ -7,7 +7,7 @@
   </head>
   <body>
     <p>{{ user }},</p>
-    <p>{% trans "We have found new documents for areas that you are folllowing:" %}</p>
+    <p>{% trans "We have found new documents for areas that you are following:" %}</p>
     {% for item in followed_documents %}
       {{ item.followed_object }}
       {% for doc in item.documents %}

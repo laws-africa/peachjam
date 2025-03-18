@@ -167,48 +167,52 @@ class UserFollowing(models.Model):
     def get_new_followed_documents(self):
         qs = CoreDocument.objects.all()
         if self.last_alerted_at:
-            qs.filter(created_at__gt=self.last_alerted_at)
+            qs = qs.filter(created_at__gt=self.last_alerted_at)
         if self.court:
+            qs = qs.filter(judgment__court=self.court)[:10]
             return {
                 "followed_object": self.court,
-                "documents": qs.filter(judgment__court=self.court)[:10],
+                "documents": qs,
             }
+
         elif self.author:
+            qs = qs.filter(genericdocument__author=self.author)[:10]
             return {
                 "followed_object": self.author,
-                "documents": qs.filter(genericdocument__author=self.author)[:10],
+                "documents": qs,
             }
         elif self.court_class:
+            qs = qs.filter(judgment__court__court_class=self.court_class)[:10]
             return {
                 "followed_object": self.court_class,
-                "documents": qs.filter(judgment__court__court_class=self.court_class)[
-                    :10
-                ],
+                "documents": qs,
             }
         elif self.court_registry:
+            qs = qs.filter(judgment__registry=self.court_registry)[:10]
             return {
                 "followed_object": self.court_registry,
-                "documents": qs.filter(
-                    judgment__court__court_registry=self.court_registry
-                )[:10],
+                "documents": qs,
             }
         elif self.country:
+            qs = qs.filter(jurisdiction=self.country)[:10]
             return {
                 "followed_object": self.country,
-                "documents": qs.filter(jurisdiction=self.country)[:10],
+                "documents": qs,
             }
         elif self.locality:
+            qs = qs.filter(locality=self.locality)[:10]
             return {
                 "followed_object": self.locality,
-                "documents": qs.filter(locality=self.locality)[:10],
+                "documents": qs,
             }
         elif self.taxonomy_topic:
             topics = [self.taxonomy_topic] + [
                 t for t in self.taxonomy_topic.get_descendants()
             ]
+            qs = qs.filter(taxonomies__topic__in=topics)[:10]
             return {
                 "followed_object": self.taxonomy_topic,
-                "documents": qs.filter(taxonomies__topic__in=topics)[:10],
+                "documents": qs,
             }
 
     @classmethod
