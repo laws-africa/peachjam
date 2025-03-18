@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from . import Author, CoreDocument, Court, CourtClass, CourtRegistry, Locality, Taxonomy
@@ -217,10 +218,10 @@ class UserFollowing(models.Model):
             for follow in follows:
                 new = follow.get_new_followed_documents()
                 if new["documents"]:
-                    documents.append(follow.get_new_followed_documents())
+                    follow.last_alerted_at = timezone.now()
+                    follow.save()
+                    documents.append(new)
             if documents:
-                # TODO: we need a better way to do this, as we are updating the last_alerted_at for all follows
-                # follows.update(last_alerted_at=timezone.now())
                 cls.send_alert(user, documents)
 
     @classmethod
