@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.shortcuts import redirect
 
+from peachjam.admin import UserAdminCustom
+
 from .models import (
     Feature,
     PricingPlan,
@@ -46,7 +48,7 @@ class ProductOfferingAdmin(admin.ModelAdmin):
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ("user", "product_offering", "active", "created_at")
     search_fields = ("user__username", "product_offering__product__name")
-    list_filter = ("active", "created_at")
+    list_filter = ("product_offering", "active", "created_at")
     readonly_fields = ["created_at"]
 
     def get_readonly_fields(self, request, obj=None):
@@ -77,3 +79,19 @@ class SubscriptionSettingsAdmin(admin.ModelAdmin):
                 Subscription.objects.create(
                     user=user, product_offering=obj.default_product_offering
                 )
+
+
+class SubscriptionInline(admin.TabularInline):
+    model = Subscription
+    extra = 0
+    readonly_fields = ["created_at"]
+    can_delete = False
+    max_num = 1
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return self.readonly_fields + ["user", "product_offering"]
+        return self.readonly_fields
+
+
+UserAdminCustom.inlines = list(UserAdminCustom.inlines) + [SubscriptionInline]
