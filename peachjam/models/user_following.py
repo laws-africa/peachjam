@@ -181,7 +181,9 @@ class UserFollowing(models.Model):
         elif self.court_class:
             return {
                 "followed_object": self.court_class,
-                "documents": qs.filter(judgment__court__court_class=self.court_class),
+                "documents": qs.filter(judgment__court__court_class=self.court_class)[
+                    :10
+                ],
             }
         elif self.court_registry:
             return {
@@ -193,12 +195,12 @@ class UserFollowing(models.Model):
         elif self.country:
             return {
                 "followed_object": self.country,
-                "documents": qs.filter(jurisdiction=self.country),
+                "documents": qs.filter(jurisdiction=self.country)[:10],
             }
         elif self.locality:
             return {
                 "followed_object": self.locality,
-                "documents": qs.filter(locality=self.locality),
+                "documents": qs.filter(locality=self.locality)[:10],
             }
         elif self.taxonomy_topic:
             topics = [self.taxonomy_topic] + [
@@ -206,7 +208,7 @@ class UserFollowing(models.Model):
             ]
             return {
                 "followed_object": self.taxonomy_topic,
-                "documents": qs.filter(taxonomies__topic__in=topics),
+                "documents": qs.filter(taxonomies__topic__in=topics)[:10],
             }
 
     @classmethod
