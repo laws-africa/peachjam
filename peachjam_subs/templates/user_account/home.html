@@ -1,0 +1,30 @@
+{% extends 'user_account/home.html' %}
+{% load i18n %}
+{% block account-home-content %}
+  {{ block.super }}
+  <h2 class="mt-4">{% trans "Subscription" %}</h2>
+  {% for subscription in user.subscriptions.all %}
+    {% if subscription.active %}
+      <div class="row">
+        <div class="col col-md-6">
+          <div class="card mb-3">
+            <div class="card-body">
+              <h4 class="card-title">{{ subscription.product.name }}</h4>
+              <div class="text-muted mb-3">{% trans "Member since" %} {{ subscription.created_at|date }}</div>
+              <p>{{ subscription.product.description|linebreaksbr }}</p>
+              <ul class="list-unstyled">
+                {% for feature in subscription.product.features.all %}
+                  {% if not feature.hidden %}
+                    <li>
+                      <i class="bi bi-check text-success"></i> {{ feature.name }}
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endblock %}
