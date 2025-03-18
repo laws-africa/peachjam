@@ -94,28 +94,31 @@
               {{ $t("Filters") }} <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
             </button>
           </form>
-          <div class="my-2 text-end">
-            <select v-if="showModes && searchInfo && searchInfo.can_debug" v-model="mode" class="me-2">
-              <option value="text">Text (regular)</option>
-              <option value="hybrid">Text and semantic</option>
-              <option value="semantic">Semantic (content only)</option>
-            </select>
-            <HelpBtn page="search/" />
+          <div class="d-flex my-2">
+            <div v-if="showModes && searchInfo && searchInfo.can_semantic">
+              <div class="form-check form-switch">
+                <input
+                  id="mode-hybrid"
+                  v-model="mode"
+                  class="form-check-input"
+                  type="checkbox"
+                  :true-value="'hybrid'"
+                  :false-value="'text'"
+                >
+                <label class="form-check-label" for="mode-hybrid">
+                  {{ $t('Expand your search using AI') }}
+                  <i class="bi bi-stars"></i>
+                </label>
+              </div>
+            </div>
+            <div class="ms-auto">
+              <HelpBtn page="search/" />
+            </div>
           </div>
           <div v-if="searchTip" class="mt-2 mb-3">
             <i class="bi bi-info-circle" />
             {{ searchTip.prompt }}
             <a href="#" @click.stop.prevent="useSearchTip()">{{ searchTip.q }}</a>
-          </div>
-          <div id="saved-search-button" />
-          <div
-            id="saved-search-modal"
-            class="modal fade"
-            tabindex="-1"
-            aria-labelledby="saved-search-modal-label"
-            aria-hidden="true"
-          >
-            <div id="saved-search-modal-dialog" class="modal-dialog" />
           </div>
         </div>
         <div
@@ -148,7 +151,6 @@
       </div>
     </div>
     <div class="mt-3" v-if="!googleActive">
-      <FacetBadges v-model="facets" :permissive="searchInfo.count === 0" />
       <div
         v-if="error"
         class="mt-3 alert alert-warning"
@@ -188,12 +190,23 @@
           </div>
 
           <div class="col-md-12 col-lg-9 position-relative">
-            <div class="search-results">
+            <div>
+              <FacetBadges v-model="facets" :permissive="searchInfo.count === 0" />
+              <div id="saved-search-button" />
+              <div
+                id="saved-search-modal"
+                class="modal fade"
+                tabindex="-1"
+                aria-labelledby="saved-search-modal-label"
+                aria-hidden="true"
+              >
+                <div id="saved-search-modal-dialog" class="modal-dialog" />
+              </div>
               <div v-if="searchInfo.count">
-                <div class="mb-3 sort-body row">
+                <div class="my-3 sort-body row">
                   <div class="col-md-4 order-md-2 mb-2 sort__inner d-flex align-items-center">
                     <div style="width: 6em">
-                      {{ $t('Sort') }}
+                      {{ $t('Sort by') }}
                     </div>
                     <select
                       v-model="ordering"
@@ -211,8 +224,14 @@
                     </select>
                   </div>
                   <div class="col-md order-md-1 align-self-center">
-                    <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
-                    <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
+                    <div>
+                      <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
+                      <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
+                      <span v-if="searchInfo.can_download">
+                        &nbsp;
+                        <a :href="downloadUrl()" target="_blank">{{ $t('Download to Excel') }}</a>
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -338,7 +357,7 @@ export default {
         date_from: null
       },
       googleActive: false,
-      mode: 'text',
+      mode: 'text'
     };
     const facets = [
       // most frequently used facets first, based on user data
@@ -455,6 +474,10 @@ export default {
 
   watch: {
     ordering () {
+      this.search();
+    },
+
+    mode () {
       this.search();
     },
 
@@ -882,9 +905,11 @@ export default {
         date_from: null
       };
     },
+
     savedSearchModal () {
       htmx.ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });
     },
+
     async linkTraces (previousId, newId) {
       if (previousId) {
         // ensure we don't try to link our very first trace if we re-use a trace due to caching
@@ -900,6 +925,12 @@ export default {
           });
         }
       }
+    },
+
+    downloadUrl () {
+      const params = this.generateSearchParams();
+      params.set('format', 'xlsx');
+      return `/search/api/documents/?${params.toString()}`;
     }
   }
 };

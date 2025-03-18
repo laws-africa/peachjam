@@ -2,12 +2,25 @@
 {% load i18n %}
 {% block page-content %}
   <div class="container">
-    <h1 class="mb-3 mt-3">{% trans "My account" %}</h1>
-    <div>
-      {% block account-tabs %}{% endblock %}
-    </div>
-    <div class="mt-3">
-      {% block account-content %}{% endblock %}
+    {% block breadcrumbs %}
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'account_home' %}">{% trans 'My account' %}</a>
+          </li>
+        </ol>
+      </nav>
+    {% endblock %}
+    <div class="row">
+      <div class="col-3 col-xl-2 d-none d-md-block">
+        {% block account-tabs %}{% endblock %}
+      </div>
+      <div class="col">
+        {% block account-content %}{% endblock %}
+      </div>
     </div>
   </div>
 {% endblock %}

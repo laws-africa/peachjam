@@ -1,33 +1,62 @@
 {% load i18n %}
-<li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle"
-     href="#"
-     role="button"
-     data-bs-toggle="dropdown"
-     aria-expanded="false">
-    {{ user }}
-  </a>
-  <ul class="dropdown-menu">
-    <li>
-      <a class="dropdown-item" href="{% url 'edit_account' %}">{% trans 'My account' %}</a>
-    </li>
-    {% if user.is_staff %}
-      <li>
-        <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
-      </li>
-    {% endif %}
-    {% if PEACHJAM_SETTINGS.allow_save_documents %}
-      <li>
-        <a class="dropdown-item" href="{% url 'folder_list' %}">{% trans 'Saved documents' %}</a>
-      </li>
-    {% endif %}
-    {% if PEACHJAM_SETTINGS.allow_save_searches %}
-      <li>
-        <a class="dropdown-item" href="{% url 'search:saved_search_list' %}">{% trans 'Search alerts' %}</a>
-      </li>
-    {% endif %}
-    <li>
-      <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
+{% if user.is_authenticated %}
+  <ul class="navbar-nav ms-auto me-2">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle"
+         href="#"
+         role="button"
+         data-bs-toggle="dropdown"
+         data-bs-reference="body"
+         aria-expanded="false">
+        <i class="bi bi-person-circle"></i>
+        {% trans "My account" %}
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end nav-user-dropdown-menu">
+        <li class="dropdown-item username">
+          {{ user.first_name }} {{ user.last_name }}
+          {% if user.email %}
+            <br/>
+            {{ user.email }}
+          {% endif %}
+        </li>
+        <li>
+          <hr class="dropdown-divider"/>
+        </li>
+        <li>
+          <a class="dropdown-item" href="{% url 'account_home' %}">{% trans 'My account' %}</a>
+        </li>
+        {% if PEACHJAM_SETTINGS.allow_save_documents %}
+          <li>
+            <a class="dropdown-item" href="{% url 'folder_list' %}">{% trans 'Saved documents' %}</a>
+          </li>
+        {% endif %}
+        {% if PEACHJAM_SETTINGS.allow_save_searches %}
+          <li>
+            <a class="dropdown-item" href="{% url 'search:saved_search_list' %}">{% trans 'Search alerts' %}</a>
+          </li>
+        {% endif %}
+        <li>
+          <hr class="dropdown-divider"/>
+        </li>
+        {% if user.is_staff %}
+          <li>
+            <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
+          </li>
+        {% endif %}
+        <li>
+          <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Log out' %}</a>
+        </li>
+      </ul>
     </li>
   </ul>
-</li>
+{% elif PEACHJAM_SETTINGS.allow_signups %}
+  <ul class="navbar-nav ms-auto me-2">
+    <li class="nav-item">
+      <a class="btn btn-primary"
+         href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">
+        <i class="bi bi-person-circle"></i>
+        {% trans "Log in" %}
+      </a>
+    </li>
+  </ul>
+{% endif %}

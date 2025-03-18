@@ -1,7 +1,7 @@
 {% load static i18n %}
 <header>
   {% block skip-links %}
-    <div id="skip-links">
+    <div class="skip-links">
       <a class="bg-white"
          href="{% if 'akn/' in request.path %}#document-content{% else %}#top{% endif %}">{% trans 'Skip to document content' %}</a>
       <a class="bg-white" href="#main-nav">{% trans 'Skip to main menu' %}</a>
@@ -14,6 +14,9 @@
       <a class="navbar-brand" href="{% url 'home_page' %}">
         {% block navbar-logo %}Logo image{% endblock %}
       </a>
+      {% block navbar-user-menu %}
+        {% include "peachjam/_user_menu.html" %}
+      {% endblock %}
       <button class="navbar-toggler"
               type="button"
               data-bs-toggle="collapse"
@@ -58,20 +61,6 @@
             </li>
           {% endblock %}
         </ul>
-        {% if user.is_authenticated %}
-          <ul class="navbar-nav">
-            {% block navbar-user-menu %}
-              {% include "peachjam/_user_menu.html" %}
-            {% endblock %}
-          </ul>
-        {% elif PEACHJAM_SETTINGS.allow_save_documents %}
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="btn btn-primary"
-                 href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">{% trans "Log in" %}</a>
-            </li>
-          </ul>
-        {% endif %}
       </div>
     </div>
   </nav>

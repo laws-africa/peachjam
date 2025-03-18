@@ -176,19 +176,19 @@ html[data-user-agent*='pocketlaw'] .pocketlaw-hidden {
   overflow-y: auto;
 }
 
-a:visited {
+a:visited:not(.btn) {
   color: $visited-link;
 }
 
-#skip-links li {
+.skip-links li {
   list-style-type: none;
 }
-#skip-links a {
+.skip-links a {
   position: absolute;
-  top: -201px;
+  left: -201px;
 }
-#skip-links a:focus {
-  top: -1px;
+.skip-links a:focus {
+  left: -1px;
 }
 
 .breadcrumb {

@@ -143,6 +143,8 @@ PEACHJAM = {
     "SEARCH_JURISDICTION_FILTER": False,
     "SEARCH_SUGGESTIONS": os.environ.get("SEARCH_SUGGESTIONS", "false") == "true",
     "SEARCH_SEMANTIC": os.environ.get("SEARCH_SEMANTIC", "false") == "true",
+    # CoreDocument.doc_type values that are excluded from semantic search indexing
+    "SEARCH_SEMANTIC_EXCLUDE_DOCTYPES": ["gazette", "causelist"],
     "MULTIPLE_JURISDICTIONS": False,
     "MULTIPLE_LOCALITIES": False,
     "PDFJS_TO_TEXT": "bin/pdfjs-to-text" if DEBUG else "pdfjs-to-text",
@@ -160,8 +162,6 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
     "guardian.backends.ObjectPermissionBackend",
 ]
-# admins must create accounts
-ACCOUNT_SIGNUP_ENABLED = False
 # email addresses are required for new accounts
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_PRESERVE_USERNAME_CASING = False
@@ -195,6 +195,7 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = "peachjam.auth.SocialAccountAdapter"
+ACCOUNT_ADAPTER = "peachjam.auth.AccountAdapter"
 
 # Recaptcha
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY", "")

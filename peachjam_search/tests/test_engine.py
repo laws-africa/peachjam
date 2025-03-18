@@ -512,12 +512,11 @@ class TestSearchEngine(TestCase):
                                 {
                                     "nested": {
                                         "inner_hits": {
-                                            "_source": [
-                                                "content_chunks.type",
-                                                "content_chunks.portion",
-                                                "content_chunks.text",
-                                                "content_chunks.chunk_n",
-                                            ]
+                                            "_source": {
+                                                "excludes": [
+                                                    "content_chunks.text_embedding"
+                                                ]
+                                            }
                                         },
                                         "path": "content_chunks",
                                         "query": {

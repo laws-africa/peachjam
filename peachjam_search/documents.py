@@ -23,7 +23,13 @@ from peachjam.models import (
     Taxonomy,
 )
 from peachjam.xmlutils import parse_html_str
-from peachjam_search.embeddings import add_chunk_embeddings, make_content_chunks
+from peachjam_search.embeddings import (
+    TEXT_INJECTION_SEPARATOR,
+    ContentChunk,
+    add_chunk_embeddings,
+    make_page_chunks,
+    split_chunks,
+)
 
 log = logging.getLogger(__name__)
 
@@ -127,19 +133,28 @@ class SearchableDocument(Document):
         }
     )
 
+    # see peachjam_search.embeddings.ContentChunk
     content_chunks = fields.NestedField(
         properties={
             "chunk_n": fields.IntegerField(),
             "n_chunks": fields.IntegerField(),
             "portion": fields.KeywordField(),
-            # TODO: this should be a keyword field with index=False, since we don't need analysis overhead
+            # for provisions, similar to provisions above
+            "provision_type": fields.KeywordField(),
+            "title": fields.KeywordField(),
+            "parent_titles": fields.KeywordField(),
+            "parent_ids": fields.KeywordField(),
+            # text and embedding
             "text": fields.TextField(),
             "text_embedding": {
                 "type": "dense_vector",
                 "dims": 1024,
                 "index": True,
+                # internally elasticsearch normalises the vectors and uses dot product
                 "similarity": "cosine",
-                "index_options": {"type": "int8_hnsw", "m": 16, "ef_construction": 100},
+                # int4 means we quantize down to half bytes
+                # see https://www.elastic.co/search-labs/blog/optimized-scalar-quantization-elasticsearch
+                "index_options": {"type": "int4_hnsw", "m": 16, "ef_construction": 100},
             },
         }
     )
@@ -359,14 +374,56 @@ class SearchableDocument(Document):
     def prepare_content_chunks(self, instance):
         """Prepare the content_chunks field with embeddings."""
         if settings.PEACHJAM["SEARCH_SEMANTIC"]:
-            # only for judgments currently
-            if instance.frbr_uri_doctype == "judgment":
-                text = instance.get_content_as_text()
+            if (
+                instance.doc_type
+                in settings.PEACHJAM["SEARCH_SEMANTIC_EXCLUDE_DOCTYPES"]
+                or not instance.is_most_recent()
+            ):
+                return
+
+            chunks = []
+
+            if (
+                instance.content_html
+                and instance.content_html_is_akn
+                and instance.toc_json
+            ):
+                # AKN provisions
+                provisions = self.prepare_provisions(instance)
+                for provision in provisions:
+                    text = provision["body"]
+                    # inject the titles at the top of the text to add extra context
+                    titles = [
+                        t
+                        for t in provision["parent_titles"] + [provision["title"]]
+                        if t
+                    ]
+                    if titles:
+                        text = (
+                            "\n".join(titles) + "\n" + TEXT_INJECTION_SEPARATOR + text
+                        )
+
+                    for chunk in split_chunks([ContentChunk("provision", text)]):
+                        chunk.portion = provision["id"]
+                        chunk.provision_type = provision["type"]
+                        chunk.title = provision["title"]
+                        chunk.parent_titles = provision["parent_titles"]
+                        chunk.parent_ids = provision["parent_ids"]
+                        chunks.append(chunk)
+
+            else:
+                # plain html or PDF text
+                text = (instance.get_content_as_text() or "").strip()
                 if text:
-                    chunks = make_content_chunks(text)
-                    # TODO: can we re-use existing embeddings if we already have them, to save $$$?
-                    add_chunk_embeddings(chunks)
-                    return chunks
+                    if "\f" in text:
+                        # pages
+                        chunks.extend(split_chunks(make_page_chunks(text)))
+                    else:
+                        chunks.extend(split_chunks([ContentChunk("text", text)]))
+
+            # TODO: can we re-use existing embeddings if we already have them, to save $$$?
+            add_chunk_embeddings(chunks)
+            return [c.asdict() for c in chunks]
 
     def prepare_taxonomies(self, instance):
         """Taxonomy topics are stored as slugs of all the items in the tree down to that topic. This is easier than
