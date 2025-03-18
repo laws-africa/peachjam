@@ -1,11 +1,11 @@
 <template>
-  <div v-if="activeOptions" class="d-none d-md-block mb-3">
+  <div v-if="activeOptions.length" class="mb-3">
     <button
       v-for="option in activeOptions"
       :key="option.value"
-      class="btn btn-outline-primary me-2 btn-sm"
+      class="btn btn-secondary me-2"
       type="button"
-      :title="$t('Remove')"
+      :title="$t('Remove filter')"
       @click="updateModel(option.value)"
     >
       {{ option.label }}

@@ -109,7 +109,7 @@ class DocumentSearchView(TemplateView):
             many=True,
             context={
                 "request": request,
-                "explain": request.user.has_perm("peachjam.can_debug_search"),
+                "explain": request.user.has_perm("peachjam_search.debug_search"),
             },
         ).data
 
@@ -122,7 +122,15 @@ class DocumentSearchView(TemplateView):
         trace = self.save_search_trace(engine, response)
 
         # show debug information to this user
-        response["can_debug"] = self.request.user.has_perm("peachjam.can_debug_search")
+        response["can_debug"] = self.request.user.has_perm(
+            "peachjam_search.debug_search"
+        )
+        response["can_download"] = self.request.user.has_perm(
+            "peachjam_search.download_search"
+        )
+        response["can_semantic"] = settings.PEACHJAM[
+            "SEARCH_SEMANTIC"
+        ] and self.request.user.has_perm("peachjam_search.semantic_search")
         response["trace_id"] = str(trace.id) if trace else None
 
         return self.render(response)
@@ -143,10 +151,11 @@ class DocumentSearchView(TemplateView):
         engine = SearchEngine()
         form.configure_engine(engine)
 
-        if self.request.user.has_perm("peachjam.can_debug_search"):
-            engine.explain = True
-            if settings.PEACHJAM["SEARCH_SEMANTIC"]:
-                engine.mode = form.cleaned_data.get("mode") or engine.mode
+        engine.explain = self.request.user.has_perm("peachjam_search.debug_search")
+        if settings.PEACHJAM["SEARCH_SEMANTIC"] and self.request.user.has_perm(
+            "peachjam_search.semantic_search"
+        ):
+            engine.mode = form.cleaned_data.get("mode") or engine.mode
 
         return engine
 
@@ -184,8 +193,7 @@ class DocumentSearchView(TemplateView):
         )
 
     def download_results(self, engine, format):
-        # TODO: better perm
-        if not self.request.user.has_perm("peachjam.can_debug_search"):
+        if not self.request.user.has_perm("peachjam_search.download_search"):
             return HttpResponseForbidden()
 
         if format not in self.download_formats:

@@ -171,9 +171,6 @@ class PeachJamSettings(SingletonModel):
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
-        permissions = [
-            ("can_debug_search", "Can debug search"),
-        ]
 
     def __str__(self):
         return "Settings"

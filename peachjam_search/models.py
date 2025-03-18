@@ -46,15 +46,20 @@ class SearchTrace(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
+    class Meta:
+        ordering = ("-created_at",)
+        permissions = [
+            ("can_debug_search", "Can debug search"),
+            ("can_download_search", "Can download search results"),
+            ("can_semantic_search", "Can use semantic search"),
+        ]
+
     @classmethod
     def prune(cls, days=90):
         cutoff = now() - timedelta(days=days)
         log.info(f"Pruning search traces older than {days} days")
         deleted = cls.objects.filter(created_at__lt=cutoff).delete()
         log.info(f"Deleted: {deleted}")
-
-    class Meta:
-        ordering = ("-created_at",)
 
     def get_search_url(self):
         """Re-build a search URL for this trace."""
