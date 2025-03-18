@@ -90,7 +90,7 @@ class SubscriptionInline(admin.TabularInline):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return self.readonly_fields + ["user", "product_offering"]
+            return self.readonly_fields + ["user"]
         return self.readonly_fields
 
 
