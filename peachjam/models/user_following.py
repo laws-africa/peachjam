@@ -167,7 +167,7 @@ class UserFollowing(models.Model):
 
     def get_new_followed_documents(self):
         qs = CoreDocument.objects.preferred_language(
-            self.user.userprofile.preferred_language
+            self.user.userprofile.preferred_language.iso_639_3
         )
         if self.last_alerted_at:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
@@ -239,7 +239,7 @@ class UserFollowing(models.Model):
             "user": user,
             "site": Site.objects.get_current(),
         }
-        with override(user.userprofile.preferred_language):
+        with override(user.userprofile.preferred_language.pk):
             html = render_to_string(
                 "peachjam/emails/user_following_alert_email.html", context
             )
