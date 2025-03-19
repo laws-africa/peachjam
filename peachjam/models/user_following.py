@@ -1,3 +1,5 @@
+import logging
+
 from countries_plus.models import Country
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -11,6 +13,8 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
 
 from . import Author, CoreDocument, Court, CourtClass, CourtRegistry, Locality, Taxonomy
+
+log = logging.getLogger(__name__)
 
 
 class UserFollowing(models.Model):
@@ -217,19 +221,22 @@ class UserFollowing(models.Model):
             }
 
     @classmethod
-    def update_and_alert(cls):
-        users = get_user_model().objects.filter(following__isnull=False).distinct()
-        for user in users:
-            follows = UserFollowing.objects.filter(user=user)
-            documents = []
-            for follow in follows:
-                new = follow.get_new_followed_documents()
-                if new["documents"]:
-                    follow.last_alerted_at = timezone.now()
-                    follow.save()
-                    documents.append(new)
-            if documents:
-                cls.send_alert(user, documents)
+    def update_and_alert(cls, user):
+        follows = UserFollowing.objects.filter(user=user)
+        log.info(f"Found {follows.count()} follows for user {user.pk}")
+        documents = []
+        for follow in follows:
+            new = follow.get_new_followed_documents()
+            if new["documents"]:
+                log.info(
+                    f"Found {new['documents'].count()} new documents for {new['followed_object']}"
+                )
+                follow.last_alerted_at = timezone.now()
+                follow.save()
+                documents.append(new)
+        if documents:
+            log.info(f"Sending alert to user {user.pk}")
+            cls.send_alert(user, documents)
 
     @classmethod
     def send_alert(cls, user, documents):
