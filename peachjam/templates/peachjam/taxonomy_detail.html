@@ -2,7 +2,13 @@
 {% load peachjam i18n %}
 {% block title %}{{ taxonomy.name }}{% endblock %}
 {% block page-title %}
-  {% if not entity_profile %}<h1 class="mt-4">{{ taxonomy.name }}</h1>{% endif %}
+  {% if not entity_profile %}
+    <div class="d-flex align-item-center my-4">
+      <h1 class="flex-grow-1">{{ taxonomy.name }}</h1>
+      <div hx-get="{% url 'user_following_button' %}?taxonomy={{ taxonomy.pk }}"
+           hx-trigger="load"></div>
+    </div>
+  {% endif %}
 {% endblock %}
 {% block breadcrumbs %}
   <div class="container">
@@ -29,9 +35,5 @@
       {% include 'peachjam/_entity_profile.html' %}
     {% endwith %}
   {% endif %}
-{% endblock %}
-{% block follow-button %}
-  <div hx-get="{% url 'user_following_button' %}?taxonomy_topic={{ taxonomy.pk }}"
-       hx-trigger="load"></div>
 {% endblock %}
 {% block taxonomy-json %}{{ taxonomy_tree|json_script:"taxonomy_tree" }}{% endblock %}

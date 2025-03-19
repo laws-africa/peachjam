@@ -21,7 +21,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
-        <a href="{% url 'account_login' %}?next={{ request.path }}"
+        <a href="{% url 'account_login' %}?next={{ request.get_full_path }}"
            class="btn btn-primary">{% trans 'Log in' %}</a>
       </div>
     </div>

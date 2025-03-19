@@ -26,7 +26,7 @@ class Taxonomy(MP_Node):
     )
 
     class Meta:
-        verbose_name = _("taxonomies")
+        verbose_name = _("taxonomy")
         verbose_name_plural = _("taxonomies")
 
     def __str__(self):

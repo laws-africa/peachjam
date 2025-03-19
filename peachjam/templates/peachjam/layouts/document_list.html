@@ -15,9 +15,9 @@
       {% block page-title %}
         {% if not entity_profile %}
           <h1 class="mt-4">{% trans 'Documents' %}</h1>
+          {% block follow-button %}{% endblock %}
         {% endif %}
       {% endblock %}
-      {% block follow-button %}{% endblock %}
       {% block count-and-search %}
         {% include 'peachjam/_count_and_search.html' %}
       {% endblock %}

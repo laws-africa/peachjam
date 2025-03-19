@@ -67,13 +67,13 @@ class UserFollowing(models.Model):
         related_name="followers",
         verbose_name=_("locality"),
     )
-    taxonomy_topic = models.ForeignKey(
+    taxonomy = models.ForeignKey(
         Taxonomy,
         null=True,
         blank=True,
         on_delete=models.CASCADE,
         related_name="followers",
-        verbose_name=_("taxonomy topic"),
+        verbose_name=_("taxonomy"),
     )
     last_alerted_at = models.DateTimeField(_("last alerted at"), null=True, blank=True)
 
@@ -112,9 +112,9 @@ class UserFollowing(models.Model):
                 name="unique_user_locality",
             ),
             models.UniqueConstraint(
-                fields=["user", "taxonomy_topic"],
-                condition=models.Q(taxonomy_topic__isnull=False),
-                name="unique_user_taxonomy_topic",
+                fields=["user", "taxonomy"],
+                condition=models.Q(taxonomy__isnull=False),
+                name="unique_user_taxonomy",
             ),
         ]
 
@@ -130,7 +130,7 @@ class UserFollowing(models.Model):
             or self.court_registry
             or self.country
             or self.locality
-            or self.taxonomy_topic
+            or self.taxonomy
         )
 
     def clean(self):
@@ -142,7 +142,7 @@ class UserFollowing(models.Model):
             self.court_registry,
             self.country,
             self.locality,
-            self.taxonomy_topic,
+            self.taxonomy,
         ]
 
         # Count how many fields are set (not None)
@@ -205,13 +205,11 @@ class UserFollowing(models.Model):
                 "followed_object": self.locality,
                 "documents": qs,
             }
-        elif self.taxonomy_topic:
-            topics = [self.taxonomy_topic] + [
-                t for t in self.taxonomy_topic.get_descendants()
-            ]
+        elif self.taxonomy:
+            topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
             qs = qs.filter(taxonomies__topic__in=topics)[:10]
             return {
-                "followed_object": self.taxonomy_topic,
+                "followed_object": self.taxonomy,
                 "documents": qs,
             }
 

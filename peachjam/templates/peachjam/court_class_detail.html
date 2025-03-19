@@ -1,5 +1,5 @@
 {% extends 'peachjam/court_detail.html' %}
-{% load i18n %}
+{% load i18n peachjam %}
 {% block year_list %}
   {% include "peachjam/_court_class_years_list.html" %}
 {% endblock %}
@@ -7,6 +7,6 @@
   {% include "peachjam/_court_class_month_list.html" %}
 {% endblock %}
 {% block follow-button %}
-  <div hx-get="{% url 'user_following_button' %}?court_class={{ court_class.pk }}"
+  <div hx-get="{% url 'user_following_button' %}?{{ court_class|get_follow_params }}"
        hx-trigger="load"></div>
 {% endblock %}

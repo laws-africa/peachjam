@@ -1,5 +1,6 @@
 from django import forms
-from django.http import HttpResponseRedirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, TemplateView
 
@@ -16,7 +17,7 @@ class UserFollowingForm(forms.ModelForm):
             "court_registry",
             "country",
             "locality",
-            "taxonomy_topic",
+            "taxonomy",
         )
 
     def __init__(self, *args, **kwargs):
@@ -32,10 +33,10 @@ class UserFollowingButtonView(TemplateView):
     def get(self, *args, **kwargs):
         form = UserFollowingForm(self.request.GET)
         if form.is_valid():
-            follow = UserFollowing.objects.filter(
-                **form.cleaned_data, user=self.request.user
-            ).first()
             if self.request.user.is_authenticated:
+                follow = UserFollowing.objects.filter(
+                    **form.cleaned_data, user=self.request.user
+                ).first()
                 if follow:
                     return HttpResponseRedirect(
                         reverse("user_following_delete", kwargs={"pk": follow.pk})
@@ -45,13 +46,22 @@ class UserFollowingButtonView(TemplateView):
                     reverse("user_following_create")
                     + f"?{self.request.GET.urlencode()}"
                 )
-        return super().get(*args, **kwargs)
+            return super().get(*args, **kwargs)
+        # invalid form, return empty response i.e no button
+        return HttpResponse(status=400)
 
 
-class UserFollowingCreateView(CreateView):
+class BaseUserFollowingView(LoginRequiredMixin):
     model = UserFollowing
     form_class = UserFollowingForm
+
+    def get_queryset(self):
+        return self.request.user.following.all()
+
+
+class UserFollowingCreateView(BaseUserFollowingView, CreateView):
     template_name = "peachjam/user_following_create.html"
+    permission_required = "peachjam.add_userfollowing"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -69,8 +79,8 @@ class UserFollowingCreateView(CreateView):
 
 
 class UserFollowingDeleteView(DeleteView):
-    model = UserFollowing
     template_name = "peachjam/user_following_delete.html"
+    permission_required = "peachjam.delete_userfollowing"
 
     def get_success_url(self):
         return reverse("user_following_button") + f"?{self.request.GET.urlencode()}"
