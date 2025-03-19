@@ -53,13 +53,13 @@ class UserFollowingButtonView(TemplateView):
 
 class BaseUserFollowingView(LoginRequiredMixin):
     model = UserFollowing
-    form_class = UserFollowingForm
 
     def get_queryset(self):
         return self.request.user.following.all()
 
 
 class UserFollowingCreateView(BaseUserFollowingView, CreateView):
+    form_class = UserFollowingForm
     template_name = "peachjam/user_following_create.html"
     permission_required = "peachjam.add_userfollowing"
 
@@ -78,7 +78,7 @@ class UserFollowingCreateView(BaseUserFollowingView, CreateView):
         )
 
 
-class UserFollowingDeleteView(DeleteView):
+class UserFollowingDeleteView(BaseUserFollowingView, DeleteView):
     template_name = "peachjam/user_following_delete.html"
     permission_required = "peachjam.delete_userfollowing"
 

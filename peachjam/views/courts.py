@@ -11,7 +11,6 @@ from django.utils.text import slugify
 from peachjam.helpers import chunks
 from peachjam.models import Court, CourtClass, CourtRegistry, Judge, Judgment, Outcome
 from peachjam.views.generic_views import FilteredDocumentListView, YearListMixin
-from peachjam.views.user_following import UserFollowingForm
 
 
 class FilteredJudgmentView(FilteredDocumentListView):
@@ -169,12 +168,6 @@ class CourtDetailView(FilteredJudgmentView):
             qs = qs.filter(court=self.court)
         return qs
 
-    def get_user_follow_form(self):
-        form = UserFollowingForm(
-            initial={"court": self.court.pk, "user": self.request.user.pk}
-        )
-        return form
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["court"] = self.court
@@ -186,7 +179,6 @@ class CourtDetailView(FilteredJudgmentView):
             context["registry_groups"] = chunks(registries, 3)
 
         context["all_years_url"] = self.court.get_absolute_url()
-        context["form"] = self.get_user_follow_form()
         return context
 
     def add_entity_profile(self, context):

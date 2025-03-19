@@ -7,6 +7,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from languages_plus.models import Language
 
 
 def file_location(instance, filename):
@@ -93,6 +94,14 @@ class UserProfile(models.Model):
         _("photo"), upload_to=file_location, blank=True, null=True
     )
     profile_description = models.TextField(_("profile description"))
+
+    preferred_language = models.ForeignKey(
+        Language,
+        on_delete=models.PROTECT,
+        default="en",
+        related_name="+",
+        verbose_name=_("preferred language"),
+    )
 
     class Meta:
         verbose_name = _("user profile")

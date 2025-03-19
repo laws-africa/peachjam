@@ -8,6 +8,7 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import override
 
 from . import Author, CoreDocument, Court, CourtClass, CourtRegistry, Locality, Taxonomy
 
@@ -165,7 +166,9 @@ class UserFollowing(models.Model):
         super().save(*args, **kwargs)
 
     def get_new_followed_documents(self):
-        qs = CoreDocument.objects.all()
+        qs = CoreDocument.objects.preferred_language(
+            self.user.userprofile.preferred_language
+        )
         if self.last_alerted_at:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
         if self.court:
@@ -236,13 +239,16 @@ class UserFollowing(models.Model):
             "user": user,
             "site": Site.objects.get_current(),
         }
-        html = render_to_string(
-            "peachjam/emails/user_following_alert_email.html", context
-        )
-        plain_txt = render_to_string(
-            "peachjam/emails/user_following_alert_email.txt", context
-        )
-        subject = settings.EMAIL_SUBJECT_PREFIX + _("New documents have been published")
+        with override(user.userprofile.preferred_language):
+            html = render_to_string(
+                "peachjam/emails/user_following_alert_email.html", context
+            )
+            plain_txt = render_to_string(
+                "peachjam/emails/user_following_alert_email.txt", context
+            )
+            subject = settings.EMAIL_SUBJECT_PREFIX + _(
+                "New documents have been published"
+            )
         send_mail(
             subject=subject,
             message=plain_txt,
