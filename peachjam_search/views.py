@@ -28,7 +28,6 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
-from import_export.formats.base_formats import CSV, XLSX
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
@@ -77,11 +76,6 @@ class DocumentSearchView(TemplateView):
     action = "search"
     template_name = "peachjam_search/search_request_debug.html"
     config_version = "2024-10-31"
-
-    download_formats = {
-        "xlsx": XLSX,
-        "csv": CSV,
-    }
 
     def get(self, request, *args, **kwargs):
         return getattr(self, self.action)(request, *args, **kwargs)
@@ -200,7 +194,7 @@ class DocumentSearchView(TemplateView):
         if not self.request.user.has_perm("peachjam_search.download_search"):
             return HttpResponseForbidden()
 
-        if format not in self.download_formats:
+        if format not in DownloadDocumentsResource.download_formats:
             return HttpResponseBadRequest("Invalid format")
 
         # only need the ids
@@ -215,7 +209,7 @@ class DocumentSearchView(TemplateView):
         dataset = DownloadDocumentsResource().export(
             DownloadDocumentsResource.get_objects_for_download(pks)
         )
-        fmt = self.download_formats[format]()
+        fmt = DownloadDocumentsResource.download_formats[format]()
         data = fmt.export_data(dataset)
 
         response = HttpResponse(data, content_type=fmt.get_content_type())

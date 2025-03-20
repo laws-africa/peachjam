@@ -81,6 +81,7 @@ from peachjam.views import (
     EditAccountView,
     FolderCreateView,
     FolderDeleteView,
+    FolderDownloadView,
     FolderListView,
     FolderUpdateView,
     GazetteListView,
@@ -469,50 +470,62 @@ urlpatterns = [
         DocumentProblemView.as_view(),
         name="document_problem",
     ),
-    # Saved Documents
     path(
-        "saved-documents/button/<int:doc_id>",
-        SavedDocumentButtonView.as_view(),
-        name="saved_document_button",
-    ),
-    path(
-        "saved-documents/buttons/",
-        SavedDocumentButtonBulkView.as_view(),
-    ),
-    path(
-        "saved-documents/create",
-        SavedDocumentCreateView.as_view(),
-        name="saved_document_create",
-    ),
-    path(
-        "saved-documents/<int:pk>/update",
-        SavedDocumentUpdateView.as_view(),
-        name="saved_document_update",
-    ),
-    path(
-        "saved-documents/<int:pk>/delete",
-        SavedDocumentDeleteView.as_view(),
-        name="saved_document_delete",
-    ),
-    path(
-        "saved-documents/folders/",
-        FolderListView.as_view(),
-        name="folder_list",
-    ),
-    path(
-        "saved-documents/folders/create",
-        FolderCreateView.as_view(),
-        name="folder_create",
-    ),
-    path(
-        "saved-documents/folders/<int:pk>/update",
-        FolderUpdateView.as_view(),
-        name="folder_update",
-    ),
-    path(
-        "saved-documents/folders/<int:pk>/delete",
-        FolderDeleteView.as_view(),
-        name="folder_delete",
+        "saved-documents/",
+        include(
+            [
+                # Saved Documents
+                path(
+                    "button/<int:doc_id>",
+                    SavedDocumentButtonView.as_view(),
+                    name="saved_document_button",
+                ),
+                path(
+                    "buttons/",
+                    SavedDocumentButtonBulkView.as_view(),
+                ),
+                path(
+                    "create",
+                    SavedDocumentCreateView.as_view(),
+                    name="saved_document_create",
+                ),
+                path(
+                    "<int:pk>/update",
+                    SavedDocumentUpdateView.as_view(),
+                    name="saved_document_update",
+                ),
+                path(
+                    "<int:pk>/delete",
+                    SavedDocumentDeleteView.as_view(),
+                    name="saved_document_delete",
+                ),
+                path(
+                    "folders/",
+                    FolderListView.as_view(),
+                    name="folder_list",
+                ),
+                path(
+                    "folders/create",
+                    FolderCreateView.as_view(),
+                    name="folder_create",
+                ),
+                path(
+                    "folders/<int:pk>/update",
+                    FolderUpdateView.as_view(),
+                    name="folder_update",
+                ),
+                path(
+                    "folders/<int:pk>/delete",
+                    FolderDeleteView.as_view(),
+                    name="folder_delete",
+                ),
+                path(
+                    "folders/<int:pk>/download",
+                    FolderDownloadView.as_view(),
+                    name="folder_download",
+                ),
+            ]
+        ),
     ),
     # Restricted Documents
     path(
