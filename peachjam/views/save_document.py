@@ -34,8 +34,8 @@ class BaseFolderMixin(
 
     def get_template_names(self):
         if self.request.htmx:
-            return ["peachjam/_folders_list.html"]
-        return ["peachjam/folders_list.html"]
+            return ["peachjam/saved_document/_folders_list.html"]
+        return ["peachjam/saved_document/folders_list.html"]
 
     def get_queryset(self):
         return self.request.user.folders.all()
@@ -218,6 +218,6 @@ class SavedDocumentDeleteView(SavedDocumentFormMixin, DeleteView):
     form_class = Form
 
     def get_success_url(self):
-        return reverse(
+        return self.request.GET.get("next") or reverse(
             "saved_document_button", kwargs={"doc_id": self.object.document_id}
         )
