@@ -1,0 +1,26 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>{% trans "New Documents Alert" %}</title>
+  </head>
+  <body>
+    <p>{{ user }},</p>
+    <p>{% trans "We have found new documents for areas that you are following:" %}</p>
+    {% for item in followed_documents %}
+      {{ item.followed_object }}
+      {% for doc in item.documents %}
+        <ul>
+          <li>
+            <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}">{{ doc.title }}</a>
+          </li>
+        </ul>
+      {% endfor %}
+      <hr/>
+    {% endfor %}
+    <p>
+      <a href="https://{{ site.domain }}{% url "user_following_list" %}">{% trans "Manage your document alerts" %}</a>
+    </p>
+  </body>
+</html>

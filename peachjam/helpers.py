@@ -6,6 +6,7 @@ from functools import wraps
 
 import martor.utils
 from django.conf import settings
+from django.urls import reverse
 from django.utils.translation import get_language_from_request
 from languages_plus.models import Language
 
@@ -134,3 +135,7 @@ def get_update_or_create(model, defaults, **kwargs):
         if updated:
             obj.save()
     return obj, (created or updated)
+
+
+def get_country_absolute_url(self):
+    return reverse("place", kwargs={"code": self.iso})

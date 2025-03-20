@@ -1,5 +1,5 @@
 {% extends 'peachjam/layouts/document_list.html' %}
-{% load i18n %}
+{% load i18n peachjam %}
 {% block title %}{{ page_title }}{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
@@ -35,7 +35,15 @@
   </div>
 {% endblock %}
 {% block page-title %}
-  {% if not entity_profile %}<h1 class="mt-4">{{ page_title }}</h1>{% endif %}
+  {% if not entity_profile %}
+    <div class="d-flex align-items-center my-4">
+      <h1 class="flex-grow-1">{{ page_title }}</h1>
+      {% block follow-button %}
+        <div hx-get="{% url 'user_following_button' %}?{{ court|get_follow_params }}"
+             hx-trigger="load"></div>
+      {% endblock %}
+    </div>
+  {% endif %}
 {% endblock %}
 {% block page-header %}
   {{ block.super }}

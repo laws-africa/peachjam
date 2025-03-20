@@ -28,4 +28,5 @@ from .robots import *
 from .save_document import *
 from .taxonomy import *
 from .terms_of_use import *
+from .user_following import *
 from .widgets import *

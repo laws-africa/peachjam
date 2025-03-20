@@ -1,8 +1,12 @@
 {% extends 'peachjam/court_detail.html' %}
-{% load i18n %}
+{% load i18n peachjam %}
 {% block year_list %}
   {% include "peachjam/_court_registries_years_list.html" %}
 {% endblock %}
 {% block month_list %}
   {% include "peachjam/_court_registries_months_list.html" %}
+{% endblock %}
+{% block follow-button %}
+  <div hx-get="{% url 'user_following_button' %}?{{ registry|get_follow_params }}"
+       hx-trigger="load"></div>
 {% endblock %}

@@ -1,0 +1,30 @@
+{% load i18n %}
+<button class="btn btn-outline-primary ms-2"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#followModal">
+  <i class="bi bi-bell"></i>
+  <span>{% trans 'Follow' %}</span>
+</button>
+<div class="modal" id="followModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{% trans 'Follow' %}</h5>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="{% trans 'Close' %}"></button>
+      </div>
+      <div class="modal-body">
+        <p>{% trans 'You are not logged in.' %}</p>
+        <p>{% trans 'To follow, you need to be logged in.' %}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
+        <a href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path }}"
+           class="btn btn-primary">{% trans 'Log in' %}</a>
+      </div>
+    </div>
+  </div>
+</div>

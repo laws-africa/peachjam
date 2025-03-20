@@ -19,5 +19,9 @@ class PlaceDetailView(FilteredDocumentListView):
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            country=self.country, locality=self.locality, place=self.place, **kwargs
+            country=self.country,
+            locality=self.locality,
+            place=self.place,
+            place_model_name=self.place._meta.model_name,
+            **kwargs
         )
