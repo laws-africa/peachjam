@@ -113,7 +113,7 @@ class FolderDownloadView(BaseFolderMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         folder = self.get_object()
-        pks = [d.pk for d in folder.saved_documents.only("pk")]
+        pks = [sd.document_id for sd in folder.saved_documents.only("document_id")]
         dataset = DownloadDocumentsResource().export(
             DownloadDocumentsResource.get_objects_for_download(pks)
         )
