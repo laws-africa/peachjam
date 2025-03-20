@@ -41,8 +41,10 @@ from peachjam.models import (
     Author,
     Bill,
     CaseNumber,
+    CauseList,
     CoreDocument,
     Court,
+    CourtDivision,
     CourtRegistry,
     CustomProperty,
     CustomPropertyLabel,
@@ -53,6 +55,7 @@ from peachjam.models import (
     Judge,
     Judgment,
     Label,
+    Legislation,
     Locality,
     MatterType,
     Outcome,
@@ -852,6 +855,7 @@ class DownloadDocumentsResource(resources.ModelResource):
     }
 
     # all documents
+    nature = fields.Field("nature")
     title = fields.Field("title")
     date = fields.Field("date", widget=DateWidget())
     citation = fields.Field("citation")
@@ -859,6 +863,8 @@ class DownloadDocumentsResource(resources.ModelResource):
     source_url = fields.Field(readonly=True)
     expression_frbr_uri = fields.Field("expression_frbr_uri")
     language = fields.Field("language")
+    jurisdiction = fields.Field("jurisdiction")
+    locality = fields.Field("locality")
     labels = fields.Field(
         "labels", widget=ManyToManyWidget(Label, separator=", ", field="name")
     )
@@ -871,13 +877,35 @@ class DownloadDocumentsResource(resources.ModelResource):
         "judges", widget=ManyToManyWidget(Judge, separator=", ", field="name")
     )
 
+    # generic documents
+    author = fields.Field(
+        "author", widget=ManyToManyWidget(Author, separator=", ", field="name")
+    )
+
+    # causelists
+    division = fields.Field(
+        "division", widget=ManyToManyWidget(CourtDivision, separator=", ", field="name")
+    )
+
+    # legislation
+    repealed = fields.Field("repealed")
+    principal = fields.Field("principal")
+    commenced = fields.Field("commenced")
+    parent_work = fields.Field(
+        "parent_work", widget=ForeignKeyWidget(Work, field="frbr_uri")
+    )
+
     # FK fields above must be added to either select_related or prefetch_related
     select_related = {
-        None: ["language"],
+        None: ["language", "nature", "jurisdiction", "locality"],
+        CauseList: ["court", "registry", "division"],
         Judgment: ["court", "registry"],
+        Legislation: ["parent_work"],
     }
     prefetch_related = {
         None: ["labels"],
+        CauseList: ["judges"],
+        GenericDocument: ["author"],
         Judgment: ["judges"],
     }
 
