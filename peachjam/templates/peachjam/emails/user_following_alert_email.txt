@@ -1,9 +1,11 @@
-{{ user }}
-We have found new documents for areas that you are following:
+{% load i18n %}
+{{ user }},
+{% trans 'We have found new documents for areas that you are following:' %}
 {% for item in followed_documents %}
  {{ item.followed_object }}
   {% for doc in item.documents %}
-      Title: {{ doc.title }}
+      {% trans 'Title:' %} {{ doc.title }}
       https://{{ site.domain }}{{ doc.expression_frbr_uri }}
   {% endfor %}
 {% endfor %}
+{% trans 'Manage your alerts:'%} https://{{ site.domain }}{% url "user_following_list" %}

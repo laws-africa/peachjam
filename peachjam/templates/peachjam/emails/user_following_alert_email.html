@@ -19,5 +19,8 @@
       {% endfor %}
       <hr/>
     {% endfor %}
+    <p>
+      <a href="https://{{ site.domain }}{% url "user_following_list" %}">{% trans "Manage your document alerts" %}</a>
+    </p>
   </body>
 </html>
