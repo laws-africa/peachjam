@@ -223,3 +223,28 @@ def get_deleted_documents(ingestor_id, range_start, range_end):
 
     adapter = ingestor.get_adapter()
     adapter.get_deleted_documents(range_start, range_end)
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def update_user_follows():
+    from django.contrib.auth import get_user_model
+
+    log.info("Updating user follows")
+    users = get_user_model().objects.filter(following__isnull=False).distinct()
+    for user in users:
+        update_user_follows_for_user(user.pk)
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def update_user_follows_for_user(user_id):
+    from django.contrib.auth import get_user_model
+
+    from peachjam.models import UserFollowing
+
+    user = get_user_model().objects.filter(pk=user_id).first()
+    if not user:
+        log.info(f"No user with id {user_id} exists, ignoring.")
+        return
+
+    log.info(f"Updating user follows for user {user_id}")
+    UserFollowing.update_and_alert(user)

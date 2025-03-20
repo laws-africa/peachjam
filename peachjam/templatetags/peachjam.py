@@ -109,3 +109,9 @@ def jurisdiction_icon(doc):
 @register.filter
 def split(value, sep=None):
     return [v.strip() for v in value.split(sep)]
+
+
+@register.filter
+def get_follow_params(obj):
+    # this would be better as a model method
+    return f"{'_'.join(obj._meta.verbose_name.lower().split())}={obj.pk}"

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n peachjam %}
 <div class="entity-profile {% if entity_profile.background_photo %} has-background-photo{% endif %}">
   <div class="entity-profile__background-photo">
     {% if entity_profile.background_photo %}
@@ -15,7 +15,12 @@
            loading="lazy"/>
     {% endif %}
     <div class="entity-profile__body__info">
-      <h1>{{ entity_profile_title|default:entity_profile.title }}</h1>
+      <div class="d-flex">
+        <h1 class="flex-grow-1">{{ entity_profile_title|default:entity_profile.title }}</h1>
+        <div hx-get="{% url 'user_following_button' %}?{{ entity_profile.content_object|get_follow_params }}"
+             hx-trigger="load">
+        </div>
+      </div>
       {% if entity_profile.about_html %}<div class="mb-2">{{ entity_profile.about_html|safe }}</div>{% endif %}
       <div class="row">
         {% if entity_profile.address %}

@@ -7,6 +7,7 @@
     <li class="nav-item">
       <a href="{% url 'account_home' %}"
          class="nav-link {% if active == 'home' %}active{% endif %}">
+        <i class="bi bi-person-circle"></i>
         {% trans "My account" %}
       </a>
     </li>
@@ -14,7 +15,25 @@
       <li class="nav-item">
         <a href="{% url 'folder_list' %}"
            class="nav-link {% if active == 'folders' %}active{% endif %}">
+          {% if active == 'folders' %}
+            <i class="bi bi-star-fill"></i>
+          {% else %}
+            <i class="bi bi-star"></i>
+          {% endif %}
           {% trans "Saved documents" %}
+        </a>
+      </li>
+    {% endif %}
+    {% if perms.peachjam.view_userfollowing %}
+      <li class="nav-item">
+        <a href="{% url 'user_following_list' %}"
+           class="nav-link {% if active == 'following' %}active{% endif %}">
+          {% if active == 'following' %}
+            <i class="bi bi-bell-fill"></i>
+          {% else %}
+            <i class="bi bi-bell"></i>
+          {% endif %}
+          {% trans "Following" %}
         </a>
       </li>
     {% endif %}
@@ -22,7 +41,11 @@
       <li class="nav-item">
         <a href="{% url 'search:saved_search_list' %}"
            class="nav-link {% if active == 'saved_searches' %}active{% endif %}">
-          <i class="bi bi-bell"></i>
+          {% if active == 'saved_searches' %}
+            <i class="bi bi-bell-fill"></i>
+          {% else %}
+            <i class="bi bi-bell"></i>
+          {% endif %}
           {% trans "Search alerts" %}
         </a>
       </li>
@@ -30,6 +53,7 @@
     <li class="nav-item">
       <a href="{% url 'document_access_group_list' %}"
          class="nav-link {% if active == 'doc_access_groups' %}active{% endif %}">
+        <i class="bi bi-files"></i>
         {% trans "Document access groups" %}
       </a>
     </li>

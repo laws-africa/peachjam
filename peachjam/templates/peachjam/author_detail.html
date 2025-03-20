@@ -1,9 +1,15 @@
 {% extends 'peachjam/layouts/document_list.html' %}
-{% load i18n %}
+{% load i18n peachjam %}
 {% block title %}{{ author }}{% endblock %}
 {% block page-title %}
   {% if not entity_profile %}
-    <h1 class="mt-4">{% blocktrans %} Documents by {{ author }} {% endblocktrans %}</h1>
+    <div class="d-flex align-items-center my-4">
+      <h1 class="flex-grow-1">{% blocktrans %} Documents by {{ author }} {% endblocktrans %}</h1>
+      {% block follow-button %}
+        <div hx-get="{% url 'user_following_button' %}?{{ author|get_follow_params }}"
+             hx-trigger="load"></div>
+      {% endblock %}
+    </div>
   {% endif %}
 {% endblock %}
 {% block entity-profile %}
