@@ -23,6 +23,7 @@ from django.utils.text import slugify
 from docpipe.pdf import pdf_to_text
 from docpipe.soffice import SOfficeError, soffice_convert
 from import_export import fields, resources
+from import_export.formats.base_formats import CSV, XLSX
 from import_export.widgets import (
     BooleanWidget,
     CharWidget,
@@ -844,6 +845,11 @@ class BillResource(BaseDocumentResource):
 
 class DownloadDocumentsResource(resources.ModelResource):
     """Resource used for downloading collections of documents by users from search results and saved folders."""
+
+    download_formats = {
+        "xlsx": XLSX,
+        "csv": CSV,
+    }
 
     # all documents
     title = fields.Field("title")

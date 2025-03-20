@@ -12,7 +12,9 @@
   {% if folders or ungrouped_saved_documents %}
     {% for folder in folders %}
       <div class="card mb-5">
-        <h5 class="card-header">{{ folder.name }}</h5>
+        <h5 class="card-header">
+          <i class="bi bi-folder"></i> {{ folder.name }}
+        </h5>
         <div class="card-body">
           <div>
             {% if folder.saved_documents.all %}
@@ -24,12 +26,20 @@
             {% endif %}
           </div>
         </div>
-        <div class="card-footer text-end">
+        <div class="card-footer d-flex">
+          {% if perms.peachjam.download_folder %}
+            <a href="{% url 'folder_download' folder.id %}"
+               target="_blank"
+               class="btn btn-primary me-2">
+              <i class="bi bi-download"></i>
+              {% trans 'Download to Excel' %}
+            </a>
+          {% endif %}
           <input id="folder_{{ forloop.counter }}"
                  type="hidden"
                  name="name"
                  value="{{ folder.name }}"/>
-          <button class="btn btn-outline-danger me-2"
+          <button class="btn btn-outline-danger me-2 ms-auto"
                   type="button"
                   hx-post="{% url 'folder_delete' folder.id %}"
                   hx-target="#folders-list"

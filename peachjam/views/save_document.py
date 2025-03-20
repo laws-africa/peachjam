@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import Count, Prefetch, Q
@@ -11,9 +13,11 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
+from django.views.generic.detail import DetailView
 
 from peachjam.forms import SaveDocumentForm
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
+from peachjam.resources import DownloadDocumentsResource
 
 User = get_user_model()
 
@@ -101,6 +105,24 @@ class FolderUpdateView(BaseFolderFormMixin, UpdateView):
 class FolderDeleteView(BaseFolderMixin, DeleteView):
     success_url = reverse_lazy("folder_list")
     permission_required = "peachjam.delete_folder"
+
+
+class FolderDownloadView(BaseFolderMixin, DetailView):
+    permission_required = "peachjam.download_folder"
+
+    def get(self, request, *args, **kwargs):
+        folder = self.get_object()
+        pks = [d.pk for d in folder.saved_documents.only("pk")]
+        dataset = DownloadDocumentsResource().export(
+            DownloadDocumentsResource.get_objects_for_download(pks)
+        )
+        fmt = DownloadDocumentsResource.download_formats["xlsx"]()
+        data = fmt.export_data(dataset)
+
+        response = HttpResponse(data, content_type=fmt.get_content_type())
+        fname = re.sub(r"[^a-zA-Z0-9-]", "-", folder.name) + "." + fmt.get_extension()
+        response["Content-Disposition"] = f'attachment; filename="{fname}"'
+        return response
 
 
 class SavedDocumentButtonView(AllowSavedDocumentMixin, TemplateView):

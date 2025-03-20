@@ -21,6 +21,7 @@ class Folder(models.Model):
         ordering = ("name",)
         verbose_name = _("folder")
         verbose_name_plural = _("folders")
+        permissions = [("download", "Can download documents")]
 
     def __str__(self):
         return f"{self.name}"
