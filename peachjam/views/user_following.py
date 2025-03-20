@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from django.views.generic import CreateView, DeleteView, TemplateView
+from django.views.generic import CreateView, DeleteView, ListView, TemplateView
 
 from peachjam.models import UserFollowing
 
@@ -56,6 +56,10 @@ class BaseUserFollowingView(LoginRequiredMixin):
 
     def get_queryset(self):
         return self.request.user.following.all()
+
+
+class UserFollowingListView(BaseUserFollowingView, ListView):
+    template_name = "peachjam/user_following_list.html"
 
 
 class UserFollowingCreateView(BaseUserFollowingView, CreateView):

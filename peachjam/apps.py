@@ -8,11 +8,15 @@ class PeachJamConfig(AppConfig):
 
     def ready(self):
         import jazzmin.settings
+        from countries_plus.models import Country
 
         import peachjam.adapters  # noqa
         import peachjam.signals  # noqa
+        from peachjam.helpers import get_country_absolute_url
 
         jazzmin.settings.THEMES["peachjam"] = "stylesheets/peachjam-jazzmin.css"
+
+        Country.get_absolute_url = get_country_absolute_url
 
         if not settings.DEBUG:
             from background_task.models import Task

@@ -109,6 +109,7 @@ from peachjam.views import (
     UserFollowingButtonView,
     UserFollowingCreateView,
     UserFollowingDeleteView,
+    UserFollowingListView,
     WorkAutocomplete,
 )
 from peachjam.views.comments import comment_form_view
@@ -552,6 +553,11 @@ urlpatterns = [
         "follow/",
         include(
             [
+                path(
+                    "",
+                    UserFollowingListView.as_view(),
+                    name="user_following_list",
+                ),
                 path(
                     "button/",
                     UserFollowingButtonView.as_view(),

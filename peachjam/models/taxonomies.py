@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from treebeard.mp_tree import MP_Node
@@ -31,6 +32,12 @@ class Taxonomy(MP_Node):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse(
+            "taxonomy_detail",
+            kwargs={"topic": self.get_root().slug, "child": self.slug},
+        )
 
     def get_entity_profile(self):
         """Get the entity profile for this taxonomy, starting with the current taxonomy and then
