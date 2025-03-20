@@ -113,6 +113,23 @@
           />
         </div>
       </div>
+      <div class="card-footer text-end">
+        <div v-if="canSave" :class="`save-document-button--${item.id}`" />
+        <a
+          class="btn btn-primary ms-2"
+          :href="`${item.expression_frbr_uri}/source`"
+          target="_blank"
+        >{{ $t('Download') }}</a>
+      </div>
+    </div>
+    <div
+      v-if="canSave"
+      :id="`saveDocumentModal-${item.id}`"
+      class="modal fade"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div :id="`saveDocumentModalDialog-${item.id}`" class="modal-dialog" />
     </div>
   </li>
 </template>
@@ -147,6 +164,10 @@ export default {
       default: () => []
     },
     debug: {
+      type: Boolean,
+      default: false
+    },
+    canSave: {
       type: Boolean,
       default: false
     }

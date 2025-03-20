@@ -98,6 +98,7 @@ from peachjam.views import (
     PlaceDetailView,
     PocketLawResources,
     RobotsView,
+    SavedDocumentButtonBulkView,
     SavedDocumentButtonView,
     SavedDocumentCreateView,
     SavedDocumentDeleteView,
@@ -469,6 +470,10 @@ urlpatterns = [
         "saved-documents/button/<int:doc_id>",
         SavedDocumentButtonView.as_view(),
         name="saved_document_button",
+    ),
+    path(
+        "saved-documents/buttons/",
+        SavedDocumentButtonBulkView.as_view(),
     ),
     path(
         "saved-documents/create",

@@ -120,6 +120,7 @@ class DocumentSearchView(TemplateView):
         }
 
         trace = self.save_search_trace(engine, response)
+        response["trace_id"] = str(trace.id) if trace else None
 
         # show debug information to this user
         response["can_debug"] = self.request.user.has_perm(
@@ -131,7 +132,10 @@ class DocumentSearchView(TemplateView):
         response["can_semantic"] = settings.PEACHJAM[
             "SEARCH_SEMANTIC"
         ] and self.request.user.has_perm("peachjam_search.semantic_search")
-        response["trace_id"] = str(trace.id) if trace else None
+        response["can_save_documents"] = pj_settings().allow_save_documents and (
+            not self.request.user.is_authenticated
+            or self.request.user.has_perm("peachjam.add_saveddocument")
+        )
 
         return self.render(response)
 
