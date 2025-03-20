@@ -245,6 +245,7 @@
                     :item="item"
                     :query="q"
                     :debug="searchInfo.can_debug"
+                    :canSave="searchInfo.can_save_documents"
                     :show-jurisdiction="showJurisdiction"
                     :document-labels="documentLabels"
                     @item-clicked="(e) => itemClicked(item, e)"
@@ -839,6 +840,9 @@ export default {
               this.trackSearch(params);
               this.savedSearchModal();
               this.linkTraces(previousId, this.searchInfo.trace_id);
+              if (this.searchInfo.can_save_documents) {
+                this.loadSaveDocumentButtons();
+              }
             } else {
               this.error = response.statusText;
             }
@@ -924,6 +928,18 @@ export default {
             headers: await authHeaders()
           });
         }
+      }
+    },
+
+    loadSaveDocumentButtons () {
+      // use htmx to load and inject save-document buttons
+      // get document ids
+      const ids = this.searchInfo.results.map(result => result.id);
+      if (ids.length) {
+        const el = document.createElement('div');
+        document.body.appendChild(el);
+        const query = ids.map(id => `doc_id=${id}`).join('&');
+        htmx.ajax('GET', '/saved-documents/buttons/?' + query, el);
       }
     },
 

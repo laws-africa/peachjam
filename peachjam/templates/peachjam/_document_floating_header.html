@@ -14,7 +14,7 @@
     {% include 'peachjam/_copy_to_clipboard.html' with value=document.mnc|default:document.citation verb=verb %}
     {% if show_save_doc_button %}
       <!-- this will be replaced by htmx from the main toolbar's save document button is loaded -->
-      <div class="save-document-button"></div>
+      <div class="save-document-button save-document-button--{{ document.id }}"></div>
     {% endif %}
   </div>
 </div>

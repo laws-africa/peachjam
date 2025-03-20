@@ -66,6 +66,7 @@ class PeachJam {
   }
 
   setupHtmx () {
+    // @ts-ignore
     window.htmx = htmx;
     // htmx:load is fired both when the page loads (weird) and when new content is loaded. We only care about the latter
     // case. See https://github.com/bigskysoftware/htmx/issues/1500
