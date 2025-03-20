@@ -176,7 +176,7 @@ html[data-user-agent*='pocketlaw'] .pocketlaw-hidden {
   overflow-y: auto;
 }
 
-a:visited:not(.btn) {
+a:visited:not(.btn, .nav-link, .dropdown-item) {
   color: $visited-link;
 }
 
