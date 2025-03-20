@@ -63,11 +63,11 @@ mark {
 
 footer {
   .footer-logos {
-    display: block;
+    display: flex;
+    flex-wrap: wrap;
+
     @include media-breakpoint-up(md) {
-      display: flex;
       justify-content: space-around;
-      flex-wrap: wrap;
     }
   }
 
@@ -75,18 +75,23 @@ footer {
     padding: 1rem 0.5rem;
     display: block;
     text-align: center;
+    flex: 0 0 auto;
+    width: 50%;
+
+    @include media-breakpoint-up(md) {
+      width: auto;
+    }
 
     img {
       width: 100%;
+      max-width: 100%;
       height: auto;
+
       @include media-breakpoint-up(md) {
         height: 60px;
         width: auto;
-
       }
-
     }
-
   }
 }
 
@@ -176,7 +181,7 @@ html[data-user-agent*='pocketlaw'] .pocketlaw-hidden {
   overflow-y: auto;
 }
 
-a:visited:not(.btn) {
+a:visited:not(.btn, .nav-link, .dropdown-item) {
   color: $visited-link;
 }
 
