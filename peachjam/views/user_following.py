@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, ListView, TemplateView
@@ -51,7 +51,7 @@ class UserFollowingButtonView(TemplateView):
         return HttpResponse(status=400)
 
 
-class BaseUserFollowingView(LoginRequiredMixin):
+class BaseUserFollowingView(LoginRequiredMixin, PermissionRequiredMixin):
     model = UserFollowing
 
     def get_queryset(self):
@@ -59,6 +59,7 @@ class BaseUserFollowingView(LoginRequiredMixin):
 
 
 class UserFollowingListView(BaseUserFollowingView, ListView):
+    permission_required = "peachjam.view_userfollowing"
     template_name = "peachjam/user_following_list.html"
 
 
