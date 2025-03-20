@@ -5,9 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam", "0199_alter_peachjamsettings_options"),
-    ]
+    dependencies = [("peachjam", "0202_alter_userfollowing_last_alerted_at")]
 
     operations = [
         migrations.AlterModelOptions(
