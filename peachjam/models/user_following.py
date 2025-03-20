@@ -80,7 +80,9 @@ class UserFollowing(models.Model):
         related_name="followers",
         verbose_name=_("taxonomy"),
     )
-    last_alerted_at = models.DateTimeField(_("last alerted at"), null=True, blank=True)
+    last_alerted_at = models.DateTimeField(
+        _("last alerted at"), null=True, blank=True, auto_now_add=True
+    )
 
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
