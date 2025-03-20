@@ -28,16 +28,11 @@
   {% block download-btn %}
     <div>
       {% if show_save_doc_button %}
-        <!-- this will be replaced by htmx -->
-        <div class="save-document-button"></div>
         <div hx-get="{% url 'saved_document_button' document.id %}"
              hx-trigger="load"></div>
-        <div id="saveDocumentModal"
-             class="modal fade"
-             tabindex="-1"
-             aria-hidden="true">
-          <div id="saveDocumentModalDialog" class="modal-dialog"></div>
-        </div>
+        <!-- these will be replaced by htmx -->
+        <div class="save-document-button save-document-button--{{ document.id }}"></div>
+        {% include 'peachjam/saved_document/_modal_placeholder.html' %}
       {% endif %}
     </div>
     {% if document.source_file %}

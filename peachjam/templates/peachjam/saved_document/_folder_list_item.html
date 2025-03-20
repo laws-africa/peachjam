@@ -24,7 +24,7 @@
         {{ saved_doc.document.date }}
         <button class="btn btn-link"
                 type="button"
-                hx-post="{% url 'saved_document_delete' saved_doc.id %}"
+                hx-post="{% url 'saved_document_delete' saved_doc.id %}?next={% url 'folder_list' %}"
                 hx-target="#folders-list"
                 hx-confirm="{% trans "Are you sure you want to remove this document?" %}">
           <i class="bi bi-trash"></i>
