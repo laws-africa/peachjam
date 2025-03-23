@@ -1,4 +1,9 @@
+import base64
+
 from cobalt import FrbrUri
+from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.staticfiles.finders import find as find_static
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
 from django.utils.decorators import method_decorator
@@ -263,3 +268,34 @@ class RestrictedDocument403View(BaseDocumentDetailView):
 
     def render_to_response(self, context, **response_kwargs):
         return super().render_to_response(context, status=403, **response_kwargs)
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+class DocumentSocialImageView(DetailView):
+    """Image for this document used by social media."""
+
+    model = CoreDocument
+    slug_field = "expression_frbr_uri"
+    slug_url_kwarg = "frbr_uri"
+    context_object_name = "document"
+    template_name = "peachjam/document/social_image.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["site"] = get_current_site(self.request)
+
+        # inject logo as base64
+        fname = find_static("images/hero-logo.jpg")
+        with open(fname, "rb") as f:
+            file_content = f.read()
+        base64_encoded = base64.b64encode(file_content).decode("utf-8")
+        context["logo_b64"] = f"data:image/jpg;base64,{base64_encoded}"
+
+        return context
+
+    def render_to_response(self, context, **response_kwargs):
+        if settings.DEBUG and "debug" in self.request.GET:
+            return super().render_to_response(context, **response_kwargs)
+
+        # otherwise, render the html into an image
+        raise NotImplementedError()

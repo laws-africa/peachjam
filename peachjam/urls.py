@@ -76,6 +76,7 @@ from peachjam.views import (
     DocumentPopupView,
     DocumentProblemView,
     DocumentPublicationView,
+    DocumentSocialImageView,
     DocumentSourcePDFView,
     DocumentSourceView,
     EditAccountView,
@@ -328,6 +329,11 @@ urlpatterns = [
     re_path(
         r"^(?P<frbr_uri>akn/.*)/citations$",
         cache_page(CACHE_DURATION)(DocumentCitationsView.as_view()),
+        name="document_citations",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/social-image.png$",
+        cache_page(CACHE_DURATION)(DocumentSocialImageView.as_view()),
         name="document_citations",
     ),
     re_path(
