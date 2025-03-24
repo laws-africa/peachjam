@@ -1,3 +1,5 @@
+import hashlib
+import io
 import logging
 import os
 import re
@@ -9,6 +11,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from docpipe.soffice import soffice_convert
 
+from peachjam.helpers import html_to_png
 from peachjam.storage import DynamicStorageFileField
 
 log = logging.getLogger(__name__)
@@ -247,3 +250,48 @@ class ArticleAttachment(AttachmentAbstractModel):
                 "filename": self.filename,
             },
         )
+
+
+class DocumentSocialImage(models.Model):
+    SAVE_FOLDER = "social-images"
+
+    file = models.FileField(_("file"), upload_to=file_location, max_length=1024)
+    document = models.OneToOneField(
+        "peachjam.CoreDocument",
+        related_name="social_media_image",
+        on_delete=models.CASCADE,
+        verbose_name=_("document"),
+    )
+    html_md5sum = models.CharField(
+        _("html md5sum"), max_length=32, null=True, blank=True
+    )
+    updated_at = models.DateTimeField(_("updated at"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("social media image")
+        verbose_name_plural = _("social media images")
+
+    @classmethod
+    def get_or_create_for_document(cls, document, html_str):
+        image = cls.objects.filter(document=document).first()
+
+        # has the html changed?
+        html_md5sum = hashlib.md5(html_str.encode()).hexdigest()
+        if image and html_md5sum == image.html_md5sum:
+            return image
+
+        # render the html into an image using puppeteer and chrome
+        png = html_to_png(html_str, "1200x600")
+        f = File(io.BytesIO(png), name="social-image.png")
+        image, created = cls.objects.update_or_create(
+            document=document, defaults={"file": f, "html_md5sum": html_md5sum}
+        )
+        return image
+
+    def delete(self, *args, **kwargs):
+        if self.file:
+            try:
+                self.file.delete(False)
+            except Exception as e:
+                log.warning(f"Ignoring error while deleting {self.file}", exc_info=e)
+        return super().delete(*args, **kwargs)

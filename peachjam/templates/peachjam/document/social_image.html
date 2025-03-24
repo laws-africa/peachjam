@@ -82,7 +82,7 @@
       }
 
       .logo {
-          height: 8em;
+          max-height: 8em;
           width: auto;
           margin-inline-start: auto;
       }
@@ -110,7 +110,7 @@
       </main>
       <footer>
         <div class="site">{{ site.domain }}</div>
-        <img class="logo" src="{{ logo_b64 }}" alt="logo"/>
+        {% if logo_b64 %}<img class="logo" src="{{ logo_b64 }}" alt="logo"/>{% endif %}
       </footer>
     </div>
   </body>

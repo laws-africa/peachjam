@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.staticfiles.finders import find as find_static
 from django.http import Http404, HttpResponse
+from django.http.response import FileResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
 from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
@@ -14,8 +15,12 @@ from guardian.shortcuts import get_groups_with_perms
 
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
-from peachjam.helpers import html_to_png
-from peachjam.models import CoreDocument, DocumentNature, ExtractedCitation
+from peachjam.models import (
+    CoreDocument,
+    DocumentNature,
+    DocumentSocialImage,
+    ExtractedCitation,
+)
 from peachjam.registry import registry
 from peachjam.resolver import resolver
 from peachjam.views import BaseDocumentDetailView
@@ -285,14 +290,17 @@ class DocumentSocialImageView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["site"] = get_current_site(self.request)
-
-        # inject logo as base64
-        fname = find_static("images/hero-logo.jpg")
-        with open(fname, "rb") as f:
-            file_content = f.read()
-        base64_encoded = base64.b64encode(file_content).decode("utf-8")
-        context["logo_b64"] = f"data:image/jpg;base64,{base64_encoded}"
         context["debug"] = "debug" in self.request.GET
+
+        # find the logo to use and inject it as base 64
+        for fname in ["images/hero-logo.jpg", "images/logo.png"]:
+            fname = find_static(fname)
+            if fname:
+                with open(fname, "rb") as f:
+                    file_content = f.read()
+                    base64_encoded = base64.b64encode(file_content).decode("utf-8")
+                    context["logo_b64"] = f"data:image/jpg;base64,{base64_encoded}"
+                    break
 
         return context
 
@@ -300,9 +308,11 @@ class DocumentSocialImageView(DetailView):
         if settings.DEBUG and "debug" in self.request.GET:
             return super().render_to_response(context, **response_kwargs)
 
-        # otherwise, render the html into an image using puppeteer and chrome
         html_str = render_to_string(self.get_template_names(), context)
-        png = html_to_png(html_str, "1200x600")
+        image = DocumentSocialImage.get_or_create_for_document(self.object, html_str)
 
-        # prepare a file response from the binary png data
-        return HttpResponse(png, content_type="image/png")
+        if getattr(image.file.storage, "custom_domain", None):
+            # use the storage's custom domain to serve the file
+            return redirect(image.file.url)
+
+        return FileResponse(image.file, content_type="image/png")

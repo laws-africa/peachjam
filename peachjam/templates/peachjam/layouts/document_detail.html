@@ -3,11 +3,13 @@
 {% block title %}{{ document.title }}{% endblock %}
 {% block head-meta %}
   {{ block.super }}
+  {% if not document.allow_robots %}<meta name="robots" content="noindex" />{% endif %}
   <meta property="og:title" content="{{ document.title }}" />
   <meta property="og:type" content="book" />
+  <meta property="og:image"
+        content="{{ request.scheme }}://{{ request.get_host }}{% url 'document_social_image' document.expression_frbr_uri|slice:"1:" %}"/>
   <meta property="book:release_date"
         content="{{ document.date|date:'Y-m-d' }}"/>
-  {% if not document.allow_robots %}<meta name="robots" content="noindex" />{% endif %}
   <meta name="twitter:card" content="summary"/>
   <meta name="twitter:title" content="{{ document.title }}"/>
   {% if language_versions|length > 1 %}

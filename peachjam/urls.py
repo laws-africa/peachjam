@@ -334,7 +334,7 @@ urlpatterns = [
     re_path(
         r"^(?P<frbr_uri>akn/.*)/social-image.png$",
         cache_page(CACHE_DURATION)(DocumentSocialImageView.as_view()),
-        name="document_citations",
+        name="document_social_image",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/?.*)$",
