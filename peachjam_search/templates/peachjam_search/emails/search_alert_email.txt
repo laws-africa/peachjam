@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {{ saved_search.user }},
-{% trans 'We have found new documents that match your search alert.' %}
+{% trans 'We have found new documents that match your search alert:' %}
 
 {{ saved_search.q }}
 
@@ -13,5 +13,5 @@ https://{{ site.domain }}{{ saved_search.get_absolute_url }}
 {% endfor %}
 {% blocktrans %}
 The {{ APP_NAME }} Team
-{% endblock
+{% endblocktrans %}
 {% trans 'Manage these email alerts:' %} https://{{ site.domain }}{% url "search:saved_search_list" %}
