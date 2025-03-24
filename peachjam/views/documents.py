@@ -6,6 +6,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.staticfiles.finders import find as find_static
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
+from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.generic import DetailView, View
@@ -13,6 +14,7 @@ from guardian.shortcuts import get_groups_with_perms
 
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
+from peachjam.helpers import html_to_png
 from peachjam.models import CoreDocument, DocumentNature, ExtractedCitation
 from peachjam.registry import registry
 from peachjam.resolver import resolver
@@ -290,6 +292,7 @@ class DocumentSocialImageView(DetailView):
             file_content = f.read()
         base64_encoded = base64.b64encode(file_content).decode("utf-8")
         context["logo_b64"] = f"data:image/jpg;base64,{base64_encoded}"
+        context["debug"] = "debug" in self.request.GET
 
         return context
 
@@ -297,5 +300,9 @@ class DocumentSocialImageView(DetailView):
         if settings.DEBUG and "debug" in self.request.GET:
             return super().render_to_response(context, **response_kwargs)
 
-        # otherwise, render the html into an image
-        raise NotImplementedError()
+        # otherwise, render the html into an image using puppeteer and chrome
+        html_str = render_to_string(self.get_template_names(), context)
+        png = html_to_png(html_str, "1200x600")
+
+        # prepare a file response from the binary png data
+        return HttpResponse(png, content_type="image/png")

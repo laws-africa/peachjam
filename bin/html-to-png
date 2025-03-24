@@ -1,0 +1,43 @@
+#!/usr/bin/env node
+
+// Usage: html-to-png infile.html outfile.png
+//
+// Render the HTML in infile.html to a PNG image and save it to outfile.png.
+
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+
+async function generateScreenshot(htmlString, outputFilePath, clip) {
+  const [width, height] = clip.split('x').map(x => parseFloat(x));
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(htmlString, { waitUntil: 'domcontentloaded' });
+  try {
+    await page.screenshot({
+      clip: {
+        x: 0,
+        y: 0,
+        width,
+        height,
+      },
+      type: 'png',
+      path: outputFilePath,
+    });
+  } finally {
+    await browser.close();
+  }
+}
+
+if (process.argv.length !== 5) {
+  console.error('Usage: html-to-png <input-html-file> <output-image-file> <clip-width>x<clip-height>');
+  process.exit(1);
+}
+
+const inputFilePath = process.argv[2];
+const outputFilePath = process.argv[3];
+const clip = process.argv[4];
+const htmlString = fs.readFileSync(inputFilePath, 'utf8');
+
+generateScreenshot(htmlString, outputFilePath, clip)
+  .then(() => console.log('Screenshot saved to', outputFilePath))
+  .catch(err => console.error('Error generating screenshot:', err));
