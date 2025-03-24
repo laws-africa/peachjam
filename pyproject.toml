@@ -72,7 +72,10 @@ dependencies = [
 ]
 
 [tool.setuptools.data-files]
-"bin" = ["bin/pdfjs-to-text"]
+"bin" = [
+    "bin/html-to-png",
+    "bin/pdfjs-to-text",
+]
 
 [project.optional-dependencies]
 dev = [
