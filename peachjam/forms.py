@@ -528,9 +528,6 @@ class UserProfileForm(forms.Form):
         queryset=Language.objects.filter(iso_639_1__in=get_languages())
     )
 
-    class Meta:
-        fields = ["first_name", "last_name", "preferred_language"]
-
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
         kwargs["initial"] = {

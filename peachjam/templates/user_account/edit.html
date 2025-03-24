@@ -43,12 +43,7 @@
           <select class="form-control"
                   name="{{ form.preferred_language.name }}"
                   id="{{ form.preferred_language.id_for_label }}">
-            {% for language in form.preferred_language.field.choices %}
-              <option value="{{ language.0 }}"
-                      {% if language.0 == form.preferred_language.value %}selected{% endif %}>
-                {{ language.1 }}
-              </option>
-            {% endfor %}
+            {% for opt in form.preferred_language %}{{ opt }}{% endfor %}
           </select>
           {% if form.preferred_language.errors %}
             <div class="text-danger">

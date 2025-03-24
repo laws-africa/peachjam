@@ -19,8 +19,6 @@ class AccountsHomeView(LoginRequiredMixin, TemplateView):
 
 
 class EditAccountView(LoginRequiredMixin, FormView):
-    authentication_required = True
-    model = User
     template_name = "user_account/edit.html"
     form_class = UserProfileForm
 
