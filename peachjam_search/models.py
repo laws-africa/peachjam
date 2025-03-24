@@ -15,6 +15,7 @@ from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import override
 
 log = logging.getLogger(__name__)
 
@@ -159,19 +160,26 @@ class SavedSearch(models.Model):
         return SearchableDocumentSerializer(es_response.hits, many=True).data
 
     def send_alert(self, hits):
-        # send an email or other alert to the user
         hits = hits[:10]
         context = {
             "hits": hits,
             "saved_search": self,
             "site": Site.objects.get_current(),
+            "APP_NAME": settings.PEACHJAM["APP_NAME"],
         }
-        html = render_to_string("peachjam_search/emails/search_alert.html", context)
-        plain_txt = render_to_string("peachjam_search/emails/search_alert.txt", context)
+        with override(self.user.userprofile.preferred_language.pk):
+            html = render_to_string(
+                "peachjam_search/emails/search_alert_email.html", context
+            )
+            plain_txt = render_to_string(
+                "peachjam_search/emails/search_alert_email.txt", context
+            )
 
-        subject = (
-            settings.EMAIL_SUBJECT_PREFIX + _("New matches for your search ") + self.q
-        )
+            subject = (
+                settings.EMAIL_SUBJECT_PREFIX
+                + _("New matches for your search ")
+                + self.q
+            )
         send_mail(
             subject=subject,
             message=plain_txt,
