@@ -30,8 +30,8 @@ def normalize_vector(vec):
 class DocumentEmbedding(models.Model):
     """Embedding data for a document, built from the embeddings of its various content chunks."""
 
-    document = models.ForeignKey(
-        "peachjam.CoreDocument", on_delete=models.CASCADE, unique=True
+    document = models.OneToOneField(
+        "peachjam.CoreDocument", on_delete=models.CASCADE, related_name="embedding"
     )
     # md5 sum of the content when the embedding was created
     content_text_md5 = models.CharField(max_length=50, null=True, blank=True)
@@ -134,6 +134,61 @@ class DocumentEmbedding(models.Model):
         search_model_saved(document.__class__._meta.label, document.pk, schedule=60)
 
         return doc_embedding
+
+    @classmethod
+    def backfill_from_es(cls, document):
+        """Temporary helper to backfill content chunks and embeddings from elasticsearch."""
+        from elasticsearch_dsl import Search
+        from elasticsearch_dsl.connections import connections
+
+        from peachjam_search.documents import MultiLanguageIndexManager
+
+        log.info(f"Backfilling content chunks for {document}")
+
+        text = document.get_content_as_text()
+        if not text.strip():
+            log.info(f"No text for {document}, skipping")
+            return
+        content_text_md5 = hashlib.md5(text.encode()).hexdigest()
+
+        index = MultiLanguageIndexManager.get_instance().get_index_for_language(
+            document.language.iso_639_2T
+        )
+        client = connections.get_connection("default")
+        s = Search(using=client, index=index).query("match", _id=document.id)
+        s = s.source(["content_chunks"])
+
+        response = s.execute()
+        updated = False
+        for hit in response.hits.hits:
+            for chunk in getattr(hit._source, "content_chunks", None) or []:
+                updated = True
+                ContentChunk.objects.create(
+                    document=document,
+                    type=chunk.type,
+                    text=chunk.text,
+                    portion=chunk.portion,
+                    chunk_n=chunk.chunk_n,
+                    n_chunks=chunk.n_chunks,
+                    provision_type=chunk.provision_type,
+                    title=chunk.title,
+                    parent_titles=chunk.parent_titles,
+                    parent_ids=chunk.parent_ids,
+                    text_embedding=chunk.text_embedding,
+                )
+
+        if updated:
+            doc_embedding = DocumentEmbedding.objects.get_or_create(document=document)[
+                0
+            ]
+            doc_embedding.content_text_md5 = content_text_md5
+            doc_embedding.update_embedding()
+            doc_embedding.save()
+            log.info("Embedding updated")
+        else:
+            log.info("No chunks")
+
+        log.info("Done")
 
 
 class ContentChunk(models.Model):

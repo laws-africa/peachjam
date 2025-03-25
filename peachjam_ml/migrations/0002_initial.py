@@ -42,10 +42,10 @@ class Migration(migrations.Migration):
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "document",
-                    models.ForeignKey(
+                    models.OneToOneField(
                         on_delete=django.db.models.deletion.CASCADE,
                         to="peachjam.coredocument",
-                        unique=True,
+                        related_name="embedding",
                     ),
                 ),
             ],
