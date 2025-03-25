@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import io
 import logging
@@ -5,8 +6,10 @@ import os
 import re
 
 import magic
+from django.contrib.staticfiles.finders import find as find_static
 from django.core.files import File
 from django.db import models
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from docpipe.soffice import soffice_convert
@@ -254,14 +257,15 @@ class ArticleAttachment(AttachmentAbstractModel):
 
 class DocumentSocialImage(models.Model):
     SAVE_FOLDER = "social-images"
+    template_name = "peachjam/document/social_image.html"
 
-    file = models.FileField(_("file"), upload_to=file_location, max_length=1024)
     document = models.OneToOneField(
         "peachjam.CoreDocument",
         related_name="social_media_image",
         on_delete=models.CASCADE,
         verbose_name=_("document"),
     )
+    file = models.FileField(_("file"), upload_to=file_location, max_length=1024)
     html_md5sum = models.CharField(
         _("html md5sum"), max_length=32, null=True, blank=True
     )
@@ -270,6 +274,18 @@ class DocumentSocialImage(models.Model):
     class Meta:
         verbose_name = _("social media image")
         verbose_name_plural = _("social media images")
+
+    def delete(self, *args, **kwargs):
+        self.delete_file()
+        return super().delete(*args, **kwargs)
+
+    def delete_file(self):
+        """Delete the file, if present, and silently ignore errors."""
+        if self.file:
+            try:
+                self.file.delete(False)
+            except Exception as e:
+                log.warning(f"Ignoring error while deleting {self.file}", exc_info=e)
 
     @classmethod
     def get_or_create_for_document(cls, document, html_str):
@@ -281,17 +297,32 @@ class DocumentSocialImage(models.Model):
             return image
 
         # render the html into an image using puppeteer and chrome
-        png = html_to_png(html_str, "1200x600")
-        f = File(io.BytesIO(png), name="social-image.png")
+        f = File(io.BytesIO(cls.make_image(html_str)), name="social-image.png")
         image, created = cls.objects.update_or_create(
             document=document, defaults={"file": f, "html_md5sum": html_md5sum}
         )
         return image
 
-    def delete(self, *args, **kwargs):
-        if self.file:
-            try:
-                self.file.delete(False)
-            except Exception as e:
-                log.warning(f"Ignoring error while deleting {self.file}", exc_info=e)
-        return super().delete(*args, **kwargs)
+    @classmethod
+    def html_for_document(cls, document, site, debug=False):
+        context = {
+            "document": document,
+            "debug": debug,
+            "site": site,
+        }
+
+        # find the logo to use and inject it as base 64
+        for fname in ["images/hero-logo.jpg", "images/logo.png"]:
+            fname = find_static(fname)
+            if fname:
+                with open(fname, "rb") as f:
+                    file_content = f.read()
+                    base64_encoded = base64.b64encode(file_content).decode("utf-8")
+                    context["logo_b64"] = f"data:image/jpg;base64,{base64_encoded}"
+                    break
+
+        return render_to_string(cls.template_name, context)
+
+    @classmethod
+    def make_image(cls, html_str):
+        return html_to_png(html_str, "1200x600")

@@ -19,7 +19,7 @@ RUN npm i -g sass
 # copying this in first means Docker can cache this operation
 COPY pyproject.toml /app/
 # this dir is needed by pip when processing pyproject.toml
-COPY bin/* /app/bin/
+COPY bin /app/bin
 WORKDIR /app
 RUN pip install .
 

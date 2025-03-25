@@ -1,13 +1,9 @@
-import base64
-
 from cobalt import FrbrUri
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.contrib.staticfiles.finders import find as find_static
 from django.http import Http404, HttpResponse
 from django.http.response import FileResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
-from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.generic import DetailView, View
@@ -285,32 +281,17 @@ class DocumentSocialImageView(DetailView):
     slug_field = "expression_frbr_uri"
     slug_url_kwarg = "frbr_uri"
     context_object_name = "document"
-    template_name = "peachjam/document/social_image.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["site"] = get_current_site(self.request)
-        context["debug"] = "debug" in self.request.GET
+    def get(self, request, *args, **kwargs):
+        document = self.get_object()
+        site = get_current_site(request)
+        debug = settings.DEBUG and "debug" in request.GET
+        html_str = DocumentSocialImage.html_for_document(document, site, debug)
 
-        # find the logo to use and inject it as base 64
-        for fname in ["images/hero-logo.jpg", "images/logo.png"]:
-            fname = find_static(fname)
-            if fname:
-                with open(fname, "rb") as f:
-                    file_content = f.read()
-                    base64_encoded = base64.b64encode(file_content).decode("utf-8")
-                    context["logo_b64"] = f"data:image/jpg;base64,{base64_encoded}"
-                    break
+        if debug:
+            return HttpResponse(html_str)
 
-        return context
-
-    def render_to_response(self, context, **response_kwargs):
-        if settings.DEBUG and "debug" in self.request.GET:
-            return super().render_to_response(context, **response_kwargs)
-
-        html_str = render_to_string(self.get_template_names(), context)
-        image = DocumentSocialImage.get_or_create_for_document(self.object, html_str)
-
+        image = DocumentSocialImage.get_or_create_for_document(document, html_str)
         if getattr(image.file.storage, "custom_domain", None):
             # use the storage's custom domain to serve the file
             return redirect(image.file.url)
