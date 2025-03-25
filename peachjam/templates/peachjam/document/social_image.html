@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>{{ document.title }}</title>
+    <style>
+      html, body {
+          margin: 0;
+          padding: 0;
+          width: 1200px;
+          height: 600px;
+          background-color: white;
+          font-family: Arial, sans-serif;
+          font-size: 16px;
+          --secondary-color: #555555;
+          --secondary-size: 1.75em;
+      }
+
+      * {
+          box-sizing: border-box;
+      }
+
+      #container {
+          width: 1200px;
+          height: 600px;
+          padding: 60px 50px;
+          display: flex;
+          flex-direction: column;
+          {% if debug %}border: 1px solid red;{% endif %}
+      }
+
+      main {
+          flex-grow: 1;
+      }
+
+      .place {
+          margin: 0;
+          font-size: var(--secondary-size);
+          color: var(--secondary-color);
+          font-weight: normal;
+      }
+
+      .title {
+          margin-top: 0.5em;
+          margin-bottom: 0.5em;
+          font-size: 3em;
+      }
+      .title.small {
+          font-size: 2.25em;
+      }
+      .title.xsmall {
+          font-size: 2em;
+      }
+
+      .citation {
+          margin-top: 0;
+          margin-bottom: 1em;
+          font-size: var(--secondary-size);
+          color: var(--secondary-color);
+      }
+
+      .date {
+          margin-top: 0;
+          margin-bottom: 1em;
+          font-size: var(--secondary-size);
+          color: var(--secondary-color);
+          font-weight: normal;
+      }
+
+      .topics {
+          font-size: var(--secondary-size);
+          color: var(--secondary-color);
+          font-style: italic;
+      }
+
+      footer {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-end;
+      }
+
+      .logo {
+          max-height: 8em;
+          width: auto;
+          margin-inline-start: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <main>
+        <h3 class="place">
+          {% if document.locality %}{{ document.locality }},{% endif %}
+          {{ document.jurisdiction }}
+        </h3>
+        <h1 class="title {% if document.title|length > 100 %}xsmall{% elif document.title|length > 75 %}small{% endif %}">
+          {{ document.title|truncatechars:200 }}
+        </h1>
+        {% if document.citation and document.citation != document.title %}
+          <h2 class="citation">{{ document.citation }}</h2>
+        {% endif %}
+        <h3 class="date">{{ document.date }}</h3>
+        {% if document.listing_taxonomies %}
+          <div class="topics">
+            {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
+          </div>
+        {% endif %}
+      </main>
+      <footer>
+        {% if logo_b64 %}<img class="logo" src="{{ logo_b64 }}" alt="logo"/>{% endif %}
+      </footer>
+    </div>
+  </body>
+</html>
