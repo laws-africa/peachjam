@@ -11,7 +11,9 @@
           height: 600px;
           background-color: white;
           font-family: Arial, sans-serif;
-          --secondary-color: #777777;
+          font-size: 16px;
+          --secondary-color: #555555;
+          --secondary-size: 1.75em;
       }
 
       * {
@@ -33,7 +35,7 @@
 
       .place {
           margin: 0;
-          font-size: 1.5em;
+          font-size: var(--secondary-size);
           color: var(--secondary-color);
           font-weight: normal;
       }
@@ -41,7 +43,7 @@
       .title {
           margin-top: 0.5em;
           margin-bottom: 0.5em;
-          font-size: 2.5em;
+          font-size: 3em;
       }
       .title.small {
           font-size: 2.25em;
@@ -53,21 +55,22 @@
       .citation {
           margin-top: 0;
           margin-bottom: 1em;
-          font-size: 1.5em;
+          font-size: var(--secondary-size);
           color: var(--secondary-color);
       }
 
       .date {
           margin-top: 0;
           margin-bottom: 1em;
-          font-size: 1.5em;
+          font-size: var(--secondary-size);
           color: var(--secondary-color);
           font-weight: normal;
       }
 
       .topics {
-          font-size: 1.5em;
+          font-size: var(--secondary-size);
           color: var(--secondary-color);
+          font-style: italic;
       }
 
       footer {
