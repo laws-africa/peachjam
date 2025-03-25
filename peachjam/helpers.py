@@ -139,3 +139,21 @@ def get_update_or_create(model, defaults, **kwargs):
 
 def get_country_absolute_url(self):
     return reverse("place", kwargs={"code": self.iso})
+
+
+def html_to_png(html_str, clip):
+    """Extract text from fname using pdfjs-compatible script."""
+    with tempfile.NamedTemporaryFile(suffix=".html") as inf:
+        inf.write(html_str.encode("utf-8"))
+        inf.flush()
+
+        with tempfile.NamedTemporaryFile(suffix=".png") as outf:
+            cmd = [
+                settings.PEACHJAM["HTML_TO_PNG"],
+                inf.name,
+                outf.name,
+                clip,
+            ]
+
+            subprocess.run(cmd, check=True)
+            return outf.read()
