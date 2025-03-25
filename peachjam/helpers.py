@@ -155,7 +155,5 @@ def html_to_png(html_str, clip):
                 clip,
             ]
 
-            subprocess.run(
-                cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            )
+            subprocess.run(cmd, check=True)
             return outf.read()

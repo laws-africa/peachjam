@@ -39,5 +39,4 @@ const clip = process.argv[4];
 const htmlString = fs.readFileSync(inputFilePath, 'utf8');
 
 generateScreenshot(htmlString, outputFilePath, clip)
-  .then(() => console.log('Screenshot saved to', outputFilePath))
-  .catch(err => console.error('Error generating screenshot:', err));
+  .then(() => console.log('Screenshot saved to', outputFilePath));

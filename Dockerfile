@@ -15,6 +15,10 @@ RUN apt-get install -y nodejs
 # install sass for compiling assets before deploying
 RUN npm i -g sass
 
+# install puppeteer and chrome for generating images
+RUN npm i -g puppeteer
+RUN npx puppeteer browsers install chrome
+
 # install dependencies
 # copying this in first means Docker can cache this operation
 COPY pyproject.toml /app/
