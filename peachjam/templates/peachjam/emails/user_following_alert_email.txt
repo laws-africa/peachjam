@@ -1,6 +1,6 @@
 {% load i18n %}
 {{ user }},
-{% trans 'We have found new documents for areas that you are following:' %}
+{% trans 'We have found new documents for topics that you are following.' %}
 {% for item in followed_documents %}
  {{ item.followed_object }}
   {% for doc in item.documents %}
@@ -8,4 +8,7 @@
       https://{{ site.domain }}{{ doc.expression_frbr_uri }}
   {% endfor %}
 {% endfor %}
-{% trans 'Manage your alerts:'%} https://{{ site.domain }}{% url "user_following_list" %}
+{% blocktrans %}
+The {{ APP_NAME }} Team
+{% endblocktrans %}
+{% trans 'Manage these email alerts:'%} https://{{ site.domain }}{% url "user_following_list" %}
