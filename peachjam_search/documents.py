@@ -126,7 +126,7 @@ class SearchableDocument(Document):
         }
     )
 
-    # see peachjam_search.embeddings.ContentChunk
+    # see peachjam_ml.models.ContentChunk
     content_chunks = fields.NestedField(
         properties={
             "chunk_n": fields.IntegerField(),
