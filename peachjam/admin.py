@@ -528,11 +528,26 @@ class DocumentAccessMixin(GuardedModelAdminMixin):
             form = DocumentAccessForm(request.POST, doc=obj)
             if form.is_valid():
                 form.set_doc_access_groups()
-                messages.success(request, _("Document access groups updated."))
+                messages.success(request, _("Access groups updated."))
                 return HttpResponseRedirect(".")
             context["doc_access_form"] = form
 
         return render(request, template_name, context)
+
+    def document_access_link(self, obj):
+        if obj and obj.id:
+            url = reverse(
+                f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
+                args=[quote(obj.pk)],
+            )
+            return format_html(
+                '<a href="{}">{}</a>',
+                url,
+                _("Manage restricted access groups"),
+            )
+        return "-"
+
+    document_access_link.short_description = gettext_lazy("Restricted access groups")
 
 
 class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
@@ -674,21 +689,6 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
             fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
 
         return fieldsets
-
-    def document_access_link(self, obj):
-        if obj and obj.id:
-            url = reverse(
-                f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
-                args=[quote(obj.pk)],
-            )
-            return format_html(
-                '<a href="{}">{}</a>',
-                url,
-                _("Select restricted document access groups"),
-            )
-        return "-"
-
-    document_access_link.short_description = gettext_lazy("Restricted document access")
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
@@ -918,9 +918,9 @@ class TaxonomyForm(MoveNodeForm):
 
 
 @admin.register(Taxonomy)
-class TaxonomyAdmin(TreeAdmin):
+class TaxonomyAdmin(DocumentAccessMixin, TreeAdmin):
     form = movenodeform_factory(Taxonomy, TaxonomyForm)
-    readonly_fields = ("slug", "path_name")
+    readonly_fields = ("slug", "path_name", "document_access_link")
     inlines = [EntityProfileInline]
     # prevent pagination
     list_per_page = 1_000_000

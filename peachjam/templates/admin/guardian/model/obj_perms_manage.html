@@ -23,7 +23,7 @@
         {{ original|truncatewords:"18" }}
       {% endif %}
       &rsaquo;
-      {% trans "Document access" %}
+      {% trans "Manage access groups" %}
     </div>
   {% endif %}
 {% endblock %}
@@ -33,7 +33,7 @@
     {% csrf_token %}
     <p class="form-label">
       {% blocktrans trimmed %}
-      Select the groups that have access to this document
+      Select the groups that have access permissions to this item.
       {% endblocktrans %}
     </p>
     {{ doc_access_form }}
