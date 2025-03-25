@@ -304,11 +304,10 @@ class DocumentSocialImage(models.Model):
         return image
 
     @classmethod
-    def html_for_document(cls, document, site, debug=False):
+    def html_for_document(cls, document, debug=False):
         context = {
             "document": document,
             "debug": debug,
-            "site": site,
         }
 
         # find the logo to use and inject it as base 64

@@ -1,6 +1,5 @@
 from cobalt import FrbrUri
 from django.conf import settings
-from django.contrib.sites.shortcuts import get_current_site
 from django.http import Http404, HttpResponse
 from django.http.response import FileResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
@@ -284,9 +283,8 @@ class DocumentSocialImageView(DetailView):
 
     def get(self, request, *args, **kwargs):
         document = self.get_object()
-        site = get_current_site(request)
         debug = settings.DEBUG and "debug" in request.GET
-        html_str = DocumentSocialImage.html_for_document(document, site, debug)
+        html_str = DocumentSocialImage.html_for_document(document, debug)
 
         if debug:
             return HttpResponse(html_str)
