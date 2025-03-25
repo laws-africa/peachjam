@@ -7,7 +7,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Avg
 from django.forms import model_to_dict
-from pgvector.django import VectorField
+from pgvector.django import HnswIndex, VectorField
 
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR, get_text_embedding_batch
 from peachjam_search.tasks import search_model_saved
@@ -40,6 +40,18 @@ class DocumentEmbedding(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            HnswIndex(
+                name="peachjam_ml_docembedding_emb_ix",
+                fields=["text_embedding"],
+                m=16,
+                ef_construction=64,
+                # ip == inner product == dot product == the "<#>" pgvector operator
+                opclasses=["vector_ip_ops"],
+            )
+        ]
 
     def __str__(self):
         return f"DocumentEmbedding<#{self.pk} {self.document}>"
@@ -221,6 +233,18 @@ class ContentChunk(models.Model):
     # embedding of the text field
     text_embedding = VectorField(dimensions=1024)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            HnswIndex(
+                name="peachjam_ml_cchunk_emb_ix",
+                fields=["text_embedding"],
+                m=16,
+                ef_construction=64,
+                # ip == inner product == dot product == the "<#>" pgvector operator
+                opclasses=["vector_ip_ops"],
+            )
+        ]
 
     def clone(self):
         # walk over all the fields and clone them
