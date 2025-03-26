@@ -178,7 +178,7 @@ class DocumentEmbedding(models.Model):
                     document=document,
                     type=chunk.type,
                     text=chunk.text,
-                    portion=chunk.portion,
+                    portion=getattr(chunk, "portion", None),
                     chunk_n=chunk.chunk_n,
                     n_chunks=chunk.n_chunks,
                     text_embedding=chunk.text_embedding,
