@@ -170,12 +170,13 @@ class DocumentEmbedding(models.Model):
         s = Search(using=client, index=index).query("match", _id=document.id)
         s = s.source(["content_chunks"])
 
+        log.info("Calling ES")
         response = s.execute()
+        log.info(f"Called ES - {len(response.hits.hits)} hit")
         updated = False
         for hit in response.hits.hits:
-            for chunk in getattr(hit._source, "content_chunks", None) or []:
-                updated = True
-                ContentChunk.objects.create(
+            chunks = [
+                ContentChunk(
                     document=document,
                     type=chunk.type,
                     text=chunk.text,
@@ -192,12 +193,20 @@ class DocumentEmbedding(models.Model):
                     else list(chunk.parent_ids),
                     text_embedding=chunk.text_embedding,
                 )
+                for chunk in getattr(hit._source, "content_chunks", None) or []
+            ]
+            if chunks:
+                updated = True
+                log.info(f"Creating {len(chunks)} chunks")
+                ContentChunk.objects.bulk_create(chunks)
+                log.info("Created chunks")
 
         if updated:
             doc_embedding = DocumentEmbedding.objects.get_or_create(document=document)[
                 0
             ]
             doc_embedding.content_text_md5 = content_text_md5
+            log.info("Updating embedding")
             doc_embedding.update_embedding()
             doc_embedding.save()
             log.info("Embedding updated")
