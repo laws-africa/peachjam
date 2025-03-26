@@ -184,8 +184,12 @@ class DocumentEmbedding(models.Model):
                     n_chunks=chunk.n_chunks,
                     provision_type=chunk.provision_type,
                     title=chunk.title,
-                    parent_titles=chunk.parent_titles,
-                    parent_ids=chunk.parent_ids,
+                    parent_titles=None
+                    if chunk.parent_titles is None
+                    else list(chunk.parent_titles),
+                    parent_ids=None
+                    if chunk.parent_ids is None
+                    else list(chunk.parent_ids),
                     text_embedding=chunk.text_embedding,
                 )
 
