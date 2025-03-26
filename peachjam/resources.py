@@ -800,7 +800,7 @@ class RatificationResource(resources.ModelResource):
     country = fields.Field(
         attribute="country",
         column_name="country",
-        widget=CountryField(Country, field="name"),
+        widget=CountryField(Country, field="pk"),
     )
     ratification_date = fields.Field(
         attribute="ratification_date",
@@ -817,14 +817,6 @@ class RatificationResource(resources.ModelResource):
         column_name="signature_date",
         widget=DateWidget(),
     )
-    source_url = fields.Field(
-        attribute="source_url", column_name="source_url", widget=CharWidget()
-    )
-    last_updated = fields.Field(
-        attribute="last_updated",
-        column_name="last_updated",
-        widget=DateWidget(),
-    )
 
     class Meta:
         model = RatificationCountry
@@ -833,6 +825,11 @@ class RatificationResource(resources.ModelResource):
             "work",
             "country",
         )
+
+    def filter_export(self, queryset, *args, **kwargs):
+        return RatificationCountry.objects.filter(
+            ratification__in=queryset
+        ).select_related("country", "ratification", "ratification__work")
 
 
 class BillResource(BaseDocumentResource):
