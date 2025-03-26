@@ -817,6 +817,16 @@ class RatificationResource(resources.ModelResource):
         column_name="signature_date",
         widget=DateWidget(),
     )
+    source_url = fields.Field(
+        attribute="ratification__source_url",
+        column_name="source_url",
+        widget=CharWidget(),
+    )
+    last_updated = fields.Field(
+        attribute="ratification__last_updated",
+        column_name="last_updated",
+        widget=DateWidget(),
+    )
 
     class Meta:
         model = RatificationCountry
