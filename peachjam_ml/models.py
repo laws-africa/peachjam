@@ -170,9 +170,7 @@ class DocumentEmbedding(models.Model):
         s = Search(using=client, index=index).query("match", _id=document.id)
         s = s.source(["content_chunks"])
 
-        log.info("Calling ES")
         response = s.execute()
-        log.info(f"Called ES - {len(response.hits.hits)} hit")
         updated = False
         for hit in response.hits.hits:
             chunks = [
@@ -183,15 +181,15 @@ class DocumentEmbedding(models.Model):
                     portion=chunk.portion,
                     chunk_n=chunk.chunk_n,
                     n_chunks=chunk.n_chunks,
-                    provision_type=chunk.provision_type,
-                    title=chunk.title,
+                    text_embedding=chunk.text_embedding,
+                    provision_type=getattr(chunk, "provision_type", None),
+                    title=getattr(chunk, "title", None),
                     parent_titles=None
-                    if chunk.parent_titles is None
+                    if getattr(chunk, "parent_titles", None) is None
                     else list(chunk.parent_titles),
                     parent_ids=None
-                    if chunk.parent_ids is None
+                    if getattr(chunk, "parent_ids", None) is None
                     else list(chunk.parent_ids),
-                    text_embedding=chunk.text_embedding,
                 )
                 for chunk in getattr(hit._source, "content_chunks", None) or []
             ]
