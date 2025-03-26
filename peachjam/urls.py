@@ -398,6 +398,11 @@ urlpatterns = [
                 path("home/", AccountsHomeView.as_view(), name="account_home"),
                 path("profile/", EditAccountView.as_view(), name="edit_account"),
                 path("user/", GetAccountView.as_view(), name="get_account"),
+                path(
+                    "document-access-groups/",
+                    DocumentAccessGroupListView.as_view(),
+                    name="document_access_group_list",
+                ),
             ]
         ),
     ),
@@ -534,11 +539,6 @@ urlpatterns = [
         ),
     ),
     # Restricted Documents
-    path(
-        "document-access-groups/",
-        DocumentAccessGroupListView.as_view(),
-        name="document_access_group_list",
-    ),
     path(
         "document-access-groups/<int:pk>",
         DocumentAccessGroupDetailView.as_view(),
