@@ -13,7 +13,7 @@
           font-family: Arial, sans-serif;
           font-size: 16px;
           --secondary-color: #555555;
-          --secondary-size: 1.75em;
+          --secondary-size: 2.5em;
       }
 
       * {
@@ -43,34 +43,30 @@
       .title {
           margin-top: 0.5em;
           margin-bottom: 0.5em;
-          font-size: 3em;
+          font-size: 3.5em;
       }
       .title.small {
-          font-size: 2.25em;
+          font-size: 2.755em;
       }
       .title.xsmall {
-          font-size: 2em;
+          font-size: 2.5em;
+      }
+
+      .citation,
+      .court {
+          margin-top: 0;
+          margin-bottom: 1em;
+          font-size: var(--secondary-size);
+          color: var(--secondary-color);
       }
 
       .citation {
-          margin-top: 0;
-          margin-bottom: 1em;
-          font-size: var(--secondary-size);
-          color: var(--secondary-color);
+          font-weight: bold;
       }
 
       .date {
-          margin-top: 0;
-          margin-bottom: 1em;
           font-size: var(--secondary-size);
           color: var(--secondary-color);
-          font-weight: normal;
-      }
-
-      .topics {
-          font-size: var(--secondary-size);
-          color: var(--secondary-color);
-          font-style: italic;
       }
 
       footer {
@@ -80,7 +76,7 @@
       }
 
       .logo {
-          max-height: 8em;
+          max-height: 7em;
           width: auto;
           margin-inline-start: auto;
       }
@@ -89,24 +85,20 @@
   <body>
     <div id="container">
       <main>
-        <h3 class="place">
+        <div class="place">
           {% if document.locality %}{{ document.locality }},{% endif %}
           {{ document.jurisdiction }}
-        </h3>
-        <h1 class="title {% if document.title|length > 100 %}xsmall{% elif document.title|length > 75 %}small{% endif %}">
+        </div>
+        <h1 class="title {% if document.title|length > 150 %}xsmall{% elif document.title|length > 75 %}small{% endif %}">
           {{ document.title|truncatechars:200 }}
         </h1>
         {% if document.citation and document.citation != document.title %}
-          <h2 class="citation">{{ document.citation }}</h2>
+          <div class="citation">{{ document.citation }}</div>
         {% endif %}
-        <h3 class="date">{{ document.date }}</h3>
-        {% if document.listing_taxonomies %}
-          <div class="topics">
-            {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
-          </div>
-        {% endif %}
+        {% if document.court %}<div class="court">{{ document.court }}</div>{% endif %}
       </main>
       <footer>
+        <div class="date">{{ document.date }}</div>
         {% if logo_b64 %}<img class="logo" src="{{ logo_b64 }}" alt="logo"/>{% endif %}
       </footer>
     </div>
