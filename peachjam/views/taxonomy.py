@@ -61,7 +61,7 @@ class TaxonomyDetailView(FilteredDocumentListView):
             super().get_base_queryset().filter(taxonomies__topic__in=topics).distinct()
         )
 
-    def get_allowed_taxonomies(self, root, get_ids=False):
+    def get_allowed_taxonomies(self, root):
         if self.request.user.is_authenticated:
             allowed_taxonomies = set(
                 get_objects_for_user(
@@ -74,9 +74,6 @@ class TaxonomyDetailView(FilteredDocumentListView):
         node_ids = []
 
         def filter_nodes(node):
-            if not isinstance(node, dict):
-                return node
-
             is_restricted = node.get("data", {}).get("restricted", False)
             is_allowed = node.get("id") in allowed_taxonomies
 
