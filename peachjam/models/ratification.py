@@ -15,7 +15,9 @@ class Ratification(models.Model):
         on_delete=models.CASCADE,
         verbose_name=_("work"),
     )
-    source_url = models.URLField(_("source URL"), null=True, blank=True)
+    source_url = models.URLField(
+        _("source URL"), null=True, blank=True, max_length=2048
+    )
     last_updated = models.DateField(_("last updated"), null=True, blank=True)
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
 
