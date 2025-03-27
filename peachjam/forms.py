@@ -93,7 +93,7 @@ class NewDocumentFormMixin:
     def adjust_fieldsets(cls, fieldsets):
         # add the upload_file to the first set of fields to include on the page
         fieldsets = copy.deepcopy(fieldsets)
-        fieldsets[0][1]["fields"].append("upload_file")
+        fieldsets[0][1]["fields"].insert(0, "upload_file")
         return fieldsets
 
     @classmethod
