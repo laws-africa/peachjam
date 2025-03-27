@@ -1,20 +1,25 @@
 export default class DocumentUploader {
   extractorUrl: string;
   fileUpload: HTMLInputElement;
+  notices: HTMLElement;
 
   constructor (root: HTMLElement) {
     this.extractorUrl = root.dataset.extractorUrl || '';
+    this.notices = document.createElement('div');
     this.fileUpload = document.getElementById('id_upload_file') as HTMLInputElement;
-    this.fileUpload?.addEventListener('change', this.onFileChanged.bind(this));
+
+    if (this.fileUpload) {
+      this.fileUpload.insertAdjacentElement('afterend', this.notices);
+      this.fileUpload?.addEventListener('change', this.onFileChanged.bind(this));
+    }
   }
 
   async onFileChanged (event: Event) {
     const file = this.fileUpload.files?.[0];
     if (file) {
-      const notices = document.createElement('div');
+      this.notices.innerHTML = '';
       const result = document.createElement('div');
-      notices.appendChild(result);
-      this.fileUpload.insertAdjacentElement('afterend', notices);
+      this.notices.appendChild(result);
 
       // get a digest of the file and check with the server if it's a duplicate
       const digest = await calculateDigest(file);
@@ -25,15 +30,15 @@ export default class DocumentUploader {
       }
 
       if (this.extractorUrl) {
-        this.useExtractor(file, notices);
+        this.useExtractor(file);
       }
     }
   }
 
-  async useExtractor (file: File, notices: HTMLElement) {
+  async useExtractor (file: File) {
     const status = document.createElement('div');
     status.innerText = 'Extracting...';
-    notices.appendChild(status);
+    this.notices.appendChild(status);
 
     const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.getAttribute('value');
     const formData = new FormData();
@@ -46,23 +51,12 @@ export default class DocumentUploader {
         body: formData
       });
       if (resp.ok) {
-        const html = await resp.text();
         // parse the html into a DOM
+        const html = await resp.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
-        // insert the elements into the form
-        doc.querySelectorAll('select[id], input[id]').forEach((input) => {
-          const el = document.getElementById(input.id);
-          if (el) {
-            if (el.tagName === 'SELECT' && el.nextElementSibling?.classList.contains('select2')) {
-              el.nextElementSibling.remove();
-            }
-            el.replaceWith(input);
-            // @ts-ignore
-            window.django.jQuery(input).select2({width: 'element'});
-          }
-        });
+        this.replaceFormElements(doc);
 
         const result = doc.querySelector('#extraction-result');
         if (result) {
@@ -74,6 +68,24 @@ export default class DocumentUploader {
     } catch (e) {
       status.innerText = 'Error: ' + e;
     }
+  }
+
+  replaceFormElements (doc: Document) {
+    // insert the elements into the form
+    doc.querySelectorAll('select[id], input[id]').forEach((input) => {
+      const el = document.getElementById(input.id);
+      if (el) {
+        // SELECT elements need special handling for select2
+        if (el.tagName === 'SELECT' && el.nextElementSibling?.classList.contains('select2')) {
+          el.nextElementSibling.remove();
+        }
+        el.replaceWith(input);
+        if (el.tagName === 'SELECT') {
+          // @ts-ignore
+          window.django.jQuery(input).select2({ width: 'element' });
+        }
+      }
+    });
   }
 }
 

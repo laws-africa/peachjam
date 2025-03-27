@@ -2,7 +2,6 @@ import copy
 import logging
 
 from allauth.account.forms import LoginForm, SignupForm
-from countries_plus.models import Country
 from dal import autocomplete
 from django import forms
 from django.conf import settings
@@ -23,7 +22,6 @@ from peachjam.models import (
     AttachedFiles,
     CoreDocument,
     Folder,
-    PeachJamSettings,
     PublicationFile,
     Ratification,
     SavedDocument,
@@ -523,17 +521,6 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["first_name", "last_name"]
-
-
-class JudgmentUploadForm(forms.Form):
-    jurisdiction = forms.ModelChoiceField(Country.objects)
-    file = forms.FileField()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields[
-            "jurisdiction"
-        ].queryset = PeachJamSettings.load().document_jurisdictions.all()
 
 
 class RatificationForm(forms.ModelForm):

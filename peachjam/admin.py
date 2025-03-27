@@ -1200,29 +1200,41 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         if not extractor.enabled() or request.method != "POST" or not file:
             return HttpResponse()
 
-        # TODO: we don't want to create the actual judgment, just get the data back
-
         error = None
         try:
             # details = extractor.extract_judgment_details(pj_settings().default_document_jurisdiction, file)
-            details = {"language": "afr", "court": "Continental Court"}
+            # TODO
+            details = {
+                "language": "afr",
+                "court": "Continental Court",
+                "date": "2025-02-03",
+            }
+            extractor.process_judgment_details(details)
         except ExtractorError as e:
             error = e
 
         params = QueryDict(mutable=True)
 
-        if details.get("language"):
-            lang = (
-                Language.objects.filter(iso_639_3=details["language"].lower()).first()
-                or pj_settings().default_document_language
-            )
-            params["language"] = lang.pk if lang else "en"
+        # fk fields
+        for fk in ["language", "court"]:
+            if details.get(fk):
+                params[fk] = details[fk].pk
 
-        if details.get("court"):
-            try:
-                params["court"] = Court.objects.get(name=details["court"]).pk
-            except Court.DoesNotExist:
-                pass
+        # simply fields
+        for field in ["case_name"]:
+            if details.get(field):
+                params[field] = details[field]
+
+        # date fields
+        w = DateSelectorWidget()
+        for field in ["date", "hearing_date"]:
+            if details.get(field):
+                values = w.decompress(details[field])
+                for suffix, value in zip(w.widgets_names, values):
+                    params[field + suffix] = value
+
+        # TODO: judges
+        # TODO: case numbers
 
         fieldsets = self.get_fieldsets(request, None)
         ModelForm = self.get_form(
