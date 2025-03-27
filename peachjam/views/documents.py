@@ -4,7 +4,6 @@ from django.shortcuts import get_list_or_404, get_object_or_404, redirect, rever
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.generic import DetailView, View
-from guardian.shortcuts import get_groups_with_perms
 
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
@@ -62,15 +61,8 @@ class DocumentDetailViewResolver(View):
             restricted_view = RestrictedDocument403View()
             restricted_view.setup(request, *args, **kwargs)
 
-            if not request.user.is_authenticated:
+            if not request.user.has_perm("peachjam.view_document", obj):
                 return restricted_view.dispatch(request, *args, **kwargs)
-
-            if not request.user.is_superuser or not request.user.is_staff:
-                # check if user belongs to a group that has access to the document
-                doc_groups = get_groups_with_perms(obj)
-                user_groups = request.user.groups.all()
-                if not doc_groups.intersection(user_groups):
-                    return restricted_view.dispatch(request, *args, **kwargs)
 
         view_class = registry.views.get(obj.doc_type)
 

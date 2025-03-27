@@ -17,6 +17,11 @@ class Taxonomy(MP_Node):
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
+    restricted = models.BooleanField(
+        _("restricted"),
+        default=False,
+        null=False,
+    )
     show_in_document_listing = models.BooleanField(
         _("show in document listing"),
         default=False,
