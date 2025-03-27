@@ -1,0 +1,14 @@
+{% load i18n %}
+<div id="extraction-result"
+     class="mt-2 alert {% if error %}alert-warning{% else %}alert-info{% endif %}">
+  {% if error %}
+    <p>{{ error }}</p>
+  {% else %}
+    {% trans "Extracted:" %}
+    <ul>
+      {% for key, value in details.items %}<li>{{ key }}: {{ value }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+</div>
+{% if form.language.value %}{{ form.language }}{% endif %}
+{% if form.court.value %}{{ form.court }}{% endif %}

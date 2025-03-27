@@ -9,7 +9,7 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin.utils import quote
+from django.contrib.admin.utils import flatten_fieldsets, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
@@ -17,7 +17,8 @@ from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabul
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.http.response import FileResponse, HttpResponseRedirect
+from django.http.request import QueryDict
+from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
@@ -1188,6 +1189,11 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                 self.admin_site.admin_view(self.upload_view),
                 name="peachjam_judgment_upload",
             ),
+            path(
+                "extract/",
+                self.admin_site.admin_view(self.extract_view),
+                name="peachjam_judgment_extract",
+            ),
         ]
         return custom_urls + urls
 
@@ -1237,6 +1243,52 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             "form": form,
         }
         return render(request, "admin/judgment_upload_form.html", context)
+
+    def extract_view(self, request):
+        """Special view that is submitted via AJAX which extracts judgment data from a file, and re-renders
+        various form elements which are then injected back into the page.
+        """
+        extractor = ExtractorService()
+        file = request.FILES.get("file")
+        if not extractor.enabled() or request.method != "POST" or not file:
+            return HttpResponse()
+
+        # TODO: we don't want to create the actual judgment, just get the data back
+
+        error = None
+        try:
+            # details = extractor.extract_judgment_details(pj_settings().default_document_jurisdiction, file)
+            details = {"language": "afr", "court": "Continental Court"}
+        except ExtractorError as e:
+            error = e
+
+        params = QueryDict(mutable=True)
+
+        if details.get("language"):
+            lang = (
+                Language.objects.filter(iso_639_3=details["language"].lower()).first()
+                or pj_settings().default_document_language
+            )
+            params["language"] = lang.pk if lang else "en"
+
+        if details.get("court"):
+            try:
+                params["court"] = Court.objects.get(name=details["court"]).pk
+            except Court.DoesNotExist:
+                pass
+
+        fieldsets = self.get_fieldsets(request, None)
+        ModelForm = self.get_form(
+            request, None, change=False, fields=flatten_fieldsets(fieldsets)
+        )
+
+        form = ModelForm(params)
+        context = {
+            "form": form,
+            "error": error,
+            "details": details,
+        }
+        return render(request, "admin/peachjam/judgment/_extracted_form.html", context)
 
 
 @admin.register(CauseList)
