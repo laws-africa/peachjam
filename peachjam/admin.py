@@ -16,7 +16,6 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from django.http.request import QueryDict
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -40,7 +39,6 @@ from treebeard.forms import MoveNodeForm, movenodeform_factory
 from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
-    JudgmentUploadForm,
     NewDocumentFormMixin,
     PublicationFileForm,
     RatificationForm,
@@ -440,6 +438,13 @@ class DocumentForm(forms.ModelForm):
     def _save_m2m(self):
         super()._save_m2m()
         self.create_topics(self.instance)
+
+    @property
+    def extractor_url(self):
+        """URL to use if this document type supports the extractor service."""
+        extractor = ExtractorService()
+        if extractor.enabled() and isinstance(self.instance, Judgment):
+            return reverse("admin:peachjam_extract_judgment")
 
 
 class AttachedFilesInline(BaseAttachmentFileInline):
@@ -1157,12 +1162,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     class Media:
         js = ("js/judgment_duplicates.js",)
 
-    def changelist_view(self, request, extra_context=None):
-        extra_context = extra_context or {}
-        extra_context["can_upload_document"] = ExtractorService().enabled()
-        extra_context["upload_url"] = reverse("admin:peachjam_judgment_upload")
-        return super().changelist_view(request, extra_context)
-
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
 
@@ -1185,64 +1184,12 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         urls = super().get_urls()
         custom_urls = [
             path(
-                "upload/",
-                self.admin_site.admin_view(self.upload_view),
-                name="peachjam_judgment_upload",
-            ),
-            path(
                 "extract/",
                 self.admin_site.admin_view(self.extract_view),
-                name="peachjam_judgment_extract",
+                name="peachjam_extract_judgment",
             ),
         ]
         return custom_urls + urls
-
-    def upload_view(self, request):
-        extractor = ExtractorService()
-        if not extractor.enabled():
-            messages.error(
-                request,
-                _(
-                    "The Laws.Africa extractor is not enabled. Please check your settings."
-                ),
-            )
-            return redirect("admin:peachjam_judgment_changelist")
-
-        form = JudgmentUploadForm(
-            initial={"jurisdiction": pj_settings().default_document_jurisdiction}
-        )
-
-        # Custom logic for the upload view
-        if request.method == "POST":
-            form = JudgmentUploadForm(
-                request.POST,
-                request.FILES,
-            )
-            if form.is_valid():
-                try:
-                    with transaction.atomic():
-                        fname = form.cleaned_data["file"].name
-                        doc = extractor.extract_judgment_from_file(
-                            jurisdiction=form.cleaned_data["jurisdiction"],
-                            file=form.cleaned_data["file"],
-                            user=request.user,
-                        )
-                        self.log_addition(request, doc, _("Uploaded") + f": {fname}")
-                    messages.success(
-                        request, _("Judgment uploaded. Please check details carefully.")
-                    )
-                    url = (
-                        reverse("admin:peachjam_judgment_change", args=[doc.pk])
-                        + "?stage=after-extraction"
-                    )
-                    return redirect(url)
-                except ExtractorError as e:
-                    form.add_error(None, str(e))
-
-        context = {
-            "form": form,
-        }
-        return render(request, "admin/judgment_upload_form.html", context)
 
     def extract_view(self, request):
         """Special view that is submitted via AJAX which extracts judgment data from a file, and re-renders

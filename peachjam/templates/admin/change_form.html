@@ -6,7 +6,7 @@
   {% if adminform.form.edit_activity_stage %}{{ adminform.form.edit_activity_stage }}{% endif %}
   {% if not original %}
     <div data-component="DocumentUploader"
-         data-model="{{ opts.app_label }}.{{ opts.model_name }}"></div>
+         data-extractor-url="{{ adminform.form.extractor_url }}"></div>
   {% endif %}
 {% endblock %}
 {% block extra_actions %}

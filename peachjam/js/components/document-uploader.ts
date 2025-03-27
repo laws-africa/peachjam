@@ -1,9 +1,9 @@
 export default class DocumentUploader {
-  model: string;
+  extractorUrl: string;
   fileUpload: HTMLInputElement;
 
   constructor (root: HTMLElement) {
-    this.model = root.dataset.model || '';
+    this.extractorUrl = root.dataset.extractorUrl || '';
     this.fileUpload = document.getElementById('id_upload_file') as HTMLInputElement;
     this.fileUpload?.addEventListener('change', this.onFileChanged.bind(this));
   }
@@ -24,7 +24,7 @@ export default class DocumentUploader {
         window.htmx.ajax('GET', `/admin/check-duplicate-file?sha256=${digest}`, result);
       }
 
-      if (this.model === 'peachjam.judgment') {
+      if (this.extractorUrl) {
         this.useExtractor(file, notices);
       }
     }
@@ -41,7 +41,7 @@ export default class DocumentUploader {
     formData.append('csrfmiddlewaretoken', csrfToken || '');
 
     try {
-      const resp = await fetch('/admin/peachjam/judgment/extract/', {
+      const resp = await fetch(this.extractorUrl, {
         method: 'POST',
         body: formData
       });
