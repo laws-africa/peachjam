@@ -13,7 +13,7 @@
       <ul>
         {% for doc in item.documents %}
           <li>
-            <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}">{{ doc.title }}</a>
+            <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}?utm_campaign=following&utm_source=alert&utm_medium=email">{{ doc.title }}</a>
           </li>
         {% endfor %}
       </ul>
@@ -25,7 +25,7 @@
       {% endblocktrans %}
     </p>
     <small>
-      <a href="https://{{ site.domain }}{% url "user_following_list" %}">{% trans "Manage these email alerts" %}</a>
+      <a href="https://{{ site.domain }}{% url "user_following_list" %}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
     </small>
   </body>
 </html>
