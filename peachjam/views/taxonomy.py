@@ -26,7 +26,32 @@ class TaxonomyFirstLevelView(DetailView):
     navbar_link = "taxonomy"
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(taxonomy_link_prefix="taxonomy", **kwargs)
+        context = super().get_context_data(**kwargs)
+        context["children"] = self.get_allowed_children()
+        context["taxonomy_link_prefix"] = "taxonomy"
+        return context
+
+    def get_allowed_children(self):
+        if self.request.user.is_authenticated:
+            allowed_taxonomies = set(
+                get_objects_for_user(
+                    self.request.user, "peachjam.view_taxonomy"
+                ).values_list("id", flat=True)
+            )
+        else:
+            allowed_taxonomies = []
+
+        children = self.object.get_children().values("id", "restricted")
+        exclude = []
+
+        for child in children:
+            is_restricted = child["restricted"]
+            is_allowed = child["id"] in allowed_taxonomies
+            if is_restricted and not is_allowed:
+                exclude.append(child["id"])
+
+        children = self.object.get_children().exclude(id__in=exclude)
+        return children
 
 
 class TaxonomyDetailView(FilteredDocumentListView):
@@ -94,7 +119,7 @@ class TaxonomyDetailView(FilteredDocumentListView):
             return node
 
         # Filter the entire tree
-        taxonomies = Taxonomy.dump_bulk(root)
+        taxonomies = root.dump_bulk(root)
         filtered_taxonomies = [
             filtered_node
             for filtered_node in (filter_nodes(node) for node in taxonomies)
