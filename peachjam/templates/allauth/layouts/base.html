@@ -4,8 +4,11 @@
 {% block title %}{{ title }}{% endblock %}
 {% block page-content %}
   {% include "peachjam/_messages.html" %}
+  <div class="text-center">
+    <h1 class="mb-4">{{ APP_NAME }}</h1>
+  </div>
   <div class="card allauth-box">
-    <div class="m-4">
+    <div class="card-body m-3">
       {% block content %}{% endblock %}
     </div>
     {% if SUPPORT_EMAIL %}
