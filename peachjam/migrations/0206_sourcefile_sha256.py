@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam", "0204_documentsocialimage"),
-    ]
+    dependencies = [("peachjam", "0205_alter_ratification_source_url")]
 
     operations = [
         migrations.AddField(
