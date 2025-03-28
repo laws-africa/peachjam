@@ -2,6 +2,7 @@ import ProvisionChangedGutterItem from './ProvisionChangedGutterItem.vue';
 import ProvisionDiffInline from './ProvisionDiffInline.vue';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { vueI18n } from '../../i18n';
+import analytics from '../analytics';
 
 class DocDiffsManager {
   private gutter: HTMLElement;
@@ -78,6 +79,7 @@ class DocDiffsManager {
     this.inlineDiff.$el.addEventListener('close', () => {
       this.inlineDiff = null;
     });
+    analytics.trackEvent('Document', 'What changed');
   }
 }
 
