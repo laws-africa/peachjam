@@ -4,6 +4,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from guardian.shortcuts import get_objects_for_user
 from treebeard.mp_tree import MP_Node
 
 from peachjam.models import CoreDocument
@@ -16,6 +17,11 @@ class Taxonomy(MP_Node):
     node_order_by = ["name"]
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
+    )
+    restricted = models.BooleanField(
+        _("restricted"),
+        default=False,
+        null=False,
     )
     show_in_document_listing = models.BooleanField(
         _("show in document listing"),
@@ -116,6 +122,76 @@ class Taxonomy(MP_Node):
                 current_level = current_level[node]
 
         return tree
+
+    @classmethod
+    def get_allowed_taxonomies(cls, user, root=None):
+        if user.is_authenticated:
+            allowed_taxonomies = set(
+                get_objects_for_user(user, "peachjam.view_taxonomy").values_list(
+                    "id", flat=True
+                )
+            )
+        else:
+            allowed_taxonomies = []
+
+        node_ids = []
+
+        def filter_nodes(node):
+            is_restricted = node.get("data", {}).get("restricted", False)
+            is_allowed = node.get("id") in allowed_taxonomies
+            if is_restricted and not is_allowed:
+                return None
+
+            node_ids.append(node["id"])
+
+            if "children" in node:
+                filtered_children = [
+                    child
+                    for child in (filter_nodes(child) for child in node["children"])
+                    if child is not None
+                ]
+                if filtered_children:
+                    node["children"] = filtered_children
+                else:
+                    node.pop("children", None)
+            return node
+
+        # Filter the tree
+        if root:
+            taxonomies = root.dump_bulk(root)
+        else:
+            taxonomies = cls.dump_bulk()
+        filtered_taxonomies = [
+            filtered_node
+            for filtered_node in (filter_nodes(node) for node in taxonomies)
+            if filtered_node is not None
+        ]
+        return {
+            "tree": filtered_taxonomies,
+            "pk_list": node_ids,
+        }
+
+    def get_allowed_children(self, user):
+        if user.is_authenticated:
+            allowed_taxonomies = set(
+                get_objects_for_user(user, "peachjam.view_taxonomy").values_list(
+                    "id", flat=True
+                )
+            )
+        else:
+            allowed_taxonomies = []
+
+        children = self.get_children().values("id", "restricted")
+        exclude = []
+
+        for child in children:
+            is_restricted = child["restricted"]
+            is_allowed = child["id"] in allowed_taxonomies
+            if is_restricted and not is_allowed:
+                exclude.append(child["id"])
+
+        children = self.get_children().exclude(id__in=exclude)
+        return children
 
 
 class DocumentTopic(models.Model):

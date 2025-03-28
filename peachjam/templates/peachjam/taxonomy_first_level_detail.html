@@ -22,9 +22,9 @@
         {% if help_link %}
           {% include "peachjam/_help_button.html" %}
         {% endif %}
-        {% if taxonomy.get_children|length > 0 %}
+        {% if children %}
           <ul>
-            {% for child in taxonomy.get_children %}
+            {% for child in children %}
               <li>
                 <a href="{% build_taxonomy_url child prefix=taxonomy_link_prefix %}">{{ child }}</a>
               </li>

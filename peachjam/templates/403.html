@@ -1,0 +1,25 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Forbidden (Error 403)' %}
+{% endblock %}
+{% block page-content %}
+  <section class="py-5">
+    <div class="container">
+      <h1 class="mb-4">{% trans 'Forbidden (Error 403)' %}</h1>
+      <p>
+        {% blocktrans trimmed %}
+          You don't have permission to access this page.
+        {% endblocktrans %}
+      </p>
+      <ul>
+        <li>
+          <a href="{% url 'home_page' %}">{% trans "Go to the homepage." %}</a>
+        </li>
+        <li>
+          <a href="{% url 'search:search' %}">{% trans "Try searching for what you're looking for." %}</a>
+        </li>
+      </ul>
+    </div>
+  </section>
+{% endblock %}
