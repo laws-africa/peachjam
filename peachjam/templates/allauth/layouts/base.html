@@ -6,9 +6,11 @@
   {% include "peachjam/_messages.html" %}
   <div class="text-center">
     {% block logo %}
-      <img src="{% static 'images/logo.png' %}"
-           alt="{{ APP_NAME }}"
-           style="max-height: 80px"/>
+      <a href="{% url 'home_page' %}">
+        <img src="{% static 'images/logo.png' %}"
+             alt="{{ APP_NAME }}"
+             style="max-height: 80px"/>
+      </a>
     {% endblock %}
     <h1 class="mt-3 mb-4">{{ APP_NAME }}</h1>
   </div>
