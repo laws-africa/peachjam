@@ -923,10 +923,14 @@ export default {
 
         if (newId && previousId !== newId && !this.linkedTraces.has(newId)) {
           this.linkedTraces.add(newId);
-          fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {
-            method: 'POST',
-            headers: await authHeaders()
-          });
+          try {
+            fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {
+              method: 'POST',
+              headers: await authHeaders()
+            });
+          } catch {
+            // ignore network errors
+          }
         }
       }
     },
