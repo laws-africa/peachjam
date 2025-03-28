@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -94,6 +95,7 @@ class UserProfile(models.Model):
         _("photo"), upload_to=file_location, blank=True, null=True
     )
     profile_description = models.TextField(_("profile description"))
+    tracking_id = models.UUIDField(_("tracking id"), default=uuid.uuid4, editable=False)
 
     preferred_language = models.ForeignKey(
         Language,

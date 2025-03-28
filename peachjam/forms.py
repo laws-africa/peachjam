@@ -513,6 +513,8 @@ class SaveDocumentForm(forms.ModelForm):
 
 class PeachjamSignupForm(SignupForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+    first_name = forms.CharField(max_length=150, label=_("First name"), required=False)
+    last_name = forms.CharField(max_length=150, label=_("Last name"), required=False)
 
 
 class PeachjamLoginForm(LoginForm):
