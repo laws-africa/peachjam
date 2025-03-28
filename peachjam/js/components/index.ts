@@ -5,6 +5,7 @@ import DocumentFilterForm from './document-filter-form';
 import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
 import FloatingHeader from './floating-header';
+import DocumentUploader from './document-uploader';
 import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
 import TaxonomyTree from './taxonomy-tree';
@@ -24,6 +25,7 @@ const components: Record<string, any> = {
   DocumentFilterForm,
   DocumentTable,
   FloatingHeader,
+  DocumentUploader,
   NavigationSelect,
   RelationshipEnrichments,
   AnnotationsProvider,

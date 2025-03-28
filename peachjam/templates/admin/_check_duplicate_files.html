@@ -1,0 +1,13 @@
+{% load i18n %}
+{% if duplicate_documents %}
+  <div class="alert alert-warning">
+    <p>{% trans "This file has already been uploaded." %}</p>
+    <ul>
+      {% for doc in duplicate_documents %}
+        <li>
+          <a href="{{ doc.get_absolute_url }}">{{ doc }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}

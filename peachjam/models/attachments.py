@@ -110,6 +110,9 @@ class SourceFile(AttachmentAbstractModel):
         null=True,
         blank=True,
     )
+    sha256 = models.CharField(
+        "SHA 256", max_length=64, null=True, blank=True, db_index=True
+    )
 
     class Meta:
         verbose_name = _("source file")
@@ -158,7 +161,12 @@ class SourceFile(AttachmentAbstractModel):
                 CopySource=src, MetadataDirective="REPLACE", **src, **metadata
             )
 
+    def calculate_sha256(self):
+        self.sha256 = hashlib.sha256(self.file.read()).hexdigest()
+
     def save(self, *args, **kwargs):
+        if not self.sha256:
+            self.calculate_sha256()
         pk = self.pk
         super().save(*args, **kwargs)
         if not pk:

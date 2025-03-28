@@ -55,6 +55,7 @@ from peachjam.views import (
     CauseListCourtRegistryYearView,
     CauseListCourtYearView,
     CauseListListView,
+    CheckDuplicateFilesView,
     ComparePortionsView,
     CourtClassDetailView,
     CourtClassMonthView,
@@ -386,6 +387,7 @@ urlpatterns = [
                     "anon/<int:pk>/suggestions",
                     DocumentAnonymiseSuggestionsAPIView.as_view(),
                 ),
+                path("check-duplicate-file", CheckDuplicateFilesView.as_view()),
                 path("", admin.site.urls),
             ]
         ),
