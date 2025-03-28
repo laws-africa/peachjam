@@ -5,10 +5,7 @@
   {% trans 'Sign Up' %}
 {% endblock %}
 {% block content %}
-  <h1>{% trans 'Sign up' %}</h1>
-  <p>
-    {% trans 'Already have an account?' %} <a href="{% url 'account_login' %}">{% trans 'Log in here' %}</a>.
-  </p>
+  <h2 class="mb-4">{% trans 'Sign up' %}</h2>
   <form method="post">
     {% csrf_token %}
     {% if form.non_field_errors %}
@@ -16,12 +13,45 @@
         {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
       </div>
     {% endif %}
+    <div class="mb-3 row">
+      <div class="col-sm">
+        <label class="form-label" for="{{ form.first_name.id_for_label }}">{% trans 'First name' %}</label>
+        <input type="{{ form.first_name.type }}"
+               class="form-control"
+               name="{{ form.first_name.name }}"
+               id="{{ form.first_name.id_for_label }}"
+               value="{{ form.first_name.value|default:'' }}"
+               maxlength="150"
+               required/>
+        {% if form.first_name.errors %}
+          <div class="text-danger">
+            {% for error in form.first_name.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="col-sm">
+        <label class="form-label" for="{{ form.last_name.id_for_label }}">{% trans 'Last name' %}</label>
+        <input type="{{ form.last_name.type }}"
+               class="form-control"
+               name="{{ form.last_name.name }}"
+               id="{{ form.last_name.id_for_label }}"
+               value="{{ form.last_name.value|default:'' }}"
+               maxlength="150"
+               required/>
+        {% if form.last_name.errors %}
+          <div class="text-danger">
+            {% for error in form.last_name.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
     <div class="mb-3">
       <label class="form-label" for="{{ form.email.id_for_label }}">{% trans 'Email address' %}</label>
       <input type="{{ form.email.type }}"
              class="form-control"
              name="{{ form.email.name }}"
              id="{{ form.email.id_for_label }}"
+             value="{{ form.email.value|default:'' }}"
              required
              placeholder="you@example.com"/>
       {% if form.email.errors %}
@@ -69,4 +99,7 @@
     </div>
   </form>
   {% include "account/_social_login_buttons.html" %}
+  <p class="mt-3">
+    {% trans 'Already have an account?' %} <a href="{% url 'account_login' %}">{% trans 'Log in' %}</a>.
+  </p>
 {% endblock %}
