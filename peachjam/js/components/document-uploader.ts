@@ -51,12 +51,15 @@ export default class DocumentUploader {
         body: formData
       });
       if (resp.ok) {
+        status.innerText = '';
+
         // parse the html into a DOM
         const html = await resp.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
-        this.replaceFormElements(doc);
+        this.replaceInputs(doc);
+        this.replaceFormsets(doc);
 
         const result = doc.querySelector('#extraction-result');
         if (result) {
@@ -70,9 +73,9 @@ export default class DocumentUploader {
     }
   }
 
-  replaceFormElements (doc: Document) {
+  replaceInputs (doc: Document) {
     // insert the elements into the form
-    doc.querySelectorAll('select[id], input[id]').forEach((input) => {
+    doc.querySelectorAll('#inputs select[id], #inputs input[id]').forEach((input) => {
       const el = document.getElementById(input.id);
       if (el) {
         // SELECT elements need special handling for select2
@@ -83,6 +86,32 @@ export default class DocumentUploader {
         if (el.tagName === 'SELECT') {
           // @ts-ignore
           window.django.jQuery(input).select2({ width: 'element' });
+        }
+      }
+    });
+  }
+
+  replaceFormsets (doc: Document) {
+    doc.querySelectorAll('#formsets .inline-group').forEach((group) => {
+      // @ts-ignore
+      const el = document.getElementById(group.id);
+      if (el) {
+        el.replaceWith(group);
+
+        // trigger django's inline formset initialization
+        const options = JSON.parse(el.dataset.inlineFormset || '{}');
+        let selector;
+        switch (el.dataset.inlineType) {
+          case 'stacked':
+            selector = options.name + '-group .inline-related';
+            // @ts-ignore
+            window.django.jQuery(selector).stackedFormset(selector, options.options);
+            break;
+          case 'tabular':
+            selector = options.name + '-group .tabular.inline-related tbody:first > tr.form-row';
+            // @ts-ignore
+            window.django.jQuery(selector).tabularFormset(selector, options.options);
+            break;
         }
       }
     });

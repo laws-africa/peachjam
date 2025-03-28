@@ -71,8 +71,10 @@ class ExtractorService:
                     pass
 
         if details.get("judges"):
-            details["judges"] = Judge.objects.annotate(name_lower=Lower("name")).filter(
-                name_lower__in=[s.lower() for s in details["judges"]]
+            details["judges"] = list(
+                Judge.objects.annotate(name_lower=Lower("name")).filter(
+                    name_lower__in=[s.lower() for s in details["judges"]]
+                )
             )
 
         # case numbers
@@ -82,12 +84,12 @@ class ExtractorService:
                 # TODO: matter type
                 try:
                     number = int(case_number["number"])
-                except ValueError:
+                except TypeError:
                     number = None
 
                 try:
                     year = int(case_number["year"])
-                except ValueError:
+                except TypeError:
                     year = None
 
                 case_numbers.append(

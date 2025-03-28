@@ -16,7 +16,6 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.http.request import QueryDict
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
@@ -1201,52 +1200,86 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             return HttpResponse()
 
         error = None
+        details = {}
         try:
-            # details = extractor.extract_judgment_details(pj_settings().default_document_jurisdiction, file)
-            # TODO
-            details = {
-                "language": "afr",
-                "court": "Continental Court",
-                "date": "2025-02-03",
-            }
-            extractor.process_judgment_details(details)
+            if settings.DEBUG:
+                # for testing
+                details = {
+                    "language": "afr",
+                    "court": "Continental Court",
+                    "date": "2025-02-03",
+                    "judges": ["Anukam J", "Eno R", "Plasket JA", "Maya P"],
+                    "case_numbers": [
+                        {
+                            "case_number_string": "123/2025",
+                            "number": None,
+                            "year": 2025,
+                        },
+                    ],
+                }
+            else:
+                details = extractor.extract_judgment_details(
+                    pj_settings().default_document_jurisdiction, file
+                )
         except ExtractorError as e:
             error = e
 
-        params = QueryDict(mutable=True)
+        # turn references into Django objects
+        extractor.process_judgment_details(details)
 
-        # fk fields
-        for fk in ["language", "court"]:
-            if details.get(fk):
-                params[fk] = details[fk].pk
+        # prepare form data
+        inlines = []
+        formsets = []
 
-        # simply fields
-        for field in ["case_name"]:
-            if details.get(field):
-                params[field] = details[field]
+        if details.get("judges"):
+            judges = [{"judge": j} for j in details["judges"]]
+            # make it pretty for the template
+            details["judges"] = "; ".join(str(j) for j in details["judges"])
 
-        # date fields
-        w = DateSelectorWidget()
-        for field in ["date", "hearing_date"]:
-            if details.get(field):
-                values = w.decompress(details[field])
-                for suffix, value in zip(w.widgets_names, values):
-                    params[field + suffix] = value
+            # prepare the formset
+            inline = BenchInline(Judgment, self.admin_site)
+            inline.extra = len(judges) + inline.extra
+            inlines.append(inline)
+            formsets.append(inline.get_formset(request)(initial=judges))
 
-        # TODO: judges
-        # TODO: case numbers
+        if details.get("case_numbers"):
+            case_numbers = [
+                {
+                    "number": cn.number,
+                    "year": cn.year,
+                    "string_override": cn.string_override,
+                }
+                for cn in details["case_numbers"]
+            ]
+            # make it pretty for the template
+            details["case_numbers"] = "; ".join(
+                cn.get_case_number_string() for cn in details["case_numbers"]
+            )
 
+            # prepare the formset
+            inline = CaseNumberAdmin(Judgment, self.admin_site)
+            inline.extra = len(case_numbers) + inline.extra
+            inlines.append(inline)
+            formsets.append(inline.get_formset(request)(initial=case_numbers))
+
+        judgment = Judgment()
+        for field in ["language", "court", "case_name", "date", "hearing_date"]:
+            setattr(judgment, field, details.get(field))
+
+        formsets = self.get_inline_formsets(request, formsets, inlines)
         fieldsets = self.get_fieldsets(request, None)
         ModelForm = self.get_form(
             request, None, change=False, fields=flatten_fieldsets(fieldsets)
         )
+        form = ModelForm(instance=judgment)
 
-        form = ModelForm(params)
         context = {
             "form": form,
+            "formsets": formsets,
             "error": error,
             "details": details,
         }
+
         return render(request, "admin/peachjam/judgment/_extracted_form.html", context)
 
 

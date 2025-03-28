@@ -10,7 +10,15 @@
     </ul>
   {% endif %}
 </div>
-{% if form.language.value %}{{ form.language }}{% endif %}
-{% if form.court.value %}{{ form.court }}{% endif %}
-{% if form.date.value %}{{ form.date }}{% endif %}
-{% if form.hearing_date.value %}{{ form.hearing_date }}{% endif %}
+<div id="inputs">
+  {% if form.language.value %}{{ form.language }}{% endif %}
+  {% if form.court.value %}{{ form.court }}{% endif %}
+  {% if form.case_name.value %}{{ form.case_name }}{% endif %}
+  {% if form.date.value %}{{ form.date }}{% endif %}
+  {% if form.hearing_date.value %}{{ form.hearing_date }}{% endif %}
+</div>
+<div id="formsets">
+  {% for formset in formsets %}
+    {% include formset.opts.template with inline_admin_formset=formset %}
+  {% endfor %}
+</div>
