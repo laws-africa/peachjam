@@ -76,35 +76,34 @@ class TaxonomyDetailView(FilteredDocumentListView):
         def filter_nodes(node):
             is_restricted = node.get("data", {}).get("restricted", False)
             is_allowed = node.get("id") in allowed_taxonomies
-
             if is_restricted and not is_allowed:
                 return None
 
             node_ids.append(node["id"])
+
             if "children" in node:
                 filtered_children = [
                     child
                     for child in (filter_nodes(child) for child in node["children"])
                     if child is not None
                 ]
-
                 if filtered_children:
                     node["children"] = filtered_children
                 else:
                     node.pop("children", None)
-
             return node
 
-        taxonomies = Taxonomy.dump_bulk(root)
-
         # Filter the entire tree
+        taxonomies = Taxonomy.dump_bulk(root)
         filtered_taxonomies = [
             filtered_node
             for filtered_node in (filter_nodes(node) for node in taxonomies)
             if filtered_node is not None
         ]
-
-        return {"tree": filtered_taxonomies, "pk_list": node_ids}
+        return {
+            "tree": filtered_taxonomies,
+            "pk_list": node_ids,
+        }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
