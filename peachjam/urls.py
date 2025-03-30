@@ -76,6 +76,7 @@ from peachjam.views import (
     DocumentPopupView,
     DocumentProblemView,
     DocumentPublicationView,
+    DocumentSocialImageView,
     DocumentSourcePDFView,
     DocumentSourceView,
     EditAccountView,
@@ -331,6 +332,11 @@ urlpatterns = [
         name="document_citations",
     ),
     re_path(
+        r"^(?P<frbr_uri>akn/.*)/social-image.png$",
+        cache_page(CACHE_DURATION)(DocumentSocialImageView.as_view()),
+        name="document_social_image",
+    ),
+    re_path(
         r"^(?P<frbr_uri>akn/?.*)$",
         DocumentDetailViewResolver.as_view(),
         name="document_detail",
@@ -392,6 +398,11 @@ urlpatterns = [
                 path("home/", AccountsHomeView.as_view(), name="account_home"),
                 path("profile/", EditAccountView.as_view(), name="edit_account"),
                 path("user/", GetAccountView.as_view(), name="get_account"),
+                path(
+                    "document-access-groups/",
+                    DocumentAccessGroupListView.as_view(),
+                    name="document_access_group_list",
+                ),
             ]
         ),
     ),
@@ -528,11 +539,6 @@ urlpatterns = [
         ),
     ),
     # Restricted Documents
-    path(
-        "document-access-groups/",
-        DocumentAccessGroupListView.as_view(),
-        name="document_access_group_list",
-    ),
     path(
         "document-access-groups/<int:pk>",
         DocumentAccessGroupDetailView.as_view(),

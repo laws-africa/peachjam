@@ -17,7 +17,7 @@
   {% block account-home-content %}
     <div class="row">
       {% if PEACHJAM_SETTINGS.allow_save_documents %}
-        <div class="col-md">
+        <div class="col-12 col-md-6">
           <div class="card mb-3">
             <div class="card-body">
               <h4 class="card-title">{% trans "Saved documents" %}</h4>
@@ -27,15 +27,22 @@
           </div>
         </div>
       {% endif %}
+      <div class="col-12 col-md-6">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h4 class="card-title">{% trans "Following" %}</h4>
+            <p>{% trans "Follow courts and areas of interest and we'll email you when new documents are available." %}</p>
+            <a href="{% url 'user_following_list' %}" class="btn btn-primary">{% trans "Following" %}</a>
+          </div>
+        </div>
+      </div>
       {% if PEACHJAM_SETTINGS.allow_save_searches %}
-        <div class="col-md">
-          <div class="col-md">
-            <div class="card mb-3">
-              <div class="card-body">
-                <h4 class="card-title">{% trans "Search alerts" %}</h4>
-                <p>{% trans "We'll email you when new documents match your search." %}</p>
-                <a href="{% url 'search:saved_search_list' %}" class="btn btn-primary">{% trans "Search alerts" %}</a>
-              </div>
+        <div class="col-12 col-md-6">
+          <div class="card mb-3">
+            <div class="card-body">
+              <h4 class="card-title">{% trans "Search alerts" %}</h4>
+              <p>{% trans "We'll email you when new documents match your search." %}</p>
+              <a href="{% url 'search:saved_search_list' %}" class="btn btn-primary">{% trans "Search alerts" %}</a>
             </div>
           </div>
         </div>

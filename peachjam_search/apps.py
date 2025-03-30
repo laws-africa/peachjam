@@ -1,4 +1,4 @@
-from django.apps import AppConfig
+from django.apps import AppConfig, apps
 from django.conf import settings
 
 
@@ -14,6 +14,13 @@ class PeachjamSearchConfig(AppConfig):
 
         manager = MultiLanguageIndexManager.get_instance()
         manager.register_indexes()
+
+        if settings.PEACHJAM["SEARCH_SEMANTIC"]:
+            installed_apps = [a.label for a in apps.get_app_configs()]
+            if "peachjam_ml" not in installed_apps:
+                raise ImportError(
+                    "peachjam_ml is required for semantic search. Please add it to settings.INSTALLED_APPS."
+                )
 
         if not settings.DEBUG:
             from peachjam_search.tasks import prune_search_traces, update_saved_searches

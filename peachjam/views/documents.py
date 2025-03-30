@@ -1,5 +1,7 @@
 from cobalt import FrbrUri
+from django.conf import settings
 from django.http import Http404, HttpResponse
+from django.http.response import FileResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
@@ -8,7 +10,12 @@ from guardian.shortcuts import get_groups_with_perms
 
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
-from peachjam.models import CoreDocument, DocumentNature, ExtractedCitation
+from peachjam.models import (
+    CoreDocument,
+    DocumentNature,
+    DocumentSocialImage,
+    ExtractedCitation,
+)
 from peachjam.registry import registry
 from peachjam.resolver import resolver
 from peachjam.views import BaseDocumentDetailView
@@ -263,3 +270,28 @@ class RestrictedDocument403View(BaseDocumentDetailView):
 
     def render_to_response(self, context, **response_kwargs):
         return super().render_to_response(context, status=403, **response_kwargs)
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+class DocumentSocialImageView(DetailView):
+    """Image for this document used by social media."""
+
+    model = CoreDocument
+    slug_field = "expression_frbr_uri"
+    slug_url_kwarg = "frbr_uri"
+    context_object_name = "document"
+
+    def get(self, request, *args, **kwargs):
+        document = self.get_object()
+        debug = settings.DEBUG and "debug" in request.GET
+        html_str = DocumentSocialImage.html_for_document(document, debug)
+
+        if debug:
+            return HttpResponse(html_str)
+
+        image = DocumentSocialImage.get_or_create_for_document(document, html_str)
+        if getattr(image.file.storage, "custom_domain", None):
+            # use the storage's custom domain to serve the file
+            return redirect(image.file.url)
+
+        return FileResponse(image.file, content_type="image/png")

@@ -172,6 +172,12 @@ class PeachJamSettings(SingletonModel):
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
 
+    @property
+    def twitter_username(self):
+        if self.twitter_link:
+            # https://foo.com/bar -> bar
+            return "@" + self.twitter_link.split("/", 4)[-1]
+
     def __str__(self):
         return "Settings"
 

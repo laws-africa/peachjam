@@ -247,6 +247,7 @@ class UserFollowing(models.Model):
             "followed_documents": documents,
             "user": user,
             "site": Site.objects.get_current(),
+            "APP_NAME": settings.PEACHJAM["APP_NAME"],
         }
         with override(user.userprofile.preferred_language.pk):
             html = render_to_string(
@@ -256,7 +257,7 @@ class UserFollowing(models.Model):
                 "peachjam/emails/user_following_alert_email.txt", context
             )
             subject = settings.EMAIL_SUBJECT_PREFIX + _(
-                "New documents have been published"
+                "New documents for topics that you are following"
             )
         send_mail(
             subject=subject,
