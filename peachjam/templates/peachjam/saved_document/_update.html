@@ -16,7 +16,7 @@
 <div hx-swap-oob="true"
      id="saveDocumentModalDialog-{{ saved_document.document.id }}"
      class="modal-dialog">
-  <div class="modal-content">
+  <div class="modal-content text-start">
     <div class="modal-header">
       <p class="h5 modal-title">{% trans 'Document saved' %}</p>
       <button type="button"
@@ -58,6 +58,13 @@
         <div class="mt-3">
           <a href="{% url 'folder_list' %}">{% trans 'All saved documents' %}</a>
         </div>
+        <div>
+          <label class="form-label" for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
+          <textarea class="form-control"
+                    id="{{ form.note.id_for_label }}"
+                    name="{{ form.note.name }}"
+                    placeholder="{% trans "A note to yourself about this document" %}">{{ form.note.value|default_if_none:'' }}</textarea>
+        </div>
       </form>
     </div>
     <div class="modal-footer d-flex justify-content-between">
@@ -73,7 +80,8 @@
         <button type="button"
                 class="btn btn-outline-secondary ms-2"
                 data-bs-dismiss="modal">{% trans 'Close' %}</button>
-        <button class="btn btn-primary ms-1"
+        <button id="updateDocument"
+                class="btn btn-primary ms-1"
                 type="submit"
                 form="save-document-form"
                 data-bs-dismiss="modal">
