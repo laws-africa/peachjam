@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
@@ -10,6 +9,7 @@ from django.views.generic.base import TemplateView
 
 from peachjam.auth import user_display
 from peachjam.forms import UserProfileForm
+from peachjam.helpers import set_language_cookie
 
 User = get_user_model()
 
@@ -36,16 +36,7 @@ class EditAccountView(LoginRequiredMixin, FormView):
         language_code = user.userprofile.preferred_language.iso_639_1
         # Set the language for the current session
         activate(language_code)
-        response.set_cookie(
-            settings.LANGUAGE_COOKIE_NAME,
-            language_code,
-            max_age=settings.LANGUAGE_COOKIE_AGE,
-            path=settings.LANGUAGE_COOKIE_PATH,
-            domain=settings.LANGUAGE_COOKIE_DOMAIN,
-            secure=settings.LANGUAGE_COOKIE_SECURE,
-            httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
-            samesite=settings.LANGUAGE_COOKIE_SAMESITE,
-        )
+        response = set_language_cookie(response, language_code)
         return response
 
 

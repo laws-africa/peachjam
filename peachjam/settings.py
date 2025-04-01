@@ -88,6 +88,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "peachjam.middleware.GeneralUpdateCacheMiddleware",
     "peachjam.middleware.VaryOnHxHeadersMiddleware",
+    "peachjam.middleware.PreferredLanguageMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
     "peachjam.middleware.RedirectWWWMiddleware",
     "django.middleware.security.SecurityMiddleware",
