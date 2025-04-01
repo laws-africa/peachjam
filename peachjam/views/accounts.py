@@ -2,14 +2,13 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
-from django.utils.translation import activate
 from django.views import View
 from django.views.generic import FormView
 from django.views.generic.base import TemplateView
+from django.views.i18n import set_language
 
 from peachjam.auth import user_display
 from peachjam.forms import UserProfileForm
-from peachjam.helpers import set_language_cookie
 
 User = get_user_model()
 
@@ -32,12 +31,9 @@ class EditAccountView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         user = form.save()
-        response = super().form_valid(form)
         language_code = user.userprofile.preferred_language.iso_639_1
-        # Set the language for the current session
-        activate(language_code)
-        response = set_language_cookie(response, language_code)
-        return response
+        self.request.POST = {"language": language_code, "next": self.get_success_url()}
+        return set_language(self.request)
 
 
 class GetAccountView(View):

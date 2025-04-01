@@ -2,9 +2,7 @@ from django.middleware.cache import UpdateCacheMiddleware
 from django.shortcuts import redirect
 from django.utils.cache import get_max_age, patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
-from django.utils.translation.trans_real import activate
-
-from peachjam.helpers import set_language_cookie
+from django.views.i18n import set_language
 
 
 class StripDomainPrefixMiddleware:
@@ -51,11 +49,11 @@ class ForceDefaultLanguageMiddleware(MiddlewareMixin):
             del request.META["HTTP_ACCEPT_LANGUAGE"]
 
 
-class PreferredLanguageMiddleware(MiddlewareMixin):
+class SetPreferredLanguageMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
-        if hasattr(request, "preferred_language"):
-            activate(request.preferred_language)
-            response = set_language_cookie(response, request.preferred_language)
+        if hasattr(request, "set_language"):
+            request.POST = {"language": request.set_language}
+            response = set_language(request)
         return response
 
 

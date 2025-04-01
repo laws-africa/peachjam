@@ -80,4 +80,4 @@ def before_comment_posted(sender, comment, request, **kwargs):
 
 @receiver(user_logged_in)
 def set_user_language(sender, request, user, **kwargs):
-    setattr(request, "preferred_language", user.userprofile.preferred_language.pk)
+    setattr(request, "set_language", user.userprofile.preferred_language.iso_639_1)
