@@ -2,12 +2,10 @@
 
 from django.db import migrations, models
 
-from peachjam.models import Taxonomy
-
 
 def backfill_path_name(apps, schema_editor):
-    # deliberately use the actual Taxonomy model
-    for taxonomy in Taxonomy.get_root_nodes():
+    Taxonomy = apps.get_model("peachjam", "Taxonomy")
+    for taxonomy in Taxonomy.objects.iterator(chunk_size=100):
         taxonomy.save()
 
 
