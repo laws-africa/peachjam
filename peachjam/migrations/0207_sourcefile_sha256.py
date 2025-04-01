@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [("peachjam", "0205_alter_ratification_source_url")]
+    dependencies = [("peachjam", "0206_userprofile_tracking_id")]
 
     operations = [
         migrations.AddField(
