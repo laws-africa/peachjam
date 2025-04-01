@@ -7,7 +7,6 @@ from elasticsearch_dsl.query import MatchAll, MatchPhrase, Q, SimpleQueryString
 
 from peachjam.models import pj_settings
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
-from peachjam_search.embeddings import get_query_embedding
 
 log = logging.getLogger(__name__)
 
@@ -694,6 +693,8 @@ class SearchEngine:
         return knn
 
     def get_query_embedding(self, query):
+        from peachjam_ml.embeddings import get_query_embedding
+
         return get_query_embedding(query)
 
     def get_field(self, field):

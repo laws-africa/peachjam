@@ -13,7 +13,7 @@ from rest_framework.serializers import (
 )
 
 from peachjam.models import DocumentTopic
-from peachjam_search.embeddings import TEXT_INJECTION_SEPARATOR
+from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
 from peachjam_search.models import SearchClick
 
 

@@ -2,7 +2,7 @@ from django.utils.translation import gettext_lazy as _
 
 from liiweb.settings import *  # noqa
 
-INSTALLED_APPS = ["tanzlii.apps.TanzLIIConfig"] + INSTALLED_APPS  # noqa
+INSTALLED_APPS = ["tanzlii.apps.TanzLIIConfig", "peachjam_ml"] + INSTALLED_APPS  # noqa
 
 
 JAZZMIN_SETTINGS["site_title"] = "TanzLII"  # noqa

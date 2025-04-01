@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>{{ document.title }}</title>
+    <style>
+      html, body {
+          margin: 0;
+          padding: 0;
+          width: 1200px;
+          height: 600px;
+          background-color: white;
+          font-family: Arial, sans-serif;
+          font-size: 16px;
+          --secondary-color: #555555;
+          --secondary-size: 2.5em;
+      }
+
+      * {
+          box-sizing: border-box;
+      }
+
+      #container {
+          width: 1200px;
+          height: 600px;
+          padding: 60px 50px;
+          display: flex;
+          flex-direction: column;
+          {% if debug %}border: 1px solid red;{% endif %}
+      }
+
+      main {
+          flex-grow: 1;
+      }
+
+      .place {
+          margin: 0;
+          font-size: var(--secondary-size);
+          color: var(--secondary-color);
+          font-weight: normal;
+      }
+
+      .title {
+          margin-top: 0.5em;
+          margin-bottom: 0.5em;
+          font-size: 3.5em;
+      }
+      .title.small {
+          font-size: 2.755em;
+      }
+      .title.xsmall {
+          font-size: 2.5em;
+      }
+
+      .citation,
+      .court {
+          margin-top: 0;
+          margin-bottom: 1em;
+          font-size: var(--secondary-size);
+          color: var(--secondary-color);
+      }
+
+      .citation {
+          font-weight: bold;
+      }
+
+      .date {
+          font-size: var(--secondary-size);
+          color: var(--secondary-color);
+      }
+
+      footer {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-end;
+      }
+
+      .logo {
+          max-height: 7em;
+          width: auto;
+          margin-inline-start: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <main>
+        <div class="place">
+          {% if document.locality %}{{ document.locality }},{% endif %}
+          {{ document.jurisdiction }}
+        </div>
+        <h1 class="title {% if document.title|length > 150 %}xsmall{% elif document.title|length > 75 %}small{% endif %}">
+          {{ document.title|truncatechars:200 }}
+        </h1>
+        {% if document.citation and document.citation != document.title %}
+          <div class="citation">{{ document.citation }}</div>
+        {% endif %}
+        {% if document.court %}<div class="court">{{ document.court }}</div>{% endif %}
+      </main>
+      <footer>
+        <div class="date">{{ document.date }}</div>
+        {% if logo_b64 %}<img class="logo" src="{{ logo_b64 }}" alt="logo"/>{% endif %}
+      </footer>
+    </div>
+  </body>
+</html>

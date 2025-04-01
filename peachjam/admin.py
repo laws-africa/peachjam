@@ -9,15 +9,14 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin.utils import quote
+from django.contrib.admin.utils import flatten_fieldsets, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.db import transaction
-from django.http.response import FileResponse, HttpResponseRedirect
+from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
@@ -39,7 +38,6 @@ from treebeard.forms import MoveNodeForm, movenodeform_factory
 from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
-    JudgmentUploadForm,
     NewDocumentFormMixin,
     PublicationFileForm,
     RatificationForm,
@@ -439,6 +437,13 @@ class DocumentForm(forms.ModelForm):
     def _save_m2m(self):
         super()._save_m2m()
         self.create_topics(self.instance)
+
+    @property
+    def extractor_url(self):
+        """URL to use if this document type supports the extractor service."""
+        extractor = ExtractorService()
+        if extractor.enabled() and isinstance(self.instance, Judgment):
+            return reverse("admin:peachjam_extract_judgment")
 
 
 class AttachedFilesInline(BaseAttachmentFileInline):
@@ -1156,12 +1161,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     class Media:
         js = ("js/judgment_duplicates.js",)
 
-    def changelist_view(self, request, extra_context=None):
-        extra_context = extra_context or {}
-        extra_context["can_upload_document"] = ExtractorService().enabled()
-        extra_context["upload_url"] = reverse("admin:peachjam_judgment_upload")
-        return super().changelist_view(request, extra_context)
-
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
 
@@ -1184,59 +1183,104 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         urls = super().get_urls()
         custom_urls = [
             path(
-                "upload/",
-                self.admin_site.admin_view(self.upload_view),
-                name="peachjam_judgment_upload",
+                "extract/",
+                self.admin_site.admin_view(self.extract_view),
+                name="peachjam_extract_judgment",
             ),
         ]
         return custom_urls + urls
 
-    def upload_view(self, request):
+    def extract_view(self, request):
+        """Special view that is submitted via AJAX which extracts judgment data from a file, and re-renders
+        various form elements which are then injected back into the page.
+        """
         extractor = ExtractorService()
-        if not extractor.enabled():
-            messages.error(
-                request,
-                _(
-                    "The Laws.Africa extractor is not enabled. Please check your settings."
-                ),
-            )
-            return redirect("admin:peachjam_judgment_changelist")
+        file = request.FILES.get("file")
+        if not extractor.enabled() or request.method != "POST" or not file:
+            return HttpResponse()
 
-        form = JudgmentUploadForm(
-            initial={"jurisdiction": pj_settings().default_document_jurisdiction}
+        error = None
+        details = {}
+        try:
+            if settings.DEBUG:
+                # for testing
+                details = {
+                    "language": "afr",
+                    "court": "Continental Court",
+                    "date": "2025-02-03",
+                    "judges": ["Anukam J", "Eno R", "Plasket JA", "Maya P"],
+                    "case_numbers": [
+                        {
+                            "case_number_string": "123/2025",
+                            "number": None,
+                            "year": 2025,
+                        },
+                    ],
+                }
+            else:
+                details = extractor.extract_judgment_details(
+                    pj_settings().default_document_jurisdiction, file
+                )
+        except ExtractorError as e:
+            error = e
+
+        # turn references into Django objects
+        extractor.process_judgment_details(details)
+
+        # prepare form data
+        inlines = []
+        formsets = []
+
+        if details.get("judges"):
+            judges = [{"judge": j} for j in details["judges"]]
+            # make it pretty for the template
+            details["judges"] = "; ".join(str(j) for j in details["judges"])
+
+            # prepare the formset
+            inline = BenchInline(Judgment, self.admin_site)
+            inline.extra = len(judges) + inline.extra
+            inlines.append(inline)
+            formsets.append(inline.get_formset(request)(initial=judges))
+
+        if details.get("case_numbers"):
+            case_numbers = [
+                {
+                    "number": cn.number,
+                    "year": cn.year,
+                    "string_override": cn.string_override,
+                }
+                for cn in details["case_numbers"]
+            ]
+            # make it pretty for the template
+            details["case_numbers"] = "; ".join(
+                cn.get_case_number_string() for cn in details["case_numbers"]
+            )
+
+            # prepare the formset
+            inline = CaseNumberAdmin(Judgment, self.admin_site)
+            inline.extra = len(case_numbers) + inline.extra
+            inlines.append(inline)
+            formsets.append(inline.get_formset(request)(initial=case_numbers))
+
+        judgment = Judgment()
+        for field in ["language", "court", "case_name", "date", "hearing_date"]:
+            setattr(judgment, field, details.get(field))
+
+        formsets = self.get_inline_formsets(request, formsets, inlines)
+        fieldsets = self.get_fieldsets(request, None)
+        ModelForm = self.get_form(
+            request, None, change=False, fields=flatten_fieldsets(fieldsets)
         )
-
-        # Custom logic for the upload view
-        if request.method == "POST":
-            form = JudgmentUploadForm(
-                request.POST,
-                request.FILES,
-            )
-            if form.is_valid():
-                try:
-                    with transaction.atomic():
-                        fname = form.cleaned_data["file"].name
-                        doc = extractor.extract_judgment_from_file(
-                            jurisdiction=form.cleaned_data["jurisdiction"],
-                            file=form.cleaned_data["file"],
-                            user=request.user,
-                        )
-                        self.log_addition(request, doc, _("Uploaded") + f": {fname}")
-                    messages.success(
-                        request, _("Judgment uploaded. Please check details carefully.")
-                    )
-                    url = (
-                        reverse("admin:peachjam_judgment_change", args=[doc.pk])
-                        + "?stage=after-extraction"
-                    )
-                    return redirect(url)
-                except ExtractorError as e:
-                    form.add_error(None, str(e))
+        form = ModelForm(instance=judgment)
 
         context = {
             "form": form,
+            "formsets": formsets,
+            "error": error,
+            "details": details,
         }
-        return render(request, "admin/judgment_upload_form.html", context)
+
+        return render(request, "admin/peachjam/judgment/_extracted_form.html", context)
 
 
 @admin.register(CauseList)

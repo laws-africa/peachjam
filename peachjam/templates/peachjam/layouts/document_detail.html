@@ -3,12 +3,16 @@
 {% block title %}{{ document.title }}{% endblock %}
 {% block head-meta %}
   {{ block.super }}
-  <meta property="og:title" content="{{ document.title }}" />
-  <meta property="og:type" content="book" />
-  <meta property="book:release_date"
-        content="{{ document.date|date:'Y-m-d' }}"/>
   {% if not document.allow_robots %}<meta name="robots" content="noindex" />{% endif %}
-  <meta name="twitter:card" content="summary"/>
+  <meta property="og:title" content="{{ document.title }}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:image"
+        content="{{ request.scheme }}://{{ request.get_host }}{% url 'document_social_image' document.expression_frbr_uri|slice:"1:" %}"/>
+  <meta property="article:published_time"
+        content="{{ document.date|date:'Y-m-d' }}"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:site"
+        content="{{ PEACHJAM_SETTINGS.twitter_username }}"/>
   <meta name="twitter:title" content="{{ document.title }}"/>
   {% if language_versions|length > 1 %}
     {% for version in language_versions %}

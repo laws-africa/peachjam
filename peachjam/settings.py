@@ -149,6 +149,7 @@ PEACHJAM = {
     "MULTIPLE_JURISDICTIONS": False,
     "MULTIPLE_LOCALITIES": False,
     "PDFJS_TO_TEXT": "bin/pdfjs-to-text" if DEBUG else "pdfjs-to-text",
+    "HTML_TO_PNG": "bin/html-to-png" if DEBUG else "html-to-png",
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -541,6 +542,7 @@ LOGGING = {
         "peachjam": {"level": "DEBUG" if DEBUG else "INFO"},
         "peachjam_search": {"level": "DEBUG" if DEBUG else "INFO"},
         "peachjam_api": {"level": "DEBUG" if DEBUG else "INFO"},
+        "peachjam_ml": {"level": "DEBUG" if DEBUG else "INFO"},
         "background_task": {"level": "INFO"},
         "import_export": {"level": "DEBUG"},
     },

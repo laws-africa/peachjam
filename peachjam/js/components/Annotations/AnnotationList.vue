@@ -69,19 +69,25 @@ export default {
   methods: {
     async getUser () {
       if (!this.editable) return;
-      const resp = await fetch('/accounts/user/');
-      if (!resp.ok) {
-        throw new Error('Failed to fetch user');
+      try {
+        const resp = await fetch('/accounts/user/');
+        if (resp.ok) {
+          this.user = await resp.json();
+        }
+      } catch {
+        // ignore network errors
       }
-      this.user = await resp.json();
     },
     async getAnnotations () {
       if (!this.editable) return;
-      const resp = await fetch(`/api/documents/${this.viewRoot.dataset.documentId}/annotations/`);
-      if (!resp.ok) {
-        throw new Error('Failed to fetch annotations');
+      try {
+        const resp = await fetch(`/api/documents/${this.viewRoot.dataset.documentId}/annotations/`);
+        if (resp.ok) {
+          this.items = (await resp.json()).results;
+        }
+      } catch {
+        // ignore network errors
       }
-      this.items = (await resp.json()).results;
     },
     addAnnotation (target) {
       if (!this.editable) {

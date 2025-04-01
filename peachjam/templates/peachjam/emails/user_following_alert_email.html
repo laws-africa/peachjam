@@ -7,20 +7,25 @@
   </head>
   <body>
     <p>{{ user }},</p>
-    <p>{% trans "We have found new documents for areas that you are following:" %}</p>
+    <p>{% trans "We have found new documents for topics that you are following." %}</p>
     {% for item in followed_documents %}
       {{ item.followed_object }}
-      {% for doc in item.documents %}
-        <ul>
+      <ul>
+        {% for doc in item.documents %}
           <li>
-            <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}">{{ doc.title }}</a>
+            <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}?utm_campaign=following&utm_source=alert&utm_medium=email">{{ doc.title }}</a>
           </li>
-        </ul>
-      {% endfor %}
+        {% endfor %}
+      </ul>
       <hr/>
     {% endfor %}
     <p>
-      <a href="https://{{ site.domain }}{% url "user_following_list" %}">{% trans "Manage your document alerts" %}</a>
+      {% blocktrans %}
+        The {{ APP_NAME }} Team
+      {% endblocktrans %}
     </p>
+    <small>
+      <a href="https://{{ site.domain }}{% url "user_following_list" %}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
+    </small>
   </body>
 </html>

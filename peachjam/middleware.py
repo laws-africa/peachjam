@@ -76,9 +76,10 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
 
     # url prefixes that should never be cached
     never_cache_prefixes = [
-        "/admin/",
         "/accounts/",
+        "/admin/",
         "/api/",
+        "/follow/",
         "/saved-documents/",
         "/_",
     ]
