@@ -1,9 +1,6 @@
 {% extends 'peachjam/_header.html' %}
 {% load static i18n %}
 {% block top-bar %}{% endblock %}
-{% block navbar-logo %}
-  <img src="{% static 'images/logo.png' %}" alt="{{ APP_NAME }}" height="40"/>
-{% endblock %}
 {% block nav-items %}
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'judgments' %}active{% endif %}"

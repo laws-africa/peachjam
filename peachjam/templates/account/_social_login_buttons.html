@@ -1,6 +1,6 @@
 {% load i18n socialaccount static %}
 {% get_providers as socialaccount_providers %}
-{% if socialaccount_providers %}
+{% if PEACHJAM_SETTINGS.allow_social_logins and socialaccount_providers %}
   <hr/>
   {% for provider in socialaccount_providers %}
     <form method="post"

@@ -3,11 +3,6 @@
 {% block top-bar %}
   {% include 'peachjam/_open_law_africa.html' %}
 {% endblock %}
-{% block navbar-logo %}
-  <img src="{% static 'images/lawlibrary-logo.png' %}"
-       alt="lawlibrary"
-       width="70"/>
-{% endblock %}
 {% block nav-items %}
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'judgments' %}active{% endif %}"

@@ -2,7 +2,6 @@ import copy
 import logging
 
 from allauth.account.forms import LoginForm, SignupForm
-from countries_plus.models import Country
 from dal import autocomplete
 from django import forms
 from django.conf import settings
@@ -23,7 +22,6 @@ from peachjam.models import (
     AttachedFiles,
     CoreDocument,
     Folder,
-    PeachJamSettings,
     PublicationFile,
     Ratification,
     SavedDocument,
@@ -93,7 +91,7 @@ class NewDocumentFormMixin:
     def adjust_fieldsets(cls, fieldsets):
         # add the upload_file to the first set of fields to include on the page
         fieldsets = copy.deepcopy(fieldsets)
-        fieldsets[0][1]["fields"].append("upload_file")
+        fieldsets[0][1]["fields"].insert(0, "upload_file")
         return fieldsets
 
     @classmethod
@@ -513,6 +511,8 @@ class SaveDocumentForm(forms.ModelForm):
 
 class PeachjamSignupForm(SignupForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+    first_name = forms.CharField(max_length=150, label=_("First name"), required=False)
+    last_name = forms.CharField(max_length=150, label=_("Last name"), required=False)
 
 
 class PeachjamLoginForm(LoginForm):
@@ -523,17 +523,6 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["first_name", "last_name"]
-
-
-class JudgmentUploadForm(forms.Form):
-    jurisdiction = forms.ModelChoiceField(Country.objects)
-    file = forms.FileField()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields[
-            "jurisdiction"
-        ].queryset = PeachJamSettings.load().document_jurisdictions.all()
 
 
 class RatificationForm(forms.ModelForm):
