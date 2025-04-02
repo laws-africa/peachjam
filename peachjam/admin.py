@@ -479,37 +479,37 @@ class CustomPropertyInline(admin.TabularInline):
     model = CustomProperty
 
 
-class DocumentAccessForm(forms.Form):
+class AccessGroupForm(forms.Form):
     groups = forms.ModelMultipleChoiceField(
         queryset=DocumentAccessGroup.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False,
     )
 
-    def __init__(self, *args, doc=None, **kwargs):
+    def __init__(self, *args, obj=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.doc = doc
+        self.obj = obj
         groups = DocumentAccessGroup.objects.filter(
-            group__in=get_groups_with_perms(doc)
+            group__in=get_groups_with_perms(obj)
         )
         self.fields["groups"].initial = groups
 
-    def set_doc_access_groups(self):
+    def set_access_groups(self):
         add_groups = self.cleaned_data["groups"]
         remove_groups = DocumentAccessGroup.objects.exclude(pk__in=add_groups)
-        content_type = ContentType.objects.get_for_model(self.doc)
+        content_type = ContentType.objects.get_for_model(self.obj)
         view_perm = Permission.objects.get(
             content_type=content_type, codename=f"view_{content_type.model}"
         )
 
         for group in add_groups:
-            assign_perm(view_perm, group.group, self.doc)
+            assign_perm(view_perm, group.group, self.obj)
 
         for group in remove_groups:
-            remove_perm(view_perm, group.group, self.doc)
+            remove_perm(view_perm, group.group, self.obj)
 
 
-class DocumentAccessMixin(GuardedModelAdminMixin):
+class AccessGroupMixin(GuardedModelAdminMixin):
     change_form_template = None
 
     def obj_perms_manage_view(self, request, object_pk):
@@ -520,17 +520,17 @@ class DocumentAccessMixin(GuardedModelAdminMixin):
         context = self.get_obj_perms_base_context(request, obj)
         context.update(
             {
-                "doc_access_form": DocumentAccessForm(doc=obj),
+                "access_group_form": AccessGroupForm(obj=obj),
             }
         )
 
-        if request.method == "POST" and "set_doc_access" in request.POST:
-            form = DocumentAccessForm(request.POST, doc=obj)
+        if request.method == "POST" and "set_access_group" in request.POST:
+            form = AccessGroupForm(request.POST, obj=obj)
             if form.is_valid():
-                form.set_doc_access_groups()
+                form.set_access_groups()
                 messages.success(request, _("Access groups updated."))
                 return HttpResponseRedirect(".")
-            context["doc_access_form"] = form
+            context["access_group_form"] = form
 
         return render(request, template_name, context)
 
@@ -550,7 +550,7 @@ class DocumentAccessMixin(GuardedModelAdminMixin):
     document_access_link.short_description = gettext_lazy("Restricted access groups")
 
 
-class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
+class DocumentAdmin(AccessGroupMixin, BaseAdmin):
     form = DocumentForm
     inlines = [
         SourceFileInline,
@@ -918,7 +918,7 @@ class TaxonomyForm(MoveNodeForm):
 
 
 @admin.register(Taxonomy)
-class TaxonomyAdmin(DocumentAccessMixin, TreeAdmin):
+class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
     form = movenodeform_factory(Taxonomy, TaxonomyForm)
     readonly_fields = ("slug", "path_name", "document_access_link")
     inlines = [EntityProfileInline]
