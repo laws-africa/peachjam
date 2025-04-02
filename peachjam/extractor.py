@@ -61,14 +61,14 @@ class ExtractorService:
             try:
                 details["court"] = Court.objects.get(name=details["court"])
             except Court.DoesNotExist:
-                pass
+                details["court"] = None
 
         for field in ["date", "hearing_date"]:
             if details.get(field):
                 try:
                     details[field] = datetime.strptime(details[field], "%Y-%m-%d")
                 except ValueError:
-                    pass
+                    details[field] = None
 
         if details.get("judges"):
             details["judges"] = list(
@@ -84,12 +84,12 @@ class ExtractorService:
                 # TODO: matter type
                 try:
                     number = int(case_number["number"])
-                except TypeError:
+                except (TypeError, ValueError):
                     number = None
 
                 try:
                     year = int(case_number["year"])
-                except TypeError:
+                except (TypeError, ValueError):
                     year = None
 
                 case_numbers.append(
