@@ -8,8 +8,16 @@ concurrency:
   group: liiweb2.africanlii.org
 
 jobs:
+  should-proceed:
+    name: Should deployment proceed?
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, 'nodeploy') }}
+    steps:
+    - run: echo "Deployment will proceed. Include nodeploy in the commit message to avoid deployments."
+
   deploy-agp:
     name: Deploy to africanlii.org
+    needs: should-proceed
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -25,6 +33,7 @@ jobs:
 
   deploy-lawlibrary:
     name: Deploy to lawlibrary
+    needs: should-proceed
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -40,6 +49,7 @@ jobs:
 
   deploy-ulii:
     name: Deploy to ulii
+    needs: should-proceed
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
