@@ -179,6 +179,7 @@ ACCOUNT_FORMS = {
     "login": "peachjam.forms.PeachjamLoginForm",
 }
 ACCOUNT_USER_DISPLAY = "peachjam.auth.user_display"
+ACCOUNT_USERNAME_REQUIRED = False
 
 # social logins
 SOCIALACCOUNT_PROVIDERS = {
