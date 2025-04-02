@@ -5,7 +5,6 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import FormView
 from django.views.generic.base import TemplateView
-from django.views.i18n import set_language
 
 from peachjam.auth import user_display
 from peachjam.forms import UserProfileForm
@@ -30,15 +29,11 @@ class EditAccountView(LoginRequiredMixin, FormView):
         return reverse("edit_account")
 
     def form_valid(self, form):
-        if form.is_valid():
-            user = form.save()
-            language_code = user.userprofile.preferred_language.iso_639_1
-            self.request.POST = {
-                "language": language_code,
-                "next": self.get_success_url(),
-            }
-            return set_language(self.request)
-        return super().form_valid(form)
+        user = form.save()
+        language_code = user.userprofile.preferred_language.iso_639_1
+        response = super().form_valid(form)
+        setattr(response, "set_language", language_code)
+        return response
 
 
 class GetAccountView(View):

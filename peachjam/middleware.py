@@ -1,10 +1,8 @@
-import sys
-
+from django.conf import settings
 from django.middleware.cache import UpdateCacheMiddleware
 from django.shortcuts import redirect
 from django.utils.cache import get_max_age, patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
-from django.views.i18n import set_language
 
 
 class StripDomainPrefixMiddleware:
@@ -53,10 +51,20 @@ class ForceDefaultLanguageMiddleware(MiddlewareMixin):
 
 class SetPreferredLanguageMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
-
-        if hasattr(request, "set_language") and "test" not in sys.argv:
-            request.POST = {"language": request.set_language}
-            response = set_language(request)
+        if hasattr(request, "set_language") or hasattr(response, "set_language"):
+            lang_code = getattr(request, "set_language", None) or getattr(
+                response, "set_language", None
+            )
+            response.set_cookie(
+                settings.LANGUAGE_COOKIE_NAME,
+                lang_code,
+                max_age=settings.LANGUAGE_COOKIE_AGE,
+                path=settings.LANGUAGE_COOKIE_PATH,
+                domain=settings.LANGUAGE_COOKIE_DOMAIN,
+                secure=settings.LANGUAGE_COOKIE_SECURE,
+                httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+                samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+            )
         return response
 
 
