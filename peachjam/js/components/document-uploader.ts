@@ -66,7 +66,7 @@ export default class DocumentUploader {
           status.replaceWith(result);
         }
       } else {
-        status.innerText = 'Error: ' + (await resp.text()) || resp.statusText;
+        status.innerText = 'Extraction failed.';
       }
     } catch (e) {
       status.innerText = 'Error: ' + e;
