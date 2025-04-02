@@ -25,6 +25,15 @@
         "pk": 8
     },
     {
+        "fields": {
+            "description": "",
+            "name": "Judgment",
+            "code": "judgment"
+        },
+        "model": "peachjam.documentnature",
+        "pk": 15
+    },
+    {
         "model": "peachjam.courtclass",
         "pk": 2,
         "fields": {
@@ -4838,7 +4847,7 @@
     },
     {
         "fields": {
-            "nature": 2,
+            "nature": 15,
             "citation": "Obi vs Federal Republic of Nigeria [2016] ECOWASCJ 52 (09 November 2016)",
             "content_html": "",
             "content_html_is_akn": false,
@@ -4846,11 +4855,11 @@
             "date": "2016-11-09",
             "doc_type": "judgment",
             "expression_frbr_uri": "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09",
-            "frbr_uri_actor": null,
+            "frbr_uri_actor": "ecowascj",
             "frbr_uri_date": "2016",
             "frbr_uri_doctype": "judgment",
             "frbr_uri_number": "52",
-            "frbr_uri_subtype": "ecowascj",
+            "frbr_uri_subtype": null,
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,
@@ -4878,7 +4887,7 @@
     },
     {
         "fields": {
-            "nature": 2,
+            "nature": 15,
             "citation": "Ababacar and Ors vs Senegal [2018] ECOWASCJ 17 (29 June 2018)",
             "content_html": "",
             "content_html_is_akn": false,
@@ -4886,11 +4895,11 @@
             "date": "2018-06-29",
             "doc_type": "judgment",
             "expression_frbr_uri": "/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29",
-            "frbr_uri_actor": null,
+            "frbr_uri_actor": "ecowascj" ,
             "frbr_uri_date": "2018",
             "frbr_uri_doctype": "judgment",
             "frbr_uri_number": "17",
-            "frbr_uri_subtype": "ecowascj",
+            "frbr_uri_subtype": null,
             "jurisdiction": "AA",
             "language": "en",
             "locality": 1,

@@ -1,5 +1,6 @@
 from cobalt import FrbrUri
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponse
 from django.http.response import FileResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
@@ -67,8 +68,10 @@ class DocumentDetailViewResolver(View):
         if obj.restricted:
             restricted_view = RestrictedDocument403View()
             restricted_view.setup(request, *args, **kwargs)
+            content_type = ContentType.objects.get_for_model(obj)
+            perm = f"{content_type.app_label}.view_{content_type.model}"
 
-            if not request.user.has_perm("peachjam.view_document", obj):
+            if not request.user.has_perm(perm, obj):
                 return restricted_view.dispatch(request, *args, **kwargs)
 
         view_class = registry.views.get(obj.doc_type)
