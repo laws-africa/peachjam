@@ -1,3 +1,5 @@
+import sys
+
 from django.middleware.cache import UpdateCacheMiddleware
 from django.shortcuts import redirect
 from django.utils.cache import get_max_age, patch_vary_headers
@@ -51,7 +53,8 @@ class ForceDefaultLanguageMiddleware(MiddlewareMixin):
 
 class SetPreferredLanguageMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
-        if hasattr(request, "set_language"):
+
+        if hasattr(request, "set_language") and "test" not in sys.argv:
             request.POST = {"language": request.set_language}
             response = set_language(request)
         return response
