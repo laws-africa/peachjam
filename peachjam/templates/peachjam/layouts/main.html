@@ -37,7 +37,6 @@
     {% if PEACHJAM_SETTINGS.matomo_domain and PEACHJAM_SETTINGS.matomo_site_id %}
       <script>
         var _paq = window._paq = window._paq || [];
-        _paq.push(["setDoNotTrack", true]);
         {% if user.is_authenticated %}_paq.push(['setUserId', '{{ user.userprofile.tracking_id }}']);{% endif %}
         _paq.push(["disableCookies"]);
         _paq.push(['setCustomDimension', 1, '{{ CURRENT_LANGUAGE }}']);
