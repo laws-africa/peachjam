@@ -3,12 +3,6 @@
 from django.db import migrations, models
 
 
-def backfill_path_name(apps, schema_editor):
-    Taxonomy = apps.get_model("peachjam", "Taxonomy")
-    for taxonomy in Taxonomy.objects.iterator(chunk_size=100):
-        taxonomy.save()
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -51,5 +45,4 @@ class Migration(migrations.Migration):
                 blank=True, max_length=4096, null=True, verbose_name="path name"
             ),
         ),
-        migrations.RunPython(backfill_path_name, migrations.RunPython.noop),
     ]
