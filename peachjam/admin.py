@@ -1211,6 +1211,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                     "judges": ["Anukam J", "Eno R", "Plasket JA", "Maya P"],
                     "case_numbers": [
                         {
+                            "matter_type": "Criminal Case",
                             "case_number_string": "123/2025",
                             "number": None,
                             "year": 2025,
@@ -1245,6 +1246,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         if details.get("case_numbers"):
             case_numbers = [
                 {
+                    "matter_type": cn.matter_type,
                     "number": cn.number,
                     "year": cn.year,
                     "string_override": cn.string_override,
