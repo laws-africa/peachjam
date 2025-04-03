@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db.models.functions import Lower
 from languages_plus.models import Language
 
-from peachjam.models import CaseNumber, Court, Judge, pj_settings
+from peachjam.models import CaseNumber, Court, Judge, MatterType, pj_settings
 
 log = logging.getLogger(__name__)
 
@@ -30,6 +30,7 @@ class ExtractorService:
         data = {
             "country": jurisdiction.pk,
             "court_names": [c.name for c in Court.objects.all()],
+            "matter_types": [m.name for m in MatterType.objects.all()],
         }
         headers = self.get_headers()
         resp = requests.post(
