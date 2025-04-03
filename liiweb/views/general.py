@@ -33,7 +33,9 @@ class HomePageView(PJHomePageView):
             .exclude(published=False)
             .order_by("-date")[:5]
         )
-        context["taxonomies"] = Taxonomy.dump_bulk()
+        context["taxonomies"] = Taxonomy.get_allowed_taxonomies(self.request.user)[
+            "tree"
+        ]
         context["taxonomy_url"] = "taxonomy_detail"
         context["recent_articles"] = (
             Article.objects.prefetch_related("topics", "author")

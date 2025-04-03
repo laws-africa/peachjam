@@ -2,14 +2,6 @@
 
 from django.db import migrations, models
 
-from peachjam.models import Taxonomy
-
-
-def backfill_path_name(apps, schema_editor):
-    # deliberately use the actual Taxonomy model
-    for taxonomy in Taxonomy.get_root_nodes():
-        taxonomy.save()
-
 
 class Migration(migrations.Migration):
 
@@ -53,5 +45,4 @@ class Migration(migrations.Migration):
                 blank=True, max_length=4096, null=True, verbose_name="path name"
             ),
         ),
-        migrations.RunPython(backfill_path_name, migrations.RunPython.noop),
     ]

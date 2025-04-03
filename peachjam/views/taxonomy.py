@@ -1,3 +1,4 @@
+from django.http import HttpResponseForbidden
 from django.shortcuts import Http404, get_object_or_404
 from django.views.generic import DetailView, TemplateView
 
@@ -11,31 +12,48 @@ class TaxonomyListView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context["taxonomies"] = Taxonomy.dump_bulk()
+        context["taxonomies"] = Taxonomy.get_allowed_taxonomies(request.user)["tree"]
         context["taxonomy_url"] = "taxonomy_detail"
         return self.render_to_response(context)
 
 
-class TaxonomyFirstLevelView(DetailView):
+class AllowedTaxonomyMixin:
+    def dispatch(self, request, *args, **kwargs):
+        self.taxonomy = self.get_taxonomy()
+        is_ancestor_restricted = self.taxonomy.get_ancestors().values_list(
+            "restricted", flat=True
+        )
+        if self.taxonomy.restricted or any(is_ancestor_restricted):
+            if not request.user.has_perm("peachjam.view_taxonomy", self.taxonomy):
+                return HttpResponseForbidden()
+        self.allowed_taxonomies = Taxonomy.get_allowed_taxonomies(
+            request.user, root=self.taxonomy
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+
+class TaxonomyFirstLevelView(AllowedTaxonomyMixin, DetailView):
     template_name = "peachjam/taxonomy_first_level_detail.html"
     model = Taxonomy
     slug_url_kwarg = "topic"
     context_object_name = "taxonomy"
     navbar_link = "taxonomy"
 
+    def get_taxonomy(self):
+        return self.get_object()
+
     def get_context_data(self, **kwargs):
-        return super().get_context_data(taxonomy_link_prefix="taxonomy", **kwargs)
+        context = super().get_context_data(**kwargs)
+        context["children"] = self.object.get_allowed_children(self.request.user)
+        context["taxonomy_link_prefix"] = "taxonomy"
+        return context
 
 
-class TaxonomyDetailView(FilteredDocumentListView):
+class TaxonomyDetailView(AllowedTaxonomyMixin, FilteredDocumentListView):
     template_name = "peachjam/taxonomy_detail.html"
     navbar_link = "taxonomy"
     # taxonomies may include legislation, so we want to show the latest expression only
     latest_expression_only = True
-
-    def get(self, request, *args, **kwargs):
-        self.taxonomy = self.get_taxonomy()
-        return super().get(request, *args, **kwargs)
 
     def get_taxonomy(self):
         root = get_object_or_404(Taxonomy, slug=self.kwargs["topic"])
@@ -47,7 +65,7 @@ class TaxonomyDetailView(FilteredDocumentListView):
 
     def get_base_queryset(self):
         # we want all documents that are in the current topic, and any of the topic's descendants
-        topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
+        topics = self.allowed_taxonomies["pk_list"]
         return (
             super().get_base_queryset().filter(taxonomies__topic__in=topics).distinct()
         )
@@ -63,7 +81,7 @@ class TaxonomyDetailView(FilteredDocumentListView):
             context["root"] = ancestors[1]
         context["ancestors"] = ancestors
         context["root_taxonomy"] = context["root"].get_root().slug
-        context["taxonomy_tree"] = list(context["root"].dump_bulk(context["root"]))
+        context["taxonomy_tree"] = self.allowed_taxonomies["tree"]
         context["first_level_taxonomy"] = context["taxonomy_tree"][0]["data"]["name"]
         context["is_leaf_node"] = not (context["taxonomy_tree"][0].get("children"))
         context["taxonomy_link_prefix"] = "taxonomy"
