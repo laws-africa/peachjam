@@ -14,6 +14,7 @@ import '@lawsafrica/law-widgets/dist/components/la-decorate-terms';
 // @ts-ignore
 import htmx from 'htmx.org';
 import { csrfToken } from './api';
+import analytics from './components/analytics';
 
 export interface PeachJamConfig {
   appName: string;
@@ -46,6 +47,7 @@ class PeachJam {
     this.setupConfig();
     // add the current user agent to the root HTML element for use with pocketlaw
     document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
+    this.setupAnalytics();
     this.setupHtmx();
     this.setupSentry();
     this.createComponents(document.body);
@@ -63,6 +65,10 @@ class PeachJam {
     if (data) {
       this.config = JSON.parse(data);
     }
+  }
+
+  setupAnalytics () {
+    analytics.trackButtonEvents();
   }
 
   setupHtmx () {

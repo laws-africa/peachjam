@@ -13,6 +13,7 @@
         <button
           class="btn btn-sm btn-secondary"
           type="button"
+          data-track-event="Document | What changed"
           @click="showChanges"
         >
           {{ $t('What changed?') }}
