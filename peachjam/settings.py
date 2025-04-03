@@ -104,6 +104,7 @@ MIDDLEWARE = [
     "django.middleware.cache.FetchFromCacheMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
+    "peachjam.middleware.SetPreferredLanguageMiddleware",
 ]
 
 ROOT_URLCONF = "peachjam.urls"

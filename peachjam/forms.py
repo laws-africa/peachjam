@@ -14,8 +14,10 @@ from django.db.models.functions.text import Substr
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
+from django.utils.translation.trans_real import get_languages
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
+from languages_plus.models import Language
 
 from peachjam.models import (
     Annotation,
@@ -519,10 +521,32 @@ class PeachjamLoginForm(LoginForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
 
 
-class UserForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ["first_name", "last_name"]
+class UserProfileForm(forms.Form):
+    first_name = forms.CharField(max_length=255, required=False)
+    last_name = forms.CharField(max_length=255, required=False)
+    preferred_language = forms.ModelChoiceField(
+        queryset=Language.objects.filter(iso_639_1__in=get_languages())
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        kwargs["initial"] = {
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "preferred_language": self.user.userprofile.preferred_language,
+        }
+        super().__init__(*args, **kwargs)
+
+    def save(self):
+        self.user.first_name = self.cleaned_data["first_name"]
+        self.user.last_name = self.cleaned_data["last_name"]
+        self.user.userprofile.preferred_language = self.cleaned_data[
+            "preferred_language"
+        ]
+        self.user.userprofile.save()
+        self.user.save()
+        self.user.refresh_from_db()
+        return self.user
 
 
 class RatificationForm(forms.ModelForm):

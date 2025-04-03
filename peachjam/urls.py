@@ -122,6 +122,7 @@ from peachjam.views.document_access_group import (
     DocumentAccessGroupListView,
 )
 from peachjam.views.generic_views import CSRFTokenView
+from peachjam.views.language import set_preferred_language
 from peachjam.views.metabase_stats import MetabaseStatsView
 
 register_converter(ISODateConverter, "isodate")
@@ -410,6 +411,11 @@ urlpatterns = [
     ),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
+    path(
+        "i18n/set_preferred_language/",
+        set_preferred_language,
+        name="set_preferred_language",
+    ),
     path(
         "articles/",
         include(

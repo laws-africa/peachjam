@@ -38,6 +38,19 @@
             </div>
           {% endif %}
         </div>
+        <div class="mb-3">
+          <label for="{{ form.preferred_language.id_for_label }}">{{ form.preferred_language.label }}</label>
+          <select class="form-control"
+                  name="{{ form.preferred_language.name }}"
+                  id="{{ form.preferred_language.id_for_label }}">
+            {% for opt in form.preferred_language %}{{ opt }}{% endfor %}
+          </select>
+          {% if form.preferred_language.errors %}
+            <div class="text-danger">
+              {% for error in form.preferred_language.errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+        </div>
       </div>
       <div class="card-footer">
         <button type="submit" class="btn btn-success">{% trans "Save" %}</button>

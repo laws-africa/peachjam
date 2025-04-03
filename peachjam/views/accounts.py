@@ -3,11 +3,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.views import View
-from django.views.generic import UpdateView
+from django.views.generic import FormView
 from django.views.generic.base import TemplateView
 
 from peachjam.auth import user_display
-from peachjam.forms import UserForm
+from peachjam.forms import UserProfileForm
 
 User = get_user_model()
 
@@ -16,17 +16,23 @@ class AccountsHomeView(LoginRequiredMixin, TemplateView):
     template_name = "user_account/home.html"
 
 
-class EditAccountView(LoginRequiredMixin, UpdateView):
-    authentication_required = True
-    model = User
+class EditAccountView(LoginRequiredMixin, FormView):
     template_name = "user_account/edit.html"
-    form_class = UserForm
+    form_class = UserProfileForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def get_success_url(self):
         return reverse("edit_account")
 
-    def get_object(self, queryset=None):
-        return self.request.user
+    def form_valid(self, form):
+        user = form.save()
+        language_code = user.userprofile.preferred_language.iso_639_1
+        setattr(self.request, "set_language", language_code)
+        return super().form_valid(form)
 
 
 class GetAccountView(View):
