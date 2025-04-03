@@ -82,7 +82,12 @@ class ExtractorService:
         if details.get("case_numbers"):
             case_numbers = []
             for case_number in details["case_numbers"]:
-                # TODO: matter type
+                matter_type = None
+                if case_number.get("matter_type"):
+                    matter_type = MatterType.objects.filter(
+                        name=case_number["matter_type"]
+                    ).first()
+
                 try:
                     number = int(case_number["number"])
                 except (TypeError, ValueError):
@@ -95,6 +100,7 @@ class ExtractorService:
 
                 case_numbers.append(
                     CaseNumber(
+                        matter_type=matter_type,
                         number=number,
                         year=year,
                         string_override=case_number["case_number_string"],
