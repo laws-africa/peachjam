@@ -40,6 +40,7 @@
         {% if user.is_authenticated %}_paq.push(['setUserId', '{{ user.userprofile.tracking_id }}']);{% endif %}
         _paq.push(["disableCookies"]);
         _paq.push(['setCustomDimension', 1, '{{ CURRENT_LANGUAGE }}']);
+        _paq.push(['FormAnalytics::disableFormAnalytics']);
         _paq.push(["trackPageView"]);
         _paq.push(["enableLinkTracking"]);
         (function() {
