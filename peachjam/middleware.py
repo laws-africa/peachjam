@@ -51,13 +51,10 @@ class ForceDefaultLanguageMiddleware(MiddlewareMixin):
 
 class SetPreferredLanguageMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
-        if hasattr(request, "set_language") or hasattr(response, "set_language"):
-            lang_code = getattr(request, "set_language", None) or getattr(
-                response, "set_language", None
-            )
+        if hasattr(request, "set_language"):
             response.set_cookie(
                 settings.LANGUAGE_COOKIE_NAME,
-                lang_code,
+                request.set_language,
                 max_age=settings.LANGUAGE_COOKIE_AGE,
                 path=settings.LANGUAGE_COOKIE_PATH,
                 domain=settings.LANGUAGE_COOKIE_DOMAIN,

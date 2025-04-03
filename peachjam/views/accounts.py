@@ -31,9 +31,8 @@ class EditAccountView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         user = form.save()
         language_code = user.userprofile.preferred_language.iso_639_1
-        response = super().form_valid(form)
-        setattr(response, "set_language", language_code)
-        return response
+        setattr(self.request, "set_language", language_code)
+        return super().form_valid(form)
 
 
 class GetAccountView(View):
