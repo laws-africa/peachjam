@@ -1,4 +1,4 @@
-from django.http import HttpResponseForbidden
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import Http404, get_object_or_404
 from django.views.generic import DetailView, TemplateView
 
@@ -25,7 +25,7 @@ class AllowedTaxonomyMixin:
         )
         if self.taxonomy.restricted or any(is_ancestor_restricted):
             if not request.user.has_perm("peachjam.view_taxonomy", self.taxonomy):
-                return HttpResponseForbidden()
+                raise PermissionDenied
         self.allowed_taxonomies = Taxonomy.get_allowed_taxonomies(
             request.user, root=self.taxonomy
         )
