@@ -27,7 +27,7 @@ export class Analytics {
     this.gtag('event', 'site_search', { keyword, category, searchCount });
   }
 
-  trackEvent (category: string, action: string, name: string | null = null, value: number | null = null) {
+  trackEvent (category: string, action: string, name?: string, value?: number) {
     this.paq.push(['trackEvent', category, action, name, value]);
     this.gtag('event', action, { event_category: category, event_name: name, value });
   }
