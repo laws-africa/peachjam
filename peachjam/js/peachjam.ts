@@ -14,7 +14,7 @@ import '@lawsafrica/law-widgets/dist/components/la-decorate-terms';
 // @ts-ignore
 import htmx from 'htmx.org';
 import { csrfToken } from './api';
-import analytics from './components/analytics';
+import analytics, { Analytics } from './components/analytics';
 
 export interface PeachJamConfig {
   appName: string;
@@ -28,6 +28,7 @@ export interface PeachJamConfig {
 
 class PeachJam {
   private components: any[];
+  public analytics: Analytics;
   public config: PeachJamConfig = {
     appName: 'Peach Jam',
     pdfWorker: '/static/js/pdf.worker-prod.js',
@@ -40,6 +41,7 @@ class PeachJam {
 
   constructor () {
     this.components = [];
+    this.analytics = analytics;
   }
 
   setup () {
@@ -68,7 +70,7 @@ class PeachJam {
   }
 
   setupAnalytics () {
-    analytics.trackButtonEvents();
+    this.analytics.trackButtonEvents();
   }
 
   setupHtmx () {
