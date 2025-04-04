@@ -67,7 +67,9 @@ class SearchableDocumentSerializer(Serializer):
     pages = SerializerMethodField()
     provisions = SerializerMethodField()
     outcome = SerializerMethodField()
+    verdict = CharField()
     registry = SerializerMethodField()
+    division = CharField()
     explanation = SerializerMethodField()
     raw = SerializerMethodField()
 

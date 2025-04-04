@@ -283,9 +283,11 @@
       {{ $t('Author') }}
       {{ $t('Court') }}
       {{ $t('Court registry') }}
+      {{ $t('Court division') }}
       {{ $t('Judges') }}
       {{ $t('Attorneys') }}
       {{ $t('Outcome') }}
+      {{ $t('Case verdict') }}
       {{ $t('Jurisdiction') }}
       {{ $t('Locality') }}
       {{ $t('Matter type') }}
@@ -391,6 +393,13 @@ export default {
         options: []
       },
       {
+        title: this.$t('Court division'),
+        name: 'division',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
         title: this.$t('Locality'),
         name: 'locality',
         type: 'checkboxes',
@@ -400,6 +409,13 @@ export default {
       {
         title: this.$t('Outcome'),
         name: 'outcome',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Case verdicts'),
+        name: 'verdict',
         type: 'checkboxes',
         value: [],
         options: []

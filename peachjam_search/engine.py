@@ -130,8 +130,10 @@ class SearchEngine:
         "year",
         "judges",
         "registry",
+        "division",
         "attorneys",
         "outcome",
+        "verdict",
         "labels",
     }
 
@@ -171,8 +173,10 @@ class SearchEngine:
         {"field": "court", "options": {"size": 100}},
         {"field": "judges", "options": {"size": 100}},
         {"field": "registry", "options": {"size": 100}},
+        {"field": "division", "options": {"size": 100}},
         {"field": "attorneys", "options": {"size": 100}},
         {"field": "outcome", "options": {"size": 100}},
+        {"field": "verdict", "options": {"size": 100}},
         {"field": "labels", "options": {"size": 100}},
     ]
 

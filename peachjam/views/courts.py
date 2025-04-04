@@ -9,7 +9,16 @@ from django.utils.text import gettext_lazy as _
 from django.utils.text import slugify
 
 from peachjam.helpers import chunks
-from peachjam.models import Court, CourtClass, CourtRegistry, Judge, Judgment, Outcome
+from peachjam.models import (
+    CaseVerdict,
+    Court,
+    CourtClass,
+    CourtDivision,
+    CourtRegistry,
+    Judge,
+    Judgment,
+    Outcome,
+)
 from peachjam.views.generic_views import FilteredDocumentListView, YearListMixin
 
 
@@ -110,6 +119,24 @@ class FilteredJudgmentView(FilteredDocumentListView):
                     "values": self.request.GET.getlist("outcomes"),
                 }
 
+    def add_verdicts_facet(self, context):
+        if "verdicts" not in self.exclude_facets:
+            verdicts = CaseVerdict.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="verdicts"
+                )
+                .order_by()
+                .values_list("verdict_id", flat=True)
+                .distinct()
+            )
+
+            context["facet_data"]["verdicts"] = {
+                "label": _("Case verdicts"),
+                "type": "checkbox",
+                "options": sorted([(v.name, v.name) for v in verdicts]),
+                "values": self.request.GET.getlist("verdicts"),
+            }
+
     def add_attorneys_facet(self, context):
         if "attorneys" not in self.exclude_facets:
             attorneys = list(
@@ -130,11 +157,31 @@ class FilteredJudgmentView(FilteredDocumentListView):
                     "values": self.request.GET.getlist("attorneys"),
                 }
 
+    def add_divisions_facet(self, context):
+        if "divisions" not in self.exclude_facets:
+            divisions = CourtDivision.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="divisions"
+                )
+                .order_by()
+                .values_list("division_id", flat=True)
+                .distinct()
+            )
+
+            context["facet_data"]["divisions"] = {
+                "label": _("Court divisions"),
+                "type": "checkbox",
+                "options": sorted([(d.code, d.name) for d in divisions]),
+                "values": self.request.GET.getlist("divisions"),
+            }
+
     def add_facets(self, context):
         context["facet_data"] = {}
         self.add_judges_facet(context)
         self.add_labels_facet(context)
+        self.add_divisions_facet(context)
         self.add_outcomes_facet(context)
+        self.add_verdicts_facet(context)
         self.add_attorneys_facet(context)
         self.add_taxonomies_facet(context)
         self.add_alphabet_facet(context)
