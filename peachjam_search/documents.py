@@ -87,11 +87,15 @@ class SearchableDocument(Document):
     registry_fr = fields.KeywordField()
     registry_pt = fields.KeywordField()
 
+    division = fields.KeywordField(attr="division.name")
+
     outcome = fields.KeywordField()
     outcome_en = fields.KeywordField()
     outcome_sw = fields.KeywordField()
     outcome_fr = fields.KeywordField()
     outcome_pt = fields.KeywordField()
+
+    verdict = fields.KeywordField(attr="verdict.name")
 
     # GenericDocument
     authors = fields.KeywordField()
@@ -284,6 +288,14 @@ class SearchableDocument(Document):
     def prepare_registry(self, instance):
         if hasattr(instance, "registry") and instance.registry:
             return instance.registry.name
+
+    def prepare_division(self, instance):
+        if hasattr(instance, "division") and instance.division:
+            return instance.division.name
+
+    def prepare_verdict(self, instance):
+        if hasattr(instance, "verdict") and instance.verdict:
+            return instance.verdict.name
 
     def prepare_outcome(self, instance):
         if hasattr(instance, "outcomes") and instance.outcomes:

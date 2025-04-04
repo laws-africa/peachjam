@@ -134,7 +134,9 @@ class CourtClass(models.Model):
 
 class CourtDivision(models.Model):
     name = models.CharField(_("name"), max_length=255, null=False, unique=True)
-    code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
+    code = models.SlugField(
+        _("code"), max_length=255, null=False, blank=True, unique=True
+    )
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
