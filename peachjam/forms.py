@@ -142,6 +142,7 @@ class BaseDocumentFilterForm(forms.Form):
     divisions = PermissiveTypedListField(coerce=remove_nulls, required=False)
     attorneys = PermissiveTypedListField(coerce=remove_nulls, required=False)
     outcomes = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    verdicts = PermissiveTypedListField(coerce=remove_nulls, required=False)
     taxonomies = PermissiveTypedListField(coerce=remove_nulls, required=False)
     labels = PermissiveTypedListField(coerce=remove_nulls, required=False)
     q = forms.CharField(required=False)
@@ -170,6 +171,7 @@ class BaseDocumentFilterForm(forms.Form):
         "divisions",
         "attorneys",
         "outcomes",
+        "verdicts",
         "labels",
         "taxonomies",
     ]
@@ -265,6 +267,14 @@ class BaseDocumentFilterForm(forms.Form):
         return (
             queryset.filter(outcomes__name__in=outcomes).distinct()
             if outcomes
+            else queryset
+        )
+
+    def apply_filter_verdicts(self, queryset):
+        verdicts = self.cleaned_data.get("verdicts", [])
+        return (
+            queryset.filter(verdict__name__in=verdicts).distinct()
+            if verdicts
             else queryset
         )
 

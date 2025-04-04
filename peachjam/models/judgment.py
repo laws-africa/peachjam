@@ -60,6 +60,21 @@ class Outcome(models.Model):
         return self.name
 
 
+class CaseVerdict(models.Model):
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("case verdict")
+        verbose_name_plural = _("case verdicts")
+
+    def __str__(self):
+        return self.name
+
+
 class MatterType(models.Model):
     name = models.CharField(
         _("name"), max_length=1024, null=False, blank=False, unique=True
@@ -267,6 +282,22 @@ class Judgment(CoreDocument):
         null=True,
         related_name="judgments",
         blank=True,
+    )
+    division = models.ForeignKey(
+        CourtDivision,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="judgments",
+        verbose_name=_("court division"),
+    )
+    verdict = models.ForeignKey(
+        CaseVerdict,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="judgments",
+        verbose_name=_("verdict"),
     )
     judges = models.ManyToManyField(
         Judge, blank=True, verbose_name=_("judges"), through=Bench
