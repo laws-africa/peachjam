@@ -1,11 +1,18 @@
 {% load i18n %}
-<div class="border-bottom">
+<div id="saved-doc-{{ saved_doc.pk }}" class="border-bottom">
   <div class="row pt-2">
-    <div class="col-md-8">
+    <div class="col-md-6">
       <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
       {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
+      {% if saved_doc.note %}
+        <br/>
+        <div>
+          <i class="bi bi-sticky"></i>
+          <span class="text-muted">{{ saved_doc.note }}</span>
+        </div>
+      {% endif %}
     </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
       {% if saved_doc.annotation_count %}
         <i class="text-primary bi bi-chat-left-text"></i>
         <a href="#"
@@ -19,9 +26,23 @@
         </a>
       {% endif %}
     </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
       <div class="text-end text-nowrap">
         {{ saved_doc.document.date }}
+        <a class="ms-3"
+           type="button"
+           data-bs-toggle="modal"
+           data-bs-target="#saveDocumentModal-{{ saved_doc.document.id }}">
+          <i class="bi bi-pencil"
+             hx-get="{% url 'saved_document_update' saved_doc.id %}"></i>
+        </a>
+        <div id="saveDocumentModal-{{ saved_doc.document.id }}"
+             class="modal fade"
+             tabindex="-1"
+             aria-hidden="true">
+          <div id="saveDocumentModalDialog-{{ saved_doc.document.id }}"
+               class="modal-dialog"></div>
+        </div>
         <button class="btn btn-link"
                 type="button"
                 hx-post="{% url 'saved_document_delete' saved_doc.id %}?next={% url 'folder_list' %}"
