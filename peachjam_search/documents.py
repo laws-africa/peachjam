@@ -97,7 +97,7 @@ class SearchableDocument(Document):
     outcome_fr = fields.KeywordField()
     outcome_pt = fields.KeywordField()
 
-    verdict = fields.KeywordField(attr="verdict.name")
+    case_action = fields.KeywordField(attr="case_action.name")
 
     # GenericDocument
     authors = fields.KeywordField()
@@ -300,9 +300,9 @@ class SearchableDocument(Document):
         if hasattr(instance, "division") and instance.division:
             return instance.division.name
 
-    def prepare_verdict(self, instance):
-        if hasattr(instance, "verdict") and instance.verdict:
-            return instance.verdict.name
+    def prepare_case_action(self, instance):
+        if hasattr(instance, "case_action") and instance.case_action:
+            return instance.case_action.name
 
     def prepare_outcome(self, instance):
         if hasattr(instance, "outcomes") and instance.outcomes:
