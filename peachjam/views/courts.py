@@ -10,7 +10,7 @@ from django.utils.text import slugify
 
 from peachjam.helpers import chunks
 from peachjam.models import (
-    CaseVerdict,
+    CaseAction,
     Court,
     CourtClass,
     CourtDivision,
@@ -119,22 +119,22 @@ class FilteredJudgmentView(FilteredDocumentListView):
                     "values": self.request.GET.getlist("outcomes"),
                 }
 
-    def add_verdicts_facet(self, context):
-        if "verdicts" not in self.exclude_facets:
-            verdicts = CaseVerdict.objects.filter(
+    def add_case_action_facet(self, context):
+        if "case_actions" not in self.exclude_facets:
+            case_actions = CaseAction.objects.filter(
                 pk__in=self.form.filter_queryset(
-                    self.get_base_queryset(), exclude="verdicts"
+                    self.get_base_queryset(), exclude="case_actions"
                 )
                 .order_by()
-                .values_list("verdict_id", flat=True)
+                .values_list("case_action_id", flat=True)
                 .distinct()
             )
 
-            context["facet_data"]["verdicts"] = {
-                "label": _("Case verdicts"),
+            context["facet_data"]["case_actions"] = {
+                "label": _("Case actions"),
                 "type": "checkbox",
-                "options": sorted([(v.name, v.name) for v in verdicts]),
-                "values": self.request.GET.getlist("verdicts"),
+                "options": sorted([(v.name, v.name) for v in case_actions]),
+                "values": self.request.GET.getlist("case_actions"),
             }
 
     def add_attorneys_facet(self, context):
@@ -181,7 +181,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
         self.add_labels_facet(context)
         self.add_divisions_facet(context)
         self.add_outcomes_facet(context)
-        self.add_verdicts_facet(context)
+        self.add_case_action_facet(context)
         self.add_attorneys_facet(context)
         self.add_taxonomies_facet(context)
         self.add_alphabet_facet(context)

@@ -287,7 +287,7 @@
       {{ $t('Judges') }}
       {{ $t('Attorneys') }}
       {{ $t('Outcome') }}
-      {{ $t('Case verdict') }}
+      {{ $t('Case action') }}
       {{ $t('Jurisdiction') }}
       {{ $t('Locality') }}
       {{ $t('Matter type') }}
@@ -414,8 +414,8 @@ export default {
         options: []
       },
       {
-        title: this.$t('Case verdicts'),
-        name: 'verdict',
+        title: this.$t('Case action'),
+        name: 'case_action',
         type: 'checkboxes',
         value: [],
         options: []
