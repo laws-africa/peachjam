@@ -133,7 +133,7 @@ class SearchEngine:
         "division",
         "attorneys",
         "outcome",
-        "verdict",
+        "case_action",
         "labels",
     }
 
@@ -176,7 +176,7 @@ class SearchEngine:
         {"field": "division", "options": {"size": 100}},
         {"field": "attorneys", "options": {"size": 100}},
         {"field": "outcome", "options": {"size": 100}},
-        {"field": "verdict", "options": {"size": 100}},
+        {"field": "case_action", "options": {"size": 100}},
         {"field": "labels", "options": {"size": 100}},
     ]
 
