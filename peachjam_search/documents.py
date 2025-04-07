@@ -11,8 +11,10 @@ from elasticsearch_dsl.analysis import CustomAnalyzer
 from peachjam.models import (
     Attorney,
     Author,
+    CaseVerdict,
     CoreDocument,
     Court,
+    CourtDivision,
     CourtRegistry,
     DocumentNature,
     ExternalDocument,
@@ -202,7 +204,9 @@ class SearchableDocument(Document):
             # add related models
             related_models = [
                 Locality,
+                CaseVerdict,
                 Court,
+                CourtDivision,
                 CourtRegistry,
                 Outcome,
                 Author,
@@ -226,7 +230,10 @@ class SearchableDocument(Document):
         if any(isinstance(related_instance, cls) for cls in [Locality, DocumentNature]):
             return related_instance.coredocument_set.all()
 
-        if any(isinstance(related_instance, cls) for cls in [CourtRegistry, Outcome]):
+        if any(
+            isinstance(related_instance, cls)
+            for cls in [CourtRegistry, CourtDivision, CaseVerdict, Outcome]
+        ):
             return related_instance.judgments.all()
 
         if any(isinstance(related_instance, cls) for cls in [Court, Judge, Attorney]):
