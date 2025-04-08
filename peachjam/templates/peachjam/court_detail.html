@@ -36,8 +36,8 @@
 {% endblock %}
 {% block page-title %}
   {% if not entity_profile %}
-    <div class="d-flex align-items-center my-4">
-      <h1 class="flex-grow-1">{{ page_title }}</h1>
+    <div class="my-4">
+      <h1>{{ page_title }}</h1>
       {% block follow-button %}
         <div hx-get="{% url 'user_following_button' %}?{{ court|get_follow_params }}"
              hx-trigger="load"></div>
