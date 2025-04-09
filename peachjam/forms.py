@@ -449,7 +449,7 @@ class DocumentProblemForm(forms.Form):
             subject=subject,
             message=plain_txt_msg,
             from_email=None,
-            recipient_list=default_admin_emails + site_admin_emails,
+            recipient_list=site_admin_emails or default_admin_emails,
             html_message=html,
             fail_silently=False,
         )
