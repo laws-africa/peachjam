@@ -448,7 +448,7 @@ class DocumentProblemForm(forms.Form):
         send_mail(
             subject=subject,
             message=plain_txt_msg,
-            from_email=None,
+            from_email=self.cleaned_data.get("email_address"),
             recipient_list=site_admin_emails or default_admin_emails,
             html_message=html,
             fail_silently=False,
