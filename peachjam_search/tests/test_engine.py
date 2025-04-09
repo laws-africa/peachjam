@@ -59,6 +59,14 @@ class TestSearchEngine(TestCase):
                             },
                             "filter": {"terms": {"nature": ["Act"]}},
                         },
+                        "_filter_division": {
+                            "aggs": {
+                                "division": {
+                                    "terms": {"field": "division", "size": 100}
+                                }
+                            },
+                            "filter": {"terms": {"nature": ["Act"]}},
+                        },
                         "_filter_doc_type": {
                             "aggs": {
                                 "doc_type": {
@@ -120,6 +128,14 @@ class TestSearchEngine(TestCase):
                         "_filter_outcome": {
                             "aggs": {
                                 "outcome": {"terms": {"field": "outcome", "size": 100}}
+                            },
+                            "filter": {"terms": {"nature": ["Act"]}},
+                        },
+                        "_filter_case_action": {
+                            "aggs": {
+                                "case_action": {
+                                    "terms": {"field": "case_action", "size": 100}
+                                }
                             },
                             "filter": {"terms": {"nature": ["Act"]}},
                         },
@@ -393,6 +409,14 @@ class TestSearchEngine(TestCase):
                             },
                             "filter": {"terms": {"nature": ["Act"]}},
                         },
+                        "_filter_division": {
+                            "aggs": {
+                                "division": {
+                                    "terms": {"field": "division", "size": 100}
+                                }
+                            },
+                            "filter": {"terms": {"nature": ["Act"]}},
+                        },
                         "_filter_doc_type": {
                             "aggs": {
                                 "doc_type": {
@@ -454,6 +478,14 @@ class TestSearchEngine(TestCase):
                         "_filter_outcome": {
                             "aggs": {
                                 "outcome": {"terms": {"field": "outcome", "size": 100}}
+                            },
+                            "filter": {"terms": {"nature": ["Act"]}},
+                        },
+                        "_filter_case_action": {
+                            "aggs": {
+                                "case_action": {
+                                    "terms": {"field": "case_action", "size": 100}
+                                }
                             },
                             "filter": {"terms": {"nature": ["Act"]}},
                         },
