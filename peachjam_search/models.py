@@ -151,11 +151,12 @@ class SavedSearch(models.Model):
         params["search"] = self.q
 
         engine = SearchEngine()
+        engine.page_size = 20
         form = SearchForm(params)
         form.is_valid()
         form.configure_engine(engine)
         es_response = engine.execute()
-        hits = es_response.hits[:20]
+        hits = es_response.hits
 
         # get hits that were created later than the last alert
         if self.last_alerted_at:
