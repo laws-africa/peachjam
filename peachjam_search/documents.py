@@ -11,8 +11,10 @@ from elasticsearch_dsl.analysis import CustomAnalyzer
 from peachjam.models import (
     Attorney,
     Author,
+    CaseAction,
     CoreDocument,
     Court,
+    CourtDivision,
     CourtRegistry,
     DocumentNature,
     ExternalDocument,
@@ -87,11 +89,15 @@ class SearchableDocument(Document):
     registry_fr = fields.KeywordField()
     registry_pt = fields.KeywordField()
 
+    division = fields.KeywordField(attr="division.name")
+
     outcome = fields.KeywordField()
     outcome_en = fields.KeywordField()
     outcome_sw = fields.KeywordField()
     outcome_fr = fields.KeywordField()
     outcome_pt = fields.KeywordField()
+
+    case_action = fields.KeywordField(attr="case_action.name")
 
     # GenericDocument
     authors = fields.KeywordField()
@@ -198,7 +204,9 @@ class SearchableDocument(Document):
             # add related models
             related_models = [
                 Locality,
+                CaseAction,
                 Court,
+                CourtDivision,
                 CourtRegistry,
                 Outcome,
                 Author,
@@ -222,7 +230,10 @@ class SearchableDocument(Document):
         if any(isinstance(related_instance, cls) for cls in [Locality, DocumentNature]):
             return related_instance.coredocument_set.all()
 
-        if any(isinstance(related_instance, cls) for cls in [CourtRegistry, Outcome]):
+        if any(
+            isinstance(related_instance, cls)
+            for cls in [CourtRegistry, CourtDivision, CaseAction, Outcome]
+        ):
             return related_instance.judgments.all()
 
         if any(isinstance(related_instance, cls) for cls in [Court, Judge, Attorney]):
@@ -284,6 +295,14 @@ class SearchableDocument(Document):
     def prepare_registry(self, instance):
         if hasattr(instance, "registry") and instance.registry:
             return instance.registry.name
+
+    def prepare_division(self, instance):
+        if hasattr(instance, "division") and instance.division:
+            return instance.division.name
+
+    def prepare_case_action(self, instance):
+        if hasattr(instance, "case_action") and instance.case_action:
+            return instance.case_action.name
 
     def prepare_outcome(self, instance):
         if hasattr(instance, "outcomes") and instance.outcomes:

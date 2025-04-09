@@ -54,6 +54,7 @@ from peachjam.models import (
     Bench,
     Bill,
     Book,
+    CaseAction,
     CaseHistory,
     CaseNumber,
     CauseList,
@@ -1121,10 +1122,12 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
     fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "registry")
+    fieldsets[0][1]["fields"].insert(4, "division")
     fieldsets[0][1]["fields"].insert(5, "case_name")
     fieldsets[0][1]["fields"].append("mnc")
     fieldsets[0][1]["fields"].append("hearing_date")
     fieldsets[0][1]["fields"].append("outcomes")
+    fieldsets[0][1]["fields"].append("case_action")
     fieldsets[0][1]["fields"].append("serial_number")
     fieldsets[0][1]["fields"].append("serial_number_override")
     fieldsets[0][1]["fields"].append("anonymised")
@@ -1755,6 +1758,7 @@ class PartnerAdmin(admin.ModelAdmin):
 admin.site.register(
     [
         AttachedFileNature,
+        CaseAction,
         CitationLink,
         CitationProcessing,
         CourtDivision,

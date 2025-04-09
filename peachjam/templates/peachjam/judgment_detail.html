@@ -62,6 +62,22 @@
       <a href="{% url 'court_registry' document.court.code document.registry.code %}">{{ document.registry.name }}</a>
     </dd>
   {% endif %}
+  {% if document.division %}
+    <dt>
+      {% trans 'Court division' %}
+    </dt>
+    <dd class="text-muted">
+      {{ document.division }}
+    </dd>
+  {% endif %}
+  {% if document.case_action %}
+    <dt>
+      {% trans 'Case action' %}
+    </dt>
+    <dd class="text-muted">
+      {{ document.case_action }}
+    </dd>
+  {% endif %}
   {% with document.outcomes.all as outcomes %}
     {% if outcomes %}
       <dt>

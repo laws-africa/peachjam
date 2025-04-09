@@ -60,6 +60,21 @@ class Outcome(models.Model):
         return self.name
 
 
+class CaseAction(models.Model):
+    name = models.CharField(
+        _("name"), max_length=1024, null=False, blank=False, unique=True
+    )
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("case action")
+        verbose_name_plural = _("case actions")
+
+    def __str__(self):
+        return self.name
+
+
 class MatterType(models.Model):
     name = models.CharField(
         _("name"), max_length=1024, null=False, blank=False, unique=True
@@ -119,7 +134,9 @@ class CourtClass(models.Model):
 
 class CourtDivision(models.Model):
     name = models.CharField(_("name"), max_length=255, null=False, unique=True)
-    code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
+    code = models.SlugField(
+        _("code"), max_length=255, null=False, blank=True, unique=True
+    )
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
@@ -267,6 +284,22 @@ class Judgment(CoreDocument):
         null=True,
         related_name="judgments",
         blank=True,
+    )
+    division = models.ForeignKey(
+        CourtDivision,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="judgments",
+        verbose_name=_("court division"),
+    )
+    case_action = models.ForeignKey(
+        CaseAction,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="judgments",
+        verbose_name=_("case action"),
     )
     judges = models.ManyToManyField(
         Judge, blank=True, verbose_name=_("judges"), through=Bench
@@ -421,6 +454,9 @@ class Judgment(CoreDocument):
         if self.date:
             with lang_override(self.language.iso_639_1):
                 parts.append(format_date(self.date, self.CITATION_DATE_FORMAT))
+
+        if self.case_action:
+            parts.append("(" + self.case_action.name + ")")
 
         self.title = " ".join(parts)
         self.citation = self.title
