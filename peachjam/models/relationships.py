@@ -30,7 +30,11 @@ class Relationship(models.Model):
         verbose_name=_("subject work"),
     )
     subject_target_id = models.CharField(
-        _("subject target ID"), max_length=1024, null=True, blank=True
+        _("subject target ID"),
+        max_length=1024,
+        null=False,
+        blank=True,
+        default="",
     )
     subject_selectors = models.JSONField(
         verbose_name=_("subject selectors"), null=True, blank=False
@@ -44,7 +48,11 @@ class Relationship(models.Model):
         verbose_name=_("object work"),
     )
     object_target_id = models.CharField(
-        _("object target ID"), max_length=1024, null=True, blank=True
+        _("object target ID"),
+        max_length=1024,
+        null=False,
+        blank=True,
+        default="",
     )
 
     predicate = models.ForeignKey(
