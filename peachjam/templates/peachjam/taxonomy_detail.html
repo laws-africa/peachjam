@@ -3,10 +3,12 @@
 {% block title %}{{ taxonomy.name }}{% endblock %}
 {% block page-title %}
   {% if not entity_profile %}
-    <div class="d-flex align-item-center my-4">
-      <h1 class="flex-grow-1">{{ taxonomy.name }}</h1>
-      <div hx-get="{% url 'user_following_button' %}?taxonomy={{ taxonomy.pk }}"
-           hx-trigger="load"></div>
+    <div class="my-4">
+      <h1>{{ taxonomy.name }}</h1>
+      {% block follow-button %}
+        <div hx-get="{% url 'user_following_button' %}?taxonomy={{ taxonomy.pk }}"
+             hx-trigger="load"></div>
+      {% endblock %}
     </div>
   {% endif %}
 {% endblock %}

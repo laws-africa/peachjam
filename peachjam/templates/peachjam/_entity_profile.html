@@ -15,9 +15,10 @@
            loading="lazy"/>
     {% endif %}
     <div class="entity-profile__body__info">
-      <div class="d-flex">
-        <h1 class="flex-grow-1">{{ entity_profile_title|default:entity_profile.title }}</h1>
-        <div hx-get="{% url 'user_following_button' %}?{{ entity_profile.content_object|get_follow_params }}"
+      <div>
+        <h1>{{ entity_profile_title|default:entity_profile.title }}</h1>
+        <div class="my-2"
+             hx-get="{% url 'user_following_button' %}?{{ entity_profile.content_object|get_follow_params }}"
              hx-trigger="load">
         </div>
       </div>
