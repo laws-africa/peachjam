@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
+from django.core.mail.message import EmailMultiAlternatives
 from django.db.models import Q
 from django.db.models.functions.text import Substr
 from django.http import QueryDict
@@ -444,15 +445,22 @@ class DocumentProblemForm(forms.Form):
 
         default_admin_emails = [email for name, email in settings.ADMINS]
         site_admin_emails = (pj_settings().admin_emails or "").split()
-
-        send_mail(
-            subject=subject,
-            message=plain_txt_msg,
-            from_email=self.cleaned_data.get("email_address"),
-            recipient_list=site_admin_emails or default_admin_emails,
-            html_message=html,
-            fail_silently=False,
+        recipients = (site_admin_emails or default_admin_emails,)
+        reply_to = (
+            [self.cleaned_data.get("email_address")]
+            if self.cleaned_data.get("email_address")
+            else []
         )
+
+        # use this sending mechanism because we can set reply-to
+        mail = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_txt_msg,
+            to=recipients,
+            reply_to=reply_to,
+        )
+        mail.attach_alternative(html, "text/html")
+        mail.send(fail_silently=False)
 
 
 class ContactUsForm(forms.Form):
