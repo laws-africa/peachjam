@@ -14,7 +14,7 @@ import '@lawsafrica/law-widgets/dist/components/la-decorate-terms';
 // @ts-ignore
 import htmx from 'htmx.org';
 import { csrfToken } from './api';
-import analytics, { Analytics } from './components/analytics';
+import analytics, { Analytics } from './analytics';
 
 export interface PeachJamConfig {
   appName: string;

@@ -4,10 +4,12 @@
 export class Analytics {
   isGAEnabled: boolean;
   isMatomoEnabled: boolean;
+  isCustomerIOEnabled: boolean;
 
   constructor () {
     this.isGAEnabled = 'gtag' in window;
     this.isMatomoEnabled = '_paq' in window;
+    this.isCustomerIOEnabled = 'cioanalytics' in window;
   }
 
   matomo (x: any) {
@@ -24,9 +26,22 @@ export class Analytics {
     }
   }
 
+  customerio () {
+    if (this.isCustomerIOEnabled) {
+      // @ts-ignore
+      return window.cioanalytics;
+    }
+    return {
+      track: () => {},
+      page: () => {},
+      identify: () => {}
+    };
+  }
+
   trackPageView () {
     this.matomo(['trackPageView']);
     this.gtag('event', 'page_view');
+    this.customerio().page();
   }
 
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
@@ -37,6 +52,11 @@ export class Analytics {
   trackEvent (category: string, action: string, name?: string, value?: number) {
     this.matomo(['trackEvent', category, action, name, value]);
     this.gtag('event', action, { event_category: category, event_name: name, value });
+    this.customerio().track(`${category} ${action}`, {
+      event_category: category,
+      event_action: action,
+      event_name: name,
+    });
   }
 
   /**

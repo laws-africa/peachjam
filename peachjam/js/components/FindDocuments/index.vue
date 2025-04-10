@@ -306,7 +306,7 @@ import AdvancedSearch from './AdvancedSearch.vue';
 import HelpBtn from '../HelpBtn.vue';
 import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
-import analytics from '../analytics';
+import analytics from '../../analytics';
 import { authHeaders } from '../../api';
 import SearchTypeahead from '../search-typeahead';
 import htmx from 'htmx.org';

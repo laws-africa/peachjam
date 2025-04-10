@@ -151,7 +151,8 @@ PEACHJAM = {
     "PDFJS_TO_TEXT": "bin/pdfjs-to-text" if DEBUG else "pdfjs-to-text",
     "HTML_TO_PNG": "bin/html-to-png" if DEBUG else "html-to-png",
     # Customer.io
-    "CUSTOMERIO_API_KEY": os.environ.get("CUSTOMERIO_API_KEY"),
+    "CUSTOMERIO_JS_KEY": os.environ.get("CUSTOMERIO_JS_KEY"),
+    "CUSTOMERIO_PYTHON_KEY": os.environ.get("CUSTOMERIO_PYTHON_KEY"),
     "CUSTOMERIO_JOURNEYS_SITE_ID": os.environ.get("CUSTOMERIO_JOURNEYS_SITE_ID"),
 }
 
