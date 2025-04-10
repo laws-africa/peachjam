@@ -3,12 +3,10 @@ from datetime import datetime
 
 import requests
 from django.conf import settings
-from django.core.files import File
 from django.db.models.functions import Lower
 from languages_plus.models import Language
 
-from peachjam.models import CaseNumber, Court, Judge, Judgment, SourceFile, pj_settings
-from peachjam.storage import clean_filename
+from peachjam.models import CaseNumber, Court, Judge, MatterType, pj_settings
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +30,7 @@ class ExtractorService:
         data = {
             "country": jurisdiction.pk,
             "court_names": [c.name for c in Court.objects.all()],
+            "matter_types": [m.name for m in MatterType.objects.all()],
         }
         headers = self.get_headers()
         resp = requests.post(
@@ -51,92 +50,60 @@ class ExtractorService:
     def get_headers(self):
         return {"Authorization": "Token " + self.api_token}
 
-    def extract_judgment_from_file(self, jurisdiction, file, user):
-        details = self.extract_judgment_details(jurisdiction, file)
-
+    def process_judgment_details(self, details):
         if details.get("language"):
-            language = (
+            details["language"] = (
                 Language.objects.filter(iso_639_3=details["language"].lower()).first()
                 or pj_settings().default_document_language
                 or Language.objects.get(pk="en")
             )
-        else:
-            raise ExtractorError("No language detected")
 
         if details.get("court"):
             try:
-                court = Court.objects.get(name=details["court"])
+                details["court"] = Court.objects.get(name=details["court"])
             except Court.DoesNotExist:
-                raise ExtractorError(f"Could not find court: {details['court']}")
-        else:
-            raise ExtractorError("No court detected")
+                details["court"] = None
 
-        if details.get("date"):
-            try:
-                date = datetime.strptime(details["date"], "%Y-%m-%d")
-            except ValueError:
-                raise ExtractorError(f"Invalid date: {details['date']}")
-        else:
-            raise ExtractorError("No date detected")
-
-        log.info("Creating new judgment")
-        doc = Judgment()
-        doc.created_by = user
-        doc.jurisdiction = jurisdiction
-        doc.language = language
-        doc.court = court
-        doc.date = date
-        doc.case_name = details.get("case_name", "")
-
-        if details.get("hearing_date"):
-            try:
-                doc.hearing_date = datetime.strptime(
-                    details["hearing_date"], "%Y-%m-%d"
-                )
-            except ValueError:
-                pass
-
-        doc.save()
+        for field in ["date", "hearing_date"]:
+            if details.get(field):
+                try:
+                    details[field] = datetime.strptime(details[field], "%Y-%m-%d")
+                except ValueError:
+                    details[field] = None
 
         if details.get("judges"):
-            judges = Judge.objects.annotate(name_lower=Lower("name")).filter(
-                name_lower__in=[s.lower() for s in details["judges"]]
+            details["judges"] = list(
+                Judge.objects.annotate(name_lower=Lower("name")).filter(
+                    name_lower__in=[s.lower() for s in details["judges"]]
+                )
             )
-            doc.judges.set(judges)
-
-        # attach source file
-        file.seek(0)
-        SourceFile(
-            document=doc,
-            file=File(file, name=clean_filename(file.name)),
-            filename=file.name,
-            mimetype=file.content_type,
-        ).save()
-
-        if doc.extract_content_from_source_file():
-            doc.save()
-
-        if doc.extract_citations():
-            doc.save()
 
         # case numbers
-        for case_number in details.get("case_numbers") or []:
-            # TODO: matter type
-            try:
-                number = int(case_number["number"])
-            except ValueError:
-                number = None
+        if details.get("case_numbers"):
+            case_numbers = []
+            for case_number in details["case_numbers"]:
+                matter_type = None
+                if case_number.get("matter_type"):
+                    matter_type = MatterType.objects.filter(
+                        name=case_number["matter_type"]
+                    ).first()
 
-            try:
-                year = int(case_number["year"])
-            except ValueError:
-                year = None
+                try:
+                    number = int(case_number["number"])
+                except (TypeError, ValueError):
+                    number = None
 
-            CaseNumber.objects.create(
-                document=doc,
-                number=number,
-                year=year,
-                string_override=case_number["case_number_string"],
-            )
+                try:
+                    year = int(case_number["year"])
+                except (TypeError, ValueError):
+                    year = None
 
-        return doc
+                case_numbers.append(
+                    CaseNumber(
+                        matter_type=matter_type,
+                        number=number,
+                        year=year,
+                        string_override=case_number["case_number_string"],
+                    )
+                )
+            details["case_numbers"] = case_numbers

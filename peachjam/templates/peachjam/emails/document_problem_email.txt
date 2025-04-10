@@ -1,9 +1,11 @@
 Hello,
 
-We have received a report regarding the following document: {{ document_link }}
+{% if email_address %}
+The user {{ email_address }} reported a problem with a document.
+{% else %}
+A user reported a problem with a document.
+{% endif %}
 
-Problem category: {{ problem_category }}
-The reported problem is described as follows:
-{{ problem_description }}
-
-This was reported by: {{ email_address }}
+* Document: {{ document_link }}
+* Problem category: {{ problem_category }}
+* Problem description: {{ problem_description }}

@@ -9,15 +9,14 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin.utils import quote
+from django.contrib.admin.utils import flatten_fieldsets, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.db import transaction
-from django.http.response import FileResponse, HttpResponseRedirect
+from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
@@ -39,7 +38,6 @@ from treebeard.forms import MoveNodeForm, movenodeform_factory
 from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
-    JudgmentUploadForm,
     NewDocumentFormMixin,
     PublicationFileForm,
     RatificationForm,
@@ -56,6 +54,7 @@ from peachjam.models import (
     Bench,
     Bill,
     Book,
+    CaseAction,
     CaseHistory,
     CaseNumber,
     CauseList,
@@ -440,6 +439,13 @@ class DocumentForm(forms.ModelForm):
         super()._save_m2m()
         self.create_topics(self.instance)
 
+    @property
+    def extractor_url(self):
+        """URL to use if this document type supports the extractor service."""
+        extractor = ExtractorService()
+        if extractor.enabled() and isinstance(self.instance, Judgment):
+            return reverse("admin:peachjam_extract_judgment")
+
 
 class AttachedFilesInline(BaseAttachmentFileInline):
     model = AttachedFiles
@@ -479,37 +485,37 @@ class CustomPropertyInline(admin.TabularInline):
     model = CustomProperty
 
 
-class DocumentAccessForm(forms.Form):
+class AccessGroupForm(forms.Form):
     groups = forms.ModelMultipleChoiceField(
         queryset=DocumentAccessGroup.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False,
     )
 
-    def __init__(self, *args, doc=None, **kwargs):
+    def __init__(self, *args, obj=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.doc = doc
+        self.obj = obj
         groups = DocumentAccessGroup.objects.filter(
-            group__in=get_groups_with_perms(doc)
+            group__in=get_groups_with_perms(obj)
         )
         self.fields["groups"].initial = groups
 
-    def set_doc_access_groups(self):
+    def set_access_groups(self):
         add_groups = self.cleaned_data["groups"]
         remove_groups = DocumentAccessGroup.objects.exclude(pk__in=add_groups)
-        content_type = ContentType.objects.get_for_model(self.doc)
+        content_type = ContentType.objects.get_for_model(self.obj)
         view_perm = Permission.objects.get(
             content_type=content_type, codename=f"view_{content_type.model}"
         )
 
         for group in add_groups:
-            assign_perm(view_perm, group.group, self.doc)
+            assign_perm(view_perm, group.group, self.obj)
 
         for group in remove_groups:
-            remove_perm(view_perm, group.group, self.doc)
+            remove_perm(view_perm, group.group, self.obj)
 
 
-class DocumentAccessMixin(GuardedModelAdminMixin):
+class AccessGroupMixin(GuardedModelAdminMixin):
     change_form_template = None
 
     def obj_perms_manage_view(self, request, object_pk):
@@ -520,22 +526,37 @@ class DocumentAccessMixin(GuardedModelAdminMixin):
         context = self.get_obj_perms_base_context(request, obj)
         context.update(
             {
-                "doc_access_form": DocumentAccessForm(doc=obj),
+                "access_group_form": AccessGroupForm(obj=obj),
             }
         )
 
-        if request.method == "POST" and "set_doc_access" in request.POST:
-            form = DocumentAccessForm(request.POST, doc=obj)
+        if request.method == "POST" and "set_access_group" in request.POST:
+            form = AccessGroupForm(request.POST, obj=obj)
             if form.is_valid():
-                form.set_doc_access_groups()
-                messages.success(request, _("Document access groups updated."))
+                form.set_access_groups()
+                messages.success(request, _("Access groups updated."))
                 return HttpResponseRedirect(".")
-            context["doc_access_form"] = form
+            context["access_group_form"] = form
 
         return render(request, template_name, context)
 
+    def document_access_link(self, obj):
+        if obj and obj.id:
+            url = reverse(
+                f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
+                args=[quote(obj.pk)],
+            )
+            return format_html(
+                '<a href="{}">{}</a>',
+                url,
+                _("Manage restricted access groups"),
+            )
+        return "-"
 
-class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
+    document_access_link.short_description = gettext_lazy("Restricted access groups")
+
+
+class DocumentAdmin(AccessGroupMixin, BaseAdmin):
     form = DocumentForm
     inlines = [
         SourceFileInline,
@@ -674,21 +695,6 @@ class DocumentAdmin(DocumentAccessMixin, BaseAdmin):
             fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
 
         return fieldsets
-
-    def document_access_link(self, obj):
-        if obj and obj.id:
-            url = reverse(
-                f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
-                args=[quote(obj.pk)],
-            )
-            return format_html(
-                '<a href="{}">{}</a>',
-                url,
-                _("Select restricted document access groups"),
-            )
-        return "-"
-
-    document_access_link.short_description = gettext_lazy("Restricted document access")
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
@@ -918,9 +924,9 @@ class TaxonomyForm(MoveNodeForm):
 
 
 @admin.register(Taxonomy)
-class TaxonomyAdmin(TreeAdmin):
+class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
     form = movenodeform_factory(Taxonomy, TaxonomyForm)
-    readonly_fields = ("slug", "path_name")
+    readonly_fields = ("slug", "path_name", "document_access_link")
     inlines = [EntityProfileInline]
     # prevent pagination
     list_per_page = 1_000_000
@@ -1116,10 +1122,12 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
     fieldsets[0][1]["fields"].insert(3, "court")
     fieldsets[0][1]["fields"].insert(4, "registry")
+    fieldsets[0][1]["fields"].insert(4, "division")
     fieldsets[0][1]["fields"].insert(5, "case_name")
     fieldsets[0][1]["fields"].append("mnc")
     fieldsets[0][1]["fields"].append("hearing_date")
     fieldsets[0][1]["fields"].append("outcomes")
+    fieldsets[0][1]["fields"].append("case_action")
     fieldsets[0][1]["fields"].append("serial_number")
     fieldsets[0][1]["fields"].append("serial_number_override")
     fieldsets[0][1]["fields"].append("anonymised")
@@ -1156,12 +1164,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     class Media:
         js = ("js/judgment_duplicates.js",)
 
-    def changelist_view(self, request, extra_context=None):
-        extra_context = extra_context or {}
-        extra_context["can_upload_document"] = ExtractorService().enabled()
-        extra_context["upload_url"] = reverse("admin:peachjam_judgment_upload")
-        return super().changelist_view(request, extra_context)
-
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
 
@@ -1184,59 +1186,106 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         urls = super().get_urls()
         custom_urls = [
             path(
-                "upload/",
-                self.admin_site.admin_view(self.upload_view),
-                name="peachjam_judgment_upload",
+                "extract/",
+                self.admin_site.admin_view(self.extract_view),
+                name="peachjam_extract_judgment",
             ),
         ]
         return custom_urls + urls
 
-    def upload_view(self, request):
+    def extract_view(self, request):
+        """Special view that is submitted via AJAX which extracts judgment data from a file, and re-renders
+        various form elements which are then injected back into the page.
+        """
         extractor = ExtractorService()
-        if not extractor.enabled():
-            messages.error(
-                request,
-                _(
-                    "The Laws.Africa extractor is not enabled. Please check your settings."
-                ),
-            )
-            return redirect("admin:peachjam_judgment_changelist")
+        file = request.FILES.get("file")
+        if not extractor.enabled() or request.method != "POST" or not file:
+            return HttpResponse()
 
-        form = JudgmentUploadForm(
-            initial={"jurisdiction": pj_settings().default_document_jurisdiction}
+        error = None
+        details = {}
+        try:
+            if settings.DEBUG:
+                # for testing
+                details = {
+                    "language": "afr",
+                    "court": "Continental Court",
+                    "date": "2025-02-03",
+                    "judges": ["Anukam J", "Eno R", "Plasket JA", "Maya P"],
+                    "case_numbers": [
+                        {
+                            "matter_type": "Criminal Case",
+                            "case_number_string": "123/2025",
+                            "number": None,
+                            "year": 2025,
+                        },
+                    ],
+                }
+            else:
+                details = extractor.extract_judgment_details(
+                    pj_settings().default_document_jurisdiction, file
+                )
+        except ExtractorError as e:
+            error = e
+
+        # turn references into Django objects
+        extractor.process_judgment_details(details)
+
+        # prepare form data
+        inlines = []
+        formsets = []
+
+        if details.get("judges"):
+            judges = [{"judge": j} for j in details["judges"]]
+            # make it pretty for the template
+            details["judges"] = "; ".join(str(j) for j in details["judges"])
+
+            # prepare the formset
+            inline = BenchInline(Judgment, self.admin_site)
+            inline.extra = len(judges) + inline.extra
+            inlines.append(inline)
+            formsets.append(inline.get_formset(request)(initial=judges))
+
+        if details.get("case_numbers"):
+            case_numbers = [
+                {
+                    "matter_type": cn.matter_type,
+                    "number": cn.number,
+                    "year": cn.year,
+                    "string_override": cn.string_override,
+                }
+                for cn in details["case_numbers"]
+            ]
+            # make it pretty for the template
+            details["case_numbers"] = "; ".join(
+                cn.get_case_number_string() for cn in details["case_numbers"]
+            )
+
+            # prepare the formset
+            inline = CaseNumberAdmin(Judgment, self.admin_site)
+            inline.extra = len(case_numbers) + inline.extra
+            inlines.append(inline)
+            formsets.append(inline.get_formset(request)(initial=case_numbers))
+
+        judgment = Judgment()
+        for field in ["language", "court", "case_name", "date", "hearing_date"]:
+            setattr(judgment, field, details.get(field))
+
+        formsets = self.get_inline_formsets(request, formsets, inlines)
+        fieldsets = self.get_fieldsets(request, None)
+        ModelForm = self.get_form(
+            request, None, change=False, fields=flatten_fieldsets(fieldsets)
         )
-
-        # Custom logic for the upload view
-        if request.method == "POST":
-            form = JudgmentUploadForm(
-                request.POST,
-                request.FILES,
-            )
-            if form.is_valid():
-                try:
-                    with transaction.atomic():
-                        fname = form.cleaned_data["file"].name
-                        doc = extractor.extract_judgment_from_file(
-                            jurisdiction=form.cleaned_data["jurisdiction"],
-                            file=form.cleaned_data["file"],
-                            user=request.user,
-                        )
-                        self.log_addition(request, doc, _("Uploaded") + f": {fname}")
-                    messages.success(
-                        request, _("Judgment uploaded. Please check details carefully.")
-                    )
-                    url = (
-                        reverse("admin:peachjam_judgment_change", args=[doc.pk])
-                        + "?stage=after-extraction"
-                    )
-                    return redirect(url)
-                except ExtractorError as e:
-                    form.add_error(None, str(e))
+        form = ModelForm(instance=judgment)
 
         context = {
             "form": form,
+            "formsets": formsets,
+            "error": error,
+            "details": details,
         }
-        return render(request, "admin/judgment_upload_form.html", context)
+
+        return render(request, "admin/peachjam/judgment/_extracted_form.html", context)
 
 
 @admin.register(CauseList)
@@ -1709,6 +1758,7 @@ class PartnerAdmin(admin.ModelAdmin):
 admin.site.register(
     [
         AttachedFileNature,
+        CaseAction,
         CitationLink,
         CitationProcessing,
         CourtDivision,

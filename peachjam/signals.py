@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.contrib.auth.signals import user_logged_in
 from django.db.models import signals
 from django.dispatch import receiver
 from django_comments.models import Comment
@@ -75,3 +76,8 @@ def before_comment_posted(sender, comment, request, **kwargs):
     # prevent unauthorized comments
     if not comment.user or not comment.user.is_staff:
         return False
+
+
+@receiver(user_logged_in)
+def set_user_language(sender, request, user, **kwargs):
+    setattr(request, "set_language", user.userprofile.preferred_language.iso_639_1)

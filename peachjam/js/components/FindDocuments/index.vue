@@ -283,9 +283,11 @@
       {{ $t('Author') }}
       {{ $t('Court') }}
       {{ $t('Court registry') }}
+      {{ $t('Court division') }}
       {{ $t('Judges') }}
       {{ $t('Attorneys') }}
       {{ $t('Outcome') }}
+      {{ $t('Case action') }}
       {{ $t('Jurisdiction') }}
       {{ $t('Locality') }}
       {{ $t('Matter type') }}
@@ -391,6 +393,13 @@ export default {
         options: []
       },
       {
+        title: this.$t('Court division'),
+        name: 'division',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
         title: this.$t('Locality'),
         name: 'locality',
         type: 'checkboxes',
@@ -400,6 +409,13 @@ export default {
       {
         title: this.$t('Outcome'),
         name: 'outcome',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Case action'),
+        name: 'case_action',
         type: 'checkboxes',
         value: [],
         options: []
@@ -923,10 +939,14 @@ export default {
 
         if (newId && previousId !== newId && !this.linkedTraces.has(newId)) {
           this.linkedTraces.add(newId);
-          fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {
-            method: 'POST',
-            headers: await authHeaders()
-          });
+          try {
+            fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {
+              method: 'POST',
+              headers: await authHeaders()
+            });
+          } catch {
+            // ignore network errors
+          }
         }
       }
     },

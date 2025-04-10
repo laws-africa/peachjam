@@ -55,6 +55,7 @@ from peachjam.views import (
     CauseListCourtRegistryYearView,
     CauseListCourtYearView,
     CauseListListView,
+    CheckDuplicateFilesView,
     ComparePortionsView,
     CourtClassDetailView,
     CourtClassMonthView,
@@ -122,6 +123,7 @@ from peachjam.views.document_access_group import (
     DocumentAccessGroupListView,
 )
 from peachjam.views.generic_views import CSRFTokenView
+from peachjam.views.language import set_preferred_language
 from peachjam.views.metabase_stats import MetabaseStatsView
 
 register_converter(ISODateConverter, "isodate")
@@ -387,6 +389,7 @@ urlpatterns = [
                     "anon/<int:pk>/suggestions",
                     DocumentAnonymiseSuggestionsAPIView.as_view(),
                 ),
+                path("check-duplicate-file", CheckDuplicateFilesView.as_view()),
                 path("", admin.site.urls),
             ]
         ),
@@ -409,6 +412,11 @@ urlpatterns = [
     ),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
+    path(
+        "i18n/set_preferred_language/",
+        set_preferred_language,
+        name="set_preferred_language",
+    ),
     path(
         "articles/",
         include(

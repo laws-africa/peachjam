@@ -1,6 +1,6 @@
 import logging
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 from math import exp
 from urllib.parse import urlencode
 
@@ -102,7 +102,7 @@ class SavedSearch(models.Model):
         User, on_delete=models.CASCADE, related_name="saved_searches"
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    last_alerted_at = models.DateTimeField(null=True, blank=True)
+    last_alerted_at = models.DateTimeField(null=True, blank=True, auto_now_add=True)
 
     def __str__(self):
         return self.q
@@ -149,15 +149,24 @@ class SavedSearch(models.Model):
             else:
                 params[key] = values
         params["search"] = self.q
-        params["created_at__gte"] = self.last_alerted_at.isoformat()
 
         engine = SearchEngine()
+        engine.page_size = 20
         form = SearchForm(params)
         form.is_valid()
         form.configure_engine(engine)
         es_response = engine.execute()
+        hits = es_response.hits
 
-        return SearchableDocumentSerializer(es_response.hits, many=True).data
+        # get hits that were created later than the last alert
+        if self.last_alerted_at:
+            hits = [
+                hit
+                for hit in hits
+                if datetime.fromisoformat(hit.created_at) > self.last_alerted_at
+            ]
+
+        return SearchableDocumentSerializer(hits, many=True).data
 
     def send_alert(self, hits):
         hits = hits[:10]

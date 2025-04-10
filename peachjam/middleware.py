@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.middleware.cache import UpdateCacheMiddleware
 from django.shortcuts import redirect
 from django.utils.cache import get_max_age, patch_vary_headers
@@ -46,6 +47,22 @@ class ForceDefaultLanguageMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if "HTTP_ACCEPT_LANGUAGE" in request.META:
             del request.META["HTTP_ACCEPT_LANGUAGE"]
+
+
+class SetPreferredLanguageMiddleware(MiddlewareMixin):
+    def process_response(self, request, response):
+        if hasattr(request, "set_language"):
+            response.set_cookie(
+                settings.LANGUAGE_COOKIE_NAME,
+                request.set_language,
+                max_age=settings.LANGUAGE_COOKIE_AGE,
+                path=settings.LANGUAGE_COOKIE_PATH,
+                domain=settings.LANGUAGE_COOKIE_DOMAIN,
+                secure=settings.LANGUAGE_COOKIE_SECURE,
+                httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+                samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+            )
+        return response
 
 
 class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):

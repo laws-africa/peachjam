@@ -15,22 +15,21 @@ RUN apt-get install -y nodejs
 # install sass for compiling assets before deploying
 RUN npm i -g sass
 
-# install puppeteer and chrome for generating images
-RUN npm i -g puppeteer
+# install runtime node dependencies
+# copying this in first means Docker can cache this operation
+COPY package*.json /app/
+WORKDIR /app
+RUN npm ci --no-audit --ignore-scripts --omit=dev
+
+# install chrome for generating images
 RUN npx puppeteer browsers install chrome
 
-# install dependencies
+# install python dependencies
 # copying this in first means Docker can cache this operation
 COPY pyproject.toml /app/
 # this dir is needed by pip when processing pyproject.toml
 COPY bin /app/bin
-WORKDIR /app
 RUN pip install .
-
-# install runtime node dependencies
-# copying this in first means Docker can cache this operation
-COPY package*.json /app/
-RUN npm ci --no-audit --ignore-scripts --only=prod
 
 ENV NODE_PATH=/app/node_modules/
 

@@ -581,8 +581,9 @@ class JudgmentResource(BaseDocumentResource):
         if row.get("matter_type"):
             matter_type = row["matter_type"].split("|")
             matter_types = [
-                MatterType.objects.get_or_create(name=m)[0] if m else None
+                MatterType.objects.get_or_create(name=m)[0]
                 for m in matter_type
+                if m.strip()
             ]
 
             keys.append("matter_type")

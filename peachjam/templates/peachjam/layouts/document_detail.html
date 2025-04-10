@@ -37,21 +37,25 @@
             <div class="d-flex align-items-center">
               <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
                  class="btn btn-link share-link"
+                 data-track-event="Document | Social share | WhatsApp"
                  target="_blank">
                 <i class="bi bi-whatsapp whatsapp-forecolor share-icon"></i>
               </a>
               <a href="https://twitter.com/intent/tweet?text={{ request.build_absolute_uri }}"
                  class="btn btn-link share-link"
+                 data-track-event="Document | Social share | X"
                  target="_blank">
                 <i class="bi bi-twitter-x twitter-x-forecolor share-icon"></i>
               </a>
               <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
                  class="btn btn-link share-link"
+                 data-track-event="Document | Social share | Facebook"
                  target="_blank">
                 <i class="bi bi-facebook facebook-forecolor share-icon"></i>
               </a>
               <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}"
                  class="btn btn-link share-link"
+                 data-track-event="Document | Social share | LinkedIn"
                  target="_blank">
                 <i class="bi bi-linkedin linkedin-forecolor share-icon"></i>
               </a>
@@ -59,6 +63,7 @@
                  href="mailto:?subject={% trans 'Take a look at this document from' %} {{ APP_NAME }}: {{ document.title|truncatewords:7|escape }}&body={{ request.build_absolute_uri }}"
                  class="btn btn-link share-link"
                  target="_blank"
+                 data-track-event="Document | Social share | Email"
                  data-subject="{% trans 'Take a look at this document from' %} {{ APP_NAME }}: {{ document.title|truncatewords:7|escape }}">
                 <i class="bi bi-envelope-at-fill envelope-at-fill-forecolor share-icon"></i>
               </a>
@@ -74,6 +79,7 @@
               <button class="nav-link active"
                       data-bs-toggle="tab"
                       data-bs-target="#document-detail-tab"
+                      data-track-event="Document | Tab | Document detail"
                       type="button"
                       role="tab"
                       aria-controls="document-detail-tab"
@@ -87,6 +93,7 @@
                 <button class="nav-link"
                         data-bs-toggle="tab"
                         data-bs-target="#history-tab"
+                        data-track-event="Document | Tab | History"
                         type="button"
                         role="tab"
                         aria-controls="history-tab"
@@ -101,6 +108,7 @@
                 <button class="nav-link"
                         data-bs-toggle="tab"
                         data-bs-target="#related-tab"
+                        data-track-event="Document | Tab | Related documents"
                         type="button"
                         role="tab"
                         aria-controls="related-tab"
@@ -116,6 +124,7 @@
                 <button class="nav-link"
                         data-bs-toggle="tab"
                         data-bs-target="#citations-tab"
+                        data-track-event="Document | Tab | Citations"
                         type="button"
                         role="tab"
                         aria-controls="citations-tab"
@@ -131,6 +140,7 @@
                 <button class="nav-link"
                         data-bs-toggle="tab"
                         data-bs-target="#case-history-tab"
+                        data-track-event="Document | Tab | Case history"
                         type="button"
                         role="tab"
                         aria-controls="case-history-tab"
@@ -145,6 +155,7 @@
                 <button class="nav-link"
                         data-bs-toggle="tab"
                         data-bs-target="#ratifications-tab"
+                        data-track-event="Document | Tab | Ratifications"
                         type="button"
                         role="tab"
                         aria-controls="ratifications-tab"

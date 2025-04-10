@@ -2,7 +2,6 @@ import copy
 import logging
 
 from allauth.account.forms import LoginForm, SignupForm
-from countries_plus.models import Country
 from dal import autocomplete
 from django import forms
 from django.conf import settings
@@ -10,20 +9,22 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
+from django.core.mail.message import EmailMultiAlternatives
 from django.db.models import Q
 from django.db.models.functions.text import Substr
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
+from django.utils.translation.trans_real import get_languages
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
+from languages_plus.models import Language
 
 from peachjam.models import (
     Annotation,
     AttachedFiles,
     CoreDocument,
     Folder,
-    PeachJamSettings,
     PublicationFile,
     Ratification,
     SavedDocument,
@@ -93,7 +94,7 @@ class NewDocumentFormMixin:
     def adjust_fieldsets(cls, fieldsets):
         # add the upload_file to the first set of fields to include on the page
         fieldsets = copy.deepcopy(fieldsets)
-        fieldsets[0][1]["fields"].append("upload_file")
+        fieldsets[0][1]["fields"].insert(0, "upload_file")
         return fieldsets
 
     @classmethod
@@ -142,6 +143,7 @@ class BaseDocumentFilterForm(forms.Form):
     divisions = PermissiveTypedListField(coerce=remove_nulls, required=False)
     attorneys = PermissiveTypedListField(coerce=remove_nulls, required=False)
     outcomes = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    case_actions = PermissiveTypedListField(coerce=remove_nulls, required=False)
     taxonomies = PermissiveTypedListField(coerce=remove_nulls, required=False)
     labels = PermissiveTypedListField(coerce=remove_nulls, required=False)
     q = forms.CharField(required=False)
@@ -170,6 +172,7 @@ class BaseDocumentFilterForm(forms.Form):
         "divisions",
         "attorneys",
         "outcomes",
+        "case_actions",
         "labels",
         "taxonomies",
     ]
@@ -265,6 +268,14 @@ class BaseDocumentFilterForm(forms.Form):
         return (
             queryset.filter(outcomes__name__in=outcomes).distinct()
             if outcomes
+            else queryset
+        )
+
+    def apply_filter_case_actions(self, queryset):
+        actions = self.cleaned_data.get("case_actions", [])
+        return (
+            queryset.filter(case_action__name__in=actions).distinct()
+            if actions
             else queryset
         )
 
@@ -434,15 +445,22 @@ class DocumentProblemForm(forms.Form):
 
         default_admin_emails = [email for name, email in settings.ADMINS]
         site_admin_emails = (pj_settings().admin_emails or "").split()
-
-        send_mail(
-            subject=subject,
-            message=plain_txt_msg,
-            from_email=None,
-            recipient_list=default_admin_emails + site_admin_emails,
-            html_message=html,
-            fail_silently=False,
+        recipients = site_admin_emails or default_admin_emails
+        reply_to = (
+            [self.cleaned_data.get("email_address")]
+            if self.cleaned_data.get("email_address")
+            else []
         )
+
+        # use this sending mechanism because we can set reply-to
+        mail = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_txt_msg,
+            to=recipients,
+            reply_to=reply_to,
+        )
+        mail.attach_alternative(html, "text/html")
+        mail.send(fail_silently=False)
 
 
 class ContactUsForm(forms.Form):
@@ -513,27 +531,40 @@ class SaveDocumentForm(forms.ModelForm):
 
 class PeachjamSignupForm(SignupForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+    first_name = forms.CharField(max_length=150, label=_("First name"), required=False)
+    last_name = forms.CharField(max_length=150, label=_("Last name"), required=False)
 
 
 class PeachjamLoginForm(LoginForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
 
 
-class UserForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ["first_name", "last_name"]
-
-
-class JudgmentUploadForm(forms.Form):
-    jurisdiction = forms.ModelChoiceField(Country.objects)
-    file = forms.FileField()
+class UserProfileForm(forms.Form):
+    first_name = forms.CharField(max_length=255, required=False)
+    last_name = forms.CharField(max_length=255, required=False)
+    preferred_language = forms.ModelChoiceField(
+        queryset=Language.objects.filter(iso_639_1__in=get_languages())
+    )
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        kwargs["initial"] = {
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "preferred_language": self.user.userprofile.preferred_language,
+        }
         super().__init__(*args, **kwargs)
-        self.fields[
-            "jurisdiction"
-        ].queryset = PeachJamSettings.load().document_jurisdictions.all()
+
+    def save(self):
+        self.user.first_name = self.cleaned_data["first_name"]
+        self.user.last_name = self.cleaned_data["last_name"]
+        self.user.userprofile.preferred_language = self.cleaned_data[
+            "preferred_language"
+        ]
+        self.user.userprofile.save()
+        self.user.save()
+        self.user.refresh_from_db()
+        return self.user
 
 
 class RatificationForm(forms.ModelForm):
