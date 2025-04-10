@@ -509,7 +509,7 @@ class SaveDocumentForm(forms.ModelForm):
 
     class Meta:
         model = SavedDocument
-        fields = ["document", "folder", "new_folder"]
+        fields = ["document", "folder", "new_folder", "note"]
         widgets = {"document": forms.HiddenInput()}
 
     def __init__(self, *args, **kwargs):

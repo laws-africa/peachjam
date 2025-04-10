@@ -105,6 +105,7 @@ from peachjam.views import (
     SavedDocumentButtonView,
     SavedDocumentCreateView,
     SavedDocumentDeleteView,
+    SavedDocumentDetailView,
     SavedDocumentUpdateView,
     TaxonomyDetailView,
     TaxonomyFirstLevelView,
@@ -502,6 +503,11 @@ urlpatterns = [
                 path(
                     "buttons/",
                     SavedDocumentButtonBulkView.as_view(),
+                ),
+                path(
+                    "<int:pk>/",
+                    SavedDocumentDetailView.as_view(),
+                    name="saved_document_detail",
                 ),
                 path(
                     "create",

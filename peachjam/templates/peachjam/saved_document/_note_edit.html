@@ -1,0 +1,17 @@
+{% load i18n %}
+<form class="mt-2 w-100"
+      hx-swap="outerHTML"
+      hx-target="#saved-doc-{{ saved_document.pk }}"
+      hx-post="{% url 'saved_document_update' saved_document.pk %}"
+      hx-vals='{"edit": "note"}'>
+  <input hidden
+         name="{{ form.document.name }}"
+         value="{{ form.document.value }}"/>
+  <input hidden name="{{ form.folder.name }}" value="{{ form.folder.value }}" />
+  <textarea style="field-sizing:content"
+            class="form-control w-100"
+            name="{{ form.note.name }}">{{ form.note.value }}</textarea>
+  <div class="text-end my-2">
+    <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+  </div>
+</form>
