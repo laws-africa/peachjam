@@ -445,7 +445,7 @@ class DocumentProblemForm(forms.Form):
 
         default_admin_emails = [email for name, email in settings.ADMINS]
         site_admin_emails = (pj_settings().admin_emails or "").split()
-        recipients = (site_admin_emails or default_admin_emails,)
+        recipients = site_admin_emails or default_admin_emails
         reply_to = (
             [self.cleaned_data.get("email_address")]
             if self.cleaned_data.get("email_address")
