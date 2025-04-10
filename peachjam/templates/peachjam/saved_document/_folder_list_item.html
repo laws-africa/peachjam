@@ -1,24 +1,29 @@
 {% load i18n %}
-<div id="saved-doc-{{ saved_doc.pk }}" class="border-bottom">
+<div id="saved-doc-{{ saved_document.pk }}" class="border-bottom">
   <div class="row pt-2">
     <div class="col-md-6">
-      <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
-      {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
-      {% if saved_doc.note %}
+      <a href="{{ saved_document.document.get_absolute_url }}">{{ saved_document.document.title }}</a>
+      {% include 'peachjam/_document_labels.html' with labels=saved_document.document.labels.all %}
+      {% if saved_document.note %}
         <br/>
-        <div>
-          <i class="bi bi-sticky"></i>
-          <span class="text-muted">{{ saved_doc.note }}</span>
+        <div id="saved-doc-note-{{ saved_document.pk }}" class="d-flex">
+          <button class="btn btn-link"
+                  hx-get="{% url 'saved_document_update' saved_document.pk %}"
+                  hx-vals='{"edit": "note"}'
+                  hx-target="#saved-doc-note-{{ saved_document.pk }}">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <span class="text-muted pt-2">{{ saved_document.note }}</span>
         </div>
       {% endif %}
     </div>
     <div class="col-md-3">
-      {% if saved_doc.annotation_count %}
+      {% if saved_document.annotation_count %}
         <i class="text-primary bi bi-chat-left-text"></i>
         <a href="#"
-           hx-target="#document-annotations-{{ saved_doc.document.pk }}"
-           hx-get="{% url 'annotation_list' saved_doc.document.pk %}">
-          {% blocktrans trimmed count comment_count=saved_doc.annotation_count %}
+           hx-target="#document-annotations-{{ saved_document.document.pk }}"
+           hx-get="{% url 'annotation_list' saved_document.document.pk %}">
+          {% blocktrans trimmed count comment_count=saved_document.annotation_count %}
             {{ comment_count }} comment
           {% plural %}
             {{ comment_count }} comments
@@ -28,24 +33,10 @@
     </div>
     <div class="col-md-3">
       <div class="text-end text-nowrap">
-        {{ saved_doc.document.date }}
-        <a class="ms-3"
-           type="button"
-           data-bs-toggle="modal"
-           data-bs-target="#saveDocumentModal-{{ saved_doc.document.id }}">
-          <i class="bi bi-pencil"
-             hx-get="{% url 'saved_document_update' saved_doc.id %}"></i>
-        </a>
-        <div id="saveDocumentModal-{{ saved_doc.document.id }}"
-             class="modal fade"
-             tabindex="-1"
-             aria-hidden="true">
-          <div id="saveDocumentModalDialog-{{ saved_doc.document.id }}"
-               class="modal-dialog"></div>
-        </div>
+        {{ saved_document.document.date }}
         <button class="btn btn-link"
                 type="button"
-                hx-post="{% url 'saved_document_delete' saved_doc.id %}?next={% url 'folder_list' %}"
+                hx-post="{% url 'saved_document_delete' saved_document.id %}?next={% url 'folder_list' %}"
                 hx-target="#folders-list"
                 hx-confirm="{% trans "Are you sure you want to remove this document?" %}">
           <i class="bi bi-trash"></i>
@@ -54,6 +45,7 @@
     </div>
   </div>
   <div class="row">
-    <div id="document-annotations-{{ saved_doc.document.pk }}" class="col"></div>
+    <div id="document-annotations-{{ saved_document.document.pk }}"
+         class="col"></div>
   </div>
 </div>

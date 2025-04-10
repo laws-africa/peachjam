@@ -45,7 +45,7 @@ class SavedDocument(models.Model):
         blank=True,
         related_name="saved_documents",
     )
-    note = models.TextField(null=True, blank=True)
+    note = models.TextField(_("note"), null=True, blank=True, max_length=2048)
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
