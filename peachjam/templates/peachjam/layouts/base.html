@@ -56,7 +56,9 @@
     {% block head-css %}{% endblock %}
     {% block head-js %}{% endblock %}
   </head>
-  <body class="{% block body-class %}{% endblock %}">
+  <body class="{% block body-class %}{% endblock %}"
+        {% block body-tags %}
+        {% endblock %}>
     {% block header %}{% endblock %}
     {% block body-content %}{% endblock %}
     {% block footer %}{% endblock %}

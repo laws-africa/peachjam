@@ -112,6 +112,12 @@ export class CustomerIO implements AnalyticsProvider {
 
   trackPageLoad () {
     this.trackPageView();
+    // also track a custom event for page load, if specified
+    const name = document.body.dataset.trackPageLoad;
+    if (name) {
+      // @ts-ignore
+      window.cioanalytics.track(name, this.pageProperties);
+    }
   }
 
   trackPageView () {

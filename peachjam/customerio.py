@@ -18,6 +18,21 @@ class CustomerIO:
             "language": user.userprofile.preferred_language.iso,
         }
 
+    def track_user_logged_in(self, user):
+        if self.enabled():
+            self.update_user_details(user)
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "User logged in",
+            )
+
+    def track_user_logged_out(self, user):
+        if self.enabled():
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "User logged out",
+            )
+
     def update_user_details(self, user):
         """Push user details to customerio"""
         if self.enabled():

@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.contrib.auth.signals import user_logged_in
+from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.db.models import signals
 from django.dispatch import receiver
 from django_comments.models import Comment
@@ -102,4 +102,9 @@ def userprofile_saved_updated_customerio(sender, instance, **kwargs):
 
 @receiver(user_logged_in)
 def user_logged_in_update_customerio(sender, request, user, **kwargs):
-    get_customerio().update_user_details(user)
+    get_customerio().track_user_logged_in(user)
+
+
+@receiver(user_logged_out)
+def user_logged_out_update_customerio(sender, request, user, **kwargs):
+    get_customerio().track_user_logged_out(user)
