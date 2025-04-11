@@ -49,3 +49,11 @@ class GetAccountView(View):
             response = JsonResponse(user_details)
             return response
         return HttpResponse(status=404)
+
+
+class LoggedOutView(TemplateView):
+    """When the user has logged out, they see this page with a Continue button. This gives us
+    a chance to clear client-side state and cookies."""
+
+    template_name = "account/logged_out.html"
+    extra_context = {"reset_analytics": True}
