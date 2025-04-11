@@ -20,6 +20,31 @@ class Adapter:
                 "verb": "is repealed by",
                 "reverse_verb": "repeals",
             },
+            "revoked-by": {
+                "name": "revoked by",
+                "verb": "is revoked by",
+                "reverse_verb": "revokes",
+            },
+            "withdrawn-by": {
+                "name": "withdrawn by",
+                "verb": "is withdrawn by",
+                "reverse_verb": "withdraws",
+            },
+            "lapsed-by": {
+                "name": "lapsed by",
+                "verb": "is lapsed by",
+                "reverse_verb": "lapses",
+            },
+            "retired-by": {
+                "name": "retired by",
+                "verb": "is retired by",
+                "reverse_verb": "retires",
+            },
+            "expired-by": {
+                "name": "expired by",
+                "verb": "is expired by",
+                "reverse_verb": "expires",
+            },
             "commenced-by": {
                 "name": "commenced by",
                 "verb": "is commenced by",

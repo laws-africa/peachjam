@@ -100,18 +100,28 @@ class LegislationDetailView(BaseDocumentDetailView):
         if self.object.repealed and repeal:
             args = {"friendly_type": friendly_type}
             args.update(repeal)
-            notices.append(
-                {
-                    "type": messages.ERROR,
-                    "html": mark_safe(
-                        _(
-                            'This %(friendly_type)s was repealed on %(date)s by <a href="%(repealing_uri)s">'
-                            "%(repealing_title)s</a>."
-                        )
-                        % args
-                    ),
-                }
-            )
+            if repeal.get("repealing_uri"):
+                notices.append(
+                    {
+                        "type": messages.ERROR,
+                        "html": mark_safe(
+                            _(
+                                'This %(friendly_type)s was %(verb)s on %(date)s by <a href="%(repealing_uri)s">'
+                                "%(repealing_title)s</a>."
+                            )
+                            % args
+                        ),
+                    }
+                )
+            else:
+                notices.append(
+                    {
+                        "type": messages.ERROR,
+                        "html": mark_safe(
+                            _("This %(friendly_type)s %(verb)s on %(date)s.") % args
+                        ),
+                    }
+                )
 
         current_date = datetime.now().date()
         latest_commencement_date = self.get_latest_commencement_date()

@@ -50,6 +50,34 @@ class LegislationDecorator(DocumentDecorator):
             code="repealed",
             defaults={"name": "Repealed", "code": "repealed", "level": "danger"},
         )
+        revoked_label, _ = Label.objects.get_or_create(
+            code="revoked",
+            defaults={"name": "Revoked", "code": "revoked", "level": "danger"},
+        )
+        withdrawn_label, _ = Label.objects.get_or_create(
+            code="withdrawn",
+            defaults={"name": "Withdrawn", "code": "withdrawn", "level": "danger"},
+        )
+        lapsed_label, _ = Label.objects.get_or_create(
+            code="lapsed",
+            defaults={"name": "Lapsed", "code": "lapsed", "level": "danger"},
+        )
+        retired_label, _ = Label.objects.get_or_create(
+            code="retired",
+            defaults={"name": "Retired", "code": "retired", "level": "danger"},
+        )
+        expired_label, _ = Label.objects.get_or_create(
+            code="expired",
+            defaults={"name": "Expired", "code": "expired", "level": "danger"},
+        )
+        repealed_labels = [
+            repealed_label,
+            revoked_label,
+            withdrawn_label,
+            lapsed_label,
+            retired_label,
+            expired_label,
+        ]
         uncommenced_label, _ = Label.objects.get_or_create(
             code="uncommenced",
             defaults={
@@ -59,12 +87,24 @@ class LegislationDecorator(DocumentDecorator):
         )
 
         # apply label if repealed
+        existing_repeal_labels = document.labels.filter(
+            pk__in=[label.pk for label in repealed_labels]
+        )
         if document.repealed:
-            if repealed_label not in labels:
-                document.labels.add(repealed_label.pk)
-        elif repealed_label in labels:
-            # not repealed, remove label
-            document.labels.remove(repealed_label.pk)
+            verb = document.metadata_json["repeal"].get("verb", "repealed")
+            # if the verb isn't in repealed_labels, we need to add it for translations (and under Adapter.predicates)
+            assert verb in [label.code for label in repealed_labels]
+            apply_label = Label.objects.get(code=verb)
+            # apply the right label, and remove any other repeal-like labels
+            for label in existing_repeal_labels:
+                if label != apply_label:
+                    document.labels.remove(label.pk)
+            if apply_label not in labels:
+                document.labels.add(apply_label.pk)
+        else:
+            for remove_label in existing_repeal_labels:
+                # not repealed, remove label
+                document.labels.remove(remove_label.pk)
 
         # apply label if not commenced
         if not document.commenced:

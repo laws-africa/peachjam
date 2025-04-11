@@ -445,13 +445,16 @@ class IndigoAdapter(RequestsAdapter):
         subject_work = created_document.work
         self.remove_existing_relationships(subject_work)
 
-        if imported_document["repeal"]:
+        if imported_document["repeal"] and imported_document["repeal"]["repealing_uri"]:
             repealing_work, _ = Work.objects.get_or_create(
                 frbr_uri=imported_document["repeal"]["repealing_uri"],
                 defaults={"title": imported_document["repeal"]["repealing_title"]},
             )
+            relationship = "repealed-by"
+            if imported_document["repeal"]["verb"]:
+                relationship = f"{imported_document['repeal']['verb']}-by"
             self.create_relationship(
-                "repealed-by",
+                relationship,
                 subject_work=subject_work,
                 object_work=repealing_work,
             )
