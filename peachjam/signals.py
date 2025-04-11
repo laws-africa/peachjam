@@ -1,3 +1,4 @@
+import allauth.account.signals as allauth_signals
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.auth.signals import user_logged_in, user_logged_out
@@ -95,16 +96,23 @@ def user_saved_updated_customerio(sender, instance, **kwargs):
     get_customerio().update_user_details(instance)
 
 
+@receiver(allauth_signals.user_signed_up)
+def user_signed_up_update_customerio(sender, request, user, **kwargs):
+    get_customerio().track_user_signed_up(user)
+
+
 @receiver(signals.post_save, sender=UserProfile)
 def userprofile_saved_updated_customerio(sender, instance, **kwargs):
     get_customerio().update_user_details(instance.user)
 
 
 @receiver(user_logged_in)
+@receiver(allauth_signals.user_logged_in)
 def user_logged_in_update_customerio(sender, request, user, **kwargs):
     get_customerio().track_user_logged_in(user)
 
 
+# allauth uses the same signal
 @receiver(user_logged_out)
 def user_logged_out_update_customerio(sender, request, user, **kwargs):
     get_customerio().track_user_logged_out(user)

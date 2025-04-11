@@ -23,14 +23,21 @@ class CustomerIO:
             self.update_user_details(user)
             analytics.track(
                 user.userprofile.tracking_id_str,
-                "User logged in",
+                "Logged in",
             )
 
     def track_user_logged_out(self, user):
         if self.enabled():
             analytics.track(
                 user.userprofile.tracking_id_str,
-                "User logged out",
+                "Logged out",
+            )
+
+    def track_user_signed_up(self, user):
+        if self.enabled():
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "Sign up",
             )
 
     def update_user_details(self, user):
