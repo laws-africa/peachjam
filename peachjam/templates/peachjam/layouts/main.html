@@ -69,7 +69,6 @@
           {% endif %}
       );
         {% if user.is_authenticated %}analytics.identify('{{ user.userprofile.tracking_id }}');{% endif %}
-        analytics.page();
       }}();
     </script>
   {% endif %}
@@ -77,6 +76,7 @@
   <script defer src="{% static 'js/app-prod.js' %}"></script>
 {% endblock %}
 {% block header %}
+  {% if track_page_properties %}{{ track_page_properties|json_script:"track-page-properties" }}{% endif %}
   {% include 'peachjam/_header.html' %}
 {% endblock %}
 {% block body-content %}

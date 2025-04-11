@@ -1,68 +1,49 @@
 /**
  * Helper class to do common analytics tracking across both GA and Matomo.
  */
+export interface AnalyticsProvider {
+  trackPageLoad: () => void;
+  trackPageView: () => void;
+  trackEvent: (category: string, action: string, name?: string, value?: number) => void;
+  trackSiteSearch: (keyword: string, category: string, searchCount: number) => void;
+}
+
 export class Analytics {
-  isGAEnabled: boolean;
-  isMatomoEnabled: boolean;
-  isCustomerIOEnabled: boolean;
+  public providers: AnalyticsProvider[] = [];
 
-  constructor () {
-    this.isGAEnabled = 'gtag' in window;
-    this.isMatomoEnabled = '_paq' in window;
-    this.isCustomerIOEnabled = 'cioanalytics' in window;
+  start () {
+    this.setupButtonEvents();
+    this.trackPageLoad();
   }
 
-  matomo (x: any) {
-    if (this.isMatomoEnabled) {
-      // @ts-ignore
-      window._paq.push(x);
+  trackPageLoad () {
+    for (const provider of this.providers) {
+      provider.trackPageLoad();
     }
-  }
-
-  gtag (...x: any[]) {
-    if (this.isGAEnabled) {
-      // @ts-ignore
-      window.gtag(...x);
-    }
-  }
-
-  customerio () {
-    if (this.isCustomerIOEnabled) {
-      // @ts-ignore
-      return window.cioanalytics;
-    }
-    return {
-      track: () => {},
-      page: () => {},
-      identify: () => {}
-    };
   }
 
   trackPageView () {
-    this.matomo(['trackPageView']);
-    this.gtag('event', 'page_view');
-    this.customerio().page();
+    for (const provider of this.providers) {
+      provider.trackPageView();
+    }
   }
 
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
-    this.matomo(['trackSiteSearch', keyword, category, searchCount]);
-    this.gtag('event', 'site_search', { keyword, category, searchCount });
+    for (const provider of this.providers) {
+      provider.trackSiteSearch(keyword, category, searchCount);
+    }
   }
 
   trackEvent (category: string, action: string, name?: string, value?: number) {
-    this.matomo(['trackEvent', category, action, name, value]);
-    this.gtag('event', action, { event_category: category, event_name: name, value });
-    this.customerio().track(`${category} ${action}`, {
-      event_category: category,
-      event_action: action,
-      event_name: name,
-    });
+    for (const provider of this.providers) {
+      provider.trackEvent(category, action, name, value);
+    }
   }
 
   /**
    * Submit analytics events for clickable elements with data-track-event="Cat | Action | Name" attributes.
    */
-  trackButtonEvents () {
+  setupButtonEvents () {
     document.addEventListener('click', (e) => {
       if (e.target && e.target instanceof Element) {
         // find the closest element with the data-track-event attribute
@@ -79,5 +60,88 @@ export class Analytics {
   }
 }
 
+export class GA4 implements AnalyticsProvider {
+  trackPageLoad () {
+    // tracked automatically
+  }
+
+  trackPageView () {
+    // @ts-ignore
+    window.gtag('event', 'page_view');
+  }
+
+  trackEvent (category: string, action: string, name?: string, value?: number) {
+    // @ts-ignore
+    window.gtag('event', action, { event_category: category, event_name: name, value });
+  }
+
+  trackSiteSearch (keyword: string, category: string, searchCount: number) {
+    // @ts-ignore
+    window.gtag('event', 'site_search', { keyword, category, searchCount });
+  }
+}
+
+export class Matomo implements AnalyticsProvider {
+  trackPageLoad () {
+    // tracked automatically
+  }
+
+  trackPageView () {
+    // @ts-ignore
+    window._paq.push(['trackPageView']);
+  }
+
+  trackEvent (category: string, action: string, name?: string, value?: number) {
+    // @ts-ignore
+    window._paq.push(['trackEvent', category, action, name, value]);
+  }
+
+  trackSiteSearch (keyword: string, category: string, searchCount: number) {
+    // @ts-ignore
+    window._paq.push(['trackSiteSearch', keyword, category, searchCount]);
+  }
+}
+
+export class CustomerIO implements AnalyticsProvider {
+  pageProperties: Record<string, any>;
+
+  constructor () {
+    // properties pushed with all page events
+    this.pageProperties = JSON.parse(document.getElementById('track-page-properties')?.innerText || '{}');
+  }
+
+  trackPageLoad () {
+    this.trackPageView();
+  }
+
+  trackPageView () {
+    // @ts-ignore
+    window.cioanalytics.page(this.pageProperties);
+  }
+
+  trackEvent (category: string, action: string, name?: string, value?: number) {
+    const props = { ...this.pageProperties, event_category: category, event_action: action, event_name: name, value };
+    // @ts-ignore
+    window.cioanalytics.track(`${category} ${action}`, props);
+  }
+
+  trackSiteSearch (keyword: string, category: string, searchCount: number) {
+    // TODO
+  }
+}
+
 const analytics = new Analytics();
+
+if ('gtag' in window) {
+  analytics.providers.push(new GA4());
+}
+
+if ('_paq' in window) {
+  analytics.providers.push(new Matomo());
+}
+
+if ('cioanalytics' in window) {
+  analytics.providers.push(new CustomerIO());
+}
+
 export default analytics;

@@ -70,7 +70,7 @@ class PeachJam {
   }
 
   setupAnalytics () {
-    this.analytics.trackButtonEvents();
+    this.analytics.start();
   }
 
   setupHtmx () {

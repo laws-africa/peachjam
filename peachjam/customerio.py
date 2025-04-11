@@ -25,6 +25,24 @@ class CustomerIO:
                 user.userprofile.tracking_id_str, self.get_user_details(user)
             )
 
+    def get_document_track_properties(self, doc):
+        """Get the properties for this document that are included with its tracking events."""
+        uri = doc.expression_uri()
+        return {
+            "work_frbr_uri": uri.work_uri(),
+            "expression_frbr_uri": uri.expression_uri(),
+            "frbr_uri_country": uri.country,
+            "frbr_uri_locality": uri.locality,
+            "frbr_uri_place": uri.place,
+            "frbr_uri_doctype": doc.frbr_uri_doctype,
+            "frbr_uri_subtype": doc.frbr_uri_subtype,
+            # uri.actor gets confused with subtype
+            "frbr_uri_actor": doc.frbr_uri_actor,
+            "frbr_uri_date": uri.date,
+            "frbr_uri_number": uri.number,
+            "frbr_uri_language": uri.language,
+        }
+
 
 _customerio = CustomerIO()
 
