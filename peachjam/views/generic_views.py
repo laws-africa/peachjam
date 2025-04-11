@@ -13,6 +13,7 @@ from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, View
 from lxml import html
 
+from peachjam.customerio import get_customerio
 from peachjam.forms import BaseDocumentFilterForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
@@ -427,6 +428,10 @@ class BaseDocumentDetailView(DetailView):
             doc.work.works_citing_current_work(), "citing_works"
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
+
+        # provide extra context for analytics
+        self.add_track_page_properties(context)
+
         return context
 
     def fetch_citation_docs(self, works, direction):
@@ -563,6 +568,11 @@ class BaseDocumentDetailView(DetailView):
                 img.attrib["src"] = document.expression_frbr_uri + "/" + src
 
         document.content_html = html.tostring(root, encoding="unicode")
+
+    def add_track_page_properties(self, context):
+        context[
+            "track_page_properties"
+        ] = get_customerio().get_document_track_properties(context["document"])
 
 
 class CSRFTokenView(View):

@@ -109,6 +109,10 @@ class UserProfile(models.Model):
         verbose_name = _("user profile")
         verbose_name_plural = _("user profiles")
 
+    @property
+    def tracking_id_str(self):
+        return str(self.tracking_id)
+
     def __str__(self):
         return f"{self.user.username}"
 

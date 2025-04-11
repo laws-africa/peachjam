@@ -1,12 +1,20 @@
+import allauth.account.signals as allauth_signals
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.contrib.auth.signals import user_logged_in
+from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.db.models import signals
 from django.dispatch import receiver
 from django_comments.models import Comment
 from django_comments.signals import comment_will_be_posted
 
-from peachjam.models import CoreDocument, ExtractedCitation, SourceFile, Work
+from peachjam.customerio import get_customerio
+from peachjam.models import (
+    CoreDocument,
+    ExtractedCitation,
+    SourceFile,
+    UserProfile,
+    Work,
+)
 from peachjam.tasks import update_extracted_citations_for_a_work
 
 User = get_user_model()
@@ -81,3 +89,30 @@ def before_comment_posted(sender, comment, request, **kwargs):
 @receiver(user_logged_in)
 def set_user_language(sender, request, user, **kwargs):
     setattr(request, "set_language", user.userprofile.preferred_language.iso_639_1)
+
+
+@receiver(signals.post_save, sender=User)
+def user_saved_updated_customerio(sender, instance, **kwargs):
+    get_customerio().update_user_details(instance)
+
+
+@receiver(allauth_signals.user_signed_up)
+def user_signed_up_update_customerio(sender, request, user, **kwargs):
+    get_customerio().track_user_signed_up(user)
+
+
+@receiver(signals.post_save, sender=UserProfile)
+def userprofile_saved_updated_customerio(sender, instance, **kwargs):
+    get_customerio().update_user_details(instance.user)
+
+
+@receiver(user_logged_in)
+@receiver(allauth_signals.user_logged_in)
+def user_logged_in_update_customerio(sender, request, user, **kwargs):
+    get_customerio().track_user_logged_in(user)
+
+
+# allauth uses the same signal
+@receiver(user_logged_out)
+def user_logged_out_update_customerio(sender, request, user, **kwargs):
+    get_customerio().track_user_logged_out(user)
