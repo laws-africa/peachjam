@@ -9,14 +9,23 @@ class CustomerIO:
     def enabled(self):
         return bool(analytics.write_key)
 
-    def get_user_details(self, user):
+    def get_common_details(self):
+        """Details pushed for all events."""
+        # if this is changed, ensure the same details are added to CustomerIO in peachjam/js/analytics.ts
         return {
+            "app_name": settings.PEACHJAM["APP_NAME"],
+        }
+
+    def get_user_details(self, user):
+        details = {
             "email": user.email,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "is_staff": user.is_staff,
             "language": user.userprofile.preferred_language.iso,
         }
+        details.update(self.get_common_details())
+        return details
 
     def track_user_logged_in(self, user):
         if self.enabled():
@@ -24,6 +33,7 @@ class CustomerIO:
             analytics.track(
                 user.userprofile.tracking_id_str,
                 "Logged in",
+                self.get_common_details(),
             )
 
     def track_user_logged_out(self, user):
@@ -31,6 +41,7 @@ class CustomerIO:
             analytics.track(
                 user.userprofile.tracking_id_str,
                 "Logged out",
+                self.get_common_details(),
             )
 
     def track_user_signed_up(self, user):
@@ -38,6 +49,7 @@ class CustomerIO:
             analytics.track(
                 user.userprofile.tracking_id_str,
                 "Sign up",
+                self.get_common_details(),
             )
 
     def update_user_details(self, user):

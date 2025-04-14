@@ -104,10 +104,14 @@ export class Matomo implements AnalyticsProvider {
 
 export class CustomerIO implements AnalyticsProvider {
   pageProperties: Record<string, any>;
+  commonProperties: Record<string, any>;
 
   constructor () {
     // properties pushed with all page events
     this.pageProperties = JSON.parse(document.getElementById('track-page-properties')?.innerText || '{}');
+    this.commonProperties = {
+      app_name: JSON.parse(document.getElementById('peachjam-config')?.innerText || '{}')?.appName
+    };
   }
 
   trackPageLoad () {
@@ -116,17 +120,24 @@ export class CustomerIO implements AnalyticsProvider {
     const name = document.body.dataset.trackPageLoad;
     if (name) {
       // @ts-ignore
-      window.cioanalytics.track(name, this.pageProperties);
+      window.cioanalytics.track(name, { ...this.pageProperties, ...this.commonProperties });
     }
   }
 
   trackPageView () {
     // @ts-ignore
-    window.cioanalytics.page(this.pageProperties);
+    window.cioanalytics.page({ ...this.pageProperties, ...this.commonProperties });
   }
 
   trackEvent (category: string, action: string, name?: string, value?: number) {
-    const props = { ...this.pageProperties, event_category: category, event_action: action, event_name: name, value };
+    const props = {
+      ...this.pageProperties,
+      ...this.commonProperties,
+      event_category: category,
+      event_action: action,
+      event_name: name,
+      event_value: value
+    };
     // @ts-ignore
     window.cioanalytics.track(`${category} ${action}`, props);
   }
