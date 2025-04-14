@@ -104,6 +104,7 @@ MIDDLEWARE = [
     "django.middleware.cache.FetchFromCacheMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
+    "peachjam.middleware.SetPreferredLanguageMiddleware",
 ]
 
 ROOT_URLCONF = "peachjam.urls"
@@ -184,6 +185,7 @@ ACCOUNT_FORMS = {
     "login": "peachjam.forms.PeachjamLoginForm",
 }
 ACCOUNT_USER_DISPLAY = "peachjam.auth.user_display"
+ACCOUNT_USERNAME_REQUIRED = False
 
 # social logins
 SOCIALACCOUNT_PROVIDERS = {
