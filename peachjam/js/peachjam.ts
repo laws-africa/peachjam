@@ -76,6 +76,8 @@ class PeachJam {
   setupHtmx () {
     // @ts-ignore
     window.htmx = htmx;
+    // @ts-ignore
+    window.htmx.config.allowNestedOobSwaps = false;
     // htmx:load is fired both when the page loads (weird) and when new content is loaded. We only care about the latter
     // case. See https://github.com/bigskysoftware/htmx/issues/1500
     const htmxHelper = { firstLoad: true };

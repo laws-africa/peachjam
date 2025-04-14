@@ -45,7 +45,8 @@
     </div>
   </div>
   <div id="savedDocumentModal-{{ saved_document.id }}" class="modal fade">
-    {% include "peachjam/saved_document/_update.html" with form=saved_document.form target="#folders-list" %}
+    {% url 'folder_list' as folder_list_url %}
+    {% include "peachjam/saved_document/_update_modal.html" with form=saved_document.form target="#folders-list" next=folder_list_url %}
   </div>
   <div class="row">
     <div id="document-annotations-{{ saved_document.document.pk }}"

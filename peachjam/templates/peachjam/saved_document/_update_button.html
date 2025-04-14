@@ -1,0 +1,15 @@
+{% load i18n %}
+<button class="btn btn-outline-primary btn-shrink-sm ms-2 save-document-button save-document-button--{{ saved_document.document.id }}"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#saveDocumentModal-{{ saved_document.document.id }}"
+        aria-expanded="false"
+        data-saved-document="{{ saved_document.id }}"
+        hx-swap-oob="outerHTML:.save-document-button--{{ saved_document.document.id }}">
+  <i class="bi bi-star-fill"></i>
+  {% if saved_document.folder %}
+    {{ saved_document.folder }}
+  {% else %}
+    {% trans 'Saved' %}
+  {% endif %}
+</button>
