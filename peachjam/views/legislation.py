@@ -189,15 +189,32 @@ class LegislationDetailView(BaseDocumentDetailView):
 
             if index == len(point_in_time_dates) - 1:
                 if self.object.repealed and repeal:
-                    notices.append(
-                        {
-                            "type": messages.INFO,
-                            "html": _(
-                                "This is the version of this %(friendly_type)s as it was when it was repealed."
-                            )
-                            % {"friendly_type": friendly_type},
-                        }
-                    )
+                    if repeal["repealing_uri"]:
+                        notices.append(
+                            {
+                                "type": messages.INFO,
+                                "html": _(
+                                    "This is the version of this %(friendly_type)s as it was when it was %(verb)s."
+                                )
+                                % {
+                                    "friendly_type": friendly_type,
+                                    "verb": repeal["verb"],
+                                },
+                            }
+                        )
+                    else:
+                        notices.append(
+                            {
+                                "type": messages.INFO,
+                                "html": _(
+                                    "This is the version of this %(friendly_type)s as it was when it %(verb)s."
+                                )
+                                % {
+                                    "friendly_type": friendly_type,
+                                    "verb": repeal["verb"],
+                                },
+                            }
+                        )
 
                 elif work_amendments and latest_amendment_date > current_object_date:
                     self.set_unapplied_amendment_notice(notices)
@@ -221,10 +238,16 @@ class LegislationDetailView(BaseDocumentDetailView):
                 ]
 
                 if self.object.repealed and repeal:
-                    msg = _(
-                        "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. "
-                        ' <a href="%(expression_frbr_uri)s">Read the version as it was when it was repealed</a>.'
-                    )
+                    if repeal["repealing_uri"]:
+                        msg = _(
+                            "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s."
+                            ' <a href="%(expression_frbr_uri)s">Read the version as it was when it was %(verb)s</a>.'
+                        )
+                    else:
+                        msg = _(
+                            "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s."
+                            ' <a href="%(expression_frbr_uri)s">Read the version as it was when it %(verb)s</a>.'
+                        )
                 else:
                     msg = _(
                         "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. "
@@ -241,6 +264,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                                 "date_to": format_date(date, "j F Y"),
                                 "expression_frbr_uri": expression_frbr_uri,
                                 "friendly_type": friendly_type,
+                                "verb": repeal["verb"],
                             }
                         ),
                     }
@@ -249,7 +273,10 @@ class LegislationDetailView(BaseDocumentDetailView):
         return notices
 
     def get_repeal_info(self):
-        return self.object.metadata_json.get("repeal", None)
+        repeal_info = self.object.metadata_json.get("repeal", None)
+        if repeal_info and not repeal_info.get("verb"):
+            repeal_info.update({"verb": "repealed"})
+        return repeal_info
 
     def get_friendly_type(self):
         return self.object.metadata_json.get("type_name", None)
