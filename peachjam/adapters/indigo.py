@@ -450,11 +450,9 @@ class IndigoAdapter(RequestsAdapter):
                 frbr_uri=imported_document["repeal"]["repealing_uri"],
                 defaults={"title": imported_document["repeal"]["repealing_title"]},
             )
-            relationship = "repealed-by"
-            if imported_document["repeal"]["verb"]:
-                relationship = f"{imported_document['repeal']['verb']}-by"
+            verb = imported_document["repeal"].get("verb", "repealed")
             self.create_relationship(
-                relationship,
+                f"{verb}-by",
                 subject_work=subject_work,
                 object_work=repealing_work,
             )
