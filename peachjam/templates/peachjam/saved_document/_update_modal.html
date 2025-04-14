@@ -59,8 +59,9 @@
       <button class="btn btn-danger"
               type="button"
               data-bs-dismiss="modal"
-              hx-include="#save-document-form"
-              hx-post="{% url 'saved_document_delete' saved_document.id %}"
+              hx-target="{{ target }}"
+              hx-include="#save-document-form-{{ saved_document.id }}"
+              hx-post="{% url 'saved_document_delete' saved_document.id %}?next={{ next }}"
               hx-confirm="{% trans "Are you sure you want to unsave? This will also remove all comments." %}">
         {% trans 'Unsave' %}
       </button>
