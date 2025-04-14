@@ -95,6 +95,7 @@ from peachjam.views import (
     JudgmentListView,
     JudgmentWorksAutocomplete,
     LegislationListView,
+    LoggedOutView,
     PartnerLogoView,
     PeachjamAdminLoginView,
     PlaceBillListView,
@@ -407,6 +408,7 @@ urlpatterns = [
                     DocumentAccessGroupListView.as_view(),
                     name="document_access_group_list",
                 ),
+                path("logged-out", LoggedOutView.as_view(), name="account_logged_out"),
             ]
         ),
     ),

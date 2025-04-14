@@ -22,6 +22,10 @@
     {% endfor %}
   {% endif %}
 {% endblock %}
+{% block body-tags %}
+  {{ block.super }}
+  data-track-page-load="View document"
+{% endblock %}
 {% block page-content %}
   <div class="pb-5">
     <div class="bg-light">

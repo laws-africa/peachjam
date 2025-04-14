@@ -1,0 +1,13 @@
+{% extends "allauth/layouts/base.html" %}
+{% load static %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Logged Out' %}
+{% endblock %}
+{% block content %}
+  <h2 class="mb-4">{% trans 'You have logged out.' %}</h2>
+  <div class="d-flex">
+    <a href="{% url 'home_page' %}" class="btn btn-primary">{% trans 'Home' %}</a>
+    <a class="btn btn-primary ms-auto" href="{% url 'account_login' %}">{% trans 'Log in' %}</a>
+  </div>
+{% endblock %}

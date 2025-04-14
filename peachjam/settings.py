@@ -149,6 +149,10 @@ PEACHJAM = {
     "MULTIPLE_LOCALITIES": False,
     "PDFJS_TO_TEXT": "bin/pdfjs-to-text" if DEBUG else "pdfjs-to-text",
     "HTML_TO_PNG": "bin/html-to-png" if DEBUG else "html-to-png",
+    # Customer.io
+    "CUSTOMERIO_JS_KEY": os.environ.get("CUSTOMERIO_JS_KEY"),
+    "CUSTOMERIO_PYTHON_KEY": os.environ.get("CUSTOMERIO_PYTHON_KEY"),
+    "CUSTOMERIO_JOURNEYS_SITE_ID": os.environ.get("CUSTOMERIO_JOURNEYS_SITE_ID"),
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -171,6 +175,7 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http" if DEBUG else "https"
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home_page"
+LOGOUT_REDIRECT_URL = "account_logged_out"
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
