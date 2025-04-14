@@ -204,13 +204,8 @@ class SavedDocumentFormMixin(
         return self.request.user.saved_documents.all()
 
     def get_success_url(self):
-        if self.request.htmx and self.request.htmx.request.POST.get("edit") == "note":
-            return reverse(
-                "saved_document_detail",
-                kwargs={
-                    "pk": self.object.pk,
-                },
-            )
+        if self.request.GET.get("next"):
+            return self.request.GET.get("next")
         return reverse(
             "saved_document_update",
             kwargs={

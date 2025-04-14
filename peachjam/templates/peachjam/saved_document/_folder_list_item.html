@@ -6,13 +6,7 @@
       {% include 'peachjam/_document_labels.html' with labels=saved_document.document.labels.all %}
       {% if saved_document.note %}
         <br/>
-        <div id="saved-doc-note-{{ saved_document.pk }}" class="d-flex">
-          <button class="btn btn-link"
-                  hx-get="{% url 'saved_document_update' saved_document.pk %}"
-                  hx-vals='{"edit": "note"}'
-                  hx-target="#saved-doc-note-{{ saved_document.pk }}">
-            <i class="bi bi-pencil"></i>
-          </button>
+        <div class="my-2">
           <span class="text-muted pt-2">{{ saved_document.note }}</span>
         </div>
       {% endif %}
@@ -32,9 +26,15 @@
       {% endif %}
     </div>
     <div class="col-md-3">
-      <div class="text-end text-nowrap">
+      <div class="mx-1 text-end text-nowrap">
         {{ saved_document.document.date }}
-        <button class="btn btn-link"
+        <button class="p-1 btn btn-link"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#savedDocumentModal-{{ saved_document.pk }}">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button class=" btn btn-link"
                 type="button"
                 hx-post="{% url 'saved_document_delete' saved_document.id %}?next={% url 'folder_list' %}"
                 hx-target="#folders-list"
@@ -43,6 +43,9 @@
         </button>
       </div>
     </div>
+  </div>
+  <div id="savedDocumentModal-{{ saved_document.id }}" class="modal fade">
+    {% include "peachjam/saved_document/_update.html" with form=saved_document.form target="#folders-list" %}
   </div>
   <div class="row">
     <div id="document-annotations-{{ saved_document.document.pk }}"
