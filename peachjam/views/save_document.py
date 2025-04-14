@@ -234,27 +234,8 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
 
 
 class SavedDocumentUpdateView(SavedDocumentFormMixin, UpdateView):
+    template_name = "peachjam/saved_document/_update.html"
     permission_required = "peachjam.change_saveddocument"
-
-    def get_template_names(self):
-        if self.request.htmx and self.request.htmx.request.GET.get("edit") == "note":
-            return ["peachjam/saved_document/_note_edit.html"]
-        return ["peachjam/saved_document/_update.html"]
-
-
-class SavedDocumentDetailView(SavedDocumentFormMixin, DetailView):
-    template_name = "peachjam/saved_document/_folder_list_item.html"
-    permission_required = "peachjam.view_saveddocument"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context[
-            "saved_document"
-        ].annotation_count = self.object.document.annotations.filter(
-            user=self.request.user
-        ).count()
-
-        return context
 
 
 class SavedDocumentDeleteView(SavedDocumentFormMixin, DeleteView):
