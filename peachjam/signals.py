@@ -9,6 +9,7 @@ from django_comments.signals import comment_will_be_posted
 
 from peachjam.customerio import get_customerio
 from peachjam.models import (
+    Annotation,
     CoreDocument,
     ExtractedCitation,
     SavedDocument,
@@ -148,11 +149,22 @@ def unsaved_document_customerio(sender, instance, **kwargs):
 
 
 @receiver(signals.post_save, sender=UserFollowing)
-def user_followed(sender, instance, created, raw, **kwargs):
+def user_followed_customerio(sender, instance, created, raw, **kwargs):
     if not raw and created:
         get_customerio().track_follow(instance)
 
 
 @receiver(signals.pre_delete, sender=UserFollowing)
-def user_unfollowed(sender, instance, **kwargs):
+def user_unfollowed_customerio(sender, instance, **kwargs):
     get_customerio().track_unfollow(instance)
+
+
+@receiver(signals.post_save, sender=Annotation)
+def annotated_customerio(sender, instance, created, raw, **kwargs):
+    if not raw and created:
+        get_customerio().track_annotate(instance)
+
+
+@receiver(signals.pre_delete, sender=Annotation)
+def unannotated_customerio(sender, instance, **kwargs):
+    get_customerio().track_unannotate(instance)

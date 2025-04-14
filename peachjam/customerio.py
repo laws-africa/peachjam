@@ -45,6 +45,11 @@ class CustomerIO:
         details["followed_name"] = str(user_following.followed_object)
         return details
 
+    def get_annotation_details(self, annotation):
+        details = self.get_document_track_properties(annotation.document)
+        details.update(self.get_common_details())
+        return details
+
     def get_user_details(self, user):
         details = {
             "email": user.email,
@@ -127,6 +132,22 @@ class CustomerIO:
                 user_following.user.userprofile.tracking_id_str,
                 "Stopped following",
                 self.get_user_following_details(user_following),
+            )
+
+    def track_annotated(self, annotation):
+        if self.enabled():
+            analytics.track(
+                annotation.user.userprofile.tracking_id_str,
+                "Annotated a document",
+                self.get_annotation_details(annotation),
+            )
+
+    def track_unannotated(self, annotation):
+        if self.enabled():
+            analytics.track(
+                annotation.user.userprofile.tracking_id_str,
+                "Unannotated a document",
+                self.get_annotation_details(annotation),
             )
 
     def update_user_details(self, user):
