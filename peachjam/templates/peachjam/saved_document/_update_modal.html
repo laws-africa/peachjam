@@ -50,6 +50,7 @@
           <textarea class="form-control"
                     id="{{ form.note.id_for_label }}"
                     name="{{ form.note.name }}"
+                    maxlength="{{ form.note.field.max_length }}"
                     placeholder="{% trans "A note to yourself about this document" %}">{{ form.note.value|default_if_none:'' }}</textarea>
         </div>
       </form>
