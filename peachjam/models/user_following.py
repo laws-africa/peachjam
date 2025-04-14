@@ -86,6 +86,11 @@ class UserFollowing(models.Model):
 
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
+    # fields that can be followed
+    follow_fields = (
+        "court author court_class court_registry country locality taxonomy".split()
+    )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -129,31 +134,24 @@ class UserFollowing(models.Model):
         return f"{self.user} follows {self.followed_object}"
 
     @property
+    def followed_field(self):
+        for field in self.follow_fields:
+            if getattr(self, field):
+                return field
+
+    @property
     def followed_object(self):
-        return (
-            self.court
-            or self.author
-            or self.court_class
-            or self.court_registry
-            or self.country
-            or self.locality
-            or self.taxonomy
-        )
+        field = self.followed_field
+        if field:
+            return getattr(self, field)
 
     def clean(self):
         super().clean()
-        follow_fields = [
-            self.court,
-            self.author,
-            self.court_class,
-            self.court_registry,
-            self.country,
-            self.locality,
-            self.taxonomy,
-        ]
 
         # Count how many fields are set (not None)
-        set_fields = sum(1 for field in follow_fields if field is not None)
+        set_fields = sum(
+            1 for field in self.follow_fields if getattr(self, field) is not None
+        )
 
         if set_fields == 0:
             raise ValidationError(
