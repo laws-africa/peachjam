@@ -11,11 +11,14 @@ from peachjam.customerio import get_customerio
 from peachjam.models import (
     CoreDocument,
     ExtractedCitation,
+    SavedDocument,
     SourceFile,
+    UserFollowing,
     UserProfile,
     Work,
 )
 from peachjam.tasks import update_extracted_citations_for_a_work
+from peachjam_search.models import SavedSearch
 
 User = get_user_model()
 
@@ -91,6 +94,10 @@ def set_user_language(sender, request, user, **kwargs):
     setattr(request, "set_language", user.userprofile.preferred_language.iso_639_1)
 
 
+###
+# Analytics
+
+
 @receiver(signals.post_save, sender=User)
 def user_saved_updated_customerio(sender, instance, **kwargs):
     get_customerio().update_user_details(instance)
@@ -116,3 +123,36 @@ def user_logged_in_update_customerio(sender, request, user, **kwargs):
 @receiver(user_logged_out)
 def user_logged_out_update_customerio(sender, request, user, **kwargs):
     get_customerio().track_user_logged_out(user)
+
+
+@receiver(signals.post_save, sender=SavedSearch)
+def saved_search_customerio(sender, instance, created, raw, **kwargs):
+    if not raw and created:
+        get_customerio().track_saved_search(instance)
+
+
+@receiver(signals.pre_delete, sender=SavedSearch)
+def unsaved_search_customerio(sender, instance, **kwargs):
+    get_customerio().track_unsaved_search(instance)
+
+
+@receiver(signals.post_save, sender=SavedDocument)
+def saved_document_customerio(sender, instance, created, raw, **kwargs):
+    if not raw and created:
+        get_customerio().track_saved_document(instance)
+
+
+@receiver(signals.pre_delete, sender=SavedDocument)
+def unsaved_document_customerio(sender, instance, **kwargs):
+    get_customerio().track_unsaved_document(instance)
+
+
+@receiver(signals.post_save, sender=UserFollowing)
+def user_followed(sender, instance, created, raw, **kwargs):
+    if not raw and created:
+        get_customerio().track_follow(instance)
+
+
+@receiver(signals.pre_delete, sender=UserFollowing)
+def user_unfollowed(sender, instance, **kwargs):
+    get_customerio().track_unfollow(instance)
