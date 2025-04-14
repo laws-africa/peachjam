@@ -264,7 +264,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                                 "date_to": format_date(date, "j F Y"),
                                 "expression_frbr_uri": expression_frbr_uri,
                                 "friendly_type": friendly_type,
-                                "verb": repeal["verb"],
+                                "verb": repeal["verb"] if repeal else "",
                             }
                         ),
                     }
