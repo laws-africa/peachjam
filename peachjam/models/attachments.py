@@ -175,6 +175,19 @@ class SourceFile(AttachmentAbstractModel):
             # first save, set the download filename
             self.set_download_filename()
 
+    def get_duplicate_documents(self):
+        """Return a list of documents that have the same SHA256 hash as this source file."""
+        from peachjam.models import CoreDocument
+
+        if not self.sha256:
+            return []
+
+        return list(
+            CoreDocument.objects.filter(source_file__sha256=self.sha256).exclude(
+                pk=self.document_id
+            )
+        )
+
 
 class PublicationFile(AttachmentAbstractModel):
     SAVE_FOLDER = "publication_file"
