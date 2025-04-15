@@ -204,6 +204,8 @@ class SavedDocumentFormMixin(
         return self.request.user.saved_documents.all()
 
     def get_success_url(self):
+        if self.request.GET.get("next"):
+            return self.request.GET.get("next")
         return reverse(
             "saved_document_update",
             kwargs={

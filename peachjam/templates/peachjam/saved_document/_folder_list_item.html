@@ -1,17 +1,23 @@
 {% load i18n %}
-<div class="border-bottom">
+<div id="saved-doc-{{ saved_document.pk }}" class="border-bottom">
   <div class="row pt-2">
-    <div class="col-md-8">
-      <a href="{{ saved_doc.document.get_absolute_url }}">{{ saved_doc.document.title }}</a>
-      {% include 'peachjam/_document_labels.html' with labels=saved_doc.document.labels.all %}
+    <div class="col-md-6">
+      <a href="{{ saved_document.document.get_absolute_url }}">{{ saved_document.document.title }}</a>
+      {% include 'peachjam/_document_labels.html' with labels=saved_document.document.labels.all %}
+      {% if saved_document.note %}
+        <br/>
+        <div class="my-2">
+          <span class="text-muted pt-2">{{ saved_document.note }}</span>
+        </div>
+      {% endif %}
     </div>
-    <div class="col-md-2">
-      {% if saved_doc.annotation_count %}
+    <div class="col-md-3">
+      {% if saved_document.annotation_count %}
         <i class="text-primary bi bi-chat-left-text"></i>
         <a href="#"
-           hx-target="#document-annotations-{{ saved_doc.document.pk }}"
-           hx-get="{% url 'annotation_list' saved_doc.document.pk %}">
-          {% blocktrans trimmed count comment_count=saved_doc.annotation_count %}
+           hx-target="#document-annotations-{{ saved_document.document.pk }}"
+           hx-get="{% url 'annotation_list' saved_document.document.pk %}">
+          {% blocktrans trimmed count comment_count=saved_document.annotation_count %}
             {{ comment_count }} comment
           {% plural %}
             {{ comment_count }} comments
@@ -19,12 +25,18 @@
         </a>
       {% endif %}
     </div>
-    <div class="col-md-2">
-      <div class="text-end text-nowrap">
-        {{ saved_doc.document.date }}
-        <button class="btn btn-link"
+    <div class="col-md-3">
+      <div class="mx-1 text-end text-nowrap">
+        {{ saved_document.document.date }}
+        <button class="p-1 btn btn-link"
                 type="button"
-                hx-post="{% url 'saved_document_delete' saved_doc.id %}?next={% url 'folder_list' %}"
+                data-bs-toggle="modal"
+                data-bs-target="#savedDocumentModal-{{ saved_document.pk }}">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button class=" btn btn-link"
+                type="button"
+                hx-post="{% url 'saved_document_delete' saved_document.id %}?next={% url 'folder_list' %}"
                 hx-target="#folders-list"
                 hx-confirm="{% trans "Are you sure you want to remove this document?" %}">
           <i class="bi bi-trash"></i>
@@ -32,7 +44,12 @@
       </div>
     </div>
   </div>
+  <div id="savedDocumentModal-{{ saved_document.id }}" class="modal fade">
+    {% url 'folder_list' as folder_list_url %}
+    {% include "peachjam/saved_document/_update_modal.html" with form=saved_document.form target="#folders-list" next=folder_list_url %}
+  </div>
   <div class="row">
-    <div id="document-annotations-{{ saved_doc.document.pk }}" class="col"></div>
+    <div id="document-annotations-{{ saved_document.document.pk }}"
+         class="col"></div>
   </div>
 </div>
