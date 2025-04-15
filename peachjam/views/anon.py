@@ -63,6 +63,8 @@ class DocumentAnonymiseView(PermissionRequiredMixin, DetailView):
         context["replacements"] = ReplacementSerializer(
             self.object.replacements.all(), many=True
         ).data
+        context["app_label"] = self.object._meta.app_label
+        context["model_name"] = self.object._meta.model_name
 
         return context
 

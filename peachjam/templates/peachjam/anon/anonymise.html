@@ -10,6 +10,10 @@
   </div>
   <div class="d-none" id="document-content">{{ document.content_html|safe }}</div>
   {{ replacements|json_script:"replacements" }}
+  <div id="comments-wrapper">
+    <div id="comments-list">{% include 'admin/_comments_list.html' with object=document %}</div>
+    <div id="comments-form-wrapper">{% include 'admin/_comments_form.html' with object=document %}</div>
+  </div>
   {% csrf_token %}
 {% endblock %}
 {% block footer %}{% endblock %}

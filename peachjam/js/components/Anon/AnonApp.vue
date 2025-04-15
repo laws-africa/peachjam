@@ -5,7 +5,8 @@
         🥷
         <a :href="`/admin/peachjam/judgment/${documentId}/change/`">{{ title }}</a>
       </h5>
-      <button class="btn btn-success ms-auto" :disabled="saving" @click="savePublish">Save and publish</button>
+      <a class="btn btn-link ms-auto" :href="`/admin/peachjam/judgment/${documentId}/change/`">Close</a>
+      <button class="btn btn-success ms-2" :disabled="saving" @click="savePublish">Save and publish</button>
       <button class="btn btn-outline-success ms-2" :disabled="saving" @click="saveDraft">Save draft</button>
     </div>
     <input v-model="newCaseName" class="form-control" />
@@ -18,7 +19,20 @@
       </div>
     </div>
     <div class="sidebar-pane border-start">
-      <ReplacementsPane ref="replacements" :replacements="replacements" :document-id="documentId" />
+      <ul class="nav nav-tabs border-bottom">
+        <li class="nav-item">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#replacements-tab" type="button">Replacements</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#comments-tab" type="button">Comments</button>
+        </li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane fade show active pt-2" id="replacements-tab">
+          <ReplacementsPane ref="replacements" :replacements="replacements" :document-id="documentId" />
+        </div>
+        <div class="tab-pane fade pt-2" id="comments-tab" ref="comments" />
+      </div>
     </div>
   </div>
 </template>
@@ -37,6 +51,12 @@ export default {
       newCaseName: self.caseName,
       contentHtml: document.getElementById('document-content').innerHTML
     };
+  },
+  mounted () {
+    const comments = document.getElementById('comments-wrapper');
+    if (comments) {
+      this.$refs.comments.appendChild(comments);
+    }
   },
   methods: {
     saveDraft () {
@@ -107,8 +127,14 @@ body, html {
 
 .sidebar-pane {
   flex: 1;
-  overflow-y: auto;
   padding: 0.5em;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-content {
+  flex-grow: 1;
+  overflow-y: auto;
 }
 
 #anon-app mark {
