@@ -15,7 +15,7 @@
             hx-target="{{ target }}"
             hx-post="{% url 'saved_document_update' saved_document.id %}?next={{ next }}">
         {{ form.document }}
-        <p class="h5">{{ saved_document.document }}</p>
+        <p class="h5">{{ saved_document.document.title }}</p>
         <div>
           <textarea class="form-control"
                     name="{{ form.note.name }}"
