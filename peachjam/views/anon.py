@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from peachjam.extractor import ExtractorError
 from peachjam.models import Judgment, Replacement
+from peachjam.models.activity import EditActivity
 
 
 class ReplacementSerializer(serializers.ModelSerializer):
@@ -21,10 +22,19 @@ class ReplacementSerializer(serializers.ModelSerializer):
 
 class DocumentAnonymiseSerializer(serializers.ModelSerializer):
     replacements = ReplacementSerializer(many=True)
+    activity_start = serializers.DateTimeField()
+    activity_end = serializers.DateTimeField()
 
     class Meta:
         model = Judgment
-        fields = ["case_name", "content_html", "replacements", "published"]
+        fields = [
+            "case_name",
+            "content_html",
+            "replacements",
+            "published",
+            "activity_start",
+            "activity_end",
+        ]
 
     def update(self, instance, validated_data):
         replacements_data = validated_data.pop("replacements")
@@ -37,6 +47,15 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
         instance.replacements.all().delete()
         for replacement_data in replacements_data:
             Replacement.objects.create(document=instance, **replacement_data)
+
+        # store edit activity details
+        EditActivity.objects.create(
+            document=instance,
+            user=self.context["request"].user,
+            start=validated_data["activity_start"],
+            end=validated_data["activity_end"],
+            stage="anonymisation",
+        )
 
         return instance
 

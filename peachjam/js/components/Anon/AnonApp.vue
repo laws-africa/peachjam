@@ -49,7 +49,8 @@ export default {
       replacements: [],
       saving: false,
       newCaseName: self.caseName,
-      contentHtml: document.getElementById('document-content').innerHTML
+      contentHtml: document.getElementById('document-content').innerHTML,
+      activityStart: null,
     };
   },
   mounted () {
@@ -57,6 +58,7 @@ export default {
     if (comments) {
       this.$refs.comments.appendChild(comments);
     }
+    this.activityStart = new Date();
   },
   methods: {
     saveDraft () {
@@ -88,10 +90,14 @@ export default {
             content_html: html,
             anonymised: true,
             published,
-            replacements
+            replacements,
+            activity_start: this.activityStart.toISOString(),
+            activity_end: new Date().toISOString()
           })
         });
-        if (!resp.ok) {
+        if (resp.ok) {
+          this.activityStart = new Date();
+        } else {
           alert(`Failed to save: ${resp.statusText}`);
         }
       } finally {
