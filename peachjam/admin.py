@@ -238,7 +238,11 @@ class BaseAttachmentFileInline(admin.StackedInline):
 class SourceFileInline(BaseAttachmentFileInline):
     model = SourceFile
     form = SourceFileForm
-    readonly_fields = (*BaseAttachmentFileInline.readonly_fields, "source_url")
+    readonly_fields = (
+        *BaseAttachmentFileInline.readonly_fields,
+        "source_url",
+        "sha256",
+    )
 
 
 class PublicationFileInline(BaseAttachmentFileInline):
