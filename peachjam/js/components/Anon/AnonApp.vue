@@ -86,6 +86,7 @@ export default {
           body: JSON.stringify({
             case_name: this.newCaseName,
             content_html: html,
+            anonymised: true,
             published,
             replacements
           })

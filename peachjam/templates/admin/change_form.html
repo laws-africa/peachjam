@@ -11,6 +11,12 @@
   {% if original and original.source_file.pk %}
     {% include 'admin/peachjam/_duplicates_warning.html' with document=original %}
   {% endif %}
+  {% if original.pk and not original.published %}
+    <div class="alert alert-warning">{% trans "This document is not published and is not visible to the public." %}</div>
+  {% endif %}
+  {% if original.restricted %}
+    <div class="alert alert-warning">{% trans "This document is restricted and is only visible to some users." %}</div>
+  {% endif %}
 {% endblock %}
 {% block extra_actions %}
   {{ block.super }}

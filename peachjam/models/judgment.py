@@ -357,9 +357,14 @@ class Judgment(CoreDocument):
         default=True,
     )
 
+    must_be_anonymised = models.BooleanField(
+        _("Must be anonymised"),
+        help_text=_("Must this judgment be anonymised?"),
+        default=False,
+    )
     anonymised = models.BooleanField(
         _("Anonymised"),
-        help_text=_("Whether or not the judgment is anonymised"),
+        help_text=_("Has the judgment been anonymised?"),
         default=False,
     )
 
@@ -477,6 +482,11 @@ class Judgment(CoreDocument):
         if self.auto_assign_details:
             self.assign_mnc()
             self.assign_title()
+
+        # enforce anonymisation
+        if self.must_be_anonymised:
+            self.published = self.anonymised
+
         super().pre_save()
 
 
