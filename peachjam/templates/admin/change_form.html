@@ -8,6 +8,9 @@
     <div data-component="DocumentUploader"
          data-extractor-url="{{ adminform.form.extractor_url }}"></div>
   {% endif %}
+  {% if original and original.source_file.pk %}
+    {% include 'admin/peachjam/_duplicates_warning.html' with document=original %}
+  {% endif %}
 {% endblock %}
 {% block extra_actions %}
   {{ block.super }}

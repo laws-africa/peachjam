@@ -1,6 +1,6 @@
 {% load i18n %}
 {% if duplicate_documents %}
-  <div class="alert alert-warning">
+  <div class="alert alert-danger">
     <p>{% trans "This file has already been uploaded." %}</p>
     <ul>
       {% for doc in duplicate_documents %}
