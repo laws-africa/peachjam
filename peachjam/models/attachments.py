@@ -165,8 +165,7 @@ class SourceFile(AttachmentAbstractModel):
         self.sha256 = hashlib.sha256(self.file.read()).hexdigest()
 
     def save(self, *args, **kwargs):
-        if not self.sha256:
-            self.calculate_sha256()
+        self.calculate_sha256()
         pk = self.pk
         super().save(*args, **kwargs)
         if not pk:
