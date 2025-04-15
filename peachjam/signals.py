@@ -162,9 +162,9 @@ def user_unfollowed_customerio(sender, instance, **kwargs):
 @receiver(signals.post_save, sender=Annotation)
 def annotated_customerio(sender, instance, created, raw, **kwargs):
     if not raw and created:
-        get_customerio().track_annotate(instance)
+        get_customerio().track_annotated(instance)
 
 
 @receiver(signals.pre_delete, sender=Annotation)
 def unannotated_customerio(sender, instance, **kwargs):
-    get_customerio().track_unannotate(instance)
+    get_customerio().track_unannotated(instance)
