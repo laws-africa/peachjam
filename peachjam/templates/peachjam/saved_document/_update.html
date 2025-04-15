@@ -51,6 +51,7 @@
         <div class="collapse" id="addFolder">
           <label class="form-label" for="{{ form.new_folder.id_for_label }}">{% trans 'New folder name' %}</label>
           <input class="form-control"
+                 maxlength="100"
                  id="{{ form.new_folder.id_for_label }}"
                  name="{{ form.new_folder.name }}"
                  type="text"/>
