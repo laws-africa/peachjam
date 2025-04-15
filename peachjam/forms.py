@@ -505,7 +505,7 @@ class ContactUsForm(forms.Form):
 
 
 class SaveDocumentForm(forms.ModelForm):
-    new_folder = forms.CharField(max_length=255, required=False)
+    new_folder = forms.CharField(max_length=100, required=False)
 
     class Meta:
         model = SavedDocument
