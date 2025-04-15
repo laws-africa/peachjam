@@ -1,7 +1,7 @@
 {% load i18n %}
 <div hx-swap-oob="true"
      id="saveDocumentModalDialog-{{ saved_document.document.id }}"
-     class="modal-dialog">
+     class="modal-dialog modal-lg">
   <div class="modal-content">
     <div class="modal-header">
       <p class="h5 modal-title">{% trans 'Document saved' %}</p>
@@ -16,7 +16,13 @@
             hx-post="{% url 'saved_document_update' saved_document.id %}?next={{ next }}">
         {{ form.document }}
         <p class="h5">{{ saved_document.document }}</p>
-        <label class="form-label" for="{{ form.folder.id_for_label }}">{{ form.folder.label }}</label>
+        <div>
+          <textarea class="form-control"
+                    name="{{ form.note.name }}"
+                    maxlength="{{ form.note.field.max_length }}"
+                    placeholder="{% trans "A note to yourself about this document" %}">{{ form.note.value|default_if_none:'' }}</textarea>
+        </div>
+        <label class="form-label mt-3" for="{{ form.folder.id_for_label }}">{{ form.folder.label }}</label>
         <select id="{{ form.folder.id_for_label }}"
                 class="form-select"
                 name="{{ form.folder.name }}">
@@ -42,18 +48,10 @@
                  name="{{ form.new_folder.name }}"
                  type="text"/>
         </div>
-        <div class="mt-3">
-          <a href="{% url 'folder_list' %}">{% trans 'All saved documents' %}</a>
-        </div>
-        <div>
-          <label class="form-label" for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
-          <textarea class="form-control"
-                    id="{{ form.note.id_for_label }}"
-                    name="{{ form.note.name }}"
-                    maxlength="{{ form.note.field.max_length }}"
-                    placeholder="{% trans "A note to yourself about this document" %}">{{ form.note.value|default_if_none:'' }}</textarea>
-        </div>
       </form>
+      <div class="mt-3">
+        <a href="{% url 'folder_list' %}">{% trans 'All saved documents' %}</a>
+      </div>
     </div>
     <div class="modal-footer d-flex justify-content-between">
       <button class="btn btn-danger"
