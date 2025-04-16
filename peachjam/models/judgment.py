@@ -490,8 +490,8 @@ class Judgment(CoreDocument):
             self.assign_title()
 
         # enforce anonymisation
-        if self.must_be_anonymised:
-            self.published = self.anonymised
+        if self.must_be_anonymised and not self.anonymised:
+            self.published = False
 
         super().pre_save()
 
