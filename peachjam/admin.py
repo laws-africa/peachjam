@@ -1105,7 +1105,11 @@ class JudgmentAdminForm(DocumentForm):
             # if the serial number override is reset, then also clear the serial number so that it is
             # re-assigned
             self.instance.serial_number = None
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+
+        self.instance.ensure_anonymised_source_file()
+
+        return self.instance
 
 
 @admin.register(Judgment)

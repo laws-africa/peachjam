@@ -104,14 +104,20 @@ class DocumentDetailViewResolver(View):
 
 
 class DocumentSourceView(DocumentDetailView):
-    def render_to_response(self, context, **response_kwargs):
-        if hasattr(self.object, "source_file") and self.object.source_file.file:
-            source_file = self.object.source_file
+    """Returns the source file (non-PDF) for a document. If the source file is a PDF, it redirects to the PDF view."""
 
-            if source_file.mimetype == "application/pdf":
-                # If the source file is a PDF, redirect to the source.pdf URL
-                # This avoids providing an identical file from two different URLs, which is bad for caching,
-                # bad for Google, and bad for PocketLaw.
+    def render_to_response(self, context, **response_kwargs):
+        if hasattr(self.object, "source_file"):
+            source_file = self.object.source_file
+            anonymised = getattr(self.object, "anonymised", False)
+
+            # redirect to the PDF view if necessary
+            if (
+                source_file.file
+                and source_file.mimetype == "application/pdf"
+                or anonymised
+                and source_file.anonymised_file_as_pdf
+            ):
                 return redirect(
                     reverse(
                         "document_source_pdf",
@@ -119,18 +125,20 @@ class DocumentSourceView(DocumentDetailView):
                     )
                 )
 
-            if source_file.source_url:
-                return redirect(source_file.source_url)
+            if source_file.file and (not anonymised or source_file.file_is_anonymised):
+                if source_file.source_url:
+                    return redirect(source_file.source_url)
 
-            if getattr(source_file.file.storage, "custom_domain", None):
-                # use the storage's custom domain to serve the file
-                return redirect(source_file.file.url)
+                if getattr(source_file.file.storage, "custom_domain", None):
+                    # use the storage's custom domain to serve the file
+                    return redirect(source_file.file.url)
 
-            return self.make_response(
-                source_file.file.open(),
-                source_file.mimetype,
-                source_file.filename_for_download(),
-            )
+                return self.make_response(
+                    source_file.file.open(),
+                    source_file.mimetype,
+                    source_file.filename_for_download(),
+                )
+
         raise Http404
 
     def make_response(self, f, content_type, fname):
@@ -142,6 +150,9 @@ class DocumentSourceView(DocumentDetailView):
 
 
 class DocumentSourcePDFView(DocumentSourceView):
+    """Returns the PDF source file for a document. For anonymised judgments, we return an anonymised version if
+    available."""
+
     def render_to_response(self, context, **response_kwargs):
         if hasattr(self.object, "source_file"):
             source_file = self.object.source_file
@@ -151,6 +162,15 @@ class DocumentSourcePDFView(DocumentSourceView):
                 return redirect(source_file.source_url)
 
             pdf = source_file.as_pdf()
+
+            # special case for anonymised judgments: use the anonymised file if available
+            if (
+                getattr(self.object, "anonymised", False)
+                and not source_file.file_is_anonymised
+            ):
+                # this may be None
+                pdf = source_file.anonymised_file_as_pdf
+
             if pdf:
                 if getattr(pdf.storage, "custom_domain", None):
                     # use the storage's custom domain to serve the file
@@ -161,6 +181,7 @@ class DocumentSourcePDFView(DocumentSourceView):
                         "application/pdf",
                         source_file.filename_for_download(".pdf"),
                     )
+
         raise Http404()
 
 

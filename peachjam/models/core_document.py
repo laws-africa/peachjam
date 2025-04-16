@@ -1,3 +1,4 @@
+import base64
 import logging
 import re
 import shutil
@@ -11,7 +12,6 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.files import File
 from django.db import models
 from django.http import Http404
 from django.urls import reverse
@@ -22,7 +22,7 @@ from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from docpipe.xmlutils import unwrap_element
 from languages_plus.models import Language
-from lxml import html
+from lxml import etree, html
 from lxml.etree import ParserError
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
@@ -36,8 +36,8 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_component,
     validate_frbr_uri_date,
 )
-from peachjam.helpers import pdfjs_to_text
-from peachjam.models.attachments import Image, SourceFile
+from peachjam.helpers import parse_utf8_html, pdfjs_to_text
+from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
@@ -740,23 +740,44 @@ class CoreDocument(PolymorphicModel):
         return result
 
     def prepare_content_html_for_pdf(self):
-        return self.content_html.encode("utf-8")
+        """Prepare the content HTML for PDF generation by inlining images as base64."""
+        if not self.content_html:
+            return None
+
+        # Parse the HTML content
+        root = parse_utf8_html(self.content_html)
+        images = {i.filename: i for i in self.images.all()}
+
+        # inline images
+        for img_tag in root.xpath("//img[@src]"):
+            src = img_tag.attrib["src"]
+            if src.startswith("media/"):
+                # strip media prefix
+                src = src[6:]
+
+            # Look up the image file associated with the document
+            image = images.get(src)
+            if image:
+                try:
+                    # Read the image file and encode it as base64
+                    base64_data = base64.b64encode(image.file.read()).decode("utf-8")
+                    img_tag.attrib[
+                        "src"
+                    ] = f"data:{image.mimetype};base64,{base64_data}"
+                except Exception as e:
+                    log.warning(f"Failed to inline image {src}: {e}", exc_info=e)
+
+        # Return the modified HTML as a string
+        return etree.tostring(root, encoding="utf-8", method="html")
 
     def convert_html_to_pdf(self):
+        """Generate a PDF from the HTML content of this file. Returns an open file handle to the PDF data."""
         with tempfile.NamedTemporaryFile(suffix=".html") as html_file:
             html_file.write(self.prepare_content_html_for_pdf())
             html_file.flush()
             html_file.seek(0)
-
             pdf, _ = soffice_convert(html_file, "html", "pdf")
-            filename = slugify(self.case_name)
-            SourceFile.objects.update_or_create(
-                document=self,
-                defaults={
-                    "file": File(pdf, name=f"{filename}.pdf"),
-                    "mimetype": "application/pdf",
-                },
-            )
+            return pdf
 
     def is_most_recent(self):
         """Is this the most recent document for this work?
