@@ -242,6 +242,7 @@ class SourceFileInline(BaseAttachmentFileInline):
         *BaseAttachmentFileInline.readonly_fields,
         "source_url",
         "sha256",
+        "anonymised_file_as_pdf",
     )
 
 
