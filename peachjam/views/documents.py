@@ -1,6 +1,5 @@
 from cobalt import FrbrUri
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponse
 from django.http.response import FileResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
@@ -19,6 +18,25 @@ from peachjam.models import (
 from peachjam.registry import registry
 from peachjam.resolver import resolver
 from peachjam.views import BaseDocumentDetailView
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+class DocumentDetailView(DetailView):
+    """Base class for document-based detail views that enforces permissions."""
+
+    model = CoreDocument
+    queryset = CoreDocument.objects.filter(published=True)
+    slug_field = "expression_frbr_uri"
+    slug_url_kwarg = "frbr_uri"
+    context_object_name = "document"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.restricted:
+            perm = f"{obj._meta.app_label}.view_{obj._meta.model_name}"
+            if not self.request.user.has_perm(perm, obj):
+                raise Http404()
+        return obj
 
 
 class DocumentDetailViewResolver(View):
@@ -68,9 +86,7 @@ class DocumentDetailViewResolver(View):
         if obj.restricted:
             restricted_view = RestrictedDocument403View()
             restricted_view.setup(request, *args, **kwargs)
-            content_type = ContentType.objects.get_for_model(obj)
-            perm = f"{content_type.app_label}.view_{content_type.model}"
-
+            perm = f"{obj._meta.app_label}.view_{obj._meta.model_name}"
             if not request.user.has_perm(perm, obj):
                 return restricted_view.dispatch(request, *args, **kwargs)
 
@@ -87,20 +103,21 @@ class DocumentDetailViewResolver(View):
         )
 
 
-@method_decorator(add_slash_to_frbr_uri(), name="setup")
-class DocumentSourceView(DetailView):
-    model = CoreDocument
-    slug_field = "expression_frbr_uri"
-    slug_url_kwarg = "frbr_uri"
+class DocumentSourceView(DocumentDetailView):
+    """Returns the source file (non-PDF) for a document. If the source file is a PDF, it redirects to the PDF view."""
 
     def render_to_response(self, context, **response_kwargs):
-        if hasattr(self.object, "source_file") and self.object.source_file.file:
+        if hasattr(self.object, "source_file"):
             source_file = self.object.source_file
+            anonymised = getattr(self.object, "anonymised", False)
 
-            if source_file.mimetype == "application/pdf":
-                # If the source file is a PDF, redirect to the source.pdf URL
-                # This avoids providing an identical file from two different URLs, which is bad for caching,
-                # bad for Google, and bad for PocketLaw.
+            # redirect to the PDF view if necessary
+            if (
+                source_file.file
+                and source_file.mimetype == "application/pdf"
+                or anonymised
+                and source_file.anonymised_file_as_pdf
+            ):
                 return redirect(
                     reverse(
                         "document_source_pdf",
@@ -108,18 +125,20 @@ class DocumentSourceView(DetailView):
                     )
                 )
 
-            if source_file.source_url:
-                return redirect(source_file.source_url)
+            if source_file.file and (not anonymised or source_file.file_is_anonymised):
+                if source_file.source_url:
+                    return redirect(source_file.source_url)
 
-            if getattr(source_file.file.storage, "custom_domain", None):
-                # use the storage's custom domain to serve the file
-                return redirect(source_file.file.url)
+                if getattr(source_file.file.storage, "custom_domain", None):
+                    # use the storage's custom domain to serve the file
+                    return redirect(source_file.file.url)
 
-            return self.make_response(
-                source_file.file.open(),
-                source_file.mimetype,
-                source_file.filename_for_download(),
-            )
+                return self.make_response(
+                    source_file.file.open(),
+                    source_file.mimetype,
+                    source_file.filename_for_download(),
+                )
+
         raise Http404
 
     def make_response(self, f, content_type, fname):
@@ -131,6 +150,9 @@ class DocumentSourceView(DetailView):
 
 
 class DocumentSourcePDFView(DocumentSourceView):
+    """Returns the PDF source file for a document. For anonymised judgments, we return an anonymised version if
+    available."""
+
     def render_to_response(self, context, **response_kwargs):
         if hasattr(self.object, "source_file"):
             source_file = self.object.source_file
@@ -140,6 +162,15 @@ class DocumentSourcePDFView(DocumentSourceView):
                 return redirect(source_file.source_url)
 
             pdf = source_file.as_pdf()
+
+            # special case for anonymised judgments: use the anonymised file if available
+            if (
+                getattr(self.object, "anonymised", False)
+                and not source_file.file_is_anonymised
+            ):
+                # this may be None
+                pdf = source_file.anonymised_file_as_pdf
+
             if pdf:
                 if getattr(pdf.storage, "custom_domain", None):
                     # use the storage's custom domain to serve the file
@@ -150,6 +181,7 @@ class DocumentSourcePDFView(DocumentSourceView):
                         "application/pdf",
                         source_file.filename_for_download(".pdf"),
                     )
+
         raise Http404()
 
 
@@ -175,16 +207,11 @@ class DocumentPublicationView(DocumentSourceView):
         raise Http404
 
 
-@method_decorator(add_slash_to_frbr_uri(), name="setup")
-class DocumentMediaView(DetailView):
+class DocumentMediaView(DocumentDetailView):
     """Serve an image file, such as
 
     /akn/za/judgment/afchpr/2022/1/eng@2022-09-14/media/tmpwx2063x2_html_31b3ed1b55e86754.png
     """
-
-    model = CoreDocument
-    slug_field = "expression_frbr_uri"
-    slug_url_kwarg = "frbr_uri"
 
     def render_to_response(self, context, **response_kwargs):
         # there should only be one, but until we enforce uniqueness of filenames, get the first in the list
@@ -202,12 +229,7 @@ class DocumentMediaView(DetailView):
         return response
 
 
-@method_decorator(add_slash_to_frbr_uri(), name="setup")
-class DocumentCitationsView(DetailView):
-    model = CoreDocument
-    slug_field = "expression_frbr_uri"
-    slug_url_kwarg = "frbr_uri"
-    context_object_name = "document"
+class DocumentCitationsView(DocumentDetailView):
     template_name = "peachjam/_citations_list_items.html"
 
     def get_context_data(self, **kwargs):
@@ -267,14 +289,8 @@ class RestrictedDocument403View(BaseDocumentDetailView):
         return super().render_to_response(context, status=403, **response_kwargs)
 
 
-@method_decorator(add_slash_to_frbr_uri(), name="setup")
-class DocumentSocialImageView(DetailView):
+class DocumentSocialImageView(DocumentDetailView):
     """Image for this document used by social media."""
-
-    model = CoreDocument
-    slug_field = "expression_frbr_uri"
-    slug_url_kwarg = "frbr_uri"
-    context_object_name = "document"
 
     def get(self, request, *args, **kwargs):
         document = self.get_object()

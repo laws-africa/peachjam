@@ -2,10 +2,19 @@ import datetime
 
 from countries_plus.models import Country
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from django.test import TestCase
 from languages_plus.models import Language
 
-from peachjam.models import CaseHistory, Court, Judgment, Outcome, PeachJamSettings
+from peachjam.models import (
+    CaseHistory,
+    CoreDocument,
+    Court,
+    Judgment,
+    Outcome,
+    PeachJamSettings,
+    SourceFile,
+)
 
 
 class PeachjamViewsTest(TestCase):
@@ -187,6 +196,28 @@ class PeachjamViewsTest(TestCase):
         )
         self.assertTrue(hasattr(response.context["document"], "author"))
 
+    def test_generic_document_detail_unpublished(self):
+        doc = CoreDocument.objects.get(
+            expression_frbr_uri="/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
+        )
+        doc.published = False
+        doc.save()
+        response = self.client.get(
+            "/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_generic_document_detail_restricted(self):
+        doc = CoreDocument.objects.get(
+            expression_frbr_uri="/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
+        )
+        doc.restricted = True
+        doc.save()
+        response = self.client.get(
+            "/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
+        )
+        self.assertEqual(response.status_code, 403)
+
     def test_robots_txt(self):
         response = self.client.get("/robots.txt")
         self.assertEqual(response.status_code, 200)
@@ -252,3 +283,167 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "Case history")
         self.assertContains(response, appeal_case.title)
         self.assertContains(response, appeal_allowed.name)
+
+    def test_document_source_file(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+
+        # no source file
+        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
+        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+
+        # basic source file
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.txt"),
+            mimetype="text/plain",
+        )
+        resp = self.client.get(f"{frbr_uri}/source")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+        doc.published = True
+        doc.save()
+
+        # pdf source file
+        sf.delete()
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.pdf"),
+            mimetype="application/pdf",
+        )
+        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 302)
+        resp = self.client.get(f"{frbr_uri}/source.pdf")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content, b"test")
+
+    def test_document_source_unpublished(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        doc.published = False
+        doc.save()
+
+        # basic source file
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.txt"),
+            mimetype="text/plain",
+        )
+        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
+        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+
+        # pdf source file
+        sf.delete()
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.pdf"),
+            mimetype="application/pdf",
+            source_url="https://example.com",
+        )
+        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
+        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+
+    def test_document_source_restricted(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        doc.restricted = True
+        doc.save()
+
+        # basic source file
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.txt"),
+            mimetype="text/plain",
+        )
+        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
+        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+
+        # pdf source file
+        sf.delete()
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.pdf"),
+            mimetype="application/pdf",
+            source_url="https://example.com",
+        )
+        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
+        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+
+    def test_document_source_file_url(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.txt"),
+            mimetype="text/plain",
+            source_url="https://example.com",
+        )
+        resp = self.client.get(f"{frbr_uri}/source")
+        self.assertEqual(resp.status_code, 302)
+        self.assertRedirects(resp, "https://example.com", fetch_redirect_response=False)
+        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+
+        sf.delete()
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.pdf"),
+            mimetype="application/pdf",
+            source_url="https://example.com",
+        )
+        resp = self.client.get(f"{frbr_uri}/source")
+        self.assertRedirects(
+            resp, f"{frbr_uri}/source.pdf", fetch_redirect_response=False
+        )
+
+        resp = self.client.get(f"{frbr_uri}/source.pdf")
+        self.assertRedirects(resp, "https://example.com", fetch_redirect_response=False)
+
+    def test_document_source_file_anonymised(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        doc.anonymised = True
+        doc.save()
+
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.txt"),
+            mimetype="text/plain",
+        )
+        # source file not anonymised
+        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
+        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+
+        # source file is anonymised
+        sf.file_is_anonymised = True
+        sf.save()
+        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 200)
+
+        # pdf source file is anonymised
+        sf.delete()
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.pdf"),
+            mimetype="application/pdf",
+            file_is_anonymised=True,
+        )
+        resp = self.client.get(f"{frbr_uri}/source")
+        self.assertRedirects(
+            resp, f"{frbr_uri}/source.pdf", fetch_redirect_response=False
+        )
+        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 200)
+
+        # extra anonymised file is available
+        sf.delete()
+        sf = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"test", name="test.txt"),
+            mimetype="text/plain",
+            anonymised_file_as_pdf=ContentFile(b"anon", name="anon.pdf"),
+        )
+        resp = self.client.get(f"{frbr_uri}/source")
+        self.assertRedirects(
+            resp, f"{frbr_uri}/source.pdf", fetch_redirect_response=False
+        )
+        resp = self.client.get(f"{frbr_uri}/source.pdf")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content, b"anon")

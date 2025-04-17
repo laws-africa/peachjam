@@ -14,7 +14,11 @@ class EditActivity(models.Model):
     seconds = models.IntegerField()
     stage = models.CharField(
         max_length=255,
-        choices=(("initial", "initial"), ("corrections", "corrections")),
+        choices=(
+            ("initial", "initial"),
+            ("corrections", "corrections"),
+            ("anonymisation", "anonymisation"),
+        ),
         default="initial",
     )
 

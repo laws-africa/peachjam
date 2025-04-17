@@ -16,6 +16,7 @@
   {% if form.case_name.value %}{{ form.case_name }}{% endif %}
   {% if form.date.value %}{{ form.date }}{% endif %}
   {% if form.hearing_date.value %}{{ form.hearing_date }}{% endif %}
+  {% if form.must_be_anonymised.value %}{{ form.must_be_anonymised }}{% endif %}
 </div>
 <div id="formsets">
   {% for formset in formsets %}

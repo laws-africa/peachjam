@@ -1,7 +1,18 @@
 <template>
   <div>
     <SuggestionsPane @apply="add" :document-id="documentId" />
-    <button class="btn btn-primary" @click="newReplacement">Replace...</button>
+    <div class="d-flex">
+      <button class="btn btn-primary" @click="newReplacement">Replace...</button>
+      <div class="dropdown ms-auto">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          Anonymisation notice
+        </button>
+        <ul class="dropdown-menu">
+          <li><button class="dropdown-item" @click="$emit('insertNotice')">Insert</button></li>
+          <li><button class="dropdown-item" @click="$emit('removeNotice')">Remove</button></li>
+        </ul>
+      </div>
+    </div>
     <div v-for="group of groups.values()" :key="group.key" class="mt-3">
       <ReplacementGroupDetail
         v-model="activeReplacement"
@@ -23,8 +34,9 @@ export default {
   components: { ReplacementGroupDetail, SuggestionsPane },
   props: {
     replacements: Array,
-    documentId: String,
+    documentId: String
   },
+  emits: ['insertNotice', 'removeNotice', 'applied'],
   data () {
     return {
       activeReplacement: null,
@@ -66,6 +78,7 @@ export default {
         }
       }
       this.$nextTick(() => this.updateGroups());
+      this.$emit('applied');
     },
     remove (group) {
       for (const replacement of group.replacements) {

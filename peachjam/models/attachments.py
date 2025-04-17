@@ -100,6 +100,9 @@ class SourceFile(AttachmentAbstractModel):
         on_delete=models.CASCADE,
         verbose_name=_("document"),
     )
+    sha256 = models.CharField(
+        "SHA 256", max_length=64, null=True, blank=True, db_index=True
+    )
     source_url = models.URLField(
         _("source URL"), max_length=2048, null=True, blank=True
     )
@@ -110,8 +113,17 @@ class SourceFile(AttachmentAbstractModel):
         null=True,
         blank=True,
     )
-    sha256 = models.CharField(
-        "SHA 256", max_length=64, null=True, blank=True, db_index=True
+    # These two fields provide support for anonymised source files for use with judgments that must be anonymised.
+    # If file_is_anonymised is True, then file (and file_as_pdf) are anonymised and can be safely sent to the user.
+    # Otherwise, we can create a PDF from the anonymised HTML and it is stored as anonymised_file_as_pdf, which is
+    # shared with the user instead.
+    file_is_anonymised = models.BooleanField(_("file is anonymised"), default=False)
+    anonymised_file_as_pdf = models.FileField(
+        _("anonymised file as pdf"),
+        upload_to=file_location,
+        max_length=1024,
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -187,6 +199,26 @@ class SourceFile(AttachmentAbstractModel):
                 pk=self.document_id
             )
         )
+
+    def delete(self, *args, **kwargs):
+        if self.file_as_pdf:
+            try:
+                self.file_as_pdf.delete(False)
+            except Exception as e:
+                log.warning(
+                    f"Ignoring error while deleting {self.file_as_pdf}", exc_info=e
+                )
+
+        if self.anonymised_file_as_pdf:
+            try:
+                self.anonymised_file_as_pdf.delete(False)
+            except Exception as e:
+                log.warning(
+                    f"Ignoring error while deleting {self.anonymised_file_as_pdf}",
+                    exc_info=e,
+                )
+
+        return super().delete(*args, **kwargs)
 
 
 class PublicationFile(AttachmentAbstractModel):
