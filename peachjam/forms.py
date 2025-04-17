@@ -505,11 +505,11 @@ class ContactUsForm(forms.Form):
 
 
 class SaveDocumentForm(forms.ModelForm):
-    new_folder = forms.CharField(max_length=255, required=False)
+    new_folder = forms.CharField(max_length=100, required=False)
 
     class Meta:
         model = SavedDocument
-        fields = ["document", "folder", "new_folder"]
+        fields = ["document", "folder", "new_folder", "note"]
         widgets = {"document": forms.HiddenInput()}
 
     def __init__(self, *args, **kwargs):
