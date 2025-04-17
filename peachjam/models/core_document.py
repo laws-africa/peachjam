@@ -767,6 +767,12 @@ class CoreDocument(PolymorphicModel):
                 except Exception as e:
                     log.warning(f"Failed to inline image {src}: {e}", exc_info=e)
 
+        # inline CSS for the inject pj-anonymisation-notice
+        # TODO: this is a bit of a hack; if we inline other css, find a better way
+        notice = root.get_element_by_id("pj-anonymisation-notice")
+        if notice is not None:
+            notice.set("style", "text-align: center; color: red; margin-bottom: 1em;")
+
         # Return the modified HTML as a string
         return etree.tostring(root, encoding="utf-8", method="html")
 

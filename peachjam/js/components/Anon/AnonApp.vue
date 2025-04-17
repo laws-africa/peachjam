@@ -13,9 +13,9 @@
   </header>
   <div class="main-pane">
     <div class="content-pane">
-      <div ref="contentRoot" id="content-root">
+      <div ref="contentRoot" id="content-root" class="document-content">
         <!-- Note: we have two roots, because targets need a root element with an ID that is inside "content-root" -->
-        <div ref="documentRoot" id="document-root" v-html="contentHtml" />
+        <div ref="documentRoot" id="document-root" class="content content__html" v-html="contentHtml" />
       </div>
     </div>
     <div class="sidebar-pane border-start">
@@ -29,7 +29,14 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane fade show active pt-2" id="replacements-tab">
-          <ReplacementsPane ref="replacements" :replacements="replacements" :document-id="documentId" />
+          <ReplacementsPane
+            ref="replacements"
+            :replacements="replacements"
+            :document-id="documentId"
+            @insert-notice="insertNotice"
+            @remove-notice="removeNotice"
+            @applied="insertNotice"
+          />
         </div>
         <div class="tab-pane fade pt-2" id="comments-tab" ref="comments" />
       </div>
@@ -61,6 +68,21 @@ export default {
     this.activityStart = new Date();
   },
   methods: {
+    insertNotice () {
+      if (!this.$refs.documentRoot.querySelector('#pj-anonymisation-notice')) {
+        // insert the anonymisation notice, only if it isn't there
+        const notice = document.createElement('div');
+        notice.id = 'pj-anonymisation-notice';
+        notice.innerText = 'Editorial note: This judgment has been anonymised to protect personal information in compliance with the law.';
+        this.$refs.documentRoot.insertAdjacentElement('afterbegin', notice);
+      }
+    },
+    removeNotice () {
+      const notice = this.$refs.documentRoot.querySelector('#pj-anonymisation-notice');
+      if (notice) {
+        notice.remove();
+      }
+    },
     saveDraft () {
       this.save(false);
     },
