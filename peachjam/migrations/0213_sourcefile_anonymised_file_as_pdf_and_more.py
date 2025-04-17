@@ -7,9 +7,7 @@ import peachjam.models.attachments
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam", "0211_judgment_must_be_anonymised_and_more"),
-    ]
+    dependencies = [("peachjam", "0212_judgment_must_be_anonymised_and_more")]
 
     operations = [
         migrations.AddField(
