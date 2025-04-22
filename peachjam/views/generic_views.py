@@ -518,6 +518,7 @@ class BaseDocumentDetailView(DetailView):
         context["n_relationships"] = sum(
             len(g) for v, g in itertools.chain(rels_as_object, rels_as_subject)
         )
+        context["show_related_documents"] = context["n_relationships"] > 0
         context["relationship_limit"] = 4
 
     def add_provision_relationships(self, context):

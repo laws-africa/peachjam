@@ -1,6 +1,6 @@
 {% load i18n %}
-<h5>{% trans 'Similar documents' %}</h5>
-<ul>
+<h4>{% trans 'Similar documents' %}</h4>
+<ol>
   {% for doc in similar_documents %}
     <li>
       <a href="{{ doc.expression_frbr_uri }}">{{ doc.title }}
@@ -8,4 +8,4 @@
       </a>
     </li>
   {% endfor %}
-</ul>
+</ol>

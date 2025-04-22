@@ -107,7 +107,6 @@ from peachjam.views import (
     SavedDocumentCreateView,
     SavedDocumentDeleteView,
     SavedDocumentUpdateView,
-    SimilarDocumentsView,
     TaxonomyDetailView,
     TaxonomyFirstLevelView,
     TaxonomyListView,
@@ -334,11 +333,6 @@ urlpatterns = [
         r"^(?P<frbr_uri>akn/.*)/citations$",
         cache_page(CACHE_DURATION)(DocumentCitationsView.as_view()),
         name="document_citations",
-    ),
-    re_path(
-        r"^(?P<frbr_uri>akn/.*)/similar-documents$",
-        cache_page(CACHE_DURATION)(SimilarDocumentsView.as_view()),
-        name="document_similar_docs",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/social-image.png$",
