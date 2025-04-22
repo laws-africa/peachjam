@@ -1,0 +1,5 @@
+{% extends 'peachjam/emails/layouts/base.html' %}
+{% block body %}
+  <p>{{ user }},</p>
+  {% block alert-body %}{% endblock %}
+{% endblock %}
