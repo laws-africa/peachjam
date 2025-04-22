@@ -1,5 +1,8 @@
+import logging
+
 from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.files.base import File
 from django.db import models
 from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
@@ -9,7 +12,10 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
 from peachjam.decorators import JudgmentDecorator
-from peachjam.models import CoreDocument, Locality
+from peachjam.models import CoreDocument, Locality, SourceFile
+from peachjam.tasks import create_anonymised_source_file_pdf
+
+log = logging.getLogger(__name__)
 
 
 class Attorney(models.Model):
@@ -357,9 +363,14 @@ class Judgment(CoreDocument):
         default=True,
     )
 
+    must_be_anonymised = models.BooleanField(
+        _("Must be anonymised"),
+        help_text=_("Must this judgment be anonymised?"),
+        default=False,
+    )
     anonymised = models.BooleanField(
         _("Anonymised"),
-        help_text=_("Whether or not the judgment is anonymised"),
+        help_text=_("Has the judgment been anonymised?"),
         default=False,
     )
 
@@ -477,7 +488,59 @@ class Judgment(CoreDocument):
         if self.auto_assign_details:
             self.assign_mnc()
             self.assign_title()
+
+        # enforce anonymisation
+        if self.must_be_anonymised and not self.anonymised:
+            self.published = False
+
         super().pre_save()
+
+    def ensure_anonymised_source_file(self):
+        """If this judgment is anonymised but its source file isn't, then queue up a task to generate a PDF
+        from the anonymised file."""
+        if self.anonymised:
+            if self.content_html and not self.content_html_is_akn:
+                if (
+                    not hasattr(self, "source_file")
+                    or not self.source_file.file_is_anonymised
+                ):
+                    # there is no source file, or it is not anonymised
+                    create_anonymised_source_file_pdf(
+                        self.pk, creator=self, schedule=60
+                    )
+
+        elif hasattr(self, "source_file") and self.source_file.anonymised_file_as_pdf:
+            # we're not anonymised, but an anonymised source file exists - delete it
+            try:
+                self.source_file.anonymised_file_as_pdf.delete(False)
+            except Exception as e:
+                log.warning(
+                    f"Ignoring error while deleting {self.source_file.anonymised_file_as_pdf}",
+                    exc_info=e,
+                )
+            self.source_file.anonymised_file_as_pdf = None
+            self.source_file.save()
+
+    def create_anonymised_source_file_pdf(self):
+        """Create an anonymised source file from the HTML of this judgment. If there is already a source file,
+        store this new one as the anonymised pdf. Otherwise, create a new source file using this PDF and set
+        the anonymised flag."""
+        if self.anonymised and self.content_html and not self.content_html_is_akn:
+            pdf = self.convert_html_to_pdf()
+            f = File(pdf, name=f"{slugify(self.case_name)}.pdf")
+
+            try:
+                self.source_file.anonymised_file_as_pdf = f
+                self.source_file.save()
+            except SourceFile.DoesNotExist:
+                # create a new source file with this PDF as the main file, and the anonymised flag set.
+                # there's a small chance of a race condition here, the task will just be retried
+                SourceFile.objects.create(
+                    document=self,
+                    file=f,
+                    mimetype="application/pdf",
+                    file_is_anonymised=True,
+                )
 
 
 class CaseNumber(models.Model):

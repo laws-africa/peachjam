@@ -242,6 +242,7 @@ class SourceFileInline(BaseAttachmentFileInline):
         *BaseAttachmentFileInline.readonly_fields,
         "source_url",
         "sha256",
+        "anonymised_file_as_pdf",
     )
 
 
@@ -1105,7 +1106,11 @@ class JudgmentAdminForm(DocumentForm):
             # if the serial number override is reset, then also clear the serial number so that it is
             # re-assigned
             self.instance.serial_number = None
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+
+        self.instance.ensure_anonymised_source_file()
+
+        return self.instance
 
 
 @admin.register(Judgment)
@@ -1124,17 +1129,18 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     list_filter = (*DocumentAdmin.list_filter, "court")
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
 
-    fieldsets[0][1]["fields"].insert(3, "court")
-    fieldsets[0][1]["fields"].insert(4, "registry")
-    fieldsets[0][1]["fields"].insert(4, "division")
-    fieldsets[0][1]["fields"].insert(5, "case_name")
-    fieldsets[0][1]["fields"].append("mnc")
+    fieldsets[0][1]["fields"].insert(4, "court")
+    fieldsets[0][1]["fields"].insert(5, "registry")
+    fieldsets[0][1]["fields"].insert(6, "division")
+    fieldsets[0][1]["fields"].insert(7, "case_name")
     fieldsets[0][1]["fields"].append("hearing_date")
-    fieldsets[0][1]["fields"].append("outcomes")
+    fieldsets[0][1]["fields"].append("must_be_anonymised")
+    fieldsets[0][1]["fields"].append("anonymised")
     fieldsets[0][1]["fields"].append("case_action")
+    fieldsets[0][1]["fields"].append("outcomes")
+    fieldsets[0][1]["fields"].append("mnc")
     fieldsets[0][1]["fields"].append("serial_number")
     fieldsets[0][1]["fields"].append("serial_number_override")
-    fieldsets[0][1]["fields"].append("anonymised")
 
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
@@ -1216,6 +1222,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                     "court": "Continental Court",
                     "date": "2025-02-03",
                     "judges": ["Anukam J", "Eno R", "Plasket JA", "Maya P"],
+                    "must_be_anonymised": True,
                     "case_numbers": [
                         {
                             "matter_type": "Criminal Case",
@@ -1272,7 +1279,14 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             formsets.append(inline.get_formset(request)(initial=case_numbers))
 
         judgment = Judgment()
-        for field in ["language", "court", "case_name", "date", "hearing_date"]:
+        for field in [
+            "language",
+            "court",
+            "case_name",
+            "date",
+            "hearing_date",
+            "must_be_anonymised",
+        ]:
             setattr(judgment, field, details.get(field))
 
         formsets = self.get_inline_formsets(request, formsets, inlines)

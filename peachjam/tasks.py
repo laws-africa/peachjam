@@ -193,15 +193,15 @@ def convert_source_file_to_pdf(source_file_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def convert_html_to_pdf(doc_id):
-    from peachjam.models import CoreDocument
+def create_anonymised_source_file_pdf(doc_id):
+    from peachjam.models import Judgment
 
-    doc = CoreDocument.objects.filter(id=doc_id).first()
-    logger.info(f"Creating PDF from HTML for document {doc_id}")
+    doc = Judgment.objects.filter(id=doc_id).first()
+    logger.info(f"Creating anonymised source file PDF for judgment {doc_id}")
     if not doc:
-        logger.warning("Document not found")
+        logger.warning("Judgment not found")
         return
-    doc.convert_html_to_pdf()
+    doc.create_anonymised_source_file_pdf()
     logger.info("Done")
 
 
