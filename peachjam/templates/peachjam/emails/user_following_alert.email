@@ -1,11 +1,7 @@
 {% load i18n %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8"/>
-    <title>{% trans "New Documents Alert" %}</title>
-  </head>
-  <body>
+{% block subject %}{% trans "New documents for topics that you are following" %}{% endblock %}
+{% block html %}
+  {% include 'peachjam/emails/_header.html' %}
     <p>{{ user }},</p>
     <p>{% trans "We have found new documents for topics that you are following." %}</p>
     {% for item in followed_documents %}
@@ -27,5 +23,5 @@
     <small>
       <a href="https://{{ site.domain }}{% url "user_following_list" %}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
     </small>
-  </body>
-</html>
+  {% include 'peachjam/emails/_footer.html' %}
+{% endblock %}

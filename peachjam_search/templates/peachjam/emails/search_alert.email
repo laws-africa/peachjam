@@ -1,11 +1,9 @@
 {% load i18n %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8"/>
-    <title>{% trans "Search Alert" %}</title>
-  </head>
-  <body>
+{% block subject %}
+  {% trans "New matches for your search" %} {{ saved_search.q }}
+{% endblock %}
+{% block html %}
+  {% include 'peachjam/emails/_header.html' %}
     <p>{{ saved_search.user }},</p>
     <p>{% trans "We have found new documents that match your search alert:" %}</p>
     <p>
@@ -27,5 +25,5 @@
     <small>
       <a href="https://{{ site.domain }}{% url "search:saved_search_list" %}">{% trans "Manage these email alerts" %}</a>
     </small>
-  </body>
-</html>
+  {% include 'peachjam/emails/_footer.html' %}
+{% endblock %}
