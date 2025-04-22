@@ -97,7 +97,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .replacement-group-items {
   max-height: 50vh;
   overflow-y: auto;

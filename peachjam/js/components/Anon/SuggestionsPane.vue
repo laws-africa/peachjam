@@ -87,7 +87,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .suggestion-list {
   max-height: 25vh;
   overflow-y: auto;

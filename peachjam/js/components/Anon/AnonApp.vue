@@ -66,6 +66,7 @@ export default {
       this.$refs.comments.appendChild(comments);
     }
     this.activityStart = new Date();
+    document.body.classList.add('anon-app-tall');
   },
   methods: {
     insertNotice () {
@@ -131,7 +132,7 @@ export default {
 </script>
 
 <style>
-body, html {
+.anon-app-tall {
   height: 100%;
 }
 
@@ -141,27 +142,27 @@ body, html {
   flex-direction: column;
 }
 
-.main-pane {
+#anon-app .main-pane {
   flex: 1;
   display: flex;
   flex-direction: row;
   overflow: hidden;
 }
 
-.content-pane {
+#anon-app .content-pane {
   flex: 2;
   overflow-y: auto;
   padding: 0.5em;
 }
 
-.sidebar-pane {
+#anon-app .sidebar-pane {
   flex: 1;
   padding: 0.5em;
   display: flex;
   flex-direction: column;
 }
 
-.tab-content {
+#anon-app .tab-content {
   flex-grow: 1;
   overflow-y: auto;
 }
@@ -184,19 +185,19 @@ body, html {
   background-color: #00ff00;
 }
 
-.list-group-item.replacement.is-active {
+#anon-app .list-group-item.replacement.is-active {
   background-color: rgba(255, 165, 0, 0.25);
 }
 
-.list-group-item.replacement.applied {
+#anon-app .list-group-item.replacement.applied {
   background-color: #aeffae;
 }
 
-.list-group-item.replacement.applied.is-active {
+#anon-app .list-group-item.replacement.applied.is-active {
   background-color: #00ff00;
 }
 
-.content-pane mark {
+#anon-app .content-pane mark {
   scroll-margin-top: 5em;
 }
 </style>
