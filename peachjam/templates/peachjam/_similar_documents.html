@@ -1,0 +1,11 @@
+{% load i18n %}
+<h5>{% trans 'Similar documents' %}</h5>
+<ul>
+  {% for doc in similar_documents %}
+    <li>
+      <a href="{{ doc.expression_frbr_uri }}">{{ doc.title }}
+        {% if request.user.is_superuser %}({{ doc.similarity }}){% endif %}
+      </a>
+    </li>
+  {% endfor %}
+</ul>

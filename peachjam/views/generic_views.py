@@ -381,7 +381,7 @@ class BaseDocumentDetailView(DetailView):
         )
 
         # citation links for a document
-        doc = get_object_or_404(CoreDocument, pk=self.object.pk)
+        doc = self.object
         citation_links = CitationLink.objects.filter(document=doc)
         context["citation_links"] = CitationLinkSerializer(
             citation_links, many=True
