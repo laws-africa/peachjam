@@ -1,4 +1,4 @@
-{% extends 'peachjam/emails/layouts/base.html' %}
+{% extends 'peachjam/emails/layouts/alert.html' %}
 {% load i18n %}
 {% block subject %}{% trans "New matches for your search" %} {{ saved_search.q }}{% endblock %}
 {% block alert-body %}
