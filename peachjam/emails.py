@@ -10,6 +10,7 @@ from templated_email.backends.vanilla_django import (
 )
 
 from peachjam.models import CoreDocument
+from peachjam_search.models import SavedSearch
 
 log = logging.getLogger(__name__)
 
@@ -46,18 +47,23 @@ class CustomerIOTemplateBackend(TemplateBackend):
     """
 
     serializers = {
-        User: lambda context, user: {
-            "email": user.email,
-            "tracking_id": user.userprofile.tracking_id_str,
-        },
         CoreDocument: lambda context, doc: {
             "title": doc.title,
             "url_path": doc.get_absolute_url(),
         },
+        SavedSearch: lambda context, obj: {
+            "q": obj.q,
+            "name": str(obj),
+            "url_path": obj.get_absolute_url(),
+        },
+        User: lambda context, user: {
+            "email": user.email,
+            "tracking_id": user.userprofile.tracking_id_str,
+        },
     }
 
     # use CustomerIO for these templates, otherwise fall back to the usual system
-    transactional_message_ids = ["user_following_alert"]
+    transactional_message_ids = ["search_alert", "user_following_alert"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

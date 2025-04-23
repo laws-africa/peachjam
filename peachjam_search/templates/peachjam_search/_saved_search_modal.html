@@ -18,7 +18,7 @@
                 hx-target="#saved-search-button"
                 hx-post="{% url 'search:saved_search_update' saved_search.pk %}">
             <div class="mb-3">{{ saved_search.q }}</div>
-            <div class="mb-3">{% include 'peachjam_search/_saved_search_filters.html' %}</div>
+            <div class="mb-3">{{ saved_search.pretty_filters }}</div>
             <div>
               <label class="form-label" for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
               <textarea class="form-control"

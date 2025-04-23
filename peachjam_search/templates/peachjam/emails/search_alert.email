@@ -6,7 +6,7 @@
   <p>
     <strong><a href="https://{{ site.domain }}{{ saved_search.get_absolute_url }}">{{ saved_search.q }}</a></strong>
   </p>
-  <p>{% include 'peachjam_search/_saved_search_filters.html' %}</p>
+  <p>{{ saved_search.pretty_filters }}</p>
   <ul>
     {% for doc in hits %}
       <li>

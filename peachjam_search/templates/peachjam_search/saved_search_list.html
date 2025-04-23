@@ -18,11 +18,11 @@
           <li class="list-group-item d-flex">
             <div class="flex-grow-1 row">
               <div class="col-md-6">
-                <a href="{{ search.get_absolute_url }}">{{ search }}</a>
+                <a href="{{ search.get_absolute_url }}">{{ search.q }}</a>
                 <br/>
                 <span class="text-muted">{{ search.note }}</span>
               </div>
-              <div class="col-md-6">{% include 'peachjam_search/_saved_search_filters.html' with saved_search=search %}</div>
+              <div class="col-md-6">{{ search.pretty_filters }}</div>
             </div>
             <div>
               <form action="{% url 'search:saved_search_delete' search.pk %}?next={{ request.get_full_path }}"
