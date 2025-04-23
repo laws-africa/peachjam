@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls.base import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
@@ -222,7 +223,7 @@ class UserFollowing(models.Model):
     def update_and_alert(cls, user):
         follows = UserFollowing.objects.filter(user=user)
         log.info(f"Found {follows.count()} follows for user {user.pk}")
-        documents = []
+        followed_documents = []
         for follow in follows:
             new = follow.get_new_followed_documents()
             if new["documents"]:
@@ -231,20 +232,21 @@ class UserFollowing(models.Model):
                 )
                 follow.last_alerted_at = timezone.now()
                 follow.save()
-                documents.append(new)
-        if documents:
+                followed_documents.append(new)
+        if followed_documents:
             log.info(f"Sending alert to user {user.pk}")
-            cls.send_alert(user, documents)
+            cls.send_alert(user, followed_documents)
 
     @classmethod
     def send_alert(cls, user, followed_documents):
         context = {
             "followed_documents": followed_documents,
             "user": user,
+            "manage_url_path": reverse("user_following_list"),
         }
         with override(user.userprofile.preferred_language.pk):
             send_templated_mail(
-                template_name="user_following_alert.email",
+                template_name="user_following_alert",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
                 context=context,

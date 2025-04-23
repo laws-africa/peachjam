@@ -19,6 +19,8 @@ TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa
     "lawlibrary.context_processors.lawlibrary"
 )
 
+TEMPLATED_EMAIL_BACKEND = "peachjam.emails.CustomerIOTemplateBackend"
+
 
 if not DEBUG:  # noqa
     # Law Library media files are stored on S3 and served via a Cloudflare CDN (via copying to R2).
