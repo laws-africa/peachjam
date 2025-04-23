@@ -769,7 +769,7 @@ class CoreDocument(PolymorphicModel):
 
         # inline CSS for the inject pj-anonymisation-notice
         # TODO: this is a bit of a hack; if we inline other css, find a better way
-        notice = root.get_element_by_id("pj-anonymisation-notice")
+        notice = root.get_element_by_id("pj-anonymisation-notice", None)
         if notice is not None:
             notice.set("style", "text-align: center; color: red; margin-bottom: 1em;")
 
