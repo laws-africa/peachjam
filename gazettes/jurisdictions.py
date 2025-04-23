@@ -149,6 +149,11 @@ CONTRIBUTORS = {
             "url": "https://www.webberwentzel.com",
             "img": "ww-logo.png",
         },
+        {
+            "name": "JSA Library",
+            "url": "https://johannesburgbar.co.za/library",
+            "img": "jsa.webp",
+        },
     ],
     "za-fs": [
         {
