@@ -8,6 +8,7 @@ from peachjam.models import CoreDocument
 
 class TestCustomerIOTemplateBackendSupplementContext(unittest.TestCase):
     fixtures = [
+        "tests/users",
         "tests/countries",
         "tests/courts",
         "test/languages",
