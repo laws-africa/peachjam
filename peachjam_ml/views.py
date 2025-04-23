@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -10,16 +11,18 @@ from peachjam_ml.models import DocumentEmbedding
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-class SimilarDocumentsView(DetailView):
+class SimilarDocumentsView(PermissionRequiredMixin, DetailView):
+    permission_required = "peachjam_ml.view_documentembedding"
     template_name = "peachjam/_similar_documents.html"
     slug_url_kwarg = "frbr_uri"
     slug_field = "expression_frbr_uri"
     model = CoreDocument
+    similarity_threshold = 0.5
 
     def get_similar_documents(self):
         embedding = get_object_or_404(DocumentEmbedding, document_id=self.object.pk)
         similar_docs = (
-            DocumentEmbedding.objects.exclude(document_id=self.object.pk)
+            DocumentEmbedding.objects.exclude(document__work=self.object.work)
             .exclude(text_embedding__isnull=True)
             .select_related("document")
             .annotate(
@@ -28,6 +31,7 @@ class SimilarDocumentsView(DetailView):
                 title=F("document__title"),
                 expression_frbr_uri=F("document__expression_frbr_uri"),
             )
+            .filter(similarity__gt=self.similarity_threshold)
             .values("title", "expression_frbr_uri", "similarity")
             .order_by("-similarity")[:10]
         )

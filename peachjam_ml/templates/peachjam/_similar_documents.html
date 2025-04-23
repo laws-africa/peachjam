@@ -2,7 +2,7 @@
 <h4>{% trans 'Similar documents' %}</h4>
 <ol>
   {% for doc in similar_documents %}
-    <li>
+    <li class="pb-2">
       <a href="{{ doc.expression_frbr_uri }}">{{ doc.title }}
         {% if request.user.is_superuser %}({{ doc.similarity }}){% endif %}
       </a>
