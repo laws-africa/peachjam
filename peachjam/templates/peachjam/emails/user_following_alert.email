@@ -1,0 +1,25 @@
+{% extends 'peachjam/emails/layouts/alert.html' %}
+{% load i18n %}
+{% block subject %}{% trans "New documents for topics that you are following" %}{% endblock %}
+{% block alert-body %}
+  <p>{% trans "We have found new documents for topics that you are following." %}</p>
+  {% for item in followed_documents %}
+    {{ item.followed_object }}
+    <ul>
+      {% for doc in item.documents %}
+        <li>
+          <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}?utm_campaign=following&utm_source=alert&utm_medium=email">{{ doc.title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+    <hr/>
+  {% endfor %}
+  <p>
+    {% blocktrans %}
+      The {{ APP_NAME }} Team
+    {% endblocktrans %}
+  </p>
+  <small>
+    <a href="https://{{ site.domain }}{% url "user_following_list" %}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
+  </small>
+{% endblock %}

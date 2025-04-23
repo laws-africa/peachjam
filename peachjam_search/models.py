@@ -7,15 +7,13 @@ from urllib.parse import urlencode
 from allauth.account import app_settings
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.sites.models import Site
-from django.core.mail import send_mail
 from django.db import models
 from django.http import QueryDict
 from django.shortcuts import reverse
-from django.template.loader import render_to_string
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
+from templated_email import send_templated_mail
 
 log = logging.getLogger(__name__)
 
@@ -171,32 +169,17 @@ class SavedSearch(models.Model):
     def send_alert(self, hits):
         hits = hits[:10]
         context = {
+            "user": self.user,
             "hits": hits,
             "saved_search": self,
-            "site": Site.objects.get_current(),
-            "APP_NAME": settings.PEACHJAM["APP_NAME"],
         }
         with override(self.user.userprofile.preferred_language.pk):
-            html = render_to_string(
-                "peachjam_search/emails/search_alert_email.html", context
+            send_templated_mail(
+                template_name="search_alert.email",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[self.user.email],
+                context=context,
             )
-            plain_txt = render_to_string(
-                "peachjam_search/emails/search_alert_email.txt", context
-            )
-
-            subject = (
-                settings.EMAIL_SUBJECT_PREFIX
-                + _("New matches for your search ")
-                + self.q
-            )
-        send_mail(
-            subject=subject,
-            message=plain_txt,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[self.user.email],
-            html_message=html,
-            fail_silently=False,
-        )
 
 
 class SearchFeedback(models.Model):

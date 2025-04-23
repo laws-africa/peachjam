@@ -1,0 +1,25 @@
+{% extends 'peachjam/emails/layouts/alert.html' %}
+{% load i18n %}
+{% block subject %}{% trans "New matches for your search" %} {{ saved_search.q }}{% endblock %}
+{% block alert-body %}
+  <p>{% trans "We have found new documents that match your search alert:" %}</p>
+  <p>
+    <strong><a href="https://{{ site.domain }}{{ saved_search.get_absolute_url }}">{{ saved_search.q }}</a></strong>
+  </p>
+  <p>{% include 'peachjam_search/_saved_search_filters.html' %}</p>
+  <ul>
+    {% for doc in hits %}
+      <li>
+        <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}">{{ doc.title }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+  <p>
+    {% blocktrans %}
+      The {{ APP_NAME }} Team
+    {% endblocktrans %}
+  </p>
+  <small>
+    <a href="https://{{ site.domain }}{% url "search:saved_search_list" %}">{% trans "Manage these email alerts" %}</a>
+  </small>
+{% endblock %}

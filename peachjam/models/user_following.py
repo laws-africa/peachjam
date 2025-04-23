@@ -3,14 +3,12 @@ import logging
 from countries_plus.models import Country
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
 from django.db import models
-from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
+from templated_email import send_templated_mail
 
 from . import Author, CoreDocument, Court, CourtClass, CourtRegistry, Locality, Taxonomy
 
@@ -239,29 +237,15 @@ class UserFollowing(models.Model):
             cls.send_alert(user, documents)
 
     @classmethod
-    def send_alert(cls, user, documents):
-        documents = documents
+    def send_alert(cls, user, followed_documents):
         context = {
-            "followed_documents": documents,
+            "followed_documents": followed_documents,
             "user": user,
-            "site": Site.objects.get_current(),
-            "APP_NAME": settings.PEACHJAM["APP_NAME"],
         }
         with override(user.userprofile.preferred_language.pk):
-            html = render_to_string(
-                "peachjam/emails/user_following_alert_email.html", context
+            send_templated_mail(
+                template_name="user_following_alert.email",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                context=context,
             )
-            plain_txt = render_to_string(
-                "peachjam/emails/user_following_alert_email.txt", context
-            )
-            subject = settings.EMAIL_SUBJECT_PREFIX + _(
-                "New documents for topics that you are following"
-            )
-        send_mail(
-            subject=subject,
-            message=plain_txt,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
-            html_message=html,
-        )
