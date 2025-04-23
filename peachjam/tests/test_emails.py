@@ -1,27 +1,23 @@
-import unittest
-
 from django.contrib.auth.models import User
+from django.test import TestCase
 
 from peachjam.emails import CustomerIOTemplateBackend
 from peachjam.models import CoreDocument
 
 
-class TestCustomerIOTemplateBackendSupplementContext(unittest.TestCase):
+class TestCustomerIOTemplateBackendSupplementContext(TestCase):
     fixtures = [
-        "tests/users",
+        "tests/languages",
         "tests/countries",
+        "tests/users",
         "tests/courts",
-        "test/languages",
         "documents/sample_documents",
     ]
 
     def setUp(self):
-        self.user = User.objects.first()
+        self.user = User.objects.get(pk=1)
         self.backend = CustomerIOTemplateBackend()
-        self.context = {
-            "APP_NAME": "PeachJam",
-            "site": {"domain": "example.com", "url": "https://example.com"},
-        }
+        self.context = {}
 
     def test_supplement_context_with_user_and_document(self):
         document = CoreDocument.objects.first()
@@ -46,7 +42,7 @@ class TestCustomerIOTemplateBackendSupplementContext(unittest.TestCase):
             {
                 "title": document.title,
                 "url_path": document.get_absolute_url(),
-                "url": "https://localhost:8000/akn/za/bill/senate/2024-01-01/test-for-senate/eng@2024-01-01",
+                "url": "https://example.com" + document.get_absolute_url(),
             },
         )
         self.assertEqual(
@@ -57,7 +53,7 @@ class TestCustomerIOTemplateBackendSupplementContext(unittest.TestCase):
                         {
                             "title": document.title,
                             "url_path": document.get_absolute_url(),
-                            "url": "https://localhost:8000/akn/za/bill/senate/2024-01-01/test-for-senate/eng@2024-01-01",  # noqa
+                            "url": "https://example.com" + document.get_absolute_url(),
                         }
                     ]
                 }
