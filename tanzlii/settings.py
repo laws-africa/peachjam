@@ -11,6 +11,8 @@ JAZZMIN_SETTINGS["site_brand"] = "tanzlii.org"  # noqa
 
 COURT_CODE_MAPPINGS = {"court-appeal-tanzania": "TZCA", "high-court-tanzania": "TZHC"}
 
+TEMPLATED_EMAIL_BACKEND = "peachjam.emails.CustomerIOTemplateBackend"
+
 # Custom middleware to force the I18N machinery to always choose settings.LANGUAGE_CODE
 # as the default initial language, unless another one is set via sessions or cookies
 # MIDDLEWARE = ["peachjam.middleware.ForceDefaultLanguageMiddleware"] + MIDDLEWARE  # noqa
