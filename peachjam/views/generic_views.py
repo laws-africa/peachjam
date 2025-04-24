@@ -3,6 +3,7 @@ import itertools
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count
+from django.dispatch import Signal
 from django.http import Http404
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
@@ -356,6 +357,7 @@ class BaseDocumentDetailView(DetailView):
     slug_url_kwarg = "frbr_uri"
     context_object_name = "document"
     document_diffs_url = "https://services.lawsafrica.com"
+    modify_context = Signal()
 
     def get_object(self, *args, **kwargs):
         return get_object_or_404(
@@ -381,7 +383,7 @@ class BaseDocumentDetailView(DetailView):
         )
 
         # citation links for a document
-        doc = get_object_or_404(CoreDocument, pk=self.object.pk)
+        doc = self.object
         citation_links = CitationLink.objects.filter(document=doc)
         context["citation_links"] = CitationLinkSerializer(
             citation_links, many=True
@@ -431,7 +433,7 @@ class BaseDocumentDetailView(DetailView):
 
         # provide extra context for analytics
         self.add_track_page_properties(context)
-
+        self.modify_context.send(sender=self.__class__, context=context, view=self)
         return context
 
     def fetch_citation_docs(self, works, direction):
@@ -518,6 +520,7 @@ class BaseDocumentDetailView(DetailView):
         context["n_relationships"] = sum(
             len(g) for v, g in itertools.chain(rels_as_object, rels_as_subject)
         )
+        context["show_related_documents"] = context["n_relationships"] > 0
         context["relationship_limit"] = 4
 
     def add_provision_relationships(self, context):
