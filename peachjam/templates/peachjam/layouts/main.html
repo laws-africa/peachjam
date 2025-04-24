@@ -59,8 +59,8 @@
         analytics.load(
           "{{ CUSTOMERIO_JS_KEY }}",
           {
-            {# disable cookie storage #}
-            "storage": {"stores": ["localStorage", "memory"]},
+            {# disable all persistence since it is not possible to disable just cookies #}
+            disableClientPersistence: true,
             {% if CUSTOMERIO_JOURNEYS_SITE_ID %}
               "integrations": {"Customer.io In-App Plugin": {siteId: "{{ CUSTOMERIO_JOURNEYS_SITE_ID }}"}},
             {% endif %}
