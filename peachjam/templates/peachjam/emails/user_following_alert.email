@@ -4,7 +4,7 @@
 {% block alert-body %}
   <p>{% trans "We have found new documents for topics that you are following." %}</p>
   {% for item in followed_documents %}
-    {{ item.followed_object }}
+    <b>{{ item.followed_object }}</b>
     <ul>
       {% for doc in item.documents %}
         <li>
@@ -20,6 +20,6 @@
     {% endblocktrans %}
   </p>
   <small>
-    <a href="https://{{ site.domain }}{% url "user_following_list" %}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
+    <a href="https://{{ site.domain }}{{ manage_url_path }}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
   </small>
 {% endblock %}

@@ -103,13 +103,23 @@ class SavedSearch(models.Model):
     last_alerted_at = models.DateTimeField(null=True, blank=True, auto_now_add=True)
 
     def __str__(self):
-        return self.q
+        s = self.q
+        f = self.pretty_filters()
+        if f:
+            s = f"{s} ({f})"
+        return s
 
     def get_filters_dict(self):
         filters = dict(QueryDict(self.filters).lists())
         filters.pop("q", None)
         filters.pop("page", None)
         return filters
+
+    def pretty_filters(self):
+        # get_filters_dict().values() is a list of lists, join the values with commas
+        return ", ".join(
+            [", ".join(values) for values in self.get_filters_dict().values()]
+        )
 
     def get_sorted_filters_string(self):
         return urlencode(sorted(self.get_filters_dict().items()), doseq=True)
@@ -172,10 +182,11 @@ class SavedSearch(models.Model):
             "user": self.user,
             "hits": hits,
             "saved_search": self,
+            "manage_url_path": reverse("search:saved_search_list"),
         }
         with override(self.user.userprofile.preferred_language.pk):
             send_templated_mail(
-                template_name="search_alert.email",
+                template_name="search_alert",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[self.user.email],
                 context=context,
