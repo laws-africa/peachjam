@@ -58,6 +58,7 @@ class PeachJam {
     this.setupPopovers();
     this.scrollNavTabs();
     this.clearGACookies();
+    this.clearCIOCookies();
     this.setupConfirm();
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
@@ -257,6 +258,15 @@ class PeachJam {
         if (name.trim().startsWith('_ga')) {
           document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
         }
+      }
+    }
+  }
+
+  clearCIOCookies () {
+    // clear cookies set by customerio's analytics.js
+    for (const name of ['ajs_user_id', 'ajs_anonymous_id']) {
+      if (document.cookie.includes(name)) {
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
       }
     }
   }
