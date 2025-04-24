@@ -35,7 +35,7 @@
         {% include 'peachjam/saved_document/_modal_placeholder.html' %}
       {% endif %}
     </div>
-    {% if document.source_file %}
+    {% if document.source_file and not document.source_file.private %}
       <div class="btn-group dropdown-center ms-2">
         <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
            class="btn btn-primary btn-shrink-sm"

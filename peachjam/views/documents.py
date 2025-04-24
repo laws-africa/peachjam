@@ -111,6 +111,10 @@ class DocumentSourceView(DocumentDetailView):
             source_file = self.object.source_file
             anonymised = getattr(self.object, "anonymised", False)
 
+            # if source file is private return 404
+            if source_file.private:
+                raise Http404
+
             # redirect to the PDF view if necessary
             if (
                 source_file.file
@@ -187,7 +191,10 @@ class DocumentSourcePDFView(DocumentSourceView):
 
 class DocumentPublicationView(DocumentSourceView):
     def render_to_response(self, context, **response_kwargs):
-        if hasattr(self.object, "publication_file"):
+        if (
+            hasattr(self.object, "publication_file")
+            and not self.object.publication_file.private
+        ):
             publication_file = self.object.publication_file
             if publication_file.use_source_file:
                 return redirect(

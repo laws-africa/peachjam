@@ -37,6 +37,11 @@ class AttachmentAbstractModel(models.Model):
     filename = models.CharField(_("filename"), max_length=1024, null=False, blank=False)
     mimetype = models.CharField(_("mimetype"), max_length=1024, null=False, blank=False)
     size = models.BigIntegerField(_("size"), default=0)
+    private = models.BooleanField(
+        _("private"),
+        default=False,
+        help_text=_("Set to True if this file should not be publicly accessible"),
+    )
     file = DynamicStorageFileField(_("file"), upload_to=file_location, max_length=1024)
 
     def __str__(self):

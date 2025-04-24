@@ -353,7 +353,7 @@
                         </dd>
                       {% endblock %}
                       {% block document-metadata-content-publication %}
-                        {% if document.publication_file %}
+                        {% if document.publication_file and not document.publication_file.private %}
                           <dt>
                             {% trans 'Publication' %}
                           </dt>
@@ -367,13 +367,15 @@
                       {% block document-metadata-media-summary-download %}
                         {% if document.attachedfiles_set %}
                           {% for attachedfile in document.attachedfiles_set.all %}
-                            <dt>
-                              {{ attachedfile.nature.name }}
-                            </dt>
-                            <dd>
-                              <a href="{{ attachedfile.file.url }}" target="_blank">{% trans "Download" %} {{ attachedfile.extension|upper }}</a>
-                              ({{ attachedfile.size|filesizeformat }})
-                            </dd>
+                            {% if not attachedfile.private %}
+                              <dt>
+                                {{ attachedfile.nature.name }}
+                              </dt>
+                              <dd>
+                                <a href="{{ attachedfile.file.url }}" target="_blank">{% trans "Download" %} {{ attachedfile.extension|upper }}</a>
+                                ({{ attachedfile.size|filesizeformat }})
+                              </dd>
+                            {% endif %}
                           {% endfor %}
                         {% endif %}
                       {% endblock %}
