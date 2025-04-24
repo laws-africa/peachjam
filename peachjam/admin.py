@@ -562,6 +562,8 @@ class AccessGroupMixin(GuardedModelAdminMixin):
 
 
 class DocumentAdmin(AccessGroupMixin, BaseAdmin):
+    # used in change_form.html
+    is_document_admin = True
     form = DocumentForm
     inlines = [
         SourceFileInline,

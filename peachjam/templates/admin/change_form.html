@@ -4,18 +4,20 @@
   {{ block.super }}
   {% if adminform.form.edit_activity_start %}{{ adminform.form.edit_activity_start }}{% endif %}
   {% if adminform.form.edit_activity_stage %}{{ adminform.form.edit_activity_stage }}{% endif %}
-  {% if not original %}
-    <div data-component="DocumentUploader"
-         data-extractor-url="{{ adminform.form.extractor_url }}"></div>
-  {% endif %}
-  {% if original and original.source_file.pk %}
-    {% include 'admin/peachjam/_duplicates_warning.html' with document=original %}
-  {% endif %}
-  {% if original.pk and not original.published %}
-    <div class="alert alert-warning">{% trans "This document is not published and is not visible to the public." %}</div>
-  {% endif %}
-  {% if original.restricted %}
-    <div class="alert alert-warning">{% trans "This document is restricted and is only visible to some users." %}</div>
+  {% if adminform.model_admin.is_document_admin %}
+    {% if not original %}
+      <div data-component="DocumentUploader"
+           data-extractor-url="{{ adminform.form.extractor_url }}"></div>
+    {% endif %}
+    {% if original and original.source_file.pk %}
+      {% include 'admin/peachjam/_duplicates_warning.html' with document=original %}
+    {% endif %}
+    {% if original.pk and not original.published %}
+      <div class="alert alert-warning">{% trans "This document is not published and is not visible to the public." %}</div>
+    {% endif %}
+    {% if original.restricted %}
+      <div class="alert alert-warning">{% trans "This document is restricted and is only visible to some users." %}</div>
+    {% endif %}
   {% endif %}
 {% endblock %}
 {% block extra_actions %}
