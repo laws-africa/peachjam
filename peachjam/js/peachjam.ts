@@ -265,8 +265,12 @@ class PeachJam {
   clearCIOCookies () {
     // clear cookies set by customerio's analytics.js
     for (const name of ['ajs_user_id', 'ajs_anonymous_id']) {
-      if (document.cookie.includes(name)) {
-        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
+      try {
+        if (document.cookie.includes(name)) {
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
+        }
+      } catch {
+        // ignore security errors when reading cookies
       }
     }
   }
