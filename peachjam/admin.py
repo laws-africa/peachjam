@@ -72,7 +72,6 @@ from peachjam.models import (
     DocumentTopic,
     EntityProfile,
     ExternalDocument,
-    Folder,
     Gazette,
     GenericDocument,
     Image,
@@ -96,11 +95,9 @@ from peachjam.models import (
     Ratification,
     RatificationCountry,
     Relationship,
-    SavedDocument,
     SourceFile,
     Taxonomy,
     Treatment,
-    UserFollowing,
     UserProfile,
     Work,
     citations_processor,
@@ -1710,6 +1707,7 @@ class JudgeAdmin(admin.ModelAdmin):
 @admin.register(MatterType)
 class MatterTypeAdmin(BaseAdmin):
     help_topic = "site-admin/add-matter-types"
+    search_fields = ("name",)
 
 
 @admin.register(Attorney)
@@ -1783,11 +1781,8 @@ admin.site.register(
         CitationProcessing,
         CourtDivision,
         CustomPropertyLabel,
-        Folder,
-        SavedDocument,
         DocumentAccessGroup,
         Treatment,
-        UserFollowing,
     ]
 )
 admin.site.unregister(User)
