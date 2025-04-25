@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.db.models import signals
 from django.dispatch import receiver
+from django.dispatch.dispatcher import Signal
 from django_comments.models import Comment
 from django_comments.signals import comment_will_be_posted
 
@@ -22,6 +23,10 @@ from peachjam.tasks import update_extracted_citations_for_a_work
 from peachjam_search.models import SavedSearch
 
 User = get_user_model()
+
+
+# a user has requested a password reset
+password_reset_started = Signal()
 
 
 @receiver(signals.post_save)
@@ -168,3 +173,13 @@ def annotated_customerio(sender, instance, created, raw, **kwargs):
 @receiver(signals.pre_delete, sender=Annotation)
 def unannotated_customerio(sender, instance, **kwargs):
     get_customerio().track_unannotated(instance)
+
+
+@receiver(password_reset_started, sender=User)
+def password_reset_started_customerio(sender, request, user, **kwargs):
+    get_customerio().track_password_reset_started(user)
+
+
+@receiver(allauth_signals.password_reset, sender=User)
+def password_reset_customerio(sender, request, user, **kwargs):
+    get_customerio().track_password_reset(user)
