@@ -150,6 +150,22 @@ class CustomerIO:
                 self.get_annotation_details(annotation),
             )
 
+    def track_password_reset_started(self, user):
+        if self.enabled():
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "Password reset started",
+                self.get_common_details(),
+            )
+
+    def track_password_reset(self, user):
+        if self.enabled():
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "Password reset",
+                self.get_common_details(),
+            )
+
     def update_user_details(self, user):
         """Push user details to customerio"""
         if self.enabled():

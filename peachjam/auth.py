@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import redirect_to_login
 
 from peachjam.models import pj_settings
+from peachjam.signals import password_reset_started
 
 
 def user_display(user):
@@ -18,6 +19,19 @@ def user_display(user):
 class AccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         return pj_settings().allow_signups
+
+    def send_mail(self, template_prefix, email, context):
+        # injection point for hooking into password reset initiation
+        # see allauth.account.forms.ResetPasswordForm._send_password_reset_mail
+        if template_prefix == "account/email/password_reset_key":
+            user = context["user"]
+            password_reset_started.send(
+                sender=user.__class__,
+                request=context["request"],
+                user=user,
+            )
+
+        super().send_mail(template_prefix, email, context)
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
