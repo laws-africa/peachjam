@@ -118,7 +118,11 @@ class SavedSearch(models.Model):
     def pretty_filters(self):
         # get_filters_dict().values() is a list of lists, join the values with commas
         return ", ".join(
-            [", ".join(values) for values in self.get_filters_dict().values()]
+            [
+                ", ".join(values)
+                for key, values in self.get_filters_dict().items()
+                if key != "sort"
+            ]
         )
 
     def get_sorted_filters_string(self):
