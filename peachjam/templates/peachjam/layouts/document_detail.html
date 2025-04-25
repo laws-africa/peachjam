@@ -353,7 +353,7 @@
                         </dd>
                       {% endblock %}
                       {% block document-metadata-content-publication %}
-                        {% if document.publication_file and not document.publication_file.private %}
+                        {% if document.publication_file %}
                           <dt>
                             {% trans 'Publication' %}
                           </dt>
