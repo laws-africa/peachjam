@@ -1,3 +1,4 @@
+import datetime
 import logging
 import math
 
@@ -25,7 +26,7 @@ class GraphRanker:
     This system improves document ranking and recommendation quality by introducing
     an Authority Score, which measures a document’s importance within the citation network.
 
-    The Authority Score combines two complementary signals:
+    The Authority Score combines three complementary signals:
 
     1. PageRank:
        - Computed using the PageRank algorithm on the document citation graph.
@@ -37,6 +38,9 @@ class GraphRanker:
        - Measures raw popularity, independent of the quality of the citing documents.
        - Helps identify documents that are widely referenced even if by less influential sources.
 
+    3. Recency score:
+       - Recent documents are boosted slightly to account for the fact that they haven't had time to be cited yet.
+
     Normalization:
     - PageRank values are min-max normalized across the full corpus to scale to [0, 1].
     - Citation counts are log-transformed using log(1 + count) to reduce the effect of extreme outliers,
@@ -44,7 +48,7 @@ class GraphRanker:
 
     Combination:
     The final Authority Score is calculated as a weighted sum:
-        authority_score = 0.7 * normalized_pagerank + 0.3 * normalized_log_citation_count
+        authority_score = 0.6 * normalized_pagerank + 0.3 * normalized_log_citation_count + 0.1 * recency
 
     - PageRank is weighted more heavily to prioritize influence over popularity.
     - The weighting can be tuned based on empirical ranking quality.
@@ -59,8 +63,12 @@ class GraphRanker:
     with other signals such as semantic similarity and document recency during re-ranking.
     """
 
-    AUTHORITY_WEIGHT_PAGERANK = 0.7
+    AUTHORITY_WEIGHT_PAGERANK = 0.6
     AUTHORITY_WEIGHT_CITATIONS = 0.3
+    AUTHORITY_WEIGHT_RECENCY = 0.1
+
+    # the maximum age of a document in days to be considered "recent"
+    RECENCY_AGE_DAYS = 365
 
     work_ids = None
     graph = None
@@ -113,13 +121,35 @@ class GraphRanker:
             [math.log(x + 1) for x in in_degrees]
         )
 
+        recency_scores = self.calculate_recency_scores()
+
         # calculate weighted authority scores
         self.authority_scores = [
             self.AUTHORITY_WEIGHT_PAGERANK * rank
             + self.AUTHORITY_WEIGHT_CITATIONS * citation_count
-            for rank, citation_count in zip(
-                self.normalized_ranks, self.normalized_n_citing_works
+            + self.AUTHORITY_WEIGHT_RECENCY * recency
+            for rank, citation_count, recency in zip(
+                self.normalized_ranks, self.normalized_n_citing_works, recency_scores
             )
+        ]
+
+    def calculate_recency_scores(self):
+        """Recency scores to compensate for recent documents that are too new to be cited.
+        We use the earliest document date for each work."""
+        dates = {
+            x["work_id"]: x["date"]
+            for x in CoreDocument.objects.filter(work__in=self.work_ids.keys())
+            .values("work_id", "date")
+            .distinct("work_id")
+            .order_by("work_id", "date")
+        }
+        # build ordered list of dates for works
+        dates = [dates.get(w.pk) for w in self.work_ids.keys()]
+        today = datetime.date.today()
+        ages = [(today - d).days if d else self.RECENCY_AGE_DAYS for d in dates]
+        return [
+            1 - (age / self.RECENCY_AGE_DAYS) if age < self.RECENCY_AGE_DAYS else 0
+            for age in ages
         ]
 
     def publish_ranks(self):
