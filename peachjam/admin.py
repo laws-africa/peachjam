@@ -1508,7 +1508,7 @@ class WorkAdmin(admin.ModelAdmin):
         "title",
         "frbr_uri",
         "languages",
-        "ranking",
+        "authority_score",
         "frbr_uri_country",
         "frbr_uri_locality",
         "frbr_uri_doctype",
@@ -1528,7 +1528,7 @@ class WorkAdmin(admin.ModelAdmin):
         "frbr_uri_subtype",
         "frbr_uri_actor",
     )
-    list_display = ("title", "frbr_uri", "languages", "ranking")
+    list_display = ("title", "frbr_uri", "languages", "authority_score")
     readonly_fields = [f for f in fields if f != "partner"]
     inlines = [RelationshipInline, DocumentInline]
     actions = ["update_extracted_citations", "update_languages"]
