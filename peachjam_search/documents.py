@@ -284,8 +284,8 @@ class SearchableDocument(Document):
             return text
 
     def prepare_ranking(self, instance):
-        if instance.work.ranking > 0:
-            return instance.work.ranking
+        if instance.work.pagerank > 0:
+            return instance.work.pagerank
         return 0.00000001
 
     def prepare_court(self, instance):
