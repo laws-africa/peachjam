@@ -74,7 +74,7 @@
             </div>
           </div>
         {% endblock %}
-        {% include 'peachjam/_notices.html' with messages=notices %}
+        {% include 'peachjam/document/_warning_notices.html' with messages=notices %}
         {% include "peachjam/_document_detail_toolbar.html" %}
         {% include 'peachjam/_document_floating_header.html' %}
         <ul class="nav nav-tabs border-bottom scroll-xs" role="tablist">
@@ -182,6 +182,7 @@
              role="tabpanel"
              aria-labelledby="document-detail-tab">
           <div class="container">
+            {% include 'peachjam/document/_info_notices.html' with messages=notices %}
             {% block document-metadata %}
               <div class="row">
                 <div class="col-md mb-3">
