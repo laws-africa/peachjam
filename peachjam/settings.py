@@ -153,6 +153,7 @@ PEACHJAM = {
     # Customer.io
     "CUSTOMERIO_JS_KEY": os.environ.get("CUSTOMERIO_JS_KEY"),
     "CUSTOMERIO_PYTHON_KEY": os.environ.get("CUSTOMERIO_PYTHON_KEY"),
+    "CUSTOMERIO_EMAIL_API_KEY": os.environ.get("CUSTOMERIO_EMAIL_API_KEY"),
     "CUSTOMERIO_JOURNEYS_SITE_ID": os.environ.get("CUSTOMERIO_JOURNEYS_SITE_ID"),
 }
 

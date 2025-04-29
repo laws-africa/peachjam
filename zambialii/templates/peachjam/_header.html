@@ -13,11 +13,28 @@
       {% trans 'Legislation' %}
     </a>
   </li>
-  <li class="nav-item">
-    <a class="nav-link {% if view.document_nature.code == 'speech' %}active{% endif %}"
-       href="{% url 'document_nature_list' 'speech' %}">
-      {% trans 'Speeches' %}
+  <li class="nav-item dropdown main-nav">
+    <a href="#"
+       class="nav-link dropdown-toggle"
+       role="button"
+       data-bs-togge="dropdown"
+       aria-expanded="false">
+      {% trans 'Publications' %}
     </a>
+    <ul class="dropdown-menu">
+      <li class="dropdown-item">
+        <a class="nav-link {% if view.document_nature.code == 'newsletter' %}active{% endif %}"
+           href="{% url 'document_nature_list' 'newsletter' %}">
+          {% trans 'Newsletters' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link {% if view.document_nature.code == 'speech' %}active{% endif %}"
+           href="{% url 'document_nature_list' 'speech' %}">
+          {% trans 'Speeches' %}
+        </a>
+      </li>
+    </ul>
   </li>
   <li class="nav-item">
     <a class="nav-link {% if view.document_nature.code == 'law-reform-report' %}active{% endif %}"

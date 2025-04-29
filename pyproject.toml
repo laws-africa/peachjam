@@ -24,6 +24,7 @@ dependencies = [
     "boto3>=1.21.38",
     "cobalt>=6.0.0",
     "cssutils >= 2",
+    "customerio >= 2.1",
     "customerio-cdp-analytics>=0.0.2",
     "dj-database-url>=0.5.0",
     "Django~=4.2",
