@@ -229,6 +229,24 @@ class DocumentMediaView(DocumentDetailView):
         return response
 
 
+class DocumentAttachmentView(DocumentDetailView):
+    def render_to_response(self, context, **response_kwargs):
+        file = self.object.attachedfiles_set.filter(
+            filename=self.kwargs["filename"]
+        ).first()
+        if file and not file.private:
+            if getattr(file.file.storage, "custom_domain", None):
+                # use the storage's custom domain to serve the file
+                return redirect(file.file.url)
+
+            file_bytes = file.file.open().read()
+            response = HttpResponse(file_bytes, content_type=file.mimetype)
+            response["Content-Disposition"] = f"attachment; filename={file.filename}"
+            response["Content-Length"] = str(len(file_bytes))
+            return response
+        raise Http404
+
+
 class DocumentCitationsView(DocumentDetailView):
     template_name = "peachjam/_citations_list_items.html"
 
