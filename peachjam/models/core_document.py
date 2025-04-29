@@ -177,12 +177,6 @@ class Work(models.Model):
         default=list,
         verbose_name=_("languages"),
     )
-    # the rank (weight) of this work in the graph network, computer by peachjam.graph.ranker
-    ranking = models.FloatField(_("ranking"), null=True, blank=False, default=0.0)
-    # number of outgoing citations
-    n_cited_works = models.IntegerField(_("number of cited works"), default=0)
-    # number of incoming citations
-    n_citing_works = models.IntegerField(_("number of incoming citations"), default=0)
     partner = models.ForeignKey(
         "peachjam.Partner",
         null=True,
@@ -191,6 +185,23 @@ class Work(models.Model):
         help_text=_("Publication partner"),
         on_delete=models.SET_NULL,
     )
+
+    # work score details
+
+    # the rank (weight) of this work in the graph network, computer by peachjam.analysis.ranker
+    pagerank = models.FloatField(_("pagerank"), null=True, blank=False, default=0.0)
+    # normalised pagerank using min/max normalisation
+    pagerank_normalized = models.FloatField(_("pagerank normalized"), default=0.0)
+    # number of outgoing citations
+    n_cited_works = models.IntegerField(_("number of cited works"), default=0)
+    # number of incoming citations
+    n_citing_works = models.IntegerField(_("number of incoming citations"), default=0)
+    # normalised number of incoming citations: min/max normalisation of log(n_citing_works + 1)
+    n_citing_works_normalized = models.FloatField(
+        _("number of incoming citations normalized"), default=0.0
+    )
+    # weighted combination of pagerank_normalized and n_citing_works_normalized
+    authority_score = models.FloatField(_("authority score"), default=0.0)
 
     class Meta:
         verbose_name = _("work")

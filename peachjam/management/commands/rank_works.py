@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand
 
-from peachjam.graph.ranker import GraphRanker
+from peachjam.analysis.ranker import GraphRanker
 
 
 class Command(BaseCommand):

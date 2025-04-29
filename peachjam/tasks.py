@@ -207,7 +207,7 @@ def create_anonymised_source_file_pdf(doc_id):
 
 @background(queue="peachjam", remove_existing_tasks=True)
 def rank_works():
-    from peachjam.graph.ranker import GraphRanker
+    from peachjam.analysis.ranker import GraphRanker
 
     GraphRanker().rank_and_publish()
 
