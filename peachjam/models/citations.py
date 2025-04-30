@@ -142,7 +142,7 @@ class ExtractedCitation(models.Model):
         # get the top n_per_group documents for each nature, ordering by the number of incoming citations
         if nature:
             # just one group, don't need a window function
-            qs = qs.filter(nature=nature).order_by("-work__n_citing_works", "title")
+            qs = qs.filter(nature=nature).order_by("-work__authority_score", "title")
             truncated = qs.count() > offset + n_per_group
             qs = qs[offset : offset + n_per_group]
         else:
@@ -153,11 +153,11 @@ class ExtractedCitation(models.Model):
                 row_number=Window(
                     expression=RowNumber(),
                     partition_by=[F("nature__name")],
-                    order_by=[F("work__n_citing_works").desc(), F("title")],
+                    order_by=[F("work__authority_score").desc(), F("title")],
                 )
             ).filter(row_number__lte=n_per_group)
         return (
-            sorted(qs, key=lambda d: [d.nature.name, -d.work.n_citing_works, d.title]),
+            sorted(qs, key=lambda d: [d.nature.name, -d.work.authority_score, d.title]),
             truncated,
         )
 
