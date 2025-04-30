@@ -1,3 +1,5 @@
+import re
+
 from cobalt import FrbrUri
 from django.conf import settings
 from django.http import Http404, HttpResponse
@@ -241,7 +243,8 @@ class DocumentAttachmentView(DocumentDetailView):
 
             file_bytes = file.file.open().read()
             response = HttpResponse(file_bytes, content_type=file.mimetype)
-            response["Content-Disposition"] = f"attachment; filename={file.filename}"
+            filename = re.sub(r"[^A-Za-z0-9._-]", "", file.filename)
+            response["Content-Disposition"] = f"attachment; filename={filename}"
             response["Content-Length"] = str(len(file_bytes))
             return response
         raise Http404
