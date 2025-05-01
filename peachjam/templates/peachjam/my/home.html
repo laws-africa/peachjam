@@ -2,16 +2,6 @@
 {% block title %}{{ MY_LII }}{% endblock %}
 {% load i18n %}
 {% block my-content %}
-  <h1 class="mb-2">{{ MY_LII }}</h1>
-  <div class="h5 text-muted">
-    {% if user.first_name %}
-      <span class="me-3">{{ user.first_name }} {{ user.last_name }}</span>
-      {{ user.email }}
-    {% endif %}
-  </div>
-  <div class="mb-4">
-    <a href="{% url 'edit_account' %}">{% trans "Account settings" %}</a>
-  </div>
   <div class="row">
     {% if PEACHJAM_SETTINGS.allow_save_documents %}
       <div class="col-lg-6">

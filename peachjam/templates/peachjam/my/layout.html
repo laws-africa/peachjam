@@ -16,7 +16,18 @@
           </ol>
         </nav>
       {% endblock %}
-      <ul class="nav nav-tabs border-bottom scroll-xs" role="tablist">
+      <div class="row mb-2">
+        <div class="col-sm">
+          <h1 class="mb-2 text-nowrap">{{ MY_LII }}</h1>
+        </div>
+        <div class="col-sm ms-sm-auto text-sm-end">
+          <div class="h5 text-muted">
+            {% if user.first_name %}<div>{{ user.first_name }} {{ user.last_name }}</div>{% endif %}
+            {{ user.email }}
+          </div>
+        </div>
+      </div>
+      <ul class="nav nav-tabs border-bottom scroll-xs">
         {% block my-tabs %}
           <li class="nav-item" role="presentation">
             <a href="{% url "my_home" %}"
