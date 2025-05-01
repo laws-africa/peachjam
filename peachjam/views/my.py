@@ -16,7 +16,9 @@ class MyHomeView(LoginRequiredMixin, TemplateView):
             n_saved_documents=Count("saved_documents")
         )
         context["doc_suggestions"] = list(
-            UserFollowing.latest_documents_for_user(self.request.user, 10)
+            UserFollowing.latest_documents_for_user(
+                self.request.user, 10
+            ).prefetch_related("labels")
         )
         return context
 
@@ -41,6 +43,8 @@ class MyFrontpageView(TemplateView):
                 n_saved_documents=Count("saved_documents")
             )
             context["doc_suggestions"] = list(
-                UserFollowing.latest_documents_for_user(self.request.user, 10)
+                UserFollowing.latest_documents_for_user(
+                    self.request.user, 10
+                ).prefetch_related("labels")
             )
         return context

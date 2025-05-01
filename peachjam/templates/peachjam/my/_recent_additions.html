@@ -2,20 +2,13 @@
 <div class="card mb-3">
   <div class="card-body">
     <h5 class="mb-3">{% trans "What's new in topics you follow" %}</h5>
-    <ul class="list-unstyled">
-      {% for doc in doc_suggestions %}
-        <li class="row">
-          <div class="col-md-9">
-            <a href="{{ doc.get_absolute_url }}" class="flex-grow-1">{{ doc }}</a>
-          </div>
-          <div class="col-md-3 text-muted">
-            {% blocktrans with ago=doc.created_at|timesince %}{{ ago }} ago{% endblocktrans %}
-          </div>
-        </li>
-      {% empty %}
-        <li>{% trans "Follow courts and topics to stay up-to-date." %}</li>
-      {% endfor %}
-    </ul>
-    <a href="{% url 'user_following_list' %}">{% trans "Topics you follow" %} →</a>
+    <p>
+      <a href="{% url 'user_following_list' %}">{% trans "Topics you follow" %} →</a>
+    </p>
+    {% if doc_suggestions %}
+      {% include 'peachjam/_document_table.html' with doc_table_show_date=True documents=doc_suggestions doc_table_title_label="Title" doc_table_date_label="Date" %}
+    {% else %}
+      <p>{% trans "Follow courts and topics to stay up-to-date." %}</p>
+    {% endif %}
   </div>
 </div>
