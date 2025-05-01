@@ -1,4 +1,5 @@
 import logging
+from functools import reduce
 
 from countries_plus.models import Country
 from django.conf import settings
@@ -168,56 +169,42 @@ class UserFollowing(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+    def get_documents_queryset(self):
+        qs = CoreDocument.objects
+
+        if self.court:
+            return qs.filter(judgment__court=self.court)
+
+        if self.author:
+            return qs.filter(genericdocument__author=self.author)
+
+        if self.court_class:
+            return qs.filter(judgment__court__court_class=self.court_class)
+
+        if self.court_registry:
+            return qs.filter(judgment__registry=self.court_registry)
+
+        if self.country:
+            return qs.filter(jurisdiction=self.country)
+
+        if self.locality:
+            return qs.filter(locality=self.locality)
+
+        if self.taxonomy:
+            topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
+            return qs.filter(taxonomies__topic__in=topics)
+
     def get_new_followed_documents(self):
-        qs = CoreDocument.objects.preferred_language(
+        qs = self.get_documents_queryset().preferred_language(
             self.user.userprofile.preferred_language.iso_639_3
         )
         if self.last_alerted_at:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
-        if self.court:
-            qs = qs.filter(judgment__court=self.court)[:10]
-            return {
-                "followed_object": self.court,
-                "documents": qs,
-            }
 
-        elif self.author:
-            qs = qs.filter(genericdocument__author=self.author)[:10]
-            return {
-                "followed_object": self.author,
-                "documents": qs,
-            }
-        elif self.court_class:
-            qs = qs.filter(judgment__court__court_class=self.court_class)[:10]
-            return {
-                "followed_object": self.court_class,
-                "documents": qs,
-            }
-        elif self.court_registry:
-            qs = qs.filter(judgment__registry=self.court_registry)[:10]
-            return {
-                "followed_object": self.court_registry,
-                "documents": qs,
-            }
-        elif self.country:
-            qs = qs.filter(jurisdiction=self.country)[:10]
-            return {
-                "followed_object": self.country,
-                "documents": qs,
-            }
-        elif self.locality:
-            qs = qs.filter(locality=self.locality)[:10]
-            return {
-                "followed_object": self.locality,
-                "documents": qs,
-            }
-        elif self.taxonomy:
-            topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
-            qs = qs.filter(taxonomies__topic__in=topics)[:10]
-            return {
-                "followed_object": self.taxonomy,
-                "documents": qs,
-            }
+        return {
+            "followed_object": self.followed_object,
+            "documents": qs[:10],
+        }
 
     @classmethod
     def update_and_alert(cls, user):
@@ -251,3 +238,14 @@ class UserFollowing(models.Model):
                 recipient_list=[user.email],
                 context=context,
             )
+
+    @classmethod
+    def latest_documents_for_user(cls, user, top_n):
+        """Gets a queryset of the latest documents across all follows for this user, ordered by creation date."""
+        qs = [
+            f.get_documents_queryset().order_by("-created_at")[:top_n]
+            for f in user.following.all()
+        ]
+        # union, sort and get the top n
+        qs = reduce(lambda x, y: x | y, qs).order_by("-created_at")
+        return qs[:top_n]
