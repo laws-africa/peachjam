@@ -4,51 +4,10 @@
 {% block my-content %}
   <div class="row">
     {% if PEACHJAM_SETTINGS.allow_save_documents %}
-      <div class="col-lg-6">
-        <div class="card mb-3">
-          <div class="card-body">
-            <h5 class="mb-3">{% trans "Saved documents" %}</h5>
-            <ul class="list-unstyled mb-3">
-              {% for folder in folders %}
-                <li class="d-flex">
-                  <i class="bi bi-folder me-2"></i>
-                  <div class="flex-grow-1">
-                    <a href="{{ folder.get_absolute_url }}">{{ folder }}</a>
-                    <span class="badge bg-secondary">{{ folder.n_saved_documents }}</span>
-                    {% if folder.note %}<div class="text-muted">{{ folder.note }}</div>{% endif %}
-                  </div>
-                </li>
-              {% empty %}
-                <li>{% trans "You haven't saved any documents yet." %}</li>
-              {% endfor %}
-            </ul>
-            <a href="{% url 'folder_list' %}">{% trans "Saved documents" %} →</a>
-          </div>
-        </div>
-      </div>
+      <div class="col-lg-6">{% include "peachjam/my/_saved_documents.html" %}</div>
     {% endif %}
     {% if PEACHJAM_SETTINGS.allow_save_searches %}
-      <div class="col-lg-6">
-        <div class="card mb-3">
-          <div class="card-body">
-            <h5 class="mb-3">{% trans "Search alerts" %}</h5>
-            <ul class="list-unstyled mb-3">
-              {% for saved_search in user.saved_searches.all %}
-                <li class="d-flex">
-                  <i class="bi bi-search me-2"></i>
-                  <div class="flex-grow-1">
-                    <a href="{{ saved_search.get_absolute_url }}">{{ saved_search }}</a>
-                    {% if saved_search.note %}<div class="text-muted">{{ saved_search.note }}</div>{% endif %}
-                  </div>
-                </li>
-              {% empty %}
-                <li>{% trans "You don't have any search alerts." %}</li>
-              {% endfor %}
-            </ul>
-            <a href="{% url 'search:saved_search_list' %}">{% trans "Search alerts" %} →</a>
-          </div>
-        </div>
-      </div>
+      <div class="col-lg-6">{% include "peachjam/my/_saved_searches.html" %}</div>
     {% endif %}
     {% if perms.peachjam.view_userfollowing %}
       <div class="col-lg-12">{% include "peachjam/my/_recent_additions.html" %}</div>
