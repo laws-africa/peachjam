@@ -13,13 +13,19 @@
       <ul class="list-group list-group-flush">
         {% for search in saved_searches %}
           <li class="list-group-item d-flex">
+            <i class="bi bi-search me-2"></i>
             <div class="flex-grow-1 row">
-              <div class="col-md-6">
-                <a href="{{ search.get_absolute_url }}">{{ search.q }}</a>
-                <br/>
-                <span class="text-muted">{{ search.note }}</span>
+              <div class="col-md">
+                <a href="{{ search.get_absolute_url }}">{{ search }}</a>
+                {% if search.note %}<div class="text-muted">{{ search.note }}</div>{% endif %}
               </div>
-              <div class="col-md-6">{{ search.pretty_filters }}</div>
+              {% if search.last_alerted_at %}
+                <div class="col-md text-muted">
+                  {% blocktrans trimmed with ago=search.last_alerted_at|timesince %}
+                    Alerted {{ ago }} ago
+                  {% endblocktrans %}
+                </div>
+              {% endif %}
             </div>
             <div>
               <form action="{% url 'search:saved_search_delete' search.pk %}?next={{ request.get_full_path }}"
