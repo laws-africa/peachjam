@@ -1,0 +1,33 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% block title %}My LII{% endblock %}
+{% load i18n %}
+{% block page-content %}
+  <div class="container">
+    {% block breadcrumbs %}
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'account_home' %}">{% trans 'My LII' %}</a>
+          </li>
+        </ol>
+      </nav>
+    {% endblock %}
+    <ul class="nav nav-tabs border-bottom scroll-xs" role="tablist">
+      {% block my-tabs %}
+        <li class="nav-item" role="presentation">
+          <a href="{% url "my_home" %}"
+             class="nav-link {% if view.tab == "my" %}active{% endif %}">My LII</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link {% if view.tab == "saved_documents" %}active{% endif %}">{% trans "Saved documents" %}</a>
+        </li>
+      {% endblock %}
+    </ul>
+    <div class="pt-3">
+      {% block my-content %}{% endblock %}
+    </div>
+  </div>
+{% endblock %}
