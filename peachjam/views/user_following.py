@@ -32,7 +32,7 @@ class UserFollowingForm(forms.ModelForm):
 
 
 class UserFollowingButtonView(TemplateView):
-    template_name = "peachjam/user_followings/_button.html"
+    template_name = "peachjam/user_following/_button.html"
 
     def get(self, *args, **kwargs):
         form = UserFollowingForm(self.request.GET)
@@ -87,13 +87,13 @@ class UserFollowingListView(BaseUserFollowingView, ListView):
 
     def get_template_names(self):
         if self.request.htmx:
-            return ["peachjam/user_followings/_timeline.html"]
-        return ["peachjam/user_followings/list.html"]
+            return ["peachjam/user_following/_timeline.html"]
+        return ["peachjam/user_following/list.html"]
 
 
 class UserFollowingCreateView(BaseUserFollowingView, CreateView):
     form_class = UserFollowingForm
-    template_name = "peachjam/user_followings/_create.html"
+    template_name = "peachjam/user_following/_create.html"
     permission_required = "peachjam.add_userfollowing"
 
     def get_form_kwargs(self):
@@ -112,7 +112,7 @@ class UserFollowingCreateView(BaseUserFollowingView, CreateView):
 
 
 class UserFollowingDeleteView(BaseUserFollowingView, DeleteView):
-    template_name = "peachjam/user_followings/_delete.html"
+    template_name = "peachjam/user_following/_delete.html"
     permission_required = "peachjam.delete_userfollowing"
 
     def get_success_url(self):
