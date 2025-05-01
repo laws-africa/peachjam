@@ -7,7 +7,7 @@
     </p>
     {% if following_timeline %}
       <ol class="list-timeline list-scrollable">
-        {% include "peachjam/my/_following_timeline.html" with truncated=True %}
+        {% include "peachjam/user_followings/_timeline.html" with truncated=True %}
       </ol>
     {% else %}
       <p>{% trans "Follow courts and topics to stay up-to-date." %}</p>
