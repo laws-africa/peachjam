@@ -60,7 +60,7 @@
     bottom: 0;
     left: 10px;
     width: 2px;
-    background: $border-color;
+    background: $gray-300;
   }
 
   > li {
@@ -74,9 +74,8 @@
       left: -19px;
       width: 10px;
       height: 10px;
-      background: $border-color;
+      background: $gray-300;
       border-radius: 50%;
-      border: 2px solid white; /* optional: adds contrast if background is white */
     }
   }
 }

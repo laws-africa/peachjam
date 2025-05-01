@@ -1,33 +1,39 @@
 {% load i18n %}
-<ol class="list-timeline">
-  {% for date, groups in following_timeline.items %}
-    <li>
-      <div class="sticky-top bg-white">
-        <b>{{ date }}</b>
-      </div>
-      <ul class="list-unstyled ms-3 mt-3">
-        {% for following, docs in groups %}
-          <li>
-            <b><a href="{{ following.followed_object.get_absolute_url }}">{{ following.followed_object }}</a></b>
-            <div class="ms-3">
-              {% include 'peachjam/_document_table.html' with doc_table_hide_thead=True doc_table_show_date=True documents=docs.0 %}
-              {% if docs.1 %}
-                <details>
-                  <summary>
-                    {% blocktrans trimmed with n_more=docs.1|length %}{{ n_more }} more{% endblocktrans %}
-                  </summary>
-                  {% include 'peachjam/_document_table.html' with doc_table_hide_thead=True doc_table_show_date=True documents=docs.1 %}
-                </details>
-              {% endif %}
-            </div>
-          </li>
-        {% endfor %}
-      </ul>
-    </li>
-  {% endfor %}
-  {% if truncated %}
-    <li>
-      <a href="{% url 'user_following_list' %}">{% trans "Explore older updates" %}</a>
-    </li>
-  {% endif %}
-</ol>
+{% for date, groups in following_timeline.items %}
+  <li>
+    <div class="sticky-top bg-white text-muted">{{ date }}</div>
+    <ul class="list-unstyled">
+      {% for following, docs in groups %}
+        <li>
+          <b><a href="{{ following.followed_object.get_absolute_url }}">{{ following.followed_object }}</a></b>
+          <div class="ms-3">
+            {% include 'peachjam/_document_table.html' with doc_table_hide_thead=True doc_table_show_date=True documents=docs.0 %}
+            {% if docs.1 %}
+              <details>
+                <summary>
+                  {% blocktrans trimmed with n_more=docs.1|length obj=following.followed_object %}{{ n_more }} more for {{ obj }}{% endblocktrans %}
+                </summary>
+                {% include 'peachjam/_document_table.html' with doc_table_hide_thead=True doc_table_show_date=True documents=docs.1 %}
+              </details>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </li>
+{% endfor %}
+{% if truncated %}
+  <li>
+    <a href="{% url 'user_following_list' %}#timeline">{% trans "Explore older updates" %}</a>
+  </li>
+{% endif %}
+{% if before_date %}
+  <li>
+    <button class="btn btn-secondary"
+            hx-get="{% url 'user_following_list' %}?before={{ before_date.isoformat }}"
+            hx-swap="outerHTML"
+            hx-target="closest li">
+      {% trans "Load more" %} ...
+    </button>
+  </li>
+{% endif %}

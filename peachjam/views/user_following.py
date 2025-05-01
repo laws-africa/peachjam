@@ -1,3 +1,4 @@
+import datetime
 import heapq
 from itertools import groupby
 
@@ -63,15 +64,31 @@ class BaseUserFollowingView(LoginRequiredMixin, PermissionRequiredMixin):
 
 class UserFollowingListView(BaseUserFollowingView, ListView):
     permission_required = "peachjam.view_userfollowing"
-    template_name = "peachjam/user_following_list.html"
     tab = "user_following"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["following_timeline"] = get_user_following_timeline(
-            self.request.user, 10, 50
+
+        try:
+            # optional before_date parameter
+            before_date = datetime.date.fromisoformat(self.request.GET.get("before"))
+        except (TypeError, ValueError):
+            before_date = None
+
+        context["following_timeline"] = timeline = get_user_following_timeline(
+            self.request.user,
+            10,
+            50,
+            before_date,
         )
+        if timeline:
+            context["before_date"] = list(timeline.keys())[-1]
         return context
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["peachjam/my/_following_timeline.html"]
+        return ["peachjam/user_following_list.html"]
 
 
 class UserFollowingCreateView(BaseUserFollowingView, CreateView):
@@ -102,16 +119,22 @@ class UserFollowingDeleteView(BaseUserFollowingView, DeleteView):
         return reverse("user_following_button") + f"?{self.request.GET.urlencode()}"
 
 
-def get_user_following_timeline(user, docs_per_source, max_docs):
+def get_user_following_timeline(user, docs_per_source, max_docs, before_date=None):
     # Get the latest documents from all followed sources
+    def apply_filter(qs):
+        if before_date:
+            qs = qs.filter(created_at__lt=before_date)
+        return qs
+
     sources = [
         (
             f,
-            f.get_documents_queryset()
-            .order_by("-created_at")
-            .select_related("work")
-            .prefetch_related("labels", "taxonomies")
-            .iterator(50),
+            apply_filter(
+                f.get_documents_queryset()
+                .order_by("-created_at")
+                .select_related("work")
+                .prefetch_related("labels", "taxonomies")
+            ).iterator(max_docs),
         )
         for f in user.following.all()
     ]

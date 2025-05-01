@@ -37,7 +37,9 @@
     </ul>
   </div>
   {% if following_timeline %}
-    <h5 class="mt-4 mb-3">{% trans "What's new in topics you follow" %}</h5>
-    {% include "peachjam/my/_following_timeline.html" %}
+    <h5 class="mt-4 mb-3" id="timeline">{% trans "What's new in topics you follow" %}</h5>
+    <ol class="list-timeline">
+      {% include "peachjam/my/_following_timeline.html" %}
+    </ol>
   {% endif %}
 {% endblock %}
