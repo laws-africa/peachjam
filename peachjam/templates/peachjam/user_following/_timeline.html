@@ -24,13 +24,12 @@
 {% endfor %}
 {% if truncated %}
   <li>
-    <a href="{% url 'user_following_list' %}#timeline">{% trans "Explore older updates" %}</a>
+    <a href="{% url 'my_home' %}#timeline">{% trans "Explore older updates" %}</a>
   </li>
-{% endif %}
-{% if before_date %}
+{% elif before_date %}
   <li>
     <button class="btn btn-secondary"
-            hx-get="{% url 'user_following_list' %}?before={{ before_date.isoformat }}"
+            hx-get="{% url 'my_timeline' %}?before={{ before_date.isoformat }}"
             hx-swap="outerHTML"
             hx-target="closest li">
       {% trans "Load more" %} ...

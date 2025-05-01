@@ -20,7 +20,11 @@
       {% if PEACHJAM_SETTINGS.allow_save_searches %}
         <div class="col-lg-6">{% include "peachjam/my/_saved_searches.html" %}</div>
       {% endif %}
-      <div class="col-lg-12">{% include "peachjam/my/_recent_additions.html" %}</div>
+      <div class="col-lg-12">
+        <div class="card mb-3">
+          <div class="card-body list-scrollable">{% include "peachjam/my/_recent_additions.html" %}</div>
+        </div>
+      </div>
     </div>
     <a class="btn btn-primary" href="{% url 'my_home' %}">{{ MY_LII }}</a>
   </div>
