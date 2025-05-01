@@ -29,17 +29,17 @@
           </a>
         </li>
         <li class="nav-item" role="presentation">
-          <a href="{% url "user_following_list" %}"
-             class="nav-link {% if view.tab == "user_following" %}active{% endif %}">
-            <i class="bi bi-bell"></i>
-            {% trans "Following" %}
-          </a>
-        </li>
-        <li class="nav-item" role="presentation">
           <a href="{% url "search:saved_search_list" %}"
              class="nav-link {% if view.tab == "saved_searches" %}active{% endif %}">
             <i class="bi bi-search"></i>
             {% trans "Search alerts" %}
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a href="{% url "user_following_list" %}"
+             class="nav-link {% if view.tab == "user_following" %}active{% endif %}">
+            <i class="bi bi-bell"></i>
+            {% trans "Following" %}
           </a>
         </li>
       {% endblock %}

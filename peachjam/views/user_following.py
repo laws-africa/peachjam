@@ -60,7 +60,7 @@ class BaseUserFollowingView(LoginRequiredMixin, PermissionRequiredMixin):
 
 class UserFollowingListView(BaseUserFollowingView, ListView):
     permission_required = "peachjam.view_userfollowing"
-    template_name = "peachjam/my/user_following_list.html"
+    template_name = "peachjam/user_following_list.html"
     tab = "user_following"
 
 

@@ -1,4 +1,37 @@
 {% extends 'peachjam/my/layout.html' %}
 {% block title %}My LII{% endblock %}
 {% load i18n %}
-{% block my-content %}hi{% endblock %}
+{% block my-content %}
+  <h1 class="mb-2">My LII</h1>
+  <div class="mb-4 h5 text-muted">
+    {% if user.first_name %}
+      <span class="me-3">{{ user.first_name }} {{ user.last_name }}</span>
+      {{ user.email }}
+    {% endif %}
+  </div>
+  <div class="row">
+    <div class="col-md">
+      <div class="card">
+        <h5 class="card-header">{% trans "Saved documents" %}</h5>
+        <ul class="list-group list-group-flush">
+          {% for folder in folders %}
+            <li class="list-group-item d-flex">
+              <i class="bi bi-folder"></i>
+              <div class="flex-grow-1 ms-2">
+                <a href="{{ folder.get_absolute_url }}">{{ folder }}</a>
+                <span class="badge bg-secondary">{{ folder.n_saved_documents }}</span>
+                {% if folder.note %}<div class="text-muted">{{ folder.note }}</div>{% endif %}
+              </div>
+            </li>
+          {% empty %}
+            <li class="list-group-item">{% trans "You haven't saved any documents yet." %}</li>
+          {% endfor %}
+        </ul>
+        <div class="card-footer text-end">
+          <a href="{% url 'folder_list' %}">{% trans "Saved documents" %} →</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md"></div>
+  </div>
+{% endblock %}
