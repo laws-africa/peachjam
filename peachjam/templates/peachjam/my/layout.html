@@ -10,7 +10,7 @@
             <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
           </li>
           <li class="breadcrumb-item">
-            <a href="{% url 'account_home' %}">{% trans 'My LII' %}</a>
+            <a href="{% url 'my_home' %}">{% trans 'My LII' %}</a>
           </li>
         </ol>
       </nav>
@@ -21,27 +21,33 @@
           <a href="{% url "my_home" %}"
              class="nav-link {% if view.tab == "my" %}active{% endif %}">My LII</a>
         </li>
-        <li class="nav-item" role="presentation">
-          <a href="{% url "folder_list" %}"
-             class="nav-link {% if view.tab == "saved_documents" %}active{% endif %}">
-            <i class="bi bi-star"></i>
-            {% trans "Saved documents" %}
-          </a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a href="{% url "search:saved_search_list" %}"
-             class="nav-link {% if view.tab == "saved_searches" %}active{% endif %}">
-            <i class="bi bi-search"></i>
-            {% trans "Search alerts" %}
-          </a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a href="{% url "user_following_list" %}"
-             class="nav-link {% if view.tab == "user_following" %}active{% endif %}">
-            <i class="bi bi-bell"></i>
-            {% trans "Following" %}
-          </a>
-        </li>
+        {% if PEACHJAM_SETTINGS.allow_save_documents %}
+          <li class="nav-item" role="presentation">
+            <a href="{% url "folder_list" %}"
+               class="nav-link {% if view.tab == "saved_documents" %}active{% endif %}">
+              <i class="bi bi-star"></i>
+              {% trans "Saved documents" %}
+            </a>
+          </li>
+        {% endif %}
+        {% if perms.peachjam.view_userfollowing %}
+          <li class="nav-item" role="presentation">
+            <a href="{% url "user_following_list" %}"
+               class="nav-link {% if view.tab == "user_following" %}active{% endif %}">
+              <i class="bi bi-bell"></i>
+              {% trans "Following" %}
+            </a>
+          </li>
+        {% endif %}
+        {% if PEACHJAM_SETTINGS.allow_save_searches %}
+          <li class="nav-item" role="presentation">
+            <a href="{% url "search:saved_search_list" %}"
+               class="nav-link {% if view.tab == "saved_searches" %}active{% endif %}">
+              <i class="bi bi-search"></i>
+              {% trans "Search alerts" %}
+            </a>
+          </li>
+        {% endif %}
       {% endblock %}
     </ul>
     <div class="pt-3">
