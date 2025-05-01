@@ -1,8 +1,8 @@
 {% extends 'peachjam/my/layout.html' %}
-{% block title %}My LII{% endblock %}
+{% block title %}{{ MY_LII }}{% endblock %}
 {% load i18n %}
 {% block my-content %}
-  <h1 class="mb-2">My LII</h1>
+  <h1 class="mb-2">{{ MY_LII }}</h1>
   <div class="h5 text-muted">
     {% if user.first_name %}
       <span class="me-3">{{ user.first_name }} {{ user.last_name }}</span>

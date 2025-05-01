@@ -14,6 +14,7 @@ def general(request):
     return {
         "DEBUG": settings.DEBUG,
         "APP_NAME": settings.PEACHJAM["APP_NAME"],
+        "MY_LII": settings.PEACHJAM["MY_LII"],
         "SUPPORT_EMAIL": settings.PEACHJAM["SUPPORT_EMAIL"],
         "PEACHJAM_SETTINGS": pj_settings(),
         "CURRENT_LANGUAGE": language,
