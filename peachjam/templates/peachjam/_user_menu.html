@@ -2,14 +2,14 @@
 {% if user.is_authenticated %}
   <ul class="navbar-nav ms-auto me-2">
     <li class="nav-item dropdown">
-      <a class="nav-link"
+      <a class="btn"
          href="#"
          role="button"
          data-bs-toggle="dropdown"
          data-bs-reference="body"
          aria-expanded="false">
         <i class="bi bi-person-circle"></i>
-        {% trans "My account" %}
+        <span class="d-none d-sm-inline">{% trans "My account" %}</span>
       </a>
       <ul class="dropdown-menu dropdown-menu-end nav-user-dropdown-menu">
         <li>
