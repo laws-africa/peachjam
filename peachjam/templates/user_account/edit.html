@@ -11,7 +11,7 @@
   <form method="post" class="mb-5">
     {% csrf_token %}
     <div class="mb-3">
-      <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+      <label class="form-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
       <input type="text"
              class="form-control"
              name="{{ form.first_name.name }}"
@@ -24,7 +24,7 @@
       {% endif %}
     </div>
     <div class="mb-3">
-      <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+      <label class="form-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
       <input type="text"
              class="form-control"
              name="{{ form.last_name.name }}"
@@ -37,7 +37,7 @@
       {% endif %}
     </div>
     <div class="mb-3">
-      <label for="{{ form.preferred_language.id_for_label }}">{{ form.preferred_language.label }}</label>
+      <label class="form-label" for="{{ form.preferred_language.id_for_label }}">{{ form.preferred_language.label }}</label>
       <select class="form-control"
               name="{{ form.preferred_language.name }}"
               id="{{ form.preferred_language.id_for_label }}">
