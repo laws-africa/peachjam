@@ -3,7 +3,8 @@ from django.db.models.aggregates import Count
 from django.http.response import Http404
 from django.views.generic.base import TemplateView
 
-from peachjam.models import Folder, UserFollowing, pj_settings
+from peachjam.models import Folder, pj_settings
+from peachjam.views.user_following import get_user_following_timeline
 
 
 class CommonContextMixin:
@@ -14,10 +15,8 @@ class CommonContextMixin:
             context["folders"] = Folder.objects.filter(user=self.request.user).annotate(
                 n_saved_documents=Count("saved_documents")
             )
-            context["doc_suggestions"] = list(
-                UserFollowing.latest_documents_for_user(
-                    self.request.user, 10
-                ).prefetch_related("labels", "taxonomies")
+            context["following_timeline"] = get_user_following_timeline(
+                self.request.user, 7, 15
             )
 
         return context

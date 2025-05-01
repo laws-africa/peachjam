@@ -34,6 +34,10 @@
           {% trans 'You are not following anything. Click the Follow button on pages across the site to start following.' %}
         </li>
       {% endfor %}
-    </div>
-  </ul>
+    </ul>
+  </div>
+  {% if following_timeline %}
+    <h5 class="mt-4 mb-3">{% trans "What's new in topics you follow" %}</h5>
+    {% include "peachjam/my/_following_timeline.html" %}
+  {% endif %}
 {% endblock %}

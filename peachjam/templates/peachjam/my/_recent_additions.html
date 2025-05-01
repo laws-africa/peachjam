@@ -5,10 +5,8 @@
     <p>
       <a href="{% url 'user_following_list' %}">{% trans "Topics you follow" %} →</a>
     </p>
-    {% if doc_suggestions %}
-      <div class="list-scrollable">
-        {% include 'peachjam/_document_table.html' with doc_table_show_date=True documents=doc_suggestions doc_table_title_label="Title" doc_table_date_label="Date" %}
-      </div>
+    {% if following_timeline %}
+      <div class="list-scrollable">{% include "peachjam/my/_following_timeline.html" with truncated=True %}</div>
     {% else %}
       <p>{% trans "Follow courts and topics to stay up-to-date." %}</p>
     {% endif %}

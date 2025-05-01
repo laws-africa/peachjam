@@ -46,3 +46,37 @@
     z-index: 1;
   }
 }
+
+.list-timeline {
+  position: relative;
+  margin: 0;
+  padding: 0 0 0 25px;
+  list-style: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0.4em;
+    bottom: 0;
+    left: 10px;
+    width: 2px;
+    background: $border-color;
+  }
+
+  > li {
+    position: relative;
+    margin-bottom: 20px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.4em;
+      left: -19px;
+      width: 10px;
+      height: 10px;
+      background: $border-color;
+      border-radius: 50%;
+      border: 2px solid white; /* optional: adds contrast if background is white */
+    }
+  }
+}

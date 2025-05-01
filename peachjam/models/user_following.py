@@ -1,5 +1,4 @@
 import logging
-from functools import reduce
 
 from countries_plus.models import Country
 from django.conf import settings
@@ -238,14 +237,3 @@ class UserFollowing(models.Model):
                 recipient_list=[user.email],
                 context=context,
             )
-
-    @classmethod
-    def latest_documents_for_user(cls, user, top_n):
-        """Gets a queryset of the latest documents across all follows for this user, ordered by creation date."""
-        qs = [
-            f.get_documents_queryset().order_by("-created_at")[:top_n]
-            for f in user.following.all()
-        ]
-        # union, sort and get the top n
-        qs = reduce(lambda x, y: x | y, qs).order_by("-created_at")
-        return qs[:top_n]

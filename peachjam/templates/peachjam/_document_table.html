@@ -3,40 +3,42 @@
      id="doc-table"
      data-component="DocumentTable">
   <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {% if doc_table_show_date %}doc-table--date{% endif %} {{ doc_table_classes }}">
-    <thead>
-      <tr>
-        {% if doc_table_toggle %}<th class="cell-toggle"></th>{% endif %}
-        <th scope="col" class="cell-title">
-          <div class="align-items-center"
-               role="button"
-               data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
-            {{ doc_table_title_label|default_if_none:"Title" }}
-            <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-down{% endif %} {% if form.sort.value == "-title" %}bi-sort-up{% endif %}"></i>
-          </div>
-        </th>
-        {% if doc_table_citations %}<th scope="col" class="cell-citation"></th>{% endif %}
-        {% if doc_table_show_jurisdiction %}
-          {% if MULTIPLE_JURISDICTIONS or MULTIPLE_LOCALITIES %}
-            <th scope="col">{% trans 'Jurisdiction' %}</th>
-          {% endif %}
-        {% endif %}
-        {% if doc_table_show_author %}<th scope="col"></th>{% endif %}
-        {% if doc_table_show_court %}<th scope="col"></th>{% endif %}
-        {% if doc_table_show_sub_publication %}<th scope="col"></th>{% endif %}
-        {% if doc_table_show_frbr_uri_number %}<th scope="col"></th>{% endif %}
-        {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
-        {% if doc_table_show_date %}
-          <th scope="col" class="cell-date">
+    {% if not doc_table_hide_thead %}
+      <thead>
+        <tr>
+          {% if doc_table_toggle %}<th class="cell-toggle"></th>{% endif %}
+          <th scope="col" class="cell-title">
             <div class="align-items-center"
                  role="button"
-                 data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
-              {{ doc_table_date_label|default_if_none:"Date" }}
-              <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"></i>
+                 data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
+              {{ doc_table_title_label|default_if_none:"Title" }}
+              <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-down{% endif %} {% if form.sort.value == "-title" %}bi-sort-up{% endif %}"></i>
             </div>
           </th>
-        {% endif %}
-      </tr>
-    </thead>
+          {% if doc_table_citations %}<th scope="col" class="cell-citation"></th>{% endif %}
+          {% if doc_table_show_jurisdiction %}
+            {% if MULTIPLE_JURISDICTIONS or MULTIPLE_LOCALITIES %}
+              <th scope="col">{% trans 'Jurisdiction' %}</th>
+            {% endif %}
+          {% endif %}
+          {% if doc_table_show_author %}<th scope="col"></th>{% endif %}
+          {% if doc_table_show_court %}<th scope="col"></th>{% endif %}
+          {% if doc_table_show_sub_publication %}<th scope="col"></th>{% endif %}
+          {% if doc_table_show_frbr_uri_number %}<th scope="col"></th>{% endif %}
+          {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
+          {% if doc_table_show_date %}
+            <th scope="col" class="cell-date">
+              <div class="align-items-center"
+                   role="button"
+                   data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
+                {{ doc_table_date_label|default_if_none:"Date" }}
+                <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"></i>
+              </div>
+            </th>
+          {% endif %}
+        </tr>
+      </thead>
+    {% endif %}
     {% for document in documents %}
       {% include 'peachjam/_document_table_row.html' %}
       {% if document.children %}

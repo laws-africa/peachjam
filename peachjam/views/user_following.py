@@ -1,3 +1,6 @@
+import heapq
+from itertools import groupby
+
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
@@ -63,6 +66,13 @@ class UserFollowingListView(BaseUserFollowingView, ListView):
     template_name = "peachjam/user_following_list.html"
     tab = "user_following"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["following_timeline"] = get_user_following_timeline(
+            self.request.user, 10, 50
+        )
+        return context
+
 
 class UserFollowingCreateView(BaseUserFollowingView, CreateView):
     form_class = UserFollowingForm
@@ -90,3 +100,77 @@ class UserFollowingDeleteView(BaseUserFollowingView, DeleteView):
 
     def get_success_url(self):
         return reverse("user_following_button") + f"?{self.request.GET.urlencode()}"
+
+
+def get_user_following_timeline(user, docs_per_source, max_docs):
+    # Get the latest documents from all followed sources
+    sources = [
+        (
+            f,
+            f.get_documents_queryset()
+            .order_by("-created_at")
+            .select_related("work")
+            .prefetch_related("labels", "taxonomies")
+            .iterator(50),
+        )
+        for f in user.following.all()
+    ]
+    sources = merge_sources_by_date(sources, "created_at")
+
+    # group the (source, document) tuples by date
+    n_docs = 0
+    groups_by_date = {}
+    for day, doc_group in groupby(sources, lambda p: p[1].created_at.date()):
+        doc_group = list(doc_group)
+        n_docs += len(doc_group)
+
+        # group the days documents by source, and put the smallest groups first
+        groups = {}
+        for source, doc in doc_group:
+            groups.setdefault(source, []).append(doc)
+
+        # cap documents per source
+        for source, docs in groups.items():
+            docs = sorted(docs, key=lambda d: d.date, reverse=True)
+            groups[source] = (docs[:docs_per_source], docs[docs_per_source:])
+
+        # tuples: (source, (docs, rest))
+        groups_by_date[day] = sorted(
+            groups.items(), key=lambda x: len(x[1][0]) + len(x[1][1])
+        )
+
+        if max_docs and n_docs > max_docs:
+            break
+
+    return groups_by_date
+
+
+def merge_sources_by_date(sources, date_attr):
+    """Merge multiple following sources into a single iterator of documents, ordered by date.
+    sources: (source, Iterator[Document])
+    Yields (source, document) in descending date order across all sources.
+    """
+    heap = []
+    source_iters = {}
+
+    # Prime heap
+    for source, docs in sources:
+        source_iters[source] = docs
+        try:
+            doc = next(docs)
+            heapq.heappush(heap, (-getattr(doc, date_attr).toordinal(), source, doc))
+        except StopIteration:
+            continue
+
+    while heap:
+        _, source, doc = heapq.heappop(heap)
+        yield source, doc
+
+        # Refill from this source
+        try:
+            next_doc = next(source_iters[source])
+            heapq.heappush(
+                heap, (-getattr(next_doc, date_attr).toordinal(), source, next_doc)
+            )
+        except StopIteration:
+            continue
