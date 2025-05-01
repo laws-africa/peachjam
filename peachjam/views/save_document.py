@@ -38,8 +38,8 @@ class BaseFolderMixin(
 
     def get_template_names(self):
         if self.request.htmx:
-            return ["peachjam/my/_folders_list.html"]
-        return ["peachjam/my/folders_list.html"]
+            return ["peachjam/saved_document/_folders_list.html"]
+        return ["peachjam/saved_document/folders_list.html"]
 
     def get_queryset(self):
         return self.request.user.folders.all()
@@ -59,7 +59,9 @@ class BaseFolderMixin(
         context["folders"] = self.request.user.folders.prefetch_related(
             Prefetch(
                 "saved_documents",
-                queryset=SavedDocument.objects.select_related("document").annotate(
+                queryset=SavedDocument.objects.select_related("document")
+                .prefetch_related("document__labels")
+                .annotate(
                     annotation_count=Count(
                         "document__annotations",
                         filter=Q(document__annotations__user=self.request.user),
