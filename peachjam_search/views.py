@@ -361,6 +361,7 @@ class SavedSearchListView(BaseSavedSearchFormView, ListView):
     permission_required = "peachjam_search.view_savedsearch"
     template_name = "peachjam_search/saved_search_list.html"
     context_object_name = "saved_searches"
+    tab = "saved_searches"
 
 
 class SavedSearchDeleteView(BaseSavedSearchFormView, DeleteView):

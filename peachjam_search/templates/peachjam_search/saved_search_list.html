@@ -1,12 +1,9 @@
-{% extends "user_account/layout.html" %}
+{% extends "peachjam/my/layout.html" %}
 {% load i18n %}
 {% block title %}
   {% trans 'Search Alerts' %}
 {% endblock %}
-{% block account-tabs %}
-  {% include 'user_account/_tabs.html' with active='saved_searches' %}
-{% endblock %}
-{% block account-content %}
+{% block my-content %}
   <h2>{% trans 'Search alerts' %}</h2>
   <div class="mb-4">
     {% blocktrans trimmed %}We'll email you when new documents are found for your search alerts.{% endblocktrans %}

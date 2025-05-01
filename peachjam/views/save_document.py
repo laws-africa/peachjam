@@ -38,8 +38,8 @@ class BaseFolderMixin(
 
     def get_template_names(self):
         if self.request.htmx:
-            return ["peachjam/saved_document/_folders_list.html"]
-        return ["peachjam/saved_document/folders_list.html"]
+            return ["peachjam/my/_folders_list.html"]
+        return ["peachjam/my/folders_list.html"]
 
     def get_queryset(self):
         return self.request.user.folders.all()
@@ -73,6 +73,7 @@ class BaseFolderMixin(
 
 class FolderListView(BaseFolderMixin, ListView):
     permission_required = "peachjam.view_folder"
+    tab = "saved_documents"
 
 
 class BaseFolderFormMixin(BaseFolderMixin):

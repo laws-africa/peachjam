@@ -1,12 +1,9 @@
-{% extends "user_account/layout.html" %}
+{% extends "peachjam/my/layout.html" %}
 {% load i18n peachjam %}
 {% block title %}
   {% trans 'Following' %}
 {% endblock %}
-{% block account-tabs %}
-  {% include 'user_account/_tabs.html' with active='following' %}
-{% endblock %}
-{% block account-content %}
+{% block my-content %}
   <div class="mb-4">
     <h2>{% trans 'Following' %}</h2>
     <p>{% trans 'Receive email alerts when new documents are added to the following areas.' %}</p>

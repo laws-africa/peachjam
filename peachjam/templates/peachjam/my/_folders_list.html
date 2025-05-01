@@ -19,7 +19,7 @@
           <div>
             {% if folder.saved_documents.all %}
               {% for saved_document in folder.saved_documents.all %}
-                {% include "peachjam/saved_document/_folder_list_item.html" %}
+                {% include "peachjam/my/_folder_list_item.html" %}
               {% endfor %}
             {% else %}
               <p>{% trans 'No saved documents.' %}</p>
@@ -61,7 +61,7 @@
         <h5 class="card-header">{% trans 'Ungrouped documents' %}</h5>
         <div class="card-body">
           {% for saved_document in ungrouped_saved_documents %}
-            {% include "peachjam/saved_document/_folder_list_item.html" %}
+            {% include "peachjam/my/_folder_list_item.html" %}
           {% endfor %}
         </div>
       </div>
