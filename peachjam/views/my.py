@@ -6,24 +6,29 @@ from django.views.generic.base import TemplateView
 from peachjam.models import Folder, UserFollowing, pj_settings
 
 
-class MyHomeView(LoginRequiredMixin, TemplateView):
-    template_name = "peachjam/my/home.html"
-    tab = "my"
-
+class CommonContextMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["folders"] = Folder.objects.filter(user=self.request.user).annotate(
-            n_saved_documents=Count("saved_documents")
-        )
-        context["doc_suggestions"] = list(
-            UserFollowing.latest_documents_for_user(
-                self.request.user, 10
-            ).prefetch_related("labels")
-        )
+
+        if self.request.user.is_authenticated:
+            context["folders"] = Folder.objects.filter(user=self.request.user).annotate(
+                n_saved_documents=Count("saved_documents")
+            )
+            context["doc_suggestions"] = list(
+                UserFollowing.latest_documents_for_user(
+                    self.request.user, 10
+                ).prefetch_related("labels", "taxonomies")
+            )
+
         return context
 
 
-class MyFrontpageView(TemplateView):
+class MyHomeView(LoginRequiredMixin, CommonContextMixin, TemplateView):
+    template_name = "peachjam/my/home.html"
+    tab = "my"
+
+
+class MyFrontpageView(CommonContextMixin, TemplateView):
     """The My LII part of the site homepage that is loaded dynamically."""
 
     def get(self, request, *args, **kwargs):
@@ -35,16 +40,3 @@ class MyFrontpageView(TemplateView):
         if self.request.user.is_authenticated:
             return ["peachjam/my/_frontpage.html"]
         return ["peachjam/my/_frontpage_anon.html"]
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self.request.user.is_authenticated:
-            context["folders"] = Folder.objects.filter(user=self.request.user).annotate(
-                n_saved_documents=Count("saved_documents")
-            )
-            context["doc_suggestions"] = list(
-                UserFollowing.latest_documents_for_user(
-                    self.request.user, 10
-                ).prefetch_related("labels")
-            )
-        return context
