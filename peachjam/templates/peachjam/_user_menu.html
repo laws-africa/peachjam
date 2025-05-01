@@ -12,17 +12,13 @@
         <span class="d-none d-sm-inline">{% trans "My account" %}</span>
       </a>
       <ul class="dropdown-menu dropdown-menu-end nav-user-dropdown-menu">
-        <li>
-          <a class="dropdown-item username" href="{% url 'my_home' %}">
-            {{ user.first_name }} {{ user.last_name }}
-            {% if user.email %}
-              <br/>
-              {{ user.email }}
-            {% endif %}
-          </a>
-        </li>
-        <li>
-          <hr class="dropdown-divider"/>
+        <li class="dropdown-item username text-center mb-2">
+          {{ user.first_name }} {{ user.last_name }}
+          {% if user.email %}
+            <div class="text-muted">
+              <small>{{ user.email }}</small>
+            </div>
+          {% endif %}
         </li>
         <li>
           <a class="dropdown-item" href="{% url 'my_home' %}">{{ MY_LII }}</a>
