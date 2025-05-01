@@ -6,12 +6,14 @@ from peachjam.views import (
     FolderDownloadView,
     FolderListView,
     FolderUpdateView,
+    MyFrontpageView,
     MyHomeView,
     UserFollowingListView,
 )
 
 urlpatterns = [
     path("", MyHomeView.as_view(), name="my_home"),
+    path("frontpage", MyFrontpageView.as_view(), name="my_frontpage"),
     path(
         "folders/",
         include(
