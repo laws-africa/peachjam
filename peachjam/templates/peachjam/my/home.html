@@ -10,7 +10,7 @@
     {% endif %}
   </div>
   <div class="row">
-    <div class="col-md">
+    <div class="col-lg-6">
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="mb-3">{% trans "Saved documents" %}</h5>
@@ -32,7 +32,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md">
+    <div class="col-lg-6">
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="mb-3">{% trans "Search alerts" %}</h5>
@@ -50,6 +50,26 @@
             {% endfor %}
           </ul>
           <a href="{% url 'search:saved_search_list' %}">{% trans "Search alerts" %} →</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="mb-3">{% trans "Following" %}</h5>
+          <ul class="list-unstyled mb-3">
+            {% for following in user.following.all %}
+              <li class="d-flex">
+                <i class="bi bi-bell me-2"></i>
+                <div class="flex-grow-1">
+                  <a href="{{ following.followed_object.get_absolute_url }}">{{ following.followed_object }}</a>
+                </div>
+              </li>
+            {% empty %}
+              <li>{% trans "Follow courts and topics to stay up-to-date." %}</li>
+            {% endfor %}
+          </ul>
+          <a href="{% url 'search:saved_search_list' %}">{% trans "Following" %} →</a>
         </div>
       </div>
     </div>
