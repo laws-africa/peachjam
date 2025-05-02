@@ -1,9 +1,6 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.db.models import F
-from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
-from pgvector.django import MaxInnerProduct
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument
@@ -25,21 +22,11 @@ class SimilarDocumentsView(PermissionRequiredMixin, DetailView):
     n_similar = 10
 
     def get_similar_documents(self):
-        embedding = get_object_or_404(DocumentEmbedding, document_id=self.object.pk)
-        similar_docs = (
-            DocumentEmbedding.objects.exclude(document__work=self.object.work)
-            .exclude(text_embedding__isnull=True)
-            .select_related("document")
-            .annotate(
-                similarity=MaxInnerProduct("text_embedding", embedding.text_embedding)
-                * -1,
-                title=F("document__title"),
-                expression_frbr_uri=F("document__expression_frbr_uri"),
-                authority_score=F("document__work__authority_score"),
-            )
-            .filter(similarity__gt=self.similarity_threshold)
-            .values("title", "expression_frbr_uri", "similarity", "authority_score")
-            .order_by("-similarity")
+
+        similar_docs = DocumentEmbedding.get_similar_documents(
+            [self.object.pk],
+            threshold=self.similarity_threshold,
+            exclude_works=[self.object.work],
         )[: self.top_k]
 
         # re-rank based on a weighted average of similarity and authority score, and keep the top 10

@@ -5,9 +5,9 @@ import math
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import Avg
+from django.db.models import Avg, F
 from django.forms import model_to_dict
-from pgvector.django import HnswIndex, VectorField
+from pgvector.django import HnswIndex, MaxInnerProduct, VectorField
 
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR, get_text_embedding_batch
 from peachjam_search.tasks import search_model_saved
@@ -146,6 +146,45 @@ class DocumentEmbedding(models.Model):
         search_model_saved(document.__class__._meta.label, document.pk, schedule=60)
 
         return doc_embedding
+
+    @classmethod
+    def get_average_embedding(cls, pks):
+        """Get the average embedding for a set of documents."""
+        if not pks:
+            return None
+
+        avg = (
+            DocumentEmbedding.objects.filter(document__in=pks)
+            .aggregate(avg=Avg("text_embedding"))
+            .get("avg")
+        )
+        if avg is not None and len(avg):
+            avg = normalize_vector(avg)
+
+        return avg
+
+    @classmethod
+    def get_similar_documents(cls, pks, threshold=0.0, exclude_works=None):
+        """
+        Retrieve documents that are most similar to a given embedding, optionally excluding specific works.
+        """
+        exclude_works = exclude_works or []
+        avg_embedding = cls.get_average_embedding(pks)
+        similar_docs = (
+            DocumentEmbedding.objects.exclude(document__work__in=exclude_works)
+            .exclude(text_embedding__isnull=True)
+            .annotate(
+                similarity=MaxInnerProduct("text_embedding", avg_embedding) * -1,
+                title=F("document__title"),
+                expression_frbr_uri=F("document__expression_frbr_uri"),
+                authority_score=F("document__work__authority_score"),
+            )
+            .filter(similarity__gt=threshold)
+            .values("title", "expression_frbr_uri", "similarity", "authority_score")
+            .order_by("-similarity")
+        )
+
+        return similar_docs
 
 
 class ContentChunk(models.Model):

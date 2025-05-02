@@ -15,15 +15,54 @@
         <h5 class="card-header">
           <i class="bi bi-folder"></i> {{ folder.name }}
         </h5>
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+              <button class="nav-link active"
+                      id="saved-doc-tab-{{ folder.pk }}"
+                      data-bs-toggle="tab"
+                      data-bs-target="#saved-docs-{{ folder.pk }}"
+                      type="button"
+                      role="tab"
+                      aria-controls="saved-doc-tab-{{ folder.pk }}"
+                      aria-selected="true">
+                Saved documents
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link"
+                      id="similar-docs-tab-{{ folder.pk }}"
+                      data-bs-toggle="tab"
+                      data-bs-target="#similar-docs-{{ folder.pk }}"
+                      type="button"
+                      role="tab"
+                      aria-controls="home"
+                      aria-selected="true">
+                Similar to these
+              </button>
+            </li>
+          </ul>
+        </div>
         <div class="card-body">
-          <div>
-            {% if folder.saved_documents.all %}
-              {% for saved_document in folder.saved_documents.all %}
-                {% include "peachjam/saved_document/_folder_list_item.html" %}
-              {% endfor %}
-            {% else %}
-              <p>{% trans 'No saved documents.' %}</p>
-            {% endif %}
+          <div class="tab-content">
+            <div class="tab-pane fade show active"
+                 id="saved-docs-{{ folder.pk }}"
+                 role="tabpanel"
+                 aria-labelledby="saved-doc-tab">
+              {% if folder.saved_documents.all %}
+                {% for saved_document in folder.saved_documents.all %}
+                  {% include "peachjam/saved_document/_folder_list_item.html" %}
+                {% endfor %}
+              {% else %}
+                <p>{% trans 'No saved documents.' %}</p>
+              {% endif %}
+            </div>
+            <div class="tab-pane fade"
+                 id="similar-docs-{{ folder.pk }}"
+                 role="tabpanel"
+                 aria-labelledby="similar-docs-tab-{{ folder.pk }}">
+              <p>hello</p>
+            </div>
           </div>
         </div>
         <div class="card-footer d-flex">
