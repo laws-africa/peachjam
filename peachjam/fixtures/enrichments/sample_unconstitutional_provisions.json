@@ -1,0 +1,28 @@
+[
+  {
+    "source_id":  123,
+    "work_frbr_uri":  "/akn/za/act/1979/70",
+    "provision_eid": "sec_2__subsec_1__para_b",
+    "enrichment_type":  "unconstitutional_provision",
+    "text": "This is a snippet of text that was copied from the judgment by an editor and pasted into the form on indigo. It is not linked, and must be updated manually on the Enrichment object.",
+    "judgment_frbr_uri": "/akn/za/judgment/zacc/2021/51",
+    "date_deemed_unconstitutional": "2021-12-31",
+    "end_of_suspension_period": "2024-12-31",
+    "resolved": false,
+    "date_resolved": null,
+    "resolving_amendment_frbr_uri": null
+  },
+  {
+    "source_id":  57,
+    "work_frbr_uri":  "/akn/za/act/1979/70",
+    "provision_eid": "sec_2__subsec_1__para_a",
+    "enrichment_type":  "unconstitutional_provision",
+    "text": "This is a (different) snippet of text that was copied from the judgment by an editor and pasted into the form on indigo.",
+    "judgment_frbr_uri": "/akn/za/judgment/zacc/2021/51",
+    "date_deemed_unconstitutional": "2021-12-31",
+    "end_of_suspension_period": "2024-12-31",
+    "resolved": true,
+    "date_resolved": "2024-05-14",
+    "resolving_amendment_frbr_uri": "/akn/za/act/2024/1"
+  }
+]
