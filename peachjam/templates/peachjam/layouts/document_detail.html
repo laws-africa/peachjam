@@ -368,13 +368,16 @@
                       {% block document-metadata-media-summary-download %}
                         {% if document.attachedfiles_set %}
                           {% for attachedfile in document.attachedfiles_set.all %}
-                            <dt>
-                              {{ attachedfile.nature.name }}
-                            </dt>
-                            <dd>
-                              <a href="{{ attachedfile.file.url }}" target="_blank">{% trans "Download" %} {{ attachedfile.extension|upper }}</a>
-                              ({{ attachedfile.size|filesizeformat }})
-                            </dd>
+                            {% if not attachedfile.private %}
+                              <dt>
+                                {{ attachedfile.nature.name }}
+                              </dt>
+                              <dd>
+                                <a href="{% url 'document_attachment' document.expression_frbr_uri|strip_first_character attachedfile.filename %}"
+                                   target="_blank">{% trans "Download" %} {{ attachedfile.extension|upper }}</a>
+                                ({{ attachedfile.size|filesizeformat }})
+                              </dd>
+                            {% endif %}
                           {% endfor %}
                         {% endif %}
                       {% endblock %}

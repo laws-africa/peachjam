@@ -279,6 +279,11 @@ class AttachedFiles(AttachmentAbstractModel):
     nature = models.ForeignKey(
         AttachedFileNature, on_delete=models.CASCADE, verbose_name=_("nature")
     )
+    private = models.BooleanField(
+        _("private"),
+        default=False,
+        help_text=_("Set to True if this file should not be publicly accessible"),
+    )
 
     class Meta:
         verbose_name = _("attached file")

@@ -1,3 +1,5 @@
+import re
+
 from cobalt import FrbrUri
 from django.conf import settings
 from django.http import Http404, HttpResponse
@@ -227,6 +229,25 @@ class DocumentMediaView(DocumentDetailView):
         response = HttpResponse(file_bytes, content_type=img.mimetype)
         response["Content-Length"] = str(len(file_bytes))
         return response
+
+
+class DocumentAttachmentView(DocumentDetailView):
+    def render_to_response(self, context, **response_kwargs):
+        file = self.object.attachedfiles_set.filter(
+            filename=self.kwargs["filename"]
+        ).first()
+        if file and not file.private:
+            if getattr(file.file.storage, "custom_domain", None):
+                # use the storage's custom domain to serve the file
+                return redirect(file.file.url)
+
+            file_bytes = file.file.open().read()
+            response = HttpResponse(file_bytes, content_type=file.mimetype)
+            filename = re.sub(r"[^A-Za-z0-9._-]", "", file.filename)
+            response["Content-Disposition"] = f"attachment; filename={filename}"
+            response["Content-Length"] = str(len(file_bytes))
+            return response
+        raise Http404
 
 
 class DocumentCitationsView(DocumentDetailView):
