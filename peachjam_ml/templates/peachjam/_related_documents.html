@@ -4,9 +4,8 @@
   {% if perms.peachjam_ml.view_documentembedding %}
     <div class="row">
       <div class="col-lg">
-        <div hx-get="{% url 'similar_documents' %}?doc_ids={{ document.id }}&exclude_ids={{ document.id }}"
-             hx-trigger="load">
-        </div>
+        <div hx-get="{% url 'similar_documents' %}?doc_ids={{ document.id }}"
+             hx-trigger="load"></div>
       </div>
     </div>
   {% endif %}

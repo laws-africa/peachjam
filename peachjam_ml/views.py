@@ -20,7 +20,7 @@ class SimilarDocumentsForm(forms.Form):
     def clean_doc_ids(self):
         try:
             doc_ids = self.cleaned_data["doc_ids"]
-            doc_ids = [int(pk.strip()) for pk in doc_ids.split(",")]
+            doc_ids = [int(pk.strip()) for pk in doc_ids.split(",") if pk.strip()]
             if not doc_ids:
                 raise forms.ValidationError("Please provide at least one document ID.")
         except ValueError:
