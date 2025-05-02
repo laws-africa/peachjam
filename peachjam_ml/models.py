@@ -153,6 +153,12 @@ class DocumentEmbedding(models.Model):
         if not pks:
             return None
 
+        if len(pks) == 1:
+            # if there's only one document, we can just return its embedding
+            doc_embedding = cls.objects.filter(document__pk=pks[0]).first()
+            if doc_embedding:
+                return doc_embedding.text_embedding
+
         avg = (
             DocumentEmbedding.objects.filter(document__in=pks)
             .aggregate(avg=Avg("text_embedding"))
@@ -164,14 +170,15 @@ class DocumentEmbedding(models.Model):
         return avg
 
     @classmethod
-    def get_similar_documents(cls, pks, threshold=0.0, exclude_works=None):
+    def get_similar_documents(cls, doc_ids, exclude_ids=None, threshold=0.0):
         """
         Retrieve documents that are most similar to a given embedding, optionally excluding specific works.
         """
-        exclude_works = exclude_works or []
-        avg_embedding = cls.get_average_embedding(pks)
+        exclude_ids = exclude_ids or []
+        avg_embedding = cls.get_average_embedding(doc_ids)
+
         similar_docs = (
-            DocumentEmbedding.objects.exclude(document__work__in=exclude_works)
+            DocumentEmbedding.objects.exclude(document__work__documents__in=exclude_ids)
             .exclude(text_embedding__isnull=True)
             .annotate(
                 similarity=MaxInnerProduct("text_embedding", avg_embedding) * -1,
