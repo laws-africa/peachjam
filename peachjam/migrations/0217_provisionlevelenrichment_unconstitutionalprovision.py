@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                     "provision_eid",
                     models.CharField(
                         blank=True,
-                        max_length=1024,
+                        max_length=2048,
                         null=True,
                         verbose_name="provision eid",
                     ),

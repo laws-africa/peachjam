@@ -25,7 +25,7 @@ class ProvisionLevelEnrichment(models.Model):
         verbose_name=_("work"),
     )
     provision_eid = models.CharField(
-        _("provision eid"), max_length=1024, null=True, blank=True
+        _("provision eid"), max_length=2048, null=True, blank=True
     )
     # whole_work = models.BooleanField(_("whole work"), default=False)
     enrichment_type = models.CharField(
