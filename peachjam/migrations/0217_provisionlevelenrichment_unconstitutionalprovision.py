@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "resolving_amendment",
+                    "resolving_amendment_work",
                     models.ForeignKey(
                         blank=True,
                         null=True,

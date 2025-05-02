@@ -10,7 +10,7 @@
     "end_of_suspension_period": "2024-12-31",
     "resolved": false,
     "date_resolved": null,
-    "resolving_amendment_frbr_uri": null
+    "resolving_amendment_work_frbr_uri": null
   },
   {
     "source_id":  57,
@@ -23,6 +23,6 @@
     "end_of_suspension_period": "2024-12-31",
     "resolved": true,
     "date_resolved": "2024-05-14",
-    "resolving_amendment_frbr_uri": "/akn/za/act/2024/1"
+    "resolving_amendment_work_frbr_uri": "/akn/za/act/2024/1"
   }
 ]

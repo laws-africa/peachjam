@@ -73,7 +73,7 @@ class UnconstitutionalProvision(ProvisionLevelEnrichment):
     resolved = models.BooleanField(_("resolved"), default=False)
     date_resolved = models.DateField(_("date resolved"), null=True, blank=True)
     # TODO: SET_NULL rather?
-    resolving_amendment = models.ForeignKey(
+    resolving_amendment_work = models.ForeignKey(
         "peachjam.Work",
         on_delete=models.PROTECT,
         null=True,
