@@ -27,6 +27,7 @@ from peachjam.models import (
     Legislation,
     Locality,
     Predicate,
+    ProvisionLevelEnrichment,
     Relationship,
     Taxonomy,
     Work,
@@ -371,6 +372,25 @@ class IndigoAdapter(RequestsAdapter):
         self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
         self.download_and_save_document_images(document, created_doc)
+        if model is Legislation:
+            self.get_and_update_or_create_enrichments(url)
+
+    def get_and_update_or_create_enrichments(self, url):
+        enrichments = self.client_get(f"{url}/enrichments.json").json()
+        for enrichment in enrichments:
+            defaults = {}
+            for key, value in enrichment.items():
+                if key == "source_id":
+                    continue
+                if key.endswith("_frbr_uri"):
+                    related_work = Work.objects.filter(frbr_uri=value).first()
+                    if related_work:
+                        defaults[key[:-9]] = related_work
+                else:
+                    defaults[key] = value
+            ProvisionLevelEnrichment.objects.update_or_create(
+                source_id=enrichment["source_id"], defaults=defaults
+            )
 
     def list_images_from_content_api(self, document):
         links = document["links"]
