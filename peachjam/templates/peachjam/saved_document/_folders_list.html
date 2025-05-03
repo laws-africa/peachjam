@@ -34,6 +34,8 @@
                       id="similar-docs-tab-{{ folder.pk }}"
                       data-bs-toggle="tab"
                       data-bs-target="#similar-docs-{{ folder.pk }}"
+                      hx-target="#similar-docs-list-{{ folder.pk }}"
+                      hx-get="{% url 'similar_documents' %}?doc_ids={% for pk in folder.get_doc_ids %}{{ pk }},{% endfor %}"
                       type="button"
                       role="tab"
                       aria-controls="home"
@@ -61,13 +63,7 @@
                  id="similar-docs-{{ folder.pk }}"
                  role="tabpanel"
                  aria-labelledby="similar-docs-tab-{{ folder.pk }}">
-              <div id="similar-docs-list-{{ folder.pk }}">
-                <button class="btn btn-outline-danger"
-                        hx-target="#similar-docs-list-{{ folder.pk }}"
-                        hx-get="{% url 'similar_documents' %}?doc_ids={% for pk in folder.get_doc_ids %}{{ pk }},{% endfor %}">
-                  Get similar docs
-                </button>
-              </div>
+              <div id="similar-docs-list-{{ folder.pk }}"></div>
             </div>
           </div>
         </div>
