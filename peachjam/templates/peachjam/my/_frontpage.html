@@ -1,17 +1,17 @@
 {% load i18n %}
 <div class="bg-light my-5">
   <div class="container py-4">
-    <div class="d-flex mb-2">
-      <h2 class="text-nowrap">{{ MY_LII }}</h2>
-      <div class="ms-auto ps-2">
-        <h5 class="text-muted">
-          {% if user.first_name %}
-            {{ user.first_name }} {{ user.last_name }}
-          {% else %}
-            {{ user.email }}
-          {% endif %}
-        </h5>
+    <div class="d-sm-flex mb-2">
+      <div class="d-flex d-sm-block">
+        <h2 class="text-nowrap">{{ MY_LII }}</h2>
+        <div class="mb-2 ms-auto">
+          <a href="{% url 'my_home' %}" class="h4">Explore →</a>
+        </div>
       </div>
+      <h5 class="text-muted ms-auto">
+        {% if user.first_name %}<div>{{ user.first_name }} {{ user.last_name }}</div>{% endif %}
+        {{ user.email }}
+      </h5>
     </div>
     <div class="row">
       {% if PEACHJAM_SETTINGS.allow_save_documents %}
