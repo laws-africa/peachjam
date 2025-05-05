@@ -26,9 +26,6 @@ class Folder(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-    def get_doc_ids(self):
-        return self.saved_documents.values_list("document_id", flat=True)
-
 
 class SavedDocument(models.Model):
     document = models.ForeignKey(

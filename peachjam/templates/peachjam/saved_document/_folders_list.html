@@ -24,9 +24,9 @@
                       data-bs-target="#saved-docs-{{ folder.pk }}"
                       type="button"
                       role="tab"
-                      aria-controls="saved-doc-tab-{{ folder.pk }}"
+                      aria-controls="saved-docs-{{ folder.pk }}"
                       aria-selected="true">
-                Saved documents
+                {% trans 'Saved documents' %}
               </button>
             </li>
             <li class="nav-item">
@@ -35,12 +35,12 @@
                       data-bs-toggle="tab"
                       data-bs-target="#similar-docs-{{ folder.pk }}"
                       hx-target="#similar-docs-list-{{ folder.pk }}"
-                      hx-get="{% url 'similar_documents' %}?doc_ids={% for pk in folder.get_doc_ids %}{{ pk }},{% endfor %}"
+                      hx-get="{% url 'folder_similar_docs' folder.pk %}"
                       type="button"
                       role="tab"
-                      aria-controls="home"
-                      aria-selected="true">
-                Similar to these
+                      aria-controls="similar-docs-{{ folder.pk }}"
+                      aria-selected="false">
+                {% trans 'Recommended documents' %}
               </button>
             </li>
           </ul>
@@ -50,7 +50,7 @@
             <div class="tab-pane fade show active"
                  id="saved-docs-{{ folder.pk }}"
                  role="tabpanel"
-                 aria-labelledby="saved-doc-tab">
+                 aria-labelledby="saved-doc-tab-{{ folder.pk }}">
               {% if folder.saved_documents.all %}
                 {% for saved_document in folder.saved_documents.all %}
                   {% include "peachjam/saved_document/_folder_list_item.html" %}

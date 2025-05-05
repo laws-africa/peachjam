@@ -170,13 +170,9 @@ class DocumentEmbedding(models.Model):
         return avg
 
     @classmethod
-    def get_similar_documents(cls, doc_ids, exclude_ids=None, threshold=0.0):
-        """
-        Retrieve documents that are most similar to a given embedding, optionally excluding specific works.
-        """
-        exclude_ids = exclude_ids or []
+    def get_similar_documents(cls, doc_ids, threshold=0.0):
         # always exclude the documents we are comparing against
-        exclude_ids = exclude_ids + doc_ids
+        exclude_ids = doc_ids
         avg_embedding = cls.get_average_embedding(doc_ids)
 
         similar_docs = (
