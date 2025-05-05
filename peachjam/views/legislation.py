@@ -270,6 +270,17 @@ class LegislationDetailView(BaseDocumentDetailView):
                     }
                 )
 
+        if self.object.date > datetime.now().date():
+            notices.append(
+                {
+                    "type": messages.WARNING,
+                    "html": _(
+                        "This version will be applied on %(current_object_date)s."
+                    )
+                    % {"current_object_date": current_object_date},
+                }
+            )
+
         return notices
 
     def get_repeal_info(self):
