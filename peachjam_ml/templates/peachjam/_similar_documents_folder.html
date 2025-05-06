@@ -1,11 +1,17 @@
 {% load i18n %}
-<h4>{% trans 'Recommended documents' %}</h4>
 <ol>
+  <p class="mb-4">
+    {% blocktrans %}
+    Documents you might find interesting, based on this folder.
+    {% endblocktrans %}
+  </p>
   {% for doc in similar_documents %}
     <li class="pb-2">
       <a href="{{ doc.expression_frbr_uri }}">{{ doc.title }}
         {% if request.user.is_superuser %}({{ doc.similarity }}){% endif %}
       </a>
     </li>
+  {% empty %}
+    {% trans 'No documents found.' %}
   {% endfor %}
 </ol>

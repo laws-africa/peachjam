@@ -9,6 +9,7 @@ from django.db.models import Avg, F
 from django.forms import model_to_dict
 from pgvector.django import HnswIndex, MaxInnerProduct, VectorField
 
+from peachjam.models import Work
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR, get_text_embedding_batch
 from peachjam_search.tasks import search_model_saved
 
@@ -163,15 +164,15 @@ class DocumentEmbedding(models.Model):
 
     @classmethod
     def get_similar_documents(cls, doc_ids, threshold=0.6, n_similar=10):
-        # always exclude the documents we are comparing against
-        exclude_ids = doc_ids
         weight_similarity = 0.7
         weight_authority = 0.3
         top_k = 100
         avg_embedding = cls.get_average_embedding(doc_ids)
 
         similar_docs = (
-            DocumentEmbedding.objects.exclude(document__work__documents__in=exclude_ids)
+            DocumentEmbedding.objects.exclude(
+                document__work__in=Work.objects.filter(documents__in=doc_ids)
+            )
             .exclude(text_embedding__isnull=True)
             .annotate(
                 similarity=MaxInnerProduct("text_embedding", avg_embedding) * -1,

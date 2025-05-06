@@ -8,9 +8,9 @@ from peachjam_ml.models import DocumentEmbedding
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-class SimilarDocumentsView(PermissionRequiredMixin, DetailView):
+class SimilarDocumentsDocumentDetailView(PermissionRequiredMixin, DetailView):
     permission_required = "peachjam_ml.view_documentembedding"
-    template_name = "peachjam/_similar_documents.html"
+    template_name = "peachjam/_similar_documents_doc_detail.html"
     slug_url_kwarg = "frbr_uri"
     slug_field = "expression_frbr_uri"
     model = CoreDocument
@@ -25,7 +25,7 @@ class SimilarDocumentsView(PermissionRequiredMixin, DetailView):
 
 class SimilarDocumentsFolderView(PermissionRequiredMixin, DetailView):
     permission_required = "peachjam_ml.view_documentembedding"
-    template_name = "peachjam/_similar_documents.html"
+    template_name = "peachjam/_similar_documents_folder.html"
     model = Folder
 
     def get_context_data(self, **kwargs):
