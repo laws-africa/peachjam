@@ -274,10 +274,7 @@ class LegislationDetailView(BaseDocumentDetailView):
             notices.append(
                 {
                     "type": messages.WARNING,
-                    "html": _(
-                        "This version will be applied on %(current_object_date)s."
-                    )
-                    % {"current_object_date": current_object_date},
+                    "html": _("This version is at a future date."),
                 }
             )
 
