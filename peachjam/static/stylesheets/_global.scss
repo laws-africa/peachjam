@@ -151,6 +151,10 @@ footer {
   font-size: 22px;
 }
 
+.text-purple-500 {
+  color: $purple-500 !important;
+}
+
 @each $state, $value in $theme-colors {
   .alert-#{$state} {
     $alert-color: shift-color($value, $alert-color-scale);
