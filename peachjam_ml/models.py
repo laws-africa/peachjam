@@ -150,15 +150,6 @@ class DocumentEmbedding(models.Model):
     @classmethod
     def get_average_embedding(cls, pks):
         """Get the average embedding for a set of documents."""
-        if not pks:
-            return None
-
-        if len(pks) == 1:
-            # if there's only one document, we can just return its embedding
-            doc_embedding = cls.objects.filter(document__pk=pks[0]).first()
-            if doc_embedding:
-                return doc_embedding.text_embedding
-
         avg = (
             DocumentEmbedding.objects.filter(document__in=pks)
             .aggregate(avg=Avg("text_embedding"))
@@ -170,9 +161,12 @@ class DocumentEmbedding(models.Model):
         return avg
 
     @classmethod
-    def get_similar_documents(cls, doc_ids, threshold=0.0):
+    def get_similar_documents(cls, doc_ids, threshold=0.6, n_similar=10):
         # always exclude the documents we are comparing against
         exclude_ids = doc_ids
+        weight_similarity = 0.7
+        weight_authority = 0.3
+        top_k = 100
         avg_embedding = cls.get_average_embedding(doc_ids)
 
         similar_docs = (
@@ -187,7 +181,17 @@ class DocumentEmbedding(models.Model):
             .filter(similarity__gt=threshold)
             .values("title", "expression_frbr_uri", "similarity", "authority_score")
             .order_by("-similarity")
-        )
+        )[:top_k]
+
+        # re-rank based on a weighted average of similarity and authority score, and keep the top 10
+        similar_docs = sorted(
+            similar_docs,
+            key=lambda x: (
+                x["similarity"] * weight_similarity
+                + x["authority_score"] * weight_authority
+            ),
+            reverse=True,
+        )[:n_similar]
 
         return similar_docs
 

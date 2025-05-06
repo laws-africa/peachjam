@@ -51,13 +51,11 @@
                  id="saved-docs-{{ folder.pk }}"
                  role="tabpanel"
                  aria-labelledby="saved-doc-tab-{{ folder.pk }}">
-              {% if folder.saved_documents.all %}
-                {% for saved_document in folder.saved_documents.all %}
-                  {% include "peachjam/saved_document/_folder_list_item.html" %}
-                {% endfor %}
-              {% else %}
+              {% for saved_document in folder.saved_documents.all %}
+                {% include "peachjam/saved_document/_folder_list_item.html" %}
+              {% empty %}
                 <p>{% trans 'No saved documents.' %}</p>
-              {% endif %}
+              {% endfor %}
             </div>
             <div class="tab-pane fade"
                  id="similar-docs-{{ folder.pk }}"
