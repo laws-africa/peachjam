@@ -163,9 +163,9 @@ class DocumentEmbedding(models.Model):
         return avg
 
     @classmethod
-    def get_similar_documents(cls, doc_ids, threshold=0.6, n_similar=10):
-        weight_similarity = 0.7
-        weight_authority = 0.3
+    def get_similar_documents(cls, doc_ids, threshold=0.8, n_similar=10):
+        weight_similarity = 0.9
+        weight_authority = 0.1
         top_k = 100
         avg_embedding = cls.get_average_embedding(doc_ids)
 
