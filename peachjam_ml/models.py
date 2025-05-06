@@ -150,6 +150,12 @@ class DocumentEmbedding(models.Model):
     @classmethod
     def get_average_embedding(cls, pks):
         """Get the average embedding for a set of documents."""
+        if len(pks) == 1:
+            # if there's only one document, we can just return its embedding
+            doc_embedding = cls.objects.filter(document__pk=pks[0]).first()
+            if doc_embedding:
+                return doc_embedding.text_embedding
+
         avg = (
             DocumentEmbedding.objects.filter(document__in=pks)
             .aggregate(avg=Avg("text_embedding"))
