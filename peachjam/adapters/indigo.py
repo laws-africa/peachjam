@@ -27,7 +27,7 @@ from peachjam.models import (
     Legislation,
     Locality,
     Predicate,
-    ProvisionLevelEnrichment,
+    ProvisionEnrichment,
     Relationship,
     Taxonomy,
     Work,
@@ -376,7 +376,7 @@ class IndigoAdapter(RequestsAdapter):
             self.get_and_update_or_create_enrichments(url)
 
     def get_and_update_or_create_enrichments(self, url):
-        enrichments = self.client_get(f"{url}/enrichments.json").json()
+        enrichments = self.client_get(f"{url}/provision-enrichments.json").json()
         for enrichment in enrichments:
             defaults = {}
             for key, value in enrichment.items():
@@ -388,7 +388,7 @@ class IndigoAdapter(RequestsAdapter):
                         defaults[key[:-9]] = related_work
                 else:
                     defaults[key] = value
-            ProvisionLevelEnrichment.objects.update_or_create(
+            ProvisionEnrichment.objects.update_or_create(
                 source_id=enrichment["source_id"], defaults=defaults
             )
 

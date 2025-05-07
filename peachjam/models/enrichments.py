@@ -2,13 +2,13 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class ProvisionLevelEnrichmentManager(models.Manager):
+class ProvisionEnrichmentManager(models.Manager):
     # use e.g. doc.work.enrichments.unconstitutional_provisions()
     def unconstitutional_provisions(self):
         return self.filter(enrichment_type="unconstitutional_provision")
 
 
-class ProvisionLevelEnrichment(models.Model):
+class ProvisionEnrichment(models.Model):
     # TODO: add more choices
     ENRICHMENT_TYPE_CHOICES = (
         ("provision_enrichment", _("Provision enrichment")),
@@ -27,7 +27,7 @@ class ProvisionLevelEnrichment(models.Model):
     provision_eid = models.CharField(
         _("provision eid"), max_length=2048, null=True, blank=True
     )
-    # whole_work = models.BooleanField(_("whole work"), default=False)
+    whole_work = models.BooleanField(_("whole work"), default=False)
     enrichment_type = models.CharField(
         _("enrichment type"),
         max_length=256,
@@ -38,23 +38,21 @@ class ProvisionLevelEnrichment(models.Model):
     )
     text = models.CharField(_("text"), max_length=2048, null=True, blank=True)
 
-    objects = ProvisionLevelEnrichmentManager()
+    objects = ProvisionEnrichmentManager()
 
     class Meta:
-        verbose_name = _("provision-level enrichment")
-        verbose_name_plural = _("provision-level enrichments")
-
-    @property
-    def whole_work(self):
-        return not self.provision_eid
+        verbose_name = _("provision enrichment")
+        verbose_name_plural = _("provision enrichments")
 
     def save(self, *args, **kwargs):
-        # if not self.provision:
-        #     self.whole_work = True
+        if not self.provision_eid:
+            self.whole_work = True
+        if self.whole_work:
+            self.provision_eid = None
         super().save(*args, **kwargs)
 
 
-class UnconstitutionalProvision(ProvisionLevelEnrichment):
+class UnconstitutionalProvision(ProvisionEnrichment):
     # TODO: SET_NULL rather?
     judgment = models.ForeignKey(
         "peachjam.Work",
