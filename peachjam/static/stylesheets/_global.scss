@@ -151,8 +151,8 @@ footer {
   font-size: 22px;
 }
 
-.text-purple-500 {
-  color: $purple-500 !important;
+.text-ai {
+  color: $text-ai !important;
 }
 
 @each $state, $value in $theme-colors {

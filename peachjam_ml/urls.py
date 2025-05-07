@@ -13,7 +13,7 @@ urlpatterns = [
     ),
     path(
         "folder/<int:pk>/similar-documents",
-        cache_page(CACHE_DURATION)(SimilarDocumentsFolderView.as_view()),
+        SimilarDocumentsFolderView.as_view(),
         name="folder_similar_docs",
     ),
 ]
