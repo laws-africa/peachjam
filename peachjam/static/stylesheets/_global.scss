@@ -151,6 +151,10 @@ footer {
   font-size: 22px;
 }
 
+.text-ai {
+  color: $text-ai !important;
+}
+
 @each $state, $value in $theme-colors {
   .alert-#{$state} {
     $alert-color: shift-color($value, $alert-color-scale);
