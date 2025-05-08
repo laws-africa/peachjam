@@ -1,6 +1,5 @@
 [
   {
-    "source_id":  123,
     "work_frbr_uri":  "/akn/za/act/1979/70",
     "provision_eid": "sec_2__subsec_1__para_b",
     "whole_work": false,
@@ -14,7 +13,6 @@
     "resolving_amendment_work_frbr_uri": null
   },
   {
-    "source_id":  57,
     "work_frbr_uri":  "/akn/za/act/1979/70",
     "provision_eid": "sec_2__subsec_1__para_a",
     "whole_work": false,

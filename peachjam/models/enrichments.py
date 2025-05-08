@@ -15,7 +15,6 @@ class ProvisionEnrichment(models.Model):
         ("unconstitutional_provision", _("Unconstitutional provision")),
     )
 
-    source_id = models.IntegerField(_("source id"), null=False, blank=False)
     work = models.ForeignKey(
         "peachjam.Work",
         on_delete=models.CASCADE,
