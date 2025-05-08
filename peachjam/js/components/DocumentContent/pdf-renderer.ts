@@ -139,8 +139,25 @@ class PdfRenderer {
     this.root.removeAttribute('data-pdf-standby');
     this.root.setAttribute('data-pdf-loading', '');
 
-    // load the PDF asynchronously
-    const loadingTask = this.pdfjsLib.getDocument(this.pdfUrl);
+    // load the PDF
+    let response = null;
+    try {
+      response = await fetch(this.pdfUrl);
+    } catch (e) {
+      // total failure to fetch the PDF
+      this.showError(null, e);
+      return;
+    }
+
+    if (!response.ok) {
+      // response from server was non-200
+      this.showError(response);
+      return;
+    }
+
+    // render the PDF asynchronously
+    const pdfData = new Uint8Array(await response.arrayBuffer());
+    const loadingTask = this.pdfjsLib.getDocument(pdfData);
     loadingTask.onProgress = (data: { loaded: number, total: number }) => {
       if (data.total && this.progressBarElement) {
         const progress = data.loaded / data.total * 100;
@@ -171,7 +188,6 @@ class PdfRenderer {
       if (ctx) ctx.clearRect(0, 0, 1, 1);
     } catch (e) {
       console.log(e);
-      this.showError(e);
     }
   }
 
@@ -275,12 +291,29 @@ class PdfRenderer {
     }
   }
 
-  showError (e: any) {
+  showError (response: Response|null, e?: any) {
+    let message;
+
+    if (response) {
+      console.log('Bad response when fetching PDF');
+      console.log(response);
+      message = `Response ${response.status} ${response.statusText} for ${response.url}`;
+      console.log(message);
+    } else {
+      console.log('Error fetching PDF');
+      console.log(e);
+      message = `Error: ${e.message}`;
+    }
+
     this.root.removeAttribute('data-pdf-loading');
     this.root.setAttribute('data-pdf-error', '');
     const err = this.root.querySelector('.pdf-error-message') as HTMLSpanElement;
     if (err) {
-      err.innerText = e.message;
+      err.innerText = message;
+    }
+
+    if (response) {
+      throw new Error(`Error fetching PDF: ${message}`);
     }
   }
 }
