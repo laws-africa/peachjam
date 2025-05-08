@@ -171,6 +171,7 @@ class PdfRenderer {
       if (ctx) ctx.clearRect(0, 0, 1, 1);
     } catch (e) {
       console.log(e);
+      this.showError(e);
     }
   }
 
@@ -271,6 +272,15 @@ class PdfRenderer {
 
     if (this.previewPanelsContainer) {
       this.previewPanelsContainer.appendChild(panelPreview);
+    }
+  }
+
+  showError (e: any) {
+    this.root.removeAttribute('data-pdf-loading');
+    this.root.setAttribute('data-pdf-error', '');
+    const err = this.root.querySelector('.pdf-error-message') as HTMLSpanElement;
+    if (err) {
+      err.innerText = e.message;
     }
   }
 }
