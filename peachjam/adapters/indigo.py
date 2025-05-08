@@ -373,24 +373,21 @@ class IndigoAdapter(RequestsAdapter):
         self.fetch_relationships(document, created_doc)
         self.download_and_save_document_images(document, created_doc)
         if model is Legislation:
-            self.get_and_update_or_create_enrichments(url)
+            self.get_provision_enrichments(url, created_doc.work)
 
-    def get_and_update_or_create_enrichments(self, url):
+    def get_provision_enrichments(self, url, work):
+        ProvisionEnrichment.objects.filter(work=work).delete()
         enrichments = self.client_get(f"{url}/provision-enrichments.json").json()
         for enrichment in enrichments:
-            defaults = {}
+            kwargs = {}
             for key, value in enrichment.items():
-                if key == "source_id":
-                    continue
                 if key.endswith("_frbr_uri"):
                     related_work = Work.objects.filter(frbr_uri=value).first()
                     if related_work:
-                        defaults[key[:-9]] = related_work
+                        kwargs[key[:-9]] = related_work
                 else:
-                    defaults[key] = value
-            ProvisionEnrichment.objects.update_or_create(
-                source_id=enrichment["source_id"], defaults=defaults
-            )
+                    kwargs[key] = value
+            ProvisionEnrichment.objects.create(**kwargs)
 
     def list_images_from_content_api(self, document):
         links = document["links"]
