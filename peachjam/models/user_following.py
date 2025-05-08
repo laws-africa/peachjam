@@ -291,31 +291,20 @@ def get_user_following_timeline(user, docs_per_source, max_docs, before_date=Non
 
 
 def merge_sources_by_date(sources, date_attr):
-    """Merge multiple following sources into a single iterator of documents, ordered by date.
+    """Merge multiple following sources into a single iterator of documents, ordered by the date attribute,
+    most recent first.
+
     sources: (source, Iterator[Document])
     Yields (source, document) in descending date order across all sources.
     """
-    heap = []
-    source_iters = {}
 
-    # Prime heap
-    for source, docs in sources:
-        source_iters[source] = docs
-        try:
-            doc = next(docs)
-            heapq.heappush(heap, (-getattr(doc, date_attr).toordinal(), source, doc))
-        except StopIteration:
-            continue
+    def pair_generator(source, docs):
+        for d in docs:
+            yield source, d
 
-    while heap:
-        _, source, doc = heapq.heappop(heap)
-        yield source, doc
+    generators = [pair_generator(source, docs) for source, docs in sources]
 
-        # Refill from this source
-        try:
-            next_doc = next(source_iters[source])
-            heapq.heappush(
-                heap, (-getattr(next_doc, date_attr).toordinal(), source, next_doc)
-            )
-        except StopIteration:
-            continue
+    # merge the sources by date, reverse=True because we have the largest date first
+    return heapq.merge(
+        *generators, key=lambda p: getattr(p[1], date_attr), reverse=True
+    )
