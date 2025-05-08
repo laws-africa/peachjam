@@ -245,6 +245,9 @@ def percentile(values, percent):
 
 def min_max_normalize(values):
     """Normalize a list of values to the range [0, 1]."""
+    if not values:
+        return []
+
     min_val = min(values)
     max_val = max(values)
     if max_val == min_val:
