@@ -45,6 +45,7 @@ urlpatterns = [
     path("i18n/", include("peachjam.urls.i18n")),
     path("saved-documents/", include("peachjam.urls.saved_documents")),
     path("follow/", include("peachjam.urls.following")),
+    path("my/", include("peachjam.urls.my")),
     # general
     path("_token", CSRFTokenView.as_view(), name="csrf_token"),
     path("about/", AboutPageView.as_view(), name="about"),

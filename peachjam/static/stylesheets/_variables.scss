@@ -44,3 +44,11 @@ $container-max-widths: (
   xl: 1140px,
   xxl: 1320px
 );
+
+// make navbar toggler simpler
+.navbar-toggler {
+  --bs-navbar-toggler-padding-x: 0px;
+  --bs-navbar-toggler-padding-y: 0px;
+  --bs-border-width: 0px;
+  --bs-navbar-toggler-focus-width: 1px;
+}

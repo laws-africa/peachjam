@@ -185,6 +185,11 @@ html[data-user-agent*='pocketlaw'] .pocketlaw-hidden {
   overflow-y: auto;
 }
 
+.list-scrollable {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
 a:visited:not(.btn, .nav-link, .dropdown-item) {
   color: $visited-link;
 }

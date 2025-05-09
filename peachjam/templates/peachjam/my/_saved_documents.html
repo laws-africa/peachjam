@@ -1,0 +1,21 @@
+{% load i18n %}
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="mb-3">{% trans "Saved documents" %}</h5>
+    <ul class="list-unstyled mb-3 list-scrollable">
+      {% for folder in folders %}
+        <li class="d-flex">
+          <i class="bi bi-folder me-2"></i>
+          <div class="flex-grow-1">
+            <a href="{{ folder.get_absolute_url }}">{{ folder }}</a>
+            <span class="badge bg-secondary">{{ folder.n_saved_documents }}</span>
+            {% if folder.note %}<div class="text-muted">{{ folder.note }}</div>{% endif %}
+          </div>
+        </li>
+      {% empty %}
+        <li>{% trans "You haven't saved any documents yet." %}</li>
+      {% endfor %}
+    </ul>
+    <a href="{% url 'folder_list' %}">{% trans "Saved documents" %} →</a>
+  </div>
+</div>

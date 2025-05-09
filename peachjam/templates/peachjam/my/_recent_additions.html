@@ -1,0 +1,12 @@
+{% load i18n %}
+<h5 class="mb-3">{% trans "What's new in topics you follow" %}</h5>
+<p>
+  <a href="{% url 'user_following_list' %}">{% trans "Topics you follow" %} →</a>
+</p>
+{% if following_timeline %}
+  <ol class="list-timeline">
+    {% include "peachjam/user_following/_timeline.html" with truncated=timeline_truncated %}
+  </ol>
+{% else %}
+  <p>{% trans "Follow courts and topics to stay up-to-date." %}</p>
+{% endif %}

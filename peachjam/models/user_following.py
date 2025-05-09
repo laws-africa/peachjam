@@ -1,4 +1,6 @@
+import heapq
 import logging
+from itertools import groupby
 
 from countries_plus.models import Country
 from django.conf import settings
@@ -168,56 +170,42 @@ class UserFollowing(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+    def get_documents_queryset(self):
+        qs = CoreDocument.objects
+
+        if self.court:
+            return qs.filter(judgment__court=self.court)
+
+        if self.author:
+            return qs.filter(genericdocument__author=self.author)
+
+        if self.court_class:
+            return qs.filter(judgment__court__court_class=self.court_class)
+
+        if self.court_registry:
+            return qs.filter(judgment__registry=self.court_registry)
+
+        if self.country:
+            return qs.filter(jurisdiction=self.country)
+
+        if self.locality:
+            return qs.filter(locality=self.locality)
+
+        if self.taxonomy:
+            topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
+            return qs.filter(taxonomies__topic__in=topics)
+
     def get_new_followed_documents(self):
-        qs = CoreDocument.objects.preferred_language(
+        qs = self.get_documents_queryset().preferred_language(
             self.user.userprofile.preferred_language.iso_639_3
         )
         if self.last_alerted_at:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
-        if self.court:
-            qs = qs.filter(judgment__court=self.court)[:10]
-            return {
-                "followed_object": self.court,
-                "documents": qs,
-            }
 
-        elif self.author:
-            qs = qs.filter(genericdocument__author=self.author)[:10]
-            return {
-                "followed_object": self.author,
-                "documents": qs,
-            }
-        elif self.court_class:
-            qs = qs.filter(judgment__court__court_class=self.court_class)[:10]
-            return {
-                "followed_object": self.court_class,
-                "documents": qs,
-            }
-        elif self.court_registry:
-            qs = qs.filter(judgment__registry=self.court_registry)[:10]
-            return {
-                "followed_object": self.court_registry,
-                "documents": qs,
-            }
-        elif self.country:
-            qs = qs.filter(jurisdiction=self.country)[:10]
-            return {
-                "followed_object": self.country,
-                "documents": qs,
-            }
-        elif self.locality:
-            qs = qs.filter(locality=self.locality)[:10]
-            return {
-                "followed_object": self.locality,
-                "documents": qs,
-            }
-        elif self.taxonomy:
-            topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
-            qs = qs.filter(taxonomies__topic__in=topics)[:10]
-            return {
-                "followed_object": self.taxonomy,
-                "documents": qs,
-            }
+        return {
+            "followed_object": self.followed_object,
+            "documents": qs[:10],
+        }
 
     @classmethod
     def update_and_alert(cls, user):
@@ -251,3 +239,72 @@ class UserFollowing(models.Model):
                 recipient_list=[user.email],
                 context=context,
             )
+
+
+def get_user_following_timeline(user, docs_per_source, max_docs, before_date=None):
+    # Get the latest documents from all followed sources
+    def apply_filter(qs):
+        if before_date:
+            qs = qs.filter(created_at__lt=before_date)
+        return qs
+
+    sources = [
+        (
+            f,
+            apply_filter(
+                f.get_documents_queryset()
+                .order_by("-created_at")
+                .select_related("work")
+                .prefetch_related("labels", "taxonomies")
+            ).iterator(max_docs),
+        )
+        for f in user.following.all()
+    ]
+    sources = merge_sources_by_date(sources, "created_at")
+
+    # group the (source, document) tuples by date
+    n_docs = 0
+    groups_by_date = {}
+    for day, doc_group in groupby(sources, lambda p: p[1].created_at.date()):
+        doc_group = list(doc_group)
+        n_docs += len(doc_group)
+
+        # group the days documents by source, and put the smallest groups first
+        groups = {}
+        for source, doc in doc_group:
+            groups.setdefault(source, []).append(doc)
+
+        # cap documents per source
+        for source, docs in groups.items():
+            docs = sorted(docs, key=lambda d: d.date, reverse=True)
+            groups[source] = (docs[:docs_per_source], docs[docs_per_source:])
+
+        # tuples: (source, (docs, rest))
+        groups_by_date[day] = sorted(
+            groups.items(), key=lambda x: len(x[1][0]) + len(x[1][1])
+        )
+
+        if max_docs and n_docs > max_docs:
+            break
+
+    return groups_by_date
+
+
+def merge_sources_by_date(sources, date_attr):
+    """Merge multiple following sources into a single iterator of documents, ordered by the date attribute,
+    most recent first.
+
+    sources: (source, Iterator[Document])
+    Yields (source, document) in descending date order across all sources.
+    """
+
+    def pair_generator(source, docs):
+        for d in docs:
+            yield source, d
+
+    generators = [pair_generator(source, docs) for source, docs in sources]
+
+    # merge the sources by date, reverse=True because we have the largest date first
+    return heapq.merge(
+        *generators, key=lambda p: getattr(p[1], date_attr), reverse=True
+    )

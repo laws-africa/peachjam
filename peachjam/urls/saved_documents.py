@@ -1,11 +1,6 @@
 from django.urls import path
 
 from peachjam.views import (
-    FolderCreateView,
-    FolderDeleteView,
-    FolderDownloadView,
-    FolderListView,
-    FolderUpdateView,
     SavedDocumentButtonBulkView,
     SavedDocumentButtonView,
     SavedDocumentCreateView,
@@ -37,30 +32,5 @@ urlpatterns = [
         "<int:pk>/delete",
         SavedDocumentDeleteView.as_view(),
         name="saved_document_delete",
-    ),
-    path(
-        "folders/",
-        FolderListView.as_view(),
-        name="folder_list",
-    ),
-    path(
-        "folders/create",
-        FolderCreateView.as_view(),
-        name="folder_create",
-    ),
-    path(
-        "folders/<int:pk>/update",
-        FolderUpdateView.as_view(),
-        name="folder_update",
-    ),
-    path(
-        "folders/<int:pk>/delete",
-        FolderDeleteView.as_view(),
-        name="folder_delete",
-    ),
-    path(
-        "folders/<int:pk>/download",
-        FolderDownloadView.as_view(),
-        name="folder_download",
     ),
 ]

@@ -4,15 +4,9 @@ from peachjam.views import (
     UserFollowingButtonView,
     UserFollowingCreateView,
     UserFollowingDeleteView,
-    UserFollowingListView,
 )
 
 urlpatterns = [
-    path(
-        "",
-        UserFollowingListView.as_view(),
-        name="user_following_list",
-    ),
     path(
         "button/",
         UserFollowingButtonView.as_view(),

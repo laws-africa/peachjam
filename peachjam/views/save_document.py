@@ -59,7 +59,9 @@ class BaseFolderMixin(
         context["folders"] = self.request.user.folders.prefetch_related(
             Prefetch(
                 "saved_documents",
-                queryset=SavedDocument.objects.select_related("document").annotate(
+                queryset=SavedDocument.objects.select_related("document")
+                .prefetch_related("document__labels")
+                .annotate(
                     annotation_count=Count(
                         "document__annotations",
                         filter=Q(document__annotations__user=self.request.user),
@@ -73,6 +75,7 @@ class BaseFolderMixin(
 
 class FolderListView(BaseFolderMixin, ListView):
     permission_required = "peachjam.view_folder"
+    tab = "saved_documents"
 
 
 class BaseFolderFormMixin(BaseFolderMixin):

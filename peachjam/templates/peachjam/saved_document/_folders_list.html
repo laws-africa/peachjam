@@ -1,6 +1,6 @@
 {% load i18n %}
 <div>
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center">
     <h2>{% trans 'Saved documents' %}</h2>
     <button class="btn btn-primary"
             hx-target="#folders-list"
@@ -9,10 +9,11 @@
       {% trans 'New Folder' %}
     </button>
   </div>
+  <div class="mb-4">{% trans "Save documents to simplify your research and stay up-to-date" %}</div>
   {% if folders or ungrouped_saved_documents %}
     {% block folder-list %}
       {% for folder in folders %}
-        <div class="card mb-5">
+        <div class="card mb-5" id="folder-{{ folder.pk }}">
           <div class="card-header">
             {% block folder-list-card-header %}
               <h5 class="mb-0">

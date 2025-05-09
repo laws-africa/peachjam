@@ -8,53 +8,47 @@
 {% endblock %}
 {% block account-content %}
   <h2>{% trans "Profile" %}</h2>
-  <form method="post">
+  <form method="post" class="mb-5">
     {% csrf_token %}
-    <div class="card mb-5">
-      <div class="card-body">
-        <div class="mb-3">
-          <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
-          <input type="text"
-                 class="form-control"
-                 name="{{ form.first_name.name }}"
-                 id="{{ form.first_name.id_for_label }}"
-                 value="{{ form.first_name.value|default:'' }}"/>
-          {% if form.first_name.errors %}
-            <div class="text-danger">
-              {% for error in form.first_name.errors %}<p>{{ error }}</p>{% endfor %}
-            </div>
-          {% endif %}
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+      <input type="text"
+             class="form-control"
+             name="{{ form.first_name.name }}"
+             id="{{ form.first_name.id_for_label }}"
+             value="{{ form.first_name.value|default:'' }}"/>
+      {% if form.first_name.errors %}
+        <div class="text-danger">
+          {% for error in form.first_name.errors %}<p>{{ error }}</p>{% endfor %}
         </div>
-        <div class="mb-3">
-          <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
-          <input type="text"
-                 class="form-control"
-                 name="{{ form.last_name.name }}"
-                 id="{{ form.last_name.id_for_label }}"
-                 value="{{ form.last_name.value|default:'' }}"/>
-          {% if form.last_name.errors %}
-            <div class="text-danger">
-              {% for error in form.last_name.errors %}<p>{{ error }}</p>{% endfor %}
-            </div>
-          {% endif %}
-        </div>
-        <div class="mb-3">
-          <label for="{{ form.preferred_language.id_for_label }}">{{ form.preferred_language.label }}</label>
-          <select class="form-control"
-                  name="{{ form.preferred_language.name }}"
-                  id="{{ form.preferred_language.id_for_label }}">
-            {% for opt in form.preferred_language %}{{ opt }}{% endfor %}
-          </select>
-          {% if form.preferred_language.errors %}
-            <div class="text-danger">
-              {% for error in form.preferred_language.errors %}<p>{{ error }}</p>{% endfor %}
-            </div>
-          {% endif %}
-        </div>
-      </div>
-      <div class="card-footer">
-        <button type="submit" class="btn btn-success">{% trans "Save" %}</button>
-      </div>
+      {% endif %}
     </div>
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+      <input type="text"
+             class="form-control"
+             name="{{ form.last_name.name }}"
+             id="{{ form.last_name.id_for_label }}"
+             value="{{ form.last_name.value|default:'' }}"/>
+      {% if form.last_name.errors %}
+        <div class="text-danger">
+          {% for error in form.last_name.errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.preferred_language.id_for_label }}">{{ form.preferred_language.label }}</label>
+      <select class="form-control"
+              name="{{ form.preferred_language.name }}"
+              id="{{ form.preferred_language.id_for_label }}">
+        {% for opt in form.preferred_language %}{{ opt }}{% endfor %}
+      </select>
+      {% if form.preferred_language.errors %}
+        <div class="text-danger">
+          {% for error in form.preferred_language.errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
   </form>
 {% endblock %}
