@@ -8,10 +8,10 @@
           <a href="{% url 'my_home' %}" class="h4">Explore →</a>
         </div>
       </div>
-      <h5 class="text-muted ms-auto">
+      <div class="h5 text-muted ms-auto mb-3">
         {% if user.first_name %}<div>{{ user.first_name }} {{ user.last_name }}</div>{% endif %}
-        {{ user.email }}
-      </h5>
+        <div class="h6">{{ user.email }}</div>
+      </div>
     </div>
     <div class="row">
       {% if PEACHJAM_SETTINGS.allow_save_documents %}
