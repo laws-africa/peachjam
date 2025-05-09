@@ -1,7 +1,7 @@
 {% load i18n %}
 {% for date, groups in following_timeline.items %}
   <li>
-    <div class="sticky-top bg-white text-muted">{{ date }}</div>
+    <div class="bg-white text-muted">{{ date }}</div>
     <ul class="list-unstyled">
       {% for following, docs in groups %}
         <li>

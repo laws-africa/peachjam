@@ -6,6 +6,7 @@
 {% endblock %}
 {% block content %}
   <h2 class="mb-4">{% trans 'Log in' %}</h2>
+  {% include "account/_social_login_buttons.html" %}
   <form method="post" action="{% url 'account_login' %}" id="email-login">
     {% csrf_token %}
     {% if redirect_field_value %}
@@ -60,5 +61,4 @@
       <a class="btn btn-link ms-3" href="{% url 'account_signup' %}">{% trans 'Create an account' %}</a>
     </div>
   </form>
-  {% include "account/_social_login_buttons.html" %}
 {% endblock %}
