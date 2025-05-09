@@ -1,5 +1,5 @@
 {% load i18n %}
-<button class="btn btn-outline-primary btn-shrink-sm ms-2 save-document-button save-document-button--{{ document.id }}"
+<button class="btn btn-primary btn-shrink-sm save-document-button save-document-button--{{ document.id }}"
         type="button"
         data-bs-toggle="modal"
         data-bs-target="#saveDocumentModal-{{ document.id }}"
@@ -12,7 +12,7 @@
 </button>
 <div hx-swap-oob="true"
      id="saveDocumentModalDialog-{{ document.id }}"
-     class="modal-dialog">
+     class="modal-dialog modal-lg">
   <div class="modal-content">
     <div class="modal-header">
       <p class="h5 modal-title">{% trans 'Save document' %}</p>
