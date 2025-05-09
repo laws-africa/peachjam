@@ -66,6 +66,17 @@
               </p>
               <button class="btn btn-primary" type="button" data-load-doc-button>{% trans 'Load document' %}</button>
             </div>
+            <div class="pdf-error">
+              <h5>{% trans 'Error loading PDF' %}</h5>
+              <div class="mb-3">{% trans "Try reloading the page or downloading the PDF." %}</div>
+              <div class="mb-5">
+                <a href="#" onclick="window.location.reload();" class="me-3">{% trans "Reload page" %}</a>
+                <a href="{% url 'document_source_pdf' document.expression_frbr_uri|strip_first_character %}">{% trans "Download PDF" %}</a>
+              </div>
+              <div class="text-muted">
+                {% trans "Error" %}: <span class="pdf-error-message"></span>
+              </div>
+            </div>
           </div>
         {% endif %}
         <la-gutter akoma-ntoso=".content-and-enrichments .content"></la-gutter>
