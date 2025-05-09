@@ -37,6 +37,17 @@ $floating-header-height-md: 2.5rem !default;
 
 $alert-padding-y: 0.75rem;
 
+// add an xxxl breakpoint for wide screens
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px,
+  xxxl: 1600px,
+) !default;
+
 // Force bootstrap's container to be fluid up to 960px, which covers most phones and tablets in portrait and
 // landscape. This is easier than changing all uses of container to container-lg.
 $container-max-widths: (
@@ -44,7 +55,9 @@ $container-max-widths: (
   md: 960px,
   lg: 960px,
   xl: 1140px,
-  xxl: 1320px
+  xxl: 1320px,
+  // custom xxxl container
+  xxxl: 1520px
 );
 
 // make navbar toggler simpler
