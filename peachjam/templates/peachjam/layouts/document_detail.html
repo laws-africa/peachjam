@@ -38,7 +38,7 @@
               {% block sub-title %}{% endblock %}
               {% include 'peachjam/_document_labels.html' %}
             </div>
-            <div class="d-flex align-items-center">
+            <div class="d-none d-md-flex align-items-center">
               <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
                  class="btn btn-link share-link"
                  data-track-event="Document | Social share | WhatsApp"
