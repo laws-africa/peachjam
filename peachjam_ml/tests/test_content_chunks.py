@@ -4,7 +4,13 @@ from unittest.mock import patch
 from django.conf import settings
 from django.test import TestCase
 
-from peachjam.models import Country, DocumentContent, GenericDocument, Language
+from peachjam.models import (
+    Country,
+    DocumentContent,
+    GenericDocument,
+    Language,
+    Legislation,
+)
 from peachjam_ml.models import ContentChunk, DocumentEmbedding
 
 
@@ -222,7 +228,7 @@ class TestContentChunks(TestCase):
         )
 
     @patch("peachjam_ml.models.get_text_embedding_batch")
-    def test_refresh_for_document(self, mock_get_text_embedding_batch):
+    def test_refresh_for_text_document(self, mock_get_text_embedding_batch):
         mock_get_text_embedding_batch.return_value = [[0.1] * 1024]
 
         DocumentContent.objects.create(
@@ -242,7 +248,73 @@ class TestContentChunks(TestCase):
             self.assertTrue(mock_get_text_embedding_batch.called)
             chunks = ContentChunk.objects.filter(document=self.document)
             self.assertEqual(["one two three"], [c.text for c in chunks])
-            self.assertEqual(len(chunks), 1)
+            self.assertEqual([0.031249847] * 1024, de.text_embedding)
+        finally:
+            settings.PEACHJAM["SEARCH_SEMANTIC"] = False
+
+    @patch("peachjam_ml.models.get_text_embedding_batch")
+    def test_refresh_for_akn_document(self, mock_get_text_embedding_batch):
+        mock_get_text_embedding_batch.return_value = [
+            # chp_1
+            [0.1] * 1024,
+            # chp_1__sec_1
+            [0.9] * 1024,
+        ]
+
+        self.document = Legislation.objects.create(
+            jurisdiction=Country.objects.first(),
+            title="Test",
+            date=date.today(),
+            language=Language.objects.first(),
+            frbr_uri_doctype="act",
+            frbr_uri_number="test",
+            frbr_uri_date="2024",
+            metadata_json={"commenced": True},
+            content_html_is_akn=True,
+            content_html="""
+<section id="chp_1">
+  <h1>Chapter 1</h1>
+  <p>Chapter text</p>
+  <div id="chp_1__sec_1">
+    <h2>Section 1</h2>
+    <p>Section text</p>
+  </div>
+</section>
+            """,
+            toc_json=[
+                {
+                    "id": "chp_1",
+                    "title": "Chapter 1",
+                    "type": "chapter",
+                    "num": "1",
+                    "basic_unit": False,
+                    "children": [
+                        {
+                            "id": "chp_1__sec_1",
+                            "type": "section",
+                            "num": "1",
+                            "basic_unit": True,
+                            "title": None,
+                        }
+                    ],
+                }
+            ],
+        )
+
+        settings.PEACHJAM["SEARCH_SEMANTIC"] = True
+        try:
+            de = DocumentEmbedding.refresh_for_document(self.document)
+
+            # Verify
+            self.assertTrue(mock_get_text_embedding_batch.called)
+            chunks = ContentChunk.objects.filter(document=self.document)
+            self.assertEqual(
+                [
+                    "Chapter 1\n\n-<>-\n\nChapter text \n     Section 1 \n     Section text",
+                    "Chapter 1\n\n-<>-\n\nSection text",
+                ],
+                [c.text for c in chunks],
+            )
             self.assertEqual([0.031249847] * 1024, de.text_embedding)
         finally:
             settings.PEACHJAM["SEARCH_SEMANTIC"] = False
