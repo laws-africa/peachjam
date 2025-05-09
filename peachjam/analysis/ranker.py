@@ -63,9 +63,10 @@ class GraphRanker:
     with other signals such as semantic similarity and document recency during re-ranking.
     """
 
-    AUTHORITY_WEIGHT_PAGERANK = 0.6
+    AUTHORITY_WEIGHT_PAGERANK = 0.7
     AUTHORITY_WEIGHT_CITATIONS = 0.3
-    AUTHORITY_WEIGHT_RECENCY = 0.1
+    # TODO: this is turned off for now, it skews scores too much
+    AUTHORITY_WEIGHT_RECENCY = 0.0
 
     # the maximum age of a document in days to be considered "recent"
     RECENCY_AGE_DAYS = 365
