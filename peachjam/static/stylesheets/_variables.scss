@@ -35,6 +35,8 @@ $breadcrumb-margin-bottom: 1rem !default;
 $floating-header-height: 3rem !default;
 $floating-header-height-md: 2.5rem !default;
 
+$alert-padding-y: 0.75rem;
+
 // Force bootstrap's container to be fluid up to 960px, which covers most phones and tablets in portrait and
 // landscape. This is easier than changing all uses of container to container-lg.
 $container-max-widths: (
