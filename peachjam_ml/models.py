@@ -80,10 +80,32 @@ class DocumentEmbedding(models.Model):
         """Calculate the document-level embedding from the content chunks."""
         self.text_embedding = None
 
+        qs = ContentChunk.objects.filter(document=self.document)
+        if (
+            self.document.content_html
+            and self.document.content_html_is_akn
+            and self.document.toc_json
+        ):
+            # The document is AKN with a TOC and has been chunked recursively based on the TOC.
+            # This means that, for example, a chapter has been chunked and embeddings calculated, and then
+            # all the children of the chapter have been chunked and embeddings calculated too.
+            #
+            # For example, we have multiple chunks and embeddings for:
+            #   chp_1
+            #   chp_1__sec_1
+            #   chp_2__sec_2
+            #
+            # If we take the average of all embeddings, it means that we're double-counting the nested children
+            # of top-level TOC containers since the text of chp_1__sec_1 is in chp_1 and chp_1__sec_1.
+            #
+            # So, instead we only get the embeddings for the top-level TOC containers and take the average of those.
+            top_level_ids = [
+                item["id"] or item["type"] for item in self.document.toc_json
+            ]
+            qs = qs.filter(portion__in=top_level_ids)
+
         # get the average directly in the DB (faster) and then normalise it
-        avg = ContentChunk.objects.filter(document=self.document).aggregate(
-            avg=Avg("text_embedding")
-        )["avg"]
+        avg = qs.aggregate(avg=Avg("text_embedding"))["avg"]
         # if numpy is installed, this will be ndarray, otherwise it will be a list
         if avg is not None and len(avg):
             avg = normalize_vector(avg)
