@@ -1,7 +1,16 @@
 {% load peachjam static i18n %}
-<div class="btn-toolbar justify-content-end mb-3 document-detail-toolbar"
+<div class="btn-toolbar mb-3 document-detail-toolbar"
      role="toolbar"
      aria-label="{% trans "Document toolbar" %}">
+  <div class="me-auto">
+    {% if show_save_doc_button %}
+      <div hx-get="{% url 'saved_document_button' document.id %}"
+           hx-trigger="load"></div>
+      <!-- these will be replaced by htmx -->
+      <div class="save-document-button save-document-button--{{ document.id }}"></div>
+      {% include 'peachjam/saved_document/_modal_placeholder.html' %}
+    {% endif %}
+  </div>
   {% block edit-btn %}
     {% if user.is_staff %}
       {% if document.ingestor_edit_url %}
@@ -26,26 +35,17 @@
     {% endif %}
   {% endblock %}
   {% block download-btn %}
-    <div>
-      {% if show_save_doc_button %}
-        <div hx-get="{% url 'saved_document_button' document.id %}"
-             hx-trigger="load"></div>
-        <!-- these will be replaced by htmx -->
-        <div class="save-document-button save-document-button--{{ document.id }}"></div>
-        {% include 'peachjam/saved_document/_modal_placeholder.html' %}
-      {% endif %}
-    </div>
     {% if document.source_file %}
-      <div class="btn-group dropdown-center ms-2">
+      <div class="btn-group dropdown-center ms-2 d-none d-md-block">
         <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
-           class="btn btn-primary btn-shrink-sm"
+           class="btn btn-secondary btn-shrink-sm"
            target="_blank">
           {% trans "Download" %} {{ document.source_file.filename_extension|upper }}
           ({{ document.source_file.size|filesizeformat }})
         </a>
         {% if document.source_file.filename_extension != "pdf" %}
           <button type="button"
-                  class="btn btn-primary btn-shrink-sm dropdown-toggle dropdown-toggle-split"
+                  class="btn btn-secondary btn-shrink-sm dropdown-toggle dropdown-toggle-split"
                   data-bs-toggle="dropdown"
                   aria-expanded="false">
             <span class="visually-hidden">{% trans "Toggle dropdown" %}</span>
@@ -62,21 +62,56 @@
     {% endif %}
   {% endblock %}
   {% block report-problem-btn %}
-    <div>
-      <button type="button"
-              class="btn btn-outline-secondary btn-shrink-sm ms-2"
-              data-bs-toggle="modal"
-              data-bs-target="#documentProblemModal">
-        <span class="d-md-none">{% trans "Report" %}</span>
-        <span class="d-none d-md-inline">{% trans 'Report a problem' %}</span>
-      </button>
-      <div class="modal fade"
-           id="documentProblemModal"
-           tabindex="-1"
-           aria-labelledby="documentProblemModalTitle"
-           aria-hidden="true"
-           data-vue-component="DocumentProblemModal">
-      </div>
+    <button type="button"
+            class="btn btn-outline-secondary btn-shrink-sm ms-2 d-none d-md-block"
+            data-bs-toggle="modal"
+            data-bs-target="#documentProblemModal">
+      {% trans 'Report a problem' %}
+    </button>
+    <div class="modal fade"
+         id="documentProblemModal"
+         tabindex="-1"
+         aria-labelledby="documentProblemModalTitle"
+         aria-hidden="true"
+         data-vue-component="DocumentProblemModal">
     </div>
   {% endblock %}
+  <div class="d-md-none dropdown">
+    <button class="btn btn-outline-secondary btn-shrink-sm ms-2"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+      <i class="bi bi-three-dots"></i>
+    </button>
+    <ul class="dropdown-menu">
+      <li>
+        <button class="dropdown-item" data-component="ShareMenuItem">{% trans "Share" %}</button>
+      </li>
+      {% if document.source_file %}
+        <li>
+          <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
+             class="dropdown-item"
+             target="_blank">
+            {% trans "Download" %} {{ document.source_file.filename_extension|upper }}
+            ({{ document.source_file.size|filesizeformat }})
+          </a>
+        </li>
+        {% if document.source_file.filename_extension != "pdf" %}
+          <li>
+            <a class="dropdown-item"
+               href="{% url 'document_source_pdf' document.expression_frbr_uri|strip_first_character %}"
+               target="_blank">{% trans "Download" %} PDF</a>
+          </li>
+        {% endif %}
+      {% endif %}
+      <li>
+        <hr class="dropdown-divider"/>
+      </li>
+      <li>
+        <a class="dropdown-item"
+           href="#documentProblemModal"
+           data-bs-toggle="modal">{% trans "Report a problem" %}</a>
+      </li>
+    </ul>
+  </div>
 </div>

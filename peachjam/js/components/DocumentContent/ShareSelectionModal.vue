@@ -39,7 +39,7 @@
               target="_blank"
               data-track-event="Document | Social share | X"
               @click="modal.hide()"
-            ><i class="bi bi-twitter twitter-forecolor share-icon" />
+            ><i class="bi bi-twitter-x twitter-x-forecolor share-icon" />
             </a>
             <a
               :href="`https://www.facebook.com/sharer/sharer.php?u=${ encodeURIComponent(url) }`"
