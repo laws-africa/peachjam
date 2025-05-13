@@ -536,24 +536,31 @@ class IndigoAdapter(RequestsAdapter):
 
         logger.info(f"Downloading source file from {url}")
 
-        with NamedTemporaryFile() as f:
-            r = self.client_get(url)
-            try:
-                # sometimes this header is not present
-                d = r.headers["Content-Disposition"]
-                filename = re.findall("filename=(.+)", d)[0]
-            except KeyError:
-                filename = f"{slugify(title)}.pdf"
-            f.write(r.content)
+        r = self.client_get(url)
+        if not r.content:
+            if hasattr(doc, "source_file"):
+                logger.info("  No content in response, deleting existing source file")
+                doc.source_file.delete()
+            else:
+                logger.info("  No content in response, skipping")
+        else:
+            with NamedTemporaryFile() as f:
+                try:
+                    # sometimes this header is not present
+                    d = r.headers["Content-Disposition"]
+                    filename = re.findall("filename=(.+)", d)[0]
+                except KeyError:
+                    filename = f"{slugify(title)}.pdf"
+                f.write(r.content)
 
-            SourceFile.objects.update_or_create(
-                document=doc,
-                defaults={
-                    "file": File(f, name=filename),
-                    "mimetype": magic.from_file(f.name, mime=True),
-                    "size": len(r.content),
-                },
-            )
+                SourceFile.objects.update_or_create(
+                    document=doc,
+                    defaults={
+                        "file": File(f, name=filename),
+                        "mimetype": magic.from_file(f.name, mime=True),
+                        "size": len(r.content),
+                    },
+                )
 
     def get_size_from_url(self, url):
         logger.info("  Getting the file size ...")
@@ -619,24 +626,33 @@ class IndigoAdapter(RequestsAdapter):
 
             else:
                 logger.info(f"  Downloading publication file from {url}")
-                with NamedTemporaryFile() as f:
-                    r = self.client_get(url)
-                    f.write(r.content)
-                    mimetype = publication_document["mime_type"] or magic.from_file(
-                        f.name, mime=True
-                    )
-                    file = File(f, name=filename)
-                    PublicationFile.objects.update_or_create(
-                        document=doc,
-                        defaults={
-                            "filename": filename,
-                            "mimetype": mimetype,
-                            "size": len(r.content),
-                            "file": file,
-                            "url": None,
-                            "use_source_file": False,
-                        },
-                    )
+                r = self.client_get(url)
+                if not r.content:
+                    if hasattr(doc, "publication_file"):
+                        logger.info(
+                            "  No content in response, deleting existing publication file"
+                        )
+                        doc.publication_file.delete()
+                    else:
+                        logger.info("  No content in response, skipping")
+                else:
+                    with NamedTemporaryFile() as f:
+                        f.write(r.content)
+                        mimetype = publication_document["mime_type"] or magic.from_file(
+                            f.name, mime=True
+                        )
+                        file = File(f, name=filename)
+                        PublicationFile.objects.update_or_create(
+                            document=doc,
+                            defaults={
+                                "filename": filename,
+                                "mimetype": mimetype,
+                                "size": len(r.content),
+                                "file": file,
+                                "url": None,
+                                "use_source_file": False,
+                            },
+                        )
 
     def delete_document(self, expression_frbr_uri):
         url = f"{self.api_url}{expression_frbr_uri}"
