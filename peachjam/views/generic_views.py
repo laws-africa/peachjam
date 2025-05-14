@@ -32,6 +32,7 @@ from peachjam.xmlutils import parse_html_str
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,
+    ProvisionEnrichmentSerializer,
     RelationshipSerializer,
 )
 
@@ -403,6 +404,7 @@ class BaseDocumentDetailView(DetailView):
 
         self.add_relationships(context)
         self.add_provision_relationships(context)
+        self.add_provision_enrichments(context)
 
         if context["document"].content_html:
             context["display_type"] = (
@@ -555,6 +557,14 @@ class BaseDocumentDetailView(DetailView):
             context["predicates_json"] = PredicateSerializer(
                 Predicate.objects.all(), many=True
             ).data
+
+    def add_provision_enrichments(self, context):
+        context["provision_enrichments_json"] = ProvisionEnrichmentSerializer(
+            self.object.work.enrichments.all(), many=True
+        ).data
+        context["unconstitutional_provisions"] = self.object.work.enrichments.filter(
+            enrichment_type="unconstitutional_provision"
+        )
 
     def get_notices(self):
         return []

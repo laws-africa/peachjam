@@ -14,6 +14,7 @@ from peachjam.models import (
     Legislation,
     Locality,
     Predicate,
+    ProvisionEnrichment,
     Ratification,
     RatificationCountry,
     Relationship,
@@ -73,6 +74,19 @@ class RelationshipSerializer(serializers.ModelSerializer):
             "subject_documents",
             "object_documents",
         ]
+
+
+class ProvisionEnrichmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProvisionEnrichment
+        fields = (
+            "id",
+            "work",
+            "provision_eid",
+            "whole_work",
+            "enrichment_type",
+            "text",
+        )
 
 
 class AnnotationSerializer(serializers.ModelSerializer):

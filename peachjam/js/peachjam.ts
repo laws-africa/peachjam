@@ -60,6 +60,7 @@ class PeachJam {
     this.clearGACookies();
     this.clearCIOCookies();
     this.setupConfirm();
+    this.setupProvisionClick();
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
 
@@ -288,6 +289,35 @@ class PeachJam {
             e.stopImmediatePropagation();
           }
         }
+      }
+    });
+  }
+
+  setupProvisionClick () {
+    document.addEventListener('click', function (e) {
+      if (e.target && e.target instanceof HTMLElement && e.target.matches('a[href^="#"].provision-link')) {
+        const link = e.target.closest("a[href^='#'].provision-link");
+        if (!link) return;
+
+        const hash = link.getAttribute('href');
+        if (!hash) return;
+        const target = document.querySelector(`[data-eid="${hash.slice(1)}"]`);
+        if (!target) return;
+
+        const tabPane = target.closest('.tab-pane');
+        if (!tabPane) return;
+
+        const tabId = tabPane.id;
+        const tabTrigger = document.querySelector(`button[data-bs-toggle="tab"][data-bs-target="#${tabId}"]`);
+        if (!tabTrigger) return;
+
+        // Show the tab
+        new window.bootstrap.Tab(tabTrigger).show();
+
+        // Wait a moment and scroll to the element
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }, 200);
       }
     });
   }
