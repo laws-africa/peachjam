@@ -1,6 +1,7 @@
 {% load i18n peachjam %}
 <div class="table-responsive"
      id="doc-table"
+     {% if show_saved_documents %}data-show-saved-documents="true"{% endif %}
      data-component="DocumentTable">
   <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {% if doc_table_show_date %}doc-table--date{% endif %} {{ doc_table_classes }}">
     {% if not doc_table_hide_thead %}

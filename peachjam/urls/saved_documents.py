@@ -5,6 +5,7 @@ from peachjam.views import (
     SavedDocumentButtonView,
     SavedDocumentCreateView,
     SavedDocumentDeleteView,
+    SavedDocumentTableBulkView,
     SavedDocumentUpdateView,
 )
 
@@ -17,6 +18,10 @@ urlpatterns = [
     path(
         "buttons/",
         SavedDocumentButtonBulkView.as_view(),
+    ),
+    path(
+        "table/",
+        SavedDocumentTableBulkView.as_view(),
     ),
     path(
         "create",

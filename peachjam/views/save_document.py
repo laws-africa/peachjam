@@ -169,8 +169,8 @@ class SavedDocumentButtonBulkView(AllowSavedDocumentMixin, TemplateView):
             pks = [int(pk) for pk in self.request.GET.getlist("doc_id")]
         except ValueError:
             pass
-        # validate the pks - first 10 only
-        docs = {doc.id: doc for doc in CoreDocument.objects.filter(pk__in=pks)[:10]}
+        # validate the pks - first few only
+        docs = {doc.id: doc for doc in CoreDocument.objects.filter(pk__in=pks)[:20]}
         saved_docs = {}
 
         if self.request.user.is_authenticated:
@@ -194,6 +194,10 @@ class SavedDocumentButtonBulkView(AllowSavedDocumentMixin, TemplateView):
         context["next_url"] = self.request.headers.get("HX-Current-URL")
 
         return context
+
+
+class SavedDocumentTableBulkView(SavedDocumentButtonBulkView):
+    template_name = "peachjam/saved_document/_table_bulk.html"
 
 
 class SavedDocumentFormMixin(

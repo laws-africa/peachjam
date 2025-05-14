@@ -118,6 +118,7 @@ class DocumentListView(ListView):
             doc_table_show_date=True,
             doc_count_noun=_("document"),
             doc_count_noun_plural=_("documents"),
+            show_saved_documents=pj_settings().allow_save_documents,
             *args,
             **kwargs,
         )
