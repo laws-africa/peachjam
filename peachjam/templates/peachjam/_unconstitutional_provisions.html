@@ -1,0 +1,17 @@
+{% load peachjam i18n %}
+<h4 class="mb-3">
+  <i class="bi bi-pj pj-unconstitutional-provisions"></i>
+  {% trans 'Unconstitutional provisions' %}
+</h4>
+<div class="row">
+  <div class="col col-md-9">
+    {% for provision in unconstitutional_provisions %}
+      <div class="card my-3">
+        <div class="card-body">
+          <a class="provision-link" href="#{{ provision.provision_eid }}">{{ provision.provision_eid }}</a>
+          <p>{{ provision.text }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>

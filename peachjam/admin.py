@@ -91,6 +91,7 @@ from peachjam.models import (
     PartnerLogo,
     PeachJamSettings,
     Predicate,
+    ProvisionEnrichment,
     PublicationFile,
     Ratification,
     RatificationCountry,
@@ -1783,6 +1784,7 @@ admin.site.register(
         CustomPropertyLabel,
         DocumentAccessGroup,
         Treatment,
+        ProvisionEnrichment,
     ]
 )
 admin.site.unregister(User)

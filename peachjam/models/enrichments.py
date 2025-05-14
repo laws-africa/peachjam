@@ -43,6 +43,9 @@ class ProvisionEnrichment(models.Model):
         verbose_name = _("provision enrichment")
         verbose_name_plural = _("provision enrichments")
 
+    def __str__(self):
+        return f"{self.enrichment_type} - {self.work} - {self.provision_eid or 'whole work'}"
+
     def save(self, *args, **kwargs):
         if not self.provision_eid:
             self.whole_work = True

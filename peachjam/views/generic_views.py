@@ -559,9 +559,12 @@ class BaseDocumentDetailView(DetailView):
             ).data
 
     def add_provision_enrichments(self, context):
-        context["provision_enrichments"] = ProvisionEnrichmentSerializer(
+        context["provision_enrichments_json"] = ProvisionEnrichmentSerializer(
             self.object.work.enrichments.all(), many=True
         ).data
+        context["unconstitutional_provisions"] = self.object.work.enrichments.filter(
+            enrichment_type="unconstitutional_provision"
+        )
 
     def get_notices(self):
         return []

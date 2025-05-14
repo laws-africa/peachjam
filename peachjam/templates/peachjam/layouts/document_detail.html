@@ -107,6 +107,22 @@
                 </button>
               </li>
             {% endif %}
+            {% block unconstitutional-provisions-tab %}
+              {% if perms.peachjam.view_provisionenrichment %}
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link"
+                          data-bs-toggle="tab"
+                          data-bs-target="#unconstitutional-provisions-tab"
+                          type="button"
+                          role="tab"
+                          aria-controls="unconstitutional-provisions-tab"
+                          aria-selected="false">
+                    <i class="bi bi-pj pj-unconstitutional-provisions"></i>
+                    {% trans "Unconstitutional provisions" %}
+                  </button>
+                </li>
+              {% endif %}
+            {% endblock %}
             {% block related-documents-tab %}
               {% if show_related_documents %}
                 <li class="nav-item" role="presentation">
@@ -476,6 +492,16 @@
             </div>
           {% endif %}
         {% endblock %}
+        {% block unconstitutional-provisions-tab-pane %}
+          {% if perms.peachjam.view_provisionenrichment %}
+            <div class="tab-pane fade"
+                 id="unconstitutional-provisions-tab"
+                 role="tabpanel"
+                 aria-labelledby="unconstitutional-provisions-tab">
+              <div class="container">{% include 'peachjam/_unconstitutional_provisions.html' %}</div>
+            </div>
+          {% endif %}
+        {% endblock %}
         {% if cited_documents or documents_citing_current_doc %}
           <div class="tab-pane fade"
                id="citations-tab"
@@ -505,6 +531,6 @@
     {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
-    {{ provision_enrichments|json_script:"provision-enrichments" }}
+    {{ provision_enrichments_json|json_script:"provision-enrichments" }}
   </div>
 {% endblock %}

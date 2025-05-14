@@ -57,9 +57,6 @@ export default {
       }
     },
     unmark () {
-      if (this.marks) {
-        this.marks.forEach(mark => mark.unmark());
-      }
     },
     handleOutsideClick (event) {
       if (!this.$el.contains(event.target)) {
