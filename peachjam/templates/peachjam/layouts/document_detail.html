@@ -34,7 +34,10 @@
         {% block document-title %}
           <div class="d-md-flex justify-content-md-between my-3">
             <div>
-              <h1 class="doc-title">{{ document.title }}</h1>
+              <h1 class="doc-title">
+                {{ document.title }}
+                {% if PEACHJAM_SETTINGS.allow_save_documents %}<span id="saved-document-star--{{ document.pk }}"></span>{% endif %}
+              </h1>
               {% block sub-title %}{% endblock %}
               {% include 'peachjam/_document_labels.html' %}
             </div>
