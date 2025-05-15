@@ -7,9 +7,6 @@
         data-saved-document="{{ saved_document.id }}"
         hx-swap-oob="outerHTML:.save-document-button--{{ saved_document.document.id }}">
   <i class="bi bi-star-fill"></i>
-  {% if saved_document.folder %}
-    {{ saved_document.folder }}
-  {% else %}
-    {% trans 'Saved' %}
-  {% endif %}
+  {{ saved_document.folders.all.last }}
+  {% if saved_document.folders.count > 1 %}& more{% endif %}
 </button>

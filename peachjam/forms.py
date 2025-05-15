@@ -509,12 +509,15 @@ class SaveDocumentForm(forms.ModelForm):
 
     class Meta:
         model = SavedDocument
-        fields = ["document", "folder", "new_folder", "note"]
-        widgets = {"document": forms.HiddenInput()}
+        fields = ["document", "folders", "new_folder", "note"]
+        widgets = {
+            "document": forms.HiddenInput(),
+            "folders": forms.CheckboxSelectMultiple(),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["folder"].queryset = self.instance.user.folders.all()
+        self.fields["folders"].queryset = self.instance.user.folders.all()
         self.fields["document"].required = False
 
     def clean(self):
@@ -525,7 +528,10 @@ class SaveDocumentForm(forms.ModelForm):
                 name=cleaned_data["new_folder"],
                 user=self.instance.user,
             )
-            cleaned_data["folder"] = folder
+            folders = list(cleaned_data.get("folders").values_list("pk", flat=True))
+            if folder:
+                folders.append(folder.pk)
+                cleaned_data["folders"] = Folder.objects.filter(pk__in=folders)
         return cleaned_data
 
 

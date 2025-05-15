@@ -49,8 +49,10 @@ class SavedDocument(models.Model):
         blank=True,
         related_name="saved_documents",
     )
+    folders = models.ManyToManyField(Folder, related_name="saved_docs")
     note = models.TextField(_("note"), null=True, blank=True, max_length=2048)
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("updated at"), auto_now=True)
 
     class Meta:
         ordering = ("document__title",)
