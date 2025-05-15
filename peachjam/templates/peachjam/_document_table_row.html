@@ -23,22 +23,22 @@
     <td class="cell-title">
       <div class="d-flex">
         <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-        {% if show_saved_documents %}<span id="saved-document-star--{{ document.pk }}"></span>{% endif %}
+        {% if document.work.languages|length > 1 %}
+          <span class="d-inline-block ms-2"
+                data-bs-toggle="tooltip"
+                title="{% trans 'Multiple languages available' %}">
+            <i class="bi bi-translate"></i>
+          </span>
+        {% endif %}
+        <span id="saved-document-star--{{ document.pk }}"></span>
       </div>
-      {% if document.work.languages|length > 1 %}
-        <span class="d-inline-block"
-              data-bs-toggle="tooltip"
-              title="{% trans 'Multiple languages available' %}">
-          <i class="bi bi-translate"></i>
-        </span>
-      {% endif %}
       {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
       {% if document.listing_taxonomies %}
         <div class="d-none d-md-block ms-3">
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
         </div>
       {% endif %}
-      {% if show_saved_documents %}<div id="saved-document-table-detail--{{ document.pk }}"></div>{% endif %}
+      <div id="saved-document-table-detail--{{ document.pk }}"></div>
     </td>
   {% endif %}
   {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}

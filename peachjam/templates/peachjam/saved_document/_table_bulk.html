@@ -3,7 +3,7 @@
   {% if saved_document.id %}
     {% include "peachjam/saved_document/_star.html" %}
     <div id="saved-document-table-detail--{{ saved_document.document.id }}"
-         class="saved-document-table-detail text-muted fs-sm ms-2"
+         class="saved-document-table-detail text-muted fs-sm ms-2 mt-1"
          hx-swap-oob="true">
       {% if saved_document.folder %}
         <i class="bi bi-folder"></i>
