@@ -1,20 +1,16 @@
 {% load i18n %}
-<div hx-swap-oob="true"
-     id="saveDocumentModalDialog-{{ saved_document.document.id }}"
-     class="modal-dialog modal-lg">
+<div class="modal-dialog modal-lg">
   <div class="modal-content">
-    <div class="modal-header">
-      <p class="h5 modal-title">{% trans 'Document saved' %}</p>
-      <button type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"></button>
-    </div>
-    <div class="modal-body">
-      <form id="save-document-form-{{ saved_document.id }}"
-            hx-target="{{ target }}"
-            hx-post="{% url 'saved_document_update' saved_document.id %}?next={{ next }}">
-        {{ form.document }}
+    <form hx-target="{{ target }}"
+          hx-post="{% url 'saved_document_update' saved_document.id %}?next={{ modal_next_url|urlencode }}">
+      <div class="modal-header">
+        <p class="h5 modal-title">{% trans 'Document saved' %}</p>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
         <p class="h5">{{ saved_document.document.title }}</p>
         <div>
           <textarea class="form-control"
@@ -44,32 +40,27 @@
                  name="{{ form.new_folder.name }}"
                  type="text"/>
         </div>
-      </form>
-      <div class="mt-3">
-        <a href="{% url 'folder_list' %}">{% trans 'All saved documents' %}</a>
+        <div class="mt-3">
+          <a href="{% url 'folder_list' %}">{% trans 'All saved documents' %}</a>
+        </div>
       </div>
-    </div>
-    <div class="modal-footer d-flex justify-content-between">
-      <button class="btn btn-danger"
-              type="button"
-              data-bs-dismiss="modal"
-              hx-target="{{ target }}"
-              hx-include="#save-document-form-{{ saved_document.id }}"
-              hx-post="{% url 'saved_document_delete' saved_document.id %}?next={{ next }}"
-              hx-confirm="{% trans "Are you sure you want to unsave? This will also remove all comments." %}">
-        {% trans 'Unsave' %}
-      </button>
-      <div>
-        <button type="button"
-                class="btn btn-outline-secondary ms-2"
-                data-bs-dismiss="modal">{% trans 'Close' %}</button>
-        <button class="btn btn-primary ms-1"
-                type="submit"
-                form="save-document-form-{{ saved_document.id }}"
-                data-bs-dismiss="modal">
-          {% trans 'Save' %}
+      <div class="modal-footer d-flex justify-content-between">
+        <button class="btn btn-danger"
+                type="button"
+                data-bs-dismiss="modal"
+                hx-target="{{ target }}"
+                {% url 'saved_document_button' saved_document.document.id as next_url %}
+                hx-post="{% url 'saved_document_delete' saved_document.id %}?next={{ next_url|urlencode }}"
+                hx-confirm="{% trans "Are you sure you want to unsave? This will also remove all comments." %}">
+          {% trans 'Unsave' %}
         </button>
+        <div>
+          <button type="button"
+                  class="btn btn-outline-secondary ms-2"
+                  data-bs-dismiss="modal">{% trans 'Close' %}</button>
+          <button class="btn btn-primary ms-1" type="submit" data-bs-dismiss="modal">{% trans 'Save' %}</button>
+        </div>
       </div>
-    </div>
+    </form>
   </div>
 </div>

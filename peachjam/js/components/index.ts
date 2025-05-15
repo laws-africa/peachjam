@@ -12,6 +12,7 @@ import TaxonomyTree from './taxonomy-tree';
 import TermsOfUse from './terms-of-use';
 import SearchTypeahead from './search-typeahead';
 import ShareMenuItem from './share-menu-item';
+import { SavedDocumentModalToggle } from './SavedDocument';
 
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
@@ -30,6 +31,7 @@ const components: Record<string, any> = {
   NavigationSelect,
   RelationshipEnrichments,
   AnnotationsProvider,
+  SavedDocumentModalToggle,
   SearchTypeahead,
   ShareMenuItem,
   ToggleTab,

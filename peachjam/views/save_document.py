@@ -130,6 +130,8 @@ class FolderDownloadView(BaseFolderMixin, DetailView):
 
 
 class SavedDocumentButtonView(AllowSavedDocumentMixin, TemplateView):
+    """Renders saved document buttons and other details for use in a document detail page."""
+
     def get_template_names(self):
         if self.saved_document:
             return ["peachjam/saved_document/_update.html"]
@@ -137,23 +139,28 @@ class SavedDocumentButtonView(AllowSavedDocumentMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        document = get_object_or_404(CoreDocument, pk=self.kwargs["doc_id"])
+        context["document"] = document = get_object_or_404(
+            CoreDocument, pk=self.kwargs["doc_id"]
+        )
 
-        saved_doc = None
         if self.request.user.is_authenticated:
-            saved_doc = self.request.user.saved_documents.filter(
+            context[
+                "saved_document"
+            ] = self.saved_document = self.request.user.saved_documents.filter(
                 document=document
             ).first()
-
-        context["document"] = document
-        context["saved_document"] = self.saved_document = saved_doc
-        if saved_doc:
-            # for updating
-            context["form"] = SaveDocumentForm(instance=saved_doc)
-        # redirect URL for the next button for non-authenticated users
-        context["next_url"] = self.request.headers.get("HX-Current-URL")
+            if self.saved_document:
+                context["form"] = SaveDocumentForm(instance=self.saved_document)
+                # re-render this view if the saved document details are updated
+                context["form"].modal_next_url = self.request.get_full_path()
+        else:
+            # redirect URL for the next button for non-authenticated users
+            context["next_url"] = self.request.headers.get("HX-Current-URL")
 
         return context
+
+    def get_modal_next_url(self, saved_document):
+        return self.request.get_full_path()
 
 
 class SavedDocumentButtonBulkView(AllowSavedDocumentMixin, TemplateView):
@@ -176,13 +183,19 @@ class SavedDocumentButtonBulkView(AllowSavedDocumentMixin, TemplateView):
         if self.request.user.is_authenticated:
             # stash saved documents and forms (for updating) for ones that are already saved
             saved_docs = {
-                sd.document_id: (sd, SaveDocumentForm(instance=sd))
+                sd.document_id: (
+                    sd,
+                    SaveDocumentForm(instance=sd),
+                )
                 for sd in SavedDocument.objects.filter(
                     user=self.request.user, document_id__in=docs.keys()
                 )
                 .select_related("document", "folder")
                 .all()
             }
+            for sd, form in saved_docs.values():
+                # set the next URL for the form to re-render this view if the saved document details are updated
+                form.modal_next_url = self.request.path + f"?doc_id={sd.document_id}"
 
         # fake saved docs for the ones that don't exist
         for doc in docs.values():
@@ -209,6 +222,9 @@ class SavedDocumentFormMixin(
 
     def get_queryset(self):
         return self.request.user.saved_documents.all()
+
+    def form_valid(self, form):
+        return super().form_valid(form)
 
     def get_success_url(self):
         if self.request.GET.get("next"):
@@ -243,6 +259,17 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
 class SavedDocumentUpdateView(SavedDocumentFormMixin, UpdateView):
     template_name = "peachjam/saved_document/_update.html"
     permission_required = "peachjam.change_saveddocument"
+
+
+class SavedDocumentModalView(SavedDocumentUpdateView):
+    template_name = "peachjam/saved_document/_update_modal.html"
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            # when the form is submitted, go to this URL (which usually re-renders saved document details)
+            modal_next_url=self.request.GET.get("next"),
+            **kwargs,
+        )
 
 
 class SavedDocumentDeleteView(SavedDocumentFormMixin, DeleteView):
