@@ -234,8 +234,13 @@ class SavedDocumentFormMixin(
 
 
 class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
-    template_name = "peachjam/saved_document/_create.html"
+    """Creates a saved document and renders the updated details to the page, as well as into the modal which will have
+    been opened by the save action."""
+
+    template_name = "peachjam/saved_document/_created.html"
     permission_required = "peachjam.add_saveddocument"
+
+    # TODO: redirect to login view if not authenticated
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -250,6 +255,14 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
                 pass
         kwargs["instance"] = instance
         return kwargs
+
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        self.object = form.save()
+        # TODO: check if created
+        return self.render_to_response(
+            self.get_context_data(saved_document=self.object, form=form)
+        )
 
 
 class SavedDocumentUpdateView(SavedDocumentFormMixin, UpdateView):
