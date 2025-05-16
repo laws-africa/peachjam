@@ -8,7 +8,7 @@ from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
 
 from peachjam.forms import LegislationFilterForm
-from peachjam.models import Legislation, pj_settings
+from peachjam.models import Legislation, ProvisionEnrichment, pj_settings
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
@@ -372,3 +372,23 @@ class LegislationDetailView(BaseDocumentDetailView):
         )
         # TODO: we're not guaranteed to get documents in the same language, here
         return docs
+
+
+class UnconstitutionalProvisionListView(LegislationListView):
+    template_name = "peachjam/unconstitutional_provision_list.html"
+    latest_expression_only = True
+
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/_provision_enrichment_table.html"]
+            return ["peachjam/_provision_enrichment_table_form.html"]
+        return super().get_template_names()
+
+    def get_base_queryset(self, *args, **kwargs):
+        qs = super().get_base_queryset(*args, **kwargs)
+        unconstitutional_provision_works = ProvisionEnrichment.objects.filter(
+            enrichment_type="unconstitutional_provision"
+        ).values_list("work__id", flat=True)
+        qs = qs.filter(work__in=unconstitutional_provision_works)
+        return qs

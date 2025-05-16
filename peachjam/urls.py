@@ -112,6 +112,7 @@ from peachjam.views import (
     TaxonomyFirstLevelView,
     TaxonomyListView,
     TermsOfUsePageView,
+    UnconstitutionalProvisionListView,
     UserFollowingButtonView,
     UserFollowingCreateView,
     UserFollowingDeleteView,
@@ -256,6 +257,11 @@ urlpatterns = [
     ),
     path("place/<str:code>", PlaceDetailView.as_view(), name="place"),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
+    path(
+        "unconstitutional-provisions/",
+        UnconstitutionalProvisionListView.as_view(),
+        name="unconstitutional_provision_list",
+    ),
     path(
         "bills/",
         include(

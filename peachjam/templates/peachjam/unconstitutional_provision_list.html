@@ -1,0 +1,11 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Unconstitutional Provisions' %}
+{% endblock %}
+{% block page-title %}
+  <h1 class="mt-4">{% trans 'Unconstitutional Provisions' %}</h1>
+{% endblock %}
+{% block document-table %}
+  {% include "peachjam/_provision_enrichment_table_form.html" %}
+{% endblock %}

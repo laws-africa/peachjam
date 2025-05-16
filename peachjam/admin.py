@@ -99,6 +99,7 @@ from peachjam.models import (
     SourceFile,
     Taxonomy,
     Treatment,
+    UnconstitutionalProvision,
     UserProfile,
     Work,
     citations_processor,
@@ -1785,6 +1786,7 @@ admin.site.register(
         DocumentAccessGroup,
         Treatment,
         ProvisionEnrichment,
+        UnconstitutionalProvision,
     ]
 )
 admin.site.unregister(User)

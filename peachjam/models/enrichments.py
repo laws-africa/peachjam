@@ -1,14 +1,16 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from lxml import etree
+from polymorphic.models import PolymorphicManager, PolymorphicModel
 
 
-class ProvisionEnrichmentManager(models.Manager):
+class ProvisionEnrichmentManager(PolymorphicManager):
     # use e.g. doc.work.enrichments.unconstitutional_provisions()
     def unconstitutional_provisions(self):
         return self.filter(enrichment_type="unconstitutional_provision")
 
 
-class ProvisionEnrichment(models.Model):
+class ProvisionEnrichment(PolymorphicModel):
     # TODO: add more choices
     ENRICHMENT_TYPE_CHOICES = (
         ("provision_enrichment", _("Provision enrichment")),
@@ -45,6 +47,20 @@ class ProvisionEnrichment(models.Model):
 
     def __str__(self):
         return f"{self.enrichment_type} - {self.work} - {self.provision_eid or 'whole work'}"
+
+    @property
+    def provision_by_eid(self):
+        html_content = self.work.documents.latest_expression().first().content_html
+        parser = etree.HTMLParser()
+        tree = etree.fromstring(html_content, parser)
+
+        # Find element with data-eId
+        xpath = f"//*[@data-eid='{self.provision_eid}']"
+        elements = tree.xpath(xpath)
+
+        if elements:
+            return etree.tostring(elements[0], encoding="unicode", method="html")
+        return None
 
     def save(self, *args, **kwargs):
         if not self.provision_eid:
