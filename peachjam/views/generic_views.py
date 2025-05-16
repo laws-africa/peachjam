@@ -118,7 +118,6 @@ class DocumentListView(ListView):
             doc_table_show_date=True,
             doc_count_noun=_("document"),
             doc_count_noun_plural=_("documents"),
-            show_saved_documents=pj_settings().allow_save_documents,
             *args,
             **kwargs,
         )
@@ -452,13 +451,16 @@ class BaseDocumentDetailView(DetailView):
             works, get_language(self.request)
         )
 
+        table_direction = None
         if direction == "cited_works":
+            table_direction = "outgoing"
             citations = ExtractedCitation.objects.filter(
                 citing_work=self.object.work, target_work__documents__in=docs
             ).prefetch_related("treatments")
             treatments = {c.target_work_id: c.treatments for c in citations}
 
         elif direction == "citing_works":
+            table_direction = "incoming"
             citations = ExtractedCitation.objects.filter(
                 citing_work__documents__in=docs, target_work=self.object.work
             ).prefetch_related("treatments")
@@ -473,6 +475,7 @@ class BaseDocumentDetailView(DetailView):
                 "nature": nature,
                 "n_docs": counts.get(nature.pk, 0),
                 "docs": list(group),
+                "table_id": f"citations-table-{table_direction}-{nature.pk}",
             }
             # the docs are already sorted by nature
             for nature, group in itertools.groupby(docs, lambda d: d.nature)

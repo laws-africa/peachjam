@@ -2,15 +2,11 @@ import htmx from 'htmx.org';
 
 class DocumentTable {
   public root: HTMLElement;
-  public showSavedDocuments = false;
 
   constructor (root: HTMLElement) {
     this.root = root;
-    this.showSavedDocuments = !!root.getAttribute('data-show-saved-documents');
     this.setupSorting();
-    if (this.showSavedDocuments) {
-      this.loadSavedDocuments();
-    }
+    this.loadSavedDocuments();
   }
 
   setupSorting () {

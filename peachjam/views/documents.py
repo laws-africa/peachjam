@@ -251,7 +251,7 @@ class DocumentAttachmentView(DocumentDetailView):
 
 
 class DocumentCitationsView(DocumentDetailView):
-    template_name = "peachjam/_citations_list_items.html"
+    template_name = "peachjam/document/_citations_list_more.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -289,6 +289,7 @@ class DocumentCitationsView(DocumentDetailView):
         context["offset"] = offset + len(context["docs"])
         context["nature"] = nature
         context["direction"] = direction
+        context["doc_table_id"] = f"citations-table-{direction}-{nature.pk}"
 
         return context
 

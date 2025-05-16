@@ -1,0 +1,4 @@
+{% for document in docs %}
+  {% include 'peachjam/_document_table_row.html' with doc_table_show_treatments=True %}
+{% endfor %}
+{% include 'peachjam/document/_citations_list_more_button.html' %}

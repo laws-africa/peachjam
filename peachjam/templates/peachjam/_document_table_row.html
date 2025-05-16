@@ -33,6 +33,9 @@
         <span id="saved-document-star--{{ document.pk }}"></span>
       </div>
       {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
+      {% if doc_table_show_treatments %}
+        {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
+      {% endif %}
       {% if document.listing_taxonomies %}
         <div class="d-none d-md-block ms-3">
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
