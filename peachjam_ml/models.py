@@ -203,7 +203,13 @@ class DocumentEmbedding(models.Model):
                 authority_score=F("document__work__authority_score"),
             )
             .filter(similarity__gt=threshold)
-            .values("title", "expression_frbr_uri", "similarity", "authority_score")
+            .values(
+                "document_id",
+                "title",
+                "expression_frbr_uri",
+                "similarity",
+                "authority_score",
+            )
             .order_by("-similarity")
         )[:top_k]
 

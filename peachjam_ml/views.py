@@ -10,16 +10,26 @@ from peachjam_ml.models import DocumentEmbedding
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 class SimilarDocumentsDocumentDetailView(PermissionRequiredMixin, DetailView):
     permission_required = "peachjam_ml.view_documentembedding"
-    template_name = "peachjam/_similar_documents_doc_detail.html"
+    template_name = "peachjam/document/_similar_documents.html"
     slug_url_kwarg = "frbr_uri"
     slug_field = "expression_frbr_uri"
     model = CoreDocument
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["similar_documents"] = DocumentEmbedding.get_similar_documents(
-            [self.object.pk]
-        )
+        # get the similar documents, best first
+        similar_documents = DocumentEmbedding.get_similar_documents([self.object.pk])
+        # get the actual documents
+        docs = {
+            d.id: d
+            for d in CoreDocument.objects.filter(
+                pk__in=[sd["document_id"] for sd in similar_documents]
+            )
+        }
+        # preserve ordering
+        context["similar_documents"] = [
+            docs.get(sd["document_id"]) for sd in similar_documents
+        ]
         return context
 
 
