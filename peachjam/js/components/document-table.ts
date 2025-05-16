@@ -39,7 +39,7 @@ class DocumentTable {
     if (ids.length) {
       const el = document.createElement('div');
       const query = ids.map(id => `doc_id=${id}`).join('&');
-      htmx.ajax('get', '/saved-documents/table/?' + query, el);
+      htmx.ajax('get', '/saved-documents/buttons/?' + query, el);
     }
   }
 }

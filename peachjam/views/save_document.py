@@ -209,10 +209,6 @@ class SavedDocumentButtonBulkView(AllowSavedDocumentMixin, TemplateView):
         return context
 
 
-class SavedDocumentTableBulkView(SavedDocumentButtonBulkView):
-    template_name = "peachjam/saved_document/_table_bulk.html"
-
-
 class SavedDocumentFormMixin(
     AllowSavedDocumentMixin, LoginRequiredMixin, PermissionRequiredMixin
 ):
@@ -227,13 +223,13 @@ class SavedDocumentFormMixin(
         return super().form_valid(form)
 
     def get_success_url(self):
-        if self.request.GET.get("next"):
-            return self.request.GET.get("next")
-        return reverse(
-            "saved_document_update",
-            kwargs={
-                "pk": self.object.pk,
-            },
+        # by default, we always redirect to the bulk view which refreshes this document's saved doc details in the page
+        return (
+            self.request.GET.get("next")
+            or reverse(
+                "saved_document_bulk",
+            )
+            + f"?doc_id={self.object.document.id}"
         )
 
 
@@ -264,20 +260,8 @@ class SavedDocumentUpdateView(SavedDocumentFormMixin, UpdateView):
 class SavedDocumentModalView(SavedDocumentUpdateView):
     template_name = "peachjam/saved_document/_update_modal.html"
 
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            # when the form is submitted, go to this URL (which usually re-renders saved document details)
-            modal_next_url=self.request.GET.get("next"),
-            **kwargs,
-        )
-
 
 class SavedDocumentDeleteView(SavedDocumentFormMixin, DeleteView):
     permission_required = "peachjam.delete_saveddocument"
     # stub form that always validates
     form_class = Form
-
-    def get_success_url(self):
-        return self.request.GET.get("next") or reverse(
-            "saved_document_button", kwargs={"doc_id": self.object.document_id}
-        )

@@ -1,0 +1,27 @@
+{% load i18n %}
+<div class="modal-content" id="saved-document-modal-content">
+  <div class="modal-header">
+    <p class="h5 modal-title">{% trans 'Save document' %}</p>
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"></button>
+  </div>
+  <div class="modal-body">
+    {% if user.is_authenticated %}
+      {% trans 'Saving...' %}
+    {% else %}
+      <p>
+        <strong>{% trans 'You are not logged in' %}.</strong>
+      </p>
+      <p>{% trans 'To save a document you need to be logged in' %}.</p>
+    {% endif %}
+  </div>
+  <div class="modal-footer d-flex">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
+    {% if not user.is_authenticated %}
+      <a href="{% url 'account_login' %}?next={{ next_url|default_if_none:document.get_absolute_url }}"
+         class="btn btn-primary">{% trans 'Login' %}</a>
+    {% endif %}
+  </div>
+</div>

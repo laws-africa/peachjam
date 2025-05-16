@@ -1,4 +1,5 @@
 {% load i18n %}
+<span hx-swap-oob="true" id="saved-document-star--{{ document.id }}"></span>
 <button class="btn btn-primary btn-shrink-sm save-document-button save-document-button--{{ document.id }}"
         type="button"
         data-bs-toggle="modal"
@@ -10,6 +11,5 @@
   <span class="d-md-none">{% trans 'Save' %}</span>
   <span class="d-none d-md-inline">{% trans 'Save document' %}</span>
 </button>
-<span hx-swap-oob="true" id="saved-document-star--{{ document.id }}"></span>
 <span hx-swap-oob="true"
       id="saved-document-table-detail--{{ document.id }}"></span>

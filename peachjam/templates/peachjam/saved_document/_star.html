@@ -1,8 +1,0 @@
-{% load i18n %}
-<span id="saved-document-star--{{ saved_document.document.id }}"
-      hx-swap-oob="true"
-      class="saved-document-star"
-      data-component="SavedDocumentModalToggle"
-      data-modal-url="{% url 'saved_document_modal' saved_document.pk %}?next={{ modal_next_url|urlencode }}"
-      aria-expanded="false"
-      title="{% trans "Saved" %}"><i class="bi-pj pj-saved"></i></span>

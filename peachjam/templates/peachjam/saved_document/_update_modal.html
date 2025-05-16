@@ -1,66 +1,63 @@
 {% load i18n %}
-<div class="modal-dialog modal-lg">
-  <div class="modal-content">
-    <form hx-target="{{ target }}"
-          hx-post="{% url 'saved_document_update' saved_document.id %}?next={{ modal_next_url|urlencode }}">
-      <div class="modal-header">
-        <p class="h5 modal-title">{% trans 'Document saved' %}</p>
+<div class="modal-content">
+  <form hx-target="{{ target }}"
+        hx-post="{% url 'saved_document_update' saved_document.id %}">
+    <div class="modal-header">
+      <p class="h5 modal-title">{% trans 'Document saved' %}</p>
+      <button type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <p class="h5">{{ saved_document.document.title }}</p>
+      <div>
+        <textarea class="form-control"
+                  name="{{ form.note.name }}"
+                  maxlength="{{ form.note.field.max_length }}"
+                  placeholder="{% trans "A note to yourself about this document" %}">{{ form.note.value|default_if_none:'' }}</textarea>
+      </div>
+      <label class="form-label mt-3" for="{{ form.folder.id_for_label }}">{{ form.folder.label }}</label>
+      <select id="{{ form.folder.id_for_label }}"
+              class="form-select"
+              name="{{ form.folder.name }}">
+        {% for opt in form.folder %}{{ opt }}{% endfor %}
+      </select>
+      <button type="button"
+              class="btn btn-link link-underline link-underline-opacity-0 ps-0"
+              data-bs-toggle="collapse"
+              data-bs-target="#addFolder"
+              aria-expanded="false"
+              aria-controls="addFolder">
+        {% trans 'New folder...' %}
+      </button>
+      <div class="collapse" id="addFolder">
+        <label class="form-label" for="{{ form.new_folder.id_for_label }}">{% trans 'New folder name' %}</label>
+        <input class="form-control"
+               maxlength="{{ form.new_folder.field.max_length }}"
+               id="{{ form.new_folder.id_for_label }}"
+               name="{{ form.new_folder.name }}"
+               type="text"/>
+      </div>
+      <div class="mt-3">
+        <a href="{% url 'folder_list' %}">{% trans 'All saved documents' %}</a>
+      </div>
+    </div>
+    <div class="modal-footer d-flex justify-content-between">
+      <button class="btn btn-danger"
+              type="button"
+              data-bs-dismiss="modal"
+              hx-target="{{ target }}"
+              hx-post="{% url 'saved_document_delete' saved_document.id %}"
+              hx-confirm="{% trans "Are you sure you want to unsave? This will also remove all comments." %}">
+        {% trans 'Unsave' %}
+      </button>
+      <div>
         <button type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"></button>
+                class="btn btn-outline-secondary ms-2"
+                data-bs-dismiss="modal">{% trans 'Close' %}</button>
+        <button class="btn btn-primary ms-1" type="submit" data-bs-dismiss="modal">{% trans 'Save' %}</button>
       </div>
-      <div class="modal-body">
-        <p class="h5">{{ saved_document.document.title }}</p>
-        <div>
-          <textarea class="form-control"
-                    name="{{ form.note.name }}"
-                    maxlength="{{ form.note.field.max_length }}"
-                    placeholder="{% trans "A note to yourself about this document" %}">{{ form.note.value|default_if_none:'' }}</textarea>
-        </div>
-        <label class="form-label mt-3" for="{{ form.folder.id_for_label }}">{{ form.folder.label }}</label>
-        <select id="{{ form.folder.id_for_label }}"
-                class="form-select"
-                name="{{ form.folder.name }}">
-          {% for opt in form.folder %}{{ opt }}{% endfor %}
-        </select>
-        <button type="button"
-                class="btn btn-link link-underline link-underline-opacity-0 ps-0"
-                data-bs-toggle="collapse"
-                data-bs-target="#addFolder"
-                aria-expanded="false"
-                aria-controls="addFolder">
-          {% trans 'New folder...' %}
-        </button>
-        <div class="collapse" id="addFolder">
-          <label class="form-label" for="{{ form.new_folder.id_for_label }}">{% trans 'New folder name' %}</label>
-          <input class="form-control"
-                 maxlength="{{ form.new_folder.field.max_length }}"
-                 id="{{ form.new_folder.id_for_label }}"
-                 name="{{ form.new_folder.name }}"
-                 type="text"/>
-        </div>
-        <div class="mt-3">
-          <a href="{% url 'folder_list' %}">{% trans 'All saved documents' %}</a>
-        </div>
-      </div>
-      <div class="modal-footer d-flex justify-content-between">
-        <button class="btn btn-danger"
-                type="button"
-                data-bs-dismiss="modal"
-                hx-target="{{ target }}"
-                {% url 'saved_document_button' saved_document.document.id as next_url %}
-                hx-post="{% url 'saved_document_delete' saved_document.id %}?next={{ next_url|urlencode }}"
-                hx-confirm="{% trans "Are you sure you want to unsave? This will also remove all comments." %}">
-          {% trans 'Unsave' %}
-        </button>
-        <div>
-          <button type="button"
-                  class="btn btn-outline-secondary ms-2"
-                  data-bs-dismiss="modal">{% trans 'Close' %}</button>
-          <button class="btn btn-primary ms-1" type="submit" data-bs-dismiss="modal">{% trans 'Save' %}</button>
-        </div>
-      </div>
-    </form>
-  </div>
+    </div>
+  </form>
 </div>

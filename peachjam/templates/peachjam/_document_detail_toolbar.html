@@ -4,11 +4,8 @@
      aria-label="{% trans "Document toolbar" %}">
   <div class="me-auto">
     {% if show_save_doc_button %}
-      <div hx-get="{% url 'saved_document_button' document.id %}"
-           hx-trigger="load"></div>
       <!-- these will be replaced by htmx -->
       <div class="save-document-button save-document-button--{{ document.id }}"></div>
-      {% include 'peachjam/saved_document/_modal_placeholder.html' %}
     {% endif %}
   </div>
   {% block edit-btn %}

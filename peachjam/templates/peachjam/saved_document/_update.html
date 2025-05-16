@@ -1,2 +1,38 @@
-{% include "peachjam/saved_document/_update_button.html" %}
-{% include "peachjam/saved_document/_star.html" %}
+{% load i18n %}
+<span id="saved-document-star--{{ saved_document.document.id }}"
+      hx-swap-oob="true"
+      class="saved-document-star"
+      data-bs-toggle="modal"
+      data-bs-target="#saved-document-modal"
+      hx-get="{% url 'saved_document_modal' saved_document.pk %}"
+      hx-target="#saved-document-modal-content"
+      hx-trigger="click"
+      aria-expanded="false"
+      title="{% trans "Saved" %}">
+  <i class="bi-pj pj-saved"></i>
+</span>
+<button class="btn btn-primary btn-shrink-sm save-document-button save-document-button--{{ saved_document.document.id }}"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#saved-document-modal"
+        hx-get="{% url 'saved_document_modal' saved_document.pk %}"
+        hx-target="#saved-document-modal-content"
+        data-saved-document="{{ saved_document.id }}"
+        aria-expanded="false"
+        hx-swap-oob="outerHTML:.save-document-button--{{ saved_document.document.id }}">
+  <i class="bi bi-star-fill"></i>
+  {% if saved_document.folder %}
+    {{ saved_document.folder }}
+  {% else %}
+    {% trans 'Saved' %}
+  {% endif %}
+</button>
+<div id="saved-document-table-detail--{{ saved_document.document.id }}"
+     class="saved-document-table-detail text-muted fs-sm ms-2 mt-1"
+     hx-swap-oob="true">
+  {% if saved_document.folder %}
+    <i class="bi bi-folder"></i>
+    <a class="text-muted"
+       href="{{ saved_document.folder.get_absolute_url }}">{{ saved_document.folder.name }}</a>
+  {% endif %}
+</div>

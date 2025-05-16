@@ -36,7 +36,7 @@
             <div>
               <h1 class="doc-title">
                 {{ document.title }}
-                {% if PEACHJAM_SETTINGS.allow_save_documents %}<span id="saved-document-star--{{ document.pk }}"></span>{% endif %}
+                <span id="saved-document-star--{{ document.pk }}"></span>
               </h1>
               {% block sub-title %}{% endblock %}
               {% include 'peachjam/_document_labels.html' %}
@@ -508,5 +508,7 @@
     {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
+    <div hx-get="{% url 'saved_document_bulk' %}?doc_id={{ document.id }}"
+         hx-trigger="load"></div>
   </div>
 {% endblock %}
