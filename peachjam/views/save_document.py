@@ -151,20 +151,15 @@ class SavedDocumentButtonView(AllowSavedDocumentMixin, TemplateView):
             ).first()
             if self.saved_document:
                 context["form"] = SaveDocumentForm(instance=self.saved_document)
-                # re-render this view if the saved document details are updated
-                context["form"].modal_next_url = self.request.get_full_path()
         else:
             # redirect URL for the next button for non-authenticated users
             context["next_url"] = self.request.headers.get("HX-Current-URL")
 
         return context
 
-    def get_modal_next_url(self, saved_document):
-        return self.request.get_full_path()
 
-
-class SavedDocumentButtonBulkView(AllowSavedDocumentMixin, TemplateView):
-    """Renders saved document buttons for multiple documents. Used from the search results page."""
+class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
+    """Renders saved document html fragments for multiple documents. Used from the search results page."""
 
     template_name = "peachjam/saved_document/_bulk.html"
 
@@ -193,9 +188,6 @@ class SavedDocumentButtonBulkView(AllowSavedDocumentMixin, TemplateView):
                 .select_related("document", "folder")
                 .all()
             }
-            for sd, form in saved_docs.values():
-                # set the next URL for the form to re-render this view if the saved document details are updated
-                form.modal_next_url = self.request.path + f"?doc_id={sd.document_id}"
 
         # fake saved docs for the ones that don't exist
         for doc in docs.values():
@@ -203,9 +195,6 @@ class SavedDocumentButtonBulkView(AllowSavedDocumentMixin, TemplateView):
                 saved_docs[doc.id] = (SavedDocument(document=doc), None)
 
         context["saved_documents"] = saved_docs.values()
-        # redirect URL for the next button for non-authenticated users
-        context["next_url"] = self.request.headers.get("HX-Current-URL")
-
         return context
 
 
@@ -227,7 +216,7 @@ class SavedDocumentFormMixin(
         return (
             self.request.GET.get("next")
             or reverse(
-                "saved_document_bulk",
+                "saved_document_fragments",
             )
             + f"?doc_id={self.object.document.id}"
         )
@@ -240,26 +229,37 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
     template_name = "peachjam/saved_document/_created.html"
     permission_required = "peachjam.add_saveddocument"
 
-    # TODO: redirect to login view if not authenticated
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        instance = SavedDocument()
-        instance.user = self.request.user
+    def dispatch(self, request, *args, **kwargs):
         doc_id = self.request.GET.get("doc_id")
         if doc_id:
             try:
                 document = get_object_or_404(CoreDocument, pk=int(doc_id))
-                instance.document = document
+                self.document = document
             except ValueError:
                 pass
-        kwargs["instance"] = instance
-        return kwargs
+        else:
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            # user is not logged in
+            self.template_name = "peachjam/saved_document/_anon_modal.html"
+            return self.render_to_response(
+                {
+                    "document": self.document,
+                    "next_url": self.request.htmx.current_url,
+                }
+            )
+        return super().handle_no_permission()
+
+    def get_form_kwargs(self):
+        self.object = SavedDocument(user=self.request.user, document=self.document)
+        return super().get_form_kwargs()
 
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
         self.object = form.save()
-        # TODO: check if created
         return self.render_to_response(
             self.get_context_data(saved_document=self.object, form=form)
         )

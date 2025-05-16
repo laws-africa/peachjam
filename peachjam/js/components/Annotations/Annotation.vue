@@ -97,9 +97,8 @@ export default {
 
       const isDocumentSaved = document.querySelector('[data-saved-document]') !== null;
       if (!isDocumentSaved) {
-        await window.htmx.ajax('post', `/saved-documents/create?doc_id=${this.annotation.document}`, {
-          target: '.save-document-button'
-        });
+        const el = document.createElement('div');
+        await window.htmx.ajax('post', `/saved-documents/create?doc_id=${this.annotation.document}`, el);
       }
 
       const headers = await authHeaders();

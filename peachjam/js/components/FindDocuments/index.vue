@@ -959,7 +959,7 @@ export default {
         const el = document.createElement('div');
         document.body.appendChild(el);
         const query = ids.map(id => `doc_id=${id}`).join('&');
-        htmx.ajax('GET', '/saved-documents/buttons/?' + query, el);
+        htmx.ajax('GET', '/saved-documents/fragments?' + query, el);
       }
     },
 

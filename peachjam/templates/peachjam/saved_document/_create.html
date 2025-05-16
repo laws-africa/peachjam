@@ -8,8 +8,7 @@
         aria-expanded="false"
         hx-swap-oob="outerHTML:.save-document-button--{{ document.id }}">
   <i class="bi bi-star"></i>
-  <span class="d-md-none">{% trans 'Save' %}</span>
-  <span class="d-none d-md-inline">{% trans 'Save document' %}</span>
+  {% trans 'Save' %}
 </button>
 <span hx-swap-oob="true" id="saved-document-star--{{ document.id }}"></span>
 <span hx-swap-oob="true"
