@@ -129,39 +129,10 @@ class FolderDownloadView(BaseFolderMixin, DetailView):
         return response
 
 
-class SavedDocumentButtonView(AllowSavedDocumentMixin, TemplateView):
-    """Renders saved document buttons and other details for use in a document detail page."""
-
-    def get_template_names(self):
-        if self.saved_document:
-            return ["peachjam/saved_document/_update.html"]
-        return ["peachjam/saved_document/_create.html"]
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["document"] = document = get_object_or_404(
-            CoreDocument, pk=self.kwargs["doc_id"]
-        )
-
-        if self.request.user.is_authenticated:
-            context[
-                "saved_document"
-            ] = self.saved_document = self.request.user.saved_documents.filter(
-                document=document
-            ).first()
-            if self.saved_document:
-                context["form"] = SaveDocumentForm(instance=self.saved_document)
-        else:
-            # redirect URL for the next button for non-authenticated users
-            context["next_url"] = self.request.headers.get("HX-Current-URL")
-
-        return context
-
-
 class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
     """Renders saved document html fragments for multiple documents. Used from the search results page."""
 
-    template_name = "peachjam/saved_document/_bulk.html"
+    template_name = "peachjam/saved_document/_fragments.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
