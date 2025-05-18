@@ -1,4 +1,26 @@
 {% load i18n peachjam %}
+{% comment %}
+This template is used to render a table of documents. It supports a number of variable to configure its behaviour.
+All variables default to null or false. So positive variables like "show_xxx" default to being "off", but negative
+variables like "hide_xxx" default to being "on".
+
+* doc_table_id: The ID of the table (default: doc-table)
+* doc_table_classes: Additional classes for the table
+* doc_table_toggle: Show a toggle for child documents (default: false)
+* doc_table_citations: Show document citations column
+* doc_table_many_cols: There are multiple columns
+* doc_table_hide_thead: Hide the table header
+* doc_table_title_label: label to use for Title column (default: Title)
+* doc_table_date_label: label to use for Date column (default: Date)
+* doc_table_show_jurisdictions: show document jurisdiction (and jurisdiction column)
+* doc_table_show_author: show document author (and author column)
+* doc_table_show_court: show document court (and court column)
+* doc_table_show_sub_publication: show document sub_publication (and sub_publication column)
+* doc_table_show_frbr_uri_number: show document FRBR URI number (and associated column)
+* doc_table_show_doc_type: show document type (and associated column)
+* doc_table_show_date: show document date (and associated column)
+* hide_pagination: Hide pagination
+{% endcomment %}
 <div class="table-responsive"
      id="{{ doc_table_id|default:"doc-table" }}"
      data-component="DocumentTable">
