@@ -94,16 +94,7 @@ class DocumentListView(ListView):
 
     def get_model_queryset(self):
         qs = self.queryset if self.queryset is not None else self.model.objects
-        return (
-            qs.filter(published=True)
-            .select_related(
-                "nature",
-                "work",
-                "jurisdiction",
-                "locality",
-            )
-            .prefetch_related("labels", "taxonomies", "taxonomies__topic")
-        )
+        return qs.filter(published=True).for_document_table()
 
     def get_base_queryset(self, *args, **kwargs):
         return self.get_model_queryset()

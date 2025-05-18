@@ -255,7 +255,7 @@ def get_user_following_timeline(user, docs_per_source, max_docs, before_date=Non
                 f.get_documents_queryset()
                 .order_by("-created_at")
                 .select_related("work")
-                .prefetch_related("labels", "taxonomies")
+                .prefetch_related("labels", "taxonomies", "taxonomies__topic")
             ).iterator(max_docs),
         )
         for f in user.following.all()

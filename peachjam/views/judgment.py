@@ -17,8 +17,7 @@ class JudgmentListView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context["recent_judgments"] = (
-            Judgment.objects.select_related("work")
-            .prefetch_related("labels")
+            Judgment.objects.for_document_table()
             .exclude(published=False)
             .order_by("-date")[:30]
         )

@@ -11,17 +11,17 @@ class HomePageView(TemplateView):
         context = super().get_context_data(**kwargs)
         recent_judgments = (
             Judgment.objects.exclude(published=False)
-            .prefetch_related("labels")
+            .for_document_table()
             .order_by("-date")[:5]
         )
         recent_documents = (
             GenericDocument.objects.exclude(published=False)
-            .prefetch_related("labels")
+            .for_document_table()
             .order_by("-date")[:5]
         )
         recent_legislation = (
             Legislation.objects.exclude(published=False)
-            .prefetch_related("labels")
+            .for_document_table()
             .order_by("-date")[:5]
         )
 
