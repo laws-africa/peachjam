@@ -6,6 +6,7 @@ variables like "hide_xxx" default to being "on".
 
 * doc_table_id: The ID of the table (default: doc-table)
 * doc_table_classes: Additional classes for the table
+* doc_table_collapse: include the doc-table--collapse modifier so the table behaves like it's on a small screen
 * doc_table_toggle: Show a toggle for child documents (default: false)
 * doc_table_citations: Show document citations column
 * doc_table_many_cols: There are multiple columns
@@ -24,7 +25,7 @@ variables like "hide_xxx" default to being "on".
 <div class="table-responsive"
      id="{{ doc_table_id|default:"doc-table" }}"
      data-component="DocumentTable">
-  <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {% if doc_table_show_date %}doc-table--date{% endif %} {{ doc_table_classes }}">
+  <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {% if doc_table_show_date %}doc-table--date{% endif %} {% if doc_table_collapse %}doc-table--collapse{% endif %} {{ doc_table_classes }}">
     {% if not doc_table_hide_thead %}
       <thead>
         <tr>
