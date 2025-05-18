@@ -27,7 +27,7 @@
   data-track-page-load="View document"
 {% endblock %}
 {% block page-content %}
-  <div class="pb-5">
+  <div class="pb-5" data-document-id="{{ document.pk }}">
     <div class="bg-light">
       <div class="container">
         {% block breadcrumbs %}{% endblock %}
@@ -508,7 +508,5 @@
     {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
-    <div hx-get="{% url 'saved_document_fragments' %}?doc_id={{ document.id }}"
-         hx-trigger="load"></div>
   </div>
 {% endblock %}

@@ -12,7 +12,7 @@ import TaxonomyTree from './taxonomy-tree';
 import TermsOfUse from './terms-of-use';
 import SearchTypeahead from './search-typeahead';
 import ShareMenuItem from './share-menu-item';
-import { SavedDocumentModal } from './SavedDocument';
+import { SavedDocumentModal } from './saved-documents';
 
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
