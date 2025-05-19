@@ -38,7 +38,8 @@
               {{ comment_count }} comments
             {% endblocktrans %}
           </summary>
-          <div id="document-annotations-{{ saved_document.document.pk }}"></div>
+          <div id="document-annotations-{{ saved_document.document.pk }}"
+               class="spinner-when-empty"></div>
         </details>
       {% endif %}
     </div>
