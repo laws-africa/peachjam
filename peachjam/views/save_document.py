@@ -36,7 +36,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.db.models import Count, Prefetch, Q
 from django.forms.forms import Form
 from django.http import Http404
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
@@ -203,6 +203,9 @@ class SavedDocumentFormMixin(
     def form_valid(self, form):
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        return HttpResponseBadRequest(form.errors)
+
     def get_success_url(self):
         # by default, we always redirect to the bulk view which refreshes this document's saved doc details in the page
         return (
@@ -224,15 +227,10 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         doc_id = self.request.GET.get("doc_id")
-        most_recent_saved = self.request.user.saved_documents.order_by(
-            "created_at"
-        ).last()
         if doc_id:
             try:
                 document = get_object_or_404(CoreDocument, pk=int(doc_id))
                 self.document = document
-                folders = [most_recent_saved.folders.all().last().pk]
-                kwargs["data"] = {"folders": folders}
             except ValueError:
                 pass
         else:
@@ -256,8 +254,9 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
         return super().get_form_kwargs()
 
     def form_valid(self, form):
-        """If the form is valid, save the associated model."""
         self.object = form.save()
+        # this ensures the form reflects the actual saved document
+        form = self.form_class(instance=self.object)
         return self.render_to_response(
             self.get_context_data(saved_document=self.object, form=form)
         )
@@ -271,6 +270,7 @@ class SavedDocumentUpdateView(SavedDocumentFormMixin, UpdateView):
 
 class SavedDocumentModalView(SavedDocumentUpdateView):
     template_name = "peachjam/saved_document/_update_modal.html"
+    http_method_names = ["get"]
 
 
 class SavedDocumentDeleteView(SavedDocumentFormMixin, DeleteView):

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 
-from peachjam.models import CoreDocument, SavedDocument, pj_settings
+from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
 
 
 class SavedDocumentViewsTest(TestCase):
@@ -23,6 +23,7 @@ class SavedDocumentViewsTest(TestCase):
         self.user.user_permissions.add(
             Permission.objects.get(codename="delete_saveddocument")
         )
+        self.folder = Folder.objects.create(user=self.user, name="test")
 
     def assert_no_recursive(self, response):
         self.assertNotContains(
@@ -50,9 +51,10 @@ class SavedDocumentViewsTest(TestCase):
         self.assertContains(response, "saved-document-table-detail--4124")
         self.assert_no_recursive(response)
 
-        SavedDocument.objects.create(
+        sd = SavedDocument.objects.create(
             user=self.user, document=CoreDocument.objects.get(pk=4124)
         )
+        sd.folders.set([self.folder])
 
         response = self.client.get("/saved-documents/fragments?doc_id=4124")
         self.assertContains(response, "Saved")
@@ -80,6 +82,7 @@ class SavedDocumentViewsTest(TestCase):
         sd = SavedDocument.objects.create(
             user=self.user, document=CoreDocument.objects.get(pk=4124)
         )
+        sd.folders.set([self.folder])
         response = self.client.get(f"/saved-documents/{sd.pk}/modal")
         self.assertContains(response, "modal-content")
         self.assert_no_recursive(response)
@@ -88,8 +91,9 @@ class SavedDocumentViewsTest(TestCase):
         sd = SavedDocument.objects.create(
             user=self.user, document=CoreDocument.objects.get(pk=4124)
         )
+        sd.folders.set([self.folder])
         response = self.client.post(
-            f"/saved-documents/{sd.pk}/update", {"folder": "", "note": "my note"}
+            f"/saved-documents/{sd.pk}/update", {"note": "my note"}
         )
         self.assertRedirects(response, "/saved-documents/fragments?doc_id=4124")
 
@@ -97,5 +101,6 @@ class SavedDocumentViewsTest(TestCase):
         sd = SavedDocument.objects.create(
             user=self.user, document=CoreDocument.objects.get(pk=4124)
         )
+        sd.folders.set([self.folder])
         response = self.client.post(f"/saved-documents/{sd.pk}/delete")
         self.assertRedirects(response, "/saved-documents/fragments?doc_id=4124")
