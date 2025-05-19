@@ -206,6 +206,13 @@ class SavedDocumentFormMixin(
     def form_invalid(self, form):
         return HttpResponseBadRequest(form.errors)
 
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            next=self.request.GET.get("next"),
+            target=self.request.GET.get("target"),
+            **kwargs,
+        )
+
     def get_success_url(self):
         # by default, we always redirect to the bulk view which refreshes this document's saved doc details in the page
         return (

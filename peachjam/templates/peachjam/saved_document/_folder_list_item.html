@@ -31,7 +31,9 @@
         <button class="p-1 btn btn-link"
                 type="button"
                 data-bs-toggle="modal"
-                data-bs-target="#savedDocumentModal-{{ saved_document.pk }}">
+                data-bs-target="#saved-document-modal"
+                hx-get="{% url 'saved_document_modal' saved_document.pk %}?next={% url 'folder_list' %}&target=%23folders-list"
+                hx-target="#saved-document-modal-content">
           <i class="bi bi-pencil"></i>
         </button>
         <button class=" btn btn-link"
@@ -43,10 +45,6 @@
         </button>
       </div>
     </div>
-  </div>
-  <div id="savedDocumentModal-{{ saved_document.id }}" class="modal fade">
-    {% url 'folder_list' as folder_list_url %}
-    {% include "peachjam/saved_document/_update_modal.html" with form=saved_document.form target="#folders-list" next=folder_list_url %}
   </div>
   <div class="row">
     <div id="document-annotations-{{ saved_document.document.pk }}"
