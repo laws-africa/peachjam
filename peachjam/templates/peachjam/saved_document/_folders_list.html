@@ -4,76 +4,71 @@
     <h2>{% trans 'Saved documents' %}</h2>
     <button class="btn btn-primary"
             hx-target="#folders-list"
-            hx-prompt="Give your folder a name:"
+            hx-prompt="{% trans "Folder name" %}"
             hx-post="{% url 'folder_create' %}">
       {% trans 'New Folder' %}
     </button>
   </div>
   <div class="mb-4">{% trans "Save documents to simplify your research and stay up-to-date" %}</div>
-  {% if folders or ungrouped_saved_documents %}
-    {% block folder-list %}
-      {% for folder in folders %}
-        <div class="card mb-5" id="folder-{{ folder.pk }}">
-          <div class="card-header">
-            {% block folder-list-card-header %}
-              <h5 class="mb-0">
+  {% block folder-list %}
+    {% for folder in folders %}
+      <div class="card mb-5" id="folder-{{ folder.pk }}">
+        <div class="card-header">
+          {% block folder-list-card-header %}
+            <div class="justify-content-between d-flex">
+              <p class="mb-0 h5">
                 <i class="bi bi-folder"></i> {{ folder.name }}
-              </h5>
-            {% endblock %}
-          </div>
-          <div class="card-body">
-            {% block folder-list-card-body %}
-              {% if folder.saved_documents.all %}
-                {% for saved_document in folder.saved_documents.all %}
-                  {% include "peachjam/saved_document/_folder_list_item.html" %}
-                {% endfor %}
-              {% else %}
-                <p>{% trans 'No saved documents.' %}</p>
-              {% endif %}
-            {% endblock %}
-          </div>
-          <div class="card-footer d-flex">
-            {% if perms.peachjam.download_folder %}
-              <a href="{% url 'folder_download' folder.id %}"
-                 target="_blank"
-                 class="btn btn-primary me-2">
-                {% trans 'Download to Excel' %}
-              </a>
-            {% endif %}
-            <input id="folder_{{ forloop.counter }}"
-                   type="hidden"
-                   name="name"
-                   value="{{ folder.name }}"/>
-            <button class="btn btn-outline-danger me-2 ms-auto"
-                    type="button"
-                    hx-post="{% url 'folder_delete' folder.id %}"
-                    hx-target="#folders-list"
-                    hx-include="#folder_{{ forloop.counter }}"
-                    hx-confirm="{% trans "Are you sure you want to delete this folder? All saved documents in this folder will also be deleted." %}">
-              {% trans 'Delete' %}
-            </button>
-            <button class="btn btn-secondary"
-                    type="button"
-                    hx-post="{% url 'folder_update' folder.id %}"
-                    hx-target="#folders-list"
-                    hx-prompt="Edit folder name">
-              {% trans 'Rename' %}
-            </button>
-          </div>
+              </p>
+              <div class="dropdown">
+                <button class="btn btn-outline-secondary"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                  <i class="bi bi-three-dots"></i>
+                </button>
+                <ul class="dropdown-menu">
+                  {% if perms.peachjam.download_folder %}
+                    <li>
+                      <a href="{% url 'folder_download' folder.id %}"
+                         target="_blank"
+                         class="dropdown-item">
+                        {% trans 'Download to Excel' %}
+                      </a>
+                    </li>
+                  {% endif %}
+                  <li>
+                    <button class="dropdown-item"
+                            hx-post="{% url 'folder_update' folder.id %}"
+                            hx-target="#folders-list"
+                            hx-prompt="{% trans "Rename folder" %}">
+                      {% trans 'Rename' %}
+                    </button>
+                  </li>
+                  <li>
+                    <button class="dropdown-item text-danger"
+                            hx-post="{% url 'folder_delete' folder.id %}"
+                            hx-target="#folders-list"
+                            hx-confirm="{% trans "Are you sure you want to delete this folder? All saved documents in this folder will also be deleted." %}">
+                      {% trans 'Delete' %}
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          {% endblock %}
         </div>
-      {% endfor %}
-    {% endblock %}
-    {% if ungrouped_saved_documents %}
-      <div class="card">
-        <h5 class="card-header">{% trans 'Ungrouped documents' %}</h5>
         <div class="card-body">
-          {% for saved_document in ungrouped_saved_documents %}
-            {% include "peachjam/saved_document/_folder_list_item.html" %}
-          {% endfor %}
+          {% block folder-list-card-body %}
+            {% for saved_document in folder.saved_documents.all %}
+              {% include "peachjam/saved_document/_folder_list_item.html" %}
+            {% empty %}
+              <p>{% trans 'No saved documents.' %}</p>
+            {% endfor %}
+          {% endblock %}
         </div>
       </div>
-    {% endif %}
-  {% else %}
-    <p>You have no saved documents.</p>
-  {% endif %}
+    {% empty %}
+      <p>You have no saved documents.</p>
+    {% endfor %}
+  {% endblock %}
 </div>
