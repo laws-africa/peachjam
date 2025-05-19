@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam", "0216_attachedfiles_private"),
-    ]
+    dependencies = [("peachjam", "0217_backfill_anonymised_source_files")]
 
     operations = [
         migrations.AddField(

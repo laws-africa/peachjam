@@ -5,9 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam", "0219_alter_saveddocument_folders"),
-    ]
+    dependencies = [("peachjam", "0220_alter_saveddocument_folders")]
 
     operations = [
         migrations.AlterUniqueTogether(
