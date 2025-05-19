@@ -30,9 +30,10 @@
 <div id="saved-document-table-detail--{{ saved_document.document.id }}"
      class="saved-document-table-detail text-muted fs-sm ms-2 mt-1"
      hx-swap-oob="true">
-  {% if saved_document.folder %}
-    <i class="bi bi-folder"></i>
-    <a class="text-muted"
-       href="{{ saved_document.folder.get_absolute_url }}">{{ saved_document.folder.name }}</a>
-  {% endif %}
+  <i class="bi bi-folder"></i>
+  {% for folder in saved_document.folders.all %}
+    {# djLint:off #}
+    <a class="text-muted" href="{{ folder.get_absolute_url }}">{{ folder.name }}</a>{% if not forloop.last %},{% endif %}
+    {# djLint:on #}
+  {% endfor %}
 </div>

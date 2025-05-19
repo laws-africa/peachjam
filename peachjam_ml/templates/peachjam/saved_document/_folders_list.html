@@ -3,7 +3,7 @@
 {% block folder-list-card-header %}
   {{ block.super }}
   {% if folder.saved_documents.exists %}
-    <ul class="nav nav-tabs card-header-tabs">
+    <ul class="nav nav-tabs card-header-tabs scroll-xs">
       <li class="nav-item">
         <button class="nav-link active"
                 id="saved-doc-tab-{{ folder.pk }}"
