@@ -1,3 +1,34 @@
+"""The save document views work closely with HTMX to provide a dynamic saving experience without heavy client-side
+Javascript. This also means that we can use caching on document listing views while still showing up-to-date
+details for saved documents.
+
+When a page loads, it includes elements with data-document-id="123" attributes indicate the documents included on
+the page. In listing views, this is included by the document table row template. The document detail page also includes
+it. All pages include a placeholder saved-document-modal which is used when the user saves or edits a saved document.
+
+Some custom Javascript finds all the document IDs on the page and uses HTMX to load the various saved document
+HTML fragments into the page, including:
+
+* the star for saved documents
+* the Save/Unsave button
+* the folder and note details included in the document table
+
+If a document is not saved, then the Save button submits a POST to save the document. The response to that request
+includes all the HTML fragments for the newly saved document, and the contents of the saved-document-modal which is
+shown by the Save button.
+
+If a document is already saved, then clicking on the Save button opens the modal and uses HTMX to load the "update"
+form into the modal.
+
+When the Unsave button is clicked, a POST request is sent to delete the saved document. That response redirects to the
+bulk fragments URL to re-load all the (now unsaved) fragments for that document.
+
+In summary:
+
+* various page elements are injected (possibly in bulk) via the fragments endpoint using HTMX
+* Bootstrap is used to toggle a single, global Saved Document modal
+* HTMX is used to inject the correct content into the modal when it is shown
+"""
 import re
 
 from django.contrib.auth import get_user_model
