@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name="saveddocument",
             name="folders",
             field=models.ManyToManyField(
-                related_name="saved_docs", to="peachjam.folder"
+                related_name="saved_documents", to="peachjam.folder"
             ),
         ),
     ]

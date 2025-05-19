@@ -48,7 +48,7 @@ class BaseFolderMixin(
         context = super().get_context_data(**kwargs)
         context["folders"] = self.request.user.folders.prefetch_related(
             Prefetch(
-                "saved_docs",
+                "saved_documents",
                 queryset=SavedDocument.objects.select_related("document")
                 .prefetch_related("document__labels")
                 .annotate(
