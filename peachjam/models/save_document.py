@@ -54,9 +54,3 @@ class SavedDocument(models.Model):
     def delete(self, using=None, keep_parents=False):
         self.document.annotations.filter(user=self.user).delete()
         return super().delete(using=using, keep_parents=keep_parents)
-
-    @property
-    def form(self):
-        from peachjam.forms import SaveDocumentForm
-
-        return SaveDocumentForm(instance=self)
