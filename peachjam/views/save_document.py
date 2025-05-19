@@ -77,16 +77,6 @@ class BaseFolderMixin(
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["ungrouped_saved_documents"] = (
-            self.request.user.saved_documents.filter(folder__isnull=True)
-            .select_related("document")
-            .annotate(
-                annotation_count=Count(
-                    "document__annotations",
-                    filter=Q(document__annotations__user=self.request.user),
-                )
-            )
-        )
         context["folders"] = self.request.user.folders.prefetch_related(
             Prefetch(
                 "saved_documents",
@@ -187,7 +177,7 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
                 for sd in SavedDocument.objects.filter(
                     user=self.request.user, document_id__in=docs.keys()
                 )
-                .select_related("document", "folder")
+                .select_related("document")
                 .all()
             }
 
@@ -233,10 +223,15 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         doc_id = self.request.GET.get("doc_id")
+        most_recent_saved = self.request.user.saved_documents.order_by(
+            "created_at"
+        ).last()
         if doc_id:
             try:
                 document = get_object_or_404(CoreDocument, pk=int(doc_id))
                 self.document = document
+                folders = [most_recent_saved.folders.all().last().pk]
+                kwargs["data"] = {"folders": folders}
             except ValueError:
                 pass
         else:
