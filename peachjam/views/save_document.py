@@ -208,8 +208,8 @@ class SavedDocumentFormMixin(
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            next=self.request.GET.get("next"),
-            target=self.request.GET.get("target"),
+            next=self.request.GET.get("next") or "",
+            target=self.request.GET.get("target") or "",
             **kwargs,
         )
 

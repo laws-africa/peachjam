@@ -28,12 +28,12 @@
   {% endif %}
 </button>
 <div id="saved-document-table-detail--{{ saved_document.document.id }}"
-     class="saved-document-table-detail text-muted fs-sm ms-2 mt-1"
+     class="saved-document-table-detail"
      hx-swap-oob="true">
   <i class="bi bi-folder"></i>
   {% for folder in saved_document.folders.all %}
     {# djLint:off #}
-    <a class="text-muted" href="{{ folder.get_absolute_url }}">{{ folder.name }}</a>{% if not forloop.last %},{% endif %}
+    <a href="{{ folder.get_absolute_url }}">{{ folder.name }}</a>{% if not forloop.last %},{% endif %}
     {# djLint:on #}
   {% endfor %}
 </div>

@@ -235,7 +235,7 @@
                   </div>
                 </div>
 
-                <ul class="list-unstyled">
+                <ul class="list-unstyled search-result-list">
                   <SearchResult
                     v-for="(item, index) in searchInfo.results"
                     :key="item.id"
@@ -245,7 +245,6 @@
                     :item="item"
                     :query="q"
                     :debug="searchInfo.can_debug"
-                    :canSave="searchInfo.can_save_documents"
                     :show-jurisdiction="showJurisdiction"
                     :document-labels="documentLabels"
                     @item-clicked="(e) => itemClicked(item, e)"

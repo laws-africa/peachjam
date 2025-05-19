@@ -187,3 +187,13 @@ table.doc-table.doc-table--toggle {
   margin-inline-start: 0.5rem;
   cursor: pointer;
 }
+
+.doc-table .saved-document-table-detail {
+  color: $text-muted;
+  font-size: $font-size-sm;
+  margin-inline-start: map-get($spacers, 3);
+}
+
+.search-result-list .saved-document-table-detail {
+  margin-bottom: map-get($spacers, 2);
+}
