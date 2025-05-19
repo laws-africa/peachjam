@@ -220,6 +220,7 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
 
     template_name = "peachjam/saved_document/_created.html"
     permission_required = "peachjam.add_saveddocument"
+    http_method_names = ["post"]
 
     def dispatch(self, request, *args, **kwargs):
         doc_id = self.request.GET.get("doc_id")
@@ -265,6 +266,7 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
 class SavedDocumentUpdateView(SavedDocumentFormMixin, UpdateView):
     template_name = "peachjam/saved_document/_update.html"
     permission_required = "peachjam.change_saveddocument"
+    http_method_names = ["post"]
 
 
 class SavedDocumentModalView(SavedDocumentUpdateView):
@@ -275,3 +277,4 @@ class SavedDocumentDeleteView(SavedDocumentFormMixin, DeleteView):
     permission_required = "peachjam.delete_saveddocument"
     # stub form that always validates
     form_class = Form
+    http_method_names = ["post"]
