@@ -223,7 +223,16 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
             try:
                 document = get_object_or_404(CoreDocument, pk=int(doc_id))
                 instance.document = document
-                folders = [most_recent_saved.folders.all().last().pk]
+                if False and most_recent_saved:
+                    folders = [most_recent_saved.folders.all().last().pk]
+                else:
+                    folders = self.request.user.folders.all()[:1]
+                if not folders:
+                    folders = [
+                        Folder.objects.create(
+                            name="My Documents", user=self.request.user
+                        )
+                    ]
                 kwargs["data"] = {"folders": folders}
             except ValueError:
                 pass
