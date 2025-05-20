@@ -559,6 +559,9 @@ class BaseDocumentDetailView(DetailView):
             ).data
 
     def add_provision_enrichments(self, context):
+        context["document"].provision_enrichments = context[
+            "document"
+        ].work.enrichments.all()
         context["provision_enrichments_json"] = ProvisionEnrichmentSerializer(
             self.object.work.enrichments.all(), many=True
         ).data

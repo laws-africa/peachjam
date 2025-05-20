@@ -5,7 +5,7 @@
       <a href="{{ document.get_absolute_url }}" class="">{{ document.title }}</a>
     </h5>
     <ul class="list-unstyled mt-3">
-      {% for enrichment in document.filtered_enrichments %}
+      {% for enrichment in document.provision_enrichments %}
         <li class="mb-4 pb-3 border-bottom">
           <p class="mb-2">
             <a href="#{{ enrichment.provision_eid }}" class="provision-link fw-bold">
@@ -34,38 +34,58 @@
           <p class="my-2">{{ enrichment.text }}</p>
           {% if enrichment.enrichment_type == 'unconstitutional_provision' %}
             {% if enrichment.judgment %}
-              <p class="mb-1">
-                <strong>{% trans 'Judgment' %}:</strong>
-                <span><a href="{{ enrichment.judgment.documents.latest_expression.first.get_absolute_url }}">{{ enrichment.judgment.documents.latest_expression.first.title }}</a></span>
-              </p>
+              <div class="mb-2 row d-flex align-items-center">
+                <div class="col-2">
+                  <strong>{% trans 'Judgment' %}:</strong>
+                </div>
+                <div class="col">
+                  <span><a href="{{ enrichment.judgment.documents.latest_expression.first.get_absolute_url }}">{{ enrichment.judgment.documents.latest_expression.first.title }}</a></span>
+                </div>
+              </div>
             {% endif %}
             {% if enrichment.date_deemed_unconstitutional %}
-              <p class="mb-1">
-                <strong>{% trans 'Date deemed unconstitutional' %}:</strong>
-                <span>{{ enrichment.date_deemed_unconstitutional }}</span>
-              </p>
+              <div class="mb-2 row d-flex align-items-center">
+                <div class="col-2">
+                  <strong>{% trans 'Date deemed unconstitutional' %}:</strong>
+                </div>
+                <div class="col">
+                  <span>{{ enrichment.date_deemed_unconstitutional }}</span>
+                </div>
+              </div>
             {% endif %}
             {% if enrichment.end_of_suspension_period %}
-              <p class="mb-1">
-                <strong>{% trans 'End of suspension period' %}:</strong>
-                <span>{{ enrichment.end_of_suspension_period }}</span>
-              </p>
+              <div class="mb-2 row d-flex align-items-center">
+                <div class="col-2">
+                  <strong>{% trans 'End of suspension period' %}:</strong>
+                </div>
+                <div class="col">
+                  <span>{{ enrichment.end_of_suspension_period }}</span>
+                </div>
+              </div>
             {% endif %}
             {% if enrichment.date_resolved %}
-              <p class="mb-1">
-                <strong>{% trans 'Date resolved' %}:</strong>
-                <span>{{ enrichment.date_resolved }}</span>
-              </p>
+              <div class="mb-2 row d-flex align-items-center">
+                <div class="col-2">
+                  <strong>{% trans 'Date resolved' %}:</strong>
+                </div>
+                <div class="col">
+                  <span>{{ enrichment.date_resolved }}</span>
+                </div>
+              </div>
             {% endif %}
             {% if enrichment.resolving_amendment_work %}
-              <p class="mb-1">
-                <strong>{% trans 'Resolving amendment' %}:</strong>
-                <span>
-                  <a href="{{ enrichment.resolving_amendment_work.documents.latest_expression.first.get_absolute_url }}">
-                    {{ enrichment.resolving_amendment_work.title }}
-                  </a>
-                </span>
-              </p>
+              <div class="mb-2 row d-flex align-items-center">
+                <div class="col-2">
+                  <strong>{% trans 'Resolving amendment' %}:</strong>
+                </div>
+                <div class="col">
+                  <span>
+                    <a href="{{ enrichment.resolving_amendment_work.documents.latest_expression.first.get_absolute_url }}">
+                      {{ enrichment.resolving_amendment_work.title }}
+                    </a>
+                  </span>
+                </div>
+              </div>
             {% endif %}
           {% endif %}
         </li>

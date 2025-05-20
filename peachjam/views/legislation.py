@@ -430,14 +430,14 @@ class UnconstitutionalProvisionListView(LegislationListView):
             enrichments_qs = UnconstitutionalProvision.objects.filter(work=doc.work)
 
             if resolved_filter == "resolved":
-                doc.filtered_enrichments = enrichments_qs.filter(resolved=True)
+                doc.provision_enrichments = enrichments_qs.filter(resolved=True)
             elif resolved_filter == "unresolved":
-                doc.filtered_enrichments = enrichments_qs.filter(resolved=False)
+                doc.provision_enrichments = enrichments_qs.filter(resolved=False)
             elif resolved_filter == "both":
-                doc.filtered_enrichments = enrichments_qs.filter(
+                doc.provision_enrichments = enrichments_qs.filter(
                     resolved__in=[True, False]
                 )
             else:
-                doc.filtered_enrichments = enrichments_qs.all()
+                doc.provision_enrichments = enrichments_qs.all()
 
         return context
