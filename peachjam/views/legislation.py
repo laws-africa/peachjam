@@ -411,3 +411,33 @@ class UnconstitutionalProvisionListView(LegislationListView):
     def add_facets(self, context):
         super().add_facets(context)
         self.add_resolved_facet(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        resolved_filter_values = self.request.GET.getlist("resolved")
+        if (
+            "resolved" in resolved_filter_values
+            and "unresolved" in resolved_filter_values
+        ):
+            resolved_filter = "both"
+        elif "resolved" in resolved_filter_values:
+            resolved_filter = "resolved"
+        elif "unresolved" in resolved_filter_values:
+            resolved_filter = "unresolved"
+        else:
+            resolved_filter = "both"  # show nothing or default?
+        for doc in context["documents"]:
+            enrichments_qs = UnconstitutionalProvision.objects.filter(work=doc.work)
+
+            if resolved_filter == "resolved":
+                doc.filtered_enrichments = enrichments_qs.filter(resolved=True)
+            elif resolved_filter == "unresolved":
+                doc.filtered_enrichments = enrichments_qs.filter(resolved=False)
+            elif resolved_filter == "both":
+                doc.filtered_enrichments = enrichments_qs.filter(
+                    resolved__in=[True, False]
+                )
+            else:
+                doc.filtered_enrichments = enrichments_qs.all()
+
+        return context

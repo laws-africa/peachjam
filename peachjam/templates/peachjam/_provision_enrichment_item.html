@@ -5,7 +5,7 @@
       <a href="{{ document.get_absolute_url }}" class="">{{ document.title }}</a>
     </h5>
     <ul class="list-unstyled mt-3">
-      {% for enrichment in document.work.enrichments.all %}
+      {% for enrichment in document.filtered_enrichments %}
         <li class="mb-4 pb-3 border-bottom">
           <p class="mb-2">
             <a href="#{{ enrichment.provision_eid }}" class="provision-link fw-bold">
@@ -13,16 +13,23 @@
             </a>
           </p>
           <div class="px-2">
-            <p class="my-2 badge bg-danger">{{ enrichment.get_enrichment_type_display }}</p>
-            <la-akoma-ntoso
-            frbr-expression-uri="{{ document.expression_frbr_uri }}"
-            class="bg-light flash-target content content__akn border-start p-2 border-2 border-danger rounded"
-            lang="{{ document.language.iso }}"
-            >
-            <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
-            <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
-            {{ enrichment.provision_by_eid|safe }}
-            </la-akoma-ntoso>
+            <p class="my-2">
+              <span class="badge bg-danger">{{ enrichment.get_enrichment_type_display }}</span>
+              {% if enrichment.resolved %}
+                <span class="badge bg-success">{% trans 'Resolved' %}</span>
+              {% endif %}
+            </p>
+            {% if enrichment.provision_by_eid %}
+              <la-akoma-ntoso
+              frbr-expression-uri="{{ document.expression_frbr_uri }}"
+              class="bg-light flash-target content content__akn border-start p-2 border-2 border-danger rounded"
+              lang="{{ document.language.iso }}"
+              >
+              <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
+              <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
+              {{ enrichment.provision_by_eid|safe }}
+              </la-akoma-ntoso>
+            {% endif %}
           </div>
           <p class="my-2">{{ enrichment.text }}</p>
           {% if enrichment.enrichment_type == 'unconstitutional_provision' %}

@@ -51,6 +51,8 @@ class ProvisionEnrichment(PolymorphicModel):
     @property
     def provision_by_eid(self):
         html_content = self.work.documents.latest_expression().first().content_html
+        if not html_content:
+            return None
         parser = etree.HTMLParser()
         tree = etree.fromstring(html_content, parser)
 

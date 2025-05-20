@@ -361,24 +361,27 @@ class GazetteFilterForm(BaseDocumentFilterForm):
 
 
 class UnconstitutionalProvisionFilterForm(BaseDocumentFilterForm):
-    resolved = forms.BooleanField(required=False)
+    resolved = PermissiveTypedListField(coerce=remove_nulls, required=False)
 
-    def filter_queryset(self, queryset, exclude=None, filter_q=False):
-        queryset = super().filter_queryset(queryset, exclude, filter_q)
+    filter_fields = BaseDocumentFilterForm.filter_fields + ["resolved"]
+
+    def apply_filter_resolved(self, queryset):
         resolved = self.cleaned_data.get("resolved", [])
 
-        enrichments_qs = Q()
-
-        if resolved == "resolved" and exclude != "resolved":
-            enrichments_qs |= Q(resolved=True)
-        if resolved == "unresolved" and exclude != "resolved":
-            enrichments_qs |= Q(resolved=False)
-
-        enrichments = UnconstitutionalProvision.objects.filter(enrichments_qs)
-
-        queryset = queryset.filter(
-            work__in=enrichments.values_list("work_id", flat=True)
-        )
+        q = Q()
+        if "resolved" in resolved:
+            q |= Q(
+                work__enrichments__in=UnconstitutionalProvision.objects.filter(
+                    resolved=True
+                )
+            )
+        if "unresolved" in resolved:
+            q |= Q(
+                work__enrichments__in=UnconstitutionalProvision.objects.filter(
+                    resolved=False
+                )
+            )
+        queryset = queryset.filter(q).distinct()
         return queryset
 
 
