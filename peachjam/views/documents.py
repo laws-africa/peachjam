@@ -327,3 +327,15 @@ class DocumentSocialImageView(DocumentDetailView):
             return redirect(image.file.url)
 
         return FileResponse(image.file, content_type="image/png")
+
+
+class DocumentSummaryView(DetailView):
+    # TODO: perms
+    model = CoreDocument
+    queryset = CoreDocument.objects.filter(published=True)
+    context_object_name = "document"
+    template_name = "peachjam/document/_summary.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
