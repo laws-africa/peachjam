@@ -8,15 +8,22 @@
       {% for enrichment in document.work.enrichments.all %}
         <li class="mb-4 pb-3 border-bottom">
           <p class="mb-2">
-            <a href="{{ document.get_absolute_url }}#{{ enrichment.provision_eid }}"
-               class="fw-bold">
+            <a href="#{{ enrichment.provision_eid }}" class="provision-link fw-bold">
               {{ document.title }}#{{ enrichment.provision_eid }}
             </a>
           </p>
-          <blockquote cite="{{ document.get_absolute_url }}#{{ enrichment.provision_eid }}"
-                      class="blockquote bg-light px-3 py-2 border-start border-4 border-danger rounded">
+          <div class="px-2">
+            <p class="my-2 badge bg-danger">{{ enrichment.get_enrichment_type_display }}</p>
+            <la-akoma-ntoso
+            frbr-expression-uri="{{ document.expression_frbr_uri }}"
+            class="bg-light flash-target content content__akn border-start p-2 border-2 border-danger rounded"
+            lang="{{ document.language.iso }}"
+            >
+            <la-decorate-terms popup-definitions link-terms></la-decorate-terms>
+            <la-decorate-internal-refs flag popups></la-decorate-internal-refs>
             {{ enrichment.provision_by_eid|safe }}
-          </blockquote>
+            </la-akoma-ntoso>
+          </div>
           <p class="my-2">{{ enrichment.text }}</p>
           {% if enrichment.enrichment_type == 'unconstitutional_provision' %}
             {% if enrichment.judgment %}

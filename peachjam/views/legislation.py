@@ -7,8 +7,8 @@ from django.template.defaultfilters import date as format_date
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
 
-from peachjam.forms import LegislationFilterForm
-from peachjam.models import Legislation, ProvisionEnrichment, pj_settings
+from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
+from peachjam.models import Legislation, UnconstitutionalProvision, pj_settings
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
@@ -377,6 +377,7 @@ class LegislationDetailView(BaseDocumentDetailView):
 class UnconstitutionalProvisionListView(LegislationListView):
     template_name = "peachjam/unconstitutional_provision_list.html"
     latest_expression_only = True
+    form_class = UnconstitutionalProvisionFilterForm
 
     def get_template_names(self):
         if self.request.htmx:
@@ -387,8 +388,26 @@ class UnconstitutionalProvisionListView(LegislationListView):
 
     def get_base_queryset(self, *args, **kwargs):
         qs = super().get_base_queryset(*args, **kwargs)
-        unconstitutional_provision_works = ProvisionEnrichment.objects.filter(
-            enrichment_type="unconstitutional_provision"
-        ).values_list("work__id", flat=True)
+        unconstitutional_provision_works = (
+            UnconstitutionalProvision.objects.all().values_list("work__id", flat=True)
+        )
         qs = qs.filter(work__in=unconstitutional_provision_works)
         return qs
+
+    def add_resolved_facet(self, context):
+        # add a facet for resolved/unresolved
+        if "resolved" not in self.exclude_facets:
+            context["facet_data"]["resolved"] = {
+                "label": _("Resolved"),
+                "type": "checkbox",
+                # these are (value, label) tuples
+                "options": [
+                    ("resolved", _("Resolved")),
+                    ("unresolved", _("Unresolved")),
+                ],
+                "values": self.request.GET.getlist("resolved"),
+            }
+
+    def add_facets(self, context):
+        super().add_facets(context)
+        self.add_resolved_facet(context)

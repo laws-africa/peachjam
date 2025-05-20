@@ -29,6 +29,7 @@ from peachjam.models import (
     Ratification,
     SavedDocument,
     SourceFile,
+    UnconstitutionalProvision,
     pj_settings,
 )
 from peachjam.plugins import plugins
@@ -356,6 +357,28 @@ class GazetteFilterForm(BaseDocumentFilterForm):
         if supplement and exclude != "supplement":
             queryset = queryset.filter(supplement=True)
 
+        return queryset
+
+
+class UnconstitutionalProvisionFilterForm(BaseDocumentFilterForm):
+    resolved = forms.BooleanField(required=False)
+
+    def filter_queryset(self, queryset, exclude=None, filter_q=False):
+        queryset = super().filter_queryset(queryset, exclude, filter_q)
+        resolved = self.cleaned_data.get("resolved", [])
+
+        enrichments_qs = Q()
+
+        if resolved == "resolved" and exclude != "resolved":
+            enrichments_qs |= Q(resolved=True)
+        if resolved == "unresolved" and exclude != "resolved":
+            enrichments_qs |= Q(resolved=False)
+
+        enrichments = UnconstitutionalProvision.objects.filter(enrichments_qs)
+
+        queryset = queryset.filter(
+            work__in=enrichments.values_list("work_id", flat=True)
+        )
         return queryset
 
 
