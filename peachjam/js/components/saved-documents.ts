@@ -1,15 +1,22 @@
 export class SavedDocumentModal {
   root: HTMLElement;
+  placeholder = '';
 
   constructor (root: HTMLElement) {
     this.root = root;
-    this.root.addEventListener('show.bs.modal', () => {
-      // clear modal content
-      const content = document.getElementById('saved-document-modal-content');
-      if (content) {
-        content.innerHTML = '<div class="modal-body spinner-when-empty"></div>';
-      }
-    });
+    this.root.addEventListener('show.bs.modal', this.onShow.bind(this));
+    const content = document.getElementById('saved-document-modal-content');
+    if (content) {
+      this.placeholder = content.innerHTML;
+    }
+  }
+
+  onShow () {
+    // clear modal content
+    const content = document.getElementById('saved-document-modal-content');
+    if (content) {
+      content.innerHTML = this.placeholder;
+    }
   }
 }
 

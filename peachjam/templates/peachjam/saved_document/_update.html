@@ -37,3 +37,40 @@
     {# djLint:on #}
   {% endfor %}
 </div>
+<div id="saved-document-detail--{{ saved_document.document.id }}"
+     class="mb-3 row"
+     hx-swap-oob="true">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex">
+          <h5 class="card-title">{{ MY_LII }}</h5>
+          <a href="#saved-document-modal"
+             class="btn btn-outline-secondary ms-auto"
+             data-bs-toggle="modal"
+             hx-get="{% url 'saved_document_modal' saved_document.pk %}"
+             hx-target="#saved-document-modal-content"><i class="bi bi-three-dots"></i></a>
+        </div>
+        <ul class="list-unstyled mb-2">
+          {% for folder in saved_document.folders.all %}
+            <li class="mb-0">
+              <i class="bi bi-folder"></i>
+              <a href="{{ folder.get_absolute_url }}">{{ folder.name }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+        <div>
+          {{ saved_document.note|default_if_none:"" }}
+          <a href="#saved-document-modal"
+             data-bs-toggle="modal"
+             hx-get="{% url 'saved_document_modal' saved_document.pk %}"
+             hx-target="#saved-document-modal-content">
+            {# djLint:off #}
+            <i class="bi bi-pencil me-1"></i>{% if saved_document.note %}{% trans "edit" %}{% else %}{% trans "Add a note" %}{% endif %}
+            {# djLint:on #}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
