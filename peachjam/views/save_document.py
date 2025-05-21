@@ -236,8 +236,7 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
         doc_id = self.request.GET.get("doc_id")
         if doc_id:
             try:
-                document = get_object_or_404(CoreDocument, pk=int(doc_id))
-                self.document = document
+                self.document = get_object_or_404(CoreDocument, pk=int(doc_id))
             except ValueError:
                 pass
         else:

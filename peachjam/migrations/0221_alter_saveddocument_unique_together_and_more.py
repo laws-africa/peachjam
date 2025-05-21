@@ -8,10 +8,6 @@ class Migration(migrations.Migration):
     dependencies = [("peachjam", "0220_alter_saveddocument_folders")]
 
     operations = [
-        migrations.AlterUniqueTogether(
-            name="saveddocument",
-            unique_together=set(),
-        ),
         migrations.RemoveField(
             model_name="saveddocument",
             name="folder",
