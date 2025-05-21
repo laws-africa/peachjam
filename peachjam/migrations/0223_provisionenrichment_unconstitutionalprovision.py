@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("peachjam", "0216_attachedfiles_private"),
+        ("peachjam", "0222_alter_coredocument_options"),
     ]
 
     operations = [

@@ -382,15 +382,19 @@ class LegislationDetailView(BaseDocumentDetailView):
 
 
 class UnconstitutionalProvisionListView(LegislationListView):
-    template_name = "peachjam/unconstitutional_provision_list.html"
+    template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
     latest_expression_only = True
     form_class = UnconstitutionalProvisionFilterForm
 
     def get_template_names(self):
         if self.request.htmx:
             if self.request.htmx.target == "doc-table":
-                return ["peachjam/_provision_enrichment_table.html"]
-            return ["peachjam/_provision_enrichment_table_form.html"]
+                return [
+                    "peachjam/provision_enrichment/_provision_enrichment_table.html"
+                ]
+            return [
+                "peachjam/provision_enrichment/_provision_enrichment_table_form.html"
+            ]
         return super().get_template_names()
 
     def get_base_queryset(self, *args, **kwargs):
