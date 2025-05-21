@@ -1,55 +1,47 @@
 {% load i18n %}
 <div id="saved-doc-{{ saved_document.pk }}" class="border-bottom">
-  <div class="row pt-2">
-    <div class="col-md-6">
-      <a href="{{ saved_document.document.get_absolute_url }}">{{ saved_document.document.title }}</a>
-      {% include 'peachjam/_document_labels.html' with labels=saved_document.document.labels.all %}
-      {% if saved_document.note %}
-        <br/>
-        <div class="my-2">
-          <span class="text-muted pt-2">{{ saved_document.note }}</span>
-        </div>
-      {% endif %}
-    </div>
-    <div class="col-md-3">
-      {% if saved_document.annotation_count %}
-        <i class="text-primary bi bi-chat-left-text"></i>
-        <a href="#"
-           hx-target="#document-annotations-{{ saved_document.document.pk }}"
-           hx-get="{% url 'annotation_list' saved_document.document.pk %}">
-          {% blocktrans trimmed count comment_count=saved_document.annotation_count %}
-            {{ comment_count }} comment
-          {% plural %}
-            {{ comment_count }} comments
-          {% endblocktrans %}
-        </a>
-      {% endif %}
-    </div>
-    <div class="col-md-3">
-      <div class="mx-1 text-end text-nowrap">
-        {{ saved_document.document.date }}
-        <button class="p-1 btn btn-link"
-                type="button"
-                data-bs-toggle="modal"
-                data-bs-target="#savedDocumentModal-{{ saved_document.pk }}">
-          <i class="bi bi-pencil"></i>
-        </button>
-        <button class=" btn btn-link"
-                type="button"
-                hx-post="{% url 'saved_document_delete' saved_document.id %}?next={% url 'folder_list' %}"
-                hx-target="#folders-list"
-                hx-confirm="{% trans "Are you sure you want to remove this document?" %}">
-          <i class="bi bi-trash"></i>
-        </button>
+  <div class="py-2">
+    <div class="d-flex">
+      <div class="me-2">
+        <a href="{{ saved_document.document.get_absolute_url }}">{{ saved_document.document.title }}</a>
+        {% include 'peachjam/_document_labels.html' with labels=saved_document.document.labels.all %}
       </div>
+      <button class="btn btn-link ms-auto p-0"
+              type="button"
+              title="{% trans "Edit" %}"
+              data-bs-toggle="modal"
+              data-bs-target="#saved-document-modal"
+              hx-get="{% url 'saved_document_modal' saved_document.pk %}?next={% url 'folder_list' %}&target=%23folders-list"
+              hx-target="#saved-document-modal-content">
+        <i class="bi bi-pencil"></i>
+      </button>
+      <button class="btn btn-link text-danger p-0 ms-2"
+              type="button"
+              title="{% trans "Delete" %}"
+              hx-post="{% url 'saved_document_delete' saved_document.id %}?next={% url 'folder_list' %}"
+              hx-target="#folders-list"
+              hx-confirm="{% trans "Are you sure you want to remove this document?" %}">
+        <i class="bi bi-trash"></i>
+      </button>
     </div>
-  </div>
-  <div id="savedDocumentModal-{{ saved_document.id }}" class="modal fade">
-    {% url 'folder_list' as folder_list_url %}
-    {% include "peachjam/saved_document/_update_modal.html" with form=saved_document.form target="#folders-list" next=folder_list_url %}
-  </div>
-  <div class="row">
-    <div id="document-annotations-{{ saved_document.document.pk }}"
-         class="col"></div>
+    <div class="ms-3">
+      {% if saved_document.note %}<div class="text-muted">{{ saved_document.note }}</div>{% endif %}
+      {% if saved_document.annotation_count %}
+        <details>
+          <summary hx-target="#document-annotations-{{ saved_document.document.pk }}"
+                   hx-get="{% url 'annotation_list' saved_document.document.pk %}"
+                   hx-trigger="click once">
+            <i class="text-primary bi bi-chat-left-text"></i>
+            {% blocktrans trimmed count comment_count=saved_document.annotation_count %}
+              {{ comment_count }} comment
+            {% plural %}
+              {{ comment_count }} comments
+            {% endblocktrans %}
+          </summary>
+          <div id="document-annotations-{{ saved_document.document.pk }}"
+               class="spinner-when-empty"></div>
+        </details>
+      {% endif %}
+    </div>
   </div>
 </div>

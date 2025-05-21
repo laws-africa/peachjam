@@ -1,5 +1,6 @@
 {% load i18n peachjam %}
-<tr class="{% if document.children %}has-children{% endif %}">
+<tr class="{% if document.children %}has-children{% endif %}"
+    {% if document.pk %}data-document-id="{{ document.pk }}"{% endif %}>
   {% if doc_table_toggle %}
     <td class="cell-toggle">
       {% if document.children %}
@@ -20,20 +21,27 @@
         class="cell-group">{{ document.title }}</td>
   {% else %}
     <td class="cell-title">
-      <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-      {% if document.work.languages|length > 1 %}
-        <span class="d-inline-block"
-              data-bs-toggle="tooltip"
-              title="{% trans 'Multiple languages available' %}">
-          <i class="bi bi-translate"></i>
-        </span>
-      {% endif %}
+      <div class="d-flex">
+        <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+        {% if document.work.languages|length > 1 %}
+          <span class="d-inline-block ms-2"
+                data-bs-toggle="tooltip"
+                title="{% trans 'Multiple languages available' %}">
+            <i class="bi bi-translate"></i>
+          </span>
+        {% endif %}
+        <span id="saved-document-star--{{ document.pk }}"></span>
+      </div>
       {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
+      {% if doc_table_show_treatments %}
+        {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
+      {% endif %}
       {% if document.listing_taxonomies %}
         <div class="d-none d-md-block ms-3">
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
         </div>
       {% endif %}
+      <div id="saved-document-table-detail--{{ document.pk }}"></div>
     </td>
   {% endif %}
   {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}

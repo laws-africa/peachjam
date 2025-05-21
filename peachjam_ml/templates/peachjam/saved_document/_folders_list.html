@@ -3,7 +3,7 @@
 {% block folder-list-card-header %}
   {{ block.super }}
   {% if folder.saved_documents.exists %}
-    <ul class="nav nav-tabs card-header-tabs">
+    <ul class="nav nav-tabs card-header-tabs scroll-xs">
       <li class="nav-item">
         <button class="nav-link active"
                 id="saved-doc-tab-{{ folder.pk }}"
@@ -49,7 +49,7 @@
            id="similar-docs-{{ folder.pk }}"
            role="tabpanel"
            aria-labelledby="similar-docs-tab-{{ folder.pk }}">
-        <div id="similar-docs-list-{{ folder.pk }}"></div>
+        <div id="similar-docs-list-{{ folder.pk }}" class="spinner-when-empty"></div>
       </div>
     {% endif %}
   </div>

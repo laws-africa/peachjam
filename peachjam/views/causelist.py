@@ -49,8 +49,7 @@ class CauseListListView(TemplateView):
         )
         context["court_classes"] = court_classes_with_cause_lists
         context["recent_causelists"] = (
-            CauseList.objects.select_related("work")
-            .prefetch_related("labels")
+            CauseList.objects.for_document_table()
             .exclude(published=False)
             .order_by("-date")[:30]
         )

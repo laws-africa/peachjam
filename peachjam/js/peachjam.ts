@@ -3,6 +3,7 @@ import components from './components';
 // @ts-ignore
 import { vueI18n } from './i18n';
 import { createAndMountApp } from './utils/vue-utils';
+import { loadSavedDocuments } from './components/saved-documents';
 
 import '@lawsafrica/law-widgets/dist/components/la-akoma-ntoso';
 import '@lawsafrica/law-widgets/dist/components/la-gutter';
@@ -60,6 +61,7 @@ class PeachJam {
     this.clearGACookies();
     this.clearCIOCookies();
     this.setupConfirm();
+    loadSavedDocuments();
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
 
@@ -91,6 +93,7 @@ class PeachJam {
       // mount components on new elements
       this.createComponents(e.target as HTMLElement);
       this.createVueComponents(e.target as HTMLElement);
+      loadSavedDocuments(e.target as HTMLElement);
     });
 
     htmx.on('htmx:confirm', (e:any) => {

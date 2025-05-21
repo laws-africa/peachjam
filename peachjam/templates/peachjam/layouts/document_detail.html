@@ -27,14 +27,17 @@
   data-track-page-load="View document"
 {% endblock %}
 {% block page-content %}
-  <div class="pb-5">
+  <div class="pb-5" data-document-id="{{ document.pk }}">
     <div class="bg-light">
       <div class="container">
         {% block breadcrumbs %}{% endblock %}
         {% block document-title %}
           <div class="d-md-flex justify-content-md-between my-3">
             <div>
-              <h1 class="doc-title">{{ document.title }}</h1>
+              <h1 class="doc-title">
+                {{ document.title }}
+                <span id="saved-document-star--{{ document.pk }}"></span>
+              </h1>
               {% block sub-title %}{% endblock %}
               {% include 'peachjam/_document_labels.html' %}
             </div>
@@ -76,6 +79,7 @@
         {% endblock %}
         {% include 'peachjam/document/_warning_notices.html' with messages=notices %}
         {% include "peachjam/_document_detail_toolbar.html" %}
+        <div id="saved-document-detail--{{ document.id }}"></div>
         {% include 'peachjam/_document_floating_header.html' %}
         <ul class="nav nav-tabs border-bottom scroll-xs" role="tablist">
           {% block document-tabs %}

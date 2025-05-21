@@ -1,22 +1,18 @@
 from django.urls import path
 
 from peachjam.views import (
-    SavedDocumentButtonBulkView,
-    SavedDocumentButtonView,
     SavedDocumentCreateView,
     SavedDocumentDeleteView,
+    SavedDocumentFragmentsView,
+    SavedDocumentModalView,
     SavedDocumentUpdateView,
 )
 
 urlpatterns = [
     path(
-        "button/<int:doc_id>",
-        SavedDocumentButtonView.as_view(),
-        name="saved_document_button",
-    ),
-    path(
-        "buttons/",
-        SavedDocumentButtonBulkView.as_view(),
+        "fragments",
+        SavedDocumentFragmentsView.as_view(),
+        name="saved_document_fragments",
     ),
     path(
         "create",
@@ -32,5 +28,10 @@ urlpatterns = [
         "<int:pk>/delete",
         SavedDocumentDeleteView.as_view(),
         name="saved_document_delete",
+    ),
+    path(
+        "<int:pk>/modal",
+        SavedDocumentModalView.as_view(),
+        name="saved_document_modal",
     ),
 ]

@@ -21,24 +21,22 @@ from peachjam.views import HomePageView as BaseHomePageView
 class HomePageView(BaseHomePageView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        recent_articles = (
+        context["recent_articles"] = (
             Article.objects.prefetch_related("topics")
             .filter(published=True)
             .select_related("author")
             .order_by("-date")[:5]
         )
-
-        context["recent_articles"] = recent_articles
         context["recent_soft_law"] = (
             GenericDocument.objects.exclude(published=False)
             .exclude(frbr_uri_doctype="doc")
-            .prefetch_related("labels")
+            .for_document_table()
             .order_by("-date")[:5]
         )
         context["recent_reports_guides"] = (
             GenericDocument.objects.exclude(published=False)
             .filter(frbr_uri_doctype="doc")
-            .prefetch_related("labels")
+            .for_document_table()
             .order_by("-date")[:5]
         )
         context["recent_legal_instruments"] = (
@@ -46,7 +44,7 @@ class HomePageView(BaseHomePageView):
             .filter(
                 taxonomies__topic__slug="african-union-collections-legal-instruments"
             )
-            .prefetch_related("labels")
+            .for_document_table()
             .order_by("-date")[:5]
         )
         context["au_organs"] = AfricanUnionOrgan.objects.prefetch_related("author")

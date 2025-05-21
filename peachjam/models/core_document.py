@@ -336,6 +336,12 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
         obj = qs.latest_expression().first()
         return obj, False
 
+    def for_document_table(self):
+        """Apply the appropriate prefetches for data to show in the document table view."""
+        return self.select_related(
+            "nature", "work", "jurisdiction", "locality"
+        ).prefetch_related("labels", "taxonomies", "taxonomies__topic")
+
 
 class CoreDocument(PolymorphicModel):
     # There are three ways of indicating a document's type:

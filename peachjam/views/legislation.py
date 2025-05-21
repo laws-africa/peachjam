@@ -375,8 +375,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                 )
             )
             .order_by("-date", "-frbr_uri_date", "-padded_frbr_uri_number")
-            .select_related("work")
-            .prefetch_related("labels")
+            .for_document_table()
         )
         # TODO: we're not guaranteed to get documents in the same language, here
         return docs
