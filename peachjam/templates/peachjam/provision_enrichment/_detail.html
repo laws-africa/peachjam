@@ -1,12 +1,12 @@
 {% load i18n %}
 <div class="mb-2">
   <a href="{{ document.get_absolute_url }}#{{ enrichment.provision_eid }}"
-     class="provision-link fw-bold">
-    {{ document.title }}#{{ enrichment.provision_eid }}
+     class="provision-link fw-bold me-2">
+    {{ enrichment.provision_title }}
   </a>
-  <span class="badge bg-danger ms-2">{{ enrichment.get_enrichment_type_display }}</span>
+  <span class="badge bg-danger me-2">{{ enrichment.get_enrichment_type_display }}</span>
   {% if enrichment.resolved %}
-    <span class="badge bg-success ms-2">{% trans 'Resolved' %}</span>
+    <span class="badge bg-success">{% trans 'Resolved' %}</span>
   {% endif %}
 </div>
 <div class="my-2">{{ enrichment.text }}</div>

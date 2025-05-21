@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from lxml import etree
 from polymorphic.models import PolymorphicManager, PolymorphicModel
@@ -48,7 +49,7 @@ class ProvisionEnrichment(PolymorphicModel):
     def __str__(self):
         return f"{self.enrichment_type} - {self.work} - {self.provision_eid or 'whole work'}"
 
-    @property
+    @cached_property
     def provision_by_eid(self):
         html_content = self.work.documents.latest_expression().first().content_html
         if not html_content:
@@ -63,6 +64,33 @@ class ProvisionEnrichment(PolymorphicModel):
         if elements:
             return etree.tostring(elements[0], encoding="unicode", method="html")
         return None
+
+    @cached_property
+    def provision_title(self):
+        """A friendly title for this provision, if available."""
+        # TODO: better place to get this document
+        document = self.work.documents.latest_expression().first()
+        if document and document.toc_json:
+
+            def find_toc_item(toc, eid):
+                for item in toc:
+                    if item["id"] == eid:
+                        return item
+
+                    if item["id"] and eid.startswith(f"{item['id']}__"):
+                        if item["children"]:
+                            # descend into children
+                            found = find_toc_item(item["children"], eid)
+                            if found:
+                                return found
+
+                        # closest match
+                        return item
+
+            item = find_toc_item(document.toc_json, self.provision_eid)
+            # TODO: get remaining portion if we couldn't go far enough down
+            # which is all the akn-num text between item and the provision
+            return item["title"] if item else self.provision_eid
 
     def save(self, *args, **kwargs):
         if not self.provision_eid:
