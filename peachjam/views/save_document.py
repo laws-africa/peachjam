@@ -164,7 +164,7 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
         except ValueError:
             pass
         # validate the pks - first few only
-        docs = {doc.id: doc for doc in CoreDocument.objects.filter(pk__in=pks)[:20]}
+        docs = {doc.id: doc for doc in CoreDocument.objects.filter(pk__in=pks)[:50]}
         saved_docs = {}
 
         if self.request.user.is_authenticated:
