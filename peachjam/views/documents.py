@@ -2,6 +2,7 @@ import re
 
 from cobalt import FrbrUri
 from django.conf import settings
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import Http404, HttpResponse
 from django.http.response import FileResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
@@ -9,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.generic import DetailView, View
 
+from peachjam.analysis.summariser import SummariserError, SummariserService
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
 from peachjam.models import (
@@ -329,8 +331,8 @@ class DocumentSocialImageView(DocumentDetailView):
         return FileResponse(image.file, content_type="image/png")
 
 
-class DocumentSummaryView(DetailView):
-    # TODO: perms
+class DocumentSummaryView(DetailView, PermissionRequiredMixin):
+    permission_required = "peachjam.can_debug_document"
     model = CoreDocument
     queryset = CoreDocument.objects.filter(published=True)
     context_object_name = "document"
@@ -338,4 +340,11 @@ class DocumentSummaryView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        summariser = SummariserService()
+        try:
+            context["summary"] = summariser.summarise_judgment(self.object)["summary"]
+        except SummariserError as e:
+            context["error"] = e
+
         return context

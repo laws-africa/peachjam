@@ -103,7 +103,7 @@ urlpatterns = [
         ),
     ),
     path(
-        "document/<int:document_pk>/summary",
+        "document/<int:pk>/summary",
         DocumentSummaryView.as_view(),
         name="document_summary",
     ),
