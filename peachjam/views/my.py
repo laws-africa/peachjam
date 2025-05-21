@@ -10,6 +10,8 @@ from peachjam.models.user_following import get_user_following_timeline
 
 
 class CommonContextMixin:
+    max_docs = 15
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -18,7 +20,7 @@ class CommonContextMixin:
                 n_saved_documents=Count("saved_documents")
             )
             context["following_timeline"] = timeline = get_user_following_timeline(
-                self.request.user, 7, 15
+                self.request.user, 7, self.max_docs
             )
             context["timeline_truncated"] = self.timeline_truncated
             if timeline:
@@ -37,6 +39,7 @@ class MyFrontpageView(CommonContextMixin, TemplateView):
     """The My LII part of the site homepage that is loaded dynamically."""
 
     timeline_truncated = True
+    max_docs = 5
 
     def get(self, request, *args, **kwargs):
         if not pj_settings().allow_signups:
