@@ -12,10 +12,6 @@ from peachjam.forms import UserProfileForm
 User = get_user_model()
 
 
-class AccountsHomeView(LoginRequiredMixin, TemplateView):
-    template_name = "user_account/home.html"
-
-
 class EditAccountView(LoginRequiredMixin, FormView):
     template_name = "user_account/edit.html"
     form_class = UserProfileForm

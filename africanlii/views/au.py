@@ -65,7 +65,7 @@ class AfricanUnionInstitutionDetailView(AuthorDetailView):
 
 class RegionalEconomicCommunityDetailView(PlaceDetailView):
     template_name = "africanlii/regional_economic_community_detail.html"
-    queryset = CoreDocument.objects.prefetch_related("labels")
+    queryset = CoreDocument.objects.for_document_table()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

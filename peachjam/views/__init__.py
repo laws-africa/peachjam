@@ -12,6 +12,7 @@ from .books import *
 from .causelist import *
 from .compare import *
 from .courts import *
+from .document_access_group import *
 from .document_nature import *
 from .document_problem import *
 from .documents import *
@@ -22,6 +23,7 @@ from .home import *
 from .judgment import *
 from .legislation import *
 from .login import *
+from .my import *
 from .partner import *
 from .place import *
 from .pocketlaw import *

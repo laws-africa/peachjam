@@ -1,12 +1,6 @@
 .top-bar {
   .top-bar-logo {
-    max-height: 40px;
-  }
-
-  @include media-breakpoint-down(sm) {
-    .top-bar-logo {
-      max-height: 30px;
-    }
+    max-height: 30px;
   }
 }
 
@@ -19,6 +13,7 @@
 }
 
 .dropdown-item.username {
+  min-width: 13em;
   max-width: 50vw;
   overflow-x: hidden;
 }

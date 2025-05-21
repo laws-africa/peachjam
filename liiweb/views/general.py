@@ -19,17 +19,17 @@ class HomePageView(PJHomePageView):
 
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["recent_judgments"] = (
-            Judgment.objects.prefetch_related("labels")
+            Judgment.objects.for_document_table()
             .exclude(published=False)
             .order_by("-date")[:10]
         )
         context["recent_legislation"] = (
-            Legislation.objects.prefetch_related("labels")
+            Legislation.objects.for_document_table()
             .exclude(published=False)
             .order_by("-date")[:10]
         )
         context["recent_gazettes"] = (
-            Gazette.objects.prefetch_related("labels")
+            Gazette.objects.for_document_table()
             .exclude(published=False)
             .order_by("-date")[:5]
         )

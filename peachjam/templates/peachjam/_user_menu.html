@@ -2,28 +2,26 @@
 {% if user.is_authenticated %}
   <ul class="navbar-nav ms-auto me-2">
     <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle"
+      <a class="btn"
          href="#"
          role="button"
          data-bs-toggle="dropdown"
          data-bs-reference="body"
          aria-expanded="false">
         <i class="bi bi-person-circle"></i>
-        {% trans "My account" %}
+        <span class="d-none d-sm-inline">{% trans "My account" %}</span>
       </a>
       <ul class="dropdown-menu dropdown-menu-end nav-user-dropdown-menu">
-        <li class="dropdown-item username">
+        <li class="dropdown-item username text-center mb-2">
           {{ user.first_name }} {{ user.last_name }}
           {% if user.email %}
-            <br/>
-            {{ user.email }}
+            <div class="text-muted">
+              <small>{{ user.email }}</small>
+            </div>
           {% endif %}
         </li>
         <li>
-          <hr class="dropdown-divider"/>
-        </li>
-        <li>
-          <a class="dropdown-item" href="{% url 'account_home' %}">{% trans 'My account' %}</a>
+          <a class="dropdown-item" href="{% url 'my_home' %}">{{ MY_LII }}</a>
         </li>
         {% if PEACHJAM_SETTINGS.allow_save_documents %}
           <li>
@@ -46,6 +44,9 @@
             <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
           </li>
         {% endif %}
+        <li>
+          <a class="dropdown-item" href="{% url 'edit_account' %}">{% trans "Settings" %}</a>
+        </li>
         <li>
           <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Log out' %}</a>
         </li>

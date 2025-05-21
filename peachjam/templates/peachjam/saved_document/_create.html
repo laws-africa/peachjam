@@ -1,42 +1,16 @@
 {% load i18n %}
-<button class="btn btn-outline-primary btn-shrink-sm ms-2 save-document-button save-document-button--{{ document.id }}"
+<button class="btn btn-primary btn-shrink-sm save-document-button save-document-button--{{ document.id }}"
         type="button"
         data-bs-toggle="modal"
-        data-bs-target="#saveDocumentModal-{{ document.id }}"
+        data-bs-target="#saved-document-modal"
+        hx-post="{% url 'saved_document_create' %}?doc_id={{ document.id }}"
+        hx-target="#saved-document-modal-content"
         aria-expanded="false"
-        {% if user.is_authenticated %} hx-post="{% url 'saved_document_create' %}?doc_id={{ document.id }}" {% endif %}
         hx-swap-oob="outerHTML:.save-document-button--{{ document.id }}">
   <i class="bi bi-star"></i>
-  <span class="d-md-none">{% trans 'Save' %}</span>
-  <span class="d-none d-md-inline">{% trans 'Save document' %}</span>
+  {% trans 'Save' %}
 </button>
-<div hx-swap-oob="true"
-     id="saveDocumentModalDialog-{{ document.id }}"
-     class="modal-dialog">
-  <div class="modal-content">
-    <div class="modal-header">
-      <p class="h5 modal-title">{% trans 'Save document' %}</p>
-      <button type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"></button>
-    </div>
-    <div class="modal-body">
-      {% if user.is_authenticated %}
-        {% trans 'Saving...' %}
-      {% else %}
-        <p>
-          <strong>{% trans 'You are not logged in' %}.</strong>
-        </p>
-        <p>{% trans 'To save a document you need to be logged in' %}.</p>
-      {% endif %}
-    </div>
-    <div class="modal-footer d-flex">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
-      {% if not user.is_authenticated %}
-        <a href="{% url 'account_login' %}?next={{ next_url|default_if_none:document.get_absolute_url }}"
-           class="btn btn-primary">{% trans 'Login' %}</a>
-      {% endif %}
-    </div>
-  </div>
-</div>
+<span hx-swap-oob="true" id="saved-document-star--{{ document.id }}"></span>
+<span hx-swap-oob="true"
+      id="saved-document-table-detail--{{ document.id }}"></span>
+<div id="saved-document-detail--{{ document.id }}" hx-swap-oob="true"></div>

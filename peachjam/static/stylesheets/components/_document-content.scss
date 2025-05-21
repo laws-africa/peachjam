@@ -339,11 +339,12 @@
     @extend .mb-4;
   }
 
-  .pdf-loading {
+  .pdf-loading,
+  .pdf-error {
     display: none;
   }
 
-  &[data-pdf-standby], &[data-pdf-loading] {
+  &[data-pdf-standby], &[data-pdf-loading], &[data-pdf-error] {
     .navigation {
       opacity: 0;
     }
@@ -361,6 +362,12 @@
 
   &[data-pdf-loading] {
     .pdf-loading {
+      display: block;
+    }
+  }
+
+  &[data-pdf-error] {
+    .pdf-error {
       display: block;
     }
   }

@@ -88,6 +88,7 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
         "/admin/",
         "/api/",
         "/follow/",
+        "/my/",
         "/saved-documents/",
         "/_",
     ]

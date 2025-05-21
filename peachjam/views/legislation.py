@@ -270,6 +270,14 @@ class LegislationDetailView(BaseDocumentDetailView):
                     }
                 )
 
+        if self.object.date > datetime.now().date():
+            notices.append(
+                {
+                    "type": messages.WARNING,
+                    "html": _("This version is at a future date."),
+                }
+            )
+
         return notices
 
     def get_repeal_info(self):
@@ -367,8 +375,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                 )
             )
             .order_by("-date", "-frbr_uri_date", "-padded_frbr_uri_number")
-            .select_related("work")
-            .prefetch_related("labels")
+            .for_document_table()
         )
         # TODO: we're not guaranteed to get documents in the same language, here
         return docs

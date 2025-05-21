@@ -33,9 +33,7 @@
             class="form-control grow-text"
             required
           />
-          <div v-else>
-            {{ annotation.text }}
-          </div>
+          <div v-else v-html="urlize(annotation.text)" />
           <div v-if="editing" class="mt-2 text-end">
             <button
               class="btn btn-sm btn-secondary"
@@ -99,9 +97,8 @@ export default {
 
       const isDocumentSaved = document.querySelector('[data-saved-document]') !== null;
       if (!isDocumentSaved) {
-        await window.htmx.ajax('post', `/saved-documents/create?doc_id=${this.annotation.document}`, {
-          target: '.save-document-button'
-        });
+        const el = document.createElement('div');
+        await window.htmx.ajax('post', `/saved-documents/create?doc_id=${this.annotation.document}`, el);
       }
 
       const headers = await authHeaders();
@@ -174,6 +171,27 @@ export default {
         parent.removeChild(mark);
       });
       this.marks = [];
+    },
+    urlize (text) {
+      const urlPattern = /(https?:\/\/[^\s]+)/g;
+
+      const emailPattern = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
+
+      const domainPattern = /([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?=\s|$)/g;
+
+      text = text.replace(urlPattern, (url) => {
+        return `<a href="${url}" target="_blank">${url}</a>`;
+      });
+
+      text = text.replace(emailPattern, (email) => {
+        return `<a href="mailto:${email}">${email}</a>`;
+      });
+
+      text = text.replace(domainPattern, (domain) => {
+        return `<a href="http://${domain}" target="_blank">${domain}</a>`;
+      });
+
+      return text;
     }
   }
 };

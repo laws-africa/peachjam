@@ -34,6 +34,25 @@
       {% trans 'Hansard' %}
     </a>
   </li>
+  <li class="nav-item dropdown main-nav">
+    <a href="#"
+       class="nav-link dropdown-toggle"
+       role="button"
+       data-bs-toggle="dropdown"
+       aria-expanded="false">
+      {% trans 'East African Community' %}
+    </a>
+    <ul class="dropdown-menu">
+      <li class="dropdown-item">
+        <a href="{% url 'court' 'EACJ' %}"
+           class="nav-link {% if 'EACJ' in request.path %}active{% endif %}">{% trans 'East African Court of Justice' %}</a>
+      </li>
+      <li class="dropdown-item">
+        <a href="{% url 'court' 'EACA' %}"
+           class="nav-link {% if 'EACA' in request.path %}active{% endif %}">{% trans 'East African Court of Appeal' %}</a>
+      </li>
+    </ul>
+  </li>
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'about' %}active{% endif %}"
        href="{% url 'about' %}">

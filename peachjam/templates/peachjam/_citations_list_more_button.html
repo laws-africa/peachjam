@@ -1,9 +1,0 @@
-{% load peachjam i18n %}
-<button class="btn btn-link"
-        id="citation-button-{{ direction }}-{{ nature.pk }}"
-        hx-get="{% url 'document_citations' document.expression_frbr_uri|strip_first_character %}?direction={{ direction }}&nature={{ nature.pk }}&offset={{ citation_group.docs|length|add:offset }}"
-        hx-target="#citation-tbody-{{ direction }}-{{ nature.pk }}"
-        hx-swap="beforeend"
-        hx-swap-oob="true">
-  {% trans "More..." %}
-</button>

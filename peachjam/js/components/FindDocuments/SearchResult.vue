@@ -10,6 +10,7 @@
             @click="$emit('item-clicked')"
             v-html="item.highlight.title || item.title"
           />
+          <span :id="`saved-document-star--${item.id}`"></span>
         </h5>
         <div class="mb-1">
           <div v-if="item.citation && item.citation !== item.title">
@@ -56,6 +57,7 @@
           <div v-if="item.topic_path_names" class="text-muted fst-italic mt-1">
             {{ item.topic_path_names.join(' · ') }}
           </div>
+          <div :id="`saved-document-table-detail--${item.id}`"></div>
         </div>
         <div v-if="debug && item.explanation" :id="`debug-${item.id}`" class="my-2 collapse">
           <div class="card">
@@ -114,22 +116,13 @@
         </div>
       </div>
       <div class="card-footer text-end">
-        <div v-if="canSave" :class="`save-document-button--${item.id}`" />
         <a
-          class="btn btn-primary ms-2"
+          class="btn btn-outline-primary me-2"
           :href="`${item.expression_frbr_uri}/source`"
           target="_blank"
         >{{ $t('Download') }}</a>
+        <div :class="`save-document-button--${item.id}`" />
       </div>
-    </div>
-    <div
-      v-if="canSave"
-      :id="`saveDocumentModal-${item.id}`"
-      class="modal fade"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div :id="`saveDocumentModalDialog-${item.id}`" class="modal-dialog" />
     </div>
   </li>
 </template>
@@ -164,10 +157,6 @@ export default {
       default: () => []
     },
     debug: {
-      type: Boolean,
-      default: false
-    },
-    canSave: {
       type: Boolean,
       default: false
     }

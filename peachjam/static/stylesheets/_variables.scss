@@ -19,6 +19,8 @@ $anntn-highlight-color: #a68bdc !default;
 $diff-green-color: #a6f3a6 !default;
 $diff-red-color: #f8cbcb !default;
 $visited-link: #1A77F2 !default;
+$text-ai : #6f42c1 !default;
+$saved-star-color: #ffc107 !default;
 
 :root {
   --facebook-color: #{$facebook-color};
@@ -34,6 +36,19 @@ $breadcrumb-margin-bottom: 1rem !default;
 $floating-header-height: 3rem !default;
 $floating-header-height-md: 2.5rem !default;
 
+$alert-padding-y: 0.75rem;
+
+// add an xxxl breakpoint for wide screens
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px,
+  xxxl: 1600px,
+) !default;
+
 // Force bootstrap's container to be fluid up to 960px, which covers most phones and tablets in portrait and
 // landscape. This is easier than changing all uses of container to container-lg.
 $container-max-widths: (
@@ -41,5 +56,15 @@ $container-max-widths: (
   md: 960px,
   lg: 960px,
   xl: 1140px,
-  xxl: 1320px
+  xxl: 1320px,
+  // custom xxxl container
+  xxxl: 1520px
 );
+
+// make navbar toggler simpler
+.navbar-toggler {
+  --bs-navbar-toggler-padding-x: 0px;
+  --bs-navbar-toggler-padding-y: 0px;
+  --bs-border-width: 0px;
+  --bs-navbar-toggler-focus-width: 1px;
+}

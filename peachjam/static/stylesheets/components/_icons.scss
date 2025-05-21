@@ -10,4 +10,12 @@
   &.pj-related::before { content: "\f548"; /* bi-signpost-split-fill */ }
   &.pj-unconstitutional-provisions::before { content: "\f445"; /* bi-tags-fill */ }
   &.pj-taxonomies::before { content: "\f5b1"; /* bi-tags-fill */ }
+  &.pj-ai::before {
+    color: $text-ai;
+    content: "\f589"; /* bi-stars */
+  }
+  &.pj-saved::before {
+    color: $saved-star-color;
+    content: "\f586"; /* bi-star-fill */
+  }
 }

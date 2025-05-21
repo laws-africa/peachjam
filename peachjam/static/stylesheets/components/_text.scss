@@ -5,3 +5,7 @@
 .fs-sm {
   font-size: small;
 }
+
+h1.doc-title {
+  font-size: $font-size-base * 1.75; // h3
+}

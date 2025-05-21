@@ -532,26 +532,50 @@ class ContactUsForm(forms.Form):
 
 class SaveDocumentForm(forms.ModelForm):
     new_folder = forms.CharField(max_length=100, required=False)
+    folders = forms.ModelMultipleChoiceField(
+        queryset=Folder.objects.none(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
 
     class Meta:
         model = SavedDocument
-        fields = ["document", "folder", "new_folder", "note"]
-        widgets = {"document": forms.HiddenInput()}
+        fields = ["folders", "new_folder", "note"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["folder"].queryset = self.instance.user.folders.all()
-        self.fields["document"].required = False
+        self.fields["folders"].queryset = self.instance.user.folders.all()
 
     def clean(self):
         cleaned_data = super().clean()
-        cleaned_data["document"] = self.instance.document
+        folders = list(cleaned_data.get("folders") or [])
+
         if cleaned_data.get("new_folder"):
             folder, _ = Folder.objects.get_or_create(
                 name=cleaned_data["new_folder"],
                 user=self.instance.user,
             )
-            cleaned_data["folder"] = folder
+            folders.append(folder)
+
+        if not folders:
+            # default a folder
+            most_recent_saved = self.instance.user.saved_documents.order_by(
+                "-created_at"
+            ).first()
+            if most_recent_saved:
+                folders = [most_recent_saved.folders.all().last()]
+
+            if not folders:
+                folders = self.instance.user.folders.all()[:1]
+
+            if not folders:
+                folders = [
+                    Folder.objects.get_or_create(
+                        name="My Documents", user=self.instance.user
+                    )[0]
+                ]
+
+        cleaned_data["folders"] = folders
         return cleaned_data
 
 

@@ -2,6 +2,7 @@ import re
 
 from cobalt import FrbrUri
 from django.conf import settings
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import Http404, HttpResponse
 from django.http.response import FileResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
@@ -9,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.generic import DetailView, View
 
+from peachjam.analysis.summariser import SummariserError, SummariserService
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
 from peachjam.models import (
@@ -19,6 +21,7 @@ from peachjam.models import (
 )
 from peachjam.registry import registry
 from peachjam.resolver import resolver
+from peachjam.storage import clean_filename
 from peachjam.views import BaseDocumentDetailView
 
 
@@ -251,7 +254,7 @@ class DocumentAttachmentView(DocumentDetailView):
 
 
 class DocumentCitationsView(DocumentDetailView):
-    template_name = "peachjam/_citations_list_items.html"
+    template_name = "peachjam/document/_citations_list_more.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -289,6 +292,7 @@ class DocumentCitationsView(DocumentDetailView):
         context["offset"] = offset + len(context["docs"])
         context["nature"] = nature
         context["direction"] = direction
+        context["doc_table_id"] = f"citations-table-{direction}-{nature.pk}"
 
         return context
 
@@ -327,3 +331,35 @@ class DocumentSocialImageView(DocumentDetailView):
             return redirect(image.file.url)
 
         return FileResponse(image.file, content_type="image/png")
+
+
+class DocumentDebugViewBase(DetailView, PermissionRequiredMixin):
+    permission_required = "peachjam.can_debug_document"
+    model = CoreDocument
+    queryset = CoreDocument.objects.filter(published=True)
+    context_object_name = "document"
+
+
+class DocumentSummaryView(DocumentDebugViewBase):
+    template_name = "peachjam/document/_summary.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        summariser = SummariserService()
+        try:
+            context["summary"] = summariser.summarise_judgment(self.object)["summary"]
+        except SummariserError as e:
+            context["error"] = e
+
+        return context
+
+
+class DocumentTextContentView(DocumentDebugViewBase):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        text = self.object.get_content_as_text()
+        filename = clean_filename(self.object.title) + ".txt"
+        response = FileResponse(text, as_attachment=True, content_type="text/plain")
+        response["Content-Disposition"] = f"attachment; filename={filename}"
+        return response

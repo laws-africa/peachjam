@@ -95,16 +95,7 @@ class DocumentListView(ListView):
 
     def get_model_queryset(self):
         qs = self.queryset if self.queryset is not None else self.model.objects
-        return (
-            qs.filter(published=True)
-            .select_related(
-                "nature",
-                "work",
-                "jurisdiction",
-                "locality",
-            )
-            .prefetch_related("labels", "taxonomies", "taxonomies__topic")
-        )
+        return qs.filter(published=True).for_document_table()
 
     def get_base_queryset(self, *args, **kwargs):
         return self.get_model_queryset()
@@ -453,13 +444,16 @@ class BaseDocumentDetailView(DetailView):
             works, get_language(self.request)
         )
 
+        table_direction = None
         if direction == "cited_works":
+            table_direction = "outgoing"
             citations = ExtractedCitation.objects.filter(
                 citing_work=self.object.work, target_work__documents__in=docs
             ).prefetch_related("treatments")
             treatments = {c.target_work_id: c.treatments for c in citations}
 
         elif direction == "citing_works":
+            table_direction = "incoming"
             citations = ExtractedCitation.objects.filter(
                 citing_work__documents__in=docs, target_work=self.object.work
             ).prefetch_related("treatments")
@@ -474,6 +468,7 @@ class BaseDocumentDetailView(DetailView):
                 "nature": nature,
                 "n_docs": counts.get(nature.pk, 0),
                 "docs": list(group),
+                "table_id": f"citations-table-{table_direction}-{nature.pk}",
             }
             # the docs are already sorted by nature
             for nature, group in itertools.groupby(docs, lambda d: d.nature)

@@ -1,0 +1,31 @@
+{% load i18n %}
+<div class="bg-light my-5">
+  <div class="container py-4">
+    <div class="d-sm-flex mb-2">
+      <div class="d-flex d-sm-block">
+        <h2 class="text-nowrap">{{ MY_LII }}</h2>
+        <div class="mb-2 ms-auto">
+          <a href="{% url 'my_home' %}" class="h4">Explore →</a>
+        </div>
+      </div>
+      <div class="h5 text-muted ms-auto mb-3">
+        {% if user.first_name %}<div>{{ user.first_name }} {{ user.last_name }}</div>{% endif %}
+        <div class="h6">{{ user.email }}</div>
+      </div>
+    </div>
+    <div class="row">
+      {% if PEACHJAM_SETTINGS.allow_save_documents %}
+        <div class="col-lg-6">{% include "peachjam/my/_saved_documents.html" %}</div>
+      {% endif %}
+      {% if PEACHJAM_SETTINGS.allow_save_searches %}
+        <div class="col-lg-6">{% include "peachjam/my/_saved_searches.html" %}</div>
+      {% endif %}
+      <div class="col-lg-12">
+        <div class="card mb-3">
+          <div class="card-body">{% include "peachjam/my/_recent_additions.html" %}</div>
+        </div>
+      </div>
+    </div>
+    <a class="btn btn-primary" href="{% url 'my_home' %}">{{ MY_LII }}</a>
+  </div>
+</div>

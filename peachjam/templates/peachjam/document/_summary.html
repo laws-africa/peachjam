@@ -1,0 +1,48 @@
+<div>
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% else %}
+    <dl class="document-metadata-list d-flex">
+      <dt>
+        Title
+      </dt>
+      <dd>
+        {{ summary.one_liner }}
+      </dd>
+      <dt>
+        Summary
+      </dt>
+      <dd>
+        {{ summary.summary }}
+      </dd>
+      <dt>
+        Brief facts
+      </dt>
+      <dd>
+        {% for p in summary.brief_facts %}<p>{{ p }}</p>{% endfor %}
+      </dd>
+      <dt>
+        Issues
+      </dt>
+      <dd>
+        <ol>
+          {% for p in summary.issues %}<li>{{ p }}</li>{% endfor %}
+        </ol>
+      </dd>
+      <dt>
+        Held
+      </dt>
+      <dd>
+        <ol>
+          {% for p in summary.held %}<li>{{ p }}</li>{% endfor %}
+        </ol>
+      </dd>
+      <dt>
+        Order
+      </dt>
+      <dd>
+        {{ summary.order }}
+      </dd>
+    </dl>
+  {% endif %}
+</div>
