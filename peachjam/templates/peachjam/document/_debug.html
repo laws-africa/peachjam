@@ -1,15 +1,23 @@
-<ul class="nav nav-tabs">
+<ul class="nav nav-tabs border-bottom">
+  <li class="nav-item">
+    <a class="nav-link active" data-bs-toggle="tab" href="#debug-main-tab">Debug</a>
+  </li>
   {% if document.doc_type == "judgment" %}
     <li class="nav-item">
-      <a class="nav-link active"
-         data-bs-toggle="tab"
-         href="#debug-summary-tab">Summary</a>
+      <a class="nav-link" data-bs-toggle="tab" href="#debug-summary-tab">Summary</a>
     </li>
   {% endif %}
 </ul>
 <div class="tab-content py-3">
+  <div class="tab-pane show active" id="debug-main-tab">
+    <ul>
+      <li>
+        <a href="{% url 'document_text_content' document.id %}">Download text content</a>
+      </li>
+    </ul>
+  </div>
   {% if document.doc_type == "judgment" %}
-    <div class="tab-pane show active" id="debug-summary-tab">
+    <div class="tab-pane" id="debug-summary-tab">
       <button class="btn btn-secondary"
               hx-get="{% url 'document_summary' document.id %}"
               hx-target="#debug-summary-content"

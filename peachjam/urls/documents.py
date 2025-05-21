@@ -19,6 +19,7 @@ from peachjam.views import (
     DocumentSourcePDFView,
     DocumentSourceView,
     DocumentSummaryView,
+    DocumentTextContentView,
     PartnerLogoView,
 )
 
@@ -106,6 +107,11 @@ urlpatterns = [
         "document/<int:pk>/summary",
         DocumentSummaryView.as_view(),
         name="document_summary",
+    ),
+    path(
+        "document/<int:pk>/text",
+        DocumentTextContentView.as_view(),
+        name="document_text_content",
     ),
     path(
         "partners/<int:pk>/logo/<int:logo_pk>",

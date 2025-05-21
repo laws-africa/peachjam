@@ -21,6 +21,7 @@ from peachjam.models import (
 )
 from peachjam.registry import registry
 from peachjam.resolver import resolver
+from peachjam.storage import clean_filename
 from peachjam.views import BaseDocumentDetailView
 
 
@@ -331,11 +332,14 @@ class DocumentSocialImageView(DocumentDetailView):
         return FileResponse(image.file, content_type="image/png")
 
 
-class DocumentSummaryView(DetailView, PermissionRequiredMixin):
+class DocumentDebugViewBase(DetailView, PermissionRequiredMixin):
     permission_required = "peachjam.can_debug_document"
     model = CoreDocument
     queryset = CoreDocument.objects.filter(published=True)
     context_object_name = "document"
+
+
+class DocumentSummaryView(DocumentDebugViewBase):
     template_name = "peachjam/document/_summary.html"
 
     def get_context_data(self, **kwargs):
@@ -348,3 +352,13 @@ class DocumentSummaryView(DetailView, PermissionRequiredMixin):
             context["error"] = e
 
         return context
+
+
+class DocumentTextContentView(DocumentDebugViewBase):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        text = self.object.get_content_as_text()
+        filename = clean_filename(self.object.title) + ".txt"
+        response = FileResponse(text, as_attachment=True, content_type="text/plain")
+        response["Content-Disposition"] = f"attachment; filename={filename}"
+        return response
