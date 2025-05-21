@@ -522,7 +522,7 @@ class SaveDocumentForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        folders = cleaned_data.get("folders") or []
+        folders = list(cleaned_data.get("folders") or [])
 
         if cleaned_data.get("new_folder"):
             folder, _ = Folder.objects.get_or_create(
