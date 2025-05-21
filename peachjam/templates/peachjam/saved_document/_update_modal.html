@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="modal-content">
+<div class="modal-content" id="saved-document-modal-content">
   <form hx-target="{{ target }}"
         hx-post="{% url 'saved_document_update' saved_document.id %}?next={{ next }}">
     <div class="modal-header">
