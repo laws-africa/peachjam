@@ -1,0 +1,11 @@
+{% load i18n %}
+<div class="card my-4">
+  <h5 class="card-header">
+    <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+  </h5>
+  <ul class="list-group list-group-flush">
+    {% for enrichment in provision_enrichments %}
+      <li class="list-group-item">{% include "peachjam/provision_enrichment/_detail.html" %}</li>
+    {% endfor %}
+  </ul>
+</div>
