@@ -49,14 +49,14 @@ and #navigation-column for desktop screensize.
     <div class="tab-content"
          id="navigation-tab-content"
          data-preview-scroll-container>
-      <div class="tab-pane fade h-100"
+      <div class="tab-pane h-100"
            id="navigation-search"
            role="tabpanel"
            aria-labelledby="nav-search-tab">
         <div data-doc-search class="h-100"></div>
       </div>
       {% if display_type == 'akn' or display_type == 'html' %}
-        <div class="tab-pane fade h-100"
+        <div class="tab-pane h-100"
              id="toc"
              role="tabpanel"
              aria-labelledby="toc-tab">
@@ -65,7 +65,7 @@ and #navigation-column for desktop screensize.
         </div>
       {% endif %}
       {% if display_type == 'pdf' %}
-        <div class="tab-pane fade pdf-previews-pane"
+        <div class="tab-pane pdf-previews-pane"
              id="pdf-previews"
              role="tabpanel"
              aria-labelledby="pdf-previews">

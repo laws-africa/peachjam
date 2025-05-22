@@ -191,7 +191,7 @@
     </div>
     <div class="tab-content mt-3">
       {% block document-tab-panes %}
-        <div class="tab-pane fade show active"
+        <div class="tab-pane show active"
              id="document-detail-tab"
              role="tabpanel"
              aria-labelledby="document-detail-tab">
@@ -473,7 +473,7 @@
           </div>
         </div>
         {% if timeline %}
-          <div class="tab-pane fade"
+          <div class="tab-pane"
                id="history-tab"
                role="tabpanel"
                aria-labelledby="history-tab">
@@ -482,7 +482,7 @@
         {% endif %}
         {% block related-documents-tab-pane %}
           {% if show_related_documents %}
-            <div class="tab-pane fade"
+            <div class="tab-pane"
                  id="related-tab"
                  role="tabpanel"
                  aria-labelledby="related-tab">
@@ -491,7 +491,7 @@
           {% endif %}
         {% endblock %}
         {% if cited_documents or documents_citing_current_doc %}
-          <div class="tab-pane fade"
+          <div class="tab-pane"
                id="citations-tab"
                role="tabpanel"
                aria-labelledby="citations-tab">
@@ -499,7 +499,7 @@
           </div>
         {% endif %}
         {% if case_histories %}
-          <div class="tab-pane fade"
+          <div class="tab-pane"
                id="case-history-tab"
                role="tabpanel"
                aria-labelledby="case-history-tab">
@@ -507,7 +507,7 @@
           </div>
         {% endif %}
         {% if document.work.ratification %}
-          <div class="tab-pane fade"
+          <div class="tab-pane"
                id="ratifications-tab"
                role="tabpanel"
                aria-labelledby="ratifications-tab">
@@ -515,7 +515,7 @@
           </div>
         {% endif %}
         {% if perms.can_debug_document %}
-          <div class="tab-pane fade"
+          <div class="tab-pane"
                id="debug-tab"
                role="tabpanel"
                aria-labelledby="debug-tab">

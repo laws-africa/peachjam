@@ -28,7 +28,7 @@
         </li>
       </ul>
       <div class="tab-content">
-        <div class="tab-pane fade show active pt-2" id="replacements-tab">
+        <div class="tab-pane show active pt-2" id="replacements-tab">
           <ReplacementsPane
             ref="replacements"
             :replacements="replacements"
@@ -38,7 +38,7 @@
             @applied="insertNotice"
           />
         </div>
-        <div class="tab-pane fade pt-2" id="comments-tab" ref="comments" />
+        <div class="tab-pane pt-2" id="comments-tab" ref="comments" />
       </div>
     </div>
   </div>
