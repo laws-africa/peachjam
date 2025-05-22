@@ -48,7 +48,7 @@
       <div class="tab-content">
         <div
           id="nav-search"
-          class="tab-pane fade show active"
+          class="tab-pane show active"
           role="tabpanel"
           aria-labelledby="search-tab"
         >
@@ -123,7 +123,7 @@
         </div>
         <div
           id="nav-advanced-search"
-          class="tab-pane fade"
+          class="tab-pane"
           role="tabpanel"
           aria-labelledby="advanced-search-tab"
         >
@@ -142,7 +142,7 @@
         <div
           v-if="showGoogle"
           id="nav-google-search"
-          class="tab-pane fade"
+          class="tab-pane"
           role="tabpanel"
           aria-labelledby="google-search-tab"
         >
