@@ -8,7 +8,6 @@ from docpipe.matchers import ExtractedCitation
 from lxml.etree import ParseError
 
 from peachjam.models import CitationLink
-from peachjam.xmlutils import parse_html_str
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ class CitationAnalyser:
 
     def extract_citations_from_html(self, document):
         try:
-            html = parse_html_str(document.content_html)
+            html = document.content_html_tree
         except ParseError as e:
             log.warning(
                 f"Could not parse HTML for document {document.expression_uri()}: {document.content_html}",

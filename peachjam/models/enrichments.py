@@ -81,27 +81,8 @@ class ProvisionEnrichment(PolymorphicModel):
     @cached_property
     def provision_title(self):
         """A friendly title for this provision, if available."""
-        if self.document and self.document.toc_json:
-
-            def find_toc_item(toc, eid):
-                for item in toc:
-                    if item["id"] == eid:
-                        return item
-
-                    if item["id"] and eid.startswith(f"{item['id']}__"):
-                        if item["children"]:
-                            # descend into children
-                            found = find_toc_item(item["children"], eid)
-                            if found:
-                                return found
-
-                        # closest match
-                        return item
-
-            item = find_toc_item(self.document.toc_json, self.provision_eid)
-            # TODO: get remaining portion if we couldn't go far enough down
-            # which is all the akn-num text between item and the provision
-            return item["title"] if item else self.provision_eid
+        if self.provision_eid:
+            return self.document.friendly_provision_title(self.provision_eid)
 
     def save(self, *args, **kwargs):
         if not self.provision_eid:
