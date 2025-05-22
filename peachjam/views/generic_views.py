@@ -26,14 +26,15 @@ from peachjam.models import (
     Predicate,
     Relationship,
     Taxonomy,
+    UnconstitutionalProvision,
     pj_settings,
 )
 from peachjam.xmlutils import parse_html_str
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,
-    ProvisionEnrichmentSerializer,
     RelationshipSerializer,
+    UnconstitutionalProvisionsSerializer,
 )
 
 
@@ -395,7 +396,7 @@ class BaseDocumentDetailView(DetailView):
 
         self.add_relationships(context)
         self.add_provision_relationships(context)
-        self.add_provision_enrichments(context)
+        self.add_unconstitutional_provisions(context)
 
         if context["document"].content_html:
             context["display_type"] = (
@@ -553,17 +554,19 @@ class BaseDocumentDetailView(DetailView):
                 Predicate.objects.all(), many=True
             ).data
 
-    def add_provision_enrichments(self, context):
-        context["provision_enrichments_json"] = ProvisionEnrichmentSerializer(
-            self.object.work.enrichments.all(), many=True
-        ).data
-        context["unconstitutional_provisions"] = list(
-            self.object.work.enrichments.filter(
-                enrichment_type="unconstitutional_provision"
-            )
+    def add_unconstitutional_provisions(self, context):
+        unconstitutional_provisions = list(
+            UnconstitutionalProvision.objects.filter(work=self.object.work)
         )
-        for provision in context["unconstitutional_provisions"]:
+        for provision in unconstitutional_provisions:
             provision.document = self.object
+
+        context["document"].unconstitutional_provisions = unconstitutional_provisions
+        context[
+            "unconstitutional_provisions_json"
+        ] = UnconstitutionalProvisionsSerializer(
+            unconstitutional_provisions, many=True
+        ).data
 
     def get_notices(self):
         return []

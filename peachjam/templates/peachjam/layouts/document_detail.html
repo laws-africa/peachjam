@@ -112,7 +112,7 @@
               </li>
             {% endif %}
             {% block unconstitutional-provisions-tab %}
-              {% if perms.peachjam.view_provisionenrichment and unconstitutional_provisions %}
+              {% if perms.peachjam.view_unconstitutionalprovison and unconstitutional_provisions %}
                 <li class="nav-item" role="presentation">
                   <button class="nav-link"
                           data-bs-toggle="tab"
@@ -508,7 +508,7 @@
           {% endif %}
         {% endblock %}
         {% block unconstitutional-provisions-tab-pane %}
-          {% if perms.peachjam.view_provisionenrichment and unconstitutional_provisions %}
+          {% if perms.peachjam.view_unconstitutionalprovision and unconstitutional_provisions %}
             <div class="tab-pane fade"
                  id="unconstitutional-provisions-tab"
                  role="tabpanel"
@@ -554,6 +554,8 @@
     {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
-    {{ provision_enrichments_json|json_script:"provision-enrichments" }}
+    {% if perms.peachjam.view_unconstitutionalprovision %}
+      {{ unconstitutional_provisions_json|json_script:"unconstitutional-provisions-json" }}
+    {% endif %}
   </div>
 {% endblock %}
