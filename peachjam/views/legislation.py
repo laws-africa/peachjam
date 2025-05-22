@@ -31,10 +31,11 @@ class LegislationListView(FilteredDocumentListView):
     def add_facets(self, context):
         super().add_facets(context)
         # move the alphabet facet first, it's highly used on the legislation page for some LIIs
-        facets = {"alphabet": context["facet_data"].pop("alphabet")}
-        for k, v in context["facet_data"].items():
-            facets[k] = v
-        context["facet_data"] = facets
+        if "alphabet" in context["facet_data"]:
+            facets = {"alphabet": context["facet_data"].pop("alphabet")}
+            for k, v in context["facet_data"].items():
+                facets[k] = v
+            context["facet_data"] = facets
 
     def add_years_facet(self, context):
         # for legislation, use the work year as the years facet
@@ -385,16 +386,13 @@ class UnconstitutionalProvisionListView(LegislationListView):
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
     latest_expression_only = True
     form_class = UnconstitutionalProvisionFilterForm
+    exclude_facets = ["alphabet", "years"]
 
     def get_template_names(self):
         if self.request.htmx:
             if self.request.htmx.target == "doc-table":
-                return [
-                    "peachjam/provision_enrichment/_provision_enrichment_table.html"
-                ]
-            return [
-                "peachjam/provision_enrichment/_provision_enrichment_table_form.html"
-            ]
+                return ["peachjam/provision_enrichment/_table.html"]
+            return ["peachjam/provision_enrichment/_table_form.html"]
         return super().get_template_names()
 
     def get_base_queryset(self, *args, **kwargs):
@@ -450,5 +448,10 @@ class UnconstitutionalProvisionListView(LegislationListView):
                 )
             else:
                 doc.provision_enrichments = enrichments_qs.all()
+
+            # set the document on the enrichment objects so they know to use it for extra detail
+            doc.provision_enrichments = list(doc.provision_enrichments)
+            for enrichment in doc.provision_enrichments:
+                enrichment.document = doc
 
         return context

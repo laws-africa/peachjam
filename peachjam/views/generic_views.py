@@ -555,9 +555,12 @@ class BaseDocumentDetailView(DetailView):
             ).data
 
     def add_unconstitutional_provisions(self, context):
-        unconstitutional_provisions = UnconstitutionalProvision.objects.filter(
-            work=self.object.work
+        unconstitutional_provisions = list(
+            UnconstitutionalProvision.objects.filter(work=self.object.work)
         )
+        for provision in unconstitutional_provisions:
+            provision.document = self.object
+
         context["document"].unconstitutional_provisions = unconstitutional_provisions
         context[
             "unconstitutional_provisions_json"

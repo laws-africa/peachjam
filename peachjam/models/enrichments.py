@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from lxml import etree
 from polymorphic.models import PolymorphicManager, PolymorphicModel
@@ -41,6 +42,9 @@ class ProvisionEnrichment(PolymorphicModel):
 
     objects = ProvisionEnrichmentManager()
 
+    # this is the document that will be used to display provision information
+    _document = None
+
     class Meta:
         verbose_name = _("provision enrichment")
         verbose_name_plural = _("provision enrichments")
@@ -49,8 +53,18 @@ class ProvisionEnrichment(PolymorphicModel):
         return f"{self.enrichment_type} - {self.work} - {self.provision_eid or 'whole work'}"
 
     @property
+    def document(self):
+        if self._document is None:
+            self._document = self.work.documents.latest_expression().first()
+        return self._document
+
+    @document.setter
+    def document(self, value):
+        self._document = value
+
+    @cached_property
     def provision_by_eid(self):
-        html_content = self.work.documents.latest_expression().first().content_html
+        html_content = self.document.content_html
         if not html_content:
             return None
         parser = etree.HTMLParser()
@@ -64,6 +78,31 @@ class ProvisionEnrichment(PolymorphicModel):
             return etree.tostring(elements[0], encoding="unicode", method="html")
         return None
 
+    @cached_property
+    def provision_title(self):
+        """A friendly title for this provision, if available."""
+        if self.document and self.document.toc_json:
+
+            def find_toc_item(toc, eid):
+                for item in toc:
+                    if item["id"] == eid:
+                        return item
+
+                    if item["id"] and eid.startswith(f"{item['id']}__"):
+                        if item["children"]:
+                            # descend into children
+                            found = find_toc_item(item["children"], eid)
+                            if found:
+                                return found
+
+                        # closest match
+                        return item
+
+            item = find_toc_item(self.document.toc_json, self.provision_eid)
+            # TODO: get remaining portion if we couldn't go far enough down
+            # which is all the akn-num text between item and the provision
+            return item["title"] if item else self.provision_eid
+
     def save(self, *args, **kwargs):
         if not self.provision_eid:
             self.whole_work = True
@@ -73,7 +112,6 @@ class ProvisionEnrichment(PolymorphicModel):
 
 
 class UnconstitutionalProvision(ProvisionEnrichment):
-    # TODO: SET_NULL rather?
     judgment = models.ForeignKey(
         "peachjam.Work",
         on_delete=models.PROTECT,
@@ -90,7 +128,6 @@ class UnconstitutionalProvision(ProvisionEnrichment):
     )
     resolved = models.BooleanField(_("resolved"), default=False)
     date_resolved = models.DateField(_("date resolved"), null=True, blank=True)
-    # TODO: SET_NULL rather?
     resolving_amendment_work = models.ForeignKey(
         "peachjam.Work",
         on_delete=models.PROTECT,
