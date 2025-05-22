@@ -561,7 +561,7 @@ class BaseDocumentDetailView(DetailView):
         for provision in unconstitutional_provisions:
             provision.document = self.object
 
-        context["document"].unconstitutional_provisions = unconstitutional_provisions
+        context["unconstitutional_provisions"] = unconstitutional_provisions
         context[
             "unconstitutional_provisions_json"
         ] = UnconstitutionalProvisionsSerializer(

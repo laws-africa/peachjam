@@ -1,9 +1,9 @@
 {% load i18n %}
 <div class="mb-2">
-  <a href="{{ document.get_absolute_url }}{% if enrichment.provision_eid %}#{{ enrichment.provision_eid }}{% endif %}"
+  <a href="{{ enrichment.document.get_absolute_url }}{% if enrichment.provision_eid %}#{{ enrichment.provision_eid }}{% endif %}"
      class="provision-link fw-bold me-2">
     {% if enrichment.whole_work %}
-      {{ document.title }}
+      {{ enrichment.document.title }}
     {% else %}
       {{ enrichment.provision_title }}
     {% endif %}
@@ -63,13 +63,13 @@
   {% if enrichment.provision_by_eid %}
     <div class="mb-2">
       {% trans "Provision as at" %}
-      {{ document.date }}:
+      {{ enrichment.document.date }}:
     </div>
     <la-akoma-ntoso
-    frbr-expression-uri="{{ document.expression_frbr_uri }}"
+    frbr-expression-uri="{{ enrichment.document.expression_frbr_uri }}"
     class="bg-light p-3 border my-2"
     style="max-height: 50vh; overflow-y: auto;"
-    lang="{{ document.language.iso }}"
+    lang="{{ enrichment.document.language.iso }}"
     >
     {{ enrichment.provision_by_eid|safe }}
     </la-akoma-ntoso>
