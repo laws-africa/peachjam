@@ -29,7 +29,6 @@ from peachjam.models import (
     UnconstitutionalProvision,
     pj_settings,
 )
-from peachjam.xmlutils import parse_html_str
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,
@@ -573,7 +572,7 @@ class BaseDocumentDetailView(DetailView):
 
     def prefix_images(self, document):
         """Rewrite image URLs so that we can serve them correctly."""
-        root = parse_html_str(document.content_html)
+        root = document.content_html_tree
 
         for img in root.xpath(".//img[@src]"):
             src = img.attrib["src"]

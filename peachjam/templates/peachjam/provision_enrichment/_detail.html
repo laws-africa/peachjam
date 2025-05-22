@@ -1,19 +1,15 @@
 {% load i18n %}
-<div class="mb-2">
-  <a href="{{ document.get_absolute_url }}{% if enrichment.provision_eid %}#{{ enrichment.provision_eid }}{% endif %}"
-     class="provision-link fw-bold me-2">
-    {% if enrichment.whole_work %}
-      {{ document.title }}
-    {% else %}
-      {{ enrichment.provision_title }}
-    {% endif %}
-  </a>
+<h6 class="mb-2">
+  {# djLint:off #}
+  <a href="{{ document.get_absolute_url }}{% if enrichment.provision_eid %}#{{ enrichment.provision_eid }}{% endif %}" class="provision-link fw-bold me-2">
+    {% if enrichment.whole_work %}{{ document.title }}{% else %}{{ enrichment.provision_title }}{% endif %}</a>
+  {# djLint:on #}
   {% if enrichment.resolved %}
     <span class="badge bg-success">{% trans 'Resolved' %}</span>
   {% else %}
     <span class="badge bg-danger">{% trans 'Unresolved' %}</span>
   {% endif %}
-</div>
+</h6>
 <div class="my-2">{{ enrichment.text|linebreaks }}</div>
 {% if enrichment.enrichment_type == 'unconstitutional_provision' %}
   <dl class="document-metadata-list d-flex mb-3">

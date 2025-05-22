@@ -27,5 +27,12 @@ class Annotation(models.Model):
         verbose_name = _("annotation")
         verbose_name_plural = _("annotations")
 
+    def friendly_target(self):
+        """A human-friendly rendering of the target's title."""
+        if self.target_id:
+            if self.target_id.startswith("page-"):
+                return _("Page") + " " + self.target_id.split("-")[1]
+            return self.document.friendly_provision_title(self.target_id)
+
     def __str__(self):
         return f"Annotation for {self.document}"

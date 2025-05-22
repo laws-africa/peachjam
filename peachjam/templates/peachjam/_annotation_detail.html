@@ -22,7 +22,7 @@
         </div>
       </div>
     </div>
-    <a href="{% url 'document_detail' annotation.document.expression_frbr_uri|strip_first_character %}#{{ annotation.target_id }}">{{ annotation.document }}</a>
+    <a href="{% url 'document_detail' annotation.document.expression_frbr_uri|strip_first_character %}#{{ annotation.target_id }}">{{ annotation.friendly_target }}</a>
     <div class="my-2">
       {% for selector in annotation.target_selectors %}
         {% if selector.type == 'TextQuoteSelector' %}
