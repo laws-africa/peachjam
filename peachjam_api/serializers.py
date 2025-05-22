@@ -95,6 +95,7 @@ class UnconstitutionalProvisionsSerializer(serializers.ModelSerializer):
             "end_of_suspension_period",
             "date_resolved",
             "resolving_amendment_work",
+            "provision_by_eid",
         )
 
 
