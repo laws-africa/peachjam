@@ -5,7 +5,11 @@
     <div class="card">
       <div class="card-body">
         <p>
-          {{ enrichment.text }}
+          {{ $t('This provision was declared unconstitutional') }}
+          <span v-if="enrichment.judgment">{{ $t('by') }} <a :href="enrichment.judgment.frbr_uri">{{ enrichment.judgment.title }}</a></span>
+          <span v-if="enrichment.date_deemed_unconstitutional">{{ " " }}{{ $t('on') }} {{ enrichment.date_deemed_unconstitutional }}</span>
+          <span>.</span>
+          <span v-if="enrichment.resolved">{{ " " }}{{ $t('It has since been resolved.') }}</span>
         </p>
       </div>
     </div>

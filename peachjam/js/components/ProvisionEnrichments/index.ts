@@ -17,7 +17,7 @@ export class ProvisionEnrichments implements IGutterEnrichmentProvider {
       this.root = root;
       this.manager = manager;
       this.gutter = root.querySelector('la-gutter');
-      const node = document.getElementById('provision-enrichments');
+      const node = document.getElementById('unconstitutional-provisions-json');
       if (node) {
         this.enrichments = JSON.parse(node.innerText || '[]');
       } else {

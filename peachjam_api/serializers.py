@@ -14,10 +14,10 @@ from peachjam.models import (
     Legislation,
     Locality,
     Predicate,
-    ProvisionEnrichment,
     Ratification,
     RatificationCountry,
     Relationship,
+    UnconstitutionalProvision,
     Work,
 )
 
@@ -76,16 +76,25 @@ class RelationshipSerializer(serializers.ModelSerializer):
         ]
 
 
-class ProvisionEnrichmentSerializer(serializers.ModelSerializer):
+class UnconstitutionalProvisionsSerializer(serializers.ModelSerializer):
+    judgment = WorkSerializer(read_only=True)
+    resolving_amendment_work = WorkSerializer(read_only=True)
+
     class Meta:
-        model = ProvisionEnrichment
+        model = UnconstitutionalProvision
         fields = (
             "id",
             "work",
             "provision_eid",
             "whole_work",
             "enrichment_type",
+            "judgment",
             "text",
+            "resolved",
+            "date_deemed_unconstitutional",
+            "end_of_suspension_period",
+            "date_resolved",
+            "resolving_amendment_work",
         )
 
 

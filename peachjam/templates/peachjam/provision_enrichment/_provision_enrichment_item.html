@@ -5,7 +5,7 @@
       <a href="{{ document.get_absolute_url }}" class="">{{ document.title }}</a>
     </h5>
     <ul class="list-unstyled mt-3">
-      {% for enrichment in document.provision_enrichments %}
+      {% for enrichment in document.unconstitutional_provisions %}
         <li class="mb-4 pb-3 border-bottom">
           <p class="mb-2">
             <a href="#{{ enrichment.provision_eid }}" class="provision-link fw-bold">
