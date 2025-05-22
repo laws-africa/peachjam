@@ -561,10 +561,10 @@ def no_links(value):
 class PeachjamSignupForm(SignupForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
     first_name = forms.CharField(
-        max_length=75, label=_("First name"), required=False, validators=[no_links]
+        max_length=40, label=_("First name"), required=False, validators=[no_links]
     )
     last_name = forms.CharField(
-        max_length=75, label=_("Last name"), required=False, validators=[no_links]
+        max_length=40, label=_("Last name"), required=False, validators=[no_links]
     )
 
 

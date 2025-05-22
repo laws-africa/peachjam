@@ -22,7 +22,7 @@
                name="{{ form.first_name.name }}"
                id="{{ form.first_name.id_for_label }}"
                value="{{ form.first_name.value|default:'' }}"
-               maxlength="75"
+               maxlength="40"
                required/>
         {% if form.first_name.errors %}
           <div class="text-danger">
@@ -37,7 +37,7 @@
                name="{{ form.last_name.name }}"
                id="{{ form.last_name.id_for_label }}"
                value="{{ form.last_name.value|default:'' }}"
-               maxlength="75"
+               maxlength="40"
                required/>
         {% if form.last_name.errors %}
           <div class="text-danger">
