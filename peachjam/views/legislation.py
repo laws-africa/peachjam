@@ -31,10 +31,11 @@ class LegislationListView(FilteredDocumentListView):
     def add_facets(self, context):
         super().add_facets(context)
         # move the alphabet facet first, it's highly used on the legislation page for some LIIs
-        facets = {"alphabet": context["facet_data"].pop("alphabet")}
-        for k, v in context["facet_data"].items():
-            facets[k] = v
-        context["facet_data"] = facets
+        if "alphabet" in context["facet_data"]:
+            facets = {"alphabet": context["facet_data"].pop("alphabet")}
+            for k, v in context["facet_data"].items():
+                facets[k] = v
+            context["facet_data"] = facets
 
     def add_years_facet(self, context):
         # for legislation, use the work year as the years facet
@@ -385,6 +386,7 @@ class UnconstitutionalProvisionListView(LegislationListView):
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
     latest_expression_only = True
     form_class = UnconstitutionalProvisionFilterForm
+    exclude_facets = ["alphabet", "years"]
 
     def get_template_names(self):
         if self.request.htmx:

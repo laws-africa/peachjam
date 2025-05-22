@@ -4,14 +4,15 @@
      class="provision-link fw-bold me-2">
     {{ enrichment.provision_title }}
   </a>
-  <span class="badge bg-danger me-2">{{ enrichment.get_enrichment_type_display }}</span>
   {% if enrichment.resolved %}
     <span class="badge bg-success">{% trans 'Resolved' %}</span>
+  {% else %}
+    <span class="badge bg-danger">{% trans 'Unresolved' %}</span>
   {% endif %}
 </div>
-<div class="my-2">{{ enrichment.text }}</div>
+<div class="my-2">{{ enrichment.text|linebreaks }}</div>
 {% if enrichment.enrichment_type == 'unconstitutional_provision' %}
-  <dl class="document-metadata-list d-flex">
+  <dl class="document-metadata-list d-flex mb-3">
     {% if enrichment.judgment %}
       <dt>
         {% trans 'Judgment' %}
@@ -56,9 +57,14 @@
     {% endif %}
   </dl>
   {% if enrichment.provision_by_eid %}
+    <div class="mb-2">
+      {% trans "Provision as at" %}
+      {{ document.date }}:
+    </div>
     <la-akoma-ntoso
     frbr-expression-uri="{{ document.expression_frbr_uri }}"
     class="bg-light p-3 border my-2"
+    style="max-height: 50vh; overflow-y: auto;"
     lang="{{ document.language.iso }}"
     >
     {{ enrichment.provision_by_eid|safe }}
