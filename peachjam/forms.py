@@ -553,10 +553,19 @@ class SaveDocumentForm(forms.ModelForm):
         return cleaned_data
 
 
+def no_links(value):
+    if value and ("https:" in value) or ("http:" in value):
+        raise ValidationError(_("Please provide a valid name"))
+
+
 class PeachjamSignupForm(SignupForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
-    first_name = forms.CharField(max_length=150, label=_("First name"), required=False)
-    last_name = forms.CharField(max_length=150, label=_("Last name"), required=False)
+    first_name = forms.CharField(
+        max_length=40, label=_("First name"), required=False, validators=[no_links]
+    )
+    last_name = forms.CharField(
+        max_length=40, label=_("Last name"), required=False, validators=[no_links]
+    )
 
 
 class PeachjamLoginForm(LoginForm):
