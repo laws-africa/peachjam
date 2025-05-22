@@ -42,6 +42,9 @@ class ProvisionEnrichment(PolymorphicModel):
 
     objects = ProvisionEnrichmentManager()
 
+    # this is the document that will be used to display provision information
+    _document = None
+
     class Meta:
         verbose_name = _("provision enrichment")
         verbose_name_plural = _("provision enrichments")
@@ -49,9 +52,19 @@ class ProvisionEnrichment(PolymorphicModel):
     def __str__(self):
         return f"{self.enrichment_type} - {self.work} - {self.provision_eid or 'whole work'}"
 
+    @property
+    def document(self):
+        if self._document is None:
+            self._document = self.work.documents.latest_expression().first()
+        return self._document
+
+    @document.setter
+    def document(self, value):
+        self._document = value
+
     @cached_property
     def provision_by_eid(self):
-        html_content = self.work.documents.latest_expression().first().content_html
+        html_content = self.document.content_html
         if not html_content:
             return None
         parser = etree.HTMLParser()
@@ -68,9 +81,7 @@ class ProvisionEnrichment(PolymorphicModel):
     @cached_property
     def provision_title(self):
         """A friendly title for this provision, if available."""
-        # TODO: better place to get this document
-        document = self.work.documents.latest_expression().first()
-        if document and document.toc_json:
+        if self.document and self.document.toc_json:
 
             def find_toc_item(toc, eid):
                 for item in toc:
@@ -87,7 +98,7 @@ class ProvisionEnrichment(PolymorphicModel):
                         # closest match
                         return item
 
-            item = find_toc_item(document.toc_json, self.provision_eid)
+            item = find_toc_item(self.document.toc_json, self.provision_eid)
             # TODO: get remaining portion if we couldn't go far enough down
             # which is all the akn-num text between item and the provision
             return item["title"] if item else self.provision_eid

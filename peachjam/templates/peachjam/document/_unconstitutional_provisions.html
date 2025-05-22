@@ -4,7 +4,7 @@
   {% trans 'Unconstitutional provisions' %}
 </h4>
 <div class="mb-4">
-  <p>{% include "peachjam/provision_enrichment/_unconstitutional_provisions_blurb.html" %}</p>
+  {% include "peachjam/provision_enrichment/_unconstitutional_provisions_blurb.html" %}
   <a href="{% url "unconstitutional_provision_list" %}">{% trans "All unconstitutional provisions" %} →</a>
 </div>
 <div class="card">

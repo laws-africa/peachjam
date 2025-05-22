@@ -449,4 +449,9 @@ class UnconstitutionalProvisionListView(LegislationListView):
             else:
                 doc.provision_enrichments = enrichments_qs.all()
 
+            # set the document on the enrichment objects so they know to use it for extra detail
+            doc.provision_enrichments = list(doc.provision_enrichments)
+            for enrichment in doc.provision_enrichments:
+                enrichment.document = doc
+
         return context
