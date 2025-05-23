@@ -102,6 +102,28 @@ class Taxonomy(MP_Node):
             for child in self.get_children():
                 child.save()
 
+    def get_allowed_children(self, user):
+        if user.is_authenticated:
+            allowed_taxonomies = set(
+                get_objects_for_user(user, "peachjam.view_taxonomy").values_list(
+                    "id", flat=True
+                )
+            )
+        else:
+            allowed_taxonomies = []
+
+        children = self.get_children().values("id", "restricted")
+        exclude = []
+
+        for child in children:
+            is_restricted = child["restricted"]
+            is_allowed = child["id"] in allowed_taxonomies
+            if is_restricted and not is_allowed:
+                exclude.append(child["id"])
+
+        children = self.get_children().exclude(id__in=exclude)
+        return children
+
     @classmethod
     def get_tree_for_items(cls, items):
         """Get a tree of taxonomies for a list of items, which can be leaf or intermediate nodes. The path
@@ -171,27 +193,18 @@ class Taxonomy(MP_Node):
             "pk_list": node_ids,
         }
 
-    def get_allowed_children(self, user):
-        if user.is_authenticated:
-            allowed_taxonomies = set(
-                get_objects_for_user(user, "peachjam.view_taxonomy").values_list(
-                    "id", flat=True
-                )
-            )
-        else:
-            allowed_taxonomies = []
+    @classmethod
+    def limit_to_lowest(cls, topics):
+        """Limit the topics to the lowest level of the tree. This is used to avoid a document being tagged under
+        a parent and a descendant taxonomy topic."""
 
-        children = self.get_children().values("id", "restricted")
-        exclude = []
+        # walk bottom up and exclude topics that already have a descendant selected
+        selected = []
+        for topic in sorted(topics, key=lambda topic: topic.depth, reverse=True):
+            if not any(t.path.startswith(topic.path) for t in selected):
+                selected.append(topic)
 
-        for child in children:
-            is_restricted = child["restricted"]
-            is_allowed = child["id"] in allowed_taxonomies
-            if is_restricted and not is_allowed:
-                exclude.append(child["id"])
-
-        children = self.get_children().exclude(id__in=exclude)
-        return children
+        return selected
 
 
 class DocumentTopic(models.Model):

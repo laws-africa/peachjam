@@ -43,7 +43,7 @@ class MyFrontpageView(CommonContextMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         if not pj_settings().allow_signups:
-            return Http404()
+            raise Http404()
         return super().get(request, *args, **kwargs)
 
     def get_template_names(self):

@@ -430,6 +430,8 @@ class DocumentForm(forms.ModelForm):
     def create_topics(self, instance):
         topics = self.cleaned_data.get("topics", [])
         if instance.pk:
+            # sanitise topics so that only the lowest level topic is used
+            topics = Taxonomy.limit_to_lowest(topics)
             for topic in topics:
                 DocumentTopic.objects.get_or_create(document=instance, topic=topic)
 

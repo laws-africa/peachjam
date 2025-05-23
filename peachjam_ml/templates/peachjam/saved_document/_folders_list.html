@@ -38,14 +38,14 @@
 {% endblock %}
 {% block folder-list-card-body %}
   <div class="tab-content">
-    <div class="tab-pane fade show active"
+    <div class="tab-pane show active"
          id="saved-docs-{{ folder.pk }}"
          role="tabpanel"
          aria-labelledby="saved-doc-tab-{{ folder.pk }}">
       {{ block.super }}
     </div>
     {% if perms.peachjam_ml.view_documentembedding %}
-      <div class="tab-pane fade"
+      <div class="tab-pane"
            id="similar-docs-{{ folder.pk }}"
            role="tabpanel"
            aria-labelledby="similar-docs-tab-{{ folder.pk }}">
