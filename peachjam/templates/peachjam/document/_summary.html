@@ -7,19 +7,19 @@
         Title
       </dt>
       <dd>
-        {{ summary.one_liner }}
+        {{ summary.blurb }}
+      </dd>
+      <dt>
+        Flynote
+      </dt>
+      <dd>
+        {{ summary.flynote }}
       </dd>
       <dt>
         Summary
       </dt>
       <dd>
         {{ summary.summary }}
-      </dd>
-      <dt>
-        Brief facts
-      </dt>
-      <dd>
-        {% for p in summary.brief_facts %}<p>{{ p }}</p>{% endfor %}
       </dd>
       <dt>
         Issues
