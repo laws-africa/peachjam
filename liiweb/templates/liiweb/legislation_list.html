@@ -8,6 +8,23 @@
     <h1 class="my-4">{% trans 'Legislation' %}</h1>
   {% endif %}
 {% endblock %}
+{% block page-header %}
+  {{ block.super }}
+  {% if show_unconstitutional_provisions %}
+    <div class="row">
+      <div class="col-12 col-sm-6 col-lg-4 mb-4 ms-auto">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">{% trans "More resources" %}</h5>
+            <p class="card-text">
+              <a href="{% url "unconstitutional_provision_list" %}">{% trans "Unconstitutional provisions" %}</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
 {% block alerts %}
   {% if view.variant == 'repealed' %}
     <div class="alert alert-danger">{% trans 'You are viewing repealed legislation which is no longer in force.' %}</div>
