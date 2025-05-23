@@ -298,13 +298,15 @@ class PeachJam {
 
   setupProvisionClick () {
     document.addEventListener('click', function (e) {
-      if (e.target && e.target instanceof HTMLElement && e.target.matches('a[href^="#"].provision-link')) {
-        const link = e.target.closest("a[href^='#'].provision-link");
+      if (e.target && e.target instanceof HTMLElement && e.target.matches('a.provision-link')) {
+        const link = e.target.closest('a.provision-link');
         if (!link) return;
 
-        const hash = link.getAttribute('href');
-        if (!hash) return;
-        const target = document.querySelector(`[data-eid="${hash.slice(1)}"]`);
+        const href = link.getAttribute('href');
+        if (!href) return;
+        const eid = href.split('#')[1];
+        if (!eid) return;
+        const target = document.querySelector(`[data-eid="${eid}"]`);
         if (!target) return;
 
         const tabPane = target.closest('.tab-pane');

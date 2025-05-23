@@ -46,10 +46,6 @@ export default {
           item.markAndAnchor();
         });
       }
-    },
-
-    async deleteEnrichment (enrichment) {
-      // Logic to delete enrichment
     }
   }
 };

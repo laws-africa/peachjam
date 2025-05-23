@@ -5,23 +5,25 @@
     <div class="card">
       <div class="card-body">
         <p>
-          {{ $t('This provision was declared unconstitutional') }}
-          <span v-if="enrichment.judgment">{{ $t('by') }} <a :href="enrichment.judgment.frbr_uri">{{ enrichment.judgment.title }}</a></span>
-          <span v-if="enrichment.date_deemed_unconstitutional">{{ " " }}{{ $t('on') }} {{ enrichment.date_deemed_unconstitutional }}</span>
-          <span>.</span>
-          <span v-if="enrichment.resolved">{{ " " }}{{ $t('It has since been resolved.') }}</span>
+          {{ $t('Unconstitutional provision') }}
+          <span v-if="enrichment.resolved" class="badge bg-success">{{ $t( 'Resolved' ) }}</span>
+          <span v-else class="badge bg-danger">{{ $t( 'Unresolved' ) }}</span>
         </p>
 
-        <button class="btn btn-sm btn-secondary" :onclick="showModal">View details</button>
+        <button
+          type="button"
+          class="btn btn-sm btn-secondary"
+          data-bs-toggle="modal"
+          :data-bs-target="'#provision-enrichment-modal-' + enrichment.id"
+        >
+          {{ $t( 'View details' ) }}
+        </button>
       </div>
     </div>
   </la-gutter-item>
 </template>
 <script>
 import { markRange } from '@lawsafrica/indigo-akn/dist/ranges';
-import { Modal } from 'bootstrap';
-import { createApp, h } from 'vue';
-import ProvisionEnrichmentModal from './ProvisionEnrichmentModal.vue';
 
 export default {
   name: 'ProvisionEnrichment',
@@ -43,7 +45,6 @@ export default {
     anchorElement: null
   }),
   mounted () {
-    this.createModal();
     this.markAndAnchor();
     window.addEventListener('click', this.handleOutsideClick);
     this.gutter.appendChild(this.$el);
@@ -66,17 +67,17 @@ export default {
         }
       }
     },
-    createModal () {
-      const container = document.createElement('div');
-      document.body.appendChild(container);
-      const app = createApp({
-        render: () => h(ProvisionEnrichmentModal, { enrichment: this.enrichment })
+    activate () {
+      // Deactivate all
+      Array.from(this.viewRoot.querySelectorAll('mark')).forEach(mark => {
+        mark.classList.remove('active');
       });
-      app.mount(container);
-    },
-    showModal () {
-      const modal = new Modal(document.querySelector(`#provision-modal-${this.enrichment.id}`));
-      modal.show();
+      // Activate gutter item
+      this.$el.active = true;
+      // activate enrichment gutter item marks
+      this.marks.forEach(mark => {
+        mark.classList.add('active');
+      });
     }
   }
 

@@ -556,6 +556,7 @@
     {{ provision_relationships|json_script:"provision-relationships" }}
     {% if perms.peachjam.view_unconstitutionalprovision %}
       {{ unconstitutional_provisions_json|json_script:"unconstitutional-provisions-json" }}
+      {% include "peachjam/provision_enrichment/_modals.html" %}
     {% endif %}
   </div>
 {% endblock %}
