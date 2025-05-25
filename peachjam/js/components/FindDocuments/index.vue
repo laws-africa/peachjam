@@ -235,21 +235,10 @@
                   </div>
                 </div>
 
-                <ul class="list-unstyled search-result-list">
-                  <SearchResult
-                    v-for="(item, index) in searchInfo.results"
-                    :key="item.id"
-                    :index="index"
-                    :count="searchInfo.count"
-                    :trace-id="searchInfo.trace_id"
-                    :item="item"
-                    :query="q"
-                    :debug="searchInfo.can_debug"
-                    :show-jurisdiction="showJurisdiction"
-                    :document-labels="documentLabels"
-                    @item-clicked="(e) => itemClicked(item, e)"
-                  />
-                </ul>
+                <div
+                  @click="itemClicked"
+                  v-html="searchInfo.results_html"
+                />
 
                 <SearchFeedback :trace-id="searchInfo.trace_id" />
 
@@ -720,19 +709,6 @@ export default {
       });
     },
 
-    formatResults () {
-      for (let i = 0; i < this.searchInfo.results.length; i++) {
-        // number items from 1 consistently across pages
-        this.searchInfo.results[i].position = (this.page - 1) * this.pageSize + i + 1;
-      }
-
-      // determine best match: is the first result's score significantly better than the next?
-      if (this.page === 1 && this.searchInfo.results.length > 1 &&
-          this.searchInfo.results[0]._score / this.searchInfo.results[1]._score >= 1.2) {
-        this.searchInfo.results[0].best_match = true;
-      }
-    },
-
     generateSearchParams () {
       const params = new URLSearchParams();
       if (this.q) params.append('search', this.q);
@@ -861,7 +837,6 @@ export default {
               if (this.mode === 'text') {
                 this.formatFacets(this.searchInfo.facets, this.searchInfo.count);
               }
-              this.formatResults();
               this.trackSearch(params);
               this.savedSearchModal();
               this.linkTraces(previousId, this.searchInfo.trace_id);
@@ -924,20 +899,23 @@ export default {
       analytics.trackSiteSearch(keywords.join('; '), facets.join('; '), this.searchInfo.count);
     },
 
-    async itemClicked (item, portion) {
-      const params = new URLSearchParams();
-      params.set('frbr_uri', item.expression_frbr_uri);
-      params.set('portion', portion || '');
-      params.set('position', item.position);
-      params.set('search_trace', this.searchInfo.trace_id);
-      try {
-        fetch('/search/api/click/', {
-          method: 'POST',
-          headers: await authHeaders(),
-          body: params
-        });
-      } catch (err) {
-        console.log(err);
+    async itemClicked (event) {
+      const item = event.target.closest('[data-position]');
+      if (item) {
+        const params = new URLSearchParams();
+        params.set('frbr_uri', item.getAttribute('data-frbr-uri'));
+        params.set('portion', item.getAttribute('data-portion') || '');
+        params.set('position', item.getAttribute('data-position'));
+        params.set('search_trace', this.searchInfo.trace_id);
+        try {
+          fetch('/search/api/click/', {
+            method: 'POST',
+            headers: await authHeaders(),
+            body: params
+          });
+        } catch (err) {
+          console.log(err);
+        }
       }
     },
 

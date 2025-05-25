@@ -58,7 +58,7 @@ class SearchableDocumentSerializer(Serializer):
     alternative_names = ListField()
     labels = ListField()
     topic_path_names = ListField()
-    _score = FloatField(source="meta.score")
+    score = FloatField(source="meta.score")
     _index = CharField(source="meta.index")
 
     nature = SerializerMethodField()

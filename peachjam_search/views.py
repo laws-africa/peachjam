@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
@@ -14,6 +15,7 @@ from django.http.response import (
     JsonResponse,
 )
 from django.shortcuts import redirect, reverse
+from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -32,7 +34,14 @@ from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
-from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
+from peachjam.models import (
+    Author,
+    CoreDocument,
+    CourtRegistry,
+    Judge,
+    Label,
+    pj_settings,
+)
 from peachjam.resources import DownloadDocumentsResource
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.engine import SearchEngine
@@ -107,6 +116,18 @@ class DocumentSearchView(TemplateView):
             },
         ).data
 
+        # attach page information
+        for i, result in enumerate(results):
+            result["position"] = (engine.page - 1) * engine.page_size + i + 1
+
+        # determine best match: is the first result's score significantly better than the next?
+        if (
+            engine.page == 1
+            and len(results) > 1
+            and results[0]["score"] / results[1]["score"] >= 1.2
+        ):
+            results[0]["best_match"] = True
+
         response = {
             "count": es_response.hits.total.value,
             "results": results,
@@ -129,6 +150,31 @@ class DocumentSearchView(TemplateView):
         response["can_save_documents"] = pj_settings().allow_save_documents and (
             not self.request.user.is_authenticated
             or self.request.user.has_perm("peachjam.add_saveddocument")
+        )
+
+        # link actual documents to ES results, and drop those that don't exist
+        qs = (
+            CoreDocument.objects.for_document_table()
+            .filter(pk__in=[item["id"] for item in results])
+            .prefetch_related("alternative_names")
+        )
+        documents = {str(d.id): d for d in qs}
+        # modify a copy so we don't try to serialise the documents
+        doc_results = deepcopy(list(results))
+        for item in doc_results:
+            item["document"] = documents.get(item["id"])
+        # only keep those with documents
+        doc_results = [r for r in doc_results if r.get("document")]
+
+        # render results
+        response["results_html"] = render_to_string(
+            "peachjam_search/_search_hit_list.html",
+            {
+                "request": request,
+                "results": doc_results,
+                "can_debug": self.request.user.has_perm("peachjam_search.debug_search"),
+                "show_jurisdiction": settings.PEACHJAM["SEARCH_JURISDICTION_FILTER"],
+            },
         )
 
         return self.render(response)
