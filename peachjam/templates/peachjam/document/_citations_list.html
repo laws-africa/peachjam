@@ -1,10 +1,11 @@
 {% load peachjam i18n %}
 {% for citation_group in citations %}
-  <div class="card">
-    <h5 class="card-header">
-      {{ citation_group.nature.name }} <span class="badge bg-secondary">{{ citation_group.n_docs }}</span>
-    </h5>
-    <div class="card-body">
+  <div class="card mb-3">
+    <div class="card-header d-flex">
+      <h5 class="mb-0">{{ citation_group.nature.name }}</h5>
+      <span class="badge bg-secondary ms-auto align-self-center">{{ citation_group.n_docs }}</span>
+    </div>
+    <div class="card-body-doc-table">
       {% include 'peachjam/_document_table.html' with doc_table_show_treatments=True doc_table_hide_thead=True doc_table_id=citation_group.table_id documents=citation_group.docs %}
       {% if citation_group.docs|length < citation_group.n_docs %}
         {% include 'peachjam/document/_citations_list_more_button.html' with truncated=True doc_table_id=citation_group.table_id nature=citation_group.nature offset=0 %}
