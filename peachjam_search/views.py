@@ -145,6 +145,30 @@ class DocumentSearchView(TemplateView):
         response = {"suggestions": suggestions}
         return self.render(response)
 
+    @vary_on_cookie
+    @method_decorator(cache_page(CACHE_SECS))
+    def facets(self, request, *args, **kwargs):
+        """Only return facets from search."""
+        form = SearchForm(request.GET)
+        if not form.is_valid():
+            return JsonResponse({"error": form.errors}, status=400)
+
+        form.cleaned_data["facets"] = True
+        engine = self.make_search_engine(form)
+        if not engine.query and not engine.field_queries:
+            # no search term
+            return JsonResponse({"error": "No search term"}, status=400)
+
+        engine.page_size = 0
+        es_response = engine.execute()
+
+        return self.render(
+            {
+                "count": es_response.hits.total.value,
+                "facets": es_response.aggregations.to_dict(),
+            }
+        )
+
     def make_search_engine(self, form):
         engine = SearchEngine()
         form.configure_engine(engine)

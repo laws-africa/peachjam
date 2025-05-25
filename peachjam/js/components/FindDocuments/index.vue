@@ -174,7 +174,7 @@
               <FilterFacets
                 v-if="searchInfo.count"
                 v-model="facets"
-                :loading="loading"
+                :loading="facetsLoading"
               >
                 <template #header-title>
                   <button
@@ -333,6 +333,7 @@ export default {
       searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
       documentLabels: JSON.parse(document.querySelector('#data-labels').textContent).documentLabels,
       loadingCount: 0,
+      facetsLoadingCount: 0,
       error: null,
       searchInfo: {},
       page: 1,
@@ -485,6 +486,9 @@ export default {
     },
     loading () {
       return this.loadingCount > 0;
+    },
+    facetsLoading () {
+      return this.facetsLoadingCount > 0;
     }
   },
 
@@ -671,7 +675,7 @@ export default {
       this.search();
     },
 
-    formatFacets () {
+    formatFacets (facetInfo, count) {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
 
@@ -687,16 +691,16 @@ export default {
         if (facet.name === 'year') {
           facet.options = generateOptions(
             this.sortBuckets(
-              this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
+              facetInfo[`_filter_${facet.name}`][facet.name].buckets,
               true
             ),
             facet.optionLabels
           );
         } else {
-          if (this.searchInfo.facets[`_filter_${facet.name}`]) {
+          if (facetInfo[`_filter_${facet.name}`]) {
             facet.options = generateOptions(
               this.sortBuckets(
-                this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
+                facetInfo[`_filter_${facet.name}`][facet.name].buckets,
                false,
                 // sort nature by descending count, everything else alphabetically
                 facet.name === 'nature'
@@ -709,7 +713,7 @@ export default {
         // If we have results, then sanity check chosen options against those that are available.
         // If there are no results, we trust any options given so that we can show the facet buttons
         // and allow the user to remove the facets to try to find results.
-        if (this.searchInfo.count > 0) {
+        if (count > 0) {
           const availableOptions = facet.options.map(option => option.value);
           facet.value = urlParams.getAll(facet.name).filter(value => availableOptions.includes(value));
         }
@@ -741,11 +745,6 @@ export default {
         });
       });
 
-      // facets that we want the API to return
-      this.facets.forEach((facet) => {
-        params.append('facet', facet.name);
-      });
-
       this.generateAdvancedSearchParams(params);
 
       // record suggestion details for statistics
@@ -755,6 +754,8 @@ export default {
 
       if (this.mode !== 'text') {
         params.append('mode', this.mode);
+      } else {
+        params.append('facets', '1');
       }
 
       return params;
@@ -841,6 +842,13 @@ export default {
               document.location.pathname + '?' + this.serialiseState()
             );
           }
+
+          if (this.mode !== 'text') {
+            // load facets in a separate request
+            this.loadFacets();
+          }
+
+          // do the search
           const response = await fetch(url);
 
           // check that the search state hasn't changed since we sent the request
@@ -850,7 +858,9 @@ export default {
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
-              this.formatFacets();
+              if (this.mode === 'text') {
+                this.formatFacets(this.searchInfo.facets, this.searchInfo.count);
+              }
               this.formatResults();
               this.trackSearch(params);
               this.savedSearchModal();
@@ -868,6 +878,32 @@ export default {
 
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
+      }
+    },
+
+    /**
+     * Load the facets only, separately to a search. This is used in non-text mode because the facets are
+     * slower.
+     */
+    async loadFacets () {
+      this.facetsLoadingCount++;
+
+      try {
+        const params = this.generateSearchParams();
+        params.append('facets', '1');
+        const url = `/search/api/documents/facets?${params.toString()}`;
+        params.delete('facets');
+        const response = await fetch(url);
+
+        // check that the search state hasn't changed since we sent the request
+        if (params.toString() === this.generateSearchParams().toString()) {
+          const info = await response.json();
+          this.formatFacets(info.facets, info.count);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        this.facetsLoadingCount--;
       }
     },
 
