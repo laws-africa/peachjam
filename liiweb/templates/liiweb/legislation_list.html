@@ -8,22 +8,27 @@
     <h1 class="my-4">{% trans 'Legislation' %}</h1>
   {% endif %}
 {% endblock %}
-{% block page-header %}
-  {{ block.super }}
-  {% if show_unconstitutional_provisions %}
-    <div class="row">
-      <div class="col-12 col-sm-6 col-lg-4 mb-4 ms-auto">
-        <div class="card mb-4">
-          <div class="card-body">
-            <h5 class="card-title">{% trans "More resources" %}</h5>
-            <p class="card-text">
-              <a href="{% url "unconstitutional_provision_list" %}">{% trans "Unconstitutional provisions" %}</a>
-            </p>
-          </div>
+{% block count-and-search %}
+  <div class="row mb-4">
+    <div class="col-12 col-sm-6 col-lg-8 mb-2">
+      {% block help %}
+        {% if help_link %}
+          {% include "peachjam/_help_button.html" %}
+        {% endif %}
+      {% endblock %}
+      {% if show_unconstitutional_provisions %}
+        <h5>{% trans "More resources" %}</h5>
+        <div class="mb-3">
+          <a href="{% url "unconstitutional_provision_list" %}">{% trans "Unconstitutional provisions" %}</a>
         </div>
-      </div>
+      {% endif %}
     </div>
-  {% endif %}
+    <div class="col-12 col-sm-6 col-lg-4 mb-2">
+      {% block quick-search %}
+        {% include 'peachjam/_quick_search.html' %}
+      {% endblock %}
+    </div>
+  </div>
 {% endblock %}
 {% block alerts %}
   {% if view.variant == 'repealed' %}
