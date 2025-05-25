@@ -1,4 +1,4 @@
-{% load i18n peachjam %}
+{% load i18n peachjam humanize %}
 {% comment %}
 This template is used to render a table of documents. It supports a number of variable to configure its behaviour.
 All variables default to null or false. So positive variables like "show_xxx" default to being "off", but negative
@@ -15,6 +15,7 @@ variables like "hide_xxx" default to being "on".
 * doc_table_date_label: label to use for Date column (default: Date)
 * doc_table_show_author: show document author (and author column)
 * doc_table_show_court: show document court (and court column)
+* doc_table_show_counts: show filtered and total document counts at the top of the table
 * doc_table_show_date: show document date (and associated column)
 * doc_table_show_doc_type: show document type (and associated column)
 * doc_table_show_frbr_uri_number: show document FRBR URI number (and associated column)
@@ -26,6 +27,14 @@ variables like "hide_xxx" default to being "on".
 <div class="table-responsive"
      id="{{ doc_table_id|default:"doc-table" }}"
      data-component="DocumentTable">
+  {% if doc_table_show_counts %}
+    <div class="mb-3 text-muted">
+      {% blocktrans trimmed with doc_count=doc_count|intcomma doc_count_total=doc_count_total|intcomma %}
+        {{ doc_count }} of {{ doc_count_total }}
+      {% endblocktrans %}
+      {{ doc_count_noun_plural }}
+    </div>
+  {% endif %}
   <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {% if doc_table_show_date %}doc-table--date{% endif %} {% if doc_table_collapse %}doc-table--collapse{% endif %} {{ doc_table_classes }}">
     {% if not doc_table_hide_thead %}
       <thead>
