@@ -40,11 +40,7 @@ export class ProvisionEnrichments implements IGutterEnrichmentProvider {
     }
 
     getButton (target: IRangeTarget): HTMLButtonElement | null {
-      const btn = document.createElement('button');
-      btn.className = 'btn btn-outline-secondary';
-      btn.type = 'button';
-      btn.innerText = i18next.t('Add comment...');
-      return btn;
+      return null;
     }
 
     addEnrichment (target: IRangeTarget): void {

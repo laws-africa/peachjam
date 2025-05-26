@@ -64,7 +64,11 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   }
 
   getButton (target: IRangeTarget): HTMLButtonElement | null {
-    return null;
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-outline-secondary';
+    btn.type = 'button';
+    btn.innerText = 'Add relationship...';
+    return btn;
   }
 
   addEnrichment (target: IRangeTarget): void {
