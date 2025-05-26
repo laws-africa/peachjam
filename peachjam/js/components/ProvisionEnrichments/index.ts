@@ -44,8 +44,6 @@ export class ProvisionEnrichments implements IGutterEnrichmentProvider {
     }
 
     addEnrichment (target: IRangeTarget): void {
-      document.getSelection()?.removeAllRanges();
-      // @ts-ignore
-      this.listComponent.addAnnotation(target);
+    // No action needed for provision enrichments
     }
 }
