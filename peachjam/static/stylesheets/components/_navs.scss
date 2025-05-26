@@ -34,6 +34,11 @@ $dropdown-box-shadow: $box-shadow-lg;
   overflow-x: auto;
   scroll-snap-type: x proximity;
 
+  > li.nav-item {
+    white-space: nowrap;
+    scroll-snap-align: start;
+  }
+
   .nav-link {
     border: none;
     border-bottom: 2px solid transparent;
@@ -46,16 +51,5 @@ $dropdown-box-shadow: $box-shadow-lg;
       border-bottom: 2px solid $primary;
       background-color: inherit;
     }
-  }
-}
-
-.nav.nav-tabs.scroll-xs {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-
-  > li.nav-item {
-    white-space: nowrap;
-    scroll-snap-align: start;
   }
 }
