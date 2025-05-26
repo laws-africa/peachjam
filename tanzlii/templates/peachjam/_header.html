@@ -88,6 +88,11 @@
            href="{% url 'document_nature_list' 'speech' %}">{% trans 'Notable Speeches' %}
         </a>
       </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if request.path == '/taxonomy' %}active{% endif %}"
+           href="{% url 'top_level_taxonomy_list' %}">{% trans 'Collections' %}
+        </a>
+      </li>
     </ul>
   </li>
   <li class="nav-item">
