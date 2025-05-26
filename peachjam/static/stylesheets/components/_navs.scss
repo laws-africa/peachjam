@@ -30,6 +30,10 @@ $dropdown-box-shadow: $box-shadow-lg;
 }
 
 .nav-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+
   .nav-link {
     border: none;
     border-bottom: 2px solid transparent;
