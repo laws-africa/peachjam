@@ -37,6 +37,7 @@
           {% if show_clear_all %}
             <div class="d-flex align-items-center">
               <a href="{{ request.path }}"
+                 data-track-event="Listing | Clear filter | all"
                  hx-get="{{ request.path }}"
                  hx-params="none"
                  hx-push-url="true">{% trans 'Clear all' %}</a>
@@ -51,6 +52,7 @@
                 {% if facet.values %}
                   <div class="d-flex align-items-center">
                     <a href="{{ request.path }}"
+                       data-track-event="Listing | Clear filter | {{ facet_name }}"
                        hx-get="{{ request.path }}"
                        hx-params="not {{ facet_name }}"
                        hx-push-url="true">{% trans 'Clear' %}</a>
@@ -70,7 +72,8 @@
                                {% if value == facet.values %}checked{% endif %}
                                hx-include="#filter-form"
                                value="{{ value }}"/>
-                        <span class="letter-radiobox__text">{{ label }}</span>
+                        <span class="letter-radiobox__text"
+                              data-track-event="Listing | Filter | Alphabet">{{ label }}</span>
                       </label>
                     {% endfor %}
                   </div>
@@ -79,7 +82,8 @@
                 <div class="facets-scrollable">
                   {% for value, label in facet.options %}
                     <div class="d-flex justify-content-between align-items-center">
-                      <div class="form-check flex-grow-1">
+                      <div class="form-check flex-grow-1"
+                           data-track-event="Listing | Filter | {{ facet_name }}">
                         <input id="{{ facet_name }}_{{ forloop.counter0 }}"
                                class="form-check-input"
                                name="{{ facet_name }}"
