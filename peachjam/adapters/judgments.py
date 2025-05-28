@@ -216,7 +216,7 @@ class JudgmentAdapter(BaseJudgmentAdapter):
         if topics:
             for topic in topics:
                 # we are not building a tree here
-                taxonomy = Taxonomy.objects.filter(name=topic).first()
+                taxonomy = Taxonomy.objects.filter(slug=topic).first()
                 if taxonomy:
                     DocumentTopic.objects.create(
                         document=doc,
