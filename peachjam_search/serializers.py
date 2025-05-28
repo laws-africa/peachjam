@@ -214,6 +214,15 @@ class SearchHit:
             if field.name not in ["es_hit"]
         }
 
+    def raw(self):
+        data = self.meta.to_dict()
+        if "explanation" in data:
+            del data["explanation"]
+        for key, value in data.get("inner_hits", {}).items():
+            # force to_dict
+            data["inner_hits"][key] = value.to_dict()
+        return data
+
 
 class SearchClickSerializer(ModelSerializer):
     class Meta:

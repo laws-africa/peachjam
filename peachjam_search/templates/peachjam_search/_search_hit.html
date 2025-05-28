@@ -1,5 +1,6 @@
 {% load i18n peachjam %}
-<li class="mb-4 hit {% if hit.best_match %}best-match{% endif %}">
+<li class="mb-4 hit {% if hit.best_match %}best-match{% endif %}"
+    data-document-id="{{ hit.document.id }}">
   <div class="card" data-best-match="{% trans "Best match" %}">
     <div class="card-body">
       <h5 class="card-title">
@@ -16,7 +17,7 @@
         </a>
         <span id="saved-document-star--{{ hit.document.id }}"></span>
       </h5>
-      <div class="mb-1">
+      <div class="mb-2">
         {% if hit.document.citation and hit.document.citation != hit.document.title %}
           <div>
             <i>
@@ -97,7 +98,7 @@
                      class="tab-pane active show overflow-x-auto">
                   {% json_table hit.meta.explanation %}
                 </div>
-                <div id="raw-{{ hit.document.id }}" class="tab-pane overflow-x-auto">{% json_table hit.es_hit %}</div>
+                <div id="raw-{{ hit.document.id }}" class="tab-pane overflow-x-auto">{% json_table hit.raw %}</div>
               </div>
             </div>
           </div>

@@ -235,6 +235,7 @@
                   </div>
                 </div>
                 <div
+                  ref="results"
                   @click="itemClicked"
                   v-html="searchInfo.results_html"
                 />
@@ -295,6 +296,7 @@ import { authHeaders } from '../../api';
 import SearchTypeahead from '../search-typeahead';
 import htmx from 'htmx.org';
 import SearchFeedback from './SearchFeedback.vue';
+import { loadSavedDocuments } from "../saved-documents";
 
 export default {
   name: 'FindDocuments',
@@ -961,15 +963,7 @@ export default {
     },
 
     loadSaveDocumentButtons () {
-      // use htmx to load and inject save-document buttons
-      // get document ids
-      const ids = this.searchInfo.results.map(result => result.id);
-      if (ids.length) {
-        const el = document.createElement('div');
-        document.body.appendChild(el);
-        const query = ids.map(id => `doc_id=${id}`).join('&');
-        htmx.ajax('GET', '/saved-documents/fragments?' + query, el);
-      }
+      this.$nextTick(() => loadSavedDocuments(this.$refs.results));
     },
 
     downloadUrl () {
