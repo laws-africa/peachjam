@@ -44,6 +44,7 @@ $dropdown-box-shadow: $box-shadow-lg;
     border-bottom: 2px solid transparent;
     color: inherit;
     background-color: inherit;
+    white-space: nowrap;
 
     &.active {
       border: none;

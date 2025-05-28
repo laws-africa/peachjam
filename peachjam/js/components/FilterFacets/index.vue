@@ -14,6 +14,20 @@
         {{ $t("Clear all") }}
       </a>
     </li>
+    <li class="list-group-item d-flex d-lg-none">
+      <label class="form-label align-self-center mb-0 me-2">{{ $t('Sort') }}</label>
+      <select v-model="ordering" class="ms-auto form-select select-narrow">
+        <option value="-score">
+          {{ $t('Relevance') }}
+        </option>
+        <option value="date">
+          {{ $t('Date (oldest first)') }}
+        </option>
+        <option value="-date">
+          {{ $t('Date (newest first)') }}
+        </option>
+      </select>
+    </li>
     <template
       v-for="(facet, index) in modelValue"
       :key="index"
@@ -112,6 +126,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-</style>

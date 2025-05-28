@@ -77,9 +77,7 @@
                 class="circle-loader--lt"
               />
               <span v-else>
-                <span class="d-none d-md-inline">
-                {{ $t("Search") }}
-                </span>
+                <span class="d-none d-md-inline">{{ $t("Search") }}</span>
                 <span class="d-md-none">
                   <i class="bi bi-search text-white"></i>
                 </span>
@@ -91,7 +89,11 @@
               class="btn btn-secondary ms-1 d-lg-none text-nowrap"
               @click="() => drawerOpen = true"
             >
-              {{ $t("Filters") }} <span v-if="selectedFacetsCount">({{ selectedFacetsCount }})</span>
+              <span class="d-none d-md-inline">{{ $t("Filters") }}</span>
+              <span class="d-md-none">
+                <i class="bi bi-filters text-white"></i>
+              </span>
+              <span v-if="selectedFacetsCount" class="badge bg-light text-dark">{{ selectedFacetsCount }}</span>
             </button>
           </form>
           <div class="d-flex my-2">
@@ -203,36 +205,29 @@
                 <div id="saved-search-modal-dialog" class="modal-dialog" />
               </div>
               <div v-if="searchInfo.count">
-                <div class="my-3 sort-body row">
-                  <div class="col-md-4 order-md-2 mb-2 sort__inner d-flex align-items-center">
-                    <div style="width: 6em">
-                      {{ $t('Sort by') }}
-                    </div>
-                    <select
-                      v-model="ordering"
-                      class="ms-2 form-select"
-                    >
-                      <option value="-score">
-                        {{ $t('Relevance') }}
-                      </option>
-                      <option value="date">
-                        {{ $t('Date (oldest first)') }}
-                      </option>
-                      <option value="-date">
-                        {{ $t('Date (newest first)') }}
-                      </option>
-                    </select>
+                <div class="my-3 d-flex">
+                  <div class="me-2">
+                    <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
+                    <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
+                    <span v-if="searchInfo.can_download">
+                      &nbsp;
+                      <a :href="downloadUrl()" target="_blank">{{ $t('Download to Excel') }}</a>
+                    </span>
                   </div>
-                  <div class="col-md order-md-1 align-self-center">
-                    <div>
-                      <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
-                      <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
-                      <span v-if="searchInfo.can_download">
-                        &nbsp;
-                        <a :href="downloadUrl()" target="_blank">{{ $t('Download to Excel') }}</a>
-                      </span>
-                    </div>
-                  </div>
+                  <select
+                    v-model="ordering"
+                    class="form-select ms-auto select-narrow d-none d-lg-block"
+                  >
+                    <option value="-score">
+                      {{ (ordering === "-score" ? ($t("Sort") + ": ") : "") + $t('Relevance') }}
+                    </option>
+                    <option value="date">
+                      {{ (ordering === "date" ? ($t("Sort") + ": ") : "") + $t('Date (oldest first)') }}
+                    </option>
+                    <option value="-date">
+                      {{ (ordering === "-date" ? ($t("Sort") + ": ") : "") + $t('Date (newest first)') }}
+                    </option>
+                  </select>
                 </div>
                 <div
                   ref="results"
@@ -984,17 +979,6 @@ export default {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.2);
   z-index: 9;
-}
-
-.sort-body {
-  display: flex;
-  justify-content: space-between;
-}
-
-@media screen and (max-width: 400px) {
-  .sort-body {
-    flex-direction: column;
-  }
 }
 
 @media screen and (max-width: 992px) {
