@@ -128,16 +128,25 @@ def json_table(data):
         )
 
     def make_row(key, value):
-        return format_html(
-            '<tr><th style="width: 7em">{}</th><td>', key
-        ) + render_value(value)
+        return (
+            format_html('<tr><th style="width: 7em">{}</th><td>', key)
+            + render_value(value)
+            + "</td></tr>"
+        )
 
     def render_value(value):
         if isinstance(value, dict):
             return make_table(value)
         elif isinstance(value, list):
             s = "<ol>"
-            s += "".join(["<li>" + render_value(v) + "</li>" for v in value])
+            s += "".join(
+                [
+                    "<li><details><summary>(details)</summary>"
+                    + render_value(v)
+                    + "</details></li>"
+                    for v in value
+                ]
+            )
             s += "</ol>"
             return s
         else:
