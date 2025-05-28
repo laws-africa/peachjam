@@ -34,8 +34,8 @@
         {% block document-title %}
           <div class="d-md-flex justify-content-md-between my-3">
             <div>
-              <h1 class="doc-title">
-                {{ document.title }}
+              <h1 class="doc-title d-flex">
+                <span>{{ document.title }}</span>
                 <span id="saved-document-star--{{ document.pk }}"></span>
               </h1>
               {% block sub-title %}{% endblock %}
