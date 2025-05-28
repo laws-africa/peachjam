@@ -48,6 +48,7 @@ class SearchHit:
             fake_documents = settings.PEACHJAM["SEARCH_FAKE_DOCUMENTS"]
         if fake_documents:
             cls.attach_fake_documents(hits)
+            return
 
         qs = (
             CoreDocument.objects.for_document_table()
