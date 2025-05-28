@@ -234,7 +234,7 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
         return [j.name for j in instance.judges.all()]
 
     def get_topics(self, instance):
-        return [t.topic.name for t in instance.taxonomies.all()]
+        return [t.topic.slug for t in instance.taxonomies.all()]
 
 
 class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):
