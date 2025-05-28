@@ -96,6 +96,8 @@ class DocumentSearchView(TemplateView):
             return self.download_results(engine, self.request.GET["format"])
 
         es_response = engine.execute()
+        trace = self.save_search_trace(engine, es_response.hits.total.value)
+
         hits = SearchHit.from_es_hits(engine, es_response.hits)
         SearchHit.attach_documents(hits)
         # only keep those with documents
@@ -117,25 +119,19 @@ class DocumentSearchView(TemplateView):
                     ],
                 },
             ),
+            "trace_id": str(trace.id) if trace else None,
+            "can_debug": self.request.user.has_perm("peachjam_search.debug_search"),
+            "can_download": self.request.user.has_perm(
+                "peachjam_search.download_search"
+            ),
+            "can_semantic": settings.PEACHJAM["SEARCH_SEMANTIC"]
+            and self.request.user.has_perm("peachjam_search.semantic_search"),
+            "can_save_documents": pj_settings().allow_save_documents
+            and (
+                not self.request.user.is_authenticated
+                or self.request.user.has_perm("peachjam.add_saveddocument")
+            ),
         }
-
-        trace = self.save_search_trace(engine, response)
-        response["trace_id"] = str(trace.id) if trace else None
-
-        # show debug information to this user
-        response["can_debug"] = self.request.user.has_perm(
-            "peachjam_search.debug_search"
-        )
-        response["can_download"] = self.request.user.has_perm(
-            "peachjam_search.download_search"
-        )
-        response["can_semantic"] = settings.PEACHJAM[
-            "SEARCH_SEMANTIC"
-        ] and self.request.user.has_perm("peachjam_search.semantic_search")
-        response["can_save_documents"] = pj_settings().allow_save_documents and (
-            not self.request.user.is_authenticated
-            or self.request.user.has_perm("peachjam.add_saveddocument")
-        )
 
         return self.render(response)
 
@@ -195,7 +191,7 @@ class DocumentSearchView(TemplateView):
             )
         return JsonResponse(response)
 
-    def save_search_trace(self, engine, response):
+    def save_search_trace(self, engine, n_results):
         filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
 
         search = self.request.GET.get("search", "")[:2048]
@@ -210,7 +206,7 @@ class DocumentSearchView(TemplateView):
             mode=engine.mode,
             search=search,
             field_searches=engine.field_queries,
-            n_results=response["count"],
+            n_results=n_results,
             page=engine.page,
             filters=engine.filters,
             filters_string=filters_string,
