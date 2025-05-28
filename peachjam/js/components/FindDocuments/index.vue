@@ -234,14 +234,11 @@
                     </div>
                   </div>
                 </div>
-
                 <div
                   @click="itemClicked"
                   v-html="searchInfo.results_html"
                 />
-
                 <SearchFeedback :trace-id="searchInfo.trace_id" />
-
                 <SearchPagination
                   :search="searchInfo"
                   :page="page"
@@ -286,7 +283,6 @@
 </template>
 
 <script>
-import SearchResult from './SearchResult.vue';
 import SearchPagination from './SearchPagination.vue';
 import FilterFacets from '../FilterFacets/index.vue';
 import MobileFacetsDrawer from './MobileSideDrawer.vue';
@@ -302,7 +298,7 @@ import SearchFeedback from './SearchFeedback.vue';
 
 export default {
   name: 'FindDocuments',
-  components: { SearchFeedback, FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
+  components: { SearchFeedback, FacetBadges, MobileFacetsDrawer, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
   props: ['showJurisdiction', 'showGoogle', 'showSuggestions', 'showModes'],
   data () {
     const getLabelOptionLabels = (labels) => {

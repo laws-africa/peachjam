@@ -1,5 +1,5 @@
 <ul class="list-unstyled search-result-list">
-  {% for hit in results %}
-    {% include "peachjam_search/_search_hit.html" with document=hit.document %}
+  {% for hit in hits %}
+    {% include "peachjam_search/_search_hit.html" %}
   {% endfor %}
 </ul>

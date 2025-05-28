@@ -129,7 +129,7 @@ def json_table(data):
 
     def make_row(key, value):
         return format_html(
-            '<tr><th style="width: 20%">{}</th><td>', key
+            '<tr><th style="width: 7em">{}</th><td>', key
         ) + render_value(value)
 
     def render_value(value):

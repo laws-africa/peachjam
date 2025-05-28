@@ -146,6 +146,7 @@ PEACHJAM = {
     "SEARCH_SEMANTIC": os.environ.get("SEARCH_SEMANTIC", "false") == "true",
     # CoreDocument.doc_type values that are excluded from semantic search indexing
     "SEARCH_SEMANTIC_EXCLUDE_DOCTYPES": ["gazette", "causelist"],
+    "SEARCH_FAKE_DOCUMENTS": False,
     "MULTIPLE_JURISDICTIONS": False,
     "MULTIPLE_LOCALITIES": False,
     "PDFJS_TO_TEXT": "bin/pdfjs-to-text" if DEBUG else "pdfjs-to-text",

@@ -1,134 +1,124 @@
-from django.utils.html import escape
-from django.utils.translation import get_language_from_request
-from rest_framework.serializers import (
-    BooleanField,
-    CharField,
-    FloatField,
-    IntegerField,
-    ListField,
-    ListSerializer,
-    ModelSerializer,
-    Serializer,
-    SerializerMethodField,
-)
+import dataclasses
 
-from peachjam.models import DocumentTopic
+from django.conf import settings
+from django.utils.html import escape
+from rest_framework.serializers import ModelSerializer
+
+from peachjam.models import CoreDocument
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
 from peachjam_search.models import SearchClick
 
 
-class SearchableDocumentListSerializer(ListSerializer):
-    def to_representation(self, data):
-        self.add_topic_path_names(data)
-        return super().to_representation(data)
+@dataclasses.dataclass
+class SearchHit:
+    es_hit: any
+    id: int
+    index: str
+    score: float
+    position: int
+    document: CoreDocument = None
+    best_match: bool = False
+    highlight: dict = None
+    pages: list = None
+    provisions: list = None
 
-    def add_topic_path_names(self, data):
-        # add topic path names for topics that should be shown in result listings
-        doc_ids = [doc.meta.id for doc in data]
-        doc_topics = DocumentTopic.objects.filter(
-            document_id__in=doc_ids, topic__show_in_document_listing=True
-        ).prefetch_related("topic")
-        topics = {}
-        for doc_topic in doc_topics:
-            topics.setdefault(str(doc_topic.document_id), []).append(
-                doc_topic.topic.path_name
-            )
+    @classmethod
+    def from_es_hits(cls, engine, es_hits):
+        hits = [cls.from_es_hit(engine, es_hit, i) for i, es_hit in enumerate(es_hits)]
 
-        for hit in data:
-            hit.topic_path_names = topics.get(hit.meta.id, [])
+        # determine best match: is the first result's score significantly better than the next?
+        if engine.page == 1 and len(hits) > 1 and hits[0].score / hits[1].score >= 1.2:
+            hits[0].best_match = True
 
+        return hits
 
-class SearchableDocumentSerializer(Serializer):
-    id = CharField(source="meta.id")
-    doc_type = CharField()
-    title = CharField()
-    date = CharField()
-    year = IntegerField()
-    jurisdiction = CharField()
-    locality = CharField()
-    citation = CharField()
-    expression_frbr_uri = CharField()
-    work_frbr_uri = CharField()
-    authors = ListField()
-    matter_type = CharField()
-    created_at = CharField()
-    case_number = ListField()
-    judges = ListField()
-    is_most_recent = BooleanField()
-    alternative_names = ListField()
-    labels = ListField()
-    topic_path_names = ListField()
-    score = FloatField(source="meta.score")
-    _index = CharField(source="meta.index")
+    @classmethod
+    def from_es_hit(cls, engine, es_hit, i):
+        return SearchHit(
+            es_hit=es_hit,
+            id=int(es_hit.meta.id),
+            index=es_hit.meta.index,
+            score=es_hit.meta.score,
+            position=(engine.page - 1) * engine.page_size + i + 1,
+        )
 
-    nature = SerializerMethodField()
-    court = SerializerMethodField()
-    highlight = SerializerMethodField()
-    pages = SerializerMethodField()
-    provisions = SerializerMethodField()
-    outcome = SerializerMethodField()
-    case_action = CharField(allow_null=True)
-    registry = SerializerMethodField()
-    division = CharField(allow_null=True)
-    explanation = SerializerMethodField()
-    raw = SerializerMethodField()
+    @classmethod
+    def attach_documents(cls, hits, fake_documents=None):
+        if fake_documents is None:
+            fake_documents = settings.PEACHJAM["SEARCH_FAKE_DOCUMENTS"]
+        if fake_documents:
+            cls.attach_fake_documents(hits)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.language_suffix = ""
-        if "request" in self.context:
-            self.language_suffix = "_" + get_language_from_request(
-                self.context["request"]
-            )
+        qs = (
+            CoreDocument.objects.for_document_table()
+            .filter(pk__in=[hit.id for hit in hits])
+            .prefetch_related("alternative_names")
+        )
 
-    class Meta:
-        list_serializer_class = SearchableDocumentListSerializer
+        documents = {d.id: d for d in qs}
+        for hit in hits:
+            hit.document = documents.get(hit.id)
 
-    def get_highlight(self, obj):
-        highlight = {}
-        if hasattr(obj.meta, "highlight"):
-            highlight = obj.meta.highlight.__dict__["_d_"]
+    @classmethod
+    def attach_fake_documents(cls, hits):
+        for hit in hits:
+            hit.set_fake_document()
+
+    def __post_init__(self):
+        self.set_highlight()
+        self.set_pages()
+        self.set_provisions()
+
+    @property
+    def meta(self):
+        return self.es_hit.meta
+
+    def set_highlight(self):
+        if hasattr(self.meta, "highlight"):
+            self.highlight = self.meta.highlight.__dict__["_d_"]
+        else:
+            self.highlight = {}
 
         # add text content chunks as content highlights
         if (
-            not highlight.get("content")
-            and hasattr(obj.meta, "inner_hits")
-            and hasattr(obj.meta.inner_hits, "content_chunks")
+            not self.highlight.get("content")
+            and hasattr(self.meta, "inner_hits")
+            and hasattr(self.meta.inner_hits, "content_chunks")
         ):
-            highlight["content"] = []
-            for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
+            self.highlight["content"] = []
+            for chunk in self.meta.inner_hits.content_chunks.hits.hits:
                 if chunk._source.type == "text":
-                    highlight["content"].append(escape(chunk._source.text))
+                    self.highlight["content"].append(escape(chunk._source.text))
                     # only add one, otherwise it's too long
                     break
 
-        return highlight
-
-    def get_pages(self, obj):
+    def set_pages(self):
         """Serialize nested page hits and highlights."""
-        pages = []
-        if hasattr(obj.meta, "inner_hits"):
-            if hasattr(obj.meta.inner_hits, "pages"):
-                for page in obj.meta.inner_hits.pages.hits.hits:
+        self.pages = []
+        if hasattr(self.meta, "inner_hits"):
+            if hasattr(self.meta.inner_hits, "pages"):
+                for page in self.meta.inner_hits.pages.hits.hits:
                     info = page._source.to_dict()
                     info["highlight"] = (
-                        page.highlight.to_dict() if hasattr(page, "highlight") else {}
+                        self.fix_dot_keys(page.highlight.to_dict())
+                        if hasattr(page, "highlight")
+                        else {}
                     )
                     info["score"] = page._score
                     self.merge_exact_highlights(info["highlight"])
-                    pages.append(info)
+                    self.pages.append(info)
 
             # merge in page-based content chunks
-            if hasattr(obj.meta.inner_hits, "content_chunks"):
-                for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
+            if hasattr(self.meta.inner_hits, "content_chunks"):
+                for chunk in self.meta.inner_hits.content_chunks.hits.hits:
                     if chunk._source.type == "page":
                         # max pages to return
-                        if len(pages) >= 2:
+                        if len(self.pages) >= 2:
                             break
                         info = chunk._source.to_dict()
                         page_num = info["portion"]
-                        if page_num not in [p["page_num"] for p in pages]:
-                            pages.append(
+                        if page_num not in [p["page_num"] for p in self.pages]:
+                            self.pages.append(
                                 {
                                     "page_num": page_num,
                                     "highlight": {"pages.body": [escape(info["text"])]},
@@ -136,17 +126,15 @@ class SearchableDocumentSerializer(Serializer):
                                 }
                             )
 
-        return pages
-
-    def get_provisions(self, obj):
+    def set_provisions(self):
         """Serialize nested provision hits and highlights."""
-        provisions = []
+        self.provisions = []
         # keep track of which provisions (including parents) we've seen, so that we don't, for
         # example, repeat Chapter 7 if Chapter 7, Section 32 is also a hit
         seen = set()
-        if hasattr(obj.meta, "inner_hits"):
-            if hasattr(obj.meta.inner_hits, "provisions"):
-                for provision in obj.meta.inner_hits.provisions.hits.hits:
+        if hasattr(self.meta, "inner_hits"):
+            if hasattr(self.meta.inner_hits, "provisions"):
+                for provision in self.meta.inner_hits.provisions.hits.hits:
                     info = provision._source.to_dict()
 
                     if info["id"] in seen:
@@ -155,19 +143,25 @@ class SearchableDocumentSerializer(Serializer):
                     seen.update(info["parent_ids"])
 
                     info["highlight"] = (
-                        provision.highlight.to_dict()
+                        self.fix_dot_keys(provision.highlight.to_dict())
                         if hasattr(provision, "highlight")
                         else {}
                     )
                     self.merge_exact_highlights(info["highlight"])
-                    provisions.append(info)
+
+                    info["parents"] = [
+                        {"title": title, "id": id}
+                        for title, id in zip(info["parent_titles"], info["parent_ids"])
+                    ]
+
+                    self.provisions.append(info)
 
             # merge in provision-based content chunks
-            if hasattr(obj.meta.inner_hits, "content_chunks"):
-                for chunk in obj.meta.inner_hits.content_chunks.hits.hits:
+            if hasattr(self.meta.inner_hits, "content_chunks"):
+                for chunk in self.meta.inner_hits.content_chunks.hits.hits:
                     if chunk._source.type == "provision":
                         # max provisions to return
-                        if len(provisions) >= 3:
+                        if len(self.provisions) >= 3:
                             break
 
                         info = chunk._source.to_dict()
@@ -188,26 +182,7 @@ class SearchableDocumentSerializer(Serializer):
                         info["highlight"] = {"provisions.body": [escape(text)]}
                         info["id"] = info["portion"]
                         info["type"] = info["provision_type"]
-                        provisions.append(info)
-
-        return provisions
-
-    def get_court(self, obj):
-        return obj["court" + self.language_suffix]
-
-    def get_nature(self, obj):
-        return obj["nature" + self.language_suffix]
-
-    def get_outcome(self, obj):
-        if hasattr(obj, "outcome" + self.language_suffix):
-            val = obj["outcome" + self.language_suffix]
-            if val is not None:
-                val = list(val)
-            return val
-        return None
-
-    def get_registry(self, obj):
-        return obj["registry" + self.language_suffix]
+                        self.provisions.append(info)
 
     def merge_exact_highlights(self, highlight):
         # fold .exact highlights into the main field to make life easier for the client
@@ -218,19 +193,25 @@ class SearchableDocumentSerializer(Serializer):
                     highlight[short] = value
                 del highlight[key]
 
-    def get_explanation(self, obj):
-        if self.context.get("explain"):
-            if hasattr(obj.meta, "explanation"):
-                return obj.meta.explanation.to_dict()
+    def fix_dot_keys(self, d):
+        """In a dictionary, replace dots in keys with underscores so that they can be referenced in a template."""
+        for k, v in list(d.items()):
+            if "." in k:
+                d[k.replace(".", "_")] = v
+        return d
 
-    def get_raw(self, obj):
-        if self.context.get("explain"):
-            data = obj.meta.to_dict()
-            del data["explanation"]
-            for key, value in data.get("inner_hits", {}).items():
-                # force to_dict
-                data["inner_hits"][key] = value.to_dict()
-            return data
+    def set_fake_document(self):
+        """Attaches a fake document. This is used when we know elasticsearch results won't be in a local database,
+        for example with AfricanLII where it searches remote document indexes."""
+        self.document = self.es_hit.to_dict()
+        self.document["get_absolute_url"] = self.es_hit.expression_frbr_uri
+
+    def as_dict(self):
+        return {
+            field.name: getattr(self, field.name)
+            for field in dataclasses.fields(self)
+            if field.name not in ["es_hit"]
+        }
 
 
 class SearchClickSerializer(ModelSerializer):

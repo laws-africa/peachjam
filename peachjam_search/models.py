@@ -151,7 +151,7 @@ class SavedSearch(models.Model):
     def find_new_hits(self):
         from peachjam_search.engine import SearchEngine
         from peachjam_search.forms import SearchForm
-        from peachjam_search.serializers import SearchableDocumentSerializer
+        from peachjam_search.serializers import SearchHit
 
         params = QueryDict("", mutable=True)
         for key, values in self.get_filters_dict().items():
@@ -168,7 +168,7 @@ class SavedSearch(models.Model):
         form.is_valid()
         form.configure_engine(engine)
         es_response = engine.execute()
-        hits = es_response.hits
+        hits = SearchHit.from_es_hits(engine, es_response.hits)
 
         # get hits that were created later than the last alert
         if self.last_alerted_at:
@@ -178,7 +178,8 @@ class SavedSearch(models.Model):
                 if datetime.fromisoformat(hit.created_at) > self.last_alerted_at
             ]
 
-        return SearchableDocumentSerializer(hits, many=True).data
+        SearchHit.attach_fake_documents(hits)
+        return [hit.as_dict() for hit in hits]
 
     def send_alert(self, hits):
         hits = hits[:10]
