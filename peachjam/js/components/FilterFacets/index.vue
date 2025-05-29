@@ -14,6 +14,20 @@
         {{ $t("Clear all") }}
       </a>
     </li>
+    <li class="list-group-item d-flex d-lg-none">
+      <label class="form-label align-self-center mb-0 me-2">{{ $t('Sort') }}</label>
+      <select :value="ordering" class="ms-auto form-select select-narrow" @change="ordered">
+        <option value="-score">
+          {{ $t('Relevance') }}
+        </option>
+        <option value="date">
+          {{ $t('Date (oldest first)') }}
+        </option>
+        <option value="-date">
+          {{ $t('Date (newest first)') }}
+        </option>
+      </select>
+    </li>
     <template
       v-for="(facet, index) in modelValue"
       :key="index"
@@ -41,9 +55,13 @@ export default {
     loading: {
       type: Boolean,
       default: false
+    },
+    ordering: {
+      type: String,
+      default: '-score'
     }
   },
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'ordered'],
   computed: {
     showClearAllFilter () {
       return this.modelValue.some((item) => {
@@ -108,10 +126,11 @@ export default {
         value: getValue()
       };
       this.$emit('update:modelValue', data);
+    },
+
+    ordered (e) {
+      this.$emit('ordered', e.target.value);
     }
   }
 };
 </script>
-
-<style scoped>
-</style>

@@ -203,3 +203,7 @@ a:visited:not(.btn, .nav-link, .dropdown-item) {
 .breadcrumb {
   padding-top: 1rem;
 }
+
+select.form-select.select-narrow {
+  width: initial;
+}

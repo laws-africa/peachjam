@@ -1,5 +1,5 @@
 <template>
-  <div v-if="activeOptions.length" class="mb-3">
+  <div v-if="activeOptions.length" class="mb-3 d-none d-lg-block">
     <button
       v-for="option in activeOptions"
       :key="option.value"

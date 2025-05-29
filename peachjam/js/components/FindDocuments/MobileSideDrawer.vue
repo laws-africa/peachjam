@@ -49,7 +49,7 @@ export default {
 }
 
 .mobile-side-drawer__mobile-view__content .slot {
-  width: 80%;
+  width: 85%;
   height: 100%;
   transition: transform 300ms ease-in-out;
   transform: translateX(-100%);
