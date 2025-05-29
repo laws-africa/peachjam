@@ -4,8 +4,8 @@
   >
     <div class="card">
       <div class="card-body">
+        <p>{{ $t('Unconstitutional provision') }}</p>
         <p>
-          {{ $t('Unconstitutional provision') }}
           <span v-if="enrichment.resolved" class="badge bg-success">{{ $t( 'Resolved' ) }}</span>
           <span v-else class="badge bg-danger">{{ $t( 'Unresolved' ) }}</span>
         </p>
