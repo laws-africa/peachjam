@@ -113,8 +113,18 @@ class DocumentListView(ListView):
             *args,
             **kwargs,
         )
+        self.add_doc_count(context)
         self.add_entity_profile(context)
         return context
+
+    def add_doc_count(self, context):
+        # count total documents
+        key = f"{self.request.path}_doc_count"
+        count = cache.get(key)
+        if count is None:
+            count = self.get_base_queryset().count()
+            cache.set(key, count)
+        context["doc_count"] = count
 
     def add_entity_profile(self, context):
         pass
@@ -202,15 +212,20 @@ class FilteredDocumentListView(DocumentListView):
     def filter_queryset(self, qs, filter_q=False):
         return self.form.filter_queryset(qs, filter_q=filter_q)
 
-    def doc_count(self, context):
+    def add_doc_count(self, context):
+        super().add_doc_count(context)
+
+        # count matching filtered documents
         if context["paginator"]:
             count = context["paginator"].count
         else:
-            key = f"{self.cache_key_prefix()}_doc_count"
+            key = f"{self.cache_key_prefix()}_doc_count_filtered"
             count = cache.get(key)
             if count is None:
                 count = context["object_list"].count()
                 cache.set(key, count)
+
+        context["doc_count_total"] = context["doc_count"]
         context["doc_count"] = count
 
     def get_context_data(self, **kwargs):
@@ -218,9 +233,9 @@ class FilteredDocumentListView(DocumentListView):
 
         self.add_facets(context)
         self.show_facet_clear_all(context)
-        self.doc_count(context)
         context["doc_table_title_label"] = _("Title")
         context["doc_table_date_label"] = _("Date")
+        context["doc_table_show_counts"] = True
 
         return context
 

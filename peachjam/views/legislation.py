@@ -68,6 +68,9 @@ class LegislationListView(FilteredDocumentListView):
             "is_group": True,
             "title": pj_settings().subleg_label,
         }
+        context[
+            "show_unconstitutional_provisions"
+        ] = UnconstitutionalProvision.objects.exists()
         return context
 
 
