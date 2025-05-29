@@ -409,17 +409,20 @@ class UnconstitutionalProvisionListView(PermissionRequiredMixin, LegislationList
         return qs
 
     def add_resolved_facet(self, context):
-        # add a facet for resolved/unresolved
+        # add a facet for resolved/unresolved at the top
         if "resolved" not in self.exclude_facets:
-            context["facet_data"]["resolved"] = {
-                "label": _("Resolved"),
-                "type": "checkbox",
-                # these are (value, label) tuples
-                "options": [
-                    ("resolved", _("Resolved")),
-                    ("unresolved", _("Unresolved")),
-                ],
-                "values": self.request.GET.getlist("resolved"),
+            context["facet_data"] = {
+                "resolved": {
+                    "label": _("Resolved"),
+                    "type": "checkbox",
+                    # these are (value, label) tuples
+                    "options": [
+                        ("resolved", _("Resolved")),
+                        ("unresolved", _("Unresolved")),
+                    ],
+                    "values": self.request.GET.getlist("resolved"),
+                },
+                **context.get("facet_data", {}),
             }
 
     def add_facets(self, context):

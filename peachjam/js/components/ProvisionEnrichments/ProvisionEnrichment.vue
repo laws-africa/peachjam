@@ -4,12 +4,14 @@
   >
     <div class="card">
       <div class="card-body">
-        <p>{{ $t('Unconstitutional provision') }}</p>
-        <p>
+        <div class="mb-1">
+          <i class="bi bi-journal-x" />
+          {{ $t('Unconstitutional provision') }}
+        </div>
+        <div class="mb-2">
           <span v-if="enrichment.resolved" class="badge bg-success">{{ $t( 'Resolved' ) }}</span>
           <span v-else class="badge bg-danger">{{ $t( 'Unresolved' ) }}</span>
-        </p>
-
+        </div>
         <button
           type="button"
           class="btn btn-sm btn-secondary"
