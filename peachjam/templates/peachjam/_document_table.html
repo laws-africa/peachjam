@@ -29,10 +29,11 @@ variables like "hide_xxx" default to being "on".
      data-component="DocumentTable">
   {% if doc_table_show_counts %}
     <div class="mb-3 text-muted">
-      {% blocktrans trimmed with doc_count=doc_count|intcomma doc_count_total=doc_count_total|intcomma %}
-        {{ doc_count }} of {{ doc_count_total }}
-      {% endblocktrans %}
-      {{ doc_count_noun_plural }}
+      {% if doc_count == 1 %}
+        {{ doc_count|intcomma }} {{ doc_count_noun }}
+      {% else %}
+        {{ doc_count|intcomma }} {{ doc_count_noun_plural }}
+      {% endif %}
     </div>
   {% endif %}
   <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {% if doc_table_show_date %}doc-table--date{% endif %} {% if doc_table_collapse %}doc-table--collapse{% endif %} {{ doc_table_classes }}">

@@ -118,12 +118,16 @@ class DocumentListView(ListView):
         return context
 
     def add_doc_count(self, context):
-        # count total documents
-        key = f"{self.request.path}_doc_count"
-        count = cache.get(key)
-        if count is None:
-            count = self.get_base_queryset().count()
-            cache.set(key, count)
+        # count matching documents
+        if context["paginator"]:
+            count = context["paginator"].count
+        else:
+            key = f"{self.cache_key_prefix()}_doc_count"
+            count = cache.get(key)
+            if count is None:
+                count = context["object_list"].count()
+                cache.set(key, count)
+
         context["doc_count"] = count
 
     def add_entity_profile(self, context):
@@ -211,22 +215,6 @@ class FilteredDocumentListView(DocumentListView):
 
     def filter_queryset(self, qs, filter_q=False):
         return self.form.filter_queryset(qs, filter_q=filter_q)
-
-    def add_doc_count(self, context):
-        super().add_doc_count(context)
-
-        # count matching filtered documents
-        if context["paginator"]:
-            count = context["paginator"].count
-        else:
-            key = f"{self.cache_key_prefix()}_doc_count_filtered"
-            count = cache.get(key)
-            if count is None:
-                count = context["object_list"].count()
-                cache.set(key, count)
-
-        context["doc_count_total"] = context["doc_count"]
-        context["doc_count"] = count
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(form=self.form, **kwargs)
