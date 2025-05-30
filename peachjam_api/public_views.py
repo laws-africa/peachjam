@@ -50,6 +50,7 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
         "date": ["exact", "gte", "lte"],
         "updated_at": ["exact", "gte", "lte"],
         "created_at": ["exact", "gte", "lte"],
+        "language__iso_639_3": ["exact"],
     }
     ordering_fields = ["title", "date", "updated_at", "created_at"]
     ordering = ["updated_at"]
