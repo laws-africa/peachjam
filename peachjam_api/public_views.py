@@ -1,4 +1,5 @@
 from django.http import Http404, HttpResponse
+from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiTypes, extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -40,18 +41,35 @@ class RatificationAPIPermission(JudgmentAPIPermission):
     permission_name = "peachjam.api_ratification"
 
 
+class CharInFilter(filters.BaseInFilter, filters.CharFilter):
+    pass
+
+
+class DocumentFilterSet(filters.FilterSet):
+    language = CharInFilter(field_name="language__iso_639_3")
+
+    class Meta:
+        fields = {
+            "jurisdiction": ["exact"],
+            "work_frbr_uri": ["exact"],
+            "title": ["exact", "icontains"],
+            "date": ["exact", "gte", "lte"],
+            "updated_at": ["exact", "gte", "lte"],
+            "created_at": ["exact", "gte", "lte"],
+        }
+
+    def filter_by_language(self, queryset, name, value):
+        languages = [lang.strip() for lang in value.split(",") if lang.strip()]
+        if not languages:
+            return queryset
+        # filter the queryset by the provided languages
+        return queryset.filter(language__iso_639_3__in=languages)
+
+
 class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = "expression_frbr_uri"
     permission_classes = [DjangoModelPermissions]
-    filterset_fields = {
-        "jurisdiction": ["exact"],
-        "work_frbr_uri": ["exact"],
-        "title": ["exact", "icontains"],
-        "date": ["exact", "gte", "lte"],
-        "updated_at": ["exact", "gte", "lte"],
-        "created_at": ["exact", "gte", "lte"],
-        "language__iso_639_3": ["exact"],
-    }
+    filterset_class = DocumentFilterSet
     ordering_fields = ["title", "date", "updated_at", "created_at"]
     ordering = ["updated_at"]
 
@@ -129,6 +147,20 @@ class GazettesViewSet(BaseDocumentViewSet):
     serializer_class = GazetteSerializer
 
 
+class JudgmentFilterSet(DocumentFilterSet):
+    """Filter set for Judgment documents."""
+
+    class Meta(DocumentFilterSet.Meta):
+        model = Judgment
+        fields = DocumentFilterSet.Meta.fields.copy()
+        fields.update(
+            {
+                "court__code": ["exact"],
+                "registry__code": ["exact"],
+            }
+        )
+
+
 class JudgmentsViewSet(BaseDocumentViewSet):
     permission_classes = [
         JudgmentAPIPermission,
@@ -140,13 +172,7 @@ class JudgmentsViewSet(BaseDocumentViewSet):
         .all()
     )
     serializer_class = JudgmentSerializer
-    filterset_fields = BaseDocumentViewSet.filterset_fields.copy()
-    filterset_fields.update(
-        {
-            "court__code": ["exact"],
-            "registry__code": ["exact"],
-        }
-    )
+    filterset_class = JudgmentFilterSet
 
 
 class RatificationsViewSet(viewsets.ReadOnlyModelViewSet):
