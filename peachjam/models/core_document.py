@@ -520,6 +520,9 @@ class CoreDocument(PolymorphicModel):
         help_text=_("Restrict access to this document to selected groups."),
     )
 
+    # for caching parsed html
+    _content_html_tree = None
+
     class Meta:
         ordering = ["doc_type", "title"]
         permissions = [
@@ -553,10 +556,18 @@ class CoreDocument(PolymorphicModel):
         if not self.content_html_is_akn:
             self.content_html = self.clean_content_html(content_html)
             self.update_toc_json_from_html()
+            self._content_html_tree = None
+
+    @property
+    def content_html_tree(self) -> html.HtmlElement:
+        """A parsed version of the content HTML. This is cached for performance."""
+        if self._content_html_tree is None:
+            self._content_html_tree = parse_html_str(self.content_html)
+        return self._content_html_tree
 
     def update_toc_json_from_html(self):
         if self.content_html:
-            root = parse_html_str(self.content_html)
+            root = self.content_html_tree
             self.toc_json = generate_toc_json_from_html(root)
             wrap_toc_entries_in_divs(root, self.toc_json)
             self.content_html = html.tostring(root, encoding="unicode")
@@ -716,7 +727,7 @@ class CoreDocument(PolymorphicModel):
 
         if self.content_html and not self.content_html_is_akn:
             # delete existing citations in html
-            root = parse_html_str(self.content_html)
+            root = self.content_html_tree
             deleted = False
             for a in root.xpath('//a[starts-with(@href, "/akn/")]'):
                 unwrap_element(a)
@@ -884,6 +895,63 @@ class CoreDocument(PolymorphicModel):
         have been pre-fetched."""
         return [t for t in self.taxonomies.all() if t.topic.show_in_document_listing]
 
+    def friendly_provision_title(self, provision_eid):
+        """Generate a friendly title for the provision with the given eid. This assumes the document is AKN HTML
+        and has a TOC JSON.
+        """
+        if self.toc_json:
+
+            def find_toc_item(toc, eid):
+                for item in toc:
+                    if item["id"] == eid:
+                        return item
+
+                    if item["id"] and eid.startswith(f"{item['id']}__"):
+                        if item["children"]:
+                            # descend into children
+                            found = find_toc_item(item["children"], eid)
+                            if found:
+                                return found
+
+                        # closest match
+                        return item
+
+            # walk down the TOC and try to find the item, or the closest entry to it
+            item = find_toc_item(self.toc_json, provision_eid)
+            if item:
+                if item["id"] == provision_eid:
+                    return item["title"]
+
+                # we didn't find it, so join up the gap between the item we did find and the real provision
+                if self.content_html and self.content_html_is_akn:
+                    root = self.content_html_tree
+                    element = root.get_element_by_id(provision_eid, None)
+                    nums = []
+
+                    # walk upwards from our actual element up to item, gathering akn-nums along the way
+                    while element is not None:
+                        for kid in element:
+                            if "akn-num" in (kid.get("class") or ""):
+                                if kid.text:
+                                    nums.append(kid.text)
+                                break
+
+                        # have we topped out, either at the item or above it (and their ids no longer match)
+                        if element.get("id") and (
+                            element.get("id") == item["id"]
+                            or not element.get("id").startswith(item["id"])
+                        ):
+                            break
+
+                        element = element.getparent()
+
+                    nums.append(item["title"])
+                    nums.reverse()
+                    return " ".join(nums)
+
+        # fallback to the eid
+        return provision_eid
+
 
 class AlternativeName(models.Model):
     document = models.ForeignKey(
@@ -945,7 +1013,7 @@ class DocumentContent(models.Model):
         text = ""
         if document.content_html:
             # it's html, grab the text from the html tree
-            root = parse_html_str(document.content_html)
+            root = document.content_html_tree
             text = " ".join(root.itertext())
 
         elif hasattr(document, "source_file"):

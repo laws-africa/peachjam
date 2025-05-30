@@ -1,5 +1,6 @@
 import { CopyToClipboard } from './clipboard';
 import { RelationshipEnrichments } from './RelationshipEnrichment';
+import { ProvisionEnrichments } from './ProvisionEnrichments';
 import { AnnotationsProvider } from './Annotations';
 import DocumentFilterForm from './document-filter-form';
 import DocumentTable from './document-table';
@@ -30,6 +31,7 @@ const components: Record<string, any> = {
   DocumentUploader,
   NavigationSelect,
   RelationshipEnrichments,
+  ProvisionEnrichments,
   AnnotationsProvider,
   SavedDocumentModal,
   SearchTypeahead,

@@ -1,0 +1,12 @@
+{% load i18n peachjam %}
+<div id="doc-table">
+  {% for document in documents %}
+    {% include "peachjam/provision_enrichment/_document_detail.html" with provision_enrichments=document.provision_enrichments %}
+  {% endfor %}
+  {% if not documents %}
+    <p>{% trans 'No documents found.' %}</p>
+  {% endif %}
+  {% if documents and not hide_pagination and paginator %}
+    {% include 'peachjam/_pagination.html' %}
+  {% endif %}
+</div>

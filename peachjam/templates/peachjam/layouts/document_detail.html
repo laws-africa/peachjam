@@ -111,6 +111,23 @@
                 </button>
               </li>
             {% endif %}
+            {% block unconstitutional-provisions-tab %}
+              {% if perms.peachjam.view_unconstitutionalprovision and unconstitutional_provisions %}
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link"
+                          data-bs-toggle="tab"
+                          data-bs-target="#unconstitutional-provisions-tab"
+                          type="button"
+                          role="tab"
+                          aria-controls="unconstitutional-provisions-tab"
+                          aria-selected="false">
+                    <i class="bi bi-pj pj-unconstitutional-provisions"></i>
+                    {% trans "Unconstitutional provisions" %}
+                    <span class="badge bg-secondary">{{ unconstitutional_provisions|length }}</span>
+                  </button>
+                </li>
+              {% endif %}
+            {% endblock %}
             {% block related-documents-tab %}
               {% if show_related_documents %}
                 <li class="nav-item" role="presentation">
@@ -490,6 +507,16 @@
             </div>
           {% endif %}
         {% endblock %}
+        {% block unconstitutional-provisions-tab-pane %}
+          {% if perms.peachjam.view_unconstitutionalprovision and unconstitutional_provisions %}
+            <div class="tab-pane fade"
+                 id="unconstitutional-provisions-tab"
+                 role="tabpanel"
+                 aria-labelledby="unconstitutional-provisions-tab">
+              <div class="container">{% include 'peachjam/document/_unconstitutional_provisions.html' %}</div>
+            </div>
+          {% endif %}
+        {% endblock %}
         {% if cited_documents or documents_citing_current_doc %}
           <div class="tab-pane"
                id="citations-tab"
@@ -527,5 +554,9 @@
     {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
+    {% if perms.peachjam.view_unconstitutionalprovision %}
+      {{ unconstitutional_provisions_json|json_script:"unconstitutional-provisions-json" }}
+      {% include "peachjam/provision_enrichment/_modals.html" %}
+    {% endif %}
   </div>
 {% endblock %}

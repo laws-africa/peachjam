@@ -91,6 +91,7 @@ from peachjam.models import (
     PartnerLogo,
     PeachJamSettings,
     Predicate,
+    ProvisionEnrichment,
     PublicationFile,
     Ratification,
     RatificationCountry,
@@ -98,6 +99,7 @@ from peachjam.models import (
     SourceFile,
     Taxonomy,
     Treatment,
+    UnconstitutionalProvision,
     UserProfile,
     Work,
     citations_processor,
@@ -1785,6 +1787,8 @@ admin.site.register(
         CustomPropertyLabel,
         DocumentAccessGroup,
         Treatment,
+        ProvisionEnrichment,
+        UnconstitutionalProvision,
     ]
 )
 admin.site.unregister(User)

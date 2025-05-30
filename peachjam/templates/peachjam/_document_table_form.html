@@ -139,11 +139,13 @@
                 </button>
               </div>
             </div>
+            <div class="htmx-progress progress mb-2">
+              <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+            </div>
           {% endblock %}
-          <div class="htmx-progress progress mb-2">
-            <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
-          </div>
-          {% include 'peachjam/_document_table.html' %}
+          {% block doc-table %}
+            {% include 'peachjam/_document_table.html' %}
+          {% endblock %}
         {% endblock %}
       </div>
     </div>
