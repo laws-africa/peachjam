@@ -38,4 +38,10 @@
     </div>
   {% endif %}
 </div>
-{% block extra-related-documents %}{% endblock %}
+{% if user.is_authenticated %}
+  {% block extra-related-documents %}{% endblock %}
+{% else %}
+  <p>
+    <a href="{% url 'account_signup' %}?next={{ request.get_full_path|urlencode }}">{% trans "Sign up" %}</a> or <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">{% trans "Log in" %}</a> to see similar documents.
+  </p>
+{% endif %}

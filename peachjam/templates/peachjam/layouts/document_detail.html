@@ -112,22 +112,20 @@
               </li>
             {% endif %}
             {% block related-documents-tab %}
-              {% if show_related_documents %}
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link"
-                          data-bs-toggle="tab"
-                          data-bs-target="#related-tab"
-                          data-track-event="Document | Tab | Related documents"
-                          type="button"
-                          role="tab"
-                          aria-controls="related-tab"
-                          aria-selected="false">
-                    <i class="bi bi-pj pj-related"></i>
-                    {% trans "Related documents" %}
-                    {% if n_relationships %}<span class="badge bg-secondary">{{ n_relationships }}</span>{% endif %}
-                  </button>
-                </li>
-              {% endif %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#related-tab"
+                        data-track-event="Document | Tab | Related documents"
+                        type="button"
+                        role="tab"
+                        aria-controls="related-tab"
+                        aria-selected="false">
+                  <i class="bi bi-pj pj-related"></i>
+                  {% trans "Related documents" %}
+                  {% if n_relationships %}<span class="badge bg-secondary">{{ n_relationships }}</span>{% endif %}
+                </button>
+              </li>
             {% endblock %}
             {% if cited_documents or documents_citing_current_doc %}
               <li class="nav-item" role="presentation">
@@ -481,14 +479,12 @@
           </div>
         {% endif %}
         {% block related-documents-tab-pane %}
-          {% if show_related_documents %}
-            <div class="tab-pane"
-                 id="related-tab"
-                 role="tabpanel"
-                 aria-labelledby="related-tab">
-              <div class="container">{% include 'peachjam/_related_documents.html' %}</div>
-            </div>
-          {% endif %}
+          <div class="tab-pane"
+               id="related-tab"
+               role="tabpanel"
+               aria-labelledby="related-tab">
+            <div class="container">{% include 'peachjam/_related_documents.html' %}</div>
+          </div>
         {% endblock %}
         {% if cited_documents or documents_citing_current_doc %}
           <div class="tab-pane"
