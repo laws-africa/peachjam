@@ -8,7 +8,8 @@ from peachjam_ml.models import DocumentEmbedding
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-class SimilarDocumentsDocumentDetailView(DetailView):
+class SimilarDocumentsDocumentDetailView(PermissionRequiredMixin, DetailView):
+    permission_required = "peachjam_ml.view_documentembedding"
     template_name = "peachjam/document/_similar_documents.html"
     slug_url_kwarg = "frbr_uri"
     slug_field = "expression_frbr_uri"
