@@ -13,6 +13,7 @@ from peachjam.models import (
     Annotation,
     CoreDocument,
     ExtractedCitation,
+    Judgment,
     SavedDocument,
     SourceFile,
     UserFollowing,
@@ -183,3 +184,13 @@ def password_reset_started_customerio(sender, request, user, **kwargs):
 @receiver(allauth_signals.password_reset, sender=User)
 def password_reset_customerio(sender, request, user, **kwargs):
     get_customerio().track_password_reset(user)
+
+
+@receiver(signals.post_save, sender=Judgment)
+def judgment_saved_generate_summary(sender, instance, created, **kwargs):
+    """Generate AI summary for a judgment when it's saved."""
+    from peachjam.tasks import generate_judgment_summary
+
+    if instance.summary is None:
+        # Only generate summary if it doesn't exist
+        generate_judgment_summary(instance.pk)
