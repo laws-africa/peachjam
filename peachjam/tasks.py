@@ -248,3 +248,15 @@ def update_user_follows_for_user(user_id):
 
     log.info(f"Updating user follows for user {user_id}")
     UserFollowing.update_and_alert(user)
+
+
+@background(queue="peachjam", schedule=5 * 60, remove_existing_tasks=True)
+def generate_judgment_summary(doc_id):
+    from peachjam.models import Judgment
+
+    doc = Judgment.objects.filter(id=doc_id).first()
+    if not doc:
+        log.info(f"No judgment with id {doc_id} exists, ignoring.")
+        return
+    log.info(f"Summarizing judgment {doc_id}")
+    doc.generate_summary()
