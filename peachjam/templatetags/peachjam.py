@@ -115,3 +115,8 @@ def split(value, sep=None):
 def get_follow_params(obj):
     # this would be better as a model method
     return f"{'_'.join(obj._meta.verbose_name.lower().split())}={obj.pk}"
+
+
+@register.filter
+def get_dotted_key_value(obj, key):
+    return obj.get(key, "")
