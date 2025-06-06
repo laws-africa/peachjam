@@ -592,13 +592,18 @@ class Judgment(CoreDocument):
             return
 
         try:
-            summary = summariser.summarise_judgment(self)
+            response = summariser.summarise_judgment(self)
+            summary = response.get("summary", {})
+            if not summary:
+                log.warning(f"No summary found in response {self.pk}, skipping.")
+                return
             self.blurb = summary.get("blurb", "")
-            self.case_summary = summary.get("case_summary", "")
+            self.case_summary = summary.get("summary", "")
             self.flynote = summary.get("flynote", "")
             self.held = summary.get("held", [])
             self.issues = summary.get("issues", [])
             self.summary_ai_generated = True
+            self.save()
         except Exception as e:
             log.error(f"Error generating AI summary for judgment {self.pk}", exc_info=e)
 

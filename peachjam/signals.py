@@ -191,6 +191,6 @@ def judgment_saved_generate_summary(sender, instance, created, **kwargs):
     """Generate AI summary for a judgment when it's saved."""
     from peachjam.tasks import generate_judgment_summary
 
-    if instance.summary is None:
+    if not instance.case_summary:
         # Only generate summary if it doesn't exist
         generate_judgment_summary(instance.pk)
