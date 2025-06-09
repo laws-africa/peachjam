@@ -129,7 +129,7 @@
               {% endif %}
             {% endblock %}
             {% block related-documents-tab %}
-              {% if show_related_documents %}
+              {% if show_related_documents or not user.is_authenticated %}
                 <li class="nav-item" role="presentation">
                   <button class="nav-link"
                           data-bs-toggle="tab"
@@ -498,7 +498,7 @@
           </div>
         {% endif %}
         {% block related-documents-tab-pane %}
-          {% if show_related_documents %}
+          {% if show_related_documents or not user.is_authenticated %}
             <div class="tab-pane"
                  id="related-tab"
                  role="tabpanel"
