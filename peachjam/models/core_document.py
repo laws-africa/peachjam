@@ -531,6 +531,7 @@ class CoreDocument(PolymorphicModel):
             ("can_edit_advanced_fields", "Can edit advanced fields"),
             ("can_debug_document", "Can do document debugging"),
             ("can_view_document_summary", "Can view document summary"),
+            ("can_generate_judgment_summary", "Can generate judgment summary"),
         ]
 
     def __str__(self):

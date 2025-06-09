@@ -1210,6 +1210,11 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                 self.admin_site.admin_view(self.extract_view),
                 name="peachjam_extract_judgment",
             ),
+            path(
+                "<int:object_id>/generate-summary/",
+                self.admin_site.admin_view(self.generate_summary_view),
+                name="peachjam_generate_summary",
+            ),
         ]
         return custom_urls + urls
 
@@ -1318,12 +1323,38 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     def generate_summary(self, request, queryset):
         """Generate a summary for the selected judgments."""
 
+        # check if the user has permission to generate summaries
+        if not request.user.has_perm("peachjam.can_generate_judgment_summary"):
+            self.message_user(
+                request,
+                _("You do not have permission to generate judgment summaries."),
+                level=messages.ERROR,
+            )
+            return
+
         count = queryset.count()
         for doc in queryset.iterator():
             generate_judgment_summary(doc.pk)
         self.message_user(
             request,
             _("Generating summaries for %(count)d judgments.") % {"count": count},
+        )
+
+    def generate_summary_view(self, request, object_id):
+        if request.user.has_perm("peachjam.can_generate_judgment_summary"):
+            message = _("Generating summary for judgment with ID: {}").format(object_id)
+            generate_judgment_summary(object_id)
+            self.message_user(request, message)
+        else:
+            message = _("You do not have permission to generate judgment summaries.")
+            self.message_user(request, message, level=messages.ERROR)
+
+        return redirect(
+            reverse(
+                "admin:%s_%s_change"
+                % (self.model._meta.app_label, self.model._meta.model_name),
+                args=[object_id],
+            )
         )
 
     generate_summary.short_description = gettext_lazy("Generate summaries (background)")

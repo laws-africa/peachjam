@@ -38,6 +38,12 @@
             </ol>
           </div>
         {% endif %}
+        {% if document.order %}
+          <div class="mb-2">
+            <h6 class="mb-1 fw-bold">{% trans 'Order' %}</h6>
+            <p>{{ document.order }}</p>
+          </div>
+        {% endif %}
       </details>
     {% endif %}
   </dd>
