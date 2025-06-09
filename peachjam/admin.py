@@ -1328,7 +1328,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             self.message_user(
                 request,
                 _("You do not have permission to generate judgment summaries."),
-                level=messages.ERROR,
             )
             return
 
@@ -1347,7 +1346,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             self.message_user(request, message)
         else:
             message = _("You do not have permission to generate judgment summaries.")
-            self.message_user(request, message, level=messages.ERROR)
+            self.message_user(request, message)
 
         return redirect(
             reverse(
