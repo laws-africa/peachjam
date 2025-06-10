@@ -189,8 +189,9 @@ def password_reset_customerio(sender, request, user, **kwargs):
 @receiver(signals.post_save, sender=Judgment)
 def judgment_saved_generate_summary(sender, instance, created, **kwargs):
     """Generate AI summary for a judgment when it's saved."""
-    from peachjam.tasks import generate_judgment_summary
+    # from peachjam.tasks import generate_judgment_summary
 
-    if not instance.case_summary:
-        # Only generate summary if it doesn't exist
-        generate_judgment_summary(instance.pk)
+    # if not instance.summary:
+    # Only generate summary if it doesn't exist
+    # generate_judgment_summary(instance.pk)
+    pass

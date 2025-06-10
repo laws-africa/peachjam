@@ -96,7 +96,7 @@
                 {% trans "Document detail" %}
               </button>
             </li>
-            {% if document.case_summary %}
+            {% if document.summary %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
                         data-bs-toggle="tab"
@@ -504,7 +504,7 @@
             {% endblock %}
           </div>
         </div>
-        {% if document.case_summary %}
+        {% if document.summary %}
           <div class="tab-pane"
                id="summary-tab"
                role="tabpanel"

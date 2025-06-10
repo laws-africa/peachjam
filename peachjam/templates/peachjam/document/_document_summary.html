@@ -13,13 +13,13 @@
         {% if document.flynote %}
           <div class="mb-2">
             <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
-            <p>{{ document.flynote }}</p>
+            <p>{{ document.flynote|safe }}</p>
           </div>
         {% endif %}
-        {% if document.case_summary %}
+        {% if document.summary %}
           <div class="mb-2">
             <h6 class="h6 mb-1 fw-bold">{% trans 'Case summary' %}</h6>
-            <p>{{ document.case_summary }}</p>
+            <p>{{ document.summary|safe }}</p>
           </div>
         {% endif %}
         {% if document.issues %}
