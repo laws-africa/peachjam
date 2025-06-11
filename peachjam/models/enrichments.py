@@ -16,6 +16,7 @@ class ProvisionEnrichment(PolymorphicModel):
     ENRICHMENT_TYPE_CHOICES = (
         ("provision_enrichment", _("Provision enrichment")),
         ("unconstitutional_provision", _("Unconstitutional provision")),
+        ("uncommenced_provision", _("Uncommenced provision")),
     )
 
     work = models.ForeignKey(
@@ -124,4 +125,16 @@ class UnconstitutionalProvision(ProvisionEnrichment):
 
     def save(self, *args, **kwargs):
         self.enrichment_type = "unconstitutional_provision"
+        super().save(*args, **kwargs)
+
+
+class UncommencedProvision(ProvisionEnrichment):
+    and_all_descendants = models.BooleanField(_("and all descendants"), default=False)
+
+    class Meta:
+        verbose_name = _("uncommenced provision")
+        verbose_name_plural = _("uncommenced provisions")
+
+    def save(self, *args, **kwargs):
+        self.enrichment_type = "uncommenced_provision"
         super().save(*args, **kwargs)
