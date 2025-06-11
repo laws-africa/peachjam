@@ -96,7 +96,7 @@
                 {% trans "Document detail" %}
               </button>
             </li>
-            {% if document.summary %}
+            {% if document.summary and document.blurb %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
                         data-bs-toggle="tab"
@@ -504,7 +504,7 @@
             {% endblock %}
           </div>
         </div>
-        {% if document.summary %}
+        {% if document.summary and document.blurb %}
           <div class="tab-pane"
                id="summary-tab"
                role="tabpanel"
