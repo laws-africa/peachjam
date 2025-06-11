@@ -118,7 +118,10 @@ from peachjam.resources import (
     UserResource,
 )
 from peachjam.tasks import extract_citations as extract_citations_task
-from peachjam.tasks import update_extracted_citations_for_a_work
+from peachjam.tasks import (
+    generate_judgment_summary,
+    update_extracted_citations_for_a_work,
+)
 from peachjam_search.tasks import search_model_saved
 
 User = get_user_model()
@@ -1148,12 +1151,15 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets[3][1]["fields"].extend(["case_summary", "flynote", "order"])
+    fieldsets[3][1]["fields"].extend(
+        ["case_summary", "case_summary_ai", "flynote", "order"]
+    )
     readonly_fields = [
         "mnc",
         "serial_number",
         "title",
         "citation",
+        "case_summary_ai",
         "frbr_uri_doctype",
         "frbr_uri_subtype",
         "frbr_uri_actor",
@@ -1173,6 +1179,10 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         "Work identification",
         "Advanced",
     )
+
+    actions = DocumentAdmin.actions + [
+        "generate_summary",
+    ]
 
     class Media:
         js = ("js/judgment_duplicates.js",)
@@ -1202,6 +1212,11 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                 "extract/",
                 self.admin_site.admin_view(self.extract_view),
                 name="peachjam_extract_judgment",
+            ),
+            path(
+                "<int:object_id>/generate-summary/",
+                self.admin_site.admin_view(self.generate_summary_view),
+                name="peachjam_generate_summary",
             ),
         ]
         return custom_urls + urls
@@ -1307,6 +1322,44 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         }
 
         return render(request, "admin/peachjam/judgment/_extracted_form.html", context)
+
+    def generate_summary(self, request, queryset):
+        """Generate a summary for the selected judgments."""
+
+        # check if the user has permission to generate summaries
+        if not request.user.has_perm("peachjam.can_generate_judgment_summary"):
+            self.message_user(
+                request,
+                _("You do not have permission to generate judgment summaries."),
+            )
+            return
+
+        count = queryset.count()
+        for doc in queryset.iterator():
+            generate_judgment_summary(doc.pk)
+        self.message_user(
+            request,
+            _("Generating summaries for %(count)d judgments.") % {"count": count},
+        )
+
+    def generate_summary_view(self, request, object_id):
+        if request.user.has_perm("peachjam.can_generate_judgment_summary"):
+            message = _("Generating summary for judgment with ID: {}").format(object_id)
+            generate_judgment_summary(object_id)
+            self.message_user(request, message)
+        else:
+            message = _("You do not have permission to generate judgment summaries.")
+            self.message_user(request, message)
+
+        return redirect(
+            reverse(
+                "admin:%s_%s_change"
+                % (self.model._meta.app_label, self.model._meta.model_name),
+                args=[object_id],
+            )
+        )
+
+    generate_summary.short_description = gettext_lazy("Generate summaries (background)")
 
 
 @admin.register(CauseList)
