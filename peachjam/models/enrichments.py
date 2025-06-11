@@ -2,13 +2,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from lxml import etree
-from polymorphic.models import PolymorphicManager, PolymorphicModel
-
-
-class ProvisionEnrichmentManager(PolymorphicManager):
-    # use e.g. doc.work.enrichments.unconstitutional_provisions()
-    def unconstitutional_provisions(self):
-        return self.filter(enrichment_type="unconstitutional_provision")
+from polymorphic.models import PolymorphicModel
 
 
 class ProvisionEnrichment(PolymorphicModel):
@@ -40,8 +34,6 @@ class ProvisionEnrichment(PolymorphicModel):
         blank=False,
     )
     text = models.CharField(_("text"), max_length=2048, null=True, blank=True)
-
-    objects = ProvisionEnrichmentManager()
 
     # this is the document that will be used to display provision information
     _document = None
