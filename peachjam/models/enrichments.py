@@ -2,13 +2,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from lxml import etree
-from polymorphic.models import PolymorphicManager, PolymorphicModel
-
-
-class ProvisionEnrichmentManager(PolymorphicManager):
-    # use e.g. doc.work.enrichments.unconstitutional_provisions()
-    def unconstitutional_provisions(self):
-        return self.filter(enrichment_type="unconstitutional_provision")
+from polymorphic.models import PolymorphicModel
 
 
 class ProvisionEnrichment(PolymorphicModel):
@@ -16,6 +10,7 @@ class ProvisionEnrichment(PolymorphicModel):
     ENRICHMENT_TYPE_CHOICES = (
         ("provision_enrichment", _("Provision enrichment")),
         ("unconstitutional_provision", _("Unconstitutional provision")),
+        ("uncommenced_provision", _("Uncommenced provision")),
     )
 
     work = models.ForeignKey(
@@ -39,8 +34,6 @@ class ProvisionEnrichment(PolymorphicModel):
         blank=False,
     )
     text = models.CharField(_("text"), max_length=2048, null=True, blank=True)
-
-    objects = ProvisionEnrichmentManager()
 
     # this is the document that will be used to display provision information
     _document = None
@@ -124,4 +117,16 @@ class UnconstitutionalProvision(ProvisionEnrichment):
 
     def save(self, *args, **kwargs):
         self.enrichment_type = "unconstitutional_provision"
+        super().save(*args, **kwargs)
+
+
+class UncommencedProvision(ProvisionEnrichment):
+    and_all_descendants = models.BooleanField(_("and all descendants"), default=False)
+
+    class Meta:
+        verbose_name = _("uncommenced provision")
+        verbose_name_plural = _("uncommenced provisions")
+
+    def save(self, *args, **kwargs):
+        self.enrichment_type = "uncommenced_provision"
         super().save(*args, **kwargs)

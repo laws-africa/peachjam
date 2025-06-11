@@ -1,0 +1,10 @@
+[
+  {
+    "work_frbr_uri":  "/akn/sc/act/1903/6",
+    "provision_eid": "sec_6",
+    "whole_work": false,
+    "enrichment_type":  "uncommenced_provision",
+    "text": null,
+    "and_all_descendants": true
+  }
+]
