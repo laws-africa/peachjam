@@ -4,7 +4,7 @@
     Summary
   </dt>
   <dd>
-    {{ document.blurb }}
+    {{ document.blurb|default_if_none:"" }}
     {% if perms.peachjam.can_view_document_summary %}
       <details class="my-3">
         <summary>

@@ -146,6 +146,8 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             "language": language,
             "jurisdiction": jurisdiction,
             "locality": locality,
+            "flynote": doc["flynote"],
+            "case_summary": doc["case_summary"],
         }
 
         document = Judgment(**data)
