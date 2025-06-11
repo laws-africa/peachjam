@@ -5,7 +5,6 @@
   </dt>
   <dd>
     {{ document.blurb|default_if_none:"" }}
-    {% if not document.blurb %}{{ document.case_summary|safe }}{% endif %}
     {% if perms.peachjam.can_view_document_summary %}
       <details class="my-3">
         <summary>
