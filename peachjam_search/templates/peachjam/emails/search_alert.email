@@ -10,6 +10,7 @@
   <ul>
     {% for doc in hits %}
       <li>
+        <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}">{% if doc.highlight.title %} {{ doc.highlight.title|first|safe }} {% else %} {{ doc.title }} {% endif %}</a>
         <div>
           {% if doc.highlight.content %}
             <p>{{ doc.highlight.content|safeseq|join:' ... ' }}</p>
@@ -30,9 +31,8 @@
               </div>
             {% endfor %}
           {% endif %}
-
       </div>
-        <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}">{% if doc.highlight.title %} {{ doc.highlight.title|first|safe }} {% else %} {{ doc.title }} {% endif %}</a>
+      <br/>
       </li>
     {% endfor %}
   </ul>
