@@ -127,12 +127,43 @@
         {{ document.flynote|safe }}
       </dd>
     {% endif %}
-    {% if document.case_summary %}
+    {% if document.summary %}
       <dt>
-        {% trans 'Case summary' %}
+        Summary
       </dt>
       <dd>
-        {{ document.case_summary|safe }}
+        {{ document.blurb|default_if_none:"" }}
+        <details class="my-3">
+          <summary>
+            Read full summary
+          </summary>
+          {% if perms.peachjam.can_view_document_summary %}
+            {% if document.summary %}
+              <div class="mb-2">
+                <h6 class="h6 mb-1 fw-bold">{% trans 'Case summary' %}</h6>
+                <p>{{ document.summary|safe }}</p>
+              </div>
+            {% endif %}
+            {% if document.issues %}
+              <div class="mb-2">
+                <h6 class="mb-1 fw-bold">{% trans 'Issues' %}</h6>
+                <ol>
+                  {% for issue in document.issues %}<li>{{ issue }}</li>{% endfor %}
+                </ol>
+              </div>
+            {% endif %}
+            {% if document.held %}
+              <div class="mb-2">
+                <h6 class="mb-1 fw-bold">{% trans 'Held' %}</h6>
+                <ol>
+                  {% for held in document.held %}<li>{{ held }}</li>{% endfor %}
+                </ol>
+              </div>
+            {% endif %}
+          {% else %}
+            {% trans 'You are not allowed to view the summary.' %}
+          {% endif %}
+        </details>
       </dd>
     {% endif %}
     {% if document.order %}

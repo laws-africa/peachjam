@@ -20,7 +20,10 @@ from peachjam.models import (
     UserProfile,
     Work,
 )
-from peachjam.tasks import update_extracted_citations_for_a_work
+from peachjam.tasks import (
+    generate_judgment_summary,
+    update_extracted_citations_for_a_work,
+)
 from peachjam_search.models import SavedSearch
 
 User = get_user_model()
@@ -191,7 +194,9 @@ def judgment_saved_generate_summary(sender, instance, created, **kwargs):
     """Generate AI summary for a judgment when it's saved."""
     # from peachjam.tasks import generate_judgment_summary
 
-    # if not instance.summary:
-    # Only generate summary if it doesn't exist
-    # generate_judgment_summary(instance.pk)
-    pass
+    if (
+        not instance.summary
+        and not instance.summary_ai_generated
+        and (not instance.must_be_anonymized or instance.anonymized)
+    ):
+        generate_judgment_summary(instance.pk)

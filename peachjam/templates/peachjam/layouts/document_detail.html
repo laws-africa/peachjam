@@ -96,21 +96,6 @@
                 {% trans "Document detail" %}
               </button>
             </li>
-            {% if document.summary and document.blurb %}
-              <li class="nav-item" role="presentation">
-                <button class="nav-link"
-                        data-bs-toggle="tab"
-                        data-bs-target="#summary-tab"
-                        data-track-event="Document | Tab | Document summary"
-                        type="button"
-                        role="tab"
-                        aria-controls="summary-tab"
-                        aria-selected="false">
-                  <i class="bi bi-pj pj-document-summary"></i>
-                  {% trans "Summary" %}
-                </button>
-              </li>
-            {% endif %}
             {% if timeline %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
