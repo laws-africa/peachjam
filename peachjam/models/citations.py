@@ -7,6 +7,7 @@ from django.db.models import F, Window
 from django.db.models.functions import RowNumber
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from lxml import html
 
 from .settings import SingletonModel
 
@@ -160,6 +161,93 @@ class ExtractedCitation(models.Model):
             sorted(qs, key=lambda d: [d.nature.name, -d.work.authority_score, d.title]),
             truncated,
         )
+
+
+class ExtractedCitationContext(models.Model):
+    document = models.ForeignKey(
+        "peachjam.CoreDocument",
+        null=False,
+        on_delete=models.CASCADE,
+        related_name="citation_contexts",
+        verbose_name=_("citation context"),
+    )
+
+    selector_anchor_id = models.CharField(
+        _("target id"), max_length=1024, null=False, blank=False
+    )
+    selectors = models.JSONField(verbose_name=_("selectors"))
+    target_work = models.ForeignKey(
+        "peachjam.Work",
+        null=False,
+        on_delete=models.CASCADE,
+        related_name="+",
+        verbose_name=_("target work"),
+    )
+    target_provision_eid = models.CharField(
+        _("target provision eid"), max_length=1024, null=False, blank=False
+    )
+    created_at = models.DateField(auto_now_add=True)
+
+    def extract_citations(self):
+        tree = html.fromstring(self.document.content_html)
+        citation_links = tree.xpath('//a[starts-with(@href, "/akn/")]')
+
+        results = []
+
+        for link in citation_links:
+            href = link.get("href")
+            anchor_id = self._find_anchor_id(link)
+            context = self._extract_text_context(link)
+
+            # Assemble selector data
+            selectors = {
+                "prefix": context["prefix"],
+                "exact": context["exact"],
+                "suffix": context["suffix"],
+            }
+
+            # Create a dict of what will go into ExtractedCitationContext
+            results.append(
+                {
+                    "selector_anchor_id": anchor_id,
+                    "selectors": selectors,
+                    "from_selectors": selectors,  # assuming same for now
+                    "target_href": href,
+                    "exact_text": context["exact"],
+                }
+            )
+
+        return results
+
+    def _find_anchor_id(self, link):
+        # Walk up the tree to find the nearest parent with an id
+        current = link
+        while current is not None:
+            anchor_id = current.get("id")
+            if anchor_id:
+                return anchor_id
+            current = current.getparent()
+        return None  # fallback if no ID found
+
+    def _extract_text_context(self, link, window=30):
+        """Extracts text around the link to simulate a quote selector (prefix, exact, suffix)"""
+        parent_text = "".join(link.itertext())
+        exact = parent_text.strip()
+
+        # get parent node's full text content
+        full_text = "".join(link.getparent().itertext())
+        exact_pos = full_text.find(exact)
+
+        if exact_pos == -1:
+            return {"prefix": "", "exact": exact, "suffix": ""}
+
+        prefix_start = max(0, exact_pos - window)
+        prefix = full_text[prefix_start:exact_pos].strip()
+
+        suffix_end = exact_pos + len(exact) + window
+        suffix = full_text[exact_pos + len(exact) : suffix_end].strip()
+
+        return {"prefix": prefix, "exact": exact, "suffix": suffix}
 
 
 class Treatment(models.Model):
