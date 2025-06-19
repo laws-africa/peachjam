@@ -623,6 +623,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
                     "locality",
                     "date",
                     "language",
+                    "published",
                 ]
             },
         ),
@@ -667,7 +668,6 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
                 "fields": [
                     "content_html_is_akn",
                     "allow_robots",
-                    "published",
                     "restricted",
                     "document_access_link",
                     "toc_json",
