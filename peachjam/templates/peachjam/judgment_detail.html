@@ -127,7 +127,7 @@
         {{ document.flynote|safe }}
       </dd>
     {% endif %}
-    {% if document.summary %}
+    {% if document.case_summary %}
       <dt>
         Summary
       </dt>
@@ -138,10 +138,10 @@
             Read full summary
           </summary>
           {% if perms.peachjam.can_view_document_summary %}
-            {% if document.summary %}
+            {% if document.case_summary %}
               <div class="mb-2">
                 <h6 class="h6 mb-1 fw-bold">{% trans 'Case summary' %}</h6>
-                <p>{{ document.summary|safe }}</p>
+                <p>{{ document.case_summary|safe }}</p>
               </div>
             {% endif %}
             {% if document.issues %}

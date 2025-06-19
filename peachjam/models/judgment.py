@@ -327,12 +327,6 @@ class Judgment(CoreDocument):
     )
     # Summary fields
     case_summary = models.TextField(_("case summary"), null=True, blank=True)
-    case_summary_ai = models.TextField(
-        _("case summary AI"),
-        null=True,
-        blank=True,
-        help_text=_("AI generated case summary, used if no manual summary is provided"),
-    )
     flynote = models.TextField(_("flynote"), null=True, blank=True)
     order = models.TextField(_("order"), null=True, blank=True)
     blurb = models.CharField(
@@ -604,7 +598,7 @@ class Judgment(CoreDocument):
                 log.warning(f"No summary found in response {self.pk}, skipping.")
                 return
             self.blurb = summary.get("blurb", "")
-            self.case_summary_ai = summary.get("summary", "")
+            self.case_summary = summary.get("summary", "")
             self.flynote = summary.get("flynote", "")
             self.held = summary.get("held", [])
             self.issues = summary.get("issues", [])
@@ -615,10 +609,7 @@ class Judgment(CoreDocument):
 
     @property
     def summary(self):
-        """Return the case summary, prefer the manually entered one."""
-        if self.case_summary:
-            return self.case_summary
-        return self.case_summary_ai
+        return self.case_summary
 
 
 class CaseNumber(models.Model):
