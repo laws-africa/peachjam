@@ -12,8 +12,8 @@ from peachjam.customerio import get_customerio
 from peachjam.models import (
     Annotation,
     CoreDocument,
+    DocumentContent,
     ExtractedCitation,
-    Judgment,
     SavedDocument,
     SourceFile,
     UserFollowing,
@@ -189,14 +189,16 @@ def password_reset_customerio(sender, request, user, **kwargs):
     get_customerio().track_password_reset(user)
 
 
-@receiver(signals.post_save, sender=Judgment)
-def judgment_saved_generate_summary(sender, instance, created, **kwargs):
-    """Generate AI summary for a judgment when it's saved."""
-    # from peachjam.tasks import generate_judgment_summary
-
-    if (
-        not instance.summary
-        and not instance.summary_ai_generated
-        and (not instance.must_be_anonymized or instance.anonymized)
-    ):
-        generate_judgment_summary(instance.pk)
+@receiver(signals.post_save, sender=DocumentContent)
+def judgment_content_changed_generate_summary(sender, instance, **kwargs):
+    if not instance.document.doc_type == "judgment":
+        return
+    judgment = instance.document
+    should_generate = (
+        not judgment.summary  # No summary at all
+        or judgment.summary_ai_generated  # Summary exists but is AI-generated
+    ) and (
+        not judgment.must_be_anonymized  # Anonymization OK
+    )
+    if should_generate:
+        generate_judgment_summary(judgment.pk)
