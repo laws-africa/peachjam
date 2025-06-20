@@ -377,7 +377,8 @@ class SearchableDocument(Document):
         if instance.content_html and instance.content_html_is_akn and instance.toc_json:
             # index each provision separately
             provisions = []
-            root = strip_remarks(instance.content_html_tree)
+            root = instance.content_html_tree
+            strip_remarks(root)
             for item in instance.toc_json:
                 prepare_provision(item, [])
 
