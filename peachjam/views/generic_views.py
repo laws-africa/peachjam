@@ -26,6 +26,7 @@ from peachjam.models import (
     Predicate,
     Relationship,
     Taxonomy,
+    UncommencedProvision,
     UnconstitutionalProvision,
     pj_settings,
 )
@@ -33,6 +34,7 @@ from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,
     RelationshipSerializer,
+    UncommencedProvisionsSerializer,
     UnconstitutionalProvisionsSerializer,
 )
 
@@ -399,6 +401,7 @@ class BaseDocumentDetailView(DetailView):
         self.add_relationships(context)
         self.add_provision_relationships(context)
         self.add_unconstitutional_provisions(context)
+        self.add_uncommenced_provisions(context)
 
         if context["document"].content_html:
             context["display_type"] = (
@@ -568,6 +571,18 @@ class BaseDocumentDetailView(DetailView):
             "unconstitutional_provisions_json"
         ] = UnconstitutionalProvisionsSerializer(
             unconstitutional_provisions, many=True
+        ).data
+
+    def add_uncommenced_provisions(self, context):
+        uncommenced_provisions = list(
+            UncommencedProvision.objects.filter(work=self.object.work)
+        )
+        for provision in uncommenced_provisions:
+            provision.document = self.object
+
+        context["uncommenced_provisions"] = uncommenced_provisions
+        context["uncommenced_provisions_json"] = UncommencedProvisionsSerializer(
+            uncommenced_provisions, many=True
         ).data
 
     def get_notices(self):

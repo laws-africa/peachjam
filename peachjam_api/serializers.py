@@ -17,6 +17,7 @@ from peachjam.models import (
     Ratification,
     RatificationCountry,
     Relationship,
+    UncommencedProvision,
     UnconstitutionalProvision,
     Work,
 )
@@ -95,6 +96,21 @@ class UnconstitutionalProvisionsSerializer(serializers.ModelSerializer):
             "end_of_suspension_period",
             "date_resolved",
             "resolving_amendment_work",
+            "provision_by_eid",
+        )
+
+
+class UncommencedProvisionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UncommencedProvision
+        fields = (
+            "id",
+            "work",
+            "provision_eid",
+            "whole_work",
+            "enrichment_type",
+            "text",
+            "and_all_descendants",
             "provision_by_eid",
         )
 
