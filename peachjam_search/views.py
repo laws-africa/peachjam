@@ -120,17 +120,11 @@ class DocumentSearchView(TemplateView):
                 },
             ),
             "trace_id": str(trace.id) if trace else None,
-            "can_debug": self.request.user.has_perm("peachjam_search.debug_search"),
             "can_download": self.request.user.has_perm(
                 "peachjam_search.download_search"
             ),
             "can_semantic": settings.PEACHJAM["SEARCH_SEMANTIC"]
             and self.request.user.has_perm("peachjam_search.semantic_search"),
-            "can_save_documents": pj_settings().allow_save_documents
-            and (
-                not self.request.user.is_authenticated
-                or self.request.user.has_perm("peachjam.add_saveddocument")
-            ),
         }
 
         return self.render(response)

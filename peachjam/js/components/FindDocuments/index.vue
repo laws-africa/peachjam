@@ -831,9 +831,7 @@ export default {
               this.trackSearch(params);
               this.savedSearchModal();
               this.linkTraces(previousId, this.searchInfo.trace_id);
-              if (this.searchInfo.can_save_documents) {
-                this.loadSaveDocumentButtons();
-              }
+              this.loadSaveDocumentButtons();
             } else {
               this.error = response.statusText;
             }
