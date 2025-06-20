@@ -61,6 +61,7 @@ class PeachJam {
     this.clearGACookies();
     this.clearCIOCookies();
     this.setupConfirm();
+    this.setupProvisionClick();
     loadSavedDocuments();
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
@@ -291,6 +292,37 @@ class PeachJam {
             e.stopImmediatePropagation();
           }
         }
+      }
+    });
+  }
+
+  setupProvisionClick () {
+    document.addEventListener('click', function (e) {
+      if (e.target && e.target instanceof HTMLElement && e.target.matches('a.provision-link')) {
+        const link = e.target.closest('a.provision-link');
+        if (!link) return;
+
+        const href = link.getAttribute('href');
+        if (!href) return;
+        const eid = href.split('#')[1];
+        if (!eid) return;
+        const target = document.querySelector(`[data-eid="${eid}"]`);
+        if (!target) return;
+
+        const tabPane = target.closest('.tab-pane');
+        if (!tabPane) return;
+
+        const tabId = tabPane.id;
+        const tabTrigger = document.querySelector(`button[data-bs-toggle="tab"][data-bs-target="#${tabId}"]`);
+        if (!tabTrigger) return;
+
+        // Show the tab
+        new window.bootstrap.Tab(tabTrigger).show();
+
+        // Wait a moment and scroll to the element
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }, 200);
       }
     });
   }

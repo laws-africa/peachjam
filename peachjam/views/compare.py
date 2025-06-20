@@ -4,7 +4,6 @@ from django.views.generic import TemplateView
 from rest_framework.generics import get_object_or_404
 
 from peachjam.models import CoreDocument
-from peachjam.xmlutils import parse_html_str
 
 
 class ComparePortionsView(TemplateView):
@@ -41,7 +40,7 @@ class ComparePortionsView(TemplateView):
 
     def get_portion_html(self, doc, portion):
         if doc.content_html:
-            root = parse_html_str(doc.content_html)
+            root = doc.content_html_tree
             try:
                 el = root.get_element_by_id(portion)
                 return lxml.html.tostring(el, encoding="unicode")

@@ -26,13 +26,14 @@ from peachjam.models import (
     Predicate,
     Relationship,
     Taxonomy,
+    UnconstitutionalProvision,
     pj_settings,
 )
-from peachjam.xmlutils import parse_html_str
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     PredicateSerializer,
     RelationshipSerializer,
+    UnconstitutionalProvisionsSerializer,
 )
 
 
@@ -112,8 +113,22 @@ class DocumentListView(ListView):
             *args,
             **kwargs,
         )
+        self.add_doc_count(context)
         self.add_entity_profile(context)
         return context
+
+    def add_doc_count(self, context):
+        # count matching documents
+        if context["paginator"]:
+            count = context["paginator"].count
+        else:
+            key = f"{self.cache_key_prefix()}_doc_count"
+            count = cache.get(key)
+            if count is None:
+                count = context["object_list"].count()
+                cache.set(key, count)
+
+        context["doc_count"] = count
 
     def add_entity_profile(self, context):
         pass
@@ -201,25 +216,14 @@ class FilteredDocumentListView(DocumentListView):
     def filter_queryset(self, qs, filter_q=False):
         return self.form.filter_queryset(qs, filter_q=filter_q)
 
-    def doc_count(self, context):
-        if context["paginator"]:
-            count = context["paginator"].count
-        else:
-            key = f"{self.cache_key_prefix()}_doc_count"
-            count = cache.get(key)
-            if count is None:
-                count = context["object_list"].count()
-                cache.set(key, count)
-        context["doc_count"] = count
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(form=self.form, **kwargs)
 
         self.add_facets(context)
         self.show_facet_clear_all(context)
-        self.doc_count(context)
         context["doc_table_title_label"] = _("Title")
         context["doc_table_date_label"] = _("Date")
+        context["doc_table_show_counts"] = True
 
         return context
 
@@ -394,6 +398,7 @@ class BaseDocumentDetailView(DetailView):
 
         self.add_relationships(context)
         self.add_provision_relationships(context)
+        self.add_unconstitutional_provisions(context)
 
         if context["document"].content_html:
             context["display_type"] = (
@@ -551,12 +556,26 @@ class BaseDocumentDetailView(DetailView):
                 Predicate.objects.all(), many=True
             ).data
 
+    def add_unconstitutional_provisions(self, context):
+        unconstitutional_provisions = list(
+            UnconstitutionalProvision.objects.filter(work=self.object.work)
+        )
+        for provision in unconstitutional_provisions:
+            provision.document = self.object
+
+        context["unconstitutional_provisions"] = unconstitutional_provisions
+        context[
+            "unconstitutional_provisions_json"
+        ] = UnconstitutionalProvisionsSerializer(
+            unconstitutional_provisions, many=True
+        ).data
+
     def get_notices(self):
         return []
 
     def prefix_images(self, document):
         """Rewrite image URLs so that we can serve them correctly."""
-        root = parse_html_str(document.content_html)
+        root = document.content_html_tree
 
         for img in root.xpath(".//img[@src]"):
             src = img.attrib["src"]

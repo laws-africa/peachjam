@@ -153,3 +153,8 @@ def json_table(data):
             return format_html("{}", value)
 
     return make_table(data or {})
+
+
+@register.filter
+def get_dotted_key_value(obj, key):
+    return obj.get(key, "")

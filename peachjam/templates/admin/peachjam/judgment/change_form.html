@@ -10,5 +10,9 @@
   {% if original %}
     <a href="{% url 'anon' original.pk %}" class="btn btn-block btn-info">{% trans "Anonymise" %}</a>
   {% endif %}
+  {% if perms.peachjam.can_generate_judgment_summary %}
+    <a href="{% url 'admin:peachjam_generate_summary' original.pk %}"
+       class="btn btn-block btn-info">{% trans "Generate summary" %}</a>
+  {% endif %}
   {{ block.super }}
 {% endblock %}

@@ -96,6 +96,21 @@
                 {% trans "Document detail" %}
               </button>
             </li>
+            {% if document.summary and document.blurb %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#summary-tab"
+                        data-track-event="Document | Tab | Document summary"
+                        type="button"
+                        role="tab"
+                        aria-controls="summary-tab"
+                        aria-selected="false">
+                  <i class="bi bi-pj pj-document-summary"></i>
+                  {% trans "Summary" %}
+                </button>
+              </li>
+            {% endif %}
             {% if timeline %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
@@ -111,8 +126,25 @@
                 </button>
               </li>
             {% endif %}
+            {% block unconstitutional-provisions-tab %}
+              {% if perms.peachjam.view_unconstitutionalprovision and unconstitutional_provisions %}
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link"
+                          data-bs-toggle="tab"
+                          data-bs-target="#unconstitutional-provisions-tab"
+                          type="button"
+                          role="tab"
+                          aria-controls="unconstitutional-provisions-tab"
+                          aria-selected="false">
+                    <i class="bi bi-pj pj-unconstitutional-provisions"></i>
+                    {% trans "Unconstitutional provisions" %}
+                    <span class="badge bg-secondary">{{ unconstitutional_provisions|length }}</span>
+                  </button>
+                </li>
+              {% endif %}
+            {% endblock %}
             {% block related-documents-tab %}
-              {% if show_related_documents %}
+              {% if show_related_documents or not user.is_authenticated %}
                 <li class="nav-item" role="presentation">
                   <button class="nav-link"
                           data-bs-toggle="tab"
@@ -176,7 +208,7 @@
               </li>
             {% endif %}
           {% endblock %}
-          {% if perms.can_debug_document %}
+          {% if perms.peachjam.can_debug_document %}
             <li class="nav-item ms-auto">
               <button class="nav-link"
                       data-bs-toggle="tab"
@@ -472,6 +504,14 @@
             {% endblock %}
           </div>
         </div>
+        {% if document.summary and document.blurb %}
+          <div class="tab-pane"
+               id="summary-tab"
+               role="tabpanel"
+               aria-labelledby="summary-tab">
+            <div class="container">{% include 'peachjam/document/_document_summary.html' %}</div>
+          </div>
+        {% endif %}
         {% if timeline %}
           <div class="tab-pane"
                id="history-tab"
@@ -481,12 +521,22 @@
           </div>
         {% endif %}
         {% block related-documents-tab-pane %}
-          {% if show_related_documents %}
+          {% if show_related_documents or not user.is_authenticated %}
             <div class="tab-pane"
                  id="related-tab"
                  role="tabpanel"
                  aria-labelledby="related-tab">
               <div class="container">{% include 'peachjam/_related_documents.html' %}</div>
+            </div>
+          {% endif %}
+        {% endblock %}
+        {% block unconstitutional-provisions-tab-pane %}
+          {% if perms.peachjam.view_unconstitutionalprovision and unconstitutional_provisions %}
+            <div class="tab-pane fade"
+                 id="unconstitutional-provisions-tab"
+                 role="tabpanel"
+                 aria-labelledby="unconstitutional-provisions-tab">
+              <div class="container">{% include 'peachjam/document/_unconstitutional_provisions.html' %}</div>
             </div>
           {% endif %}
         {% endblock %}
@@ -514,7 +564,7 @@
             <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
           </div>
         {% endif %}
-        {% if perms.can_debug_document %}
+        {% if perms.peachjam.can_debug_document %}
           <div class="tab-pane"
                id="debug-tab"
                role="tabpanel"
@@ -527,5 +577,9 @@
     {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
+    {% if perms.peachjam.view_unconstitutionalprovision %}
+      {{ unconstitutional_provisions_json|json_script:"unconstitutional-provisions-json" }}
+      {% include "peachjam/provision_enrichment/_modals.html" %}
+    {% endif %}
   </div>
 {% endblock %}

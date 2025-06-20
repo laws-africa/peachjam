@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta
 
 from django.contrib import messages
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import CharField, Func, Value
 from django.db.models.functions.text import Substr
 from django.template.defaultfilters import date as format_date
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
 
-from peachjam.forms import LegislationFilterForm
-from peachjam.models import Legislation, pj_settings
+from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
+from peachjam.models import Legislation, UnconstitutionalProvision, pj_settings
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
@@ -31,10 +32,11 @@ class LegislationListView(FilteredDocumentListView):
     def add_facets(self, context):
         super().add_facets(context)
         # move the alphabet facet first, it's highly used on the legislation page for some LIIs
-        facets = {"alphabet": context["facet_data"].pop("alphabet")}
-        for k, v in context["facet_data"].items():
-            facets[k] = v
-        context["facet_data"] = facets
+        if "alphabet" in context["facet_data"]:
+            facets = {"alphabet": context["facet_data"].pop("alphabet")}
+            for k, v in context["facet_data"].items():
+                facets[k] = v
+            context["facet_data"] = facets
 
     def add_years_facet(self, context):
         # for legislation, use the work year as the years facet
@@ -66,6 +68,9 @@ class LegislationListView(FilteredDocumentListView):
             "is_group": True,
             "title": pj_settings().subleg_label,
         }
+        context[
+            "show_unconstitutional_provisions"
+        ] = UnconstitutionalProvision.objects.exists()
         return context
 
 
@@ -379,3 +384,82 @@ class LegislationDetailView(BaseDocumentDetailView):
         )
         # TODO: we're not guaranteed to get documents in the same language, here
         return docs
+
+
+class UnconstitutionalProvisionListView(PermissionRequiredMixin, LegislationListView):
+    template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
+    latest_expression_only = True
+    form_class = UnconstitutionalProvisionFilterForm
+    exclude_facets = ["alphabet", "years"]
+    permission_required = "peachjam.view_unconstitutionalprovision"
+
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/provision_enrichment/_table.html"]
+            return ["peachjam/provision_enrichment/_table_form.html"]
+        return super().get_template_names()
+
+    def get_base_queryset(self, *args, **kwargs):
+        qs = super().get_base_queryset(*args, **kwargs)
+        unconstitutional_provision_works = (
+            UnconstitutionalProvision.objects.all().values_list("work__id", flat=True)
+        )
+        qs = qs.filter(work__in=unconstitutional_provision_works)
+        return qs
+
+    def add_resolved_facet(self, context):
+        # add a facet for resolved/unresolved at the top
+        if "resolved" not in self.exclude_facets:
+            context["facet_data"] = {
+                "resolved": {
+                    "label": _("Resolved"),
+                    "type": "checkbox",
+                    # these are (value, label) tuples
+                    "options": [
+                        ("resolved", _("Resolved")),
+                        ("unresolved", _("Unresolved")),
+                    ],
+                    "values": self.request.GET.getlist("resolved"),
+                },
+                **context.get("facet_data", {}),
+            }
+
+    def add_facets(self, context):
+        super().add_facets(context)
+        self.add_resolved_facet(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        resolved_filter_values = self.request.GET.getlist("resolved")
+        if (
+            "resolved" in resolved_filter_values
+            and "unresolved" in resolved_filter_values
+        ):
+            resolved_filter = "both"
+        elif "resolved" in resolved_filter_values:
+            resolved_filter = "resolved"
+        elif "unresolved" in resolved_filter_values:
+            resolved_filter = "unresolved"
+        else:
+            resolved_filter = "both"  # show nothing or default?
+        for doc in context["documents"]:
+            enrichments_qs = UnconstitutionalProvision.objects.filter(work=doc.work)
+
+            if resolved_filter == "resolved":
+                doc.provision_enrichments = enrichments_qs.filter(resolved=True)
+            elif resolved_filter == "unresolved":
+                doc.provision_enrichments = enrichments_qs.filter(resolved=False)
+            elif resolved_filter == "both":
+                doc.provision_enrichments = enrichments_qs.filter(
+                    resolved__in=[True, False]
+                )
+            else:
+                doc.provision_enrichments = enrichments_qs.all()
+
+            # set the document on the enrichment objects so they know to use it for extra detail
+            doc.provision_enrichments = list(doc.provision_enrichments)
+            for enrichment in doc.provision_enrichments:
+                enrichment.document = doc
+
+        return context

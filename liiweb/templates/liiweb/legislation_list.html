@@ -8,6 +8,28 @@
     <h1 class="my-4">{% trans 'Legislation' %}</h1>
   {% endif %}
 {% endblock %}
+{% block count-and-search %}
+  <div class="row mb-4">
+    <div class="col-12 col-sm-6 col-lg-8 mb-2">
+      {% block help %}
+        {% if help_link %}
+          {% include "peachjam/_help_button.html" %}
+        {% endif %}
+      {% endblock %}
+      {% if show_unconstitutional_provisions %}
+        <h5>{% trans "More resources" %}</h5>
+        <div class="mb-3">
+          <a href="{% url "unconstitutional_provision_list" %}">{% trans "Unconstitutional provisions" %}</a>
+        </div>
+      {% endif %}
+    </div>
+    <div class="col-12 col-sm-6 col-lg-4 mb-2">
+      {% block quick-search %}
+        {% include 'peachjam/_quick_search.html' %}
+      {% endblock %}
+    </div>
+  </div>
+{% endblock %}
 {% block alerts %}
   {% if view.variant == 'repealed' %}
     <div class="alert alert-danger">{% trans 'You are viewing repealed legislation which is no longer in force.' %}</div>

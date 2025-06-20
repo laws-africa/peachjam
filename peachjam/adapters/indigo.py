@@ -27,8 +27,10 @@ from peachjam.models import (
     Legislation,
     Locality,
     Predicate,
+    ProvisionEnrichment,
     Relationship,
     Taxonomy,
+    UnconstitutionalProvision,
     Work,
 )
 from peachjam.plugins import plugins
@@ -371,6 +373,32 @@ class IndigoAdapter(RequestsAdapter):
         self.set_parent(document, created_doc)
         self.fetch_relationships(document, created_doc)
         self.download_and_save_document_images(document, created_doc)
+        if model is Legislation:
+            self.get_provision_enrichments(url, created_doc.work)
+
+    def get_provision_enrichments(self, url, work):
+        logger.info(
+            f"Deleting {work.enrichments.count()} existing provision enrichments for {work}"
+        )
+        ProvisionEnrichment.objects.filter(work=work).delete()
+        enrichments = self.client_get(f"{url}/provision-enrichments.json").json()
+        if enrichments and "enrichments" in enrichments:
+            for enrichment in enrichments["enrichments"]:
+                kwargs = {}
+                for key, value in enrichment.items():
+                    if key.endswith("_frbr_uri"):
+                        # e.g. `judgment_frbr_ur` --> `judgment` field, Work object or None
+                        kwargs[key[:-9]] = Work.objects.filter(frbr_uri=value).first()
+                    else:
+                        kwargs[key] = value
+                if kwargs["enrichment_type"] == "unconstitutional_provision":
+                    UnconstitutionalProvision.objects.create(**kwargs)
+                # add other subclasses here too before finally creating a vanilla enrichment
+                else:
+                    ProvisionEnrichment.objects.create(**kwargs)
+            logger.info(
+                f"Fetched {work.enrichments.count()} provision enrichments for {work}"
+            )
 
     def list_images_from_content_api(self, document):
         links = document["links"]

@@ -183,6 +183,19 @@ table.doc-table.doc-table--toggle {
   }
 }
 
+// document table as a card body, flush to the sides
+.card-body-doc-table .doc-table {
+  margin-bottom: 0px;
+
+  tr > td:first-child {
+    padding-left: map-get($spacers, 3);
+  }
+
+  tbody:last-child > tr:last-child td {
+    border-bottom: 0px;
+  }
+}
+
 .saved-document-star {
   margin-inline-start: 0.5rem;
   cursor: pointer;

@@ -79,7 +79,7 @@
               <span v-else>
                 <span class="d-none d-md-inline">{{ $t("Search") }}</span>
                 <span class="d-md-none">
-                  <i class="bi bi-search text-white"></i>
+                  <i class="bi bi-search"></i>
                 </span>
               </span>
             </button>
@@ -91,7 +91,7 @@
             >
               <span class="d-none d-md-inline">{{ $t("Filters") }}</span>
               <span class="d-md-none">
-                <i class="bi bi-filters text-white"></i>
+                <i class="bi bi-filter"></i>
               </span>
               <span v-if="selectedFacetsCount" class="badge bg-light text-dark">{{ selectedFacetsCount }}</span>
             </button>
@@ -177,6 +177,8 @@
                 v-if="searchInfo.count"
                 v-model="facets"
                 :loading="facetsLoading"
+                :ordering="ordering"
+                @ordered="setOrdering"
               >
                 <template #header-title>
                   <button
@@ -511,6 +513,10 @@ export default {
       this.simpleSearch();
     },
 
+    setOrdering (ordering) {
+      this.ordering = ordering;
+    },
+
     sortBuckets (items, reverse = false, byCount = false) {
       const buckets = [...items];
       function keyFn (a, b) {
@@ -545,14 +551,6 @@ export default {
     submit () {
       this.page = 1;
       this.search();
-    },
-
-    clearAllFilters () {
-      this.facets.forEach((facet) => {
-        if (facet.value.length) {
-          facet.value = [];
-        }
-      });
     },
 
     serialiseState () {

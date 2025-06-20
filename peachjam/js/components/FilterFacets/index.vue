@@ -16,7 +16,11 @@
     </li>
     <li class="list-group-item d-flex d-lg-none">
       <label class="form-label align-self-center mb-0 me-2">{{ $t('Sort') }}</label>
+<<<<<<< HEAD
       <select v-model="ordering" class="ms-auto form-select select-narrow">
+=======
+      <select :value="ordering" class="ms-auto form-select select-narrow" @change="ordered">
+>>>>>>> origin/main
         <option value="-score">
           {{ $t('Relevance') }}
         </option>
@@ -55,9 +59,13 @@ export default {
     loading: {
       type: Boolean,
       default: false
+    },
+    ordering: {
+      type: String,
+      default: '-score'
     }
   },
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'ordered'],
   computed: {
     showClearAllFilter () {
       return this.modelValue.some((item) => {
@@ -122,6 +130,10 @@ export default {
         value: getValue()
       };
       this.$emit('update:modelValue', data);
+    },
+
+    ordered (e) {
+      this.$emit('ordered', e.target.value);
     }
   }
 };

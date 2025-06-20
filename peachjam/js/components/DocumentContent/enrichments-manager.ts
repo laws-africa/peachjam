@@ -5,6 +5,7 @@ import { GutterEnrichmentManager } from '@lawsafrica/indigo-akn/dist/enrichments
 import SelectionSearch from './selection-search';
 import SelectionShare from './selection-share';
 import { AnnotationsProvider } from '../Annotations';
+import { ProvisionEnrichments } from '../ProvisionEnrichments';
 
 /**
  * Class for handling the setup of all enrichments and interactions between enrichments
@@ -12,6 +13,7 @@ import { AnnotationsProvider } from '../Annotations';
 class EnrichmentsManager {
   private relationshipsManager: RelationshipEnrichments | null = null;
   private annotationsManager: AnnotationsProvider | null = null;
+  private provisionEnrichmentsManager: ProvisionEnrichments | null = null;
   private selectionSearch: SelectionSearch;
   private selectionShare: SelectionShare;
   private root: HTMLElement;
@@ -38,6 +40,7 @@ class EnrichmentsManager {
     if (this.displayType !== 'pdf') {
       this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
       this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
+      this.provisionEnrichmentsManager = new ProvisionEnrichments(this.root, this.gutterManager, this.displayType);
     }
     this.selectionSearch = new SelectionSearch(this.gutterManager);
     this.selectionShare = new SelectionShare(this.gutterManager);
