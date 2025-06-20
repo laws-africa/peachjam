@@ -121,13 +121,13 @@
   <dl class="document-metadata-list d-md-flex">
     {% if document.case_summary %}
       <dt>
-        Summary
+        {% trans 'Short summary' %}
       </dt>
       <dd>
         {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
         <details>
           <summary class="mb-1">
-            Read full summary
+            {% trans 'Read full summary' %}
           </summary>
           {% if perms.peachjam.can_view_document_summary %}
             {% if document.case_summary %}
