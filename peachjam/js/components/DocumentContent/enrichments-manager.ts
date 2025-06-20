@@ -4,6 +4,7 @@ import PDFCitationLinks from './citation-links';
 import { GutterEnrichmentManager } from '@lawsafrica/indigo-akn/dist/enrichments';
 import SelectionSearch from './selection-search';
 import SelectionShare from './selection-share';
+import { PortionDetails } from './portions';
 import { AnnotationsProvider } from '../Annotations';
 import { ProvisionEnrichments } from '../ProvisionEnrichments';
 import { ProvisionCitations } from '../ProvisionCitations';
@@ -24,8 +25,10 @@ class EnrichmentsManager {
   private readonly gutter: HTMLLaGutterElement | null;
   private readonly akn: HTMLElement | null;
   private citationLinks: PDFCitationLinks | null = null;
+  private portionDetails: PortionDetails | null = null;
   private gutterManager: GutterEnrichmentManager;
   private displayType: string; // html, pdf or akn
+  private expressionFrbrUri: string;
   private provisionCitations: ProvisionCitations | null = null;
   private selectionToolbarManager: SelectionToolbarManager | null = null;
 
@@ -35,6 +38,7 @@ class EnrichmentsManager {
     // this is either div.content (for HTML and PDF) or la-akoma-ntoso.content (for AKN)
     this.akn = this.root.querySelector('.content');
     this.displayType = this.root.getAttribute('data-display-type') || 'html';
+    this.expressionFrbrUri = this.akn?.getAttribute('frbr-expression-uri') || '';
 
     this.docDiffsManager = this.setupDocDiffs();
     this.gutterManager = new GutterEnrichmentManager(this.root);
@@ -49,6 +53,7 @@ class EnrichmentsManager {
       this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
       this.provisionEnrichmentsManager = new ProvisionEnrichments(this.root, this.gutterManager, this.displayType);
       this.provisionCitations = new ProvisionCitations(this.root);
+      this.portionDetails = new PortionDetails(this.root, this.gutterManager, this.displayType, this.expressionFrbrUri);
     }
 
     this.selectionSearch = new SelectionSearch(this.gutterManager);
@@ -68,11 +73,10 @@ class EnrichmentsManager {
 
   setupDocDiffs () {
     if (!this.akn || !this.gutter) return null;
-    const frbrExpressionUri = this.akn.getAttribute('frbr-expression-uri');
     const documentId = this.root.dataset.documentId;
-    if (!frbrExpressionUri || !documentId) return null;
+    if (!this.expressionFrbrUri || !documentId) return null;
     return new DocDiffsManager(
-      frbrExpressionUri, documentId, this.gutter, this.root.getAttribute('data-diffs-url') || ''
+      this.expressionFrbrUri, documentId, this.gutter, this.root.getAttribute('data-diffs-url') || ''
     );
   }
 
