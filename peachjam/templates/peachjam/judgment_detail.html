@@ -119,29 +119,21 @@
 {% endblock %}
 {% block extra-metadata %}
   <dl class="document-metadata-list d-md-flex">
-    {% if document.flynote %}
-      <dt>
-        {% trans 'Flynote' %}
-      </dt>
-      <dd>
-        {{ document.flynote|safe }}
-      </dd>
-    {% endif %}
     {% if document.case_summary %}
       <dt>
         Summary
       </dt>
       <dd>
-        {{ document.blurb|default_if_none:"" }}
-        <details class="my-3">
-          <summary>
+        {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
+        <details>
+          <summary class="mb-1">
             Read full summary
           </summary>
           {% if perms.peachjam.can_view_document_summary %}
             {% if document.case_summary %}
               <div class="mb-2">
-                <h6 class="h6 mb-1 fw-bold">{% trans 'Case summary' %}</h6>
-                <p>{{ document.case_summary|safe }}</p>
+                <h6 class="fw-bold">{% trans 'Case summary' %}</h6>
+                {{ document.case_summary|safe }}
               </div>
             {% endif %}
             {% if document.issues %}
@@ -160,18 +152,32 @@
                 </ol>
               </div>
             {% endif %}
+            {% if document.order %}
+              <dt>
+                {% trans 'Order' %}
+              </dt>
+              <dd>
+                {{ document.order|safe }}
+              </dd>
+            {% endif %}
           {% else %}
-            {% trans 'You are not allowed to view the summary.' %}
+            <p>
+              {% url 'account_signup' as signup %}
+              {% url 'account_login' as login %}
+              {% blocktrans trimmed with signup_url=signup login_url=login next=request.get_full_path|urlencode %}
+                <a href="{{ signup_url }}?next={{ next }}">Sign up</a> or <a href="{{ login_url }}?next={{ next }}">Log in</a> to see the full summary.
+              {% endblocktrans %}
+            </p>
           {% endif %}
         </details>
       </dd>
     {% endif %}
-    {% if document.order %}
+    {% if document.flynote %}
       <dt>
-        {% trans 'Order' %}
+        {% trans 'Flynote' %}
       </dt>
       <dd>
-        {{ document.order|safe }}
+        {{ document.flynote|safe }}
       </dd>
     {% endif %}
   </dl>

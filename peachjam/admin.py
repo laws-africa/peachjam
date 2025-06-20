@@ -1151,7 +1151,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets[3][1]["fields"].extend(["case_summary", "flynote", "order"])
+    fieldsets[3][1]["fields"].extend(["blurb", "case_summary", "flynote", "order"])
     readonly_fields = [
         "mnc",
         "serial_number",

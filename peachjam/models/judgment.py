@@ -607,10 +607,6 @@ class Judgment(CoreDocument):
         except Exception as e:
             log.error(f"Error generating AI summary for judgment {self.pk}", exc_info=e)
 
-    @property
-    def summary(self):
-        return self.case_summary
-
 
 class CaseNumber(models.Model):
     string_override = models.CharField(
