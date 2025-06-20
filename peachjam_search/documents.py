@@ -24,6 +24,7 @@ from peachjam.models import (
     Outcome,
     Taxonomy,
 )
+from peachjam.xmlutils import strip_remarks
 
 log = logging.getLogger(__name__)
 
@@ -376,7 +377,7 @@ class SearchableDocument(Document):
         if instance.content_html and instance.content_html_is_akn and instance.toc_json:
             # index each provision separately
             provisions = []
-            root = instance.content_html_tree
+            root = strip_remarks(instance.content_html_tree)
             for item in instance.toc_json:
                 prepare_provision(item, [])
 
