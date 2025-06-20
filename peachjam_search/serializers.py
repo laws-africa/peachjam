@@ -25,6 +25,15 @@ class SearchHit:
 
     @classmethod
     def from_es_hits(cls, engine, es_hits):
+        # de-duplicate on expression FRBR URI
+        seen = set()
+        es_hits = [
+            hit
+            for hit in es_hits
+            if hit.expression_frbr_uri not in seen
+            and not seen.add(hit.expression_frbr_uri)
+        ]
+
         hits = [cls.from_es_hit(engine, es_hit, i) for i, es_hit in enumerate(es_hits)]
 
         # determine best match: is the first result's score significantly better than the next?
