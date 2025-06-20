@@ -178,7 +178,8 @@ class SavedSearch(models.Model):
                 if datetime.fromisoformat(hit.created_at) > self.last_alerted_at
             ]
 
-        SearchHit.attach_fake_documents(hits)
+        for hit in hits:
+            hit.set_fake_document()
         return [hit.as_dict() for hit in hits]
 
     def send_alert(self, hits):

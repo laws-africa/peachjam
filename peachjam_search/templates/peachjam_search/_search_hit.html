@@ -1,6 +1,6 @@
 {% load i18n peachjam %}
 <li class="mb-4 hit {% if hit.best_match %}best-match{% endif %}"
-    data-document-id="{{ hit.document.id }}">
+    data-document-id="{{ hit.document.id|default_if_none:'' }}">
   <div class="card" data-best-match="{% trans "Best match" %}">
     <div class="card-body">
       <h5 class="card-title">

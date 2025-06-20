@@ -16,6 +16,7 @@ class SearchHit:
     index: str
     score: float
     position: int
+    expression_frbr_uri: str
     document: CoreDocument = None
     best_match: bool = False
     highlight: dict = None
@@ -40,30 +41,28 @@ class SearchHit:
             index=es_hit.meta.index,
             score=es_hit.meta.score,
             position=(engine.page - 1) * engine.page_size + i + 1,
+            expression_frbr_uri=es_hit.expression_frbr_uri,
         )
 
     @classmethod
     def attach_documents(cls, hits, fake_documents=None):
         if fake_documents is None:
             fake_documents = settings.PEACHJAM["SEARCH_FAKE_DOCUMENTS"]
-        if fake_documents:
-            cls.attach_fake_documents(hits)
-            return
 
         qs = (
             CoreDocument.objects.for_document_table()
-            .filter(pk__in=[hit.id for hit in hits])
+            .filter(expression_frbr_uri__in=[hit.expression_frbr_uri for hit in hits])
             .prefetch_related("alternative_names")
         )
 
-        documents = {d.id: d for d in qs}
+        documents = {d.expression_frbr_uri: d for d in qs}
         for hit in hits:
-            hit.document = documents.get(hit.id)
+            hit.document = documents.get(hit.expression_frbr_uri)
 
-    @classmethod
-    def attach_fake_documents(cls, hits):
-        for hit in hits:
-            hit.set_fake_document()
+            # if we're faking documents and this document isn't in the local database, assume it's remote
+            # and generate a fake document
+            if not hit.document and fake_documents:
+                hit.set_fake_document()
 
     def __post_init__(self):
         self.set_highlight()
