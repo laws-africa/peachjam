@@ -198,7 +198,7 @@ def judgment_content_changed_generate_summary(sender, instance, **kwargs):
         not judgment.summary  # No summary at all
         or judgment.summary_ai_generated  # Summary exists but is AI-generated
     ) and (
-        not judgment.must_be_anonymised  # Anonymization OK
+        not judgment.must_be_anonymised or judgment.anonymised  # Anonymization OK
     )
     if should_generate:
         generate_judgment_summary(judgment.pk)
