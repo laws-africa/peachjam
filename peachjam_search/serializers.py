@@ -204,8 +204,18 @@ class SearchHit:
     def set_fake_document(self):
         """Attaches a fake document. This is used when we know elasticsearch results won't be in a local database,
         for example with AfricanLII where it searches remote document indexes."""
-        self.document = self.es_hit.to_dict()
-        self.document["get_absolute_url"] = self.es_hit.expression_frbr_uri
+
+        class FakeDocument:
+            def __init__(self, d):
+                self.d = d
+
+            def __getattr__(self, item):
+                return self.d.get(item, None)
+
+            def get_absolute_url(self):
+                return self.d.get("expression_frbr_uri", "")
+
+        self.document = FakeDocument(self.es_hit.to_dict())
 
     def as_dict(self):
         return {
