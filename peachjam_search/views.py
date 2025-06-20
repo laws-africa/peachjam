@@ -14,6 +14,7 @@ from django.http.response import (
     JsonResponse,
 )
 from django.shortcuts import redirect, reverse
+from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -43,10 +44,7 @@ from peachjam_search.forms import (
     SearchForm,
 )
 from peachjam_search.models import SavedSearch, SearchTrace
-from peachjam_search.serializers import (
-    SearchableDocumentSerializer,
-    SearchClickSerializer,
-)
+from peachjam_search.serializers import SearchClickSerializer, SearchHit
 
 CACHE_SECS = 15 * 60
 SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
@@ -98,38 +96,36 @@ class DocumentSearchView(TemplateView):
             return self.download_results(engine, self.request.GET["format"])
 
         es_response = engine.execute()
-        results = SearchableDocumentSerializer(
-            es_response.hits,
-            many=True,
-            context={
-                "request": request,
-                "explain": request.user.has_perm("peachjam_search.debug_search"),
-            },
-        ).data
+        trace = self.save_search_trace(engine, es_response.hits.total.value)
+
+        hits = SearchHit.from_es_hits(engine, es_response.hits)
+        SearchHit.attach_documents(hits)
+        # only keep those with documents
+        hits = [h for h in hits if h.document]
 
         response = {
             "count": es_response.hits.total.value,
-            "results": results,
             "facets": es_response.aggregations.to_dict(),
+            "results_html": render_to_string(
+                "peachjam_search/_search_hit_list.html",
+                {
+                    "request": request,
+                    "hits": hits,
+                    "can_debug": self.request.user.has_perm(
+                        "peachjam_search.debug_search"
+                    ),
+                    "show_jurisdiction": settings.PEACHJAM[
+                        "SEARCH_JURISDICTION_FILTER"
+                    ],
+                },
+            ),
+            "trace_id": str(trace.id) if trace else None,
+            "can_download": self.request.user.has_perm(
+                "peachjam_search.download_search"
+            ),
+            "can_semantic": settings.PEACHJAM["SEARCH_SEMANTIC"]
+            and self.request.user.has_perm("peachjam_search.semantic_search"),
         }
-
-        trace = self.save_search_trace(engine, response)
-        response["trace_id"] = str(trace.id) if trace else None
-
-        # show debug information to this user
-        response["can_debug"] = self.request.user.has_perm(
-            "peachjam_search.debug_search"
-        )
-        response["can_download"] = self.request.user.has_perm(
-            "peachjam_search.download_search"
-        )
-        response["can_semantic"] = settings.PEACHJAM[
-            "SEARCH_SEMANTIC"
-        ] and self.request.user.has_perm("peachjam_search.semantic_search")
-        response["can_save_documents"] = pj_settings().allow_save_documents and (
-            not self.request.user.is_authenticated
-            or self.request.user.has_perm("peachjam.add_saveddocument")
-        )
 
         return self.render(response)
 
@@ -144,6 +140,30 @@ class DocumentSearchView(TemplateView):
 
         response = {"suggestions": suggestions}
         return self.render(response)
+
+    @vary_on_cookie
+    @method_decorator(cache_page(CACHE_SECS))
+    def facets(self, request, *args, **kwargs):
+        """Only return facets from search."""
+        form = SearchForm(request.GET)
+        if not form.is_valid():
+            return JsonResponse({"error": form.errors}, status=400)
+
+        form.cleaned_data["facets"] = True
+        engine = self.make_search_engine(form)
+        if not engine.query and not engine.field_queries:
+            # no search term
+            return JsonResponse({"error": "No search term"}, status=400)
+
+        engine.page_size = 0
+        es_response = engine.execute()
+
+        return self.render(
+            {
+                "count": es_response.hits.total.value,
+                "facets": es_response.aggregations.to_dict(),
+            }
+        )
 
     def make_search_engine(self, form):
         engine = SearchEngine()
@@ -165,7 +185,7 @@ class DocumentSearchView(TemplateView):
             )
         return JsonResponse(response)
 
-    def save_search_trace(self, engine, response):
+    def save_search_trace(self, engine, n_results):
         filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
 
         search = self.request.GET.get("search", "")[:2048]
@@ -180,7 +200,7 @@ class DocumentSearchView(TemplateView):
             mode=engine.mode,
             search=search,
             field_searches=engine.field_queries,
-            n_results=response["count"],
+            n_results=n_results,
             page=engine.page,
             filters=engine.filters,
             filters_string=filters_string,

@@ -176,8 +176,8 @@
               <FilterFacets
                 v-if="searchInfo.count"
                 v-model="facets"
+                :loading="facetsLoading"
                 :ordering="ordering"
-                :loading="loading"
                 @ordered="setOrdering"
               >
                 <template #header-title>
@@ -231,25 +231,12 @@
                     </option>
                   </select>
                 </div>
-
-                <ul class="list-unstyled search-result-list">
-                  <SearchResult
-                    v-for="(item, index) in searchInfo.results"
-                    :key="item.id"
-                    :index="index"
-                    :count="searchInfo.count"
-                    :trace-id="searchInfo.trace_id"
-                    :item="item"
-                    :query="q"
-                    :debug="searchInfo.can_debug"
-                    :show-jurisdiction="showJurisdiction"
-                    :document-labels="documentLabels"
-                    @item-clicked="(e) => itemClicked(item, e)"
-                  />
-                </ul>
-
+                <div
+                  ref="results"
+                  @click="itemClicked"
+                  v-html="searchInfo.results_html"
+                />
                 <SearchFeedback :trace-id="searchInfo.trace_id" />
-
                 <SearchPagination
                   :search="searchInfo"
                   :page="page"
@@ -294,7 +281,6 @@
 </template>
 
 <script>
-import SearchResult from './SearchResult.vue';
 import SearchPagination from './SearchPagination.vue';
 import FilterFacets from '../FilterFacets/index.vue';
 import MobileFacetsDrawer from './MobileSideDrawer.vue';
@@ -307,10 +293,11 @@ import { authHeaders } from '../../api';
 import SearchTypeahead from '../search-typeahead';
 import htmx from 'htmx.org';
 import SearchFeedback from './SearchFeedback.vue';
+import { loadSavedDocuments } from '../saved-documents';
 
 export default {
   name: 'FindDocuments',
-  components: { SearchFeedback, FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
+  components: { SearchFeedback, FacetBadges, MobileFacetsDrawer, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },
   props: ['showJurisdiction', 'showGoogle', 'showSuggestions', 'showModes'],
   data () {
     const getLabelOptionLabels = (labels) => {
@@ -330,6 +317,7 @@ export default {
       searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
       documentLabels: JSON.parse(document.querySelector('#data-labels').textContent).documentLabels,
       loadingCount: 0,
+      facetsLoadingCount: 0,
       error: null,
       searchInfo: {},
       page: 1,
@@ -482,6 +470,9 @@ export default {
     },
     loading () {
       return this.loadingCount > 0;
+    },
+    facetsLoading () {
+      return this.facetsLoadingCount > 0;
     }
   },
 
@@ -664,7 +655,7 @@ export default {
       this.search();
     },
 
-    formatFacets () {
+    formatFacets (facetInfo, count) {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
 
@@ -680,16 +671,16 @@ export default {
         if (facet.name === 'year') {
           facet.options = generateOptions(
             this.sortBuckets(
-              this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
+              facetInfo[`_filter_${facet.name}`][facet.name].buckets,
               true
             ),
             facet.optionLabels
           );
         } else {
-          if (this.searchInfo.facets[`_filter_${facet.name}`]) {
+          if (facetInfo[`_filter_${facet.name}`]) {
             facet.options = generateOptions(
               this.sortBuckets(
-                this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
+                facetInfo[`_filter_${facet.name}`][facet.name].buckets,
                false,
                 // sort nature by descending count, everything else alphabetically
                 facet.name === 'nature'
@@ -702,24 +693,11 @@ export default {
         // If we have results, then sanity check chosen options against those that are available.
         // If there are no results, we trust any options given so that we can show the facet buttons
         // and allow the user to remove the facets to try to find results.
-        if (this.searchInfo.count > 0) {
+        if (count > 0) {
           const availableOptions = facet.options.map(option => option.value);
           facet.value = urlParams.getAll(facet.name).filter(value => availableOptions.includes(value));
         }
       });
-    },
-
-    formatResults () {
-      for (let i = 0; i < this.searchInfo.results.length; i++) {
-        // number items from 1 consistently across pages
-        this.searchInfo.results[i].position = (this.page - 1) * this.pageSize + i + 1;
-      }
-
-      // determine best match: is the first result's score significantly better than the next?
-      if (this.page === 1 && this.searchInfo.results.length > 1 &&
-          this.searchInfo.results[0]._score / this.searchInfo.results[1]._score >= 1.2) {
-        this.searchInfo.results[0].best_match = true;
-      }
     },
 
     generateSearchParams () {
@@ -734,11 +712,6 @@ export default {
         });
       });
 
-      // facets that we want the API to return
-      this.facets.forEach((facet) => {
-        params.append('facet', facet.name);
-      });
-
       this.generateAdvancedSearchParams(params);
 
       // record suggestion details for statistics
@@ -748,6 +721,8 @@ export default {
 
       if (this.mode !== 'text') {
         params.append('mode', this.mode);
+      } else {
+        params.append('facets', '1');
       }
 
       return params;
@@ -834,6 +809,13 @@ export default {
               document.location.pathname + '?' + this.serialiseState()
             );
           }
+
+          if (this.mode !== 'text') {
+            // load facets in a separate request
+            this.loadFacets();
+          }
+
+          // do the search
           const response = await fetch(url);
 
           // check that the search state hasn't changed since we sent the request
@@ -843,14 +825,13 @@ export default {
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
-              this.formatFacets();
-              this.formatResults();
+              if (this.mode === 'text') {
+                this.formatFacets(this.searchInfo.facets, this.searchInfo.count);
+              }
               this.trackSearch(params);
               this.savedSearchModal();
               this.linkTraces(previousId, this.searchInfo.trace_id);
-              if (this.searchInfo.can_save_documents) {
-                this.loadSaveDocumentButtons();
-              }
+              this.loadSaveDocumentButtons();
             } else {
               this.error = response.statusText;
             }
@@ -861,6 +842,32 @@ export default {
 
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
+      }
+    },
+
+    /**
+     * Load the facets only, separately to a search. This is used in non-text mode because the facets are
+     * slower.
+     */
+    async loadFacets () {
+      this.facetsLoadingCount++;
+
+      try {
+        const params = this.generateSearchParams();
+        params.append('facets', '1');
+        const url = `/search/api/documents/facets?${params.toString()}`;
+        params.delete('facets');
+        const response = await fetch(url);
+
+        // check that the search state hasn't changed since we sent the request
+        if (params.toString() === this.generateSearchParams().toString()) {
+          const info = await response.json();
+          this.formatFacets(info.facets, info.count);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        this.facetsLoadingCount--;
       }
     },
 
@@ -881,20 +888,23 @@ export default {
       analytics.trackSiteSearch(keywords.join('; '), facets.join('; '), this.searchInfo.count);
     },
 
-    async itemClicked (item, portion) {
-      const params = new URLSearchParams();
-      params.set('frbr_uri', item.expression_frbr_uri);
-      params.set('portion', portion || '');
-      params.set('position', item.position);
-      params.set('search_trace', this.searchInfo.trace_id);
-      try {
-        fetch('/search/api/click/', {
-          method: 'POST',
-          headers: await authHeaders(),
-          body: params
-        });
-      } catch (err) {
-        console.log(err);
+    async itemClicked (event) {
+      const item = event.target.closest('[data-position]');
+      if (item) {
+        const params = new URLSearchParams();
+        params.set('frbr_uri', item.getAttribute('data-frbr-uri'));
+        params.set('portion', item.getAttribute('data-portion') || '');
+        params.set('position', item.getAttribute('data-position'));
+        params.set('search_trace', this.searchInfo.trace_id);
+        try {
+          fetch('/search/api/click/', {
+            method: 'POST',
+            headers: await authHeaders(),
+            body: params
+          });
+        } catch (err) {
+          console.log(err);
+        }
       }
     },
 
@@ -944,15 +954,7 @@ export default {
     },
 
     loadSaveDocumentButtons () {
-      // use htmx to load and inject save-document buttons
-      // get document ids
-      const ids = this.searchInfo.results.map(result => result.id);
-      if (ids.length) {
-        const el = document.createElement('div');
-        document.body.appendChild(el);
-        const query = ids.map(id => `doc_id=${id}`).join('&');
-        htmx.ajax('GET', '/saved-documents/fragments?' + query, el);
-      }
+      this.$nextTick(() => loadSavedDocuments(this.$refs.results));
     },
 
     downloadUrl () {

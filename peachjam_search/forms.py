@@ -16,6 +16,7 @@ class SearchForm(forms.Form):
     mode = forms.ChoiceField(
         required=False, choices=[(x, x) for x in ["text", "semantic", "hybrid"]]
     )
+    facets = forms.BooleanField(required=False)
 
     def clean_ordering(self):
         if self.cleaned_data["ordering"] == "-score":
@@ -56,6 +57,10 @@ class SearchForm(forms.Form):
         engine.query = self.cleaned_data.get("search")
         engine.page = self.cleaned_data.get("page") or 1
         engine.ordering = self.cleaned_data.get("ordering") or engine.ordering
+
+        if not self.cleaned_data.get("facets"):
+            # disable facets, which can be expensive for semantic queries
+            engine.facet_fields = []
 
         for key in self.data.keys():
             if key in engine.filter_fields:
