@@ -293,7 +293,7 @@ import { authHeaders } from '../../api';
 import SearchTypeahead from '../search-typeahead';
 import htmx from 'htmx.org';
 import SearchFeedback from './SearchFeedback.vue';
-import { loadSavedDocuments } from "../saved-documents";
+import { loadSavedDocuments } from '../saved-documents';
 
 export default {
   name: 'FindDocuments',

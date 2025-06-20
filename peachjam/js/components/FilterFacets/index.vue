@@ -16,11 +16,7 @@
     </li>
     <li class="list-group-item d-flex d-lg-none">
       <label class="form-label align-self-center mb-0 me-2">{{ $t('Sort') }}</label>
-<<<<<<< HEAD
-      <select v-model="ordering" class="ms-auto form-select select-narrow">
-=======
       <select :value="ordering" class="ms-auto form-select select-narrow" @change="ordered">
->>>>>>> origin/main
         <option value="-score">
           {{ $t('Relevance') }}
         </option>
