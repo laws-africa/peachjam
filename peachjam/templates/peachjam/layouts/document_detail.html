@@ -489,14 +489,6 @@
             {% endblock %}
           </div>
         </div>
-        {% if document.summary and document.blurb %}
-          <div class="tab-pane"
-               id="summary-tab"
-               role="tabpanel"
-               aria-labelledby="summary-tab">
-            <div class="container">{% include 'peachjam/document/_document_summary.html' %}</div>
-          </div>
-        {% endif %}
         {% if timeline %}
           <div class="tab-pane"
                id="history-tab"
