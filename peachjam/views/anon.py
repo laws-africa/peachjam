@@ -57,6 +57,8 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
             stage="anonymisation",
         )
 
+        instance.update_text_content()
+
         return instance
 
 
