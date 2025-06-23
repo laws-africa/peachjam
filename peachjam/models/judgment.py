@@ -602,6 +602,7 @@ class Judgment(CoreDocument):
             self.flynote = summary.get("flynote", "")
             self.held = summary.get("held", [])
             self.issues = summary.get("issues", [])
+            self.order = summary.get("order", "")
             self.summary_ai_generated = True
             self.save()
         except Exception as e:

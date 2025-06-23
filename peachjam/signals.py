@@ -195,7 +195,7 @@ def judgment_content_changed_generate_summary(sender, instance, **kwargs):
         return
     judgment = instance.document
     should_generate = (
-        not judgment.summary  # No summary at all
+        not judgment.case_summary  # No summary at all
         or judgment.summary_ai_generated  # Summary exists but is AI-generated
     ) and (
         not judgment.must_be_anonymised or judgment.anonymised  # Anonymization OK
