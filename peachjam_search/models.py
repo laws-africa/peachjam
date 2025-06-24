@@ -168,18 +168,23 @@ class SavedSearch(models.Model):
         form.is_valid()
         form.configure_engine(engine)
         es_response = engine.execute()
+
+        # unpack the hits
         hits = SearchHit.from_es_hits(engine, es_response.hits)
+        # fetch document data for hits from the database
+        SearchHit.attach_documents(hits, fake_documents=False)
+        # only keep those with a document
+        hits = [h for h in hits if h.document]
 
         # get hits that were created later than the last alert
         if self.last_alerted_at:
             hits = [
                 hit
                 for hit in hits
-                if datetime.fromisoformat(hit.created_at) > self.last_alerted_at
+                if datetime.fromisoformat(hit.document.created_at)
+                > self.last_alerted_at
             ]
 
-        for hit in hits:
-            hit.set_fake_document()
         return [hit.as_dict() for hit in hits]
 
     def send_alert(self, hits):
