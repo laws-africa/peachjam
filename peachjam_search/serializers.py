@@ -2,7 +2,7 @@ import dataclasses
 
 from django.conf import settings
 from django.utils.html import escape
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 
 from peachjam.models import CoreDocument
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
@@ -22,6 +22,16 @@ class SearchHit:
     highlight: dict = None
     pages: list = None
     provisions: list = None
+
+    class FakeDocument:
+        def __init__(self, d):
+            self.d = d
+
+        def __getattr__(self, item):
+            return self.d.get(item, None)
+
+        def get_absolute_url(self):
+            return self.d.get("expression_frbr_uri", "")
 
     @classmethod
     def from_es_hits(cls, engine, es_hits):
@@ -212,25 +222,22 @@ class SearchHit:
     def set_fake_document(self):
         """Attaches a fake document. This is used when we know elasticsearch results won't be in a local database,
         for example with AfricanLII where it searches remote document indexes."""
-
-        class FakeDocument:
-            def __init__(self, d):
-                self.d = d
-
-            def __getattr__(self, item):
-                return self.d.get(item, None)
-
-            def get_absolute_url(self):
-                return self.d.get("expression_frbr_uri", "")
-
-        self.document = FakeDocument(self.es_hit.to_dict())
+        self.document = SearchHit.FakeDocument(self.es_hit.to_dict())
 
     def as_dict(self):
-        return {
+        d = {
             field.name: getattr(self, field.name)
             for field in dataclasses.fields(self)
-            if field.name not in ["es_hit"]
+            if field.name not in ["es_hit", "document"]
         }
+
+        d["document"] = (
+            SearchResultDocumentSerializer(self.document).data
+            if self.document
+            else None
+        )
+
+        return d
 
     def raw(self):
         data = self.meta.to_dict()
@@ -242,7 +249,18 @@ class SearchHit:
         return data
 
 
-class SearchClickSerializer(ModelSerializer):
+class SearchClickSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchClick
         fields = ("frbr_uri", "search_trace", "portion", "position")
+
+
+class SearchResultDocumentSerializer(serializers.ModelSerializer):
+    """Serializer for CoreDocument used in search results. Only minimal fields are required."""
+
+    blurb = serializers.CharField(read_only=True, allow_null=True)
+    flynote = serializers.CharField(read_only=True, allow_null=True)
+
+    class Meta:
+        model = CoreDocument
+        fields = ("expression_frbr_uri", "title", "blurb", "flynote")
