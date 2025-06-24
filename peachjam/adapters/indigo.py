@@ -375,6 +375,7 @@ class IndigoAdapter(RequestsAdapter):
         self.download_and_save_document_images(document, created_doc)
         if model is Legislation:
             self.get_provision_enrichments(url, created_doc.work)
+        created_doc.update_text_content()
 
     def get_provision_enrichments(self, url, work):
         logger.info(

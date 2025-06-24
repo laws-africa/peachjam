@@ -423,6 +423,8 @@ class DocumentForm(forms.ModelForm):
         if "content_html" in self.changed_data:
             # if the content_html has changed, set it and update related attributes
             self.instance.set_content_html(self.instance.content_html)
+            if self.instance.pk:
+                self.instance.update_text_content()
 
     def clean_content_html(self):
         # prevent CKEditor-based editing of AKN HTML
@@ -1151,15 +1153,12 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets[3][1]["fields"].extend(
-        ["case_summary", "case_summary_ai", "flynote", "order"]
-    )
+    fieldsets[3][1]["fields"].extend(["blurb", "case_summary", "flynote", "order"])
     readonly_fields = [
         "mnc",
         "serial_number",
         "title",
         "citation",
-        "case_summary_ai",
         "frbr_uri_doctype",
         "frbr_uri_subtype",
         "frbr_uri_actor",
