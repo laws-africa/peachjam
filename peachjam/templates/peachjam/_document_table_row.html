@@ -37,16 +37,8 @@
         {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
       {% endif %}
       {% if document.doc_type == "judgment" %}
-        {% if document.blurb %}
-          <div class="d-none d-md-block">
-            <div class="text-muted fs-sm fst-italic">{{ document.blurb }}</div>
-          </div>
-        {% endif %}
-        {% if document.flynote %}
-          <div class="d-none d-md-block">
-            <div class="text-muted fs-sm fst-italic">{{ document.flynote|safe }}</div>
-          </div>
-        {% endif %}
+        {% if document.blurb %}<div class="text-muted fs-sm fst-italic">{{ document.blurb }}</div>{% endif %}
+        {% if document.flynote %}<div class="text-muted fs-sm fst-italic">{{ document.flynote|safe }}</div>{% endif %}
       {% elif document.listing_taxonomies %}
         <div class="d-none d-md-block ms-3">
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
