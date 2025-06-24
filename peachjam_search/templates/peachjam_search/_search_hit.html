@@ -70,8 +70,11 @@
           {% endif %}
         </div>
         {% if hit.document.matter_type %}<div>{{ hit.document.matter_type }}</div>{% endif %}
-        {% if hit.document.listing_taxonomies %}
-          {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
+        {% if hit.document.doc_type == "judgment" %}
+          {% if hit.document.blurb %}<div class="text-muted fs-sm">{{ hit.document.blurb }}</div>{% endif %}
+          {% if hit.document.flynote %}<div class="text-muted fs-sm">{{ hit.document.flynote|safe }}</div>{% endif %}
+        {% elif hit.document.listing_taxonomies %}
+          {% include 'peachjam/_document_taxonomies.html' with taxonomies=hit.document.listing_taxonomies %}
         {% endif %}
         <div id="saved-document-table-detail--{{ hit.document.id }}"></div>
       </div>
