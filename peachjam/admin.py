@@ -423,7 +423,8 @@ class DocumentForm(forms.ModelForm):
         if "content_html" in self.changed_data:
             # if the content_html has changed, set it and update related attributes
             self.instance.set_content_html(self.instance.content_html)
-            self.instance.update_text_content()
+            if self.instance.pk:
+                self.instance.update_text_content()
 
     def clean_content_html(self):
         # prevent CKEditor-based editing of AKN HTML
