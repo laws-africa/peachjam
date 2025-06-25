@@ -400,8 +400,7 @@ class BaseDocumentDetailView(DetailView):
 
         self.add_relationships(context)
         self.add_provision_relationships(context)
-        self.add_unconstitutional_provisions(context)
-        self.add_uncommenced_provisions(context)
+        self.add_provision_enrichments(context)
 
         if context["document"].content_html:
             context["display_type"] = (
@@ -559,7 +558,7 @@ class BaseDocumentDetailView(DetailView):
                 Predicate.objects.all(), many=True
             ).data
 
-    def add_unconstitutional_provisions(self, context):
+    def add_provision_enrichments(self, context):
         unconstitutional_provisions = list(
             UnconstitutionalProvision.objects.filter(work=self.object.work)
         )
@@ -567,13 +566,10 @@ class BaseDocumentDetailView(DetailView):
             provision.document = self.object
 
         context["unconstitutional_provisions"] = unconstitutional_provisions
-        context[
-            "unconstitutional_provisions_json"
-        ] = UnconstitutionalProvisionsSerializer(
+        unconstitutional_provisions_json = UnconstitutionalProvisionsSerializer(
             unconstitutional_provisions, many=True
         ).data
 
-    def add_uncommenced_provisions(self, context):
         uncommenced_provisions = list(
             UncommencedProvision.objects.filter(work=self.object.work)
         )
@@ -581,9 +577,16 @@ class BaseDocumentDetailView(DetailView):
             provision.document = self.object
 
         context["uncommenced_provisions"] = uncommenced_provisions
-        context["uncommenced_provisions_json"] = UncommencedProvisionsSerializer(
+        uncommenced_provisions_json = UncommencedProvisionsSerializer(
             uncommenced_provisions, many=True
         ).data
+
+        context["provision_enrichments"] = (
+            context["unconstitutional_provisions"] + context["uncommenced_provisions"]
+        )
+        context["provision_enrichments_json"] = (
+            unconstitutional_provisions_json + uncommenced_provisions_json
+        )
 
     def get_notices(self):
         return []
