@@ -48,7 +48,14 @@ class SearchHit:
         hits = [cls.from_es_hit(engine, es_hit, i) for i, es_hit in enumerate(es_hits)]
 
         # determine best match: is the first result's score significantly better than the next?
-        if engine.page == 1 and len(hits) > 1 and hits[0].score / hits[1].score >= 1.2:
+        # hits may not have scores if results are not ordered by score
+        if (
+            engine.page == 1
+            and len(hits) > 1
+            and hits[0].score
+            and hits[1].score
+            and hits[0].score / hits[1].score >= 1.2
+        ):
             hits[0].best_match = True
 
         return hits
