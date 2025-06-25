@@ -14,6 +14,7 @@ import TermsOfUse from './terms-of-use';
 import SearchTypeahead from './search-typeahead';
 import ShareMenuItem from './share-menu-item';
 import { SavedDocumentModal } from './saved-documents';
+import { OfflineDocumentButton } from './offline';
 
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
@@ -30,6 +31,7 @@ const components: Record<string, any> = {
   FloatingHeader,
   DocumentUploader,
   NavigationSelect,
+  OfflineDocumentButton,
   RelationshipEnrichments,
   ProvisionEnrichments,
   AnnotationsProvider,
