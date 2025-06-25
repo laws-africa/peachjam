@@ -11,6 +11,7 @@ from templated_email.backends.vanilla_django import (
 
 from peachjam.models import CoreDocument
 from peachjam_search.models import SavedSearch
+from peachjam_search.serializers import SearchHit
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +37,21 @@ class TemplateBackend(BaseTemplateBackend):
         )
 
 
+def document_serializer(context, doc):
+    return {
+        "title": doc.title,
+        "url_path": doc.get_absolute_url(),
+        "blurb": getattr(doc, "blurb", None),
+        "flynote": getattr(doc, "flynote", None),
+    }
+
+
+def search_hit_serializer(context, hit):
+    d = hit.as_dict()
+    d["document"] = document_serializer(context, hit.document) if hit.document else None
+    return d
+
+
 class CustomerIOTemplateBackend(TemplateBackend):
     """Sends emails using CustomerIO.
 
@@ -47,10 +63,8 @@ class CustomerIOTemplateBackend(TemplateBackend):
     """
 
     serializers = {
-        CoreDocument: lambda context, doc: {
-            "title": doc.title,
-            "url_path": doc.get_absolute_url(),
-        },
+        CoreDocument: document_serializer,
+        SearchHit: search_hit_serializer,
         SavedSearch: lambda context, obj: {
             "q": obj.q,
             "name": str(obj),

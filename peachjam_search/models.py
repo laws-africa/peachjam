@@ -1,6 +1,6 @@
 import logging
 import uuid
-from datetime import datetime, timedelta
+from datetime import timedelta
 from math import exp
 from urllib.parse import urlencode
 
@@ -151,7 +151,7 @@ class SavedSearch(models.Model):
     def find_new_hits(self):
         from peachjam_search.engine import SearchEngine
         from peachjam_search.forms import SearchForm
-        from peachjam_search.serializers import SearchableDocumentSerializer
+        from peachjam_search.serializers import SearchHit
 
         params = QueryDict("", mutable=True)
         for key, values in self.get_filters_dict().items():
@@ -168,17 +168,21 @@ class SavedSearch(models.Model):
         form.is_valid()
         form.configure_engine(engine)
         es_response = engine.execute()
-        hits = es_response.hits
+
+        # unpack the hits
+        hits = SearchHit.from_es_hits(engine, es_response.hits)
+        # fetch document data for hits from the database
+        SearchHit.attach_documents(hits, fake_documents=False)
+        # only keep those with a document
+        hits = [h for h in hits if h.document]
 
         # get hits that were created later than the last alert
         if self.last_alerted_at:
             hits = [
-                hit
-                for hit in hits
-                if datetime.fromisoformat(hit.created_at) > self.last_alerted_at
+                hit for hit in hits if hit.document.created_at > self.last_alerted_at
             ]
 
-        return SearchableDocumentSerializer(hits, many=True).data
+        return hits
 
     def send_alert(self, hits):
         hits = hits[:10]

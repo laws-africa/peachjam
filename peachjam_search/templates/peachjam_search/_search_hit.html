@@ -1,0 +1,134 @@
+{% load i18n peachjam %}
+<li class="mb-4 hit {% if hit.best_match %}best-match{% endif %}"
+    data-document-id="{{ hit.document.id|default_if_none:'' }}">
+  <div class="card" data-best-match="{% trans "Best match" %}">
+    <div class="card-body">
+      <h5 class="card-title">
+        <a class="h5 text-primary"
+           target="_blank"
+           href="{{ hit.document.get_absolute_url }}"
+           data-frbr-uri="{{ hit.document.expression_frbr_uri }}"
+           data-position="{{ hit.position }}">
+          {% if hit.highlight.title %}
+            {{ hit.highlight.title.0|safe }}
+          {% else %}
+            {{ hit.document.title }}
+          {% endif %}
+        </a>
+        <span id="saved-document-star--{{ hit.document.id }}"></span>
+      </h5>
+      <div class="mb-2">
+        {% if hit.document.citation and hit.document.citation != hit.document.title %}
+          <div>
+            <i>
+              {% if hit.highlight.citation %}
+                {{ hit.highlight.citation.0|safe }}
+              {% else %}
+                {{ hit.document.citation }}
+              {% endif %}
+            </i>
+          </div>
+        {% endif %}
+        {% if hit.document.alternative_names|length %}
+          <div>
+            <i>
+              {% if hit.highlight.alternative_names %}
+                {{ hit.highlight.alternative_names|join:"; " }}
+              {% else %}
+                {{ hit.document.alternative_names|join:"; " }}
+              {% endif %}
+            </i>
+          </div>
+        {% endif %}
+        <div>
+          {% if show_jurisdiction or hit.document.locality %}
+            <span class="me-3">
+              {% if show_jurisdiction %}
+                <span class="me-1">{% jurisdiction_icon hit.document %}&nbsp;{{ hit.document.jurisdiction|default_if_none:'' }}</span>
+                {{ hit.document.jurisdiction }}
+                {% if hit.document.locality %}·{% endif %}
+              {% endif %}
+              {% if hit.document.locality %}<span>{{ hit.document.locality }}</span>{% endif %}
+            </span>
+          {% endif %}
+          <span class="me-3">{{ hit.document.date }}</span>
+          {% if hit.document.court %}<span class="me-3">{{ hit.document.court }}</span>{% endif %}
+          {% if hit.document.author_list %}
+            <span class="me-3">
+              {% for author in hit.document.author_list %}
+                {# djlint:off #}
+                {{ author.name }}{% if not forloop.last %},{% endif %}
+                {# djlint:on #}
+              {% endfor %}
+            </span>
+          {% endif %}
+          {% include 'peachjam/_document_labels.html' with document=hit.document %}
+          {% if can_debug %}
+            <a class="me-3"
+               href="#debug-{{ hit.document.id }}"
+               data-bs-toggle="collapse">{{ hit.score }}</a>
+          {% endif %}
+        </div>
+        {% if hit.document.matter_type %}<div>{{ hit.document.matter_type }}</div>{% endif %}
+        {% if hit.document.doc_type == "judgment" %}
+          {% if hit.document.blurb %}<div class="text-muted fs-sm">{{ hit.document.blurb }}</div>{% endif %}
+          {% if hit.document.flynote %}<div class="text-muted fs-sm">{{ hit.document.flynote|safe }}</div>{% endif %}
+        {% elif hit.document.listing_taxonomies %}
+          {% include 'peachjam/_document_taxonomies.html' with taxonomies=hit.document.listing_taxonomies %}
+        {% endif %}
+        <div id="saved-document-table-detail--{{ hit.document.id }}"></div>
+      </div>
+      {% if can_debug and hit.meta.explanation %}
+        <div id="debug-{{ hit.document.id }}" class="my-2 collapse">
+          <div class="card">
+            <div class="card-header">
+              <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                  <a class="nav-link active"
+                     data-bs-toggle="tab"
+                     href="#explanation-{{ hit.document.id }}">{% trans "Explanation" %}</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link"
+                     data-bs-toggle="tab"
+                     href="#raw-{{ hit.document.id }}">{% trans "Raw" %}</a>
+                </li>
+              </ul>
+            </div>
+            <div class="card-body explanation">
+              <div class="tab-content">
+                <div id="explanation-{{ hit.document.id }}"
+                     class="tab-pane active show overflow-x-auto">
+                  {% json_table hit.meta.explanation %}
+                </div>
+                <div id="raw-{{ hit.document.id }}" class="tab-pane overflow-x-auto">{% json_table hit.raw %}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      {% for page in hit.pages %}
+        <div class="mb-1">
+          <a href="{{ hit.document.get_absolute_url }}#page-{{ page.page_num }}"
+             data-frbr-uri="{{ hit.document.expression_frbr_uri }}"
+             data-position="{{ hit.position }}"
+             data-portion="page-{{ page.page_num }}"
+             target="_blank">{% trans "Page" %} {{ page.page_num }}</a>:
+          {% if page.highlight.pages_body %}<span>{{ page.highlight.pages_body|safeseq|join:" ... " }}</span>{% endif %}
+          {% if can_debug %}({{ page.score }}){% endif %}
+        </div>
+      {% endfor %}
+      {% for provision in hit.provisions %}
+        {% include 'peachjam_search/_search_hit_provision.html' with parents=provision.parents %}
+      {% empty %}
+        <div class="ms-3 snippet">{{ hit.highlight.content|safeseq|join:" ... " }}</div>
+      {% endfor %}
+    </div>
+    <div class="card-footer text-end">
+      <a class="btn btn-outline-primary me-2"
+         href="{{ hit.document.get_absolute_url }}/source"
+         target="_blank">{% trans "Download" %}</a>
+      <div class="save-document-button--{{ hit.document.id }}"></div>
+    </div>
+  </div>
+</li>
