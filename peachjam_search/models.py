@@ -185,7 +185,7 @@ class SavedSearch(models.Model):
                 > self.last_alerted_at
             ]
 
-        return [hit.as_dict() for hit in hits]
+        return hits
 
     def send_alert(self, hits):
         hits = hits[:10]

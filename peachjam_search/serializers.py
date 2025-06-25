@@ -1,4 +1,5 @@
 import dataclasses
+from typing import Type
 
 from django.conf import settings
 from django.utils.html import escape
@@ -17,7 +18,7 @@ class SearchHit:
     score: float
     position: int
     expression_frbr_uri: str
-    document: CoreDocument = None
+    document: CoreDocument | Type["FakeDocument"] = None
     best_match: bool = False
     highlight: dict = None
     pages: list = None
@@ -225,19 +226,11 @@ class SearchHit:
         self.document = SearchHit.FakeDocument(self.es_hit.to_dict())
 
     def as_dict(self):
-        d = {
+        return {
             field.name: getattr(self, field.name)
             for field in dataclasses.fields(self)
-            if field.name not in ["es_hit", "document"]
+            if field.name not in ["es_hit"]
         }
-
-        d["document"] = (
-            SearchResultDocumentSerializer(self.document).data
-            if self.document
-            else None
-        )
-
-        return d
 
     def raw(self):
         data = self.meta.to_dict()
@@ -253,14 +246,3 @@ class SearchClickSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchClick
         fields = ("frbr_uri", "search_trace", "portion", "position")
-
-
-class SearchResultDocumentSerializer(serializers.ModelSerializer):
-    """Serializer for CoreDocument used in search results. Only minimal fields are required."""
-
-    blurb = serializers.CharField(read_only=True, allow_null=True)
-    flynote = serializers.CharField(read_only=True, allow_null=True)
-
-    class Meta:
-        model = CoreDocument
-        fields = ("expression_frbr_uri", "title", "blurb", "flynote")
