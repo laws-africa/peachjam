@@ -1,6 +1,6 @@
 import logging
 import uuid
-from datetime import datetime, timedelta
+from datetime import timedelta
 from math import exp
 from urllib.parse import urlencode
 
@@ -179,10 +179,7 @@ class SavedSearch(models.Model):
         # get hits that were created later than the last alert
         if self.last_alerted_at:
             hits = [
-                hit
-                for hit in hits
-                if datetime.fromisoformat(hit.document.created_at)
-                > self.last_alerted_at
+                hit for hit in hits if hit.document.created_at > self.last_alerted_at
             ]
 
         return hits
