@@ -4,11 +4,15 @@
   >
     <div class="card">
       <div class="card-body">
-        <div class="mb-1">
+        <div v-if="enrichment.enrichment_type==='unconstitutional_provision'" class="mb-1">
           <i class="bi bi-journal-x" />
           {{ $t('Unconstitutional provision') }}
         </div>
-        <div class="mb-2">
+        <div v-else-if="enrichment.enrichment_type==='uncommenced_provision'" class="mb-1">
+          <i class="bi bi-bell-slash" />
+          {{ $t('Uncommenced provision') }}
+        </div>
+        <div v-if="enrichment.enrichment_type==='unconstitutional_provision'" class="mb-2">
           <span v-if="enrichment.resolved" class="badge bg-success">{{ $t( 'Resolved' ) }}</span>
           <span v-else class="badge bg-danger">{{ $t( 'Unresolved' ) }}</span>
         </div>
