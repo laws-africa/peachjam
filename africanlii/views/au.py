@@ -87,7 +87,7 @@ class MemberStateDetailView(DetailView):
         context = super().get_context_data(**kwargs)
 
         context["ratification_countries"] = ratification_countries = (
-            RatificationCountry.objects.prefetch_related("ratification", "country")
+            RatificationCountry.objects.select_related("ratification__work", "country")
             .filter(country=self.get_object().country)
             .order_by("ratification__work__title")
         )
