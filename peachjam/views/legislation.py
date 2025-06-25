@@ -9,7 +9,12 @@ from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
 
 from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
-from peachjam.models import Legislation, UnconstitutionalProvision, pj_settings
+from peachjam.models import (
+    Legislation,
+    UncommencedProvision,
+    UnconstitutionalProvision,
+    pj_settings,
+)
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
@@ -68,9 +73,14 @@ class LegislationListView(FilteredDocumentListView):
             "is_group": True,
             "title": pj_settings().subleg_label,
         }
+        context["show_more_resources"] = (
+            UnconstitutionalProvision.objects.exists()
+            or UncommencedProvision.objects.exists()
+        )
         context[
             "show_unconstitutional_provisions"
         ] = UnconstitutionalProvision.objects.exists()
+        context["show_uncommenced_provisions"] = UncommencedProvision.objects.exists()
         return context
 
 
@@ -384,6 +394,40 @@ class LegislationDetailView(BaseDocumentDetailView):
         )
         # TODO: we're not guaranteed to get documents in the same language, here
         return docs
+
+
+class UncommencedProvisionListView(PermissionRequiredMixin, LegislationListView):
+    template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
+    latest_expression_only = True
+    permission_required = "peachjam.view_unconstitutionalprovision"
+
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/provision_enrichment/_uncommenced_table.html"]
+            return ["peachjam/provision_enrichment/_uncommenced_table_form.html"]
+        return super().get_template_names()
+
+    def get_base_queryset(self, *args, **kwargs):
+        qs = super().get_base_queryset(*args, **kwargs)
+        uncommenced_provision_works = UncommencedProvision.objects.all().values_list(
+            "work__id", flat=True
+        )
+        qs = qs.filter(work__in=uncommenced_provision_works)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["doc_table_show_counts"] = True
+        for doc in context["documents"]:
+            doc.provision_enrichments = list(
+                UncommencedProvision.objects.filter(work=doc.work)
+            )
+            # set the document on the enrichment objects so they know to use it for extra detail
+            for enrichment in doc.provision_enrichments:
+                enrichment.document = doc
+
+        return context
 
 
 class UnconstitutionalProvisionListView(PermissionRequiredMixin, LegislationListView):
