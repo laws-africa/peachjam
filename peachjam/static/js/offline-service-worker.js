@@ -22,13 +22,26 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request).catch(() => {
+    // try a normal fetch
+    fetch(event.request)
+      .then((response) => {
+        // it succeeded, return it
+        return response;
+      })
+      .catch(async () => {
+        // it failed, try the cache
+        const cache = await caches.open(CACHE_NAME);
+        const response = await cache.match(event.request);
+
+        if (response) {
+          // we found a cached response, return it
+          return response;
+        }
+
         if (event.request.mode === 'navigate') {
           // resort to offline page for navigation requests
-          return caches.match(OFFLINE_PAGE);
+          return cache.match(OFFLINE_PAGE);
         }
-      });
-    })
+      })
   );
 });
