@@ -15,5 +15,9 @@ def service_worker(request):
     return response
 
 
+class OfflineHomeView(TemplateView):
+    template_name = "peachjam/offline/home.html"
+
+
 class OfflineView(TemplateView):
-    template_name = "peachjam/offline.html"
+    template_name = "peachjam/offline/offline.html"

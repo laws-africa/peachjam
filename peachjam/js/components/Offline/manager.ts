@@ -51,12 +51,8 @@ export class OfflineManager {
 
   async clearOfflineDocs () {
     // Clear the cache
-    const cache = await this.getCache();
-    const offlineDocs = this.getOfflineDocs();
-    for (const doc of offlineDocs) {
-      await cache.delete(doc.url);
-    }
-
+    await caches.delete(OfflineManager.CACHE_NAME);
+    this.cache = null;
     // Clear metadata from localStorage
     localStorage.removeItem(OfflineManager.INVENTORY_KEY);
   }

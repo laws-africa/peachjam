@@ -15,7 +15,7 @@
       class="btn btn-danger"
       @click="clear"
     >
-      Remove all offline documents
+      Delete all offline documents
     </button>
   </div>
 </template>
@@ -35,7 +35,7 @@ export default {
   },
   methods: {
     clear () {
-      if (confirm('Are you sure you want to remove all offline documents?')) {
+      if (confirm('Are you sure you want to delete all offline documents?')) {
         getManager().clearOfflineDocs();
         this.offlineDocs = [];
       }
