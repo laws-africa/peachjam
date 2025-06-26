@@ -1295,6 +1295,10 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             inlines.append(inline)
             formsets.append(inline.get_formset(request)(initial=case_numbers))
 
+        if not pj_settings().allow_anonymisation:
+            # if anonymisation is not enabled, set must_be_anonymised to False
+            details["must_be_anonymised"] = False
+
         judgment = Judgment()
         for field in [
             "language",
