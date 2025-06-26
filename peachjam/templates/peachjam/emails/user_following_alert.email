@@ -9,6 +9,8 @@
       {% for doc in item.documents %}
         <li>
           <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}?utm_campaign=following&utm_source=alert&utm_medium=email">{{ doc.title }}</a>
+          {% if doc.blurb %}<div>{{ doc.blurb }}</div>{% endif %}
+          {% if doc.flynote %}<div>{{ doc.flynote|safe }}</div>{% endif %}
         </li>
       {% endfor %}
     </ul>

@@ -137,6 +137,7 @@ class ExtractedCitation(models.Model):
             CoreDocument.objects.prefetch_related("work")
             .select_related("nature")
             .filter(pk__in=docs)
+            .for_document_table()
         )
 
         truncated = False

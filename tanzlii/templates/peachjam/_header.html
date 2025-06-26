@@ -111,18 +111,6 @@
     </a>
     <ul class="dropdown-menu">
       <li class="dropdown-item">
-        <a class=" nav-link px-0 {% if 'afchpr' in request.path %}active{% endif %}"
-           href="{% url 'court' 'AfCHPR' %}">
-          {% trans "African Court of Human and People's Rights" %}
-        </a>
-      </li>
-      <li class="dropdown-item">
-        <a class="nav-link px-0 {% if 'achpr' in request.path %}active{% endif %}"
-           href="{% url 'court' 'ACHPR' %}">
-          {% trans "African Commission on Human and People's Rights" %}
-        </a>
-      </li>
-      <li class="dropdown-item">
         <a class=" nav-link px-0 {% if 'aa-eac' in request.path %}active{% endif %}"
            href="{% url 'place' 'aa-eac' %}">{% trans 'East African Community (EAC)' %}
         </a>
@@ -135,6 +123,18 @@
       <li class="dropdown-item">
         <a class=" nav-link px-0 {% if 'EACA' in request.path %}active{% endif %}"
            href="{% url 'court' 'EACA' %}">{% trans 'East African Court of Appeal' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if 'afchpr' in request.path %}active{% endif %}"
+           href="{% url 'court' 'AfCHPR' %}">
+          {% trans "African Court of Human and People's Rights" %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link px-0 {% if 'achpr' in request.path %}active{% endif %}"
+           href="{% url 'court' 'ACHPR' %}">
+          {% trans "African Commission on Human and People's Rights" %}
         </a>
       </li>
       <li class="dropdown-item">
