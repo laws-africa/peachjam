@@ -2,6 +2,7 @@ import os
 
 from django.conf import settings
 from django.http.response import FileResponse
+from django.views.generic.base import TemplateView
 
 
 def service_worker(request):
@@ -12,3 +13,7 @@ def service_worker(request):
     # TODO
     response["Cache-Control"] = "no-cache"
     return response
+
+
+class OfflineView(TemplateView):
+    template_name = "peachjam/offline.html"

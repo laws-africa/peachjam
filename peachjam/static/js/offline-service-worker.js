@@ -1,12 +1,8 @@
-const CACHE_NAME = 'peachjam-offline-docs-v1';
-const OFFLINE_PAGE = '/offline/';
+const CACHE_NAME = 'peachjam-offline-v1';
+const OFFLINE_PAGE = '/offline/offline';
 
 self.addEventListener('install', (event) => {
   console.log('Service Worker installing');
-  event.waitUntil(
-    // TODO: don't need to always do this?
-    // caches.open(CACHE_NAME).then(cache => cache.add(OFFLINE_PAGE))
-  );
   self.skipWaiting();
 });
 
@@ -27,11 +23,9 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      if (cached) {
-        console.log('Service Worker FETCH ', event.request.url, cached);
-      }
       return cached || fetch(event.request).catch(() => {
         if (event.request.mode === 'navigate') {
+          // resort to offline page for navigation requests
           return caches.match(OFFLINE_PAGE);
         }
       });
