@@ -50,7 +50,7 @@ class Taxonomy(MP_Node):
         """Get the entity profile for this taxonomy, starting with the current taxonomy and then
         looking up the tree until one is found."""
         if self.entity_profile.exists():
-            return self.entity_profile
+            return self.entity_profile.first()
 
         ancestors = list(self.get_ancestors())
         taxonomy_ids = [t.id for t in ancestors]
