@@ -143,6 +143,23 @@
                 </li>
               {% endif %}
             {% endblock %}
+            {% block uncommenced-provisions-tab %}
+              {% if perms.peachjam.view_unconstitutionalprovision and uncommenced_provisions %}
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link"
+                          data-bs-toggle="tab"
+                          data-bs-target="#uncommenced-provisions-tab"
+                          type="button"
+                          role="tab"
+                          aria-controls="uncommenced-provisions-tab"
+                          aria-selected="false">
+                    <i class="bi bi-pj pj-uncommenced-provisions"></i>
+                    {% trans "Uncommenced provisions" %}
+                    <span class="badge bg-secondary">{{ uncommenced_provisions|length }}</span>
+                  </button>
+                </li>
+              {% endif %}
+            {% endblock %}
             {% block related-documents-tab %}
               {% if show_related_documents or not user.is_authenticated %}
                 <li class="nav-item" role="presentation">
@@ -540,6 +557,16 @@
             </div>
           {% endif %}
         {% endblock %}
+        {% block uncommenced-provisions-tab-pane %}
+          {% if perms.peachjam.view_unconstitutionalprovision and uncommenced_provisions %}
+            <div class="tab-pane fade"
+                 id="uncommenced-provisions-tab"
+                 role="tabpanel"
+                 aria-labelledby="uncommenced-provisions-tab">
+              <div class="container">{% include 'peachjam/document/_uncommenced_provisions.html' %}</div>
+            </div>
+          {% endif %}
+        {% endblock %}
         {% if cited_documents or documents_citing_current_doc %}
           <div class="tab-pane"
                id="citations-tab"
@@ -561,7 +588,9 @@
                id="ratifications-tab"
                role="tabpanel"
                aria-labelledby="ratifications-tab">
-            <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
+            <div class="container">
+              {% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}
+            </div>
           </div>
         {% endif %}
         {% if perms.peachjam.can_debug_document %}
@@ -569,7 +598,9 @@
                id="debug-tab"
                role="tabpanel"
                aria-labelledby="debug-tab">
-            <div class="container">{% include 'peachjam/document/_debug.html' %}</div>
+            <div class="container">
+              {% include 'peachjam/document/_debug.html' %}
+            </div>
           </div>
         {% endif %}
       {% endblock %}
