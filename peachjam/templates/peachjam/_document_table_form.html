@@ -27,83 +27,85 @@
     <div class="offcanvas-body"></div>
   </div>
   <div class="row">
-    <div class="col-lg-3 d-none d-lg-block document-list-facets-wrapper pocketlaw-hidden">
-      <ul class="list-group document-list-facets">
+    <div class="col-lg-3 d-none d-lg-block document-list-facets-wrapper">
+      <div class="document-list-facets">
         {% if taxonomy_tree|length > 0 and not is_leaf_node %}
-          <div class="mb-2">{% include "peachjam/_taxonomy_tree_facet.html" %}</div>
+          {% include "peachjam/_taxonomy_tree_facet.html" %}
         {% endif %}
-        <li class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center">
-          <strong id="document-list-filters-offcanvas-title">{% trans 'Filters' %}</strong>
-          {% if show_clear_all %}
-            <div class="d-flex align-items-center">
-              <a href="{{ request.path }}"
-                 data-track-event="Listing | Clear filter | all"
-                 hx-get="{{ request.path }}"
-                 hx-params="none"
-                 hx-push-url="true">{% trans 'Clear all' %}</a>
-            </div>
-          {% endif %}
-        </li>
-        {% for facet_name, facet in facet_data.items %}
-          {% if facet.options %}
-            <li class="list-group-item">
-              <div class="d-flex justify-content-between mb-2">
-                <strong>{{ facet.label }}</strong>
-                {% if facet.values %}
-                  <div class="d-flex align-items-center">
-                    <a href="{{ request.path }}"
-                       data-track-event="Listing | Clear filter | {{ facet_name }}"
-                       hx-get="{{ request.path }}"
-                       hx-params="not {{ facet_name }}"
-                       hx-push-url="true">{% trans 'Clear' %}</a>
-                  </div>
-                {% endif %}
+        <ul class="list-group pocketlaw-hidden">
+          <li class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center">
+            <strong id="document-list-filters-offcanvas-title">{% trans 'Filters' %}</strong>
+            {% if show_clear_all %}
+              <div class="d-flex align-items-center">
+                <a href="{{ request.path }}"
+                   data-track-event="Listing | Clear filter | all"
+                   hx-get="{{ request.path }}"
+                   hx-params="none"
+                   hx-push-url="true">{% trans 'Clear all' %}</a>
               </div>
-              {% if facet_name == "alphabet" %}
-                <div>
-                  <div class="letter-radiobox-container">
+            {% endif %}
+          </li>
+          {% for facet_name, facet in facet_data.items %}
+            {% if facet.options %}
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between mb-2">
+                  <strong>{{ facet.label }}</strong>
+                  {% if facet.values %}
+                    <div class="d-flex align-items-center">
+                      <a href="{{ request.path }}"
+                         data-track-event="Listing | Clear filter | {{ facet_name }}"
+                         hx-get="{{ request.path }}"
+                         hx-params="not {{ facet_name }}"
+                         hx-push-url="true">{% trans 'Clear' %}</a>
+                    </div>
+                  {% endif %}
+                </div>
+                {% if facet_name == "alphabet" %}
+                  <div>
+                    <div class="letter-radiobox-container">
+                      {% for value, label in facet.options %}
+                        <label class="letter-radiobox" for="{{ facet_name }}_{{ forloop.counter0 }}">
+                          <input id="{{ facet_name }}_{{ forloop.counter0 }}"
+                                 name="{{ facet_name }}"
+                                 type="{{ facet.type }}"
+                                 hx-get="{{ request.path }}"
+                                 hx-push-url="true"
+                                 {% if value == facet.values %}checked{% endif %}
+                                 hx-include="#filter-form"
+                                 value="{{ value }}"/>
+                          <span class="letter-radiobox__text"
+                                data-track-event="Listing | Filter | Alphabet">{{ label }}</span>
+                        </label>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="facets-scrollable">
                     {% for value, label in facet.options %}
-                      <label class="letter-radiobox" for="{{ facet_name }}_{{ forloop.counter0 }}">
-                        <input id="{{ facet_name }}_{{ forloop.counter0 }}"
-                               name="{{ facet_name }}"
-                               type="{{ facet.type }}"
-                               hx-get="{{ request.path }}"
-                               hx-push-url="true"
-                               {% if value == facet.values %}checked{% endif %}
-                               hx-include="#filter-form"
-                               value="{{ value }}"/>
-                        <span class="letter-radiobox__text"
-                              data-track-event="Listing | Filter | Alphabet">{{ label }}</span>
-                      </label>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="form-check flex-grow-1"
+                             data-track-event="Listing | Filter | {{ facet_name }}">
+                          <input id="{{ facet_name }}_{{ forloop.counter0 }}"
+                                 class="form-check-input"
+                                 name="{{ facet_name }}"
+                                 type="{{ facet.type }}"
+                                 hx-get="{{ request.path }}"
+                                 hx-push-url="true"
+                                 {% if value in facet.values %}checked{% endif %}
+                                 hx-include="#filter-form"
+                                 value="{{ value }}"/>
+                          <label class="form-check-label"
+                                 for="{{ facet_name }}_{{ forloop.counter0 }}">{{ label }}</label>
+                        </div>
+                      </div>
                     {% endfor %}
                   </div>
-                </div>
-              {% else %}
-                <div class="facets-scrollable">
-                  {% for value, label in facet.options %}
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div class="form-check flex-grow-1"
-                           data-track-event="Listing | Filter | {{ facet_name }}">
-                        <input id="{{ facet_name }}_{{ forloop.counter0 }}"
-                               class="form-check-input"
-                               name="{{ facet_name }}"
-                               type="{{ facet.type }}"
-                               hx-get="{{ request.path }}"
-                               hx-push-url="true"
-                               {% if value in facet.values %}checked{% endif %}
-                               hx-include="#filter-form"
-                               value="{{ value }}"/>
-                        <label class="form-check-label"
-                               for="{{ facet_name }}_{{ forloop.counter0 }}">{{ label }}</label>
-                      </div>
-                    </div>
-                  {% endfor %}
-                </div>
-              {% endif %}
-            </li>
-          {% endif %}
-        {% endfor %}
-      </ul>
+                {% endif %}
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
     </div>
     <div class="col">
       <div class="position-relative">
