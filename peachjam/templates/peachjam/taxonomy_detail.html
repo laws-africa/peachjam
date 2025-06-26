@@ -5,10 +5,23 @@
   {% if not entity_profile %}
     <div class="my-4">
       <h1>{{ taxonomy.name }}</h1>
-      {% block follow-button %}
-        <div hx-get="{% url 'user_following_button' %}?taxonomy={{ taxonomy.pk }}"
-             hx-trigger="load"></div>
-      {% endblock %}
+      <div class="d-flex">
+        {% block follow-button %}
+          <div hx-get="{% url 'user_following_button' %}?taxonomy={{ taxonomy.pk }}"
+               hx-trigger="load"></div>
+        {% endblock %}
+        {% block offline-button %}
+          {% if perms.peachjam.offline %}
+            <button class="btn btn-outline-secondary ms-2"
+                    data-component="OfflineTopicButton"
+                    data-name="{{ taxonomy.name }}"
+                    data-url="{% build_taxonomy_url taxonomy %}"
+                    data-topic="{{ taxonomy.pk }}">
+              {% trans "Make available offline" %}
+            </button>
+          {% endif %}
+        {% endblock %}
+      </div>
     </div>
   {% endif %}
 {% endblock %}

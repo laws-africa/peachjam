@@ -3,6 +3,18 @@ interface OfflineDocument {
   title: string;
 }
 
+interface OfflineTopic {
+  id: string;
+  url: string;
+  name: string;
+  documents: OfflineDocument[];
+}
+
+interface Inventory {
+  documents: OfflineDocument[],
+  topics: OfflineTopic[],
+}
+
 export class OfflineManager {
   // This MUST match CACHE_NAME in offline-service-worker.js
   public static CACHE_NAME = 'peachjam-offline-v1';
@@ -18,16 +30,75 @@ export class OfflineManager {
     return this.cache;
   }
 
-  async makeAvailableOffline (url: string, title: string) {
+  getInventory (): Inventory {
+    const saved = localStorage.getItem(OfflineManager.INVENTORY_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      documents: [],
+      topics: []
+    };
+  }
+
+  saveInventory (inventory: Inventory) {
+    localStorage.setItem(OfflineManager.INVENTORY_KEY, JSON.stringify(inventory));
+  }
+
+  addTopicToInventory (inventory: Inventory, topic: OfflineTopic) {
+    if (!inventory.topics.find((t: OfflineTopic) => t.id === topic.id)) {
+      inventory.topics.push(topic);
+    }
+    for (const doc of topic.documents) {
+      this.addDocumentToInventory(inventory, doc);
+    }
+  }
+
+  addDocumentToInventory (inventory: Inventory, doc: OfflineDocument) {
+    if (!inventory.documents.find((d: OfflineDocument) => d.url === doc.url)) {
+      inventory.documents.push(doc);
+    }
+  }
+
+  async makeDocumentAvailableOffline (url: string, title: string) {
     const cache = await this.getCache();
+    // TODO: common static assets?
     const assets = [url, OfflineManager.OFFLINE_PAGE, ...this.getStaticAssets()];
     await cache.addAll(assets);
 
-    // Store metadata for listing later
-    const saved: OfflineDocument[] = JSON.parse(localStorage.getItem(OfflineManager.INVENTORY_KEY) || '[]');
-    if (!saved.find((doc: OfflineDocument) => doc.url === url)) {
-      saved.push({ url, title });
-      localStorage.setItem(OfflineManager.INVENTORY_KEY, JSON.stringify(saved));
+    const inventory = this.getInventory();
+    this.addDocumentToInventory(inventory, { url, title });
+    this.saveInventory(inventory);
+  }
+
+  async makeTopicAvailableOffline (id: string, url: string, name: string) {
+    try {
+      // get the manifest to know what to cache
+      const resp = await fetch(`/offline/topic/${encodeURIComponent(id)}/manifest.json`);
+      if (resp.ok) {
+        const manifest = await resp.json();
+
+        // TODO: common static assets?
+        const assets = [
+          OfflineManager.OFFLINE_PAGE,
+          ...manifest.assets,
+          ...manifest.documents.map((doc: OfflineDocument) => doc.url)
+        ];
+
+        const cache = await this.getCache();
+        await cache.addAll(assets);
+
+        const inventory = this.getInventory();
+        this.addTopicToInventory(inventory, {
+          id,
+          url,
+          name,
+          documents: manifest.documents
+        });
+        this.saveInventory(inventory);
+      }
+    } catch (e) {
+      console.error('Failed to fetch topic manifest:', e);
     }
   }
 
@@ -43,10 +114,6 @@ export class OfflineManager {
     });
 
     return Array.from(urls);
-  }
-
-  getOfflineDocs (): OfflineDocument[] {
-    return JSON.parse(localStorage.getItem(OfflineManager.INVENTORY_KEY) || '[]');
   }
 
   async clearOfflineDocs () {
