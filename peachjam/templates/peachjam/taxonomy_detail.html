@@ -13,10 +13,8 @@
         {% block offline-button %}
           {% if perms.peachjam.offline %}
             <button class="btn btn-outline-secondary ms-2"
-                    data-component="OfflineTopicButton"
-                    data-name="{{ taxonomy.name }}"
-                    data-url="{% build_taxonomy_url taxonomy %}"
-                    data-topic="{{ taxonomy.pk }}">
+                    data-component="OfflineTaxonomyButton"
+                    data-taxonomy="{{ taxonomy.pk }}">
               {% trans "Make available offline" %}
             </button>
           {% endif %}

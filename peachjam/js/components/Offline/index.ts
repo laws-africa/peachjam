@@ -12,18 +12,16 @@ export class OfflineDocumentButton {
   }
 }
 
-export class OfflineTopicButton {
+export class OfflineTaxonomyButton {
   constructor (button: HTMLElement) {
-    const id = button.getAttribute('data-topic');
-    const name = button.getAttribute('data-name');
-    const url = button.getAttribute('data-url');
+    const id = button.getAttribute('data-taxonomy');
 
     // TODO: is it available offline already?
 
-    if (id && name && url) {
+    if (id) {
       button.addEventListener('click', (event: Event) => {
         const url = document.location.pathname;
-        getManager().makeTopicAvailableOffline(id, url, name);
+        getManager().makeTaxonomyAvailableOffline(id);
       });
     }
   }

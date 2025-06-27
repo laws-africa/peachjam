@@ -3,7 +3,7 @@ interface OfflineDocument {
   title: string;
 }
 
-interface OfflineTopic {
+interface OfflineTaxonomy {
   id: string;
   url: string;
   name: string;
@@ -11,14 +11,15 @@ interface OfflineTopic {
 }
 
 interface Inventory {
+  version: number,
   documents: OfflineDocument[],
-  topics: OfflineTopic[],
+  taxonomies: OfflineTaxonomy[],
 }
 
 export class OfflineManager {
   // This MUST match CACHE_NAME in offline-service-worker.js
   public static CACHE_NAME = 'peachjam-offline-v1';
-  public static INVENTORY_KEY = 'offlineDocs';
+  public static INVENTORY_KEY = 'peachjam-offline-inventory';
   public static OFFLINE_PAGE = '/offline/offline';
 
   cache: Cache | null = null;
@@ -36,8 +37,9 @@ export class OfflineManager {
       return JSON.parse(saved);
     }
     return {
+      version: 1,
       documents: [],
-      topics: []
+      taxonomies: []
     };
   }
 
@@ -45,25 +47,25 @@ export class OfflineManager {
     localStorage.setItem(OfflineManager.INVENTORY_KEY, JSON.stringify(inventory));
   }
 
-  addTopicToInventory (inventory: Inventory, topic: OfflineTopic) {
-    if (!inventory.topics.find((t: OfflineTopic) => t.id === topic.id)) {
-      inventory.topics.push(topic);
-    }
-    for (const doc of topic.documents) {
+  addTopicToInventory (inventory: Inventory, taxonomy: OfflineTaxonomy) {
+    // delete any existing taxonomy with the same ID
+    inventory.taxonomies = inventory.taxonomies.filter((t: OfflineTaxonomy) => t.id !== taxonomy.id);
+    inventory.taxonomies.push(taxonomy);
+    for (const doc of taxonomy.documents) {
       this.addDocumentToInventory(inventory, doc);
     }
   }
 
   addDocumentToInventory (inventory: Inventory, doc: OfflineDocument) {
-    if (!inventory.documents.find((d: OfflineDocument) => d.url === doc.url)) {
-      inventory.documents.push(doc);
-    }
+    // delete any existing document with the same URL
+    inventory.documents = inventory.documents.filter((d: OfflineDocument) => d.url !== doc.url);
+    inventory.documents.push(doc);
   }
 
   async makeDocumentAvailableOffline (url: string, title: string) {
     const cache = await this.getCache();
-    // TODO: common static assets?
     const assets = [url, OfflineManager.OFFLINE_PAGE, ...this.getStaticAssets()];
+    console.log('Caching assets for offline:', assets);
     await cache.addAll(assets);
 
     const inventory = this.getInventory();
@@ -71,37 +73,42 @@ export class OfflineManager {
     this.saveInventory(inventory);
   }
 
-  async makeTopicAvailableOffline (id: string, url: string, name: string) {
+  async makeTaxonomyAvailableOffline (id: string) {
     try {
       // get the manifest to know what to cache
-      const resp = await fetch(`/offline/topic/${encodeURIComponent(id)}/manifest.json`);
+      const resp = await fetch(`/offline/taxonomy/${encodeURIComponent(id)}/manifest.json`);
       if (resp.ok) {
         const manifest = await resp.json();
 
-        // TODO: common static assets?
         const assets = [
           OfflineManager.OFFLINE_PAGE,
+          ...this.getStaticAssets(),
           ...manifest.assets,
           ...manifest.documents.map((doc: OfflineDocument) => doc.url)
         ];
 
         const cache = await this.getCache();
+        console.log('Caching assets for offline:', assets);
         await cache.addAll(assets);
 
         const inventory = this.getInventory();
         this.addTopicToInventory(inventory, {
           id,
-          url,
-          name,
+          url: manifest.url,
+          name: manifest.name,
           documents: manifest.documents
         });
         this.saveInventory(inventory);
       }
     } catch (e) {
-      console.error('Failed to fetch topic manifest:', e);
+      console.error('Failed to fetch taxonomy manifest: ', e);
     }
   }
 
+  /**
+   * Get a list of asset URLs on this page that should be cached. This is easier than explicitly listing all
+   * static assets, and will include things like images in footers, etc.
+   */
   getStaticAssets (): Array<string> {
     const urls = new Set<string>();
 
