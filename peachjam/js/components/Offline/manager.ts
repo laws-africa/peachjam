@@ -7,6 +7,8 @@ interface OfflineTaxonomy {
   id: string;
   url: string;
   name: string;
+  fingerprint: string;
+  checkedAt: string;
   documents: OfflineDocument[];
 }
 
@@ -48,6 +50,7 @@ export class OfflineManager {
   constructor () {
     if (localStorage.getItem(OfflineManager.INVENTORY_KEY)) {
       this.registerServiceWorker();
+      this.checkForUpdates();
     }
   }
 
@@ -59,6 +62,51 @@ export class OfflineManager {
       } catch (err) {
         console.error('Service worker registration failed:', err);
       }
+    }
+  }
+
+  async checkForUpdates (force = false) {
+    // Check every 24 hours for updates to the topics store in the inventory
+    const inventory = this.getInventory();
+    const changed = [];
+    const threshold = new Date();
+    threshold.setHours(threshold.getHours() - 24);
+
+    for (const taxonomy of inventory.taxonomies) {
+      if (force) {
+        changed.push(taxonomy);
+        continue;
+      }
+
+      if (new Date(taxonomy.checkedAt) >= threshold) {
+        console.log(`Checking for updates to ${taxonomy.name}...`);
+
+        try {
+          const resp = await fetch(`/offline/taxonomy/${taxonomy.id}/manifest.json`);
+          if (resp.ok) {
+            const manifest = await resp.json();
+            // If the fingerprint has changed, update the cache
+            if (manifest.fingerprint !== taxonomy.fingerprint) {
+              console.log(`Taxonomy ${taxonomy.name} has changed`);
+              changed.push(taxonomy);
+            } else {
+              console.log(`Taxonomy ${taxonomy.name} has not changed`);
+              taxonomy.checkedAt = new Date().toISOString();
+            }
+          }
+        } catch (e) {
+          console.error('Failed to fetch taxonomy manifest for periodic update: ', e);
+        }
+      }
+    }
+
+    // write updated timestamps
+    this.saveInventory(inventory);
+
+    // now update the changed ones
+    for (const taxonomy of changed) {
+      console.log(`Updating offline taxonomy ${taxonomy.name}...`);
+      await this.makeTaxonomyAvailableOffline(taxonomy.id);
     }
   }
 
@@ -102,10 +150,11 @@ export class OfflineManager {
 
   async makeTaxonomyAvailableOffline (id: string) {
     this.registerServiceWorker();
+    console.log(`Making taxonomy ${id} available offline...`);
 
     try {
       // get the manifest to know what to cache
-      const resp = await fetch(`/offline/taxonomy/${encodeURIComponent(id)}/manifest.json`);
+      const resp = await fetch(`/offline/taxonomy/${id}/manifest.json`);
       if (resp.ok) {
         const manifest = await resp.json();
 
@@ -119,19 +168,24 @@ export class OfflineManager {
         const cache = await this.getCache();
         console.log('Caching urls for offline:', urls);
         await cache.addAll(urls);
+        console.log('Cached URLs');
 
         const inventory = this.getInventory();
         this.addTopicToInventory(inventory, {
           id,
           url: manifest.url,
           name: manifest.name,
-          documents: manifest.documents
+          fingerprint: manifest.fingerprint,
+          documents: manifest.documents,
+          checkedAt: new Date().toISOString()
         });
         this.saveInventory(inventory);
       }
     } catch (e) {
       console.error('Failed to fetch taxonomy manifest: ', e);
     }
+
+    console.log(`Taxonomy ${id} is now available offline.`);
   }
 
   /**
@@ -153,6 +207,7 @@ export class OfflineManager {
   }
 
   async clearOfflineDocs () {
+    console.log('Clearing offline documents...');
     // Clear metadata from localStorage
     localStorage.removeItem(OfflineManager.INVENTORY_KEY);
     // Clear the cache

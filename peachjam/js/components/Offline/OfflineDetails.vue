@@ -19,7 +19,16 @@
   </ol>
   <button
     v-if="inventory.documents.length"
-    class="btn btn-danger"
+    class="btn btn-primary"
+    :disabled="updating"
+    @click="update"
+  >
+    <span v-if="updating">Updating...</span>
+    <span v-else>Update offline content</span>
+  </button>
+  <button
+    v-if="inventory.documents.length"
+    class="btn btn-danger ms-2"
     @click="clear"
   >
     Delete all offline content
@@ -33,6 +42,7 @@ export default {
   name: 'OfflineDetails',
   data: function () {
     return {
+      updating: false,
       inventory: {
         documents: [],
         topics: []
@@ -43,6 +53,12 @@ export default {
     this.inventory = manager.getInventory();
   },
   methods: {
+    update () {
+      this.updating = true;
+      manager.checkForUpdates(true).then(() => {
+        this.updating = false;
+      });
+    },
     clear () {
       if (confirm('Are you sure you want to delete all offline documents?')) {
         manager.clearOfflineDocs();

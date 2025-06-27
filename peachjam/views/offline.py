@@ -1,3 +1,4 @@
+import hashlib
 import os
 from math import ceil
 
@@ -38,27 +39,32 @@ class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
         return self.get_object()
 
     def render_to_response(self, context, **response_kwargs):
-        documents_qs = (
+        docs = list(
             CoreDocument.objects.filter(
                 taxonomies__topic__in=self.allowed_taxonomies["pk_list"]
             )
             .distinct()
-            .only("title", "expression_frbr_uri")
+            .only("title", "expression_frbr_uri", "updated_at")
         )
 
         # n_docs should be based on the taxonomy and its children, but that's complicated
         # and the odds are the number of pages is very small
-        n_docs = documents_qs.count()
+        n_docs = len(docs)
         urls = self.get_urls(n_docs)
+
+        # hash of the documents and their timestamps
+        fingerprint = sorted([(d.expression_frbr_uri, d.updated_at) for d in docs])
+        fingerprint = hashlib.sha256(str(fingerprint).encode("utf-8")).hexdigest()
 
         data = {
             "name": self.taxonomy.name,
             "url": self.taxonomy.get_absolute_url(),
             "urls": urls,
+            "fingerprint": fingerprint,
             "documents": [
                 # TODO: PDF urls if necessary
                 {"url": doc.get_absolute_url(), "title": doc.title}
-                for doc in documents_qs
+                for doc in docs
             ],
         }
         return JsonResponse(data)
