@@ -44,13 +44,12 @@ class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
                 taxonomies__topic__in=self.allowed_taxonomies["pk_list"]
             )
             .distinct()
-            .only("title", "expression_frbr_uri", "updated_at")
+            .prefetch_related("images")
         )
 
         # n_docs should be based on the taxonomy and its children, but that's complicated
         # and the odds are the number of pages is very small
-        n_docs = len(docs)
-        urls = self.get_urls(n_docs)
+        urls = self.get_urls(docs)
 
         # hash of the documents and their timestamps
         fingerprint = sorted([(d.expression_frbr_uri, d.updated_at) for d in docs])
@@ -62,15 +61,14 @@ class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
             "urls": urls,
             "fingerprint": fingerprint,
             "documents": [
-                # TODO: PDF urls if necessary
-                {"url": doc.get_absolute_url(), "title": doc.title}
-                for doc in docs
+                {"url": doc.get_absolute_url(), "title": doc.title} for doc in docs
             ],
         }
         return JsonResponse(data)
 
-    def get_urls(self, n_docs):
+    def get_urls(self, docs):
         # urls to cache for the user to be able to browse for this topic
+        n_docs = len(docs)
         n_pages = max(1, ceil(n_docs / TaxonomyDetailView.paginate_by))
         urls = []
 
@@ -79,5 +77,12 @@ class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
             taxonomy_url = taxonomy.get_absolute_url()
             urls.append(taxonomy_url)
             urls.extend(f"{taxonomy_url}?page={i}" for i in range(1, n_pages + 1))
+
+        # include document images
+        for doc in docs:
+            for image in doc.images.all():
+                urls.append(doc.get_absolute_url() + "/media/" + image.filename)
+
+        # TODO: PDF urls if necessary
 
         return urls
