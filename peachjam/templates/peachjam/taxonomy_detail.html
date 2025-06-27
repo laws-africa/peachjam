@@ -12,11 +12,26 @@
         {% endblock %}
         {% block offline-button %}
           {% if perms.peachjam.offline %}
-            <button class="btn btn-outline-secondary ms-2"
-                    data-component="OfflineTaxonomyButton"
-                    data-taxonomy="{{ taxonomy.pk }}">
-              {% trans "Make available offline" %}
-            </button>
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary ms-2"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false">
+                <i class="bi bi-three-dots"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li>
+                  <button class="dropdown-item"
+                          data-component="OfflineTaxonomyButton"
+                          data-taxonomy="{{ taxonomy.pk }}">
+                    {% trans "Make available offline" %}
+                  </button>
+                </li>
+                <li>
+                  <a href="{% url 'offline' %}" class="dropdown-item">All offline content</a>
+                </li>
+              </ul>
+            </div>
           {% endif %}
         {% endblock %}
       </div>

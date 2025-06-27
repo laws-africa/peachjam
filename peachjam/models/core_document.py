@@ -532,6 +532,7 @@ class CoreDocument(PolymorphicModel):
             ("can_debug_document", "Can do document debugging"),
             ("can_view_document_summary", "Can view document summary"),
             ("can_generate_judgment_summary", "Can generate judgment summary"),
+            ("can_offline", "Can save content for offline use"),
         ]
 
     def __str__(self):
