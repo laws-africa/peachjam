@@ -78,7 +78,7 @@ export class OfflineManager {
         continue;
       }
 
-      if (new Date(taxonomy.checkedAt) >= threshold) {
+      if (new Date(taxonomy.checkedAt) < threshold) {
         console.log(`Checking for updates to ${taxonomy.name}...`);
 
         try {
