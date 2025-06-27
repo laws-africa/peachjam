@@ -24,8 +24,22 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     // try a normal fetch
     fetch(event.request)
-      .then((response) => {
-        // it succeeded, return it
+      .then(async (response) => {
+        // update the existing cache value (if any)
+        if (response.ok && response.type === 'basic') {
+          // clone because response is a stream
+          const responseForCache = response.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.match(event.request).then((match) => {
+              if (match) {
+                // it exists in the cache, update it
+                cache.put(event.request, responseForCache);
+              }
+            });
+          });
+        }
+
         return response;
       })
       .catch(async () => {
