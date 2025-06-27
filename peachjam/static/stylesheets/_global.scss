@@ -47,6 +47,14 @@ mark {
   }
 }
 
+.provision-toggle i::before {
+  content: "\f229";
+}
+
+.provision-toggle .collapsed i::before {
+  content: "\f231";
+}
+
 .uncommenced-provision-color {
   background-color: transparentize($uncommenced-highlight-color, 0.8);
 
