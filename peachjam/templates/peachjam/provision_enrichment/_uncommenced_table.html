@@ -1,0 +1,36 @@
+{% load i18n peachjam humanize %}
+<div class="table-responsive"
+     id="{{ doc_table_id|default:"doc-table" }}"
+     data-component="DocumentTable">
+  {% if doc_table_show_counts %}
+    <div class="mb-3 text-muted">
+      {% if doc_count == 1 %}
+        {{ doc_count|intcomma }} {{ doc_count_noun }}
+      {% else %}
+        {{ doc_count|intcomma }} {{ doc_count_noun_plural }}
+      {% endif %}
+    </div>
+  {% endif %}
+  <table class="doc-table">
+    {% for document in documents %}
+      <div class="card mb-4">
+        <h5 class="card-header">
+          <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+        </h5>
+        <ul class="list-group list-group-flush">
+          {% for enrichment in document.provision_enrichments %}
+            <li class="list-group-item">
+              {% include "peachjam/provision_enrichment/_uncommenced_provision_detail.html" with expanded=False %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+    {% if not documents %}
+      <p>{% trans 'No documents found.' %}</p>
+    {% endif %}
+    {% if documents and not hide_pagination and paginator %}
+      {% include 'peachjam/_pagination.html' %}
+    {% endif %}
+  </table>
+</div>

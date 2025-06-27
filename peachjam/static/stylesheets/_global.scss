@@ -47,9 +47,29 @@ mark {
   }
 }
 
+.provision-toggle i::before {
+  content: "\f229";
+}
+
+.provision-toggle .collapsed i::before {
+  content: "\f231";
+}
+
+.uncommenced-provision-color {
+  background-color: transparentize($uncommenced-highlight-color, 0.8);
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+
+  &.active {
+    background-color: transparentize($uncommenced-highlight-color, 0.6);
+  }
+}
+
 .unconstitutional-provision-highlight {
   background-color: transparentize($unconstitutional-highlight-color, 0.8);
   transition: background-color 300ms ease-in-out;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 
   &.active {
     background-color: transparentize($unconstitutional-highlight-color, 0.4);

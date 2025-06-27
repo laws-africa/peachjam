@@ -4,15 +4,20 @@
   >
     <div class="card">
       <div class="card-body">
-        <div class="mb-1">
+        <div v-if="enrichment.enrichment_type==='unconstitutional_provision'" class="mb-1">
           <i class="bi bi-journal-x" />
           {{ $t('Unconstitutional provision') }}
         </div>
-        <div class="mb-2">
+        <div v-else-if="enrichment.enrichment_type==='uncommenced_provision'" class="mb-1">
+          <i class="bi bi-bell-slash" />
+          {{ $t('Uncommenced provision') }}
+        </div>
+        <div v-if="enrichment.enrichment_type==='unconstitutional_provision'" class="mb-2">
           <span v-if="enrichment.resolved" class="badge bg-success">{{ $t( 'Resolved' ) }}</span>
           <span v-else class="badge bg-danger">{{ $t( 'Unresolved' ) }}</span>
         </div>
         <button
+          v-if="enrichment.enrichment_type==='unconstitutional_provision'"
           type="button"
           class="btn btn-sm btn-secondary"
           data-bs-toggle="modal"
@@ -20,12 +25,15 @@
         >
           {{ $t( 'View details' ) }}
         </button>
+        <div v-else-if="enrichment.enrichment_type==='uncommenced_provision' && !enrichment.and_all_descendants" class="small">
+          <i class="bi bi-exclamation-triangle" />
+          {{ $t('Some subprovisions are in force') }}
+        </div>
       </div>
     </div>
   </la-gutter-item>
 </template>
 <script>
-import { markRange } from '@lawsafrica/indigo-akn/dist/ranges';
 
 export default {
   name: 'ProvisionEnrichment',
@@ -55,18 +63,15 @@ export default {
     markAndAnchor () {
       const provision = document.querySelector(`[data-eid="${this.enrichment.provision_eid}"`);
       if (provision) {
-        const range = document.createRange();
-        range.selectNodeContents(provision);
-        markRange(range, 'mark', mark => {
-          this.marks.push(mark);
-          mark.classList.add('unconstitutional-provision-highlight');
-          mark.clickFn = () => this.activate();
-          mark.addEventListener('click', mark.clickFn);
-          return mark;
-        });
-        if (this.marks.length) {
-          this.anchorElement = this.marks[0];
+        this.marks.push(provision);
+        if (this.enrichment.enrichment_type === 'unconstitutional_provision') {
+          provision.classList.add('unconstitutional-provision-highlight');
+        } else if (this.enrichment.enrichment_type === 'uncommenced_provision') {
+          provision.classList.add('uncommenced-provision-color');
         }
+        provision.clickFn = () => this.activate();
+        provision.addEventListener('click', provision.clickFn);
+        this.anchorElement = provision;
       }
     },
     activate () {

@@ -99,6 +99,7 @@ from peachjam.models import (
     SourceFile,
     Taxonomy,
     Treatment,
+    UncommencedProvision,
     UnconstitutionalProvision,
     UserProfile,
     Work,
@@ -1844,6 +1845,7 @@ admin.site.register(
         DocumentAccessGroup,
         Treatment,
         ProvisionEnrichment,
+        UncommencedProvision,
         UnconstitutionalProvision,
     ]
 )

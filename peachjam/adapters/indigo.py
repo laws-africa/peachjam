@@ -30,6 +30,7 @@ from peachjam.models import (
     ProvisionEnrichment,
     Relationship,
     Taxonomy,
+    UncommencedProvision,
     UnconstitutionalProvision,
     Work,
 )
@@ -394,6 +395,8 @@ class IndigoAdapter(RequestsAdapter):
                         kwargs[key] = value
                 if kwargs["enrichment_type"] == "unconstitutional_provision":
                     UnconstitutionalProvision.objects.create(**kwargs)
+                elif kwargs["enrichment_type"] == "uncommenced_provision":
+                    UncommencedProvision.objects.create(**kwargs)
                 # add other subclasses here too before finally creating a vanilla enrichment
                 else:
                     ProvisionEnrichment.objects.create(**kwargs)

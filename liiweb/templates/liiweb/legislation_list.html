@@ -16,11 +16,22 @@
           {% include "peachjam/_help_button.html" %}
         {% endif %}
       {% endblock %}
-      {% if show_unconstitutional_provisions %}
+      {% if show_more_resources %}
         <h5>{% trans "More resources" %}</h5>
-        <div class="mb-3">
-          <a href="{% url "unconstitutional_provision_list" %}">{% trans "Unconstitutional provisions" %}</a>
-        </div>
+        <ul class="list-unstyled">
+          {% if show_unconstitutional_provisions %}
+            <li>
+              <a href="{% url "unconstitutional_provision_list" %}">{% trans "Unconstitutional provisions" %}</a>
+            </li>
+          {% endif %}
+          {% comment %}
+          {% if show_uncommenced_provisions %}
+            <li>
+              <a href="{% url "uncommenced_provision_list" %}">{% trans "Uncommenced provisions" %}</a>
+            </li>
+          {% endif %}
+          {% endcomment %}
+        </ul>
       {% endif %}
     </div>
     <div class="col-12 col-sm-6 col-lg-4 mb-2">
