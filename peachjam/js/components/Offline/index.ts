@@ -1,16 +1,6 @@
-import { getManager } from './manager';
+import { manager } from './manager';
 
 export { default as OfflineDetails } from './OfflineDetails.vue';
-
-export class OfflineDocumentButton {
-  constructor (button: HTMLElement) {
-    button.addEventListener('click', (event: Event) => {
-      const url = document.location.pathname;
-      const title = document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '';
-      getManager().makeDocumentAvailableOffline(url, title);
-    });
-  }
-}
 
 export class OfflineTaxonomyButton {
   constructor (button: HTMLElement) {
@@ -21,7 +11,7 @@ export class OfflineTaxonomyButton {
     if (id) {
       button.addEventListener('click', (event: Event) => {
         const url = document.location.pathname;
-        getManager().makeTaxonomyAvailableOffline(id);
+        manager.makeTaxonomyAvailableOffline(id);
       });
     }
   }

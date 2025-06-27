@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { getManager } from './manager';
+import { manager } from './manager';
 
 export default {
   name: 'OfflineDetails',
@@ -40,13 +40,13 @@ export default {
     };
   },
   created () {
-    this.inventory = getManager().getInventory();
+    this.inventory = manager.getInventory();
   },
   methods: {
     clear () {
       if (confirm('Are you sure you want to delete all offline documents?')) {
         getManager().clearOfflineDocs();
-        this.inventory = getManager().getInventory();
+        this.inventory = manager.getInventory();
       }
     }
   }

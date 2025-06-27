@@ -16,6 +16,26 @@ interface Inventory {
   taxonomies: OfflineTaxonomy[],
 }
 
+/**
+ * This class handles storing and tracking content that is available offline.
+ *
+ * Offline content works in collaboration with a ServiceWorker script (see peachjam/static/js/offline-service-worker.js).
+ *
+ * The service worker must be registered for the offline functionality to work. Whenever a user tries to make content
+ * available offline the service worker is registered, and it then remains registered. Because browsers check for
+ * updates to service workers only when they are registered, we also re-register every time a page loads if the user
+ * has content stored offline.
+ *
+ * The offline functionality works with two data sources:
+ *
+ * - inventory: list of documents and topics that are available offline
+ * - cache: the actual cached pages used while offline, including documents, javascript, images, stylesheets, etc.
+ *
+ * When a user makes content available offline, the manager stores information in the inventory of what is available.
+ * This is purely informational to tell the user what they do/don't have access to. It also then fires off requests
+ * to populate the offline content cache. This is the actual content (handled by the service worker) that is then
+ * available offline.
+ */
 export class OfflineManager {
   // This MUST match CACHE_NAME in offline-service-worker.js
   public static CACHE_NAME = 'peachjam-offline-v1';
@@ -23,6 +43,24 @@ export class OfflineManager {
   public static OFFLINE_PAGE = '/offline/offline';
 
   cache: Cache | null = null;
+  registered = false;
+
+  constructor () {
+    if (localStorage.getItem(OfflineManager.INVENTORY_KEY)) {
+      this.registerServiceWorker();
+    }
+  }
+
+  async registerServiceWorker () {
+    if (!this.registered && 'serviceWorker' in navigator) {
+      try {
+        await navigator.serviceWorker.register('/offline-service-worker.js');
+        this.registered = true;
+      } catch (err) {
+        console.error('Service worker registration failed:', err);
+      }
+    }
+  }
 
   async getCache () {
     if (!this.cache) {
@@ -62,18 +100,9 @@ export class OfflineManager {
     inventory.documents.push(doc);
   }
 
-  async makeDocumentAvailableOffline (url: string, title: string) {
-    const cache = await this.getCache();
-    const urls = [url, OfflineManager.OFFLINE_PAGE, ...this.getStaticAssets()];
-    console.log('Caching urls for offline:', urls);
-    await cache.addAll(urls);
-
-    const inventory = this.getInventory();
-    this.addDocumentToInventory(inventory, { url, title });
-    this.saveInventory(inventory);
-  }
-
   async makeTaxonomyAvailableOffline (id: string) {
+    this.registerServiceWorker();
+
     try {
       // get the manifest to know what to cache
       const resp = await fetch(`/offline/taxonomy/${encodeURIComponent(id)}/manifest.json`);
@@ -132,30 +161,4 @@ export class OfflineManager {
   }
 }
 
-let registered = false;
-
-async function registerServiceWorker () {
-  if (!registered && 'serviceWorker' in navigator) {
-    try {
-      await navigator.serviceWorker.register('/offline-service-worker.js');
-      registered = true;
-    } catch (err) {
-      console.error('Service worker registration failed:', err);
-    }
-  }
-}
-
-// if the user has offline content, then register the service worker
-if (localStorage.getItem(OfflineManager.INVENTORY_KEY)) {
-  registerServiceWorker();
-}
-
-let manager: OfflineManager | null = null;
-
-export function getManager (): OfflineManager {
-  if (!manager) {
-    registerServiceWorker();
-    manager = new OfflineManager();
-  }
-  return manager;
-}
+export const manager = new OfflineManager();
