@@ -127,7 +127,7 @@
               </li>
             {% endif %}
             {% block unconstitutional-provisions-tab %}
-              {% if perms.peachjam.view_unconstitutionalprovision and unconstitutional_provisions %}
+              {% if unconstitutional_provisions %}
                 <li class="nav-item" role="presentation">
                   <button class="nav-link"
                           data-bs-toggle="tab"
@@ -144,7 +144,7 @@
               {% endif %}
             {% endblock %}
             {% block uncommenced-provisions-tab %}
-              {% if perms.peachjam.view_unconstitutionalprovision and uncommenced_provisions %}
+              {% if uncommenced_provisions %}
                 <li class="nav-item" role="presentation">
                   <button class="nav-link"
                           data-bs-toggle="tab"
@@ -548,7 +548,7 @@
           {% endif %}
         {% endblock %}
         {% block unconstitutional-provisions-tab-pane %}
-          {% if perms.peachjam.view_unconstitutionalprovision and unconstitutional_provisions %}
+          {% if unconstitutional_provisions %}
             <div class="tab-pane fade"
                  id="unconstitutional-provisions-tab"
                  role="tabpanel"
@@ -558,7 +558,7 @@
           {% endif %}
         {% endblock %}
         {% block uncommenced-provisions-tab-pane %}
-          {% if perms.peachjam.view_unconstitutionalprovision and uncommenced_provisions %}
+          {% if uncommenced_provisions %}
             <div class="tab-pane fade"
                  id="uncommenced-provisions-tab"
                  role="tabpanel"
@@ -608,9 +608,7 @@
     {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
-    {% if perms.peachjam.view_unconstitutionalprovision %}
-      {{ provision_enrichments_json|json_script:"provision-enrichments-json" }}
-      {% include "peachjam/provision_enrichment/_modals.html" %}
-    {% endif %}
+    {{ provision_enrichments_json|json_script:"provision-enrichments-json" }}
+    {% include "peachjam/provision_enrichment/_modals.html" %}
   </div>
 {% endblock %}

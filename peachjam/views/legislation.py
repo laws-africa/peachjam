@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 from django.contrib import messages
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import CharField, Func, Value
 from django.db.models.functions.text import Substr
 from django.template.defaultfilters import date as format_date
@@ -396,10 +395,9 @@ class LegislationDetailView(BaseDocumentDetailView):
         return docs
 
 
-class UncommencedProvisionListView(PermissionRequiredMixin, LegislationListView):
+class UncommencedProvisionListView(LegislationListView):
     template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
     latest_expression_only = True
-    permission_required = "peachjam.view_unconstitutionalprovision"
 
     def get_template_names(self):
         if self.request.htmx:
@@ -430,12 +428,11 @@ class UncommencedProvisionListView(PermissionRequiredMixin, LegislationListView)
         return context
 
 
-class UnconstitutionalProvisionListView(PermissionRequiredMixin, LegislationListView):
+class UnconstitutionalProvisionListView(LegislationListView):
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
     latest_expression_only = True
     form_class = UnconstitutionalProvisionFilterForm
     exclude_facets = ["alphabet", "years"]
-    permission_required = "peachjam.view_unconstitutionalprovision"
 
     def get_template_names(self):
         if self.request.htmx:
