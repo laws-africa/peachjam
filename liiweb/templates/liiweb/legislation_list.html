@@ -24,11 +24,13 @@
               <a href="{% url "unconstitutional_provision_list" %}">{% trans "Unconstitutional provisions" %}</a>
             </li>
           {% endif %}
+          {% comment %}
           {% if show_uncommenced_provisions %}
             <li>
               <a href="{% url "uncommenced_provision_list" %}">{% trans "Uncommenced provisions" %}</a>
             </li>
           {% endif %}
+          {% endcomment %}
         </ul>
       {% endif %}
     </div>
