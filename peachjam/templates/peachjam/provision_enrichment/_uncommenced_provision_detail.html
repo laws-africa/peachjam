@@ -5,6 +5,14 @@
     <a href="{{ enrichment.document.get_absolute_url }}#{{ enrichment.provision_eid }}"
        class="provision-link me-2">{{ enrichment.provision_title }}</a>
   </h6>
+  <button type="button"
+          class="btn btn-sm bg-none {% if not expanded %}collapsed{% endif %}"
+          data-bs-toggle="collapse"
+          data-bs-target="#provision-detail-{{ enrichment.pk }}"
+          aria-expanded="{% if expanded %}true{% else %}false{% endif %}"
+          aria-controls="provision-detail-{{ enrichment.pk }}">
+    Show/hide
+  </button>
   {% if not enrichment.and_all_descendants %}
     <div class="my-2">
       <i class="bi bi-exclamation-triangle"></i>
@@ -15,7 +23,8 @@
   {% endif %}
 </div>
 {% if enrichment.provision_by_eid %}
-  <div>
+  <div id="provision-detail-{{ enrichment.pk }}"
+       class="{% if not expanded %}collapse{% endif %}">
     <la-akoma-ntoso frbr-expression-uri="{{ enrichment.document.expression_frbr_uri }}" class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;" lang="{{ enrichment.document.language.iso }}">
     {{ enrichment.provision_by_eid|safe }}
     </la-akoma-ntoso>
