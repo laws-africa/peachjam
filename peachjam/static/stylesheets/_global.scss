@@ -47,6 +47,14 @@ mark {
   }
 }
 
+.uncommenced-provision-color {
+  background-color: transparentize($uncommenced-highlight-color, 0.8);
+
+  &.active {
+    background-color: transparentize($uncommenced-highlight-color, 0.6);
+  }
+}
+
 .unconstitutional-provision-highlight {
   background-color: transparentize($unconstitutional-highlight-color, 0.8);
   transition: background-color 300ms ease-in-out;
