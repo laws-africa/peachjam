@@ -19,7 +19,9 @@
         </h5>
         <ul class="list-group list-group-flush">
           {% for enrichment in document.provision_enrichments %}
-            <li class="list-group-item">{% include "peachjam/provision_enrichment/_detail.html" %}</li>
+            <li class="list-group-item">
+              {% include "peachjam/provision_enrichment/_uncommenced_provision_detail.html" with expanded=False %}
+            </li>
           {% endfor %}
         </ul>
       </div>

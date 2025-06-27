@@ -4,74 +4,57 @@
   <a href="{{ enrichment.document.get_absolute_url }}{% if enrichment.provision_eid %}#{{ enrichment.provision_eid }}{% endif %}" class="provision-link me-2">
     {% if enrichment.whole_work %}{{ enrichment.document.title }}{% else %}{{ enrichment.provision_title }}{% endif %}</a>
   {# djLint:on #}
-  {% if enrichment.enrichment_type == 'unconstitutional_provision' %}
-    {% if enrichment.resolved %}
-      <span class="badge bg-success">{% trans 'Resolved' %}</span>
-    {% else %}
-      <span class="badge bg-danger">{% trans 'Unresolved' %}</span>
-    {% endif %}
+  {% if enrichment.resolved %}
+    <span class="badge bg-success">{% trans 'Resolved' %}</span>
+  {% else %}
+    <span class="badge bg-danger">{% trans 'Unresolved' %}</span>
   {% endif %}
 </h6>
 {% if enrichment.text %}<div class="my-2">{{ enrichment.text|linebreaks }}</div>{% endif %}
-{% if enrichment.enrichment_type == 'unconstitutional_provision' %}
-  <dl class="document-metadata-list d-flex mb-3">
-    {% if enrichment.judgment %}
-      <dt>
-        {% trans 'Judgment' %}
-      </dt>
-      <dd>
-        <a href="{{ enrichment.judgment.documents.latest_expression.first.get_absolute_url }}">{{ enrichment.judgment.documents.latest_expression.first.title }}</a>
-      </dd>
-    {% endif %}
-    {% if enrichment.date_deemed_unconstitutional %}
-      <dt>
-        {% trans 'Date deemed unconstitutional' %}
-      </dt>
-      <dd>
-        {{ enrichment.date_deemed_unconstitutional }}
-      </dd>
-    {% endif %}
-    {% if enrichment.end_of_suspension_period %}
-      <dt>
-        {% trans 'End of suspension period' %}
-      </dt>
-      <dd>
-        {{ enrichment.end_of_suspension_period }}
-      </dd>
-    {% endif %}
-    {% if enrichment.date_resolved %}
-      <dt>
-        {% trans 'Date resolved' %}
-      </dt>
-      <dd>
-        {{ enrichment.date_resolved }}
-      </dd>
-    {% endif %}
-    {% if enrichment.resolving_amendment_work %}
-      <dt>
-        {% trans 'Resolving amendment' %}
-      </dt>
-      <dd>
-        <a href="{{ enrichment.resolving_amendment_work.documents.latest_expression.first.get_absolute_url }}">
-          {{ enrichment.resolving_amendment_work.title }}
-        </a>
-      </dd>
-    {% endif %}
-  </dl>
-{% elif enrichment.enrichment_type == 'uncommenced_provision' %}
-  <div class="my-2">
-    {% if not enrichment.and_all_descendants %}
-      <i class="bi bi-exclamation-triangle"></i>
-      {% blocktrans %}
-        Note: this provision has some subprovisions that have already come into force.
-      {% endblocktrans %}
-    {% else %}
-      {% blocktrans %}
-        This provision and all its subprovisions have not yet come into force.
-      {% endblocktrans %}
-    {% endif %}
-  </div>
-{% endif %}
+<dl class="document-metadata-list d-flex mb-3">
+  {% if enrichment.judgment %}
+    <dt>
+      {% trans 'Judgment' %}
+    </dt>
+    <dd>
+      <a href="{{ enrichment.judgment.documents.latest_expression.first.get_absolute_url }}">{{ enrichment.judgment.documents.latest_expression.first.title }}</a>
+    </dd>
+  {% endif %}
+  {% if enrichment.date_deemed_unconstitutional %}
+    <dt>
+      {% trans 'Date deemed unconstitutional' %}
+    </dt>
+    <dd>
+      {{ enrichment.date_deemed_unconstitutional }}
+    </dd>
+  {% endif %}
+  {% if enrichment.end_of_suspension_period %}
+    <dt>
+      {% trans 'End of suspension period' %}
+    </dt>
+    <dd>
+      {{ enrichment.end_of_suspension_period }}
+    </dd>
+  {% endif %}
+  {% if enrichment.date_resolved %}
+    <dt>
+      {% trans 'Date resolved' %}
+    </dt>
+    <dd>
+      {{ enrichment.date_resolved }}
+    </dd>
+  {% endif %}
+  {% if enrichment.resolving_amendment_work %}
+    <dt>
+      {% trans 'Resolving amendment' %}
+    </dt>
+    <dd>
+      <a href="{{ enrichment.resolving_amendment_work.documents.latest_expression.first.get_absolute_url }}">
+        {{ enrichment.resolving_amendment_work.title }}
+      </a>
+    </dd>
+  {% endif %}
+</dl>
 {% if enrichment.provision_by_eid %}
   <div class="mb-2">
     {% trans "Provision as at" %}
