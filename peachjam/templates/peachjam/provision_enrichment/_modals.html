@@ -1,5 +1,5 @@
 {% load i18n %}
-{% for enrichment in provision_enrichments %}
+{% for enrichment in unconstitutional_provisions %}
   <div class="modal"
        id="provision-enrichment-modal-{{ enrichment.pk }}"
        tabindex="-1">
@@ -7,11 +7,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
-            {% if enrichment.enrichment_type == 'unconstitutional_provision' %}
-              <i class="bi bi-journal-x"></i> {% trans 'Unconstitutional provision' %}
-            {% elif enrichment.enrichment_type == 'uncommenced_provision' %}
-              <i class="bi bi-bell-slash"></i> {% trans 'Uncommenced provision' %}
-            {% endif %}
+            <i class="bi bi-journal-x"></i> {% trans 'Unconstitutional provision' %}
           </h5>
           <button type="button"
                   class="btn-close"
@@ -20,11 +16,7 @@
         </div>
         <div class="modal-body">{% include "peachjam/provision_enrichment/_detail.html" %}</div>
         <div class="modal-footer">
-          {% if enrichment.enrichment_type == 'unconstitutional_provision' %}
-            <a href="{% url 'unconstitutional_provision_list' %}" class="me-auto">{% trans "All unconstitutional provisions" %}</a>
-          {% elif enrichment.enrichment_type == 'uncommenced_provision' %}
-            <a href="{% url 'uncommenced_provision_list' %}" class="me-auto">{% trans "All uncommenced provisions" %}</a>
-          {% endif %}
+          <a href="{% url 'unconstitutional_provision_list' %}" class="me-auto">{% trans "All unconstitutional provisions" %}</a>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
         </div>
       </div>
