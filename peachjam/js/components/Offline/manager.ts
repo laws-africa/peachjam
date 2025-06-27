@@ -64,9 +64,9 @@ export class OfflineManager {
 
   async makeDocumentAvailableOffline (url: string, title: string) {
     const cache = await this.getCache();
-    const assets = [url, OfflineManager.OFFLINE_PAGE, ...this.getStaticAssets()];
-    console.log('Caching assets for offline:', assets);
-    await cache.addAll(assets);
+    const urls = [url, OfflineManager.OFFLINE_PAGE, ...this.getStaticAssets()];
+    console.log('Caching urls for offline:', urls);
+    await cache.addAll(urls);
 
     const inventory = this.getInventory();
     this.addDocumentToInventory(inventory, { url, title });
@@ -80,16 +80,16 @@ export class OfflineManager {
       if (resp.ok) {
         const manifest = await resp.json();
 
-        const assets = [
+        const urls = [
           OfflineManager.OFFLINE_PAGE,
           ...this.getStaticAssets(),
-          ...manifest.assets,
+          ...manifest.urls,
           ...manifest.documents.map((doc: OfflineDocument) => doc.url)
         ];
 
         const cache = await this.getCache();
-        console.log('Caching assets for offline:', assets);
-        await cache.addAll(assets);
+        console.log('Caching urls for offline:', urls);
+        await cache.addAll(urls);
 
         const inventory = this.getInventory();
         this.addTopicToInventory(inventory, {

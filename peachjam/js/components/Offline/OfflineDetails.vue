@@ -1,6 +1,15 @@
 <template>
+  <h3>Collections available offline</h3>
+  <ol class="mb-4">
+    <li v-for="taxonomy in inventory.taxonomies" :key="taxonomy.url">
+      <a :href="taxonomy.url">{{ taxonomy.name }}</a>
+    </li>
+    <li v-if="inventory.taxonomies.length === 0">
+      No collections available offline.
+    </li>
+  </ol>
   <h3>Documents available offline</h3>
-  <ol>
+  <ol class="mb-4">
     <li v-for="doc in inventory.documents" :key="doc.url">
       <a :href="doc.url">{{ doc.title }}</a>
     </li>
@@ -8,15 +17,13 @@
       No documents available offline.
     </li>
   </ol>
-  <div class="mt-4">
-    <button
-      v-if="inventory.documents.length"
-      class="btn btn-danger"
-      @click="clear"
-    >
-      Delete all offline documents
-    </button>
-  </div>
+  <button
+    v-if="inventory.documents.length"
+    class="btn btn-danger"
+    @click="clear"
+  >
+    Delete all offline content
+  </button>
 </template>
 
 <script>
