@@ -261,6 +261,8 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
             "serial_number_override",
             "content_html_is_akn",
             "allow_robots",
+            "flynote",
+            "case_summary",
             "published",
             "id",
             "title",

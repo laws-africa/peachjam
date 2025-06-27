@@ -30510,33 +30510,6 @@ ___CSS_LOADER_EXPORT___.push([module.id, "\n.mobile-side-drawer__mobile-view[dat
 
 /***/ }),
 
-/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=style&index=0&lang=css":
-/*!**************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=style&index=0&lang=css ***!
-  \**************************************************************************************************************************************************************************************************************************************************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
-/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
-/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
-// Imports
-
-
-var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
-// Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.hit mark {\n  font-weight: bold;\n  padding: 0px;\n  color: inherit;\n}\n.snippet {\n  line-height: 1.3;\n  word-break: break-word;\n}\n.hit .explanation {\n  max-height: 50vh;\n  overflow-y: auto;\n}\n.hit.best-match > .card {\n  box-shadow: 0px 0px 5px 2px gold;\n}\n.hit.best-match > .card::before {\n  content: attr(data-best-match);\n  position: absolute;\n  background: gold;\n  padding: 0.25rem 0.25rem;\n  right: -1px;\n  top: -1px;\n  font-size: smaller;\n  border-top-right-radius: 6px;\n}\n", "",{"version":3,"sources":["webpack://./peachjam/js/components/FindDocuments/SearchResult.vue"],"names":[],"mappings":";AA4MA;EACE,iBAAiB;EACjB,YAAY;EACZ,cAAc;AAChB;AACA;EACE,gBAAgB;EAChB,sBAAsB;AACxB;AACA;EACE,gBAAgB;EAChB,gBAAgB;AAClB;AAEA;EACE,gCAAgC;AAClC;AAEA;EACE,8BAA8B;EAC9B,kBAAkB;EAClB,gBAAgB;EAChB,wBAAwB;EACxB,WAAW;EACX,SAAS;EACT,kBAAkB;EAClB,4BAA4B;AAC9B","sourcesContent":["<template>\n  <li :class=\"`mb-4 hit ${item.best_match ? 'best-match' : ''}`\">\n    <div class=\"card\" :data-best-match=\"$t('Best match')\">\n      <div class=\"card-body\">\n        <h5 class=\"card-title\">\n          <a\n            class=\"h5 text-primary\"\n            target=\"_blank\"\n            :href=\"item.expression_frbr_uri\"\n            @click=\"$emit('item-clicked')\"\n            v-html=\"item.highlight.title || item.title\"\n          />\n          <span :id=\"`saved-document-star--${item.id}`\"></span>\n        </h5>\n        <div class=\"mb-1\">\n          <div v-if=\"item.citation && item.citation !== item.title\">\n            <i v-html=\"item.highlight.citation || item.citation\" />\n          </div>\n          <div v-if=\"item.alternative_names.length\">\n            <i>\n              <span v-for=\"(name, i) in item.highlight.alternative_names || item.alternative_names\" :key=\"i\">\n                <span v-if=\"i > 0\">; </span>\n                <span v-html=\"name\" />\n              </span>\n            </i>\n          </div>\n          <div>\n            <span v-if=\"showJurisdiction || item.locality\" class=\"me-3\">\n              <span v-if=\"showJurisdiction\" v-html=\"getFlag(item)\" class=\"me-1\" />\n              <span v-if=\"showJurisdiction\">\n                {{ item.jurisdiction }}\n                <span v-if=\"item.locality\">· </span>\n              </span>\n              <span v-if=\"item.locality\">{{ item.locality }}</span>\n            </span>\n            <span class=\"me-3\">{{ item.nature }}</span>\n            <span class=\"me-3\">{{ item.date }}</span>\n            <span\n              v-if=\"item.court\"\n              class=\"me-3\"\n            >{{ item.court }}</span>\n            <span\n              v-if=\"item.authors\"\n              class=\"me-3\"\n            >{{ authors(item) }}</span>\n            <span v-for=\"label in labels\" :key=\"label.code\" :class=\"`me-3 badge rounded-pill bg-${label.level}`\">{{ label.name }}</span>\n            <a\n              v-if=\"debug\"\n              class=\"me-3\"\n              :href=\"`#debug-${item.id}`\"\n              data-bs-toggle=\"collapse\"\n            >{{ item._score }}</a>\n          </div>\n          <div>\n            {{ item.matter_type }}\n          </div>\n          <div v-if=\"item.topic_path_names\" class=\"text-muted fst-italic mt-1\">\n            {{ item.topic_path_names.join(' · ') }}\n          </div>\n          <div :id=\"`saved-document-table-detail--${item.id}`\"></div>\n        </div>\n        <div v-if=\"debug && item.explanation\" :id=\"`debug-${item.id}`\" class=\"my-2 collapse\">\n          <div class=\"card\">\n            <div class=\"card-header\">\n              <ul class=\"nav nav-tabs card-header-tabs\">\n                <li class=\"nav-item\">\n                  <a class=\"nav-link active\" data-bs-toggle=\"tab\" :href=\"`#explanation-${item.id}`\">Explanation</a>\n                </li>\n                <li class=\"nav-item\">\n                  <a class=\"nav-link\" data-bs-toggle=\"tab\" :href=\"`#raw-${item.id}`\">Raw</a>\n                </li>\n              </ul>\n            </div>\n            <div class=\"card-body explanation\">\n              <div class=\"tab-content\">\n                <div :id=\"`explanation-${item.id}`\" class=\"tab-pane active show\">\n                  <json-table :data=\"item.explanation\" />\n                </div>\n                <div :id=\"`raw-${item.id}`\" class=\"tab-pane\">\n                  <json-table :data=\"item.raw\" />\n                </div>\n              </div>\n            </div>\n          </div>\n        </div>\n        <div v-if=\"item.pages.length\">\n          <div\n            v-for=\"page in item.pages\"\n            :key=\"page.page_num\"\n            class=\"mb-1\"\n          >\n            <a\n              :href=\"`${item.expression_frbr_uri}#page-${page.page_num}`\"\n              target=\"_blank\"\n              @click=\"$emit('item-clicked', `page-${page.page_num}`)\"\n            >{{ $t('Page') }} {{ page.page_num }}</a>:\n            <span v-if=\"page.highlight['pages.body']\" v-html=\"page.highlight['pages.body'].join(' ... ')\" />\n            <span v-if=\"debug\"> ({{ page.score }})</span>\n          </div>\n        </div>\n        <div v-if=\"item.provisions.length\">\n          <SearchResultProvision\n            v-for=\"provision in item.provisions\"\n            :key=\"provision.id\"\n            :item=\"provision\"\n            :parents=\"provisionParents(provision)\"\n            :expression-frbr-uri=\"item.expression_frbr_uri\"\n            @item-clicked=\"(x) => $emit('item-clicked', x)\"\n          />\n        </div>\n        <div v-else class=\"ms-3\">\n          <span\n            class=\"snippet\"\n            v-html=\"highlights(item)\"\n          />\n        </div>\n      </div>\n      <div class=\"card-footer text-end\">\n        <a\n          class=\"btn btn-outline-primary me-2\"\n          :href=\"`${item.expression_frbr_uri}/source`\"\n          target=\"_blank\"\n        >{{ $t('Download') }}</a>\n        <div :class=\"`save-document-button--${item.id}`\" />\n      </div>\n    </div>\n  </li>\n</template>\n\n<script>\nimport JsonTable from './JsonTable.vue';\nimport SearchResultProvision from './SearchResultProvision.vue';\n\nexport default {\n  name: 'SearchResult',\n  components: {\n    JsonTable,\n    SearchResultProvision\n  },\n  props: {\n    item: {\n      type: Object,\n      default () {\n        return {};\n      }\n    },\n    query: {\n      type: String,\n      default: () => ''\n    },\n    showJurisdiction: {\n      type: Boolean,\n      default: false\n    },\n    documentLabels: {\n      type: Array,\n      default: () => []\n    },\n    debug: {\n      type: Boolean,\n      default: false\n    }\n  },\n  emits: ['item-clicked'],\n  computed: {\n    labels () {\n      // get documentLabels where the code is in item.labels\n      return this.documentLabels.filter(label => (this.item.labels || []).includes(label.code));\n    }\n  },\n  methods: {\n    highlights (item) {\n      if (item.highlight.content) {\n        return item.highlight.content.join(' ... ');\n      }\n    },\n    getFlag (item) {\n      const code = item.expression_frbr_uri.split('/')[2].split('-')[0];\n      if (code === 'aa') {\n        return '<img style=\"width:1.33333em; vertical-align: baseline\" alt=\"African Union Icon\"  src=\"/static/images/au_icon.png\" loading=\"lazy\"/>';\n      } else {\n        return `<span class=\"fi fi-${code}\"></span>`;\n      }\n    },\n    authors (item) {\n      if (item.authors) {\n        return Array.isArray(item.authors) ? item.authors.join(', ') : item.authors;\n      }\n      return '';\n    },\n    provisionParents (provision) {\n      // zip item.parent_titles and item.parent_ids\n      return provision.parent_titles.map((title, index) => {\n        return {\n          title: title,\n          id: provision.parent_ids[index]\n        };\n      });\n    }\n  }\n};\n</script>\n\n<style>\n.hit mark {\n  font-weight: bold;\n  padding: 0px;\n  color: inherit;\n}\n.snippet {\n  line-height: 1.3;\n  word-break: break-word;\n}\n.hit .explanation {\n  max-height: 50vh;\n  overflow-y: auto;\n}\n\n.hit.best-match > .card {\n  box-shadow: 0px 0px 5px 2px gold;\n}\n\n.hit.best-match > .card::before {\n  content: attr(data-best-match);\n  position: absolute;\n  background: gold;\n  padding: 0.25rem 0.25rem;\n  right: -1px;\n  top: -1px;\n  font-size: smaller;\n  border-top-right-radius: 6px;\n}\n</style>\n"],"sourceRoot":""}]);
-// Exports
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
-
-
-/***/ }),
-
 /***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/index.vue?vue&type=style&index=0&id=03d55e9a&scoped=true&lang=css":
 /*!*******************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/index.vue?vue&type=style&index=0&id=03d55e9a&scoped=true&lang=css ***!
@@ -30557,7 +30530,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.overlay[data-v-03d55e9a] {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.2);\n  z-index: 9;\n}\n@media screen and (max-width: 992px) {\n.filter-facet-title[data-v-03d55e9a] {\n    position: absolute;\n    margin: auto;\n    left: 0;\n    right: 0;\n    width: 40px;\n}\n}\n", "",{"version":3,"sources":["webpack://./peachjam/js/components/FindDocuments/index.vue"],"names":[],"mappings":";AAu8BA;EACE,kBAAkB;EAClB,MAAM;EACN,OAAO;EACP,WAAW;EACX,YAAY;EACZ,oCAAoC;EACpC,UAAU;AACZ;AAEA;AACG;IACC,kBAAkB;IAClB,YAAY;IACZ,OAAO;IACP,QAAQ;IACR,WAAW;AACb;AACF","sourcesContent":["<template>\n  <div id=\"search\" ref=\"search-box\">\n    <div class=\"mb-4\">\n      <nav>\n        <div\n          class=\"nav nav-tabs mb-3 border-bottom\"\n          role=\"tablist\"\n        >\n          <button\n            id=\"search-tab\"\n            class=\"nav-link active\"\n            data-bs-toggle=\"tab\"\n            data-bs-target=\"#nav-search\"\n            type=\"button\"\n            role=\"tab\"\n            aria-controls=\"nav-search\"\n            aria-selected=\"true\"\n          >\n            {{ $t('Search') }}\n          </button>\n          <button\n            id=\"advanced-search-tab\"\n            class=\"nav-link\"\n            data-bs-toggle=\"tab\"\n            data-bs-target=\"#nav-advanced-search\"\n            type=\"button\"\n            role=\"tab\"\n            aria-controls=\"nav-advanced-search\"\n            aria-selected=\"false\"\n          >\n            {{ $t('Advanced search') }}\n          </button>\n          <button\n            v-if=\"showGoogle\"\n            id=\"google-search-tab\"\n            class=\"nav-link\"\n            data-bs-toggle=\"tab\"\n            data-bs-target=\"#nav-google-search\"\n            type=\"button\"\n            role=\"tab\"\n            aria-controls=\"nav-google-search\"\n            aria-selected=\"false\"\n          >\n            {{ $t('Search with Google') }}\n          </button>\n        </div>\n      </nav>\n      <div class=\"tab-content\">\n        <div\n          id=\"nav-search\"\n          class=\"tab-pane show active\"\n          role=\"tabpanel\"\n          aria-labelledby=\"search-tab\"\n        >\n          <form\n            class=\"d-flex align-items-center mb-2\"\n            @submit.prevent=\"simpleSearch\"\n          >\n            <input\n              ref=\"searchInput\"\n              v-model=\"q\"\n              type=\"search\"\n              class=\"form-control\"\n              :placeholder=\"searchPlaceholder\"\n              :aria-label=\"$t('Search documents')\"\n              aria-describedby=\"basic-addon2\"\n              required\n              @typeahead=\"onTypeahead\"\n            >\n            <button\n              type=\"submit\"\n              class=\"btn btn-primary ms-2\"\n              :disabled=\"loading\"\n            >\n              <span\n                v-if=\"loading\"\n                class=\"circle-loader--lt\"\n              />\n              <span v-else>\n                <span class=\"d-none d-md-inline\">{{ $t(\"Search\") }}</span>\n                <span class=\"d-md-none\">\n                  <i class=\"bi bi-search\"></i>\n                </span>\n              </span>\n            </button>\n            <button\n              v-if=\"searchInfo.count\"\n              type=\"button\"\n              class=\"btn btn-secondary ms-1 d-lg-none text-nowrap\"\n              @click=\"() => drawerOpen = true\"\n            >\n              <span class=\"d-none d-md-inline\">{{ $t(\"Filters\") }}</span>\n              <span class=\"d-md-none\">\n                <i class=\"bi bi-filter\"></i>\n              </span>\n              <span v-if=\"selectedFacetsCount\" class=\"badge bg-light text-dark\">{{ selectedFacetsCount }}</span>\n            </button>\n          </form>\n          <div class=\"d-flex my-2\">\n            <div v-if=\"showModes && searchInfo && searchInfo.can_semantic\">\n              <div class=\"form-check form-switch\">\n                <input\n                  id=\"mode-hybrid\"\n                  v-model=\"mode\"\n                  class=\"form-check-input\"\n                  type=\"checkbox\"\n                  :true-value=\"'hybrid'\"\n                  :false-value=\"'text'\"\n                >\n                <label class=\"form-check-label\" for=\"mode-hybrid\">\n                  {{ $t('Expand your search using AI') }}\n                  <i class=\"bi bi-stars\"></i>\n                </label>\n              </div>\n            </div>\n            <div class=\"ms-auto\">\n              <HelpBtn page=\"search/\" />\n            </div>\n          </div>\n          <div v-if=\"searchTip\" class=\"mt-2 mb-3\">\n            <i class=\"bi bi-info-circle\" />\n            {{ searchTip.prompt }}\n            <a href=\"#\" @click.stop.prevent=\"useSearchTip()\">{{ searchTip.q }}</a>\n          </div>\n        </div>\n        <div\n          id=\"nav-advanced-search\"\n          class=\"tab-pane\"\n          role=\"tabpanel\"\n          aria-labelledby=\"advanced-search-tab\"\n        >\n          <AdvancedSearch\n            v-model=\"advancedSearchCriteria\"\n            :advanced-search-date-criteria=\"advancedSearchDateCriteria\"\n            :global-search-value=\"q\"\n            :selected-facets-count=\"selectedFacetsCount\"\n            :search-info=\"searchInfo\"\n            @global-search-change=\"value => q = value\"\n            @date-change=\"value => advancedSearchDateCriteria = {...value}\"\n            @submit=\"advancedSearch\"\n            @show-facets=\"() => drawerOpen = true\"\n          />\n        </div>\n        <div\n          v-if=\"showGoogle\"\n          id=\"nav-google-search\"\n          class=\"tab-pane\"\n          role=\"tabpanel\"\n          aria-labelledby=\"google-search-tab\"\n        >\n          <div class=\"gcse-search\" data-autoSearchOnLoad=\"false\" />\n        </div>\n      </div>\n    </div>\n    <div class=\"mt-3\" v-if=\"!googleActive\">\n      <div\n        v-if=\"error\"\n        class=\"mt-3 alert alert-warning\"\n      >\n        {{ $t(\"Oops, something went wrong.\") }} {{ error }}\n      </div>\n      <div\n        v-if=\"searchInfo.count === 0\"\n        class=\"mt-3\"\n      >\n        <p>{{ $t(\"No documents match your search.\") }}</p>\n        <SearchFeedback :trace-id=\"searchInfo.trace_id\" />\n      </div>\n      <div ref=\"filters-results-container\">\n        <div class=\"row\">\n          <div class=\"col col-lg-3\">\n            <MobileFacetsDrawer\n              :open=\"drawerOpen\"\n              @outside-drawer-click=\"() => drawerOpen = false\"\n            >\n              <FilterFacets\n                v-if=\"searchInfo.count\"\n                v-model=\"facets\"\n                :ordering=\"ordering\"\n                :loading=\"loading\"\n                @ordered=\"setOrdering\"\n              >\n                <template #header-title>\n                  <button\n                    type=\"button\"\n                    class=\"btn-close d-lg-none\"\n                    :aria-label=\"$t('Close')\"\n                    @click=\"() => drawerOpen = false\"\n                  />\n                  <strong class=\"filter-facet-title\">{{ $t(\"Filters\") }}</strong>\n                </template>\n              </FilterFacets>\n            </MobileFacetsDrawer>\n          </div>\n\n          <div class=\"col-md-12 col-lg-9 position-relative\">\n            <div>\n              <FacetBadges v-model=\"facets\" :permissive=\"searchInfo.count === 0\" />\n              <div id=\"saved-search-button\" />\n              <div\n                id=\"saved-search-modal\"\n                class=\"modal fade\"\n                tabindex=\"-1\"\n                aria-labelledby=\"saved-search-modal-label\"\n                aria-hidden=\"true\"\n              >\n                <div id=\"saved-search-modal-dialog\" class=\"modal-dialog\" />\n              </div>\n              <div v-if=\"searchInfo.count\">\n                <div class=\"my-3 d-flex\">\n                  <div class=\"me-2\">\n                    <span v-if=\"searchInfo.count > 9999\">{{ $t('More than 10,000 documents found.') }}</span>\n                    <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>\n                    <span v-if=\"searchInfo.can_download\">\n                      &nbsp;\n                      <a :href=\"downloadUrl()\" target=\"_blank\">{{ $t('Download to Excel') }}</a>\n                    </span>\n                  </div>\n                  <select\n                    v-model=\"ordering\"\n                    class=\"form-select ms-auto select-narrow d-none d-lg-block\"\n                  >\n                    <option value=\"-score\">\n                      {{ (ordering === \"-score\" ? ($t(\"Sort\") + \": \") : \"\") + $t('Relevance') }}\n                    </option>\n                    <option value=\"date\">\n                      {{ (ordering === \"date\" ? ($t(\"Sort\") + \": \") : \"\") + $t('Date (oldest first)') }}\n                    </option>\n                    <option value=\"-date\">\n                      {{ (ordering === \"-date\" ? ($t(\"Sort\") + \": \") : \"\") + $t('Date (newest first)') }}\n                    </option>\n                  </select>\n                </div>\n\n                <ul class=\"list-unstyled search-result-list\">\n                  <SearchResult\n                    v-for=\"(item, index) in searchInfo.results\"\n                    :key=\"item.id\"\n                    :index=\"index\"\n                    :count=\"searchInfo.count\"\n                    :trace-id=\"searchInfo.trace_id\"\n                    :item=\"item\"\n                    :query=\"q\"\n                    :debug=\"searchInfo.can_debug\"\n                    :show-jurisdiction=\"showJurisdiction\"\n                    :document-labels=\"documentLabels\"\n                    @item-clicked=\"(e) => itemClicked(item, e)\"\n                  />\n                </ul>\n\n                <SearchFeedback :trace-id=\"searchInfo.trace_id\" />\n\n                <SearchPagination\n                  :search=\"searchInfo\"\n                  :page=\"page\"\n                  @changed=\"handlePageChange\"\n                />\n              </div>\n            </div>\n            <div\n              v-if=\"loading && searchInfo.count\"\n              class=\"overlay\"\n            />\n          </div>\n        </div>\n\n        <a\n          href=\"#search\"\n          class=\"to-the-top btn btn-secondary d-block d-lg-none\"\n        >\n          ▲ {{ $t('To the top') }}\n        </a>\n      </div>\n    </div>\n\n    <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->\n    <div v-if=\"false\">\n      {{ $t('Document type') }}\n      {{ $t('Author') }}\n      {{ $t('Court') }}\n      {{ $t('Court registry') }}\n      {{ $t('Court division') }}\n      {{ $t('Judges') }}\n      {{ $t('Attorneys') }}\n      {{ $t('Outcome') }}\n      {{ $t('Case action') }}\n      {{ $t('Jurisdiction') }}\n      {{ $t('Locality') }}\n      {{ $t('Matter type') }}\n      {{ $t('Language') }}\n      {{ $t('Year') }}\n    </div>\n  </div>\n</template>\n\n<script>\nimport SearchResult from './SearchResult.vue';\nimport SearchPagination from './SearchPagination.vue';\nimport FilterFacets from '../FilterFacets/index.vue';\nimport MobileFacetsDrawer from './MobileSideDrawer.vue';\nimport AdvancedSearch from './AdvancedSearch.vue';\nimport HelpBtn from '../HelpBtn.vue';\nimport { scrollToElement } from '../../utils/function';\nimport FacetBadges from './FacetBadges.vue';\nimport analytics from '../../analytics';\nimport { authHeaders } from '../../api';\nimport SearchTypeahead from '../search-typeahead';\nimport htmx from 'htmx.org';\nimport SearchFeedback from './SearchFeedback.vue';\n\nexport default {\n  name: 'FindDocuments',\n  components: { SearchFeedback, FacetBadges, MobileFacetsDrawer, SearchResult, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },\n  props: ['showJurisdiction', 'showGoogle', 'showSuggestions', 'showModes'],\n  data () {\n    const getLabelOptionLabels = (labels) => {\n      // the function name is a bit confusing but this gets labels for the options in Labels facet\n      const labelOptions = {};\n      for (const label of labels) {\n        labelOptions[label.code] = label.name;\n      }\n      return labelOptions;\n    };\n\n    const getTitle = (title) => {\n      return JSON.parse(document.querySelector('#data-labels').textContent)[title];\n    };\n\n    const data = {\n      searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,\n      documentLabels: JSON.parse(document.querySelector('#data-labels').textContent).documentLabels,\n      loadingCount: 0,\n      error: null,\n      searchInfo: {},\n      page: 1,\n      pageSize: 10,\n      ordering: '-score',\n      q: '',\n      drawerOpen: false,\n      searchTip: null,\n      suggestion: null,\n      advancedSearchCriteria: [{\n        text: '',\n        fields: [],\n        condition: '',\n        exact: false\n      },\n      {\n        text: '',\n        fields: [],\n        condition: 'AND',\n        exact: false\n      }],\n      advancedSearchDateCriteria: {\n        date_to: null,\n        date_from: null\n      },\n      googleActive: false,\n      mode: 'text'\n    };\n    const facets = [\n      // most frequently used facets first, based on user data\n      {\n        title: this.$t('Document type'),\n        name: 'nature',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Court'),\n        name: 'court',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Year'),\n        name: 'year',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: getTitle('registry'),\n        name: 'registry',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Court division'),\n        name: 'division',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Locality'),\n        name: 'locality',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Outcome'),\n        name: 'outcome',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Case action'),\n        name: 'case_action',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: getTitle('judge'),\n        name: 'judges',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: getTitle('author'),\n        name: 'authors',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Language'),\n        name: 'language',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Labels'),\n        name: 'labels',\n        type: 'checkboxes',\n        value: [],\n        options: [],\n        optionLabels: getLabelOptionLabels(data.documentLabels)\n      },\n      {\n        title: this.$t('Attorneys'),\n        name: 'attorneys',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Matter type'),\n        name: 'matter_type',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      }\n    ];\n\n    if (this.showJurisdiction) {\n      facets.splice(1, 0, {\n        title: this.$t('Jurisdiction'),\n        name: 'jurisdiction',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      });\n    }\n\n    data.facets = facets;\n    data.linkedTraces = new Set();\n    return data;\n  },\n\n  computed: {\n    selectedFacetsCount () {\n      return this.facets.map(facet => facet.value.length).reduce((pv, cv) => pv + cv, 0);\n    },\n    loading () {\n      return this.loadingCount > 0;\n    }\n  },\n\n  watch: {\n    ordering () {\n      this.search();\n    },\n\n    mode () {\n      this.search();\n    },\n\n    facets: {\n      handler () {\n        this.page = 1;\n        this.search();\n      }\n    }\n  },\n\n  mounted () {\n    if (this.showSuggestions) {\n      this.searchTypeahead = new SearchTypeahead(this.$refs.searchInput, true);\n    }\n    this.loadState();\n    window.addEventListener('popstate', () => this.loadState());\n    this.$el.addEventListener('show.bs.tab', this.tabChanged);\n  },\n\n  methods: {\n    tabChanged (e) {\n      this.googleActive = e.target.id === 'google-search-tab';\n    },\n\n    onTypeahead (e) {\n      this.suggestion = e.detail.suggestion;\n      this.q = this.suggestion.value;\n      this.simpleSearch();\n    },\n\n    setOrdering (ordering) {\n      this.ordering = ordering;\n    },\n\n    sortBuckets (items, reverse = false, byCount = false) {\n      const buckets = [...items];\n      function keyFn (a, b) {\n        if (byCount) {\n          // sort by count, then by key\n          return a.doc_count === b.doc_count ? a.key.localeCompare(b.key) : b.doc_count - a.doc_count;\n        }\n        return a.key.localeCompare(b.key);\n      }\n      buckets.sort(keyFn);\n      if (reverse) {\n        buckets.reverse();\n      }\n      return buckets;\n    },\n\n    handlePageChange (newPage) {\n      this.page = newPage;\n      this.search();\n    },\n\n    simpleSearch () {\n      this.resetAdvancedFields();\n      this.submit();\n    },\n\n    advancedSearch () {\n      this.q = '';\n      this.submit();\n    },\n\n    submit () {\n      this.page = 1;\n      this.search();\n    },\n\n    serialiseState () {\n      // save state to URL string\n      const params = new URLSearchParams();\n\n      if (this.q) params.set('q', this.q);\n      if (this.page > 1) {\n        params.set('page', this.page);\n      }\n      if (this.ordering !== '-score') {\n        params.set('ordering', this.ordering);\n      }\n      if (this.mode !== 'text') {\n        params.set('mode', this.mode);\n      }\n\n      this.facets.forEach((facet) => {\n        facet.value.forEach((value) => {\n          params.append(facet.name, value);\n        });\n      });\n\n      if (this.advancedSearchDateCriteria.date_from && this.advancedSearchDateCriteria.date_to) {\n        params.append('date_from', this.advancedSearchDateCriteria.date_from);\n        params.append('date_to', this.advancedSearchDateCriteria.date_to);\n      } else if (this.advancedSearchDateCriteria.date_from) {\n        params.append('date_from', this.advancedSearchDateCriteria.date_from);\n      } else if (this.advancedSearchDateCriteria.date_to) {\n        params.append('date_to', this.advancedSearchDateCriteria.date_to);\n      }\n\n      const searchParams = this.advancedSearchCriteria.filter(criterion => criterion.text).map((criterion) => {\n        const reducedCriterion = { text: criterion.text };\n        if (criterion.fields.length) reducedCriterion.fields = criterion.fields;\n        if (criterion.condition) reducedCriterion.condition = criterion.condition;\n        if (criterion.exact) reducedCriterion.exact = criterion.exact;\n\n        return reducedCriterion;\n      });\n\n      // Set advanced fields to url\n      if (searchParams.length) params.append('a', JSON.stringify(searchParams));\n\n      return params.toString();\n    },\n\n    loadState () {\n      this.resetAdvancedFields();\n\n      // load state from URL\n      const params = new URLSearchParams(window.location.search);\n      // skip the first event if there's a query, because the page load will already have sent it\n      this.q = params.get('q') || '';\n      this.page = parseInt(params.get('page')) || this.page;\n      this.ordering = params.get('ordering') || this.ordering;\n      this.mode = params.get('mode') || this.mode;\n\n      if (params.has('suggestion')) this.suggestion = { type: params.get('suggestion') };\n\n      this.facets.forEach((facet) => {\n        if (params.has(facet.name)) {\n          facet.value = params.getAll(facet.name);\n        }\n      });\n\n      if (params.has('date_from')) this.advancedSearchDateCriteria.date_from = params.get('date_from');\n      if (params.has('date_to')) this.advancedSearchDateCriteria.date_to = params.get('date_to');\n\n      let showAdvanced = params.get('show-advanced-tab');\n      if (params.has('a')) {\n        const advancedSearchParams = JSON.parse(params.get('a'));\n        advancedSearchParams.forEach((criterion, index) => {\n          const fullCriterion = {\n            text: criterion.text,\n            fields: criterion.fields || [],\n            condition: criterion.condition || '',\n            exact: !!criterion.exact\n          };\n          if (index === 0 && !criterion.condition) this.advancedSearchCriteria.splice(0, 1, fullCriterion);\n          else this.advancedSearchCriteria.splice(index, 0, fullCriterion);\n        });\n        showAdvanced = true;\n      }\n\n      // if there are advanced search fields or show-advanced-tab param, activate tab\n      if (showAdvanced) {\n        const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#advanced-search-tab'));\n        tabTrigger.show();\n      }\n\n      this.search(false);\n    },\n\n    suggest (q) {\n      this.q = q;\n      this.search();\n    },\n\n    useSearchTip () {\n      this.q = this.searchTip.q;\n      this.search();\n    },\n\n    formatFacets () {\n      const queryString = window.location.search;\n      const urlParams = new URLSearchParams(queryString);\n\n      const generateOptions = (buckets, labels) => {\n        return buckets.map((bucket) => ({\n          label: labels ? labels[bucket.key] : bucket.key,\n          count: bucket.doc_count,\n          value: bucket.key\n        }));\n      };\n\n      this.facets.forEach((facet) => {\n        if (facet.name === 'year') {\n          facet.options = generateOptions(\n            this.sortBuckets(\n              this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,\n              true\n            ),\n            facet.optionLabels\n          );\n        } else {\n          if (this.searchInfo.facets[`_filter_${facet.name}`]) {\n            facet.options = generateOptions(\n              this.sortBuckets(\n                this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,\n               false,\n                // sort nature by descending count, everything else alphabetically\n                facet.name === 'nature'\n              ),\n              facet.optionLabels\n            );\n          }\n        }\n\n        // If we have results, then sanity check chosen options against those that are available.\n        // If there are no results, we trust any options given so that we can show the facet buttons\n        // and allow the user to remove the facets to try to find results.\n        if (this.searchInfo.count > 0) {\n          const availableOptions = facet.options.map(option => option.value);\n          facet.value = urlParams.getAll(facet.name).filter(value => availableOptions.includes(value));\n        }\n      });\n    },\n\n    formatResults () {\n      for (let i = 0; i < this.searchInfo.results.length; i++) {\n        // number items from 1 consistently across pages\n        this.searchInfo.results[i].position = (this.page - 1) * this.pageSize + i + 1;\n      }\n\n      // determine best match: is the first result's score significantly better than the next?\n      if (this.page === 1 && this.searchInfo.results.length > 1 &&\n          this.searchInfo.results[0]._score / this.searchInfo.results[1]._score >= 1.2) {\n        this.searchInfo.results[0].best_match = true;\n      }\n    },\n\n    generateSearchParams () {\n      const params = new URLSearchParams();\n      if (this.q) params.append('search', this.q);\n      params.append('page', this.page);\n      params.append('ordering', this.ordering);\n\n      this.facets.forEach((facet) => {\n        facet.value.forEach((value) => {\n          params.append(facet.name, value);\n        });\n      });\n\n      // facets that we want the API to return\n      this.facets.forEach((facet) => {\n        params.append('facet', facet.name);\n      });\n\n      this.generateAdvancedSearchParams(params);\n\n      // record suggestion details for statistics\n      if (this.suggestion) {\n        params.append('suggestion', this.suggestion.type);\n      }\n\n      if (this.mode !== 'text') {\n        params.append('mode', this.mode);\n      }\n\n      return params;\n    },\n\n    generateAdvancedSearchParams (params) {\n      // advanced search fields, if any\n      if (this.advancedSearchDateCriteria.date_from && this.advancedSearchDateCriteria.date_to) {\n        const dateFrom = this.advancedSearchDateCriteria.date_from;\n        const dateTo = this.advancedSearchDateCriteria.date_to;\n        params.append('date__range', `${dateFrom}__${dateTo}`);\n      } else if (this.advancedSearchDateCriteria.date_from) {\n        params.append('date__gte', this.advancedSearchDateCriteria.date_from);\n      } else if (this.advancedSearchDateCriteria.date_to) {\n        params.append('date__lte', this.advancedSearchDateCriteria.date_to);\n      }\n\n      // group criteria by fields and process each field separately\n      const fields = new Map();\n      for (const criterion of this.advancedSearchCriteria) {\n        if (criterion.text) {\n          for (const field of criterion.fields) {\n            if (!fields.has(field)) fields.set(field, []);\n            fields.get(field).push(criterion);\n          }\n        }\n      }\n\n      for (const [field, criteria] of fields) {\n        params.set(`search__${field}`, this.generateAdvancedSearchQuery(criteria));\n      }\n    },\n\n    generateAdvancedSearchQuery (criteria) {\n      let q = '';\n\n      for (const criterion of criteria) {\n        const text = criterion.exact ? `\"${criterion.text}\"` : criterion.text;\n\n        if (criterion.condition === 'AND') {\n          q = q + ' & ';\n        } else if (criterion.condition === 'OR') {\n          q = q + ' | ';\n        } else if (criterion.condition === 'NOT') {\n          q = q + ' -';\n        }\n\n        q = q + `(${text})`;\n      }\n\n      return q.trim();\n    },\n\n    async search (pushState = true) {\n      this.searchTip = null;\n      if (this.searchTypeahead) {\n        this.searchTypeahead.autocomplete.hideSuggestions();\n      }\n\n      // if one of the search fields is true perform search\n      if (this.q || (Array.isArray(this.advancedSearchCriteria) && this.advancedSearchCriteria.some(f => f.text))) {\n        this.loadingCount = this.loadingCount + 1;\n\n        // scroll to put the search box at the top of the window\n        scrollToElement(this.$refs['search-box']);\n\n        // search tip\n        if (this.q && this.q.indexOf('\"') === -1 && this.q.indexOf(' ') > -1) {\n          this.searchTip = {\n            prompt: this.$t('Tip: Use quotes to search for an exact phrase: '),\n            q: `\"${this.q}\"`\n          };\n        }\n\n        try {\n          const params = this.generateSearchParams();\n          const previousId = this.searchInfo.trace_id || '';\n          const url = `/search/api/documents/?${params.toString()}`;\n\n          if (pushState) {\n            window.history.pushState(\n              null,\n              '',\n              document.location.pathname + '?' + this.serialiseState()\n            );\n          }\n          const response = await fetch(url);\n\n          // check that the search state hasn't changed since we sent the request\n          if (params.toString() === this.generateSearchParams().toString()) {\n            // clear the suggestion flag\n            this.suggestion = null;\n            if (response.ok) {\n              this.error = null;\n              this.searchInfo = await response.json();\n              this.formatFacets();\n              this.formatResults();\n              this.trackSearch(params);\n              this.savedSearchModal();\n              this.linkTraces(previousId, this.searchInfo.trace_id);\n              if (this.searchInfo.can_save_documents) {\n                this.loadSaveDocumentButtons();\n              }\n            } else {\n              this.error = response.statusText;\n            }\n          }\n        } catch {\n          this.error = 'Network unavailable.';\n        }\n\n        this.loadingCount = this.loadingCount - 1;\n        this.drawerOpen = false;\n      }\n    },\n\n    trackSearch (params) {\n      const keywords = [];\n      const facets = [];\n      const fields = this.facets.map(facet => facet.name).concat(['date__range', 'date__gte', 'date__lte']);\n\n      [...new Set(params.keys())].forEach((key) => {\n        if (key.startsWith('search')) {\n          const s = key === 'search' ? '' : (key.substring(8) + '=');\n          keywords.push(s + params.get(key).trim());\n        } else if (fields.includes(key)) {\n          facets.push(`${key}=${params.getAll(key).join(',')}`);\n        }\n      });\n\n      analytics.trackSiteSearch(keywords.join('; '), facets.join('; '), this.searchInfo.count);\n    },\n\n    async itemClicked (item, portion) {\n      const params = new URLSearchParams();\n      params.set('frbr_uri', item.expression_frbr_uri);\n      params.set('portion', portion || '');\n      params.set('position', item.position);\n      params.set('search_trace', this.searchInfo.trace_id);\n      try {\n        fetch('/search/api/click/', {\n          method: 'POST',\n          headers: await authHeaders(),\n          body: params\n        });\n      } catch (err) {\n        console.log(err);\n      }\n    },\n\n    resetAdvancedFields () {\n      this.advancedSearchCriteria = [{\n        text: '',\n        fields: ['all'],\n        condition: '',\n        exact: false\n      },\n      {\n        text: '',\n        fields: ['all'],\n        condition: 'AND',\n        exact: false\n      }];\n\n      this.advancedSearchDateCriteria = {\n        date_to: null,\n        date_from: null\n      };\n    },\n\n    savedSearchModal () {\n      htmx.ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });\n    },\n\n    async linkTraces (previousId, newId) {\n      if (previousId) {\n        // ensure we don't try to link our very first trace if we re-use a trace due to caching\n        if (this.linkedTraces.size === 0) {\n          this.linkedTraces.add(previousId);\n        }\n\n        if (newId && previousId !== newId && !this.linkedTraces.has(newId)) {\n          this.linkedTraces.add(newId);\n          try {\n            fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {\n              method: 'POST',\n              headers: await authHeaders()\n            });\n          } catch {\n            // ignore network errors\n          }\n        }\n      }\n    },\n\n    loadSaveDocumentButtons () {\n      // use htmx to load and inject save-document buttons\n      // get document ids\n      const ids = this.searchInfo.results.map(result => result.id);\n      if (ids.length) {\n        const el = document.createElement('div');\n        document.body.appendChild(el);\n        const query = ids.map(id => `doc_id=${id}`).join('&');\n        htmx.ajax('GET', '/saved-documents/fragments?' + query, el);\n      }\n    },\n\n    downloadUrl () {\n      const params = this.generateSearchParams();\n      params.set('format', 'xlsx');\n      return `/search/api/documents/?${params.toString()}`;\n    }\n  }\n};\n</script>\n\n<style scoped>\n.overlay {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.2);\n  z-index: 9;\n}\n\n@media screen and (max-width: 992px) {\n   .filter-facet-title {\n    position: absolute;\n    margin: auto;\n    left: 0;\n    right: 0;\n    width: 40px;\n  }\n}\n</style>\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.overlay[data-v-03d55e9a] {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.2);\n  z-index: 9;\n}\n@media screen and (max-width: 992px) {\n.filter-facet-title[data-v-03d55e9a] {\n    position: absolute;\n    margin: auto;\n    left: 0;\n    right: 0;\n    width: 40px;\n}\n}\n", "",{"version":3,"sources":["webpack://./peachjam/js/components/FindDocuments/index.vue"],"names":[],"mappings":";AAy8BA;EACE,kBAAkB;EAClB,MAAM;EACN,OAAO;EACP,WAAW;EACX,YAAY;EACZ,oCAAoC;EACpC,UAAU;AACZ;AAEA;AACG;IACC,kBAAkB;IAClB,YAAY;IACZ,OAAO;IACP,QAAQ;IACR,WAAW;AACb;AACF","sourcesContent":["<template>\n  <div id=\"search\" ref=\"search-box\">\n    <div class=\"mb-4\">\n      <nav>\n        <div\n          class=\"nav nav-tabs mb-3 border-bottom\"\n          role=\"tablist\"\n        >\n          <button\n            id=\"search-tab\"\n            class=\"nav-link active\"\n            data-bs-toggle=\"tab\"\n            data-bs-target=\"#nav-search\"\n            type=\"button\"\n            role=\"tab\"\n            aria-controls=\"nav-search\"\n            aria-selected=\"true\"\n          >\n            {{ $t('Search') }}\n          </button>\n          <button\n            id=\"advanced-search-tab\"\n            class=\"nav-link\"\n            data-bs-toggle=\"tab\"\n            data-bs-target=\"#nav-advanced-search\"\n            type=\"button\"\n            role=\"tab\"\n            aria-controls=\"nav-advanced-search\"\n            aria-selected=\"false\"\n          >\n            {{ $t('Advanced search') }}\n          </button>\n          <button\n            v-if=\"showGoogle\"\n            id=\"google-search-tab\"\n            class=\"nav-link\"\n            data-bs-toggle=\"tab\"\n            data-bs-target=\"#nav-google-search\"\n            type=\"button\"\n            role=\"tab\"\n            aria-controls=\"nav-google-search\"\n            aria-selected=\"false\"\n          >\n            {{ $t('Search with Google') }}\n          </button>\n        </div>\n      </nav>\n      <div class=\"tab-content\">\n        <div\n          id=\"nav-search\"\n          class=\"tab-pane show active\"\n          role=\"tabpanel\"\n          aria-labelledby=\"search-tab\"\n        >\n          <form\n            class=\"d-flex align-items-center mb-2\"\n            @submit.prevent=\"simpleSearch\"\n          >\n            <input\n              ref=\"searchInput\"\n              v-model=\"q\"\n              type=\"search\"\n              class=\"form-control\"\n              :placeholder=\"searchPlaceholder\"\n              :aria-label=\"$t('Search documents')\"\n              aria-describedby=\"basic-addon2\"\n              required\n              @typeahead=\"onTypeahead\"\n            >\n            <button\n              type=\"submit\"\n              class=\"btn btn-primary ms-2\"\n              :disabled=\"loading\"\n            >\n              <span\n                v-if=\"loading\"\n                class=\"circle-loader--lt\"\n              />\n              <span v-else>\n                <span class=\"d-none d-md-inline\">{{ $t(\"Search\") }}</span>\n                <span class=\"d-md-none\">\n                  <i class=\"bi bi-search\"></i>\n                </span>\n              </span>\n            </button>\n            <button\n              v-if=\"searchInfo.count\"\n              type=\"button\"\n              class=\"btn btn-secondary ms-1 d-lg-none text-nowrap\"\n              @click=\"() => drawerOpen = true\"\n            >\n              <span class=\"d-none d-md-inline\">{{ $t(\"Filters\") }}</span>\n              <span class=\"d-md-none\">\n                <i class=\"bi bi-filter\"></i>\n              </span>\n              <span v-if=\"selectedFacetsCount\" class=\"badge bg-light text-dark\">{{ selectedFacetsCount }}</span>\n            </button>\n          </form>\n          <div class=\"d-flex my-2\">\n            <div v-if=\"showModes && searchInfo && searchInfo.can_semantic\">\n              <div class=\"form-check form-switch\">\n                <input\n                  id=\"mode-hybrid\"\n                  v-model=\"mode\"\n                  class=\"form-check-input\"\n                  type=\"checkbox\"\n                  :true-value=\"'hybrid'\"\n                  :false-value=\"'text'\"\n                >\n                <label class=\"form-check-label\" for=\"mode-hybrid\">\n                  {{ $t('Expand your search using AI') }}\n                  <i class=\"bi bi-stars\"></i>\n                </label>\n              </div>\n            </div>\n            <div class=\"ms-auto\">\n              <HelpBtn page=\"search/\" />\n            </div>\n          </div>\n          <div v-if=\"searchTip\" class=\"mt-2 mb-3\">\n            <i class=\"bi bi-info-circle\" />\n            {{ searchTip.prompt }}\n            <a href=\"#\" @click.stop.prevent=\"useSearchTip()\">{{ searchTip.q }}</a>\n          </div>\n        </div>\n        <div\n          id=\"nav-advanced-search\"\n          class=\"tab-pane\"\n          role=\"tabpanel\"\n          aria-labelledby=\"advanced-search-tab\"\n        >\n          <AdvancedSearch\n            v-model=\"advancedSearchCriteria\"\n            :advanced-search-date-criteria=\"advancedSearchDateCriteria\"\n            :global-search-value=\"q\"\n            :selected-facets-count=\"selectedFacetsCount\"\n            :search-info=\"searchInfo\"\n            @global-search-change=\"value => q = value\"\n            @date-change=\"value => advancedSearchDateCriteria = {...value}\"\n            @submit=\"advancedSearch\"\n            @show-facets=\"() => drawerOpen = true\"\n          />\n        </div>\n        <div\n          v-if=\"showGoogle\"\n          id=\"nav-google-search\"\n          class=\"tab-pane\"\n          role=\"tabpanel\"\n          aria-labelledby=\"google-search-tab\"\n        >\n          <div class=\"gcse-search\" data-autoSearchOnLoad=\"false\" />\n        </div>\n      </div>\n    </div>\n    <div class=\"mt-3\" v-if=\"!googleActive\">\n      <div\n        v-if=\"error\"\n        class=\"mt-3 alert alert-warning\"\n      >\n        {{ $t(\"Oops, something went wrong.\") }} {{ error }}\n      </div>\n      <div\n        v-if=\"searchInfo.count === 0\"\n        class=\"mt-3\"\n      >\n        <p>{{ $t(\"No documents match your search.\") }}</p>\n        <SearchFeedback :trace-id=\"searchInfo.trace_id\" />\n      </div>\n      <div ref=\"filters-results-container\">\n        <div class=\"row\">\n          <div class=\"col col-lg-3\">\n            <MobileFacetsDrawer\n              :open=\"drawerOpen\"\n              @outside-drawer-click=\"() => drawerOpen = false\"\n            >\n              <FilterFacets\n                v-if=\"searchInfo.count\"\n                v-model=\"facets\"\n                :loading=\"facetsLoading\"\n                :ordering=\"ordering\"\n                @ordered=\"setOrdering\"\n              >\n                <template #header-title>\n                  <button\n                    type=\"button\"\n                    class=\"btn-close d-lg-none\"\n                    :aria-label=\"$t('Close')\"\n                    @click=\"() => drawerOpen = false\"\n                  />\n                  <strong class=\"filter-facet-title\">{{ $t(\"Filters\") }}</strong>\n                </template>\n              </FilterFacets>\n            </MobileFacetsDrawer>\n          </div>\n\n          <div class=\"col-md-12 col-lg-9 position-relative\">\n            <div>\n              <FacetBadges v-model=\"facets\" :permissive=\"searchInfo.count === 0\" />\n              <div id=\"saved-search-button\" />\n              <div\n                id=\"saved-search-modal\"\n                class=\"modal fade\"\n                tabindex=\"-1\"\n                aria-labelledby=\"saved-search-modal-label\"\n                aria-hidden=\"true\"\n              >\n                <div id=\"saved-search-modal-dialog\" class=\"modal-dialog\" />\n              </div>\n              <div v-if=\"searchInfo.count\">\n                <div class=\"my-3 d-flex\">\n                  <div class=\"me-2\">\n                    <span v-if=\"searchInfo.count > 9999\">{{ $t('More than 10,000 documents found.') }}</span>\n                    <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>\n                    <span v-if=\"searchInfo.can_download\">\n                      &nbsp;\n                      <a :href=\"downloadUrl()\" target=\"_blank\">{{ $t('Download to Excel') }}</a>\n                    </span>\n                  </div>\n                  <select\n                    v-model=\"ordering\"\n                    class=\"form-select ms-auto select-narrow d-none d-lg-block\"\n                  >\n                    <option value=\"-score\">\n                      {{ (ordering === \"-score\" ? ($t(\"Sort\") + \": \") : \"\") + $t('Relevance') }}\n                    </option>\n                    <option value=\"date\">\n                      {{ (ordering === \"date\" ? ($t(\"Sort\") + \": \") : \"\") + $t('Date (oldest first)') }}\n                    </option>\n                    <option value=\"-date\">\n                      {{ (ordering === \"-date\" ? ($t(\"Sort\") + \": \") : \"\") + $t('Date (newest first)') }}\n                    </option>\n                  </select>\n                </div>\n                <div\n                  ref=\"results\"\n                  @click=\"itemClicked\"\n                  v-html=\"searchInfo.results_html\"\n                />\n                <SearchFeedback :trace-id=\"searchInfo.trace_id\" />\n                <SearchPagination\n                  :search=\"searchInfo\"\n                  :page=\"page\"\n                  @changed=\"handlePageChange\"\n                />\n              </div>\n            </div>\n            <div\n              v-if=\"loading && searchInfo.count\"\n              class=\"overlay\"\n            />\n          </div>\n        </div>\n\n        <a\n          href=\"#search\"\n          class=\"to-the-top btn btn-secondary d-block d-lg-none\"\n        >\n          ▲ {{ $t('To the top') }}\n        </a>\n      </div>\n    </div>\n\n    <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->\n    <div v-if=\"false\">\n      {{ $t('Document type') }}\n      {{ $t('Author') }}\n      {{ $t('Court') }}\n      {{ $t('Court registry') }}\n      {{ $t('Court division') }}\n      {{ $t('Judges') }}\n      {{ $t('Attorneys') }}\n      {{ $t('Outcome') }}\n      {{ $t('Case action') }}\n      {{ $t('Jurisdiction') }}\n      {{ $t('Locality') }}\n      {{ $t('Matter type') }}\n      {{ $t('Language') }}\n      {{ $t('Year') }}\n    </div>\n  </div>\n</template>\n\n<script>\nimport SearchPagination from './SearchPagination.vue';\nimport FilterFacets from '../FilterFacets/index.vue';\nimport MobileFacetsDrawer from './MobileSideDrawer.vue';\nimport AdvancedSearch from './AdvancedSearch.vue';\nimport HelpBtn from '../HelpBtn.vue';\nimport { scrollToElement } from '../../utils/function';\nimport FacetBadges from './FacetBadges.vue';\nimport analytics from '../../analytics';\nimport { authHeaders } from '../../api';\nimport SearchTypeahead from '../search-typeahead';\nimport htmx from 'htmx.org';\nimport SearchFeedback from './SearchFeedback.vue';\nimport { loadSavedDocuments } from '../saved-documents';\n\nexport default {\n  name: 'FindDocuments',\n  components: { SearchFeedback, FacetBadges, MobileFacetsDrawer, SearchPagination, FilterFacets, AdvancedSearch, HelpBtn },\n  props: ['showJurisdiction', 'showGoogle', 'showSuggestions', 'showModes'],\n  data () {\n    const getLabelOptionLabels = (labels) => {\n      // the function name is a bit confusing but this gets labels for the options in Labels facet\n      const labelOptions = {};\n      for (const label of labels) {\n        labelOptions[label.code] = label.name;\n      }\n      return labelOptions;\n    };\n\n    const getTitle = (title) => {\n      return JSON.parse(document.querySelector('#data-labels').textContent)[title];\n    };\n\n    const data = {\n      searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,\n      documentLabels: JSON.parse(document.querySelector('#data-labels').textContent).documentLabels,\n      loadingCount: 0,\n      facetsLoadingCount: 0,\n      error: null,\n      searchInfo: {},\n      page: 1,\n      pageSize: 10,\n      ordering: '-score',\n      q: '',\n      drawerOpen: false,\n      searchTip: null,\n      suggestion: null,\n      advancedSearchCriteria: [{\n        text: '',\n        fields: [],\n        condition: '',\n        exact: false\n      },\n      {\n        text: '',\n        fields: [],\n        condition: 'AND',\n        exact: false\n      }],\n      advancedSearchDateCriteria: {\n        date_to: null,\n        date_from: null\n      },\n      googleActive: false,\n      mode: 'text'\n    };\n    const facets = [\n      // most frequently used facets first, based on user data\n      {\n        title: this.$t('Document type'),\n        name: 'nature',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Court'),\n        name: 'court',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Year'),\n        name: 'year',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: getTitle('registry'),\n        name: 'registry',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Court division'),\n        name: 'division',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Locality'),\n        name: 'locality',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Outcome'),\n        name: 'outcome',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Case action'),\n        name: 'case_action',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: getTitle('judge'),\n        name: 'judges',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: getTitle('author'),\n        name: 'authors',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Language'),\n        name: 'language',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Labels'),\n        name: 'labels',\n        type: 'checkboxes',\n        value: [],\n        options: [],\n        optionLabels: getLabelOptionLabels(data.documentLabels)\n      },\n      {\n        title: this.$t('Attorneys'),\n        name: 'attorneys',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      },\n      {\n        title: this.$t('Matter type'),\n        name: 'matter_type',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      }\n    ];\n\n    if (this.showJurisdiction) {\n      facets.splice(1, 0, {\n        title: this.$t('Jurisdiction'),\n        name: 'jurisdiction',\n        type: 'checkboxes',\n        value: [],\n        options: []\n      });\n    }\n\n    data.facets = facets;\n    data.linkedTraces = new Set();\n    return data;\n  },\n\n  computed: {\n    selectedFacetsCount () {\n      return this.facets.map(facet => facet.value.length).reduce((pv, cv) => pv + cv, 0);\n    },\n    loading () {\n      return this.loadingCount > 0;\n    },\n    facetsLoading () {\n      return this.facetsLoadingCount > 0;\n    }\n  },\n\n  watch: {\n    ordering () {\n      this.search();\n    },\n\n    mode () {\n      this.search();\n    },\n\n    facets: {\n      handler () {\n        this.page = 1;\n        this.search();\n      }\n    }\n  },\n\n  mounted () {\n    if (this.showSuggestions) {\n      this.searchTypeahead = new SearchTypeahead(this.$refs.searchInput, true);\n    }\n    this.loadState();\n    window.addEventListener('popstate', () => this.loadState());\n    this.$el.addEventListener('show.bs.tab', this.tabChanged);\n  },\n\n  methods: {\n    tabChanged (e) {\n      this.googleActive = e.target.id === 'google-search-tab';\n    },\n\n    onTypeahead (e) {\n      this.suggestion = e.detail.suggestion;\n      this.q = this.suggestion.value;\n      this.simpleSearch();\n    },\n\n    setOrdering (ordering) {\n      this.ordering = ordering;\n    },\n\n    sortBuckets (items, reverse = false, byCount = false) {\n      const buckets = [...items];\n      function keyFn (a, b) {\n        if (byCount) {\n          // sort by count, then by key\n          return a.doc_count === b.doc_count ? a.key.localeCompare(b.key) : b.doc_count - a.doc_count;\n        }\n        return a.key.localeCompare(b.key);\n      }\n      buckets.sort(keyFn);\n      if (reverse) {\n        buckets.reverse();\n      }\n      return buckets;\n    },\n\n    handlePageChange (newPage) {\n      this.page = newPage;\n      this.search();\n    },\n\n    simpleSearch () {\n      this.resetAdvancedFields();\n      this.submit();\n    },\n\n    advancedSearch () {\n      this.q = '';\n      this.submit();\n    },\n\n    submit () {\n      this.page = 1;\n      this.search();\n    },\n\n    serialiseState () {\n      // save state to URL string\n      const params = new URLSearchParams();\n\n      if (this.q) params.set('q', this.q);\n      if (this.page > 1) {\n        params.set('page', this.page);\n      }\n      if (this.ordering !== '-score') {\n        params.set('ordering', this.ordering);\n      }\n      if (this.mode !== 'text') {\n        params.set('mode', this.mode);\n      }\n\n      this.facets.forEach((facet) => {\n        facet.value.forEach((value) => {\n          params.append(facet.name, value);\n        });\n      });\n\n      if (this.advancedSearchDateCriteria.date_from && this.advancedSearchDateCriteria.date_to) {\n        params.append('date_from', this.advancedSearchDateCriteria.date_from);\n        params.append('date_to', this.advancedSearchDateCriteria.date_to);\n      } else if (this.advancedSearchDateCriteria.date_from) {\n        params.append('date_from', this.advancedSearchDateCriteria.date_from);\n      } else if (this.advancedSearchDateCriteria.date_to) {\n        params.append('date_to', this.advancedSearchDateCriteria.date_to);\n      }\n\n      const searchParams = this.advancedSearchCriteria.filter(criterion => criterion.text).map((criterion) => {\n        const reducedCriterion = { text: criterion.text };\n        if (criterion.fields.length) reducedCriterion.fields = criterion.fields;\n        if (criterion.condition) reducedCriterion.condition = criterion.condition;\n        if (criterion.exact) reducedCriterion.exact = criterion.exact;\n\n        return reducedCriterion;\n      });\n\n      // Set advanced fields to url\n      if (searchParams.length) params.append('a', JSON.stringify(searchParams));\n\n      return params.toString();\n    },\n\n    loadState () {\n      this.resetAdvancedFields();\n\n      // load state from URL\n      const params = new URLSearchParams(window.location.search);\n      // skip the first event if there's a query, because the page load will already have sent it\n      this.q = params.get('q') || '';\n      this.page = parseInt(params.get('page')) || this.page;\n      this.ordering = params.get('ordering') || this.ordering;\n      this.mode = params.get('mode') || this.mode;\n\n      if (params.has('suggestion')) this.suggestion = { type: params.get('suggestion') };\n\n      this.facets.forEach((facet) => {\n        if (params.has(facet.name)) {\n          facet.value = params.getAll(facet.name);\n        }\n      });\n\n      if (params.has('date_from')) this.advancedSearchDateCriteria.date_from = params.get('date_from');\n      if (params.has('date_to')) this.advancedSearchDateCriteria.date_to = params.get('date_to');\n\n      let showAdvanced = params.get('show-advanced-tab');\n      if (params.has('a')) {\n        const advancedSearchParams = JSON.parse(params.get('a'));\n        advancedSearchParams.forEach((criterion, index) => {\n          const fullCriterion = {\n            text: criterion.text,\n            fields: criterion.fields || [],\n            condition: criterion.condition || '',\n            exact: !!criterion.exact\n          };\n          if (index === 0 && !criterion.condition) this.advancedSearchCriteria.splice(0, 1, fullCriterion);\n          else this.advancedSearchCriteria.splice(index, 0, fullCriterion);\n        });\n        showAdvanced = true;\n      }\n\n      // if there are advanced search fields or show-advanced-tab param, activate tab\n      if (showAdvanced) {\n        const tabTrigger = new window.bootstrap.Tab(this.$el.querySelector('#advanced-search-tab'));\n        tabTrigger.show();\n      }\n\n      this.search(false);\n    },\n\n    suggest (q) {\n      this.q = q;\n      this.search();\n    },\n\n    useSearchTip () {\n      this.q = this.searchTip.q;\n      this.search();\n    },\n\n    formatFacets (facetInfo, count) {\n      const queryString = window.location.search;\n      const urlParams = new URLSearchParams(queryString);\n\n      const generateOptions = (buckets, labels) => {\n        return buckets.map((bucket) => ({\n          label: labels ? labels[bucket.key] : bucket.key,\n          count: bucket.doc_count,\n          value: bucket.key\n        }));\n      };\n\n      this.facets.forEach((facet) => {\n        if (facet.name === 'year') {\n          facet.options = generateOptions(\n            this.sortBuckets(\n              facetInfo[`_filter_${facet.name}`][facet.name].buckets,\n              true\n            ),\n            facet.optionLabels\n          );\n        } else {\n          if (facetInfo[`_filter_${facet.name}`]) {\n            facet.options = generateOptions(\n              this.sortBuckets(\n                facetInfo[`_filter_${facet.name}`][facet.name].buckets,\n               false,\n                // sort nature by descending count, everything else alphabetically\n                facet.name === 'nature'\n              ),\n              facet.optionLabels\n            );\n          }\n        }\n\n        // If we have results, then sanity check chosen options against those that are available.\n        // If there are no results, we trust any options given so that we can show the facet buttons\n        // and allow the user to remove the facets to try to find results.\n        if (count > 0) {\n          const availableOptions = facet.options.map(option => option.value);\n          facet.value = urlParams.getAll(facet.name).filter(value => availableOptions.includes(value));\n        }\n      });\n    },\n\n    generateSearchParams () {\n      const params = new URLSearchParams();\n      if (this.q) params.append('search', this.q);\n      params.append('page', this.page);\n      params.append('ordering', this.ordering);\n\n      this.facets.forEach((facet) => {\n        facet.value.forEach((value) => {\n          params.append(facet.name, value);\n        });\n      });\n\n      this.generateAdvancedSearchParams(params);\n\n      // record suggestion details for statistics\n      if (this.suggestion) {\n        params.append('suggestion', this.suggestion.type);\n      }\n\n      if (this.mode !== 'text') {\n        params.append('mode', this.mode);\n      } else {\n        params.append('facets', '1');\n      }\n\n      return params;\n    },\n\n    generateAdvancedSearchParams (params) {\n      // advanced search fields, if any\n      if (this.advancedSearchDateCriteria.date_from && this.advancedSearchDateCriteria.date_to) {\n        const dateFrom = this.advancedSearchDateCriteria.date_from;\n        const dateTo = this.advancedSearchDateCriteria.date_to;\n        params.append('date__range', `${dateFrom}__${dateTo}`);\n      } else if (this.advancedSearchDateCriteria.date_from) {\n        params.append('date__gte', this.advancedSearchDateCriteria.date_from);\n      } else if (this.advancedSearchDateCriteria.date_to) {\n        params.append('date__lte', this.advancedSearchDateCriteria.date_to);\n      }\n\n      // group criteria by fields and process each field separately\n      const fields = new Map();\n      for (const criterion of this.advancedSearchCriteria) {\n        if (criterion.text) {\n          for (const field of criterion.fields) {\n            if (!fields.has(field)) fields.set(field, []);\n            fields.get(field).push(criterion);\n          }\n        }\n      }\n\n      for (const [field, criteria] of fields) {\n        params.set(`search__${field}`, this.generateAdvancedSearchQuery(criteria));\n      }\n    },\n\n    generateAdvancedSearchQuery (criteria) {\n      let q = '';\n\n      for (const criterion of criteria) {\n        const text = criterion.exact ? `\"${criterion.text}\"` : criterion.text;\n\n        if (criterion.condition === 'AND') {\n          q = q + ' & ';\n        } else if (criterion.condition === 'OR') {\n          q = q + ' | ';\n        } else if (criterion.condition === 'NOT') {\n          q = q + ' -';\n        }\n\n        q = q + `(${text})`;\n      }\n\n      return q.trim();\n    },\n\n    async search (pushState = true) {\n      this.searchTip = null;\n      if (this.searchTypeahead) {\n        this.searchTypeahead.autocomplete.hideSuggestions();\n      }\n\n      // if one of the search fields is true perform search\n      if (this.q || (Array.isArray(this.advancedSearchCriteria) && this.advancedSearchCriteria.some(f => f.text))) {\n        this.loadingCount = this.loadingCount + 1;\n\n        // scroll to put the search box at the top of the window\n        scrollToElement(this.$refs['search-box']);\n\n        // search tip\n        if (this.q && this.q.indexOf('\"') === -1 && this.q.indexOf(' ') > -1) {\n          this.searchTip = {\n            prompt: this.$t('Tip: Use quotes to search for an exact phrase: '),\n            q: `\"${this.q}\"`\n          };\n        }\n\n        try {\n          const params = this.generateSearchParams();\n          const previousId = this.searchInfo.trace_id || '';\n          const url = `/search/api/documents/?${params.toString()}`;\n\n          if (pushState) {\n            window.history.pushState(\n              null,\n              '',\n              document.location.pathname + '?' + this.serialiseState()\n            );\n          }\n\n          if (this.mode !== 'text') {\n            // load facets in a separate request\n            this.loadFacets();\n          }\n\n          // do the search\n          const response = await fetch(url);\n\n          // check that the search state hasn't changed since we sent the request\n          if (params.toString() === this.generateSearchParams().toString()) {\n            // clear the suggestion flag\n            this.suggestion = null;\n            if (response.ok) {\n              this.error = null;\n              this.searchInfo = await response.json();\n              if (this.mode === 'text') {\n                this.formatFacets(this.searchInfo.facets, this.searchInfo.count);\n              }\n              this.trackSearch(params);\n              this.savedSearchModal();\n              this.linkTraces(previousId, this.searchInfo.trace_id);\n              this.loadSaveDocumentButtons();\n            } else {\n              this.error = response.statusText;\n            }\n          }\n        } catch {\n          this.error = 'Network unavailable.';\n        }\n\n        this.loadingCount = this.loadingCount - 1;\n        this.drawerOpen = false;\n      }\n    },\n\n    /**\n     * Load the facets only, separately to a search. This is used in non-text mode because the facets are\n     * slower.\n     */\n    async loadFacets () {\n      this.facetsLoadingCount++;\n\n      try {\n        const params = this.generateSearchParams();\n        params.append('facets', '1');\n        const url = `/search/api/documents/facets?${params.toString()}`;\n        params.delete('facets');\n        const response = await fetch(url);\n\n        // check that the search state hasn't changed since we sent the request\n        if (params.toString() === this.generateSearchParams().toString()) {\n          const info = await response.json();\n          this.formatFacets(info.facets, info.count);\n        }\n      } catch (err) {\n        console.log(err);\n      } finally {\n        this.facetsLoadingCount--;\n      }\n    },\n\n    trackSearch (params) {\n      const keywords = [];\n      const facets = [];\n      const fields = this.facets.map(facet => facet.name).concat(['date__range', 'date__gte', 'date__lte']);\n\n      [...new Set(params.keys())].forEach((key) => {\n        if (key.startsWith('search')) {\n          const s = key === 'search' ? '' : (key.substring(8) + '=');\n          keywords.push(s + params.get(key).trim());\n        } else if (fields.includes(key)) {\n          facets.push(`${key}=${params.getAll(key).join(',')}`);\n        }\n      });\n\n      analytics.trackSiteSearch(keywords.join('; '), facets.join('; '), this.searchInfo.count);\n    },\n\n    async itemClicked (event) {\n      const item = event.target.closest('[data-position]');\n      if (item) {\n        const params = new URLSearchParams();\n        params.set('frbr_uri', item.getAttribute('data-frbr-uri'));\n        params.set('portion', item.getAttribute('data-portion') || '');\n        params.set('position', item.getAttribute('data-position'));\n        params.set('search_trace', this.searchInfo.trace_id);\n        try {\n          fetch('/search/api/click/', {\n            method: 'POST',\n            headers: await authHeaders(),\n            body: params\n          });\n        } catch (err) {\n          console.log(err);\n        }\n      }\n    },\n\n    resetAdvancedFields () {\n      this.advancedSearchCriteria = [{\n        text: '',\n        fields: ['all'],\n        condition: '',\n        exact: false\n      },\n      {\n        text: '',\n        fields: ['all'],\n        condition: 'AND',\n        exact: false\n      }];\n\n      this.advancedSearchDateCriteria = {\n        date_to: null,\n        date_from: null\n      };\n    },\n\n    savedSearchModal () {\n      htmx.ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });\n    },\n\n    async linkTraces (previousId, newId) {\n      if (previousId) {\n        // ensure we don't try to link our very first trace if we re-use a trace due to caching\n        if (this.linkedTraces.size === 0) {\n          this.linkedTraces.add(previousId);\n        }\n\n        if (newId && previousId !== newId && !this.linkedTraces.has(newId)) {\n          this.linkedTraces.add(newId);\n          try {\n            fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {\n              method: 'POST',\n              headers: await authHeaders()\n            });\n          } catch {\n            // ignore network errors\n          }\n        }\n      }\n    },\n\n    loadSaveDocumentButtons () {\n      this.$nextTick(() => loadSavedDocuments(this.$refs.results));\n    },\n\n    downloadUrl () {\n      const params = this.generateSearchParams();\n      params.set('format', 'xlsx');\n      return `/search/api/documents/?${params.toString()}`;\n    }\n  }\n};\n</script>\n\n<style scoped>\n.overlay {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.2);\n  z-index: 9;\n}\n\n@media screen and (max-width: 992px) {\n   .filter-facet-title {\n    position: absolute;\n    margin: auto;\n    left: 0;\n    right: 0;\n    width: 40px;\n  }\n}\n</style>\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -67772,56 +67745,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./peachjam/js/components/FindDocuments/JsonTable.vue":
-/*!************************************************************!*\
-  !*** ./peachjam/js/components/FindDocuments/JsonTable.vue ***!
-  \************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _JsonTable_vue_vue_type_template_id_44c5a107__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./JsonTable.vue?vue&type=template&id=44c5a107 */ "./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=template&id=44c5a107");
-/* harmony import */ var _JsonTable_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./JsonTable.vue?vue&type=script&lang=js */ "./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=script&lang=js");
-
-
-
-_JsonTable_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"].render = _JsonTable_vue_vue_type_template_id_44c5a107__WEBPACK_IMPORTED_MODULE_0__.render
-/* hot reload */
-if (false) {}
-
-_JsonTable_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"].__file = "peachjam/js/components/FindDocuments/JsonTable.vue"
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_JsonTable_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"]);
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=script&lang=js":
-/*!***********************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=script&lang=js ***!
-  \***********************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  name: 'JsonTable',
-  props: {
-    data: {
-      type: Object
-    }
-  }
-});
-
-
-/***/ }),
-
 /***/ "./peachjam/js/components/FindDocuments/MobileSideDrawer.vue":
 /*!*******************************************************************!*\
   !*** ./peachjam/js/components/FindDocuments/MobileSideDrawer.vue ***!
@@ -68049,175 +67972,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./peachjam/js/components/FindDocuments/SearchResult.vue":
-/*!***************************************************************!*\
-  !*** ./peachjam/js/components/FindDocuments/SearchResult.vue ***!
-  \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _SearchResult_vue_vue_type_template_id_1afad498__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SearchResult.vue?vue&type=template&id=1afad498 */ "./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=template&id=1afad498");
-/* harmony import */ var _SearchResult_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SearchResult.vue?vue&type=script&lang=js */ "./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=script&lang=js");
-/* harmony import */ var _SearchResult_vue_vue_type_style_index_0_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SearchResult.vue?vue&type=style&index=0&lang=css */ "./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=style&index=0&lang=css");
-
-
-
-
-;
-_SearchResult_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"].render = _SearchResult_vue_vue_type_template_id_1afad498__WEBPACK_IMPORTED_MODULE_0__.render
-/* hot reload */
-if (false) {}
-
-_SearchResult_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"].__file = "peachjam/js/components/FindDocuments/SearchResult.vue"
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_SearchResult_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"]);
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=script&lang=js":
-/*!**************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=script&lang=js ***!
-  \**************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _JsonTable_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./JsonTable.vue */ "./peachjam/js/components/FindDocuments/JsonTable.vue");
-/* harmony import */ var _SearchResultProvision_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SearchResultProvision.vue */ "./peachjam/js/components/FindDocuments/SearchResultProvision.vue");
-
-
-
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  name: 'SearchResult',
-  components: {
-    JsonTable: _JsonTable_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
-    SearchResultProvision: _SearchResultProvision_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
-  },
-  props: {
-    item: {
-      type: Object,
-      default () {
-        return {};
-      }
-    },
-    query: {
-      type: String,
-      default: () => ''
-    },
-    showJurisdiction: {
-      type: Boolean,
-      default: false
-    },
-    documentLabels: {
-      type: Array,
-      default: () => []
-    },
-    debug: {
-      type: Boolean,
-      default: false
-    }
-  },
-  emits: ['item-clicked'],
-  computed: {
-    labels () {
-      // get documentLabels where the code is in item.labels
-      return this.documentLabels.filter(label => (this.item.labels || []).includes(label.code));
-    }
-  },
-  methods: {
-    highlights (item) {
-      if (item.highlight.content) {
-        return item.highlight.content.join(' ... ');
-      }
-    },
-    getFlag (item) {
-      const code = item.expression_frbr_uri.split('/')[2].split('-')[0];
-      if (code === 'aa') {
-        return '<img style="width:1.33333em; vertical-align: baseline" alt="African Union Icon"  src="/static/images/au_icon.png" loading="lazy"/>';
-      } else {
-        return `<span class="fi fi-${code}"></span>`;
-      }
-    },
-    authors (item) {
-      if (item.authors) {
-        return Array.isArray(item.authors) ? item.authors.join(', ') : item.authors;
-      }
-      return '';
-    },
-    provisionParents (provision) {
-      // zip item.parent_titles and item.parent_ids
-      return provision.parent_titles.map((title, index) => {
-        return {
-          title: title,
-          id: provision.parent_ids[index]
-        };
-      });
-    }
-  }
-});
-
-
-/***/ }),
-
-/***/ "./peachjam/js/components/FindDocuments/SearchResultProvision.vue":
-/*!************************************************************************!*\
-  !*** ./peachjam/js/components/FindDocuments/SearchResultProvision.vue ***!
-  \************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _SearchResultProvision_vue_vue_type_template_id_7c92e531__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SearchResultProvision.vue?vue&type=template&id=7c92e531 */ "./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=template&id=7c92e531");
-/* harmony import */ var _SearchResultProvision_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SearchResultProvision.vue?vue&type=script&lang=js */ "./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=script&lang=js");
-
-
-
-_SearchResultProvision_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"].render = _SearchResultProvision_vue_vue_type_template_id_7c92e531__WEBPACK_IMPORTED_MODULE_0__.render
-/* hot reload */
-if (false) {}
-
-_SearchResultProvision_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"].__file = "peachjam/js/components/FindDocuments/SearchResultProvision.vue"
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_SearchResultProvision_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"]);
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=script&lang=js":
-/*!***********************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=script&lang=js ***!
-  \***********************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  name: 'SearchResultProvision',
-  props: {
-    item: { type: Object, default: () => {} },
-    expressionFrbrUri: { type: String, default: '' },
-    parents: { type: Array, default: () => [] }
-  },
-  emits: ['item-clicked']
-});
-
-
-/***/ }),
-
 /***/ "./peachjam/js/components/FindDocuments/index.vue":
 /*!********************************************************!*\
   !*** ./peachjam/js/components/FindDocuments/index.vue ***!
@@ -68259,19 +68013,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _SearchResult_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SearchResult.vue */ "./peachjam/js/components/FindDocuments/SearchResult.vue");
-/* harmony import */ var _SearchPagination_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SearchPagination.vue */ "./peachjam/js/components/FindDocuments/SearchPagination.vue");
-/* harmony import */ var _FilterFacets_index_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../FilterFacets/index.vue */ "./peachjam/js/components/FilterFacets/index.vue");
-/* harmony import */ var _MobileSideDrawer_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./MobileSideDrawer.vue */ "./peachjam/js/components/FindDocuments/MobileSideDrawer.vue");
-/* harmony import */ var _AdvancedSearch_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./AdvancedSearch.vue */ "./peachjam/js/components/FindDocuments/AdvancedSearch.vue");
-/* harmony import */ var _HelpBtn_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../HelpBtn.vue */ "./peachjam/js/components/HelpBtn.vue");
-/* harmony import */ var _utils_function__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils/function */ "./peachjam/js/utils/function.ts");
-/* harmony import */ var _FacetBadges_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./FacetBadges.vue */ "./peachjam/js/components/FindDocuments/FacetBadges.vue");
-/* harmony import */ var _analytics__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../analytics */ "./peachjam/js/analytics.ts");
-/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../api */ "./peachjam/js/api.ts");
-/* harmony import */ var _search_typeahead__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../search-typeahead */ "./peachjam/js/components/search-typeahead.js");
-/* harmony import */ var htmx_org__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! htmx.org */ "./node_modules/htmx.org/dist/htmx.esm.js");
-/* harmony import */ var _SearchFeedback_vue__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./SearchFeedback.vue */ "./peachjam/js/components/FindDocuments/SearchFeedback.vue");
+/* harmony import */ var _SearchPagination_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SearchPagination.vue */ "./peachjam/js/components/FindDocuments/SearchPagination.vue");
+/* harmony import */ var _FilterFacets_index_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../FilterFacets/index.vue */ "./peachjam/js/components/FilterFacets/index.vue");
+/* harmony import */ var _MobileSideDrawer_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./MobileSideDrawer.vue */ "./peachjam/js/components/FindDocuments/MobileSideDrawer.vue");
+/* harmony import */ var _AdvancedSearch_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./AdvancedSearch.vue */ "./peachjam/js/components/FindDocuments/AdvancedSearch.vue");
+/* harmony import */ var _HelpBtn_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../HelpBtn.vue */ "./peachjam/js/components/HelpBtn.vue");
+/* harmony import */ var _utils_function__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/function */ "./peachjam/js/utils/function.ts");
+/* harmony import */ var _FacetBadges_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./FacetBadges.vue */ "./peachjam/js/components/FindDocuments/FacetBadges.vue");
+/* harmony import */ var _analytics__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../analytics */ "./peachjam/js/analytics.ts");
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../api */ "./peachjam/js/api.ts");
+/* harmony import */ var _search_typeahead__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../search-typeahead */ "./peachjam/js/components/search-typeahead.js");
+/* harmony import */ var htmx_org__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! htmx.org */ "./node_modules/htmx.org/dist/htmx.esm.js");
+/* harmony import */ var _SearchFeedback_vue__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./SearchFeedback.vue */ "./peachjam/js/components/FindDocuments/SearchFeedback.vue");
+/* harmony import */ var _saved_documents__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../saved-documents */ "./peachjam/js/components/saved-documents.ts");
 
 
 
@@ -68289,7 +68043,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'FindDocuments',
-  components: { SearchFeedback: _SearchFeedback_vue__WEBPACK_IMPORTED_MODULE_12__["default"], FacetBadges: _FacetBadges_vue__WEBPACK_IMPORTED_MODULE_7__["default"], MobileFacetsDrawer: _MobileSideDrawer_vue__WEBPACK_IMPORTED_MODULE_3__["default"], SearchResult: _SearchResult_vue__WEBPACK_IMPORTED_MODULE_0__["default"], SearchPagination: _SearchPagination_vue__WEBPACK_IMPORTED_MODULE_1__["default"], FilterFacets: _FilterFacets_index_vue__WEBPACK_IMPORTED_MODULE_2__["default"], AdvancedSearch: _AdvancedSearch_vue__WEBPACK_IMPORTED_MODULE_4__["default"], HelpBtn: _HelpBtn_vue__WEBPACK_IMPORTED_MODULE_5__["default"] },
+  components: { SearchFeedback: _SearchFeedback_vue__WEBPACK_IMPORTED_MODULE_11__["default"], FacetBadges: _FacetBadges_vue__WEBPACK_IMPORTED_MODULE_6__["default"], MobileFacetsDrawer: _MobileSideDrawer_vue__WEBPACK_IMPORTED_MODULE_2__["default"], SearchPagination: _SearchPagination_vue__WEBPACK_IMPORTED_MODULE_0__["default"], FilterFacets: _FilterFacets_index_vue__WEBPACK_IMPORTED_MODULE_1__["default"], AdvancedSearch: _AdvancedSearch_vue__WEBPACK_IMPORTED_MODULE_3__["default"], HelpBtn: _HelpBtn_vue__WEBPACK_IMPORTED_MODULE_4__["default"] },
   props: ['showJurisdiction', 'showGoogle', 'showSuggestions', 'showModes'],
   data () {
     const getLabelOptionLabels = (labels) => {
@@ -68309,6 +68063,7 @@ __webpack_require__.r(__webpack_exports__);
       searchPlaceholder: JSON.parse(document.querySelector('#data-labels').textContent).searchPlaceholder,
       documentLabels: JSON.parse(document.querySelector('#data-labels').textContent).documentLabels,
       loadingCount: 0,
+      facetsLoadingCount: 0,
       error: null,
       searchInfo: {},
       page: 1,
@@ -68461,6 +68216,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     loading () {
       return this.loadingCount > 0;
+    },
+    facetsLoading () {
+      return this.facetsLoadingCount > 0;
     }
   },
 
@@ -68483,7 +68241,7 @@ __webpack_require__.r(__webpack_exports__);
 
   mounted () {
     if (this.showSuggestions) {
-      this.searchTypeahead = new _search_typeahead__WEBPACK_IMPORTED_MODULE_10__["default"](this.$refs.searchInput, true);
+      this.searchTypeahead = new _search_typeahead__WEBPACK_IMPORTED_MODULE_9__["default"](this.$refs.searchInput, true);
     }
     this.loadState();
     window.addEventListener('popstate', () => this.loadState());
@@ -68643,7 +68401,7 @@ __webpack_require__.r(__webpack_exports__);
       this.search();
     },
 
-    formatFacets () {
+    formatFacets (facetInfo, count) {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
 
@@ -68659,16 +68417,16 @@ __webpack_require__.r(__webpack_exports__);
         if (facet.name === 'year') {
           facet.options = generateOptions(
             this.sortBuckets(
-              this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
+              facetInfo[`_filter_${facet.name}`][facet.name].buckets,
               true
             ),
             facet.optionLabels
           );
         } else {
-          if (this.searchInfo.facets[`_filter_${facet.name}`]) {
+          if (facetInfo[`_filter_${facet.name}`]) {
             facet.options = generateOptions(
               this.sortBuckets(
-                this.searchInfo.facets[`_filter_${facet.name}`][facet.name].buckets,
+                facetInfo[`_filter_${facet.name}`][facet.name].buckets,
                false,
                 // sort nature by descending count, everything else alphabetically
                 facet.name === 'nature'
@@ -68681,24 +68439,11 @@ __webpack_require__.r(__webpack_exports__);
         // If we have results, then sanity check chosen options against those that are available.
         // If there are no results, we trust any options given so that we can show the facet buttons
         // and allow the user to remove the facets to try to find results.
-        if (this.searchInfo.count > 0) {
+        if (count > 0) {
           const availableOptions = facet.options.map(option => option.value);
           facet.value = urlParams.getAll(facet.name).filter(value => availableOptions.includes(value));
         }
       });
-    },
-
-    formatResults () {
-      for (let i = 0; i < this.searchInfo.results.length; i++) {
-        // number items from 1 consistently across pages
-        this.searchInfo.results[i].position = (this.page - 1) * this.pageSize + i + 1;
-      }
-
-      // determine best match: is the first result's score significantly better than the next?
-      if (this.page === 1 && this.searchInfo.results.length > 1 &&
-          this.searchInfo.results[0]._score / this.searchInfo.results[1]._score >= 1.2) {
-        this.searchInfo.results[0].best_match = true;
-      }
     },
 
     generateSearchParams () {
@@ -68713,11 +68458,6 @@ __webpack_require__.r(__webpack_exports__);
         });
       });
 
-      // facets that we want the API to return
-      this.facets.forEach((facet) => {
-        params.append('facet', facet.name);
-      });
-
       this.generateAdvancedSearchParams(params);
 
       // record suggestion details for statistics
@@ -68727,6 +68467,8 @@ __webpack_require__.r(__webpack_exports__);
 
       if (this.mode !== 'text') {
         params.append('mode', this.mode);
+      } else {
+        params.append('facets', '1');
       }
 
       return params;
@@ -68791,7 +68533,7 @@ __webpack_require__.r(__webpack_exports__);
         this.loadingCount = this.loadingCount + 1;
 
         // scroll to put the search box at the top of the window
-        (0,_utils_function__WEBPACK_IMPORTED_MODULE_6__.scrollToElement)(this.$refs['search-box']);
+        (0,_utils_function__WEBPACK_IMPORTED_MODULE_5__.scrollToElement)(this.$refs['search-box']);
 
         // search tip
         if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(' ') > -1) {
@@ -68813,6 +68555,13 @@ __webpack_require__.r(__webpack_exports__);
               document.location.pathname + '?' + this.serialiseState()
             );
           }
+
+          if (this.mode !== 'text') {
+            // load facets in a separate request
+            this.loadFacets();
+          }
+
+          // do the search
           const response = await fetch(url);
 
           // check that the search state hasn't changed since we sent the request
@@ -68822,14 +68571,13 @@ __webpack_require__.r(__webpack_exports__);
             if (response.ok) {
               this.error = null;
               this.searchInfo = await response.json();
-              this.formatFacets();
-              this.formatResults();
+              if (this.mode === 'text') {
+                this.formatFacets(this.searchInfo.facets, this.searchInfo.count);
+              }
               this.trackSearch(params);
               this.savedSearchModal();
               this.linkTraces(previousId, this.searchInfo.trace_id);
-              if (this.searchInfo.can_save_documents) {
-                this.loadSaveDocumentButtons();
-              }
+              this.loadSaveDocumentButtons();
             } else {
               this.error = response.statusText;
             }
@@ -68840,6 +68588,32 @@ __webpack_require__.r(__webpack_exports__);
 
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
+      }
+    },
+
+    /**
+     * Load the facets only, separately to a search. This is used in non-text mode because the facets are
+     * slower.
+     */
+    async loadFacets () {
+      this.facetsLoadingCount++;
+
+      try {
+        const params = this.generateSearchParams();
+        params.append('facets', '1');
+        const url = `/search/api/documents/facets?${params.toString()}`;
+        params.delete('facets');
+        const response = await fetch(url);
+
+        // check that the search state hasn't changed since we sent the request
+        if (params.toString() === this.generateSearchParams().toString()) {
+          const info = await response.json();
+          this.formatFacets(info.facets, info.count);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        this.facetsLoadingCount--;
       }
     },
 
@@ -68857,23 +68631,26 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
 
-      _analytics__WEBPACK_IMPORTED_MODULE_8__["default"].trackSiteSearch(keywords.join('; '), facets.join('; '), this.searchInfo.count);
+      _analytics__WEBPACK_IMPORTED_MODULE_7__["default"].trackSiteSearch(keywords.join('; '), facets.join('; '), this.searchInfo.count);
     },
 
-    async itemClicked (item, portion) {
-      const params = new URLSearchParams();
-      params.set('frbr_uri', item.expression_frbr_uri);
-      params.set('portion', portion || '');
-      params.set('position', item.position);
-      params.set('search_trace', this.searchInfo.trace_id);
-      try {
-        fetch('/search/api/click/', {
-          method: 'POST',
-          headers: await (0,_api__WEBPACK_IMPORTED_MODULE_9__.authHeaders)(),
-          body: params
-        });
-      } catch (err) {
-        console.log(err);
+    async itemClicked (event) {
+      const item = event.target.closest('[data-position]');
+      if (item) {
+        const params = new URLSearchParams();
+        params.set('frbr_uri', item.getAttribute('data-frbr-uri'));
+        params.set('portion', item.getAttribute('data-portion') || '');
+        params.set('position', item.getAttribute('data-position'));
+        params.set('search_trace', this.searchInfo.trace_id);
+        try {
+          fetch('/search/api/click/', {
+            method: 'POST',
+            headers: await (0,_api__WEBPACK_IMPORTED_MODULE_8__.authHeaders)(),
+            body: params
+          });
+        } catch (err) {
+          console.log(err);
+        }
       }
     },
 
@@ -68898,7 +68675,7 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     savedSearchModal () {
-      htmx_org__WEBPACK_IMPORTED_MODULE_11__["default"].ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });
+      htmx_org__WEBPACK_IMPORTED_MODULE_10__["default"].ajax('GET', '/search/saved-searches/button', { target: '#saved-search-button' });
     },
 
     async linkTraces (previousId, newId) {
@@ -68913,7 +68690,7 @@ __webpack_require__.r(__webpack_exports__);
           try {
             fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {
               method: 'POST',
-              headers: await (0,_api__WEBPACK_IMPORTED_MODULE_9__.authHeaders)()
+              headers: await (0,_api__WEBPACK_IMPORTED_MODULE_8__.authHeaders)()
             });
           } catch {
             // ignore network errors
@@ -68923,15 +68700,7 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     loadSaveDocumentButtons () {
-      // use htmx to load and inject save-document buttons
-      // get document ids
-      const ids = this.searchInfo.results.map(result => result.id);
-      if (ids.length) {
-        const el = document.createElement('div');
-        document.body.appendChild(el);
-        const query = ids.map(id => `doc_id=${id}`).join('&');
-        htmx_org__WEBPACK_IMPORTED_MODULE_11__["default"].ajax('GET', '/saved-documents/fragments?' + query, el);
-      }
+      this.$nextTick(() => (0,_saved_documents__WEBPACK_IMPORTED_MODULE_12__.loadSavedDocuments)(this.$refs.results));
     },
 
     downloadUrl () {
@@ -69115,8 +68884,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _lawsafrica_indigo_akn_dist_ranges__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @lawsafrica/indigo-akn/dist/ranges */ "./node_modules/@lawsafrica/indigo-akn/dist/ranges.js");
-
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -69147,18 +68914,15 @@ __webpack_require__.r(__webpack_exports__);
     markAndAnchor () {
       const provision = document.querySelector(`[data-eid="${this.enrichment.provision_eid}"`);
       if (provision) {
-        const range = document.createRange();
-        range.selectNodeContents(provision);
-        (0,_lawsafrica_indigo_akn_dist_ranges__WEBPACK_IMPORTED_MODULE_0__.markRange)(range, 'mark', mark => {
-          this.marks.push(mark);
-          mark.classList.add('unconstitutional-provision-highlight');
-          mark.clickFn = () => this.activate();
-          mark.addEventListener('click', mark.clickFn);
-          return mark;
-        });
-        if (this.marks.length) {
-          this.anchorElement = this.marks[0];
+        this.marks.push(provision);
+        if (this.enrichment.enrichment_type === 'unconstitutional_provision') {
+          provision.classList.add('unconstitutional-provision-highlight');
+        } else if (this.enrichment.enrichment_type === 'uncommenced_provision') {
+          provision.classList.add('uncommenced-provision-color');
         }
+        provision.clickFn = () => this.activate();
+        provision.addEventListener('click', provision.clickFn);
+        this.anchorElement = provision;
       }
     },
     activate () {
@@ -70169,22 +69933,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=script&lang=js":
-/*!************************************************************************************!*\
-  !*** ./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=script&lang=js ***!
-  \************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* reexport safe */ _node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_JsonTable_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
-/* harmony export */ });
-/* harmony import */ var _node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_JsonTable_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./JsonTable.vue?vue&type=script&lang=js */ "./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=script&lang=js");
-
-
-/***/ }),
-
 /***/ "./peachjam/js/components/FindDocuments/MobileSideDrawer.vue?vue&type=script&lang=js":
 /*!*******************************************************************************************!*\
   !*** ./peachjam/js/components/FindDocuments/MobileSideDrawer.vue?vue&type=script&lang=js ***!
@@ -70229,38 +69977,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* reexport safe */ _node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchPagination_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchPagination_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./SearchPagination.vue?vue&type=script&lang=js */ "./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchPagination.vue?vue&type=script&lang=js");
-
-
-/***/ }),
-
-/***/ "./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=script&lang=js":
-/*!***************************************************************************************!*\
-  !*** ./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=script&lang=js ***!
-  \***************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* reexport safe */ _node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResult_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
-/* harmony export */ });
-/* harmony import */ var _node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResult_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./SearchResult.vue?vue&type=script&lang=js */ "./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=script&lang=js");
-
-
-/***/ }),
-
-/***/ "./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=script&lang=js":
-/*!************************************************************************************************!*\
-  !*** ./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=script&lang=js ***!
-  \************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* reexport safe */ _node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResultProvision_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
-/* harmony export */ });
-/* harmony import */ var _node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResultProvision_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./SearchResultProvision.vue?vue&type=script&lang=js */ "./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=script&lang=js");
 
 
 /***/ }),
@@ -70793,22 +70509,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=template&id=44c5a107":
-/*!******************************************************************************************!*\
-  !*** ./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=template&id=44c5a107 ***!
-  \******************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   render: () => (/* reexport safe */ _node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_1_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_JsonTable_vue_vue_type_template_id_44c5a107__WEBPACK_IMPORTED_MODULE_0__.render)
-/* harmony export */ });
-/* harmony import */ var _node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_1_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_JsonTable_vue_vue_type_template_id_44c5a107__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./JsonTable.vue?vue&type=template&id=44c5a107 */ "./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=template&id=44c5a107");
-
-
-/***/ }),
-
 /***/ "./peachjam/js/components/FindDocuments/MobileSideDrawer.vue?vue&type=template&id=48d9e98e&scoped=true":
 /*!*************************************************************************************************************!*\
   !*** ./peachjam/js/components/FindDocuments/MobileSideDrawer.vue?vue&type=template&id=48d9e98e&scoped=true ***!
@@ -70853,38 +70553,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   render: () => (/* reexport safe */ _node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_1_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchPagination_vue_vue_type_template_id_4005b19e__WEBPACK_IMPORTED_MODULE_0__.render)
 /* harmony export */ });
 /* harmony import */ var _node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_1_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchPagination_vue_vue_type_template_id_4005b19e__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./SearchPagination.vue?vue&type=template&id=4005b19e */ "./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchPagination.vue?vue&type=template&id=4005b19e");
-
-
-/***/ }),
-
-/***/ "./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=template&id=1afad498":
-/*!*********************************************************************************************!*\
-  !*** ./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=template&id=1afad498 ***!
-  \*********************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   render: () => (/* reexport safe */ _node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_1_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResult_vue_vue_type_template_id_1afad498__WEBPACK_IMPORTED_MODULE_0__.render)
-/* harmony export */ });
-/* harmony import */ var _node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_1_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResult_vue_vue_type_template_id_1afad498__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./SearchResult.vue?vue&type=template&id=1afad498 */ "./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=template&id=1afad498");
-
-
-/***/ }),
-
-/***/ "./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=template&id=7c92e531":
-/*!******************************************************************************************************!*\
-  !*** ./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=template&id=7c92e531 ***!
-  \******************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   render: () => (/* reexport safe */ _node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_1_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResultProvision_vue_vue_type_template_id_7c92e531__WEBPACK_IMPORTED_MODULE_0__.render)
-/* harmony export */ });
-/* harmony import */ var _node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_1_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResultProvision_vue_vue_type_template_id_7c92e531__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./SearchResultProvision.vue?vue&type=template&id=7c92e531 */ "./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=template&id=7c92e531");
 
 
 /***/ }),
@@ -71228,26 +70896,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_MobileSideDrawer_vue_vue_type_style_index_0_id_48d9e98e_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_MobileSideDrawer_vue_vue_type_style_index_0_id_48d9e98e_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
 /* harmony reexport (unknown) */ for(const __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_MobileSideDrawer_vue_vue_type_style_index_0_id_48d9e98e_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = () => _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_MobileSideDrawer_vue_vue_type_style_index_0_id_48d9e98e_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__[__WEBPACK_IMPORT_KEY__]
-/* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
-
-
-/***/ }),
-
-/***/ "./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=style&index=0&lang=css":
-/*!***********************************************************************************************!*\
-  !*** ./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=style&index=0&lang=css ***!
-  \***********************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* reexport default from dynamic */ _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResult_vue_vue_type_style_index_0_lang_css__WEBPACK_IMPORTED_MODULE_0___default.a)
-/* harmony export */ });
-/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResult_vue_vue_type_style_index_0_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-style-loader/index.js!../../../../node_modules/css-loader/dist/cjs.js!../../../../node_modules/vue-loader/dist/stylePostLoader.js!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./SearchResult.vue?vue&type=style&index=0&lang=css */ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=style&index=0&lang=css");
-/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResult_vue_vue_type_style_index_0_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResult_vue_vue_type_style_index_0_lang_css__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
-/* harmony reexport (unknown) */ for(const __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResult_vue_vue_type_style_index_0_lang_css__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = () => _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_SearchResult_vue_vue_type_style_index_0_lang_css__WEBPACK_IMPORTED_MODULE_0__[__WEBPACK_IMPORT_KEY__]
 /* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
 
 
@@ -73349,79 +72997,6 @@ function render(_ctx, _cache) {
 
 /***/ }),
 
-/***/ "./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=template&id=44c5a107":
-/*!***************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/JsonTable.vue?vue&type=template&id=44c5a107 ***!
-  \***************************************************************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   render: () => (/* binding */ render)
-/* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js");
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/@vue/shared/dist/shared.esm-bundler.js");
-
-
-const _hoisted_1 = { class: "table table-sm table-light mb-0" }
-const _hoisted_2 = {
-  style: {"width":"15%"},
-  class: "align-baseline"
-}
-const _hoisted_3 = { class: "align-baseline" }
-const _hoisted_4 = { key: 0 }
-const _hoisted_5 = {
-  key: 0,
-  open: ""
-}
-const _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("summary", null, "(details)", -1 /* HOISTED */)
-const _hoisted_7 = { key: 1 }
-const _hoisted_8 = {
-  key: 1,
-  open: ""
-}
-const _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("summary", null, "(details)", -1 /* HOISTED */)
-const _hoisted_10 = { key: 2 }
-
-function render(_ctx, _cache) {
-  const _component_JsonTable = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("JsonTable", true)
-
-  return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("table", _hoisted_1, [
-    ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(_ctx.data, (value, key) => {
-      return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("tr", { key: key }, [
-        (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(key), 1 /* TEXT */),
-        (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("td", _hoisted_3, [
-          (Array.isArray(value))
-            ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("ol", _hoisted_4, [
-                ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(value, (v, i) => {
-                  return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
-                    key: i,
-                    class: "border-bottom"
-                  }, [
-                    (typeof v === 'object')
-                      ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("details", _hoisted_5, [
-                          _hoisted_6,
-                          (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_JsonTable, { data: v }, null, 8 /* PROPS */, ["data"])
-                        ]))
-                      : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(v), 1 /* TEXT */))
-                  ]))
-                }), 128 /* KEYED_FRAGMENT */))
-              ]))
-            : (typeof value === 'object')
-              ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("details", _hoisted_8, [
-                  _hoisted_9,
-                  (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_JsonTable, { data: value }, null, 8 /* PROPS */, ["data"])
-                ]))
-              : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(value), 1 /* TEXT */))
-        ])
-      ]))
-    }), 128 /* KEYED_FRAGMENT */))
-  ]))
-}
-
-/***/ }),
-
 /***/ "./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/MobileSideDrawer.vue?vue&type=template&id=48d9e98e&scoped=true":
 /*!**********************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/MobileSideDrawer.vue?vue&type=template&id=48d9e98e&scoped=true ***!
@@ -73669,353 +73244,6 @@ function render(_ctx, _cache) {
 
 /***/ }),
 
-/***/ "./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=template&id=1afad498":
-/*!******************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=template&id=1afad498 ***!
-  \******************************************************************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   render: () => (/* binding */ render)
-/* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js");
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/@vue/shared/dist/shared.esm-bundler.js");
-
-
-const _hoisted_1 = ["data-best-match"]
-const _hoisted_2 = { class: "card-body" }
-const _hoisted_3 = { class: "card-title" }
-const _hoisted_4 = ["href", "innerHTML"]
-const _hoisted_5 = ["id"]
-const _hoisted_6 = { class: "mb-1" }
-const _hoisted_7 = { key: 0 }
-const _hoisted_8 = ["innerHTML"]
-const _hoisted_9 = { key: 1 }
-const _hoisted_10 = { key: 0 }
-const _hoisted_11 = ["innerHTML"]
-const _hoisted_12 = {
-  key: 0,
-  class: "me-3"
-}
-const _hoisted_13 = ["innerHTML"]
-const _hoisted_14 = { key: 1 }
-const _hoisted_15 = { key: 0 }
-const _hoisted_16 = { key: 2 }
-const _hoisted_17 = { class: "me-3" }
-const _hoisted_18 = { class: "me-3" }
-const _hoisted_19 = {
-  key: 1,
-  class: "me-3"
-}
-const _hoisted_20 = {
-  key: 2,
-  class: "me-3"
-}
-const _hoisted_21 = ["href"]
-const _hoisted_22 = {
-  key: 2,
-  class: "text-muted fst-italic mt-1"
-}
-const _hoisted_23 = ["id"]
-const _hoisted_24 = ["id"]
-const _hoisted_25 = { class: "card" }
-const _hoisted_26 = { class: "card-header" }
-const _hoisted_27 = { class: "nav nav-tabs card-header-tabs" }
-const _hoisted_28 = { class: "nav-item" }
-const _hoisted_29 = ["href"]
-const _hoisted_30 = { class: "nav-item" }
-const _hoisted_31 = ["href"]
-const _hoisted_32 = { class: "card-body explanation" }
-const _hoisted_33 = { class: "tab-content" }
-const _hoisted_34 = ["id"]
-const _hoisted_35 = ["id"]
-const _hoisted_36 = { key: 1 }
-const _hoisted_37 = ["href", "onClick"]
-const _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(": ")
-const _hoisted_39 = ["innerHTML"]
-const _hoisted_40 = { key: 1 }
-const _hoisted_41 = { key: 2 }
-const _hoisted_42 = {
-  key: 3,
-  class: "ms-3"
-}
-const _hoisted_43 = ["innerHTML"]
-const _hoisted_44 = { class: "card-footer text-end" }
-const _hoisted_45 = ["href"]
-
-function render(_ctx, _cache) {
-  const _component_json_table = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("json-table")
-  const _component_SearchResultProvision = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("SearchResultProvision")
-
-  return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
-    class: (0,vue__WEBPACK_IMPORTED_MODULE_1__.normalizeClass)(`mb-4 hit ${_ctx.item.best_match ? 'best-match' : ''}`)
-  }, [
-    (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-      class: "card",
-      "data-best-match": _ctx.$t('Best match')
-    }, [
-      (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [
-        (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", _hoisted_3, [
-          (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-            class: "h5 text-primary",
-            target: "_blank",
-            href: _ctx.item.expression_frbr_uri,
-            onClick: _cache[0] || (_cache[0] = $event => (_ctx.$emit('item-clicked'))),
-            innerHTML: _ctx.item.highlight.title || _ctx.item.title
-          }, null, 8 /* PROPS */, _hoisted_4),
-          (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-            id: `saved-document-star--${_ctx.item.id}`
-          }, null, 8 /* PROPS */, _hoisted_5)
-        ]),
-        (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [
-          (_ctx.item.citation && _ctx.item.citation !== _ctx.item.title)
-            ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_7, [
-                (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("i", {
-                  innerHTML: _ctx.item.highlight.citation || _ctx.item.citation
-                }, null, 8 /* PROPS */, _hoisted_8)
-              ]))
-            : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-          (_ctx.item.alternative_names.length)
-            ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, [
-                (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("i", null, [
-                  ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(_ctx.item.highlight.alternative_names || _ctx.item.alternative_names, (name, i) => {
-                    return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", { key: i }, [
-                      (i > 0)
-                        ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_10, "; "))
-                        : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-                      (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", { innerHTML: name }, null, 8 /* PROPS */, _hoisted_11)
-                    ]))
-                  }), 128 /* KEYED_FRAGMENT */))
-                ])
-              ]))
-            : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-          (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [
-            (_ctx.showJurisdiction || _ctx.item.locality)
-              ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_12, [
-                  (_ctx.showJurisdiction)
-                    ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", {
-                        key: 0,
-                        innerHTML: _ctx.getFlag(_ctx.item),
-                        class: "me-1"
-                      }, null, 8 /* PROPS */, _hoisted_13))
-                    : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-                  (_ctx.showJurisdiction)
-                    ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_14, [
-                        (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.item.jurisdiction) + " ", 1 /* TEXT */),
-                        (_ctx.item.locality)
-                          ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_15, "· "))
-                          : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)
-                      ]))
-                    : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-                  (_ctx.item.locality)
-                    ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.item.locality), 1 /* TEXT */))
-                    : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)
-                ]))
-              : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-            (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.item.nature), 1 /* TEXT */),
-            (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.item.date), 1 /* TEXT */),
-            (_ctx.item.court)
-              ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.item.court), 1 /* TEXT */))
-              : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-            (_ctx.item.authors)
-              ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.authors(_ctx.item)), 1 /* TEXT */))
-              : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-            ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(_ctx.labels, (label) => {
-              return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", {
-                key: label.code,
-                class: (0,vue__WEBPACK_IMPORTED_MODULE_1__.normalizeClass)(`me-3 badge rounded-pill bg-${label.level}`)
-              }, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(label.name), 3 /* TEXT, CLASS */))
-            }), 128 /* KEYED_FRAGMENT */)),
-            (_ctx.debug)
-              ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("a", {
-                  key: 3,
-                  class: "me-3",
-                  href: `#debug-${_ctx.item.id}`,
-                  "data-bs-toggle": "collapse"
-                }, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.item._score), 9 /* TEXT, PROPS */, _hoisted_21))
-              : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)
-          ]),
-          (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.item.matter_type), 1 /* TEXT */),
-          (_ctx.item.topic_path_names)
-            ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.item.topic_path_names.join(' · ')), 1 /* TEXT */))
-            : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-          (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-            id: `saved-document-table-detail--${_ctx.item.id}`
-          }, null, 8 /* PROPS */, _hoisted_23)
-        ]),
-        (_ctx.debug && _ctx.item.explanation)
-          ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-              key: 0,
-              id: `debug-${_ctx.item.id}`,
-              class: "my-2 collapse"
-            }, [
-              (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [
-                (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, [
-                  (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_27, [
-                    (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_28, [
-                      (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-                        class: "nav-link active",
-                        "data-bs-toggle": "tab",
-                        href: `#explanation-${_ctx.item.id}`
-                      }, "Explanation", 8 /* PROPS */, _hoisted_29)
-                    ]),
-                    (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_30, [
-                      (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-                        class: "nav-link",
-                        "data-bs-toggle": "tab",
-                        href: `#raw-${_ctx.item.id}`
-                      }, "Raw", 8 /* PROPS */, _hoisted_31)
-                    ])
-                  ])
-                ]),
-                (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [
-                  (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_33, [
-                    (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-                      id: `explanation-${_ctx.item.id}`,
-                      class: "tab-pane active show"
-                    }, [
-                      (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_json_table, {
-                        data: _ctx.item.explanation
-                      }, null, 8 /* PROPS */, ["data"])
-                    ], 8 /* PROPS */, _hoisted_34),
-                    (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-                      id: `raw-${_ctx.item.id}`,
-                      class: "tab-pane"
-                    }, [
-                      (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_json_table, {
-                        data: _ctx.item.raw
-                      }, null, 8 /* PROPS */, ["data"])
-                    ], 8 /* PROPS */, _hoisted_35)
-                  ])
-                ])
-              ])
-            ], 8 /* PROPS */, _hoisted_24))
-          : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-        (_ctx.item.pages.length)
-          ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_36, [
-              ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(_ctx.item.pages, (page) => {
-                return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-                  key: page.page_num,
-                  class: "mb-1"
-                }, [
-                  (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-                    href: `${_ctx.item.expression_frbr_uri}#page-${page.page_num}`,
-                    target: "_blank",
-                    onClick: $event => (_ctx.$emit('item-clicked', `page-${page.page_num}`))
-                  }, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.$t('Page')) + " " + (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(page.page_num), 9 /* TEXT, PROPS */, _hoisted_37),
-                  _hoisted_38,
-                  (page.highlight['pages.body'])
-                    ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", {
-                        key: 0,
-                        innerHTML: page.highlight['pages.body'].join(' ... ')
-                      }, null, 8 /* PROPS */, _hoisted_39))
-                    : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-                  (_ctx.debug)
-                    ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_40, " (" + (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(page.score) + ")", 1 /* TEXT */))
-                    : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)
-                ]))
-              }), 128 /* KEYED_FRAGMENT */))
-            ]))
-          : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-        (_ctx.item.provisions.length)
-          ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_41, [
-              ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(_ctx.item.provisions, (provision) => {
-                return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_SearchResultProvision, {
-                  key: provision.id,
-                  item: provision,
-                  parents: _ctx.provisionParents(provision),
-                  "expression-frbr-uri": _ctx.item.expression_frbr_uri,
-                  onItemClicked: _cache[1] || (_cache[1] = (x) => _ctx.$emit('item-clicked', x))
-                }, null, 8 /* PROPS */, ["item", "parents", "expression-frbr-uri"]))
-              }), 128 /* KEYED_FRAGMENT */))
-            ]))
-          : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_42, [
-              (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-                class: "snippet",
-                innerHTML: _ctx.highlights(_ctx.item)
-              }, null, 8 /* PROPS */, _hoisted_43)
-            ]))
-      ]),
-      (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_44, [
-        (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-          class: "btn btn-outline-primary me-2",
-          href: `${_ctx.item.expression_frbr_uri}/source`,
-          target: "_blank"
-        }, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.$t('Download')), 9 /* TEXT, PROPS */, _hoisted_45),
-        (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-          class: (0,vue__WEBPACK_IMPORTED_MODULE_1__.normalizeClass)(`save-document-button--${_ctx.item.id}`)
-        }, null, 2 /* CLASS */)
-      ])
-    ], 8 /* PROPS */, _hoisted_1)
-  ], 2 /* CLASS */))
-}
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=template&id=7c92e531":
-/*!***************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResultProvision.vue?vue&type=template&id=7c92e531 ***!
-  \***************************************************************************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   render: () => (/* binding */ render)
-/* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js");
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/@vue/shared/dist/shared.esm-bundler.js");
-
-
-const _hoisted_1 = { class: "mb-1" }
-const _hoisted_2 = { key: 0 }
-const _hoisted_3 = ["href"]
-const _hoisted_4 = { class: "ms-3" }
-const _hoisted_5 = { key: 1 }
-const _hoisted_6 = ["href"]
-const _hoisted_7 = ["innerHTML"]
-
-function render(_ctx, _cache) {
-  const _component_SearchResultProvision = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("SearchResultProvision", true)
-
-  return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [
-    (_ctx.parents.length)
-      ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, [
-          (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-            href: `${_ctx.expressionFrbrUri}#${_ctx.parents[0].id}`,
-            target: "_blank",
-            onClick: _cache[0] || (_cache[0] = $event => (_ctx.$emit('item-clicked', _ctx.parents[0].id)))
-          }, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.parents[0].title), 9 /* TEXT, PROPS */, _hoisted_3),
-          (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [
-            (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_SearchResultProvision, {
-              item: _ctx.item,
-              parents: _ctx.parents.slice(1),
-              "expression-frbr-uri": _ctx.expressionFrbrUri,
-              onItemClicked: _cache[1] || (_cache[1] = (x) => _ctx.$emit('item-clicked', x))
-            }, null, 8 /* PROPS */, ["item", "parents", "expression-frbr-uri"])
-          ])
-        ]))
-      : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_5, [
-          (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-            href: `${_ctx.expressionFrbrUri}#${_ctx.item.id}`,
-            target: "_blank",
-            onClick: _cache[2] || (_cache[2] = $event => (_ctx.$emit('item-clicked', _ctx.item.id)))
-          }, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.item.title), 9 /* TEXT, PROPS */, _hoisted_6),
-          (_ctx.item.highlight['provisions.body'])
-            ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-                key: 0,
-                class: "ms-3",
-                innerHTML: _ctx.item.highlight['provisions.body'].join(' ... ')
-              }, null, 8 /* PROPS */, _hoisted_7))
-            : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)
-        ]))
-  ]))
-}
-
-/***/ }),
-
 /***/ "./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/index.vue?vue&type=template&id=03d55e9a&scoped=true":
 /*!***********************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/index.vue?vue&type=template&id=03d55e9a&scoped=true ***!
@@ -74175,7 +73403,7 @@ const _hoisted_48 = ["href"]
 const _hoisted_49 = { value: "-score" }
 const _hoisted_50 = { value: "date" }
 const _hoisted_51 = { value: "-date" }
-const _hoisted_52 = { class: "list-unstyled search-result-list" }
+const _hoisted_52 = ["innerHTML"]
 const _hoisted_53 = {
   key: 0,
   class: "overlay"
@@ -74193,7 +73421,6 @@ function render(_ctx, _cache) {
   const _component_FilterFacets = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("FilterFacets")
   const _component_MobileFacetsDrawer = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("MobileFacetsDrawer")
   const _component_FacetBadges = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("FacetBadges")
-  const _component_SearchResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("SearchResult")
   const _component_SearchPagination = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("SearchPagination")
 
   return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [
@@ -74334,8 +73561,8 @@ function render(_ctx, _cache) {
                           key: 0,
                           modelValue: _ctx.facets,
                           "onUpdate:modelValue": _cache[11] || (_cache[11] = $event => ((_ctx.facets) = $event)),
+                          loading: _ctx.facetsLoading,
                           ordering: _ctx.ordering,
-                          loading: _ctx.loading,
                           onOrdered: _ctx.setOrdering
                         }, {
                           "header-title": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(() => [
@@ -74348,7 +73575,7 @@ function render(_ctx, _cache) {
                             (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("strong", _hoisted_37, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.$t("Filters")), 1 /* TEXT */)
                           ]),
                           _: 1 /* STABLE */
-                        }, 8 /* PROPS */, ["modelValue", "ordering", "loading", "onOrdered"]))
+                        }, 8 /* PROPS */, ["modelValue", "loading", "ordering", "onOrdered"]))
                       : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)
                   ]),
                   _: 1 /* STABLE */
@@ -74391,22 +73618,11 @@ function render(_ctx, _cache) {
                             [vue__WEBPACK_IMPORTED_MODULE_2__.vModelSelect, _ctx.ordering]
                           ])
                         ]),
-                        (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_52, [
-                          ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(_ctx.searchInfo.results, (item, index) => {
-                            return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_SearchResult, {
-                              key: item.id,
-                              index: index,
-                              count: _ctx.searchInfo.count,
-                              "trace-id": _ctx.searchInfo.trace_id,
-                              item: item,
-                              query: _ctx.q,
-                              debug: _ctx.searchInfo.can_debug,
-                              "show-jurisdiction": _ctx.showJurisdiction,
-                              "document-labels": _ctx.documentLabels,
-                              onItemClicked: (e) => _ctx.itemClicked(item, e)
-                            }, null, 8 /* PROPS */, ["index", "count", "trace-id", "item", "query", "debug", "show-jurisdiction", "document-labels", "onItemClicked"]))
-                          }), 128 /* KEYED_FRAGMENT */))
-                        ]),
+                        (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+                          ref: "results",
+                          onClick: _cache[15] || (_cache[15] = (...args) => (_ctx.itemClicked && _ctx.itemClicked(...args))),
+                          innerHTML: _ctx.searchInfo.results_html
+                        }, null, 8 /* PROPS */, _hoisted_52),
                         (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_SearchFeedback, {
                           "trace-id": _ctx.searchInfo.trace_id
                         }, null, 8 /* PROPS */, ["trace-id"]),
@@ -74583,6 +73799,11 @@ const _hoisted_10 = {
   class: "badge bg-danger"
 }
 const _hoisted_11 = ["data-bs-target"]
+const _hoisted_12 = {
+  key: 4,
+  class: "small"
+}
+const _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("i", { class: "bi bi-exclamation-triangle" }, null, -1 /* HOISTED */)
 
 function render(_ctx, _cache) {
   return ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("la-gutter-item", { ".anchor": _ctx.anchorElement }, [
@@ -74606,12 +73827,20 @@ function render(_ctx, _cache) {
                 : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.$t( 'Unresolved' )), 1 /* TEXT */))
             ]))
           : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true),
-        (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-          type: "button",
-          class: "btn btn-sm btn-secondary",
-          "data-bs-toggle": "modal",
-          "data-bs-target": '#provision-enrichment-modal-' + _ctx.enrichment.id
-        }, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.$t( 'View details' )), 9 /* TEXT, PROPS */, _hoisted_11)
+        (_ctx.enrichment.enrichment_type==='unconstitutional_provision')
+          ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
+              key: 3,
+              type: "button",
+              class: "btn btn-sm btn-secondary",
+              "data-bs-toggle": "modal",
+              "data-bs-target": '#provision-enrichment-modal-' + _ctx.enrichment.id
+            }, (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.$t( 'View details' )), 9 /* TEXT, PROPS */, _hoisted_11))
+          : (_ctx.enrichment.enrichment_type==='uncommenced_provision' && !_ctx.enrichment.and_all_descendants)
+            ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_12, [
+                _hoisted_13,
+                (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_1__.toDisplayString)(_ctx.$t('Some subprovisions are in force')), 1 /* TEXT */)
+              ]))
+            : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)
       ])
     ])
   ], 8 /* PROPS */, _hoisted_1))
@@ -75252,27 +74481,6 @@ if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var add = (__webpack_require__(/*! !../../../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
 var update = add("6d849d0a", content, false, {});
-// Hot Module Replacement
-if(false) {}
-
-/***/ }),
-
-/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=style&index=0&lang=css":
-/*!*******************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=style&index=0&lang=css ***!
-  \*******************************************************************************************************************************************************************************************************************************************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(/*! !!../../../../node_modules/css-loader/dist/cjs.js!../../../../node_modules/vue-loader/dist/stylePostLoader.js!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./SearchResult.vue?vue&type=style&index=0&lang=css */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./peachjam/js/components/FindDocuments/SearchResult.vue?vue&type=style&index=0&lang=css");
-if(content.__esModule) content = content.default;
-if(typeof content === 'string') content = [[module.id, content, '']];
-if(content.locals) module.exports = content.locals;
-// add the styles to the DOM
-var add = (__webpack_require__(/*! !../../../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
-var update = add("67e0ffea", content, false, {});
 // Hot Module Replacement
 if(false) {}
 

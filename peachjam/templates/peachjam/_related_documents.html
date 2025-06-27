@@ -42,6 +42,10 @@
   {% block extra-related-documents %}{% endblock %}
 {% else %}
   <p>
-    <a href="{% url 'account_signup' %}?next={{ request.get_full_path|urlencode }}">{% trans "Sign up" %}</a> or <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">{% trans "Log in" %}</a> to see similar documents.
+    {% url 'account_signup' as signup %}
+    {% url 'account_login' as login %}
+    {% blocktrans trimmed with signup_url=signup login_url=login next=request.get_full_path|urlencode %}
+      <a href="{{ signup_url }}?next={{ next }}">Sign up</a> or <a href="{{ login_url }}?next={{ next }}">Log in</a> to see similar documents.
+    {% endblocktrans %}
   </p>
 {% endif %}

@@ -4,6 +4,7 @@ import json
 from django import template
 from django.http import QueryDict
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -115,3 +116,45 @@ def split(value, sep=None):
 def get_follow_params(obj):
     # this would be better as a model method
     return f"{'_'.join(obj._meta.verbose_name.lower().split())}={obj.pk}"
+
+
+@register.simple_tag
+def json_table(data):
+    def make_table(info):
+        return mark_safe(
+            '<table class="table table-sm">'
+            + "".join(make_row(key, value) for key, value in info.items())
+            + "</table>"
+        )
+
+    def make_row(key, value):
+        return (
+            format_html('<tr><th style="width: 7em">{}</th><td>', key)
+            + render_value(value)
+            + "</td></tr>"
+        )
+
+    def render_value(value):
+        if isinstance(value, dict):
+            return make_table(value)
+        elif isinstance(value, list):
+            s = "<ol>"
+            s += "".join(
+                [
+                    "<li><details><summary>(details)</summary>"
+                    + render_value(v)
+                    + "</details></li>"
+                    for v in value
+                ]
+            )
+            s += "</ol>"
+            return s
+        else:
+            return format_html("{}", value)
+
+    return make_table(data or {})
+
+
+@register.filter
+def get_dotted_key_value(obj, key):
+    return obj.get(key, "")

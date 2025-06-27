@@ -96,21 +96,6 @@
                 {% trans "Document detail" %}
               </button>
             </li>
-            {% if document.summary %}
-              <li class="nav-item" role="presentation">
-                <button class="nav-link"
-                        data-bs-toggle="tab"
-                        data-bs-target="#summary-tab"
-                        data-track-event="Document | Tab | Document summary"
-                        type="button"
-                        role="tab"
-                        aria-controls="summary-tab"
-                        aria-selected="false">
-                  <i class="bi bi-pj pj-document-summary"></i>
-                  {% trans "Summary" %}
-                </button>
-              </li>
-            {% endif %}
             {% if timeline %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
@@ -521,14 +506,6 @@
             {% endblock %}
           </div>
         </div>
-        {% if document.summary %}
-          <div class="tab-pane"
-               id="summary-tab"
-               role="tabpanel"
-               aria-labelledby="summary-tab">
-            <div class="container">{% include 'peachjam/document/_document_summary.html' %}</div>
-          </div>
-        {% endif %}
         {% if timeline %}
           <div class="tab-pane"
                id="history-tab"
@@ -588,9 +565,7 @@
                id="ratifications-tab"
                role="tabpanel"
                aria-labelledby="ratifications-tab">
-            <div class="container">
-              {% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}
-            </div>
+            <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
           </div>
         {% endif %}
         {% if perms.peachjam.can_debug_document %}

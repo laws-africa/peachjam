@@ -146,6 +146,8 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             "language": language,
             "jurisdiction": jurisdiction,
             "locality": locality,
+            "flynote": doc["flynote"],
+            "case_summary": doc["case_summary"],
         }
 
         document = Judgment(**data)
@@ -165,6 +167,7 @@ class JudgmentAdapter(BaseJudgmentAdapter):
         self.get_judges(doc["judges"], created_doc)
         self.get_taxonomies(doc["topics"], created_doc)
         self.attach_source_file(doc, created_doc)
+        created_doc.update_text_content()
 
         log.info(f"Updated judgment {created_doc}")
         log.info(f"New {new}")

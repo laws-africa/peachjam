@@ -1,0 +1,19 @@
+<div class="mb-1">
+  {% if parents %}
+    <a href="{{ hit.document.get_absolute_url }}#{{ parents.0.id }}"
+       target="_blank"
+       data-frbr-uri="{{ hit.document.expression_frbr_uri }}"
+       data-position="{{ hit.position }}"
+       data-portion="{{ parents.0.id }}">{{ parents.0.title }}</a>
+    <div class="ms-3">{% include "peachjam_search/_search_hit_provision.html" with parents=parents|slice:"1:" %}</div>
+  {% else %}
+    <a href="{{ hit.document.get_absolute_url }}#{{ provision.id }}"
+       target="_blank"
+       data-frbr-uri="{{ hit.document.expression_frbr_uri }}"
+       data-position="{{ hit.position }}"
+       data-portion="{{ provision.id }}">{{ provision.title }}</a>
+    {% if provision.highlight.provisions_body %}
+      <div class="ms-3">{{ provision.highlight.provisions_body|safeseq|join:" ... " }}</div>
+    {% endif %}
+  {% endif %}
+</div>

@@ -424,6 +424,8 @@ class DocumentForm(forms.ModelForm):
         if "content_html" in self.changed_data:
             # if the content_html has changed, set it and update related attributes
             self.instance.set_content_html(self.instance.content_html)
+            if self.instance.pk:
+                self.instance.update_text_content()
 
     def clean_content_html(self):
         # prevent CKEditor-based editing of AKN HTML
@@ -624,6 +626,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
                     "locality",
                     "date",
                     "language",
+                    "published",
                 ]
             },
         ),
@@ -668,7 +671,6 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
                 "fields": [
                     "content_html_is_akn",
                     "allow_robots",
-                    "published",
                     "restricted",
                     "document_access_link",
                     "toc_json",
@@ -1152,15 +1154,12 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets[3][1]["fields"].extend(
-        ["case_summary", "case_summary_ai", "flynote", "order"]
-    )
+    fieldsets[3][1]["fields"].extend(["blurb", "case_summary", "flynote", "order"])
     readonly_fields = [
         "mnc",
         "serial_number",
         "title",
         "citation",
-        "case_summary_ai",
         "frbr_uri_doctype",
         "frbr_uri_subtype",
         "frbr_uri_actor",
@@ -1296,6 +1295,10 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             inline.extra = len(case_numbers) + inline.extra
             inlines.append(inline)
             formsets.append(inline.get_formset(request)(initial=case_numbers))
+
+        if not pj_settings().allow_anonymisation:
+            # if anonymisation is not enabled, set must_be_anonymised to False
+            details["must_be_anonymised"] = False
 
         judgment = Judgment()
         for field in [

@@ -149,6 +149,11 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow documents to be saved."),
     )
+    allow_anonymisation = models.BooleanField(
+        verbose_name=_("allow anonymisation"),
+        default=False,
+        help_text=_("Allow documents to be anonymised."),
+    )
     allow_save_searches = models.BooleanField(
         verbose_name=_("allow save searches"),
         default=False,

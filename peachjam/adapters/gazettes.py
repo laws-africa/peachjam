@@ -127,6 +127,8 @@ class GazetteAPIAdapter(RequestsAdapter):
         # force the dynamic file field to be set correctly
         SourceFile.objects.filter(pk=sf.pk).update(file=s3_file)
 
+        gazette.update_text_content()
+
         logger.info("Done.")
 
     def delete_document(self, frbr_uri):
