@@ -153,11 +153,11 @@ export class OfflineManager {
   }
 
   async clearOfflineDocs () {
+    // Clear metadata from localStorage
+    localStorage.removeItem(OfflineManager.INVENTORY_KEY);
     // Clear the cache
     await caches.delete(OfflineManager.CACHE_NAME);
     this.cache = null;
-    // Clear metadata from localStorage
-    localStorage.removeItem(OfflineManager.INVENTORY_KEY);
   }
 }
 

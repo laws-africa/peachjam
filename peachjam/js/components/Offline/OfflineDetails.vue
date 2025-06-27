@@ -45,7 +45,7 @@ export default {
   methods: {
     clear () {
       if (confirm('Are you sure you want to delete all offline documents?')) {
-        getManager().clearOfflineDocs();
+        manager.clearOfflineDocs();
         this.inventory = manager.getInventory();
       }
     }
