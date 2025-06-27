@@ -17,6 +17,7 @@
           <span v-else class="badge bg-danger">{{ $t( 'Unresolved' ) }}</span>
         </div>
         <button
+          v-if="enrichment.enrichment_type==='unconstitutional_provision'"
           type="button"
           class="btn btn-sm btn-secondary"
           data-bs-toggle="modal"
@@ -24,6 +25,10 @@
         >
           {{ $t( 'View details' ) }}
         </button>
+        <div v-else-if="enrichment.enrichment_type==='uncommenced_provision' && !enrichment.and_all_descendants" class="small">
+          <i class="bi bi-exclamation-triangle" />
+          {{ $t('Some subprovisions are in force') }}
+        </div>
       </div>
     </div>
   </la-gutter-item>
