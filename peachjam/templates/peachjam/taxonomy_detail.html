@@ -11,7 +11,7 @@
                hx-trigger="load"></div>
         {% endblock %}
         {% block offline-button %}
-          {% if perms.peachjam.offline %}
+          {% if offline_taxonomy and perms.peachjam.offline %}
             <div class="dropdown">
               <button class="btn btn-outline-secondary ms-2"
                       type="button"
@@ -23,7 +23,7 @@
                 <li>
                   <button class="dropdown-item"
                           data-component="OfflineTaxonomyButton"
-                          data-taxonomy="{{ taxonomy.pk }}">
+                          data-taxonomy="{{ offline_taxonomy.pk }}">
                     {% trans "Make available offline" %}
                   </button>
                 </li>

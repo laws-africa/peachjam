@@ -32,9 +32,9 @@ class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
     the documents in the topic (and its children), and the pages for browsing the topic."""
 
     model = Taxonomy
+    queryset = Taxonomy.objects.filter(allow_offline=True)
 
     def get_taxonomy(self):
-        # TODO: work with the root offline topic if this is a descendant
         return self.get_object()
 
     def render_to_response(self, context, **response_kwargs):
