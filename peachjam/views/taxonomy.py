@@ -85,5 +85,6 @@ class TaxonomyDetailView(AllowedTaxonomyMixin, FilteredDocumentListView):
         context["first_level_taxonomy"] = context["taxonomy_tree"][0]["data"]["name"]
         context["is_leaf_node"] = not (context["taxonomy_tree"][0].get("children"))
         context["taxonomy_link_prefix"] = "taxonomy"
+        context["offline_taxonomy"] = self.taxonomy.get_offline_ancestor()
 
         return context

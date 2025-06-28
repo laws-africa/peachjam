@@ -32,6 +32,14 @@ class Taxonomy(MP_Node):
             "Show this taxonomy in the document listing page? Cascades to descendents."
         ),
     )
+    allow_offline = models.BooleanField(
+        _("allow offline access"),
+        default=False,
+        null=False,
+        help_text=_(
+            "Allow users to make this taxonomy and its descendants available offline."
+        ),
+    )
 
     class Meta:
         verbose_name = _("taxonomy")
@@ -141,6 +149,12 @@ class Taxonomy(MP_Node):
 
         children = self.get_children().exclude(id__in=exclude)
         return children
+
+    def get_offline_ancestor(self):
+        """Return the first ancestor which is available offline, including this node, if any."""
+        if self.allow_offline:
+            return self
+        return self.get_ancestors().filter(allow_offline=True).first()
 
     @classmethod
     def get_tree_for_items(cls, items):
