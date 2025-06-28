@@ -1,7 +1,10 @@
 .content-and-enrichments {
+  .enrich {
+    transition: background-color 100ms ease-in-out;
+  }
+
   .enrich-relationship {
     background-color: transparentize($anntn-highlight-color, 0.8);
-    transition: background-color 300ms ease-in-out;
 
     &.active {
       background-color: transparentize($anntn-highlight-color, 0.4);
@@ -10,7 +13,6 @@
 
   .enrich-uncommenced-provision {
     background-color: transparentize($uncommenced-highlight-color, 0.8);
-    transition: background-color 300ms ease-in-out;
 
     &.active {
       background-color: transparentize($uncommenced-highlight-color, 0.6);
@@ -19,10 +21,15 @@
 
   .enrich-unconstitutional-provision {
     background-color: transparentize($unconstitutional-highlight-color, 0.8);
-    transition: background-color 300ms ease-in-out;
 
     &.active {
       background-color: transparentize($unconstitutional-highlight-color, 0.4);
+    }
+  }
+
+  .enrich-changed-provision {
+    &.active {
+      background-color: transparentize(tint-color($primary, 80%), 0.6);
     }
   }
 }
