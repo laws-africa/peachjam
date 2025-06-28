@@ -7,3 +7,12 @@
       display: none;
     }
 }
+
+la-gutter-item {
+  .card {
+    --bs-card-spacer-x: #{$card-spacer-x * 0.5};
+    --bs-card-spacer-y: #{$card-spacer-y * 0.6};
+    --bs-card-border-radius: 0.25rem;
+    font-size: $font-size-sm;
+  }
+}
