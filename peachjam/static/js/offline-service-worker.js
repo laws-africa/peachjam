@@ -1,6 +1,8 @@
 const CACHE_NAME = 'peachjam-offline-v1';
 const OFFLINE_PAGE = '/offline/offline';
 
+let isOffline = false;
+
 self.addEventListener('install', (event) => {
   console.log('Service Worker installing');
   self.skipWaiting();
@@ -25,27 +27,20 @@ self.addEventListener('fetch', (event) => {
     // try a normal fetch
     fetch(event.request)
       .then(async (response) => {
-        // update the existing cache value (if any)
-        if (response.ok && response.type === 'basic') {
-          // clone because response is a stream
-          const responseForCache = response.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.match(event.request).then((match) => {
-              if (match) {
-                // it exists in the cache, update it
-                cache.put(event.request, responseForCache);
-              }
-            });
-          });
+        if (event.request.mode === 'navigate' && response.ok && response.type === 'basic' && isOffline) {
+          // we're back online
+          notifyOfflineStatus(false);
         }
-
         return response;
       })
       .catch(async () => {
         // it failed, try the cache
         const cache = await caches.open(CACHE_NAME);
         const response = await cache.match(event.request);
+
+        if (event.request.mode === 'navigate' && !isOffline) {
+          notifyOfflineStatus(true);
+        }
 
         if (response) {
           // we found a cached response, return it
@@ -59,3 +54,19 @@ self.addEventListener('fetch', (event) => {
       })
   );
 });
+
+// respond when the browser wants to determine offline status
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'requestOfflineStatus') {
+    notifyOfflineStatus(isOffline);
+  }
+});
+
+function notifyOfflineStatus (offline) {
+  isOffline = offline;
+  self.clients.matchAll({ type: 'window' }).then(clients => {
+    for (const client of clients) {
+      client.postMessage({ type: 'notifyOfflineStatus', value: isOffline });
+    }
+  });
+}

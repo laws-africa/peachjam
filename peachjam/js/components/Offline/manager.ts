@@ -37,20 +37,54 @@ interface Inventory {
  * This is purely informational to tell the user what they do/don't have access to. It also then fires off requests
  * to populate the offline content cache. This is the actual content (handled by the service worker) that is then
  * available offline.
+ *
+ * The service worker detects when the user is offline. This class then requests that state from the service worker
+ * so that it can update a class on the whole page, so that some elements that we know don't work offline can be hidden.
  */
 export class OfflineManager {
   // This MUST match CACHE_NAME in offline-service-worker.js
   public static CACHE_NAME = 'peachjam-offline-v1';
   public static INVENTORY_KEY = 'peachjam-offline-inventory';
   public static OFFLINE_PAGE = '/offline/offline';
+  public static OFFLINE_KEY = 'peachjam-offline-status';
 
   cache: Cache | null = null;
   registered = false;
+  offline = false;
 
   constructor () {
+    this.setupOffline();
+
     if (localStorage.getItem(OfflineManager.INVENTORY_KEY)) {
       this.registerServiceWorker();
       this.checkForUpdates();
+    }
+  }
+
+  setupOffline () {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data?.type === 'notifyOfflineStatus') {
+          this.setOfflineStatus(event.data.value);
+        }
+      });
+
+      // Request offline status from the service worker
+      navigator.serviceWorker.ready.then((registration) => {
+        registration.active?.postMessage({ type: 'requestOfflineStatus' });
+      });
+    }
+  }
+
+  setOfflineStatus (offline: boolean) {
+    if (this.offline !== offline) {
+      if (offline) {
+        document.documentElement.classList.add('offline');
+        console.log('You are currently offline.');
+      } else {
+        document.documentElement.classList.remove('offline');
+        console.log('You are back online.');
+      }
     }
   }
 
