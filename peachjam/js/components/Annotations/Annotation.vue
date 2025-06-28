@@ -85,6 +85,8 @@ export default {
   },
   mounted () {
     this.mark();
+    // this can't be attached with vue's normal event listener because of the naming
+    this.$el.addEventListener('laItemChanged', this.itemChanged);
     this.gutter.appendChild(this.$el);
   },
   unmounted () {
@@ -143,6 +145,14 @@ export default {
       }
       this.$emit('remove-annotation', this.annotation);
     },
+    itemChanged () {
+      // either the active or anchor state has changed
+      if (this.$el.active) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    },
     mark () {
       const range = targetToRange({
         selectors: this.annotation.target_selectors,
@@ -150,6 +160,8 @@ export default {
       }, this.viewRoot);
       if (!range) return;
       markRange(range, 'mark', mark => {
+        mark.classList.add('enrich', 'enrich-comment');
+        mark.addEventListener('click', this.activate);
         this.marks.push(mark);
         return mark;
       });
@@ -171,6 +183,14 @@ export default {
         parent.removeChild(mark);
       });
       this.marks = [];
+    },
+    activate () {
+      this.$el.active = true;
+      this.marks.forEach(mark => mark.classList.add('active'));
+    },
+    deactivate () {
+      this.$el.active = false;
+      this.marks.forEach(mark => mark.classList.remove('active'));
     },
     urlize (text) {
       const urlPattern = /(https?:\/\/[^\s]+)/g;

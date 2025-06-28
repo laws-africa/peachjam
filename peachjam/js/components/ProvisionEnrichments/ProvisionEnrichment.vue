@@ -51,43 +51,43 @@ export default {
     }
   },
   data: () => ({
-    marks: [],
     anchorElement: null
   }),
   mounted () {
-    this.markAndAnchor();
-    window.addEventListener('click', this.handleOutsideClick);
+    this.setAnchor();
+    // this can't be attached with vue's normal event listener because of the naming
+    this.$el.addEventListener('laItemChanged', this.itemChanged);
     this.gutter.appendChild(this.$el);
   },
   methods: {
-    markAndAnchor () {
-      const provision = document.querySelector(`[data-eid="${this.enrichment.provision_eid}"`);
-      if (provision) {
-        this.marks.push(provision);
+    itemChanged () {
+      // either the active or anchor state has changed
+      if (this.$el.active) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    },
+    setAnchor () {
+      this.anchorElement = document.querySelector(`[data-eid="${this.enrichment.provision_eid}"`);
+      if (this.anchorElement) {
         if (this.enrichment.enrichment_type === 'unconstitutional_provision') {
-          provision.classList.add('enrich-unconstitutional-provision');
+          this.anchorElement.classList.add('enrich', 'enrich-unconstitutional-provision');
         } else if (this.enrichment.enrichment_type === 'uncommenced_provision') {
-          provision.classList.add('enrich-uncommenced-provision');
+          this.anchorElement.classList.add('enrich', 'enrich-uncommenced-provision');
         }
-        provision.clickFn = () => this.activate();
-        provision.addEventListener('click', provision.clickFn);
-        this.anchorElement = provision;
+        this.anchorElement.addEventListener('click', this.activate);
       }
     },
     activate () {
-      // Deactivate all
-      Array.from(this.viewRoot.querySelectorAll('mark')).forEach(mark => {
-        mark.classList.remove('active');
-      });
-      // Activate gutter item
       this.$el.active = true;
-      // activate enrichment gutter item marks
-      this.marks.forEach(mark => {
-        mark.classList.add('active');
-      });
+      this.anchorElement.classList.add('active');
+    },
+    deactivate () {
+      this.$el.active = false;
+      this.anchorElement.classList.remove('active');
     }
   }
-
 };
 
 </script>

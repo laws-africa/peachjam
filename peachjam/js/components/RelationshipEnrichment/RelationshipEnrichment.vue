@@ -2,7 +2,6 @@
   <la-gutter-item
     class="relationship-gutter-item"
     :anchor.prop="anchorElement"
-    @click="activate"
   >
     <i class="bi bi-chat-left mobile-gutter-item-icon" />
     <div class="card">
@@ -105,6 +104,8 @@ export default {
   mounted () {
     this.markAndAnchor();
     window.addEventListener('click', this.handleOutsideClick);
+    // this can't be attached with vue's normal event listener because of the naming
+    this.$el.addEventListener('laItemChanged', this.itemChanged);
 
     this.gutter.appendChild(this.$el);
   },
@@ -113,19 +114,12 @@ export default {
     this.unmark();
   },
 
-  beforeUnmount () {
-    // clean up
-    window.removeEventListener('click', this.handleOutsideClick);
-    this.marks.forEach(mark => {
-      mark.removeEventListener('click', mark.clickFn);
-    });
-  },
-
   methods: {
-    handleOutsideClick (e) {
-      if (!(this.$el.contains(e.target) ||
-          this.$el === e.target ||
-          this.marks.some(mark => mark.contains(e.target) || mark === e.target))) {
+    itemChanged () {
+      // either the active or anchor state has changed
+      if (this.$el.active) {
+        this.activate();
+      } else {
         this.deactivate();
       }
     },
@@ -134,16 +128,8 @@ export default {
       this.marks.forEach(mark => mark.classList.remove('active'));
     },
     activate () {
-      // Deactivate all
-      Array.from(this.viewRoot.querySelectorAll('mark')).forEach(mark => {
-        mark.classList.remove('active');
-      });
-      // Activate gutter item
       this.$el.active = true;
-      // activate enrichment gutter item marks
-      this.marks.forEach(mark => {
-        mark.classList.add('active');
-      });
+      this.marks.forEach(mark => mark.classList.add('active'));
     },
     markAndAnchor () {
       this.unmark();
@@ -157,10 +143,8 @@ export default {
       if (!range) return;
       markRange(range, 'mark', mark => {
         this.marks.push(mark);
-        mark.classList.add('enrich-relationship');
-        mark.clickFn = () => this.activate();
-        // Setup listeners
-        mark.addEventListener('click', mark.clickFn);
+        mark.classList.add('enrich', 'enrich-relationship');
+        mark.addEventListener('click', this.activate);
         return mark;
       });
       this.anchorElement = this.marks[0];
