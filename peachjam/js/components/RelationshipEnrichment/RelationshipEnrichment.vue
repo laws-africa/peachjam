@@ -157,7 +157,7 @@ export default {
       if (!range) return;
       markRange(range, 'mark', mark => {
         this.marks.push(mark);
-        mark.classList.add('anntn-highlight');
+        mark.classList.add('enrich-relationship');
         mark.clickFn = () => this.activate();
         // Setup listeners
         mark.addEventListener('click', mark.clickFn);

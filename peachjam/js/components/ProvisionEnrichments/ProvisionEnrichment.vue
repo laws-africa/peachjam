@@ -65,9 +65,9 @@ export default {
       if (provision) {
         this.marks.push(provision);
         if (this.enrichment.enrichment_type === 'unconstitutional_provision') {
-          provision.classList.add('unconstitutional-provision-highlight');
+          provision.classList.add('enrich-unconstitutional-provision');
         } else if (this.enrichment.enrichment_type === 'uncommenced_provision') {
-          provision.classList.add('uncommenced-provision-color');
+          provision.classList.add('enrich-uncommenced-provision');
         }
         provision.clickFn = () => this.activate();
         provision.addEventListener('click', provision.clickFn);

@@ -1,0 +1,31 @@
+.content-and-enrichments {
+  .enrich-relationship {
+    background-color: transparentize($anntn-highlight-color, 0.8);
+    transition: background-color 300ms ease-in-out;
+
+    &.active {
+      background-color: transparentize($anntn-highlight-color, 0.4);
+    }
+  }
+
+  .enrich-uncommenced-provision {
+    background-color: transparentize($uncommenced-highlight-color, 0.8);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+
+    &.active {
+      background-color: transparentize($uncommenced-highlight-color, 0.6);
+    }
+  }
+
+  .enrich-unconstitutional-provision {
+    background-color: transparentize($unconstitutional-highlight-color, 0.8);
+    transition: background-color 300ms ease-in-out;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+
+    &.active {
+      background-color: transparentize($unconstitutional-highlight-color, 0.4);
+    }
+  }
+}
