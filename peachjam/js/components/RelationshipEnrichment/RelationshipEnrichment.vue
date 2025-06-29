@@ -3,8 +3,12 @@
     class="relationship-gutter-item"
     :anchor.prop="anchorElement"
   >
-    <i class="bi bi-chat-left mobile-gutter-item-icon" />
-    <div class="card">
+    <i
+      class="bi bi-chat-left mobile-gutter-item-icon"
+      role="button"
+      @click="activate"
+    />
+    <div class="card gutter-item-card">
       <div class="card-body">
         <div class="mb-2 d-lg-none text-end">
           <button

@@ -2,15 +2,28 @@
   <la-gutter-item
     :anchor.prop="anchorElement"
   >
-    <div class="card">
+    <i
+      :class="`bi ${icon} mobile-gutter-item-icon`"
+      role="button"
+      @click="activate"
+    />
+    <div class="card gutter-item-card">
       <div class="card-body">
-        <div v-if="enrichment.enrichment_type==='unconstitutional_provision'">
-          <i class="bi bi-journal-x" />
-          {{ $t('Unconstitutional provision') }}
-        </div>
-        <div v-else-if="enrichment.enrichment_type==='uncommenced_provision'">
-          <i class="bi bi-bell-slash" />
-          {{ $t('Uncommenced provision') }}
+        <div class="d-flex">
+          <div v-if="enrichment.enrichment_type==='unconstitutional_provision'">
+            <i :class="`bi ${icon}`" />
+            {{ $t('Unconstitutional provision') }}
+          </div>
+          <div v-else-if="enrichment.enrichment_type==='uncommenced_provision'">
+            <i :class="`bi ${icon}`" />
+            {{ $t('Uncommenced provision') }}
+          </div>
+          <button
+            type="button"
+            class="btn-close ms-auto d-lg-none"
+            aria-label="Close"
+            @click.stop="deactivate"
+          />
         </div>
         <div v-if="enrichment.enrichment_type==='unconstitutional_provision'" class="mt-1">
           <span v-if="enrichment.resolved" class="badge bg-success">{{ $t( 'Resolved' ) }}</span>
@@ -53,6 +66,17 @@ export default {
   data: () => ({
     anchorElement: null
   }),
+  computed: {
+    icon () {
+      switch (this.enrichment.enrichment_type) {
+        case 'unconstitutional_provision':
+          return 'bi-journal-x';
+        case 'uncommenced_provision':
+          return 'bi-bell-slash';
+      }
+      return '';
+    }
+  },
   mounted () {
     this.setAnchor();
     // this can't be attached with vue's normal event listener because of the naming

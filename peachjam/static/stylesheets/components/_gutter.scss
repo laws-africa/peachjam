@@ -1,18 +1,37 @@
-// Dedicated file for la-gutter styling
-
 .mobile-gutter-item-icon {
   font-size: 24px;
-    color: var(--anntn-highlight-color);
-    @include media-breakpoint-up(lg) {
-      display: none;
-    }
+  color: var(--bs-primary);
+  @include media-breakpoint-up(lg) {
+    display: none;
+  }
 }
 
 la-gutter-item {
-  .card {
-    --bs-card-spacer-x: #{$card-spacer-x * 0.5};
-    --bs-card-spacer-y: #{$card-spacer-y * 0.6};
-    --bs-card-border-radius: 0.25rem;
-    font-size: $font-size-sm;
+  @include media-breakpoint-up(lg) {
+    .card {
+      --bs-card-spacer-x: #{$card-spacer-x * 0.5};
+      --bs-card-spacer-y: #{$card-spacer-y * 0.6};
+      --bs-card-border-radius: 0.25rem;
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+la-gutter-item .gutter-item-card {
+  display: none;
+  @include media-breakpoint-up(lg) {
+    display: block;
+  }
+}
+
+la-gutter-item[active] .gutter-item-card {
+  // on moblie, display at the bottom of the screen when active
+  @include media-breakpoint-down(lg) {
+    display: block;
+    position: fixed;
+    bottom: 45px;
+    left: 5px;
+    right: 5px;
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
   }
 }

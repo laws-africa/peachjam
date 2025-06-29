@@ -2,18 +2,22 @@
   <la-gutter-item
     :anchor.prop="anchorElement"
   >
-    <div class="card">
+    <i
+      class="`bi bi-chat-left mobile-gutter-item-icon"
+      role="button"
+      @click="activate"
+    />
+    <div class="card gutter-item-card">
       <div class="card-body">
         <div class="d-flex mb-1">
           <div>
             <small class="fw-bold text-muted">{{ annotation.user }}</small>
           </div>
-          <div class="dropdown ms-auto">
+          <div class="dropstart ms-auto">
             <a
-              class="dropdown-toggle"
+              class="bi bi-three-dots"
               href="#"
               data-bs-toggle="dropdown"
-              aria-haspopup="true"
               aria-expanded="false"
             />
             <ul class="dropdown-menu">
