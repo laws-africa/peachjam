@@ -126,8 +126,10 @@
       <dd>
         {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
         {% if document.flynote %}
-          <h6>{% trans 'Flynote' %}</h6>
-          <p>{{ document.flynote|safe }}</p>
+          <div class="mb-2">
+            <h6>{% trans 'Flynote' %}</h6>
+            {{ document.flynote|safe }}
+          </div>
         {% endif %}
         <details>
           <summary class="mb-1">
