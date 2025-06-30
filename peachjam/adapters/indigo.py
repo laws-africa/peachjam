@@ -382,6 +382,8 @@ class IndigoAdapter(RequestsAdapter):
         logger.info(
             f"Deleting {work.enrichments.count()} existing provision enrichments for {work}"
         )
+        UncommencedProvision.objects.filter(work=work).delete()
+        UnconstitutionalProvision.objects.filter(work=work).delete()
         ProvisionEnrichment.objects.filter(work=work).delete()
         enrichments = self.client_get(f"{url}/provision-enrichments.json").json()
         if enrichments and "enrichments" in enrichments:
