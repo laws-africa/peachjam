@@ -72,7 +72,7 @@ export default {
         case 'unconstitutional_provision':
           return 'bi-journal-x';
         case 'uncommenced_provision':
-          return 'bi-bell-slash';
+          return 'bi-lightbulb-off';
       }
       return '';
     }
