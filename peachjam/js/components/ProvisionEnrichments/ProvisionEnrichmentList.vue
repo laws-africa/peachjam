@@ -38,15 +38,6 @@ export default {
       items: this.enrichments,
       creating: null
     };
-  },
-  methods: {
-    markAndAnchorAll () {
-      if (this.$refs['gutter-item']) {
-        this.$refs['gutter-item'].forEach(item => {
-          item.markAndAnchor();
-        });
-      }
-    }
   }
 };
 </script>

@@ -4,7 +4,6 @@ import { IRangeTarget } from '@lawsafrica/indigo-akn/dist/ranges';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { vueI18n } from '../../i18n';
 import { ComponentPublicInstance } from 'vue';
-import i18next from 'i18next';
 
 export class ProvisionEnrichments implements IGutterEnrichmentProvider {
     root: HTMLElement;
