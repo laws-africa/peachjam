@@ -1,8 +1,10 @@
 {% load i18n %}
-{% if enrichment.provision_by_eid %}
-  <la-akoma-ntoso frbr-expression-uri="{{ enrichment.document.expression_frbr_uri }}" class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;" lang="{{ enrichment.document.language.iso }}">
-  {{ enrichment.provision_by_eid|safe }}
-  </la-akoma-ntoso>
-{% else %}
-  <em>{% trans "No content found" %}</em>
-{% endif %}
+{% with enrichment.provision_by_eid as enrichment_provision %}
+  {% if enrichment_provision %}
+    <la-akoma-ntoso frbr-expression-uri="{{ enrichment.document.expression_frbr_uri }}" class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;" lang="{{ enrichment.document.language.iso }}">
+    {{ enrichment_provision|safe }}
+    </la-akoma-ntoso>
+  {% else %}
+    <em>{% trans "No content found" %}</em>
+  {% endif %}
+{% endwith %}
