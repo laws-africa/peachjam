@@ -4,6 +4,7 @@
           class="btn btn-sm bg-none {% if not expanded %}collapsed{% endif %}"
           hx-get="{% url 'uncommenced_provision_detail' enrichment.pk %}"
           hx-target="#provision-detail-{{ enrichment.pk }}"
+          hx-swap="innerHTML"
           hx-trigger="click once"
           data-bs-toggle="collapse"
           data-bs-target="#provision-detail-{{ enrichment.pk }}"
