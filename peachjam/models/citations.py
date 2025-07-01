@@ -218,36 +218,6 @@ class ExtractedCitationContext(models.Model):
             target_provision_eid=citation.target_id,
         )
 
-    def _find_anchor_id(self, link):
-        # Walk up the tree to find the nearest parent with an id
-        current = link
-        while current is not None:
-            anchor_id = current.get("id")
-            if anchor_id:
-                return anchor_id
-            current = current.getparent()
-        return None  # fallback if no ID found
-
-    def _extract_text_context(self, link, window=30):
-        """Extracts text around the link to simulate a quote selector (prefix, exact, suffix)"""
-        parent_text = "".join(link.itertext())
-        exact = parent_text.strip()
-
-        # get parent node's full text content
-        full_text = "".join(link.getparent().itertext())
-        exact_pos = full_text.find(exact)
-
-        if exact_pos == -1:
-            return {"prefix": "", "exact": exact, "suffix": ""}
-
-        prefix_start = max(0, exact_pos - window)
-        prefix = full_text[prefix_start:exact_pos].strip()
-
-        suffix_end = exact_pos + len(exact) + window
-        suffix = full_text[exact_pos + len(exact) : suffix_end].strip()
-
-        return {"prefix": prefix, "exact": exact, "suffix": suffix}
-
 
 class Treatment(models.Model):
     name = models.CharField(_("name"), max_length=4096, unique=True)
