@@ -17,7 +17,6 @@ class CitationAnalyser:
 
     def extract_citations(self, document):
         """Run matchers across the HTML or text in this document."""
-        self.extract_citation_context(document)
         if document.content_html_is_akn:
             # don't markup AKN HTML
             return False
@@ -28,15 +27,6 @@ class CitationAnalyser:
         else:
             # markup the source file by extracting the text and assuming we'll render it as a PDF
             return self.extract_citations_from_source_file(document)
-
-    def extract_citation_context(self, document):
-        text = document.get_content_as_text()
-        if text:
-            for matcher in self.matchers:
-                matcher = matcher()
-                matcher.extract_text_matches(document.expression_uri(), text)
-                self.store_extracted_citation_context(document, matcher)
-            return True
 
     def store_extracted_citation_context(self, document, matcher, newlines):
         """Transform extracted citations from text into ExtractedCitationContext objects."""

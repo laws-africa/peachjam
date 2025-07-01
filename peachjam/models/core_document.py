@@ -37,6 +37,7 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_date,
 )
 from peachjam.helpers import parse_utf8_html, pdfjs_to_text
+from peachjam.models import ExtractedCitationContext
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
 from peachjam.models.settings import pj_settings
@@ -862,9 +863,13 @@ class CoreDocument(PolymorphicModel):
                     work_frbr_uri = FrbrUri.parse(a.attrib[attr]).work_uri()
                     # here we can add a list of citation treatments as values
                     work_frbr_uris[work_frbr_uri] = []
+                    ExtractedCitationContext.create_citation_context(
+                        self, work_frbr_uri, a
+                    )
                 except ValueError:
                     # ignore malformed FRBR URIs
                     pass
+
         else:
             for citation_link in CitationLink.objects.filter(document_id=self.pk):
                 try:

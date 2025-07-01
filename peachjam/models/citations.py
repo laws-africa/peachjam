@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import F, Window
 from django.db.models.functions import RowNumber
 from django.utils import timezone
+from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
 from .settings import SingletonModel
@@ -189,33 +190,42 @@ class ExtractedCitationContext(models.Model):
     created_at = models.DateField(auto_now_add=True)
 
     @classmethod
-    def create_citation_context(cls, document, citation):
+    def create_citation_context(cls, document, work_frb_uri, citation, a):
         from peachjam.models import Work
 
-        work = Work.objects.filter(frbr_uri=citation.href).first()
+        work = Work.objects.filter(frbr_uri=work_frb_uri).first()
         if not work:
             log.error(
                 "No work found for citation href %s",
                 citation.href,
             )
             return None
+        exact = a.text_content().strip()
+        parent_text = a.getparent().text_content().strip()
+        start = parent_text.find(exact)
+        end = start + len(exact)
+        # if start == -1:
+        #     continue
+        prefix = Truncator(parent_text[:start]).chars(30, truncate="")
+        suffix = Truncator(parent_text[end:]).chars(30, truncate="")
+
         cls.objects.create(
             document=document,
             selectors=[
                 {
                     "type": "TextPositionSelector",
-                    "start": citation.start,
-                    "end": citation.end,
+                    "start": start,
+                    "end": end,
                 },
                 {
                     "type": "TextQuoteSelector",
-                    "exact": citation.text,
-                    "prefix": citation.prefix,
-                    "suffix": citation.suffix,
+                    "exact": exact,
+                    "prefix": prefix,
+                    "suffix": suffix,
                 },
             ],
             target_work=work,
-            target_provision_eid=citation.target_id,
+            target_provision_eid=None,
         )
 
 
