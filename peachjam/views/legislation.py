@@ -6,6 +6,7 @@ from django.db.models.functions.text import Substr
 from django.template.defaultfilters import date as format_date
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
+from django.views.generic import DetailView
 
 from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
 from peachjam.models import (
@@ -393,6 +394,12 @@ class LegislationDetailView(BaseDocumentDetailView):
         )
         # TODO: we're not guaranteed to get documents in the same language, here
         return docs
+
+
+class UncommencedProvisionDetailView(DetailView):
+    model = UncommencedProvision
+    template_name = "peachjam/provision_enrichment/uncommenced_provision_detail.html"
+    context_object_name = "enrichment"
 
 
 class UncommencedProvisionListView(LegislationListView):

@@ -14,6 +14,7 @@ from peachjam.views import (
     PocketLawResources,
     RobotsView,
     TermsOfUsePageView,
+    UncommencedProvisionDetailView,
     UncommencedProvisionListView,
     UnconstitutionalProvisionListView,
 )
@@ -35,6 +36,11 @@ urlpatterns = [
     path("journals/", JournalListView.as_view(), name="journal_list"),
     path("judgments/", include("peachjam.urls.judgments")),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
+    path(
+        "uncommenced-provisions/<int:pk>",
+        UncommencedProvisionDetailView.as_view(),
+        name="uncommenced_provision_detail",
+    ),
     path(
         "uncommenced-provisions/",
         UncommencedProvisionListView.as_view(),
