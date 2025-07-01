@@ -418,7 +418,10 @@ class UncommencedProvisionListView(LegislationListView):
         uncommenced_provision_works = UncommencedProvision.objects.all().values_list(
             "work__id", flat=True
         )
-        qs = qs.filter(work__in=uncommenced_provision_works)
+        # prefetch enrichments to improve performance
+        qs = qs.filter(work__in=uncommenced_provision_works).prefetch_related(
+            "work__enrichments"
+        )
         return qs
 
     def get_context_data(self, **kwargs):
