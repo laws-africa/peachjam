@@ -418,15 +418,12 @@ class UncommencedProvisionListView(LegislationListView):
         uncommenced_provision_works = UncommencedProvision.objects.all().values_list(
             "work__id", flat=True
         )
-        qs = qs.filter(work__in=uncommenced_provision_works).prefetch_related(
-            "work__enrichments"
-        )
+        qs = qs.filter(work__in=uncommenced_provision_works)
         return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["doc_table_show_counts"] = True
-        # grab all the uncommenced provisions from the db once to improve performance
         for doc in context["documents"]:
             doc.provision_enrichments = doc.work.enrichments.instance_of(
                 UncommencedProvision
