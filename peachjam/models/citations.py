@@ -7,7 +7,6 @@ from django.db.models import F, Window
 from django.db.models.functions import RowNumber
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from lxml import html
 
 from .settings import SingletonModel
 
@@ -167,14 +166,14 @@ class ExtractedCitation(models.Model):
 class ExtractedCitationContext(models.Model):
     document = models.ForeignKey(
         "peachjam.CoreDocument",
-        null=False,
         on_delete=models.CASCADE,
         related_name="citation_contexts",
         verbose_name=_("citation context"),
     )
 
     selector_anchor_id = models.CharField(
-        _("target id"), max_length=1024, null=False, blank=False
+        _("target id"),
+        max_length=1024,
     )
     selectors = models.JSONField(verbose_name=_("selectors"))
     target_work = models.ForeignKey(
@@ -185,40 +184,39 @@ class ExtractedCitationContext(models.Model):
         verbose_name=_("target work"),
     )
     target_provision_eid = models.CharField(
-        _("target provision eid"), max_length=1024, null=False, blank=False
+        _("target provision eid"), max_length=1024, null=True
     )
     created_at = models.DateField(auto_now_add=True)
 
-    def extract_citations(self):
-        tree = html.fromstring(self.document.content_html)
-        citation_links = tree.xpath('//a[starts-with(@href, "/akn/")]')
+    @classmethod
+    def create_citation_context(cls, document, citation):
+        from peachjam.models import Work
 
-        results = []
-
-        for link in citation_links:
-            href = link.get("href")
-            anchor_id = self._find_anchor_id(link)
-            context = self._extract_text_context(link)
-
-            # Assemble selector data
-            selectors = {
-                "prefix": context["prefix"],
-                "exact": context["exact"],
-                "suffix": context["suffix"],
-            }
-
-            # Create a dict of what will go into ExtractedCitationContext
-            results.append(
-                {
-                    "selector_anchor_id": anchor_id,
-                    "selectors": selectors,
-                    "from_selectors": selectors,  # assuming same for now
-                    "target_href": href,
-                    "exact_text": context["exact"],
-                }
+        work = Work.objects.filter(frbr_uri=citation.href).first()
+        if not work:
+            log.error(
+                "No work found for citation href %s",
+                citation.href,
             )
-
-        return results
+            return None
+        cls.objects.create(
+            document=document,
+            selectors=[
+                {
+                    "type": "TextPositionSelector",
+                    "start": citation.start,
+                    "end": citation.end,
+                },
+                {
+                    "type": "TextQuoteSelector",
+                    "exact": citation.text,
+                    "prefix": citation.prefix,
+                    "suffix": citation.suffix,
+                },
+            ],
+            target_work=work,
+            target_provision_eid=citation.target_id,
+        )
 
     def _find_anchor_id(self, link):
         # Walk up the tree to find the nearest parent with an id
