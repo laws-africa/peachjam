@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.contrib import messages
-from django.db.models import CharField, Func, Value
+from django.db.models import CharField, Func, Prefetch, Value
 from django.db.models.functions.text import Substr
 from django.template.defaultfilters import date as format_date
 from django.utils.html import mark_safe
@@ -11,6 +11,7 @@ from django.views.generic import DetailView
 from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
 from peachjam.models import (
     Legislation,
+    ProvisionEnrichment,
     UncommencedProvision,
     UnconstitutionalProvision,
     pj_settings,
@@ -420,7 +421,13 @@ class UncommencedProvisionListView(LegislationListView):
         )
         # prefetch enrichments to improve performance
         qs = qs.filter(work__in=uncommenced_provision_works).prefetch_related(
-            "work__enrichments"
+            Prefetch(
+                "work__enrichments",
+                queryset=ProvisionEnrichment.objects.filter(
+                    enrichment_type="uncommenced_provision"
+                ),
+                to_attr="provision_enrichments",
+            )
         )
         return qs
 
@@ -428,9 +435,7 @@ class UncommencedProvisionListView(LegislationListView):
         context = super().get_context_data(**kwargs)
         context["doc_table_show_counts"] = True
         for doc in context["documents"]:
-            doc.provision_enrichments = doc.work.enrichments.instance_of(
-                UncommencedProvision
-            )
+            doc.provision_enrichments = doc.work.provision_enrichments
             # set the document on the enrichment objects so they know to use it for extra detail
             for enrichment in doc.provision_enrichments:
                 enrichment.document = doc
