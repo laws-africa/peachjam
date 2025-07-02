@@ -14,16 +14,18 @@
   <table class="doc-table">
     {% for document in documents %}
       <div class="card mb-4">
-        <h5 class="card-header">
-          <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-        </h5>
-        <ul class="list-group list-group-flush">
-          {% for enrichment in document.provision_enrichments %}
-            <li class="list-group-item">
-              {% include "peachjam/provision_enrichment/_uncommenced_provision_detail.html" with expanded=False %}
-            </li>
-          {% endfor %}
-        </ul>
+        {% with document.get_absolute_url as document_url %}
+          <h5 class="card-header">
+            <a href="{{ document_url }}">{{ document.title }}</a>
+          </h5>
+          <ul class="list-group list-group-flush">
+            {% for enrichment in document.provision_enrichments %}
+              <li class="list-group-item">
+                {% include "peachjam/provision_enrichment/_uncommenced_provision_detail.html" with expanded=False %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endwith %}
       </div>
     {% endfor %}
     {% if not documents %}
