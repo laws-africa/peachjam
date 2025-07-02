@@ -2,13 +2,17 @@
 <h6 class="mb-2 provision-toggle">
   <button type="button"
           class="btn btn-sm bg-none {% if not expanded %}collapsed{% endif %}"
+          hx-get="{% url 'uncommenced_provision_detail' enrichment.pk %}"
+          hx-target="#provision-detail-{{ enrichment.pk }}"
+          hx-swap="innerHTML"
+          hx-trigger="click once"
           data-bs-toggle="collapse"
           data-bs-target="#provision-detail-{{ enrichment.pk }}"
           aria-expanded="{% if expanded %}true{% else %}false{% endif %}"
           aria-controls="provision-detail-{{ enrichment.pk }}">
     <i class="bi"></i>
   </button>
-  <a href="{{ enrichment.document.get_absolute_url }}#{{ enrichment.provision_eid }}"
+  <a href="{{ document.get_absolute_url }}#{{ enrichment.provision_eid }}"
      class="provision-link me-2">{{ enrichment.provision_title }}</a>
 </h6>
 {% if not enrichment.and_all_descendants %}
@@ -21,11 +25,9 @@
 {% endif %}
 <div id="provision-detail-{{ enrichment.pk }}"
      class="collapse {% if expanded %}show{% endif %}">
-  {% if enrichment.provision_by_eid %}
-    <la-akoma-ntoso frbr-expression-uri="{{ enrichment.document.expression_frbr_uri }}" class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;" lang="{{ enrichment.document.language.iso }}">
-    {{ enrichment.provision_by_eid|safe }}
-    </la-akoma-ntoso>
+  {% if expanded %}
+    {% include 'peachjam/provision_enrichment/uncommenced_provision_detail.html' %}
   {% else %}
-    <em>{% trans "No content found" %}</em>
+    <div class="spinner-when-empty"></div>
   {% endif %}
 </div>

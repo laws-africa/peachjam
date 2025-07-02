@@ -6,6 +6,7 @@ from django.db.models.functions.text import Substr
 from django.template.defaultfilters import date as format_date
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
+from django.views.generic import DetailView
 
 from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
 from peachjam.models import (
@@ -395,6 +396,29 @@ class LegislationDetailView(BaseDocumentDetailView):
         return docs
 
 
+class UncommencedProvisionDetailView(DetailView):
+    model = UncommencedProvision
+    template_name = "peachjam/provision_enrichment/uncommenced_provision_detail.html"
+    context_object_name = "enrichment"
+
+
+class DocumentUncommencedProvisionListView(DetailView):
+    model = Legislation
+    template_name = (
+        "peachjam/provision_enrichment/_document_uncommenced_provision_list.html"
+    )
+    context_object_name = "document"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["uncommenced_provisions"] = self.object.work.enrichments.filter(
+            enrichment_type="uncommenced_provision"
+        )
+        for enrichment in context["uncommenced_provisions"]:
+            enrichment.document = self.object
+        return context
+
+
 class UncommencedProvisionListView(LegislationListView):
     template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
     latest_expression_only = True
@@ -417,14 +441,6 @@ class UncommencedProvisionListView(LegislationListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["doc_table_show_counts"] = True
-        for doc in context["documents"]:
-            doc.provision_enrichments = list(
-                UncommencedProvision.objects.filter(work=doc.work)
-            )
-            # set the document on the enrichment objects so they know to use it for extra detail
-            for enrichment in doc.provision_enrichments:
-                enrichment.document = doc
-
         return context
 
 
