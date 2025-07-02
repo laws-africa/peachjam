@@ -60,6 +60,7 @@ jobs:
   deploy-malawilii:
     if: ${{ !contains(github.event.head_commit.message, 'nodeploy') }}
     name: Deploy to malawilii
+    needs: deploy-rwandalii
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -302,7 +303,7 @@ jobs:
   deploy-open-by-laws:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
     name: Deploy to open-by-laws
-    needs: deploy-tcilii
+    needs: deploy-civlii
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -353,7 +354,7 @@ jobs:
   deploy-mauritiuslii:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
     name: Deploy to mauritiuslii
-    needs: deploy-eswatinilii
+    needs: deploy-tcilii
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
