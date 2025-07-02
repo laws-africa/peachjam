@@ -7,6 +7,7 @@ from peachjam.views import (
     AboutPageView,
     AuthorDetailView,
     BookListView,
+    DocumentUncommencedProvisionListView,
     HomePageView,
     JournalListView,
     LegislationListView,
@@ -40,6 +41,11 @@ urlpatterns = [
         "uncommenced-provisions/<int:pk>",
         UncommencedProvisionDetailView.as_view(),
         name="uncommenced_provision_detail",
+    ),
+    path(
+        "document-uncommenced-provisions/<int:pk>",
+        DocumentUncommencedProvisionListView.as_view(),
+        name="document_uncommenced_provision_list",
     ),
     path(
         "uncommenced-provisions/",

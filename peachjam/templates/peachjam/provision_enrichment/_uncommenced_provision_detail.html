@@ -12,7 +12,7 @@
           aria-controls="provision-detail-{{ enrichment.pk }}">
     <i class="bi"></i>
   </button>
-  <a href="{{ document_url }}#{{ enrichment.provision_eid }}"
+  <a href="{{ document.get_absolute_url }}#{{ enrichment.provision_eid }}"
      class="provision-link me-2">{{ enrichment.provision_title }}</a>
 </h6>
 {% if not enrichment.and_all_descendants %}

@@ -14,18 +14,25 @@
   <table class="doc-table">
     {% for document in documents %}
       <div class="card mb-4">
-        {% with document.get_absolute_url as document_url %}
-          <h5 class="card-header">
-            <a href="{{ document_url }}">{{ document.title }}</a>
-          </h5>
-          <ul class="list-group list-group-flush">
-            {% for enrichment in document.provision_enrichments %}
-              <li class="list-group-item">
-                {% include "peachjam/provision_enrichment/_uncommenced_provision_detail.html" with expanded=False %}
-              </li>
-            {% endfor %}
-          </ul>
-        {% endwith %}
+        <h5 class="card-header provision-toggle">
+          <button type="button"
+                  class="btn btn-sm bg-none collapsed"
+                  hx-get="{% url 'document_uncommenced_provision_list' document.pk %}"
+                  hx-target="#document-uncommenced-provisions-{{ document.pk }}"
+                  hx-swap="innerHTML"
+                  hx-trigger="click once"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#document-uncommenced-provisions-{{ document.pk }}"
+                  aria-expanded="false"
+                  aria-controls="document-uncommenced-provisions-{{ document.pk }}">
+            <i class="bi"></i>
+          </button>
+          <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+        </h5>
+        <div id="document-uncommenced-provisions-{{ document.pk }}"
+             class="collapse">
+          <div class="spinner-when-empty"></div>
+        </div>
       </div>
     {% endfor %}
     {% if not documents %}
