@@ -12,7 +12,7 @@
       <li>
         <a href="https://{{ site.domain }}{{ hit.expression_frbr_uri }}">{% if hit.highlight.title %} {{ hit.highlight.title|first|safe }} {% else %} {{ hit.document.title }} {% endif %}</a>
         {% if hit.document.blurb %}<div>{{ hit.document.blurb }}</div>{% endif %}
-        {% if hit.document.flynote %}<div>{{ hit.document.flynote|safe }}</div>{% endif %}
+        {% if hit.document.flynote %}<em>{{ hit.document.flynote|safe }}</em>{% endif %}
         <div>
           {% if hit.highlight.content %}
             <p>{{ hit.highlight.content|safeseq|join:' ... ' }}</p>
