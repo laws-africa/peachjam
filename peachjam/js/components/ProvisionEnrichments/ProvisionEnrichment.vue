@@ -3,7 +3,7 @@
     :anchor.prop="anchorElement"
   >
     <i
-      :class="`bi bi-exclamation-triangle-fill mobile-gutter-item-icon ${mobileIconColour}`"
+      :class="`bi ${icon} mobile-gutter-item-icon ${mobileIconColour}`"
       role="button"
       @click="activate"
     />
@@ -12,7 +12,7 @@
       <div class="card-body">
         <div class="d-flex">
           <div>
-            <i class="bi bi-exclamation-triangle-fill" /> <span
+            <i :class="`bi ${icon}`" /> <span
               v-if="enrichment.enrichment_type==='unconstitutional_provision'">{{ $t('Unconstitutional provision') }}
             </span>
             <span v-else-if="enrichment.enrichment_type==='uncommenced_provision'">{{ $t('Uncommenced provision') }}</span>
@@ -66,6 +66,13 @@ export default {
     anchorElement: null
   }),
   computed: {
+    icon () {
+      if (this.enrichment.enrichment_type === 'unconstitutional_provision' && this.enrichment.resolved) {
+        return 'bi-info-circle-fill';
+      } else {
+        return 'bi-exclamation-triangle-fill';
+      }
+    },
     mobileIconColour () {
       if (this.enrichment.enrichment_type === 'unconstitutional_provision' && !this.enrichment.resolved) {
         return 'text-danger';
