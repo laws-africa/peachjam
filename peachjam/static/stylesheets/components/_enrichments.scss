@@ -12,18 +12,24 @@
   }
 
   .enrich-uncommenced-provision {
-    background-color: transparentize($uncommenced-highlight-color, 0.8);
+    background-color: tint-color($uncommenced-highlight-color, 30%);
 
     &.active {
-      background-color: transparentize($uncommenced-highlight-color, 0.6);
+      background-color: $uncommenced-highlight-color;
     }
   }
 
-  .enrich-unconstitutional-provision {
-    background-color: transparentize($unconstitutional-highlight-color, 0.8);
+  .enrich-unconstitutional-provision-unresolved {
+    background-color: tint-color($unconstitutional-highlight-color, 30%);
 
     &.active {
-      background-color: transparentize($unconstitutional-highlight-color, 0.4);
+      background-color: $unconstitutional-highlight-color;
+    }
+  }
+
+  .enrich-unconstitutional-provision-resolved {
+    &.active {
+      background-color: var(--bs-primary-bg-subtle);
     }
   }
 
