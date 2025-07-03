@@ -60,7 +60,7 @@ jobs:
   deploy-malawilii:
     if: ${{ !contains(github.event.head_commit.message, 'nodeploy') }}
     name: Deploy to malawilii
-    needs: deploy-rwandalii
+    needs: deploy-nigerialii
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -337,7 +337,7 @@ jobs:
   deploy-rwandalii:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
     name: Deploy to rwandalii
-    needs: deploy-nigerialii
+    needs: deploy-zanzibarlii
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
