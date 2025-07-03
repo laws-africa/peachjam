@@ -262,7 +262,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb1.africanlii.org:22/tanzlii-peachjam'
+          git_remote_url: 'ssh://dokku@web2.laws.africa:22/tanzlii-peachjam'
           git_push_flags: '--force'
 
   deploy-eswatinilii:
