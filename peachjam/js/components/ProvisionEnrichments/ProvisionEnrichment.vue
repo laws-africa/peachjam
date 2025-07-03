@@ -8,7 +8,7 @@
       @click="activate"
     />
     <!-- TODO: introduce and use a card-alert class -->
-    <div :class="`card gutter-item-card alert ${alertLevel} p-0`">
+    <div :class="`card gutter-item-card ${alertLevel}`">
       <div class="card-body">
         <div class="d-flex">
           <div>
@@ -84,12 +84,12 @@ export default {
     },
     alertLevel () {
       if (this.enrichment.enrichment_type === 'unconstitutional_provision' && !this.enrichment.resolved) {
-        return 'alert-danger';
+        return 'alert alert-danger p-0';
       } else if (this.enrichment.enrichment_type === 'uncommenced_provision') {
-        return 'alert-warning';
+        return 'alert alert-warning p-0';
       }
-      // for resolved unconstitutional provisions / the default
-      return 'alert-primary';
+      // for resolved unconstitutional provisions / the default, just use a normal card
+      return null;
     }
   },
   mounted () {
