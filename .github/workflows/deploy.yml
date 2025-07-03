@@ -93,7 +93,7 @@ jobs:
 
   deploy-zanzibarlii:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
-    needs: deploy-gazettes
+    needs: deploy-tcilii
     name: Deploy to zanzibarlii
     runs-on: ubuntu-latest
     steps:
@@ -127,7 +127,7 @@ jobs:
 
   deploy-zambialii:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
-    needs: deploy-zanzibarlii
+    needs: deploy-gazettes
     name: Deploy to zambialii
     runs-on: ubuntu-latest
     steps:
@@ -354,7 +354,7 @@ jobs:
   deploy-mauritiuslii:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
     name: Deploy to mauritiuslii
-    needs: deploy-tcilii
+    needs: deploy-lesotholii
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
