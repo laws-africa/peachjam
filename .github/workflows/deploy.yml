@@ -200,7 +200,7 @@ jobs:
 
   deploy-sierralii:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
-    needs: deploy-namiblii
+    needs: deploy-rwandalii
     name: Deploy to sierralii
     runs-on: ubuntu-latest
     steps:
@@ -212,7 +212,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web3.laws.africa:22/sierralii-peachjam'
+          git_remote_url: 'ssh://dokku@web2.laws.africa:22/sierralii-peachjam'
           git_push_flags: '--force'
 
   deploy-zimlii:
@@ -280,7 +280,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web3.laws.africa:22/eswatinilii-peachjam'
+          git_remote_url: 'ssh://dokku@web2.laws.africa:22/eswatinilii-peachjam'
           git_push_flags: '--force'
 
   deploy-nigerialii:
