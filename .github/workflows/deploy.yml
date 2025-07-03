@@ -22,7 +22,7 @@ jobs:
       uses: dokku/github-action@master
       with:
         ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-        git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/agp'
+        git_remote_url: 'ssh://dokku@web3.laws.africa:22/agp'
         git_push_flags: '--force'
 
   deploy-lawlibrary:
@@ -38,7 +38,7 @@ jobs:
       uses: dokku/github-action@master
       with:
         ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-        git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/lawlibrary-peachjam'
+        git_remote_url: 'ssh://dokku@web3.laws.africa:22/lawlibrary-peachjam'
         git_push_flags: '--force'
 
   deploy-ulii:
@@ -54,7 +54,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb1.africanlii.org:22/ulii-peachjam'
+          git_remote_url: 'ssh://dokku@web2.laws.africa:22/ulii-peachjam'
           git_push_flags: '--force'
 
   deploy-malawilii:
@@ -71,7 +71,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/malawilii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/malawilii-peachjam'
           git_push_flags: '--force'
 
   deploy-gazettes:
@@ -88,7 +88,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/gazettes'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/gazettes'
           git_push_flags: '--force'
 
   deploy-zanzibarlii:
@@ -105,7 +105,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/zanzibarlii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/zanzibarlii-peachjam'
           git_push_flags: '--force'
 
   deploy-ghalii:
@@ -122,7 +122,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/ghalii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/ghalii-peachjam'
           git_push_flags: '--force'
 
   deploy-zambialii:
@@ -139,7 +139,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/zambialii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/zambialii-peachjam'
           git_push_flags: '--force'
 
 
@@ -158,7 +158,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/namiblii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/namiblii-peachjam'
           git_push_flags: '--force'
 
 
@@ -176,7 +176,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/seylii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/seylii-peachjam'
           git_push_flags: '--force'
 
 
@@ -194,7 +194,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/lesotholii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/lesotholii-peachjam'
           git_push_flags: '--force'
 
 
@@ -212,7 +212,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/sierralii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/sierralii-peachjam'
           git_push_flags: '--force'
 
   deploy-zimlii:
@@ -229,13 +229,13 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/zimlii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/zimlii-peachjam'
           git_push_flags: '--force'
 
   deploy-tcilii:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
     name: Deploy to tcilii
-    needs: deploy-lesotholii
+    needs: deploy-tanzlii
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -246,7 +246,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/tcilii-peachjam'
+          git_remote_url: 'ssh://dokku@web2.laws.africa:22/tcilii-peachjam'
           git_push_flags: '--force'
 
   deploy-tanzlii:
@@ -263,7 +263,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb1.africanlii.org:22/tanzlii-peachjam'
+          git_remote_url: 'ssh://dokku@web2.laws.africa:22/tanzlii-peachjam'
           git_push_flags: '--force'
 
   deploy-eswatinilii:
@@ -280,7 +280,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/eswatinilii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/eswatinilii-peachjam'
           git_push_flags: '--force'
 
   deploy-nigerialii:
@@ -297,7 +297,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/nigerialii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/nigerialii-peachjam'
           git_push_flags: '--force'
 
   deploy-open-by-laws:
@@ -314,7 +314,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/open-by-laws'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/open-by-laws'
           git_push_flags: '--force'
 
   deploy-obl-microsites:
@@ -331,7 +331,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/obl-microsites'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/obl-microsites'
           git_push_flags: '--force'
 
   deploy-rwandalii:
@@ -348,7 +348,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/rwandalii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/rwandalii-peachjam'
           git_push_flags: '--force'
 
   deploy-mauritiuslii:
@@ -365,7 +365,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/mauritiuslii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/mauritiuslii-peachjam'
           git_push_flags: '--force'
 
   deploy-civlii:
@@ -382,5 +382,5 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@liiweb2.africanlii.org:22/civlii-peachjam'
+          git_remote_url: 'ssh://dokku@.web3.laws.africa:22/civlii-peachjam'
           git_push_flags: '--force'
