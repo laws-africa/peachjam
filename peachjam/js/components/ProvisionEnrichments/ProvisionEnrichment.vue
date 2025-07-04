@@ -3,20 +3,19 @@
     :anchor.prop="anchorElement"
   >
     <i
-      :class="`bi ${icon} mobile-gutter-item-icon`"
+      :class="`bi ${icon} mobile-gutter-item-icon ${mobileIconColour}`"
       role="button"
       @click="activate"
     />
-    <div class="card gutter-item-card">
+    <!-- TODO: introduce and use a card-alert class -->
+    <div :class="`card gutter-item-card ${alertLevel}`">
       <div class="card-body">
         <div class="d-flex">
-          <div v-if="enrichment.enrichment_type==='unconstitutional_provision'">
-            <i :class="`bi ${icon}`" />
-            {{ $t('Unconstitutional provision') }}
-          </div>
-          <div v-else-if="enrichment.enrichment_type==='uncommenced_provision'">
-            <i :class="`bi ${icon}`" />
-            {{ $t('Uncommenced provision') }}
+          <div>
+            <i :class="`bi ${icon}`" /> <span
+              v-if="enrichment.enrichment_type==='unconstitutional_provision'">{{ $t('Unconstitutional provision') }}
+            </span>
+            <span v-else-if="enrichment.enrichment_type==='uncommenced_provision'">{{ $t('Uncommenced provision') }}</span>
           </div>
           <button
             type="button"
@@ -68,13 +67,29 @@ export default {
   }),
   computed: {
     icon () {
-      switch (this.enrichment.enrichment_type) {
-        case 'unconstitutional_provision':
-          return 'bi-journal-x';
-        case 'uncommenced_provision':
-          return 'bi-lightbulb-off';
+      if (this.enrichment.enrichment_type === 'unconstitutional_provision' && this.enrichment.resolved) {
+        return 'bi-info-circle-fill';
+      } else {
+        return 'bi-exclamation-triangle-fill';
       }
-      return '';
+    },
+    mobileIconColour () {
+      if (this.enrichment.enrichment_type === 'unconstitutional_provision' && !this.enrichment.resolved) {
+        return 'text-danger';
+      } else if (this.enrichment.enrichment_type === 'uncommenced_provision') {
+        return 'text-warning';
+      }
+      // the default uses --bs-primary
+      return null;
+    },
+    alertLevel () {
+      if (this.enrichment.enrichment_type === 'unconstitutional_provision' && !this.enrichment.resolved) {
+        return 'alert alert-danger p-0';
+      } else if (this.enrichment.enrichment_type === 'uncommenced_provision') {
+        return 'alert alert-warning p-0';
+      }
+      // for resolved unconstitutional provisions / the default, just use a normal card
+      return null;
     }
   },
   mounted () {
@@ -96,7 +111,11 @@ export default {
       this.anchorElement = document.querySelector(`[data-eid="${this.enrichment.provision_eid}"`);
       if (this.anchorElement) {
         if (this.enrichment.enrichment_type === 'unconstitutional_provision') {
-          this.anchorElement.classList.add('enrich', 'enrich-unconstitutional-provision');
+          if (!this.enrichment.resolved) {
+            this.anchorElement.classList.add('enrich', 'enrich-unconstitutional-provision-unresolved');
+          } else {
+            this.anchorElement.classList.add('enrich', 'enrich-unconstitutional-provision-resolved');
+          }
         } else if (this.enrichment.enrichment_type === 'uncommenced_provision') {
           this.anchorElement.classList.add('enrich', 'enrich-uncommenced-provision');
         }

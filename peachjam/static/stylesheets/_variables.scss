@@ -16,8 +16,8 @@ $linkedin-color: #0a66c2 !default;
 $envelope-at-fill-color: #6c757d !default;
 $youtube-color: #FF0000 !default;
 $anntn-highlight-color: #a68bdc !default;
-$uncommenced-highlight-color: #ced4da !default;
-$unconstitutional-highlight-color: #FF5555 !default;
+$uncommenced-highlight-color: #fff3cd !default; // --bs-warning-bg-subtle from data-bs-theme=light
+$unconstitutional-highlight-color: #f8d7da !default; // --bs-danger-bg-subtle from data-bs-theme=light
 $diff-green-color: #a6f3a6 !default;
 $diff-red-color: #f8cbcb !default;
 $visited-link: #1A77F2 !default;

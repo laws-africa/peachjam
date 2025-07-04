@@ -162,7 +162,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                         "type": messages.WARNING,
                         "html": _(
                             "This %(friendly_type)s has not yet come into force in full."
-                            " See the Document detail tab for more information."
+                            " See the Uncommenced provisions tab for more information."
                         )
                         % {"friendly_type": friendly_type},
                     }
