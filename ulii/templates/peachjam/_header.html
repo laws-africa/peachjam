@@ -35,28 +35,47 @@
     </a>
   </li>
   <li class="nav-item dropdown main-nav">
-    <a href="#"
-       class="nav-link dropdown-toggle"
+    <a class="nav-link dropdown-toggle"
+       href="#"
        role="button"
        data-bs-toggle="dropdown"
        aria-expanded="false">
-      {% trans 'East African Community' %}
+      {% trans 'African Union and EAC' %}
     </a>
     <ul class="dropdown-menu">
       <li class="dropdown-item">
-        <a href="{% url 'court' 'EACJ' %}"
-           class="nav-link {% if 'EACJ' in request.path %}active{% endif %}">{% trans 'East African Court of Justice' %}</a>
+        <a class=" nav-link px-0 {% if 'aa-eac' in request.path %}active{% endif %}"
+           href="{% url 'place' 'aa-eac' %}">{% trans 'East African Community (EAC)' %}
+        </a>
       </li>
       <li class="dropdown-item">
-        <a href="{% url 'court' 'EACA' %}"
-           class="nav-link {% if 'EACA' in request.path %}active{% endif %}">{% trans 'East African Court of Appeal' %}</a>
+        <a class=" nav-link px-0 {% if 'EACJ' in request.path %}active{% endif %}"
+           href="{% url 'court' 'EACJ' %}">{% trans 'East African Court of Justice' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if 'EACA' in request.path %}active{% endif %}"
+           href="{% url 'court' 'EACA' %}">{% trans 'East African Court of Appeal' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if 'afchpr' in request.path %}active{% endif %}"
+           href="{% url 'court' 'AfCHPR' %}">
+          {% trans "African Court of Human and People's Rights" %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link px-0 {% if 'achpr' in request.path %}active{% endif %}"
+           href="{% url 'court' 'ACHPR' %}">
+          {% trans "African Commission on Human and People's Rights" %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if 'aa-au' in request.path %}active{% endif %}"
+           href="{% url 'locality_legislation_list' 'aa-au' %}">
+          {% trans 'AU Charters and Treaties' %}
+        </a>
       </li>
     </ul>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'about' %}active{% endif %}"
-       href="{% url 'about' %}">
-      {% trans 'About' %}
-    </a>
   </li>
 {% endblock %}

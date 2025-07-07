@@ -4,7 +4,6 @@ import { IRangeTarget } from '@lawsafrica/indigo-akn/dist/ranges';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { vueI18n } from '../../i18n';
 import { ComponentPublicInstance } from 'vue';
-import i18next from 'i18next';
 
 export class ProvisionEnrichments implements IGutterEnrichmentProvider {
     root: HTMLElement;
@@ -17,7 +16,7 @@ export class ProvisionEnrichments implements IGutterEnrichmentProvider {
       this.root = root;
       this.manager = manager;
       this.gutter = root.querySelector('la-gutter');
-      const node = document.getElementById('unconstitutional-provisions-json');
+      const node = document.getElementById('provision-enrichments-json');
       if (node) {
         this.enrichments = JSON.parse(node.innerText || '[]');
       } else {

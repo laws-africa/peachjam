@@ -1,0 +1,18 @@
+{% load peachjam i18n %}
+<h4 class="mb-3">
+  <i class="bi bi-pj bi-exclamation-triangle-fill"></i>
+  {% trans 'Uncommenced provisions' %}
+</h4>
+<div class="mb-4">
+  {% include "peachjam/provision_enrichment/_uncommenced_provisions_blurb.html" %}
+  <a href="{% url "uncommenced_provision_list" %}">{% trans "All uncommenced provisions" %} →</a>
+</div>
+<div class="card">
+  <ul class="list-group list-group-flush">
+    {% for enrichment in uncommenced_provisions %}
+      <li class="list-group-item">
+        {% include "peachjam/provision_enrichment/_uncommenced_provision_detail.html" with expanded=True %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>

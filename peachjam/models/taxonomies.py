@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
@@ -7,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from guardian.shortcuts import get_objects_for_user
 from treebeard.mp_tree import MP_Node
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, EntityProfile
 
 
 class Taxonomy(MP_Node):
@@ -56,12 +57,29 @@ class Taxonomy(MP_Node):
     def get_entity_profile(self):
         """Get the entity profile for this taxonomy, starting with the current taxonomy and then
         looking up the tree until one is found."""
-        entity_profile = self.entity_profile.first()
-        if entity_profile:
-            return entity_profile
-        if self.is_root():
-            return None
-        return self.get_parent().get_entity_profile()
+        if self.entity_profile.exists():
+            return self.entity_profile.first()
+
+        ancestors = list(self.get_ancestors())
+        taxonomy_ids = [t.id for t in ancestors]
+
+        # Load all matching entity profiles in one go
+        taxonomy_ct = ContentType.objects.get_for_model(Taxonomy)
+        profiles = EntityProfile.objects.filter(
+            content_type=taxonomy_ct, object_id__in=taxonomy_ids
+        )
+
+        # Map: taxonomy ID -> profile
+        profile_map = {p.object_id: p for p in profiles}
+
+        # Walk up the hierarchy from self to root
+        for tax in reversed(ancestors):
+            if profile := profile_map.get(
+                tax.id
+            ):  # walrus operator: check and assign in one line :)
+                return profile
+
+        return None
 
     def update_slug(self):
         old_slug = self.slug

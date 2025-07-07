@@ -125,6 +125,10 @@
       </dt>
       <dd>
         {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
+        {% if document.flynote %}
+          <h6>{% trans 'Flynote' %}</h6>
+          <div class="mb-2 fst-italic">{{ document.flynote|safe }}</div>
+        {% endif %}
         <details>
           <summary class="mb-1">
             {% trans 'Read full summary' %}
@@ -163,14 +167,6 @@
             </p>
           {% endif %}
         </details>
-      </dd>
-    {% endif %}
-    {% if document.flynote %}
-      <dt>
-        {% trans 'Flynote' %}
-      </dt>
-      <dd>
-        {{ document.flynote|safe }}
       </dd>
     {% endif %}
   </dl>

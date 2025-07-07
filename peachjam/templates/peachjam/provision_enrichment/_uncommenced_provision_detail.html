@@ -1,0 +1,33 @@
+{% load i18n %}
+<h6 class="mb-2 provision-toggle">
+  <button type="button"
+          class="btn btn-sm bg-none {% if not expanded %}collapsed{% endif %}"
+          hx-get="{% url 'uncommenced_provision_detail' enrichment.pk %}"
+          hx-target="#provision-detail-{{ enrichment.pk }}"
+          hx-swap="innerHTML"
+          hx-trigger="click once"
+          data-bs-toggle="collapse"
+          data-bs-target="#provision-detail-{{ enrichment.pk }}"
+          aria-expanded="{% if expanded %}true{% else %}false{% endif %}"
+          aria-controls="provision-detail-{{ enrichment.pk }}">
+    <i class="bi"></i>
+  </button>
+  <a href="{{ document.get_absolute_url }}#{{ enrichment.provision_eid }}"
+     class="provision-link me-2">{{ enrichment.provision_title }}</a>
+</h6>
+{% if not enrichment.and_all_descendants %}
+  <div class="my-2">
+    <i class="bi bi-exclamation-triangle"></i>
+    {% blocktrans %}
+      Note: this provision has some subprovisions that have already come into force.
+    {% endblocktrans %}
+  </div>
+{% endif %}
+<div id="provision-detail-{{ enrichment.pk }}"
+     class="collapse {% if expanded %}show{% endif %}">
+  {% if expanded %}
+    {% include 'peachjam/provision_enrichment/uncommenced_provision_detail.html' %}
+  {% else %}
+    <div class="spinner-when-empty"></div>
+  {% endif %}
+</div>

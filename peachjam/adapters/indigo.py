@@ -30,6 +30,7 @@ from peachjam.models import (
     ProvisionEnrichment,
     Relationship,
     Taxonomy,
+    UncommencedProvision,
     UnconstitutionalProvision,
     Work,
 )
@@ -381,7 +382,7 @@ class IndigoAdapter(RequestsAdapter):
         logger.info(
             f"Deleting {work.enrichments.count()} existing provision enrichments for {work}"
         )
-        ProvisionEnrichment.objects.filter(work=work).delete()
+        ProvisionEnrichment.objects.filter(work=work).non_polymorphic().delete()
         enrichments = self.client_get(f"{url}/provision-enrichments.json").json()
         if enrichments and "enrichments" in enrichments:
             for enrichment in enrichments["enrichments"]:
@@ -394,6 +395,8 @@ class IndigoAdapter(RequestsAdapter):
                         kwargs[key] = value
                 if kwargs["enrichment_type"] == "unconstitutional_provision":
                     UnconstitutionalProvision.objects.create(**kwargs)
+                elif kwargs["enrichment_type"] == "uncommenced_provision":
+                    UncommencedProvision.objects.create(**kwargs)
                 # add other subclasses here too before finally creating a vanilla enrichment
                 else:
                     ProvisionEnrichment.objects.create(**kwargs)
