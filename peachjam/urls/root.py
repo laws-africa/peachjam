@@ -84,6 +84,8 @@ urlpatterns = [
     ),
     path("stats", MetabaseStatsView.as_view(), name="metabase_stats"),
     path("terms-of-use/", TermsOfUsePageView.as_view(), name="terms_of_use"),
+    # offline documents
+    path("", include("peachjam.urls.offline")),
     # admin
     path("admin/", include("peachjam.urls.admin")),
     path("comments/", include("peachjam.urls.comments")),
