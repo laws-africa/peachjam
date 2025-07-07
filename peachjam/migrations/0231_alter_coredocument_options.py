@@ -5,9 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam", "0228_remove_judgment_case_summary_ai"),
-    ]
+    dependencies = [("peachjam", "0230_uncommencedprovision_and_more")]
 
     operations = [
         migrations.AlterModelOptions(

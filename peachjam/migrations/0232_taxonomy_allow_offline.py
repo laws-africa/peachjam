@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam", "0229_alter_coredocument_options"),
-    ]
+    dependencies = [("peachjam", "0231_alter_coredocument_options")]
 
     operations = [
         migrations.AddField(
