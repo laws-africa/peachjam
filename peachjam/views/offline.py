@@ -4,6 +4,7 @@ from math import ceil
 
 from django.conf import settings
 from django.http.response import FileResponse, JsonResponse
+from django.urls.base import reverse
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 
@@ -83,6 +84,10 @@ class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
             for image in doc.images.all():
                 urls.append(doc.get_absolute_url() + "/media/" + image.filename)
 
-        # TODO: PDF urls if necessary
+            if not doc.content_html:
+                # PDF
+                urls.append(
+                    reverse("document_source_pdf", args=[doc.expression_frbr_uri[1:]])
+                )
 
         return urls
