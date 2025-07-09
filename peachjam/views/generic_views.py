@@ -565,6 +565,12 @@ class BaseDocumentDetailView(DetailView):
         for provision in unconstitutional_provisions:
             provision.document = self.object
 
+        if not unconstitutional_provisions:
+            unconstitutional_provisions = list(
+                UnconstitutionalProvision.objects.filter(judgment=self.object.work)
+            )
+            context["judgment_view"] = True
+
         context["unconstitutional_provisions"] = unconstitutional_provisions
         unconstitutional_provisions_json = UnconstitutionalProvisionsSerializer(
             unconstitutional_provisions, many=True
