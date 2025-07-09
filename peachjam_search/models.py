@@ -103,11 +103,28 @@ class SavedSearch(models.Model):
     last_alerted_at = models.DateTimeField(null=True, blank=True, auto_now_add=True)
 
     def __str__(self):
-        s = self.q
+        s = self.pretty_query()
         f = self.pretty_filters()
         if f:
             s = f"{s} ({f})"
         return s
+
+    def pretty_query(self):
+        s = ""
+        try:
+            from ast import literal_eval
+
+            a = literal_eval(self.q)
+            for query in a:
+                condition = query["condition"] if "condition" in query else ""
+                if query["fields"][0] == "all":
+                    s += f"{condition} {query['text']} "
+                else:
+                    s += f"{condition} {query['text']} in fields {query['fields']} "
+        except ValueError:
+            s = self.q
+
+        return s.strip()
 
     def get_filters_dict(self):
         filters = dict(QueryDict(self.filters).lists())
@@ -138,7 +155,10 @@ class SavedSearch(models.Model):
 
     def get_absolute_url(self):
         filters = self.get_filters_dict()
-        filters["q"] = self.q
+        if self.q.startswith("["):
+            filters["a"] = self.q
+        else:
+            filters["q"] = self.q
         return reverse("search:search") + "?" + urlencode(filters, doseq=True)
 
     def update_and_alert(self):

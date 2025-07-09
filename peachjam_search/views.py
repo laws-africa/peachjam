@@ -311,7 +311,8 @@ class SavedSearchButtonView(AllowSavedSearchesMixin, TemplateView):
             params.pop("page", None)
 
             q = params.pop("q", "")
-            q = q[0] if q else ""
+            a = params.pop("a", "")
+            q = q[0] if q else (a[0] if a else "")
             filters = SavedSearch(
                 filters=urlencode(params, doseq=True)
             ).get_sorted_filters_string()
