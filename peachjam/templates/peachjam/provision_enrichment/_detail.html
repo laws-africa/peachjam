@@ -12,12 +12,19 @@
 </h6>
 {% if enrichment.text %}<div class="my-2">{{ enrichment.text|linebreaks }}</div>{% endif %}
 <dl class="document-metadata-list d-flex mb-3">
-  {% if enrichment.judgment %}
+  {% if enrichment.judgment and not judgment_view %}
     <dt>
       {% trans 'Judgment' %}
     </dt>
     <dd>
       <a href="{{ enrichment.judgment.documents.latest_expression.first.get_absolute_url }}">{{ enrichment.judgment.documents.latest_expression.first.title }}</a>
+    </dd>
+  {% elif judgment_view %}
+    <dt>
+      {% trans 'Legislation' %}
+    </dt>
+    <dd>
+      <a href="{{ enrichment.work.documents.latest_expression.first.get_absolute_url }}">{{ enrichment.work.documents.latest_expression.first.title }}</a>
     </dd>
   {% endif %}
   {% if enrichment.date_deemed_unconstitutional %}
