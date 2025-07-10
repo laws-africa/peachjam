@@ -182,7 +182,7 @@ export class OfflineManager {
     inventory.documents.push(doc);
   }
 
-  async makeTaxonomyAvailableOffline (id: string) {
+  async * makeTaxonomyAvailableOffline (id: string) {
     this.registerServiceWorker();
     console.log(`Making taxonomy ${id} available offline...`);
 
@@ -199,11 +199,6 @@ export class OfflineManager {
           ...manifest.documents.map((doc: OfflineDocument) => doc.url)
         ];
 
-        const cache = await this.getCache();
-        console.log('Caching urls for offline:', urls);
-        await cache.addAll(urls);
-        console.log('Cached URLs');
-
         const inventory = this.getInventory();
         this.addTopicToInventory(inventory, {
           id,
@@ -214,12 +209,30 @@ export class OfflineManager {
           checkedAt: new Date().toISOString()
         });
         this.saveInventory(inventory);
+
+        const cache = await this.getCache();
+        console.log('Caching urls for offline:', urls);
+
+        let completed = 0;
+        for (const url of urls) {
+          try {
+            await cache.add(url);
+            completed++;
+            yield { url, completed, total: urls.length, success: true };
+          } catch (e) {
+            console.error(`Failed to cache URL: ${url}`, e);
+            yield { url, completed, total: urls.length, success: false };
+          }
+        }
+
+        console.log('Cached URLs');
       }
     } catch (e) {
       console.error('Failed to fetch taxonomy manifest: ', e);
     }
 
     console.log(`Taxonomy ${id} is now available offline.`);
+    yield { completed: 1, total: 1, success: true, finished: true };
   }
 
   /**

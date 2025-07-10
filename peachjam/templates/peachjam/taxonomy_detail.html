@@ -23,6 +23,7 @@
                 <li>
                   <button class="dropdown-item"
                           data-component="OfflineTaxonomyButton"
+                          data-status=".offline-taxonomy-status"
                           data-taxonomy="{{ offline_taxonomy.pk }}">
                     {% trans "Make available offline" %}
                   </button>
@@ -35,6 +36,7 @@
           {% endif %}
         {% endblock %}
       </div>
+      {% if offline_taxonomy and perms.peachjam.offline %}<div class="offline-taxonomy-status my-3"></div>{% endif %}
     </div>
   {% endif %}
 {% endblock %}
