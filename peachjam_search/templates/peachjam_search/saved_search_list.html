@@ -11,7 +11,7 @@
       {% for search in saved_searches %}
         <li class="list-group-item d-flex align-items-center">
           <i class="bi bi-search me-2"></i>
-          <div class="flex-grow-1 row">
+          <div class="flex-grow-1 row align-items-center">
             <div class="col-md">
               <a href="{{ search.get_absolute_url }}">{{ search }}</a>
               {% if search.note %}<div class="text-muted">{{ search.note }}</div>{% endif %}

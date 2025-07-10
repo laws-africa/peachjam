@@ -93,7 +93,8 @@ class SearchClick(models.Model):
 
 
 class SavedSearch(models.Model):
-    q = models.CharField(max_length=4098)
+    q = models.CharField(max_length=4098, null=True, blank=True)
+    a = models.CharField(max_length=4098, null=True, blank=True)
     filters = models.CharField(max_length=4098, null=True, blank=True)
     note = models.TextField(null=True, blank=True)
     user = models.ForeignKey(
@@ -101,6 +102,14 @@ class SavedSearch(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     last_alerted_at = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(q__isnull=False) | models.Q(a__isnull=False),
+                name="at_least_one_field_not_null",
+            )
+        ]
 
     def __str__(self):
         s = self.pretty_query()
@@ -111,17 +120,17 @@ class SavedSearch(models.Model):
 
     def pretty_query(self):
         s = ""
-        try:
+        if self.a:
             from ast import literal_eval
 
-            a = literal_eval(self.q)
+            a = literal_eval(self.a)
             for query in a:
                 condition = query["condition"] if "condition" in query else ""
                 if query["fields"][0] == "all":
-                    s += f"{condition} {query['text']} "
+                    s += f"{condition} {query['text']} in any field "
                 else:
-                    s += f"{condition} {query['text']} in fields {query['fields']} "
-        except ValueError:
+                    s += f"{condition} {query['text']} in {query['fields']} "
+        else:
             s = self.q
 
         return s.strip()
@@ -129,6 +138,7 @@ class SavedSearch(models.Model):
     def get_filters_dict(self):
         filters = dict(QueryDict(self.filters).lists())
         filters.pop("q", None)
+        filters.pop("a", None)
         filters.pop("page", None)
         return filters
 
@@ -155,8 +165,8 @@ class SavedSearch(models.Model):
 
     def get_absolute_url(self):
         filters = self.get_filters_dict()
-        if self.q.startswith("["):
-            filters["a"] = self.q
+        if self.a:
+            filters["a"] = self.a
         else:
             filters["q"] = self.q
         return reverse("search:search") + "?" + urlencode(filters, doseq=True)
@@ -180,7 +190,7 @@ class SavedSearch(models.Model):
                     params.appendlist(key, value)  # Append multiple values
             else:
                 params[key] = values
-        params["search"] = self.q
+        params["search"] = self.q if self.q else self.a
 
         engine = SearchEngine()
         engine.page_size = 20
