@@ -121,9 +121,9 @@ class SavedSearch(models.Model):
     def pretty_query(self):
         s = ""
         if self.a:
-            from ast import literal_eval
+            import json
 
-            a = literal_eval(self.a)
+            a = json.loads(self.a)
             for query in a:
                 condition = query["condition"] if "condition" in query else ""
                 if query["fields"][0] == "all":
