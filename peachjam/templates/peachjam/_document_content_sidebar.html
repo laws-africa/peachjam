@@ -10,6 +10,18 @@ and #navigation-column for desktop screensize.
   <div class="navigation__inner">
     <nav>
       <div class="nav nav-tabs" id="navigation-tab" role="tablist">
+        {% if document.doc_type == "judgment" and document.case_summary %}
+          <button class="nav-link"
+                  id="doc-summary-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#doc-summary"
+                  type="button"
+                  role="tab"
+                  aria-controls="nav-sum"
+                  aria-selected="true">
+            {% trans 'Summary' %}
+          </button>
+        {% endif %}
         {% if display_type == 'akn' or display_type == 'html' %}
           <button class="nav-link d-none"
                   id="toc-tab"
@@ -18,7 +30,7 @@ and #navigation-column for desktop screensize.
                   type="button"
                   role="tab"
                   aria-controls="nav-toc"
-                  aria-selected="true">
+                  aria-selected="{% if document.doc_type == "judgment" and document.case_summary %} false {% else %} true {% endif %}">
             {% trans 'Table of contents' %}
           </button>
         {% endif %}
@@ -30,7 +42,7 @@ and #navigation-column for desktop screensize.
                   type="button"
                   role="tab"
                   aria-controls="nav-toc"
-                  aria-selected="true">
+                  aria-selected="{% if document.doc_type == "judgment" and document.case_summary %} false {% else %} true {% endif %}">
             {% trans 'Pages' %}
           </button>
         {% endif %}
@@ -62,6 +74,14 @@ and #navigation-column for desktop screensize.
              aria-labelledby="toc-tab">
           <aside class="toc">
           </aside>
+        </div>
+      {% endif %}
+      {% if document.doc_type == "judgment" and document.case_summary %}
+        <div class="tab-pane"
+             id="doc-summary"
+             role="tabpanel"
+             aria-labelledby="doc-summary">
+          <div class="p-3">{% include 'peachjam/_judgment_summary.html' %}</div>
         </div>
       {% endif %}
       {% if display_type == 'pdf' %}

@@ -58,10 +58,14 @@ class DocumentContent {
     const tocTabTriggerEl = this.root.querySelector('#toc-tab');
     const searchTabTriggerEl = this.root.querySelector('#navigation-search-tab');
     const pdfPreviewsTabTriggerEl = this.root.querySelector('#pdf-previews-tab');
+    const summaryTabTriggerEl = this.root.querySelector('#doc-summary-tab');
     const tocCreated = this.setupToc();
 
     // If toc setup and mounted successfully, activate toc tab otherwise activate search tab
-    if (tocCreated && tocTabTriggerEl) {
+    if (summaryTabTriggerEl) {
+      const tocTab = new window.bootstrap.Tab(summaryTabTriggerEl);
+      tocTab.show();
+    } else if (tocCreated && tocTabTriggerEl) {
       tocTabTriggerEl.classList.remove('d-none');
       const tocTab = new window.bootstrap.Tab(tocTabTriggerEl);
       tocTab.show();
