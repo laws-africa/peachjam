@@ -5,6 +5,7 @@
           id="saved-search-create"
           hx-post="{% url 'search:saved_search_create' %}">
       <input type="hidden" name="q" value="{{ saved_search.q }}"/>
+      <input type="hidden" name="a" value="{{ saved_search.a }}"/>
       <input type="hidden" name="filters" value="{{ saved_search.filters }}"/>
     </form>
   {% endif %}

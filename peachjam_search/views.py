@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.http import HttpResponseRedirect, QueryDict
 from django.http.response import (
     Http404,
@@ -311,12 +312,14 @@ class SavedSearchButtonView(AllowSavedSearchesMixin, TemplateView):
             params.pop("page", None)
 
             q = params.pop("q", "")
+            a = params.pop("a", "")
             q = q[0] if q else ""
+            a = a[0] if a else ""
             filters = SavedSearch(
                 filters=urlencode(params, doseq=True)
             ).get_sorted_filters_string()
             saved_search = SavedSearch.objects.filter(
-                user=self.request.user, q=q, filters=filters
+                Q(q=q) | Q(a=a), user=self.request.user, filters=filters
             ).first()
             if saved_search:
                 # already exists, the update view handles editing
@@ -330,6 +333,7 @@ class SavedSearchButtonView(AllowSavedSearchesMixin, TemplateView):
                     "saved_search": SavedSearch(
                         user=self.request.user,
                         q=q,
+                        a=a,
                         filters=filters,
                     )
                 }
@@ -365,6 +369,7 @@ class SavedSearchCreateView(BaseSavedSearchFormView, CreateView):
         instance.user = self.request.user
         instance.last_alerted_at = now()
         instance.q = self.request.GET.get("q", "")
+        instance.a = self.request.GET.get("a", "")
         instance.filters = self.request.GET.urlencode()
         instance.filters = instance.get_sorted_filters_string()
         kwargs["instance"] = instance
