@@ -1,3 +1,4 @@
+import json
 import logging
 import uuid
 from datetime import timedelta
@@ -121,8 +122,6 @@ class SavedSearch(models.Model):
     def pretty_query(self):
         s = ""
         if self.a:
-            import json
-
             a = json.loads(self.a)
             for query in a:
                 condition = query["condition"] if "condition" in query else ""
@@ -178,6 +177,39 @@ class SavedSearch(models.Model):
             self.last_alerted_at = now()
             self.save()
 
+    def generate_advanced_search_query(self, criteria):
+        a = ""
+
+        for criterion in criteria:
+            text = (
+                f'"{criterion["text"]}"'
+                if criterion.get("exact")
+                else criterion.get("text", "")
+            )
+
+            if criterion.get("condition") == "AND":
+                a += " & "
+            elif criterion.get("condition") == "OR":
+                a += " | "
+            elif criterion.get("condition") == "NOT":
+                a += " -"
+
+            a += f"({text})"
+
+        return a.strip()
+
+    def generate_advanced_search_params(self, params):
+        # Group criteria by fields
+        fields = {}
+        for criterion in json.loads(self.a):
+            if criterion.get("text"):
+                for field in criterion.get("fields", []):
+                    fields.setdefault(field, []).append(criterion)
+
+        # Set search params for each field
+        for field, criteria in fields.items():
+            params[f"search__{field}"] = self.generate_advanced_search_query(criteria)
+
     def find_new_hits(self):
         from peachjam_search.engine import SearchEngine
         from peachjam_search.forms import SearchForm
@@ -190,7 +222,11 @@ class SavedSearch(models.Model):
                     params.appendlist(key, value)  # Append multiple values
             else:
                 params[key] = values
-        params["search"] = self.q if self.q else self.a
+
+        if self.q:
+            params["search"] = self.q
+        else:
+            self.generate_advanced_search_params(params)
 
         engine = SearchEngine()
         engine.page_size = 20
