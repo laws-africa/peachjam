@@ -33,7 +33,7 @@ class ProvisionEnrichment(PolymorphicModel):
         null=False,
         blank=False,
     )
-    text = models.CharField(_("text"), max_length=2048, null=True, blank=True)
+    text = models.CharField(_("text"), max_length=4096, null=True, blank=True)
 
     # this is the document that will be used to display provision information
     _document = None
