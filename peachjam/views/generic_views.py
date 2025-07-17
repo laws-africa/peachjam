@@ -428,6 +428,17 @@ class BaseDocumentDetailView(DetailView):
             doc.work.works_citing_current_work(), "citing_works"
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
+        # TODO: load real data
+        context["incoming_citations_json"] = [
+            {
+                "provision_eid": "chp_1__sec_2",
+                "citations": 3,
+            },
+            {
+                "provision_eid": "chp_1__sec_2__para_a",
+                "citations": 1,
+            },
+        ]
 
         # provide extra context for analytics
         self.add_track_page_properties(context)
