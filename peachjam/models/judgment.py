@@ -474,6 +474,9 @@ class Judgment(CoreDocument):
     def clean(self):
         if self.auto_assign_details:
             self.assign_mnc()
+        self.flynote = self.clean_html_field(self.flynote)
+        self.case_summary = self.clean_html_field(self.case_summary)
+        self.order = self.clean_html_field(self.order)
         super().clean()
 
     def assign_title(self):
