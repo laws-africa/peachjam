@@ -869,7 +869,6 @@ class CoreDocument(PolymorphicModel):
                 except ValueError:
                     # ignore malformed FRBR URIs
                     pass
-
         else:
             for citation_link in CitationLink.objects.filter(document_id=self.pk):
                 try:
@@ -880,6 +879,7 @@ class CoreDocument(PolymorphicModel):
                 except ValueError:
                     # ignore malformed FRBR URIs
                     pass
+
         return work_frbr_uris
 
     def search_penalty(self):

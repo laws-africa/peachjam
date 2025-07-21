@@ -7,7 +7,7 @@ from django.conf import settings
 from docpipe.matchers import ExtractedCitation
 from lxml.etree import ParseError
 
-from peachjam.models import CitationLink, ExtractedCitationContext
+from peachjam.models import CitationLink
 
 log = logging.getLogger(__name__)
 
@@ -27,11 +27,6 @@ class CitationAnalyser:
         else:
             # markup the source file by extracting the text and assuming we'll render it as a PDF
             return self.extract_citations_from_source_file(document)
-
-    def store_extracted_citation_context(self, document, matcher, newlines):
-        """Transform extracted citations from text into ExtractedCitationContext objects."""
-        for c in matcher.citations:
-            ExtractedCitationContext.create_citation_context(document, c)
 
     def extract_citations_from_html(self, document):
         try:
