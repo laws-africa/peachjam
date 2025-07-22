@@ -10,64 +10,69 @@
     <span class="badge bg-danger">{% trans 'Unresolved' %}</span>
   {% endif %}
 </h6>
-<div class="my-2">{{ enrichment.text|linebreaks }}</div>
-{% if enrichment.enrichment_type == 'unconstitutional_provision' %}
-  <dl class="document-metadata-list d-flex mb-3">
-    {% if enrichment.judgment %}
-      <dt>
-        {% trans 'Judgment' %}
-      </dt>
-      <dd>
-        <a href="{{ enrichment.judgment.documents.latest_expression.first.get_absolute_url }}">{{ enrichment.judgment.documents.latest_expression.first.title }}</a>
-      </dd>
-    {% endif %}
-    {% if enrichment.date_deemed_unconstitutional %}
-      <dt>
-        {% trans 'Date deemed unconstitutional' %}
-      </dt>
-      <dd>
-        {{ enrichment.date_deemed_unconstitutional }}
-      </dd>
-    {% endif %}
-    {% if enrichment.end_of_suspension_period %}
-      <dt>
-        {% trans 'End of suspension period' %}
-      </dt>
-      <dd>
-        {{ enrichment.end_of_suspension_period }}
-      </dd>
-    {% endif %}
-    {% if enrichment.date_resolved %}
-      <dt>
-        {% trans 'Date resolved' %}
-      </dt>
-      <dd>
-        {{ enrichment.date_resolved }}
-      </dd>
-    {% endif %}
-    {% if enrichment.resolving_amendment_work %}
-      <dt>
-        {% trans 'Resolving amendment' %}
-      </dt>
-      <dd>
-        <a href="{{ enrichment.resolving_amendment_work.documents.latest_expression.first.get_absolute_url }}">
-          {{ enrichment.resolving_amendment_work.title }}
-        </a>
-      </dd>
-    {% endif %}
-  </dl>
-  {% if enrichment.provision_by_eid %}
-    <div class="mb-2">
-      {% trans "Provision as at" %}
-      {{ enrichment.document.date }}:
-    </div>
-    <la-akoma-ntoso
-    frbr-expression-uri="{{ enrichment.document.expression_frbr_uri }}"
-    class="bg-light p-3 border my-2"
-    style="max-height: 50vh; overflow-y: auto;"
-    lang="{{ enrichment.document.language.iso }}"
-    >
-    {{ enrichment.provision_by_eid|safe }}
-    </la-akoma-ntoso>
+{% if enrichment.text %}<div class="my-2">{{ enrichment.text|linebreaks }}</div>{% endif %}
+<dl class="document-metadata-list d-flex mb-3">
+  {% if enrichment.judgment and not judgment_view %}
+    <dt>
+      {% trans 'Judgment' %}
+    </dt>
+    <dd>
+      <a href="{{ enrichment.judgment.documents.latest_expression.first.get_absolute_url }}">{{ enrichment.judgment.documents.latest_expression.first.title }}</a>
+    </dd>
+  {% elif judgment_view %}
+    <dt>
+      {% trans 'Legislation' %}
+    </dt>
+    <dd>
+      <a href="{{ enrichment.work.documents.latest_expression.first.get_absolute_url }}">{{ enrichment.work.documents.latest_expression.first.title }}</a>
+    </dd>
   {% endif %}
+  {% if enrichment.date_deemed_unconstitutional %}
+    <dt>
+      {% trans 'Date deemed unconstitutional' %}
+    </dt>
+    <dd>
+      {{ enrichment.date_deemed_unconstitutional }}
+    </dd>
+  {% endif %}
+  {% if enrichment.end_of_suspension_period %}
+    <dt>
+      {% trans 'End of suspension period' %}
+    </dt>
+    <dd>
+      {{ enrichment.end_of_suspension_period }}
+    </dd>
+  {% endif %}
+  {% if enrichment.date_resolved %}
+    <dt>
+      {% trans 'Date resolved' %}
+    </dt>
+    <dd>
+      {{ enrichment.date_resolved }}
+    </dd>
+  {% endif %}
+  {% if enrichment.resolving_amendment_work %}
+    <dt>
+      {% trans 'Resolving amendment' %}
+    </dt>
+    <dd>
+      <a href="{{ enrichment.resolving_amendment_work.documents.latest_expression.first.get_absolute_url }}">
+        {{ enrichment.resolving_amendment_work.title }}
+      </a>
+    </dd>
+  {% endif %}
+</dl>
+{% if enrichment.provision_by_eid %}
+  <div class="mb-2">
+    {% trans "Provision as at" %}
+    {{ enrichment.document.date }}:
+  </div>
+  <la-akoma-ntoso
+  frbr-expression-uri="{{ enrichment.document.expression_frbr_uri }}"
+  class="bg-light p-3 border my-2"
+  style="max-height: 50vh; overflow-y: auto;"
+  lang="{{ enrichment.document.language.iso }}"
+  >
+  {{ enrichment.provision_by_eid|safe }}
+  </la-akoma-ntoso>
 {% endif %}

@@ -1,15 +1,20 @@
 from datetime import datetime, timedelta
 
 from django.contrib import messages
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import CharField, Func, Value
 from django.db.models.functions.text import Substr
 from django.template.defaultfilters import date as format_date
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
+from django.views.generic import DetailView
 
 from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
-from peachjam.models import Legislation, UnconstitutionalProvision, pj_settings
+from peachjam.models import (
+    Legislation,
+    UncommencedProvision,
+    UnconstitutionalProvision,
+    pj_settings,
+)
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
@@ -68,9 +73,14 @@ class LegislationListView(FilteredDocumentListView):
             "is_group": True,
             "title": pj_settings().subleg_label,
         }
+        context["show_more_resources"] = (
+            UnconstitutionalProvision.objects.exists()
+            or UncommencedProvision.objects.exists()
+        )
         context[
             "show_unconstitutional_provisions"
         ] = UnconstitutionalProvision.objects.exists()
+        context["show_uncommenced_provisions"] = UncommencedProvision.objects.exists()
         return context
 
 
@@ -152,7 +162,7 @@ class LegislationDetailView(BaseDocumentDetailView):
                         "type": messages.WARNING,
                         "html": _(
                             "This %(friendly_type)s has not yet come into force in full."
-                            " See the Document detail tab for more information."
+                            " See the Uncommenced provisions tab for more information."
                         )
                         % {"friendly_type": friendly_type},
                     }
@@ -386,12 +396,59 @@ class LegislationDetailView(BaseDocumentDetailView):
         return docs
 
 
-class UnconstitutionalProvisionListView(PermissionRequiredMixin, LegislationListView):
+class UncommencedProvisionDetailView(DetailView):
+    model = UncommencedProvision
+    template_name = "peachjam/provision_enrichment/uncommenced_provision_detail.html"
+    context_object_name = "enrichment"
+
+
+class DocumentUncommencedProvisionListView(DetailView):
+    model = Legislation
+    template_name = (
+        "peachjam/provision_enrichment/_document_uncommenced_provision_list.html"
+    )
+    context_object_name = "document"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["uncommenced_provisions"] = self.object.work.enrichments.filter(
+            enrichment_type="uncommenced_provision"
+        )
+        for enrichment in context["uncommenced_provisions"]:
+            enrichment.document = self.object
+        return context
+
+
+class UncommencedProvisionListView(LegislationListView):
+    template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
+    latest_expression_only = True
+
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/provision_enrichment/_uncommenced_table.html"]
+            return ["peachjam/provision_enrichment/_uncommenced_table_form.html"]
+        return super().get_template_names()
+
+    def get_base_queryset(self, *args, **kwargs):
+        qs = super().get_base_queryset(*args, **kwargs)
+        uncommenced_provision_works = UncommencedProvision.objects.all().values_list(
+            "work__id", flat=True
+        )
+        qs = qs.filter(work__in=uncommenced_provision_works)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["doc_table_show_counts"] = True
+        return context
+
+
+class UnconstitutionalProvisionListView(LegislationListView):
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
     latest_expression_only = True
     form_class = UnconstitutionalProvisionFilterForm
     exclude_facets = ["alphabet", "years"]
-    permission_required = "peachjam.view_unconstitutionalprovision"
 
     def get_template_names(self):
         if self.request.htmx:

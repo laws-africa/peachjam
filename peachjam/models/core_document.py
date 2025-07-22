@@ -533,6 +533,7 @@ class CoreDocument(PolymorphicModel):
             ("can_debug_document", "Can do document debugging"),
             ("can_view_document_summary", "Can view document summary"),
             ("can_generate_judgment_summary", "Can generate judgment summary"),
+            ("can_offline", "Can save content for offline use"),
         ]
 
     def __str__(self):
@@ -577,17 +578,17 @@ class CoreDocument(PolymorphicModel):
         else:
             self.toc_json = []
 
-    def clean_content_html(self, content_html):
-        """Ensure that content_html is not just whitespace HTML. Returns the cleaned value."""
-        if not content_html:
+    def clean_html_field(self, html):
+
+        if not html:
             return None
 
         # return None if the HTML doesn't have any content
         try:
-            root = parse_html_str(content_html)
+            root = parse_html_str(html)
             iframes = root.xpath("//iframe")
             if iframes:
-                return content_html
+                return html
 
             text = "".join(root.itertext()).strip()
             text = re.sub(r"\s", "", text)
@@ -596,7 +597,11 @@ class CoreDocument(PolymorphicModel):
         except (ValueError, ParserError):
             return None
 
-        return content_html
+        return html
+
+    def clean_content_html(self, content_html):
+        """Ensure that content_html is not just whitespace HTML. Returns the cleaned value."""
+        return self.clean_html_field(content_html)
 
     def clean(self):
         super().clean()

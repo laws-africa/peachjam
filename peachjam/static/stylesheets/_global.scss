@@ -38,30 +38,16 @@ mark {
   padding: 0;
 }
 
-.anntn-highlight {
-  background-color: transparentize($anntn-highlight-color, 0.8);
-  transition: background-color 300ms ease-in-out;
-
-  &.active {
-    background-color: transparentize($anntn-highlight-color, 0.4);
-  }
+.provision-toggle i::before {
+  content: "\f229";
 }
 
-.unconstitutional-provision-highlight {
-  background-color: transparentize($unconstitutional-highlight-color, 0.8);
-  transition: background-color 300ms ease-in-out;
-
-  &.active {
-    background-color: transparentize($unconstitutional-highlight-color, 0.4);
-  }
+.provision-toggle .collapsed i::before {
+  content: "\f231";
 }
 
 .result-snippet * {
   font-size: $font-size-base;
-}
-
-.la-akoma-ntoso-with-gutter la-gutter {
-  background-color: transparent !important;
 }
 
 .offcanvas {
@@ -178,7 +164,8 @@ footer {
   }
 }
 
-html[data-user-agent*='pocketlaw'] .pocketlaw-hidden {
+html[data-user-agent*='pocketlaw'] .pocketlaw-hidden,
+.offline .pocketlaw-hidden {
   display: none !important;
 }
 

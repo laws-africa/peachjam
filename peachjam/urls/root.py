@@ -7,6 +7,7 @@ from peachjam.views import (
     AboutPageView,
     AuthorDetailView,
     BookListView,
+    DocumentUncommencedProvisionListView,
     HomePageView,
     JournalListView,
     LegislationListView,
@@ -14,6 +15,8 @@ from peachjam.views import (
     PocketLawResources,
     RobotsView,
     TermsOfUsePageView,
+    UncommencedProvisionDetailView,
+    UncommencedProvisionListView,
     UnconstitutionalProvisionListView,
 )
 from peachjam.views.generic_views import CSRFTokenView
@@ -34,6 +37,21 @@ urlpatterns = [
     path("journals/", JournalListView.as_view(), name="journal_list"),
     path("judgments/", include("peachjam.urls.judgments")),
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
+    path(
+        "uncommenced-provisions/<int:pk>",
+        UncommencedProvisionDetailView.as_view(),
+        name="uncommenced_provision_detail",
+    ),
+    path(
+        "document-uncommenced-provisions/<int:pk>",
+        DocumentUncommencedProvisionListView.as_view(),
+        name="document_uncommenced_provision_list",
+    ),
+    path(
+        "uncommenced-provisions/",
+        UncommencedProvisionListView.as_view(),
+        name="uncommenced_provision_list",
+    ),
     path(
         "unconstitutional-provisions/",
         UnconstitutionalProvisionListView.as_view(),
@@ -66,6 +84,8 @@ urlpatterns = [
     ),
     path("stats", MetabaseStatsView.as_view(), name="metabase_stats"),
     path("terms-of-use/", TermsOfUsePageView.as_view(), name="terms_of_use"),
+    # offline documents
+    path("", include("peachjam.urls.offline")),
     # admin
     path("admin/", include("peachjam.urls.admin")),
     path("comments/", include("peachjam.urls.comments")),
