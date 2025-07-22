@@ -58,3 +58,22 @@ class MncMatcherTest(TestCase):
 </div>""",  # noqa
             lxml.html.tostring(html, encoding="unicode", pretty_print=True).strip(),
         )
+
+    def test_gh_sc_mismatch(self):
+        # In Ghana, "[2011] 1 SCGLR 505" is a law report, not a seychelles court
+        self.frbr_uri = FrbrUri.parse("/akn/gh/judgment/ghsc/2025/509")
+        html = lxml.html.fromstring(
+            """
+<div>
+  <p>In Amoah v. Lokko &amp; Afred Quartey (substituted by) Gloria Quartey [2011] SCGLR 505, his Lordship Aryeetey JSC had this to say;</p>
+</div>
+"""  # noqa
+        )
+        self.marker.markup_html_matches(self.frbr_uri, html)
+
+        self.assertMultiLineEqual(
+            """<div>
+  <p>In Amoah v. Lokko &amp; Afred Quartey (substituted by) Gloria Quartey [2011] SCGLR 505, his Lordship Aryeetey JSC had this to say;</p>
+</div>""",  # noqa
+            lxml.html.tostring(html, encoding="unicode", pretty_print=True).strip(),
+        )
