@@ -62,7 +62,6 @@ class SearchEngine:
             "pages",
             "content",
             "content_chunks",
-            "flynote",
             "case_summary",
             "provisions",
             "suggest",
