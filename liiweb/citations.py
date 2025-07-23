@@ -1,6 +1,6 @@
 import re
 
-from docpipe.matchers import CitationMatcher
+from docpipe.matchers import CitationMatcher, ExtractedMatch
 
 
 class MncMatcher(CitationMatcher):
@@ -33,6 +33,12 @@ class MncMatcher(CitationMatcher):
             "wc": "wc",
         }
     }
+
+    def make_href(self, match: ExtractedMatch):
+        if self.frbr_uri.country == "gh" and match.groups["court"].lower()[:2] == "sc":
+            # In Ghana SCxx is a law report, not a Seychelles court
+            return None
+        return super().make_href(match)
 
     def href_pattern_args(self, match):
         args = super().href_pattern_args(match)
