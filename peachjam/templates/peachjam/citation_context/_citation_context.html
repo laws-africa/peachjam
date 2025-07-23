@@ -1,0 +1,12 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n %}
+{% block title %}
+  {% trans object %}
+{% endblock %}
+{% block page-title %}
+  <h1 class="mt-4">{% trans 'Portions' %}</h1>
+{% endblock %}
+{% block count-and-search %}{% endblock %}
+{% block document-table %}
+  {% include "peachjam/citation_context/_citation_context_table_form.html" %}
+{% endblock %}

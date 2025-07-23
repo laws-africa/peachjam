@@ -22,6 +22,7 @@ from peachjam.views import (
     DocumentTextContentView,
     PartnerLogoView,
 )
+from peachjam.views.citation_context import DocumentCitationContextView
 
 urlpatterns = [
     # document detail views
@@ -49,6 +50,11 @@ urlpatterns = [
         r"^(?P<frbr_uri>akn/.*)/attachment/(?P<filename>.+)$",
         cache_page(CACHE_DURATION)(DocumentAttachmentView.as_view()),
         name="document_attachment",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/portion/(?P<portion>.+)$",
+        cache_page(CACHE_DURATION)(DocumentCitationContextView.as_view()),
+        name="document_citations",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/citations$",

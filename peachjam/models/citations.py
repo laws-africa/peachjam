@@ -2,14 +2,11 @@ import logging
 from datetime import timedelta
 from random import randint
 
-from cobalt import FrbrUri
 from django.db import models
 from django.db.models import F, Window
 from django.db.models.functions import RowNumber
 from django.utils import timezone
-from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
-from lxml import html
 
 from .settings import SingletonModel
 
@@ -166,90 +163,6 @@ class ExtractedCitation(models.Model):
         )
 
 
-class CitationContextManager(models.Manager):
-    def update_and_create_contexts(self, document):
-        self.filter(document=document).delete()
-        if document.content_html:
-            self.create_from_html(document)
-        else:
-            self.create_from_citation_links(document)
-
-    def create_from_html(self, document):
-        """Create citation contexts from an HTML document."""
-        from peachjam.models import Work
-
-        if not document.content_html:
-            log.warning("No HTML content to extract citation contexts from.")
-            return
-
-        root = html.fromstring(document.content_html)
-        if document.content_html_is_akn:
-            xpath = (
-                '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
-                'not(ancestor::*[contains(@class, "akn-remark")])]'
-            )
-            attr = "data-href"
-        else:
-            xpath = '//a[starts-with(@href, "/akn")]'
-            attr = "href"
-
-        for a in root.xpath(xpath):
-            try:
-                work_frbr_uri = FrbrUri.parse(a.attrib[attr]).work_uri()
-                work = Work.objects.get(frbr_uri=work_frbr_uri).first()
-                exact = a.text_content().strip()
-                parent_text = a.getparent().text_content().strip()
-                start = parent_text.find(exact)
-                end = start + len(exact)
-                # if start == -1:
-                #     continue
-                prefix = Truncator(parent_text[:start]).chars(30, truncate="")
-                suffix = Truncator(parent_text[end:]).chars(30, truncate="")
-
-                self.create(
-                    document=document,
-                    selectors=[
-                        {
-                            "type": "TextPositionSelector",
-                            "start": start,
-                            "end": end,
-                        },
-                        {
-                            "type": "TextQuoteSelector",
-                            "exact": exact,
-                            "prefix": prefix,
-                            "suffix": suffix,
-                        },
-                    ],
-                    target_work=work,
-                    target_provision_eid=None,
-                )
-            except ValueError as e:
-                log.warning(
-                    "Invalid FRBR URI in citation link %s in document %s: %s",
-                    a.attrib[attr],
-                    document,
-                    e,
-                )
-            except Work.DoesNotExist:
-                log.warning(
-                    "No work found for FRBR URI %s in document %s",
-                    a.attrib[attr],
-                    document,
-                )
-
-    def create_from_citation_links(self, document):
-        """Create a citation context from an existing CitationLink."""
-
-        for citation_link in CitationLink.objects.filter(document=document):
-            self.create(
-                document=document,
-                selector_anchor_id=citation_link.target_id,
-                selectors=citation_link.target_selectors,
-                target_work=citation_link.target_work,
-            )
-
-
 class ExtractedCitationContext(models.Model):
     document = models.ForeignKey(
         "peachjam.CoreDocument",
@@ -275,7 +188,31 @@ class ExtractedCitationContext(models.Model):
     )
     created_at = models.DateField(auto_now_add=True)
 
-    objects = CitationContextManager()
+    def get_absolute_url(self):
+        if self.target_provision_eid:
+            return f"{self.target_work.frbr_uri}#{self.target_provision_eid}"
+        return self.target_work.frbr_uri
+
+    def get_exact_text(self):
+        """Get the exact text from the selectors."""
+        for selector in self.selectors:
+            if selector["type"] == "TextQuoteSelector":
+                return selector.get("exact", "")
+        return ""
+
+    def get_prefix_text(self):
+        """Get the prefix text from the selectors."""
+        for selector in self.selectors:
+            if selector["type"] == "TextQuoteSelector":
+                return selector.get("prefix", "")
+        return ""
+
+    def get_suffix_text(self):
+        """Get the suffix text from the selectors."""
+        for selector in self.selectors:
+            if selector["type"] == "TextQuoteSelector":
+                return selector.get("suffix", "")
+        return ""
 
 
 class Treatment(models.Model):

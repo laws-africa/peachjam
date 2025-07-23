@@ -727,6 +727,19 @@ class CoreDocument(PolymorphicModel):
         self.delete_citations()
         return citation_analyser.extract_citations(self)
 
+    def extract_citation_contexts(self):
+        """Extract citation contexts for this document. This will extract contexts for all citations
+        in the document, and update the ExtractedCitationContext objects.
+        """
+        from peachjam.analysis.citations import citation_analyser
+
+        self.delete_citation_contexts()
+        citation_analyser.update_citation_contexts(self)
+
+    def delete_citation_contexts(self):
+        """Delete existing citation contexts for this document."""
+        ExtractedCitationContext.objects.filter(document=self).delete()
+
     def delete_citations(self):
         """Delete existing citation links and added citations from this document."""
         from peachjam.models.citations import CitationLink

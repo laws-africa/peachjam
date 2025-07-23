@@ -1,0 +1,36 @@
+{% load i18n peachjam humanize %}
+<div class="table-responsive"
+     id="{{ doc_table_id|default:"doc-table" }}"
+     data-component="DocumentTable">
+  {% if doc_table_show_counts %}
+    <div class="mb-3 text-muted">
+      {% if doc_count == 1 %}
+        {{ doc_count|intcomma }} {{ doc_count_noun }}
+      {% else %}
+        {{ doc_count|intcomma }} {{ doc_count_noun_plural }}
+      {% endif %}
+    </div>
+  {% endif %}
+  <table class="doc-table">
+    {% for document in documents %}
+      <div class="card mb-4">
+        <div class="card-body">
+          <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+          {% if document.blurb %}<div>{{ document.blurb }}</div>{% endif %}
+          {% if document.flynote %}<div class="fst-italic">{{ document.flynote|safe }}</div>{% endif %}
+          {% for citation_context in document.relevant_citation_contexts %}
+            <p>
+              [...]{{ citation_context.get_prefix_text }}<a href="{{ citation_context.get_absolute_url }}">{{ citation_context.get_exact_text }}</a>{{ citation_context.get_suffix_text }}[...]
+            </p>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+    {% if not documents %}
+      <p>{% trans 'No documents found.' %}</p>
+    {% endif %}
+    {% if documents and not hide_pagination and paginator %}
+      {% include 'peachjam/_pagination.html' %}
+    {% endif %}
+  </table>
+</div>
