@@ -1,7 +1,9 @@
 <template>
   <la-gutter-item :anchor.prop="anchorElement" class="citation-count">
-    <i class="bi bi-speech">💬</i>
-    <span class="badge rounded-pill bg-secondary">{{ citations }}</span>
+    <div class="">
+      <span class="align-middle me-2 fs-5"><i class="bi bi-chat-quote" /></span>
+      <span class="badge rounded-pill bg-secondary">{{ citations }}</span>
+    </div>
     <div class="card gutter-item-card mt-2">
       <div class="card-body d-flex">
         <span>

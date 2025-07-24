@@ -30,10 +30,10 @@ class DocumentCitationContextView(FilteredDocumentListView):
 
     @cached_property
     def citation_contexts(self):
-        portion = self.kwargs.get("portion", "")
+        provision = self.kwargs.get("provision", "")
         q = Q(target_work=self.document.work)
-        if portion:
-            q &= Q(target_provision_eid__icontains=portion)
+        if provision:
+            q &= Q(target_provision_eid__icontains=provision)
         contexts = ExtractedCitationContext.objects.filter(q)
         return contexts
 
@@ -50,9 +50,9 @@ class DocumentCitationContextView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["document"] = self.document
-        if self.kwargs.get("portion"):
-            context["portion"] = context["document"].friendly_provision_title(
-                self.kwargs.get("portion")
+        if self.kwargs.get("provision"):
+            context["provision"] = context["document"].friendly_provision_title(
+                self.kwargs.get("provision")
             )
 
         return context
