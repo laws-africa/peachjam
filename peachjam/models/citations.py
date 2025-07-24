@@ -172,7 +172,7 @@ class ExtractedCitationContext(models.Model):
     )
 
     selector_anchor_id = models.CharField(
-        _("target id"),
+        _("selector anchor id"),
         max_length=1024,
     )
     selectors = models.JSONField(verbose_name=_("selectors"))

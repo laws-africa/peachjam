@@ -138,7 +138,8 @@ def extract_citations(document_id):
     try:
         if doc.extract_citations():
             doc.save()
-            doc.extract_citation_contexts()
+
+        doc.extract_citation_contexts()
     except Exception as e:
         log.error(f"Error extracting citations for {doc}", exc_info=e)
         raise

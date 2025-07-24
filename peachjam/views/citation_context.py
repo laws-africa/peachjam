@@ -1,6 +1,6 @@
 from functools import cached_property
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.http import Http404
 from django.utils.decorators import method_decorator
 
@@ -31,9 +31,10 @@ class DocumentCitationContextView(FilteredDocumentListView):
     @cached_property
     def citation_contexts(self):
         portion = self.kwargs.get("portion", "")
-        contexts = ExtractedCitationContext.objects.filter(
-            target_work=self.document.work, target_provision_eid__icontains=portion
-        )
+        q = Q(target_work=self.document.work)
+        if portion:
+            q &= Q(target_provision_eid__icontains=portion)
+        contexts = ExtractedCitationContext.objects.filter(q)
         return contexts
 
     def get_base_queryset(self, *args, **kwargs):
@@ -49,5 +50,9 @@ class DocumentCitationContextView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["document"] = self.document
+        if self.kwargs.get("portion"):
+            context["portion"] = context["document"].friendly_provision_title(
+                self.kwargs.get("portion")
+            )
 
         return context

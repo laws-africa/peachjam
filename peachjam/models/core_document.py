@@ -858,9 +858,6 @@ class CoreDocument(PolymorphicModel):
         """Update the extracted text content."""
         self.document_content = DocumentContent.update_or_create_for_document(self)
 
-    def update_citation_contexts(self):
-        ExtractedCitationContext.objects.update_and_create_contexts(self)
-
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document."""
         work_frbr_uris = {}

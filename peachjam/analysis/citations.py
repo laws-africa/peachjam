@@ -100,6 +100,14 @@ class CitationAnalyser:
         """Create citation contexts from an HTML document."""
         from peachjam.models import Work
 
+        def get_parent_element(anchor, tags=("p", "div", "section")):
+            current = anchor
+            while current is not None:
+                if current.tag in tags:
+                    return current
+                current = current.getparent()
+            return None
+
         if not document.content_html:
             log.warning("No HTML content to extract citation contexts from.")
             return
@@ -122,13 +130,16 @@ class CitationAnalyser:
                 work_frbr_uri = FrbrUri.parse(href).work_uri()
                 work = Work.objects.get(frbr_uri=work_frbr_uri)
                 exact = a.text_content().strip()
-                parent_text = a.getparent().text_content().strip()
+                parent_element = get_parent_element(a)
+                parent_text = parent_element.text_content().strip()
                 start = parent_text.find(exact)
                 end = start + len(exact)
-                # if start == -1:
-                #     continue
+                if start == -1:
+                    continue
                 prefix = Truncator(parent_text[:start]).chars(100, truncate="")
                 suffix = Truncator(parent_text[end:]).chars(100, truncate="")
+
+                selector_id = parent_element.attrib.get("id", "")
 
                 ctx = ExtractedCitationContext.objects.create(
                     document=document,
@@ -145,6 +156,7 @@ class CitationAnalyser:
                             "suffix": suffix,
                         },
                     ],
+                    selector_anchor_id=selector_id,
                     target_work=work,
                     target_provision_eid=self.get_provision_eid(href),
                 )
