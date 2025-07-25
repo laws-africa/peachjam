@@ -25,7 +25,7 @@ def forwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [("peachjam_search", "0016_alter_searchtrace_options_and_more")]
+    dependencies = [("peachjam_search", "0017_alter_savedsearch_q")]
 
     operations = [
         migrations.RunPython(forwards, migrations.RunPython.noop),
