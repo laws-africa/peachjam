@@ -10,6 +10,18 @@ and #navigation-column for desktop screensize.
   <div class="navigation__inner">
     <nav>
       <div class="nav nav-tabs" id="navigation-tab" role="tablist">
+        {% if document.doc_type == "judgment" and document.case_summary %}
+          <button class="nav-link"
+                  id="doc-summary-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#doc-summary"
+                  type="button"
+                  role="tab"
+                  aria-controls="doc-summary"
+                  aria-selected="true">
+            {% trans 'Summary' %}
+          </button>
+        {% endif %}
         {% if display_type == 'akn' or display_type == 'html' %}
           <button class="nav-link d-none"
                   id="toc-tab"
@@ -17,8 +29,8 @@ and #navigation-column for desktop screensize.
                   data-bs-target="#toc"
                   type="button"
                   role="tab"
-                  aria-controls="nav-toc"
-                  aria-selected="true">
+                  aria-controls="toc"
+                  aria-selected="{% if document.doc_type == "judgment" and document.case_summary %} false {% else %} true {% endif %}">
             {% trans 'Table of contents' %}
           </button>
         {% endif %}
@@ -29,8 +41,8 @@ and #navigation-column for desktop screensize.
                   data-bs-target="#pdf-previews"
                   type="button"
                   role="tab"
-                  aria-controls="nav-toc"
-                  aria-selected="true">
+                  aria-controls="pdf-previews"
+                  aria-selected="{% if document.doc_type == "judgment" and document.case_summary %} false {% else %} true {% endif %}">
             {% trans 'Pages' %}
           </button>
         {% endif %}
@@ -40,7 +52,7 @@ and #navigation-column for desktop screensize.
                 data-bs-target="#navigation-search"
                 type="button"
                 role="tab"
-                aria-controls="nav-search"
+                aria-controls="navigation-search"
                 aria-selected="false">
           {% trans 'Search' %}
         </button>
@@ -52,7 +64,7 @@ and #navigation-column for desktop screensize.
       <div class="tab-pane h-100"
            id="navigation-search"
            role="tabpanel"
-           aria-labelledby="nav-search-tab">
+           aria-labelledby="navigation-search-tab">
         <div data-doc-search class="h-100"></div>
       </div>
       {% if display_type == 'akn' or display_type == 'html' %}
@@ -62,6 +74,14 @@ and #navigation-column for desktop screensize.
              aria-labelledby="toc-tab">
           <aside class="toc">
           </aside>
+        </div>
+      {% endif %}
+      {% if document.doc_type == "judgment" and document.case_summary %}
+        <div class="tab-pane"
+             id="doc-summary"
+             role="tabpanel"
+             aria-labelledby="doc-summary-tab">
+          <div class="p-3">{% include 'peachjam/document/_judgment_summary.html' %}</div>
         </div>
       {% endif %}
       {% if display_type == 'pdf' %}

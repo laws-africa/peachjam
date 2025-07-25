@@ -1,3 +1,4 @@
+import json
 import logging
 import uuid
 from datetime import timedelta
@@ -93,7 +94,8 @@ class SearchClick(models.Model):
 
 
 class SavedSearch(models.Model):
-    q = models.CharField(max_length=4098)
+    q = models.CharField(max_length=4098, null=True, blank=True)
+    a = models.CharField(max_length=4098, null=True, blank=True)
     filters = models.CharField(max_length=4098, null=True, blank=True)
     note = models.TextField(null=True, blank=True)
     user = models.ForeignKey(
@@ -102,16 +104,40 @@ class SavedSearch(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_alerted_at = models.DateTimeField(null=True, blank=True, auto_now_add=True)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(q__isnull=False) | models.Q(a__isnull=False),
+                name="at_least_one_field_not_null",
+            )
+        ]
+
     def __str__(self):
-        s = self.q
+        s = self.pretty_query()
         f = self.pretty_filters()
         if f:
             s = f"{s} ({f})"
         return s
 
+    def pretty_query(self):
+        s = ""
+        if self.a:
+            a = json.loads(self.a)
+            for query in a:
+                condition = query["condition"] if "condition" in query else ""
+                if query["fields"][0] == "all":
+                    s += f"{condition} {query['text']} in any field "
+                else:
+                    s += f"{condition} {query['text']} in {query['fields']} "
+        else:
+            s = self.q
+
+        return s.strip()
+
     def get_filters_dict(self):
         filters = dict(QueryDict(self.filters).lists())
         filters.pop("q", None)
+        filters.pop("a", None)
         filters.pop("page", None)
         return filters
 
@@ -138,7 +164,10 @@ class SavedSearch(models.Model):
 
     def get_absolute_url(self):
         filters = self.get_filters_dict()
-        filters["q"] = self.q
+        if self.a:
+            filters["a"] = self.a
+        else:
+            filters["q"] = self.q
         return reverse("search:search") + "?" + urlencode(filters, doseq=True)
 
     def update_and_alert(self):
@@ -147,6 +176,39 @@ class SavedSearch(models.Model):
             self.send_alert(hits)
             self.last_alerted_at = now()
             self.save()
+
+    def generate_advanced_search_query(self, criteria):
+        a = ""
+
+        for criterion in criteria:
+            text = (
+                f'"{criterion["text"]}"'
+                if criterion.get("exact")
+                else criterion.get("text", "")
+            )
+
+            if criterion.get("condition") == "AND":
+                a += " & "
+            elif criterion.get("condition") == "OR":
+                a += " | "
+            elif criterion.get("condition") == "NOT":
+                a += " -"
+
+            a += f"({text})"
+
+        return a.strip()
+
+    def generate_advanced_search_params(self, params):
+        # Group criteria by fields
+        fields = {}
+        for criterion in json.loads(self.a):
+            if criterion.get("text"):
+                for field in criterion.get("fields", []):
+                    fields.setdefault(field, []).append(criterion)
+
+        # Set search params for each field
+        for field, criteria in fields.items():
+            params[f"search__{field}"] = self.generate_advanced_search_query(criteria)
 
     def find_new_hits(self):
         from peachjam_search.engine import SearchEngine
@@ -160,7 +222,11 @@ class SavedSearch(models.Model):
                     params.appendlist(key, value)  # Append multiple values
             else:
                 params[key] = values
-        params["search"] = self.q
+
+        if self.q:
+            params["search"] = self.q
+        else:
+            self.generate_advanced_search_params(params)
 
         engine = SearchEngine()
         engine.page_size = 20

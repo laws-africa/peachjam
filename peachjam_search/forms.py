@@ -83,7 +83,7 @@ class SearchForm(forms.Form):
 class SavedSearchCreateForm(forms.ModelForm):
     class Meta:
         model = SavedSearch
-        fields = ["q", "filters", "note"]
+        fields = ["q", "a", "filters", "note"]
 
 
 class SavedSearchUpdateForm(forms.ModelForm):
