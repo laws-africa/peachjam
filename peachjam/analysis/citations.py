@@ -5,18 +5,20 @@ import lxml.html
 import requests
 from cobalt import FrbrUri
 from django.conf import settings
-from django.utils.text import Truncator
 from docpipe.matchers import ExtractedCitation
 from lxml import html
 from lxml.etree import ParseError
 
 from peachjam.models import CitationLink, ExtractedCitationContext
+from peachjam.xmlutils import get_following_text, get_preceding_text
 
 log = logging.getLogger(__name__)
 
 
 class CitationAnalyser:
     matchers = []
+    context_not_above = ["p", "section", "div"]
+    context_length = 75
 
     def extract_citations(self, document):
         """Run matchers across the HTML or text in this document."""
@@ -130,25 +132,25 @@ class CitationAnalyser:
                 work_frbr_uri = FrbrUri.parse(href).work_uri()
                 work = Work.objects.get(frbr_uri=work_frbr_uri)
                 exact = a.text_content().strip()
-                parent_element = get_parent_element(a)
-                parent_text = parent_element.text_content().strip()
-                start = parent_text.find(exact)
-                end = start + len(exact)
-                if start == -1:
-                    continue
-                prefix = Truncator(parent_text[:start]).chars(100, truncate="")
-                suffix = Truncator(parent_text[end:]).chars(100, truncate="")
 
+                prefix = get_preceding_text(
+                    a, self.context_not_above, self.context_length
+                )
+                suffix = get_following_text(
+                    a, self.context_not_above, self.context_length
+                )
+
+                parent_element = get_parent_element(a)
                 selector_id = parent_element.attrib.get("id", "")
 
                 ctx = ExtractedCitationContext.objects.create(
                     document=document,
                     selectors=[
-                        {
-                            "type": "TextPositionSelector",
-                            "start": start,
-                            "end": end,
-                        },
+                        # {
+                        #    "type": "TextPositionSelector",
+                        #    "start": start,
+                        #    "end": end,
+                        # },
                         {
                             "type": "TextQuoteSelector",
                             "exact": exact,
