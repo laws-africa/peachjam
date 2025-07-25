@@ -31,8 +31,10 @@ class TestSearchEngine(TestCase):
                             "content",
                             "content_chunks",
                             "case_summary",
+                            "order",
                             "provisions",
                             "suggest",
+                            "summary",
                         ]
                     },
                     "explain": False,
@@ -110,6 +112,30 @@ class TestSearchEngine(TestCase):
                                     "simple_query_string": {
                                         "default_operator": "OR",
                                         "fields": ["content"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["summary^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["flynote^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["blurb^2"],
                                         "minimum_should_match": "4<80%",
                                         "query": "test",
                                     }
@@ -263,8 +289,10 @@ class TestSearchEngine(TestCase):
                             "content",
                             "content_chunks",
                             "case_summary",
+                            "order",
                             "provisions",
                             "suggest",
+                            "summary",
                         ]
                     },
                     "aggs": {
@@ -462,6 +490,30 @@ class TestSearchEngine(TestCase):
                                     }
                                 },
                                 {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["summary^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["flynote^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["blurb^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
                                     "match_phrase": {
                                         "content": {
                                             "boost": 4,
@@ -610,8 +662,10 @@ class TestSearchEngine(TestCase):
                             "content",
                             "content_chunks",
                             "case_summary",
+                            "order",
                             "provisions",
                             "suggest",
+                            "summary",
                         ]
                     },
                     "explain": False,
@@ -690,6 +744,30 @@ class TestSearchEngine(TestCase):
                                     "simple_query_string": {
                                         "default_operator": "OR",
                                         "fields": ["content"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["summary^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["flynote^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["blurb^2"],
                                         "minimum_should_match": "4<80%",
                                         "query": "test",
                                     }
@@ -845,8 +923,10 @@ class TestSearchEngine(TestCase):
                             "content",
                             "content_chunks",
                             "case_summary",
+                            "order",
                             "provisions",
                             "suggest",
+                            "summary",
                         ]
                     },
                     "explain": False,
