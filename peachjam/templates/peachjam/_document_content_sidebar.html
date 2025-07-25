@@ -81,7 +81,7 @@ and #navigation-column for desktop screensize.
              id="doc-summary"
              role="tabpanel"
              aria-labelledby="doc-summary-tab">
-          <div class="p-3">{% include 'peachjam/document/_judgment_summary.html' %}</div>
+          <div class="p-3">{% include 'peachjam/document/_judgment_summary.html' with collapse_summary=False %}</div>
         </div>
       {% endif %}
       {% if display_type == 'pdf' %}

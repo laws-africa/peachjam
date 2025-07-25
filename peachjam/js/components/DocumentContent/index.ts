@@ -63,8 +63,8 @@ class DocumentContent {
 
     // If toc setup and mounted successfully, activate toc tab otherwise activate search tab
     if (summaryTabTriggerEl) {
-      const tocTab = new window.bootstrap.Tab(summaryTabTriggerEl);
-      tocTab.show();
+      const summaryTab = new window.bootstrap.Tab(summaryTabTriggerEl);
+      summaryTab.show();
     } else if (tocCreated && tocTabTriggerEl) {
       tocTabTriggerEl.classList.remove('d-none');
       const tocTab = new window.bootstrap.Tab(tocTabTriggerEl);
