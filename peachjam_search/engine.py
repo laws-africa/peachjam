@@ -63,8 +63,10 @@ class SearchEngine:
             "content",
             "content_chunks",
             "case_summary",
+            "order",
             "provisions",
             "suggest",
+            "summary",
         ]
     }
 
@@ -105,6 +107,9 @@ class SearchEngine:
         "citation": {"boost": 2},
         "alternative_names": {"boost": 4},
         "content": None,
+        "summary": {"boost": 2},
+        "flynote": {"boost": 2},
+        "blurb": {"boost": 2},
     }
 
     advanced_search_fields = {

@@ -20,11 +20,12 @@ from peachjam.models import (
     ExternalDocument,
     GenericDocument,
     Judge,
+    Judgment,
     Locality,
     Outcome,
     Taxonomy,
 )
-from peachjam.xmlutils import strip_remarks
+from peachjam.xmlutils import parse_html_str, strip_remarks
 
 log = logging.getLogger(__name__)
 
@@ -76,12 +77,14 @@ class SearchableDocument(Document):
     case_number = fields.TextField()
     # this case party names etc. and so the standard analyzer is better than a language-based one
     case_name = fields.TextField(analyzer="standard")
-    case_summary = fields.TextField()
     flynote = fields.TextField()
-    order = fields.TextField()
+    blurb = fields.TextField()
     judges = fields.KeywordField()
     judges_text = fields.TextField()
     attorneys = fields.KeywordField(attr="attorney.name")
+
+    # a synthetic field of various summary components combined into one
+    summary = fields.TextField()
 
     registry = fields.KeywordField(attr="registry.name")
     registry_en = fields.KeywordField()
@@ -429,6 +432,26 @@ class SearchableDocument(Document):
             suggestions.append(name.title)
 
         return suggestions
+
+    def prepare_summary(self, instance):
+        """Currently only used for judgments, this combines the various summary fields of the judgment into a single
+        text field."""
+        if isinstance(instance, Judgment):
+            parts = []
+
+            # may be html
+            if instance.case_summary and instance.case_summary.strip():
+                parts.extend(parse_html_str(instance.case_summary).itertext())
+
+            parts.extend(instance.issues or [])
+            parts.extend(instance.held or [])
+
+            # may be html
+            if instance.order and instance.order.strip():
+                parts.extend(parse_html_str(instance.order).itertext())
+
+            # combine
+            return " ".join(p for p in parts if p)
 
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
