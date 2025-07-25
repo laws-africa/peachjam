@@ -37,6 +37,7 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_date,
 )
 from peachjam.helpers import parse_utf8_html, pdfjs_to_text
+from peachjam.models import ExtractedCitationContext
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
 from peachjam.models.settings import pj_settings
@@ -725,6 +726,19 @@ class CoreDocument(PolymorphicModel):
 
         self.delete_citations()
         return citation_analyser.extract_citations(self)
+
+    def extract_citation_contexts(self):
+        """Extract citation contexts for this document. This will extract contexts for all citations
+        in the document, and update the ExtractedCitationContext objects.
+        """
+        from peachjam.analysis.citations import citation_analyser
+
+        self.delete_citation_contexts()
+        citation_analyser.update_citation_contexts(self)
+
+    def delete_citation_contexts(self):
+        """Delete existing citation contexts for this document."""
+        ExtractedCitationContext.objects.filter(document=self).delete()
 
     def delete_citations(self):
         """Delete existing citation links and added citations from this document."""

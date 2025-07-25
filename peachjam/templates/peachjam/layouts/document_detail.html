@@ -584,6 +584,7 @@
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
     {{ provision_enrichments_json|json_script:"provision-enrichments-json" }}
+    {{ incoming_citations_json|json_script:"incoming-citations-json" }}
     {% include "peachjam/provision_enrichment/_modals.html" %}
   </div>
 {% endblock %}

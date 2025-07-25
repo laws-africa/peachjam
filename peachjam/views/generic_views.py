@@ -23,6 +23,7 @@ from peachjam.models import (
     CoreDocument,
     DocumentNature,
     ExtractedCitation,
+    ExtractedCitationContext,
     Predicate,
     Relationship,
     Taxonomy,
@@ -428,6 +429,21 @@ class BaseDocumentDetailView(DetailView):
             doc.work.works_citing_current_work(), "citing_works"
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
+        # TODO: load real data
+
+        citation_contexts = (
+            ExtractedCitationContext.objects.filter(target_work=doc.work)
+            .values("target_provision_eid")
+            .annotate(citations=Count("id"))
+        )
+
+        context["incoming_citations_json"] = [
+            {
+                "provision_eid": item["target_provision_eid"],
+                "citations": item["citations"],
+            }
+            for item in citation_contexts
+        ]
 
         # provide extra context for analytics
         self.add_track_page_properties(context)
