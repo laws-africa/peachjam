@@ -26,16 +26,23 @@ class TestSearchEngine(TestCase):
             json.dumps(
                 {
                     "_source": {
-                        "excludes": [
-                            "pages",
-                            "content",
-                            "content_chunks",
-                            "case_summary",
-                            "order",
-                            "provisions",
-                            "suggest",
-                            "summary",
-                        ]
+                        "includes": [
+                            "expression_frbr_uri",
+                            "date",
+                            "nature",
+                            "doc_type",
+                            "title",
+                            "jurisdiction",
+                            "locality",
+                            "citation",
+                            "authors",
+                            "labels",
+                            "alternative_names",
+                            "flynote",
+                            "blurb",
+                            "court",
+                            "matter_type",
+                        ],
                     },
                     "explain": False,
                     "from": 0,
@@ -284,16 +291,23 @@ class TestSearchEngine(TestCase):
             json.dumps(
                 {
                     "_source": {
-                        "excludes": [
-                            "pages",
-                            "content",
-                            "content_chunks",
-                            "case_summary",
-                            "order",
-                            "provisions",
-                            "suggest",
-                            "summary",
-                        ]
+                        "includes": [
+                            "expression_frbr_uri",
+                            "date",
+                            "nature",
+                            "doc_type",
+                            "title",
+                            "jurisdiction",
+                            "locality",
+                            "citation",
+                            "authors",
+                            "labels",
+                            "alternative_names",
+                            "flynote",
+                            "blurb",
+                            "court",
+                            "matter_type",
+                        ],
                     },
                     "aggs": {
                         "_filter_attorneys": {
@@ -657,16 +671,23 @@ class TestSearchEngine(TestCase):
             json.dumps(
                 {
                     "_source": {
-                        "excludes": [
-                            "pages",
-                            "content",
-                            "content_chunks",
-                            "case_summary",
-                            "order",
-                            "provisions",
-                            "suggest",
-                            "summary",
-                        ]
+                        "includes": [
+                            "expression_frbr_uri",
+                            "date",
+                            "nature",
+                            "doc_type",
+                            "title",
+                            "jurisdiction",
+                            "locality",
+                            "citation",
+                            "authors",
+                            "labels",
+                            "alternative_names",
+                            "flynote",
+                            "blurb",
+                            "court",
+                            "matter_type",
+                        ],
                     },
                     "explain": False,
                     "from": 0,
@@ -918,16 +939,23 @@ class TestSearchEngine(TestCase):
             json.dumps(
                 {
                     "_source": {
-                        "excludes": [
-                            "pages",
-                            "content",
-                            "content_chunks",
-                            "case_summary",
-                            "order",
-                            "provisions",
-                            "suggest",
-                            "summary",
-                        ]
+                        "includes": [
+                            "expression_frbr_uri",
+                            "date",
+                            "nature",
+                            "doc_type",
+                            "title",
+                            "jurisdiction",
+                            "locality",
+                            "citation",
+                            "authors",
+                            "labels",
+                            "alternative_names",
+                            "flynote",
+                            "blurb",
+                            "court",
+                            "matter_type",
+                        ],
                     },
                     "explain": False,
                     "from": 0,
