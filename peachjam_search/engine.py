@@ -58,15 +58,22 @@ class SearchEngine:
     rrf_rank_constant = 60
 
     source = {
-        "excludes": [
-            "pages",
-            "content",
-            "content_chunks",
-            "case_summary",
-            "order",
-            "provisions",
-            "suggest",
-            "summary",
+        "includes": [
+            "expression_frbr_uri",
+            "date",
+            "nature",
+            "doc_type",
+            "title",
+            "jurisdiction",
+            "locality",
+            "citation",
+            "authors",
+            "labels",
+            "alternative_names",
+            "flynote",
+            "blurb",
+            "court",
+            "matter_type",
         ]
     }
 
