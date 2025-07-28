@@ -74,7 +74,7 @@ class DocumentSearchView(TemplateView):
     http_method_names = ["get"]
     action = "search"
     template_name = "peachjam_search/search_request_debug.html"
-    config_version = "2024-10-31"
+    config_version = "2025-07-28"
 
     def get(self, request, *args, **kwargs):
         return getattr(self, self.action)(request, *args, **kwargs)
