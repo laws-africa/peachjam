@@ -70,6 +70,10 @@ class LegislationDecorator(DocumentDecorator):
             code="expired",
             defaults={"name": "Expired", "code": "expired", "level": "danger"},
         )
+        replaced_label, _ = Label.objects.get_or_create(
+            code="replaced",
+            defaults={"name": "Replaced", "code": "replaced", "level": "danger"},
+        )
         repealed_labels = [
             repealed_label,
             revoked_label,
@@ -77,6 +81,7 @@ class LegislationDecorator(DocumentDecorator):
             lapsed_label,
             retired_label,
             expired_label,
+            replaced_label,
         ]
         uncommenced_label, _ = Label.objects.get_or_create(
             code="uncommenced",
