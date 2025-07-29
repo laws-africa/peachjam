@@ -9,10 +9,10 @@ from github import Github
 from jinja2 import Environment, nodes
 from jinja2.ext import Extension
 from lxml import etree
-from martor.utils import markdownify
 
 from peachjam.adapters.base import Adapter
 from peachjam.analysis.html import generate_toc_json_from_html
+from peachjam.helpers import markdownify
 from peachjam.models import Book, Language, get_country_and_locality
 from peachjam.plugins import plugins
 from peachjam.xmlutils import parse_html_str
