@@ -3,8 +3,10 @@ import re
 from datetime import date
 from functools import cached_property
 
+import magic
 import yaml
 from cobalt import FrbrUri
+from django.core.files.base import ContentFile
 from github import Github
 from jinja2 import Environment, nodes
 from jinja2.ext import Extension
@@ -13,7 +15,7 @@ from lxml import etree
 from peachjam.adapters.base import Adapter
 from peachjam.analysis.html import generate_toc_json_from_html
 from peachjam.helpers import markdownify
-from peachjam.models import Book, Language, get_country_and_locality
+from peachjam.models import Book, Image, Language, get_country_and_locality
 from peachjam.plugins import plugins
 from peachjam.xmlutils import parse_html_str
 
@@ -165,6 +167,7 @@ class GitbookAdapter(Adapter):
         self.compile_pages(book, toc, repo_path)
         self.clean_toc(toc)
         book.toc_json = toc
+        self.fetch_images(book, repo_path)
 
     def compile_pages(self, book, toc, repo_path):
         def process_entry(entry):
@@ -194,7 +197,6 @@ class GitbookAdapter(Adapter):
             # combined html for this entry
             return f'<div id="{entry["id"]}">\n{entry_html}\n</div>'
 
-        # TODO: images
         book.content_html = "\n".join(process_entry(e) for e in toc)
 
     def compile_page(self, markdown_text):
@@ -279,6 +281,34 @@ class GitbookAdapter(Adapter):
             href = el.attrib["href"]
             if href[1:] in ids:
                 el.attrib["href"] = f"#{ids[href[1:]]}"
+
+        # rewrite image paths from [../...]gitbook/assets/foo.png to /media/foo.png
+        for el in root.xpath("//img[@src]"):
+            src = el.attrib["src"]
+            if ".gitbook/assets/" in src:
+                src = src.rsplit("/", 1)[1]
+                el.attrib["src"] = f"media/{src}"
+
+    def fetch_images(self, book, repo_path):
+        root = parse_html_str(book.content_html)
+        images = set(
+            img.attrib["src"][6:]
+            for img in root.xpath("//img[@src]")
+            if img.attrib["src"].startswith("media/")
+        )
+
+        Image.objects.filter(document=book).delete()
+
+        for image in images:
+            logger.info(f"fetching image {image}")
+            image_data = self.get_repo_file(f"{repo_path}/.gitbook/assets/{image}")
+            Image.objects.create(
+                document=book,
+                filename=image,
+                file=ContentFile(image_data, name=image),
+                mimetype=magic.from_buffer(image_data, mime=True),
+                size=len(image_data),
+            )
 
 
 def parse_kv_pairs(parser):

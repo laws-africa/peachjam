@@ -1,7 +1,9 @@
 from django.test import TestCase
+from lxml import etree
 
 from peachjam.adapters import GitbookAdapter
 from peachjam.models import Book
+from peachjam.xmlutils import parse_html_str
 
 
 class GitbookAdapterTest(TestCase):
@@ -133,4 +135,25 @@ Subheading
                 },
             ],
             toc,
+        )
+
+    def test_rewrite_images(self):
+        root = parse_html_str(
+            """
+<div>
+<img src=".gitbook/assets/foo.png">
+<img src="../.gitbook/assets/bar.png">
+</div>
+"""
+        )
+        self.adapter.munge_page_html({"id": "test"}, root)
+
+        self.assertHTMLEqual(
+            """
+<div>
+<img src="media/foo.png">
+<img src="media/bar.png">
+</div>
+""",
+            etree.tostring(root, encoding="unicode"),
         )
