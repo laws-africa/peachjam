@@ -13,6 +13,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
+from django.db.models import Max
 from django.http import Http404
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -548,6 +549,11 @@ class CoreDocument(PolymorphicModel):
     @property
     def year(self):
         return self.date.year
+
+    @property
+    def is_latest_expression(self):
+        latest_date = self.work.documents.aggregate(latest=Max("date"))["latest"]
+        return self.date == latest_date
 
     def full_clean(self, *args, **kwargs):
         # give ourselves and subclasses a chance to pre-populate derived fields before cleaning

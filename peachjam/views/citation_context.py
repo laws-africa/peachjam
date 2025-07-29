@@ -55,7 +55,11 @@ class DocumentCitationContextView(FilteredDocumentListView):
             queryset=self.citation_contexts,
             to_attr="relevant_citation_contexts",
         )
-        qs = CoreDocument.objects.filter(pk__in=document_ids).prefetch_related(prefetch)
+        qs = (
+            CoreDocument.objects.filter(pk__in=document_ids)
+            .prefetch_related(prefetch)
+            .for_document_table()
+        )
         return qs
 
     def get_context_data(self, **kwargs):
