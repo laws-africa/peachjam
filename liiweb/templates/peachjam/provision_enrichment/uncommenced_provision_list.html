@@ -1,0 +1,9 @@
+{% extends 'peachjam/provision_enrichment/uncommenced_provision_list.html' %}
+{% load i18n %}
+{% block page-title %}
+  <h1 class="mt-4">{% trans 'Uncommenced provisions' %}</h1>
+  <div class="mb-2">{% include "peachjam/provision_enrichment/_uncommenced_provisions_blurb.html" %}</div>
+  <div class="mb-5">
+    <a href="{% url 'legislation_list_uncommenced' %}">{% trans "Uncommenced legislation" %}</a>
+  </div>
+{% endblock %}
