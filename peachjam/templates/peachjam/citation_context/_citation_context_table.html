@@ -21,7 +21,7 @@
           <div class="mt-2 ms-2">
             {% for citation_context in document.relevant_citation_contexts %}
               <div class="mb-2">
-                [...] {{ citation_context.get_prefix_text }}<strong>{{ citation_context.get_exact_text }}</strong>{{ citation_context.get_suffix_text }} [...]
+                [...] {{ citation_context.prefix }}<strong>{{ citation_context.exact }}</strong>{{ citation_context.suffix }} [...]
               </div>
             {% endfor %}
           </div>

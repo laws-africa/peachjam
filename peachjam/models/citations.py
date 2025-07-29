@@ -195,27 +195,6 @@ class ExtractedCitationContext(models.Model):
             return f"{self.target_work.frbr_uri}#{self.target_provision_eid}"
         return self.target_work.frbr_uri
 
-    def get_exact_text(self):
-        """Get the exact text from the selectors."""
-        for selector in self.selectors:
-            if selector["type"] == "TextQuoteSelector":
-                return selector.get("exact", "")
-        return ""
-
-    def get_prefix_text(self):
-        """Get the prefix text from the selectors."""
-        for selector in self.selectors:
-            if selector["type"] == "TextQuoteSelector":
-                return selector.get("prefix", "")
-        return ""
-
-    def get_suffix_text(self):
-        """Get the suffix text from the selectors."""
-        for selector in self.selectors:
-            if selector["type"] == "TextQuoteSelector":
-                return selector.get("suffix", "")
-        return ""
-
 
 class Treatment(models.Model):
     name = models.CharField(_("name"), max_length=4096, unique=True)

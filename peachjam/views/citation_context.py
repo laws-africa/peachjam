@@ -13,6 +13,13 @@ from peachjam.views import FilteredDocumentListView
 class DocumentCitationContextView(FilteredDocumentListView):
     template_name = "peachjam/citation_context/citation_context.html"
 
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/citation_context/_citation_context_table.html"]
+            return ["peachjam/citation_context/_citation_context_table_form.html"]
+        return super().get_template_names()
+
     @cached_property
     def document(self):
         obj = CoreDocument.objects.filter(

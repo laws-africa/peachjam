@@ -145,19 +145,9 @@ class CitationAnalyser:
 
                 ctx = ExtractedCitationContext.objects.create(
                     document=document,
-                    selectors=[
-                        # {
-                        #    "type": "TextPositionSelector",
-                        #    "start": start,
-                        #    "end": end,
-                        # },
-                        {
-                            "type": "TextQuoteSelector",
-                            "exact": exact,
-                            "prefix": prefix,
-                            "suffix": suffix,
-                        },
-                    ],
+                    prefix=prefix,
+                    suffix=suffix,
+                    exact=exact,
                     selector_anchor_id=selector_id,
                     target_work=work,
                     target_provision_eid=self.get_provision_eid(href),
@@ -187,10 +177,22 @@ class CitationAnalyser:
                 url = citation_link.url
                 frbr_uri = FrbrUri.parse(url).work_uri()
                 target_work = Work.objects.get(frbr_uri=frbr_uri)
+                exact = ""
+                prefix = ""
+                suffix = ""
+                if citation_link.target_selectors:
+                    for selector in citation_link.target_selectors:
+                        if selector["type"] == "TextQuoteSelector":
+                            exact = selector.get("exact", "")
+                            prefix = selector.get("prefix", "")
+                            suffix = selector.get("suffix", "")
+
                 ExtractedCitationContext.objects.create(
                     document=document,
                     selector_anchor_id=citation_link.target_id,
-                    selectors=citation_link.target_selectors,
+                    prefix=prefix,
+                    suffix=suffix,
+                    exact=exact,
                     target_work=target_work,
                     target_provision_eid=self.get_provision_eid(citation_link.url),
                 )
