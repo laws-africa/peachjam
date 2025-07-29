@@ -1,0 +1,22 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n %}
+{% block title %}
+  {{ document.title }} - {% trans 'Citations' %}
+  {% if provision %}- {{ provision }}{% endif %}
+{% endblock %}
+{% block page-title %}
+  <div class="my-4">
+    <div class="mb-3">
+      <a href="{{ document.get_absolute_url }}" class="h5 text-muted ">{{ document.title }}</a>
+    </div>
+    <h1 class="doc-title">{{ provision_title }}</h1>
+    <la-akoma-ntoso frbr-expression-uri="{{ document.expression_frbr_uri }}" class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;" lang="{{ document.language.iso }}">
+    {{ provision_html|safe }}
+    </la-akoma-ntoso>
+    <span class="text-muted">{% trans "Citations" %} ({{ citation_contexts.count }})</span>
+  </div>
+{% endblock %}
+{% block count-and-search %}{% endblock %}
+{% block document-table %}
+  {% include "peachjam/citation_context/_citation_context_table_form.html" %}
+{% endblock %}

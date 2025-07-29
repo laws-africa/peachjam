@@ -18,11 +18,13 @@
           <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
           {% if document.blurb %}<div>{{ document.blurb }}</div>{% endif %}
           {% if document.flynote %}<div class="fst-italic">{{ document.flynote|safe }}</div>{% endif %}
-          {% for citation_context in document.relevant_citation_contexts %}
-            <p>
-              [...]{{ citation_context.get_prefix_text }}<a href="{{ citation_context.get_absolute_url }}">{{ citation_context.get_exact_text }}</a>{{ citation_context.get_suffix_text }}[...]
-            </p>
-          {% endfor %}
+          <div class="mt-2 ms-2">
+            {% for citation_context in document.relevant_citation_contexts %}
+              <div class="mb-2">
+                [...] {{ citation_context.get_prefix_text }}<strong>{{ citation_context.get_exact_text }}</strong>{{ citation_context.get_suffix_text }} [...]
+              </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
     {% endfor %}

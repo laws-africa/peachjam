@@ -1,6 +1,6 @@
 from functools import cached_property
 
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch
 from django.http import Http404
 from django.utils.decorators import method_decorator
 
@@ -11,7 +11,7 @@ from peachjam.views import FilteredDocumentListView
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 class DocumentCitationContextView(FilteredDocumentListView):
-    template_name = "peachjam/citation_context/_citation_context.html"
+    template_name = "peachjam/citation_context/citation_context.html"
 
     @cached_property
     def document(self):
@@ -29,12 +29,16 @@ class DocumentCitationContextView(FilteredDocumentListView):
         return obj
 
     @cached_property
+    def provision_eid(self):
+        return self.kwargs.get("provision_eid", "")
+
+    @cached_property
     def citation_contexts(self):
-        provision = self.kwargs.get("provision", "")
-        q = Q(target_work=self.document.work)
-        if provision:
-            q &= Q(target_provision_eid__icontains=provision)
-        contexts = ExtractedCitationContext.objects.filter(q)
+        contexts = ExtractedCitationContext.objects.filter(
+            target_work=self.document.work, target_provision_eid=self.provision_eid
+        ).prefetch_related("target_work")
+        if not contexts.exists():
+            raise Http404("No citations found for this provision.")
         return contexts
 
     def get_base_queryset(self, *args, **kwargs):
@@ -50,9 +54,11 @@ class DocumentCitationContextView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["document"] = self.document
-        if self.kwargs.get("provision"):
-            context["provision"] = context["document"].friendly_provision_title(
-                self.kwargs.get("provision")
-            )
-
+        context["provision_title"] = context["document"].friendly_provision_title(
+            self.provision_eid
+        )
+        context["provision_html"] = context["document"].get_provision_by_eid(
+            self.provision_eid
+        )
+        context["citation_contexts"] = self.citation_contexts
         return context

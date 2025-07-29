@@ -175,7 +175,9 @@ class ExtractedCitationContext(models.Model):
         _("selector anchor id"),
         max_length=1024,
     )
-    selectors = models.JSONField(verbose_name=_("selectors"))
+    prefix = models.CharField(_("prefix"), max_length=1024, null=True, blank=True)
+    suffix = models.CharField(_("suffix"), max_length=1024, null=True, blank=True)
+    exact = models.CharField(_("exact"), max_length=1024, null=True, blank=True)
     target_work = models.ForeignKey(
         "peachjam.Work",
         null=False,

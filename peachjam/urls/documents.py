@@ -52,7 +52,7 @@ urlpatterns = [
         name="document_attachment",
     ),
     re_path(
-        r"^(?P<frbr_uri>akn/.+?)/provision(?:/(?P<provision>.+))?$",
+        r"^(?P<frbr_uri>akn/.+?)/provision(?:/(?P<provision_eid>.+))?$",
         cache_page(CACHE_DURATION)(DocumentCitationContextView.as_view()),
         name="document_citation_context",
     ),
