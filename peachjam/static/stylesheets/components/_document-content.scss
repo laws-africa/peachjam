@@ -111,6 +111,7 @@
       .nav {
         border: 1px solid var(--bs-border-color);
         border-bottom: none;
+        background-color: $gray-100;
       }
 
       .nav + .tab-content {
