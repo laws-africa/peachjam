@@ -8,6 +8,7 @@ from cobalt import FrbrUri
 from github import Github
 from jinja2 import Environment, nodes
 from jinja2.ext import Extension
+from lxml import etree
 from martor.utils import markdownify
 
 from peachjam.adapters.base import Adapter
@@ -173,6 +174,8 @@ class GitbookAdapter(Adapter):
             )
             # html for all its children
             entry_html += "\n".join(process_entry(kid) for kid in entry["children"])
+            entry_html = self.munge_page_html(entry, entry_html)
+
             # combined html for this entry
             return f'<div id="{entry["id"]}">\n{entry_html}\n</div>'
 
@@ -226,6 +229,22 @@ class GitbookAdapter(Adapter):
 
         return toc
 
+    def munge_page_html(self, page, page_html):
+        # scope all ids
+        root = parse_html_str(page_html)
+        ids = {}
+        for el in root.xpath("//*[@id]"):
+            ids[el.attrib["id"]] = new_id = f"{page['id']}--{el.attrib['id']}"
+            el.attrib["id"] = new_id
+
+        # rewrite all hrefs to point to the correct entry
+        for el in root.xpath("//a[starts-with(@href, '#')]"):
+            href = el.attrib["href"]
+            if href[1:] in ids:
+                el.attrib["href"] = f"#{ids[href[1:]]}"
+
+        return etree.tostring(root, encoding="unicode")
+
 
 def parse_kv_pairs(parser):
     kwargs = []
@@ -255,6 +274,8 @@ class HintExtension(Extension):
 
     def _render_hint(self, caller, **kwargs):
         style = kwargs.get("style", "info")
+        if style == "info":
+            style = "primary"
         return f'<div class="alert alert-{style}">{caller()}</div>'
 
 
@@ -305,7 +326,7 @@ class TabsExtension(Extension):
 
     def _render_tabs(self, tabs, caller=None):
         # tabs is a list of (title, body) pairs
-        output = ['<ul class="nav nav-underline" role="tablist">']
+        output = ['<ul class="nav nav-tabs" role="tablist">']
 
         for i, (title, _) in enumerate(tabs):
             tab_i = self.__class__.n_tabs + i

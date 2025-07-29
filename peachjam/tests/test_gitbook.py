@@ -71,17 +71,21 @@ class GitbookAdapterTest(TestCase):
 
         self.assertHTMLEqual(
             """<div id="unit-1-administration-of-law">
-<h1 id="contents-for-book1unit-1-administration-of-law.md">
+<div>
+<h1 id="unit-1-administration-of-law--contents-for-book1unit-1-administration-of-law.md">
 Contents for book1/unit-1-administration-of-law.md
 </h1><p>
 Hello :)
 </p>
+</div>
 </div><div id="unit-2-the-composition-of-courts">
-<h1 id="contents-for-book1unit-2-the-composition-of-courts.md">
+<div>
+<h1 id="unit-2-the-composition-of-courts--contents-for-book1unit-2-the-composition-of-courts.md">
 Contents for book1/unit-2-the-composition-of-courts.md
 </h1><p>
 Hello :)
 </p>
+</div>
 </div>""",
             book.content_html,
         )
