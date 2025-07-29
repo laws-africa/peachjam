@@ -70,6 +70,7 @@ dependencies = [
     "martor>=1.6",
     "Pillow>=9.0.1",
     "pgvector>=0.4.0",
+    "PyGithub>=2.6",
     "python-magic>=0.4.25",
     "requests>=2.27.1",
     "sentry-sdk>=1.16.0,<=2.22",

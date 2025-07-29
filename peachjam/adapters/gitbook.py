@@ -1,4 +1,7 @@
 import logging
+import re
+from datetime import date
+from functools import cached_property
 
 import yaml
 from cobalt import FrbrUri
@@ -7,8 +10,8 @@ from jinja2 import Environment, nodes
 from jinja2.ext import Extension
 from martor.utils import markdownify
 
-from peachjam.adapters.base import RequestsAdapter
-from peachjam.models import Book, get_country_and_locality
+from peachjam.adapters.base import Adapter
+from peachjam.models import Book, Language, get_country_and_locality
 from peachjam.plugins import plugins
 from peachjam.xmlutils import parse_html_str
 
@@ -16,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @plugins.register("ingestor-adapter")
-class GitbookAdapter(RequestsAdapter):
+class GitbookAdapter(Adapter):
     """Imports markdown content from a GitHub repo, that has been authored with GitBook.
 
     The GitHub repository must contain a `peachjam.yaml` file at the root, which contains the details of the documents
@@ -34,12 +37,13 @@ class GitbookAdapter(RequestsAdapter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.repo_name = self.settings.get("repo_name")
-        self.access_token = self.settings.get("access_token")
-
-        if not self.repo_name or not self.access_token:
+        access_token = self.settings.get("access_token")
+        if not self.repo_name or not access_token:
             raise ValueError(
                 "GitHub repository details or credentials are missing in settings."
             )
+
+        self.github = Github(access_token)
 
         # Set up Jinja2 environment
         self.jinja_env = Environment()
@@ -59,8 +63,7 @@ class GitbookAdapter(RequestsAdapter):
 
     def get_updated_docs(self, last_refreshed):
         # TODO: handle last_refreshed timestamp
-        documents = self.get_repo_documents()
-        return [d["expression_frbr_uri"] for d in documents]
+        return [d["expression_frbr_uri"] for d in self.get_repo_documents()]
 
     def update_document(self, expression_frbr_uri):
         logger.info(f"Updating ... {expression_frbr_uri}")
@@ -72,24 +75,40 @@ class GitbookAdapter(RequestsAdapter):
 
         frbr_uri = FrbrUri.parse(expression_frbr_uri)
         country, locality = get_country_and_locality(frbr_uri.place)
+        language = Language.objects.get(iso_639_3__iexact=frbr_uri.language)
 
-        # TODO: check for existing
-        book = Book(
-            country=country,
-            locality=locality,
-            date=frbr_uri.expression_date[1:],
-            expression_frbr_uri=expression_frbr_uri,
-            title=document["title"],
+        data = {
+            "jurisdiction": country,
+            "locality": locality,
+            "frbr_uri_doctype": frbr_uri.doctype,
+            "frbr_uri_subtype": frbr_uri.subtype,
+            "frbr_uri_actor": frbr_uri.actor,
+            "frbr_uri_number": frbr_uri.number,
+            "frbr_uri_date": frbr_uri.date,
+            "language": language,
+            "date": date.fromisoformat(frbr_uri.expression_date[1:]),
+            "title": document["title"],
+        }
+        book, new = Book.objects.update_or_create(
+            expression_frbr_uri=frbr_uri.expression_uri(),
+            defaults={**data},
         )
 
+        if frbr_uri.expression_uri() != book.expression_frbr_uri:
+            raise Exception(
+                f"FRBR URIs do not match: {frbr_uri.expression_uri()} != {book.expression_frbr_uri}"
+            )
+
         self.compile_book(book, document["path"])
+        # TODO: ensure we're not messing with the HTML and updating the TOC
+        book.save()
+
+        logger.info(f"Updated book {book.expression_frbr_uri}")
 
     def delete_document(self, frbr_uri):
         documents = self.get_repo_documents()
         if frbr_uri not in [d["expression_frbr_uri"] for d in documents]:
-            document = Book.objects.filter(expression_frbr_uri=frbr_uri).first()
-            if document:
-                document.delete()
+            Book.objects.filter(expression_frbr_uri=frbr_uri).delete()
 
     def handle_webhook(self, data):
         # TODO:
@@ -100,65 +119,62 @@ class GitbookAdapter(RequestsAdapter):
         Fetches the peachjam.yaml file from the root of the GitHub repository,
         parses it, and returns the list of documents from the 'documents' key.
         """
-        # Authenticate with GitHub
-        github = Github(self.access_token)
-        repo = github.get_repo(self.repo_name)
-
-        # Fetch the peachjam.yaml file from the root of the repository
-        file_content = repo.get_contents("peachjam.yaml")
-        yaml_content = yaml.safe_load(file_content.decoded_content)
-
-        # Extract and return the list of documents
-        documents = yaml_content.get("documents", [])
-        return documents
+        yaml_content = yaml.safe_load(self.get_repo_file("peachjam.yaml"))
+        return yaml_content.get("documents", [])
 
     def get_repo_document(self, expression_frbr_uri):
         for doc in self.get_repo_documents():
-            if doc.expression_frbr_uri == expression_frbr_uri:
+            if doc["expression_frbr_uri"] == expression_frbr_uri:
                 return doc
 
     def get_local_documents(self):
         return self.ingestor.document_set.all()
 
+    @cached_property
+    def repo(self):
+        return self.github.get_repo(self.repo_name)
+
+    def get_repo_file(self, file_path) -> bytes:
+        logger.info(f"Fetching file: {file_path}")
+        file_content = self.repo.get_contents(file_path)
+        return file_content.decoded_content
+
     def compile_book(self, book, repo_path):
         """
-        Compiles a book by fetching the SUMMARY.md file, parsing its structure,
-        fetching referenced files, converting them to HTML, and combining them.
+        Compiles a book by fetching the SUMMARY.md file and using it to build a TOC, which then drives
+        the creation of a single nested HTML file with all the TOC pages combined.
         """
-        # Authenticate with GitHub
-        github = Github(self.access_token)
-        repo = github.get_repo(self.repo_name)
+        summary_html = markdownify(
+            self.get_repo_file(f"{repo_path}/SUMMARY.md").decode("utf-8")
+        )
+        toc = self.build_toc(summary_html)
+        self.compile_pages(book, toc, repo_path)
+        self.clean_toc(toc)
+        book.toc_json = toc
 
-        # Step 1: Fetch the SUMMARY.md file
-        path = f"{repo_path}/SUMMARY.md"
-        logger.info(f"Fetching file: {path}")
-        summary_file = repo.get_contents(path)
-        summary_content = markdownify(summary_file.decoded_content.decode("utf-8"))
+    def compile_pages(self, book, toc, repo_path):
+        def process_entry(entry):
+            # html for this page
+            entry_html = self.compile_page(
+                self.get_repo_file(f"{repo_path}/{entry['path']}").decode("utf-8")
+            )
+            # html for all its children
+            entry_html += "\n".join(process_entry(kid) for kid in entry["children"])
+            # combined html for this entry
+            return f'<div id="{entry["id"]}">\n{entry_html}\n</div>'
 
-        # Step 2: Parse the HTML structure of the summary
-        root = parse_html_str(summary_content)
-        links = root.xpath("//a")
+        # TODO: images
+        book.content_html = "\n".join(process_entry(e) for e in toc)
 
-        # Step 3: Fetch each linked file and convert to HTML
-        combined_html = ""
-        for link in links:
-            href = link.get("href")
-            if not href:
-                continue
+    def clean_toc(self, toc):
+        # remove "path" from the TOC items
+        def clean(entry):
+            del entry["path"]
+            for child in entry["children"]:
+                clean(child)
 
-            # Fetch the file content
-            logger.info(f"Fetching file: {href}")
-            file_path = f"{repo_path}/{href}"
-            file_content = repo.get_contents(file_path)
-            file_html = self.compile_page(file_content.decoded_content.decode("utf-8"))
-
-            # Wrap the content in a div and append to combined_html
-            # TODO: better ID
-            combined_html += f'<div id="{href}">{file_html}</div>\n'
-
-        # Step 4: Save the combined HTML to the book object
-        book.content_html = combined_html
-        book.save()
+        for item in toc:
+            clean(item)
 
     def compile_page(self, markdown_text):
         # preprocess with jinja
@@ -166,6 +182,36 @@ class GitbookAdapter(RequestsAdapter):
         markdown_text = template.render()
         # TODO: is markdownify using pandoc?
         return markdownify(markdown_text)
+
+    def build_toc(self, toc_html):
+        """Build a TOC structure from the provided markdown content."""
+
+        # walk the ULs
+        def walk(ul):
+            items = []
+
+            for li in ul.iterchildren("li"):
+                a = li.find("a[@href]")
+                if a is not None:
+                    href = a.get("href")
+                    ul = li.find("ul")
+                    items.append(
+                        {
+                            "id": re.sub("/", "--", href.lower()).split(".", 1)[0],
+                            "title": a.text.strip() if a.text else "",
+                            "path": href,
+                            "children": walk(ul) if ul is not None else [],
+                        }
+                    )
+
+            return items
+
+        root = parse_html_str(toc_html)
+        toc = []
+        for ul in root.iter("ul"):
+            toc.extend(walk(ul))
+
+        return toc
 
 
 def parse_kv_pairs(parser):
