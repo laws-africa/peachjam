@@ -98,6 +98,11 @@
       details {
         border: 1px solid var(--bs-border-color);
         padding: $spacer;
+        margin-bottom: $spacer;
+
+        &:has(+ details) {
+          margin-bottom: 0;
+        }
 
         &[open] summary {
           margin-bottom: $spacer;
@@ -118,6 +123,7 @@
         border: 1px solid var(--bs-border-color);
         border-top: none;
         padding: $spacer $spacer 0 $spacer;
+        margin-bottom: $spacer;
       }
 
       .alert > *:first-child {
