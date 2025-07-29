@@ -45,6 +45,11 @@ class Adapter:
                 "verb": "is expired by",
                 "reverse_verb": "expires",
             },
+            "replaced-by": {
+                "name": "replaced by",
+                "verb": "is replaced by",
+                "reverse_verb": "replaces",
+            },
             "commenced-by": {
                 "name": "commenced by",
                 "verb": "is commenced by",
