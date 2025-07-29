@@ -32,13 +32,13 @@ class GitbookAdapterTest(TestCase):
                     "children": [],
                 },
                 {
-                    "id": "unit-1-administration-of-law",
+                    "id": "unit-1-adm",
                     "title": "Unit 1: Administration of Law",
                     "path": "unit-1-administration-of-law.md",
                     "children": [],
                 },
                 {
-                    "id": "unit-2-the-composition-of-courts",
+                    "id": "unit-2-the",
                     "title": "Unit 2: The Composition of Courts",
                     "path": "unit-2-the-composition-of-courts.md",
                     "children": [],
@@ -51,13 +51,13 @@ class GitbookAdapterTest(TestCase):
         book = Book()
         toc = [
             {
-                "id": "unit-1-administration-of-law",
+                "id": "unit-1-adm",
                 "title": "Unit 1: Administration of Law",
                 "path": "unit-1-administration-of-law.md",
                 "children": [],
             },
             {
-                "id": "unit-2-the-composition-of-courts",
+                "id": "unit-2-the",
                 "title": "Unit 2: The Composition of Courts",
                 "path": "unit-2-the-composition-of-courts.md",
                 "children": [],
@@ -70,17 +70,17 @@ class GitbookAdapterTest(TestCase):
         self.adapter.compile_pages(book, toc, "book1")
 
         self.assertHTMLEqual(
-            """<div id="unit-1-administration-of-law">
+            """<div id="unit-1-adm">
 <div>
-<h1 id="unit-1-administration-of-law--contents-for-book1unit-1-administration-of-law.md">
+<h1 id="unit-1-adm--contents-for-book1unit-1-administration-of-law.md">
 Contents for book1/unit-1-administration-of-law.md
 </h1><p>
 Hello :)
 </p>
 </div>
-</div><div id="unit-2-the-composition-of-courts">
+</div><div id="unit-2-the">
 <div>
-<h1 id="unit-2-the-composition-of-courts--contents-for-book1unit-2-the-composition-of-courts.md">
+<h1 id="unit-2-the--contents-for-book1unit-2-the-composition-of-courts.md">
 Contents for book1/unit-2-the-composition-of-courts.md
 </h1><p>
 Hello :)

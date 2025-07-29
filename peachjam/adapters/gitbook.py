@@ -182,16 +182,6 @@ class GitbookAdapter(Adapter):
         # TODO: images
         book.content_html = "\n".join(process_entry(e) for e in toc)
 
-    def clean_toc(self, toc):
-        # remove "path" from the TOC items
-        def clean(entry):
-            del entry["path"]
-            for child in entry["children"]:
-                clean(child)
-
-        for item in toc:
-            clean(item)
-
     def compile_page(self, markdown_text):
         # preprocess with jinja
         template = self.jinja_env.from_string(markdown_text)
@@ -201,6 +191,29 @@ class GitbookAdapter(Adapter):
 
     def build_toc(self, toc_html):
         """Build a TOC structure from the provided markdown content."""
+        # for ensuring unique simplified IDs
+        ids = set()
+
+        def make_id(href):
+            href = href.lower()
+            if "/" in href:
+                prefix, id_ = href.rsplit("/", 1)
+                prefix = re.sub(r"/", "--", prefix + "/")
+            else:
+                prefix = ""
+                id_ = href
+
+            # dir1/dir2/page.md -> dir1--dir2--page
+            id_ = prefix + id_.split(".", 1)[0][:10]
+
+            # ensure it's unique
+            if id_ in ids:
+                i = 1
+                while f"{id_}-{i}" in ids:
+                    i += 1
+                id_ = f"{id_}-{i}"
+            ids.add(id_)
+            return id_
 
         # walk the ULs
         def walk(ul):
@@ -213,7 +226,7 @@ class GitbookAdapter(Adapter):
                     ul = li.find("ul")
                     items.append(
                         {
-                            "id": re.sub("/", "--", href.lower()).split(".", 1)[0],
+                            "id": make_id(href),
                             "title": a.text.strip() if a.text else "",
                             "path": href,
                             "children": walk(ul) if ul is not None else [],
@@ -228,6 +241,16 @@ class GitbookAdapter(Adapter):
             toc.extend(walk(ul))
 
         return toc
+
+    def clean_toc(self, toc):
+        # remove "path" from the TOC items
+        def clean(entry):
+            del entry["path"]
+            for child in entry["children"]:
+                clean(child)
+
+        for item in toc:
+            clean(item)
 
     def munge_page_html(self, page, page_html):
         # scope all ids
